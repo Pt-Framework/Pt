@@ -21,9 +21,9 @@
 #define Pt_Gui_Event_h
 
 #include <Pt/Event.h>
+#include "Pt/Allocator.h"
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Widget.h>
-
 
 namespace Pt {
 
@@ -60,17 +60,6 @@ namespace Gui {
              */
             Widget& widget() const
             { return _widget; }
-
-            /**
-             * @brief Returns the type information object (type_info) of this event class.
-             * 
-             * This pure virtual method has to be implemented by any sub-class of Gui::Event
-             * in a way that it returns the event's type info. Caching of this information
-             * is recommended.
-             *
-             * @return The type information object of this event.
-             */
-            virtual const std::type_info& typeInfo() const = 0;
 
         public:
             //! @brief The type information object (type_info) of this event class.

@@ -60,10 +60,6 @@ namespace Gui {
             //! @brief Empty desctructor.
             virtual ~MoveEvent();
 
-            // inherit doc
-            virtual Event* clone() const
-            { return new MoveEvent(*this); }
-
             /**
              * @brief The new x-position of the widget for which this move event was created for.
              *
@@ -88,6 +84,17 @@ namespace Gui {
              * @return The type info for this event.
              */
             virtual const std::type_info& typeInfo() const;
+
+			Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(MoveEvent));
+		        return *(new (pEvent)MoveEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(MoveEvent));
+		    }
 
         private:
             size_t _x;

@@ -10,6 +10,8 @@
 namespace Pt {
 
 namespace System {
+    
+    class SelectorBase;
 
     /** @brief Notifies clients in constant intervals
 
@@ -55,6 +57,10 @@ namespace System {
             */
             ~Timer();
 
+            SelectorBase* selector()
+            { return _selector; }
+
+            void setSelector(SelectorBase* s);
             /** @brief Returs true if timer is active
             */
             bool active() const;
@@ -110,46 +116,15 @@ namespace System {
             */
             Signal<> timeout;
 
-            /** @brief Notifies about object destruction
-
-                This signal is sent if the Timer is destroyed. A
-                reference to the destroyed timer is passed by the
-                signal.
-            */
-            Signal<Timer&> destroyed;
-
         private:
+            SelectorBase* _selector;
             bool     _active;
             unsigned _started;
             unsigned _interval;
             unsigned _elapsed;
             static const unsigned InvalidTime;
+
     };
-
-/*
-class PT_SYSTEM_API Timer : public Runnable
-{
-public:
-    Timer(void);
-    virtual ~Timer(void);
-
-    static size_t resolution();
-
-    void start();
-    void stop();
-
-    void run();
-
-    Signal<size_t> onTime;
-
-private:
-    Thread            _timerThread;
-    static size_t    _resolution;
-    size_t            _eventCounter;
-    bool            _run;
-
-};
-*/
 
 }
 

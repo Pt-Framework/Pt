@@ -21,17 +21,15 @@
 #ifndef PT_SYSTEM_FILEDEVICEIMPL_H
 #define PT_SYSTEM_FILEDEVICEIMPL_H
 
-#include "Pt/Api.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
-#include "Pt/System/IODevice.h"
 #include "IODeviceImpl.h"
-#include "ReadResult.h"
-
 #include <windows.h>
 #include <ios>
 
 namespace Pt {
+
 namespace System {
 
 class FileDeviceImpl  : public IODeviceImpl
@@ -43,17 +41,27 @@ class FileDeviceImpl  : public IODeviceImpl
     public:
         FileDeviceImpl();
 
-        //FileDeviceImpl( const char* path, std::ios_base::openmode mode, bool isAsync );
-
         ~FileDeviceImpl();
+ 
+        void attach(SelectorBase& s);
 
-        IOResult& beginRead(char* buffer, size_t n, bool& eof);
+        void detach(SelectorBase& s);
+ 
+        virtual bool wait(unsigned int msecs);
+        
+        virtual bool setWaitHandle(HANDLE h);
+        
+        bool checkEvent();
+        
+        void beginRead(char* buffer, size_t n, bool& eof);
 
-		size_t endRead(IOResult& result, bool& eof);
+        size_t endRead(bool& eof);
+
+        void beginWrite(const char* buffer, size_t n);
+
+        size_t endWrite();		
 
         void open( const char* path, std::ios_base::openmode mode, bool isAsync );
-
-        void close();
 
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
@@ -65,22 +73,20 @@ class FileDeviceImpl  : public IODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
-        bool waitable() const;
-
-        void sync() const;
-
-        HANDLE deviceHandle() const
-        { return _handle; }        
-
+        void sync() const;       
+        
     private:
-        //enum { Reading, Writing, Idle } _state;
-
-        HANDLE     _handle;
+        HANDLE _waitHandle;
         OVERLAPPED _readOv;
+        char* _rbuf;
+        size_t _rbuflen;
         OVERLAPPED _writeOv;
-        ReadResult _readResult;
+        const char* _wbuf;
+        size_t _wbuflen;
 };
 
 }//namespace System
+
 }//namespace Pt
+
 #endif

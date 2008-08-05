@@ -22,11 +22,10 @@
 #define Pt_System_IODevice_h
 
 #include <Pt/Types.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/IOError.h>
-#include <Pt/System/IOResult.h>
+#include <Pt/System/Selectable.h>
 #include <limits>
 #include <ios>
 
@@ -66,42 +65,28 @@ struct IO
     %IODevice, which will send the %Singal inputReady or outputReady of the
     %IODevice that is ready to perform I/O.
 */
-template <typename CharT>
-class BasicIODevice : public IO, protected NonCopyable {
+class IODevice : public IO, public Selectable
+{
     public:
-        typedef typename std::char_traits<CharT>::pos_type pos_type;
-        typedef typename std::char_traits<CharT>::off_type off_type;
+        typedef std::char_traits<char>::pos_type pos_type;
+        typedef std::char_traits<char>::off_type off_type;
 
     public:
         //! @brief Destructor
-        virtual ~BasicIODevice()
+        virtual ~IODevice()
         { }
 
-        //! @brief Closes the I/O device
-        /*!
-           Frees any resources associated with this object, like I/O handles.
-        */
-        void close()
-        {
-            if( this->valid() ) {
-                onClose();
-                _valid = false;
-            }
-        }
-
-        IOResult& beginRead(CharT* buffer, size_t n)
+        void beginRead(char* buffer, size_t n)
         {
             if ( !async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            IOResult& result = onBeginRead(buffer, n, _eof);
-            result.setDevice(this);
-            return result;
+            onBeginRead(buffer, n, _eof);
         }
 
-        size_t endRead(IOResult& result)
+        size_t endRead()
         {
-            return onEndRead(result, _eof);
+            return onEndRead(_eof);
         }
 
         //! @brief Read data from I/O device
@@ -116,31 +101,29 @@ class BasicIODevice : public IO, protected NonCopyable {
             \return number of bytes read, which may be less than requested.
             \throw IOError
          */
-        size_t read(CharT* buffer, size_t n)
+        size_t read(char* buffer, size_t n)
         {
             if ( async() )
             {
-                IOResult& ioResult = beginRead(buffer, n);
-                ioResult.wait();
-                return endRead(ioResult);
+                this->beginRead(buffer, n);
+                this->wait();
+                return endRead();
             }
 
             return this->onRead(buffer, n, _eof);
         }
 
-        IOResult& beginWrite(const CharT* buffer, size_t n)
+        void beginWrite(const char* buffer, size_t n)
         {
             if ( !async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            IOResult& result = onBeginWrite(buffer, n);
-            result.setDevice(this);
-            return result;
+            onBeginWrite(buffer, n);
         }
 
-        size_t endWrite(IOResult& result)
+        size_t endWrite()
         {
-            return onEndWrite(result);
+            return onEndWrite();
         }
 
         //! @brief Write data to I/O device
@@ -155,13 +138,13 @@ class BasicIODevice : public IO, protected NonCopyable {
             \return number of bytes written, which may be less than requested.
             \throw IOError
          */
-        size_t write(const CharT* buffer, size_t n)
+        size_t write(const char* buffer, size_t n)
         {
             if ( async() )
             {
-                IOResult& ioResult = beginWrite(buffer, n);
-                ioResult.wait();
-                return endWrite(ioResult);
+                this->beginWrite(buffer, n);
+                this->wait();
+                return endWrite();
             }
 
             return this->onWrite(buffer, n);
@@ -206,7 +189,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             \return number of bytes peek.
             \throw IOError
         */
-        size_t peek(CharT* buffer, size_t n)
+        size_t peek(char* buffer, size_t n)
         { return this->onPeek(buffer, n); }
 
         //! @brief Synchronize device
@@ -229,16 +212,6 @@ class BasicIODevice : public IO, protected NonCopyable {
         pos_type position()
         { return this->seek(0, std::ios::cur); }
 
-        //! @brief Test if the I/O device object is valid
-        /*!
-            Test if the I/O device object is valid i.e. open and ready
-            to perform I/O operations
-
-            \return true if the I/O device is usable, false otherwise.
-        */
-        bool valid() const
-        { return _valid; }
-
         //! @brief Returns if the device has reached EOF
         /*!
             Test if the I/O device has reached eof.
@@ -258,7 +231,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             This signal is send when the IODevice is monitored
             in a Selector or EventLoop and data becomes available.
         */
-        Signal<IOResult&> inputReady;
+        Signal<IODevice&> inputReady;
 
         /** @brief Notifies when data can be written
 
@@ -266,37 +239,41 @@ class BasicIODevice : public IO, protected NonCopyable {
             in a Selector or EventLoop and the device is ready
             to write data.
         */
-        Signal<IOResult&> outputReady;
+        Signal<IODevice&> outputReady;
+ 
+        /** @brief Notifies when an error occured
 
-		virtual IODeviceImpl* impl() = 0;
+            This signal is send when the device is monitored
+            in a Selector or EventLoop and an error occured 
+            on the device.
+        */
+        Signal<IODevice&> errorOccured;
+
+        virtual IODeviceImpl& ioimpl() = 0;
 
     protected:
         //! @brief Default Constructor
-        BasicIODevice()
-        : _valid(false)
-        , _eof(false)
+        IODevice()
+        : _eof(false)
         , _async(false)
         { }
 
-        //! @brief Closes the I/O device
-        virtual void onClose() = 0;
+        virtual void onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 
-        virtual IOResult& onBeginRead(CharT* buffer, size_t n, bool& eof) = 0;
-
-        virtual size_t onEndRead(IOResult& result, bool& eof) = 0;
+        virtual size_t onEndRead(bool& eof) = 0;
 
         //! @brief Read bytes from device
-        virtual size_t onRead(CharT* buffer, size_t count, bool& eof) = 0;
+        virtual size_t onRead(char* buffer, size_t count, bool& eof) = 0;
 
-        virtual IOResult& onBeginWrite(const CharT* buffer, size_t n) = 0;
+        virtual void onBeginWrite(const char* buffer, size_t n) = 0;
 
-        virtual size_t onEndWrite(IOResult& result) = 0;
+        virtual size_t onEndWrite() = 0;
 
         //! @brief Write bytes to device
-        virtual size_t onWrite(const CharT* buffer, size_t count) = 0;
+        virtual size_t onWrite(const char* buffer, size_t count) = 0;
 
         //! @brief Read data from I/O device without consuming them
-        virtual size_t onPeek(CharT*, size_t)
+        virtual size_t onPeek(char*, size_t)
         { return 0; }
 
         //! @brief Returns true if device is seekable
@@ -315,10 +292,6 @@ class BasicIODevice : public IO, protected NonCopyable {
         virtual size_t onSize() const
         { return 0; }
 
-        //! @brief Sets or unsets the device invalid
-        void setValid(bool v)
-        { _valid = v; }
-
         //! @brief Sets or unsets the device to eof
         void setEof(bool eof)
         { _eof = eof; }
@@ -328,12 +301,9 @@ class BasicIODevice : public IO, protected NonCopyable {
         { _async = async; }
 
     private:
-        bool _valid;
         bool _eof;
         bool _async;
 };
-
-typedef BasicIODevice<char> IODevice;
 
 //! @internal provide import information for linking DLLs
 class PT_SYSTEM_API DummyIODevice : public IODevice

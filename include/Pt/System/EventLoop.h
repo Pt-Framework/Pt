@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,20 +22,183 @@
 
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
+#include <Pt/Event.h>
+#include <Pt/Allocator.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Condition.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Runnable.h>
 #include <Pt/System/Selector.h>
-#include <Pt/Event.h>
-
-#include <list>
+#include <map>
+#include <deque>
 #include <typeinfo>
-
 
 namespace Pt {
 
 namespace System {
+
+    class Timer;
+    class Application;
+    class Selectable;
+
+    struct PT_SYSTEM_API CompareTypeInfo
+    {
+        bool operator()(const std::type_info* t1, 
+                        const std::type_info* t2) const;
+    };
+
+    /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+     */
+    class PT_SYSTEM_API EventLoopBase : public Connectable
+                                      , public Runnable
+    {
+        public:
+            static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
+
+            //! @internal
+            struct IDispatcher
+            {
+                virtual ~IDispatcher() {}
+                virtual void send(const Event&) = 0;
+            };
+
+            //! @internal
+            template <typename EventT>
+            struct Dispatcher: public IDispatcher
+            {
+                virtual void send(const Event& e)
+                {
+                    const EventT& event = static_cast<const EventT&>(e);
+                    signal.send(event);
+                }
+
+                Signal<const EventT&> signal;
+            };
+
+            /** @brief Destructs the EventLoop
+             */
+            virtual ~EventLoopBase()
+            {
+                DispatchTable::iterator it;
+                for( it =_dispatchTable.begin(); it != _dispatchTable.end(); ++it)
+                {
+                    delete it->second;
+                }
+            }
+
+            void add( Selectable& s )
+            { selector().add(s); }
+
+            void remove( Selectable& s )
+            { selector().remove(s); }
+
+            void add(Timer& timer)
+            { selector().add(timer); }
+
+            void remove( Timer& timer )
+            { selector().remove(timer); }
+
+            /** @brief Starts the event loop
+             */
+            virtual void run() = 0;
+
+            virtual void setApp(Application* app) = 0;
+
+            /** @brief Adds an event and wakes up the loop.
+             */
+            virtual void commitEvent(const Event& event/*, Priority prio= PRIO_NORMAL*/) = 0;
+
+            /** @brief Adds an event without waking the event loop
+             */
+            virtual void queueEvent(const Event& event/*, Priority prio= PRIO_NORMAL*/) = 0;
+
+            /** @brief Processes all events which are currently in the event queue
+             */
+            virtual void processEvents() = 0;
+
+            /** @brief Stops the %EventLoop.
+             */
+            virtual void exit() = 0;
+
+            /** @brief Sets the idle timeout
+            */
+            void setIdleTimeout(unsigned int msecs)
+            { _timeout = msecs; }
+
+            /** @brief Returns the idle timeout
+            */
+            unsigned int idleTimeout() const
+            { return _timeout; }
+
+            /** @brief Wakes the selctor from waiting
+
+                This method can be used to end a Selector::wait call
+                before the timeout expires. It is supposed to be used from
+                another thread and thus is thread-safe.
+            */
+            virtual void wake() = 0;
+
+            /** @brief Notifies about wait timeouts
+                This signal is send when the timeout given to a wait
+                call of the selector expires and no activity occured.
+            */
+            Signal<> timeout;
+
+            /** @brief Reports all events
+            */
+            Signal<const Event&> event;
+			
+            template <typename EventT>
+            void addHandler( const BasicSlot<void, const EventT&>& slot )
+            {
+                const std::type_info& ti = typeid(EventT);
+                DispatchTable::iterator it = _dispatchTable.lower_bound( &ti );
+
+                Dispatcher<EventT>* disp = 0;
+                if(it != _dispatchTable.end() && !(_dispatchTable.key_comp()(&ti, it->first)))
+                {
+                    IDispatcher* d = it->second;
+                    disp = static_cast<Dispatcher<EventT>*>(d);
+                }
+                else
+                {
+                    disp = new Dispatcher<EventT>;
+                    std::pair<const std::type_info*const, EventLoopBase::IDispatcher*> p( &ti, disp);
+                    _dispatchTable.insert( it, p );
+                }
+
+                disp->signal.connect(slot);
+            }
+			
+            virtual SelectorBase& selector() = 0;
+
+        protected:
+            /** @brief Constructs the EventLoop
+            */
+            EventLoopBase()
+            : _timeout(WaitInfinite)
+            {}
+
+            void dispatchEvent(const Event& ev)
+            {
+                event.send(ev);
+
+                const std::type_info& ti = ev.typeInfo();
+                DispatchTable::iterator it = _dispatchTable.find(&ti);
+                if( it != _dispatchTable.end() )
+                {
+                    it->second->send(ev);
+                }
+            }
+
+        private:
+            typedef std::map<const std::type_info*, 
+                            IDispatcher*, 
+                            CompareTypeInfo> DispatchTable;
+
+            DispatchTable _dispatchTable;
+
+            unsigned int _timeout;
+    };
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
@@ -64,163 +226,75 @@ namespace System {
         Since the %EventLoop is a Runnable, it can be easily assigned to a Thread
         to give it its own event loop.
      */
-    class PT_SYSTEM_API EventLoop : public Connectable, public Runnable
+    class PT_SYSTEM_API EventLoop : public EventLoopBase
     {
         public:
             /** @brief Constructs the EventLoop
             */
             EventLoop();
 
-            /**
-                @brief Destructs the EventLoop
-
-                Delivers all outstanding events, which are still inside the event queue
-                to the registered methods and functions.
+            /** @brief Destructs the EventLoop
              */
-            ~EventLoop();
+            virtual ~EventLoop();
 
-            /**
-                @brief Starts the event loop
-
-                This method is used to start the event loop. It will block until
-                EventLoop::exit is called. During its execution events will be
-                processed and send to the registered slots.
+            /** @brief Starts the event loop
              */
-            void run();
+            virtual void run();
 
-            /**
-                @brief Adds an event and wakes up the loop.
-
-                The event will be processed as soon as possible. If the event queue is
-                currently empty, the event will be delivered immediately. If there are
-                still events left in the queue, the event will be delivered after all
-                events that are still currently in the event queue have been delivered.
-
-                Since the given Event object is cloned before it is added to the event
-                queue the Event object may be safely deleted or changed after it has
-                been committed.
-
-                This method is thread-safe, so the caller to this method is allowed to
-                be any Thread.
-
-                @param event Event to be added to the event loop.
+            /** @brief Adds an event and wakes up the loop.
              */
-            void commitEvent(const Pt::Event& event);
+            virtual void commitEvent(const Event& event);
 
-            /**
-                @brief Adds an event without waking the event loop
-
-                The event is added to the end of the event queue without actually starting
-                to process it. It be processed after EventLoop::wake was called or another
-                event was committed to the event loop and which triggers the processing of
-                events. In case the event loop is currently processing events the event
-                queued with this method will also be delivered.
-                You may use this method to batch-commit several events be queueing them
-                and finally calling EventLoop::wake to start the processing of those events.
-
-                Since the given Event object is cloned before it is added to the event
-                queue the Event object may be safely deleted or changed after it has
-                been committed.
-
-                This method is thread-safe, so the caller to this method is allowed to
-                be any Thread.
-
-                @param event Event to be added to the event loop.
+            /** @brief Adds an event without waking the event loop
              */
-            void queueEvent(const Pt::Event& event);
+            virtual void queueEvent(const Event& event);
 
-            /**
-                @brief Processes all events which are currently in the event queue
-
-                This method will return without work if there is no event in the event
-                queue.
-
-                This method is thread-safe, so the caller to this method is allowed to
-                be in any Thread.
+            /** @brief Processes all events which are currently in the event queue
              */
-            void processEvents();
+            virtual void processEvents();
 
-            /**
-                @brief Wakes up the %EventLoop to process events.
-
-                This will only have an effect if the EventLoop::run method is currently waiting
-                for new events. If it's not, the event queue is currently processed anyway.
+            /** @brief Wakes up the %EventLoop to process events.
              */
-            void wake();
+            virtual void wake();
 
-            /**
-                @brief Stops the %EventLoop.
-
-                Before the event loop is stopped, all events which are still in the
-                event queue are processed. Calling this method will allow
-                EventLoop::run to return
+            /** @brief Stops the %EventLoop.
              */
-            void exit();
-
-            /** @copydoc Selector::addDevice
-            */
-             void add( IOResult& result );
-
-            /** @copydoc Selector::removeDevice
-            */
-            void remove( IOResult& result );
-
-            /** @copydoc Selector::addTimer
-            */
-            void add( Timer& timer );
-
-            /** @copydoc Selector::removeTimer
-            */
-            void remove( Timer& timer );
-
-            /** @brief Sets the idle timeout
-                It the set idle timeout expires without any acitvity on
-                the %EventtLoop, the signal timeout will be send.
-
-                @param msecs The timeout in milliseconds
-            */
-            void setIdleTimeout(unsigned int msecs);
-
-            /** @brief Returns the idle timeout
-                Returns the idle timeout in milliseconds
-            */
-            unsigned int idleTimeout() const;
+            virtual void exit();
 
             //! @internal
-            virtual bool opened(const Connection& c)
-            {
-                MutexLock lock(_connectionMutex);
-                bool accept = Connectable::opened(c);
-                return accept;
-            }
+            virtual bool opened(const Connection& c);
 
             //! @internal
-            virtual void closed(const Connection& c)
+            virtual void closed(const Connection& c);
+
+            virtual void setApp(Application* app)
             {
-                MutexLock lock(_connectionMutex);
-                Connectable::closed(c);
+                _selector.setApp(app);
             }
 
-            /** @brief Reports all events
-                Clients can connect themselves to this signal to listen for
-                any event that is committed to this event loop's event queue.
-            */
-            Signal<const Pt::Event&> event;
+            virtual SelectorBase& selector()
+            { return _selector; }
 
-            /** @brief Reports event loop idle timeuts
-                Clients connected to this signal will be called if there was
-                no activity in an idle time interval.
-            */
-            Signal<> timeout;
+        protected:
+            //! @brief Not thread-safe
+            void onAdd( Selectable& s );
+
+            //! @brief Not thread-safe
+            void onRemove( Selectable& s );
+
+            //! @brief Not thread-safe
+            void onAdd( Timer& timer );
+
+            //! @brief Not thread-safe
+            void onRemove( Timer& timer );
 
         private:
             bool _exitLoop;
-            Condition _cond;
-            std::list<Pt::Event*>   _eventQueue;
-            Mutex                   _connectionMutex;
-            Mutex                   _mutex;
-            Selector                _selector;
-            unsigned int            _timeout;
+            Mutex _connectionMutex;
+            Selector _selector;
+            Allocator _allocator;
+            std::deque<Event* > _eventQueue;
+            Mutex _queueMutex;
     };
 
 } // namespace System

@@ -177,8 +177,8 @@ void GDIEventLoop::queueEvent(const Pt::Event& e)
 {
     _queueMutex.lock();
 
-    Pt::Event* ev = e.clone();
-    _eventQueue.push_back(ev);
+    Pt::Event& ev = e.clone(_allocator);
+    _eventQueue.push_back(&ev);
 
     _queueMutex.unlock();
 }
@@ -200,9 +200,8 @@ void GDIEventLoop::processEvents()
 
         _queueMutex.unlock();
 
-
         eventQueueSignal.send(*ev);
-        delete ev;
+        ev->destroy(_allocator);
     }
 }
 

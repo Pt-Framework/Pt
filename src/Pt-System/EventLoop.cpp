@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 Marc Boris Duerner                                 *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
- *   Copyright (C) 2007 Sebastian Pieck                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,39 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Signal.h"
-
-#include "Pt/System/EventLoop.h"
 #include "Pt/Event.h"
+#include "Pt/System/EventLoop.h"
 
 namespace Pt {
+
 namespace System {
+
+bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
+{
+    return t1->before(*t2) != 0;
+}
+
 
 EventLoop::EventLoop()
 : _exitLoop(false)
-, _connectionMutex(Pt::System::Mutex::Normal)
-, _mutex(Pt::System::Mutex::Normal)
-, _timeout(Selector::WaitInfinite)
+, _connectionMutex(Mutex::Normal)
+, _allocator(/*255, 64*/)
+, _queueMutex(Mutex::Normal)
 {
-    connect(_selector.timeout, timeout);
 }
 
+
 EventLoop::~EventLoop()
-{   
-    Connection connection;
-    while( true )
+{
+    try
     {
+        Connection connection;
+        while( true )
         {
-            MutexLock lock( _connectionMutex );
+            {
+                MutexLock lock( _connectionMutex );
 
-             if( _connections.empty() )
-                break;
+                if( _connections.empty() )
+                    break;
 
-             connection = _connections.front();
-             _connections.remove( connection );
+                connection = _connections.front();
+                _connections.remove( connection );
+            }
+
+            connection.close();
         }
-
-        connection.close();
     }
+    catch(...)
+    {}
 }
 
 
@@ -59,56 +69,87 @@ void EventLoop::run()
 {
     while( false == _exitLoop )
     {
-        _mutex.lock();
+        MutexLock lock(_queueMutex);
 
-        if( _eventQueue.empty() )
+        if( !_eventQueue.empty() )
         {
-            _mutex.unlock();
-            _selector.wait(_timeout);
-        }
-        else
-        {
-            _mutex.unlock();
+            lock.unlock();
+            this->processEvents();
         }
 
-        this->processEvents();
+        lock.unlock();
+
+        bool active = _selector.wait( this->idleTimeout() );
+        if(!active)
+            timeout.send();
     }
 }
 
-
-void EventLoop::commitEvent(const Pt::Event& event)
+/*bool EventLoop::wait(unsigned msecs)
 {
-    queueEvent(event);
+    if (_selector.wait(msecs))
+    {
+        MutexLock lock(_queueMutex);
+
+        if( !_eventQueue.empty() )
+        {
+            lock.unlock();
+            this->processEvents();
+        }
+
+        return true;
+    }
+
+    return false;
+}*/
+
+void EventLoop::commitEvent(const Event& ev)
+{
+    queueEvent(ev);
     this->wake();
 }
+
 
 void EventLoop::processEvents()
 {
     while( false == _exitLoop )
     {
-        _mutex.lock();
+        MutexLock lock(_queueMutex);
 
-        if( _eventQueue.empty() )
+        Event* ev = 0;
+
+        if ( !_eventQueue.empty() )
         {
-            _mutex.unlock();
+            ev = _eventQueue.front();
+            _eventQueue.pop_front();
+        }
+        else
+        {
             break;
         }
 
-        Pt::Event* ev = _eventQueue.front();
-        _eventQueue.remove(ev);
+        try
+        {
+            lock.unlock();
+            this->dispatchEvent(*ev);
+        }
+        catch(...)
+        {
+            ev->destroy(_allocator);
+            throw;
+        }
 
-        _mutex.unlock();
-
-        event.send(*ev);
-        delete ev;
+        ev->destroy(_allocator);
     }
 }
 
+
 void EventLoop::wake()
 {
-    MutexLock lock( _mutex );
+    //MutexLock lock(_mutex);
     _selector.wake();
 }
+
 
 void EventLoop::exit()
 {
@@ -116,52 +157,64 @@ void EventLoop::exit()
     this->wake();
 }
 
-void EventLoop::queueEvent(const Pt::Event& event)
-{
-    MutexLock lock( _mutex );
 
-    Pt::Event* ev = event.clone();
-    _eventQueue.push_back(ev);
+bool EventLoop::opened(const Connection& c)
+{
+    MutexLock lock(_connectionMutex);
+    bool accept = Connectable::opened(c);
+    return accept;
 }
 
 
-void EventLoop::add( IOResult& result )
+void EventLoop::closed(const Connection& c)
 {
-    MutexLock lock( _mutex );
-    return _selector.add( result );
+    MutexLock lock(_connectionMutex);
+    Connectable::closed(c);
 }
 
 
-void EventLoop::remove( IOResult& result )
+void EventLoop::queueEvent(const Event& ev)
 {
-    MutexLock lock( _mutex );
-    _selector.remove( result );
+    MutexLock lock( _queueMutex );
+
+    // TODO: use a continuous block of memory to store events
+    // this avoids new/delete
+    Event& clonedEvent = ev.clone(_allocator);
+
+    try
+    {
+        _eventQueue.push_back(&clonedEvent);
+    }
+    catch(...)
+    {
+        clonedEvent.destroy(_allocator);
+        throw;
+    }
 }
 
 
-void EventLoop::add( Timer& timer )
+void EventLoop::onAdd( Selectable& s )
 {
-    MutexLock lock( _mutex );
+    return _selector.add( s );
+}
+
+
+void EventLoop::onRemove( Selectable& s )
+{
+    _selector.remove( s );
+}
+
+
+void EventLoop::onAdd( Timer& timer )
+{
     return _selector.add( timer );
 }
 
-void EventLoop::remove( Timer& timer)
+void EventLoop::onRemove( Timer& timer)
 {
-    MutexLock lock( _mutex );
     _selector.remove( timer );
 }
 
-
-void EventLoop::setIdleTimeout(unsigned int msecs)
-{
-    _timeout = msecs;
-}
-
-unsigned int EventLoop::idleTimeout() const
-{
-    return _timeout;
-}
-
-
 } // namespace System
+
 } // namespace Pt

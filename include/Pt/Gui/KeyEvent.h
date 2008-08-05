@@ -103,10 +103,6 @@ namespace Gui {
             //! @brief Empty desctructor.
             virtual ~KeyEvent();
 
-            // inherit doc
-            virtual Event* clone() const
-            { return new KeyEvent(*this); }
-
             /**
              * @brief The type of this key event; either Press or Released for a pressed or released key.
              *
@@ -147,6 +143,17 @@ namespace Gui {
              * @return The type info for this event.
              */
             virtual const std::type_info& typeInfo() const;
+
+		    Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(KeyEvent));
+		        return *(new (pEvent)KeyEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(KeyEvent));
+		    }
 
         private:
             Type _type;

@@ -56,9 +56,9 @@ void ProcessImplBase::start()
 	{
 		if( m_devIn)
 		{
-			SetHandleInformation( m_devIn->impl()->deviceHandle(), 
+			SetHandleInformation( m_devIn->ioimpl().deviceHandle(), 
 								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
+			m_startUp.hStdInput = m_devIn->ioimpl().deviceHandle();
 		}
 		else
 			m_startUp.hStdInput = INVALID_HANDLE_VALUE;
@@ -68,9 +68,9 @@ void ProcessImplBase::start()
 	{ 
 		if(m_devOut)
 		{
-			SetHandleInformation( m_devOut->impl()->deviceHandle(), 
+			SetHandleInformation( m_devOut->ioimpl().deviceHandle(), 
 								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
+			m_startUp.hStdOutput = m_devOut->ioimpl().deviceHandle();
 		}
 		else
 			m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
@@ -80,9 +80,9 @@ void ProcessImplBase::start()
 	{
 		if( m_devErr)
 		{
-			SetHandleInformation( m_devErr->impl()->deviceHandle(), 
+			SetHandleInformation( m_devErr->ioimpl().deviceHandle(), 
 								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdError = m_devErr->impl()->deviceHandle();
+			m_startUp.hStdError = m_devErr->ioimpl().deviceHandle();
 		}
 		else
 			m_startUp.hStdError = INVALID_HANDLE_VALUE;

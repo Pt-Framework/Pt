@@ -19,34 +19,43 @@
  ***************************************************************************/
 #include "win32.h"
 #include "SerialDeviceImpl.h"
-#include "Pt/System/Thread.h"
+#include "Pt/System/IODevice.h"
 #include "Pt/System/Selector.h"
+#include "Pt/System/SystemError.h"
 #include <iostream>
 
+namespace Pt {
 
-namespace Pt{
-namespace System{
+namespace System {
 
 SerialDeviceImpl::SerialDeviceImpl()
-: _terminateEv( 0 )
+: _waitHandle(INVALID_HANDLE_VALUE)
+, _rbuf(0)
+, _rbuflen(0)
+, _wbuf(0)
+, _wbuflen(0)
 {
-    memset( &_ovRead, 0, sizeof( _ovRead ) );
-    memset( &_ovWrite, 0, sizeof( _ovWrite ) );
-    memset( &_ovStatus, 0, sizeof( _ovStatus ) );
+    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if( _waitHandle == NULL )
+        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
 
-    _ovWrite.hEvent  = CreateEvent( 0, TRUE ,FALSE, 0 );
-    _ovRead.hEvent   = CreateEvent( 0, TRUE ,FALSE, 0 );
-    _ovStatus.hEvent = CreateEvent( 0, TRUE ,FALSE, 0 );
-    _terminateEv     = CreateEvent( 0, TRUE , FALSE, 0 );
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+    _readOv.hEvent = NULL;
+    _readOv.hEvent  = NULL;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+    _writeOv.hEvent = NULL;
+    _writeOv.hEvent = NULL;
 }
+
 
 SerialDeviceImpl::~SerialDeviceImpl()
 {
-    CloseHandle( _ovWrite.hEvent );
-    CloseHandle( _ovRead.hEvent );
-    CloseHandle( _ovStatus.hEvent );
-    CloseHandle( _terminateEv );
+    ::CloseHandle(_waitHandle);
 }
+
 
 void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode, bool isAsync )
 {
@@ -60,22 +69,25 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     if( mode & std::ios_base::in )
         openFlags |= GENERIC_READ;
 
+    HANDLE h = INVALID_HANDLE_VALUE;
     if(isAsync)
     {
-        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+        h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     }
     else
     {
-        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
+        h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
 
 
-    if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
+    if( h == 0  || h == INVALID_HANDLE_VALUE )
         throw OpenFailed("Could not open port" , PT_SOURCEINFO);
+
+    this->setHandle(h);
 
     try
     {
-        if( !GetCommState( _handle, &_orgCommState ) )
+        if( ! GetCommState( h, &_orgCommState ) )
             throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
 
 		// Do not use timeouts, return read data immediately.
@@ -86,86 +98,253 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.WriteTotalTimeoutMultiplier  = 0;
         comTimeOut.WriteTotalTimeoutConstant    = 1;
 
-        if( !SetCommTimeouts( _handle, &comTimeOut ) )
+        if( !SetCommTimeouts( h, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
-        SetCommMask( _handle, 0 );
+        SetCommMask( h, 0 );
     }
     catch( ... )
     {
-        CloseHandle( _handle );
-        _handle = 0;
+        CloseHandle( h );
         throw;
     }
 }
 
+
 void SerialDeviceImpl::close()
 {
-    if( _handle == 0 || _handle == INVALID_HANDLE_VALUE )
-        return;
-
-    //Signalize the terminate event.
-    SetEvent( _terminateEv );
-
-    //Reset the wait mask
-    SetCommMask( _handle, 0 );
-
     //Restore the port state.
-    SetCommState( _handle, &_orgCommState );
+    SetCommState( handle(), &_orgCommState );
+    
+    if(handle() != INVALID_HANDLE_VALUE)
+    {
+        if( FALSE == ::CloseHandle( handle() ) )
+            throw IOError("Could not close file handle", PT_SOURCEINFO);
 
-    //Close the port handle.
-    CloseHandle( _handle );
-
-    _handle = 0;
+        this->setHandle(INVALID_HANDLE_VALUE);
+    }
 }
 
-IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+
+void SerialDeviceImpl::attach(SelectorBase& s)
 {
-    DWORD length;
+}
 
-    if( ReadFile( _handle, buffer, n, &length, &_ovRead ) == FALSE )
+
+void SerialDeviceImpl::detach(SelectorBase& s)
+{
+    this->setWaitHandle(_waitHandle);
+}
+
+
+bool SerialDeviceImpl::wait(unsigned int msecs)
+{
+    HANDLE prevHandle = NULL;
+
+    if(_readOv.hEvent != _waitHandle)
     {
+        prevHandle = _readOv.hEvent;
+        this->setWaitHandle(_waitHandle);
+    }
 
-        DWORD error = GetLastError();
-        if (ERROR_HANDLE_EOF == error)
+    DWORD result = WaitForSingleObject(_waitHandle, msecs);
+
+    if(prevHandle)
+         _readOv.hEvent = prevHandle;
+    
+    if(result == WAIT_FAILED)
+        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
+    
+    if(result == WAIT_TIMEOUT)
+        return false;
+
+    if(result == WAIT_OBJECT_0)
+    {
+        this->checkEvent();
+        return true;
+    }
+        
+    throw IOError("Unknown return from WaitForSingleObject", PT_SOURCEINFO);
+    return false;
+}
+
+
+bool SerialDeviceImpl::setWaitHandle(HANDLE h)
+{
+    if(_rbuf)
+    {
+        if( _readOv.hEvent && HasOverlappedIoCompleted(&_readOv) )
         {
-            eof = true;
+            _readOv.hEvent = h;
+            SetEvent(h);
+            return true;
         }
-        else if (ERROR_IO_PENDING != error)
+ 
+        if(_readOv.hEvent != h)
         {
-            throw IOError("Read port failed" , PT_SOURCEINFO);
+            if(_readOv.hEvent)
+                CancelIo(handle());
+
+            _readOv.hEvent = h;
+        }
+
+        DWORD readBytes = 0;
+        if( FALSE == ReadFile( handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+        {
+            if( ERROR_HANDLE_EOF == GetLastError() )
+            {
+            }
+            else if( ERROR_IO_PENDING != GetLastError() )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
         }
     }
 
-    _result.setHandle(_ovRead.hEvent);
+    _readOv.hEvent = h;
 
-    return _result;
+    if(_wbuf)
+    {
+        if( _writeOv.hEvent && HasOverlappedIoCompleted(&_writeOv) )
+        {
+            _writeOv.hEvent = h;
+            SetEvent(h);
+            return true;
+        }
+
+        if(_writeOv.hEvent != h)
+        {
+            if(_writeOv.hEvent)
+                CancelIo(handle());
+                
+            _writeOv.hEvent = h;
+        }
+
+        DWORD writtenBytes = 0;
+        if( FALSE == WriteFile(handle(), (void*)_wbuf, _wbuflen, &writtenBytes, &_writeOv) )
+        {
+            DWORD err = GetLastError();
+            if( ERROR_IO_PENDING != err )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
+        }
+    }
+
+    _writeOv.hEvent = h;
+
+    return true;
+}
+        
+
+bool SerialDeviceImpl::checkEvent()
+{
+    bool avail = false;
+
+    if( _wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    {
+        this->parent().outputReady.send( this->parent() );
+        avail = true;
+    }
+    
+    if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
+    {
+        this->parent().inputReady.send( this->parent() );
+        avail = true;
+    }
+
+    return avail;
 }
 
-size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
+
+void SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-    DWORD readBytes = 0;
-    if (GetOverlappedResult(_handle, &_ovRead, &readBytes, FALSE) == FALSE )
+    _rbuf = buffer;
+    _rbuflen = n;
+        
+    if(_readOv.hEvent != NULL)
     {
-		//DWORD err=GetLastError();
-        if( ERROR_HANDLE_EOF == GetLastError() ) {
-			eof = true;
+        DWORD readBytes = 0;
+        if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+        {
+            if( ERROR_HANDLE_EOF == GetLastError() )
+            {
+            }
+            else if( ERROR_IO_PENDING != GetLastError() )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
         }
-        else{
+    }
+}
+
+
+size_t SerialDeviceImpl::endRead(bool& eof)
+{
+    _rbuf = 0;
+    _rbuflen = 0;
+    DWORD readBytes = 0;
+
+    if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err )
+        {
+            eof = true;
+        }
+        else
+        {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
     }
 
-    _ovRead.Offset += readBytes;
-
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
     return readBytes;
 }
+
+
+void SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+    _wbuf = buffer;
+    _wbuflen = n;
+
+    if(_writeOv.hEvent != NULL)
+    {
+        DWORD writtenBytes = 0;
+        if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
+        {
+            DWORD err = GetLastError();
+            if( ERROR_IO_PENDING != err )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
+        }
+    }
+}
+
+
+size_t SerialDeviceImpl::endWrite()
+{	
+    _wbuf = 0;
+    _wbuflen = 0;
+	DWORD writtenBytes = 0;
+    
+    if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
+    {
+        throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);
+    }
+
+	_writeOv.Offset += writtenBytes;
+	return writtenBytes;
+}
+
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD length;
 
-    if( ReadFile( _handle, buffer, count, &length, &_ovRead ) )
+    if( ReadFile( handle(), buffer, count, &length, &_readOv ) )
         return length;
 
     if( ERROR_HANDLE_EOF == GetLastError() )
@@ -175,7 +354,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     }
     else if( ERROR_IO_PENDING == GetLastError() )
     {
-        if( S_OK != GetOverlappedResult(_handle, &_ovRead, &length, FALSE) )
+        if( S_OK != GetOverlappedResult(handle(), &_readOv, &length, FALSE) )
             throw IOError("Read port failed" , PT_SOURCEINFO);
     }
     else
@@ -186,16 +365,17 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     return length;
 }
 
+
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
 
-    if( WriteFile(  _handle,  buffer,  count, &length, &_ovWrite ) )
+    if( WriteFile( handle(),  buffer,  count, &length, &_writeOv ) )
         return length;
 
     if( ERROR_IO_PENDING == GetLastError() )
     {
-        if( S_OK != GetOverlappedResult(_handle, &_ovWrite, &length, FALSE) )
+        if( S_OK != GetOverlappedResult(handle(), &_writeOv, &length, FALSE) )
             throw IOError("Could not write to file handle", PT_SOURCEINFO);
     }
     else
@@ -206,17 +386,20 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     return length;
 }
 
+
 void SerialDeviceImpl::writeCommState( DCB& commState )
 {
-    if( !SetCommState( _handle, &commState ) )
+    if( ! SetCommState( handle(), &commState ) )
         throw IOError( "Changing port state failed" , PT_SOURCEINFO );
 }
 
+
 void SerialDeviceImpl::readCommState( DCB& commState ) const
 {
-    if( !GetCommState( _handle, &commState ) )
+    if( ! GetCommState( handle(), &commState ) )
         throw IOError( "Get port state failed" , PT_SOURCEINFO );
 }
+
 
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
 {
@@ -226,12 +409,14 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
     writeCommState( commState );
 }
 
+
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
     DCB commState;
     readCommState( commState );
     return static_cast<SerialDevice::BaudRate>( commState.BaudRate );
 }
+
 
 void SerialDeviceImpl::setCharSize( int size )
 {
@@ -241,12 +426,14 @@ void SerialDeviceImpl::setCharSize( int size )
     writeCommState( commState );
 }
 
+
 int SerialDeviceImpl::charSize() const
 {
     DCB commState;
     readCommState( commState );
     return commState.ByteSize;
 }
+
 
 void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
@@ -270,6 +457,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 
     writeCommState( commState );
 }
+
 
 SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 {
@@ -296,6 +484,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
     return SerialDevice::OneStopBit;
 }
 
+
 void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
     DCB commState;
@@ -318,6 +507,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 
     writeCommState( commState );
 }
+
 
 SerialDevice::Parity SerialDeviceImpl::parity() const
 {
@@ -343,6 +533,7 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     throw std::runtime_error( "Invalid parity" + PT_SOURCEINFO);
     return SerialDevice::ParityEven;
 }
+
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
@@ -375,6 +566,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     writeCommState( commState );
 }
 
+
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
     DCB commState;
@@ -399,6 +591,7 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return SerialDevice::FlowControlBoth;
 }
 
+
 void SerialDeviceImpl::setTimeout( size_t msec )
 {
     COMMTIMEOUTS comTimeOut;
@@ -408,70 +601,24 @@ void SerialDeviceImpl::setTimeout( size_t msec )
     comTimeOut.WriteTotalTimeoutMultiplier  = 10;
     comTimeOut.WriteTotalTimeoutConstant    = 100;
 
-    if( !SetCommTimeouts( _handle, &comTimeOut ) )
+    if( !SetCommTimeouts( handle(), &comTimeOut ) )
         throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 }
+
 
 size_t SerialDeviceImpl::timeout() const
 {
     COMMTIMEOUTS comTimeOut;
-    GetCommTimeouts( _handle, &comTimeOut );
+    GetCommTimeouts( handle(), &comTimeOut );
     return  comTimeOut.ReadTotalTimeoutConstant;
 }
 
+
 void SerialDeviceImpl::flush()
 {
-    FlushFileBuffers( _handle );
+    FlushFileBuffers( handle() );
 }
-
-void SerialDeviceImpl::resetEvent( HANDLE handle )
-{
-    if( handle != _ovStatus.hEvent )
-        throw std::logic_error("Unknown event handle ");
-
-    if( WaitCommEvent( _handle, &_eventMask, &_ovStatus ) == FALSE )
-    {
-        if( GetLastError () != ERROR_IO_PENDING )
-            throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
-    }
-}
-
-/*void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
-{
-    handles.clear();
-
-    DWORD waitMask = 0;
-
-    if(waitMode & Selector::WaitInput)
-        waitMask |= EV_RXCHAR;
-
-    if(waitMode & Selector::WaitOutput)
-        waitMask |= EV_TXEMPTY;
-
-    SetCommMask( _handle, waitMask );
-
-    handles.push_back( _ovStatus.hEvent );
-
-    resetEvent( _ovStatus.hEvent );
-}
-
-IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
-{
-   if( handle != _ovStatus.hEvent )
-        throw std::logic_error("Unknown event handle ");
-
-    if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
-        return ReadyWrite;
-
-//    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
-//        return _readEvent;
-
-    if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
-        return ReadyRead;
-
-    throw IOError("Unknow event", PT_SOURCEINFO);
-    return ReadyRead;
-}*/
 
 }//namespace System
+
 }//namespace Pt

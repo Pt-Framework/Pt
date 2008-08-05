@@ -71,10 +71,6 @@ Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
 Main_LinkSharedLibraries DrawEllipseDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawEllipseDemo : $(OUTPUT_TARGET) ;
 
-Main DrawTextDemo : DrawTextDemo.cpp ;
-Main_LinkSharedLibraries DrawTextDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
-Main_MakeLocate DrawTextDemo : $(OUTPUT_TARGET) ;
-
 Main GfxPerf : GfxPerf.cpp ;
 Main_LinkSharedLibraries GfxPerf : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate GfxPerf : $(OUTPUT_TARGET) ;

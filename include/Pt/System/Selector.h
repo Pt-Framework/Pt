@@ -21,8 +21,8 @@
 #ifndef PT_SYSTEM_SELECTOR_H
 #define PT_SYSTEM_SELECTOR_H
 
-#include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <list>
 
@@ -30,16 +30,18 @@ namespace Pt {
 
 namespace System {
 
-    class IOResult;
     class Timer;
+    class Selectable;
+    class Application;
+    class SelectorImpl;
 
     /** @brief Reports activity on a set of devices.
 
-        A Selector can be used to monitor a set of IODevices and Timers
+        A Selector can be used to monitor a set of Selectables and Timers
         and wait for activity on them. The wait call can be performed with
         a timeout and the respective timeout signal is sent if it occurs.
-        Clients can be notified about Timer and IODevice activity by
-        connecting to the appropriate signals of the Timer and IODevice
+        Clients can be notified about Timer and Selectable activity by
+        connecting to the appropriate signals of the Timer and Selectable
         classes.
 
         The following example uses a %Selector to wait on acitvity on
@@ -51,7 +53,7 @@ namespace System {
 
         int main()
         {
-            using Pt::System;
+            using cxxtools::System;
 
             Timer timer;
             timer.start(1000);
@@ -69,27 +71,28 @@ namespace System {
         continously. The %EventLoop and %Application classes provide the same API
         as the Selector itself.
     */
-    class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
+    class PT_SYSTEM_API SelectorBase : public NonCopyable
     {
+        friend class Selectable;
+        friend class Timer;
+
         public:
             static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
-            //! @brief Default constructor
-            Selector();
-
             //! @brief Destructor
-            virtual ~Selector();
+            virtual ~SelectorBase()
+            {}
 
             /** @brief Adds an IOResult
 
                 Adds an IOResult to the selector. IOResult are removed
                 automatically when they get destroyed.
             */
-            void add( IOResult& result );
+            void add(Selectable& s);
 
             /** @brief Cancel an IOResult.
             */
-            void remove( IOResult& result );
+            void remove(Selectable& s);
 
             /** @brief Adds a Timer
 
@@ -104,17 +107,24 @@ namespace System {
 
                 @param timer The timer to remove
             */
-            void remove( Timer& timer );
+            void remove(Timer& timer);
 
             /** @brief Wait for activity
 
                 This method will wait for activity on the registered
-                IODevices and Timers. Use Selector::WaitInfinite to
+                Selectables and Timers. Use Selector::WaitInfinite to
                 wait without timeout.
 
                 @param msecs timeout in miliseconds
             */
-            bool wait(unsigned int msecs = WaitInfinite);
+            bool wait(unsigned int msecs = WaitInfinite)
+            {
+                bool ret = this->onWait(msecs);
+                if(ret == false)
+                    timeout.send();
+
+                return ret;
+            }
 
             /** @brief Wakes the selctor from waiting
 
@@ -122,7 +132,8 @@ namespace System {
                 before the timeout expires. It is supposed to be used from
                 another thread and thus is thread-safe.
             */
-            void wake();
+            void wake()
+            { this->onWake(); }
 
             /** @brief Notifies about wait timeouts
                 This signal is send when the timeout given to a wait
@@ -130,11 +141,68 @@ namespace System {
             */
             Signal<> timeout;
 
+        protected:
+            //! @brief Default constructor
+            SelectorBase()
+            {}
+
+            virtual void onAdd(Selectable&) = 0;
+
+            virtual void onRemove(Selectable&) = 0;
+
+            virtual void onEnabled(Selectable&) = 0;
+
+            virtual void onDisabled(Selectable&) = 0;
+
+            virtual void onAdd(Timer& timer) = 0;
+
+            virtual void onRemove( Timer& timer ) = 0;
+
+            virtual void onStarted( Timer& timer ) = 0;
+
+            virtual void onStopped( Timer& timer ) = 0;
+            
+            virtual bool onWait(unsigned int msecs) = 0;
+
+            virtual void onWake() = 0;
+    };
+
+    class PT_SYSTEM_API Selector : public SelectorBase
+    {
+        public:
+            Selector();
+
+            virtual ~Selector();
+
+            void setApp(Application* app);
+
+            SelectorImpl& impl();
+
+        protected:
+            void onAdd( Selectable& dev );
+
+            void onRemove( Selectable& dev );
+
+            void onEnabled(Selectable&);
+
+            void onDisabled(Selectable&);
+            
+            void onAdd(Timer& timer);
+
+            void onRemove(Timer& timer);
+
+            void onStarted(Timer& timer);
+
+            void onStopped(Timer& timer);
+
+            bool onWait(unsigned int msecs = WaitInfinite);
+
+            void onWake();
+
         private:
-            /** @brief Update all registered timers
-                @internal
+            /** @internal Update all timers and return true if a timer fired
+
                 @param timeout interval to next expiring timer
-                @return true if a timer fired
             */
             bool updateTimer(size_t& timeout);
 

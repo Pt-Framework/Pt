@@ -24,15 +24,8 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Socket.h>
 #include <Pt/System/IODevice.h>
-#include <Pt/System/IOResult.h>
 
 namespace Pt {
-
-namespace System {
-
-    class IODeviceImpl;
-
-}
 
 namespace Net {
 
@@ -63,20 +56,32 @@ namespace Net {
 
             unsigned long availableBytes(void);
 
-            virtual System::IODeviceImpl* impl()
-            { return 0;}
+            virtual System::IODeviceImpl& ioimpl()
+            { System::IODeviceImpl* impl = 0; return *impl; }
 
+            virtual System::SelectableImpl& simpl()
+            { System::SelectableImpl* impl = 0; return *impl; }
+			
         protected:
-            System::IOResult& onBeginRead(char* buffer, size_t n, bool& eof)
-            { System::IOResult* res = 0; return *res; }
+	        virtual bool onWait(unsigned int msecs)
+			{ return false; }
 
-            size_t onEndRead(System::IOResult& result, bool& eof)
+	        virtual void onAttach(System::SelectorBase&)
+			{}
+
+	        virtual void onDetach(System::SelectorBase&)
+			{}
+
+            void onBeginRead(char* buffer, size_t n, bool& eof)
+            {  }
+
+            size_t onEndRead( bool& eof)
             { return 0;}
 
-            System::IOResult& onBeginWrite(const char* buffer, size_t n)
-            { System::IOResult* res = 0; return *res; }
+            void onBeginWrite(const char* buffer, size_t n)
+            { }
 
-            size_t onEndWrite(System::IOResult& result)
+            size_t onEndWrite()
             { return 0;}
 
             size_t onRead(char* buffer, size_t count, bool& eof);

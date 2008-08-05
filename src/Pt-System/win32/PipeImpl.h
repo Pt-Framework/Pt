@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,7 +23,6 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
-#include "ReadResult.h"
 #include <windows.h>
 
 namespace Pt {
@@ -40,20 +38,31 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void open(HANDLE handle, bool isAsync);
 
-        virtual HANDLE deviceHandle() const;        
+        virtual bool checkEvent();
+        
+		virtual bool setWaitHandle(HANDLE h);        
 
-        virtual IODeviceImpl* impl()
-        { return this; }
+        virtual IODeviceImpl& ioimpl()
+        { return *this; }
+
+        virtual SelectableImpl& simpl()
+        { return *this; }
 
     protected:
-        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
+        void onAttach(SelectorBase& s);
 
-		size_t onEndRead(IOResult& resule, bool& eof);
+        void onDetach(SelectorBase& s);
+    
+        void onBeginRead(char* buffer, size_t n, bool& eof);
 
-        IOResult& onBeginWrite(const char* buffer, size_t n);
+        size_t onEndRead(bool& eof);
 
-        size_t onEndWrite(IOResult& result);
+        void onBeginWrite(const char* buffer, size_t n);
 
+        size_t onEndWrite();
+
+        bool onWait(unsigned int msecs);
+        
         //! @brief Closes the I/O device
         virtual void onClose();
 
@@ -63,16 +72,16 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         //! @brief Write bytes to device
         virtual size_t onWrite(const char* buffer, size_t count);
 
-        virtual bool _waitable() const
-        { return true; }
-
         virtual void onSync() const;
-
+        
      private:
-     	ReadResult _readResult;
-        HANDLE     _handle;
+        HANDLE _waitHandle;
         OVERLAPPED _readOv;
+        char* _rbuf;
+        size_t _rbuflen;
         OVERLAPPED _writeOv;
+        const char* _wbuf;
+        size_t _wbuflen;
 };
 
 class PipeImpl

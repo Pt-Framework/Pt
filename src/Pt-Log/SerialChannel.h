@@ -27,11 +27,9 @@
 #include <Pt/System/SerialDevice.h>
 #include <string>
 
-
 namespace Pt {
 
 namespace Log {
-
 
 class PT_LOG_API WriteEvent : public Pt::Event
 {
@@ -48,17 +46,21 @@ class PT_LOG_API WriteEvent : public Pt::Event
         {
         }
 
-
-        Event* clone() const
-        {
-            return new WriteEvent(*this);
-        }
-
-
         const std::type_info& typeInfo() const
         {
             return typeid(WriteEvent);
         }
+
+	    Pt::Event& clone(Pt::Allocator& allocator) const
+	    {
+	        void* m = allocator.allocate( sizeof(WriteEvent) );
+	        return *( new (m)WriteEvent(*this) );
+	    }
+
+	    void destroy(Pt::Allocator& allocator)
+	    {
+	        allocator.deallocate(this, sizeof(WriteEvent));
+	    }
 
     private:
         std::string _msg;

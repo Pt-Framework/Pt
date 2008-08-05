@@ -19,11 +19,12 @@
  ***************************************************************************/
 #ifndef PT_SYSTEM_SERIALDEVICE_H
 #define PT_SYSTEM_SERIALDEVICE_H
-#include <Pt/System/Api.h>
 
+#include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 
 namespace Pt {
+
 namespace System {
 
 /** @brief Serial device
@@ -114,89 +115,44 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         SerialDevice();
 
         /** @brief Constructs a serial device and open the specified device file
-
-            \param file     The serial device file
-            \param mode     The open mode
-            \param synchron  The Read/Write mode
-        */
+         */
         SerialDevice( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
 
         //! @brief Destructor
         virtual ~SerialDevice();
 
         /** @brief Open the specified device file
-
-            \param file The serial device file
-            \param mode The open mode
-        */
+         */
         void open( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
 
         //! @brief Sets the baud rate
-        /*!
-            \param rate The new baud rate
-        */
         void setBaudRate( BaudRate rate );
 
         //! @brief Gets the baud rate
-        /*!
-
-            \return The current baud rate
-        */
         BaudRate baudRate() const;
 
         //! @brief Sets the char size
-        /*!
-
-            \param size The char size to set
-        */
         void setCharSize( int size );
 
         //! @brief Gets the current char size
-        /*!
-            \return The current char size
-        */
         int charSize() const;
 
         //! @brief Sets the number of stop bits
-        /*!
-
-            \param bits The number of stop bits
-        */
         void setStopBits( StopBits bits );
 
         //! @brief Gets the current number of stop bits
-        /*!
-
-            \return The current number of stop bits
-        */
         StopBits stopBits() const;
 
         //! @brief Sets the parity
-        /*!
-
-            \param parity The new parity
-        */
         void setParity( Parity parity );
 
         //! @brief Gets the current parity
-        /*!
-
-            \return The current parity
-        */
         Parity parity() const;
 
         //! @brief Sets the flow control kind
-        /*!
-
-            \param flowControl The new flow control kind
-        */
         void setFlowControl( FlowControl flowControl );
 
         //! @brief Gets the current flow control kind
-        /*!
-
-            \return The current flow control kind
-        */
         FlowControl flowControl() const;
 
         // If device is async this call has no effect.
@@ -207,26 +163,34 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Transmit the current buffered characters.
         void flush();
 
-        virtual IODeviceImpl* impl()
-        { return (IODeviceImpl*) _impl; }
+        virtual IODeviceImpl& ioimpl();
+
+        virtual SelectableImpl& simpl();
 
     protected:
-        virtual void onClose();
+        void onClose();
 
-        virtual IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
+        bool onWait(unsigned n);
+        
+        void onBeginRead(char* buffer, size_t n, bool& eof);
 
-        virtual size_t onEndRead(IOResult& result, bool& eof);
+        size_t onEndRead(bool& eof);
 
-        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+        void onBeginWrite(const char* buffer, size_t n);
 
-        virtual IOResult& onBeginWrite(const char* buffer, size_t n);
+        size_t onEndWrite();
 
-        virtual size_t onEndWrite(IOResult& result);
+        size_t onRead(char* buffer, size_t count, bool& eof);
 
-        virtual size_t onWrite(const char* buffer, size_t count);
+        size_t onWrite(const char* buffer, size_t count);
+
+        void onAttach(SelectorBase&);
+
+        void onDetach(SelectorBase&);        
 };
 
 } //namespace System
+
 } //namespace Pt
 
 #endif

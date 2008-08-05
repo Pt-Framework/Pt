@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,36 +20,45 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include "WriteResult.h"
-#include <vector>
+#include "SelectableImpl.h"
 #include <windows.h>
-
 
 namespace Pt {
 
 namespace System {
 
+    class IODevice;
 
-	class IODeviceImpl
+	class IODeviceImpl : public SelectableImpl
 	{
 		public:
 			IODeviceImpl();
-
-			virtual ~IODeviceImpl();			
-
-			virtual HANDLE deviceHandle() const  = 0;
 			
-			virtual IOResult& beginWrite(const char* buffer, size_t n);
+            virtual ~IODeviceImpl();
+            
+            void setParent(IODevice& dev)
+            { _dev = &dev; }
+            
+            IODevice& parent()
+            { return *_dev; }
 
-			virtual size_t endWrite(IOResult& result);		
+            void setHandle(HANDLE h);
+
+			HANDLE deviceHandle() const
+            { return _handle; }	
+
+			HANDLE handle() const
+            { return _handle; }	
+			
+			virtual void close();
 			
 		private:
-		    OVERLAPPED _writeOvl;
-			WriteResult _writeResult;
+            HANDLE _handle;
+            IODevice* _dev;
 	};
 
-} //namespace
+} //namespace System
 
-} //namespace
+} //namespace Pt
 
 #endif

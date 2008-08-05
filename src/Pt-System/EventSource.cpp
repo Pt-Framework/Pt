@@ -47,11 +47,11 @@ EventSource::~EventSource()
 }
 
 
-Connection EventSource::connect( EventLoop& receiver )
+Connection EventSource::connect( EventLoopBase& receiver )
 {
     // Do not lock here, the Connection will call
     // Connectable::opened on this object
-    return Connection( *this, slot(receiver, &EventLoop::commitEvent).clone() );
+    return Connection( *this, slot(receiver, &EventLoopBase::commitEvent).clone() );
 }
 
 

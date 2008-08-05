@@ -103,10 +103,6 @@ namespace Gui {
             //! @brief Empty desctructor.
             virtual ~MouseEvent();
 
-            // inherit doc
-            virtual Event* clone() const
-            { return new MouseEvent(*this); }
-
             /**
              * @brief The x-position of the mouse cursor at the time this event was created.
              *
@@ -163,6 +159,17 @@ namespace Gui {
              * @return The type info for this event.
              */
             virtual const std::type_info& typeInfo() const;
+
+		    Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(MouseEvent));
+		        return *(new (pEvent)MouseEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(MouseEvent));
+		    }
 
         private:
             size_t _x;

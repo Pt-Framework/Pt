@@ -40,7 +40,7 @@ namespace System {
 
         public:
             //! @brief Contructs an IOBuffer for an IODevice.
-            BasicIOBuffer(BasicIODevice<CharT>& ioDevice, size_t bufferSize = 1024)
+            BasicIOBuffer(IODevice& ioDevice, size_t bufferSize = 1024)
 			: _ioDevice(&ioDevice),
               _buffer(0),
               _bufferSize(bufferSize),
@@ -68,7 +68,7 @@ namespace System {
             ~BasicIOBuffer()
             { delete[] _buffer; }
 
-            void init(BasicIODevice<CharT>& ioDevice)
+            void init(IODevice& ioDevice)
             { _ioDevice = &ioDevice; }
 
             IODevice* device()
@@ -86,7 +86,7 @@ namespace System {
             virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
 
         private:
-            BasicIODevice<CharT>* _ioDevice;
+            IODevice* _ioDevice;
 
             CharT* _buffer;
 

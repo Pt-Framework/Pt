@@ -7,6 +7,49 @@ namespace Pt {
 
 namespace System {
 
+void SelectorBase::add(Selectable& s)
+{
+    if(s.selector() != 0)
+    {
+        throw std::logic_error("Selectable already added");
+    }
+
+    s.setSelector(this);
+}
+
+void SelectorBase::remove(Selectable& s)
+{
+    if(s.selector() != this)
+    {
+        throw std::logic_error("Selectable not added");
+    }
+
+    s.setSelector(0);
+}
+
+
+void SelectorBase::add(Timer& timer)
+{
+    if(timer.selector() != 0)
+    {
+        throw std::logic_error("Selectable already added");
+    }
+
+    timer.setSelector(this);
+}
+
+
+void SelectorBase::remove( Timer& timer )
+{
+    if(timer.selector() != this)
+    {
+        throw std::logic_error("Selectable not added");
+    }
+
+    timer.setSelector(0);
+}
+
+
 Selector::Selector()
 : _impl( 0 )
 {
@@ -16,40 +59,71 @@ Selector::Selector()
 
 Selector::~Selector()
 {
+    while( _timers.size() )
+    {
+        Timer* timer = *_timers.begin();
+        timer->setSelector(0);
+    }
+
     delete _impl;
 }
 
 
-void Selector::add( IOResult& result )
+void Selector::onAdd( Selectable& selectable )
 {
-    result.setSelector(this);
-    _impl->complete(result);
+    _impl->add(selectable);
 }
 
 
-void Selector::remove( IOResult& result )
+void Selector::onRemove( Selectable& selectable )
 {
-    _impl->cancel(result);
+    _impl->remove(selectable);
 }
 
 
-void Selector::add(Timer& timer)
+void Selector::onEnabled(Selectable& s)
 {
-    void (Selector::*removeTimer)(Timer&);
-    removeTimer = &Selector::remove;
+    _impl->onEnabled(s);
+}
 
+
+void Selector::onDisabled(Selectable& s)
+{
+    _impl->onDisabled(s);
+}
+
+
+void Selector::onAdd(Timer& timer)
+{
     _timers.push_back(&timer);
-    connect(timer.destroyed, *this, removeTimer);
 }
 
 
-void Selector::remove( Timer& timer )
+void Selector::onRemove( Timer& timer )
 {
     _timers.remove( &timer );
 }
 
 
-bool Selector::updateTimer(size_t& timeout)
+void Selector::onStarted(Timer& timer)
+{
+
+}
+
+
+void Selector::onStopped(Timer& timer)
+{
+
+}
+
+
+void Selector::setApp(Application* app)
+{
+    _impl->setApp(app);
+}
+
+
+bool Selector::updateTimer(size_t& lowestTimeout)
 {
     bool timerActive = false;
     std::list<Timer*>::iterator it;
@@ -66,12 +140,13 @@ bool Selector::updateTimer(size_t& timeout)
         }
 
         // determine lowest timer timeout
-        timeout = std::min( timeout, timer->remaining() );
+        lowestTimeout = std::min( lowestTimeout, timer->remaining() );
     }
     return timerActive;
 }
 
-bool Selector::wait(unsigned int msecs)
+
+bool Selector::onWait(unsigned int msecs)
 {
     size_t timerTimeout = Selector::WaitInfinite;
 
@@ -91,17 +166,19 @@ bool Selector::wait(unsigned int msecs)
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    bool ret = _impl->wait(msecs);
-    if(ret == false)
-        timeout.send();
-
-    return ret;
+    return _impl->wait(msecs);
 }
 
 
-void Selector::wake()
+void Selector::onWake()
 {
     _impl->wake();
+}
+
+
+SelectorImpl& Selector::impl()
+{
+	return *_impl;
 }
 
 }//namespace System

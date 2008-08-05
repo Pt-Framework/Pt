@@ -28,6 +28,7 @@
 #include <Pt/Signal.h>
 
 #include <Pt/Event.h>
+#include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 
 #include <Pt/Gui/MouseEvent.h>
@@ -428,9 +429,10 @@ namespace Gui {
              * by one in method "processEvents()".
              * @see processEvents()
              */
+			Pt::Allocator         _allocator;
             std::list<Pt::Event*> _eventQueue;
-            System::Mutex          _queueMutex;
-            DWORD                  _messageLoopThreadId;
+            System::Mutex         _queueMutex;
+            DWORD                 _messageLoopThreadId;
 
             /**
              * A custom message to wake up the Windows Message Queue when a PPR event was

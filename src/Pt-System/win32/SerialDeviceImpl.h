@@ -20,76 +20,93 @@
 #ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
+#include "IODeviceImpl.h"
+#include "Pt/System/IOError.h"
+#include "Pt/System/SerialDevice.h"
 #include <string>
 #include <windows.h>
 
-#include "Pt/System/IODevice.h"
-#include "Pt/System/IOError.h"
-#include "Pt/System/SerialDevice.h"
-#include "IODeviceImpl.h"
-#include "ReadResult.h"
-
 namespace Pt{
+
 namespace System{
 
 class SerialDeviceImpl : public IODeviceImpl
 {
     public:
         SerialDeviceImpl();
+        
         ~SerialDeviceImpl();
 
         void open( const std::string& file, std::ios_base::openmode mode, bool isAsync );
 
-        //! @brief Closes the I/O device
         void close();
 
-        IOResult& beginRead(char* buffer, size_t n, bool& eof);    
+        void attach(SelectorBase& s);
 
-        size_t endRead(IOResult& result, bool& eof);
+        void detach(SelectorBase& s);
+
+        bool wait(unsigned int msecs);
+        
+        bool setWaitHandle(HANDLE h);
+        
+        bool checkEvent();
+        
+        void beginRead(char* buffer, size_t n, bool& eof);
+
+		size_t endRead(bool& eof);
+
+        void beginWrite(const char* buffer, size_t n);
+
+        size_t endWrite();		
        
         size_t read( char* buffer, size_t count, bool& eof );        
+        
         size_t write( const char* buffer, size_t count );
 
         void flush();
 
         void setBaudRate( SerialDevice::BaudRate rate );
+        
         SerialDevice::BaudRate baudRate() const;
 
         void setCharSize( int size );
+        
         int charSize() const;
 
         void setStopBits( SerialDevice::StopBits bits );
+        
         SerialDevice::StopBits stopBits() const;
 
         void setParity( SerialDevice::Parity parity );
+        
         SerialDevice::Parity parity() const;
 
         void setFlowControl( SerialDevice::FlowControl flowControl );
+        
         SerialDevice::FlowControl flowControl() const;
         
         void setTimeout( size_t msec );
-        size_t timeout() const;
-               
-        HANDLE deviceHandle() const
-        { return _handle; }
         
-        void resetEvent( HANDLE handle );                
+        size_t timeout() const;    
         
     private:
         void writeCommState( DCB& commState );
+        
         void readCommState( DCB& commState ) const;
 
-        HANDLE      _handle;
-        DCB         _orgCommState;
-        OVERLAPPED  _ovRead;
-        OVERLAPPED  _ovWrite;
-        OVERLAPPED  _ovStatus;
-        HANDLE     _terminateEv;
-        DWORD      _eventMask;
-        ReadResult _result;
+    private:
+        HANDLE _waitHandle;
+        OVERLAPPED _readOv;
+        char* _rbuf;
+        size_t _rbuflen;
+        OVERLAPPED _writeOv;
+        const char* _wbuf;
+        size_t _wbuflen;
+        DCB _orgCommState;
 };
 
 }//namespace System
+
 }//namespaec Pt
 
 #endif

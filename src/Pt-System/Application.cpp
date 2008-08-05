@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2008 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,60 +16,157 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/Application.h"
 #include "Pt/Event.h"
 #include <string>
 #include <iostream>
-using namespace std;
+#include <stdexcept>
 
+/*
+namespace {
+
+    int signalPipe[2] = {-1, -1};
+
+    void initSignalPipe()
+    {
+        if (signalPipe[0] == -1)
+        {
+            if (pipe(signalPipe) == -1)
+            {
+                throw std::runtime_error("error creating signal pipe");
+            }
+
+            int flags = ::fcntl(signalPipe[0], F_GETFL);
+            if(-1 == flags)
+                throw std::runtime_error("Could not get pipe flags." + CXXTOOLS_SOURCEINFO);
+
+            int ret = ::fcntl(signalPipe[0], F_SETFL, flags|O_NONBLOCK);
+            if(-1 == ret)
+                throw std::runtime_error("Could not set pipe to non-blocking." + CXXTOOLS_SOURCEINFO);
+
+            flags = ::fcntl(signalPipe[1], F_GETFL);
+            if(-1 == flags)
+                throw std::runtime_error("Could not get pipe flags." + CXXTOOLS_SOURCEINFO);
+
+            ret = ::fcntl(signalPipe[1], F_SETFL, flags|O_NONBLOCK);
+            if(-1 == ret)
+                throw std::runtime_error("Could not set pipe to non-blocking." + CXXTOOLS_SOURCEINFO);
+
+        }
+    }
+
+}
+
+extern "C" void pt_application_sighandler(int sigNo)
+{
+    if (signalPipe[1] != -1)
+        write(signalPipe[1], &sigNo, sizeof(sigNo));
+}
+*/
+
+
+namespace {
+
+Pt::System::Application*& getSystemAppPtr()
+{
+	static Pt::System::Application* _app = 0;
+	return _app;
+}
+
+}
 
 namespace Pt {
 
 namespace System {
 
-Application::Application()
+Application::Application(int argc, char** argv)
+: Pt::Application(argc, argv)
+, _loop(0)
+, _owner(0)
 {
-    connect(_loop.event, this->event);
-    //connect(_loop.event, *this, &Application::dispatchEvent);
+	// base class already throws if constructed twice
+	::getSystemAppPtr() = this;
+
+    _loop = new EventLoop();
+    _owner = _loop;
+    _loop->setApp(this);
+
+    //::initSignalPipe();
+
+    getAppPtr() = this;
 }
 
 
-int Application::run()
+Application::Application(EventLoopBase* loop, int argc, char** argv)
+: Pt::Application(argc, argv)
+, _loop(loop)
+, _owner(0)
 {
-    _loop.run();
-    return 0;
+	// base class already throws if constructed twice
+	::getSystemAppPtr() = this;
+
+    //::initSignalPipe();
+
+    getAppPtr() = this;
 }
 
 
-void Application::exit()
+Application::~Application()
 {
-    _loop.exit();
+    delete _owner;
+    ::getSystemAppPtr() = 0;
 }
 
 
-EventLoop& Application::eventLoop()
+Application& Application::instance()
 {
-    return _loop;
+	Application* app = ::getSystemAppPtr();
+	if( ! app )
+		throw std::logic_error("application not initialized");
+
+	return *app;
 }
 
 
-void Application::commitEvent(const Pt::Event& ev)
+void Application::init(EventLoopBase& loop)
 {
-    _loop.commitEvent(ev);
+    if(_loop)
+        throw std::logic_error("eventloop already set");
+
+    _loop = &loop;
+    _loop->setApp(this);
 }
 
 
-void Application::queueEvent(const Pt::Event& ev)
+Application*& Application::getAppPtr()
 {
-    _loop.queueEvent(ev);
+    static Application* _app = 0;
+    return _app;
 }
 
-
-void Application::processEvents()
+/*
+void Application::catchSystemSignal(int sig)
 {
-    _loop.processEvents();
+    if (sig > 0 && sig < NSIG)
+    {
+        struct sigaction act;
+
+        act.sa_handler = pt_application_sighandler;
+        sigemptyset(&act.sa_mask);
+        act.sa_flags = SA_RESTART;
+
+        if (-1 == sigaction(sig, &act, NULL))
+        {
+            throw SystemError("sigaction failed", CXXTOOLS_SOURCEINFO);
+        }
+    }
 }
+
+int Application::getSignalFd() const
+{
+    return signalPipe[0];
+}
+*/
 
 } // namespace System
 

@@ -53,16 +53,23 @@ namespace Gui {
             //! Empty destructor
             virtual ~CloseEvent();
 
-            // Inherit doc
-            virtual Event* clone() const
-            { return new CloseEvent(*this); }
-
             /**
              * @brief Returns the type info for this event.
              *
              * @return The type info for this event.
              */
             virtual const std::type_info& typeInfo() const;
+
+			Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(CloseEvent));
+		        return *(new (pEvent)CloseEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(CloseEvent));
+		    }
     };
 
 } // namespace Gui

@@ -115,7 +115,7 @@ void SerialChannel::_write(const std::string& message, bool isAsync)
 
     Pt::System::MutexLock lock( _mutex );
 
-    if(_device.valid() == false)
+    if(_device.enabled() == false)
         return;
 
     _device.write( message.data(), message.size() );

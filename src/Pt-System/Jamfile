@@ -8,7 +8,9 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
                           [ FDirName $(SYS:L) FileImpl.cpp ]
+                          [ FDirName $(SYS:L) IODeviceImpl.cpp ]
                           [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
+                          [ FDirName $(SYS:L) SelectorImpl.cpp ]
                           [ FDirName $(SYS:L) MutexImpl.cpp ]
                           [ FDirName $(SYS:L) SemaphoreImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
@@ -17,8 +19,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) SharedMemoryImpl.cpp ]
                           [ FDirName $(SYS:L) PipeImpl.cpp ]
                           [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
-                          [ FDirName $(SYS:L) SelectorImpl.cpp ]
-                          [ FDirName $(SYS:L) IODeviceImpl.cpp ]
                           Application.cpp
                           Clock.cpp
                           Condition.cpp
@@ -28,7 +28,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           File.cpp
                           FileDevice.cpp
                           FileInfo.cpp
-                          FileStream.cpp
+                          #FileStream.cpp
                           IOError.cpp
                           Mutex.cpp
                           Pipe.cpp
@@ -66,14 +66,12 @@ Main PipeDemo : PipeDemo.cpp ;
 Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
-Main EventLoopDemo : EventLoopDemo.cpp ;
-Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
-Main_MakeLocate EventLoopDemo : $(OUTPUT_TARGET) ;
-
 PT_SYSTEM_TESTS = DirectoryTest.cpp
-                  PipeTest.cpp
+                  EventLoopTest.cpp
+                  #PipeTest.cpp
                   ProcessTest.cpp
-                  SerialDeviceTest.cpp
+                  #SerialDeviceTest.cpp
+                  SelectorTest.cpp
                   TimerTest.cpp
                   ;
 

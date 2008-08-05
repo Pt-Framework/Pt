@@ -32,7 +32,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
         SerialDeviceTest()
         : Pt::Unit::TestSuite("SerialDeviceTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "ReadPnp", *this, &SerialDeviceTest::ReadPnp );
+            Pt::Unit::TestSuite::registerMethod( "ReadPnp", *this, &SerialDeviceTest::ReadPnp );
         }
 
     protected:

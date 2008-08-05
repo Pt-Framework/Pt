@@ -79,10 +79,6 @@ namespace Gui {
             //! @brief Empty destructor.
             virtual ~ResizeEvent();
 
-            // inherit doc
-            virtual Event* clone() const
-            { return new ResizeEvent(*this); }
-
             /**
              * @brief Returns the new width of the widget for which this event was generated for.
              * @return The new width of the widget.
@@ -106,6 +102,17 @@ namespace Gui {
              * @return The type info for this event.
              */
             virtual const std::type_info& typeInfo() const;
+
+		    Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(ResizeEvent));
+		        return *(new (pEvent)ResizeEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(ResizeEvent));
+		    }
 
         private:
             size_t _width;

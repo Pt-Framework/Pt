@@ -93,10 +93,6 @@ namespace Gui {
             //! @brief Empty destructor.
             virtual ~PaintEvent();
 
-            // inherit doc
-            virtual Event* clone() const
-            { return new PaintEvent(*this); }
-
             /**
              * @brief Defines the rectangular area which is supposed to be (re)painted.
              *
@@ -128,7 +124,18 @@ namespace Gui {
              */
             virtual const std::type_info& typeInfo() const;
 
-        private:
+			Pt::Event& clone(Pt::Allocator& allocator) const
+		    {
+		        void* pEvent= allocator.allocate(sizeof(PaintEvent));
+		        return *(new (pEvent)PaintEvent(*this));
+		    }
+
+		    void destroy(Pt::Allocator& allocator)
+		    {
+		        allocator.deallocate(this, sizeof(PaintEvent));
+		    }
+
+		private:
              Pt::Gfx::Region _region;
     };
 

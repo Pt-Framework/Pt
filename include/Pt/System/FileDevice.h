@@ -51,24 +51,25 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         size_t size() const;
 
-        virtual IODeviceImpl* impl()
-        { return (IODeviceImpl*) _impl; }
+        virtual IODeviceImpl& ioimpl();
+
+        virtual SelectableImpl& simpl();
 
     protected:
-        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
+        void onBeginRead(char* buffer, size_t n, bool& eof);
 
-        size_t onEndRead(IOResult& result, bool& eof);
+        size_t onEndRead(bool& eof);
 
-        IOResult& onBeginWrite(const char* buffer, size_t n);
+        void onBeginWrite(const char* buffer, size_t n);
 
-        size_t onEndWrite(IOResult& result);
+        size_t onEndWrite();
 
         void onClose();
 
-        bool _waitable() const;
-
         bool onSeekable() const
         { return true; }
+        
+        bool onWait(unsigned n);
 
         pos_type onSeek(off_type offset, std::ios::seekdir sd) ;
 
@@ -79,7 +80,11 @@ class PT_SYSTEM_API FileDevice : public IODevice
         size_t onPeek(char* buffer, size_t count);
 
         void onSync() const;
+  
+        virtual void onAttach(SelectorBase&);
 
+        virtual void onDetach(SelectorBase&);
+        
     private:
         std::string             _path;
         std::ios_base::openmode _mode;

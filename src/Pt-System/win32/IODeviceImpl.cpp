@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,67 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "IODeviceImpl.h"
-#include <cassert>
+#include "Pt/System/IOError.h"
 
 namespace Pt{ 
 
 namespace System{
 
 IODeviceImpl::IODeviceImpl()
+: _handle(INVALID_HANDLE_VALUE)
+, _dev(0)
 {
-    _writeOvl.Offset = 0;
-    _writeOvl.OffsetHigh = 0;
-    _writeOvl.hEvent = NULL;
-    _writeOvl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
 }
 
 
 IODeviceImpl::~IODeviceImpl()
 { 
-    if(_writeOvl.hEvent != NULL)
-        ::CloseHandle(_writeOvl.hEvent);
+
 }
 
 
-IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
+void IODeviceImpl::setHandle(HANDLE h)
 {
-	DWORD writtenBytes = 0;
-
-	HANDLE h = deviceHandle();
-
-	if( FALSE == WriteFile( h, (void*)buffer, n, &writtenBytes, &_writeOvl) )
-	{
-		DWORD err = GetLastError();
-		if( ERROR_IO_PENDING != GetLastError() )
-		{
-			throw IOError("Could not read from file handle", PT_SOURCEINFO);
-		}
-	}
-
-	_writeResult.setHandle(_writeOvl.hEvent);
-	return _writeResult;
+    _handle = h;
 }
 
 
-size_t IODeviceImpl::endWrite(IOResult& result)
+void IODeviceImpl::close()
 {
-	assert(&result == &_writeResult);
-	
-	DWORD writtenBytes = 0;
+    if(_handle != INVALID_HANDLE_VALUE)
+    {
+        if( FALSE == ::CloseHandle(_handle) )
+            throw IOError("Could not close file handle", PT_SOURCEINFO);
 
-#ifndef _WIN32_WCE
-	if (GetOverlappedResult( deviceHandle(), &_writeOvl, &writtenBytes, FALSE) == FALSE )
-	{
-		DWORD err = GetLastError();
-		throw IOError("Could not read from file handle", PT_SOURCEINFO);
-	}
-#else
-	throw std::runtime_error("endRead not implemented for WinCe" + PT_SOURCEINFO);
-#endif
+        _handle = INVALID_HANDLE_VALUE;
+    }
+}
 
-	_writeOvl.Offset += writtenBytes;
-	return writtenBytes;
-}	
-			
 }//namespaec System
+
 }//namespace Pt

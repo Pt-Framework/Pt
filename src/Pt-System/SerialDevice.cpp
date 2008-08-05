@@ -20,7 +20,6 @@
 #include "Pt/System/SerialDevice.h"
 #include "SerialDeviceImpl.h"
 
-
 namespace Pt {
 
 namespace System {
@@ -29,6 +28,7 @@ SerialDevice::SerialDevice()
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl();
+    _impl->setParent(*this);
 }
 
 
@@ -36,6 +36,7 @@ SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mod
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl();
+    _impl->setParent(*this);
     this->open( file, mode, isAsync );
 }
 
@@ -55,39 +56,39 @@ SerialDevice::~SerialDevice()
 
 void SerialDevice::open( const std::string& file, std::ios_base::openmode mode, bool isAsync )
 {
-    if( this->valid() ) {
+    if( this->enabled() ) {
         this->close();
     }
 
     _impl->open( file, mode, isAsync );
 
-    IODevice::setValid(true);
+    IODevice::setEnabled(true);
     IODevice::setEof(false);
     IODevice::setAsync(isAsync);
 }
 
 
-IOResult& SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
-{ 
-    return _impl->beginRead(buffer, n, eof); 
+void SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
+{
+    _impl->beginRead(buffer, n, eof);
 }
 
 
-size_t SerialDevice::onEndRead(IOResult& result, bool& eof)
+size_t SerialDevice::onEndRead(bool& eof)
 {
-    return _impl->endRead(result, eof); 
+    return _impl->endRead(eof);
 }
 
 
-IOResult& SerialDevice::onBeginWrite(const char* buffer, size_t n)
+void SerialDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return _impl->beginWrite(buffer, n);
+    _impl->beginWrite(buffer, n);
 }
 
 
-size_t SerialDevice::onEndWrite(IOResult& result)
+size_t SerialDevice::onEndWrite()
 {
-    return _impl->endWrite(result);
+    return _impl->endWrite();
 }
 
 
@@ -170,6 +171,12 @@ void SerialDevice::onClose()
 }
 
 
+bool SerialDevice::onWait(unsigned n)
+{
+    return _impl->wait(n);
+}
+
+
 size_t SerialDevice::onRead(char* buffer, size_t count, bool& eof)
 {
     return _impl->read( buffer, count, eof );
@@ -187,6 +194,29 @@ void SerialDevice::flush()
     _impl->flush();
 }
 
+IODeviceImpl& SerialDevice::ioimpl()
+{ 
+    return *_impl; 
+}
+
+
+SelectableImpl& SerialDevice::simpl()
+{ 
+    return *_impl; 
+}
+
+
+void SerialDevice::onAttach(SelectorBase& s)
+{
+    _impl->attach(s);
+}
+
+
+void SerialDevice::onDetach(SelectorBase& s)
+{
+    _impl->detach(s);
+}
 
 }//namespace System
+
 }//namespace Pt

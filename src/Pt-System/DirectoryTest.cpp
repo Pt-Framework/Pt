@@ -181,55 +181,12 @@ void DirectoryTest::removeFile()
 
 void DirectoryTest::DirectoryIterator()
 {
-    printf("\n--------------\n");
     Pt::System::Directory dir1("..");
     Pt::System::DirectoryIterator it;
     for(it = dir1.begin(); it != dir1.end(); ++it)
     {
         std::string name = *it;
-
-        //Pt::System::FileInfo info( name );
-
-        this->reportMessage( name );
     }
-    printf("--------------\n");
-
-/*	std::string dir("yyyDIR");
-    std::string file(dir + Pt::System::Directory::separator() + "file");
-
-    std::set<std::string> names;
-
-    names.insert(file + "1");
-    names.insert(file + "2");
-    names.insert(file + "3");
-    names.insert(dir + Directory::separator() + ".");
-    names.insert(dir + Directory::separator() + "..");
-
-    try {
-        Pt::System::Directory dir1(dir, Directory::Create);
-        Pt::System::File f1(file + "1", File::Create);
-        Pt::System::File f2(file + "2", File::Create);
-        Pt::System::File f3(file + "3", File::Create);
-    } catch (...) {
-        PT_UNIT_ASSERT(false);
-    }
-
-    Pt::System::Directory dir1(dir);
-    Pt::System::DirectoryIterator it = dir1.begin();
-    for (; it != dir1.end(); ++it)
-    {
-        std::string name = (*it).path();
-        PT_UNIT_ASSERT(names.find(name) != names.end());
-    }
-
-    Pt::System::File f1(file+"1");
-    f1.remove();
-    Pt::System::File f2(file+"2");
-    f2.remove();
-    Pt::System::File f3(file+"3");
-    f3.remove();
-    dir1.remove();
-*/
 }
 
 

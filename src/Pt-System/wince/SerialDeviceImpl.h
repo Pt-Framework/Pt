@@ -20,20 +20,19 @@
 #ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
-#include <string>
-#include <windows.h>
-
+#include "IODeviceImpl.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 #include "Pt/System/Runnable.h"
 #include "Pt/System/Thread.h"
-#include "IODeviceImpl.h"
+#include <string>
+#include <windows.h>
 
 namespace Pt{
 namespace System{
 
-class IOResultSerial : public IOResultImpl
+/*class IOResultSerial : public IOResultImpl
 {
 protected:
     IOResultSerial()
@@ -95,12 +94,14 @@ public:
     {
         this->device()->outputReady(*this);        
     }
-};
+};*/
 
-class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::Runnable
+class SerialDeviceImpl :  public Pt::System::IODeviceImpl
+                       , public Pt::System::Runnable
 {
     public:
         SerialDeviceImpl();
+
         ~SerialDeviceImpl();
 
         void open( const std::string& file, std::ios_base::openmode mode, bool isAsync);         
@@ -108,13 +109,25 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         //! @brief Closes the I/O device
         void close();
 
-        IOResult& beginRead(char* buffer, size_t n, bool& eof);    
+        void attach(SelectorBase& mon);
 
-        size_t endRead(IOResult& result, bool& eof);
+        void detach(SelectorBase& mon);
 
-        IOResult& beginWrite(const char* buffer, size_t n);
+        bool wait(unsigned int msecs);
 
-        size_t endWrite(IOResult& result);
+        bool setWaitHandle(HANDLE h);
+		
+        bool getWaitHandles(HandleMap& handles);
+		
+        bool checkEvent();
+
+        void beginRead(char* buffer, size_t n, bool& eof);    
+
+        size_t endRead( bool& eof);
+
+        void beginWrite(const char* buffer, size_t n);
+
+        size_t endWrite();
 
         //! @brief Read bytes from device
         size_t read( char* buffer, size_t count, bool& eof );
@@ -140,32 +153,31 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         SerialDevice::FlowControl flowControl() const;      
         
         void setTimeout( size_t timeout );       
-        size_t timeout() const;
-       
-        HANDLE deviceHandle() const
-        { return _handle; }   
+        size_t timeout() const;  
         
     private:
         SerialDeviceImpl* self()
         { return this; }
         
         void writeCommState( DCB& commState );
+
         void readCommState( DCB& commState ) const;
         
         void run();       
-       
-        enum { CharReceived, EventCharReceived, SendComplete } _commEventType;
         
-public:
-        HANDLE                 _handle;        
-        HANDLE                 _comEvent;
-        HANDLE                 _waitForComEvent;
-        DCB                    _orgCommState;        
-        Thread                 _eventThread;  
-        bool                   _terminateThread;
-        ReadResultSerial       _readResult;
-        WriteResultSerial      _writeResult;
-        
+    public:       
+        HANDLE _comEvent;
+        HANDLE _beginWait;
+        DCB _orgCommState;        
+        Thread _eventThread;  
+        bool _terminateThread;
+        char* _rbuf;
+        size_t _rbuflen;
+        DWORD _rlen;
+        const char* _wbuf;
+        size_t _wbuflen;
+        size_t _wlen;
+        DWORD _event;
 };
 
 }//namespace System

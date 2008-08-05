@@ -2,7 +2,6 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,39 +22,78 @@
 #define PT_SYSTEM_SelectorImpl_H
 
 #include "Pt/System/Api.h"
-#include "Pt/System/IODevice.h"
-#include "IOResultImpl.h"
+#include "Pt/System/Selectable.h"
+#include <iostream>
 #include <vector>
-#include <map>
+#include <set>
 #include <windows.h>
-
 
 namespace Pt {
 
 namespace System {
 
-class WakeResult : public IOResultImpl
+class HandleMap
 {
     public:
+        HandleMap()
+        {}
 
-        WakeResult()
+        ~HandleMap()
+        { }
+
+        void add(HANDLE h, Selectable* s)
         {
-            HANDLE wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
-            setHandle(wakeHandle);
+            _handles.push_back(h);
+            _selectables.push_back(s);
         }
 
-        virtual ~WakeResult()
+        HANDLE* handles()
         {
-            CloseHandle( handle() );
+            if(_handles.empty())
+                return 0;
+                
+            return &_handles[0];
         }
 
-        virtual void onComplete()
+        size_t size() const
+        { return _handles.size(); }
+        
+        Selectable* at(size_t n)
+        { return _selectables[n]; }
+        
+        void pop_front()
         {
+            _selectables.erase( _selectables.begin() );
+            _handles.erase( _handles.begin() );
+        }
+        
+        void remove(Selectable& s)
+        {
+            if( _selectables.empty() )
+                return;
+      
+            std::vector<Selectable*>::iterator it;          
+            std::vector<HANDLE>::iterator hit =_handles.begin();
+            for(it = _selectables.begin(); it != _selectables.end(); )
+            {
+                if(*it != &s)
+                {
+                    ++it;
+                    ++hit;
+                }
+                else
+                {
+                    it = _selectables.erase(it);
+                    hit = _handles.erase(hit);
+                }
+            }  
         }
 
-        void wake()
-        { SetEvent( handle() ); }    
+    private:
+        std::vector<HANDLE> _handles;
+        std::vector<Selectable*> _selectables;
 };
+
 
 class SelectorImpl
 {
@@ -64,20 +102,31 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void addDevice( IODevice& device, int waitMode );
+        void add( Selectable& dev );
 
-		void complete( IOResult& result );
+        void remove( Selectable& dev );
 
-        void cancel( IOResult& result );
-
-        bool wait( unsigned int msecs );
+        bool wait(unsigned int msecs);
 
         void wake();
-    
-    private:        
 
-		std::vector<IOResult*> _readers;
-        WakeResult             _wakeResult;        
+        void setApp(Application* app)
+        {
+            _app = app;
+        }
+
+        void onEnabled( Selectable& selectable );
+
+        void onDisabled( Selectable& selectable );
+        
+    private:       
+        HANDLE _wakeEvent;
+        HANDLE _ioEvent;
+        HandleMap _handles;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices;
+        std::set<Selectable*> _dirty;
+        Application* _app;
 };
 
 }//namespace System

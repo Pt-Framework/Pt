@@ -1,5 +1,6 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
+#include "Pt/System/Selector.h"
 #include <limits>
 
 namespace {
@@ -19,7 +20,8 @@ const unsigned Timer::InvalidTime = std::numeric_limits<unsigned>::max();
 
 
 Timer::Timer()
-: _active(false)
+: _selector(0)
+, _active(false)
 , _started(InvalidTime)
 , _interval(InvalidTime)
 , _elapsed(0)
@@ -28,7 +30,12 @@ Timer::Timer()
 
 Timer::~Timer()
 {
-    this->destroyed(*this);
+    try
+    {
+        if(_selector)
+            _selector->remove(*this);
+    }
+    catch(...) {}
 }
 
 
@@ -78,7 +85,7 @@ bool Timer::update()
     size_t current = getCurrentMSecs();
     _elapsed = current - _started;
 
-        if(_elapsed >= _interval)
+    if(_elapsed >= _interval)
     {
         _elapsed -= _interval;
         _started = current - _elapsed;
@@ -92,7 +99,23 @@ bool Timer::update()
 
 size_t Timer::remaining() const
 {
-    return _active ? (_interval - _elapsed) : InvalidTime ;
+    return _active ? _interval - _elapsed : InvalidTime;
+}
+
+
+void Timer::setSelector(SelectorBase* selector)
+{
+    if(_selector)
+    {
+        _selector->onRemove(*this);
+    }
+
+    if(selector)
+    {
+        selector->onAdd(*this);
+    }
+
+    _selector = selector;
 }
 
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,6 +21,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/Application.h>
 #include <Pt/Connectable.h>
 #include <Pt/Event.h>
 #include <Pt/Signal.h>
@@ -56,77 +57,88 @@ namespace System {
      * to EventLoop::processEvents() without making it necessary to first obtain the
      * event loop manually.
      */
-    class PT_SYSTEM_API Application : public Pt::Connectable
+    class PT_SYSTEM_API Application : public Pt::Application
     {
         public:
-            Application();
+            explicit Application(int argc = 0, char** argv = 0);
 
-            //! Empty Destructor.
-            virtual ~Application()
-            {}
+            Application(EventLoopBase* loop, int argc = 0, char** argv = 0);
 
-            /**
-             * \brief Starts this application.
-             *
-             * This method only starts this application's EventLoop. You can access the
-             * EventLoop directly by using getEventLoop(). There are some delegate methods
-             * for convenient access to certain functionality of the event loop:
-             * commitEvent(Event), queueEvent(Event) and processEvents().
-             */
-            virtual int run();
+            virtual ~Application();
 
-            /**
-             * \brief Stops the execution of this application.
-             *
-             * This method only stops this application's EventLoop by calling its
-             * exit-method.
-             */
-            virtual void exit();
+            static Application& instance();
 
-            /**
-             * \brief Commits the given event to this application's EventLoop and wakes
-             * the EventLoop so it delivers events.
-             *
-             * This method delegates directly to EventLoop::commitEvent(const Event&).
-             * @param event The event object that will be added to the event queue.
-             */
-            virtual void commitEvent(const Pt::Event& event);
+            void run()
+            {
+                aboutToStart.send();
+                _loop->run();
+                aboutToExit.send();
+            }
 
-            /**
-             * \brief Queues the given event to this application's EventLoop without
-             * waking up the events so they may not be delivered immediately.
-             *
-             * This method delegates directly to EventLoop::queueEvent(const Event&).
-             * @param event The event object that will be added to the event queue.
-             */
-            virtual void queueEvent(const Pt::Event& event);
+            void exit()
+            { _loop->exit(); }
 
-            /**
-             * \brief Delivers all events of this application's EventLoop which are
-             * currently inside the event queue to the registered listeners.
-             *
-             * This method delegates directly to EventLoop.processEvent().
-             */
-            virtual void processEvents();
+            void commitEvent(const Event& event)
+            { _loop->commitEvent(event); }
 
-            /**
-             * \brief Returns this application's EventLoop.
-             *
-             * This class provides some delegate methods so you can access
-             * certain functionality of the EventLoop without first having to
-             * retrieve it. See commitEvent(), queueEvent(), processEvents().
-             */
-            EventLoop& eventLoop();
+            void queueEvent(const Event& event)
+            { _loop->queueEvent(event); }
 
-            /**
-             * \brief The signal to which slots can register themselves to listen for
-             * any event that is committed to this application's event loop.
-             */
-            Signal<const Pt::Event&> event;
+            void processEvents()
+            { _loop->processEvents(); }
+
+            void wake()
+            { _loop->wake(); }
+
+            void add( Selectable& s )
+            { _loop->add(s); }
+
+            void remove( Selectable& s )
+            { _loop->remove(s); }
+
+            void add(Timer& timer)
+            { _loop->add(timer); }
+
+            void remove( Timer& timer )
+            { _loop->remove(timer); }
+
+            template <typename EventT>
+            void addHandler( BasicSlot<void, const EventT&>& slot )
+            {
+                _loop->addHandler(slot);
+            }
+
+            Signal<>& timeout()
+            { return _loop->timeout; }
+
+            Signal<const Event&>& event()
+            { return _loop->event; }
+
+            void setIdleTimeout(unsigned msec)
+            { _loop->setIdleTimeout(msec); }
+
+            //void catchSystemSignal(int sig);
+
+            Signal<int> systemSignal;
+
+            Signal<> aboutToStart;
+
+            Signal<> aboutToExit;
+
+            //int getSignalFd() const;
+
+            EventLoopBase& loop()
+            { return *_loop; }
+
+        protected:
+            void init(EventLoopBase& loop);
 
         private:
-            //! The EventLoop of this application.
-            EventLoop _loop;
+            static Application*& getAppPtr();
+            int     _argc;
+            char**  _argv;
+            EventLoopBase* _loop;
+            EventLoopBase* _owner;
     };
 
 } // namespace system

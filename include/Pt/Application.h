@@ -3,58 +3,54 @@
 
 #include <Pt/Api.h>
 #include <Pt/Connectable.h>
-#include <Pt/Event.h>
-#include <Pt/Signal.h>
+#include <stdexcept>
 
 namespace Pt {
 
+class Application : public Pt::Connectable
+{
+    public:
+        explicit Application(int argc = 0, char** argv = 0)
+        : _argc(argc)
+        , _argv(argv)
+        {
+            if( getAppPtr() )
+                throw std::logic_error("application already initialized");
 
-    class PT_EXPORT Application : public Connectable {
-        public:
-            Application()
-            { }
+            getAppPtr() = this;
+        }
 
-            virtual ~Application()
-            { }
+        virtual ~Application()
+        {    
+            getAppPtr() = 0;
+        }
 
-            /**
-             * \brief Starts this application and the underlying event loop.
-             */
-            virtual int run() = 0;
+        Application& instance()
+        {
+            Application* app = getAppPtr();
+            if( ! app )
+                throw std::logic_error("application not initialized");
 
-            /**
-             * \brief Stops the execution of this application.
-             */
-            virtual void exit() = 0;
+            return *app;
+        }
 
-            /**
-             * \brief Commits the given event to this application's EventLoop and wakes
-             * the EventLoop so it delivers events.
-             *
-             * @param event The event object that will be added to the event queue.
-             */
-            virtual void commitEvent(const Event& event) = 0;
+        int argc() const
+        { return _argc; }
 
-            /**
-             * \brief Queues the given event to this application's EventLoop without
-             * waking up the events so they may not be delivered immediately.
-             *
-             * @param event The event object that will be added to the event queue.
-             */
-            virtual void queueEvent(const Event& event) = 0;
+        char** argv() const
+        { return _argv; }
 
-            /**
-             * \brief Delivers all events of this application's EventLoop which are
-             * currently inside the event queue to the registered listeners.
-             */
-            virtual void processEvents() = 0;
+    private:
+        static Application*& getAppPtr()
+        {
+            static Application* _app = 0;
+            return _app;
+        }
 
-            /**
-             * \brief The signal to which slots can register themselves to listen for
-             * any event that is committed to this application's event loop.
-             */
-            Signal<const Event&> event;
-    };
+    private:
+        int     _argc;
+        char**  _argv;
+};
 
 } // namespace Pt
 

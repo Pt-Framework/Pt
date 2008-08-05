@@ -55,7 +55,7 @@ namespace System {
 
             /** @brief Connects to a EventLoop in another thread
             */
-            Connection connect( EventLoop& receiver );
+            Connection connect( EventLoopBase& receiver );
 
             /** @brief Connects to a slot in another thread
             */
