@@ -28,7 +28,9 @@ namespace Pt {
 namespace System {
 
 PipeIODevice::PipeIODevice()
-{}
+{
+    IODeviceImpl::setParent(*this);
+}
 
 
 PipeIODevice::~PipeIODevice()
@@ -45,20 +47,26 @@ PipeIODevice::~PipeIODevice()
 void PipeIODevice::open(int fd, bool isAsync)
 {
     IODeviceImpl::open(fd, isAsync);
-    this->setValid(true);
+    this->setEnabled(true);
     this->setAsync(isAsync);
 }
 
 
-IOResult& PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+bool PipeIODevice::onWait(unsigned int msecs)
 {
-    return IODeviceImpl::beginRead(buffer, n, eof);
+    return IODeviceImpl::wait(msecs);
 }
 
 
-size_t PipeIODevice::onEndRead(IOResult& result, bool& eof)
+void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    return IODeviceImpl::endRead(result, eof);
+    IODeviceImpl::beginRead(buffer, n, eof);
+}
+
+
+size_t PipeIODevice::onEndRead(bool& eof)
+{
+    return IODeviceImpl::endRead(eof);
 }
 
 
@@ -68,15 +76,15 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-IOResult& PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+void PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return IODeviceImpl::beginWrite(buffer, n);
+    IODeviceImpl::beginWrite(buffer, n);
 }
 
 
-size_t PipeIODevice::onEndWrite(IOResult& result)
+size_t PipeIODevice::onEndWrite()
 {
-    return IODeviceImpl::endWrite(result);
+    return IODeviceImpl::endWrite();
 }
 
 

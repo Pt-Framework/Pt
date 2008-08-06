@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,13 +22,16 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <list>
+#include <Pt/System/Clock.h>
+#include <sys/poll.h>
+#include <vector>
+#include <set>
 
 namespace Pt {
 
 namespace System {
+
+class Application;
 
 class SelectorImpl
 {
@@ -38,20 +40,35 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void complete( IOResult& result );
+        void add( Selectable& dev );
 
-        void cancel( IOResult& result );
+        void remove( Selectable& dev );
 
         bool wait(unsigned int msecs);
 
         void wake();
 
-    protected:
-        bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
+        void setApp(Application* app)
+        {
+            _app = app;
+            _isDirty= true;
+        }
+
+        void onEnabled(Selectable& s)
+        { _isDirty = true; }
+
+        void onDisabled(Selectable& s)
+        { _isDirty = true; }
 
     private:
-        std::list<IOResultImpl*> _results;
+        static const short POLL_ERROR_MASK;
         int _wakePipe[2];
+        bool _isDirty;
+        std::vector<pollfd> _pollfds;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices;
+        Application* _app;
+        Clock _clock;
 };
 
 }//namespace System

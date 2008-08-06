@@ -21,6 +21,8 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include "SelectableImpl.h"
+#include "Pt/System/IODevice.h"
+#include <string>
 #include <iostream>
 
 namespace Pt {
@@ -30,9 +32,16 @@ namespace System {
     class IODeviceImpl : public SelectableImpl
     {
         public:
+            static const short POLLERR_MASK;
+            static const short POLLIN_MASK;
+            static const short POLLOUT_MASK;
+
             IODeviceImpl();
 
             virtual ~IODeviceImpl();
+
+            void setParent(IODevice& dev)
+            { _dev = &dev; }
 
             int fd() const
             { return _fd; }
@@ -42,6 +51,8 @@ namespace System {
             virtual void open(int fd, bool isAsync);
 
             virtual void close();
+
+            virtual bool wait(unsigned int msecs);
 
             virtual void beginRead(char* buffer, size_t n, bool& eof);
 
@@ -57,12 +68,29 @@ namespace System {
 
             virtual void sync() const;
 
+            virtual size_t pollSize() const
+            {
+                return 1;
+            }
+
+            virtual size_t initializePoll(pollfd* pfd, size_t pollSize);
+
+            virtual bool checkPollEvent();
+
+            void attach(SelectorBase& s)
+            {}
+
+            void detach(SelectorBase& s)
+            {}
+
         protected:
+            IODevice* _dev;
             int _fd;
             char* _rbuf;
             size_t _rbuflen;
             const char* _wbuf;
             size_t _wbuflen;
+            pollfd* _pfd;
     };
 
 } //namespace System

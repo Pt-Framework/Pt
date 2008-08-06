@@ -18,18 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "IODeviceImpl.h"
-#include <Pt/System/IOError.h>
+#include "Pt/System/IOError.h"
 #include <cerrno>
 #include <cassert>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/poll.h>
 
 namespace Pt{
 
 namespace System{
 
+const short IODeviceImpl::POLLERR_MASK= POLLERR | POLLHUP | POLLNVAL;
+const short IODeviceImpl::POLLIN_MASK= POLLIN;
+const short IODeviceImpl::POLLOUT_MASK= POLLOUT;
+
 IODeviceImpl::IODeviceImpl()
-: _fd(-1)
+: _dev(0)
+, _fd(-1)
 , _rbuf(0)
 , _rbuflen(0)
 , _wbuf(0)
@@ -95,6 +101,25 @@ void IODeviceImpl::close()
 
         _fd = -1;
     }
+}
+
+
+bool IODeviceImpl::wait(unsigned int msecs)
+{
+    pollfd pfd;
+    this->initializePoll(&pfd, 1);
+
+    while( true )
+    {
+        int ret = ::poll(&pfd, 1, msecs);
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
+    }
+
+    return this->checkPollEvent();
 }
 
 
@@ -187,6 +212,51 @@ void IODeviceImpl::sync() const
         throw IOError("Could not sync handle", PT_SOURCEINFO);
 }
 
+
+size_t IODeviceImpl::initializePoll(pollfd* pfd, size_t pollSize)
+{
+    assert(pfd != 0);
+    assert(pollSize >= 1);
+
+    pfd->fd = this->fd();
+    pfd->revents = 0;
+    pfd->events = 0;
+
+    if(_rbuf)
+        pfd->events |= POLLIN;
+    if(_wbuf)
+        pfd->events |= POLLOUT;
+
+    _pfd = pfd;
+
+	return 1;
+}
+
+
+bool IODeviceImpl::checkPollEvent()
+{
+    bool avail = false;
+
+    if (_pfd->revents & POLLERR_MASK)
+    {
+        _dev->errorOccured(*_dev);
+        avail = true;
+    }
+
+    if( _pfd->revents & POLLOUT_MASK )
+    {
+        _dev->outputReady(*_dev);
+        avail = true;
+    }
+
+    if( _pfd->revents & POLLIN_MASK )
+    {
+        _dev->inputReady(*_dev);
+        avail = true;
+    }
+
+    return avail;
+}
 
 }//namespaec System
 

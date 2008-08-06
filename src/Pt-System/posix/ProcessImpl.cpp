@@ -61,21 +61,21 @@ void ProcessImpl::start()
         // --- standard in
         if( m_mask.test(0))
         {
-            if( m_devIn)  dup2( m_devIn->impl()->fd(), STDIN_FILENO);
+            if( m_devIn)  dup2( m_devIn->ioimpl().fd(), STDIN_FILENO);
             else fclose( stdin);
         }
 
         // --- standard out
         if( m_mask.test(1))
         {
-	    if( m_devOut) dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
+	    if( m_devOut) dup2( m_devOut->ioimpl().fd(), STDOUT_FILENO);
             else fclose( stdout);
         }
 
         // --- standard err
         if( m_mask.test(2))
         {
-            if( m_devErr)  dup2( m_devErr->impl()->fd(), STDERR_FILENO);
+            if( m_devErr)  dup2( m_devErr->ioimpl().fd(), STDERR_FILENO);
             else fclose( stderr);
         }
 

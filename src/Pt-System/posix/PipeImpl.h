@@ -42,21 +42,33 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         void onClose()
         { IODeviceImpl::close(); }
 
-        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
+        bool onWait(unsigned int msecs);
 
-        size_t onEndRead(IOResult& result, bool& eof);
+        void onBeginRead(char* buffer, size_t n, bool& eof);
+
+        size_t onEndRead(bool& eof);
 
         virtual size_t onRead(char* buffer, size_t count, bool& eof);
 
-        virtual IOResult& onBeginWrite(const char* buffer, size_t n);
+        virtual void onBeginWrite(const char* buffer, size_t n);
 
-        virtual size_t onEndWrite(IOResult& result);
+        virtual size_t onEndWrite();
 
         virtual size_t onWrite(const char* buffer, size_t count);
 
         virtual void onSync() const;
 
-        virtual IODeviceImpl* impl() { return this; }
+        virtual IODeviceImpl& ioimpl()
+        { return *this; }
+
+        virtual SelectableImpl& simpl()
+        { return *this; }
+
+        void onAttach(SelectorBase& s)
+        {}
+
+        void onDetach(SelectorBase& s)
+        {}
 };
 
 

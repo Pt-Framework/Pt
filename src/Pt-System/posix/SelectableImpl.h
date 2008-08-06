@@ -20,6 +20,10 @@
 #ifndef PT_SYSTEM_SELECTABLEIMPL_H
 #define PT_SYSTEM_SELECTABLEIMPL_H
 
+#include <cstddef>
+
+struct pollfd;
+
 namespace Pt {
 
 namespace System {
@@ -27,16 +31,14 @@ namespace System {
 class SelectableImpl
 {
     public:
-        virtual ~SelectableImpl() 
+        virtual ~SelectableImpl()
         {}
 
-        //virtual bool wait(unsigned int msecs)= 0;
+        virtual std::size_t pollSize() const = 0;
 
-        //virtual std::size_t pollSize() const = 0;
+        virtual std::size_t initializePoll(pollfd* pfd, std::size_t pollSize) = 0;
 
-        //virtual std::size_t initializePoll(pollfd* pfd, std::size_t pollSize) = 0;
-
-        //virtual bool checkPollEvent() = 0;
+        virtual bool checkPollEvent() = 0;
 };
 
 } // namespace System
