@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,15 +20,14 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include "ReadResult.h"
-#include "WriteResult.h"
-
+#include "SelectableImpl.h"
+#include <iostream>
 
 namespace Pt {
 
 namespace System {
 
-    class IODeviceImpl
+    class IODeviceImpl : public SelectableImpl
     {
         public:
             IODeviceImpl();
@@ -45,29 +43,30 @@ namespace System {
 
             virtual void close();
 
-            virtual IOResult& beginRead(char* buffer, size_t n, bool& eof);
+            virtual void beginRead(char* buffer, size_t n, bool& eof);
 
-            virtual size_t endRead(IOResult& result, bool& eof);
+            virtual size_t endRead( bool& eof);
 
             virtual size_t read( char* buffer, size_t count, bool& eof );
 
-            virtual IOResult& beginWrite(const char* buffer, size_t n);
+            virtual void beginWrite(const char* buffer, size_t n);
 
-            virtual size_t endWrite(IOResult& result);
+            virtual size_t endWrite();
 
             virtual size_t write( const char* buffer, size_t count );
 
             virtual void sync() const;
 
-	protected:
+        protected:
             int _fd;
-	private:
-            ReadResult _readResult;
-            WriteResult _writeResult;
+            char* _rbuf;
+            size_t _rbuflen;
+            const char* _wbuf;
+            size_t _wbuflen;
     };
 
-}//namespace System
+} //namespace System
 
-}//namespace Pt
+} //namespace Pt
 
 #endif

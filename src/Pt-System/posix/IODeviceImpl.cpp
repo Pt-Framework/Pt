@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,13 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "IODeviceImpl.h"
-
 #include <Pt/System/IOError.h>
 #include <cerrno>
 #include <cassert>
 #include <unistd.h>
 #include <fcntl.h>
-
 
 namespace Pt{
 
@@ -33,6 +30,10 @@ namespace System{
 
 IODeviceImpl::IODeviceImpl()
 : _fd(-1)
+, _rbuf(0)
+, _rbuflen(0)
+, _wbuf(0)
+, _wbuflen(0)
 { }
 
 
@@ -87,7 +88,6 @@ void IODeviceImpl::open(int fd, bool isAsync)
 
 void IODeviceImpl::close()
 {
-
     if(_fd != -1)
     {
         if( ::close(_fd) != 0 )
@@ -98,19 +98,18 @@ void IODeviceImpl::close()
 }
 
 
-IOResult& IODeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+void IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
-    _readResult.setFd(_fd);
-    _readResult.attach(buffer, n);
-    return _readResult;
+    _rbuf = buffer;
+    _rbuflen = n;
 }
 
 
-size_t IODeviceImpl::endRead(IOResult& result, bool& eof)
+size_t IODeviceImpl::endRead(bool& eof)
 {
-    assert( &result == &_readResult );
-
-    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
+    size_t n = this->read( _rbuf, _rbuflen, eof );
+    _rbuf = 0;
+    _rbuflen = 0;
     return n;
 }
 
@@ -141,19 +140,18 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
+void IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-    _writeResult.setFd(_fd);
-    _writeResult.attach( (char*)buffer, n);
-    return _writeResult;
+    _wbuf = buffer;
+    _wbuflen = n;
 }
 
 
-size_t IODeviceImpl::endWrite(IOResult& result)
+size_t IODeviceImpl::endWrite()
 {
-    assert( &result == &_writeResult );
-
-    size_t n = this->write( result.impl()->buffer(), result.impl()->bufferSize() );
+    size_t n = this->write( _wbuf, _wbuflen );
+    _wbuf = 0;
+    _wbuflen = 0;
     return n;
 }
 
