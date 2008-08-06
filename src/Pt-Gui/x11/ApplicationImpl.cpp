@@ -946,8 +946,8 @@ void X11EventLoop::queueEvent(const Pt::Event& event)
 {
     _queueMutex.lock();
 
-    Pt::Event* ev = event.clone();
-    _eventQueue.push_back(ev);
+    Pt::Event& ev = event.clone(_allocator);
+    _eventQueue.push_back(&ev);
     _queueMutex.unlock();
 }
 
@@ -1011,7 +1011,7 @@ void X11EventLoop::processEvents()
         _queueMutex.unlock();
 
         event.send(*ev);
-        delete ev;
+        ev->destroy(_allocator);
     }
 }
 

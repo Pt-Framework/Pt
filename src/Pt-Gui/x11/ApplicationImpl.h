@@ -32,6 +32,7 @@
 #undef Below
 
 #include <Pt/Api.h>
+#include <Pt/Allocator.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Mutex.h>
@@ -131,6 +132,7 @@ namespace Gui {
             Display* _display;
             int _wakeFds[2];
             XEvent _xev;
+            Pt::Allocator _allocator;
             std::list<Pt::Event*> _eventQueue;
             System::Mutex _queueMutex;
             std::map<Window, Widget*> _widgets;
