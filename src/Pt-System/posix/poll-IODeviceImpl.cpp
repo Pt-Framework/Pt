@@ -29,6 +29,10 @@ namespace Pt{
 
 namespace System{
 
+const short IODeviceImpl::POLLERR_MASK= POLLERR | POLLHUP | POLLNVAL;
+const short IODeviceImpl::POLLIN_MASK= POLLIN;
+const short IODeviceImpl::POLLOUT_MASK= POLLOUT;
+
 IODeviceImpl::IODeviceImpl()
 : _dev(0)
 , _fd(-1)
@@ -37,6 +41,7 @@ IODeviceImpl::IODeviceImpl()
 , _wbuf(0)
 , _wbuflen(0)
 { }
+
 
 
 IODeviceImpl::~IODeviceImpl()
@@ -101,36 +106,20 @@ void IODeviceImpl::close()
 
 bool IODeviceImpl::wait(unsigned int msecs)
 {
-    fd_set rfds;
-    fd_set wfds;
-    fd_set efds;
-
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&efds);
-
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != Selector::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    this->initSelect(rfds, wfds, efds);
+    pollfd pfd;
+    this->initializePoll(&pfd, 1);
 
     while( true )
     {
-        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        int ret = ::poll(&pfd, 1, msecs);
         if( ret != -1 )
             break;
 
         if( errno != EINTR )
-            throw IOError( "select failed", PT_SOURCEINFO );
+            throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    return this->checkEvent(rfds, wfds, efds);
+    return this->checkPollEvent();
 }
 
 
@@ -224,45 +213,43 @@ void IODeviceImpl::sync() const
 }
 
 
-int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+size_t IODeviceImpl::initializePoll(pollfd* pfd, size_t pollSize)
 {
+    assert(pfd != 0);
+    assert(pollSize >= 1);
+
+    pfd->fd = this->fd();
+    pfd->revents = 0;
+    pfd->events = 0;
+
     if(_rbuf)
-        FD_SET(this->fd(), &rfds);
+        pfd->events |= POLLIN;
     if(_wbuf)
-        FD_SET(this->fd(), &wfds);
+        pfd->events |= POLLOUT;
 
-    return this->fd();
+    _pfd = pfd;
+
+	return 1;
 }
 
 
-void IODeviceImpl::exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-	if( this->fd() > 0)
-	{
-		FD_CLR(this->fd(), &rfds);
-		FD_CLR(this->fd(), &wfds);
-		FD_CLR(this->fd(), &efds);
-	}
-}
-
-
-bool IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+bool IODeviceImpl::checkPollEvent()
 {
     bool avail = false;
 
-    if ( FD_ISSET(this->fd(), &efds) )
+    if (_pfd->revents & POLLERR_MASK)
     {
         _dev->errorOccured(*_dev);
         avail = true;
     }
 
-    if( FD_ISSET(this->fd(), &wfds) )
+    if( _pfd->revents & POLLOUT_MASK )
     {
         _dev->outputReady(*_dev);
         avail = true;
     }
 
-    if( FD_ISSET(this->fd(), &rfds) )
+    if( _pfd->revents & POLLIN_MASK )
     {
         _dev->inputReady(*_dev);
         avail = true;

@@ -21,7 +21,8 @@
 #define PT_SYSTEM_SELECTABLEIMPL_H
 
 #include <cstddef>
-#include <sys/select.h>
+
+struct pollfd;
 
 namespace Pt {
 
@@ -33,11 +34,11 @@ class SelectableImpl
         virtual ~SelectableImpl()
         {}
 
-        virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        virtual std::size_t pollSize() const = 0;
 
-        virtual void exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        virtual std::size_t initializePoll(pollfd* pfd, std::size_t pollSize) = 0;
 
-        virtual bool checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        virtual bool checkPollEvent() = 0;
 };
 
 } // namespace System

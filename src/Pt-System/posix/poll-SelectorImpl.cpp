@@ -33,8 +33,10 @@ namespace Pt {
 
 namespace System {
 
+const short SelectorImpl::POLL_ERROR_MASK= POLLERR | POLLHUP | POLLNVAL;
+
 SelectorImpl::SelectorImpl()
-: _app(0)
+: _isDirty(true), _app(0)
 {
     _current = _devices.end();
 
@@ -58,21 +60,16 @@ SelectorImpl::SelectorImpl()
     if(-1 == ret)
         throw std::runtime_error("Could not set pipe to non-blocking." + PT_SOURCEINFO);
 
-    FD_ZERO(&_rfds);
-    FD_ZERO(&_wfds);
-    FD_ZERO(&_efds);
-
-    FD_SET(_wakePipe[0], &_rfds);
 }
 
 
 SelectorImpl::~SelectorImpl()
 {
-    std::map<Selectable*, int>::iterator it;
+    std::set<Selectable*>::iterator it;
     while( _devices.size() )
     {
         it = _devices.begin();
-        it->first->setSelector(0);
+        (*it)->setSelector(0);
     }
 
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
@@ -85,22 +82,22 @@ SelectorImpl::~SelectorImpl()
 
 void SelectorImpl::add(Selectable& dev)
 {
-    int fd = dev.simpl().initSelect(_rfds, _wfds, _efds);
-    _devices.insert( std::make_pair(&dev, fd) );
+    _devices.insert(&dev);
+    _isDirty = true;
 }
 
 
 void SelectorImpl::remove(Selectable& dev)
 {
-   std::map<Selectable*, int>::iterator it = _devices.find( &dev );
+   std::set<Selectable*>::iterator it = _devices.find( &dev );
    if( it == _devices.end() )
         return;
 
-    if( _current == _devices.end() )
+    if (_current == _devices.end())
     {
         _devices.erase(it);
     }
-    else if(*_current == *it)
+    else if (*_current == *it)
     {
         _devices.erase(_current++);
     }
@@ -109,62 +106,84 @@ void SelectorImpl::remove(Selectable& dev)
         _devices.erase(it);
     }
 
-    dev.simpl().exitSelect(_rfds, _wfds, _efds);
+    _isDirty = true;
 }
 
 
-void SelectorImpl::onEnabled(Selectable& s)
+bool SelectorImpl::wait(unsigned int umsecs)
 {
-    s.simpl().initSelect(_rfds, _wfds, _efds);
-}
+    _clock.start();
 
+    int msecs = umsecs;
 
-void SelectorImpl::onDisabled(Selectable& s)
-{
-	std::map<Selectable*, int>::iterator it = _devices.find( &s );
-	if( it == _devices.end() )
-		return;
+    if (umsecs != SelectorBase::WaitInfinite &&
+        umsecs > std::numeric_limits<int>::max())
+    {
+        msecs= std::numeric_limits<int>::max();
+    }
 
-	int fd = it->second;
-	if( fd > 0)
-	{
-		FD_CLR(fd, &_rfds);
-		FD_CLR(fd, &_wfds);
-		FD_CLR(fd, &_efds);
-	}
-}
+    if (_isDirty)
+    {
+        _pollfds.clear();
 
+        // Groesse neu berechnen
+        size_t pollSize= 1;
 
-bool SelectorImpl::wait(unsigned int msecs)
-{
-    fd_set rfds = _rfds;
-    fd_set wfds = _wfds;
-    fd_set efds = _efds;
+        if (_app != 0)
+        {
+            ++pollSize;
+        }
+
+        std::set<Selectable*>::iterator iter;
+        for( iter= _devices.begin(); iter != _devices.end(); ++iter)
+        {
+            if( (*iter)->enabled() )
+                pollSize+= (*iter)->simpl().pollSize();
+        }
+
+        pollfd pfd;
+        pfd.fd = -1;
+        pfd.events = 0;
+        pfd.revents = 0;
+
+        _pollfds.assign(pollSize, pfd);
+
+        // Eintraege einfuegen
+        pollfd* pCurr= &_pollfds[0];
+
+        // Event Pipe einfuegen TODO Pt::System::Pipe verwenden
+        pCurr->fd = _wakePipe[0];
+        pCurr->events = POLLIN;
+
+        ++pCurr;
+
+        if (_app != 0)
+        {
+            //pCurr->fd= _app->getSignalFd();
+            //pCurr->events = POLLIN;
+            //++pCurr;
+        }
+
+        for( iter= _devices.begin(); iter != _devices.end(); ++iter)
+        {
+            if( (*iter)->enabled() )
+            {
+                const size_t availableSpace= &_pollfds.back() - pCurr + 1;
+                size_t required = (*iter)->simpl().pollSize();
+                assert( required <= availableSpace);
+                pCurr+= (*iter)->simpl().initializePoll( pCurr, required);
+            }
+        }
+
+        _isDirty= false;
+    }
 
     while( true )
     {
-        struct timeval* timeout = 0;
-        struct timeval tv;
-        if(msecs != Selector::WaitInfinite)
-        {
-            _clock.start();
-            tv.tv_sec = msecs / 1000;
-            tv.tv_usec = (msecs % 1000) * 1000;
-            timeout = &tv;
-        }
-
-        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
-        if( ret != -1 )
-            break;
-
-        if( errno != EINTR )
-        {
-            perror("select");
-            throw IOError( "select failed", PT_SOURCEINFO );
-        }
         if(msecs != SelectorBase::WaitInfinite)
         {
             int64_t diff = _clock.stop().totalMSecs();
+            _clock.start();
 
             if (diff < msecs)
             {
@@ -175,18 +194,80 @@ bool SelectorImpl::wait(unsigned int msecs)
                 msecs = 0;
             }
         }
+
+        int ret = ::poll(&_pollfds[0], _pollfds.size(), msecs);
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw IOError( "Could not poll on file descriptors", PT_SOURCEINFO );
+
     }
 
     bool avail = false;
     try
     {
-        if( FD_ISSET(_wakePipe[0], &_efds) )
+        if (_app != 0)
         {
-            throw IOError("poll error on event pipe", PT_SOURCEINFO);
+            if (_pollfds[1].revents != 0)
+            {
+
+                if ( _pollfds[1].revents & POLL_ERROR_MASK)
+                {
+                    throw IOError("poll error on signal pipe", PT_SOURCEINFO);
+                }
+
+
+                int sigNo;
+                ssize_t readSize= 0;
+
+                while(true)
+                {
+                    int ret = ::read(_pollfds[1].fd, &sigNo+readSize, sizeof(sigNo)-readSize);
+                    if(ret > 0)
+                    {
+                        avail = true;
+                        readSize+= ret;
+                        if ( readSize == sizeof(sigNo) )
+                        {
+                            _app->systemSignal.send(sigNo);
+                            readSize= 0;
+
+                        }
+                        continue;
+                    }
+
+                    if (ret == -1)
+                    {
+                        if(errno == EINTR)
+                            continue;
+
+                        if(errno == EAGAIN)
+                        {
+                            if (readSize != 0)
+                            {
+                                throw IOError("Cound not read from signal pipe", PT_SOURCEINFO);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    throw IOError("Cound not read from pipe", PT_SOURCEINFO);
+                }
+            }
         }
 
-        if( FD_ISSET(_wakePipe[0], &_rfds) )
+        if (_pollfds[0].revents != 0)
         {
+
+            if ( _pollfds[0].revents & POLL_ERROR_MASK)
+            {
+                throw IOError("poll error on event pipe", PT_SOURCEINFO);
+            }
+
             static char buffer[1024];
             while(true)
             {
@@ -212,16 +293,16 @@ bool SelectorImpl::wait(unsigned int msecs)
 
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
-            Selectable* dev = _current->first;
+            Selectable* dev = *_current;
 
-            if ( dev->enabled() && dev->simpl().checkEvent(rfds, wfds, efds) )
+            if ( dev->enabled() && dev->simpl().checkPollEvent() )
             {
                 avail = true;
             }
 
             if (_current != _devices.end())
             {
-                if (_current->first == dev)
+                if (*_current == dev)
                 {
                     ++_current;
                 }
@@ -230,7 +311,7 @@ bool SelectorImpl::wait(unsigned int msecs)
     }
     catch (...)
     {
-        _current = _devices.end();
+        _current= _devices.end();
         throw;
     }
 

@@ -157,7 +157,6 @@
 
             bool avail = selector.wait(5000);
             PT_UNIT_ASSERT(avail);
-
             avail = selector.wait(1000);
             PT_UNIT_ASSERT(!avail);
         }

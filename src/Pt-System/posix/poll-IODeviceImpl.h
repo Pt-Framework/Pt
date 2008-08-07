@@ -32,6 +32,10 @@ namespace System {
     class IODeviceImpl : public SelectableImpl
     {
         public:
+            static const short POLLERR_MASK;
+            static const short POLLIN_MASK;
+            static const short POLLOUT_MASK;
+
             IODeviceImpl();
 
             virtual ~IODeviceImpl();
@@ -64,11 +68,14 @@ namespace System {
 
             virtual void sync() const;
 
-            virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual size_t pollSize() const
+            {
+                return 1;
+            }
 
-            virtual void exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual size_t initializePoll(pollfd* pfd, size_t pollSize);
 
-            virtual bool checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual bool checkPollEvent();
 
             void attach(SelectorBase& s)
             {}
@@ -83,6 +90,7 @@ namespace System {
             size_t _rbuflen;
             const char* _wbuf;
             size_t _wbuflen;
+            pollfd* _pfd;
     };
 
 } //namespace System

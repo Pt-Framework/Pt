@@ -23,9 +23,9 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include <Pt/System/Clock.h>
-#include <sys/poll.h>
+#include <sys/select.h>
 #include <vector>
-#include <set>
+#include <map>
 
 namespace Pt {
 
@@ -51,28 +51,25 @@ class SelectorImpl
         void setApp(Application* app)
         {
             _app = app;
-            _isDirty= true;
         }
 
-        void onEnabled(Selectable& s)
-        { _isDirty = true; }
+        void onEnabled(Selectable& s);
 
-        void onDisabled(Selectable& s)
-        { _isDirty = true; }
+        void onDisabled(Selectable& s);
 
     private:
-        static const short POLL_ERROR_MASK;
         int _wakePipe[2];
-        bool _isDirty;
-        std::vector<pollfd> _pollfds;
-        std::set<Selectable*>::iterator _current;
-        std::set<Selectable*> _devices;
+        fd_set _rfds;
+        fd_set _wfds;
+        fd_set _efds;
+        std::map<Selectable*, int>::iterator _current;
+        std::map<Selectable*, int> _devices;
         Application* _app;
         Clock _clock;
 };
 
-}//namespace System
+} //namespace System
 
-}//namespace Pt
+} //namespace Pt
 
 #endif

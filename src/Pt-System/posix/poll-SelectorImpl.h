@@ -17,82 +17,62 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_System_posix_PipeImpl_h
-#define Pt_System_posix_PipeImpl_h
+#ifndef PT_SYSTEM_POSIX_SELECTORIMPL_H
+#define PT_SYSTEM_POSIX_SELECTORIMPL_H
 
-#include "IODeviceImpl.h"
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include <unistd.h>
+#include <Pt/System/Clock.h>
+#include <sys/poll.h>
+#include <vector>
+#include <set>
 
 namespace Pt {
 
 namespace System {
 
-class PipeIODevice : public Pt::System::IODevice
+class Application;
+
+class SelectorImpl
 {
     public:
-        PipeIODevice();
+        SelectorImpl();
 
-        ~PipeIODevice();
+        ~SelectorImpl();
 
-        void open(int fd, bool isAsync);
+        void add( Selectable& dev );
 
-    protected:
-        void onClose()
-        { _impl.close(); }
+        void remove( Selectable& dev );
 
-        bool onWait(unsigned int msecs);
+        bool wait(unsigned int msecs);
 
-        void onBeginRead(char* buffer, size_t n, bool& eof);
+        void wake();
 
-        size_t onEndRead(bool& eof);
+        void setApp(Application* app)
+        {
+            _app = app;
+            _isDirty= true;
+        }
 
-        size_t onRead(char* buffer, size_t count, bool& eof);
+        void onEnabled(Selectable& s)
+        { _isDirty = true; }
 
-        void onBeginWrite(const char* buffer, size_t n);
-
-        size_t onEndWrite();
-
-        size_t onWrite(const char* buffer, size_t count);
-
-        void onSync() const;
-
-        IODeviceImpl& ioimpl()
-        { return _impl; }
-
-        SelectableImpl& simpl()
-        { return _impl; }
-
-        void onAttach(SelectorBase& s)
-        {}
-
-        void onDetach(SelectorBase& s)
-        {}
+        void onDisabled(Selectable& s)
+        { _isDirty = true; }
 
     private:
-        IODeviceImpl _impl;
+        static const short POLL_ERROR_MASK;
+        int _wakePipe[2];
+        bool _isDirty;
+        std::vector<pollfd> _pollfds;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices;
+        Application* _app;
+        Clock _clock;
 };
 
+}//namespace System
 
-class PipeImpl
-{
-    public:
-        PipeImpl(bool isAsync);
-
-        ~PipeImpl();
-
-        IODevice& input();
-
-        IODevice& output();
-
-    private:
-        PipeIODevice _input;
-        PipeIODevice _output;
-};
-
-} // namespace System
-
-} // namespace Pt
+}//namespace Pt
 
 #endif
