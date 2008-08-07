@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris D�rner                               *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,7 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_REFCOUNTED_H
 #define PT_REFCOUNTED_H
 
@@ -24,10 +23,9 @@
 #include <Pt/Atomicity.h>
 #include <Pt/NonCopyable.h>
 
+namespace Pt {
 
-namespace Pt
-{
-    class PT_API RefCounted : private NonCopyable
+    class RefCounted : private NonCopyable
     {
         public:
             RefCounted()
@@ -53,10 +51,10 @@ namespace Pt
             }
 
             atomic_t refs() const
-            { return _refs; }
+            { return atomicGet(_refs); }
 
         private:
-            atomic_t _refs;
+            mutable volatile atomic_t _refs;
     };
 }
 

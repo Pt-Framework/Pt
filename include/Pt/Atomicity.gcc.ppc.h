@@ -168,8 +168,9 @@ inline void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
 
 inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch)
 {
-    volatile register atomic_t ret = 0;
+    volatile atomic_t ret = 0;
 
+/* ALTERNATIVE:
     asm volatile (
         "0:    lwarx  %0, 0, %1\n\t"
         "      stwcx. %2, 0, %1\n\t"
@@ -179,6 +180,14 @@ inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch)
         :   "r"(&val),  "r"(exch)
         : "cr0","memory", "r0"
     );
+*/
+
+    asm volatile (
+        "\n1:\n\t"
+        "lwarx  %0, 0, %2\n\t"
+        "stwcx. %3, 0, %2\n\t"
+        "bne    1b"
+        : "=r" (ret) : "0" (ret), "b" (&val), "r" (exch): "cc", "memory");
 
     return ret;
 }
@@ -189,14 +198,11 @@ inline void* atomicExchange(void* volatile& dest, void* exch)
     void* ret = 0;
 
     asm volatile (
-        "0:    lwarx  %0, 0, %1\n\t"
-        "      stwcx. %2, 0, %1\n\t"
-        "      bne-   0b       \n\t"
-        "      isync               "
-        : "=&r"(ret)
-        :   "r"(&dest),  "r"(exch)
-        : "cr0","memory", "r0"
-    );
+        "\n1:\n\t"
+        "lwarx  %0, 0, %2\n\t"
+        "stwcx. %3, 0, %2\n\t"
+        "bne    1b"
+        : "=r" (ret) : "0" (ret), "b" (&val), "r" (exch): "cc", "memory");
 
     return ret;
 }
