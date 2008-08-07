@@ -68,7 +68,7 @@ Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
 PT_SYSTEM_TESTS = DirectoryTest.cpp
                   EventLoopTest.cpp
-                  #PipeTest.cpp
+                  PipeTest.cpp
                   ProcessTest.cpp
                   #SerialDeviceTest.cpp
                   SelectorTest.cpp

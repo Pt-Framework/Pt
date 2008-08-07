@@ -65,8 +65,8 @@ class Selectable : protected NonCopyable
         {
             if( this->enabled() )
             {
-                this->onClose();
                 this->setEnabled(false);
+                this->onClose();
             }
         }
 

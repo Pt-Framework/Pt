@@ -68,11 +68,11 @@ SelectorImpl::SelectorImpl()
 
 SelectorImpl::~SelectorImpl()
 {
-    std::map<Selectable*, int>::iterator it;
+    std::set<Selectable*>::iterator it;
     while( _devices.size() )
     {
         it = _devices.begin();
-        it->first->setSelector(0);
+        (*it)->setSelector(0);
     }
 
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
@@ -83,16 +83,16 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::add(Selectable& dev)
+void SelectorImpl::add(Selectable& s)
 {
-    int fd = dev.simpl().initSelect(_rfds, _wfds, _efds);
-    _devices.insert( std::make_pair(&dev, fd) );
+    s.simpl().initSelect(_rfds, _wfds, _efds);
+    _devices.insert( &s );
 }
 
 
-void SelectorImpl::remove(Selectable& dev)
+void SelectorImpl::remove(Selectable& s)
 {
-   std::map<Selectable*, int>::iterator it = _devices.find( &dev );
+   std::set<Selectable*>::iterator it = _devices.find( &s );
    if( it == _devices.end() )
         return;
 
@@ -109,7 +109,7 @@ void SelectorImpl::remove(Selectable& dev)
         _devices.erase(it);
     }
 
-    dev.simpl().exitSelect(_rfds, _wfds, _efds);
+    s.simpl().exitSelect(_rfds, _wfds, _efds);
 }
 
 
@@ -121,17 +121,7 @@ void SelectorImpl::onEnabled(Selectable& s)
 
 void SelectorImpl::onDisabled(Selectable& s)
 {
-	std::map<Selectable*, int>::iterator it = _devices.find( &s );
-	if( it == _devices.end() )
-		return;
-
-	int fd = it->second;
-	if( fd > 0)
-	{
-		FD_CLR(fd, &_rfds);
-		FD_CLR(fd, &_wfds);
-		FD_CLR(fd, &_efds);
-	}
+    s.simpl().exitSelect(_rfds, _wfds, _efds);
 }
 
 
@@ -162,10 +152,10 @@ bool SelectorImpl::wait(unsigned int msecs)
             perror("select");
             throw IOError( "select failed", PT_SOURCEINFO );
         }
+
         if(msecs != SelectorBase::WaitInfinite)
         {
             int64_t diff = _clock.stop().totalMSecs();
-
             if (diff < msecs)
             {
                 msecs -= int(diff);
@@ -212,16 +202,16 @@ bool SelectorImpl::wait(unsigned int msecs)
 
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
-            Selectable* dev = _current->first;
+            Selectable* dev = *_current;
 
-            if ( dev->enabled() && dev->simpl().checkEvent(rfds, wfds, efds) )
+            if( dev->enabled() && dev->simpl().checkEvent(rfds, wfds, efds) )
             {
                 avail = true;
             }
 
-            if (_current != _devices.end())
+            if(_current != _devices.end())
             {
-                if (_current->first == dev)
+                if(*_current == dev)
                 {
                     ++_current;
                 }

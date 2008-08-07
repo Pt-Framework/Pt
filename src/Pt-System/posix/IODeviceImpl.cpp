@@ -237,12 +237,12 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
 void IODeviceImpl::exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-	if( this->fd() > 0)
-	{
-		FD_CLR(this->fd(), &rfds);
-		FD_CLR(this->fd(), &wfds);
-		FD_CLR(this->fd(), &efds);
-	}
+    if( this->fd() > 0)
+    {
+        FD_CLR(this->fd(), &rfds);
+        FD_CLR(this->fd(), &wfds);
+        FD_CLR(this->fd(), &efds);
+    }
 }
 
 
@@ -256,13 +256,13 @@ bool IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         avail = true;
     }
 
-    if( FD_ISSET(this->fd(), &wfds) )
+    if( _wbuf && FD_ISSET(this->fd(), &wfds) )
     {
         _dev->outputReady(*_dev);
         avail = true;
     }
 
-    if( FD_ISSET(this->fd(), &rfds) )
+    if( _rbuf && FD_ISSET(this->fd(), &rfds) )
     {
         _dev->inputReady(*_dev);
         avail = true;

@@ -26,6 +26,12 @@ class TimerTest : public Pt::Unit::TestSuite
             selector.add(timer);
             selector.wait(50000);
             PT_UNIT_ASSERT(_count == 1);
+
+            if(_count == 1)
+            {
+                std::cerr << "SUCCESS" << std::endl;
+                PT_UNIT_ASSERT(_count == 0);
+            }
         }
 
         void onTimeout()

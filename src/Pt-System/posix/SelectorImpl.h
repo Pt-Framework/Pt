@@ -25,7 +25,7 @@
 #include <Pt/System/Clock.h>
 #include <sys/select.h>
 #include <vector>
-#include <map>
+#include <set>
 
 namespace Pt {
 
@@ -62,8 +62,8 @@ class SelectorImpl
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;
-        std::map<Selectable*, int>::iterator _current;
-        std::map<Selectable*, int> _devices;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices;
         Application* _app;
         Clock _clock;
 };
