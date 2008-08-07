@@ -29,6 +29,26 @@ namespace Pt {
 typedef LONG atomic_t;
 
 
+inline atomic_t atomicGet(volatile atomic_t& val)
+{
+#ifndef _WIN32_WCE
+    MemoryBarrier();
+#endif
+
+    return val;
+}
+
+
+inline void atomicSet(volatile atomic_t& val, atomic_t n)
+{
+    val = n;
+
+#ifndef _WIN32_WCE
+    MemoryBarrier();
+#endif
+}
+
+
 inline atomic_t atomicIncrement(volatile atomic_t& value)
 {
     return InterlockedIncrement( const_cast<atomic_t*>(&value) );

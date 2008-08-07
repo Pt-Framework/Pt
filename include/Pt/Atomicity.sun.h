@@ -29,6 +29,20 @@ namespace Pt {
 typedef long atomic_t;
 
 
+inline atomic_t atomicGet(volatile atomic_t& val)
+{
+    membar_consumer();
+    return val;
+}
+
+
+inline void atomicSet(volatile atomic_t& val, atomic_t n)
+{
+    val = n;
+    membar_producer();
+}
+
+
 inline atomic_t atomicIncrement(volatile atomic_t& value)
 {
     volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);

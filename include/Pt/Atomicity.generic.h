@@ -27,6 +27,18 @@ namespace Pt {
 typedef std::sig_atomic_t atomic_t;
 
 
+inline atomic_t atomicGet(volatile atomic_t& val)
+{
+    return val;
+}
+
+
+inline void atomicSet(volatile atomic_t& val, atomic_t n)
+{
+    val = n;
+}
+
+
 inline atomic_t atomicIncrement(volatile atomic_t& dest)
 {
     return dest++;

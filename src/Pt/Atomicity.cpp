@@ -28,6 +28,20 @@ namespace Pt {
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 
 
+atomic_t atomicGet(volatile atomic_t& val)
+{
+    // MB
+    return val;
+}
+
+
+void atomicSet(volatile atomic_t& val, atomic_t n)
+{
+    val = n;
+    // MB
+}
+
+
 atomic_t atomicIncrement(volatile atomic_t& dest)
 {
     atomic_t ret = 0;
