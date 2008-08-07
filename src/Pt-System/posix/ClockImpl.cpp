@@ -36,7 +36,7 @@ DateTime ClockImpl::getCurrentTime()
     struct tm* currentTimeStruct;
     time_t time = timeValue.tv_sec;
     currentTimeStruct = localtime(&time);
-    
+
     return DateTime( currentTimeStruct->tm_year + 1900,
                      currentTimeStruct->tm_mon + 1,
                      currentTimeStruct->tm_mday,
@@ -48,7 +48,9 @@ DateTime ClockImpl::getCurrentTime()
 
 Pt::size_t ClockImpl::getTime()
 {
-    return static_cast<size_t>( ClockImpl::getCurrentTime().msecsSinceEpoch() );
+    timeval tv;
+    gettimeofday( &tv, 0 );
+    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 }
 
 } // namespace Pt

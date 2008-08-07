@@ -7,7 +7,6 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/Selector.h>
 #include <limits>
-#include <iostream>
 
 namespace Pt {
 

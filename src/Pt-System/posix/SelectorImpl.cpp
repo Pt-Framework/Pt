@@ -137,34 +137,30 @@ bool SelectorImpl::wait(unsigned int msecs)
         struct timeval tv;
         if(msecs != Selector::WaitInfinite)
         {
-            _clock.start();
             tv.tv_sec = msecs / 1000;
             tv.tv_usec = (msecs % 1000) * 1000;
             timeout = &tv;
         }
 
+        _clock.start();
         int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
-        if( ret != -1 )
+        int64_t diff = _clock.stop().totalMSecs();
+
+        if( ret > 0 )
             break;
 
-        if( errno != EINTR )
+        if( ret < 0 && errno != EINTR )
         {
-            perror("select");
             throw IOError( "select failed", PT_SOURCEINFO );
         }
 
-        if(msecs != SelectorBase::WaitInfinite)
-        {
-            int64_t diff = _clock.stop().totalMSecs();
-            if (diff < msecs)
-            {
-                msecs -= int(diff);
-            }
-            else
-            {
-                msecs = 0;
-            }
-        }
+        if(msecs == SelectorBase::WaitInfinite)
+            continue;
+
+        if(diff >= msecs)
+            break;
+
+        msecs -= int(diff);
     }
 
     bool avail = false;
