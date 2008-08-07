@@ -29,11 +29,21 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         AtomicTestSuite()
         : Pt::Unit::TestSuite("AtomicityTest")
         {
+			Pt::Unit::TestSuite::registerMethod( "GetSet", *this, &AtomicTestSuite::GetSet );
             Pt::Unit::TestSuite::registerMethod( "Integer", *this, &AtomicTestSuite::Integer );
             Pt::Unit::TestSuite::registerMethod( "Pointer", *this, &AtomicTestSuite::Pointer );
         }
 
     protected:
+        void GetSet()
+        {
+			volatile Pt::atomic_t x = 1;
+			Pt::atomicSet(x, 3);
+
+			volatile Pt::atomic_t y = Pt::atomicGet(x);
+			PT_UNIT_ASSERT(y == 3);
+		}
+
         void Integer()
         {
             PT_UNIT_ASSERT( sizeof(Pt::atomic_t) == sizeof(void*) );
