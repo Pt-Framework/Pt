@@ -166,8 +166,7 @@ bool Selector::onWait(unsigned int msecs)
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    bool b = _impl->wait(msecs);
-return b;
+    return _impl->wait(msecs);
 }
 
 

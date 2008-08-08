@@ -125,12 +125,13 @@ void SelectorImpl::onDisabled(Selectable& s)
 }
 
 
-bool SelectorImpl::wait(unsigned int msecs)
+bool SelectorImpl::wait(std::size_t msecs)
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
     fd_set efds = _efds;
 
+    int avail = 0;
     while( true )
     {
         struct timeval* timeout = 0;
@@ -143,13 +144,13 @@ bool SelectorImpl::wait(unsigned int msecs)
         }
 
         _clock.start();
-        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
-        int64_t diff = _clock.stop().totalMSecs();
+        avail = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        Pt::int64_t elapsed = _clock.stop().totalMSecs();
 
-        if( ret > 0 )
+        if( avail > 0 )
             break;
 
-        if( ret < 0 && errno != EINTR )
+        if( avail < 0 && errno != EINTR )
         {
             throw IOError( "select failed", PT_SOURCEINFO );
         }
@@ -157,57 +158,58 @@ bool SelectorImpl::wait(unsigned int msecs)
         if(msecs == SelectorBase::WaitInfinite)
             continue;
 
-        if(diff >= msecs)
-            break;
+        if(elapsed >= msecs)
+            return false;
 
-        msecs -= int(diff);
+        msecs -= int(elapsed);
     }
 
-    bool avail = false;
-    try
+
+    if( FD_ISSET(_wakePipe[0], &_efds) )
     {
-        if( FD_ISSET(_wakePipe[0], &_efds) )
+        throw IOError("select error on event pipe", PT_SOURCEINFO);
+    }
+
+    if( FD_ISSET(_wakePipe[0], &_rfds) )
+    {
+        static char buffer[1024];
+        while(true)
         {
-            throw IOError("poll error on event pipe", PT_SOURCEINFO);
-        }
-
-        if( FD_ISSET(_wakePipe[0], &_rfds) )
-        {
-            static char buffer[1024];
-            while(true)
-            {
-                int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
-                if(ret > 0)
-                {
-                    avail = true;
-                    continue;
-                }
-
-                if (ret == -1)
-                {
-                    if(errno == EINTR)
-                        continue;
-
-                    if(errno == EAGAIN)
-                        break;
-                }
-
-                throw IOError("Cound not read from pipe", PT_SOURCEINFO);
-            }
-        }
-
-        for( _current = _devices.begin(); _current != _devices.end(); )
-        {
-            Selectable* dev = *_current;
-
-            if( dev->enabled() && dev->simpl().checkEvent(rfds, wfds, efds) )
+            int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
+            if(ret > 0)
             {
                 avail = true;
+                continue;
             }
+
+            if (ret == -1)
+            {
+                if(errno == EINTR)
+                    continue;
+
+                if(errno == EAGAIN)
+                    break;
+            }
+
+            throw IOError("Cound not read from pipe", PT_SOURCEINFO);
+        }
+
+        --avail;
+    }
+
+    try
+    {
+        for( _current = _devices.begin(); _current != _devices.end(); )
+        {
+            Selectable* selectable = *_current;
+            avail -= selectable->simpl().checkEvent(rfds, wfds, efds);
+
+            if(avail <= 0)
+                break;
 
             if(_current != _devices.end())
             {
-                if(*_current == dev)
+                if(*_current == selectable)
                 {
                     ++_current;
                 }
@@ -220,7 +222,7 @@ bool SelectorImpl::wait(unsigned int msecs)
         throw;
     }
 
-    return avail;
+    return true;
 }
 
 

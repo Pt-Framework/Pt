@@ -226,10 +226,13 @@ void IODeviceImpl::sync() const
 
 int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-    if(_rbuf)
-        FD_SET(this->fd(), &rfds);
-    if(_wbuf)
-        FD_SET(this->fd(), &wfds);
+    if( this->fd() > 0)
+    {
+        if(_rbuf)
+            FD_SET(this->fd(), &rfds);
+        if(_wbuf)
+            FD_SET(this->fd(), &wfds);
+    }
 
     return this->fd();
 }
@@ -246,26 +249,29 @@ void IODeviceImpl::exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 }
 
 
-bool IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-    bool avail = false;
+    int avail = 0;
+
+    if( this->fd() < 0)
+        return avail;
 
     if ( FD_ISSET(this->fd(), &efds) )
     {
         _dev->errorOccured(*_dev);
-        avail = true;
+        ++avail;
     }
 
     if( _wbuf && FD_ISSET(this->fd(), &wfds) )
     {
         _dev->outputReady(*_dev);
-        avail = true;
+        ++avail;
     }
 
     if( _rbuf && FD_ISSET(this->fd(), &rfds) )
     {
         _dev->inputReady(*_dev);
-        avail = true;
+        ++avail;
     }
 
     return avail;

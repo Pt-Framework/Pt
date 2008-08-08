@@ -68,7 +68,7 @@ namespace System {
 
             virtual void exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual bool checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
             void attach(SelectorBase& s)
             {}

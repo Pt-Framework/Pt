@@ -37,7 +37,7 @@ class SelectableImpl
 
         virtual void exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
 
-        virtual bool checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
 };
 
 } // namespace System

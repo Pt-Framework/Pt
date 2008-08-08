@@ -44,7 +44,7 @@ class SelectorImpl
 
         void remove( Selectable& dev );
 
-        bool wait(unsigned int msecs);
+        bool wait(std::size_t msecs);
 
         void wake();
 
