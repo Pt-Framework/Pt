@@ -2,15 +2,15 @@
 #define Pt_System_Timer_h
 
 #include <Pt/Signal.h>
+#include <Pt/Timespan.h>
 #include <Pt/System/Api.h>
 #include <vector>
 #include <cstddef>
 
-
 namespace Pt {
 
 namespace System {
-    
+
     class SelectorBase;
 
     /** @brief Notifies clients in constant intervals
@@ -61,6 +61,7 @@ namespace System {
             { return _selector; }
 
             void setSelector(SelectorBase* s);
+
             /** @brief Returs true if timer is active
             */
             bool active() const;
@@ -78,7 +79,7 @@ namespace System {
 
                 @param msecs The timer inteval in milliseconds
             */
-            void setInterval(unsigned msecs);
+            void setInterval(std::size_t msecs);
 
             /** @brief Starts the timer
 
@@ -88,7 +89,7 @@ namespace System {
 
                 @param interval Timeout interval in milliseconds
             */
-            void start(unsigned interval);
+            void start(std::size_t interval);
 
             /** @brief Stops the timer
 
@@ -118,12 +119,10 @@ namespace System {
 
         private:
             SelectorBase* _selector;
-            bool     _active;
-            unsigned _started;
-            unsigned _interval;
-            unsigned _elapsed;
-            static const unsigned InvalidTime;
-
+            bool          _active;
+            Timespan      _started;
+            std::size_t   _interval;
+            std::size_t   _elapsed;
     };
 
 }

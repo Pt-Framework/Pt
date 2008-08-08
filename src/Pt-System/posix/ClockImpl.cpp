@@ -10,13 +10,16 @@ namespace System {
 ClockImpl::ClockImpl()
 {}
 
+
 ClockImpl::~ClockImpl()
 {}
+
 
 void ClockImpl::start()
 {
    gettimeofday( &_startTime, 0 );
 }
+
 
 Timespan ClockImpl::stop()
 {
@@ -27,6 +30,7 @@ Timespan ClockImpl::stop()
 
     return Timespan(secs, usecs);
 }
+
 
 DateTime ClockImpl::getCurrentTime()
 {
@@ -46,11 +50,13 @@ DateTime ClockImpl::getCurrentTime()
                      timeValue.tv_usec / 1000 );
 }
 
-Pt::size_t ClockImpl::getTime()
+
+Timespan ClockImpl::getSystemTime()
 {
-    timeval tv;
+    struct timeval tv;
     gettimeofday( &tv, 0 );
-    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+
+    return Timespan(tv.tv_sec, tv.tv_usec);
 }
 
 } // namespace Pt

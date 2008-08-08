@@ -30,9 +30,9 @@ DateTime Clock::getCurrentTime()
     return ClockImpl::getCurrentTime();
 }
 
-Pt::size_t Clock::getTime()
+Timespan Clock::getSystemTime()
 {
-    return ClockImpl::getTime();
+    return ClockImpl::getSystemTime();
 }
 
 } //namespace System

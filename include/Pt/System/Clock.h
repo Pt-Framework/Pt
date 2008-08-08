@@ -37,7 +37,7 @@ class PT_SYSTEM_API Clock
             The getTime function retrieves the system time, in milliseconds. 
             The system time is the time elapsed since the system was started.
         */
-        static Pt::size_t getTime();
+        static Timespan getSystemTime();
 
     private:
         class ClockImpl *_impl;

@@ -31,15 +31,18 @@ ClockImpl::ClockImpl()
         throw std::runtime_error("QueryPerformanceFrequency failed" + PT_SOURCEINFO);
 }
 
+
 ClockImpl::~ClockImpl()
 {
 }
+
 
 void ClockImpl::start()
 {
     _secondStartValue =   timeGetTime();
     QueryPerformanceCounter( &_startValue );
 }
+
 
 Timespan ClockImpl::stop()
 {
@@ -63,6 +66,7 @@ Timespan ClockImpl::stop()
     return Timespan();
 }
 
+
 Pt::DateTime ClockImpl::getCurrentTime()
 {
     SYSTEMTIME systemTime;
@@ -77,9 +81,10 @@ Pt::DateTime ClockImpl::getCurrentTime()
                 systemTime.wMilliseconds    );    
 }
 
-Pt::size_t ClockImpl::getTime()
+
+Timespan ClockImpl::getSystemTime()
 {
-    return timeGetTime();
+    return Timespan( 1000 * timeGetTime() );
 }
 
 } // namespace Pt

@@ -19,7 +19,7 @@ class ClockImpl
 
         static DateTime getCurrentTime();
 
-        static Pt::size_t getTime();
+        static Timespan getSystemTime();
 
     private:
         DWORD           _procAffinity;

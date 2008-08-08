@@ -11,6 +11,7 @@ class ClockImpl
 {
     public:
         ClockImpl();
+
         ~ClockImpl();
 
         void start ();
@@ -19,7 +20,7 @@ class ClockImpl
 
         static DateTime getCurrentTime();
 
-        static Pt::size_t getTime();
+        static Timespan getSystemTime();
 
     private:
         struct timeval  _startTime;
