@@ -282,20 +282,26 @@ inline const Pt::Char* basic_string<Pt::Char>::c_str() const
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
 {
+    // self-assignment check
+    if(this == &str)
+    {
+        return *this;
+    }
+
     if( str._data->busy() ) 
     {
         _data->assign( str._data->str(), str._data->length() );
 
         // caller modify ends busy mode
         _data->setInitial();
-		return *this;
+        return *this;
     }
     
-	if( _data->unref() < 1 ) 
-	{
-		delete _data;
-		_data = 0;
-	}
+    if( _data->unref() < 1 ) 
+    {
+        delete _data;
+        _data = 0;
+    }
 
     _data = str._data;
     _data->ref();
@@ -306,15 +312,19 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str, size_type pos, size_type n)
 {
-    this->assign( str._data->str() + pos, n );
+    this->assign( str._data->str() + pos, n );   
     return *this;
 }
 
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str)
 {
-    const size_type len = char_traits<Pt::Char>::length(str);
-    this->assign(str, len);
+    // self-assignment check
+    if(_data->str() != str)
+    {
+        const size_type len = char_traits<Pt::Char>::length(str);
+        this->assign(str, len);
+    }
 
     return *this;
 }

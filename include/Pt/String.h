@@ -327,25 +327,13 @@ class basic_string< Pt::Char > {
 
     public:
         basic_string& operator=(const basic_string& str)
-        {
-            if(this == &str)
-            {
-                return *this;
-            }
-            return this->assign(str);
-        }
+        { return this->assign(str); }
 
         basic_string& operator=(const Pt::Char* str)
-        {
-            if(_data->str() == str)
-            {
-                return *this;
-            }
-            return this->assign(str);
-        }
+        { return this->assign(str); }
 
         basic_string& operator=(Pt::Char c)
-        {return this->assign(1, c);}
+        { return this->assign(1, c); }
 
         basic_string& operator+=(const basic_string& str)
         { return this->append(str); }

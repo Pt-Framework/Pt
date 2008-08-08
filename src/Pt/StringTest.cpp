@@ -206,8 +206,9 @@ void StringTest::testAssign()
 */
     s = s;
     PT_UNIT_ASSERT(s == L"bcd");
+    s.assign(t);
     s = s.c_str();
-    PT_UNIT_ASSERT(s == L"bcd");
+    PT_UNIT_ASSERT(s == L"abcde");
 }
 
 void StringTest::testAppend()
