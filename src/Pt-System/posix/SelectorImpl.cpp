@@ -172,6 +172,8 @@ bool SelectorImpl::wait(std::size_t msecs)
 
     if( FD_ISSET(_wakePipe[0], &_rfds) )
     {
+        --avail;
+
         static char buffer[1024];
         while(true)
         {
@@ -193,9 +195,43 @@ bool SelectorImpl::wait(std::size_t msecs)
 
             throw IOError("Cound not read from pipe", PT_SOURCEINFO);
         }
-
-        --avail;
     }
+
+    /*if (_app && FD_ISSET( _app->signalFd(), &rfds ) )
+    {
+        int sigNo = 0;
+        ssize_t size = 0;
+        --avail;
+
+        while(true)
+        {
+            int ret = ::read(_app->signalFd(), &sigNo + size, sizeof(sigNo) - size);
+            if(ret > 0)
+            {
+                size += ret;
+                if( size == sizeof(sigNo) )
+                {
+                    _app->systemSignal.send(sigNo);
+                    size = 0;
+                }
+
+                continue;
+            }
+            else if(ret == -1 )
+            {
+                if(errno == EAGAIN && size == 0)
+                {
+                    break;
+                }
+                else if(errno == EINTR)
+                {
+                    continue;
+                }
+            }
+
+            throw IOError("Cound not read from signal pipe", XPR_SOURCEINFO);
+        }
+    }*/
 
     try
     {
