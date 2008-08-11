@@ -7,7 +7,10 @@ namespace System {
 
 ApplicationImpl::ApplicationImpl()
 {
+}
 
+ApplicationImpl::~ApplicationImpl()
+{
 }
 
 
