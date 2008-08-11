@@ -75,7 +75,7 @@ void ApplicationImpl::catchSystemSignal(int sig)
 }
 
 
-int ApplicationImpl::getSignalFd() const
+int ApplicationImpl::signalFd() const
 {
     return signalPipe[0];
 }

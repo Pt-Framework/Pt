@@ -16,7 +16,7 @@ class ApplicationImpl
 
 		void catchSystemSignal(int sig);
 
-		int getSignalFd() const;
+		int signalFd() const;
 };
 
 } // namespace System

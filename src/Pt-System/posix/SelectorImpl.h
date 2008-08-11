@@ -48,10 +48,7 @@ class SelectorImpl
 
         void wake();
 
-        void setApp(Application* app)
-        {
-            _app = app;
-        }
+        void setApp(Application* app);
 
         void onEnabled(Selectable& s);
 

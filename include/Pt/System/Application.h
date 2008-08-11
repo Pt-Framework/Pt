@@ -30,6 +30,8 @@ namespace Pt {
 
 namespace System {
 
+    class ApplicationImpl;
+
     /**
      * \brief The Application class provides an event loop for console applications
      * without a GUI.
@@ -117,7 +119,7 @@ namespace System {
             void setIdleTimeout(unsigned msec)
             { _loop->setIdleTimeout(msec); }
 
-            //void catchSystemSignal(int sig);
+            void catchSystemSignal(int sig);
 
             Signal<int> systemSignal;
 
@@ -125,16 +127,17 @@ namespace System {
 
             Signal<> aboutToExit;
 
-            //int getSignalFd() const;
-
             EventLoopBase& loop()
             { return *_loop; }
+
+            ApplicationImpl& impl();
 
         protected:
             void init(EventLoopBase& loop);
 
         private:
             static Application*& getAppPtr();
+            ApplicationImpl* _impl;
             int     _argc;
             char**  _argv;
             EventLoopBase* _loop;

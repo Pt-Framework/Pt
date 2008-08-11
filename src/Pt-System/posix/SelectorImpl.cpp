@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "SelectorImpl.h"
 #include "IODeviceImpl.h"
+#include "ApplicationImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/Application.h"
 #include "Pt/System/Selector.h"
@@ -113,6 +114,13 @@ void SelectorImpl::remove(Selectable& s)
 }
 
 
+void SelectorImpl::setApp(Application* app)
+{
+    _app = app;
+    FD_SET(_app->impl().signalFd(), &_rfds);
+}
+
+
 void SelectorImpl::onEnabled(Selectable& s)
 {
     s.simpl().initSelect(_rfds, _wfds, _efds);
@@ -164,7 +172,6 @@ bool SelectorImpl::wait(std::size_t msecs)
         msecs -= int(elapsed);
     }
 
-
     if( FD_ISSET(_wakePipe[0], &_efds) )
     {
         throw IOError("select error on event pipe", PT_SOURCEINFO);
@@ -196,8 +203,8 @@ bool SelectorImpl::wait(std::size_t msecs)
             throw IOError("Cound not read from pipe", PT_SOURCEINFO);
         }
     }
-/**
-    if (_app && FD_ISSET( _app->signalFd(), &rfds ) )
+
+    if (_app && FD_ISSET( _app->impl().signalFd(), &rfds ) )
     {
         int sigNo = 0;
         ssize_t size = 0;
@@ -205,7 +212,7 @@ bool SelectorImpl::wait(std::size_t msecs)
 
         while(true)
         {
-            int ret = ::read(_app->signalFd(), &sigNo + size, sizeof(sigNo) - size);
+            int ret = ::read(_app->impl().signalFd(), &sigNo + size, sizeof(sigNo) - size);
             if(ret > 0)
             {
                 size += ret;
@@ -215,15 +222,17 @@ bool SelectorImpl::wait(std::size_t msecs)
                     size = 0;
                 }
             }
-			else if(ret == -1 && errno == EAGAIN && size == 0)
-			{
-				break;
-			}
-			else if( ret == 0 || (ret == -1 && errno != EINTR) )
-				throw IOError("Cound not read from signal pipe", XPR_SOURCEINFO);
+            else if(ret == -1 && errno == EAGAIN && size == 0)
+            {
+                break;
+            }
+            else if( ret == 0 || (ret == -1 && errno != EINTR) )
+            {
+                throw IOError("Cound not read from signal pipe", PT_SOURCEINFO);
+            }
         }
     }
-*/
+
     try
     {
         for( _current = _devices.begin(); _current != _devices.end(); )
