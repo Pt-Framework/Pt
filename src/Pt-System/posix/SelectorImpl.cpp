@@ -196,8 +196,8 @@ bool SelectorImpl::wait(std::size_t msecs)
             throw IOError("Cound not read from pipe", PT_SOURCEINFO);
         }
     }
-
-    /*if (_app && FD_ISSET( _app->signalFd(), &rfds ) )
+/**
+    if (_app && FD_ISSET( _app->signalFd(), &rfds ) )
     {
         int sigNo = 0;
         ssize_t size = 0;
@@ -214,25 +214,16 @@ bool SelectorImpl::wait(std::size_t msecs)
                     _app->systemSignal.send(sigNo);
                     size = 0;
                 }
-
-                continue;
             }
-            else if(ret == -1 )
-            {
-                if(errno == EAGAIN && size == 0)
-                {
-                    break;
-                }
-                else if(errno == EINTR)
-                {
-                    continue;
-                }
-            }
-
-            throw IOError("Cound not read from signal pipe", XPR_SOURCEINFO);
+			else if(ret == -1 && errno == EAGAIN && size == 0)
+			{
+				break;
+			}
+			else if( ret == 0 || (ret == -1 && errno != EINTR) )
+				throw IOError("Cound not read from signal pipe", XPR_SOURCEINFO);
         }
-    }*/
-
+    }
+*/
     try
     {
         for( _current = _devices.begin(); _current != _devices.end(); )
