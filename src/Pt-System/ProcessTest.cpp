@@ -76,6 +76,7 @@ void ProcessTest::EnvVar()
 {
     Pt::System::Process::setEnvVar("PT_PROCESS_TEST", "true");
     std::string value = Pt::System::Process::getEnvVar("PT_PROCESS_TEST");
+	reportMessage( "value: " + value);
     PT_UNIT_ASSERT( value == "true");
 }
 

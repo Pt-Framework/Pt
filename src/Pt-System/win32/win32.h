@@ -2,13 +2,13 @@
 #define PT_SYSTEM_WIN32_H
 
 #include "Pt/System/Api.h"
+#include "Pt/SourceInfo.h"
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <string.h>
-
 #include <windows.h>
 #include <tchar.h>
-
 
 namespace Pt {
 
@@ -20,11 +20,12 @@ namespace win32 {
     {
         size_t length = WideCharToMultiByte(CP_ACP, 0, from, -1, NULL, 0, NULL, NULL);
 
-        std::vector<char> str(length + 1);
-        WideCharToMultiByte(CP_ACP, 0, from, -1, &str[0], length, NULL, NULL);
-
-        std::string ret(&str[0], length);
-        return ret;
+        std::vector<char> str(length);
+        int ret = WideCharToMultiByte(CP_ACP, 0, from, -1, &str[0], length, NULL, NULL);
+		if(ret == 0)
+			throw std::runtime_error(PT_SOURCEINFO + "WideCharToMultiByte failed");
+        
+		return std::string(&str[0], length-1);
     }
 
 
@@ -39,9 +40,12 @@ namespace win32 {
         size_t length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, NULL, 0);
 
         // condsider using a vector<wchar_t> as buffer
-        wchar_t* wbuf = new wchar_t[length + 1];
-        MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, wbuf, length);
-        std::wstring wstr(wbuf, length);
+        wchar_t* wbuf = new wchar_t[length];
+        length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, wbuf, length);
+		if(length == 0)
+			throw std::runtime_error(PT_SOURCEINFO + "MultiByteToWideChar failed");
+        
+		std::wstring wstr(wbuf, length-1);
         delete[] wbuf;
         return wstr;
     }

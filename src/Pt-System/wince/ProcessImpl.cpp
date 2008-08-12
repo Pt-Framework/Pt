@@ -62,7 +62,7 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
         throw std::runtime_error("Could not query Registry" + PT_SOURCEINFO);
     }
 
-    if( byteLength==0 || data[0] == 0 )
+    if( byteLength == 0 || data[0] == 0 )
         return "";
 
     return win32::toMultiByte( (LPCTSTR)data );
@@ -91,7 +91,7 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
     std::basic_string<TCHAR> wvalue = win32::fromMultiByte(value);
 
     LPBYTE data = (LPBYTE)wvalue.c_str();
-    DWORD size = (wvalue.size()+1) * sizeof(TCHAR); // size includes \0 char !!!
+    DWORD size = wvalue.size() * sizeof(TCHAR);
 
     LONG lret = RegSetValueEx(hk, wname.c_str(), 0, REG_SZ, data, size);
     RegCloseKey(hk);
