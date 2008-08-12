@@ -627,7 +627,7 @@ rule Library
     Depends $(<) : $(_l) ;
     NotFile $(<) ;
 
-    LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
+    LibraryFromObjects $(1) : $(2:GBS=$(SUFOBJ)) ; # FIX was only S
     Objects $(2) : $(1) ;
 
     LibraryImpl $(<) : $(>) ;
@@ -785,7 +785,7 @@ rule Main
 
     Depends exe : $(<) ;
 
-    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
     Objects $(>) ;
 
     MainImpl $(<) : $(>) ;
@@ -890,7 +890,7 @@ rule _MakeLocate
         MkDir $(>[1]) ;
     }
 
-    if $(<:D)
+    if $(<:D) # TODO this may be obsolete
     {
         # target to be located is passed with a path, so we create it
         # and add a dependency to the directory
@@ -1045,19 +1045,19 @@ rule Object
 
 rule ObjectCcFlags
 {
-    CCFLAGS on [ FGristFiles $(<:S=$(SUFOBJ)) ] += $(>) ;
+    CCFLAGS on [ FGristFiles $(<:BS=$(SUFOBJ)) ] += $(>) ; # FIX was only S
 }
 
 
 rule ObjectC++Flags
 {
-    C++FLAGS on [ FGristFiles $(<:S=$(SUFOBJ)) ] += $(>) ;
+    C++FLAGS on [ FGristFiles $(<:BS=$(SUFOBJ)) ] += $(>) ; # FIX was only S
 }
 
 
 rule ObjectHdrs
 {
-    HDRS on [ FGristFiles $(<:S=$(SUFOBJ)) ] += $(>) ;
+    HDRS on [ FGristFiles $(<:BS=$(SUFOBJ)) ] += $(>) ; # FIX was only S
 }
 
 
@@ -1066,8 +1066,8 @@ rule Objects
     local _i ;
     for _i in [ FGristFiles $(<) ]
     {
-        Object $(_i:S=$(SUFOBJ)) : $(_i) ;
-        DEPENDS obj : $(_i:S=$(SUFOBJ)) ;
+        Object $(_i:GBS=$(SUFOBJ)) : $(_i) ; # FIX was only S
+        DEPENDS obj : $(_i:GBS=$(SUFOBJ)) ; # FIX was only S
     }
 }
 
@@ -1133,7 +1133,7 @@ rule SharedLibrary
     Depends $(<) : $(_target) ;
     NotFile $(<) ;
 
-    SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
+    SharedLibraryFromObjects $(1) : $(2:GBS=$(SUFOBJ)) ; # FIX wasonly S
     Objects $(2) ;
 
     SharedLibraryImpl $(<) : $(>) ;
