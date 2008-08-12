@@ -14,9 +14,9 @@ class ApplicationImpl
 
 		virtual ~ApplicationImpl();
 
-		void catchSystemSignal(int sig);
+		bool catchSystemSignal(int sig);
 
-		int getSignalFd() const;
+		bool raiseSystemSignal(int sig);
 };
 
 } // namespace System

@@ -1,5 +1,4 @@
 #include "ApplicationImpl.h"
-#include "Pt/System/SystemError.h"
 
 namespace Pt {
 
@@ -14,15 +13,15 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
-void ApplicationImpl::catchSystemSignal(int sig)
+bool ApplicationImpl::catchSystemSignal(int sig)
 {
-
+	return false;
 }
 
 
-int ApplicationImpl::getSignalFd() const
+bool ApplicationImpl::raiseSystemSignal(int sig)
 {
-    return 0;
+	return false;
 }
 
 } // namespace System

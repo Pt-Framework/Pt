@@ -67,7 +67,8 @@ Main PipeDemo : PipeDemo.cpp ;
 Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
-PT_SYSTEM_TESTS = DirectoryTest.cpp
+PT_SYSTEM_TESTS = ApplicationTest.cpp
+                  DirectoryTest.cpp
                   EventLoopTest.cpp
                   #PipeTest.cpp
                   ProcessTest.cpp

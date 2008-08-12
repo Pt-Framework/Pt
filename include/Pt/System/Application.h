@@ -119,9 +119,11 @@ namespace System {
             void setIdleTimeout(unsigned msec)
             { _loop->setIdleTimeout(msec); }
 
-            void catchSystemSignal(int sig);
-
-            Signal<int> systemSignal;
+            bool catchSystemSignal(int sig);
+            
+			bool raiseSystemSignal(int sig);
+            
+			Signal<int> systemSignal;
 
             Signal<> aboutToStart;
 

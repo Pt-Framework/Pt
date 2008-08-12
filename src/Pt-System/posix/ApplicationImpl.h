@@ -14,7 +14,9 @@ class ApplicationImpl
 
 		virtual ~ApplicationImpl();
 
-		void catchSystemSignal(int sig);
+		bool catchSystemSignal(int sig);
+
+		bool raiseSystemSignal(int sig);
 
 		int signalFd() const;
 };

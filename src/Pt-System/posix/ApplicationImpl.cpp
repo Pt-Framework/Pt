@@ -63,7 +63,7 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
-void ApplicationImpl::catchSystemSignal(int sig)
+bool ApplicationImpl::catchSystemSignal(int sig)
 {
     if (sig > 0 && sig < NSIG)
     {
@@ -73,11 +73,31 @@ void ApplicationImpl::catchSystemSignal(int sig)
         sigemptyset(&act.sa_mask);
         act.sa_flags = SA_RESTART;
 
-        if (-1 == sigaction(sig, &act, NULL))
+        if (-1 == ::sigaction(sig, &act, NULL))
         {
             throw SystemError("sigaction failed", PT_SOURCEINFO);
         }
+		
+		return true;
     }
+
+	return false;
+}
+
+
+bool ApplicationImpl::raiseSystemSignal(int sig)
+{
+    if (sig > 0 && sig < NSIG)
+    {
+		if( 0 != ::raise(sig) )
+        {
+            throw SystemError("sigaction failed", PT_SOURCEINFO);
+        }
+
+		return true;
+	}
+	
+	return false;
 }
 
 

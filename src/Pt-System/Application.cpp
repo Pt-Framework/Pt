@@ -86,9 +86,15 @@ Application& Application::instance()
 }
 
 
-void Application::catchSystemSignal(int sig)
+bool Application::catchSystemSignal(int sig)
 {
-    _impl->catchSystemSignal(sig);
+    return _impl->catchSystemSignal(sig);
+}
+
+
+bool Application::raiseSystemSignal(int sig)
+{
+    return _impl->raiseSystemSignal(sig);
 }
 
 
