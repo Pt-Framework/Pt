@@ -24,18 +24,26 @@
 
 class ProcessTest : public Pt::Unit::TestSuite
 {
-public:
-    ProcessTest() : Pt::Unit::TestSuite("ProcessTest")
-    {
-        Pt::Unit::TestSuite::registerMethod( "redirectOutputStream", *this, &ProcessTest::redirectOutputStream );
-    }
-    
-protected:
-    void redirectOutputStream();
+    public:
+        ProcessTest()
+        : Pt::Unit::TestSuite("ProcessTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "RedirectIO", *this, &ProcessTest::RedirectIO );
+            Pt::Unit::TestSuite::registerMethod( "EnvVar", *this, &ProcessTest::EnvVar );
+        }
+
+    protected:
+        void RedirectIO();
+        void EnvVar();
 };
 
-void ProcessTest::redirectOutputStream()
+
+void ProcessTest::RedirectIO()
 {
+#ifdef _WIN32_WCE
+    return;
+#endif
+
 #ifdef NDEBUG
     Pt::System::ProcessInfo procInfo( "ProcessTestChild");
 #else
@@ -45,22 +53,31 @@ void ProcessTest::redirectOutputStream()
 
     Pt::System::Pipe pipe;
     procInfo.setStdOutput(&pipe.output());
-	procInfo.setStdError(0);
-    
+    procInfo.setStdError(0);
+
     Pt::System::Process p(procInfo);
 
-    p.setEnvVar( "PATH", ".");
+    p.setEnvVar("PATH", ".");
     p.start();
     p.wait();
 
     char buffer[1024];
     int n = pipe.input().read( buffer, 1024);
     buffer[n] = '\0';
-    
+
     reportMessage( std::string("child output: ") + buffer);
-    
+
     PT_UNIT_ASSERT( n > 0);
     PT_UNIT_ASSERT( std::string( buffer) == "testString");
 }
+
+
+void ProcessTest::EnvVar()
+{
+    Pt::System::Process::setEnvVar("PT_PROCESS_TEST", "true");
+    std::string value = Pt::System::Process::getEnvVar("PT_PROCESS_TEST");
+    PT_UNIT_ASSERT( value == "true");
+}
+
 
 Pt::Unit::RegisterTest<ProcessTest> register_ProcessTest;

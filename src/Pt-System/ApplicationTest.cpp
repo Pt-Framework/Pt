@@ -1,6 +1,6 @@
-#include "Pt/Unit/assertion.h"
-#include "Pt/Unit/testsuite.h"
-#include "Pt/Unit/registertest.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Application.h"
 
 #ifndef SIGUSR1
@@ -37,17 +37,17 @@ class ApplicationTest : public Pt::Unit::TestSuite
 
             app.setIdleTimeout(2000);
 
-			if( ! hasSigUsr1 && ! hasSigAlrm )
-			{
-				reportMessage("signals not supported");
-				return;
-			}
+            if( ! hasSigUsr1 && ! hasSigAlrm )
+            {
+                reportMessage("signals not supported");
+                return;
+            }
 
             app.raiseSystemSignal(SIGUSR1);
             app.raiseSystemSignal(SIGALRM);
 
             app.run();
-            PT_UNIT_ASSERT(_cnt == 2);
+            PT_UNIT_ASSERT(_cnt == hasSigUsr1 + hasSigAlrm);
         }
 
         void onSignal(int sig)
