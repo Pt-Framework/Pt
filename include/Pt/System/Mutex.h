@@ -407,13 +407,8 @@ class SpinLock
 
         ~SpinLock()
         {
-            try
-            {
-                if(_locked)
-                    this->unlock();
-            }
-            catch(...)
-            {}
+            if(_locked)
+                this->unlock();
         }
 
         void lock()

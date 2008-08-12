@@ -894,7 +894,7 @@ rule _MakeLocate
     {
         # target to be located is passed with a path, so we create it
         # and add a dependency to the directory
-        local _dir = [ FDirName $(>) $(_i:D) ] ;
+        local _dir = [ FDirName $(>) $(<:D) ] ;
         Depends $(<) : $(_dir) ;
         MkDir $(_dir) ;
     }
