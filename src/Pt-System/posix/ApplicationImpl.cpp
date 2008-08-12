@@ -57,6 +57,12 @@ ApplicationImpl::ApplicationImpl()
 }
 
 
+ApplicationImpl::~ApplicationImpl()
+{
+
+}
+
+
 void ApplicationImpl::catchSystemSignal(int sig)
 {
     if (sig > 0 && sig < NSIG)
