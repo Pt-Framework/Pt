@@ -55,7 +55,7 @@ namespace System {
             /**
                 @see Mutex#tryLock()
             */
-            bool tryLock(unsigned int msec);
+            bool tryLock();
 
             //! @brief MS Windows specific implementation of unlock()
             /**

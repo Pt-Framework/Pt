@@ -78,6 +78,8 @@ namespace System {
             /// time the thread has locked the mutex.
             void lock();
 
+            bool tryLock();
+
             //! @brief Unlock the mutex
             ///
             /// Unlocks the mutex. If the mutex was locked more than one time by the

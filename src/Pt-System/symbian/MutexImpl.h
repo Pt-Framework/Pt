@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dï¿½rner                        *
  *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
  *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
@@ -34,7 +34,7 @@ namespace System {
 
             void lock();
 
-            bool tryLock(unsigned int msec = 0);
+            bool tryLock();
 
             void unlock();
 

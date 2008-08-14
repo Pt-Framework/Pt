@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dï¿½rner                        *
  *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
  *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
@@ -63,39 +63,17 @@ void MutexImpl::lock()
 }
 
 
-bool MutexImpl::tryLock(unsigned int msec)
+bool MutexImpl::tryLock()
 {
-    int ret = 0;
+    int ret = pthread_mutex_trylock(&_handle);
+    if (ret == EBUSY)
+        return false;
 
-    // get start time
-    struct timeval start, current;
-    ::gettimeofday(&start, 0);
-    start.tv_sec = start.tv_sec + msec / 1000;
-    start.tv_usec = (start.tv_usec + (msec % 1000) * 1000);
+    if (ret == 0)
+        return true;
 
-    for( ; ; ) {
-        ret = pthread_mutex_trylock(&_handle);
-
-        if( (ret != EBUSY && ret != ETIMEDOUT) )
-            break;
-
-        // check if timeout
-        ::gettimeofday(&current, 0);
-        if( current.tv_sec > start.tv_sec ||
-                (current.tv_sec == start.tv_sec && current.tv_usec > start.tv_usec) )
-            break;
-    }
-
-    switch(ret) {
-        case 0:         break;
-        case EBUSY:     return false;
-        case ETIMEDOUT: return false;
-        default: {
-            throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
-        }
-    }
-
-    return true;
+    throw SystemError("Could not lock mutex", PT_SOURCEINFO);
+    return false;
 }
 
 

@@ -37,7 +37,7 @@ MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
     _handle = CreateMutex(NULL, FALSE, NULL);
 
     if( !_handle )
-        throw SystemError("Could not create mutex: ", PT_SOURCEINFO);
+        throw SystemError("Could not create mutex", PT_SOURCEINFO);
 }
 
 
@@ -58,25 +58,26 @@ void MutexImpl::lock()
     if(ret != WAIT_OBJECT_0)
     {
         DWORD error =  GetLastError();
-        throw SystemError ("Could not wait for mutex: ", PT_SOURCEINFO);
+        throw SystemError ("Could not wait for mutex", PT_SOURCEINFO);
     }
 }
 
 
-bool MutexImpl::tryLock(unsigned int msec)
+bool MutexImpl::tryLock()
 {
     #ifdef _WIN32_WCE
-        DWORD ret = WaitForSingleObject(_handle, msec);
+        DWORD ret = WaitForSingleObject(_handle, 0);
     #else
-        DWORD ret = WaitForSingleObjectEx(_handle, msec, FALSE);
+        DWORD ret = WaitForSingleObjectEx(_handle, 0, FALSE);
     #endif
 
-    if(ret == WAIT_FAILED) {
-        throw SystemError ("Could not wait for mutex: ", PT_SOURCEINFO);
-    }
-    else if(ret == WAIT_OBJECT_0)
+    if(ret == WAIT_OBJECT_0)
         return true;
 
+    if(ret == WAIT_TIMEOUT)
+        return false;
+
+    throw SystemError ("Could not wait for mutex", PT_SOURCEINFO);
     return false;
 }
 
@@ -86,7 +87,7 @@ void MutexImpl::unlock()
     if( !ReleaseMutex(_handle) )
     {
         DWORD error =  GetLastError();
-        throw SystemError("Could not release mutex: ", PT_SOURCEINFO);
+        throw SystemError("Could not release mutex", PT_SOURCEINFO);
     }
 }
 

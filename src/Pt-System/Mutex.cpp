@@ -44,6 +44,12 @@ void Mutex::lock()
 }
 
 
+bool Mutex::tryLock()
+{
+    return _impl->unlock();
+}
+
+
 void Mutex::unlock()
 {
     _impl->unlock();
