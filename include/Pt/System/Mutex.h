@@ -377,9 +377,14 @@ class SpinMutex : public NonCopyable
             }
         }
 
+        bool tryLock()
+        {
+           return ! atomicCompareExchange(_count, 1, 0);
+        }
+
         //! @brief Unlock.
         /// Unlocks the Spinlock.
-        inline void unlock()
+        void unlock()
         {
             // set unlocked
             atomicExchange(_count, 0);
