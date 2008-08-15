@@ -35,6 +35,7 @@
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/SystemError.h>
 #include <string>
+#include <iterator>
 
 namespace Pt {
 
@@ -75,6 +76,12 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
 class PT_SYSTEM_API DirectoryIterator
 {
     public:
+		typedef std::string value_type;
+		typedef std::ptrdiff_t difference_type;
+		typedef std::forward_iterator_tag iterator_category;
+		typedef const std::string* pointer;
+		typedef const std::string& reference;
+	
         //! @brief Default constructor
         DirectoryIterator();
 

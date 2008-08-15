@@ -4,6 +4,9 @@
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
 #include "Pt/System/FileInfo.h"
+#include <algorithm>
+#include <iostream>
+#include <iterator>
 
 class DirectoryTest : public Pt::Unit::TestSuite
 {
@@ -187,6 +190,18 @@ void DirectoryTest::DirectoryIterator()
     {
         std::string name = *it;
     }
+	
+	std::copy(dir1.begin(), 
+	          dir1.end(), 
+	          std::ostream_iterator<std::string>(std::cout, " "));
+			 
+	std::copy(dir1.begin(), 
+	          dir1.end(), 
+	          std::ostream_iterator<std::string>(std::cout, " "));
+			  
+	std::copy(dir1.begin(), 
+	          dir1.end(), 
+	          std::ostream_iterator<std::string>(std::cout, " "));
 }
 
 
