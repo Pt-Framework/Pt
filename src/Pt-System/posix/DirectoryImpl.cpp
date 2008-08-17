@@ -131,8 +131,9 @@ bool DirectoryIteratorImpl::advance()
 
     // _current == 0 means end
     _current = ::readdir( _handle );
+
     if(_current)
-    	_name = _current->d_name;
+        _name = _current->d_name;
 
     return _current != 0;
 }

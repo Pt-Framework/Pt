@@ -31,10 +31,8 @@ typedef LONG atomic_t;
 
 inline atomic_t atomicGet(volatile atomic_t& val)
 {
-#ifndef _WIN32_WCE
-#ifndef __GNUC__
+#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
     MemoryBarrier();
-#endif
 #endif
 
     return val;
@@ -45,10 +43,8 @@ inline void atomicSet(volatile atomic_t& val, atomic_t n)
 {
     val = n;
 
-#ifndef _WIN32_WCE
-#ifndef __GNUC__
+#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
     MemoryBarrier();
-#endif
 #endif
 }
 

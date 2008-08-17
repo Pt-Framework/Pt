@@ -17,7 +17,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
                           [ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
                           [ FDirName $(SYS:L) ProcessImpl.cpp ]
-                          [ FDirName $(SYS:L) SharedMemoryImpl.cpp ]
                           [ FDirName $(SYS:L) PipeImpl.cpp ]
                           [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
                           Application.cpp
@@ -39,7 +38,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           SerialDevice.cpp
                           Semaphore.cpp
                           SharedLib.cpp
-                          SharedMemory.cpp
                           SystemError.cpp
                           Thread.cpp
                           ThreadKey.cpp

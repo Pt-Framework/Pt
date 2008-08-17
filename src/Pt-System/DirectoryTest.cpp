@@ -193,15 +193,15 @@ void DirectoryTest::DirectoryIterator()
 	
 	std::copy(dir1.begin(), 
 	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cout, " "));
-			 
+	          std::ostream_iterator<std::string>(std::cerr, " "));
+
+	std::copy(dir1.begin(),
+	          dir1.end(), 
+	          std::ostream_iterator<std::string>(std::cerr, " "));
+
 	std::copy(dir1.begin(), 
 	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cout, " "));
-			  
-	std::copy(dir1.begin(), 
-	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cout, " "));
+	          std::ostream_iterator<std::string>(std::cerr, " "));
 }
 
 

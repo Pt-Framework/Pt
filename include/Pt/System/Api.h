@@ -21,6 +21,10 @@
 
 #include <Pt/Api.h>
 
+#define PT_SYSTEM_VERSION_MAJOR 1
+#define PT_SYSTEM_VERSION_MINOR 0
+#define PT_SYSTEM_VERSION_REVISION 0
+
 #if defined(PT_SYSTEM_API_EXPORT)
 #    define PT_SYSTEM_API PT_EXPORT
 #  else
@@ -28,3 +32,27 @@
 #  endif
 
 #endif
+
+namespace Pt {
+
+/** @namespace Pt::System
+    @brief %System programming
+
+    This module offers support for multithreaded programming, API's for
+    file system operations such as traversing through directories and files,
+    creating and handling of subprocesses transparent, synchronous or
+    asynchronous IO, and shared libraries.
+*/
+namespace System {
+
+    class Application;
+    class Directory;
+    class File;
+    class FileInfo;
+    class IODevice;
+    class Mutex;
+    class SpinLock;
+    class Thread;
+}
+
+}

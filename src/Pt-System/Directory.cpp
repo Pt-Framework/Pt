@@ -84,9 +84,9 @@ DirectoryIterator& DirectoryIterator::operator++()
     if( _impl && 0 == _impl->deref() )
     {
         delete _impl;
-        _impl = 0;
     }
 
+    _impl = 0;
     return *this;
 }
 
