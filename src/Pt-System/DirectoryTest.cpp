@@ -190,18 +190,6 @@ void DirectoryTest::DirectoryIterator()
     {
         std::string name = *it;
     }
-	
-	std::copy(dir1.begin(), 
-	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cerr, " "));
-
-	std::copy(dir1.begin(),
-	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cerr, " "));
-
-	std::copy(dir1.begin(), 
-	          dir1.end(), 
-	          std::ostream_iterator<std::string>(std::cerr, " "));
 }
 
 

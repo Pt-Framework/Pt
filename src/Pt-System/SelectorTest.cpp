@@ -23,6 +23,8 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Selector.h"
 #include "Pt/System/IODevice.h"
+#include "Pt/System/IOBuffer.h"
+#include "Pt/System/IOStream.h"
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Timer.h"
@@ -35,6 +37,7 @@
         SelectorTest()
         : Pt::Unit::TestSuite("SelectorTest")
         {
+            //Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
             Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
             Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
             Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );
@@ -52,6 +55,42 @@
         {
             _timeval = _clock.stop();
             _counter++;
+        }
+
+        void AsyncStream()
+        {
+            std::string out("Hello!");
+
+            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+            pipe.output().write( out.c_str(), out.size() );
+            pipe.output().close();
+
+            Pt::System::IOBuffer buffer( pipe.input() );
+            buffer.beginRead();
+
+            bool avail = pipe.input().wait();
+            std::cerr << "\n\nAVAIL: " << avail << std::endl;
+            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+
+            Pt::System::IStream stream(&buffer);
+
+            char ch = 0;
+            stream.get(ch);
+            stream.get(ch);
+            stream.get(ch);
+            stream.get(ch);
+            stream.get(ch);
+            stream.get(ch);
+            std::cerr << "LAST STREAMED: " << ch << std::endl;
+            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+            std::cerr << "STREAM EOF: " << stream.eof() << std::endl;
+
+            buffer.beginRead();
+            avail = pipe.input().wait();
+            stream.get(ch);
+            std::cerr << "STREAM EOF: " << stream.eof() << std::endl;
+
+            exit(0);
         }
 
         void WaitTimer()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -51,7 +51,6 @@ namespace System {
             std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
             { return _buffer->peek(buffer, size); }
 
-        protected:
             explicit BasicIStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
             : std::basic_istream<CharT>( buffer ),
               _buffer(buffer)
@@ -105,7 +104,7 @@ namespace System {
             { return _buffer->peeksome(buffer, size); }
 
     protected:
-            explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
+            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
             : std::basic_iostream<CharT>( buffer ),
               _buffer(buffer)
             { }

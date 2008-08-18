@@ -30,43 +30,82 @@ namespace Pt {
 namespace System {
 
     //! @brief a stream buffer for IODevices with linear buffer area.
-    template <typename CharT>
-    class BasicIOBuffer : public BasicStreamBuffer<CharT> {
+    class IOBuffer : public BasicStreamBuffer<char>, public Connectable
+    {
         public:
-            typedef typename std::basic_streambuf<CharT>::int_type int_type;
-            typedef typename std::basic_streambuf<CharT>::traits_type traits_type;
-            typedef typename std::basic_streambuf<CharT>::pos_type pos_type;
-            typedef typename std::basic_streambuf<CharT>::off_type off_type;
+            typedef std::basic_streambuf<char>::int_type int_type;
+            typedef std::basic_streambuf<char>::traits_type traits_type;
+            typedef std::basic_streambuf<char>::pos_type pos_type;
+            typedef std::basic_streambuf<char>::off_type off_type;
 
         public:
             //! @brief Contructs an IOBuffer for an IODevice.
-            BasicIOBuffer(IODevice& ioDevice, size_t bufferSize = 1024)
-			: _ioDevice(&ioDevice),
+            IOBuffer(IODevice& ioDevice, size_t bufferSize = 1024)
+            : _ioDevice(&ioDevice),
               _buffer(0),
               _bufferSize(bufferSize),
               _putbackMax(4)
             {
-                _buffer = new CharT[_bufferSize];
+                _buffer = new char[_bufferSize];
 
                 this->setg(0, 0, 0);
                 this->setp(0, 0);
+
+                connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
             }
 
             //! @brief Default constructor.
-            BasicIOBuffer(size_t bufferSize = 1024)
+            IOBuffer(size_t bufferSize = 1024)
             : _ioDevice(0),
               _buffer(0),
               _bufferSize(bufferSize),
               _putbackMax(4)
             {
-                _buffer = new CharT[_bufferSize];
+                _buffer = new char[_bufferSize];
 
                 this->setg(0, 0, 0);
                 this->setp(0, 0);
             }
 
-            ~BasicIOBuffer()
+            ~IOBuffer()
             { delete[] _buffer; }
+
+            void beginRead()
+            {
+                size_t putbackSize = _putbackMax;
+
+                // keep chars for putback if in reading mode
+                if( this->gptr() )
+                {
+                    putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
+                    std::memmove(_buffer + (_putbackMax - putbackSize),
+                                 this->gptr() - putbackSize,
+                                 putbackSize * sizeof(char) );
+                }
+
+                _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
+
+                // set get area, will also enter reading mode
+                this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
+                            _buffer + _putbackMax, // gptr position
+                            _buffer + _putbackMax ); // end of get area
+            }
+
+            void onRead(IODevice& dev)
+            {
+                size_t readSize = dev.endRead();
+
+                if( _ioDevice->eof() )
+                {
+                    this->setg(0, 0, 0);
+                    return;
+                }
+
+                // set get area, will also enter reading mode
+                this->setg( this->eback(), // start of get area
+                            this->gptr(), // gptr position
+                            this->egptr() + readSize ); // end of get area
+            }
 
             void init(IODevice& ioDevice)
             { _ioDevice = &ioDevice; }
@@ -77,7 +116,7 @@ namespace System {
         protected:
             int sync();
 
-            virtual std::streamsize _peek(CharT* buffer, std::streamsize size);
+            virtual std::streamsize _peek(char* buffer, std::streamsize size);
 
             virtual int_type underflow();
 
@@ -88,7 +127,7 @@ namespace System {
         private:
             IODevice* _ioDevice;
 
-            CharT* _buffer;
+            char* _buffer;
 
             const size_t _bufferSize;
 
@@ -96,11 +135,7 @@ namespace System {
     };
 
 
-    typedef BasicIOBuffer<char> IOBuffer;
-
-
-    template <typename CharT>
-    int BasicIOBuffer<CharT>::sync()
+    inline int IOBuffer::sync()
     {
         if(!_ioDevice)
             return 0;
@@ -119,8 +154,7 @@ namespace System {
     }
 
 
-    template <typename CharT>
-    std::streamsize BasicIOBuffer<CharT>::_peek(CharT* buffer, std::streamsize size)
+    inline std::streamsize IOBuffer::_peek(char* buffer, std::streamsize size)
     {
         // can not peek in writing mode
         if( this->pptr() )
@@ -135,23 +169,27 @@ namespace System {
             return 0;
         }
 
-        std::memcpy(buffer, this->gptr(), sizeof(CharT) * size);
+        std::memcpy(buffer, this->gptr(), sizeof(char) * size);
         return size;
     }
 
 
-    template <typename CharT>
-    typename BasicIOBuffer<CharT>::int_type
-    BasicIOBuffer<CharT>::underflow()
+    inline IOBuffer::int_type
+    IOBuffer::underflow()
     {
+        std::cerr << "UNDERFLOW" << std::endl;
+
         // return EOF if in writing mode or no device set
         if( !_ioDevice || this->pptr() )
             return traits_type::eof();
 
-        // return if input buffer is not full yet.
+        // buffer is not empty yet.
         if( this->gptr() < this->egptr() ) {
             return traits_type::to_int_type( *(this->gptr()) );
         }
+
+        if( _ioDevice->eof() )
+            return traits_type::eof();
 
         size_t putbackSize = _putbackMax;
 
@@ -160,7 +198,7 @@ namespace System {
             putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
             std::memmove(_buffer + (_putbackMax - putbackSize),
                          this->gptr() - putbackSize,
-                         putbackSize * sizeof(CharT) );
+                         putbackSize * sizeof(char) );
         }
 
         size_t readSize = _ioDevice->read( _buffer + _putbackMax, _bufferSize - _putbackMax );
@@ -177,9 +215,8 @@ namespace System {
     }
 
 
-    template <typename CharT>
-    typename BasicIOBuffer<CharT>::int_type
-    BasicIOBuffer<CharT>::overflow(int_type ch)
+    inline IOBuffer::int_type
+    IOBuffer::overflow(int_type ch)
     {
         // return EOF if we are in reading mode or no device is set
         if(!_ioDevice || this->gptr() )
@@ -216,9 +253,8 @@ namespace System {
     }
 
 
-    template <typename CharT>
-    typename BasicIOBuffer<CharT>::pos_type
-    BasicIOBuffer<CharT>::seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
+    inline IOBuffer::pos_type
+    IOBuffer::seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
     {
         if(mode == std::ios::out)
             return pos_type(-1);
