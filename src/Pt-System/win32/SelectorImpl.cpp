@@ -45,9 +45,18 @@ SelectorImpl::SelectorImpl()
         CloseHandle( _wakeEvent );
         throw SystemError("CreateEvent failed", PT_SOURCEINFO);
     }
+
+    _ioEvent2 = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _ioEvent2 == NULL )
+    {
+        CloseHandle( _wakeEvent );
+        CloseHandle( _ioEvent2 );
+        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+    }
     
     _handles.add( _wakeEvent, 0 );
     _handles.add( _ioEvent, 0 );
+    _handles.add( _ioEvent2, 0 );
 }
 
 
@@ -77,6 +86,7 @@ SelectorImpl::~SelectorImpl()
     
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
+    CloseHandle( _ioEvent2 );
 }
 
 
@@ -144,7 +154,7 @@ bool SelectorImpl::wait( unsigned umsecs )
     std::set<Selectable*>::iterator iter;
     for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
     {
-        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent);
+        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, _ioEvent2);
         if(accept)
         {
             _devices.insert(*iter);
@@ -177,7 +187,7 @@ bool SelectorImpl::wait( unsigned umsecs )
             return true;
         }
         // I/O event at offset 1 was active
-        else if (offset == 1)
+        else if (offset == 1 || offset == 2)
         {        
             bool avail = false;
             for( _current = _devices.begin(); _current != _devices.end(); )

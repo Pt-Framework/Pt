@@ -78,7 +78,7 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h)
+bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
 {
     if(_rbuf)
     {
@@ -173,7 +173,7 @@ void PipeIODevice::onAttach(SelectorBase& s)
 
 void PipeIODevice::onDetach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle);
+    this->setWaitHandle(_waitHandle, _waitHandle);
 }
 
 
@@ -267,7 +267,7 @@ bool PipeIODevice::onWait(unsigned int msecs)
     if(_readOv.hEvent != _waitHandle)
     {
         prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle);
+        this->setWaitHandle(_waitHandle, _waitHandle);
     }
 
     DWORD result = WaitForSingleObject(_waitHandle, msecs);

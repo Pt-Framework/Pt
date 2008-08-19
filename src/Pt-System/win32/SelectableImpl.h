@@ -38,7 +38,7 @@ class SelectableImpl
         virtual ~SelectableImpl() 
         {}
 
-        virtual bool setWaitHandle(HANDLE h) = 0;
+        virtual bool setWaitHandle(HANDLE pending, HANDLE finished) = 0;
         
         virtual bool getWaitHandles(HandleMap& handles)
         { return false; }

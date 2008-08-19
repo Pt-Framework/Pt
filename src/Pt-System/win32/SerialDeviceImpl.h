@@ -47,7 +47,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool wait(unsigned int msecs);
         
-        bool setWaitHandle(HANDLE h);
+        bool setWaitHandle(HANDLE h, HANDLE finished);
         
         bool checkEvent();
         

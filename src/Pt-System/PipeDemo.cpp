@@ -18,30 +18,31 @@ void onOutput(Pt::System::IODevice& r)
 
 void demo2()
 {
-	Pt::System::Selector selector;
-	Pt::System::FileDevice file("c:\\dax.xsd", std::ios::in, true);
-	Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-	
-	selector.add( pipe.input() );
-	selector.add(file);
-	selector.wait(100);
-	
-	char buf[10];
-	pipe.input().beginRead(buf, 5);
+    Pt::System::Selector selector;
+    Pt::System::FileDevice file("c:\\test.txt", std::ios::in, true);
+    Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+    
+    selector.add( pipe.input() );
+    selector.add(file);
+    selector.wait(100);
+   
+    char buffer[10];
+    file.beginRead(buffer, 1);
+   
+    char buf[10];
+    pipe.input().beginRead(buf, 5);
 
-	char buffer[10];
-	file.beginRead(buffer, 1);
+    std::cerr << "WAITING 5000 ms" << std::endl;
+    //pipe.output().write("Hello", 5);
+    selector.wait(5000);
 
-	pipe.output().write("Hello", 5);
-	selector.wait(5000);
-
-	unsigned n = file.endRead();
-	std::cerr << "READ: " << n << std::endl;
-	std::cerr.write(buffer, 1) << std::endl;
-	
-	n = pipe.input().endRead();
-	std::cerr << "READ: " << n << std::endl;
-	std::cerr.write(buf, 1) << std::endl;
+    unsigned n = file.endRead();
+    std::cerr << "READ: " << n << std::endl;
+    std::cerr.write(buffer, 1) << std::endl;
+    
+    //n = pipe.input().endRead();
+    //std::cerr << "READ: " << n << std::endl;
+    //std::cerr.write(buf, 1) << std::endl;
 }
 
 void demo1()

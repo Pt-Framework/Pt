@@ -133,7 +133,7 @@ void SerialDeviceImpl::attach(SelectorBase& s)
 
 void SerialDeviceImpl::detach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle);
+    this->setWaitHandle(_waitHandle, _waitHandle);
 }
 
 
@@ -144,7 +144,7 @@ bool SerialDeviceImpl::wait(unsigned int msecs)
     if(_readOv.hEvent != _waitHandle)
     {
         prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle);
+        this->setWaitHandle(_waitHandle, _waitHandle);
     }
 
     DWORD result = WaitForSingleObject(_waitHandle, msecs);
@@ -169,7 +169,7 @@ bool SerialDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool SerialDeviceImpl::setWaitHandle(HANDLE h)
+bool SerialDeviceImpl::setWaitHandle(HANDLE h, HANDLE finished)
 {
     if(_rbuf)
     {

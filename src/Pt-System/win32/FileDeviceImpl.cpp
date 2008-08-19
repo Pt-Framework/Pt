@@ -31,13 +31,14 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl()
 : _waitHandle(INVALID_HANDLE_VALUE)
+, _finishedHandle(INVALID_HANDLE_VALUE)
 , _rbuf(0)
 , _rbuflen(0)
 , _wbuf(0)
 , _wbuflen(0)
 {
 #ifndef _WIN32_WCE
-    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    _finishedHandle = _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
         throw SystemError("CreateEvent failed", PT_SOURCEINFO);
 #endif
@@ -124,7 +125,7 @@ void FileDeviceImpl::attach(SelectorBase& s)
 
 void FileDeviceImpl::detach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle);
+    this->setWaitHandle(_waitHandle, _waitHandle);
 }
 
 
@@ -136,7 +137,7 @@ bool FileDeviceImpl::wait(unsigned int msecs)
     if(_readOv.hEvent != _waitHandle)
     {
         prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle);
+        this->setWaitHandle(_waitHandle, _waitHandle);
     }
 
     DWORD result = WaitForSingleObject(_waitHandle, msecs);
@@ -165,25 +166,26 @@ bool FileDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool FileDeviceImpl::setWaitHandle(HANDLE h)
+bool FileDeviceImpl::setWaitHandle(HANDLE io, HANDLE wake)
 {
+    _finishedHandle = wake;
 #ifndef _WIN32_WCE
 
     if(_rbuf)
     {
         if( _readOv.hEvent && HasOverlappedIoCompleted(&_readOv) )
         {
-            _readOv.hEvent = h;
-            SetEvent(h);
+            _readOv.hEvent = io;
+            SetEvent(io);
             return true;
         }
  
-        if(_readOv.hEvent != h)
+        if(_readOv.hEvent != io)
         {
             if(_readOv.hEvent)
                 CancelIo(handle());
 
-            _readOv.hEvent = h;
+            _readOv.hEvent = io;
         }
 
         DWORD readBytes = 0;
@@ -197,25 +199,29 @@ bool FileDeviceImpl::setWaitHandle(HANDLE h)
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
         }
+        else
+        {
+            SetEvent(_finishedHandle);
+        }
     }
 
-    _readOv.hEvent = h;
+    _readOv.hEvent = io;
 
     if(_wbuf)
     {
         if( _writeOv.hEvent && HasOverlappedIoCompleted(&_writeOv) )
         {
-            _writeOv.hEvent = h;
-            SetEvent(h);
+            _writeOv.hEvent = io;
+            SetEvent(io);
             return true;
         }
 
-        if(_writeOv.hEvent != h)
+        if(_writeOv.hEvent != io)
         {
             if(_writeOv.hEvent)
                 CancelIo(handle());
                 
-            _writeOv.hEvent = h;
+            _writeOv.hEvent = io;
         }
 
         DWORD writtenBytes = 0;
@@ -229,7 +235,7 @@ bool FileDeviceImpl::setWaitHandle(HANDLE h)
         }
     }
 
-    _writeOv.hEvent = h;
+    _writeOv.hEvent = io;
 
     return true;
     
@@ -305,6 +311,10 @@ void FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
             {
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
+        }
+        else
+        {
+            SetEvent(_finishedHandle);
         }
     }
 }

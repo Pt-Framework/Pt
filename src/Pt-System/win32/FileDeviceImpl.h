@@ -49,7 +49,7 @@ class FileDeviceImpl  : public IODeviceImpl
  
         virtual bool wait(unsigned int msecs);
         
-        virtual bool setWaitHandle(HANDLE h);
+        virtual bool setWaitHandle(HANDLE h, HANDLE finished);
         
         bool checkEvent();
         
@@ -77,6 +77,7 @@ class FileDeviceImpl  : public IODeviceImpl
         
     private:
         HANDLE _waitHandle;
+        HANDLE _finishedHandle;
         OVERLAPPED _readOv;
         char* _rbuf;
         size_t _rbuflen;

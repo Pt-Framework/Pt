@@ -42,7 +42,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void open(HANDLE handle, bool isAsync);
         
-        bool setWaitHandle(HANDLE h);
+        bool setWaitHandle(HANDLE h, HANDLE finished);
 		
         bool getWaitHandles(HandleMap& handles);
 		

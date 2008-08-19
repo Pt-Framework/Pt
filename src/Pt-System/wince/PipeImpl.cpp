@@ -71,7 +71,7 @@ void PipeIODevice::open(HANDLE h, bool isAsync)
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h)
+bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
 {
 	return false;
 }

@@ -122,6 +122,7 @@ class SelectorImpl
     private:       
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
+        HANDLE _ioEvent2;
         HandleMap _handles;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;

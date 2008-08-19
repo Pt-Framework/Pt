@@ -147,7 +147,7 @@ bool SerialDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool SerialDeviceImpl::setWaitHandle(HANDLE h)
+bool SerialDeviceImpl::setWaitHandle(HANDLE h, HANDLE finished)
 {
 	return false;
 }

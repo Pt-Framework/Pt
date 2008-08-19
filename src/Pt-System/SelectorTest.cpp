@@ -37,7 +37,7 @@
         SelectorTest()
         : Pt::Unit::TestSuite("SelectorTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
+            Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
             Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
             Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
             Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );
