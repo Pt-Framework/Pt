@@ -3,6 +3,8 @@
 #include <Pt/System/Selector.h>
 #include <iostream>
 
+#include <Pt/System/FileDevice.h>
+
 void onInput(Pt::System::IODevice& r)
 {
     std::cerr << "Input: ";
@@ -11,6 +13,35 @@ void onInput(Pt::System::IODevice& r)
 void onOutput(Pt::System::IODevice& r)
 {
     std::cerr << "Output done.\n";
+}
+
+
+void demo2()
+{
+	Pt::System::Selector selector;
+	Pt::System::FileDevice file("c:\\dax.xsd", std::ios::in, true);
+	Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+	
+	selector.add( pipe.input() );
+	selector.add(file);
+	selector.wait(100);
+	
+	char buf[10];
+	pipe.input().beginRead(buf, 5);
+
+	char buffer[10];
+	file.beginRead(buffer, 1);
+
+	pipe.output().write("Hello", 5);
+	selector.wait(5000);
+
+	unsigned n = file.endRead();
+	std::cerr << "READ: " << n << std::endl;
+	std::cerr.write(buffer, 1) << std::endl;
+	
+	n = pipe.input().endRead();
+	std::cerr << "READ: " << n << std::endl;
+	std::cerr.write(buf, 1) << std::endl;
 }
 
 void demo1()
@@ -42,6 +73,9 @@ int main( int argc, char* argv[] )
 {
     try 
     {
+		demo2();
+		return 0;
+	
         std::string out("Hello World, where do you want to GOTO day!");
         const int size = 50;
         char buffer[size];
