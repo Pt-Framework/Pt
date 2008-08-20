@@ -22,7 +22,7 @@
 
 #include "SelectorImpl.h"
 #include "Pt/System/Api.h"
-#include <vector>
+#include <set>
 #include <cstddef>
 #include <windows.h>
 
@@ -38,7 +38,7 @@ class SelectableImpl
         virtual ~SelectableImpl() 
         {}
 
-        virtual bool setWaitHandle(HANDLE pending, HANDLE finished) = 0;
+        virtual bool setWaitHandle(HANDLE pending, std::set<Selectable*>* actives ) = 0;
         
         virtual bool getWaitHandles(HandleMap& handles)
         { return false; }

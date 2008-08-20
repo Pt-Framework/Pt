@@ -98,6 +98,7 @@ void SelectorImpl::add(Selectable& dev)
 
 void SelectorImpl::remove(Selectable& dev)
 {
+    _actives.erase(&dev);
     _dirty.erase(&dev);        
     _handles.remove(dev);
 
@@ -154,7 +155,7 @@ bool SelectorImpl::wait( unsigned umsecs )
     std::set<Selectable*>::iterator iter;
     for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
     {
-        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, _ioEvent2);
+        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, &_actives);
         if(accept)
         {
             _devices.insert(*iter);
@@ -166,6 +167,12 @@ bool SelectorImpl::wait( unsigned umsecs )
     }
     _dirty.clear();
 
+    if( ! _actives.empty() )
+    {
+        _actives.clear();
+        SetEvent(_ioEvent);
+    }
+    
     DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
     if(result == WAIT_FAILED)
     {
@@ -187,7 +194,7 @@ bool SelectorImpl::wait( unsigned umsecs )
             return true;
         }
         // I/O event at offset 1 was active
-        else if (offset == 1 || offset == 2)
+        else if (offset == 1)
         {        
             bool avail = false;
             for( _current = _devices.begin(); _current != _devices.end(); )

@@ -127,6 +127,7 @@ class SelectorImpl
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _dirty;
+        std::set<Selectable*> _actives;
         Application* _app;
 };
 

@@ -19,15 +19,18 @@ void onOutput(Pt::System::IODevice& r)
 void demo2()
 {
     Pt::System::Selector selector;
-    Pt::System::FileDevice file("c:\\test.txt", std::ios::in, true);
+
     Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-    
+    Pt::System::Pipe pipe2(Pt::System::IODevice::Async);
+
+    pipe2.output().write("ABCDE", 5);
+
     selector.add( pipe.input() );
-    selector.add(file);
+    selector.add( pipe2.input() );
     selector.wait(100);
    
     char buffer[10];
-    file.beginRead(buffer, 1);
+    pipe2.input().beginRead(buffer, 1);
    
     char buf[10];
     pipe.input().beginRead(buf, 5);
@@ -36,7 +39,7 @@ void demo2()
     //pipe.output().write("Hello", 5);
     selector.wait(5000);
 
-    unsigned n = file.endRead();
+    unsigned n = pipe2.input().endRead();
     std::cerr << "READ: " << n << std::endl;
     std::cerr.write(buffer, 1) << std::endl;
     

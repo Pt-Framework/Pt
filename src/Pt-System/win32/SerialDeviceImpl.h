@@ -47,7 +47,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool wait(unsigned int msecs);
         
-        bool setWaitHandle(HANDLE h, HANDLE finished);
+        bool setWaitHandle(HANDLE h, std::set<Selectable*>* actives);
         
         bool checkEvent();
         

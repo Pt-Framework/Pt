@@ -31,14 +31,13 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl()
 : _waitHandle(INVALID_HANDLE_VALUE)
-, _finishedHandle(INVALID_HANDLE_VALUE)
 , _rbuf(0)
 , _rbuflen(0)
 , _wbuf(0)
 , _wbuflen(0)
 {
 #ifndef _WIN32_WCE
-    _finishedHandle = _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
         throw SystemError("CreateEvent failed", PT_SOURCEINFO);
 #endif
@@ -125,7 +124,7 @@ void FileDeviceImpl::attach(SelectorBase& s)
 
 void FileDeviceImpl::detach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle, _waitHandle);
+    this->setWaitHandle(_waitHandle, 0);
 }
 
 
@@ -137,7 +136,7 @@ bool FileDeviceImpl::wait(unsigned int msecs)
     if(_readOv.hEvent != _waitHandle)
     {
         prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle, _waitHandle);
+        this->setWaitHandle(_waitHandle, 0);
     }
 
     DWORD result = WaitForSingleObject(_waitHandle, msecs);
@@ -166,9 +165,8 @@ bool FileDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool FileDeviceImpl::setWaitHandle(HANDLE io, HANDLE wake)
+bool FileDeviceImpl::setWaitHandle(HANDLE io, std::set<Selectable*>* actives)
 {
-    _finishedHandle = wake;
 #ifndef _WIN32_WCE
 
     if(_rbuf)
@@ -198,10 +196,6 @@ bool FileDeviceImpl::setWaitHandle(HANDLE io, HANDLE wake)
             {
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
-        }
-        else
-        {
-            SetEvent(_finishedHandle);
         }
     }
 
@@ -311,10 +305,12 @@ void FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
             {
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
+            printf("ASYNC READ on file\n");
         }
         else
         {
-            SetEvent(_finishedHandle);
+            printf("IMMEDIATE DATA on file\n");
+            SetEvent(_readOv.hEvent);
         }
     }
 }

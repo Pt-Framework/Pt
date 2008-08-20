@@ -32,6 +32,7 @@ namespace System {
 
 PipeIODevice::PipeIODevice()
 : _waitHandle(INVALID_HANDLE_VALUE)
+, _actives(0)
 , _rbuf(0)
 , _rbuflen(0)
 , _wbuf(0)
@@ -78,14 +79,17 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
+bool PipeIODevice::setWaitHandle(HANDLE h, std::set<Selectable*>* actives)
 {
+    _actives = actives;
+
     if(_rbuf)
     {
         if( _readOv.hEvent && HasOverlappedIoCompleted(&_readOv) )
         {
             _readOv.hEvent = h;
-            SetEvent(h);
+            // TODO: Selectable::setCompleted
+            if(_actives) _actives->insert(this); 
             return true;
         }
  
@@ -117,7 +121,7 @@ bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
         if( _writeOv.hEvent && HasOverlappedIoCompleted(&_writeOv) )
         {
             _writeOv.hEvent = h;
-            SetEvent(h);
+            if(_actives) _actives->insert(this); 
             return true;
         }
 
@@ -173,7 +177,7 @@ void PipeIODevice::onAttach(SelectorBase& s)
 
 void PipeIODevice::onDetach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle, _waitHandle);
+    this->setWaitHandle(_waitHandle, 0);
 }
 
 
@@ -182,19 +186,34 @@ void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
     _rbuf = buffer;
     _rbuflen = n;
         
-    if(_readOv.hEvent != NULL)
+    if(_readOv.hEvent == NULL)
+        return;
+
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
     {
-        DWORD readBytes = 0;
-        if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+        if( ERROR_HANDLE_EOF == GetLastError() )
         {
-            if( ERROR_HANDLE_EOF == GetLastError() )
-            {
-            }
-            else if( ERROR_IO_PENDING != GetLastError() )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
+            eof = true;
         }
+        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            //SetEvent(_readOv.hEvent);
+            //if(_actives) _actives->insert(this); 
+            //eof = true;
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
+        }
+        
+        printf("ASYNC READ on pipe\n");
+    }
+    else
+    {
+        printf("IMMEDIATE DATA on pipe\n");
+        if(_actives)
+            _actives->insert(this);
     }
 }
 
@@ -214,7 +233,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
         }
         else
         {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError("Could not end read from file handle", PT_SOURCEINFO);
         }
     }
 
@@ -267,7 +286,7 @@ bool PipeIODevice::onWait(unsigned int msecs)
     if(_readOv.hEvent != _waitHandle)
     {
         prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle, _waitHandle);
+        this->setWaitHandle(_waitHandle, 0);
     }
 
     DWORD result = WaitForSingleObject(_waitHandle, msecs);

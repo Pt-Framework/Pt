@@ -40,7 +40,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual bool checkEvent();
         
-		virtual bool setWaitHandle(HANDLE h, HANDLE finished);        
+        virtual bool setWaitHandle(HANDLE h, std::set<Selectable*>* actives);        
 
         virtual IODeviceImpl& ioimpl()
         { return *this; }
@@ -76,6 +76,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         
      private:
         HANDLE _waitHandle;
+        std::set<Selectable*>* _actives;
         OVERLAPPED _readOv;
         char* _rbuf;
         size_t _rbuflen;
