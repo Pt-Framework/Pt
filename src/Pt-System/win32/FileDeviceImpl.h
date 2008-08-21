@@ -39,7 +39,7 @@ class FileDeviceImpl  : public IODeviceImpl
         typedef FileDevice::off_type off_type;
 
     public:
-        FileDeviceImpl();
+        FileDeviceImpl(FileDevice& dev);
 
         ~FileDeviceImpl();
  
@@ -49,7 +49,7 @@ class FileDeviceImpl  : public IODeviceImpl
  
         virtual bool wait(unsigned int msecs);
         
-        virtual bool setWaitHandle(HANDLE h, std::set<Selectable*>* actives);
+        virtual bool setWaitHandle(HANDLE h);
         
         bool checkEvent();
         
@@ -76,13 +76,10 @@ class FileDeviceImpl  : public IODeviceImpl
         void sync() const;       
         
     private:
+        FileDevice& _device;
         HANDLE _waitHandle;
         OVERLAPPED _readOv;
-        char* _rbuf;
-        size_t _rbuflen;
         OVERLAPPED _writeOv;
-        const char* _wbuf;
-        size_t _wbuflen;
 };
 
 }//namespace System

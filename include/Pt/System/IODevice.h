@@ -81,12 +81,25 @@ class IODevice : public IO, public Selectable
             if ( !async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            onBeginRead(buffer, n, _eof);
+            _rbuf = buffer;
+            _rbuflen = n;
+            
+            this->setState(Selectable::Busy); //FIXME pass _state to onBeginRead()
+            this->onBeginRead(buffer, n, _eof);
         }
 
         size_t endRead()
         {
-            return onEndRead(_eof);
+            _rbuf = 0;
+            _rbuflen = 0;
+            
+            if( _wbuf )
+                this->setState(Selectable::Busy);
+            else
+                this->setState(Selectable::Idle);
+            
+            size_t n = this->onEndRead(_eof);
+            return n;
         }
 
         //! @brief Read data from I/O device
@@ -115,14 +128,26 @@ class IODevice : public IO, public Selectable
 
         void beginWrite(const char* buffer, size_t n)
         {
-            if ( !async() )
+            if ( ! async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
+            
+            _wbuf = buffer;
+            _wbuflen = n;
 
-            onBeginWrite(buffer, n);
+            this->setState(Selectable::Busy);
+            this->onBeginWrite(buffer, n);
         }
 
         size_t endWrite()
         {
+            _wbuf = 0;
+            _wbuflen = 0;
+            
+            if( _rbuf )
+                this->setState(Selectable::Busy);
+            else
+                this->setState(Selectable::Idle);
+            
             return onEndWrite();
         }
 
@@ -256,6 +281,10 @@ class IODevice : public IO, public Selectable
         IODevice()
         : _eof(false)
         , _async(false)
+        , _rbuf(0)
+        , _rbuflen(0)
+        , _wbuf(0)
+        , _wbuflen(0)
         { }
 
         virtual void onBeginRead(char* buffer, size_t n, bool& eof) = 0;
@@ -303,6 +332,12 @@ class IODevice : public IO, public Selectable
     private:
         bool _eof;
         bool _async;
+        
+    protected:
+        char* _rbuf;
+        size_t _rbuflen;
+        const char* _wbuf;
+        size_t _wbuflen;
 };
 
 //! @internal provide import information for linking DLLs

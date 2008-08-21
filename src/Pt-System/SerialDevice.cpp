@@ -27,7 +27,7 @@ namespace System {
 SerialDevice::SerialDevice()
 : _impl( 0 )
 {
-    _impl = new SerialDeviceImpl();
+    _impl = new SerialDeviceImpl(*this);
     _impl->setParent(*this);
 }
 
@@ -35,7 +35,7 @@ SerialDevice::SerialDevice()
 SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode, bool isAsync)
 : _impl( 0 )
 {
-    _impl = new SerialDeviceImpl();
+    _impl = new SerialDeviceImpl(*this);
     _impl->setParent(*this);
     this->open( file, mode, isAsync );
 }

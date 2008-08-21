@@ -93,6 +93,12 @@ void Selector::onDisabled(Selectable& s)
 }
 
 
+void Selector::onState(Selectable& s)
+{
+    _impl->setState(s);
+}
+
+
 void Selector::onAdd(Timer& timer)
 {
     _timers.push_back(&timer);

@@ -45,18 +45,9 @@ SelectorImpl::SelectorImpl()
         CloseHandle( _wakeEvent );
         throw SystemError("CreateEvent failed", PT_SOURCEINFO);
     }
-
-    _ioEvent2 = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _ioEvent2 == NULL )
-    {
-        CloseHandle( _wakeEvent );
-        CloseHandle( _ioEvent2 );
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
-    }
     
     _handles.add( _wakeEvent, 0 );
     _handles.add( _ioEvent, 0 );
-    _handles.add( _ioEvent2, 0 );
 }
 
 
@@ -86,7 +77,6 @@ SelectorImpl::~SelectorImpl()
     
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
-    CloseHandle( _ioEvent2 );
 }
 
 
@@ -98,7 +88,7 @@ void SelectorImpl::add(Selectable& dev)
 
 void SelectorImpl::remove(Selectable& dev)
 {
-    _actives.erase(&dev);
+    _avail.erase(&dev);
     _dirty.erase(&dev);        
     _handles.remove(dev);
 
@@ -139,6 +129,19 @@ void SelectorImpl::onDisabled(Selectable& s)
 }
 
 
+void SelectorImpl::setState(Selectable& s)
+{
+    if( s.avail() )
+    {
+        _avail.insert(&s);
+    }
+    else
+    {
+        _avail.erase(&s);
+    }
+}
+
+
 bool SelectorImpl::wait( unsigned umsecs )
 {
     // convert unsigned to signed
@@ -155,7 +158,7 @@ bool SelectorImpl::wait( unsigned umsecs )
     std::set<Selectable*>::iterator iter;
     for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
     {
-        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, &_actives);
+        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent);
         if(accept)
         {
             _devices.insert(*iter);
@@ -167,9 +170,9 @@ bool SelectorImpl::wait( unsigned umsecs )
     }
     _dirty.clear();
 
-    if( ! _actives.empty() )
+    if( ! _avail.empty() )
     {
-        _actives.clear();
+        _avail.clear();
         SetEvent(_ioEvent);
     }
     

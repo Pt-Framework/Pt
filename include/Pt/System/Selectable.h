@@ -19,6 +19,13 @@ class Selectable : protected NonCopyable
     public:
         static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
+        enum State
+        {
+            Idle = 0,
+            Busy = 1,
+            Avail = 2
+        };
+        
     public:
         //! @brief Destructor
         virtual ~Selectable()
@@ -65,6 +72,7 @@ class Selectable : protected NonCopyable
             if( this->enabled() )
             {
                 this->setEnabled(false);
+                this->setState(Selectable::Idle);
                 this->onClose();
             }
         }
@@ -82,6 +90,15 @@ class Selectable : protected NonCopyable
         bool enabled() const
         { return _enabled; }
 
+        bool idle() const
+        { return _state == Idle; }
+        
+        bool busy() const
+        { return _state == Busy; }
+        
+        bool avail() const
+        { return _state == Avail; }
+
         virtual SelectableImpl& simpl() = 0;
 
     protected:
@@ -89,6 +106,7 @@ class Selectable : protected NonCopyable
         Selectable()
         : _parent(0)
         , _enabled(false)
+        , _state(Idle)
         { }
 
         //! @brief Sets or unsets the device enabled
@@ -104,6 +122,15 @@ class Selectable : protected NonCopyable
             _enabled = isEnabled;
         }
 
+        void setState(State state)
+        {
+            _state = state;
+            if(_parent)
+            {
+                _parent->onState(*this);
+            }
+        }
+        
         //! @brief Closes the Selector
         virtual void onClose() = 0;
 
@@ -116,6 +143,7 @@ class Selectable : protected NonCopyable
     private:
         SelectorBase* _parent;
         bool _enabled;
+        State _state;
 };
 
 } // namespace System

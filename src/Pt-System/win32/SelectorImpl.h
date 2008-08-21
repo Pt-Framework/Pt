@@ -119,15 +119,16 @@ class SelectorImpl
 
         void onDisabled( Selectable& selectable );
         
+        void setState( Selectable& selectable);
+    
     private:       
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        HANDLE _ioEvent2;
         HandleMap _handles;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _dirty;
-        std::set<Selectable*> _actives;
+        std::set<Selectable*> _avail;
         Application* _app;
 };
 

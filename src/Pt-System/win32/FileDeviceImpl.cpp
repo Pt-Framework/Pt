@@ -29,12 +29,9 @@ namespace Pt {
 
 namespace System {
 
-FileDeviceImpl::FileDeviceImpl()
-: _waitHandle(INVALID_HANDLE_VALUE)
-, _rbuf(0)
-, _rbuflen(0)
-, _wbuf(0)
-, _wbuflen(0)
+FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
+: _device(dev)
+, _waitHandle(INVALID_HANDLE_VALUE)
 {
 #ifndef _WIN32_WCE
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -45,11 +42,9 @@ FileDeviceImpl::FileDeviceImpl()
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
-    _readOv.hEvent  = NULL;
 
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
     _writeOv.hEvent = NULL;
 }
 
@@ -124,39 +119,33 @@ void FileDeviceImpl::attach(SelectorBase& s)
 
 void FileDeviceImpl::detach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle, 0);
+    this->setWaitHandle(_waitHandle);
 }
 
 
 bool FileDeviceImpl::wait(unsigned int msecs)
 {
 #ifndef _WIN32_WCE
-    HANDLE prevHandle = NULL;
-
-    if(_readOv.hEvent != _waitHandle)
+    if( parent().avail() )
     {
-        prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle, 0);
+        this->checkEvent();
+        return true;
     }
 
-    DWORD result = WaitForSingleObject(_waitHandle, msecs);
+    if(_readOv.hEvent == NULL)
+        this->setWaitHandle(_waitHandle);
 
-    if(prevHandle)
-         _readOv.hEvent = prevHandle;
+    DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
     
-    if(result == WAIT_FAILED)
-        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
-    
-    if(result == WAIT_TIMEOUT)
-        return false;
-
     if(result == WAIT_OBJECT_0)
     {
         this->checkEvent();
         return true;
     }
-        
-    throw IOError("Unknown return from WaitForSingleObject", PT_SOURCEINFO);
+
+    if(result != WAIT_TIMEOUT)
+        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
+          
     return false;
 
 #else
@@ -165,77 +154,43 @@ bool FileDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool FileDeviceImpl::setWaitHandle(HANDLE io, std::set<Selectable*>* actives)
+bool FileDeviceImpl::setWaitHandle(HANDLE h)
 {
 #ifndef _WIN32_WCE
 
-    if(_rbuf)
+    HANDLE prevHandle = _readOv.hEvent;
+
+    if( prevHandle != h )
     {
-        if( _readOv.hEvent && HasOverlappedIoCompleted(&_readOv) )
-        {
-            _readOv.hEvent = io;
-            SetEvent(io);
-            return true;
-        }
+        if(_device._rbuf && _readOv.hEvent)
+            HasOverlappedIoCompleted(&_readOv) ? _device.setState(Selectable::Avail) 
+                                               : CancelIo( handle() );
+
+        if(_device._wbuf && _writeOv.hEvent)
+            HasOverlappedIoCompleted(&_writeOv)  ? _device.setState(Selectable::Avail)
+                                                 : CancelIo( handle() );
+
+        _readOv.hEvent = h;
+        _writeOv.hEvent = h;
+    }
+    
+    if( ! prevHandle && _device._rbuf )
+    {
+        bool eof = _device.eof();
+        this->beginRead(_device._rbuf, _device._rbuflen, eof);
+        _device.setEof(eof);
+    }
+
+    if( ! prevHandle && _device._wbuf)
+    {
+        this->beginWrite(_device._wbuf, _device._wbuflen);
+    }
  
-        if(_readOv.hEvent != io)
-        {
-            if(_readOv.hEvent)
-                CancelIo(handle());
-
-            _readOv.hEvent = io;
-        }
-
-        DWORD readBytes = 0;
-        if( FALSE == ReadFile( handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
-        {
-            if( ERROR_HANDLE_EOF == GetLastError() )
-            {
-            }
-            else if( ERROR_IO_PENDING != GetLastError() )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
-        }
-    }
-
-    _readOv.hEvent = io;
-
-    if(_wbuf)
-    {
-        if( _writeOv.hEvent && HasOverlappedIoCompleted(&_writeOv) )
-        {
-            _writeOv.hEvent = io;
-            SetEvent(io);
-            return true;
-        }
-
-        if(_writeOv.hEvent != io)
-        {
-            if(_writeOv.hEvent)
-                CancelIo(handle());
-                
-            _writeOv.hEvent = io;
-        }
-
-        DWORD writtenBytes = 0;
-        if( FALSE == WriteFile(handle(), (void*)_wbuf, _wbuflen, &writtenBytes, &_writeOv) )
-        {
-            DWORD err = GetLastError();
-            if( ERROR_IO_PENDING != err )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
-        }
-    }
-
-    _writeOv.hEvent = io;
-
     return true;
     
 #else
 
-    if(_rbuf || _wbuf)
+    if(_device._rbuf || _device._wbuf)
     {
         SetEvent(h);
     }
@@ -252,15 +207,15 @@ bool FileDeviceImpl::checkEvent()
 
     bool avail = false;
 
-    if( _wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    if( _device._wbuf && HasOverlappedIoCompleted(&_writeOv) )
     {
-        this->parent().outputReady.send( this->parent() );
+        _device.outputReady.send( _device );
         avail = true;
     }
     
-    if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
+    if( _device._rbuf && HasOverlappedIoCompleted(&_readOv) )
     {
-        this->parent().inputReady.send( this->parent() );
+        _device.inputReady.send( _device );
         avail = true;
     }
 
@@ -270,15 +225,15 @@ bool FileDeviceImpl::checkEvent()
 
     bool avail = false;
 
-    if(_wbuf)
+    if(_device._wbuf)
     {
-        this->parent().outputReady.send( this->parent() );
+        _device.outputReady.send( _device );
         avail = true;
     }
     
-    if(_rbuf)
+    if(_device._rbuf)
     {
-        this->parent().inputReady.send( this->parent() );
+        _device.inputReady.send( _device );
         avail = true;
     }
 
@@ -290,40 +245,45 @@ bool FileDeviceImpl::checkEvent()
 
 void FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-    _rbuf = buffer;
-    _rbuflen = n;
-        
-    if(_readOv.hEvent != NULL)
+    if(_readOv.hEvent == NULL)
+        return;
+
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
-        DWORD readBytes = 0;
-        if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+        if( ERROR_HANDLE_EOF == GetLastError() )
         {
-            if( ERROR_HANDLE_EOF == GetLastError() )
-            {
-            }
-            else if( ERROR_IO_PENDING != GetLastError() )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
-            printf("ASYNC READ on file\n");
+            eof = true;
         }
-        else
+        else if( ERROR_BROKEN_PIPE == GetLastError() )
         {
-            printf("IMMEDIATE DATA on file\n");
-            SetEvent(_readOv.hEvent);
+            _device.setState(Selectable::Avail);
+            eof = true;
         }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
+        }
+    }
+    else
+    {
+        _device.setState(Selectable::Avail);
     }
 }
 
     
 size_t FileDeviceImpl::endRead(bool& eof)
 {
-    _rbuf = 0;
-    _rbuflen = 0;
     DWORD readBytes = 0;
 
+    if( _device.eof() )
+    { 
+        eof = true;
+        return 0;
+    }
+    
 #ifndef _WIN32_WCE
-
+   
     if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
     {
         DWORD err = GetLastError();
@@ -331,9 +291,14 @@ size_t FileDeviceImpl::endRead(bool& eof)
         {
             eof = true;
         }
+        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            _device.setState(Selectable::Avail);
+            eof = true;
+        }
         else
         {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError("Could not end read from file handle", PT_SOURCEINFO);
         }
     }
     
@@ -351,9 +316,6 @@ size_t FileDeviceImpl::endRead(bool& eof)
 
 void FileDeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-    _wbuf = buffer;
-    _wbuflen = n;
-
     if(_writeOv.hEvent != NULL)
     {
         DWORD writtenBytes = 0;
@@ -365,23 +327,25 @@ void FileDeviceImpl::beginWrite(const char* buffer, size_t n)
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
         }
+        else
+        {
+            _device.setState(Selectable::Avail);
+        }
     }
 }
 
     
 size_t FileDeviceImpl::endWrite()
 {
-    _wbuf = 0;
-    _wbuflen = 0;
     DWORD writtenBytes = 0;
   
 #ifndef _WIN32_WCE
-    
+ 
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
         throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);
     }
-    
+
 #else
 
     this->write(_wbuf, _wbuflen);
@@ -436,7 +400,7 @@ size_t FileDeviceImpl::size()
     return sz;
 }
 
-
+ 
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
     eof = false;
@@ -444,7 +408,8 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 
     if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
-        if( ERROR_HANDLE_EOF == GetLastError() )
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
         {
             eof = true;
             readBytes = 0;

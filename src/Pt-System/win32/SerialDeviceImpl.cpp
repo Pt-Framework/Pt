@@ -28,12 +28,9 @@ namespace Pt {
 
 namespace System {
 
-SerialDeviceImpl::SerialDeviceImpl()
-: _waitHandle(INVALID_HANDLE_VALUE)
-, _rbuf(0)
-, _rbuflen(0)
-, _wbuf(0)
-, _wbuflen(0)
+SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
+: _device(device)
+, _waitHandle(INVALID_HANDLE_VALUE)
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
@@ -42,11 +39,9 @@ SerialDeviceImpl::SerialDeviceImpl()
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
-    _readOv.hEvent  = NULL;
 
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
     _writeOv.hEvent = NULL;
 }
 
@@ -133,106 +128,66 @@ void SerialDeviceImpl::attach(SelectorBase& s)
 
 void SerialDeviceImpl::detach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle, 0);
+    this->setWaitHandle(_waitHandle);
 }
 
 
 bool SerialDeviceImpl::wait(unsigned int msecs)
 {
-    HANDLE prevHandle = NULL;
-
-    if(_readOv.hEvent != _waitHandle)
+    if( parent().avail() )
     {
-        prevHandle = _readOv.hEvent;
-        this->setWaitHandle(_waitHandle, 0);
+        this->checkEvent();
+        return true;
     }
 
-    DWORD result = WaitForSingleObject(_waitHandle, msecs);
+    if(_readOv.hEvent == NULL)
+        this->setWaitHandle(_waitHandle);
 
-    if(prevHandle)
-         _readOv.hEvent = prevHandle;
+    DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
     
-    if(result == WAIT_FAILED)
-        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
-    
-    if(result == WAIT_TIMEOUT)
-        return false;
-
     if(result == WAIT_OBJECT_0)
     {
         this->checkEvent();
         return true;
     }
-        
-    throw IOError("Unknown return from WaitForSingleObject", PT_SOURCEINFO);
+
+    if(result != WAIT_TIMEOUT)
+        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
+          
     return false;
 }
 
 
-bool SerialDeviceImpl::setWaitHandle(HANDLE h, std::set<Selectable*>* actives)
+bool SerialDeviceImpl::setWaitHandle(HANDLE h)
 {
-    if(_rbuf)
+    HANDLE prevHandle = _readOv.hEvent;
+
+    if( prevHandle != h )
     {
-        if( _readOv.hEvent && HasOverlappedIoCompleted(&_readOv) )
-        {
-            _readOv.hEvent = h;
-            SetEvent(h);
-            return true;
-        }
+        if(_device._rbuf && _readOv.hEvent)
+            HasOverlappedIoCompleted(&_readOv) ? _device.setState(Selectable::Avail) 
+                                               : CancelIo( handle() );
+
+        if(_device._wbuf && _writeOv.hEvent)
+            HasOverlappedIoCompleted(&_writeOv)  ? _device.setState(Selectable::Avail)
+                                                 : CancelIo( handle() );
+
+        _readOv.hEvent = h;
+        _writeOv.hEvent = h;
+    }
+    
+    if( ! prevHandle && _device._rbuf )
+    {
+        bool eof = _device.eof();
+        this->beginRead(_device._rbuf, _device._rbuflen, eof);
+        _device.setEof(eof);
+    }
+
+    if( ! prevHandle && _device._wbuf)
+    {
+        this->beginWrite(_device._wbuf, _device._wbuflen);
+    }
  
-        if(_readOv.hEvent != h)
-        {
-            if(_readOv.hEvent)
-                CancelIo(handle());
-
-            _readOv.hEvent = h;
-        }
-
-        DWORD readBytes = 0;
-        if( FALSE == ReadFile( handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
-        {
-            if( ERROR_HANDLE_EOF == GetLastError() )
-            {
-            }
-            else if( ERROR_IO_PENDING != GetLastError() )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
-        }
-    }
-
-    _readOv.hEvent = h;
-
-    if(_wbuf)
-    {
-        if( _writeOv.hEvent && HasOverlappedIoCompleted(&_writeOv) )
-        {
-            _writeOv.hEvent = h;
-            SetEvent(h);
-            return true;
-        }
-
-        if(_writeOv.hEvent != h)
-        {
-            if(_writeOv.hEvent)
-                CancelIo(handle());
-                
-            _writeOv.hEvent = h;
-        }
-
-        DWORD writtenBytes = 0;
-        if( FALSE == WriteFile(handle(), (void*)_wbuf, _wbuflen, &writtenBytes, &_writeOv) )
-        {
-            DWORD err = GetLastError();
-            if( ERROR_IO_PENDING != err )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
-        }
-    }
-
-    _writeOv.hEvent = h;
-
     return true;
 }
         
@@ -241,15 +196,15 @@ bool SerialDeviceImpl::checkEvent()
 {
     bool avail = false;
 
-    if( _wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    if( _device._wbuf && HasOverlappedIoCompleted(&_writeOv) )
     {
-        this->parent().outputReady.send( this->parent() );
+        _device.outputReady.send( _device );
         avail = true;
     }
     
-    if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
+    if( _device._rbuf && HasOverlappedIoCompleted(&_readOv) )
     {
-        this->parent().inputReady.send( this->parent() );
+        _device.inputReady.send( _device );
         avail = true;
     }
 
@@ -259,31 +214,42 @@ bool SerialDeviceImpl::checkEvent()
 
 void SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-    _rbuf = buffer;
-    _rbuflen = n;
-        
-    if(_readOv.hEvent != NULL)
+    if(_readOv.hEvent == NULL)
+        return;
+
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
-        DWORD readBytes = 0;
-        if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+        if( ERROR_HANDLE_EOF == GetLastError() )
         {
-            if( ERROR_HANDLE_EOF == GetLastError() )
-            {
-            }
-            else if( ERROR_IO_PENDING != GetLastError() )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
+            eof = true;
         }
+        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            _device.setState(Selectable::Avail);
+            eof = true;
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
+        }
+    }
+    else
+    {
+        _device.setState(Selectable::Avail);
     }
 }
 
 
 size_t SerialDeviceImpl::endRead(bool& eof)
 {
-    _rbuf = 0;
-    _rbuflen = 0;
     DWORD readBytes = 0;
+    
+    if( _device.eof() )
+    { 
+        eof = true;
+        return 0;
+    }
 
     if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
     {
@@ -292,9 +258,14 @@ size_t SerialDeviceImpl::endRead(bool& eof)
         {
             eof = true;
         }
+        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            _device.setState(Selectable::Avail);
+            eof = true;
+        }
         else
         {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError("Could not end read from file handle", PT_SOURCEINFO);
         }
     }
 
@@ -306,9 +277,6 @@ size_t SerialDeviceImpl::endRead(bool& eof)
 
 void SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-    _wbuf = buffer;
-    _wbuflen = n;
-
     if(_writeOv.hEvent != NULL)
     {
         DWORD writtenBytes = 0;
@@ -320,70 +288,76 @@ void SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
                 throw IOError("Could not read from file handle", PT_SOURCEINFO);
             }
         }
+        else
+        {
+            _device.setState(Selectable::Avail);
+        }
     }
 }
 
 
 size_t SerialDeviceImpl::endWrite()
-{	
-    _wbuf = 0;
-    _wbuflen = 0;
-	DWORD writtenBytes = 0;
+{
+    DWORD writtenBytes = 0;
     
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
         throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);
     }
 
-	_writeOv.Offset += writtenBytes;
-	return writtenBytes;
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
 }
 
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
-    DWORD length;
+    eof = false;
+    DWORD readBytes = 0;
 
-    if( ReadFile( handle(), buffer, count, &length, &_readOv ) )
-        return length;
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }
+        else if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
+        {
+            readBytes = 0;
+        }
+    }
 
-    if( ERROR_HANDLE_EOF == GetLastError() )
-    {
-        eof = true;
-        length = 0;
-    }
-    else if( ERROR_IO_PENDING == GetLastError() )
-    {
-        if( S_OK != GetOverlappedResult(handle(), &_readOv, &length, FALSE) )
-            throw IOError("Read port failed" , PT_SOURCEINFO);
-    }
-    else
-    {
-        throw IOError("Read port failed" , PT_SOURCEINFO);
-    }
-
-    return length;
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
 }
 
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
-    DWORD length = 0;
+    DWORD writtenBytes = 0;
 
-    if( WriteFile( handle(),  buffer,  count, &length, &_writeOv ) )
-        return length;
-
-    if( ERROR_IO_PENDING == GetLastError() )
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, NULL) )
     {
-        if( S_OK != GetOverlappedResult(handle(), &_writeOv, &length, FALSE) )
+        if( ERROR_IO_PENDING != GetLastError() )
+        {
             throw IOError("Could not write to file handle", PT_SOURCEINFO);
-    }
-    else
-    {
-        throw IOError("Could not write to file handle", PT_SOURCEINFO);
+        }
+        if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
+        {
+            writtenBytes = 0;
+        }
     }
 
-    return length;
+    _readOv.Offset += writtenBytes;
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
 }
 
 

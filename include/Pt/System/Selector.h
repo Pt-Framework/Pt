@@ -154,6 +154,8 @@ namespace System {
 
             virtual void onDisabled(Selectable&) = 0;
 
+            virtual void onState(Selectable& s) = 0;
+            
             virtual void onAdd(Timer& timer) = 0;
 
             virtual void onRemove( Timer& timer ) = 0;
@@ -186,6 +188,8 @@ namespace System {
             void onEnabled(Selectable&);
 
             void onDisabled(Selectable&);
+            
+            void onState(Selectable&);
             
             void onAdd(Timer& timer);
 

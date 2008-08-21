@@ -36,16 +36,16 @@ void demo2()
     pipe.input().beginRead(buf, 5);
 
     std::cerr << "WAITING 5000 ms" << std::endl;
-    //pipe.output().write("Hello", 5);
+    pipe.output().write("Hello", 5);
     selector.wait(5000);
 
     unsigned n = pipe2.input().endRead();
     std::cerr << "READ: " << n << std::endl;
     std::cerr.write(buffer, 1) << std::endl;
     
-    //n = pipe.input().endRead();
-    //std::cerr << "READ: " << n << std::endl;
-    //std::cerr.write(buf, 1) << std::endl;
+    n = pipe.input().endRead();
+    std::cerr << "READ: " << n << std::endl;
+    std::cerr.write(buf, 5) << std::endl;
 }
 
 void demo1()

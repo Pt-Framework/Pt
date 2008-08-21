@@ -61,6 +61,8 @@ namespace System {
 */
 class PT_SYSTEM_API SerialDevice : public IODevice
 {
+    friend class SerialDeviceImpl;
+
    private:
         class SerialDeviceImpl* _impl;
 

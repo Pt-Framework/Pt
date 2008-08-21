@@ -31,6 +31,8 @@ namespace System {
 
 class PT_SYSTEM_API FileDevice : public IODevice 
 {
+    friend class FileDeviceImpl;
+
     private:
         class FileDeviceImpl* _impl;
 

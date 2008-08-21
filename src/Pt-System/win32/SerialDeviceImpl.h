@@ -33,7 +33,7 @@ namespace System{
 class SerialDeviceImpl : public IODeviceImpl
 {
     public:
-        SerialDeviceImpl();
+        SerialDeviceImpl(SerialDevice& device);
         
         ~SerialDeviceImpl();
 
@@ -47,7 +47,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool wait(unsigned int msecs);
         
-        bool setWaitHandle(HANDLE h, std::set<Selectable*>* actives);
+        bool setWaitHandle(HANDLE h);
         
         bool checkEvent();
         
@@ -95,13 +95,10 @@ class SerialDeviceImpl : public IODeviceImpl
         void readCommState( DCB& commState ) const;
 
     private:
+        SerialDevice& _device;
         HANDLE _waitHandle;
         OVERLAPPED _readOv;
-        char* _rbuf;
-        size_t _rbuflen;
         OVERLAPPED _writeOv;
-        const char* _wbuf;
-        size_t _wbuflen;
         DCB _orgCommState;
 };
 
