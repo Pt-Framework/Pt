@@ -28,8 +28,8 @@ namespace Pt {
 namespace System {
 
 PipeIODevice::PipeIODevice()
+: _impl(*this)
 {
-    _impl.setParent(*this);
 }
 
 

@@ -29,33 +29,26 @@ namespace System {
 
     class IODevice;
 
-	class IODeviceImpl : public SelectableImpl
-	{
-		public:
-			IODeviceImpl();
-			
+    class IODeviceImpl : public SelectableImpl
+    {
+        public:
+            IODeviceImpl();
+
             virtual ~IODeviceImpl();
-            
-            void setParent(IODevice& dev)
-            { _dev = &dev; }
-            
-            IODevice& parent()
-            { return *_dev; }
 
             void setHandle(HANDLE h);
 
-			HANDLE deviceHandle() const
+            HANDLE deviceHandle() const
             { return _handle; }	
 
-			HANDLE handle() const
+            HANDLE handle() const
             { return _handle; }	
-			
-			virtual void close();
-			
-		private:
+
+            virtual void close();
+
+        private:
             HANDLE _handle;
-            IODevice* _dev;
-	};
+    };
 
 } //namespace System
 

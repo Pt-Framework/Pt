@@ -110,6 +110,7 @@ void SelectorImpl::remove(Selectable& s)
         _devices.erase(it);
     }
 
+    // FIXME: pure virtual !!!
     s.simpl().exitSelect(_rfds, _wfds, _efds);
 }
 

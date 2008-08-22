@@ -29,13 +29,9 @@ namespace Pt{
 
 namespace System{
 
-IODeviceImpl::IODeviceImpl()
-: _dev(0)
+IODeviceImpl::IODeviceImpl(IODevice& device)
+: _device(device)
 , _fd(-1)
-, _rbuf(0)
-, _rbuflen(0)
-, _wbuf(0)
-, _wbuflen(0)
 { }
 
 
@@ -136,16 +132,12 @@ bool IODeviceImpl::wait(unsigned int msecs)
 
 void IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
-    _rbuf = buffer;
-    _rbuflen = n;
 }
 
 
 size_t IODeviceImpl::endRead(bool& eof)
 {
-    size_t n = this->read( _rbuf, _rbuflen, eof );
-    _rbuf = 0;
-    _rbuflen = 0;
+    size_t n = this->read( _device._rbuf, _device._rbuflen, eof );
     return n;
 }
 
@@ -178,16 +170,12 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 void IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-    _wbuf = buffer;
-    _wbuflen = n;
 }
 
 
 size_t IODeviceImpl::endWrite()
 {
-    size_t n = this->write( _wbuf, _wbuflen );
-    _wbuf = 0;
-    _wbuflen = 0;
+    size_t n = this->write( _device._wbuf, _device._wbuflen );
     return n;
 }
 
@@ -228,9 +216,9 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     if( this->fd() > 0)
     {
-        if(_rbuf)
+        if(_device._rbuf)
             FD_SET(this->fd(), &rfds);
-        if(_wbuf)
+        if(_device._wbuf)
             FD_SET(this->fd(), &wfds);
     }
 
@@ -258,19 +246,19 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
     if ( FD_ISSET(this->fd(), &efds) )
     {
-        _dev->errorOccured(*_dev);
+        _device.errorOccured(_device);
         ++avail;
     }
 
-    if( _wbuf && FD_ISSET(this->fd(), &wfds) )
+    if( _device._wbuf && FD_ISSET(this->fd(), &wfds) )
     {
-        _dev->outputReady(*_dev);
+        _device.outputReady(_device);
         ++avail;
     }
 
-    if( _rbuf && FD_ISSET(this->fd(), &rfds) )
+    if( _device._rbuf && FD_ISSET(this->fd(), &rfds) )
     {
-        _dev->inputReady(*_dev);
+        _device.inputReady(_device);
         ++avail;
     }
 

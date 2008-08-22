@@ -28,7 +28,6 @@ namespace System {
 FileDevice::FileDevice()
 {
     _impl = new FileDeviceImpl(*this);
-    _impl->setParent(*this);
 }
 
 
@@ -36,7 +35,6 @@ FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, bool isA
 : _mode(mode)
 {
     _impl = new FileDeviceImpl(*this);
-    _impl->setParent(*this);
 
     this->open( path, mode, isAsync);
 }

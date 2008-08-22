@@ -26,13 +26,17 @@
 #include <errno.h>
 
 namespace Pt{
+
 namespace System{
 
-FileDeviceImpl::FileDeviceImpl()
+FileDeviceImpl::FileDeviceImpl(FileDevice& device)
+: IODeviceImpl(device)
 { }
+
 
 FileDeviceImpl::~FileDeviceImpl()
 { }
+
 
 void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool isAsync )
 {

@@ -54,6 +54,9 @@ class SelectorImpl
 
         void onDisabled(Selectable& s);
 
+        void setState(Selectable& s)
+        {}
+
     private:
         int _wakePipe[2];
         fd_set _rfds;

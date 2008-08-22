@@ -28,7 +28,6 @@ SerialDevice::SerialDevice()
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl(*this);
-    _impl->setParent(*this);
 }
 
 
@@ -36,7 +35,6 @@ SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mod
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl(*this);
-    _impl->setParent(*this);
     this->open( file, mode, isAsync );
 }
 

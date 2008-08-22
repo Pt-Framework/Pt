@@ -67,6 +67,8 @@ struct IO
 */
 class IODevice : public IO, public Selectable
 {
+    friend class IODeviceImpl;
+
     public:
         typedef std::char_traits<char>::pos_type pos_type;
         typedef std::char_traits<char>::off_type off_type;
@@ -83,7 +85,7 @@ class IODevice : public IO, public Selectable
 
             _rbuf = buffer;
             _rbuflen = n;
-            
+
             this->setState(Selectable::Busy); //FIXME pass _state to onBeginRead()
             this->onBeginRead(buffer, n, _eof);
         }

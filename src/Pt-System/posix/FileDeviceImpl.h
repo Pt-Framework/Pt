@@ -25,6 +25,7 @@
 #include "IODeviceImpl.h"
 
 namespace Pt {
+
 namespace System {
 
 class FileDeviceImpl : public IODeviceImpl
@@ -34,7 +35,7 @@ class FileDeviceImpl : public IODeviceImpl
         typedef FileDevice::off_type off_type;
 
     public:
-        FileDeviceImpl();
+        FileDeviceImpl(FileDevice& device);
         ~FileDeviceImpl();
 
         void open(const char* path, std::ios_base::openmode mode, bool isAsync );
@@ -51,4 +52,5 @@ class FileDeviceImpl : public IODeviceImpl
 };
 
 } //namespace System
+
 } //namespace Pt

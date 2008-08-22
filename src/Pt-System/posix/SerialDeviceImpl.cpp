@@ -42,7 +42,8 @@ namespace Pt {
 
 namespace System {
 
-SerialDeviceImpl::SerialDeviceImpl( )
+SerialDeviceImpl::SerialDeviceImpl(IODevice& device)
+: IODeviceImpl(device)
 {
 }
 

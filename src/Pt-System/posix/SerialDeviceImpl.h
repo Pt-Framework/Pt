@@ -35,7 +35,7 @@ namespace System {
 class SerialDeviceImpl : public IODeviceImpl
 {
     public:
-        SerialDeviceImpl( );
+        SerialDeviceImpl(IODevice& device);
 
         ~SerialDeviceImpl();
 

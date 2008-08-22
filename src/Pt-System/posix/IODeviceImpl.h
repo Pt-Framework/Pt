@@ -32,12 +32,9 @@ namespace System {
     class IODeviceImpl : public SelectableImpl
     {
         public:
-            IODeviceImpl();
+            IODeviceImpl(IODevice& device);
 
             virtual ~IODeviceImpl();
-
-            void setParent(IODevice& dev)
-            { _dev = &dev; }
 
             int fd() const
             { return _fd; }
@@ -77,12 +74,8 @@ namespace System {
             {}
 
         protected:
-            IODevice* _dev;
+            IODevice& _device;
             int _fd;
-            char* _rbuf;
-            size_t _rbuflen;
-            const char* _wbuf;
-            size_t _wbuflen;
     };
 
 } //namespace System

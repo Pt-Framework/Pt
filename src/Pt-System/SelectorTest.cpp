@@ -90,7 +90,8 @@
             stream.get(ch);
             std::cerr << "STREAM EOF: " << stream.eof() << std::endl;
 
-            exit(0);
+            std::cerr << "\nOK\n\n";;
+            exit(1);
         }
 
         void WaitTimer()
