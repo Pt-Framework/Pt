@@ -126,7 +126,7 @@ void FileDeviceImpl::detach(SelectorBase& s)
 bool FileDeviceImpl::wait(unsigned int msecs)
 {
 #ifndef _WIN32_WCE
-    if( parent().avail() )
+    if( _device.avail() )
     {
         this->checkEvent();
         return true;
@@ -304,7 +304,7 @@ size_t FileDeviceImpl::endRead(bool& eof)
     
 #else
 
-    this->read(_rbuf, _rbuflen, eof);
+    this->read(_device._rbuf, _device._rbuflen, eof);
 
 #endif
 
@@ -348,7 +348,7 @@ size_t FileDeviceImpl::endWrite()
 
 #else
 
-    this->write(_wbuf, _wbuflen);
+    this->write(_device._wbuf, _device._wbuflen);
 
 #endif
 

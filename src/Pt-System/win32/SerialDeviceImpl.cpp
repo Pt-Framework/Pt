@@ -134,7 +134,7 @@ void SerialDeviceImpl::detach(SelectorBase& s)
 
 bool SerialDeviceImpl::wait(unsigned int msecs)
 {
-    if( parent().avail() )
+    if( _device.avail() )
     {
         this->checkEvent();
         return true;

@@ -33,8 +33,6 @@ namespace System {
 PipeIODevice::PipeIODevice()
 : _waitHandle(INVALID_HANDLE_VALUE)
 {
-    IODeviceImpl::setParent(*this);
-
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
         throw SystemError("CreateEvent failed", PT_SOURCEINFO);
