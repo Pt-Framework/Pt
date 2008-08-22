@@ -31,10 +31,6 @@ PipeIODevice::PipeIODevice(Mode mode)
 : _mode(mode)
 , _msgSize(0)
 , _bufferSize(0)
-, _rbuf(0)
-, _rbuflen(0)
-, _wbuf(0)
-, _wbuflen(0)
 {
     IODeviceImpl::setParent(*this);
     _internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -135,9 +131,6 @@ void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
-
-    _rbuf = buffer;
-    _rbuflen = n;
 		
     if(_bufferSize)
     {
@@ -175,9 +168,6 @@ size_t PipeIODevice::onEndRead(bool& eof)
     std::copy(beginData, endData, _buffer.begin());
 
     _bufferSize = (readBytes - bytesToCopy);
-	
-    _rbuf = 0;
-    _rbuflen = 0;
     return bytesToCopy;
 }
 
@@ -188,9 +178,6 @@ void PipeIODevice::onBeginWrite(const char* buffer, size_t n)
     {
         throw IOError("Could not write on a read only pipe", PT_SOURCEINFO);
     }
-
-    _wbuf = buffer;
-    _wbuflen = n;
 }
 
 
@@ -204,9 +191,6 @@ size_t PipeIODevice::onEndWrite()
         errorMsg << "system error code: " << GetLastError() << std::endl;
         throw IOError("WriteMsgQueue failed, " + errorMsg.str(), PT_SOURCEINFO);
     }
-
-    _wbuf = 0;
-    _wbuflen = 0;
 	
     return bytesToWrite;
 }

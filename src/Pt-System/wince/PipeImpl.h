@@ -91,10 +91,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         size_t                      _bufferSize;
         std::vector<char>           _buffer;               
         HANDLE                      _internalBufferWaitHandle;
-        char* _rbuf;
-        size_t _rbuflen;
-        const char* _wbuf;
-        size_t _wbuflen;
 };
 
 class PipeImpl
