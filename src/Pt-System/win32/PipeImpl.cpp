@@ -116,8 +116,13 @@ bool PipeIODevice::setWaitHandle(HANDLE h)
     
     if( ! prevHandle && _rbuf )
     {
-        bool eof = this->eof();
-        this->onBeginRead(_rbuf, _rbuflen, eof);
+        bool eof = false;
+        Selectable::State state = Selectable::Idle;
+        this->onBeginRead(_rbuf, _rbuflen, eof, state);
+        
+        if(state > _wstate)
+            this->setState(_rstate);
+
         this->setEof(eof);
     }
 
@@ -161,31 +166,35 @@ void PipeIODevice::onDetach(SelectorBase& s)
 }
 
 
-void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state)
 {  
     if(_readOv.hEvent == NULL)
+    {
+        state = Selectable::Busy;
         return;
+    }
 
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
     {
-        if( ERROR_HANDLE_EOF == GetLastError() )
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == GetLastError() )
         {
+            state = Selectable::Avail;
             eof = true;
+            return;
         }
-        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        else if( err == ERROR_IO_PENDING )
         {
-            this->setState(Selectable::Avail);
-            eof = true;
+            state = Selectable::Busy;
+            return;
         }
-        else if( ERROR_IO_PENDING != GetLastError() )
-        {
-            throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
-        }
+
+        throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
     }
     else
     {
-        this->setState(Selectable::Avail);
+        state = Selectable::Avail;
     }
 }
 
@@ -207,7 +216,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
         {
             eof = true;
         }
-        else if( ERROR_BROKEN_PIPE == GetLastError() )
+        else if( ERROR_BROKEN_PIPE == err )
         {
             this->setState(Selectable::Avail);
             eof = true;

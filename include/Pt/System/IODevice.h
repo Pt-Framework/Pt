@@ -83,22 +83,22 @@ class IODevice : public IO, public Selectable
             if ( ! async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
+            this->onBeginRead(buffer, n, _eof, _rstate);
+
+            if(_rstate > _wstate)
+                this->setState(_rstate);
+
             _rbuf = buffer;
             _rbuflen = n;
-
-            this->setState(Selectable::Busy); //FIXME
-            this->onBeginRead(buffer, n, _eof);
         }
 
         size_t endRead()
         {
-            if( _wbuf )
-                this->setState(Selectable::Busy);
-            else
-                this->setState(Selectable::Idle);
-            
             size_t n = this->onEndRead(_eof);
-            
+            _rstate = Selectable::Idle;
+
+            this->setState(_wstate);
+
             _rbuf = 0;
             _rbuflen = 0;
             return n;
@@ -287,11 +287,13 @@ class IODevice : public IO, public Selectable
         , _async(false)
         , _rbuf(0)
         , _rbuflen(0)
+        , _rstate(Selectable::Idle)
         , _wbuf(0)
         , _wbuflen(0)
+        , _wstate(Selectable::Idle)
         { }
 
-        virtual void onBeginRead(char* buffer, size_t n, bool& eof) = 0;
+        virtual void onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state) = 0;
 
         virtual size_t onEndRead(bool& eof) = 0;
 
@@ -340,8 +342,10 @@ class IODevice : public IO, public Selectable
     protected:
         char* _rbuf;
         size_t _rbuflen;
+        Selectable::State _rstate;
         const char* _wbuf;
         size_t _wbuflen;
+        Selectable::State _wstate;
 };
 
 //! @internal provide import information for linking DLLs

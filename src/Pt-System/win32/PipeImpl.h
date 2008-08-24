@@ -53,7 +53,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void onDetach(SelectorBase& s);
     
-        void onBeginRead(char* buffer, size_t n, bool& eof);
+        void onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state);
 
         size_t onEndRead(bool& eof);
 
