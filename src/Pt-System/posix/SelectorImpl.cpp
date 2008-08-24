@@ -35,8 +35,7 @@ namespace Pt {
 namespace System {
 
 SelectorImpl::SelectorImpl()
-: _dirty(false)
-, _app(0)
+: _app(0)
 {
     _current = _devices.end();
 

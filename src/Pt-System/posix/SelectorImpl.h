@@ -59,7 +59,6 @@ class SelectorImpl
 
     private:
         int _wakePipe[2];
-        bool _dirty;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

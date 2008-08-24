@@ -25,7 +25,6 @@ void demo2()
 
     pipe2.output().write("ABCDE", 5);
 
-
     selector.add( pipe.input() );
     selector.add( pipe2.input() );
     selector.wait(100);
