@@ -21,9 +21,6 @@
 #include "Pt/System/IOError.h"
 #include <cerrno>
 #include <cassert>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/poll.h>
 
 namespace Pt{
 
@@ -32,11 +29,16 @@ namespace System{
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
 , _fd(-1)
+, _rfds(0)
+, _wfds(0)
+, _efds(0)
 { }
 
 
 IODeviceImpl::~IODeviceImpl()
-{ }
+{ 
+	this->exitSelect();
+}
 
 
 void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
@@ -114,7 +116,13 @@ bool IODeviceImpl::wait(unsigned int msecs)
         timeout = &tv;
     }
 
-    this->initSelect(rfds, wfds, efds);
+    if( this->fd() > 0 )
+    {
+        if(_device._rbuf)
+            FD_SET(this->fd(), &rfds);
+        if(_device._wbuf)
+            FD_SET(this->fd(), &wfds);
+    }
 
     while( true )
     {
@@ -132,11 +140,20 @@ bool IODeviceImpl::wait(unsigned int msecs)
 
 void IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
+	if(_rfds)
+	{
+		FD_SET( this->fd(), _rfds );
+	}
 }
 
 
 size_t IODeviceImpl::endRead(bool& eof)
 {
+	if(_rfds)
+	{
+		FD_CLR( this->fd(), _rfds );
+	}
+
     size_t n = this->read( _device._rbuf, _device._rbuflen, eof );
     return n;
 }
@@ -170,11 +187,20 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 void IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
+	if(_wfds)
+	{
+		FD_SET( this->fd(), _wfds );
+	}
 }
 
 
 size_t IODeviceImpl::endWrite()
 {
+	if(_wfds)
+	{
+		FD_CLR( this->fd(), _wfds );
+	}
+
     size_t n = this->write( _device._wbuf, _device._wbuflen );
     return n;
 }
@@ -194,7 +220,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
         if(errno == EINTR) // signal interrupt
             continue;
 
-        if(errno == EAGAIN) // non-blocking and no data yet
+        if(errno == EAGAIN)
             return 0;
 
         throw IOError("Could not read from file handle", PT_SOURCEINFO);
@@ -214,26 +240,34 @@ void IODeviceImpl::sync() const
 
 int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
+	_rfds = &rfds;
+	_wfds = &wfds;
+	_efds = &efds;
+
     if( this->fd() > 0)
     {
         if(_device._rbuf)
-            FD_SET(this->fd(), &rfds);
+            FD_SET(this->fd(), _rfds);
         if(_device._wbuf)
-            FD_SET(this->fd(), &wfds);
+            FD_SET(this->fd(), _wfds);
     }
 
     return this->fd();
 }
 
 
-void IODeviceImpl::exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+void IODeviceImpl::exitSelect()
 {
-    if( this->fd() > 0)
+    if( _rfds && this->fd() > 0)
     {
-        FD_CLR(this->fd(), &rfds);
-        FD_CLR(this->fd(), &wfds);
-        FD_CLR(this->fd(), &efds);
+        FD_CLR(this->fd(), _rfds);
+        FD_CLR(this->fd(), _wfds);
+        FD_CLR(this->fd(), _efds);
     }
+
+    _rfds = 0;
+    _wfds = 0;
+    _efds = 0;
 }
 
 

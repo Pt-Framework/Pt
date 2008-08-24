@@ -24,6 +24,9 @@
 #include "Pt/System/IODevice.h"
 #include <string>
 #include <iostream>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/select.h>
 
 namespace Pt {
 
@@ -63,7 +66,7 @@ namespace System {
 
             virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual void exitSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual void exitSelect();
 
             virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
@@ -71,11 +74,16 @@ namespace System {
             {}
 
             void detach(SelectorBase& s)
-            {}
+            {
+				this->exitSelect();
+            }
 
         protected:
             IODevice& _device;
             int _fd;
+            fd_set* _rfds;
+            fd_set* _wfds;
+            fd_set* _efds;
     };
 
 } //namespace System

@@ -35,7 +35,8 @@ namespace Pt {
 namespace System {
 
 SelectorImpl::SelectorImpl()
-: _app(0)
+: _dirty(false)
+, _app(0)
 {
     _current = _devices.end();
 
@@ -109,9 +110,6 @@ void SelectorImpl::remove(Selectable& s)
     {
         _devices.erase(it);
     }
-
-    // FIXME: pure virtual !!!
-    s.simpl().exitSelect(_rfds, _wfds, _efds);
 }
 
 
@@ -130,7 +128,7 @@ void SelectorImpl::onEnabled(Selectable& s)
 
 void SelectorImpl::onDisabled(Selectable& s)
 {
-    s.simpl().exitSelect(_rfds, _wfds, _efds);
+    s.simpl().exitSelect();
 }
 
 

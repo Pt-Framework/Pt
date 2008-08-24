@@ -80,27 +80,27 @@ class IODevice : public IO, public Selectable
 
         void beginRead(char* buffer, size_t n)
         {
-            if ( !async() )
+            if ( ! async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
             _rbuf = buffer;
             _rbuflen = n;
 
-            this->setState(Selectable::Busy); //FIXME pass _state to onBeginRead()
+            this->setState(Selectable::Busy); //FIXME
             this->onBeginRead(buffer, n, _eof);
         }
 
         size_t endRead()
         {
-            _rbuf = 0;
-            _rbuflen = 0;
-            
             if( _wbuf )
                 this->setState(Selectable::Busy);
             else
                 this->setState(Selectable::Idle);
             
             size_t n = this->onEndRead(_eof);
+            
+            _rbuf = 0;
+            _rbuflen = 0;
             return n;
         }
 
@@ -141,16 +141,18 @@ class IODevice : public IO, public Selectable
         }
 
         size_t endWrite()
-        {
-            _wbuf = 0;
-            _wbuflen = 0;
-            
+        {   
             if( _rbuf )
                 this->setState(Selectable::Busy);
             else
                 this->setState(Selectable::Idle);
             
-            return onEndWrite();
+            size_t n =  onEndWrite();
+            
+            _wbuf = 0;
+            _wbuflen = 0;
+            
+            return n;
         }
 
         //! @brief Write data to I/O device
