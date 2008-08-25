@@ -83,24 +83,32 @@ class IODevice : public IO, public Selectable
             if ( ! async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            this->onBeginRead(buffer, n, _eof, _rstate);
+            size_t r = this->onBeginRead(buffer, n, _eof);
 
-            if(_rstate > _wstate)
-                this->setState(_rstate);
+            if(r > 0 || _eof || _wavail)
+                this->setState(Selectable::Avail);
+            else
+                this->setState(Selectable::Busy);
 
             _rbuf = buffer;
             _rbuflen = n;
+            _ravail = r;
         }
 
         size_t endRead()
         {
             size_t n = this->onEndRead(_eof);
-            _rstate = Selectable::Idle;
-
-            this->setState(_wstate);
+            
+            if(_wavail > 0)
+                this->setState(Selectable::Avail);
+            else if(_wbuf)
+                this->setState(Selectable::Busy);
+            else
+                this->setState(Selectable::Idle);
 
             _rbuf = 0;
             _rbuflen = 0;
+            _ravail = 0;
             return n;
         }
 
@@ -133,25 +141,32 @@ class IODevice : public IO, public Selectable
             if ( ! async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
             
+            size_t r = this->onBeginWrite(buffer, n);
+            
+            if(r > 0 || _ravail)
+                this->setState(Selectable::Avail);
+            else
+                this->setState(Selectable::Busy);
+            
             _wbuf = buffer;
             _wbuflen = n;
-
-            this->setState(Selectable::Busy);
-            this->onBeginWrite(buffer, n);
+            _wavail = r;
         }
 
         size_t endWrite()
         {   
-            if( _rbuf )
+            size_t n =  onEndWrite();
+            
+            if(_ravail > 0 || (_rbuf && _eof) )
+                this->setState(Selectable::Avail);
+            else if(_rbuf)
                 this->setState(Selectable::Busy);
             else
                 this->setState(Selectable::Idle);
-            
-            size_t n =  onEndWrite();
-            
+
             _wbuf = 0;
             _wbuflen = 0;
-            
+            _wavail = 0;
             return n;
         }
 
@@ -287,20 +302,20 @@ class IODevice : public IO, public Selectable
         , _async(false)
         , _rbuf(0)
         , _rbuflen(0)
-        , _rstate(Selectable::Idle)
+        , _ravail(0)
         , _wbuf(0)
         , _wbuflen(0)
-        , _wstate(Selectable::Idle)
+        , _wavail(0)
         { }
 
-        virtual void onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state) = 0;
+        virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 
         virtual size_t onEndRead(bool& eof) = 0;
 
         //! @brief Read bytes from device
         virtual size_t onRead(char* buffer, size_t count, bool& eof) = 0;
 
-        virtual void onBeginWrite(const char* buffer, size_t n) = 0;
+        virtual size_t onBeginWrite(const char* buffer, size_t n) = 0;
 
         virtual size_t onEndWrite() = 0;
 
@@ -342,10 +357,10 @@ class IODevice : public IO, public Selectable
     protected:
         char* _rbuf;
         size_t _rbuflen;
-        Selectable::State _rstate;
+        size_t _ravail;
         const char* _wbuf;
         size_t _wbuflen;
-        Selectable::State _wstate;
+        size_t _wavail;
 };
 
 //! @internal provide import information for linking DLLs

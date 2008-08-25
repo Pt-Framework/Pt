@@ -47,15 +47,15 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool wait(unsigned int msecs);
         
-        bool setWaitHandle(HANDLE h);
+        bool setWaitHandle(HANDLE h, bool& active);
         
         bool checkEvent();
         
-        void beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(char* buffer, size_t n, bool& eof);
 
-		size_t endRead(bool& eof);
+        size_t endRead(bool& eof);
 
-        void beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(const char* buffer, size_t n);
 
         size_t endWrite();		
        

@@ -119,7 +119,7 @@ class SelectorImpl
 
         void onDisabled( Selectable& selectable );
         
-        void setState( Selectable& selectable);
+        void onStateChanged( Selectable& selectable);
     
     private:       
         HANDLE _wakeEvent;

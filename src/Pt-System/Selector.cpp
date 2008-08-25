@@ -93,9 +93,9 @@ void Selector::onDisabled(Selectable& s)
 }
 
 
-void Selector::onState(Selectable& s)
+void Selector::onStateChanged(Selectable& s)
 {
-    _impl->setState(s);
+    _impl->onStateChanged(s);
 }
 
 

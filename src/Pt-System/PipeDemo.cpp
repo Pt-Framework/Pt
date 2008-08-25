@@ -3,7 +3,7 @@
 #include <Pt/System/Selector.h>
 #include <iostream>
 
-#include <Pt/System/FileDevice.h>
+//#include <Pt/System/FileDevice.h>
 
 void onInput(Pt::System::IODevice& r)
 {

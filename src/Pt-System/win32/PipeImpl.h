@@ -40,7 +40,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual bool checkEvent();
         
-        virtual bool setWaitHandle(HANDLE h);        
+        virtual bool setWaitHandle(HANDLE h, bool& avail);        
 
         virtual IODeviceImpl& ioimpl()
         { return *this; }
@@ -53,11 +53,11 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void onDetach(SelectorBase& s);
     
-        void onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state);
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
 
-        void onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(const char* buffer, size_t n);
 
         size_t onEndWrite();
 

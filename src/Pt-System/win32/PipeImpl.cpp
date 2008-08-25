@@ -79,7 +79,15 @@ bool PipeIODevice::onWait(unsigned int msecs)
     }
 
     if(_readOv.hEvent == NULL)
-        this->setWaitHandle(_waitHandle);
+    {
+        bool active = false;
+        this->setWaitHandle(_waitHandle, active);
+        if( active )
+        {
+            this->checkEvent();
+            return true;
+        }
+    }
 
     DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
     
@@ -96,18 +104,18 @@ bool PipeIODevice::onWait(unsigned int msecs)
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h)
+bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 {
     HANDLE prevHandle = _readOv.hEvent;
 
     if( prevHandle != h )
     {
         if(_rbuf && _readOv.hEvent)
-            HasOverlappedIoCompleted(&_readOv) ? this->setState(Selectable::Avail) 
+            HasOverlappedIoCompleted(&_readOv) ? avail = true
                                                : CancelIo( handle() );
 
         if(_wbuf && _writeOv.hEvent)
-            HasOverlappedIoCompleted(&_writeOv)  ? this->setState(Selectable::Avail)
+            HasOverlappedIoCompleted(&_writeOv)  ? avail = true
                                                  : CancelIo( handle() );
 
         _readOv.hEvent = h;
@@ -117,18 +125,18 @@ bool PipeIODevice::setWaitHandle(HANDLE h)
     if( ! prevHandle && _rbuf )
     {
         bool eof = false;
-        Selectable::State state = Selectable::Idle;
-        this->onBeginRead(_rbuf, _rbuflen, eof, state);
-        
-        if(state > _wstate)
-            this->setState(_rstate);
+        size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
+        if(eof || n > 0)
+            avail = true;
 
         this->setEof(eof);
     }
 
     if( ! prevHandle && _wbuf)
     {
-        this->onBeginWrite(_wbuf, _wbuflen);
+        size_t n = this->onBeginWrite(_wbuf, _wbuflen);
+        if(n > 0)
+            avail = true;
     }
  
     return true;
@@ -162,63 +170,54 @@ void PipeIODevice::onAttach(SelectorBase& s)
 
 void PipeIODevice::onDetach(SelectorBase& s)
 {
-    this->setWaitHandle(_waitHandle);
+    bool active = false;
+    this->setWaitHandle(_waitHandle, active);
+    
+    if(active)
+        this->setState(Selectable::Avail);
 }
 
 
-void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof, Selectable::State& state)
+size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {  
     if(_readOv.hEvent == NULL)
-    {
-        state = Selectable::Busy;
-        return;
-    }
+        return 0;
 
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)_rbuf, _rbuflen, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
-        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == GetLastError() )
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
         {
-            state = Selectable::Avail;
             eof = true;
-            return;
+            return 0;
         }
         else if( err == ERROR_IO_PENDING )
         {
-            state = Selectable::Busy;
-            return;
+            return 0;
         }
-
+        
         throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
     }
-    else
-    {
-        state = Selectable::Avail;
-    }
+    
+    return readBytes;
 }
 
 
 size_t PipeIODevice::onEndRead(bool& eof)
 {
-    DWORD readBytes = 0;
-    
     if( this->eof() )
     { 
         eof = true;
         return 0;
     }
 
-    if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
+    DWORD readBytes = 0;
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) )
     {
         DWORD err = GetLastError();
-        if( ERROR_HANDLE_EOF == err )
+        if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
         {
-            eof = true;
-        }
-        else if( ERROR_BROKEN_PIPE == err )
-        {
-            this->setState(Selectable::Avail);
             eof = true;
         }
         else
@@ -233,31 +232,30 @@ size_t PipeIODevice::onEndRead(bool& eof)
 }
 
 
-void PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    if(_writeOv.hEvent != NULL)
+    if(_writeOv.hEvent == NULL)
+        return 0;
+
+    DWORD writtenBytes = 0;
+    if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
     {
-        DWORD writtenBytes = 0;
-        if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
+        DWORD err = GetLastError();
+        if( ERROR_IO_PENDING == err )
         {
-            DWORD err = GetLastError();
-            if( ERROR_IO_PENDING != err )
-            {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
-            }
+            return 0;
         }
-        else
-        {
-            this->setState(Selectable::Avail);
-        }
+        
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
     }
+
+    return writtenBytes;
 }
 
 
 size_t PipeIODevice::onEndWrite()
 {
     DWORD writtenBytes = 0;
-    
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
         throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);

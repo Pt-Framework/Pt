@@ -49,15 +49,15 @@ class FileDeviceImpl  : public IODeviceImpl
  
         virtual bool wait(unsigned int msecs);
         
-        virtual bool setWaitHandle(HANDLE h);
+        virtual bool setWaitHandle(HANDLE h, bool& avail);
         
         bool checkEvent();
         
-        void beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(char* buffer, size_t n, bool& eof);
 
         size_t endRead(bool& eof);
 
-        void beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(const char* buffer, size_t n);
 
         size_t endWrite();		
 

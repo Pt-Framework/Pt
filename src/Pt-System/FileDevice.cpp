@@ -75,9 +75,9 @@ void FileDevice::onClose()
 }
 
 
-void FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(buffer, n, eof);
 }
 
 
@@ -87,9 +87,9 @@ size_t FileDevice::onEndRead(bool& eof)
 }
 
 
-void FileDevice::onBeginWrite(const char* buffer, size_t n)
+size_t FileDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(buffer, n);
 }
 
 

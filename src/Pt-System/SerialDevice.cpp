@@ -66,9 +66,9 @@ void SerialDevice::open( const std::string& file, std::ios_base::openmode mode, 
 }
 
 
-void SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(buffer, n, eof);
 }
 
 
@@ -78,9 +78,9 @@ size_t SerialDevice::onEndRead(bool& eof)
 }
 
 
-void SerialDevice::onBeginWrite(const char* buffer, size_t n)
+size_t SerialDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(buffer, n);
 }
 
 

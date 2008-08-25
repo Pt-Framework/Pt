@@ -129,7 +129,7 @@ void SelectorImpl::onDisabled(Selectable& s)
 }
 
 
-void SelectorImpl::setState(Selectable& s)
+void SelectorImpl::onStateChanged(Selectable& s)
 {
     if( s.avail() )
     {
@@ -158,9 +158,13 @@ bool SelectorImpl::wait( unsigned umsecs )
     std::set<Selectable*>::iterator iter;
     for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
     {
-        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent);
+        bool ready = false;
+        bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, ready);
         if(accept)
         {
+            if(ready) 
+                _avail.insert(*iter);
+
             _devices.insert(*iter);
         }
         else
@@ -172,9 +176,9 @@ bool SelectorImpl::wait( unsigned umsecs )
 
     if( ! _avail.empty() )
     {
-        _avail.clear();
         SetEvent(_ioEvent);
     }
+    _avail.clear();
     
     DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
     if(result == WAIT_FAILED)

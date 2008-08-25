@@ -128,7 +128,7 @@ class Selectable : protected NonCopyable
             if(_parent)
             {
                 /// TODO: rename changedState
-                _parent->onState(*this);
+                _parent->onStateChanged(*this);
             }
         }
         
