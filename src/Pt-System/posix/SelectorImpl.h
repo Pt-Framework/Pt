@@ -24,7 +24,6 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/Clock.h>
 #include <sys/select.h>
-#include <vector>
 #include <set>
 
 namespace Pt {
