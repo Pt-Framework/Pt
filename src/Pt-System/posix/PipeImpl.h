@@ -44,13 +44,13 @@ class PipeIODevice : public Pt::System::IODevice
 
         bool onWait(unsigned int msecs);
 
-        void onBeginRead(char* buffer, size_t n, bool& eof);
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
 
         size_t onRead(char* buffer, size_t count, bool& eof);
 
-        void onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(const char* buffer, size_t n);
 
         size_t onEndWrite();
 

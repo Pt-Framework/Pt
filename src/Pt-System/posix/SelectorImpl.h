@@ -54,7 +54,7 @@ class SelectorImpl
 
         void onDisabled(Selectable& s);
 
-        void setState(Selectable& s)
+        void onStateChanged(Selectable& s)
         {}
 
     private:

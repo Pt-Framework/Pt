@@ -50,13 +50,13 @@ namespace System {
 
             virtual bool wait(unsigned int msecs);
 
-            virtual void beginRead(char* buffer, size_t n, bool& eof);
+            virtual size_t beginRead(char* buffer, size_t n, bool& eof);
 
             virtual size_t endRead( bool& eof);
 
             virtual size_t read( char* buffer, size_t count, bool& eof );
 
-            virtual void beginWrite(const char* buffer, size_t n);
+            virtual size_t beginWrite(const char* buffer, size_t n);
 
             virtual size_t endWrite();
 

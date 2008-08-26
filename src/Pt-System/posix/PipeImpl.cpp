@@ -58,9 +58,9 @@ bool PipeIODevice::onWait(unsigned int msecs)
 }
 
 
-void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    _impl.beginRead(buffer, n, eof);
+    return _impl.beginRead(buffer, n, eof);
 }
 
 
@@ -76,9 +76,9 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-void PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    _impl.beginWrite(buffer, n);
+    return _impl.beginWrite(buffer, n);
 }
 
 

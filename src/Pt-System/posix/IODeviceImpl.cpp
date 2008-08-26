@@ -138,12 +138,13 @@ bool IODeviceImpl::wait(unsigned int msecs)
 }
 
 
-void IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
 	if(_rfds)
 	{
 		FD_SET( this->fd(), _rfds );
 	}
+    return 0;
 }
 
 
@@ -185,12 +186,14 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-void IODeviceImpl::beginWrite(const char* buffer, size_t n)
+size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
 	if(_wfds)
 	{
 		FD_SET( this->fd(), _wfds );
 	}
+
+	return 0;
 }
 
 
