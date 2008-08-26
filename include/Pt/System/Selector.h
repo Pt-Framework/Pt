@@ -151,13 +151,13 @@ namespace System {
             virtual void onRemove(Selectable&) = 0;
 
             virtual void onChanged(Selectable& s) = 0;
-            
+
             virtual void onAdd(Timer& timer) = 0;
 
             virtual void onRemove( Timer& timer ) = 0;
 
             virtual void onChanged( Timer& timer ) = 0;
-            
+
             virtual bool onWait(unsigned int msecs) = 0;
 
             virtual void onWake() = 0;
@@ -178,9 +178,9 @@ namespace System {
             void onAdd( Selectable& dev );
 
             void onRemove( Selectable& dev );
-            
+
             void onChanged(Selectable&);
-            
+
             void onAdd(Timer& timer);
 
             void onRemove(Timer& timer);

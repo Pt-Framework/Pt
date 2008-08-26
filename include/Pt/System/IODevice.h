@@ -65,7 +65,7 @@ struct IO
     %IODevice, which will send the %Singal inputReady or outputReady of the
     %IODevice that is ready to perform I/O.
 */
-class IODevice : public IO, public Selectable
+class PT_SYSTEM_API IODevice : public IO, public Selectable
 {
     friend class IODeviceImpl;
 
@@ -75,42 +75,11 @@ class IODevice : public IO, public Selectable
 
     public:
         //! @brief Destructor
-        virtual ~IODevice()
-        { }
+        virtual ~IODevice();
 
-        void beginRead(char* buffer, size_t n)
-        {
-            if ( ! async() )
-                throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
+        void beginRead(char* buffer, size_t n);
 
-            size_t r = this->onBeginRead(buffer, n, _eof);
-
-            if(r > 0 || _eof || _wavail)
-                this->setState(Selectable::Avail);
-            else
-                this->setState(Selectable::Busy);
-
-            _rbuf = buffer;
-            _rbuflen = n;
-            _ravail = r;
-        }
-
-        size_t endRead()
-        {
-            size_t n = this->onEndRead(_eof);
-            
-            if(_wavail > 0)
-                this->setState(Selectable::Avail);
-            else if(_wbuf)
-                this->setState(Selectable::Busy);
-            else
-                this->setState(Selectable::Idle);
-
-            _rbuf = 0;
-            _rbuflen = 0;
-            _ravail = 0;
-            return n;
-        }
+        size_t endRead();
 
         //! @brief Read data from I/O device
         /*!
@@ -124,51 +93,11 @@ class IODevice : public IO, public Selectable
             \return number of bytes read, which may be less than requested.
             \throw IOError
          */
-        size_t read(char* buffer, size_t n)
-        {
-            if ( async() )
-            {
-                this->beginRead(buffer, n);
-                this->wait();
-                return endRead();
-            }
+        size_t read(char* buffer, size_t n);
 
-            return this->onRead(buffer, n, _eof);
-        }
+        void beginWrite(const char* buffer, size_t n);
 
-        void beginWrite(const char* buffer, size_t n)
-        {
-            if ( ! async() )
-                throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
-            
-            size_t r = this->onBeginWrite(buffer, n);
-            
-            if(r > 0 || _ravail)
-                this->setState(Selectable::Avail);
-            else
-                this->setState(Selectable::Busy);
-            
-            _wbuf = buffer;
-            _wbuflen = n;
-            _wavail = r;
-        }
-
-        size_t endWrite()
-        {   
-            size_t n =  onEndWrite();
-            
-            if(_ravail > 0 || (_rbuf && _eof) )
-                this->setState(Selectable::Avail);
-            else if(_rbuf)
-                this->setState(Selectable::Busy);
-            else
-                this->setState(Selectable::Idle);
-
-            _wbuf = 0;
-            _wbuflen = 0;
-            _wavail = 0;
-            return n;
-        }
+        size_t endWrite();
 
         //! @brief Write data to I/O device
         /**
@@ -182,17 +111,7 @@ class IODevice : public IO, public Selectable
             \return number of bytes written, which may be less than requested.
             \throw IOError
          */
-        size_t write(const char* buffer, size_t n)
-        {
-            if ( async() )
-            {
-                this->beginWrite(buffer, n);
-                this->wait();
-                return endWrite();
-            }
-
-            return this->onWrite(buffer, n);
-        }
+        size_t write(const char* buffer, size_t n);
 
         //! @brief Returns true if device is seekable
         /**
@@ -200,8 +119,7 @@ class IODevice : public IO, public Selectable
 
             \return true if the device is seekable, false otherwise.
         */
-        bool seekable() const
-        { return onSeekable(); }
+        bool seekable() const;
 
         //! @brief Move the next read position to the given offset
         /**
@@ -213,14 +131,7 @@ class IODevice : public IO, public Selectable
             \return the new abosulte read positing.
             \throw IOError
         */
-        pos_type seek(off_type offset, std::ios::seekdir sd)
-        {
-            off_type ret = this->onSeek(offset, sd);
-            if( ret != off_type(-1) )
-                setEof(false);
-
-            return ret;
-        }
+        pos_type seek(off_type offset, std::ios::seekdir sd);
 
         //! @brief Read data from I/O device without consuming them
         /**
@@ -233,8 +144,7 @@ class IODevice : public IO, public Selectable
             \return number of bytes peek.
             \throw IOError
         */
-        size_t peek(char* buffer, size_t n)
-        { return this->onPeek(buffer, n); }
+        size_t peek(char* buffer, size_t n);
 
         //! @brief Synchronize device
         /**
@@ -242,8 +152,7 @@ class IODevice : public IO, public Selectable
 
             \throw IOError
         */
-        void sync()
-        { return this->onSync(); }
+        void sync();
 
         //! @brief Returns the current I/O position
         /**
@@ -253,8 +162,7 @@ class IODevice : public IO, public Selectable
 
             \throw IOError
         */
-        pos_type position()
-        { return this->seek(0, std::ios::cur); }
+        pos_type position();
 
         //! @brief Returns if the device has reached EOF
         /*!
@@ -262,13 +170,11 @@ class IODevice : public IO, public Selectable
 
             \return true if the I/O device is usable, false otherwise.
         */
-        bool eof() const
-        { return _eof; }
+        bool eof() const;
 
         /** @brief Returns true if the device operates in asynchronous mode
         */
-        bool async() const
-        { return _async; }
+        bool async() const;
 
         /** @brief Notifies about availavle data
 
@@ -297,16 +203,7 @@ class IODevice : public IO, public Selectable
 
     protected:
         //! @brief Default Constructor
-        IODevice()
-        : _eof(false)
-        , _async(false)
-        , _rbuf(0)
-        , _rbuflen(0)
-        , _ravail(0)
-        , _wbuf(0)
-        , _wbuflen(0)
-        , _wavail(0)
-        { }
+        IODevice();
 
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 
@@ -343,17 +240,15 @@ class IODevice : public IO, public Selectable
         { return 0; }
 
         //! @brief Sets or unsets the device to eof
-        void setEof(bool eof)
-        { _eof = eof; }
+        void setEof(bool eof);
 
         //! @brief Sets or unsets the device to eof
-        void setAsync(bool async)
-        { _async = async; }
+        void setAsync(bool async);
 
     private:
         bool _eof;
         bool _async;
-        
+
     protected:
         char* _rbuf;
         size_t _rbuflen;
@@ -361,13 +256,7 @@ class IODevice : public IO, public Selectable
         const char* _wbuf;
         size_t _wbuflen;
         size_t _wavail;
-};
-
-//! @internal provide import information for linking DLLs
-class PT_SYSTEM_API DummyIODevice : public IODevice
-{
-    public:
-      DummyIODevice();
+        void* _reserved;
 };
 
 } // namespace System

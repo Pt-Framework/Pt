@@ -44,18 +44,13 @@ class SelectorImpl
 
         void remove( Selectable& dev );
 
+        void changed(Selectable& s);
+
         bool wait(std::size_t msecs);
 
         void wake();
 
         void setApp(Application* app);
-
-        void onEnabled(Selectable& s);
-
-        void onDisabled(Selectable& s);
-
-        void onStateChanged(Selectable& s)
-        {}
 
     private:
         int _wakePipe[2];

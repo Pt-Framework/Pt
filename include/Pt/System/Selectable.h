@@ -30,14 +30,6 @@ class Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable()
         {
-            /*try
-            {
-                if(_parent)
-                {
-                    _parent->onRemove(*this);
-                }
-            }
-            catch(...) {}*/
         }
 
         void setSelector(SelectorBase* parent)
@@ -72,8 +64,8 @@ class Selectable : protected NonCopyable
             if( this->enabled() )
             {
                 this->setEnabled(false);
-                this->setState(Selectable::Idle);
                 this->onClose();
+                this->setState(Selectable::Idle);
             }
         }
 
@@ -115,9 +107,9 @@ class Selectable : protected NonCopyable
             if(_parent)
             {
                 if(isEnabled)
-                    _parent->onAdd(*this); /// onEnabled
+                    _parent->onAdd(*this);
                 else
-                    _parent->onRemove(*this); /// onDisabled
+                    _parent->onRemove(*this);
             }
             _enabled = isEnabled;
         }
@@ -127,7 +119,6 @@ class Selectable : protected NonCopyable
             _state = state;
             if(_parent)
             {
-                /// TODO: rename changedState
                 _parent->onChanged(*this);
             }
         }

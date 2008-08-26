@@ -114,23 +114,15 @@ void SelectorImpl::remove(Selectable& s)
 }
 
 
+void SelectorImpl::changed(Selectable& s)
+{
+}
+
+
 void SelectorImpl::setApp(Application* app)
 {
     _app = app;
     FD_SET(_app->impl().signalFd(), &_rfds);
-}
-
-
-void SelectorImpl::onEnabled(Selectable& s)
-{
-    s.simpl().initSelect(_rfds, _wfds, _efds);
-    _devices.insert( &s );
-}
-
-
-void SelectorImpl::onDisabled(Selectable& s)
-{
-    s.simpl().exitSelect();
 }
 
 
