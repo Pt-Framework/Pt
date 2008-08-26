@@ -52,6 +52,7 @@ namespace System {
                 this->setp(0, 0);
 
                 connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+                connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
             }
 
             //! @brief Default constructor.
@@ -105,6 +106,39 @@ namespace System {
                 this->setg( this->eback(), // start of get area
                             this->gptr(), // gptr position
                             this->egptr() + readSize ); // end of get area
+            }
+
+            void beginWrite()
+            {
+                // if in writing mode pptr is valid, write out the buffer
+                if( this->pptr() )
+                {
+                    // write buffer to device
+                    const size_t avail = this->pptr() - this->pbase();
+                    _ioDevice->beginWrite(_buffer, avail);
+                }
+            }
+
+            void onWrite(IODevice& dev)
+            {
+                size_t leftover = 0;
+
+                // if in writing mode pptr is valid, flush out the buffer
+                if( this->pptr() )
+                {
+                    const size_t avail = this->pptr() - this->pbase();
+                    size_t written = dev.endWrite();
+
+                    // setup put buffer area
+                    leftover = avail - written;
+                    if(leftover != 0) 
+                    {
+                        traits_type::move(_buffer, _buffer + written, leftover);
+                    }
+                }
+
+                // this will also enter writing mode if pptr is not valid
+                this->setp(_buffer + leftover, _buffer + _bufferSize);
             }
 
             void init(IODevice& ioDevice)
@@ -177,8 +211,6 @@ namespace System {
     inline IOBuffer::int_type
     IOBuffer::underflow()
     {
-        std::cerr << "UNDERFLOW" << std::endl;
-
         // return EOF if in writing mode or no device set
         if( !_ioDevice || this->pptr() )
             return traits_type::eof();
