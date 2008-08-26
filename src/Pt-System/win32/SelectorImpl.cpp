@@ -80,19 +80,19 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::add(Selectable& dev)
+void SelectorImpl::add(Selectable& s)
 {
-    _dirty.insert(&dev);
+    _dirty.insert(&s);
 }
 
 
-void SelectorImpl::remove(Selectable& dev)
+void SelectorImpl::remove(Selectable& s)
 {
-    _avail.erase(&dev);
-    _dirty.erase(&dev);        
-    _handles.remove(dev);
+    _avail.erase(&s);
+    _dirty.erase(&s);        
+    _handles.remove(s);
 
-    std::set<Selectable*>::iterator iter = _devices.find( &dev );
+    std::set<Selectable*>::iterator iter = _devices.find( &s );
     if( iter == _devices.end() )
         return;
     
@@ -111,25 +111,7 @@ void SelectorImpl::remove(Selectable& dev)
 }
 
 
-void SelectorImpl::wake()
-{
-    SetEvent( _wakeEvent );
-}
-
-
-void SelectorImpl::onEnabled(Selectable& s)
-{
-
-}
-
-
-void SelectorImpl::onDisabled(Selectable& s)
-{
-
-}
-
-
-void SelectorImpl::onStateChanged(Selectable& s)
+void SelectorImpl::changed(Selectable& s)
 {
     if( s.avail() )
     {
@@ -139,6 +121,12 @@ void SelectorImpl::onStateChanged(Selectable& s)
     {
         _avail.erase(&s);
     }
+}
+
+
+void SelectorImpl::wake()
+{
+    SetEvent( _wakeEvent );
 }
 
 

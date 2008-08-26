@@ -150,19 +150,13 @@ namespace System {
 
             virtual void onRemove(Selectable&) = 0;
 
-            virtual void onEnabled(Selectable&) = 0;
-
-            virtual void onDisabled(Selectable&) = 0;
-
-            virtual void onStateChanged(Selectable& s) = 0;
+            virtual void onChanged(Selectable& s) = 0;
             
             virtual void onAdd(Timer& timer) = 0;
 
             virtual void onRemove( Timer& timer ) = 0;
 
-            virtual void onStarted( Timer& timer ) = 0;
-
-            virtual void onStopped( Timer& timer ) = 0;
+            virtual void onChanged( Timer& timer ) = 0;
             
             virtual bool onWait(unsigned int msecs) = 0;
 
@@ -185,19 +179,13 @@ namespace System {
 
             void onRemove( Selectable& dev );
             
-            void onEnabled(Selectable&);
-
-            void onDisabled(Selectable&);
-            
-            void onStateChanged(Selectable&);
+            void onChanged(Selectable&);
             
             void onAdd(Timer& timer);
 
             void onRemove(Timer& timer);
 
-            void onStarted(Timer& timer);
-
-            void onStopped(Timer& timer);
+            void onChanged(Timer& timer);
 
             bool onWait(unsigned int msecs = WaitInfinite);
 

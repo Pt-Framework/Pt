@@ -102,9 +102,11 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void add( Selectable& dev );
+        void add( Selectable& s );
 
-        void remove( Selectable& dev );
+        void remove( Selectable& s );
+
+        void changed(Selectable& s);
 
         bool wait(unsigned int msecs);
 
@@ -115,12 +117,6 @@ class SelectorImpl
             _app = app;
         }
 
-        void onEnabled( Selectable& selectable );
-
-        void onDisabled( Selectable& selectable );
-        
-        void onStateChanged( Selectable& selectable);
-    
     private:       
         HANDLE _wakeEvent;
         HANDLE _ioEvent;

@@ -81,21 +81,9 @@ void Selector::onRemove( Selectable& selectable )
 }
 
 
-void Selector::onEnabled(Selectable& s)
+void Selector::onChanged(Selectable& s)
 {
-    _impl->onEnabled(s);
-}
-
-
-void Selector::onDisabled(Selectable& s)
-{
-    _impl->onDisabled(s);
-}
-
-
-void Selector::onStateChanged(Selectable& s)
-{
-    _impl->onStateChanged(s);
+    _impl->changed(s);
 }
 
 
@@ -111,13 +99,7 @@ void Selector::onRemove( Timer& timer )
 }
 
 
-void Selector::onStarted(Timer& timer)
-{
-
-}
-
-
-void Selector::onStopped(Timer& timer)
+void Selector::onChanged(Timer& timer)
 {
 
 }
