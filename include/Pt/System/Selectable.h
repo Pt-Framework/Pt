@@ -25,19 +25,19 @@ class Selectable : protected NonCopyable
             Busy = 1,
             Avail = 2
         };
-        
+
     public:
         //! @brief Destructor
         virtual ~Selectable()
         {
-            try
+            /*try
             {
                 if(_parent)
                 {
                     _parent->onRemove(*this);
                 }
             }
-            catch(...) {}
+            catch(...) {}*/
         }
 
         void setSelector(SelectorBase* parent)
@@ -92,10 +92,10 @@ class Selectable : protected NonCopyable
 
         bool idle() const
         { return _state == Idle; }
-        
+
         bool busy() const
         { return _state == Busy; }
-        
+
         bool avail() const
         { return _state == Avail; }
 
@@ -115,9 +115,9 @@ class Selectable : protected NonCopyable
             if(_parent)
             {
                 if(isEnabled)
-                    _parent->onEnabled(*this);
+                    _parent->onAdd(*this); /// onEnabled
                 else
-                    _parent->onDisabled(*this);
+                    _parent->onRemove(*this); /// onDisabled
             }
             _enabled = isEnabled;
         }
@@ -131,7 +131,7 @@ class Selectable : protected NonCopyable
                 _parent->onStateChanged(*this);
             }
         }
-        
+
         //! @brief Closes the Selector
         virtual void onClose() = 0;
 

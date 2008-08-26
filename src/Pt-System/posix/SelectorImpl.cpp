@@ -97,6 +97,8 @@ void SelectorImpl::remove(Selectable& s)
    if( it == _devices.end() )
         return;
 
+    s.simpl().exitSelect();
+
     if( _current == _devices.end() )
     {
         _devices.erase(it);
@@ -122,6 +124,7 @@ void SelectorImpl::setApp(Application* app)
 void SelectorImpl::onEnabled(Selectable& s)
 {
     s.simpl().initSelect(_rfds, _wfds, _efds);
+    _devices.insert( &s );
 }
 
 
