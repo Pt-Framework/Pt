@@ -14,9 +14,10 @@ namespace System {
 
 class SelectableImpl;
 
-class Selectable : protected NonCopyable
+class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
+        // TODO: use size_t instread of unsigned
         static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
         enum State
@@ -28,49 +29,21 @@ class Selectable : protected NonCopyable
 
     public:
         //! @brief Destructor
-        virtual ~Selectable()
-        {
-        }
+        virtual ~Selectable();
 
-        void setSelector(SelectorBase* parent)
-        {
-            if(_parent)
-            {
-                _parent->onRemove(*this);
-                this->onDetach(*_parent);
-            }
+        void setSelector(SelectorBase* parent);
 
-            if(parent)
-            {
-                parent->onAdd(*this);
-                this->onAttach(*parent);
-            }
+        SelectorBase* selector();
 
-            _parent = parent;
-        }
-
-        SelectorBase* selector()
-        { return _parent; }
-
-        const SelectorBase* selector() const
-        { return _parent; }
+        const SelectorBase* selector() const;
 
         //! @brief Closes the I/O device
         /*!
            Frees any resources associated with this object, like I/O handles.
         */
-        void close()
-        {
-            if( this->enabled() )
-            {
-                this->setEnabled(false);
-                this->onClose();
-                this->setState(Selectable::Idle);
-            }
-        }
+        void close();
 
-        bool wait(unsigned int msecs = WaitInfinite)
-        { return this->onWait(msecs); }
+        bool wait(unsigned int msecs = WaitInfinite);
 
         //! @brief Test if the I/O device object is enabled
         /*!
@@ -79,49 +52,24 @@ class Selectable : protected NonCopyable
 
             \return true if the I/O device is usable, false otherwise.
         */
-        bool enabled() const
-        { return _enabled; }
+        bool enabled() const;
 
-        bool idle() const
-        { return _state == Idle; }
+        bool idle() const;
 
-        bool busy() const
-        { return _state == Busy; }
+        bool busy() const;
 
-        bool avail() const
-        { return _state == Avail; }
+        bool avail() const;
 
         virtual SelectableImpl& simpl() = 0;
 
     protected:
         //! @brief Default Constructor
-        Selectable()
-        : _parent(0)
-        , _enabled(false)
-        , _state(Idle)
-        { }
+        Selectable();
 
         //! @brief Sets or unsets the device enabled
-        void setEnabled(bool isEnabled)
-        {
-            if(_parent)
-            {
-                if(isEnabled)
-                    _parent->onAdd(*this);
-                else
-                    _parent->onRemove(*this);
-            }
-            _enabled = isEnabled;
-        }
+        void setEnabled(bool isEnabled);
 
-        void setState(State state)
-        {
-            _state = state;
-            if(_parent)
-            {
-                _parent->onChanged(*this);
-            }
-        }
+        void setState(State state);
 
         //! @brief Closes the Selector
         virtual void onClose() = 0;

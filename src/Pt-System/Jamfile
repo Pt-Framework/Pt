@@ -35,6 +35,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           Pipe.cpp
                           Plugin.cpp
                           Process.cpp
+                          Selectable.cpp
                           Selector.cpp
                           SerialDevice.cpp
                           Semaphore.cpp
