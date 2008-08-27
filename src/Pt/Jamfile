@@ -40,7 +40,9 @@ PT_TESTS = AnyTest.cpp
            DateTest.cpp
            DateTimeTest.cpp
            DelegateTest.cpp
+           DoubleTest.cpp
            ExceptionTest.cpp
+           FloatTest.cpp
            NonCopyableTest.cpp
            SerializationTest.cpp
            SettingsTest.cpp
