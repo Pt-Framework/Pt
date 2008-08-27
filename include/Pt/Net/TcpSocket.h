@@ -61,16 +61,16 @@ namespace Net {
 
             virtual System::SelectableImpl& simpl()
             { System::SelectableImpl* impl = 0; return *impl; }
-			
+            
         protected:
-	        virtual bool onWait(unsigned int msecs)
-			{ return false; }
+            virtual bool onWait(unsigned int msecs)
+            { return false; }
 
-	        virtual void onAttach(System::SelectorBase&)
-			{}
+            virtual void onAttach(System::SelectorBase&)
+            {}
 
-	        virtual void onDetach(System::SelectorBase&)
-			{}
+            virtual void onDetach(System::SelectorBase&)
+            {}
 
             void onBeginRead(char* buffer, size_t n, bool& eof)
             {  }
