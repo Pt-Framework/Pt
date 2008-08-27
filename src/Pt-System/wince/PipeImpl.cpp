@@ -32,7 +32,7 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _msgSize(0)
 , _bufferSize(0)
 {
-    //_internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    _internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 
@@ -75,7 +75,7 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 bool PipeIODevice::getWaitHandles(HandleMap& handles)
 { 
     handles.add(handle(), this);
-    //handles.add(_internalBufferWaitHandle, this);
+    handles.add(_internalBufferWaitHandle, this);
     return true; 
 }
 
@@ -130,13 +130,11 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
-       
-	return _bufferSize;
     
-	//if(_bufferSize)
-    //{
-    //    SetEvent(_internalBufferWaitHandle);
-    //}
+	if(_bufferSize)
+        SetEvent(_internalBufferWaitHandle);
+
+	return 0;
 }
 
 

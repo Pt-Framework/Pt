@@ -150,15 +150,14 @@ bool SelectorImpl::wait( unsigned umsecs )
         bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, ready);
         if(accept)
         {
-            if(ready) 
-                _avail.insert(*iter);
-
             _devices.insert(*iter);
         }
         else
         {
             accept = (*iter)->simpl().getWaitHandles(_handles);
         }
+		if(ready) 
+            _avail.insert(*iter);
     }
     _dirty.clear();
 
