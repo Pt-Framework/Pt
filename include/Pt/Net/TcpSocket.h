@@ -72,17 +72,17 @@ namespace Net {
             virtual void onDetach(System::SelectorBase&)
             {}
 
-            void onBeginRead(char* buffer, size_t n, bool& eof)
-            {  }
+            size_t onBeginRead(char* buffer, size_t n, bool& eof)
+            { return 0; }
 
             size_t onEndRead( bool& eof)
-            { return 0;}
+            { return 0; }
 
-            void onBeginWrite(const char* buffer, size_t n)
-            { }
+            size_t onBeginWrite(const char* buffer, size_t n)
+            { return 0; }
 
             size_t onEndWrite()
-            { return 0;}
+            { return 0; }
 
             size_t onRead(char* buffer, size_t count, bool& eof);
 
