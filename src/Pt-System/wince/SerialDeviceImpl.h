@@ -96,11 +96,11 @@ public:
     }
 };*/
 
-class SerialDeviceImpl :  public Pt::System::IODeviceImpl
+class SerialDeviceImpl : public Pt::System::IODeviceImpl
                        , public Pt::System::Runnable
 {
     public:
-        SerialDeviceImpl();
+        SerialDeviceImpl(SerialDevice& device);
 
         ~SerialDeviceImpl();
 
@@ -115,17 +115,17 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl
 
         bool wait(unsigned int msecs);
 
-        bool setWaitHandle(HANDLE h, HANDLE finished);
+        bool setWaitHandle(HANDLE h, bool& avail);
 		
         bool getWaitHandles(HandleMap& handles);
 		
         bool checkEvent();
 
-        void beginRead(char* buffer, size_t n, bool& eof);    
+        size_t beginRead(char* buffer, size_t n, bool& eof);    
 
         size_t endRead( bool& eof);
 
-        void beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(const char* buffer, size_t n);
 
         size_t endWrite();
 
@@ -165,17 +165,18 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl
         
         void run();       
         
-    public:       
-        HANDLE _comEvent;
+    public:
+		SerialDevice& _device;
+        HANDLE _ioReady;
         HANDLE _beginWait;
         DCB _orgCommState;        
         Thread _eventThread;  
         bool _terminateThread;
-        char* _rbuf;
-        size_t _rbuflen;
+        //char* _rbuf;
+        //size_t _rbuflen;
         DWORD _rlen;
-        const char* _wbuf;
-        size_t _wbuflen;
+        //const char* _wbuf;
+        //size_t _wbuflen;
         size_t _wlen;
         DWORD _event;
 };

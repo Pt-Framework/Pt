@@ -28,20 +28,21 @@ namespace Pt{
 
 namespace System{
 
-SerialDeviceImpl::SerialDeviceImpl()
-: _eventThread( *self() )
+SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
+: _device(device)
+, _eventThread( *self() )
 , _terminateThread(false)
-, _comEvent(0)
+, _ioReady(0)
 , _beginWait(0)
-, _rbuf(0)
-, _rbuflen(0)
+//, _rbuf(0)
+//, _rbuflen(0)
 , _rlen(0)
-, _wbuf(0)
-, _wbuflen(0)
+//, _wbuf(0)
+//, _wbuflen(0)
 , _wlen(0)
 , _event(0)
 { 
-    _comEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);    
+    _ioReady  = CreateEvent(NULL, TRUE, FALSE, NULL);    
     _beginWait = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
@@ -122,11 +123,11 @@ void SerialDeviceImpl::close()
     // Wait for comm event thread termination
     _eventThread.wait();    
 
-    CloseHandle( _comEvent );
+    CloseHandle( _ioReady );
     CloseHandle( _beginWait );
 
     this->setHandle(INVALID_HANDLE_VALUE);
-    _comEvent = 0;
+    _ioReady = 0;
     _beginWait = 0;
 }
 
@@ -147,7 +148,7 @@ bool SerialDeviceImpl::wait(unsigned int msecs)
 }
 
 
-bool SerialDeviceImpl::setWaitHandle(HANDLE h, HANDLE finished)
+bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     return false;
 }
@@ -155,8 +156,7 @@ bool SerialDeviceImpl::setWaitHandle(HANDLE h, HANDLE finished)
 
 bool SerialDeviceImpl::getWaitHandles(HandleMap& handles)
 { 
-    Selectable& sel = parent();
-    handles.add(_comEvent, &sel);
+    handles.add(_ioReady, &_device);
     return true; 
 }
 
@@ -167,13 +167,13 @@ bool SerialDeviceImpl::checkEvent()
 
     if( _wlen || (_event & EV_TXEMPTY) )
     {
-        this->parent().outputReady.send( this->parent() );
+        _device.outputReady.send( _device );
         avail = true;
     }
     
     if( _rlen || (_event & EV_RXCHAR) )
     {
-        this->parent().inputReady.send( this->parent() );
+        _device.inputReady.send( _device );
         avail = true;
     }
 
@@ -193,10 +193,10 @@ void SerialDeviceImpl::run()
         // When reading and the kernel buffer is already full, WaitForCommEvent 
         // might block forever because the event type is EV_RXCHAR .
         // Therefore we check for data first before waiting for comm events
-        if(_rbuf)
+        if(_device._rbuf)
         {
             _rlen = 0;
-            if( ! ReadFile( handle(), _rbuf, _rbuflen, &_rlen, 0 ) )
+            if( ! ReadFile( handle(), _device._rbuf, _device._rbuflen, &_rlen, 0 ) )
             {
                 //TODO: Handle com errors
                 if( ! _terminateThread )
@@ -204,7 +204,7 @@ void SerialDeviceImpl::run()
             }
             if(_rlen)
             {
-                SetEvent(_comEvent);
+                SetEvent(_ioReady);
                 continue;
             }
         }
@@ -222,7 +222,7 @@ void SerialDeviceImpl::run()
         
         if( ret == TRUE && (_event & (EV_TXEMPTY|EV_RXCHAR)) )
         {         
-            SetEvent( _comEvent );
+            SetEvent( _ioReady );
         }        
         else
         {
@@ -233,10 +233,8 @@ void SerialDeviceImpl::run()
 }
 
 
-void SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof) 
+size_t SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof) 
 {
-    _rbuf = buffer;
-    _rbuflen = n;
     _rlen = 0;
 
     DWORD mask = 0;
@@ -244,6 +242,7 @@ void SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
     SetCommMask( handle(), mask | EV_RXCHAR );
 
     SetEvent(_beginWait); 
+	return 0;
 }
 
 
@@ -256,30 +255,25 @@ size_t SerialDeviceImpl::endRead(bool& eof)
     GetCommMask(handle(), &mask);
     SetCommMask( handle(), mask &~ EV_RXCHAR );
 
-    ResetEvent(_comEvent); 
+    ResetEvent(_ioReady); 
 
     // might have read data before WaitCommEvent
     if( len > 0 )
         return len;
 
     // no data read previously, but data is available
-    if( ! ReadFile( handle(), _rbuf, _rbuflen, &len, 0 ) )
+    if( ! ReadFile( handle(), _device._rbuf, _device._rbuflen, &len, 0 ) )
         throw IOError("ReadFile failed" , PT_SOURCEINFO);
 
     if( len == 0 )     
        eof = true;
 
-    _rbuf = 0;
-    _rbuflen = 0;
     return len;
 }
 
 
-void SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+size_t SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-    _wbuf = buffer;
-    _wbuflen = n;
-
     _wlen = this->write(buffer, n); 
 
     if(_wlen == 0)
@@ -292,8 +286,10 @@ void SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
     }
     else
     {
-        SetEvent(_comEvent);
+        SetEvent(_ioReady);
     }
+	
+	return 0;
 }
 
 
@@ -306,13 +302,11 @@ size_t SerialDeviceImpl::endWrite()
     GetCommMask(handle(), &mask);
     SetCommMask( handle(), mask &~ EV_TXEMPTY );
 
-    ResetEvent(_comEvent); 
+    ResetEvent(_ioReady); 
 
     if ( len == 0 )
-        len = this->write(_wbuf, _wbuflen);
-    
-    _wbuf = 0;
-    _wbuflen = 0;
+        len = this->write(_device._wbuf, _device._wbuflen);
+
     return len;
 }   
 

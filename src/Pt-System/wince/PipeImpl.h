@@ -42,7 +42,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void open(HANDLE handle, bool isAsync);
         
-        bool setWaitHandle(HANDLE h, HANDLE finished);
+        bool setWaitHandle(HANDLE h, bool& avail);
 		
         bool getWaitHandles(HandleMap& handles);
 		
@@ -55,11 +55,11 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         { return *this; }
 
     protected:
-        void onBeginRead(char* buffer, size_t n, bool& eof);
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
 
-        void onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(const char* buffer, size_t n);
 
         size_t onEndWrite();
 
@@ -90,7 +90,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         DWORD                       _msgSize;
         size_t                      _bufferSize;
         std::vector<char>           _buffer;               
-        HANDLE                      _internalBufferWaitHandle;
+        //HANDLE                      _internalBufferWaitHandle;
 };
 
 class PipeImpl

@@ -32,8 +32,7 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _msgSize(0)
 , _bufferSize(0)
 {
-    IODeviceImpl::setParent(*this);
-    _internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    //_internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 
@@ -67,7 +66,7 @@ void PipeIODevice::open(HANDLE h, bool isAsync)
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
+bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 {
     return false;
 }
@@ -76,7 +75,7 @@ bool PipeIODevice::setWaitHandle(HANDLE h, HANDLE finished)
 bool PipeIODevice::getWaitHandles(HandleMap& handles)
 { 
     handles.add(handle(), this);
-    handles.add(_internalBufferWaitHandle, this);
+    //handles.add(_internalBufferWaitHandle, this);
     return true; 
 }
 
@@ -127,15 +126,17 @@ bool PipeIODevice::onWait(unsigned int msecs)
 }
 
 
-void PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
-        
-    if(_bufferSize)
-    {
-        SetEvent(_internalBufferWaitHandle);
-    }
+       
+	return _bufferSize;
+    
+	//if(_bufferSize)
+    //{
+    //    SetEvent(_internalBufferWaitHandle);
+    //}
 }
 
 
@@ -172,12 +173,14 @@ size_t PipeIODevice::onEndRead(bool& eof)
 }
 
 
-void PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
     if( Write != _mode )
     {
         throw IOError("Could not write on a read only pipe", PT_SOURCEINFO);
     }
+	
+	return 0;
 }
 
 
