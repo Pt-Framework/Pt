@@ -149,15 +149,15 @@ bool SerialDeviceImpl::wait(unsigned int msecs)
 
 bool SerialDeviceImpl::setWaitHandle(HANDLE h, HANDLE finished)
 {
-	return false;
+    return false;
 }
 
 
 bool SerialDeviceImpl::getWaitHandles(HandleMap& handles)
 { 
     Selectable& sel = parent();
-	handles.add(_comEvent, &sel);
-	return true; 
+    handles.add(_comEvent, &sel);
+    return true; 
 }
 
 
@@ -313,8 +313,8 @@ size_t SerialDeviceImpl::endWrite()
     
     _wbuf = 0;
     _wbuflen = 0;
-	return len;
-}	
+    return len;
+}   
 
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
