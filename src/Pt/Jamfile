@@ -50,6 +50,7 @@ PT_TESTS = AnyTest.cpp
            StringStreamTest.cpp
            StringTest.cpp
            TimeTest.cpp
+           TimespanTest.cpp
            TypesTest.cpp
            TypeTraitsTest.cpp
            VariantTest.cpp
