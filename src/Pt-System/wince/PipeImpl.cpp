@@ -32,7 +32,6 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _msgSize(0)
 , _bufferSize(0)
 {
-    _internalBufferWaitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 
@@ -75,7 +74,9 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 void PipeIODevice::getWaitHandles(HandleMap& handles, bool& avail)
 { 
     handles.add(handle(), this);
-    handles.add(_internalBufferWaitHandle, this);
+	
+	if(_bufferSize > 0)
+		avail = true;
 }
 
 
@@ -119,7 +120,7 @@ bool PipeIODevice::onWait(unsigned int msecs)
         this->checkEvent();
         return true;
     }
-        
+
     throw IOError("Unknown return from WaitForSingleObject", PT_SOURCEINFO);
     return false;
 }
@@ -131,7 +132,7 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
     
 	if(_bufferSize)
-        SetEvent(_internalBufferWaitHandle);
+		return std::min(_bufferSize, n);
 
 	return 0;
 }

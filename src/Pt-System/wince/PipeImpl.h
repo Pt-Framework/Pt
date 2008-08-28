@@ -90,7 +90,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         DWORD                       _msgSize;
         size_t                      _bufferSize;
         std::vector<char>           _buffer;               
-        HANDLE                      _internalBufferWaitHandle;
 };
 
 class PipeImpl

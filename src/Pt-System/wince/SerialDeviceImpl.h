@@ -172,11 +172,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         DCB _orgCommState;        
         Thread _eventThread;  
         bool _terminateThread;
-        //char* _rbuf;
-        //size_t _rbuflen;
         DWORD _rlen;
-        //const char* _wbuf;
-        //size_t _wbuflen;
         size_t _wlen;
         DWORD _event;
 };

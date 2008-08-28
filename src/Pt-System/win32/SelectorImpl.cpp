@@ -161,9 +161,7 @@ bool SelectorImpl::wait( unsigned umsecs )
     if( _avail.size() )
     {
 		msecs = 0;
-        //SetEvent(_ioEvent);
     }
-    //_avail.clear();
     
     DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
     if(result == WAIT_FAILED)
@@ -171,13 +169,14 @@ bool SelectorImpl::wait( unsigned umsecs )
         //DWORD err = GetLastError();
         throw IOError("WaitForMultipleObjects failed", PT_SOURCEINFO);
     }
-    else if( result == WAIT_TIMEOUT && _avail.empty() ) 
+
+    if( result == WAIT_TIMEOUT && _avail.empty() ) 
     {
         return false;
     }
 
     bool avail = false;
-    const Pt::ssize_t offset  = (result - WAIT_OBJECT_0);
+    const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
     try
     {
         // wake event at offset 0 was active
@@ -185,8 +184,19 @@ bool SelectorImpl::wait( unsigned umsecs )
         {
             avail = true;
         }
+
+		while( _avail.size() )
+		{
+			Selectable* selectable = *_avail.begin();
+    	    if( selectable->enabled() && selectable->simpl().checkEvent() )
+		        avail = true;
+
+			if( ! selectable->avail() )
+				_avail.erase( selectable );
+		}
+
         // I/O event at offset 1 was active
-        else if (offset == 1)
+        if (offset == 1)
         {        
             for( _current = _devices.begin(); _current != _devices.end(); )
             {
@@ -206,18 +216,13 @@ bool SelectorImpl::wait( unsigned umsecs )
                 }
             }
         }
-        else
+        else if(result != WAIT_TIMEOUT)
         {
-    	   Selectable* selectable = _handles.at(offset);
-    	   avail = selectable->simpl().checkEvent();
+    	    Selectable* selectable = _handles.at(offset);
+    	    if( selectable->enabled() && selectable->simpl().checkEvent() )
+		        avail = true;
+		   
     	}
-		
-		while( _avail.size() )
-		{
-			Selectable* selectable = *_avail.begin();
-			selectable->simpl().checkEvent();
-			_avail.erase( selectable );
-		}
     }
     catch (...)
     {
