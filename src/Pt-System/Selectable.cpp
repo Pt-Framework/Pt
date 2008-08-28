@@ -32,13 +32,17 @@ void Selectable::setSelector(SelectorBase* parent)
 {
     if(_parent)
     {
-        _parent->onRemove(*this);
+        if( this->enabled() )
+            _parent->onRemove(*this);
+
         this->onDetach(*_parent);
     }
 
     if(parent)
     {
-        parent->onAdd(*this);
+        if( this->enabled() )
+            parent->onAdd(*this);
+
         this->onAttach(*parent);
     }
 
@@ -48,13 +52,13 @@ void Selectable::setSelector(SelectorBase* parent)
 
 SelectorBase* Selectable::selector()
 {
-    return _parent; 
+    return _parent;
 }
 
 
 const SelectorBase* Selectable::selector() const
 {
-    return _parent; 
+    return _parent;
 }
 
 
@@ -64,7 +68,6 @@ void Selectable::close()
     {
         this->setEnabled(false);
         this->onClose();
-        this->setState(Selectable::Idle);
     }
 }
 
@@ -76,32 +79,31 @@ bool Selectable::wait(unsigned int msecs)
 
 bool Selectable::enabled() const
 {
-    return _enabled; 
+    return _state != Disabled;
 }
 
 
 bool Selectable::idle() const
 {
-    return _state == Idle; 
+    return _state == Idle;
 }
 
 
 bool Selectable::busy() const
 {
-    return _state == Busy; 
+    return _state == Busy;
 }
 
 
 bool Selectable::avail() const
 {
-    return _state == Avail; 
+    return _state == Avail;
 }
 
 
 Selectable::Selectable()
 : _parent(0)
-, _enabled(false)
-, _state(Idle)
+, _state(Disabled)
 { }
 
 
@@ -114,7 +116,9 @@ void Selectable::setEnabled(bool isEnabled)
         else
             _parent->onRemove(*this);
     }
-    _enabled = isEnabled;
+
+    if(_state != Disabled)
+        _state = Idle;
 }
 
 

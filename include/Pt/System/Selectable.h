@@ -22,9 +22,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         enum State
         {
-            Idle = 0,
-            Busy = 1,
-            Avail = 2
+            Disabled = 0,
+            Idle = 1,
+            Busy = 2,
+            Avail = 3
         };
 
     public:
@@ -82,7 +83,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
     private:
         SelectorBase* _parent;
-        bool _enabled;
+        //bool _enabled;
         State _state;
 };
 
