@@ -44,7 +44,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         
         bool setWaitHandle(HANDLE h, bool& avail);
 		
-        bool getWaitHandles(HandleMap& handles);
+        void getWaitHandles(HandleMap& handles, bool& avail);
 		
         bool checkEvent();
 

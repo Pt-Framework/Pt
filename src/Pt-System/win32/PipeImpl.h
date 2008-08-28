@@ -40,7 +40,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual bool checkEvent();
         
-        virtual bool setWaitHandle(HANDLE h, bool& avail);        
+        virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         virtual IODeviceImpl& ioimpl()
         { return *this; }

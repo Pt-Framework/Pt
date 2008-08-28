@@ -154,10 +154,9 @@ bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
 }
 
 
-bool SerialDeviceImpl::getWaitHandles(HandleMap& handles)
+void SerialDeviceImpl::getWaitHandles(HandleMap& handles, bool& avail)
 { 
     handles.add(_ioReady, &_device);
-    return true; 
 }
 
 

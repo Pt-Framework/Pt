@@ -72,11 +72,10 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 }
 
 
-bool PipeIODevice::getWaitHandles(HandleMap& handles)
+void PipeIODevice::getWaitHandles(HandleMap& handles, bool& avail)
 { 
     handles.add(handle(), this);
     handles.add(_internalBufferWaitHandle, this);
-    return true; 
 }
 
 

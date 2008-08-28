@@ -39,8 +39,8 @@ class SelectableImpl
 
         virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
         
-        virtual bool getWaitHandles(HandleMap& handles)
-        { return false; }
+        virtual void getWaitHandles(HandleMap& handles, bool& avail)
+        { }
 
         virtual bool checkEvent() = 0;
 };

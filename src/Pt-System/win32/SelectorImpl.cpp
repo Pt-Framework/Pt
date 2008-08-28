@@ -149,23 +149,21 @@ bool SelectorImpl::wait( unsigned umsecs )
         bool ready = false;
         bool accept = (*iter)->simpl().setWaitHandle(_ioEvent, ready);
         if(accept)
-        {
             _devices.insert(*iter);
-        }
-        else
-        {
-            accept = (*iter)->simpl().getWaitHandles(_handles);
-        }
+
+        (*iter)->simpl().getWaitHandles(_handles, ready);
+
 		if(ready) 
             _avail.insert(*iter);
     }
     _dirty.clear();
 
-    if( ! _avail.empty() )
+    if( _avail.size() )
     {
-        SetEvent(_ioEvent);
+		msecs = 0;
+        //SetEvent(_ioEvent);
     }
-    _avail.clear();
+    //_avail.clear();
     
     DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
     if(result == WAIT_FAILED)
@@ -173,7 +171,7 @@ bool SelectorImpl::wait( unsigned umsecs )
         //DWORD err = GetLastError();
         throw IOError("WaitForMultipleObjects failed", PT_SOURCEINFO);
     }
-    else if( result == WAIT_TIMEOUT ) 
+    else if( result == WAIT_TIMEOUT && _avail.empty() ) 
     {
         return false;
     }
@@ -185,12 +183,11 @@ bool SelectorImpl::wait( unsigned umsecs )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            return true;
+            avail = true;
         }
         // I/O event at offset 1 was active
         else if (offset == 1)
         {        
-            bool avail = false;
             for( _current = _devices.begin(); _current != _devices.end(); )
             {
                 Selectable* dev = *_current;
@@ -208,14 +205,19 @@ bool SelectorImpl::wait( unsigned umsecs )
                     }
                 }
             }
-    
-            return avail;
         }
         else
         {
     	   Selectable* selectable = _handles.at(offset);
-    	   return selectable->simpl().checkEvent();
+    	   avail = selectable->simpl().checkEvent();
     	}
+		
+		while( _avail.size() )
+		{
+			Selectable* selectable = *_avail.begin();
+			selectable->simpl().checkEvent();
+			_avail.erase( selectable );
+		}
     }
     catch (...)
     {

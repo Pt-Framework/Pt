@@ -117,7 +117,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         bool setWaitHandle(HANDLE h, bool& avail);
 		
-        bool getWaitHandles(HandleMap& handles);
+        void getWaitHandles(HandleMap& handles, bool& avail);
 		
         bool checkEvent();
 
