@@ -120,10 +120,10 @@ namespace System {
             { _loop->setIdleTimeout(msec); }
 
             bool catchSystemSignal(int sig);
-            
-			bool raiseSystemSignal(int sig);
-            
-			Signal<int> systemSignal;
+
+            bool raiseSystemSignal(int sig);
+
+            Signal<int> systemSignal;
 
             Signal<> aboutToStart;
 
@@ -138,7 +138,6 @@ namespace System {
             void init(EventLoopBase& loop);
 
         private:
-            static Application*& getAppPtr();
             ApplicationImpl* _impl;
             int     _argc;
             char**  _argv;

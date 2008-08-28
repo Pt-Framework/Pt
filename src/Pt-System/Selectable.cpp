@@ -109,22 +109,35 @@ Selectable::Selectable()
 
 void Selectable::setEnabled(bool isEnabled)
 {
-    if(_parent)
+    if(isEnabled)
     {
-        if(isEnabled)
-            _parent->onAdd(*this);
+        if(_state == Disabled)
+            this->setState(Idle);
         else
-            _parent->onRemove(*this);
+            this->setState(_state);
     }
-
-    if(_state != Disabled)
-        _state = Idle;
+    else
+    {
+        this->setState(Disabled);
+    }
 }
 
 
 void Selectable::setState(State state)
 {
+    if(state == Disabled)
+    {
+        if(_parent)
+            _parent->onRemove(*this);
+    }
+    else if(_state == Disabled)
+    {
+        if(_parent)
+            _parent->onAdd(*this);
+    }
+
     _state = state;
+
     if(_parent)
     {
         _parent->onChanged(*this);

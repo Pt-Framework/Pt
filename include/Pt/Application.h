@@ -25,7 +25,7 @@ class Application : public Pt::Connectable
             getAppPtr() = 0;
         }
 
-        Application& instance()
+        static Application& instance()
         {
             Application* app = getAppPtr();
             if( ! app )

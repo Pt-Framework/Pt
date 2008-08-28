@@ -83,7 +83,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
     private:
         SelectorBase* _parent;
-        //bool _enabled;
         State _state;
 };
 
