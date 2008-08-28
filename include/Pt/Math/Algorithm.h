@@ -25,9 +25,13 @@ enum QuadrantCode
 /** @brief Determines quadrant code
 
     Determines the quadrant code of x,y within the rectangle
-    xmin, xmax, ymin, ymax. The quadrant code is a bitmask type
+    xmin, xmax, ymin, ymax. The quadrant code is a bit-mask type
     indicating if the point is above, below, left or right of
     the rectangle.
+    
+    Please note that the underlying coordinate system has its
+    origin in the left-lower corner. This means that bigger y
+    values are above smaller y values.
 */
 template <typename T, typename U>
 int quadrant( T x, T y, U xmin, U xmax, U ymin, U ymax )
@@ -98,10 +102,8 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     return( (xi1 <= xmax || xi1 >= xmin) || (xi2 <= xmax || xi2 >= xmin));
 }
 
-
-}//namespace Pt{
-
-}//namespace Math{
+} //namespace Math
+} //namespace Pt
 
 
 #endif //PT_MATH_ALGORITH_H

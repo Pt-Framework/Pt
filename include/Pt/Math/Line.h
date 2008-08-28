@@ -92,6 +92,15 @@ namespace Math {
             {
                 return _p1.x() == _p2.x();
             }
+
+            template <typename T>
+            inline bool inBounds(const BasicPoint<T>& point) const
+            {
+                return point.x() <= std::max(_p1.x(), _p2.x())
+                    && point.x() >= std::min(_p1.x(), _p2.x())
+                    && point.y() <= std::max(_p1.y(), _p2.y())
+                    && point.y() >= std::min(_p1.y(), _p2.y());
+            }
             
             /**
              * @brief Returns the slope of the line or numeric_limits<double>::infinity()
@@ -119,7 +128,7 @@ namespace Math {
             {
                 if (point == _p1 || point == _p2)
                 {
-                    return point;
+                    return PointF(point.x(), point.y());
                 }
 
                 if (_p1.x() == _p2.x())

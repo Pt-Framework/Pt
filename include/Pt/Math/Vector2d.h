@@ -139,8 +139,8 @@ namespace Math {
 
 
             /** \brief Calculate the scalar product of two vectors.
-                \param
-                \return
+                \param vector a vector
+                \return the result
             */
             inline double operator*(const BasicVector2d<T>& vector)
             {

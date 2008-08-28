@@ -2,16 +2,33 @@ SubDir TOP src Pt-Math ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_MATH_API_EXPORT ] ;
 
+# Pt-Math is a header-only module so far.
+#PT_MATH_SOURCES  = ;
 
-PtUnitTest AlgorithmTest : AlgorithmTest.cpp ;
-Main_LinkSharedLibraries AlgorithmTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate AlgorithmTest : $(OUTPUT_TARGET) ;
+#SharedLibrary Pt-Math : $(PT_MATH_SOURCES) ;
+#SharedLibrary_LinkSharedLibraries Pt-Math : Pt ;
+#SharedLibrary_MakeLocate Pt-Math : $(OUTPUT_TARGET) ;
 
-PtUnitTest BasicMatrixTest : BasicMatrixTest.cpp ;
-Main_LinkSharedLibraries BasicMatrixTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate BasicMatrixTest : $(OUTPUT_TARGET) ;
 
-PtUnitTest BasicPointTest : BasicPointTest.cpp ;
-Main_LinkSharedLibraries BasicPointTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate BasicPointTest : $(OUTPUT_TARGET) ;
+PT_MATH_TESTS = AlgorithmTest.cpp
+                BasicMatrixTest.cpp
+                BasicPointTest.cpp
+                BasicRectTest.cpp
+                BasicSizeTest.cpp
+                LineSegmentTest.cpp
+                LineTest.cpp
+                MathRectTest.cpp
+                MathUtilTest.cpp
+                MatrixTest.cpp
+                PolygonTest.cpp
+                VectorTest.cpp
+                ;
 
+PtUnitTest Pt-Math-test : Pt-Math-test.cpp $(PT_MATH_TESTS) ;
+Main_LinkSharedLibraries Pt-Math-test : Pt-Unit Pt-Xml Pt ;
+PtUnitTest_MakeLocate Pt-Math-test : $(OUTPUT_TARGET) ;
+
+# Define pseudo targets to call from projects
+DEPENDS Pt-Math-all : #Pt-Math
+                      Pt-Math-test
+                      ;

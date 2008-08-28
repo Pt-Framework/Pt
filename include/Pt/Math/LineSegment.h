@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <limits>
 
+class LineSegmentTest;
+
 namespace Pt {
 namespace Math {
 
@@ -20,15 +22,18 @@ namespace Math {
     template<typename PointT>
     class BasicLineSegment
     {
+        friend class ::LineSegmentTest;
+
         public:
+            // No default constructor available as it would most likely set the points
+            // to (0, 0) and (0, 0) which is invalid.
+
             //! Construct a BasicLineSegment specified by two points of type BasicPoint<PointT>.
             BasicLineSegment(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
             {
                 setPoints(p1, p2);
             }
 
-            // No default constructor available as it would most likely set the points
-            // to (0, 0) and (0, 0) which is invalid.
 
             double length() const
             {
@@ -53,7 +58,7 @@ namespace Math {
              * points are identical an std::invalid_argument exception is thrown.
              *
              * @param p1 The point to which the first point of this line segment is set.
-             * @param p1 The point to which the second point of this line segment is set.
+             * @param p2 The point to which the second point of this line segment is set.
              * @throws std::invalid_argument if both points are identical.
              */
             void setPoints(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
@@ -62,11 +67,11 @@ namespace Math {
                 {
                     throw std::invalid_argument("The points to construct a line from must not be identical." + PT_SOURCEINFO);
                 }
-                
+
                 _p1 = p1;
                 _p2 = p2;
             }
-            
+
             bool operator==(const BasicLineSegment& other) const
             {
                 return (other._p1 == this->_p1 && other._p2 == this->_p2)
@@ -77,12 +82,12 @@ namespace Math {
             {
                 return !(other == *this);
             }
-            
+
             bool isVertical() const
             {
                 return _p1.x() == _p2.x();
             }
-            
+
             /**
              * @brief Returns the slope of the line or numeric_limits<double>::infinity()
              * if it is a vertical line.
@@ -100,27 +105,27 @@ namespace Math {
                 {
                     return std::numeric_limits<double>::infinity();
                 }
-                
+
                 return (_p2.y() - _p1.y()) / double(_p2.x() - _p1.x());
             }
-            
+
             template <typename T>
             inline PointF calcNearestPointOnLine(const BasicPoint<T>& point) const
             {
                 PointF perp = calcPerpendicular(point);
-                
+
                 if (inBounds(perp))
                 {
                     return perp;
                 }
-                
+
                 // Perpendicular is not in line bounds. Thus we have to calculate
                 // the nearest of the two line's points and return this.
                 const double dx1 = perp.x() - _p1.x();
                 const double dy1 = perp.y() - _p1.y();
                 const double dx2 = perp.x() - _p2.x();
                 const double dy2 = perp.y() - _p2.y();
-                
+
                 if (dx1 * dx1 + dy1 * dy1 < dx2 * dx2 + dy2 * dy2)
                 {
                     return _p1;
@@ -136,7 +141,7 @@ namespace Math {
                 const PointF nearestPoint = calcNearestPointOnLine(point);
                 return nearestPoint.calcDistance(point);
             }
-            
+
             template <typename T>
             inline bool inBounds(const BasicPoint<T>& point) const
             {
@@ -146,7 +151,7 @@ namespace Math {
                     && point.y() >= std::min(_p1.y(), _p2.y());
             }
 
-        
+
         protected:
 
             // You can not calculate a perpendiclar on a line segment, but only
@@ -166,7 +171,7 @@ namespace Math {
                     // x is the x-value of 'line.p1' or 'line.p2' and y is the y-value of 'point'.
                     return PointF(_p1.x(), point.y());
                 }
-                
+
                 if (_p1.y() == _p2.y())
                 {
                     // Special case: y1 and y2 are the same. Perendicular is P(x, y) where
@@ -175,11 +180,11 @@ namespace Math {
                 }
 
                 const double slope = (_p2.y() - _p1.y()) / double(_p2.x() - _p1.x());  // Slope of 'line'.
-                
+
                 assert(slope != 0);
-                
+
                 const double reverseSlope = -1 / slope;
-                
+
                 assert(slope - reverseSlope);
 
                 const double b  = _p1.y()   - slope        * _p1.x();
@@ -190,7 +195,7 @@ namespace Math {
 
                 return PointF(perpX, perpY);
             }
-            
+
 
         protected:
             BasicPoint<PointT> _p1;

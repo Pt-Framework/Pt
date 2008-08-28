@@ -45,7 +45,7 @@ public:
         return _points.end();
     }
 
-    void addPoint(BasicPoint<PointT> point)
+    void addPoint(const BasicPoint<PointT>& point)
     {
         _points.push_back(point);
     }
@@ -99,9 +99,20 @@ public:
     }
 
 
+    /**
+     * @brief Tests if a point lies in a the polygon.
+     *
+     * This algorithm of the point in polygon test return true if the point lies
+     * within the polygon and if the point lies accurate on one border of the
+     * polygon.
+     *
+     * @param point The point to test.
+     * @return \c true if the point lies within the polygon and false otherwise.
+     */
     template <typename T>
     inline bool contains(const BasicPoint<T>& point) const
     {
+        // polygon has not three points at least -> no test necessary
         if (this->size() < 3)
         {
             return false;
@@ -109,29 +120,37 @@ public:
 
         bool result = false;
 
-        BasicPoint<PointT> last = _points.back();
+        // this is a implementation of the "crossing number algorithm" / "even-odd rule algorithm"
+        // it based on the Jordan curve theorem
+        BasicPoint<PointT> previous = _points.back();
         typename std::vector< BasicPoint<PointT> >::const_iterator it;
 
         for (it = _points.begin(); it != _points.end(); ++it)
         {
-            BasicPoint<PointT> current = *it;
+            const BasicPoint<PointT>& current = *it;
 
-            if ((current.y() <= point.y() && point.y() < last.y()) ||
-                (last.y()    <= point.y() && point.y() < current.y()))
+            // First check if y-value of point lies between y-value of previous and y-value of current point.
+            // After this check if the x-value of the point is left of the line (between previous point
+            // and current point). If so, we passed a line and thus have to invert our result.
+            if ((current.y() <= point.y() && point.y() < previous.y()) ||
+                (previous.y() <= point.y() && point.y() < current.y()))
             {
-                // y-value of point lies between y-value of last and y-value of current point.
-                // Now check if the x-value of the point is left of the line (between last point
-                // and current point). If so, we passed a line and thus have to invert our result.
-                double xPositionOnLine = (double(last.x()) - current.x()) * (point.y() - current.y())
-                                       / (last.y() - current.y()) + current.x();
+                // "two point equation" for a line: 
+                // (y - y0) = (y1 - y0) / (x1 - x0) * (x - x0)
+                // convert the equation that x is on one side:
+                // x =  (x1 - x0) * (y - y0) / (y1 - y0) + x0
+                double xPositionOnLine = (double(previous.x()) - current.x()) * (point.y() - current.y())
+                                         / (previous.y() - current.y()) + current.x();
 
-                if (double(point.x()) <= xPositionOnLine)
+                
+                // check if point lies on the left side of the current line
+                if (double(point.x()) < xPositionOnLine)
                 {
                     result = !result;
                 }
             }
 
-            last = current;
+            previous = current;
         }
 
         return result;

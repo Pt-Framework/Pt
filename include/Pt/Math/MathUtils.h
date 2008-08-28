@@ -14,6 +14,9 @@
 #ifdef __QNX__
 #include <math.h>
 #endif
+#ifdef PI
+#undef PI
+#endif
 
 
 namespace Pt {
@@ -102,7 +105,7 @@ namespace Pt {
              //  const float Q = 0.775;
                  const T P = 0.225;
 
-y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
+                 y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
             }
 
             return y;
@@ -152,6 +155,11 @@ y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
         inline BasicPoint<T> getCenterOfLine( const BasicPoint<T>& begin, const BasicPoint<T>& end )
         {
             return (begin + ( (end - begin) * 0.5) );
+        }
+
+        inline Pt::int64_t abs(Pt::int64_t value)
+        {
+            return value < 0 ? -value : value;
         }
 
 

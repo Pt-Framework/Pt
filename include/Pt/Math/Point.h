@@ -79,7 +79,7 @@ namespace Pt {
 
                 const BasicPoint& move(T dx, T dy)
                 {
-                    _x += dy; _y += dy; return *this;
+                    _x += dx; _y += dy; return *this;
                 }
 
 
@@ -249,6 +249,32 @@ namespace Pt {
             point.setX(x);
             point.setY(y);
         }
+
+        /** @brief serialization of a vector of BasicPoint
+         */
+        template <typename T>
+        inline void operator <<=(Pt::SerializationInfo& si, const std::vector<BasicPoint<T> >& points)
+        {
+            typename std::vector<BasicPoint<T> >::const_iterator it;
+            for(it = points.begin(); it != points.end(); ++it)
+            {
+                si.addMember("Point") <<= *it;
+            }
+        }
+
+        /** @brief deserialization of a vector of BasicPoint
+         */
+        template <typename T>
+        inline void operator >>=(const Pt::SerializationInfo& si, std::vector< BasicPoint<T> >& points)
+        {
+            Pt::SerializationInfo::ConstIterator it;
+            for (it = si.begin(); it != si.end(); ++it)
+            {
+                points.resize( points.size() + 1 );
+                *it >>= points.back();
+            }
+        }
+
 
     } // namespace Math
 
