@@ -34,6 +34,7 @@ SelectorImpl::SelectorImpl()
 : _app(0)
 {
     _current = _devices.end();
+    _currentAvail = _avail.end();
 
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
@@ -88,7 +89,6 @@ void SelectorImpl::add(Selectable& s)
 
 void SelectorImpl::remove(Selectable& s)
 {
-    _avail.erase(&s);
     _dirty.erase(&s);        
     _handles.remove(s);
 
@@ -96,18 +96,21 @@ void SelectorImpl::remove(Selectable& s)
     if( iter == _devices.end() )
         return;
     
-    if (_current == _devices.end())
-    {
-        _devices.erase(iter);
-    }
-    else if (*_current == *iter)
-    {
+    if( _current != _devices.end() && 
+       *_current == *iter )
         _devices.erase(_current++);
-    }
     else
-    {
         _devices.erase(iter);
-    }
+    
+    iter = _avail.find( &s );
+    if( iter == _avail.end() )
+        return;
+
+    if( _currentAvail != _avail.end() && 
+       *_currentAvail == *iter )
+        _avail.erase(_currentAvail++);
+    else
+        _avail.erase(iter);
 }
 
 
@@ -119,7 +122,15 @@ void SelectorImpl::changed(Selectable& s)
     }
     else
     {
-        _avail.erase(&s);
+        std::set<Selectable*>::iterator it = _avail.find( &s );
+        if( it == _avail.end() )
+            return;
+
+        if( _currentAvail != _avail.end() && 
+           *_currentAvail == *it )
+            _avail.erase(_currentAvail++);
+        else
+            _avail.erase(it);
     }
 }
 
@@ -153,14 +164,14 @@ bool SelectorImpl::wait( unsigned umsecs )
 
         (*iter)->simpl().getWaitHandles(_handles, ready);
 
-		if(ready) 
+        if(ready) 
             _avail.insert(*iter);
     }
     _dirty.clear();
 
     if( _avail.size() )
     {
-		msecs = 0;
+        msecs = 0;
     }
     
     DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
@@ -170,63 +181,65 @@ bool SelectorImpl::wait( unsigned umsecs )
         throw IOError("WaitForMultipleObjects failed", PT_SOURCEINFO);
     }
 
-    if( result == WAIT_TIMEOUT && _avail.empty() ) 
-    {
-        return false;
-    }
-
     bool avail = false;
-    const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
     try
     {
+        // check all selectables that did not require waiting
+        for( _currentAvail = _avail.begin(); _currentAvail != _avail.end(); )
+        {
+            Selectable* s = *_currentAvail;
+            if( s->enabled() && s->simpl().checkEvent() )
+            {
+                avail = true;
+            }
+            if( _currentAvail != _avail.end() &&
+               *_currentAvail == s )
+            {
+                    ++_currentAvail;
+            }
+        }
+
+        if( result == WAIT_TIMEOUT) 
+        {
+            return avail;
+        }
+        
+        const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            avail = true;
-        }
-
-		while( _avail.size() )
-		{
-			Selectable* selectable = *_avail.begin();
-    	    if( selectable->enabled() && selectable->simpl().checkEvent() )
-		        avail = true;
-
-			if( ! selectable->avail() )
-				_avail.erase( selectable );
-		}
-
+            return true;
+        }    
         // I/O event at offset 1 was active
-        if (offset == 1)
+        else if (offset == 1)
         {        
             for( _current = _devices.begin(); _current != _devices.end(); )
             {
                 Selectable* dev = *_current;
-    
                 if ( dev->enabled() && dev->simpl().checkEvent() )
                 {
                     avail = true;
                 }
     
-                if (_current != _devices.end())
+                if( _current != _devices.end() &&
+                   *_current == dev )
                 {
-                    if (*_current == dev)
-                    {
-                        ++_current;
-                    }
+                    ++_current;
                 }
             }
         }
-        else if(result != WAIT_TIMEOUT)
+        else
         {
-    	    Selectable* selectable = _handles.at(offset);
-    	    if( selectable->enabled() && selectable->simpl().checkEvent() )
-		        avail = true;
-		   
-    	}
+            Selectable* selectable = _handles.at(offset);
+            if( selectable->enabled() && selectable->simpl().checkEvent() )
+                avail = true;
+           
+        }
     }
     catch (...)
     {
         _current = _devices.end();
+        _currentAvail = _avail.end();
         throw;
     }
     

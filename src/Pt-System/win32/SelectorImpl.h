@@ -122,6 +122,7 @@ class SelectorImpl
         HANDLE _ioEvent;
         HandleMap _handles;
         std::set<Selectable*>::iterator _current;
+        std::set<Selectable*>::iterator _currentAvail;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _dirty;
         std::set<Selectable*> _avail;
