@@ -37,7 +37,7 @@
         SelectorTest()
         : Pt::Unit::TestSuite("SelectorTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
+            Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
             Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
             Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
             Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );
@@ -59,41 +59,44 @@
 
         void AsyncStream()
         {
-            std::string out("Hello!");
-
+            Pt::System::Selector selector;
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-            pipe.output().write( out.c_str(), out.size() );
-            pipe.output().close();
 
-            Pt::System::IOBuffer buffer( pipe.input() );
-            buffer.beginRead();
+            Pt::System::IOBuffer outbuf( pipe.output() );
+            connect(outbuf.outputReady, *this, &SelectorTest::onStreamOutput);
+            selector.add(outbuf);
 
-            bool avail = pipe.input().wait();
-            std::cerr << "\n\nAVAIL: " << avail << std::endl;
-            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+            Pt::System::IOBuffer inbuf( pipe.input() );
+            connect(inbuf.inputReady, *this, &SelectorTest::onStreamInput);
+            selector.add(inbuf);
 
-            Pt::System::IStream stream(&buffer);
+            std::cerr << "\nWriting: " << "Hello world!" << std::endl;
+            outbuf.sputn("Hello world!", 12);
+            outbuf.beginWrite();
+            
+            bool outdone = selector.wait();
+            std::cerr << "Output Done: " << outdone << std::endl;
 
-            char ch = 0;
-            stream.get(ch);
-            stream.get(ch);
-            stream.get(ch);
-            stream.get(ch);
-            stream.get(ch);
-            stream.get(ch);
-            std::cerr << "LAST STREAMED: " << ch << std::endl;
-            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
-            std::cerr << "STREAM EOF: " << stream.eof() << std::endl;
-
-            buffer.beginRead();
-            avail = pipe.input().wait();
-            stream.get(ch);
-            std::cerr << "STREAM EOF: " << stream.eof() << std::endl;
-
-            std::cerr << "\nOK\n\n";;
-            exit(1);
+            inbuf.beginRead();
+            bool avail = selector.wait();
+            std::cerr << "Input Done: " << avail << std::endl;
+            std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
 
+        void onStreamInput(Pt::System::IOBuffer& buffer)
+        {
+            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+
+            char in[20];
+            size_t n = buffer.sgetn(in, 20);
+            std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
+        }
+
+        void onStreamOutput(Pt::System::IOBuffer& buffer)
+        {
+            buffer.device()->close();
+        }
+        
         void WaitTimer()
         {
             Pt::System::Timer timer;

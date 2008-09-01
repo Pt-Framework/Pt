@@ -30,7 +30,9 @@ namespace Pt {
 namespace System {
 
     //! @brief a stream buffer for IODevices with linear buffer area.
-    class IOBuffer : public BasicStreamBuffer<char>, public Connectable
+    class IOBuffer : public BasicStreamBuffer<char>
+                   , public Selectable
+                   , public Connectable
     {
         public:
             typedef std::basic_streambuf<char>::int_type int_type;
@@ -51,6 +53,7 @@ namespace System {
                 this->setg(0, 0, 0);
                 this->setp(0, 0);
 
+                this->setEnabled(true);
                 connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
                 connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
             }
@@ -69,7 +72,14 @@ namespace System {
             }
 
             ~IOBuffer()
-            { delete[] _buffer; }
+            { 
+                delete[] _buffer; 
+                this->close();
+            }
+
+            Signal<IOBuffer&> inputReady;
+
+            Signal<IOBuffer&> outputReady;
 
             void beginRead()
             {
@@ -85,7 +95,7 @@ namespace System {
                 }
 
                 _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
-
+                
                 // set get area, will also enter reading mode
                 this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
                             _buffer + _putbackMax, // gptr position
@@ -106,6 +116,8 @@ namespace System {
                 this->setg( this->eback(), // start of get area
                             this->gptr(), // gptr position
                             this->egptr() + readSize ); // end of get area
+                
+                inputReady.send(*this);
             }
 
             void beginWrite()
@@ -139,15 +151,32 @@ namespace System {
 
                 // this will also enter writing mode if pptr is not valid
                 this->setp(_buffer + leftover, _buffer + _bufferSize);
+                
+                outputReady.send(*this);
             }
 
             void init(IODevice& ioDevice)
             { _ioDevice = &ioDevice; }
-
+            
             IODevice* device()
             { return _ioDevice; }
-
+            
+            virtual SelectableImpl& simpl()
+            { return _ioDevice->simpl(); }
+            
         protected:
+            virtual void onClose()
+            { }
+
+            virtual bool onWait(unsigned int msecs)
+            { return _ioDevice->wait(msecs); }
+
+            virtual void onAttach(SelectorBase& sb)
+            { _ioDevice->setSelector(&sb); }
+
+            virtual void onDetach(SelectorBase& sb)
+            { _ioDevice->setSelector(0); }
+        
             int sync();
 
             virtual std::streamsize _peek(char* buffer, std::streamsize size);
@@ -175,9 +204,11 @@ namespace System {
             return 0;
 
         // if in writing mode flush put area
-        if( this->pptr() ) {
+        if( this->pptr() ) 
+        {
             const int_type ch = this->overflow( traits_type::eof() );
-            if( ch == traits_type::eof() ) {
+            if( ch == traits_type::eof() ) 
+            {
                 return -1;
             }
 

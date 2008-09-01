@@ -33,7 +33,8 @@ namespace System {
 
     //! @brief An istream with peeking capability.
     template <typename CharT>
-    class BasicIStream : public std::basic_istream<CharT> {
+    class BasicIStream : public std::basic_istream<CharT> 
+    {
         public:
             ~BasicIStream() throw()
             { }
@@ -48,10 +49,10 @@ namespace System {
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
+            std::streamsize peek(char* buffer, std::streamsize size)
             { return _buffer->peek(buffer, size); }
 
-            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
+            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
             : std::basic_istream<CharT>( buffer ),
               _buffer(buffer)
             { }
@@ -63,7 +64,8 @@ namespace System {
 
     //! @brief An ostream with peeking capability.
     template <typename CharT>
-    class BasicOStream : public std::basic_ostream<CharT> {
+    class BasicOStream : public std::basic_ostream<CharT> 
+    {
         public:
             ~BasicOStream() throw()
             {}
@@ -72,8 +74,7 @@ namespace System {
             BasicStreamBuffer<CharT>* rdbuf()
             { return _buffer; }
 
-        protected:
-            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
+            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer)
             : std::basic_ostream<CharT>( buffer ),
               _buffer(buffer)
             { }
@@ -85,7 +86,8 @@ namespace System {
 
     //! @brief An iostream with peeking capability.
     template <typename CharT>
-    class BasicIOStream : public std::basic_iostream<CharT> {
+    class BasicIOStream : public std::basic_iostream<CharT> 
+    {
         public:
             ~BasicIOStream() throw()
             { }
@@ -100,18 +102,18 @@ namespace System {
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peeksome(char* buffer, std::streamsize size) throw(IOError)
+            std::streamsize peeksome(char* buffer, std::streamsize size)
             { return _buffer->peeksome(buffer, size); }
 
-    protected:
-            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
+        protected:
+            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer)
             : std::basic_iostream<CharT>( buffer ),
               _buffer(buffer)
             { }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
-};
+    };
 
 
     typedef BasicIStream<char> IStream;
