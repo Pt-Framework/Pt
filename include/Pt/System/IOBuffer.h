@@ -200,7 +200,7 @@ namespace System {
     inline size_t IOBuffer::out_avail() const
     {
         if( this->pptr() )
-            return this->pptr() - this->pbase();
+            return this->epptr() - this->pptr();
             
         return 0;
     }
