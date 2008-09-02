@@ -31,7 +31,6 @@ namespace System {
 
     //! @brief a stream buffer for IODevices with linear buffer area.
     class IOBuffer : public BasicStreamBuffer<char>
-                   , public Selectable
                    , public Connectable
     {
         public:
@@ -43,7 +42,8 @@ namespace System {
         public:
             //! @brief Contructs an IOBuffer for an IODevice.
             IOBuffer(IODevice& ioDevice, size_t bufferSize = 1024)
-            : _ioDevice(&ioDevice),
+            : _selector(0),
+              _ioDevice(&ioDevice),
               _buffer(0),
               _bufferSize(bufferSize),
               _putbackMax(4)
@@ -53,12 +53,13 @@ namespace System {
                 this->setg(0, 0, 0);
                 this->setp(0, 0);
 
-                this->init(ioDevice);
+                this->setDevice(ioDevice);
             }
 
             //! @brief Default constructor.
             IOBuffer(size_t bufferSize = 1024)
-            : _ioDevice(0),
+            : _selector(0),
+              _ioDevice(0),
               _buffer(0),
               _bufferSize(bufferSize),
               _putbackMax(4)
@@ -72,114 +73,29 @@ namespace System {
             ~IOBuffer()
             {
                 delete[] _buffer;
-                this->close();
             }
 
             Signal<IOBuffer&> inputReady;
 
             Signal<IOBuffer&> outputReady;
 
-            void beginRead()
-            {
-                size_t putbackSize = _putbackMax;
+            void setDevice(IODevice& ioDevice);
 
-                // keep chars for putback if in reading mode
-                if( this->gptr() )
-                {
-                    putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-                    std::memmove(_buffer + (_putbackMax - putbackSize),
-                                 this->gptr() - putbackSize,
-                                 putbackSize * sizeof(char) );
-                }
+            IODevice* device();
 
-                _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
+            void setSelector(Selector* selector);
+            
+            void beginSync();
 
-                // set get area, will also enter reading mode
-                this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
-                            _buffer + _putbackMax, // gptr position
-                            _buffer + _putbackMax ); // end of get area
-            }
-
-            void onRead(IODevice& dev)
-            {
-                size_t readSize = dev.endRead();
-
-                if( _ioDevice->eof() )
-                {
-                    this->setg(0, 0, 0);
-                    return;
-                }
-
-                // set get area, will also enter reading mode
-                this->setg( this->eback(), // start of get area
-                            this->gptr(), // gptr position
-                            this->egptr() + readSize ); // end of get area
-
-                inputReady.send(*this);
-            }
-
-            void beginWrite()
-            {
-                // if in writing mode pptr is valid, write out the buffer
-                if( this->pptr() )
-                {
-                    // write buffer to device
-                    const size_t avail = this->pptr() - this->pbase();
-                    _ioDevice->beginWrite(_buffer, avail);
-                }
-            }
-
-            void onWrite(IODevice& dev)
-            {
-                size_t leftover = 0;
-
-                // if in writing mode pptr is valid, flush out the buffer
-                if( this->pptr() )
-                {
-                    const size_t avail = this->pptr() - this->pbase();
-                    size_t written = dev.endWrite();
-
-                    // setup put buffer area
-                    leftover = avail - written;
-                    if(leftover != 0) 
-                    {
-                        traits_type::move(_buffer, _buffer + written, leftover);
-                    }
-                }
-
-                // this will also enter writing mode if pptr is not valid
-                this->setp(_buffer + leftover, _buffer + _bufferSize);
-
-                outputReady.send(*this);
-            }
-
-            void init(IODevice& ioDevice)
-            {
-                _ioDevice = &ioDevice;
-                connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
-                connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
-                this->setEnabled(true);
-            }
-
-            IODevice* device()
-            { return _ioDevice; }
-
-            virtual SelectableImpl& simpl()
-            { return _ioDevice->simpl(); }
+            size_t out_avail() const;
+            
+            void beginFlush();
 
         protected:
-            virtual void onClose()
-            { }
-
-            virtual bool onWait(unsigned int msecs)
-            { return _ioDevice->wait(msecs); }
-
-            virtual void onAttach(SelectorBase& sb)
-            { _ioDevice->setSelector(&sb); }
-
-            virtual void onDetach(SelectorBase& sb)
-            { _ioDevice->setSelector(0); }
-
+            void onRead(IODevice& dev);
+            
+            void onWrite(IODevice& dev);
+        
             int sync();
 
             virtual std::streamsize _peek(char* buffer, std::streamsize size);
@@ -191,16 +107,142 @@ namespace System {
             virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
 
         private:
+            SelectorBase* _selector;
             IODevice* _ioDevice;
-
             char* _buffer;
-
             const size_t _bufferSize;
-
             const size_t _putbackMax;
     };
 
 
+    inline void IOBuffer::setDevice(IODevice& ioDevice)
+    {
+        if(_ioDevice)
+        {
+            if(_selector)
+                _selector->remove(*_ioDevice);
+
+            disconnect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+            disconnect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
+        }
+
+        _ioDevice = &ioDevice;
+        
+        if(_selector)
+            _selector->add(*_ioDevice);
+        
+        connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+        connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
+    }
+
+
+    inline IODevice* IOBuffer::device()
+    { return _ioDevice; }
+
+    
+    inline void IOBuffer::setSelector(Selector* selector)
+    {
+        if(_selector && _ioDevice )
+        {
+            _selector->remove(*_ioDevice);
+        }
+
+        if(selector && _ioDevice)
+        {
+            selector->add(*_ioDevice);
+        }
+
+        _selector = selector;
+    }
+    
+    
+    inline void IOBuffer::beginSync()
+    {
+        size_t putbackSize = _putbackMax;
+
+        // keep chars for putback if in reading mode
+        if( this->gptr() )
+        {
+            putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
+            std::memmove(_buffer + (_putbackMax - putbackSize),
+                         this->gptr() - putbackSize,
+                         putbackSize * sizeof(char) );
+        }
+
+        _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
+
+        // set get area, will also enter reading mode
+        this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
+                    _buffer + _putbackMax, // gptr position
+                    _buffer + _putbackMax ); // end of get area
+    }
+
+    
+    inline void IOBuffer::onRead(IODevice& dev)
+    {
+        size_t readSize = dev.endRead();
+
+        if( _ioDevice->eof() )
+        {
+            this->setg(0, 0, 0);
+            return;
+        }
+
+        // set get area, will also enter reading mode
+        this->setg( this->eback(), // start of get area
+                    this->gptr(), // gptr position
+                    this->egptr() + readSize ); // end of get area
+
+        inputReady.send(*this);
+    }
+
+    
+    inline size_t IOBuffer::out_avail() const
+    {
+        if( this->pptr() )
+            return this->pptr() - this->pbase();
+            
+        return 0;
+    }
+    
+    
+    inline void IOBuffer::beginFlush()
+    {
+        // if in writing mode pptr is valid, write out the buffer
+        if( this->pptr() )
+        {
+            // write buffer to device
+            const size_t avail = this->pptr() - this->pbase();
+            _ioDevice->beginWrite(_buffer, avail);
+        }
+    }
+
+    
+    inline void IOBuffer::onWrite(IODevice& dev)
+    {
+        size_t leftover = 0;
+
+        // if in writing mode pptr is valid, flush out the buffer
+        if( this->pptr() )
+        {
+            const size_t avail = this->pptr() - this->pbase();
+            size_t written = dev.endWrite();
+
+            // setup put buffer area
+            leftover = avail - written;
+            if(leftover != 0) 
+            {
+                traits_type::move(_buffer, _buffer + written, leftover);
+            }
+        }
+
+        // this will also enter writing mode if pptr is not valid
+        this->setp(_buffer + leftover, _buffer + _bufferSize);
+
+        outputReady.send(*this);
+    }
+    
+    
     inline int IOBuffer::sync()
     {
         if(!_ioDevice)

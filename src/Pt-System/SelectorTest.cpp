@@ -36,39 +36,35 @@ class IOStreamTest : public Pt::Unit::TestSuite
     public:
         IOStreamTest()
         : Pt::Unit::TestSuite("IOStreamTest")
+        , _exit(false)
         {
             Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
         }
 
         ~IOStreamTest()
-        {
-
-        }
+        { }
 
         void AsyncIO()
         {
             Pt::System::Selector selector;
-
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
 
             Pt::System::IOBuffer outbuf( pipe.output() );
+            outbuf.setSelector(&selector);
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
-            selector.add(outbuf);
 
-            inbuf.init( pipe.input() );
-
+            inbuf.setDevice( pipe.input() );
+            inbuf.setSelector(&selector);
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
-            selector.add(inbuf);
 
             std::cerr << "\nWriting: " << "Hello world!" << std::endl;
             outbuf.sputn("Hello world!", 12);
-            outbuf.beginWrite();
+            std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
+            outbuf.beginFlush();
 
-            bool avail = selector.wait();
-            std::cerr << "Output Done: " << avail << std::endl;
+            while( ! _exit )
+                selector.wait();
 
-            avail = selector.wait();
-            std::cerr << "Input Done: " << avail << std::endl;
             std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
 
@@ -79,15 +75,17 @@ class IOStreamTest : public Pt::Unit::TestSuite
             char in[20];
             size_t n = buffer.sgetn(in, 20);
             std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
+            _exit = true;
         }
 
         void onOutput(Pt::System::IOBuffer& buffer)
         {
             std::cerr << "Closing pipe" << std::endl;
             buffer.device()->close();
-            inbuf.beginRead();
+            inbuf.beginSync();
         }
     private:
+        bool _exit;
         Pt::System::IOBuffer inbuf;
 };
 
@@ -117,33 +115,6 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         {
             _timeval = _clock.stop();
             _counter++;
-        }
-
-        void AsyncStream()
-        {
-            Pt::System::Selector selector;
-
-            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-
-            Pt::System::IOBuffer outbuf( pipe.output() );
-            connect(outbuf.outputReady, *this, &SelectorTest::onStreamOutput);
-            selector.add(outbuf);
-
-            Pt::System::IOBuffer inbuf( pipe.input() );
-            connect(inbuf.inputReady, *this, &SelectorTest::onStreamInput);
-            selector.add(inbuf);
-
-            std::cerr << "\nWriting: " << "Hello world!" << std::endl;
-            outbuf.sputn("Hello world!", 12);
-            outbuf.beginWrite();
-
-            bool outdone = selector.wait();
-            std::cerr << "Output Done: " << outdone << std::endl;
-
-            inbuf.beginRead();
-            bool avail = selector.wait();
-            std::cerr << "Input Done: " << avail << std::endl;
-            std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
 
         void onStreamInput(Pt::System::IOBuffer& buffer)
