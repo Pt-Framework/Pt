@@ -60,6 +60,7 @@
         void AsyncStream()
         {
             Pt::System::Selector selector;
+
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
 
             Pt::System::IOBuffer outbuf( pipe.output() );
@@ -73,7 +74,7 @@
             std::cerr << "\nWriting: " << "Hello world!" << std::endl;
             outbuf.sputn("Hello world!", 12);
             outbuf.beginWrite();
-            
+
             bool outdone = selector.wait();
             std::cerr << "Output Done: " << outdone << std::endl;
 
@@ -94,9 +95,10 @@
 
         void onStreamOutput(Pt::System::IOBuffer& buffer)
         {
+            std::cerr << "Closing pipe" << std::endl;
             buffer.device()->close();
         }
-        
+
         void WaitTimer()
         {
             Pt::System::Timer timer;

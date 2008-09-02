@@ -165,12 +165,12 @@ bool SelectorImpl::wait(std::size_t msecs)
         msecs -= int(elapsed);
     }
 
-    if( FD_ISSET(_wakePipe[0], &_efds) )
+    if( FD_ISSET(_wakePipe[0], &efds) )
     {
         throw IOError("select error on event pipe", PT_SOURCEINFO);
     }
 
-    if( FD_ISSET(_wakePipe[0], &_rfds) )
+    if( FD_ISSET(_wakePipe[0], &rfds) )
     {
         --avail;
 
