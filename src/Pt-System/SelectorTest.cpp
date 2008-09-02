@@ -31,13 +31,75 @@
 #include <string>
 #include <cstring>
 
+class IOStreamTest : public Pt::Unit::TestSuite
+{
+    public:
+        IOStreamTest()
+        : Pt::Unit::TestSuite("IOStreamTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
+        }
+
+        ~IOStreamTest()
+        {
+
+        }
+
+        void AsyncIO()
+        {
+            Pt::System::Selector selector;
+
+            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+
+            Pt::System::IOBuffer outbuf( pipe.output() );
+            connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
+            selector.add(outbuf);
+
+            inbuf.init( pipe.input() );
+
+            connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
+            selector.add(inbuf);
+
+            std::cerr << "\nWriting: " << "Hello world!" << std::endl;
+            outbuf.sputn("Hello world!", 12);
+            outbuf.beginWrite();
+
+            bool avail = selector.wait();
+            std::cerr << "Output Done: " << avail << std::endl;
+
+            avail = selector.wait();
+            std::cerr << "Input Done: " << avail << std::endl;
+            std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
+        }
+
+        void onInput(Pt::System::IOBuffer& buffer)
+        {
+            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+
+            char in[20];
+            size_t n = buffer.sgetn(in, 20);
+            std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
+        }
+
+        void onOutput(Pt::System::IOBuffer& buffer)
+        {
+            std::cerr << "Closing pipe" << std::endl;
+            buffer.device()->close();
+            inbuf.beginRead();
+        }
+    private:
+        Pt::System::IOBuffer inbuf;
+};
+
+Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
+
+
  class SelectorTest : public Pt::Unit::TestSuite
 {
     public:
         SelectorTest()
         : Pt::Unit::TestSuite("SelectorTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "AsyncStream", *this, &SelectorTest::AsyncStream );
             Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
             Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
             Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );

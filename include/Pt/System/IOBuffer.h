@@ -53,9 +53,7 @@ namespace System {
                 this->setg(0, 0, 0);
                 this->setp(0, 0);
 
-                this->setEnabled(true);
-                connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
-                connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
+                this->init(ioDevice);
             }
 
             //! @brief Default constructor.
@@ -72,8 +70,8 @@ namespace System {
             }
 
             ~IOBuffer()
-            { 
-                delete[] _buffer; 
+            {
+                delete[] _buffer;
                 this->close();
             }
 
@@ -95,7 +93,7 @@ namespace System {
                 }
 
                 _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
-                
+
                 // set get area, will also enter reading mode
                 this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
                             _buffer + _putbackMax, // gptr position
@@ -116,7 +114,7 @@ namespace System {
                 this->setg( this->eback(), // start of get area
                             this->gptr(), // gptr position
                             this->egptr() + readSize ); // end of get area
-                
+
                 inputReady.send(*this);
             }
 
@@ -151,19 +149,24 @@ namespace System {
 
                 // this will also enter writing mode if pptr is not valid
                 this->setp(_buffer + leftover, _buffer + _bufferSize);
-                
+
                 outputReady.send(*this);
             }
 
             void init(IODevice& ioDevice)
-            { _ioDevice = &ioDevice; }
-            
+            {
+                _ioDevice = &ioDevice;
+                connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+                connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
+                this->setEnabled(true);
+            }
+
             IODevice* device()
             { return _ioDevice; }
-            
+
             virtual SelectableImpl& simpl()
             { return _ioDevice->simpl(); }
-            
+
         protected:
             virtual void onClose()
             { }
@@ -176,7 +179,7 @@ namespace System {
 
             virtual void onDetach(SelectorBase& sb)
             { _ioDevice->setSelector(0); }
-        
+
             int sync();
 
             virtual std::streamsize _peek(char* buffer, std::streamsize size);
