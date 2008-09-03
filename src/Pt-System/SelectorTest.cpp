@@ -52,7 +52,6 @@ class IOStreamTest : public Pt::Unit::TestSuite
             inbuf.setSelector( &eloop.selector() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
-            std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
             std::cerr << "\nWriting: " << "Hello world!" << std::endl;
             outbuf.sputn("Hello world!", 12);
             std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
