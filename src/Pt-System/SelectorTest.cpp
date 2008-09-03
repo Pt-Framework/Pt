@@ -21,7 +21,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOBuffer.h"
 #include "Pt/System/IOStream.h"
@@ -36,34 +36,29 @@ class IOStreamTest : public Pt::Unit::TestSuite
     public:
         IOStreamTest()
         : Pt::Unit::TestSuite("IOStreamTest")
-        , _exit(false)
         {
             Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
         }
 
-        ~IOStreamTest()
-        { }
-
         void AsyncIO()
         {
-            Pt::System::Selector selector;
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
 
-            Pt::System::IOBuffer outbuf( pipe.output() );
-            outbuf.setSelector(&selector);
+            outbuf.setDevice( pipe.output() );
+            outbuf.setSelector( &eloop.selector() );
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
             inbuf.setDevice( pipe.input() );
-            inbuf.setSelector(&selector);
+            inbuf.setSelector( &eloop.selector() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
+            std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
             std::cerr << "\nWriting: " << "Hello world!" << std::endl;
             outbuf.sputn("Hello world!", 12);
             std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
             outbuf.beginFlush();
 
-            while( ! _exit )
-                selector.wait();
+            eloop.run();
 
             std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
@@ -75,7 +70,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             char in[20];
             size_t n = buffer.sgetn(in, 20);
             std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
-            _exit = true;
+            eloop.exit();
         }
 
         void onOutput(Pt::System::IOBuffer& buffer)
@@ -84,9 +79,11 @@ class IOStreamTest : public Pt::Unit::TestSuite
             buffer.device()->close();
             inbuf.beginSync();
         }
+
     private:
-        bool _exit;
+        Pt::System::EventLoop eloop;
         Pt::System::IOBuffer inbuf;
+        Pt::System::IOBuffer outbuf;
 };
 
 Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
