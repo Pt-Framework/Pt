@@ -36,6 +36,8 @@ class PT_SYSTEM_API Clock
         /** @brief Gets the system time
             The getTime function retrieves the system time, in milliseconds. 
             The system time is the time elapsed since the system was started.
+
+            TODO: getElapsedTime, getSystemTime, getLocalTime
         */
         static Timespan getSystemTime();
 
