@@ -49,8 +49,8 @@ namespace System {
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peek(char* buffer, std::streamsize size)
-            { return _buffer->peek(buffer, size); }
+            std::streamsize peeksome(char* buffer, std::streamsize size)
+            { return _buffer->peeksome(buffer, size); }
 
             explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
             : std::basic_istream<CharT>( buffer ),

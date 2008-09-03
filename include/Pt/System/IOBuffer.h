@@ -205,7 +205,7 @@ inline size_t IOBuffer::out_avail() const
     if( this->pptr() )
         return this->epptr() - this->pptr();
 
-    return 0;
+    return _bufferSize;
 }
 
 
