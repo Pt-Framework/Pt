@@ -44,12 +44,12 @@ class IOStreamTest : public Pt::Unit::TestSuite
         {
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
 
+            eloop.add( pipe.output() );
             outbuf.setDevice( pipe.output() );
-            outbuf.setSelector( &eloop.selector() );
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
+            eloop.add( pipe.input() );
             inbuf.setDevice( pipe.input() );
-            inbuf.setSelector( &eloop.selector() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
             std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;

@@ -65,8 +65,8 @@ void IOBuffer::setDevice(IODevice& ioDevice)
 {
     if(_ioDevice)
     {
-        if(_selector)
-            _selector->remove(*_ioDevice);
+        //if(_selector)
+        //    _selector->remove(*_ioDevice);
 
         disconnect(ioDevice.inputReady, *this, &IOBuffer::onRead);
         disconnect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
@@ -74,8 +74,8 @@ void IOBuffer::setDevice(IODevice& ioDevice)
 
     _ioDevice = &ioDevice;
 
-    if(_selector)
-        _selector->add(*_ioDevice);
+    //if(_selector)
+    //    _selector->add(*_ioDevice);
 
     connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
     connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
@@ -88,23 +88,13 @@ IODevice* IOBuffer::device()
 }
 
 
-void IOBuffer::setSelector(SelectorBase* selector)
+/*void IOBuffer::setSelector(SelectorBase* selector)
 {
     if( _ioDevice)
         _ioDevice->setSelector(selector);
 
-    /*if(_selector && _ioDevice )
-    {
-        _selector->remove(*_ioDevice);
-    }
-
-    if(selector && _ioDevice)
-    {
-        selector->add(*_ioDevice);
-    }*/
-
     _selector = selector;
-}
+}*/
 
 
 void IOBuffer::beginSync()
