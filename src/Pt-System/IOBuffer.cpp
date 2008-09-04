@@ -90,7 +90,10 @@ IODevice* IOBuffer::device()
 
 void IOBuffer::setSelector(SelectorBase* selector)
 {
-    if(_selector && _ioDevice )
+    if( _ioDevice)
+        _ioDevice->setSelector(selector);
+
+    /*if(_selector && _ioDevice )
     {
         _selector->remove(*_ioDevice);
     }
@@ -98,7 +101,7 @@ void IOBuffer::setSelector(SelectorBase* selector)
     if(selector && _ioDevice)
     {
         selector->add(*_ioDevice);
-    }
+    }*/
 
     _selector = selector;
 }
