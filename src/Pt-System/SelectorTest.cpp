@@ -43,12 +43,12 @@ class IOStreamTest : public Pt::Unit::TestSuite
         void AsyncIO()
         {
             Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-
             eloop.add( pipe.output() );
+            eloop.add( pipe.input() );
+
             outbuf.setDevice( pipe.output() );
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
-            eloop.add( pipe.input() );
             inbuf.setDevice( pipe.input() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
