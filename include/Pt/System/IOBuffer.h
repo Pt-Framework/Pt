@@ -45,8 +45,6 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
 
         IODevice* device();
 
-        //void setSelector(SelectorBase* selector);
-
         void beginSync();
 
         size_t out_avail() const;
