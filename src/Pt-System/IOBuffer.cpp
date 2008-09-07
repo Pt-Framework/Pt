@@ -123,11 +123,8 @@ void IOBuffer::onRead(IODevice& dev)
 }
 
 
-size_t IOBuffer::out_avail() const
+std::streamsize IOBuffer::showmanyp()
 {
-    if( this->pptr() )
-        return this->epptr() - this->pptr();
-
     return _bufferSize;
 }
 
@@ -190,7 +187,7 @@ int IOBuffer::sync()
 }
 
 
-std::streamsize IOBuffer::_peek(char* buffer, std::streamsize size)
+std::streamsize IOBuffer::xspeekn(char* buffer, std::streamsize size)
 {
     // can not peek in writing mode
     if( this->pptr() )

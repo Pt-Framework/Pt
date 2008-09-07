@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,23 +23,36 @@
 #include <streambuf>
 #include <Pt/System/Api.h>
 
-
 namespace Pt {
 
 namespace System {
 
     template <typename CharT>
-    class BasicStreamBuffer : public std::basic_streambuf<CharT> {
+    class BasicStreamBuffer : public std::basic_streambuf<CharT>
+    {
         public:
-            typedef typename std::basic_streambuf<CharT>::int_type IntT;
-            typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;
+            std::streamsize speekn(CharT* buffer, std::streamsize size)
+            { return this->xspeekn(buffer, size); }
 
-        public:
-            virtual std::streamsize peeksome(CharT* buffer, std::streamsize size)
-            { return this->_peeksome(buffer, size); }
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->epptr() - this->pptr();
+
+            return this->showmanyp();
+        }
 
         protected:
-            virtual std::streamsize _peeksome(CharT* buffer, std::streamsize size)
+            virtual std::streamsize xspeekn(CharT* buffer, std::streamsize size)
+            {
+                if(size == 0)
+                    return 0;
+
+                buffer[0] = this->sgetc();
+                return 1;
+            }
+
+            virtual std::streamsize showmanyp()
             { return 0; }
     };
 
@@ -50,5 +63,3 @@ namespace System {
 } // namespace Pt
 
 #endif
-
-

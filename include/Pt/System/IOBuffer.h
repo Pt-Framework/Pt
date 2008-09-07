@@ -29,7 +29,7 @@ namespace Pt {
 namespace System {
 
 //! @brief a stream buffer for IODevices with linear buffer area.
-class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
+class PT_SYSTEM_API IOBuffer : public StreamBuffer
                              , public Connectable
 {
     public:
@@ -47,8 +47,6 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
 
         void beginSync();
 
-        size_t out_avail() const;
-
         void beginFlush();
 
         Signal<IOBuffer&> inputReady;
@@ -58,7 +56,9 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
     protected:
         virtual int sync();
 
-        virtual std::streamsize _peek(char* buffer, std::streamsize size);
+        virtual std::streamsize showmanyp();
+
+        virtual std::streamsize xspeekn(char* buffer, std::streamsize size);
 
         virtual int_type underflow();
 

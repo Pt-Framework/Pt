@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris D�rner                                  *
+ *   Copyright (C) 2005-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,12 +20,9 @@
 #define Pt_System_IOStream_h
 
 #include <Pt/System/Api.h>
-#include <Pt/System/IODevice.h>
-#include <Pt/System/IOBuffer.h>
-
+#include <Pt/System/StreamBuffer.h>
 #include <iostream>
-#include <memory>
-
+#include <algorithm>
 
 namespace Pt {
 
@@ -36,6 +33,11 @@ namespace System {
     class BasicIStream : public std::basic_istream<CharT> 
     {
         public:
+            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
+            : std::basic_istream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
+
             ~BasicIStream() throw()
             { }
 
@@ -43,19 +45,21 @@ namespace System {
             BasicStreamBuffer<CharT>* rdbuf()
             { return _buffer; }
 
+            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            {
+                BasicStreamBuffer<CharT>* tmp = _buffer;
+                _buffer = buffer;
+                return tmp;
+            }
+
             //! @brief Peeks bytes in the stream buffer.
             /**
                The number of bytes that can be peeked depends on the current
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peeksome(char* buffer, std::streamsize size)
-            { return _buffer->peeksome(buffer, size); }
-
-            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
-            : std::basic_istream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+            std::streamsize peeksome(CharT* buffer, std::streamsize n)
+            { return _buffer->speekn(buffer, n); }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
@@ -67,6 +71,11 @@ namespace System {
     class BasicOStream : public std::basic_ostream<CharT> 
     {
         public:
+            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer)
+            : std::basic_ostream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
+
             ~BasicOStream() throw()
             {}
 
@@ -74,10 +83,24 @@ namespace System {
             BasicStreamBuffer<CharT>* rdbuf()
             { return _buffer; }
 
-            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer)
-            : std::basic_ostream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            {
+                BasicStreamBuffer<CharT>* tmp = _buffer;
+                _buffer = buffer;
+                return tmp;
+            }
+
+            std::streamsize writesome(CharT* buffer, std::streamsize n)
+            {
+                std::streamsize avail = _buffer->out_avail();
+                if(avail == 0)
+                {
+                    return 0;
+                }
+
+                n = std::min(avail, n);
+                return _buffer->sputn(buffer, n);
+            }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
@@ -86,9 +109,14 @@ namespace System {
 
     //! @brief An iostream with peeking capability.
     template <typename CharT>
-    class BasicIOStream : public std::basic_iostream<CharT> 
+    class BasicIOStream : public std::basic_iostream<CharT>
     {
         public:
+            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer)
+            : std::basic_iostream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
+
             ~BasicIOStream() throw()
             { }
 
@@ -96,25 +124,37 @@ namespace System {
             BasicStreamBuffer<CharT>* rdbuf()
             { return _buffer; }
 
-            //! @brief Peeks bytes in the stream buffer.rb
+            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            {
+                BasicStreamBuffer<CharT>* tmp = _buffer;
+                _buffer = buffer;
+                return tmp;
+            }
+
+            //! @brief Peeks bytes in the stream buffer.
             /**
                The number of bytes that can be peeked depends on the current
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peeksome(char* buffer, std::streamsize size)
-            { return _buffer->peeksome(buffer, size); }
+            std::streamsize peeksome(CharT* buffer, std::streamsize n)
+            { return _buffer->speekn(buffer, n); }
 
-        protected:
-            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer)
-            : std::basic_iostream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+            std::streamsize writesome(CharT* buffer, std::streamsize n)
+            {
+                std::streamsize avail = _buffer->out_avail();
+                if(avail == 0)
+                {
+                    return 0;
+                }
+
+                n = std::min(avail, n);
+                return _buffer->sputn(buffer, n);
+            }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
     };
-
 
     typedef BasicIStream<char> IStream;
     typedef BasicOStream<char> OStream;
@@ -125,5 +165,4 @@ namespace System {
 } // !namespace Pt
 
 #endif
-
 
