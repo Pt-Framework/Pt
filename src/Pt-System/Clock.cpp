@@ -25,14 +25,14 @@ Timespan Clock::stop()
     return _impl->stop();
 }
 
-DateTime Clock::getCurrentTime()
+DateTime Clock::getLocalTime()
 {
-    return ClockImpl::getCurrentTime();
+    return ClockImpl::getLocalTime();
 }
 
-Timespan Clock::getSystemTime()
+Timespan Clock::getSystemTicks()
 {
-    return ClockImpl::getSystemTime();
+    return ClockImpl::getSystemTicks();
 }
 
 } //namespace System

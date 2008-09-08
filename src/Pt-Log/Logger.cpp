@@ -76,7 +76,7 @@ Logger& Logger::beginLog(const Pt::SourceInfo& si)
     if( this->enabled() )
     {
         _msg->setSourceInfo(si);
-        _msg->setTimestamp( System::Clock::getCurrentTime() );
+        _msg->setTimestamp( System::Clock::getLocalTime() );
     }
 
     return *this;
@@ -185,7 +185,7 @@ Message* Logger::init(const std::string& name, LogLevel level)
     std::auto_ptr<Message> msg( new Message(name, level) );
     msg->setThreadId(0);
     msg->setProcessId(0);
-    msg->setTimestamp( System::Clock::getCurrentTime() );
+    msg->setTimestamp( System::Clock::getLocalTime() );
     return msg.release();
 }
 

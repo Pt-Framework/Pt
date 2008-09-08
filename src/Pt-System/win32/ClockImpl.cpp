@@ -67,7 +67,7 @@ Timespan ClockImpl::stop()
 }
 
 
-Pt::DateTime ClockImpl::getCurrentTime()
+Pt::DateTime ClockImpl::getLocalTime()
 {
     SYSTEMTIME systemTime;
     GetSystemTime(&systemTime);
@@ -82,7 +82,7 @@ Pt::DateTime ClockImpl::getCurrentTime()
 }
 
 
-Timespan ClockImpl::getSystemTime()
+Timespan ClockImpl::getSystemTicks()
 {
     return Timespan( 1000 * timeGetTime() );
 }

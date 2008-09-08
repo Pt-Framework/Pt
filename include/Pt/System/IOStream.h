@@ -30,7 +30,7 @@ namespace System {
 
     //! @brief An istream with peeking capability.
     template <typename CharT>
-    class BasicIStream : public std::basic_istream<CharT> 
+    class BasicIStream : public std::basic_istream<CharT>
     {
         public:
             explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
@@ -42,10 +42,10 @@ namespace System {
             { }
 
             //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* rdbuf()
+            BasicStreamBuffer<CharT>* buffer()
             { return _buffer; }
 
-            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
             {
                 BasicStreamBuffer<CharT>* tmp = _buffer;
                 _buffer = buffer;
@@ -59,7 +59,16 @@ namespace System {
                similar to istream::readsome().
             */
             std::streamsize peeksome(CharT* buffer, std::streamsize n)
-            { return _buffer->speekn(buffer, n); }
+            {
+                std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
+                if(current == _buffer)
+                    return _buffer->speekn(buffer, n);
+
+                if(n > 0)
+                    buffer[0] = current->getc();
+
+                return 0;
+            }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
@@ -80,10 +89,10 @@ namespace System {
             {}
 
             //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* rdbuf()
+            BasicStreamBuffer<CharT>* buffer()
             { return _buffer; }
 
-            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
             {
                 BasicStreamBuffer<CharT>* tmp = _buffer;
                 _buffer = buffer;
@@ -94,9 +103,7 @@ namespace System {
             {
                 std::streamsize avail = _buffer->out_avail();
                 if(avail == 0)
-                {
                     return 0;
-                }
 
                 n = std::min(avail, n);
                 return _buffer->sputn(buffer, n);
@@ -121,10 +128,10 @@ namespace System {
             { }
 
             //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* rdbuf()
+            BasicStreamBuffer<CharT>* buffer()
             { return _buffer; }
 
-            BasicStreamBuffer<CharT>* rdbuf(BasicStreamBuffer<CharT>*  buffer)
+            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
             {
                 BasicStreamBuffer<CharT>* tmp = _buffer;
                 _buffer = buffer;

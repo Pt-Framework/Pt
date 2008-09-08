@@ -52,7 +52,7 @@ void Timer::start(std::size_t interval)
 {
     _active = true;
     _interval = interval;
-    _started = Clock::getSystemTime();
+    _started = Clock::getSystemTicks();
     _elapsed = 0;
 }
 
@@ -70,7 +70,7 @@ bool Timer::update()
     if(_active == false)
         return false;
 
-    Timespan now = Clock::getSystemTime();
+    Timespan now = Clock::getSystemTicks();
     Pt::int64_t elapsedMSecs = (now - _started).totalMSecs();
 
     _elapsed = static_cast<std::size_t>(-1);

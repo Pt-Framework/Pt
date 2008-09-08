@@ -131,7 +131,7 @@ void DateTimeTest::testOperators()
 
 void DateTimeTest::testMsecsUnixEpoch()
 {
-	   Pt::DateTime dt = Pt::System::Clock::getCurrentTime();
+	   Pt::DateTime dt = Pt::System::Clock::getLocalTime();
     Pt::DateTime dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1970, 8, 1, 12, 11, 25, 0);

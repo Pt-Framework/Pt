@@ -32,7 +32,7 @@ Timespan ClockImpl::stop()
 }
 
 
-DateTime ClockImpl::getCurrentTime()
+DateTime ClockImpl::getLocalTime()
 {
     struct timeval timeValue;
     gettimeofday(&timeValue, NULL);
@@ -51,7 +51,7 @@ DateTime ClockImpl::getCurrentTime()
 }
 
 
-Timespan ClockImpl::getSystemTime()
+Timespan ClockImpl::getSystemTicks()
 {
     struct timeval tv;
     gettimeofday( &tv, 0 );

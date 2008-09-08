@@ -17,9 +17,9 @@ class ClockImpl
 
         Timespan stop();
 
-        static DateTime getCurrentTime();
+        static DateTime getLocalTime();
 
-        static Timespan getSystemTime();
+        static Timespan getSystemTicks();
 
     private:
         DWORD           _procAffinity;
