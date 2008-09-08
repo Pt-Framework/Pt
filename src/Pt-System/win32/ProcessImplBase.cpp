@@ -146,7 +146,7 @@ bool ProcessImplBase::tryWait(int& status)
     {
         DWORD exitCode;
         GetExitCodeProcess( m_pid.hProcess, &exitCode);
-        status = exitcode;
+        status = exitCode;
         return true;
     }
 

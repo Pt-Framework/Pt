@@ -78,11 +78,29 @@ size_t IODevice::endRead()
 
 size_t IODevice::read(char* buffer, size_t n)
 {
-    if ( async() )
+    if( async() )
     {
-        this->beginRead(buffer, n);
-        this->wait();
-        return endRead();
+        if( ! _rbuf )
+        {
+            this->beginRead(buffer, n);
+        }
+
+        size_t r = this->onEndRead(_eof);
+        size_t transferred = std::min(n, r);
+        size_t leftover = r > n ? r - n : 0;
+
+        memcpy( buffer, _rbuf, transferred );
+        if(leftover > 0)
+            memmove(_rbuf, _rbuf+transferred, leftover);
+        
+        _ravail = leftover + this->onBeginRead(_rbuf+leftover, _rbuflen-leftover, _eof);
+
+        if(_ravail || _eof || _wavail)
+            this->setState(Selectable::Avail);
+        else
+            this->setState(Selectable::Busy);
+        
+        return transferred;
     }
 
     return this->onRead(buffer, n, _eof);

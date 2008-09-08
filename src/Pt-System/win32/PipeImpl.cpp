@@ -212,8 +212,13 @@ size_t PipeIODevice::onEndRead(bool& eof)
         return 0;
     }
 
+    if(_readOv.hEvent == NULL)
+    {
+        return this->onRead(_rbuf, _rbuflen, eof);
+    }
+
     DWORD readBytes = 0;
-    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) )
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
         if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
@@ -223,6 +228,36 @@ size_t PipeIODevice::onEndRead(bool& eof)
         else
         {
             throw IOError("Could not end read from file handle", PT_SOURCEINFO);
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
+
+
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+{
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
+        }
+        else
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
     }
 
@@ -269,35 +304,6 @@ size_t PipeIODevice::onEndWrite()
 void PipeIODevice::onClose()
 {
     IODeviceImpl::close();
-}
-
-
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
-{
-    eof = false;
-    DWORD readBytes = 0;
-
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
-    {
-        if( ERROR_HANDLE_EOF == GetLastError() || 
-            ERROR_BROKEN_PIPE == GetLastError() )
-        {
-            eof = true;
-            readBytes = 0;
-        }
-        else if( ERROR_IO_PENDING != GetLastError() )
-        {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
-        }
-        else if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
-        {
-            readBytes = 0;
-        }
-    }
-
-    _readOv.Offset += readBytes;
-    _writeOv.Offset += readBytes;
-    return readBytes;
 }
 
 
