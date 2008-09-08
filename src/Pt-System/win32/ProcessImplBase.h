@@ -50,6 +50,8 @@ namespace System {
 
             int wait();
 
+            bool tryWait(int& status)
+
             static unsigned long usedMemory();
 
     private:

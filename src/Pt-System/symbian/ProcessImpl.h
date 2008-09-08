@@ -79,6 +79,8 @@ class PT_API ProcessImpl
 
         int wait();
 
+        bool tryWait(int& status);
+
         static unsigned long usedMemory()
         { return 0;}
 

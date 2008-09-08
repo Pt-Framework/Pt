@@ -153,7 +153,7 @@ bool ProcessImpl::tryWait(int& status)
     pid_t ret = waitpid(m_pid, &status, WUNTRACED|WNOHANG);
     if( 0 > ret)
     {
-        throw SystemError(std::strerror(errno), XPR_SOURCEINFO);
+        throw SystemError(std::strerror(errno), PT_SOURCEINFO);
     }
 
     return ret != 0;
