@@ -46,6 +46,7 @@ namespace Pt {
 namespace System {
 
     class Application;
+    class Clock;
     class Directory;
     class File;
     class FileInfo;
