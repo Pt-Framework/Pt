@@ -124,9 +124,23 @@ int ProcessImpl::wait()
     {
         User::After(1000);
     }
-    
+
     //FIXME: return exit code
     return 0;
+}
+
+
+bool ProcessImpl::tryWait(int& status)
+{
+    // wait for process to exit busy loop style
+    if(m_process.ExitType() == EExitPending)
+    {
+        return false;
+    }
+
+    //FIXME: return exit code
+    status = 0;
+    return true;
 }
 
 } // namespace Pt
