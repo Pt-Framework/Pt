@@ -135,6 +135,26 @@ int ProcessImplBase::wait()
 }
 
 
+bool ProcessImplBase::tryWait(int& status)
+{
+    DWORD ret = WaitForSingleObject(m_pid.hProcess, 0);
+
+    if(WAIT_TIMEOUT == ret)
+        return false;
+
+    if(WAIT_OBJECT_0 == ret)
+    {
+        DWORD exitCode;
+        GetExitCodeProcess( m_pid.hProcess, &exitCode);
+        status = exitcode;
+        return true;
+    }
+
+    throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
+    return false;
+}
+
+
 unsigned long ProcessImplBase::usedMemory()
 {
 #ifndef _WIN32_WCE
