@@ -51,6 +51,13 @@ namespace System {
             ~CloseFailed() throw();
     };
 
+    class PT_SYSTEM_API IOPending : public IOError {
+        public:
+            IOPending(const std::string& what, const SourceInfo& si);
+
+            ~IOPending() throw();
+    };
+
 } // namespace System
 
 } // namespace Pt

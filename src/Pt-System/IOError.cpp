@@ -57,6 +57,17 @@ CloseFailed::~CloseFailed() throw()
 {
 }
 
+
+IOPending::IOPending(const std::string& what, const SourceInfo& si)
+: IOError(what, si)
+{
+}
+
+
+IOPending::~IOPending() throw()
+{
+}
+
 } // namespace System
 
 } // namespace Pt

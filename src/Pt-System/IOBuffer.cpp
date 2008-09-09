@@ -27,10 +27,12 @@ namespace System {
 
 IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize)
 : _selector(0),
-    _ioDevice(&ioDevice),
-    _buffer(0),
-    _bufferSize(bufferSize),
-    _putbackMax(4)
+  _ioDevice(&ioDevice),
+  _buffer(0),
+  _bufferSize(bufferSize),
+  _putbackMax(4),
+  _syncing(false),
+  _flushing(false)
 {
     _buffer = new char[_bufferSize];
 
@@ -43,10 +45,12 @@ IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize)
 
 IOBuffer::IOBuffer(size_t bufferSize)
 : _selector(0),
-    _ioDevice(0),
-    _buffer(0),
-    _bufferSize(bufferSize),
-    _putbackMax(4)
+  _ioDevice(0),
+  _buffer(0),
+  _bufferSize(bufferSize),
+  _putbackMax(4),
+  _syncing(false),
+  _flushing(false)
 {
     _buffer = new char[_bufferSize];
 
@@ -63,15 +67,20 @@ IOBuffer::~IOBuffer()
 
 void IOBuffer::setDevice(IODevice& ioDevice)
 {
+    if( ioDevice.busy() )
+        throw IOPending("IODevice in use", PT_SOURCEINFO);
+
     if(_ioDevice)
     {
-        disconnect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+        if( _ioDevice->busy() )
+            throw IOPending("IODevice in use", PT_SOURCEINFO);
+
+        disconnect(ioDevice.inputReady, *this, &IOBuffer::onSync);
         disconnect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
     }
 
     _ioDevice = &ioDevice;
-
-    connect(ioDevice.inputReady, *this, &IOBuffer::onRead);
+    connect(ioDevice.inputReady, *this, &IOBuffer::onSync);
     connect(ioDevice.outputReady, *this, &IOBuffer::onWrite);
 }
 
@@ -84,42 +93,51 @@ IODevice* IOBuffer::device()
 
 void IOBuffer::beginSync()
 {
-    size_t putbackSize = _putbackMax;
+    if(_syncing)
+        return;
 
-    // keep chars for putback if in reading mode
+    size_t putback = _putbackMax;
+    size_t leftover = 0;
+
+    // keep chars for putback
     if( this->gptr() )
     {
-        putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-        std::memmove(_buffer + (_putbackMax - putbackSize),
-                        this->gptr() - putbackSize,
-                        putbackSize * sizeof(char) );
+        putback = std::min<size_t>( gptr() - eback(), _putbackMax);
+        char* to = _buffer + _putbackMax - putback;
+        char* from = this->gptr() - putback;
+
+        if(to == from)
+            throw IOPending("IOBuffer is full", PT_SOURCEINFO);
+
+        leftover = egptr() - gptr();
+        std::memmove( to, from, putback + leftover );
     }
 
-    _ioDevice->beginRead( _buffer + _putbackMax, _bufferSize - _putbackMax );
+    size_t used = _putbackMax + leftover;
+    _ioDevice->beginRead( _buffer + used, _bufferSize - used );
+    _syncing = true;
 
-    // set get area, will also enter reading mode
-    this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
-                _buffer + _putbackMax, // gptr position
-                _buffer + _putbackMax ); // end of get area
+    this->setg( _buffer + (_putbackMax - putback), // start of get area
+                _buffer + used, // gptr position
+                _buffer + used ); // end of get area
 }
 
 
-void IOBuffer::onRead(IODevice& dev)
+void IOBuffer::onSync(IODevice& dev)
 {
-    size_t readSize = dev.endRead();
+    this->endSync();
+    inputReady.send(*this);
+}
 
-    if( _ioDevice->eof() )
-    {
-        this->setg(0, 0, 0);
-        return;
-    }
 
-    // set get area, will also enter reading mode
+void IOBuffer::endSync()
+{
+    size_t readSize = _ioDevice->endRead();
+    _syncing = false;
+
     this->setg( this->eback(), // start of get area
                 this->gptr(), // gptr position
                 this->egptr() + readSize ); // end of get area
-
-    inputReady.send(*this);
 }
 
 
@@ -215,9 +233,11 @@ IOBuffer::underflow()
         return traits_type::eof();
 
     // buffer is not empty yet.
-    if( this->gptr() < this->egptr() ) {
+    if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *(this->gptr()) );
-    }
+
+    if( _syncing)
+        this->endSync();
 
     if( _ioDevice->eof() )
         return traits_type::eof();
@@ -225,7 +245,8 @@ IOBuffer::underflow()
     size_t putbackSize = _putbackMax;
 
     // keep chars for putback if in reading mode
-    if( this->gptr() ) {
+    if( this->gptr() )
+    {
         putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
         std::memmove(_buffer + (_putbackMax - putbackSize),
                         this->gptr() - putbackSize,

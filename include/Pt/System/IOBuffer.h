@@ -67,7 +67,9 @@ class PT_SYSTEM_API IOBuffer : public StreamBuffer
         virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
 
     private:
-        void onRead(IODevice& dev);
+        void onSync(IODevice& dev);
+
+        void endSync();
 
         void onWrite(IODevice& dev);
 
@@ -77,6 +79,8 @@ class PT_SYSTEM_API IOBuffer : public StreamBuffer
         char* _buffer;
         const size_t _bufferSize;
         const size_t _putbackMax;
+        bool _syncing;
+        bool _flushing;
 };
 
 } //namespace System
