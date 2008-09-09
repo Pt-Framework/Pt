@@ -177,9 +177,24 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
             continue;
 
         if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(this->fd(), &fds);
+            while( true )
+            {
+                int ret = ::select(_fd+1, &fds, 0, 0, 0);
+                if( ret != -1 )
+                    break;
 
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+                if( errno != EINTR )
+                    throw IOError( "select failed", PT_SOURCEINFO );
+            }
+
+            continue;
+        }
+
+        throw IOError("read failed", PT_SOURCEINFO);
     }
 
     return ret;
@@ -223,8 +238,23 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
         if(errno == EINTR) // signal interrupt
             continue;
 
-        if(errno == EAGAIN)
-            return 0;
+        if(errno == EAGAIN) // non-blocking and no data yet
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(this->fd(), &fds);
+            while( true )
+            {
+                int ret = ::select(_fd+1, 0, &fds, 0, 0);
+                if( ret != -1 )
+                    break;
+
+                if( errno != EINTR )
+                    throw IOError( "select failed", PT_SOURCEINFO );
+            }
+
+            continue;
+        }
 
         throw IOError("Could not read from file handle", PT_SOURCEINFO);
     }
