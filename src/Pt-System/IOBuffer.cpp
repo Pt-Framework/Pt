@@ -19,6 +19,7 @@
 
 #include "Pt/System/IOBuffer.h"
 #include <algorithm>
+#include <stdexcept>
 #include <cstring> //memcpy/memmove()
 
 namespace Pt {
@@ -107,7 +108,7 @@ void IOBuffer::beginSync()
         char* from = this->gptr() - putback;
 
         if(to == from)
-            throw IOPending("IOBuffer is full", PT_SOURCEINFO);
+            throw std::logic_error(PT_SOURCEINFO + "IOBuffer is full");
 
         leftover = egptr() - gptr();
         std::memmove( to, from, putback + leftover );
