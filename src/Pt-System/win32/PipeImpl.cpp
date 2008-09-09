@@ -240,7 +240,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
 size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
         if( ERROR_HANDLE_EOF == GetLastError() || 
             ERROR_BROKEN_PIPE == GetLastError() )

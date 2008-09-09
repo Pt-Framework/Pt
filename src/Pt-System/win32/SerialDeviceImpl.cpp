@@ -264,7 +264,7 @@ size_t SerialDeviceImpl::endRead(bool& eof)
     }
 
     DWORD readBytes = 0;
-    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) )
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
         if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
@@ -322,7 +322,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     eof = false;
     DWORD readBytes = 0;
 
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
         if( ERROR_HANDLE_EOF == GetLastError() || 
             ERROR_BROKEN_PIPE == GetLastError() )
@@ -330,13 +330,16 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
             eof = true;
             readBytes = 0;
         }
-        else if( ERROR_IO_PENDING != GetLastError() )
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
+        }
+        else
         {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
-        }
-        else if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
-        {
-            readBytes = 0;
         }
     }
 

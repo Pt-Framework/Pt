@@ -298,7 +298,7 @@ size_t FileDeviceImpl::endRead(bool& eof)
 
 #ifndef _WIN32_WCE
    
-    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) )
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
         if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
@@ -409,7 +409,7 @@ size_t FileDeviceImpl::size()
     return sz;
 }
 
- 
+
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
     eof = false;
@@ -423,19 +423,19 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
             eof = true;
             readBytes = 0;
         }
-        else if( ERROR_IO_PENDING != GetLastError() )
+#ifndef _WIN32_WCE
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+            {
+                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            }
+        }
+#endif
+        else
         {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
-
-#ifndef _WIN32_WCE
-
-        else if (GetOverlappedResult(handle(), &_readOv, &readBytes, FALSE) == FALSE )
-        {
-            readBytes = 0;
-        }
-        
-#endif
     }
 
     _readOv.Offset += readBytes;
