@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Duerner                                 *
+ *   Copyright (C) 2004-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/System/IODevice.h"
+#include <string.h>
 
 namespace Pt {
 
@@ -83,23 +84,24 @@ size_t IODevice::read(char* buffer, size_t n)
         if( ! _rbuf )
         {
             this->beginRead(buffer, n);
+            return this->onEndRead(_eof);
         }
 
-        size_t r = this->onEndRead(_eof);
-        size_t transferred = std::min(n, r);
-        size_t leftover = r > n ? r - n : 0;
+        size_t available = this->onEndRead(_eof);
+        size_t transferred = std::min(n, available);
+        size_t leftover = available > n ? available - n : 0;
 
         memcpy( buffer, _rbuf, transferred );
         if(leftover > 0)
             memmove(_rbuf, _rbuf+transferred, leftover);
-        
+
         _ravail = leftover + this->onBeginRead(_rbuf+leftover, _rbuflen-leftover, _eof);
 
         if(_ravail || _eof || _wavail)
             this->setState(Selectable::Avail);
         else
             this->setState(Selectable::Busy);
-        
+
         return transferred;
     }
 
@@ -147,8 +149,12 @@ size_t IODevice::write(const char* buffer, size_t n)
 {
     if ( async() )
     {
+        if( _wbuf )
+        {
+            return this->endWrite();
+        }
+
         this->beginWrite(buffer, n);
-        this->wait();
         return endWrite();
     }
 
@@ -158,7 +164,7 @@ size_t IODevice::write(const char* buffer, size_t n)
 
 bool IODevice::seekable() const
 {
-    return onSeekable(); 
+    return onSeekable();
 }
 
 
