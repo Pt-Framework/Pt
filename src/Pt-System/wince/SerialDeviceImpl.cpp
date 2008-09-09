@@ -250,6 +250,7 @@ size_t SerialDeviceImpl::endRead(bool& eof)
     GetCommMask(handle(), &mask);
     SetCommMask( handle(), mask &~ EV_RXCHAR );
 
+	WaitForSingleObject(_ioReady, INFINITE);
     ResetEvent(_ioReady); 
 
     // might have read data before WaitCommEvent
@@ -297,6 +298,7 @@ size_t SerialDeviceImpl::endWrite()
     GetCommMask(handle(), &mask);
     SetCommMask( handle(), mask &~ EV_TXEMPTY );
 
+	WaitForSingleObject(_ioReady, INFINITE);
     ResetEvent(_ioReady); 
 
     if ( len == 0 )
