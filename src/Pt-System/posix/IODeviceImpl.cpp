@@ -183,8 +183,8 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
             FD_SET(this->fd(), &fds);
             while( true )
             {
-                int ret = ::select(_fd+1, &fds, 0, 0, 0);
-                if( ret != -1 )
+                int r = ::select(_fd+1, &fds, 0, 0, 0);
+                if( r != -1 )
                     break;
 
                 if( errno != EINTR )
@@ -245,8 +245,8 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
             FD_SET(this->fd(), &fds);
             while( true )
             {
-                int ret = ::select(_fd+1, 0, &fds, 0, 0);
-                if( ret != -1 )
+                int r = ::select(_fd+1, 0, &fds, 0, 0);
+                if( r != -1 )
                     break;
 
                 if( errno != EINTR )
