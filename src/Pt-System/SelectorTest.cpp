@@ -46,10 +46,10 @@ class IOStreamTest : public Pt::Unit::TestSuite
             eloop.add( pipe.output() );
             eloop.add( pipe.input() );
 
-            outbuf.setDevice( pipe.output() );
+            outbuf.attach( pipe.output() );
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
-            inbuf.setDevice( pipe.input() );
+            inbuf.attach( pipe.input() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
             std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;

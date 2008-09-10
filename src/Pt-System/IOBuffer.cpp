@@ -27,8 +27,7 @@ namespace Pt {
 namespace System {
 
 IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize)
-: _selector(0),
-  _ioDevice(&ioDevice),
+: _ioDevice(&ioDevice),
   _buffer(0),
   _bufferSize(bufferSize),
   _putbackMax(4),
@@ -40,13 +39,12 @@ IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize)
     this->setg(0, 0, 0);
     this->setp(0, 0);
 
-    this->setDevice(ioDevice);
+    this->attach(ioDevice);
 }
 
 
 IOBuffer::IOBuffer(size_t bufferSize)
-: _selector(0),
-  _ioDevice(0),
+: _ioDevice(0),
   _buffer(0),
   _bufferSize(bufferSize),
   _putbackMax(4),
@@ -66,7 +64,7 @@ IOBuffer::~IOBuffer()
 }
 
 
-void IOBuffer::setDevice(IODevice& ioDevice)
+void IOBuffer::attach(IODevice& ioDevice)
 {
     if( ioDevice.busy() )
         throw IOPending("IODevice in use", PT_SOURCEINFO);
@@ -94,7 +92,7 @@ IODevice* IOBuffer::device()
 
 void IOBuffer::beginSync()
 {
-    if(_syncing)
+    if(_syncing || _ioDevice == 0)
         return;
 
     size_t putback = _putbackMax;

@@ -41,7 +41,7 @@ class PT_SYSTEM_API IOBuffer : public StreamBuffer
 
         ~IOBuffer();
 
-        void setDevice(IODevice& ioDevice);
+        void attach(IODevice& ioDevice);
 
         IODevice* device();
 
@@ -74,7 +74,6 @@ class PT_SYSTEM_API IOBuffer : public StreamBuffer
         void onWrite(IODevice& dev);
 
     private:
-        SelectorBase* _selector;
         IODevice* _ioDevice;
         char* _buffer;
         const size_t _bufferSize;
