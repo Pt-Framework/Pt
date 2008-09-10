@@ -33,12 +33,12 @@ namespace System {
     class BasicIStream : public std::basic_istream<CharT>
     {
         public:
-            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer)
+            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer = 0)
             : std::basic_istream<CharT>( buffer ),
               _buffer(buffer)
             { }
 
-            ~BasicIStream() throw()
+            ~BasicIStream()
             { }
 
             //! @brief Access to the underlying buffer.
@@ -80,12 +80,12 @@ namespace System {
     class BasicOStream : public std::basic_ostream<CharT> 
     {
         public:
-            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer)
+            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer = 0)
             : std::basic_ostream<CharT>( buffer ),
               _buffer(buffer)
             { }
 
-            ~BasicOStream() throw()
+            ~BasicOStream()
             {}
 
             //! @brief Access to the underlying buffer.
@@ -119,12 +119,12 @@ namespace System {
     class BasicIOStream : public std::basic_iostream<CharT>
     {
         public:
-            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer)
+            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer = 0)
             : std::basic_iostream<CharT>( buffer ),
               _buffer(buffer)
             { }
 
-            ~BasicIOStream() throw()
+            ~BasicIOStream()
             { }
 
             //! @brief Access to the underlying buffer.

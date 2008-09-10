@@ -23,7 +23,6 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/StreamBuffer.h>
 
-
 namespace Pt {
 
 namespace System {

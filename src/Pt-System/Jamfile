@@ -28,7 +28,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           File.cpp
                           FileDevice.cpp
                           FileInfo.cpp
-                          #FileStream.cpp
+                          FileStream.cpp
                           IOBuffer.cpp
                           IODevice.cpp
                           IOError.cpp

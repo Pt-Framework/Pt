@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,40 +16,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/FileStream.h"
-
+#include "Pt/System/Selector.h"
 
 namespace Pt {
 
 namespace System {
 
-
-FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode)
-: IOBuffer(),
-  _file(name, omode)
+FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode, bool async)
+: _file(name, omode, async)
 {
-    IOBuffer::init(_file);
+    IOBuffer::attach(_file);
 }
 
 
-
-
-FileStream::FileStream(const char* path, std::ios_base::openmode omode)
-: IOStream( &_buffer ),
-  _buffer(path, omode)
+FileBuffer::~FileBuffer()
 {
-    // no std::locale on WinCE
-    #ifndef _WIN32_WCE
-    this->imbue( std::locale(this->getloc(), new std::ctype<char>()) );
-    this->imbue( std::locale(this->getloc(), new std::num_get<char>()) );
-    this->imbue( std::locale(this->getloc(), new std::num_put<char>()) );
-    this->imbue( std::locale(this->getloc(), new std::numpunct<char>()) );
-    #endif
 }
 
 
-FileStream::~FileStream() throw()
+void FileBuffer::setSelector(SelectorBase* sel)
+{
+    _file.setSelector(sel);
+}
+
+
+void FileBuffer::close()
+{
+    _file.close();
+}
+
+
+FileStream::FileStream(const char* path, std::ios_base::openmode omode, bool async)
+: _buffer(path, omode, async)
+{
+    this->setBuffer(&_buffer);
+}
+
+
+FileStream::~FileStream()
 {
     try {
         IOStream::sync();
@@ -57,6 +62,17 @@ FileStream::~FileStream() throw()
     catch(...) {}
 }
 
+
+void FileStream::setSelector(SelectorBase* sel)
+{
+    _buffer.setSelector(sel);
+}
+
+
+void FileStream::close()
+{
+    _buffer.close();
+}
 
 } // namespace System
 

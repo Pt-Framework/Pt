@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,25 +20,28 @@
 #ifndef Pt_System_FileStream_h
 #define Pt_System_FileStream_h
 
-#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/FileDevice.h>
-
 
 namespace Pt {
 
 namespace System {
 
+    class SelectorBase;
 
     class PT_SYSTEM_API FileBuffer : public IOBuffer
     {
         public:
-            FileBuffer(const char* name, std::ios_base::openmode omode);
+            FileBuffer(const char* name, std::ios_base::openmode omode, bool async = false);
 
-            const FileDevice& fileDevice() const
-            {return _file;}
+            ~FileBuffer();
+
+            void setSelector(SelectorBase* sel);
+
+            void close();
 
         private:
             FileDevice _file;
@@ -48,14 +51,17 @@ namespace System {
     class PT_SYSTEM_API FileStream : public IOStream
     {
         public:
-            FileStream(const char* name, std::ios_base::openmode omode);
+            FileStream(const char* name, std::ios_base::openmode omode, bool async = false);
 
-            ~FileStream() throw();
+            ~FileStream();
+
+            void setSelector(SelectorBase* sel);
+
+            void close();
 
         private:
             FileBuffer _buffer;
     };
-
 
 } // namespace System
 
