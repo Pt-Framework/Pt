@@ -63,12 +63,6 @@ FileStream::~FileStream()
 }
 
 
-void FileStream::setSelector(SelectorBase* sel)
-{
-    _buffer.setSelector(sel);
-}
-
-
 void FileStream::close()
 {
     _buffer.close();

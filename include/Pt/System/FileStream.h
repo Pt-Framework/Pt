@@ -55,8 +55,6 @@ namespace System {
 
             ~FileStream();
 
-            void setSelector(SelectorBase* sel);
-
             void close();
 
         private:

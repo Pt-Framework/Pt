@@ -35,13 +35,13 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
         std::streamsize speekn(CharT* buffer, std::streamsize size)
         { return this->xspeekn(buffer, size); }
 
-    std::streamsize out_avail()
-    {
-        if( this->pptr() )
-            return this->epptr() - this->pptr();
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->epptr() - this->pptr();
 
-         return this->showmanyp();
-    }
+             return this->showmanyp();
+        }
 
      protected:
         virtual std::streamsize xspeekn(CharT* buffer, std::streamsize size)

@@ -49,6 +49,7 @@ namespace System {
             {
                 BasicStreamBuffer<CharT>* tmp = _buffer;
                 _buffer = buffer;
+                rdbuf(buffer);
                 return tmp;
             }
 
@@ -135,6 +136,7 @@ namespace System {
             {
                 BasicStreamBuffer<CharT>* tmp = _buffer;
                 _buffer = buffer;
+                rdbuf(buffer);
                 return tmp;
             }
 
