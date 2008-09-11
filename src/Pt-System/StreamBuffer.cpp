@@ -146,8 +146,7 @@ void StreamBuffer::endSync()
 StreamBuffer::int_type
 StreamBuffer::underflow()
 {
-    // return EOF if in writing mode or no device set
-    if( !_ioDevice || this->pptr() )
+    if( ! _ioDevice )
         return traits_type::eof();
 
     // buffer is not empty yet.
