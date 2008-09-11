@@ -63,10 +63,10 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
 {
     public:
         //! @brief Contructs an IOBuffer for an IODevice.
-        StreamBuffer(IODevice& ioDevice, size_t bufferSize = 1024);
+        StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192);
 
         //! @brief Default constructor.
-        StreamBuffer(size_t bufferSize = 1024);
+        StreamBuffer(size_t bufferSize = 8192);
 
         ~StreamBuffer();
 
@@ -106,9 +106,10 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
 
     private:
         IODevice* _ioDevice;
-        char* _buffer;
+        char* _ibuffer;
+        char* _obuffer;
         const size_t _bufferSize;
-        const size_t _putbackMax;
+        const size_t _pbmax;
         bool _syncing;
         bool _flushing;
 };

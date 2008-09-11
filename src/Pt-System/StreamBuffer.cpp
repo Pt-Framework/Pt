@@ -28,13 +28,14 @@ namespace System {
 
 StreamBuffer::StreamBuffer(IODevice& ioDevice, size_t bufferSize)
 : _ioDevice(&ioDevice),
-  _buffer(0),
-  _bufferSize(bufferSize),
-  _putbackMax(4),
+  _ibuffer(0),
+  _obuffer(0),
+  _bufferSize(bufferSize+4),
+  _pbmax(4),
   _syncing(false),
   _flushing(false)
 {
-    _buffer = new char[_bufferSize];
+    _ibuffer = new char[_bufferSize];
 
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -45,13 +46,14 @@ StreamBuffer::StreamBuffer(IODevice& ioDevice, size_t bufferSize)
 
 StreamBuffer::StreamBuffer(size_t bufferSize)
 : _ioDevice(0),
-  _buffer(0),
-  _bufferSize(bufferSize),
-  _putbackMax(4),
+  _ibuffer(0),
+  _obuffer(0),
+  _bufferSize(bufferSize+4),
+  _pbmax(4),
   _syncing(false),
   _flushing(false)
 {
-    _buffer = new char[_bufferSize];
+    _ibuffer = new char[_bufferSize];
 
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -60,7 +62,8 @@ StreamBuffer::StreamBuffer(size_t bufferSize)
 
 StreamBuffer::~StreamBuffer()
 {
-    delete[] _buffer;
+    delete[] _ibuffer;
+    delete[] _obuffer;
 }
 
 
@@ -95,14 +98,14 @@ void StreamBuffer::beginSync()
     if(_syncing || _ioDevice == 0)
         return;
 
-    size_t putback = _putbackMax;
+    size_t putback = _pbmax;
     size_t leftover = 0;
 
     // keep chars for putback
     if( this->gptr() )
     {
-        putback = std::min<size_t>( gptr() - eback(), _putbackMax);
-        char* to = _buffer + _putbackMax - putback;
+        putback = std::min<size_t>( gptr() - eback(), _pbmax);
+        char* to = _ibuffer + _pbmax - putback;
         char* from = this->gptr() - putback;
 
         if(to == from)
@@ -112,13 +115,13 @@ void StreamBuffer::beginSync()
         std::memmove( to, from, putback + leftover );
     }
 
-    size_t used = _putbackMax + leftover;
-    _ioDevice->beginRead( _buffer + used, _bufferSize - used );
+    size_t used = _pbmax + leftover;
+    _ioDevice->beginRead( _ibuffer + used, _bufferSize - used );
     _syncing = true;
 
-    this->setg( _buffer + (_putbackMax - putback), // start of get area
-                _buffer + used, // gptr position
-                _buffer + used ); // end of get area
+    this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                _ibuffer + used, // gptr position
+                _ibuffer + used ); // end of get area
 }
 
 
@@ -157,23 +160,23 @@ StreamBuffer::underflow()
     if( _ioDevice->eof() )
         return traits_type::eof();
 
-    size_t putbackSize = _putbackMax;
+    size_t putbackSize = _pbmax;
 
     // keep chars for putback if in reading mode
     if( this->gptr() )
     {
-        putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-        std::memmove(_buffer + (_putbackMax - putbackSize),
+        putbackSize = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
+        std::memmove(_ibuffer + (_pbmax - putbackSize),
                         this->gptr() - putbackSize,
                         putbackSize * sizeof(char) );
     }
 
-    size_t readSize = _ioDevice->read( _buffer + _putbackMax, _bufferSize - _putbackMax );
+    size_t readSize = _ioDevice->read( _ibuffer + _pbmax, _bufferSize - _pbmax );
 
     // set get area, will also enter reading mode
-    this->setg( _buffer + (_putbackMax - putbackSize), // start of get area
-                _buffer + _putbackMax, // gptr position
-                _buffer + _putbackMax + readSize ); // end of get area
+    this->setg( _ibuffer + (_pbmax - putbackSize), // start of get area
+                _ibuffer + _pbmax, // gptr position
+                _ibuffer + _pbmax + readSize ); // end of get area
 
     if( _ioDevice->eof() )
         return traits_type::eof();
@@ -193,15 +196,15 @@ void StreamBuffer::beginFlush()
     if(_flushing || _ioDevice == 0 )
         return;
 
-    // if in writing mode pptr is valid, write out the buffer
     if( this->pptr() )
     {
-        // write buffer to device
-        const size_t avail = this->pptr() - this->pbase();
-        _ioDevice->beginWrite(_buffer, avail);
+        size_t avail = this->pptr() - this->pbase();
+        if(avail > 0)
+        {
+            _ioDevice->beginWrite(_obuffer, avail);
+            _flushing = true;
+        }
     }
-
-    _flushing = true;
 }
 
 
@@ -217,57 +220,49 @@ void StreamBuffer::endFlush()
     _flushing = false;
     size_t leftover = 0;
 
-    // if in writing mode pptr is valid, flush out the buffer
     if( this->pptr() )
     {
-        const size_t avail = this->pptr() - this->pbase();
+        size_t avail = this->pptr() - this->pbase();
         size_t written = _ioDevice->endWrite();
 
-        // setup put buffer area
         leftover = avail - written;
-        if(leftover != 0)
+        if(leftover > 0)
         {
-            traits_type::move(_buffer, _buffer + written, leftover);
+            traits_type::move(_obuffer, _obuffer + written, leftover);
         }
     }
 
-    // this will also enter writing mode if pptr is not valid
-    this->setp(_buffer + leftover, _buffer + _bufferSize);
+    this->setp(_obuffer + leftover, _obuffer + _bufferSize);
 }
 
 
 StreamBuffer::int_type
 StreamBuffer::overflow(int_type ch)
 {
-    // return EOF if we are in reading mode or no device is set
-    if(!_ioDevice || this->gptr() )
+    if( ! _ioDevice )
         return traits_type::eof();
+
+    if(_obuffer == 0)
+    {
+        _obuffer = new char[_bufferSize];
+        this->setp(_obuffer, _obuffer + _bufferSize);
+    }
 
     if(_flushing)
     {
         this->endFlush();
     }
-    else
+    else if( this->pptr() > this->pbase() )
     {
-        size_t leftover = 0;
+        size_t avail = this->pptr() - this->pbase();
+        size_t written = _ioDevice->write(_obuffer, avail);
+        size_t leftover = avail - written;
 
-        // if in writing mode pptr is valid, flush out the buffer
-        if( this->pptr() )
+        if(leftover > 0)
         {
-            // write buffer to device
-            const size_t avail = this->pptr() - this->pbase();
-            size_t written = _ioDevice->write(_buffer, avail);
-
-            // setup put buffer area
-            const size_t leftover = avail - written;
-            if(leftover != 0)
-            {
-                traits_type::move(_buffer, _buffer + written, leftover);
-            }
+            traits_type::move(_obuffer, _obuffer + written, leftover);
         }
-
-        // this will also enter writing mode if pptr is not valid
-        this->setp(_buffer + leftover, _buffer + _bufferSize);
+        this->setp(_obuffer + leftover, _obuffer + _bufferSize);
     }
 
     // if the overflow char is not EOF put it in buffer
@@ -283,19 +278,21 @@ StreamBuffer::overflow(int_type ch)
 
 int StreamBuffer::sync()
 {
-    if(!_ioDevice)
+    if( ! _ioDevice )
         return 0;
 
-    // if in writing mode flush put area
-    if( this->pptr() )
+    if( pptr() )
     {
-        const int_type ch = this->overflow( traits_type::eof() );
-        if( ch == traits_type::eof() )
+        while( this->pptr() > this->pbase() )
         {
-            return -1;
-        }
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() )
+            {
+                return -1;
+            }
 
-        _ioDevice->sync();
+            _ioDevice->sync();
+        }
     }
 
     return 0;
