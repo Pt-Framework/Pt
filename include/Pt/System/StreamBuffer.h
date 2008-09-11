@@ -22,41 +22,96 @@
 #include <ios>
 #include <streambuf>
 #include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
 
 namespace Pt {
 
 namespace System {
 
-    template <typename CharT>
-    class BasicStreamBuffer : public std::basic_streambuf<CharT>
+template <typename CharT>
+class BasicStreamBuffer : public std::basic_streambuf<CharT>
+{
+    public:
+        std::streamsize speekn(CharT* buffer, std::streamsize size)
+        { return this->xspeekn(buffer, size); }
+
+    std::streamsize out_avail()
     {
-        public:
-            std::streamsize speekn(CharT* buffer, std::streamsize size)
-            { return this->xspeekn(buffer, size); }
+        if( this->pptr() )
+            return this->epptr() - this->pptr();
 
-        std::streamsize out_avail()
+         return this->showmanyp();
+    }
+
+     protected:
+        virtual std::streamsize xspeekn(CharT* buffer, std::streamsize size)
         {
-            if( this->pptr() )
-                return this->epptr() - this->pptr();
+            if(size == 0)
+                return 0;
 
-            return this->showmanyp();
+            buffer[0] = this->sgetc();
+            return 1;
         }
 
-        protected:
-            virtual std::streamsize xspeekn(CharT* buffer, std::streamsize size)
-            {
-                if(size == 0)
-                    return 0;
+        virtual std::streamsize showmanyp()
+        { return 0; }
+};
 
-                buffer[0] = this->sgetc();
-                return 1;
-            }
+//! @brief A stream buffer for IODevices with linear buffer area.
+class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
+                                 , public Connectable
+{
+    public:
+        //! @brief Contructs an IOBuffer for an IODevice.
+        StreamBuffer(IODevice& ioDevice, size_t bufferSize = 1024);
 
-            virtual std::streamsize showmanyp()
-            { return 0; }
-    };
+        //! @brief Default constructor.
+        StreamBuffer(size_t bufferSize = 1024);
 
-    typedef BasicStreamBuffer<char> StreamBuffer;
+        ~StreamBuffer();
+
+        void attach(IODevice& ioDevice);
+
+        IODevice* device();
+
+        void beginSync();
+
+        void beginFlush();
+
+        Signal<StreamBuffer&> inputReady;
+
+        Signal<StreamBuffer&> outputReady;
+
+    protected:
+        virtual int sync();
+
+        virtual std::streamsize showmanyp();
+
+        virtual std::streamsize xspeekn(char* buffer, std::streamsize size);
+
+        virtual int_type underflow();
+
+        virtual int_type overflow(int_type ch);
+
+        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
+
+    private:
+        void onSync(IODevice& dev);
+
+        void endSync();
+
+        void onFlush(IODevice& dev);
+
+        void endFlush();
+
+    private:
+        IODevice* _ioDevice;
+        char* _buffer;
+        const size_t _bufferSize;
+        const size_t _putbackMax;
+        bool _syncing;
+        bool _flushing;
+};
 
 } // namespace System
 

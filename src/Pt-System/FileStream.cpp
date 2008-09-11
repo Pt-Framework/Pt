@@ -26,7 +26,7 @@ namespace System {
 FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode, bool async)
 : _file(name, omode, async)
 {
-    IOBuffer::attach(_file);
+    this->attach(_file);
 }
 
 

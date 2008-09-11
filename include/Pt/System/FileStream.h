@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris D�rner                                  *
+ *   Copyright (C) 2005 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,8 +22,8 @@
 
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/IOBuffer.h>
 #include <Pt/System/IOStream.h>
+#include <Pt/System/StreamBuffer.h>
 #include <Pt/System/FileDevice.h>
 
 namespace Pt {
@@ -32,7 +32,7 @@ namespace System {
 
     class SelectorBase;
 
-    class PT_SYSTEM_API FileBuffer : public IOBuffer
+    class PT_SYSTEM_API FileBuffer : public StreamBuffer
     {
         public:
             FileBuffer(const char* name, std::ios_base::openmode omode, bool async = false);

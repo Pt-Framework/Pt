@@ -23,7 +23,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/IODevice.h"
-#include "Pt/System/IOBuffer.h"
+#include "Pt/System/StreamBuffer.h"
 #include "Pt/System/IOStream.h"
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Clock.h"
@@ -63,7 +63,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
 
-        void onInput(Pt::System::IOBuffer& buffer)
+        void onInput(Pt::System::StreamBuffer& buffer)
         {
             std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
 
@@ -73,7 +73,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             eloop.exit();
         }
 
-        void onOutput(Pt::System::IOBuffer& buffer)
+        void onOutput(Pt::System::StreamBuffer& buffer)
         {
             std::cerr << "Closing pipe" << std::endl;
             buffer.device()->close();
@@ -82,8 +82,8 @@ class IOStreamTest : public Pt::Unit::TestSuite
 
     private:
         Pt::System::EventLoop eloop;
-        Pt::System::IOBuffer inbuf;
-        Pt::System::IOBuffer outbuf;
+        Pt::System::StreamBuffer inbuf;
+        Pt::System::StreamBuffer outbuf;
 };
 
 Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
@@ -112,21 +112,6 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         {
             _timeval = _clock.stop();
             _counter++;
-        }
-
-        void onStreamInput(Pt::System::IOBuffer& buffer)
-        {
-            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
-
-            char in[20];
-            size_t n = buffer.sgetn(in, 20);
-            std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
-        }
-
-        void onStreamOutput(Pt::System::IOBuffer& buffer)
-        {
-            std::cerr << "Closing pipe" << std::endl;
-            buffer.device()->close();
         }
 
         void WaitTimer()
