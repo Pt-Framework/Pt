@@ -23,8 +23,8 @@ namespace Pt {
 
 namespace System {
 
-FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode, bool async)
-: _file(name, omode, async)
+FileBuffer::FileBuffer(const char* s, std::ios_base::openmode m, bool async)
+: _file(s, m, async)
 {
     this->attach(_file);
 }
@@ -41,14 +41,27 @@ void FileBuffer::setSelector(SelectorBase* sel)
 }
 
 
+void FileBuffer::open(const char* s, std::ios_base::openmode m, bool async)
+{
+    _file.open(s, m, async);
+}
+
+
 void FileBuffer::close()
 {
     _file.close();
 }
 
 
-FileStream::FileStream(const char* path, std::ios_base::openmode omode, bool async)
-: _buffer(path, omode, async)
+bool FileBuffer::is_open()
+{
+    return _file.enabled();
+}
+
+
+
+FileStream::FileStream(const char* s, std::ios_base::openmode m, bool async)
+: _buffer(s, m, async)
 {
     this->setBuffer(&_buffer);
 }
@@ -63,9 +76,27 @@ FileStream::~FileStream()
 }
 
 
+void FileStream::open(const char* s, std::ios_base::openmode m, bool async)
+{
+    _buffer.open(s, m, async);
+}
+
+
 void FileStream::close()
 {
     _buffer.close();
+}
+
+
+bool FileStream::is_open()
+{
+    return _buffer.is_open();
+}
+
+
+FileBuffer* FileStream::rdbuf()
+{
+    return &_buffer;
 }
 
 } // namespace System
