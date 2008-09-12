@@ -20,7 +20,7 @@
 #include "Pt/System/StreamBuffer.h"
 #include <algorithm>
 #include <stdexcept>
-#include <cstring> //memcpy/memmove()
+#include <cstring>
 
 namespace Pt {
 
@@ -35,7 +35,7 @@ StreamBuffer::StreamBuffer(IODevice& ioDevice, size_t bufferSize)
   _syncing(false),
   _flushing(false)
 {
-    _ibuffer = new char[_bufferSize];
+    //_ibuffer = new char[_bufferSize];
 
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -53,7 +53,7 @@ StreamBuffer::StreamBuffer(size_t bufferSize)
   _syncing(false),
   _flushing(false)
 {
-    _ibuffer = new char[_bufferSize];
+    //_ibuffer = new char[_bufferSize];
 
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -97,6 +97,11 @@ void StreamBuffer::beginSync()
 {
     if(_syncing || _ioDevice == 0)
         return;
+
+    if( ! _ibuffer )
+    {
+        _ibuffer = new char[_bufferSize];
+    }
 
     size_t putback = _pbmax;
     size_t leftover = 0;
@@ -143,38 +148,39 @@ void StreamBuffer::endSync()
 }
 
 
-StreamBuffer::int_type
-StreamBuffer::underflow()
+StreamBuffer::int_type StreamBuffer::underflow()
 {
     if( ! _ioDevice )
         return traits_type::eof();
 
-    // buffer is not empty yet.
+    if(_syncing)
+        this->endSync();
+
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *(this->gptr()) );
-
-    if( _syncing)
-        this->endSync();
 
     if( _ioDevice->eof() )
         return traits_type::eof();
 
-    size_t putbackSize = _pbmax;
+    if( ! _ibuffer )
+    {
+        _ibuffer = new char[_bufferSize];
+    }
 
-    // keep chars for putback if in reading mode
+    size_t putback = _pbmax;
+
     if( this->gptr() )
     {
-        putbackSize = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
-        std::memmove(_ibuffer + (_pbmax - putbackSize),
-                        this->gptr() - putbackSize,
-                        putbackSize * sizeof(char) );
+        putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
+        std::memmove( _ibuffer + (_pbmax - putback),
+                      this->gptr() - putback,
+                      putback );
     }
 
     size_t readSize = _ioDevice->read( _ibuffer + _pbmax, _bufferSize - _pbmax );
 
-    // set get area, will also enter reading mode
-    this->setg( _ibuffer + (_pbmax - putbackSize), // start of get area
-                _ibuffer + _pbmax, // gptr position
+    this->setg( _ibuffer + _pbmax - putback,    // start of get area
+                _ibuffer + _pbmax,              // gptr position
                 _ibuffer + _pbmax + readSize ); // end of get area
 
     if( _ioDevice->eof() )
@@ -235,13 +241,12 @@ void StreamBuffer::endFlush()
 }
 
 
-StreamBuffer::int_type
-StreamBuffer::overflow(int_type ch)
+StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 {
     if( ! _ioDevice )
         return traits_type::eof();
 
-    if(_obuffer == 0)
+    if( ! _obuffer )
     {
         _obuffer = new char[_bufferSize];
         this->setp(_obuffer, _obuffer + _bufferSize);
