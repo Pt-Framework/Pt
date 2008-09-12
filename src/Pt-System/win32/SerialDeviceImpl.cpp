@@ -306,6 +306,11 @@ size_t SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 
 size_t SerialDeviceImpl::endWrite()
 {
+    if(_writeOv.hEvent == NULL)
+    {
+        return this->write(_device._wbuf, _device._wbuflen);
+    }
+
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {

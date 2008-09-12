@@ -349,6 +349,10 @@ size_t FileDeviceImpl::endWrite()
     DWORD writtenBytes = 0;
   
 #ifndef _WIN32_WCE
+    if(_writeOv.hEvent == NULL)
+    {
+        return this->write(_device._wbuf, _device._wbuflen);
+    }
  
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {

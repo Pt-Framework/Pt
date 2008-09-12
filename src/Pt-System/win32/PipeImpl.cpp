@@ -290,6 +290,11 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 
 size_t PipeIODevice::onEndWrite()
 {
+    if(_writeOv.hEvent == NULL)
+    {
+        return this->onWrite(_wbuf, _wbuflen);
+    }
+
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
