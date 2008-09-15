@@ -57,15 +57,15 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
         { return 0; }
 };
 
-//! @brief A stream buffer for IODevices with linear buffer area.
+//! @brief A stream buffer for IODevices with linear buffer area
 class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
                                  , public Connectable
 {
     public:
-        //! @brief Contructs an IOBuffer for an IODevice.
+        //! @brief Contructs an IOBuffer for an IODevice
         StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192);
 
-        //! @brief Default constructor.
+        //! @brief Default constructor
         StreamBuffer(size_t bufferSize = 8192);
 
         ~StreamBuffer();
@@ -93,7 +93,15 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
 
         virtual int_type overflow(int_type ch);
 
+        virtual int_type pbackfail(int_type c);
+
+        /** @brief  Alters the stream positions
+        */
         virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
+
+        /** @brief  Alters the stream positions
+        */
+        virtual pos_type seekpos(pos_type p, std::ios::openmode mode );
 
     private:
         void onSync(IODevice& dev);

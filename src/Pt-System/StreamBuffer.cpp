@@ -280,6 +280,12 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 }
 
 
+StreamBuffer::int_type StreamBuffer::pbackfail(StreamBuffer::int_type)
+{
+    return traits_type::eof();
+}
+
+
 int StreamBuffer::sync()
 {
     if( ! _ioDevice )
@@ -305,10 +311,6 @@ int StreamBuffer::sync()
 
 std::streamsize StreamBuffer::xspeekn(char* buffer, std::streamsize size)
 {
-    // can not peek in writing mode
-    if( this->pptr() )
-        return 0;
-
     if( traits_type::eof() == this->underflow() )
         return 0;
 
@@ -324,15 +326,29 @@ std::streamsize StreamBuffer::xspeekn(char* buffer, std::streamsize size)
 
 
 StreamBuffer::pos_type
-StreamBuffer::seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
+StreamBuffer::seekoff(off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
-    if(mode == std::ios::out)
-        return pos_type(-1);
+	pos_type ret =  pos_type( off_type(-1) );
 
-    if(!_ioDevice || !_ioDevice->seekable() )
-        return pos_type(-1);
+	if ( ! _ioDevice || ! _ioDevice->enabled() ||
+	     ! _ioDevice->seekable() || off == 0)
+	{
+		return ret;
+	}
 
-    return pos_type(-1);
+	ret = _ioDevice->seek(off, dir);
+
+	// eliminate currently buffered sequence
+	this->setg(0, 0, 0);
+
+	return ret;
+}
+
+
+StreamBuffer::pos_type
+StreamBuffer::seekpos(pos_type p, std::ios::openmode mode)
+{
+    return this->seekoff(p, std::ios::beg, mode);
 }
 
 }
