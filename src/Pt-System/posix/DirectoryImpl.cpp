@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <vector>
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
@@ -197,15 +198,15 @@ void DirectoryImpl::chdir(const std::string& path)
 
 std::string DirectoryImpl::cwd()
 {
-    long size = pathconf(".", _PC_PATH_MAX);
+    const long size = pathconf(".", _PC_PATH_MAX);
     if(size == -1)
         throw SystemError("pathconf failed for .", PT_SOURCEINFO);
-    
-    char cwd[size];
-    if( !getcwd(cwd, size) )
+
+    std::vector<char> buffer(size);
+    if( ! getcwd(&buffer[0], size) )
         throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
 
-    return std::string(cwd);
+    return std::string( &buffer[0] );
 }
 
 
