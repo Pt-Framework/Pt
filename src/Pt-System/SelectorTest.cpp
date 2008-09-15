@@ -37,6 +37,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
         IOStreamTest()
         : Pt::Unit::TestSuite("IOStreamTest")
         {
+            Pt::System::OMode mode;
             Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
         }
 

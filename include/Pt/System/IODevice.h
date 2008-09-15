@@ -48,8 +48,22 @@ struct IO
         Trunc  = 0x0032
     };
 
+    static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+
     virtual ~IO()
     {}
+};
+
+
+struct OMode
+{
+    OMode()
+    : _mode(),
+      _nonblock(false)
+    {}
+
+    std::ios_base::openmode _mode;
+    bool _nonblock;
 };
 
 
