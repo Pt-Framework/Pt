@@ -53,10 +53,10 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
 
     DWORD openFlags = 0;
-    if( mode & IODevice::::Write )
+    if( mode & IODevice::Write )
         openFlags |= GENERIC_WRITE;
 
-    if( mode & IODevice::::Read )
+    if( mode & IODevice::Read )
         openFlags |= GENERIC_READ;
 
     HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
