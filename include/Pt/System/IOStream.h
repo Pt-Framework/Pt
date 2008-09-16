@@ -165,10 +165,6 @@ namespace System {
             BasicStreamBuffer<CharT>* _buffer;
     };
 
-    typedef BasicIStream<char> IStream;
-    typedef BasicOStream<char> OStream;
-    typedef BasicIOStream<char> IOStream;
-
 } // namespace System
 
 } // !namespace Pt

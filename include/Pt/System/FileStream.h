@@ -52,7 +52,7 @@ namespace System {
     };
 
 
-    class PT_SYSTEM_API FileStream : public IOStream
+    class PT_SYSTEM_API FileStream : public BasicIOStream<char>
     {
         public:
             FileStream(const char* s, IODevice::OpenMode mode);

@@ -70,7 +70,7 @@ FileStream::FileStream(const char* s, IODevice::OpenMode mode)
 FileStream::~FileStream()
 {
     try {
-        IOStream::sync();
+        BasicIOStream<char>::sync();
     }
     catch(...) {}
 }
