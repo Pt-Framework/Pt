@@ -28,7 +28,7 @@ namespace System {
 
 Pipe::Pipe(OpenMode mode)
 {
-    _impl = new PipeImpl(mode);
+    _impl = new PipeImpl(mode & IODevice::Async);
 }
 
 

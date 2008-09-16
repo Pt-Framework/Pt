@@ -52,20 +52,20 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode, bool isAsync )
+void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 {
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
 
     DWORD openFlags = 0;
 
-    if( mode & std::ios_base::out )
+    if( mode & IODevice::Write )
         openFlags |= GENERIC_WRITE;
 
-    if( mode & std::ios_base::in )
+    if( mode & IODevice::Read )
         openFlags |= GENERIC_READ;
 
     HANDLE h = INVALID_HANDLE_VALUE;
-    if(isAsync)
+    if(mode & IODevice::Async)
     {
         h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     }

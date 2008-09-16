@@ -61,7 +61,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         size_t endWrite();		
 
-        void open( const char* path, std::ios_base::openmode mode, bool isAsync );
+        void open( const char* path, IODevice::OpenMode mode);
 
         pos_type seek( off_type offset, std::ios::seekdir sd );
 

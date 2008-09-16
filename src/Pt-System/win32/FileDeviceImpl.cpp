@@ -57,7 +57,7 @@ FileDeviceImpl::~FileDeviceImpl()
 }
 
 
-void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool isAsync )
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -72,19 +72,19 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool 
     DWORD create = OPEN_EXISTING;
     DWORD flags  = 0;
 
-    if( mode & std::ios_base::in )
+    if( mode & IODevice::Read )
         access |= GENERIC_READ;
 
-    if( mode & std::ios_base::out )
+    if( mode & IODevice::Write )
     {
         access |= GENERIC_WRITE;
         create = OPEN_ALWAYS;
     }
 
-    if( mode & std::ios_base::trunc )
+    if( mode & IODevice::Trunc )
         create |= TRUNCATE_EXISTING;
 
-    if( isAsync )
+    if( mode & IODevice::Async )
     {
 #ifndef _WIN32_WCE
         flags |= FILE_FLAG_OVERLAPPED;
@@ -101,7 +101,7 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool 
 
     try
     {
-        if(mode & std::ios_base::ate )
+        if(mode & IODevice::AtEnd )
             this->seek(0, std::ios::end);
     }
     catch(...)

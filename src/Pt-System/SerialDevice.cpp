@@ -62,7 +62,7 @@ void SerialDevice::open( const std::string& file, OpenMode mode)
 
     IODevice::setEnabled(true);
     IODevice::setEof(false);
-    IODevice::setAsync(mode & IODevice::Async);
+    IODevice::setAsync( mode & IODevice::Async);
 }
 
 
