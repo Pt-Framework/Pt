@@ -33,12 +33,9 @@ namespace Pt {
 
 namespace System {
 
-class IODeviceImpl;
-
-
 struct IO
 {
-    enum OpenMode {
+    enum OpenFlags {
         Sync   = 0x0000,
         Async  = 0x0001,
         Read   = 0x0002,
@@ -48,24 +45,49 @@ struct IO
         Trunc  = 0x0032
     };
 
-    static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
-
     virtual ~IO()
     {}
 };
 
+const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
-struct OMode
+typedef std::ios_base::seekdir SeekDir;
+
+enum OpenMode
 {
-    OMode()
-    : _mode(),
-      _nonblock(false)
-    {}
-
-    std::ios_base::openmode _mode;
-    bool _nonblock;
+    Sync        = 0,
+    Async       = 1L << 0,
+    Read        = 1L << 1,
+    Write       = 1L << 2,
+    AtEnd       = 1L << 3,
+    Append      = 1L << 4,
+    Trunc       = 1L << 5,
+    OpenModeEnd = 1L << 16
 };
 
+inline OpenMode operator&(OpenMode a, OpenMode b)
+{ return OpenMode(static_cast<int>(a) & static_cast<int>(b)); }
+
+inline OpenMode operator|(OpenMode a, OpenMode b)
+{ return OpenMode(static_cast<int>(a) | static_cast<int>(b)); }
+
+inline OpenMode operator^(OpenMode a, OpenMode b)
+{ return OpenMode(static_cast<int>(a) ^ static_cast<int>(b)); }
+
+inline OpenMode& operator|=(OpenMode& a, OpenMode b)
+{ return a = a | b; }
+
+inline OpenMode& operator&=(OpenMode& a, OpenMode b)
+{ return a = a & b; }
+
+inline OpenMode& operator^=(OpenMode& a, OpenMode b)
+{ return a = a ^ b; }
+
+inline OpenMode operator~(OpenMode a)
+{ return OpenMode(~static_cast<int>(a)); }
+
+
+class IODeviceImpl;
 
 /** @brief Endpoint for I/O operations
 
