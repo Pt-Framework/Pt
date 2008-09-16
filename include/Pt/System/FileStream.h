@@ -35,13 +35,13 @@ namespace System {
     class PT_SYSTEM_API FileBuffer : public StreamBuffer
     {
         public:
-            FileBuffer(const char* s, std::ios_base::openmode m = std::ios_base::out, bool async = false);
+            FileBuffer(const char* s, IODevice::OpenMode mode);
 
             ~FileBuffer();
 
             void setSelector(SelectorBase* sel);
 
-            void open(const char* s, std::ios_base::openmode m = std::ios_base::out, bool async = false);
+            void open(const char* s, IODevice::OpenMode mode);
 
             void close();
 
@@ -55,11 +55,11 @@ namespace System {
     class PT_SYSTEM_API FileStream : public IOStream
     {
         public:
-            FileStream(const char* s, std::ios_base::openmode m= std::ios_base::out, bool async = false);
+            FileStream(const char* s, IODevice::OpenMode mode);
 
             ~FileStream();
 
-            void open(const char* s, std::ios_base::openmode m = std::ios_base::out, bool async = false);
+            void open(const char* s, IODevice::OpenMode mode);
 
             void close();
 

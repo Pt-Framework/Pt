@@ -23,8 +23,8 @@ namespace Pt {
 
 namespace System {
 
-FileBuffer::FileBuffer(const char* s, std::ios_base::openmode m, bool async)
-: _file(s, m, async)
+FileBuffer::FileBuffer(const char* s, IODevice::OpenMode mode)
+: _file(s, mode)
 {
     this->attach(_file);
 }
@@ -41,9 +41,9 @@ void FileBuffer::setSelector(SelectorBase* sel)
 }
 
 
-void FileBuffer::open(const char* s, std::ios_base::openmode m, bool async)
+void FileBuffer::open(const char* s, IODevice::OpenMode mode)
 {
-    _file.open(s, m, async);
+    _file.open(s, mode);
 }
 
 
@@ -60,8 +60,8 @@ bool FileBuffer::is_open()
 
 
 
-FileStream::FileStream(const char* s, std::ios_base::openmode m, bool async)
-: _buffer(s, m, async)
+FileStream::FileStream(const char* s, IODevice::OpenMode mode)
+: _buffer(s, mode)
 {
     this->setBuffer(&_buffer);
 }
@@ -76,9 +76,9 @@ FileStream::~FileStream()
 }
 
 
-void FileStream::open(const char* s, std::ios_base::openmode m, bool async)
+void FileStream::open(const char* s, IODevice::OpenMode mode)
 {
-    _buffer.open(s, m, async);
+    _buffer.open(s, mode);
 }
 
 

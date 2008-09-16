@@ -31,11 +31,11 @@ SerialDevice::SerialDevice()
 }
 
 
-SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode, bool isAsync)
+SerialDevice::SerialDevice( const std::string& file, OpenMode mode)
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl(*this);
-    this->open( file, mode, isAsync );
+    this->open( file, mode);
 }
 
 
@@ -52,17 +52,17 @@ SerialDevice::~SerialDevice()
 }
 
 
-void SerialDevice::open( const std::string& file, std::ios_base::openmode mode, bool isAsync )
+void SerialDevice::open( const std::string& file, OpenMode mode)
 {
     if( this->enabled() ) {
         this->close();
     }
 
-    _impl->open( file, mode, isAsync );
+    _impl->open( file, mode);
 
     IODevice::setEnabled(true);
     IODevice::setEof(false);
-    IODevice::setAsync(isAsync);
+    IODevice::setAsync(mode & IODevice::Async);
 }
 
 

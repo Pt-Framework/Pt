@@ -38,7 +38,7 @@ class FileDeviceImpl : public IODeviceImpl
         FileDeviceImpl(FileDevice& device);
         ~FileDeviceImpl();
 
-        void open(const char* path, std::ios_base::openmode mode, bool isAsync );
+        void open(const char* path, IODevice::OpenMode mode);
 
         bool seekable() const;
 

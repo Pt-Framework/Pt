@@ -9,7 +9,7 @@
 
 void readMousePnp(const std::string& port)
 {
-    Pt::System::SerialDevice serdev( port,  std::ios_base::in );
+    Pt::System::SerialDevice serdev( port, Pt::System::SerialDevice::Read );
     serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
     serdev.setCharSize(7);
     serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
@@ -88,7 +88,7 @@ int main( int argc, char* argv[] )
         
         readMousePnp(port);
 
-        Pt::System::SerialDevice serialDevice(port, std::ios_base::in, Pt::System::IODevice::Async);
+        Pt::System::SerialDevice serialDevice(port, Pt::System::SerialDevice::Read);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);

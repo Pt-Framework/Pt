@@ -38,26 +38,26 @@ FileDeviceImpl::~FileDeviceImpl()
 { }
 
 
-void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool isAsync )
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 {
     int flags = O_RDONLY;
 
-    if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) ) {
+    if( (mode & IODevice::Read ) && (mode & IODevice::Write) ) {
         flags |= O_RDWR;
         flags |= O_CREAT;
     }
-    else if(mode & std::ios_base::out) {
+    else if(mode & IODevice::Write) {
         flags |= O_WRONLY;
         flags |= O_CREAT;
     }
-    else if(mode & std::ios_base::in) {
+    else if(mode & IODevice::Read) {
         flags |= O_RDONLY;
     }
 
-    if(isAsync)
+    if(mode & IODevice::Async)
         flags |= O_NONBLOCK;
 
-    if(mode & std::ios::trunc)
+    if(mode & IODevice::Trunc)
         flags |= O_TRUNC;
 
     _fd = ::open(path, flags, 0644);
@@ -67,7 +67,7 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool 
     }
 
     try {
-        if(mode & std::ios::ate)
+        if(mode & IODevice::AtEnd)
             this->seek(0, std::ios::end);
     }
     catch(...) {
@@ -75,7 +75,6 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool 
         throw;
     }
 }
-
 
 
 bool FileDeviceImpl::seekable() const

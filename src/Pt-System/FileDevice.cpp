@@ -31,12 +31,11 @@ FileDevice::FileDevice()
 }
 
 
-FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, bool isAsync )
-: _mode(mode)
+FileDevice::FileDevice(const char* path, OpenMode mode)
 {
     _impl = new FileDeviceImpl(*this);
 
-    this->open( path, mode, isAsync);
+    this->open( path, mode);
 }
 
 
@@ -50,20 +49,19 @@ FileDevice::~FileDevice()
 }
 
 
-void FileDevice::open( const char* path, std::ios_base::openmode mode, bool isAsync )
+void FileDevice::open( const char* path, OpenMode mode)
 {
     if( this->enabled() ) {
         this->close();
     }
 
-    _impl->open(path, mode, isAsync );
+    _impl->open(path, mode);
 
-    _mode = mode;
     _path = path;
 
     IODevice::setEnabled(true);
     IODevice::setEof(false);
-    IODevice::setAsync(isAsync);
+    IODevice::setAsync(mode & Async);
 }
 
 
@@ -129,10 +127,7 @@ size_t FileDevice::onRead( char* buffer, size_t count, bool& eof )
 
 size_t FileDevice::onWrite(const char* buffer, size_t count)
 {
-    if( _mode & std::ios_base::out )
-        return _impl->write(buffer, count);
-
-    return 0;
+    return _impl->write(buffer, count);
 }
 
 
@@ -144,8 +139,7 @@ size_t FileDevice::onPeek(char* buffer, size_t count)
 
 void FileDevice::onSync() const
 {
-    if( _mode & std::ios_base::out )
-        _impl->sync();
+    _impl->sync();
 }
 
 

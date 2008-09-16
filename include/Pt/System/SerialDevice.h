@@ -118,14 +118,14 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         /** @brief Constructs a serial device and open the specified device file
          */
-        SerialDevice( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
+        SerialDevice( const std::string& file, OpenMode mode);
 
         //! @brief Destructor
         virtual ~SerialDevice();
 
         /** @brief Open the specified device file
          */
-        void open( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
+        void open( const std::string& file, OpenMode mode);
 
         //! @brief Sets the baud rate
         void setBaudRate( BaudRate rate );
@@ -173,7 +173,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         void onClose();
 
         bool onWait(unsigned n);
-        
+
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
@@ -188,7 +188,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         void onAttach(SelectorBase&);
 
-        void onDetach(SelectorBase&);        
+        void onDetach(SelectorBase&);
 };
 
 } //namespace System

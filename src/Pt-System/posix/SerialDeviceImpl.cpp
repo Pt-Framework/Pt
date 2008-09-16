@@ -53,11 +53,11 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
+void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 {
     try
     {
-        IODeviceImpl::open(path, mode, isAsync);
+        IODeviceImpl::open(path, mode);
     }
     catch (const OpenFailed& e)
     {

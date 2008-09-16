@@ -41,27 +41,27 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
+void IODeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 {
     int flags = O_RDONLY;
 
-    if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) )
+    if( (mode & IODevice::Read ) && (mode & IODevice::Write) )
     {
         flags |= O_RDWR;
     }
-    else if(mode & std::ios_base::out)
+    else if(mode & IODevice::Write)
     {
         flags |= O_WRONLY;
     }
-    else if(mode & std::ios_base::in  )
+    else if(mode & IODevice::Read  )
     {
         flags |= O_RDONLY;
     }
 
-    if(isAsync)
+    if(mode & IODevice::Async)
         flags |= O_NONBLOCK;
 
-    if(mode & std::ios::trunc)
+    if(mode & IODevice::Trunc)
         flags |= O_TRUNC;
 
     flags |=  O_NOCTTY;

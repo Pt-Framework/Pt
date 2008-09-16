@@ -39,17 +39,14 @@ class PT_SYSTEM_API FileDevice : public IODevice
     public:
         FileDevice();
 
-        FileDevice( const char* path, std::ios_base::openmode mode, bool m = Sync );
+        FileDevice( const char* path, OpenMode mode);
 
         ~FileDevice();
 
-        void open( const char* path, std::ios_base::openmode mode, bool m = Sync );
+        void open( const char* path, OpenMode mode);
 
         const char* path() const
         { return _path.c_str(); }
-
-        std::ios_base::openmode openMode() const
-        { return _mode; }
 
         size_t size() const;
 
@@ -70,7 +67,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         bool onSeekable() const
         { return true; }
-        
+
         bool onWait(unsigned n);
 
         pos_type onSeek(off_type offset, std::ios::seekdir sd) ;
@@ -82,14 +79,13 @@ class PT_SYSTEM_API FileDevice : public IODevice
         size_t onPeek(char* buffer, size_t count);
 
         void onSync() const;
-  
+
         virtual void onAttach(SelectorBase&);
 
         virtual void onDetach(SelectorBase&);
-        
+
     private:
-        std::string             _path;
-        std::ios_base::openmode _mode;
+        std::string _path;
 };
 
 } // namespace System
