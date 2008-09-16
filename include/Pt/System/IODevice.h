@@ -33,22 +33,6 @@ namespace Pt {
 
 namespace System {
 
-struct IO
-{
-    enum OpenFlags {
-        Sync   = 0x0000,
-        Async  = 0x0001,
-        Read   = 0x0002,
-        Write  = 0x0004,
-        AtEnd  = 0x0008,
-        Append = 0x0016,
-        Trunc  = 0x0032
-    };
-
-    virtual ~IO()
-    {}
-};
-
 const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
 typedef std::ios_base::seekdir SeekDir;
@@ -101,7 +85,7 @@ class IODeviceImpl;
     %IODevice, which will send the %Singal inputReady or outputReady of the
     %IODevice that is ready to perform I/O.
 */
-class PT_SYSTEM_API IODevice : public IO, public Selectable
+class PT_SYSTEM_API IODevice : public Selectable
 {
     friend class IODeviceImpl;
 
