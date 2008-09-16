@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dï¿½rner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *   Copyright (C) 2007 Bjoern Oliver Streule                              *
  *                                                                         *
@@ -48,15 +48,15 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode, bool isAsync )
+void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 {
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
 
     DWORD openFlags = 0;
-    if( mode & std::ios_base::out )
+    if( mode & IODevice::::Write )
         openFlags |= GENERIC_WRITE;
 
-    if( mode & std::ios_base::in )
+    if( mode & IODevice::::Read )
         openFlags |= GENERIC_READ;
 
     HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -92,7 +92,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     
     _terminateThread = false;
 
-    if (isAsync)
+    if (mode & IODevice::Async)
     {
         _eventThread.start();    
     }

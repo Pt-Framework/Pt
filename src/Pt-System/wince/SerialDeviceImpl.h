@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dï¿½rner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,71 +30,8 @@
 #include <windows.h>
 
 namespace Pt{
+
 namespace System{
-
-/*class IOResultSerial : public IOResultImpl
-{
-protected:
-    IOResultSerial()
-    : _processedBytes(0)
-    , _bufferSize(0)
-    , _buffer(0)
-    {}
-public:    
-    virtual ~IOResultSerial()
-    {}
-
-    void attach(char* buffer, size_t size)
-    {
-        _processedBytes = 0;
-        _buffer = buffer;
-        _bufferSize = size;
-    }
-
-    void setProcessedBytes(size_t bytes)
-    {
-        _processedBytes = bytes;
-    }
-
-    size_t processedBytes() const
-    {
-        return _processedBytes;
-    }
-
-    char* buffer() const
-    { return _buffer; }
-
-    size_t bufferSize() const
-    { return _bufferSize; } 
-    
-    bool attached() const
-    {
-        return _buffer != 0;
-    }   
-
-private:
-    char*   _buffer;
-    size_t  _bufferSize;
-    size_t  _processedBytes;
-};
-
-class ReadResultSerial : public IOResultSerial
-{
-public:
-    virtual void onComplete()
-    {
-        this->device()->inputReady(*this);        
-    }
-};
-
-class WriteResultSerial : public IOResultSerial
-{
-public:
-    virtual void onComplete()
-    {
-        this->device()->outputReady(*this);        
-    }
-};*/
 
 class SerialDeviceImpl : public Pt::System::IODeviceImpl
                        , public Pt::System::Runnable
@@ -104,7 +41,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, std::ios_base::openmode mode, bool isAsync);         
+        void open( const std::string& file, IODevice::OpenMode mode);
 
         //! @brief Closes the I/O device
         void close();
