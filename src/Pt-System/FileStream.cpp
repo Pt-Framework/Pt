@@ -22,7 +22,7 @@
 namespace Pt {
 
 namespace System {
-
+/*
 FileBuffer::FileBuffer(const char* s, IODevice::OpenMode mode)
 : _file(s, mode)
 {
@@ -98,7 +98,7 @@ FileBuffer* FileStream::rdbuf()
 {
     return &_buffer;
 }
-
+*/
 } // namespace System
 
 } // namespace Pt

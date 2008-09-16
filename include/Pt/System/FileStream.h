@@ -29,7 +29,7 @@
 namespace Pt {
 
 namespace System {
-
+/*
     class SelectorBase;
 
     class PT_SYSTEM_API FileBuffer : public StreamBuffer
@@ -70,7 +70,7 @@ namespace System {
         private:
             FileBuffer _buffer;
     };
-
+*/
 } // namespace System
 
 } // namespace Pt

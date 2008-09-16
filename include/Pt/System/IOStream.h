@@ -28,142 +28,261 @@ namespace Pt {
 
 namespace System {
 
-    //! @brief An istream with peeking capability.
-    template <typename CharT>
-    class BasicIStream : public std::basic_istream<CharT>
-    {
-        public:
-            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer = 0)
-            : std::basic_istream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+//! @brief An istream with peeking capability.
+template <typename CharT>
+class BasicIStream : public std::basic_istream<CharT>
+{
+    public:
+        explicit BasicIStream(BasicStreamBuffer<CharT>* buffer = 0)
+        : std::basic_istream<CharT>( buffer ),
+          _buffer(buffer)
+        { }
 
-            ~BasicIStream()
-            { }
+        ~BasicIStream()
+        { }
 
-            //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* buffer()
-            { return _buffer; }
+        //! @brief Access to the underlying buffer.
+        BasicStreamBuffer<CharT>* attachedBuffer()
+        { return _buffer; }
 
-            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
+        BasicStreamBuffer<CharT>* attachBuffer(BasicStreamBuffer<CharT>*  buffer)
+        {
+            BasicStreamBuffer<CharT>* tmp = _buffer;
+            _buffer = buffer;
+            rdbuf(buffer);
+            return tmp;
+        }
+
+        //! @brief Peeks bytes in the stream buffer.
+        /**
+            The number of bytes that can be peeked depends on the current
+            stream buffer get area and maybe less than requested,
+            similar to istream::readsome().
+        */
+        std::streamsize peeksome(CharT* buffer, std::streamsize n)
+        {
+            std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
+            if(current == _buffer)
+                return _buffer->speekn(buffer, n);
+
+            if(n > 0)
+                buffer[0] = current->getc();
+
+            return 0;
+        }
+
+    private:
+        BasicStreamBuffer<CharT>* _buffer;
+};
+
+
+//! @brief An ostream with peeking capability.
+template <typename CharT>
+class BasicOStream : public std::basic_ostream<CharT>
+{
+    public:
+        explicit BasicOStream(BasicStreamBuffer<CharT>* buffer = 0)
+        : std::basic_ostream<CharT>( buffer ),
+          _buffer(buffer)
+        { }
+
+        ~BasicOStream()
+        {}
+
+        //! @brief Access to the underlying buffer.
+        BasicStreamBuffer<CharT>* attachedBuffer()
+        { return _buffer; }
+
+        BasicStreamBuffer<CharT>* attachBuffer(BasicStreamBuffer<CharT>*  buffer)
+        {
+            BasicStreamBuffer<CharT>* tmp = _buffer;
+            _buffer = buffer;
+            rdbuf(buffer);
+            return tmp;
+        }
+
+        std::streamsize writesome(CharT* buffer, std::streamsize n)
+        {
+            std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
+            if(current != _buffer)
+                return 0;
+
+            std::streamsize avail = _buffer->out_avail();
+            if(avail == 0)
             {
-                BasicStreamBuffer<CharT>* tmp = _buffer;
-                _buffer = buffer;
-                rdbuf(buffer);
-                return tmp;
-            }
-
-            //! @brief Peeks bytes in the stream buffer.
-            /**
-               The number of bytes that can be peeked depends on the current
-               stream buffer get area and maybe less than requested,
-               similar to istream::readsome().
-            */
-            std::streamsize peeksome(CharT* buffer, std::streamsize n)
-            {
-                std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
-                if(current == _buffer)
-                    return _buffer->speekn(buffer, n);
-
-                if(n > 0)
-                    buffer[0] = current->getc();
-
                 return 0;
             }
 
-        private:
-            BasicStreamBuffer<CharT>* _buffer;
-    };
+            n = std::min(avail, n);
+            return _buffer->sputn(buffer, n);
+        }
+
+    private:
+        BasicStreamBuffer<CharT>* _buffer;
+};
 
 
-    //! @brief An ostream with peeking capability.
-    template <typename CharT>
-    class BasicOStream : public std::basic_ostream<CharT> 
-    {
-        public:
-            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer = 0)
-            : std::basic_ostream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+//! @brief An iostream with peeking capability.
+template <typename CharT>
+class BasicIOStream : public std::basic_iostream<CharT>
+{
+    public:
+        explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer = 0)
+        : std::basic_iostream<CharT>( buffer ),
+          _buffer(buffer)
+        { }
 
-            ~BasicOStream()
-            {}
+        ~BasicIOStream()
+        { }
 
-            //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* buffer()
-            { return _buffer; }
+        //! @brief Access to the underlying buffer.
+        BasicStreamBuffer<CharT>* attachedBuffer()
+        { return _buffer; }
 
-            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
+        BasicStreamBuffer<CharT>* attachBuffer(BasicStreamBuffer<CharT>*  buffer)
+        {
+            BasicStreamBuffer<CharT>* tmp = _buffer;
+            _buffer = buffer;
+            rdbuf(buffer);
+            return tmp;
+        }
+
+        //! @brief Peeks bytes in the stream buffer.
+        /**
+            The number of bytes that can be peeked depends on the current
+            stream buffer get area and maybe less than requested,
+            similar to istream::readsome().
+        */
+        std::streamsize peeksome(CharT* buffer, std::streamsize n)
+        {
+            std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
+            if(current == _buffer)
+                return _buffer->speekn(buffer, n);
+
+            if(n > 0)
+                buffer[0] = current->getc();
+
+            return 0;
+        }
+
+        std::streamsize writesome(CharT* buffer, std::streamsize n)
+        {
+            std::basic_streambuf<CharT>* current = std::basic_ios<CharT>::rdbuf();
+            if(current != _buffer)
+                return 0;
+
+            std::streamsize avail = _buffer->out_avail();
+            if(avail == 0)
             {
-                BasicStreamBuffer<CharT>* tmp = _buffer;
-                _buffer = buffer;
-                return tmp;
+                return 0;
             }
 
-            std::streamsize writesome(CharT* buffer, std::streamsize n)
-            {
-                std::streamsize avail = _buffer->out_avail();
-                if(avail == 0)
-                    return 0;
+            n = std::min(avail, n);
+            return _buffer->sputn(buffer, n);
+        }
 
-                n = std::min(avail, n);
-                return _buffer->sputn(buffer, n);
-            }
-
-        private:
-            BasicStreamBuffer<CharT>* _buffer;
-    };
+    private:
+        BasicStreamBuffer<CharT>* _buffer;
+};
 
 
-    //! @brief An iostream with peeking capability.
-    template <typename CharT>
-    class BasicIOStream : public std::basic_iostream<CharT>
-    {
-        public:
-            explicit BasicIOStream(BasicStreamBuffer<CharT>* buffer = 0)
-            : std::basic_iostream<CharT>( buffer ),
-              _buffer(buffer)
-            { }
+class IStream : public BasicIStream<char>
+{
+    public:
+        IStream(size_t bufferSize = 8192)
+        : _buffer(bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
 
-            ~BasicIOStream()
-            { }
+        IStream(IODevice& device, size_t bufferSize = 8192)
+        : _buffer(device, bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
 
-            //! @brief Access to the underlying buffer.
-            BasicStreamBuffer<CharT>* buffer()
-            { return _buffer; }
+        StreamBuffer& buffer()
+        { return _buffer; }
 
-            BasicStreamBuffer<CharT>* setBuffer(BasicStreamBuffer<CharT>*  buffer)
-            {
-                BasicStreamBuffer<CharT>* tmp = _buffer;
-                _buffer = buffer;
-                rdbuf(buffer);
-                return tmp;
-            }
+        IODevice* attachDevice(IODevice& device)
+        {
+            IODevice* ret = attachedDevice();
+            _buffer.attach(device);
+            return ret;
+        }
 
-            //! @brief Peeks bytes in the stream buffer.
-            /**
-               The number of bytes that can be peeked depends on the current
-               stream buffer get area and maybe less than requested,
-               similar to istream::readsome().
-            */
-            std::streamsize peeksome(CharT* buffer, std::streamsize n)
-            { return _buffer->speekn(buffer, n); }
+        IODevice* attachedDevice()
+        { return _buffer.device(); }
 
-            std::streamsize writesome(CharT* buffer, std::streamsize n)
-            {
-                std::streamsize avail = _buffer->out_avail();
-                if(avail == 0)
-                {
-                    return 0;
-                }
+    private:
+        StreamBuffer _buffer;
+};
 
-                n = std::min(avail, n);
-                return _buffer->sputn(buffer, n);
-            }
 
-        private:
-            BasicStreamBuffer<CharT>* _buffer;
-    };
+class OStream : public BasicIStream<char>
+{
+    public:
+        OStream(size_t bufferSize = 8192)
+        : _buffer(bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
+
+        OStream(IODevice& device, size_t bufferSize = 8192)
+        : _buffer(device, bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
+
+        StreamBuffer& buffer()
+        { return _buffer; }
+
+        IODevice* attachDevice(IODevice& device)
+        {
+            IODevice* ret = attachedDevice();
+            _buffer.attach(device);
+            return ret;
+        }
+
+        IODevice* attachedDevice()
+        { return _buffer.device(); }
+
+    private:
+        StreamBuffer _buffer;
+};
+
+
+class IOStream : public BasicIOStream<char>
+{
+    public:
+        IOStream(size_t bufferSize = 8192)
+        : _buffer(bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
+
+        IOStream(IODevice& device, size_t bufferSize = 8192)
+        : _buffer(device, bufferSize)
+        {
+            attachBuffer(&_buffer);
+        }
+
+        StreamBuffer& buffer()
+        { return _buffer; }
+
+        IODevice* attachDevice(IODevice& device)
+        {
+            IODevice* ret = attachedDevice();
+            _buffer.attach(device);
+            return ret;
+        }
+
+        IODevice* attachedDevice()
+        { return _buffer.device(); }
+
+    private:
+        StreamBuffer _buffer;
+};
 
 } // namespace System
 
