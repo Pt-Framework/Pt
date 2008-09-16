@@ -26,9 +26,9 @@ namespace Pt {
 
 namespace System {
 
-Pipe::Pipe(bool isAsync)
+Pipe::Pipe(OpenMode mode)
 {
-    _impl = new PipeImpl(isAsync);
+    _impl = new PipeImpl(mode);
 }
 
 

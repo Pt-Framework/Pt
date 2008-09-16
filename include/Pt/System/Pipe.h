@@ -65,12 +65,17 @@ class PT_SYSTEM_API Pipe : public NonCopyable
         class PipeImpl* _impl;
 
     public:
+        typedef int OpenMode;
+
+        static const int Sync  = 0;
+        static const int Async = 1;
+
         /** @brief Creates the pipe with two IODevices
 
             The default constructor will create the pipe and the appropriate
             IODevices to read and write to the pipe.
         */
-        Pipe(bool isAsync = IODevice::Sync);
+        Pipe(OpenMode mode = Sync);
 
         /** @brief Destructor
 

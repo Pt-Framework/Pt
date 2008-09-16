@@ -42,7 +42,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
 
         void AsyncIO()
         {
-            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             eloop.add( pipe.output() );
             eloop.add( pipe.input() );
 
@@ -142,7 +142,7 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         {
             std::string out("Hello World, where do you want to GOTO day!");
 
-            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             pipe.output().write( out.c_str(), out.size() );
 
             pipe.input().beginRead(_buffer, sizeof(_buffer));
@@ -171,7 +171,7 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         {
             _out = "Hello World, where do you want to GOTO day!";
 
-            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
 
             _pos = 0;
             std::memcpy(_buffer, _out.c_str(),  sizeof(_buffer));
@@ -206,7 +206,7 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         {
             std::string out("Hello World, where do you want to GOTO day!");
 
-            Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             pipe.output().write( out.c_str(), out.size() );
 
             pipe.input().beginRead(_buffer, sizeof(_buffer));
