@@ -186,99 +186,60 @@ class BasicIOStream : public std::basic_iostream<CharT>
 };
 
 
-class IStream : public BasicIStream<char>
+class PT_SYSTEM_API IStream : public BasicIStream<char>
 {
     public:
-        IStream(size_t bufferSize = 8192)
-        : _buffer(bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        IStream(size_t bufferSize = 8192);
 
-        IStream(IODevice& device, size_t bufferSize = 8192)
-        : _buffer(device, bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        ~IStream();
 
-        StreamBuffer& buffer()
-        { return _buffer; }
+        IStream(IODevice& device, size_t bufferSize = 8192);
 
-        IODevice* attachDevice(IODevice& device)
-        {
-            IODevice* ret = attachedDevice();
-            _buffer.attach(device);
-            return ret;
-        }
+        StreamBuffer& buffer();
 
-        IODevice* attachedDevice()
-        { return _buffer.device(); }
+        IODevice* attachDevice(IODevice& device);
+
+        IODevice* attachedDevice();
 
     private:
         StreamBuffer _buffer;
 };
 
 
-class OStream : public BasicIStream<char>
+class PT_SYSTEM_API OStream : public BasicIStream<char>
 {
     public:
-        OStream(size_t bufferSize = 8192)
-        : _buffer(bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        OStream(size_t bufferSize = 8192);
 
-        OStream(IODevice& device, size_t bufferSize = 8192)
-        : _buffer(device, bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        OStream(IODevice& device, size_t bufferSize = 8192);
 
-        StreamBuffer& buffer()
-        { return _buffer; }
+        ~OStream();
 
-        IODevice* attachDevice(IODevice& device)
-        {
-            IODevice* ret = attachedDevice();
-            _buffer.attach(device);
-            return ret;
-        }
+        StreamBuffer& buffer();
 
-        IODevice* attachedDevice()
-        { return _buffer.device(); }
+        IODevice* attachDevice(IODevice& device);
+
+        IODevice* attachedDevice();
 
     private:
         StreamBuffer _buffer;
 };
 
 
-class IOStream : public BasicIOStream<char>
+class PT_SYSTEM_API IOStream : public BasicIOStream<char>
 {
     public:
-        IOStream(size_t bufferSize = 8192)
-        : _buffer(bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        IOStream(size_t bufferSize = 8192);
 
-        IOStream(IODevice& device, size_t bufferSize = 8192)
-        : _buffer(device, bufferSize)
-        {
-            attachBuffer(&_buffer);
-        }
+        IOStream(IODevice& device, size_t bufferSize = 8192);
 
-        StreamBuffer& buffer()
-        { return _buffer; }
+        ~IOStream();
 
-        IODevice* attachDevice(IODevice& device)
-        {
-            IODevice* ret = attachedDevice();
-            _buffer.attach(device);
-            return ret;
-        }
+        StreamBuffer& buffer();
 
-        IODevice* attachedDevice()
-        { return _buffer.device(); }
+        IODevice* attachDevice(IODevice& device);
+
+        IODevice* attachedDevice();
 
     private:
         StreamBuffer _buffer;
