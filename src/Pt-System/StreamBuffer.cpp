@@ -328,20 +328,31 @@ std::streamsize StreamBuffer::xspeekn(char* buffer, std::streamsize size)
 StreamBuffer::pos_type
 StreamBuffer::seekoff(off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
-	pos_type ret =  pos_type( off_type(-1) );
+    pos_type ret =  pos_type( off_type(-1) );
 
-	if ( ! _ioDevice || ! _ioDevice->enabled() ||
-	     ! _ioDevice->seekable() || off == 0)
-	{
-		return ret;
-	}
+    if ( ! _ioDevice || ! _ioDevice->enabled() ||
+         ! _ioDevice->seekable() || off == 0)
+    {
+        return ret;
+    }
 
-	ret = _ioDevice->seek(off, dir);
+    if(_flushing)
+    {
+        this->endFlush();
+    }
 
-	// eliminate currently buffered sequence
-	this->setg(0, 0, 0);
+    if(_syncing)
+    {
+        this->endSync();
+    }
 
-	return ret;
+    ret = _ioDevice->seek(off, dir);
+
+    // eliminate currently buffered sequence
+    this->setg(0, 0, 0);
+    this->setp(0);
+
+    return ret;
 }
 
 
