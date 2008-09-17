@@ -66,7 +66,7 @@ class BasicIStream : public std::basic_istream<CharT>
                 return _buffer->speekn(buffer, n);
 
             if(n > 0)
-                buffer[0] = current->getc();
+                buffer[0] = std::basic_ios<CharT>::rdbuf()->getc();
 
             return 0;
         }

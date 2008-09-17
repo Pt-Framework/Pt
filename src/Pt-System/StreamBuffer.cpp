@@ -350,7 +350,7 @@ StreamBuffer::seekoff(off_type off, std::ios::seekdir dir, std::ios::openmode)
 
     // eliminate currently buffered sequence
     this->setg(0, 0, 0);
-    this->setp(0);
+    this->setp(0, 0);
 
     return ret;
 }
