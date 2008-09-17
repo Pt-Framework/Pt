@@ -66,7 +66,7 @@ class BasicIStream : public std::basic_istream<CharT>
 
             if(n > 0)
 			{
-                buffer[0] = peek();
+                buffer[0] = this->peek();
 				return 1;
 			}
 
@@ -162,7 +162,7 @@ class BasicIOStream : public std::basic_iostream<CharT>
 
             if(n > 0)
 			{
-                buffer[0] = peek();
+                buffer[0] = this->peek();
 				return 1;
 			}
 
