@@ -1,19 +1,29 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006-2008 by Marc Boris Duerner                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#if !defined(PTV_Process_H)
-#define PTV_Process_H
+#ifndef PT_SYSTEM_PROCESS_H
+#define PT_SYSTEM_PROCESS_H
 
 #include <Pt/System/Api.h>
-#include <Pt/Types.h>
-#include <Pt/SourceInfo.h>
 #include <Pt/System/IODevice.h>
-#include <Pt/System/SystemError.h>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <bitset>
 
 namespace Pt {
 
@@ -24,43 +34,48 @@ class PT_SYSTEM_API ProcessInfo
 {
     public:
         //! process info can contain at least the command
-        ProcessInfo( const std::string& command);
+        ProcessInfo(const std::string& command);
 
-    const std::string& command() const;
+        const std::string& command() const;
 
-        /** @brief adds an argument to the list of arguments
-        *
-        * An argument can contain white spaces
-        *
-        * @param argument [IN] string containing the argument
+        /** @brief Adds an argument to the list of arguments
         */
-        void addArgument( const std::string& argument);
+        void addArg(const std::string& argument);
 
         unsigned argCount() const;
-        std::string getArgument( unsigned idx) const;
 
-        //! replaces or, if null, closes the standard input
-        void setStdInput( IODevice* dev);
-        IODevice* getStdInput() const;
+        const std::string& arg(unsigned idx) const;
 
-        //! replaces or, if null, closes the standard output
-        void setStdOutput( IODevice* dev);
-        IODevice* getStdOutput() const;
+        //! @brief Replaces or, if null, closes the standard input
+        void setStdin(IODevice* dev);
 
-        //! replaces or, if null, closes the standard error
-        void setStdError( IODevice* dev);
-        IODevice* getStdError() const;
+        IODevice* stdin() const;
 
-        std::bitset<3> mask() const;
+        bool stdinClosed() const;
+
+        //! @brief Replaces or, if null, closes the standard output
+        void setStdout(IODevice* dev);
+
+        bool stdoutClosed() const;
+
+        IODevice* stdout() const;
+
+        //! @brief Replaces or, if null, closes the standard error
+        void setStderr(IODevice* dev);
+
+        IODevice* stderr() const;
+
+        bool stderrClosed() const;
 
     private:
-        std::string m_command;
-        std::bitset<3> m_mask;
-        std::vector< std::string> m_argList;
-
-        IODevice* m_devInput;
-        IODevice* m_devOutput;
-        IODevice* m_devError;
+        std::string _command;
+        std::vector<std::string> _args;
+        IODevice* _stdin;
+        bool _stdinClosed;
+        IODevice* _stdout;
+        bool _stdoutClosed;
+        IODevice* _stderr;
+        bool _stderrClosed;
 };
 
 //! Process Environment
@@ -71,19 +86,15 @@ class PT_SYSTEM_API Process
         /**
             @param command Name of the executable along with its arguments
         */
-        Process( const std::string& commandline);
+        Process(const std::string& commandline);
 
         //! Constructs a Process with a process info structure
-        Process( const ProcessInfo& procInfo);
+        Process(const ProcessInfo& procInfo);
 
         //! Dtor
         ~Process();
 
-        //! Get the Command string
-        /**
-            @return Name of the executable
-        */
-        const std::string& command();
+        const ProcessInfo& procInfo() const;
 
         //! Start/Create the Process
         /**
@@ -130,7 +141,6 @@ class PT_SYSTEM_API Process
         static unsigned long usedMemory();
 
     private:
-        friend class ProcessImpl;
         class ProcessImpl *_impl;
 };
 
@@ -138,4 +148,4 @@ class PT_SYSTEM_API Process
 
 }
 
-#endif // PT_Process_H
+#endif // PT_SYSTEM_PROCESS_H

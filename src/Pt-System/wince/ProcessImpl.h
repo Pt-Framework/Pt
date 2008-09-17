@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,13 +32,13 @@ class ProcessImpl : public ProcessImplBase
 {
     public:
         ProcessImpl(const std::string& command);
-		
-		ProcessImpl(const ProcessInfo& procInfo);
+
+        ProcessImpl(const ProcessInfo& procInfo);
 
         static std::string getEnvVar(const std::string& name);
-        
+
         static void setEnvVar(const std::string& name, const std::string& value);
-        
+
         static void unsetEnvVar(const std::string& name)
         {
             ProcessImpl::setEnvVar(name, "");

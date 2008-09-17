@@ -1,93 +1,145 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006-2008 by Marc Boris Duerner                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/System/Process.h"
 #include "ProcessImpl.h"
-
+#include "Pt/System/Process.h"
 
 namespace Pt {
 
 namespace System {
 
+ProcessInfo::ProcessInfo(const std::string& command)
+: _command(command)
+, _stdin(0)
+, _stdinClosed(false)
+, _stdout(0)
+, _stdoutClosed(false)
+, _stderr(0)
+, _stderrClosed(false)
+{
+}
 
-ProcessInfo::ProcessInfo( const std::string& command)
-    : m_command( command)
-    , m_devInput(0)
-    , m_devOutput(0)
-    , m_devError(0)
-{ }
 
 const std::string& ProcessInfo::command() const
 {
-	return m_command;
+    return _command;
 }
 
-void ProcessInfo::addArgument( const std::string& argument)
+
+void ProcessInfo::addArg(const std::string& argument)
 {
-    m_argList.push_back( argument);
+    _args.push_back(argument);
 }
 
-void ProcessInfo::setStdInput( IODevice* dev)
+
+void ProcessInfo::setStdin(IODevice* dev)
 {
-    m_mask.set(0);
-    m_devInput = dev;
+    if( dev )
+        _stdinClosed = false;
+    else
+        _stdinClosed = true;
+
+    _stdin = dev;
 }
 
-IODevice* ProcessInfo:: getStdInput() const
+
+IODevice* ProcessInfo::stdin() const
 {
-    return m_devInput;
+    return _stdin;
 }
 
- 
-void ProcessInfo::setStdOutput( IODevice* dev)
+
+bool ProcessInfo::stdinClosed() const
 {
-    m_mask.set(1);
-    m_devOutput = dev;
+    return _stdinClosed;
 }
 
-IODevice* ProcessInfo::getStdOutput() const
+
+void ProcessInfo::setStdout(IODevice* dev)
 {
-    return m_devOutput;
+    if( dev )
+        _stdoutClosed = false;
+    else
+        _stdoutClosed = true;
+
+    _stdout = dev;
 }
 
- 
-void ProcessInfo::setStdError( IODevice* dev)
+
+IODevice* ProcessInfo::stdout() const
 {
-    m_mask.set(2);
-    m_devError = dev;
+    return _stdout;
 }
 
-IODevice* ProcessInfo::getStdError() const
+
+bool ProcessInfo::stdoutClosed() const
 {
-    return m_devError;
+    return _stdoutClosed;
 }
 
-std::bitset<3> ProcessInfo::mask() const
+
+void ProcessInfo::setStderr(IODevice* dev)
 {
-    return m_mask;
+    if( dev )
+        _stderrClosed = false;
+    else
+        _stderrClosed = true;
+
+    _stderr = dev;
 }
+
+
+IODevice* ProcessInfo::stderr() const
+{
+    return _stderr;
+}
+
+
+bool ProcessInfo::stderrClosed() const
+{
+    return _stderrClosed;
+}
+
 
 unsigned ProcessInfo::argCount() const
 {
-    return m_argList.size();
+    return _args.size();
 }
 
-std::string ProcessInfo::getArgument( unsigned idx) const
+
+const std::string& ProcessInfo::arg(unsigned idx) const
 {
-    return (idx < m_argList.size()) ? m_argList[idx] : std::string();
+    return _args.at(idx);
 }
 
 
 Process::Process(const std::string& command)
 {
-    _impl = new ProcessImpl(command);
+    _impl = new ProcessImpl( ProcessInfo(command) );
 }
 
-Process::Process( const ProcessInfo& procInfo)
+
+Process::Process(const ProcessInfo& procInfo)
 {
     _impl = new ProcessImpl( procInfo);
 }
+
 
 Process::~Process()
 {
@@ -99,20 +151,24 @@ Process::~Process()
     delete _impl;
 }
 
-const std::string& Process::command()
+
+const ProcessInfo& Process::procInfo() const
 {
-     return _impl->command();
+    return _impl->procInfo();
 }
+
 
 void Process::start()
 {
      _impl->start();
 }
 
+
 void Process::kill()
 {
      _impl->kill();
 }
+
 
 int Process::wait() 
 {

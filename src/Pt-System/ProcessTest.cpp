@@ -49,11 +49,11 @@ void ProcessTest::RedirectIO()
 #else
     Pt::System::ProcessInfo procInfo( "ProcessTestChildd");
 #endif
-    procInfo.addArgument( "testString");
+    procInfo.addArg( "testString");
 
     Pt::System::Pipe pipe;
-    procInfo.setStdOutput(&pipe.output());
-    procInfo.setStdError(0);
+    procInfo.setStdout(&pipe.output());
+    procInfo.setStderr(0);
 
     Pt::System::Process p(procInfo);
 

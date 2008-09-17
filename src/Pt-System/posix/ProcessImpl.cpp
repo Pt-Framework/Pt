@@ -14,25 +14,9 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const std::string& strCommand)
-    : m_command(strCommand)
-    , m_devIn(0)
-    , m_devOut(0)
-    , m_devErr(0)
-{
-}
-
 ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
+: _procInfo(procInfo)
 {
-    m_command = procInfo.command();
-    m_mask = procInfo.mask();
-
-    m_devIn  = procInfo.getStdInput();
-    m_devOut = procInfo.getStdOutput();
-    m_devErr = procInfo.getStdError();
-
-    for( unsigned i = 0; i < procInfo.argCount(); i++)
-        m_args += procInfo.getArgument( i);
 }
 
 
@@ -41,15 +25,10 @@ ProcessImpl::~ProcessImpl()
 }
 
 
-const std::string& ProcessImpl::command()
-{
-    return m_command;
-}
-
 void ProcessImpl::start()
 {
     m_pid = fork();
-    
+
     if( m_pid < 0 )
     {
         m_pid = -1;
@@ -58,68 +37,63 @@ void ProcessImpl::start()
 
     if( m_pid == 0)    // child Process
     {
-        // --- standard in
-        if( m_mask.test(0))
+        if( _procInfo.stdinClosed() )
         {
-            if( m_devIn)  dup2( m_devIn->ioimpl().fd(), STDIN_FILENO);
-            else fclose( stdin);
+            fclose(stdin);
+        }
+        else if(_procInfo.stdin() )
+        {
+            dup2(_procInfo.stdin()->ioimpl().fd(), STDIN_FILENO);
         }
 
-        // --- standard out
-        if( m_mask.test(1))
+        if( _procInfo.stdoutClosed() )
         {
-	    if( m_devOut) dup2( m_devOut->ioimpl().fd(), STDOUT_FILENO);
-            else fclose( stdout);
+            fclose( stdout);
+        }
+        else if( _procInfo.stdout() )
+        {
+            dup2(_procInfo.stdout()->ioimpl().fd(), STDOUT_FILENO);
         }
 
-        // --- standard err
-        if( m_mask.test(2))
+        if( _procInfo.stderrClosed() )
         {
-            if( m_devErr)  dup2( m_devErr->ioimpl().fd(), STDERR_FILENO);
-            else fclose( stderr);
+            fclose(stderr);
+        }
+        else if( _procInfo.stderr() )
+        {
+            dup2(_procInfo.stderr()->ioimpl().fd(), STDERR_FILENO);
         }
 
-        // split m_command and args in anrray of pointers
-        // we don't use strtok for problems with trailing spaces
-        std::string strCommArgs = m_command + " " + m_args;
-        std::vector<char> buffer( strCommArgs.length() );
-        std::copy( strCommArgs.begin(), strCommArgs.end(), buffer.begin() );
-        buffer.push_back('\0');
+        std::vector< std::vector<char> > args;
 
-        char* cpArgs[ buffer.size() ];
+        const std::string& c = _procInfo.command();
+        std::vector<char> cmd( c.begin(), c.end() );
+        cmd.push_back('\0');
+        args.push_back(cmd);
 
-        bool fetch = false;
-        unsigned j = 0;
-        for( unsigned int i = 0; i < buffer.size(); ++i)
+        for( unsigned i = 0; i < _procInfo.argCount(); i++)
         {
-            if( buffer[i] != ' ' && buffer[i] != '\0')
-            {
-                if( !fetch)
-                {
-                    fetch = true;
-                    cpArgs[j++] = &buffer[i];
-                }
-            }
-            else
-            {
-                if( fetch)
-                {
-                    fetch = false;
-                    buffer[i] = '\0';
-                }
-            }
+            const std::string& a = _procInfo.arg(i);
+            std::vector<char> arg(a.begin(), a.end());
+            arg.push_back('\0');
+            args.push_back(arg);
         }
-        cpArgs[j] = 0;
 
-        // call exec
-        if( 0 > execvp(cpArgs[0], cpArgs))
+        std::vector<char*> argptrs;
+        for( unsigned n = 0; n < args.size(); n++)
+        {
+            std::vector<char>& a = args[n];
+            argptrs.push_back( &a[0] );
+        }
+        argptrs.push_back( 0 );
+
+        if( 0 > execvp(argptrs[0], &argptrs[0]))
         {
             throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
             std::exit(-1);
         }
     }
 
-    // Parent Process
     return;
 }
 
@@ -157,6 +131,40 @@ bool ProcessImpl::tryWait(int& status)
     }
 
     return ret != 0;
+}
+
+
+void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
+{
+    if( 0 > setenv(name.c_str(),value.c_str(),1) )
+    {
+        throw SystemError("not Enough Memory in Environment!",PT_SOURCEINFO);
+    }
+}
+
+
+void ProcessImpl::unsetEnvVar(const std::string& name)
+{
+    unsetenv(name.c_str());
+}
+
+
+std::string ProcessImpl::getEnvVar(const std::string& name)
+{
+    std::string ret;
+    const char* cp = std::getenv(name.c_str());
+    if( NULL == cp )
+    {
+        return ret;
+    }
+    ret = cp;
+    return ret;
+}
+
+
+void ProcessImpl::sleep(size_t milliSec)
+{
+    usleep(milliSec*1000);
 }
 
 
