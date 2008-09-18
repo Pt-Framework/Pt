@@ -22,6 +22,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/System/SystemError.h>
 #include <string>
 #include <vector>
 

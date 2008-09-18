@@ -32,7 +32,7 @@ void ProcessImpl::start()
     if( m_pid < 0 )
     {
         m_pid = -1;
-        throw SystemError("fork failed!", PT_SOURCEINFO);
+        throw SystemError("fork failed", PT_SOURCEINFO);
     }
 
     if( m_pid == 0)    // child Process
@@ -89,7 +89,6 @@ void ProcessImpl::start()
 
         if( 0 > execvp(argptrs[0], &argptrs[0]))
         {
-            throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
             std::exit(-1);
         }
     }
