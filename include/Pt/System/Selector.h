@@ -119,11 +119,7 @@ namespace System {
             */
             bool wait(unsigned int msecs = WaitInfinite)
             {
-                bool ret = this->onWait(msecs);
-                if(ret == false)
-                    timeout.send();
-
-                return ret;
+                return this->onWait(msecs);
             }
 
             /** @brief Wakes the selctor from waiting
@@ -134,12 +130,6 @@ namespace System {
             */
             void wake()
             { this->onWake(); }
-
-            /** @brief Notifies about wait timeouts
-                This signal is send when the timeout given to a wait
-                call of the selector expires and no activity occured.
-            */
-            Signal<> timeout;
 
         protected:
             //! @brief Default constructor
