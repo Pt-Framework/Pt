@@ -47,25 +47,25 @@ class PT_SYSTEM_API ProcessInfo
         const std::string& arg(unsigned idx) const;
 
         //! @brief Replaces or, if null, closes the standard input
-        void setStdin(IODevice* dev);
+        void setStdInput(IODevice* dev);
 
-        IODevice* stdin() const;
+        IODevice* stdInput() const;
 
-        bool stdinClosed() const;
+        bool stdInputClosed() const;
 
         //! @brief Replaces or, if null, closes the standard output
-        void setStdout(IODevice* dev);
+        void setStdOutput(IODevice* dev);
 
-        bool stdoutClosed() const;
+        bool stdOutputClosed() const;
 
-        IODevice* stdout() const;
+        IODevice* stdOutput() const;
 
         //! @brief Replaces or, if null, closes the standard error
-        void setStderr(IODevice* dev);
+        void setStdError(IODevice* dev);
 
-        IODevice* stderr() const;
+        IODevice* stdError() const;
 
-        bool stderrClosed() const;
+        bool stdErrorClosed() const;
 
     private:
         std::string _command;

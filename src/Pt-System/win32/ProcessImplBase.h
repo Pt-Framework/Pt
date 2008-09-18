@@ -36,13 +36,13 @@ namespace System {
     class ProcessImplBase
     {
         public:
-            ProcessImplBase(const std::string& command);
             ProcessImplBase(const ProcessInfo& procInfo);
 
             static void sleep(unsigned int milliSec)
             { ::Sleep(milliSec); }
 
-            const std::string& command();
+            const ProcessInfo& procInfo() const
+			{ return _procInfo; }
 
             void start();
 
@@ -56,16 +56,7 @@ namespace System {
 
     private:
         PROCESS_INFORMATION m_pid;
-
-        std::string m_command;
-
-        std::bitset<3> m_mask;
-
-        IODevice* m_devIn;
-        IODevice* m_devOut;
-        IODevice* m_devErr;
-
-        std::string m_args;
+        ProcessInfo _procInfo;
     };
 
 } // namespace System

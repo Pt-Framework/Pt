@@ -1,6 +1,6 @@
 #include "ProcessImplBase.h"
 #include "IODeviceImpl.h"
-
+#include "Pt/System/SystemError.h"
 #include "win32.h"
 #include <sstream>
 #include <vector>
@@ -14,33 +14,11 @@ namespace Pt {
 
 namespace System {
 
-ProcessImplBase::ProcessImplBase(const std::string& command)
-    : m_command(command)
-    , m_devIn(0)
-    , m_devOut(0)
-    , m_devErr(0)
-{
-}
-
 ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
+: _procInfo(procInfo)
 {
-    m_mask = procInfo.mask();
-
-	m_command = procInfo.command();
- 
-    m_devIn  = procInfo.getStdInput();
-    m_devOut = procInfo.getStdOutput();
-    m_devErr = procInfo.getStdError();
-
-    for( unsigned i = 0; i < procInfo.argCount(); i++)
-        m_args += " " + procInfo.getArgument( i);
 }
 
-
-const std::string& ProcessImplBase::command()
-{
-    return m_command;
-}
 
 void ProcessImplBase::start()
 {
@@ -51,64 +29,65 @@ void ProcessImplBase::start()
     ZeroMemory( &m_pid, sizeof(m_pid) );
 
 #ifndef _WIN32_WCE
-    // --- standard in
-    if( m_mask.test(0))
+    if( _procInfo.stdInputClosed() )
 	{
-		if( m_devIn)
-		{
-			SetHandleInformation( m_devIn->ioimpl().deviceHandle(), 
-								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdInput = m_devIn->ioimpl().deviceHandle();
-		}
-		else
-			m_startUp.hStdInput = INVALID_HANDLE_VALUE;
+		m_startUp.hStdInput = INVALID_HANDLE_VALUE;
+	}
+	else if( _procInfo.stdInput() )
+	{
+		SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
 	}
 
-    if( m_mask.test(1))
+    if( _procInfo.stdOutputClosed() )
 	{ 
-		if(m_devOut)
-		{
-			SetHandleInformation( m_devOut->ioimpl().deviceHandle(), 
-								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdOutput = m_devOut->ioimpl().deviceHandle();
-		}
-		else
-			m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
+		m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
+	}
+	else if( _procInfo.stdOutput() )
+	{
+		SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
 	}
 
-	if( m_mask.test(2))
+	if( _procInfo.stdErrorClosed())
 	{
-		if( m_devErr)
-		{
-			SetHandleInformation( m_devErr->ioimpl().deviceHandle(), 
-								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-			m_startUp.hStdError = m_devErr->ioimpl().deviceHandle();
-		}
-		else
-			m_startUp.hStdError = INVALID_HANDLE_VALUE;
+		m_startUp.hStdError = INVALID_HANDLE_VALUE;
+	}
+	else if( _procInfo.stdError() )
+	{
+		SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
 	}
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
-    std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command + " " + m_args  );
-	std::vector<TCHAR> m_buffer;
-    m_buffer.assign( tcommand.begin(), tcommand.end() );
+	std::basic_string<TCHAR> tcmd = win32::fromMultiByte( _procInfo.command() );
+	for( unsigned i = 0; i < _procInfo.argCount(); i++)
+	{
+        tcmd += win32::fromMultiByte( " " + _procInfo.arg(i) );
+	}
+	
+	std::vector<TCHAR> m_buffer( tcmd.begin(), tcmd.end() );
     m_buffer.push_back(0);
+
     BOOL ret = CreateProcess( NULL, &m_buffer[0], NULL, NULL,
                               true, 0, NULL, NULL, &m_startUp, &m_pid);
 #else
-    std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command  );
+    std::basic_string<TCHAR> tcmd = win32::fromMultiByte( m_command  );
     std::basic_string<TCHAR> targs = win32::fromMultiByte( m_args );
-    BOOL ret = CreateProcess( tcommand.c_str(), targs.c_str(), NULL, NULL,
+    BOOL ret = CreateProcess( tcmd.c_str(), targs.c_str(), NULL, NULL,
                               0, 0, NULL, NULL, &m_startUp, &m_pid);
 #endif
 
-    if( !ret )
+    if( ! ret )
     {
 		DWORD errCode = GetLastError(); 
 		std::ostringstream errorOut;
 		errorOut << "System call CreateProcess() Failed! error code: " << errCode;
-        throw SystemError(errorOut.str().c_str(),PT_SOURCEINFO);
+        throw SystemError( errorOut.str().c_str(), PT_SOURCEINFO );
     }
 }
 

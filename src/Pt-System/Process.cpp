@@ -48,7 +48,7 @@ void ProcessInfo::addArg(const std::string& argument)
 }
 
 
-void ProcessInfo::setStdin(IODevice* dev)
+void ProcessInfo::setStdInput(IODevice* dev)
 {
     if( dev )
         _stdinClosed = false;
@@ -59,19 +59,19 @@ void ProcessInfo::setStdin(IODevice* dev)
 }
 
 
-IODevice* ProcessInfo::stdin() const
+IODevice* ProcessInfo::stdInput() const
 {
     return _stdin;
 }
 
 
-bool ProcessInfo::stdinClosed() const
+bool ProcessInfo::stdInputClosed() const
 {
     return _stdinClosed;
 }
 
 
-void ProcessInfo::setStdout(IODevice* dev)
+void ProcessInfo::setStdOutput(IODevice* dev)
 {
     if( dev )
         _stdoutClosed = false;
@@ -82,19 +82,19 @@ void ProcessInfo::setStdout(IODevice* dev)
 }
 
 
-IODevice* ProcessInfo::stdout() const
+IODevice* ProcessInfo::stdOutput() const
 {
     return _stdout;
 }
 
 
-bool ProcessInfo::stdoutClosed() const
+bool ProcessInfo::stdOutputClosed() const
 {
     return _stdoutClosed;
 }
 
 
-void ProcessInfo::setStderr(IODevice* dev)
+void ProcessInfo::setStdError(IODevice* dev)
 {
     if( dev )
         _stderrClosed = false;
@@ -105,13 +105,13 @@ void ProcessInfo::setStderr(IODevice* dev)
 }
 
 
-IODevice* ProcessInfo::stderr() const
+IODevice* ProcessInfo::stdError() const
 {
     return _stderr;
 }
 
 
-bool ProcessInfo::stderrClosed() const
+bool ProcessInfo::stdErrorClosed() const
 {
     return _stderrClosed;
 }
