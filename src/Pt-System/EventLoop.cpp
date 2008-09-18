@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "SelectorImpl.h"
 #include "Pt/Signal.h"
 #include "Pt/Event.h"
 #include "Pt/System/EventLoop.h"
@@ -37,6 +38,7 @@ EventLoop::EventLoop()
 , _allocator(/*255, 64*/)
 , _queueMutex(Mutex::Normal)
 {
+    _selector = new SelectorImpl();
 }
 
 
@@ -62,6 +64,14 @@ EventLoop::~EventLoop()
     }
     catch(...)
     {}
+
+    delete _selector;
+}
+
+
+void EventLoop::setApp(Application* app)
+{
+    _selector->setApp(app);
 }
 
 
@@ -79,29 +89,12 @@ void EventLoop::run()
 
         lock.unlock();
 
-        bool active = _selector.wait( this->idleTimeout() );
+        bool active = _selector->wait( this->idleTimeout() );
         if(!active)
             timeout.send();
     }
 }
 
-/*bool EventLoop::wait(unsigned msecs)
-{
-    if (_selector.wait(msecs))
-    {
-        MutexLock lock(_queueMutex);
-
-        if( !_eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }
-
-        return true;
-    }
-
-    return false;
-}*/
 
 void EventLoop::commitEvent(const Event& ev)
 {
@@ -141,13 +134,6 @@ void EventLoop::processEvents()
 
         ev->destroy(_allocator);
     }
-}
-
-
-void EventLoop::wake()
-{
-    //MutexLock lock(_mutex);
-    _selector.wake();
 }
 
 
@@ -195,24 +181,45 @@ void EventLoop::queueEvent(const Event& ev)
 
 void EventLoop::onAdd( Selectable& s )
 {
-    return _selector.add( s );
+    return _selector->add( s );
 }
 
 
 void EventLoop::onRemove( Selectable& s )
 {
-    _selector.remove( s );
+    _selector->remove( s );
 }
 
 
-void EventLoop::onAdd( Timer& timer )
+void EventLoop::onChanged(Selectable& s)
 {
-    return _selector.add( timer );
+    _selector->changed(s);
 }
 
-void EventLoop::onRemove( Timer& timer)
+
+bool EventLoop::onWait(unsigned int msecs)
 {
-    _selector.remove( timer );
+    if( _selector->wait(msecs) )
+    {
+        MutexLock lock(_queueMutex);
+
+        if( !_eventQueue.empty() )
+        {
+            lock.unlock();
+            this->processEvents();
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+void EventLoop::onWake()
+{
+    //MutexLock lock(_mutex);
+    _selector->wake();
 }
 
 } // namespace System

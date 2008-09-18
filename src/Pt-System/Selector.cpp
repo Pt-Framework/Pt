@@ -7,6 +7,16 @@ namespace Pt {
 
 namespace System {
 
+SelectorBase::~SelectorBase()
+{
+    while( _timers.size() )
+    {
+        Timer* timer = *_timers.begin();
+        timer->setSelector(0);
+    }
+}
+
+
 void SelectorBase::add(Selectable& s)
 {
     if(s.selector() != 0)
@@ -16,6 +26,7 @@ void SelectorBase::add(Selectable& s)
 
     s.setSelector(this);
 }
+
 
 void SelectorBase::remove(Selectable& s)
 {
@@ -50,68 +61,25 @@ void SelectorBase::remove( Timer& timer )
 }
 
 
-Selector::Selector()
-: _impl( 0 )
-{
-    _impl = new SelectorImpl();
-}
-
-
-Selector::~Selector()
-{
-    while( _timers.size() )
-    {
-        Timer* timer = *_timers.begin();
-        timer->setSelector(0);
-    }
-
-    delete _impl;
-}
-
-
-void Selector::onAdd( Selectable& selectable )
-{
-    _impl->add(selectable);
-}
-
-
-void Selector::onRemove( Selectable& selectable )
-{
-    _impl->remove(selectable);
-}
-
-
-void Selector::onChanged(Selectable& s)
-{
-    _impl->changed(s);
-}
-
-
-void Selector::onAdd(Timer& timer)
+void SelectorBase::onAdd(Timer& timer)
 {
     _timers.push_back(&timer);
 }
 
 
-void Selector::onRemove( Timer& timer )
+void SelectorBase::onRemove( Timer& timer )
 {
     _timers.remove( &timer );
 }
 
 
-void Selector::onChanged(Timer& timer)
+void SelectorBase::onChanged(Timer& timer)
 {
 
 }
 
 
-void Selector::setApp(Application* app)
-{
-    _impl->setApp(app);
-}
-
-
-bool Selector::updateTimer(size_t& lowestTimeout)
+bool SelectorBase::updateTimer(size_t& lowestTimeout)
 {
     bool timerActive = false;
     std::list<Timer*>::iterator it;
@@ -134,7 +102,7 @@ bool Selector::updateTimer(size_t& lowestTimeout)
 }
 
 
-bool Selector::onWait(unsigned int msecs)
+bool SelectorBase::wait(unsigned int msecs)
 {
     size_t timerTimeout = Selector::WaitInfinite;
 
@@ -145,7 +113,7 @@ bool Selector::onWait(unsigned int msecs)
     // timeout expires we can wait and return true
     if(timerTimeout <= msecs)
     {
-        if (_impl->wait(timerTimeout))
+        if (this->onWait(timerTimeout))
             return true;
 
         return updateTimer(timerTimeout);
@@ -154,6 +122,49 @@ bool Selector::onWait(unsigned int msecs)
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
+    return this->onWait(msecs);
+}
+
+
+Selector::Selector()
+: _impl( 0 )
+{
+    _impl = new SelectorImpl();
+}
+
+
+Selector::~Selector()
+{
+    delete _impl;
+}
+
+
+void Selector::onAdd( Selectable& selectable )
+{
+    _impl->add(selectable);
+}
+
+
+void Selector::onRemove( Selectable& selectable )
+{
+    _impl->remove(selectable);
+}
+
+
+void Selector::onChanged(Selectable& s)
+{
+    _impl->changed(s);
+}
+
+
+void Selector::setApp(Application* app)
+{
+    _impl->setApp(app);
+}
+
+
+bool Selector::onWait(unsigned int msecs)
+{
     return _impl->wait(msecs);
 }
 

@@ -80,8 +80,7 @@ namespace System {
             static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
             //! @brief Destructor
-            virtual ~SelectorBase()
-            {}
+            virtual ~SelectorBase();
 
             /** @brief Adds an IOResult
 
@@ -117,10 +116,7 @@ namespace System {
 
                 @param msecs timeout in miliseconds
             */
-            bool wait(unsigned int msecs = WaitInfinite)
-            {
-                return this->onWait(msecs);
-            }
+            bool wait(unsigned int msecs = WaitInfinite);
 
             /** @brief Wakes the selctor from waiting
 
@@ -136,21 +132,31 @@ namespace System {
             SelectorBase()
             {}
 
+            void onAdd(Timer& timer);
+
+            void onRemove( Timer& timer );
+
+            void onChanged( Timer& timer );
+
             virtual void onAdd(Selectable&) = 0;
 
             virtual void onRemove(Selectable&) = 0;
 
             virtual void onChanged(Selectable& s) = 0;
 
-            virtual void onAdd(Timer& timer) = 0;
-
-            virtual void onRemove( Timer& timer ) = 0;
-
-            virtual void onChanged( Timer& timer ) = 0;
-
             virtual bool onWait(unsigned int msecs) = 0;
 
             virtual void onWake() = 0;
+
+        private:
+            /** @internal Update all timers and return true if a timer fired
+
+                @param timeout interval to next expiring timer
+            */
+            bool updateTimer(size_t& timeout);
+
+            //! @internal
+            std::list<Timer*> _timers;
     };
 
     class PT_SYSTEM_API Selector : public SelectorBase
@@ -171,29 +177,13 @@ namespace System {
 
             void onChanged(Selectable&);
 
-            void onAdd(Timer& timer);
-
-            void onRemove(Timer& timer);
-
-            void onChanged(Timer& timer);
-
             bool onWait(unsigned int msecs = WaitInfinite);
 
             void onWake();
 
         private:
-            /** @internal Update all timers and return true if a timer fired
-
-                @param timeout interval to next expiring timer
-            */
-            bool updateTimer(size_t& timeout);
-
-        private:
             //! @internal
             class SelectorImpl* _impl;
-
-            //! @internal
-            std::list<Timer*> _timers;
     };
 
 } //namespace System

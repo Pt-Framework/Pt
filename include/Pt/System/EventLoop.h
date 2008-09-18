@@ -48,7 +48,8 @@ namespace System {
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
      */
-    class PT_SYSTEM_API EventLoopBase : public Connectable
+    class PT_SYSTEM_API EventLoopBase : public SelectorBase
+                                      , public Connectable
                                       , public Runnable
     {
         public:
@@ -85,18 +86,6 @@ namespace System {
                 }
             }
 
-            void add( Selectable& s )
-            { selector().add(s); }
-
-            void remove( Selectable& s )
-            { selector().remove(s); }
-
-            void add(Timer& timer)
-            { selector().add(timer); }
-
-            void remove( Timer& timer )
-            { selector().remove(timer); }
-
             /** @brief Starts the event loop
              */
             virtual void run() = 0;
@@ -129,14 +118,6 @@ namespace System {
             unsigned int idleTimeout() const
             { return _timeout; }
 
-            /** @brief Wakes the selctor from waiting
-
-                This method can be used to end a Selector::wait call
-                before the timeout expires. It is supposed to be used from
-                another thread and thus is thread-safe.
-            */
-            virtual void wake() = 0;
-
             /** @brief Notifies about wait timeouts
                 This signal is send when the timeout given to a wait
                 call of the selector expires and no activity occured.
@@ -146,7 +127,7 @@ namespace System {
             /** @brief Reports all events
             */
             Signal<const Event&> event;
-			
+
             template <typename EventT>
             void addHandler( const BasicSlot<void, const EventT&>& slot )
             {
@@ -168,8 +149,6 @@ namespace System {
 
                 disp->signal.connect(slot);
             }
-			
-            virtual SelectorBase& selector() = 0;
 
         protected:
             /** @brief Constructs the EventLoop
@@ -253,10 +232,6 @@ namespace System {
              */
             virtual void processEvents();
 
-            /** @brief Wakes up the %EventLoop to process events.
-             */
-            virtual void wake();
-
             /** @brief Stops the %EventLoop.
              */
             virtual void exit();
@@ -267,31 +242,23 @@ namespace System {
             //! @internal
             virtual void closed(const Connection& c);
 
-            virtual void setApp(Application* app)
-            {
-                _selector.setApp(app);
-            }
-
-            virtual SelectorBase& selector()
-            { return _selector; }
+            virtual void setApp(Application* app);
 
         protected:
-            //! @brief Not thread-safe
-            void onAdd( Selectable& s );
+            virtual void onAdd( Selectable& s );
 
-            //! @brief Not thread-safe
-            void onRemove( Selectable& s );
+            virtual void onRemove( Selectable& s );
 
-            //! @brief Not thread-safe
-            void onAdd( Timer& timer );
+            virtual void onChanged(Selectable& s);
 
-            //! @brief Not thread-safe
-            void onRemove( Timer& timer );
+            virtual bool onWait(unsigned int msecs);
+
+            virtual void onWake();
 
         private:
             bool _exitLoop;
             Mutex _connectionMutex;
-            Selector _selector;
+            SelectorImpl* _selector;
             Allocator _allocator;
             std::deque<Event* > _eventQueue;
             Mutex _queueMutex;
