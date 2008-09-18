@@ -32,36 +32,36 @@ void ProcessImpl::start()
     if( m_pid < 0 )
     {
         m_pid = -1;
-        throw SystemError("System call FORK() Failed!", PT_SOURCEINFO);
+        throw SystemError("fork failed!", PT_SOURCEINFO);
     }
 
     if( m_pid == 0)    // child Process
     {
-        if( _procInfo.stdinClosed() )
+        if( _procInfo.stdInputClosed() )
         {
             fclose(stdin);
         }
-        else if(_procInfo.stdin() )
+        else if(_procInfo.stdInput() )
         {
-            dup2(_procInfo.stdin()->ioimpl().fd(), STDIN_FILENO);
+            dup2(_procInfo.stdInput()->ioimpl().fd(), STDIN_FILENO);
         }
 
-        if( _procInfo.stdoutClosed() )
+        if( _procInfo.stdOutputClosed() )
         {
             fclose( stdout);
         }
-        else if( _procInfo.stdout() )
+        else if( _procInfo.stdOutput() )
         {
-            dup2(_procInfo.stdout()->ioimpl().fd(), STDOUT_FILENO);
+            dup2(_procInfo.stdOutput()->ioimpl().fd(), STDOUT_FILENO);
         }
 
-        if( _procInfo.stderrClosed() )
+        if( _procInfo.stdErrorClosed() )
         {
             fclose(stderr);
         }
-        else if( _procInfo.stderr() )
+        else if( _procInfo.stdError() )
         {
-            dup2(_procInfo.stderr()->ioimpl().fd(), STDERR_FILENO);
+            dup2(_procInfo.stdError()->ioimpl().fd(), STDERR_FILENO);
         }
 
         std::vector< std::vector<char> > args;

@@ -45,36 +45,27 @@ namespace System {
 
     //! Thread-specific storage template class
     template <class T>
-    class ThreadKey: private ThreadKeyBase {
+    class ThreadStoragePtr : protected NonCopyable
+                           , private ThreadKeyBase
+    {
         public:
-            ThreadKey()
-            : ThreadKeyBase()
+            ThreadStoragePtr()
             {}
 
-            ThreadKey(const ThreadKey& k)
-            : ThreadKeyBase()
-            { ThreadKeyBase::set( k.get() ); }
-
-            ~ThreadKey()
+            ~ThreadStoragePtr()
             {}
 
-            ThreadKey& operator=(const ThreadKey& k)
-            {
-                ThreadKeyBase::set( k.get() );
-                return *this;
-            }
-
-            ThreadKey& operator=(T* val)
+            ThreadStoragePtr& operator=(T* val)
             {
                 ThreadKeyBase::set( static_cast<void*>(val) );
                 return *this;
             }
 
             T* get()
-            { return (T*)ThreadKeyBase::get(); }
+            { return static_cast<T*>( ThreadKeyBase::get() ); }
 
             const T* get() const
-            { return (T*)ThreadKeyBase::get(); }
+            { return static_cast<const T*>( ThreadKeyBase::get() ); }
     };
 
 } // !namespace System
