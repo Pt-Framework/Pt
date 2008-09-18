@@ -82,6 +82,15 @@ class PT_SYSTEM_API ProcessInfo
 class PT_SYSTEM_API Process
 {
     public:
+        enum State
+        {
+            Ready    = 0,
+            Running  = 1,
+            Finished = 2,
+            Failed   = 3
+        };
+
+    public:
         //! Constructs a Process with a command including its arguments
         /**
             @param command Name of the executable along with its arguments
