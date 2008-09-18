@@ -76,8 +76,6 @@ void ProcessImplBase::start()
     BOOL ret = CreateProcess( NULL, &m_buffer[0], NULL, NULL,
                               true, 0, NULL, NULL, &m_startUp, &m_pid);
 #else
-    std::basic_string<TCHAR> tcmd = win32::fromMultiByte( m_command  );
-    std::basic_string<TCHAR> targs = win32::fromMultiByte( m_args );
     BOOL ret = CreateProcess( tcmd.c_str(), targs.c_str(), NULL, NULL,
                               0, 0, NULL, NULL, &m_startUp, &m_pid);
 #endif
