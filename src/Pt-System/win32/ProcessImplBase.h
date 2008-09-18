@@ -42,7 +42,7 @@ namespace System {
             { ::Sleep(milliSec); }
 
             const ProcessInfo& procInfo() const
-			{ return _procInfo; }
+            { return _procInfo; }
 
             void start();
 
@@ -56,6 +56,7 @@ namespace System {
 
     private:
         PROCESS_INFORMATION m_pid;
+        int _rc;
         ProcessInfo _procInfo;
     };
 

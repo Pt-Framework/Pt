@@ -16,6 +16,7 @@ namespace System {
 
 ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
 : _procInfo(procInfo)
+, _rc(-1)
 {
 }
 
@@ -80,12 +81,9 @@ void ProcessImplBase::start()
                               0, 0, NULL, NULL, &m_startUp, &m_pid);
 #endif
 
-    if( ! ret )
+    if(ret)
     {
-		DWORD errCode = GetLastError(); 
-		std::ostringstream errorOut;
-		errorOut << "System call CreateProcess() Failed! error code: " << errCode;
-        throw SystemError( errorOut.str().c_str(), PT_SOURCEINFO );
+        _rc = 0;
     }
 }
 
@@ -101,6 +99,9 @@ void ProcessImplBase::kill()
 
 int ProcessImplBase::wait()
 {
+    if(_rc == -1)
+        return _rc;
+
     if( WAIT_FAILED == WaitForSingleObject(m_pid.hProcess, INFINITE) )
     {
         throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
@@ -114,6 +115,9 @@ int ProcessImplBase::wait()
 
 bool ProcessImplBase::tryWait(int& status)
 {
+    if(_rc == -1)
+        return _rc;
+
     DWORD ret = WaitForSingleObject(m_pid.hProcess, 0);
 
     if(WAIT_TIMEOUT == ret)
