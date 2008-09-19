@@ -26,6 +26,36 @@ namespace Pt {
 
 namespace System {
 
+void EventLoopBase::run()
+{
+    this->onRun();
+}
+
+
+void EventLoopBase::exit()
+{
+    this->onExit();
+}
+
+
+void EventLoopBase::commitEvent(const Event& event)
+{
+    this->onCommitEvent(event);
+}
+
+
+void EventLoopBase::queueEvent(const Event& event)
+{
+    this->onQueueEvent(event);
+}
+
+
+void EventLoopBase::processEvents()
+{
+    this->onProcessEvents();
+}
+
+
 bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
 {
     return t1->before(*t2) != 0;
@@ -75,11 +105,47 @@ void EventLoop::setApp(Application* app)
 }
 
 
-void EventLoop::run()
+bool EventLoop::opened(const Connection& c)
 {
-    while( false == _exitLoop )
+    MutexLock lock(_connectionMutex);
+    bool accept = Connectable::opened(c);
+    return accept;
+}
+
+
+void EventLoop::closed(const Connection& c)
+{
+    MutexLock lock(_connectionMutex);
+    Connectable::closed(c);
+}
+
+
+void EventLoop::onAdd( Selectable& s )
+{
+    return _selector->add( s );
+}
+
+
+void EventLoop::onRemove( Selectable& s )
+{
+    _selector->remove( s );
+}
+
+
+void EventLoop::onChanged(Selectable& s)
+{
+    _selector->changed(s);
+}
+
+
+void EventLoop::onRun()
+{
+    while( true )
     {
         MutexLock lock(_queueMutex);
+
+        if(_exitLoop)
+            break;
 
         if( !_eventQueue.empty() )
         {
@@ -90,20 +156,76 @@ void EventLoop::run()
         lock.unlock();
 
         bool active = _selector->wait( this->idleTimeout() );
-        if(!active)
+        if( ! active )
             timeout.send();
     }
 }
 
 
-void EventLoop::commitEvent(const Event& ev)
+bool EventLoop::onWait(unsigned int msecs)
+{
+    if( _selector->wait(msecs) )
+    {
+        MutexLock lock(_queueMutex);
+
+        if( !_eventQueue.empty() )
+        {
+            lock.unlock();
+            this->processEvents();
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+void EventLoop::onWake()
+{
+    //MutexLock lock(_mutex);
+    _selector->wake();
+}
+
+
+void EventLoop::onExit()
+{
+    MutexLock lock(_queueMutex);
+    _exitLoop = true;
+    lock.unlock();
+
+    this->wake();
+}
+
+
+void EventLoop::onQueueEvent(const Event& ev)
+{
+    MutexLock lock( _queueMutex );
+
+    // TODO: use a continuous block of memory to store events
+    // this avoids new/delete
+    Event& clonedEvent = ev.clone(_allocator);
+
+    try
+    {
+        _eventQueue.push_back(&clonedEvent);
+    }
+    catch(...)
+    {
+        clonedEvent.destroy(_allocator);
+        throw;
+    }
+}
+
+
+void EventLoop::onCommitEvent(const Event& ev)
 {
     queueEvent(ev);
     this->wake();
 }
 
 
-void EventLoop::processEvents()
+void EventLoop::onProcessEvents()
 {
     while( false == _exitLoop )
     {
@@ -134,92 +256,6 @@ void EventLoop::processEvents()
 
         ev->destroy(_allocator);
     }
-}
-
-
-void EventLoop::exit()
-{
-    _exitLoop = true;
-    this->wake();
-}
-
-
-bool EventLoop::opened(const Connection& c)
-{
-    MutexLock lock(_connectionMutex);
-    bool accept = Connectable::opened(c);
-    return accept;
-}
-
-
-void EventLoop::closed(const Connection& c)
-{
-    MutexLock lock(_connectionMutex);
-    Connectable::closed(c);
-}
-
-
-void EventLoop::queueEvent(const Event& ev)
-{
-    MutexLock lock( _queueMutex );
-
-    // TODO: use a continuous block of memory to store events
-    // this avoids new/delete
-    Event& clonedEvent = ev.clone(_allocator);
-
-    try
-    {
-        _eventQueue.push_back(&clonedEvent);
-    }
-    catch(...)
-    {
-        clonedEvent.destroy(_allocator);
-        throw;
-    }
-}
-
-
-void EventLoop::onAdd( Selectable& s )
-{
-    return _selector->add( s );
-}
-
-
-void EventLoop::onRemove( Selectable& s )
-{
-    _selector->remove( s );
-}
-
-
-void EventLoop::onChanged(Selectable& s)
-{
-    _selector->changed(s);
-}
-
-
-bool EventLoop::onWait(unsigned int msecs)
-{
-    if( _selector->wait(msecs) )
-    {
-        MutexLock lock(_queueMutex);
-
-        if( !_eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
-void EventLoop::onWake()
-{
-    //MutexLock lock(_mutex);
-    _selector->wake();
 }
 
 } // namespace System

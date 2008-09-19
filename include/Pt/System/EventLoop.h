@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -88,25 +88,25 @@ namespace System {
 
             /** @brief Starts the event loop
              */
-            virtual void run() = 0;
+            void run();
 
             virtual void setApp(Application* app) = 0;
 
             /** @brief Adds an event and wakes up the loop.
              */
-            virtual void commitEvent(const Event& event/*, Priority prio= PRIO_NORMAL*/) = 0;
+            void commitEvent(const Event& event);
 
             /** @brief Adds an event without waking the event loop
              */
-            virtual void queueEvent(const Event& event/*, Priority prio= PRIO_NORMAL*/) = 0;
+            void queueEvent(const Event& event);
 
             /** @brief Processes all events which are currently in the event queue
              */
-            virtual void processEvents() = 0;
+            void processEvents();
 
             /** @brief Stops the %EventLoop.
              */
-            virtual void exit() = 0;
+            void exit();
 
             /** @brief Sets the idle timeout
             */
@@ -151,6 +151,16 @@ namespace System {
             }
 
         protected:
+            virtual void onRun() = 0;
+
+            virtual void onExit() = 0;
+
+            virtual void onCommitEvent(const Event& event) = 0;
+
+            virtual void onQueueEvent(const Event& event) = 0;
+
+            virtual void onProcessEvents() = 0;
+
             /** @brief Constructs the EventLoop
             */
             EventLoopBase()
@@ -216,33 +226,13 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            /** @brief Starts the event loop
-             */
-            virtual void run();
-
-            /** @brief Adds an event and wakes up the loop.
-             */
-            virtual void commitEvent(const Event& event);
-
-            /** @brief Adds an event without waking the event loop
-             */
-            virtual void queueEvent(const Event& event);
-
-            /** @brief Processes all events which are currently in the event queue
-             */
-            virtual void processEvents();
-
-            /** @brief Stops the %EventLoop.
-             */
-            virtual void exit();
+            virtual void setApp(Application* app);
 
             //! @internal
             virtual bool opened(const Connection& c);
 
             //! @internal
             virtual void closed(const Connection& c);
-
-            virtual void setApp(Application* app);
 
         protected:
             virtual void onAdd( Selectable& s );
@@ -251,9 +241,19 @@ namespace System {
 
             virtual void onChanged(Selectable& s);
 
+            virtual void onRun();
+
             virtual bool onWait(unsigned int msecs);
 
             virtual void onWake();
+
+            virtual void onExit();
+
+            virtual void onCommitEvent(const Event& event);
+
+            virtual void onQueueEvent(const Event& event);
+
+            virtual void onProcessEvents();
 
         private:
             bool _exitLoop;
