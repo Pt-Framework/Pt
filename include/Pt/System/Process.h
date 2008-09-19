@@ -105,6 +105,8 @@ class PT_SYSTEM_API Process
 
         const ProcessInfo& procInfo() const;
 
+        State state() const;
+
         //! Start/Create the Process
         /**
             @throw SystemError

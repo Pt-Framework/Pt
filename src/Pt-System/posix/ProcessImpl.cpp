@@ -15,7 +15,8 @@ namespace Pt {
 namespace System {
 
 ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
-: _procInfo(procInfo)
+: _state(Process::Ready)
+, _procInfo(procInfo)
 {
 }
 
@@ -27,15 +28,17 @@ ProcessImpl::~ProcessImpl()
 
 void ProcessImpl::start()
 {
+    _state = Process::Running;
     m_pid = fork();
 
     if( m_pid < 0 )
     {
         m_pid = -1;
+        _state = Process::Failed;
         throw SystemError("fork failed", PT_SOURCEINFO);
     }
 
-    if( m_pid == 0)    // child Process
+    if( m_pid == 0) // child Process
     {
         if( _procInfo.stdInputClosed() )
         {
@@ -115,8 +118,11 @@ int ProcessImpl::wait()
     int iStatus;
     if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
     {
+        _state = Process::Failed;
         throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
+
+    _state = Process::Finished;
     return iStatus;
 }
 
@@ -126,10 +132,15 @@ bool ProcessImpl::tryWait(int& status)
     pid_t ret = waitpid(m_pid, &status, WUNTRACED|WNOHANG);
     if( 0 > ret)
     {
+        _state = Process::Failed;
         throw SystemError(std::strerror(errno), PT_SOURCEINFO);
     }
 
-    return ret != 0;
+    if(ret == 0)
+        return false;
+
+    _state = Process::Finished;
+    return true;
 }
 
 

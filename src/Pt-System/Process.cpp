@@ -158,6 +158,12 @@ const ProcessInfo& Process::procInfo() const
 }
 
 
+Process::State Process::state() const
+{
+    return _impl->state();
+}
+
+
 void Process::start()
 {
      _impl->start();

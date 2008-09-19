@@ -21,6 +21,9 @@ class ProcessImpl
         const ProcessInfo& procInfo() const
         { return _procInfo; }
 
+        Process::State state() const
+        { return _state; }
+
         void start();
 
         void kill();
@@ -41,6 +44,7 @@ class ProcessImpl
 
     private:
         pid_t m_pid;
+        Process::State _state;
         ProcessInfo _procInfo;
 };
 
