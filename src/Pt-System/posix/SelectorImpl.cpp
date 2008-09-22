@@ -119,7 +119,7 @@ void SelectorImpl::changed(Selectable& s)
 }
 
 
-void SelectorImpl::setApp(Application* app)
+void SelectorImpl::setParent(Application* app)
 {
     _app = app;
     FD_SET(_app->impl().signalFd(), &_rfds);

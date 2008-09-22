@@ -48,8 +48,8 @@ Application::Application(int argc, char** argv)
     ::getSystemAppPtr() = this;
 
     _loop = new EventLoop();
+    _loop->setParent(this);
     _owner = _loop;
-    _loop->setApp(this);
 }
 
 
@@ -62,8 +62,6 @@ Application::Application(EventLoopBase* loop, int argc, char** argv)
 
     // base class already throws if constructed twice
     ::getSystemAppPtr() = this;
-
-    //TODO: _loop ? _loop->setApp(this);
 }
 
 
@@ -98,15 +96,99 @@ bool Application::raiseSystemSignal(int sig)
 }
 
 
-void Application::init(EventLoopBase& loop)
-{
-    if(_loop)
-        throw std::logic_error("eventloop already set");
-
-    _loop = &loop;
-    _loop->setApp(this);
+EventLoopBase* Application::loop()
+{ 
+    return _loop; 
 }
 
+
+EventLoopBase* Application::setLoop(EventLoopBase& loop)
+{
+    EventLoopBase* tmp = _loop;
+    _loop = &loop;
+    return tmp;
+}
+
+
+void Application::run()
+{
+    aboutToStart.send();
+    _loop->run();
+    aboutToExit.send();
+}
+
+
+void Application::exit()
+{ 
+_loop->exit(); 
+    }
+
+
+void Application::commitEvent(const Event& event)
+{ 
+    _loop->commitEvent(event); 
+}
+
+
+void Application::queueEvent(const Event& event)
+{ 
+    _loop->queueEvent(event); 
+}
+
+
+void Application::processEvents()
+{ 
+    _loop->processEvents(); 
+}
+
+
+void Application::wake()
+{ 
+    _loop->wake(); 
+}
+
+
+void Application::add( Selectable& s )
+{ 
+    _loop->add(s); 
+}
+
+
+void Application::remove( Selectable& s )
+{ 
+    _loop->remove(s); 
+}
+
+
+void Application::add(Timer& timer)
+{ 
+    _loop->add(timer); 
+}
+
+
+void Application::remove( Timer& timer )
+{ 
+    _loop->remove(timer); 
+}
+
+
+Signal<>& Application::timeout()
+{ 
+    return _loop->timeout; 
+}
+
+
+Signal<const Event&>& Application::event()
+{ 
+    return _loop->event; 
+}
+
+
+void Application::setIdleTimeout(unsigned msec)
+{ 
+    _loop->setIdleTimeout(msec); 
+}
+            
 
 ApplicationImpl& Application::impl()
 {

@@ -82,6 +82,8 @@ namespace System {
             //! @brief Destructor
             virtual ~SelectorBase();
 
+            void setParent(Application* app);
+            
             /** @brief Adds an IOResult
 
                 Adds an IOResult to the selector. IOResult are removed
@@ -124,13 +126,11 @@ namespace System {
                 before the timeout expires. It is supposed to be used from
                 another thread and thus is thread-safe.
             */
-            void wake()
-            { this->onWake(); }
+            void wake();
 
         protected:
             //! @brief Default constructor
-            SelectorBase()
-            {}
+            SelectorBase();
 
             void onAdd(Timer& timer);
 
@@ -138,6 +138,8 @@ namespace System {
 
             void onChanged( Timer& timer );
 
+            virtual void onSetParent(Application* app) = 0;
+            
             virtual void onAdd(Selectable&) = 0;
 
             virtual void onRemove(Selectable&) = 0;
@@ -157,6 +159,8 @@ namespace System {
 
             //! @internal
             std::list<Timer*> _timers;
+            
+            void* _reserved;
     };
 
     class PT_SYSTEM_API Selector : public SelectorBase
@@ -166,11 +170,11 @@ namespace System {
 
             virtual ~Selector();
 
-            void setApp(Application* app);
-
             SelectorImpl& impl();
 
         protected:
+            void onSetParent(Application* app);
+            
             void onAdd( Selectable& dev );
 
             void onRemove( Selectable& dev );

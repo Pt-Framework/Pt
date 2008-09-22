@@ -49,7 +49,7 @@ class SelectorImpl
 
         void wake();
 
-        void setApp(Application* app);
+        void setParent(Application* app);
 
     private:
         int _wakePipe[2];

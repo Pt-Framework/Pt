@@ -26,6 +26,15 @@ namespace Pt {
 
 namespace System {
 
+EventLoopBase::~EventLoopBase()
+{
+    DispatchTable::iterator it;
+    for( it =_dispatchTable.begin(); it != _dispatchTable.end(); ++it)
+    {
+        delete it->second;
+    }
+}
+
 void EventLoopBase::run()
 {
     this->onRun();
@@ -35,6 +44,17 @@ void EventLoopBase::run()
 void EventLoopBase::exit()
 {
     this->onExit();
+}
+
+void EventLoopBase::setIdleTimeout(unsigned int msecs)
+{ 
+    _timeout = msecs; 
+}
+
+
+unsigned int EventLoopBase::idleTimeout() const
+{ 
+    return _timeout; 
 }
 
 
@@ -53,6 +73,24 @@ void EventLoopBase::queueEvent(const Event& event)
 void EventLoopBase::processEvents()
 {
     this->onProcessEvents();
+}
+
+
+EventLoopBase::EventLoopBase()
+: _timeout(WaitInfinite)
+{}
+
+
+void EventLoopBase::dispatchEvent(const Event& ev)
+{
+    event.send(ev);
+
+    const std::type_info& ti = ev.typeInfo();
+    DispatchTable::iterator it = _dispatchTable.find(&ti);
+    if( it != _dispatchTable.end() )
+    {
+        it->second->send(ev);
+    }
 }
 
 
@@ -99,12 +137,6 @@ EventLoop::~EventLoop()
 }
 
 
-void EventLoop::setApp(Application* app)
-{
-    _selector->setApp(app);
-}
-
-
 bool EventLoop::opened(const Connection& c)
 {
     MutexLock lock(_connectionMutex);
@@ -117,6 +149,12 @@ void EventLoop::closed(const Connection& c)
 {
     MutexLock lock(_connectionMutex);
     Connectable::closed(c);
+}
+
+
+void EventLoop::onSetParent(Application* app)
+{
+    _selector->setParent(app);
 }
 
 

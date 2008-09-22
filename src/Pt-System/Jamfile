@@ -15,7 +15,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           [ FDirName $(SYS:L) MutexImpl.cpp ]
                           [ FDirName $(SYS:L) SemaphoreImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
-                          [ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
+                          #[ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
                           [ FDirName $(SYS:L) ProcessImpl.cpp ]
                           [ FDirName $(SYS:L) PipeImpl.cpp ]
                           [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
@@ -28,7 +28,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           File.cpp
                           FileDevice.cpp
                           FileInfo.cpp
-                          FileStream.cpp
+                          #FileStream.cpp
                           IODevice.cpp
                           IOError.cpp
                           IOStream.cpp
@@ -44,7 +44,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           StreamBuffer.cpp
                           SystemError.cpp
                           Thread.cpp
-                          ThreadKey.cpp
+                          #ThreadKey.cpp
                           Timer.cpp
                           Url.cpp
                           ;

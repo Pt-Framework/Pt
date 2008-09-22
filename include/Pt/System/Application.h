@@ -70,54 +70,43 @@ namespace System {
 
             static Application& instance();
 
-            void run()
-            {
-                aboutToStart.send();
-                _loop->run();
-                aboutToExit.send();
-            }
+            EventLoopBase* loop();
 
-            void exit()
-            { _loop->exit(); }
+            EventLoopBase* setLoop(EventLoopBase& loop);
+            
+            void run();
 
-            void commitEvent(const Event& event)
-            { _loop->commitEvent(event); }
+            void exit();
 
-            void queueEvent(const Event& event)
-            { _loop->queueEvent(event); }
+            void commitEvent(const Event& event);
 
-            void processEvents()
-            { _loop->processEvents(); }
+            void queueEvent(const Event& event);
 
-            void wake()
-            { _loop->wake(); }
+            void processEvents();
 
-            void add( Selectable& s )
-            { _loop->add(s); }
+            void wake();
 
-            void remove( Selectable& s )
-            { _loop->remove(s); }
+            void add( Selectable& s );
 
-            void add(Timer& timer)
-            { _loop->add(timer); }
+            void remove( Selectable& s );
 
-            void remove( Timer& timer )
-            { _loop->remove(timer); }
+            void add(Timer& timer);
+
+            void remove( Timer& timer );
 
             template <typename EventT>
-            void addHandler( BasicSlot<void, const EventT&>& slot )
+            void addEventHandler( BasicSlot<void, const EventT&>& slot )
             {
-                _loop->addHandler(slot);
+                EventLoopBase* loop = this->loop();
+                if( loop )
+                    loop->addHandler(slot);
             }
 
-            Signal<>& timeout()
-            { return _loop->timeout; }
+            Signal<>& timeout();
 
-            Signal<const Event&>& event()
-            { return _loop->event; }
+            Signal<const Event&>& event();
 
-            void setIdleTimeout(unsigned msec)
-            { _loop->setIdleTimeout(msec); }
+            void setIdleTimeout(unsigned msec);
 
             bool catchSystemSignal(int sig);
 
@@ -128,14 +117,8 @@ namespace System {
             Signal<> aboutToStart;
 
             Signal<> aboutToExit;
-
-            EventLoopBase& loop()
-            { return *_loop; }
-
+            
             ApplicationImpl& impl();
-
-        protected:
-            void init(EventLoopBase& loop);
 
         private:
             ApplicationImpl* _impl;

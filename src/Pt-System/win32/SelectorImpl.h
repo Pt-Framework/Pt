@@ -112,7 +112,7 @@ class SelectorImpl
 
         void wake();
 
-        void setApp(Application* app)
+        void setParent(Application* app)
         {
             _app = app;
         }

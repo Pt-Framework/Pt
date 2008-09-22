@@ -77,20 +77,11 @@ namespace System {
 
             /** @brief Destructs the EventLoop
              */
-            virtual ~EventLoopBase()
-            {
-                DispatchTable::iterator it;
-                for( it =_dispatchTable.begin(); it != _dispatchTable.end(); ++it)
-                {
-                    delete it->second;
-                }
-            }
+            virtual ~EventLoopBase();
 
             /** @brief Starts the event loop
              */
             void run();
-
-            virtual void setApp(Application* app) = 0;
 
             /** @brief Adds an event and wakes up the loop.
              */
@@ -110,13 +101,11 @@ namespace System {
 
             /** @brief Sets the idle timeout
             */
-            void setIdleTimeout(unsigned int msecs)
-            { _timeout = msecs; }
+            void setIdleTimeout(unsigned int msecs);
 
             /** @brief Returns the idle timeout
             */
-            unsigned int idleTimeout() const
-            { return _timeout; }
+            unsigned int idleTimeout() const;
 
             /** @brief Notifies about wait timeouts
                 This signal is send when the timeout given to a wait
@@ -129,7 +118,7 @@ namespace System {
             Signal<const Event&> event;
 
             template <typename EventT>
-            void addHandler( const BasicSlot<void, const EventT&>& slot )
+            void addEventHandler( const BasicSlot<void, const EventT&>& slot )
             {
                 const std::type_info& ti = typeid(EventT);
                 DispatchTable::iterator it = _dispatchTable.lower_bound( &ti );
@@ -163,30 +152,18 @@ namespace System {
 
             /** @brief Constructs the EventLoop
             */
-            EventLoopBase()
-            : _timeout(WaitInfinite)
-            {}
+            EventLoopBase();
 
-            void dispatchEvent(const Event& ev)
-            {
-                event.send(ev);
-
-                const std::type_info& ti = ev.typeInfo();
-                DispatchTable::iterator it = _dispatchTable.find(&ti);
-                if( it != _dispatchTable.end() )
-                {
-                    it->second->send(ev);
-                }
-            }
+            void dispatchEvent(const Event& ev);
 
         private:
-            typedef std::map<const std::type_info*, 
-                            IDispatcher*, 
-                            CompareTypeInfo> DispatchTable;
+            typedef std::map< const std::type_info*, 
+                              IDispatcher*, 
+                              CompareTypeInfo > DispatchTable;
 
             DispatchTable _dispatchTable;
-
             unsigned int _timeout;
+            void* _reserved;
     };
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
@@ -226,8 +203,6 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            virtual void setApp(Application* app);
-
             //! @internal
             virtual bool opened(const Connection& c);
 
@@ -235,6 +210,8 @@ namespace System {
             virtual void closed(const Connection& c);
 
         protected:
+            virtual void onSetParent(Application* app);
+            
             virtual void onAdd( Selectable& s );
 
             virtual void onRemove( Selectable& s );
@@ -262,6 +239,7 @@ namespace System {
             Allocator _allocator;
             std::deque<Event* > _eventQueue;
             Mutex _queueMutex;
+            void* _reserved;
     };
 
 } // namespace System

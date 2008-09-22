@@ -17,6 +17,12 @@ SelectorBase::~SelectorBase()
 }
 
 
+void SelectorBase::setParent(Application* app)
+{
+    this->onSetParent(app);
+}
+
+
 void SelectorBase::add(Selectable& s)
 {
     if(s.selector() != 0)
@@ -126,6 +132,16 @@ bool SelectorBase::wait(unsigned int msecs)
 }
 
 
+void SelectorBase::wake()
+{ 
+    this->onWake(); 
+}
+
+
+SelectorBase::SelectorBase()
+{}
+            
+            
 Selector::Selector()
 : _impl( 0 )
 {
@@ -157,9 +173,9 @@ void Selector::onChanged(Selectable& s)
 }
 
 
-void Selector::setApp(Application* app)
+void Selector::onSetParent(Application* app)
 {
-    _impl->setApp(app);
+    _impl->setParent(app);
 }
 
 

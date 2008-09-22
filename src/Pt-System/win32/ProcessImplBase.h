@@ -50,13 +50,16 @@ namespace System {
 
             int wait();
 
+            Process::State state() const
+            { return _state; }
+            
             bool tryWait(int& status);
 
             static unsigned long usedMemory();
 
     private:
         PROCESS_INFORMATION m_pid;
-        int _rc;
+        Process::State _state;
         ProcessInfo _procInfo;
     };
 
