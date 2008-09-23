@@ -10,9 +10,9 @@ namespace System {
 Timer::Timer()
 : _selector(0)
 , _active(false)
-, _started(0)
 , _interval(0)
-, _elapsed(0)
+, _remaining(0)
+, _finished(0)
 { }
 
 
@@ -52,16 +52,16 @@ void Timer::start(std::size_t interval)
 {
     _active = true;
     _interval = interval;
-    _started = Clock::getSystemTicks();
-    _elapsed = 0;
+    _remaining = _interval * 1000;
+    _finished = Clock::getSystemTicks() + _remaining;
 }
 
 
 void Timer::stop()
 {
     _active = false;
-    _started = 0;
-    _elapsed = 0;
+    _remaining = 0;
+    _finished = 0;
 }
 
 
@@ -71,18 +71,15 @@ bool Timer::update()
         return false;
 
     Timespan now = Clock::getSystemTicks();
-    Pt::int64_t elapsedMSecs = (now - _started).totalMSecs();
 
-    _elapsed = static_cast<std::size_t>(-1);
-    if( elapsedMSecs < static_cast<std::size_t>(-1) )
+    if( _finished <= now )
     {
-        _elapsed = static_cast<std::size_t>(elapsedMSecs);
-    }
+        _finished += (_interval * 1000);
+        _remaining = _finished - now;
 
-    if(_elapsed >= _interval )
-    {
-        _elapsed -= _interval;
-        _started = now - (_elapsed * 1000);
+        if(_remaining < 0)
+            _remaining = 0;
+
         timeout.send();
         return true;
     }
@@ -96,7 +93,7 @@ std::size_t Timer::remaining() const
     if( ! _active )
         return std::numeric_limits<std::size_t>::max();
 
-    return _interval - _elapsed;
+    return static_cast<std::size_t>( _remaining.toUSecs() / 1000 );
 }
 
 

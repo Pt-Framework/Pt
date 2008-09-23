@@ -99,7 +99,7 @@ namespace System {
             {
                 EventLoopBase* loop = this->loop();
                 if( loop )
-                    loop->addHandler(slot);
+                    loop->addEventHandler(slot);
             }
 
             Signal<>& timeout();

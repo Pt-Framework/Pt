@@ -120,9 +120,9 @@ namespace System {
         private:
             SelectorBase* _selector;
             bool          _active;
-            Timespan      _started;
             std::size_t   _interval;
-            std::size_t   _elapsed;
+            Timespan      _remaining;
+            Timespan      _finished;
     };
 
 }
