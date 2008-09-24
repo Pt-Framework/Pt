@@ -43,8 +43,10 @@ void Timer::setInterval(std::size_t msecs)
 {
     _interval = msecs;
 
-    if( _active )
-        this->update();
+    if( ! _active )
+        return;
+
+    this->update();
 }
 
 
@@ -54,6 +56,9 @@ void Timer::start(std::size_t interval)
     _interval = interval;
     _remaining = _interval * 1000;
     _finished = Clock::getSystemTicks() + _remaining;
+
+    if(_selector)
+        _selector->onChanged(*this);
 }
 
 
@@ -62,6 +67,9 @@ void Timer::stop()
     _active = false;
     _remaining = 0;
     _finished = 0;
+
+    if(_selector)
+        _selector->onChanged(*this);
 }
 
 
@@ -71,34 +79,33 @@ bool Timer::update()
         return false;
 
     Timespan now = Clock::getSystemTicks();
-
-    if( _finished <= now )
-    {
-        _finished += (_interval * 1000);
-        _remaining = _finished - now;
-
-        if(_remaining < 0)
-            _remaining = 0;
-
-        timeout.send();
-        return true;
-    }
-
-    return false;
+    return this->update(now);
 }
 
 
-std::size_t Timer::remaining() const
+bool Timer::update(const Timespan& now)
 {
-    if( ! _active )
-        return std::numeric_limits<std::size_t>::max();
+    if(_active == false)
+        return false;
 
-    return static_cast<std::size_t>( _remaining.toUSecs() / 1000 );
+    bool hasElapsed = now >= _finished;
+
+    while( now >= _finished )
+    {
+        _finished += (_interval * 1000);
+        timeout.send();
+    }
+
+    _remaining = _finished - now;
+    return hasElapsed;
 }
 
 
 void Timer::setSelector(SelectorBase* selector)
 {
+    if(_selector == selector)
+        return;
+
     if(_selector)
     {
         _selector->onRemove(*this);

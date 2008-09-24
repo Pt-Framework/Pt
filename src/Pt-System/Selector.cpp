@@ -11,7 +11,7 @@ SelectorBase::~SelectorBase()
 {
     while( _timers.size() )
     {
-        Timer* timer = *_timers.begin();
+       Timer* timer = _timers.begin()->second;
         timer->setSelector(0);
     }
 }
@@ -25,85 +25,98 @@ void SelectorBase::setParent(Application* app)
 
 void SelectorBase::add(Selectable& s)
 {
-    if(s.selector() != 0)
-    {
-        throw std::logic_error("Selectable already added");
-    }
-
     s.setSelector(this);
 }
 
 
 void SelectorBase::remove(Selectable& s)
 {
-    if(s.selector() != this)
-    {
-        throw std::logic_error("Selectable not added");
-    }
-
-    s.setSelector(0);
+    if(s.selector() == this)
+        s.setSelector(0);
 }
 
 
 void SelectorBase::add(Timer& timer)
 {
-    if(timer.selector() != 0)
-    {
-        throw std::logic_error("Selectable already added");
-    }
-
     timer.setSelector(this);
 }
 
 
 void SelectorBase::remove( Timer& timer )
 {
-    if(timer.selector() != this)
-    {
-        throw std::logic_error("Selectable not added");
-    }
-
-    timer.setSelector(0);
+    if(timer.selector() == this)
+        timer.setSelector(0);
 }
 
 
 void SelectorBase::onAdd(Timer& timer)
 {
-    _timers.push_back(&timer);
+    if( timer.active() )
+    {
+        _timers.insert( std::make_pair(timer.finished(), &timer) );
+    }
 }
 
 
 void SelectorBase::onRemove( Timer& timer )
 {
-    _timers.remove( &timer );
+    std::multimap<Timespan, Timer*>::iterator it;
+    for(it = _timers.begin(); it != _timers.end(); ++it)
+    {
+        if(it->second == &timer)
+        {
+            _timers.erase(it);
+            return;
+        }
+    }
 }
 
 
 void SelectorBase::onChanged(Timer& timer)
 {
-
+    if( timer.active() )
+    {
+        _timers.insert( std::make_pair(timer.finished(), &timer) );
+    }
+    else
+    {
+        SelectorBase::onRemove(timer);
+    }
 }
 
 
 bool SelectorBase::updateTimer(size_t& lowestTimeout)
 {
-    bool timerActive = false;
-    std::list<Timer*>::iterator it;
-    for(it = _timers.begin(); it != _timers.end(); ++it)
-    {
-        Timer* timer = *it;
+    if( _timers.empty() )
+        return false;
 
-        // update timer and return indicating activity
-        // if it fires its timout signal
-        if( timer->update() )
+    Timespan now = Clock::getSystemTicks();
+    Timer* timer = _timers.begin()->second;
+    bool timerActive = now > timer->finished();
+
+    while( ! _timers.empty() )
+    {
+        timer = _timers.begin()->second;
+
+        if( now < timer->finished() )
         {
-            timerActive = true;
-            continue;
+            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+            lowestTimeout = (remaining / 1000);
+            if(remaining % 1000 > 0) ++lowestTimeout;
+            break;
         }
 
-        // determine lowest timer timeout
-        lowestTimeout = std::min( lowestTimeout, timer->remaining() );
+        timer->update(now);
+
+        if( ! _timers.empty() &&
+            timer == _timers.begin()->second &&
+            timer->finished() != _timers.begin()->first )
+        {
+            _timers.erase( _timers.begin() );
+            _timers.insert( std::make_pair(timer->finished(), timer) );
+        }
     }
+
     return timerActive;
 }
 
@@ -115,33 +128,36 @@ bool SelectorBase::wait(unsigned int msecs)
     if ( updateTimer(timerTimeout) )
         return true;
 
-    // If a timer will become active before the passed
-    // timeout expires we can wait and return true
-    if(timerTimeout <= msecs)
-    {
-        if (this->onWait(timerTimeout))
-            return true;
-
-        return updateTimer(timerTimeout);
-    }
-
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    return this->onWait(msecs);
+    if(timerTimeout == Selector::WaitInfinite)
+        return this->onWait(msecs);
+
+    // A timer will become active before the timeout expires
+    while(true)
+    {
+        if( this->onWait(timerTimeout) )
+            return true;
+
+        if( updateTimer(timerTimeout) )
+            return true;
+    }
+
+    return false;
 }
 
 
 void SelectorBase::wake()
 { 
-    this->onWake(); 
+    this->onWake();
 }
 
 
 SelectorBase::SelectorBase()
 {}
-            
-            
+
+
 Selector::Selector()
 : _impl( 0 )
 {

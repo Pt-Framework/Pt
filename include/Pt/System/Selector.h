@@ -22,9 +22,10 @@
 #define PT_SYSTEM_SELECTOR_H
 
 #include <Pt/Signal.h>
+#include <Pt/Timespan.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-#include <list>
+#include <map>
 
 namespace Pt {
 
@@ -83,7 +84,7 @@ namespace System {
             virtual ~SelectorBase();
 
             void setParent(Application* app);
-            
+
             /** @brief Adds an IOResult
 
                 Adds an IOResult to the selector. IOResult are removed
@@ -139,7 +140,7 @@ namespace System {
             void onChanged( Timer& timer );
 
             virtual void onSetParent(Application* app) = 0;
-            
+
             virtual void onAdd(Selectable&) = 0;
 
             virtual void onRemove(Selectable&) = 0;
@@ -158,8 +159,8 @@ namespace System {
             bool updateTimer(size_t& timeout);
 
             //! @internal
-            std::list<Timer*> _timers;
-            
+            std::multimap<Timespan, Timer*> _timers;
+
             void* _reserved;
     };
 

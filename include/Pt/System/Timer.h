@@ -107,15 +107,16 @@ namespace System {
             */
             bool update();
 
-            /** @brief Returns the remaining time to the next timeout
-            */
-            std::size_t remaining() const;
+            bool update(const Timespan& now);
 
             /** @brief Notifies about interval timeouts
 
                 This signal is sent if the interval time has expired.
             */
             Signal<> timeout;
+
+            const Timespan& finished() const
+            { return _finished; }
 
         private:
             SelectorBase* _selector;
