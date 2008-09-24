@@ -72,8 +72,6 @@ namespace System {
 
             EventLoopBase* loop();
 
-            EventLoopBase* setLoop(EventLoopBase& loop);
-            
             void run();
 
             void exit();
@@ -117,8 +115,11 @@ namespace System {
             Signal<> aboutToStart;
 
             Signal<> aboutToExit;
-            
+
             ApplicationImpl& impl();
+
+        protected:
+            EventLoopBase* setLoop(EventLoopBase& loop);
 
         private:
             ApplicationImpl* _impl;
