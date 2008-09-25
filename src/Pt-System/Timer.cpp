@@ -39,17 +39,6 @@ std::size_t Timer::interval() const
 }
 
 
-void Timer::setInterval(std::size_t msecs)
-{
-    _interval = msecs;
-
-    if( ! _active )
-        return;
-
-    this->update();
-}
-
-
 void Timer::start(std::size_t interval)
 {
     _active = true;
@@ -58,7 +47,7 @@ void Timer::start(std::size_t interval)
     _finished = Clock::getSystemTicks() + _remaining;
 
     if(_selector)
-        _selector->onChanged(*this);
+        _selector->onTimerChanged(*this);
 }
 
 
@@ -69,7 +58,7 @@ void Timer::stop()
     _finished = 0;
 
     if(_selector)
-        _selector->onChanged(*this);
+        _selector->onTimerChanged(*this);
 }
 
 
@@ -108,12 +97,12 @@ void Timer::setSelector(SelectorBase* selector)
 
     if(_selector)
     {
-        _selector->onRemove(*this);
+        _selector->onRemoveTimer(*this);
     }
 
     if(selector)
     {
-        selector->onAdd(*this);
+        selector->onAddTimer(*this);
     }
 
     _selector = selector;

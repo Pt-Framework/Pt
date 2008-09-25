@@ -72,15 +72,6 @@ namespace System {
             */
             std::size_t interval() const;
 
-            /** @brief Sets the timer interval
-
-                This method will set the interval in which the timer notifies
-                the connected clients by sending the timeout signal.
-
-                @param msecs The timer inteval in milliseconds
-            */
-            void setInterval(std::size_t msecs);
-
             /** @brief Starts the timer
 
                 Start a timer from the moment this method is called. The

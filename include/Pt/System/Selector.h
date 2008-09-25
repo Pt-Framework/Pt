@@ -131,11 +131,11 @@ namespace System {
             //! @brief Default constructor
             SelectorBase();
 
-            void onAdd(Timer& timer);
+            void onAddTimer(Timer& timer);
 
-            void onRemove( Timer& timer );
+            void onRemoveTimer( Timer& timer );
 
-            void onChanged( Timer& timer );
+            void onTimerChanged( Timer& timer );
 
             virtual void onAdd(Selectable&) = 0;
 

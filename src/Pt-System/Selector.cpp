@@ -43,7 +43,7 @@ void SelectorBase::remove( Timer& timer )
 }
 
 
-void SelectorBase::onAdd(Timer& timer)
+void SelectorBase::onAddTimer(Timer& timer)
 {
     if( timer.active() )
     {
@@ -52,7 +52,7 @@ void SelectorBase::onAdd(Timer& timer)
 }
 
 
-void SelectorBase::onRemove( Timer& timer )
+void SelectorBase::onRemoveTimer( Timer& timer )
 {
     std::multimap<Timespan, Timer*>::iterator it;
     for(it = _timers.begin(); it != _timers.end(); ++it)
@@ -66,7 +66,7 @@ void SelectorBase::onRemove( Timer& timer )
 }
 
 
-void SelectorBase::onChanged(Timer& timer)
+void SelectorBase::onTimerChanged(Timer& timer)
 {
     if( timer.active() )
     {
@@ -74,7 +74,7 @@ void SelectorBase::onChanged(Timer& timer)
     }
     else
     {
-        SelectorBase::onRemove(timer);
+        SelectorBase::onRemoveTimer(timer);
     }
 }
 
