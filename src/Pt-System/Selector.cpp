@@ -17,12 +17,6 @@ SelectorBase::~SelectorBase()
 }
 
 
-void SelectorBase::setParent(Application* app)
-{
-    this->onSetParent(app);
-}
-
-
 void SelectorBase::add(Selectable& s)
 {
     s.setSelector(this);
@@ -170,6 +164,14 @@ Selector::~Selector()
 }
 
 
+
+void Selector::setParent(Application* app)
+{
+    _impl->setParent(app);
+}
+
+
+
 void Selector::onAdd( Selectable& selectable )
 {
     _impl->add(selectable);
@@ -185,12 +187,6 @@ void Selector::onRemove( Selectable& selectable )
 void Selector::onChanged(Selectable& s)
 {
     _impl->changed(s);
-}
-
-
-void Selector::onSetParent(Application* app)
-{
-    _impl->setParent(app);
 }
 
 

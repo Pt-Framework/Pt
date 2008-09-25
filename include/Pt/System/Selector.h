@@ -83,8 +83,6 @@ namespace System {
             //! @brief Destructor
             virtual ~SelectorBase();
 
-            void setParent(Application* app);
-
             /** @brief Adds an IOResult
 
                 Adds an IOResult to the selector. IOResult are removed
@@ -139,8 +137,6 @@ namespace System {
 
             void onChanged( Timer& timer );
 
-            virtual void onSetParent(Application* app) = 0;
-
             virtual void onAdd(Selectable&) = 0;
 
             virtual void onRemove(Selectable&) = 0;
@@ -171,11 +167,11 @@ namespace System {
 
             virtual ~Selector();
 
+            void setParent(Application* app);
+
             SelectorImpl& impl();
 
         protected:
-            void onSetParent(Application* app);
-            
             void onAdd( Selectable& dev );
 
             void onRemove( Selectable& dev );

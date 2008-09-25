@@ -137,6 +137,12 @@ EventLoop::~EventLoop()
 }
 
 
+void EventLoop::setParent(Application* app)
+{
+    _selector->setParent(app);
+}
+
+
 bool EventLoop::opened(const Connection& c)
 {
     MutexLock lock(_connectionMutex);
@@ -149,12 +155,6 @@ void EventLoop::closed(const Connection& c)
 {
     MutexLock lock(_connectionMutex);
     Connectable::closed(c);
-}
-
-
-void EventLoop::onSetParent(Application* app)
-{
-    _selector->setParent(app);
 }
 
 

@@ -66,7 +66,7 @@ namespace System {
 
             Application(EventLoopBase* loop, int argc = 0, char** argv = 0);
 
-            virtual ~Application();
+            ~Application();
 
             static Application& instance();
 
@@ -126,7 +126,7 @@ namespace System {
             int     _argc;
             char**  _argv;
             EventLoopBase* _loop;
-            EventLoopBase* _owner;
+            EventLoop* _owner;
     };
 
 } // namespace system

@@ -203,6 +203,8 @@ namespace System {
              */
             virtual ~EventLoop();
 
+            void setParent(Application* app);
+
             //! @internal
             virtual bool opened(const Connection& c);
 
@@ -210,8 +212,6 @@ namespace System {
             virtual void closed(const Connection& c);
 
         protected:
-            virtual void onSetParent(Application* app);
-            
             virtual void onAdd( Selectable& s );
 
             virtual void onRemove( Selectable& s );
