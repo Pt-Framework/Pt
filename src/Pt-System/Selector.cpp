@@ -108,10 +108,9 @@ bool SelectorBase::updateTimer(size_t& lowestTimeout)
 
         timer->update(now);
 
-        if( ! _timers.empty() &&
-            timer == _timers.begin()->second &&
-            timer->finished() != _timers.begin()->first )
+        if( ! _timers.empty() )
         {
+            timer = _timers.begin()->second;
             _timers.erase( _timers.begin() );
             _timers.insert( std::make_pair(timer->finished(), timer) );
         }
