@@ -49,7 +49,6 @@ namespace System {
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
      */
     class PT_SYSTEM_API EventLoopBase : public SelectorBase
-                                      , public Connectable
                                       , public Runnable
     {
         public:
@@ -78,6 +77,8 @@ namespace System {
             /** @brief Destructs the EventLoop
              */
             virtual ~EventLoopBase();
+
+            void setParent(Application* app);
 
             /** @brief Starts the event loop
              */
@@ -144,6 +145,8 @@ namespace System {
             */
             EventLoopBase();
 
+            virtual void onSetParent(Application* app) = 0;
+
             virtual void onRun() = 0;
 
             virtual void onExit() = 0;
@@ -203,8 +206,6 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            void setParent(Application* app);
-
             //! @internal
             virtual bool opened(const Connection& c);
 
@@ -212,6 +213,8 @@ namespace System {
             virtual void closed(const Connection& c);
 
         protected:
+            virtual void onSetParent(Application* app);
+
             virtual void onAdd( Selectable& s );
 
             virtual void onRemove( Selectable& s );

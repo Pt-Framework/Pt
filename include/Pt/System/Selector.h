@@ -72,7 +72,8 @@ namespace System {
         continously. The %EventLoop and %Application classes provide the same API
         as the Selector itself.
     */
-    class PT_SYSTEM_API SelectorBase : public NonCopyable
+    class PT_SYSTEM_API SelectorBase : public Connectable
+                                     , public NonCopyable
     {
         friend class Selectable;
         friend class Timer;

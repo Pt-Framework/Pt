@@ -58,6 +58,9 @@ Application::Application(EventLoopBase* loop, int argc, char** argv)
 , _loop(loop)
 , _owner(0)
 {
+    if(_loop)
+        _loop->setParent(this);
+
     _impl = new ApplicationImpl;
 
     // base class already throws if constructed twice
@@ -105,6 +108,7 @@ EventLoopBase& Application::loop()
 void Application::init(EventLoopBase& loop)
 {
     _loop = &loop;
+    _loop->setParent(this);
 }
 
 
@@ -186,7 +190,7 @@ void Application::setIdleTimeout(unsigned msec)
 { 
     _loop->setIdleTimeout(msec); 
 }
-            
+
 
 ApplicationImpl& Application::impl()
 {

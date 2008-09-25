@@ -42,6 +42,13 @@ EventLoopBase::~EventLoopBase()
     }
 }
 
+
+void EventLoopBase::setParent(Application* app)
+{
+    this->onSetParent(app);
+}
+
+
 void EventLoopBase::run()
 {
     this->onRun();
@@ -137,7 +144,7 @@ EventLoop::~EventLoop()
 }
 
 
-void EventLoop::setParent(Application* app)
+void EventLoop::onSetParent(Application* app)
 {
     _selector->setParent(app);
 }
