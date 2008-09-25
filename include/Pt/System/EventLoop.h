@@ -140,6 +140,10 @@ namespace System {
             }
 
         protected:
+            /** @brief Constructs the EventLoop
+            */
+            EventLoopBase();
+
             virtual void onRun() = 0;
 
             virtual void onExit() = 0;
@@ -149,10 +153,6 @@ namespace System {
             virtual void onQueueEvent(const Event& event) = 0;
 
             virtual void onProcessEvents() = 0;
-
-            /** @brief Constructs the EventLoop
-            */
-            EventLoopBase();
 
             void dispatchEvent(const Event& ev);
 

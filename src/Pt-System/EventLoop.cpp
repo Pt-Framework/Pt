@@ -26,6 +26,13 @@ namespace Pt {
 
 namespace System {
 
+EventLoopBase::EventLoopBase()
+: _timeout(WaitInfinite)
+{
+    connect(event, *this, &EventLoopBase::dispatchEvent);
+}
+
+
 EventLoopBase::~EventLoopBase()
 {
     DispatchTable::iterator it;
@@ -76,15 +83,8 @@ void EventLoopBase::processEvents()
 }
 
 
-EventLoopBase::EventLoopBase()
-: _timeout(WaitInfinite)
-{}
-
-
 void EventLoopBase::dispatchEvent(const Event& ev)
 {
-    event.send(ev);
-
     const std::type_info& ti = ev.typeInfo();
     DispatchTable::iterator it = _dispatchTable.find(&ti);
     if( it != _dispatchTable.end() )
@@ -284,7 +284,7 @@ void EventLoop::onProcessEvents()
         try
         {
             lock.unlock();
-            this->dispatchEvent(*ev);
+            event.send(*ev);
         }
         catch(...)
         {

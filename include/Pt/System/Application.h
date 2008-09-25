@@ -70,7 +70,7 @@ namespace System {
 
             static Application& instance();
 
-            EventLoopBase* loop();
+            EventLoopBase& loop();
 
             void run();
 
@@ -119,7 +119,7 @@ namespace System {
             ApplicationImpl& impl();
 
         protected:
-            EventLoopBase* setLoop(EventLoopBase& loop);
+            void init(EventLoopBase& loop);
 
         private:
             ApplicationImpl* _impl;

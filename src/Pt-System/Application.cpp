@@ -96,17 +96,15 @@ bool Application::raiseSystemSignal(int sig)
 }
 
 
-EventLoopBase* Application::loop()
+EventLoopBase& Application::loop()
 { 
-    return _loop; 
+    return *_loop;
 }
 
 
-EventLoopBase* Application::setLoop(EventLoopBase& loop)
+void Application::init(EventLoopBase& loop)
 {
-    EventLoopBase* tmp = _loop;
     _loop = &loop;
-    return tmp;
 }
 
 
@@ -119,9 +117,9 @@ void Application::run()
 
 
 void Application::exit()
-{ 
-_loop->exit(); 
-    }
+{
+    _loop->exit();
+}
 
 
 void Application::commitEvent(const Event& event)
@@ -138,13 +136,13 @@ void Application::queueEvent(const Event& event)
 
 void Application::processEvents()
 { 
-    _loop->processEvents(); 
+    _loop->processEvents();
 }
 
 
 void Application::wake()
 { 
-    _loop->wake(); 
+    _loop->wake();
 }
 
 
