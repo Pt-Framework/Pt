@@ -131,7 +131,7 @@ bool SelectorBase::wait(unsigned int msecs)
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    if(timerTimeout == Selector::WaitInfinite)
+    if(timerTimeout > msecs)
         return this->onWait(msecs);
 
     // A timer will become active before the timeout expires
