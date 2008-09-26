@@ -64,11 +64,11 @@ class PipeIODevice : public Pt::System::IODevice
         SelectableImpl& simpl()
         { return _impl; }
 
-        void onAttach(SelectorBase& s)
-        {}
+        void onAttach(xpr::SelectorBase& s)
+        { IODeviceImpl::attach(s); }
 
-        void onDetach(SelectorBase& s)
-        {}
+        void onDetach(xpr::SelectorBase& s)
+        { IODeviceImpl::detach(s); }
 
     private:
         IODeviceImpl _impl;
