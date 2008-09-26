@@ -114,7 +114,7 @@ bool SelectorBase::updateTimer(size_t& lowestTimeout)
 }
 
 
-bool SelectorBase::wait(unsigned int msecs)
+/*bool SelectorBase::wait(unsigned int msecs)
 {
 	Timespan now = Clock::getSystemTicks();
 
@@ -141,21 +141,28 @@ bool SelectorBase::wait(unsigned int msecs)
 	}
 
 	return active;
-}
+}*/
 
 
-/*bool SelectorBase::wait(unsigned int msecs)
+bool SelectorBase::wait(unsigned int msecs)
 {
     size_t timerTimeout = Selector::WaitInfinite;
 
+    // If a timer is immediately ready, still check for an
+    // active selectable to avoid timer preemption
     if ( updateTimer(timerTimeout) )
+    {
+        this->onWait(0);
         return true;
+    }
 
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    if(timerTimeout > msecs)
+    if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
+    {
         return this->onWait(msecs);
+    }
 
     // A timer will become active before the timeout expires
     while(true)
@@ -168,7 +175,7 @@ bool SelectorBase::wait(unsigned int msecs)
     }
 
     return false;
-}*/
+}
 
 
 void SelectorBase::wake()
