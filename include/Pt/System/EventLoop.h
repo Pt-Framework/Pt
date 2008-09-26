@@ -78,7 +78,7 @@ namespace System {
              */
             virtual ~EventLoopBase();
 
-            void setParent(Application* app);
+            //void setParent(Application* app);
 
             /** @brief Starts the event loop
              */
@@ -145,7 +145,7 @@ namespace System {
             */
             EventLoopBase();
 
-            virtual void onSetParent(Application* app) = 0;
+            //virtual void onSetParent(Application* app) = 0;
 
             virtual void onRun() = 0;
 
@@ -213,7 +213,7 @@ namespace System {
             virtual void closed(const Connection& c);
 
         protected:
-            virtual void onSetParent(Application* app);
+            //virtual void onSetParent(Application* app);
 
             virtual void onAdd( Selectable& s );
 

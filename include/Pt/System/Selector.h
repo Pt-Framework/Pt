@@ -168,7 +168,7 @@ namespace System {
 
             virtual ~Selector();
 
-            void setParent(Application* app);
+            //void setParent(Application* app);
 
             SelectorImpl& impl();
 

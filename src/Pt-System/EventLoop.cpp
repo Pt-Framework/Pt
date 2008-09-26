@@ -43,10 +43,10 @@ EventLoopBase::~EventLoopBase()
 }
 
 
-void EventLoopBase::setParent(Application* app)
+/*void EventLoopBase::setParent(Application* app)
 {
     this->onSetParent(app);
-}
+}*/
 
 
 void EventLoopBase::run()
@@ -144,10 +144,10 @@ EventLoop::~EventLoop()
 }
 
 
-void EventLoop::onSetParent(Application* app)
+/*void EventLoop::onSetParent(Application* app)
 {
     _selector->setParent(app);
-}
+}*/
 
 
 bool EventLoop::opened(const Connection& c)

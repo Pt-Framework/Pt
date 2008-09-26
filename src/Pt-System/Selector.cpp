@@ -195,10 +195,10 @@ Selector::~Selector()
 
 
 
-void Selector::setParent(Application* app)
+/*void Selector::setParent(Application* app)
 {
     _impl->setParent(app);
-}
+}*/
 
 
 

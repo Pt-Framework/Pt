@@ -48,8 +48,7 @@ Application::Application(int argc, char** argv)
     ::getSystemAppPtr() = this;
 
     _owner = new EventLoop();
-    _owner->setParent(this);
-    _loop = _owner;
+    this->init(*_owner);
 }
 
 
@@ -58,10 +57,10 @@ Application::Application(EventLoopBase* loop, int argc, char** argv)
 , _loop(loop)
 , _owner(0)
 {
-    if(_loop)
-        _loop->setParent(this);
-
     _impl = new ApplicationImpl;
+
+    if(_loop)
+        this->init(*_loop);
 
     // base class already throws if constructed twice
     ::getSystemAppPtr() = this;
@@ -108,7 +107,8 @@ EventLoopBase& Application::loop()
 void Application::init(EventLoopBase& loop)
 {
     _loop = &loop;
-    _loop->setParent(this);
+    //_loop->setParent(this);
+    _impl->init(*_loop);
 }
 
 

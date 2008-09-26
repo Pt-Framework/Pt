@@ -35,7 +35,7 @@ namespace Pt {
 namespace System {
 
 SelectorImpl::SelectorImpl()
-: _app(0)
+//: _app(0)
 {
     _current = _devices.end();
 
@@ -119,11 +119,11 @@ void SelectorImpl::changed(Selectable& s)
 }
 
 
-void SelectorImpl::setParent(Application* app)
+/*void SelectorImpl::setParent(Application* app)
 {
     _app = app;
-    FD_SET(_app->impl().signalFd(), &_rfds);
-}
+    //FD_SET(_app->impl().signalFd(), &_rfds);
+}*/
 
 
 bool SelectorImpl::wait(std::size_t msecs)
@@ -197,7 +197,7 @@ bool SelectorImpl::wait(std::size_t msecs)
         }
     }
 
-    if (_app && FD_ISSET( _app->impl().signalFd(), &rfds ) )
+    /*if (_app && FD_ISSET( _app->impl().signalFd(), &rfds ) )
     {
         int sigNo = 0;
         ssize_t size = 0;
@@ -224,7 +224,7 @@ bool SelectorImpl::wait(std::size_t msecs)
                 throw IOError("Cound not read from signal pipe", PT_SOURCEINFO);
             }
         }
-    }
+    }*/
 
     try
     {

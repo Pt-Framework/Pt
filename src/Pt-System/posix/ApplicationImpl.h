@@ -7,6 +7,8 @@ namespace Pt {
 
 namespace System  {
 
+class SelectorBase;
+
 class ApplicationImpl
 {
 	public:
@@ -20,7 +22,9 @@ class ApplicationImpl
 
 		bool raiseSystemSignal(int sig);
 
-		int signalFd() const;
+		//int signalFd() const;
+    private:
+        static void onSystemSignal(IODevice& device);
 };
 
 } // namespace System
