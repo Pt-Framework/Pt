@@ -8,20 +8,26 @@ ApplicationImpl::ApplicationImpl()
 {
 }
 
+
 ApplicationImpl::~ApplicationImpl()
+{
+}
+
+
+void ApplicationImpl::init(SelectorBase& s)
 {
 }
 
 
 bool ApplicationImpl::catchSystemSignal(int sig)
 {
-	return false;
+    return false;
 }
 
 
 bool ApplicationImpl::raiseSystemSignal(int sig)
 {
-	return false;
+    return false;
 }
 
 } // namespace System

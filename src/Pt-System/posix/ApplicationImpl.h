@@ -11,20 +11,19 @@ class SelectorBase;
 
 class ApplicationImpl
 {
-	public:
-		ApplicationImpl();
+    public:
+        ApplicationImpl();
 
-		virtual ~ApplicationImpl();
+        virtual ~ApplicationImpl();
 
-		void init(SelectorBase& s);
+        void init(SelectorBase& s);
 
-		bool catchSystemSignal(int sig);
+        bool catchSystemSignal(int sig);
 
-		bool raiseSystemSignal(int sig);
+        bool raiseSystemSignal(int sig);
 
-		//int signalFd() const;
-    private:
-        static void onSystemSignal(IODevice& device);
+        //int signalFd() const;
+
 };
 
 } // namespace System

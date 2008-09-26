@@ -7,16 +7,20 @@ namespace Pt {
 
 namespace System  {
 
+class SelectorBase
+
 class ApplicationImpl
 {
-	public:
-		ApplicationImpl();
+    public:
+        ApplicationImpl();
 
-		virtual ~ApplicationImpl();
+        virtual ~ApplicationImpl();
 
-		bool catchSystemSignal(int sig);
+        void init(SelectorBase& s);
 
-		bool raiseSystemSignal(int sig);
+        bool catchSystemSignal(int sig);
+
+        bool raiseSystemSignal(int sig);
 };
 
 } // namespace System

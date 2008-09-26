@@ -47,6 +47,31 @@ namespace {
         }*/
     }
 
+    void processSignal(Pt::System::IODevice& device)
+    {
+        try
+        {
+            size_t n = device.endRead();
+
+            int sigNo = 0;
+            char* it = _signalBuffer;
+            char* last = &_signalBuffer[ n- sizeof(sigNo) ];
+            while(it <= last)
+            {
+                memcpy(&sigNo, it, sizeof(sigNo));
+                Pt::System::Application::instance().systemSignal.send(sigNo);
+                it += sizeof(sigNo);
+            }
+
+            device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
+        }
+        catch(...)
+        {
+            device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
+            throw;
+        }
+    }
+
 }
 
 
@@ -79,35 +104,10 @@ ApplicationImpl::~ApplicationImpl()
 void ApplicationImpl::init(SelectorBase& s)
 {
     pt_signal_pipe->input().setSelector(&s);
-    connect(pt_signal_pipe->input().inputReady, &ApplicationImpl::onSystemSignal);
+    connect(pt_signal_pipe->input().inputReady, processSignal);
     pt_signal_pipe->input().beginRead( _signalBuffer, sizeof(_signalBuffer) );
 }
 
-
-void ApplicationImpl::onSystemSignal(IODevice& device)
-{
-    try
-    {
-        size_t n = device.endRead();
-
-        int sigNo = 0;
-        char* it = _signalBuffer;
-        char* last = &_signalBuffer[ n- sizeof(sigNo) ];
-        while(it <= last)
-        {
-            memcpy(&sigNo, it, sizeof(sigNo));
-            Pt::System::Application::instance().systemSignal.send(sigNo);
-            it += sizeof(sigNo);
-        }
-
-        device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
-    }
-    catch(...)
-    {
-        device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
-        throw;
-    }
-}
 
 
 bool ApplicationImpl::catchSystemSignal(int sig)
