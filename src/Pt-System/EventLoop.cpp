@@ -200,7 +200,7 @@ void EventLoop::onRun()
 
         lock.unlock();
 
-        bool active = _selector->wait( this->idleTimeout() );
+        bool active = this->wait( this->idleTimeout() );
         if( ! active )
             timeout.send();
     }

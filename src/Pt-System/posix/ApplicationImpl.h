@@ -14,6 +14,8 @@ class ApplicationImpl
 
 		virtual ~ApplicationImpl();
 
+		void init(SelectorBase& s);
+
 		bool catchSystemSignal(int sig);
 
 		bool raiseSystemSignal(int sig);

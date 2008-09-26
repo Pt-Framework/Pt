@@ -63,6 +63,11 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
+void ApplicationImpl::init(SelectorBase& s)
+{
+}
+
+
 bool ApplicationImpl::catchSystemSignal(int sig)
 {
     if (sig > 0 && sig < NSIG)
