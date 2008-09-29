@@ -7,7 +7,7 @@ namespace Pt {
 
 namespace System  {
 
-class SelectorBase
+class SelectorBase;
 
 class ApplicationImpl
 {
