@@ -43,12 +43,6 @@ EventLoopBase::~EventLoopBase()
 }
 
 
-/*void EventLoopBase::setParent(Application* app)
-{
-    this->onSetParent(app);
-}*/
-
-
 void EventLoopBase::run()
 {
     this->onRun();
@@ -151,12 +145,6 @@ EventLoop::~EventLoop()
 }
 
 
-/*void EventLoop::onSetParent(Application* app)
-{
-    _selector->setParent(app);
-}*/
-
-
 bool EventLoop::opened(const Connection& c)
 {
     MutexLock lock(_connectionMutex);
@@ -235,7 +223,6 @@ bool EventLoop::onWait(unsigned int msecs)
 
 void EventLoop::onWake()
 {
-    //MutexLock lock(_mutex);
     _selector->wake();
 }
 
