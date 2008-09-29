@@ -136,6 +136,13 @@ EventLoop::~EventLoop()
 
             connection.close();
         }
+
+        while ( ! _eventQueue.empty() )
+        {
+            Event* ev = _eventQueue.front();
+            _eventQueue.pop_front();
+            ev->destroy(_allocator);
+        }
     }
     catch(...)
     {}
