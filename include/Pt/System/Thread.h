@@ -196,6 +196,8 @@ namespace System {
             */
             Thread(Mode mode = Joinable);
 
+            void init(Runnable& runnable);
+
             /** @brief Thread entry point
 
                 This function needs to be overridden by derived classes.

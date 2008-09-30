@@ -21,10 +21,58 @@
 #include "Pt/Signal.h"
 #include "Pt/Event.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/EventSource.h"
 
 namespace Pt {
 
 namespace System {
+
+EventSink::EventSink()
+: _mutex(Pt::System::Mutex::Normal)
+{ }
+
+
+EventSink::~EventSink()
+{
+    EventSource* source = 0;
+
+    while( true )
+    {
+        {
+            MutexLock lock( _mutex );
+
+            if( _sources.empty() )
+                break;
+
+            source = _sources.front();
+            _sources.remove(source);
+        }
+
+        source->removeSink(*this);
+    }
+}
+
+
+void EventSink::commitEvent(const Event& event)
+{
+    this->onCommitEvent(event);
+}
+
+
+
+void EventSink::addSource(EventSource& source)
+{
+    MutexLock lock(_mutex);
+    _sources.push_back(&source);
+}
+
+
+void EventSink::removeSource(EventSource& source)
+{
+    MutexLock lock(_mutex);
+    _sources.remove(&source);
+}
+
 
 EventLoopBase::EventLoopBase()
 : _timeout(WaitInfinite)
@@ -66,12 +114,6 @@ unsigned int EventLoopBase::idleTimeout() const
 }
 
 
-void EventLoopBase::commitEvent(const Event& event)
-{
-    this->onCommitEvent(event);
-}
-
-
 void EventLoopBase::queueEvent(const Event& event)
 {
     this->onQueueEvent(event);
@@ -103,7 +145,6 @@ bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info*
 
 EventLoop::EventLoop()
 : _exitLoop(false)
-, _connectionMutex(Mutex::Normal)
 , _allocator(/*255, 64*/)
 , _queueMutex(Mutex::Normal)
 {
@@ -115,22 +156,6 @@ EventLoop::~EventLoop()
 {
     try
     {
-        Connection connection;
-        while( true )
-        {
-            {
-                MutexLock lock( _connectionMutex );
-
-                if( _connections.empty() )
-                    break;
-
-                connection = _connections.front();
-                _connections.remove( connection );
-            }
-
-            connection.close();
-        }
-
         while ( ! _eventQueue.empty() )
         {
             Event* ev = _eventQueue.front();
@@ -142,21 +167,6 @@ EventLoop::~EventLoop()
     {}
 
     delete _selector;
-}
-
-
-bool EventLoop::opened(const Connection& c)
-{
-    MutexLock lock(_connectionMutex);
-    bool accept = Connectable::opened(c);
-    return accept;
-}
-
-
-void EventLoop::closed(const Connection& c)
-{
-    MutexLock lock(_connectionMutex);
-    Connectable::closed(c);
 }
 
 

@@ -168,8 +168,6 @@ namespace System {
 
             virtual ~Selector();
 
-            //void setParent(Application* app);
-
             SelectorImpl& impl();
 
         protected:

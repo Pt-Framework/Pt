@@ -47,6 +47,12 @@ Thread::~Thread()
 }
 
 
+void Thread::init(Runnable& runnable)
+{
+    _runnable = &runnable;
+}
+
+
 Thread::State Thread::state() const
 {
     return _impl->state();

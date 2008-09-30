@@ -61,6 +61,10 @@ Main PluginDemo : PluginDemo.cpp ;
 Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : $(OUTPUT_TARGET) ;
 
+Main EventSinkDemo : EventSinkDemo.cpp ;
+Main_LinkSharedLibraries EventSinkDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate EventSinkDemo : $(OUTPUT_TARGET) ;
+
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;

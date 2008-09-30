@@ -39,6 +39,7 @@ namespace System {
     class Timer;
     class Application;
     class Selectable;
+    class EventSource;
 
     struct PT_SYSTEM_API CompareTypeInfo
     {
@@ -46,9 +47,36 @@ namespace System {
                         const std::type_info* t2) const;
     };
 
+
+    class EventSink : protected NonCopyable
+    {
+        friend class EventSource;
+
+        public:
+            EventSink();
+
+            virtual ~EventSink();
+
+            /** @brief Adds an event and wakes up the loop.
+             */
+            void commitEvent(const Event& event);
+
+        protected:
+            virtual void onCommitEvent(const Event& event) = 0;
+
+            void addSource(EventSource& source);
+            void removeSource(EventSource& source);
+
+        private:
+            mutable Mutex _mutex;
+            std::list<EventSource*> _sources;
+    };
+
+
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
      */
     class PT_SYSTEM_API EventLoopBase : public SelectorBase
+                                      , public EventSink
                                       , public Runnable
     {
         public:
@@ -81,10 +109,6 @@ namespace System {
             /** @brief Starts the event loop
              */
             void run();
-
-            /** @brief Adds an event and wakes up the loop.
-             */
-            void commitEvent(const Event& event);
 
             /** @brief Adds an event without waking the event loop
              */
@@ -147,8 +171,6 @@ namespace System {
 
             virtual void onExit() = 0;
 
-            virtual void onCommitEvent(const Event& event) = 0;
-
             virtual void onQueueEvent(const Event& event) = 0;
 
             virtual void onProcessEvents() = 0;
@@ -202,12 +224,6 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            //! @internal
-            virtual bool opened(const Connection& c);
-
-            //! @internal
-            virtual void closed(const Connection& c);
-
         protected:
             virtual void onAdd( Selectable& s );
 
@@ -231,7 +247,6 @@ namespace System {
 
         private:
             bool _exitLoop;
-            Mutex _connectionMutex;
             SelectorImpl* _selector;
             Allocator _allocator;
             std::deque<Event* > _eventQueue;

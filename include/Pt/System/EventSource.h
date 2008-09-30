@@ -71,10 +71,6 @@ namespace System {
     };*/
 
 
-
-
-    class EventSink;
-
     class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
     {
         friend class EventSink;
@@ -96,26 +92,6 @@ namespace System {
         private:
             mutable Mutex _mutex;
             std::list<EventSink*> _sinks;
-    };
-
-    class EventSink : public NonCopyable
-    {
-        friend class EventSource;
-
-        public:
-            EventSink();
-
-            ~EventSink();
-
-            void commitEvent(const Pt::Event& ev);
-
-        protected:
-            void addSource(EventSource& source);
-            void removeSource(EventSource& source);
-
-        private:
-            mutable Mutex _mutex;
-            std::list<EventSource*> _sources;
     };
 
 } // namespace System

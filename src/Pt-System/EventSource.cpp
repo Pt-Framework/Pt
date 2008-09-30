@@ -163,52 +163,6 @@ void EventSource::removeSink(EventSink& sink)
 }
 
 
-
-
-EventSink::EventSink()
-: _mutex(Pt::System::Mutex::Normal)
-{ }
-
-
-EventSink::~EventSink()
-{
-    EventSource* source = 0;
-
-    while( true )
-    {
-        {
-            MutexLock lock( _mutex );
-
-            if( _sources.empty() )
-                break;
-
-            source = _sources.front();
-            _sources.remove(source);
-        }
-
-        source->removeSink(*this);
-    }
-}
-
-
-void EventSink::commitEvent(const Pt::Event& ev)
-{
-}
-
-
-void EventSink::addSource(EventSource& source)
-{
-    MutexLock lock(_mutex);
-    _sources.push_back(&source);
-}
-
-
-void EventSink::removeSource(EventSource& source)
-{
-    MutexLock lock(_mutex);
-    _sources.remove(&source);
-}
-
 } // namespace System
 
 } // namespace Pt
