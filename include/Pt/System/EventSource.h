@@ -42,23 +42,19 @@ namespace System {
         of the %EventSource itself (connection, disconnecting...) and not the
         slot.
     */
-    class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
+    /*class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
     {
         public:
-            /** @brief Constructs a new EventSource
-            */
+            //! @brief Constructs a new EventSource
             EventSource();
 
-            /** @brief Destructs the EventSource
-            */
+            //! @brief Destructs the EventSource
             ~EventSource();
 
-            /** @brief Connects to a EventLoop in another thread
-            */
+            //! @brief Connects to a EventLoop in another thread
             Connection connect( EventLoopBase& receiver );
 
-            /** @brief Connects to a slot in another thread
-            */
+            //! @brief Connects to a slot in another thread
             Connection connect( const Slot& s );
 
             //! @internal
@@ -72,6 +68,54 @@ namespace System {
 
         private:
             mutable Mutex _mutex;
+    };*/
+
+
+
+
+    class EventSink;
+
+    class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
+    {
+        friend class EventSink;
+
+        public:
+            EventSource();
+
+            ~EventSource();
+
+            void connect(EventSink& sink);
+
+            void disconnect(EventSink& sink);
+
+            void send(const Pt::Event& ev) const;
+
+        protected:
+            void removeSink(EventSink& sink);
+
+        private:
+            mutable Mutex _mutex;
+            std::list<EventSink*> _sinks;
+    };
+
+    class EventSink : public NonCopyable
+    {
+        friend class EventSource;
+
+        public:
+            EventSink();
+
+            ~EventSink();
+
+            void commitEvent(const Pt::Event& ev);
+
+        protected:
+            void addSource(EventSource& source);
+            void removeSource(EventSource& source);
+
+        private:
+            mutable Mutex _mutex;
+            std::list<EventSource*> _sources;
     };
 
 } // namespace System

@@ -22,6 +22,7 @@ namespace Pt {
 
 namespace System {
 
+/*
 EventSource::EventSource()
 : _mutex(Pt::System::Mutex::Normal)
 { }
@@ -92,6 +93,120 @@ void EventSource::send(const Pt::Event& ev) const
         const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
         invokable->invoke(ev);
     }
+}
+*/
+
+
+
+
+
+
+EventSource::EventSource()
+: _mutex(Pt::System::Mutex::Normal)
+{ }
+
+
+EventSource::~EventSource()
+{
+    EventSink* sink = 0;
+
+    while( true )
+    {
+        {
+            MutexLock lock( _mutex );
+
+            if( _sinks.empty() )
+                break;
+
+            sink = _sinks.front();
+            _sinks.remove(sink);
+        }
+
+        sink->removeSource(*this);
+    }
+}
+
+
+void EventSource::connect(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    sink.addSource(*this);
+    _sinks.push_back(&sink);
+}
+
+
+void EventSource::disconnect(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    sink.removeSource(*this);
+    _sinks.remove(&sink);
+}
+
+
+void EventSource::send(const Pt::Event& ev) const
+{
+    MutexLock lock(_mutex);
+
+    std::list<EventSink*>::const_iterator it = _sinks.begin();
+    for(; it != _sinks.end(); ++it)
+    {
+        EventSink* sink = *it;
+        sink->commitEvent(ev);
+    }
+}
+
+
+void EventSource::removeSink(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    _sinks.remove(&sink);
+}
+
+
+
+
+EventSink::EventSink()
+: _mutex(Pt::System::Mutex::Normal)
+{ }
+
+
+EventSink::~EventSink()
+{
+    EventSource* source = 0;
+
+    while( true )
+    {
+        {
+            MutexLock lock( _mutex );
+
+            if( _sources.empty() )
+                break;
+
+            source = _sources.front();
+            _sources.remove(source);
+        }
+
+        source->removeSink(*this);
+    }
+}
+
+
+void EventSink::commitEvent(const Pt::Event& ev)
+{
+}
+
+
+void EventSink::addSource(EventSource& source)
+{
+    MutexLock lock(_mutex);
+    _sources.push_back(&source);
+}
+
+
+void EventSink::removeSource(EventSource& source)
+{
+    MutexLock lock(_mutex);
+    _sources.remove(&source);
 }
 
 } // namespace System
