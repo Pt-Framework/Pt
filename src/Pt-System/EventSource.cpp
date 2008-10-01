@@ -138,6 +138,8 @@ EventSource::~EventSource()
         sink->removeSource(*this);
     }*/
 
+    // GLOBAL MUTEX PTR IN CONNECTION
+
     while(true)
     {
         _deletionMutex.lock();
@@ -172,6 +174,7 @@ void EventSource::removeSink(EventSink& sink)
     if(_isDeleting)
     {
         _deleted.push_back(&sink);
+        _deletionMutex.unlock();
         MutexLock lock(_mutex);
         return;
     }
