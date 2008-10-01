@@ -143,12 +143,11 @@ EventSource::~EventSource()
         _deletionMutex.lock();
         _isDeleting = true;
 
-        _mutex.lock();
-
         std::list<EventSink*>::iterator it;
         for(it = _deleted.begin(); it != _deleted.end(); ++it)
             _sinks.remove(*it);
 
+        _mutex.lock();
         _deletionMutex.unlock();
 
         if( _sinks.empty() )
@@ -168,19 +167,17 @@ EventSource::~EventSource()
 
 void EventSource::removeSink(EventSink& sink)
 {
-    _deletionMutex.lock();
+    MutexLock lock(_deletionMutex);
 
     if(_isDeleting)
     {
         _deleted.push_back(&sink);
-        _deletionMutex.unlock();
+        MutexLock lock(_mutex);
         return;
     }
 
     MutexLock lock(_mutex);
     _sinks.remove(&sink);
-
-    _deletionMutex.unlock();
 }
 
 void EventSource::connect(EventSink& sink)
