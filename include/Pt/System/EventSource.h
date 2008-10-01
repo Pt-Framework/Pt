@@ -90,6 +90,10 @@ namespace System {
             void removeSink(EventSink& sink);
 
         private:
+            Mutex _deletionMutex;
+            bool _isDeleting;
+            std::list<EventSink*> _deleted;
+
             mutable Mutex _mutex;
             std::list<EventSink*> _sinks;
     };

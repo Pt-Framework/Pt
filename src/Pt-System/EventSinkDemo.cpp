@@ -15,7 +15,7 @@ class TestEvent : public Pt::Event
 
         Pt::Event& clone(Pt::Allocator& allocator) const
         {
-            void* ev = allocator.allocate(sizeof(TestEvent));
+            void* ev = allocator.allocate( sizeof(TestEvent)) ;
             return *(new (ev)TestEvent(*this));
         }
 
@@ -26,7 +26,7 @@ class TestEvent : public Pt::Event
 
         const std::type_info& typeInfo() const
         {
-            return typeid( *this );
+            return typeid(TestEvent);
         }
 
         const std::string& text() const
@@ -52,6 +52,12 @@ class TestThread : public Pt::System::Thread
             init(_loop);
         }
 
+        ~TestThread()
+        {
+            // NOTE: must end thread before loop is destructed
+            this->wait();
+        }
+
     private:
         Pt::System::EventLoop _loop;
 };
@@ -63,7 +69,7 @@ int main( int argc, char* argv[] )
     {
         Pt::System::Application app;
 
-        TestThread thread("T1");
+        TestThread thread;
         thread.start();
 
         app.run();

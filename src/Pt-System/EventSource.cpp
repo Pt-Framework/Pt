@@ -97,20 +97,7 @@ void EventSource::send(const Pt::Event& ev) const
 */
 
 
-
-
-
-
-EventSource::EventSource()
-: _mutex(Pt::System::Mutex::Normal)
-{ }
-
-
-EventSource::~EventSource()
-{
-    EventSink* sink = 0;
-
-    while( true )
+    /*while( true )
     {
         {
             MutexLock lock( _mutex );
@@ -123,9 +110,78 @@ EventSource::~EventSource()
         }
 
         sink->removeSource(*this);
+    }*/
+
+
+
+EventSource::EventSource()
+: _deletionMutex(Pt::System::Mutex::Normal)
+, _isDeleting(false)
+, _mutex(Pt::System::Mutex::Normal)
+{ }
+
+
+EventSource::~EventSource()
+{
+    /*while( true )
+    {
+        {
+            MutexLock lock( _mutex );
+
+            if( _sinks.empty() )
+                break;
+
+            sink = _sinks.front();
+            _sinks.remove(sink);
+        }
+
+        sink->removeSource(*this);
+    }*/
+
+    while(true)
+    {
+        _deletionMutex.lock();
+        _isDeleting = true;
+
+        _mutex.lock();
+
+        std::list<EventSink*>::iterator it;
+        for(it = _deleted.begin(); it != _deleted.end(); ++it)
+            _sinks.remove(*it);
+
+        _deletionMutex.unlock();
+
+        if( _sinks.empty() )
+        {
+            _mutex.unlock();
+            return;
+        }
+
+        EventSink* sink = _sinks.front();
+        _sinks.remove(sink);
+
+        sink->removeSource(*this);
+        _mutex.unlock();
     }
 }
 
+
+void EventSource::removeSink(EventSink& sink)
+{
+    _deletionMutex.lock();
+
+    if(_isDeleting)
+    {
+        _deleted.push_back(&sink);
+        _deletionMutex.unlock();
+        return;
+    }
+
+    MutexLock lock(_mutex);
+    _sinks.remove(&sink);
+
+    _deletionMutex.unlock();
+}
 
 void EventSource::connect(EventSink& sink)
 {
@@ -138,8 +194,9 @@ void EventSource::connect(EventSink& sink)
 void EventSource::disconnect(EventSink& sink)
 {
     MutexLock lock(_mutex);
-    sink.removeSource(*this);
+
     _sinks.remove(&sink);
+    sink.removeSource(*this);
 }
 
 
@@ -154,14 +211,6 @@ void EventSource::send(const Pt::Event& ev) const
         sink->commitEvent(ev);
     }
 }
-
-
-void EventSource::removeSink(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    _sinks.remove(&sink);
-}
-
 
 } // namespace System
 
