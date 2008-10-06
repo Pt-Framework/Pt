@@ -22,6 +22,65 @@ namespace Pt {
 
 namespace System {
 
+EventSource::EventSource()
+: _mutex(Pt::System::Mutex::Normal)
+{ }
+
+
+EventSource::~EventSource()
+{
+    while( true )
+    {
+        MutexLock lock1( EventMutex::instance() );
+        MutexLock lock2( _mutex );
+
+        if( _sinks.empty() )
+            break;
+
+        EventSink* sink = _sinks.front();
+        _sinks.remove(sink);
+
+        sink->removeSource(*this);
+    }
+}
+
+
+void EventSource::removeSink(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    _sinks.remove(&sink);
+}
+
+
+void EventSource::connect(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    sink.addSource(*this);
+    _sinks.push_back(&sink);
+}
+
+
+void EventSource::disconnect(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    _sinks.remove(&sink);
+    sink.removeSource(*this);
+}
+
+
+void EventSource::send(const Pt::Event& ev) const
+{
+    MutexLock lock(_mutex);
+
+    std::list<EventSink*>::const_iterator it = _sinks.begin();
+    for(; it != _sinks.end(); ++it)
+    {
+        EventSink* sink = *it;
+        sink->commitEvent(ev);
+    }
+}
+
+
 /*
 EventSource::EventSource()
 : _mutex(Pt::System::Mutex::Normal)
@@ -95,65 +154,6 @@ void EventSource::send(const Pt::Event& ev) const
     }
 }
 */
-
-
-EventSource::EventSource()
-: _mutex(Pt::System::Mutex::Normal)
-{ }
-
-
-EventSource::~EventSource()
-{
-    while( true )
-    {
-        MutexLock lock1( EventMutex::instance() );
-        MutexLock lock2( _mutex );
-
-        if( _sinks.empty() )
-            break;
-
-        EventSink* sink = _sinks.front();
-        _sinks.remove(sink);
-
-        sink->removeSource(*this);
-    }
-}
-
-
-void EventSource::removeSink(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    _sinks.remove(&sink);
-}
-
-
-void EventSource::connect(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    sink.addSource(*this);
-    _sinks.push_back(&sink);
-}
-
-
-void EventSource::disconnect(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    _sinks.remove(&sink);
-    sink.removeSource(*this);
-}
-
-
-void EventSource::send(const Pt::Event& ev) const
-{
-    MutexLock lock(_mutex);
-
-    std::list<EventSink*>::const_iterator it = _sinks.begin();
-    for(; it != _sinks.end(); ++it)
-    {
-        EventSink* sink = *it;
-        sink->commitEvent(ev);
-    }
-}
 
 } // namespace System
 

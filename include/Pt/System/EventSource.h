@@ -34,43 +34,6 @@ namespace System {
 
     class EventLoop;
 
-    /** @brief Sends Events to receivers in other threads
-
-        The Signal class is not thread-safe and can only be used for
-        intra-thread communication. To pass Events between different threads
-        use an %EventSource instead. Thread-safety only refers to the usage
-        of the %EventSource itself (connection, disconnecting...) and not the
-        slot.
-    */
-    /*class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
-    {
-        public:
-            //! @brief Constructs a new EventSource
-            EventSource();
-
-            //! @brief Destructs the EventSource
-            ~EventSource();
-
-            //! @brief Connects to a EventLoop in another thread
-            Connection connect( EventLoopBase& receiver );
-
-            //! @brief Connects to a slot in another thread
-            Connection connect( const Slot& s );
-
-            //! @internal
-            virtual bool opened( const Connection& c );
-
-            //! @internal
-            virtual void closed( const Connection& c );
-
-            //! @brief Send an Event to all receivers
-            void send(const Pt::Event& ev) const;
-
-        private:
-            mutable Mutex _mutex;
-    };*/
-
-
     class EventMutex : protected NonCopyable
     {
         public:
@@ -114,6 +77,44 @@ namespace System {
             mutable Mutex _mutex;
             std::list<EventSink*> _sinks;
     };
+
+
+
+    /** @brief Sends Events to receivers in other threads
+
+        The Signal class is not thread-safe and can only be used for
+        intra-thread communication. To pass Events between different threads
+        use an %EventSource instead. Thread-safety only refers to the usage
+        of the %EventSource itself (connection, disconnecting...) and not the
+        slot.
+    */
+    /*class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
+    {
+        public:
+            //! @brief Constructs a new EventSource
+            EventSource();
+
+            //! @brief Destructs the EventSource
+            ~EventSource();
+
+            //! @brief Connects to a EventLoop in another thread
+            Connection connect( EventLoopBase& receiver );
+
+            //! @brief Connects to a slot in another thread
+            Connection connect( const Slot& s );
+
+            //! @internal
+            virtual bool opened( const Connection& c );
+
+            //! @internal
+            virtual void closed( const Connection& c );
+
+            //! @brief Send an Event to all receivers
+            void send(const Pt::Event& ev) const;
+
+        private:
+            mutable Mutex _mutex;
+    };*/
 
 } // namespace System
 
