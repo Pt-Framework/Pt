@@ -97,91 +97,35 @@ void EventSource::send(const Pt::Event& ev) const
 */
 
 
-    /*while( true )
-    {
-        {
-            MutexLock lock( _mutex );
-
-            if( _sinks.empty() )
-                break;
-
-            sink = _sinks.front();
-            _sinks.remove(sink);
-        }
-
-        sink->removeSource(*this);
-    }*/
-
-
-
 EventSource::EventSource()
-: _deletionMutex(Pt::System::Mutex::Normal)
-, _isDeleting(false)
-, _mutex(Pt::System::Mutex::Normal)
+: _mutex(Pt::System::Mutex::Normal)
 { }
 
 
 EventSource::~EventSource()
 {
-    /*while( true )
+    while( true )
     {
-        {
-            MutexLock lock( _mutex );
-
-            if( _sinks.empty() )
-                break;
-
-            sink = _sinks.front();
-            _sinks.remove(sink);
-        }
-
-        sink->removeSource(*this);
-    }*/
-
-    // GLOBAL MUTEX PTR IN CONNECTION
-
-    while(true)
-    {
-        _deletionMutex.lock();
-        _isDeleting = true;
-
-        std::list<EventSink*>::iterator it;
-        for(it = _deleted.begin(); it != _deleted.end(); ++it)
-            _sinks.remove(*it);
-
-        _mutex.lock();
-        _deletionMutex.unlock();
+        MutexLock lock1( EventMutex::instance() );
+        MutexLock lock2( _mutex );
 
         if( _sinks.empty() )
-        {
-            _mutex.unlock();
-            return;
-        }
+            break;
 
         EventSink* sink = _sinks.front();
         _sinks.remove(sink);
 
         sink->removeSource(*this);
-        _mutex.unlock();
     }
 }
 
 
 void EventSource::removeSink(EventSink& sink)
 {
-    MutexLock lock(_deletionMutex);
-
-    if(_isDeleting)
-    {
-        _deleted.push_back(&sink);
-        _deletionMutex.unlock();
-        MutexLock lock(_mutex);
-        return;
-    }
-
     MutexLock lock(_mutex);
     _sinks.remove(&sink);
 }
+
 
 void EventSource::connect(EventSink& sink)
 {
@@ -194,7 +138,6 @@ void EventSource::connect(EventSink& sink)
 void EventSource::disconnect(EventSink& sink)
 {
     MutexLock lock(_mutex);
-
     _sinks.remove(&sink);
     sink.removeSource(*this);
 }

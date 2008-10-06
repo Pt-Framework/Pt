@@ -71,6 +71,27 @@ namespace System {
     };*/
 
 
+    class EventMutex : protected NonCopyable
+    {
+        public:
+            static Mutex& instance()
+            {
+                static EventMutex _instance;
+                return _instance._mtx;
+            }
+
+        protected:
+            EventMutex()
+            : _mtx(Pt::System::Mutex::Normal)
+            {}
+
+        private:
+            Mutex _mtx;
+    };
+
+    struct EventMutexInit { EventMutexInit() { EventMutex::instance(); } };
+
+
     class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
     {
         friend class EventSink;
@@ -90,10 +111,6 @@ namespace System {
             void removeSink(EventSink& sink);
 
         private:
-            Mutex _deletionMutex;
-            bool _isDeleting;
-            std::list<EventSink*> _deleted;
-
             mutable Mutex _mutex;
             std::list<EventSink*> _sinks;
     };
