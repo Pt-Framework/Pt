@@ -68,7 +68,7 @@ void EventSource::disconnect(EventSink& sink)
 }
 
 
-void EventSource::send(const Pt::Event& ev) const
+void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
 
@@ -77,6 +77,13 @@ void EventSource::send(const Pt::Event& ev) const
     {
         EventSink* sink = *it;
         sink->commitEvent(ev);
+    }
+
+    const std::type_info& ti = ev.typeInfo();
+    DispatchTable::iterator it2 = _dispatchTable.find(&ti);
+    if( it2 != _dispatchTable.end() )
+    {
+        it2->second->send(ev);
     }
 }
 

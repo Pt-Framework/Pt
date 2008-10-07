@@ -55,9 +55,50 @@ namespace System {
     struct EventMutexInit { EventMutexInit() { EventMutex::instance(); } };
 
 
+    struct PT_SYSTEM_API CompareTypeInfo2
+    {
+        bool operator()(const std::type_info* t1, 
+                        const std::type_info* t2) const
+
+        {
+            return t1->before(*t2) != 0;
+        }
+    };
+
     class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
     {
         friend class EventSink;
+
+        public:
+            struct IDispatcher
+            {
+                virtual ~IDispatcher() {}
+                virtual void send(const Event&) = 0;
+            };
+
+            template <typename EventT>
+            struct Dispatcher : public IDispatcher
+            {
+                typedef Invokable<EventT> Target;
+
+                virtual void send(const Event& e)
+                {
+                    const EventT& event = static_cast<const EventT&>(e);
+                    typename std::list<Target*>::iterator it;
+                    for(it = _sinks.begin(); it != _sinks.end(); ++it)
+                    {
+                        (*it)->commitEvent(event);
+                    }
+                }
+
+                void add(Target& target)
+                { _sinks.push_back(&target); }
+
+                void remove(Target& target)
+                { _sinks.remove(&target); }
+
+                std::list<Target*> _sinks;
+            };
 
         public:
             EventSource();
@@ -68,12 +109,42 @@ namespace System {
 
             void disconnect(EventSink& sink);
 
-            void send(const Pt::Event& ev) const;
+            void send(const Pt::Event& ev);
+
+            template <typename EventT>
+            void subscribe(EventSink& sink)
+            {
+                MutexLock lock(_mutex);
+
+                const std::type_info& ti = typeid(EventT);
+                DispatchTable::iterator it = _dispatchTable.find( &ti );
+
+                Dispatcher<EventT>* disp = 0;
+                if( it != _dispatchTable.end() )
+                {
+                    IDispatcher* d = it->second;
+                    disp = static_cast<Dispatcher<EventT>*>(d);
+                }
+                else
+                {
+                    disp = new Dispatcher<EventT>;
+                    std::pair<const std::type_info*const, EventLoopBase::IDispatcher*> p( &ti, disp);
+                    _dispatchTable.insert( p );
+                }
+
+                disp->add(sink);
+            }
 
         protected:
             void removeSink(EventSink& sink);
 
         private:
+            typedef std::map< const std::type_info*, 
+                              IDispatcher*, 
+                              CompareTypeInfo2 > DispatchTable;
+
+            DispatchTable _dispatchTable;
+
             mutable Mutex _mutex;
             std::list<EventSink*> _sinks;
     };
