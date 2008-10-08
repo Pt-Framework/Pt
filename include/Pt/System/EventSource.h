@@ -34,27 +34,6 @@ namespace System {
 
     class EventLoop;
 
-    class EventMutex : protected NonCopyable
-    {
-        public:
-            static Mutex& instance()
-            {
-                static EventMutex _instance;
-                return _instance._mtx;
-            }
-
-        protected:
-            EventMutex()
-            : _mtx(Pt::System::Mutex::Normal)
-            {}
-
-        private:
-            Mutex _mtx;
-    };
-
-    struct EventMutexInit { EventMutexInit() { EventMutex::instance(); } };
-
-
     struct PT_SYSTEM_API CompareTypeInfo2
     {
         bool operator()(const std::type_info* t1, 

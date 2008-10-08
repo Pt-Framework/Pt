@@ -22,8 +22,11 @@ namespace Pt {
 
 namespace System {
 
+static Mutex pt_evt_mtx(Mutex::Normal);
+
+
 EventSource::EventSource()
-: _mutex(Pt::System::Mutex::Normal)
+: _mutex(Pt::System::Mutex::Recursive)
 { }
 
 
@@ -31,7 +34,7 @@ EventSource::~EventSource()
 {
     while( true )
     {
-        MutexLock lock1( EventMutex::instance() );
+        MutexLock lock1( pt_evt_mtx );
         MutexLock lock2( _mutex );
 
         if( _sinks.empty() )
@@ -42,13 +45,6 @@ EventSource::~EventSource()
 
         sink->removeSource(*this);
     }
-}
-
-
-void EventSource::removeSink(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    _sinks.remove(&sink);
 }
 
 
@@ -79,14 +75,20 @@ void EventSource::send(const Pt::Event& ev)
         sink->commitEvent(ev);
     }
 
-    const std::type_info& ti = ev.typeInfo();
-    DispatchTable::iterator it2 = _dispatchTable.find(&ti);
-    if( it2 != _dispatchTable.end() )
-    {
-        it2->second->send(ev);
-    }
+//     const std::type_info& ti = ev.typeInfo();
+//     DispatchTable::iterator it2 = _dispatchTable.find(&ti);
+//     if( it2 != _dispatchTable.end() )
+//     {
+//         it2->second->send(ev);
+//     }
 }
 
+
+void EventSource::removeSink(EventSink& sink)
+{
+    MutexLock lock(_mutex);
+    _sinks.remove(&sink);
+}
 
 /*
 EventSource::EventSource()
