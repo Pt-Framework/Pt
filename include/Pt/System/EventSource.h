@@ -49,6 +49,7 @@ namespace System {
         friend class EventSink;
 
         public:
+            // TODO call EventRoute
             struct IDispatcher
             {
                 virtual ~IDispatcher() {}
