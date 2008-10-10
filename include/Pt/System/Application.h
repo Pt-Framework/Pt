@@ -78,8 +78,6 @@ namespace System {
 
             void commitEvent(const Event& event);
 
-            void queueEvent(const Event& event);
-
             void processEvents();
 
             void wake();

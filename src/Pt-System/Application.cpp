@@ -132,12 +132,6 @@ void Application::commitEvent(const Event& event)
 }
 
 
-void Application::queueEvent(const Event& event)
-{ 
-    _loop->queueEvent(event); 
-}
-
-
 void Application::processEvents()
 { 
     _loop->processEvents();

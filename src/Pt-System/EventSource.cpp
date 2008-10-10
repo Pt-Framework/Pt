@@ -17,12 +17,66 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/System/EventSource.h"
+#include "Pt/System/EventSink.h"
+#include <algorithm>
 
 namespace Pt {
 
 namespace System {
 
 static Mutex pt_evt_mtx(Mutex::Normal);
+
+
+struct EventSourceSentry
+{
+    EventSourceSentry(const EventSource* es)
+    : _es(es)
+    {
+        _es->_sentry = this;
+        _es->_sending = true;
+        _es->_dirty = false;
+    }
+
+    ~EventSourceSentry()
+    {
+        if( _es )
+            this->detach();
+    }
+
+    void detach()
+    {
+        _es->_sending = false;
+
+        if( _es->_dirty == false )
+        {
+            _es->_sentry = 0;
+            _es = 0;
+            return;
+        }
+
+        std::list<EventSink*>::iterator it = _es->_sinks.begin();
+        while( it != _es->_sinks.end() )
+        {
+            if( *it )
+            {
+                ++it;
+            }
+            else
+            {
+                it = _es->_sinks.erase(it);
+            }
+        }
+
+        _es->_dirty = false;
+        _es->_sentry = 0;
+        _es = 0;
+    }
+
+    bool operator!() const
+    { return _es == 0; }
+
+    const EventSource* _es;
+};
 
 
 EventSource::EventSource()
@@ -36,6 +90,9 @@ EventSource::~EventSource()
     {
         MutexLock lock1( pt_evt_mtx );
         MutexLock lock2( _mutex );
+
+        if(_sentry)
+            _sentry->detach();
 
         if( _sinks.empty() )
             break;
@@ -59,8 +116,19 @@ void EventSource::connect(EventSink& sink)
 void EventSource::disconnect(EventSink& sink)
 {
     MutexLock lock(_mutex);
-    _sinks.remove(&sink);
-    sink.removeSource(*this);
+
+    if( _sending )
+    {
+        _dirty = true;
+        EventSink* ns = 0;
+        std::replace(_sinks.begin(), _sinks.end(), &sink, ns );
+        sink.removeSource(*this);
+    }
+    else
+    {
+        _sinks.remove(&sink);
+        sink.removeSource(*this);
+    }
 }
 
 
@@ -68,11 +136,16 @@ void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
 
+    EventSourceSentry sentry(this);
+
     std::list<EventSink*>::const_iterator it = _sinks.begin();
     for(; it != _sinks.end(); ++it)
     {
         EventSink* sink = *it;
         sink->commitEvent(ev);
+
+        if( ! sentry )
+            return;
     }
 
 //     const std::type_info& ti = ev.typeInfo();
@@ -89,80 +162,6 @@ void EventSource::removeSink(EventSink& sink)
     MutexLock lock(_mutex);
     _sinks.remove(&sink);
 }
-
-/*
-EventSource::EventSource()
-: _mutex(Pt::System::Mutex::Normal)
-{ }
-
-
-EventSource::~EventSource()
-{
-    Connection connection;
-    while( true )
-    {
-        {
-            MutexLock lock( _mutex );
-
-                if( _connections.empty() )
-                break;
-
-                connection = _connections.front();
-                _connections.remove( connection );
-        }
-
-        connection.close();
-    }
-}
-
-
-Connection EventSource::connect( EventLoopBase& receiver )
-{
-    // Do not lock here, the Connection will call
-    // Connectable::opened on this object
-    return Connection( *this, slot(receiver, &EventLoopBase::commitEvent).clone() );
-}
-
-
-Connection EventSource::connect( const Slot& s )
-{
-    // Do not lock here, the Connection will call
-    // Connectable::opened on this object
-    return Connection( *this, s.clone() );
-}
-
-
-bool EventSource::opened( const Connection& c )
-{
-    MutexLock lock(_mutex);
-    bool accept = Connectable::opened(c);
-    return accept;
-}
-
-
-void EventSource::closed( const Connection& c )
-{
-    MutexLock lock(_mutex);
-    Connectable::closed(c);
-}
-
-
-void EventSource::send(const Pt::Event& ev) const
-{
-    typedef Pt::Invokable<const Pt::Event&, Pt::Void, Pt::Void> InvokableT;
-    MutexLock lock(_mutex);
-
-    std::list<Connection>::const_iterator it = Connectable::connections().begin();
-    for(; it != _connections.end(); ++it)
-    {
-        if( false == it->valid() || &( it->sender() ) != this  )
-            continue;
-
-        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-        invokable->invoke(ev);
-    }
-}
-*/
 
 } // namespace System
 

@@ -18,61 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "SelectorImpl.h"
-#include "Pt/Signal.h"
-#include "Pt/Event.h"
 #include "Pt/System/EventLoop.h"
-#include "Pt/System/EventSource.h"
 
 namespace Pt {
 
 namespace System {
-
-EventSink::EventSink()
-: _mutex(Pt::System::Mutex::Normal)
-{ }
-
-
-EventSink::~EventSink()
-{
-    EventSource* source = 0;
-
-    while( true )
-    {
-        {
-            MutexLock lock( _mutex );
-
-            if( _sources.empty() )
-                break;
-
-            source = _sources.front();
-            _sources.remove(source);
-        }
-
-        source->removeSink(*this);
-    }
-}
-
-
-void EventSink::commitEvent(const Event& event)
-{
-    this->onCommitEvent(event);
-}
-
-
-
-void EventSink::addSource(EventSource& source)
-{
-    MutexLock lock(_mutex);
-    _sources.push_back(&source);
-}
-
-
-void EventSink::removeSource(EventSource& source)
-{
-    MutexLock lock(_mutex);
-    _sources.remove(&source);
-}
-
 
 EventLoopBase::EventLoopBase()
 : _timeout(WaitInfinite)
@@ -111,12 +61,6 @@ void EventLoopBase::setIdleTimeout(unsigned int msecs)
 unsigned int EventLoopBase::idleTimeout() const
 { 
     return _timeout; 
-}
-
-
-void EventLoopBase::queueEvent(const Event& event)
-{
-    this->onQueueEvent(event);
 }
 
 
@@ -247,29 +191,26 @@ void EventLoop::onExit()
 }
 
 
-void EventLoop::onQueueEvent(const Event& ev)
-{
-    MutexLock lock( _queueMutex );
-
-    // TODO: use a continuous block of memory to store events
-    // this avoids new/delete
-    Event& clonedEvent = ev.clone(_allocator);
-
-    try
-    {
-        _eventQueue.push_back(&clonedEvent);
-    }
-    catch(...)
-    {
-        clonedEvent.destroy(_allocator);
-        throw;
-    }
-}
-
-
 void EventLoop::onCommitEvent(const Event& ev)
 {
-    queueEvent(ev);
+    {
+        MutexLock lock( _queueMutex );
+
+        // TODO: use a continuous block of memory to store events
+        // this avoids new/delete
+        Event& clonedEvent = ev.clone(_allocator);
+
+        try
+        {
+            _eventQueue.push_back(&clonedEvent);
+        }
+        catch(...)
+        {
+            clonedEvent.destroy(_allocator);
+            throw;
+        }
+    }
+
     this->wake();
 }
 

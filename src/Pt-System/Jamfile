@@ -24,6 +24,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           Condition.cpp
                           Directory.cpp
                           EventSource.cpp
+                          EventSink.cpp
                           EventLoop.cpp
                           File.cpp
                           FileDevice.cpp

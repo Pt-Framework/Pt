@@ -20,7 +20,6 @@
 #ifndef PT_SYSTEM_EVENTLOOP_H
 #define PT_SYSTEM_EVENTLOOP_H
 
-#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Event.h>
 #include <Pt/Allocator.h>
@@ -28,6 +27,7 @@
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Runnable.h>
 #include <Pt/System/Selector.h>
+#include <Pt/System/EventSink.h>
 #include <map>
 #include <deque>
 #include <typeinfo>
@@ -39,37 +39,11 @@ namespace System {
     class Timer;
     class Application;
     class Selectable;
-    class EventSource;
 
     struct PT_SYSTEM_API CompareTypeInfo
     {
         bool operator()(const std::type_info* t1, 
                         const std::type_info* t2) const;
-    };
-
-
-    class EventSink : protected NonCopyable
-    {
-        friend class EventSource;
-
-        public:
-            EventSink();
-
-            virtual ~EventSink();
-
-            /** @brief Adds an event and wakes up the loop.
-             */
-            void commitEvent(const Event& event);
-
-        protected:
-            virtual void onCommitEvent(const Event& event) = 0;
-
-            void addSource(EventSource& source);
-            void removeSource(EventSource& source);
-
-        private:
-            mutable Mutex _mutex;
-            std::list<EventSource*> _sources;
     };
 
 
@@ -109,10 +83,6 @@ namespace System {
             /** @brief Starts the event loop
              */
             void run();
-
-            /** @brief Adds an event without waking the event loop
-             */
-            void queueEvent(const Event& event);
 
             /** @brief Processes all events which are currently in the event queue
              */
@@ -170,8 +140,6 @@ namespace System {
             virtual void onRun() = 0;
 
             virtual void onExit() = 0;
-
-            virtual void onQueueEvent(const Event& event) = 0;
 
             virtual void onProcessEvents() = 0;
 
@@ -240,8 +208,6 @@ namespace System {
             virtual void onExit();
 
             virtual void onCommitEvent(const Event& event);
-
-            virtual void onQueueEvent(const Event& event);
 
             virtual void onProcessEvents();
 

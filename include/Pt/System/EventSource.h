@@ -21,18 +21,19 @@
 #define PT_SYSTEM_EVENTSOURCE_H
 
 #include <Pt/Event.h>
-#include <Pt/Slot.h>
-#include <Pt/Connectable.h>
+#include <Pt/Method.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/EventLoop.h>
 #include <list>
+#include <map>
+#include <typeinfo>
 
 namespace Pt {
 
 namespace System {
 
-    class EventLoop;
+    class EventSink;
+    class EventSourceSentry;
 
     struct PT_SYSTEM_API CompareTypeInfo2
     {
@@ -44,9 +45,19 @@ namespace System {
         }
     };
 
-    class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
+
+    /** @brief Sends Events to receivers in other threads
+
+        The Signal class is not thread-safe and can only be used for
+        intra-thread communication. To pass Events between different threads
+        use an %EventSource instead. Thread-safety only refers to the usage
+        of the %EventSource itself (connection, disconnecting...) and not the
+        slot.
+    */
+    class PT_SYSTEM_API EventSource : public NonCopyable
     {
         friend class EventSink;
+        friend class EventSourceSentry;
 
         public:
             // TODO call EventRoute
@@ -108,7 +119,7 @@ namespace System {
                 else
                 {
                     disp = new Dispatcher<EventT>;
-                    std::pair<const std::type_info*const, EventLoopBase::IDispatcher*> p( &ti, disp);
+                    std::pair<const std::type_info*const, EventSource::IDispatcher*> p( &ti, disp);
                     _dispatchTable.insert( p );
                 }
 
@@ -126,46 +137,16 @@ namespace System {
             DispatchTable _dispatchTable;
 
             mutable Mutex _mutex;
-            std::list<EventSink*> _sinks;
+            mutable std::list<EventSink*> _sinks;
+            mutable EventSourceSentry* _sentry;
+            mutable bool _sending;
+            mutable bool _dirty;
     };
 
 
 
-    /** @brief Sends Events to receivers in other threads
 
-        The Signal class is not thread-safe and can only be used for
-        intra-thread communication. To pass Events between different threads
-        use an %EventSource instead. Thread-safety only refers to the usage
-        of the %EventSource itself (connection, disconnecting...) and not the
-        slot.
-    */
-    /*class PT_SYSTEM_API EventSource : public Connectable, public NonCopyable
-    {
-        public:
-            //! @brief Constructs a new EventSource
-            EventSource();
 
-            //! @brief Destructs the EventSource
-            ~EventSource();
-
-            //! @brief Connects to a EventLoop in another thread
-            Connection connect( EventLoopBase& receiver );
-
-            //! @brief Connects to a slot in another thread
-            Connection connect( const Slot& s );
-
-            //! @internal
-            virtual bool opened( const Connection& c );
-
-            //! @internal
-            virtual void closed( const Connection& c );
-
-            //! @brief Send an Event to all receivers
-            void send(const Pt::Event& ev) const;
-
-        private:
-            mutable Mutex _mutex;
-    };*/
 
 } // namespace System
 
