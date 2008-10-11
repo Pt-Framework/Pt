@@ -47,6 +47,7 @@ namespace System {
         protected:
             virtual void onCommitEvent(const Event& event) = 0;
 
+        protected:
             void addSource(EventSource& source);
             void removeSource(EventSource& source);
 

@@ -45,6 +45,52 @@ namespace System {
         }
     };
 
+    class PT_SYSTEM_API EventRouter : protected Pt::NonCopyable
+    {
+        public:
+            struct IEventRoute
+            {
+                virtual ~IEventRoute() {}
+                virtual void send(const Event&) = 0;
+            };
+
+            EventRouter()
+            {}
+
+            virtual ~EventRouter()
+            {}
+
+            template <typename EventT>
+            IEventRoute* findRoute()
+            {
+                const std::type_info& ti = typeid(EventT);
+                RouteMap::iterator it = _routes.find( &ti );
+
+                if( it != _routes.end() )
+                {
+                    return it->second;
+                }
+
+                return 0;
+            }
+
+            void addRoute(IEventRoute& route)
+            {}
+
+            void removeRoute(IEventRoute& route)
+            {}
+
+            void send(const Event& ev)
+            {}
+
+        private:
+            typedef std::map< const std::type_info*,
+                              IEventRoute*,
+                              CompareTypeInfo2 > RouteMap;
+
+            RouteMap _routes;
+    };
+
 
     /** @brief Sends Events to receivers in other threads
 
