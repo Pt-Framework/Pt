@@ -32,167 +32,276 @@ namespace Pt {
 
 namespace System {
 
-    class EventSink;
-    class EventSourceSentry;
+class EventSink;
+class EventSourceSentry;
 
-    struct PT_SYSTEM_API CompareTypeInfo2
+struct PT_SYSTEM_API CompareTypeInfo2
+{
+    bool operator()(const std::type_info* t1, 
+                    const std::type_info* t2) const
+
     {
-        bool operator()(const std::type_info* t1, 
-                        const std::type_info* t2) const
+        return t1->before(*t2) != 0;
+    }
+};
 
+class PT_SYSTEM_API EventRouter : protected Pt::NonCopyable
+{
+    public:
+        struct IEventRoute
         {
-            return t1->before(*t2) != 0;
+            virtual ~IEventRoute() {}
+            virtual void send(const Event&) = 0;
+            virtual bool equals(IEventRoute& route) = 0;
+        };
+
+        /*template <typename EventT>
+        struct EventRoute : public IEventRoute
+        {
+            typedef Invokable<EventT> Target;
+
+            EventRoute(Target& target)
+            : _target(0)
+            {
+                _target = target.clone();
+            }
+
+            ~EventRoute
+            ( delete _target)
+
+            Target* _target;
+        };*/
+
+    public:
+        EventRouter()
+        {}
+
+        virtual ~EventRouter()
+        {}
+
+        template <typename EventT>
+        IEventRoute* findRoute()
+        {
+            const std::type_info& ti = typeid(EventT);
+            RouteMap::iterator it = _routes.find( &ti );
+
+            if( it != _routes.end() )
+            {
+                return it->second;
+            }
+
+            return 0;
         }
-    };
 
-    class PT_SYSTEM_API EventRouter : protected Pt::NonCopyable
-    {
-        public:
-            struct IEventRoute
+        void addRoute(IEventRoute& route)
+        {
+        }
+
+        void removeRoute(IEventRoute& route)
+        {
+            RouteMap::iterator it;
+            for(it = _routes.begin(); it != _routes.end(); ++it)
             {
-                virtual ~IEventRoute() {}
-                virtual void send(const Event&) = 0;
-            };
-
-            EventRouter()
-            {}
-
-            virtual ~EventRouter()
-            {}
-
-            template <typename EventT>
-            IEventRoute* findRoute()
-            {
-                const std::type_info& ti = typeid(EventT);
-                RouteMap::iterator it = _routes.find( &ti );
-
-                if( it != _routes.end() )
+                if( it->second->equals(route) )
                 {
-                    return it->second;
+                    _routes.erase(it);
+                    return;
                 }
+            }
+        }
 
-                return 0;
+        void send(const Event& ev)
+        {}
+
+    private:
+        typedef std::multimap< const std::type_info*,
+                                IEventRoute*,
+                                CompareTypeInfo2 > RouteMap;
+
+        RouteMap _routes;
+};
+
+class EventRoute;
+
+class IEventHandler
+{
+    public:
+        virtual ~IEventHandler() {}
+
+        virtual IEventHandler* clone() const = 0;
+
+        virtual const void* invokable() const = 0;
+
+        virtual bool opened(const EventRoute& r) = 0;
+
+        virtual void closed(const EventRoute& r) = 0;
+
+        virtual bool equals(const IEventHandler& eh) const = 0;
+};
+
+
+template <typename C, typename EventT>
+class EventHandler : public IEventHandler
+{
+    public:
+        EventHandler(Method<void, C, EventT>& m)
+        : _method(m)
+        {}
+
+        virtual ~EventHandler() {}
+
+        virtual EventHandler* clone() const = 0;
+
+        virtual const void* invokable() const = 0;
+
+        virtual bool opened(const EventRoute& r) = 0;
+
+        virtual void closed(const EventRoute& r) = 0;
+
+        virtual bool equals(const EventHandler& eh) const = 0;
+
+    private:
+        Method<void, C, EventT> _method;
+};
+
+class EventSource;
+
+class PT_SYSTEM_API EventRoute
+{
+    public:
+        EventRoute(EventSource& source, const IEventHandler& eh)
+        {}
+
+        ~EventRoute()
+        {}
+
+        //bool valid() const
+        //{ return _data->valid(); }
+
+        //const EventSource& sender() const
+        //{ return _data->sender(); }
+
+        //const Slot& slot() const
+        //{ return _data->slot(); }
+
+        //bool operator!() const
+        //{ return this->valid() == false; }
+
+        //void close();
+
+        //EventRoute& operator=(const EventRoute& r);
+
+        //bool operator==(const EventRoute& r) const;
+
+    private:
+        //EventRouteData* _data;
+};
+
+
+/** @brief Sends Events to receivers in other threads
+
+    The Signal class is not thread-safe and can only be used for
+    intra-thread communication. To pass Events between different threads
+    use an %EventSource instead. Thread-safety only refers to the usage
+    of the %EventSource itself (connection, disconnecting...) and not the
+    slot.
+*/
+class PT_SYSTEM_API EventSource : public NonCopyable
+{
+    friend class EventSink;
+    friend class EventSourceSentry;
+
+    public:
+        // TODO call EventRoute
+        struct IDispatcher
+        {
+            virtual ~IDispatcher() {}
+            virtual void send(const Event&) = 0;
+        };
+
+        template <typename EventT>
+        struct Dispatcher : public IDispatcher
+        {
+            typedef Invokable<EventT> Target;
+
+            virtual void send(const Event& e)
+            {
+                const EventT& event = static_cast<const EventT&>(e);
+                typename std::list<Target*>::iterator it;
+                for(it = _sinks.begin(); it != _sinks.end(); ++it)
+                {
+                    (*it)->commitEvent(event);
+                }
             }
 
-            void addRoute(IEventRoute& route)
-            {}
+            void add(Target& target)
+            { _sinks.push_back(&target); }
 
-            void removeRoute(IEventRoute& route)
-            {}
+            void remove(Target& target)
+            { _sinks.remove(&target); }
 
-            void send(const Event& ev)
-            {}
+            std::list<Target*> _sinks;
+        };
 
-        private:
-            typedef std::map< const std::type_info*,
-                              IEventRoute*,
-                              CompareTypeInfo2 > RouteMap;
+    public:
+        EventSource();
 
-            RouteMap _routes;
-    };
+        ~EventSource();
+
+        void connect(EventSink& sink);
+
+        void disconnect(EventSink& sink);
+
+        void send(const Pt::Event& ev);
+
+        template <typename EventT>
+        void subscribe(EventSink& sink)
+        {
+            EventHandler<EventSink, EventT> handler( callable( sink, &EventSink::commitEvent ) );
+            EventRoute route(*this, handler);
+        }
 
 
-    /** @brief Sends Events to receivers in other threads
+        template <typename EventT>
+        void subscribe_old(EventSink& sink)
+        {
+            MutexLock lock(_mutex);
 
-        The Signal class is not thread-safe and can only be used for
-        intra-thread communication. To pass Events between different threads
-        use an %EventSource instead. Thread-safety only refers to the usage
-        of the %EventSource itself (connection, disconnecting...) and not the
-        slot.
-    */
-    class PT_SYSTEM_API EventSource : public NonCopyable
-    {
-        friend class EventSink;
-        friend class EventSourceSentry;
+            const std::type_info& ti = typeid(EventT);
+            DispatchTable::iterator it = _dispatchTable.find( &ti );
 
-        public:
-            // TODO call EventRoute
-            struct IDispatcher
+            Dispatcher<EventT>* disp = 0;
+            if( it != _dispatchTable.end() )
             {
-                virtual ~IDispatcher() {}
-                virtual void send(const Event&) = 0;
-            };
-
-            template <typename EventT>
-            struct Dispatcher : public IDispatcher
+                IDispatcher* d = it->second;
+                disp = static_cast<Dispatcher<EventT>*>(d);
+            }
+            else
             {
-                typedef Invokable<EventT> Target;
-
-                virtual void send(const Event& e)
-                {
-                    const EventT& event = static_cast<const EventT&>(e);
-                    typename std::list<Target*>::iterator it;
-                    for(it = _sinks.begin(); it != _sinks.end(); ++it)
-                    {
-                        (*it)->commitEvent(event);
-                    }
-                }
-
-                void add(Target& target)
-                { _sinks.push_back(&target); }
-
-                void remove(Target& target)
-                { _sinks.remove(&target); }
-
-                std::list<Target*> _sinks;
-            };
-
-        public:
-            EventSource();
-
-            ~EventSource();
-
-            void connect(EventSink& sink);
-
-            void disconnect(EventSink& sink);
-
-            void send(const Pt::Event& ev);
-
-            template <typename EventT>
-            void subscribe(EventSink& sink)
-            {
-                MutexLock lock(_mutex);
-
-                const std::type_info& ti = typeid(EventT);
-                DispatchTable::iterator it = _dispatchTable.find( &ti );
-
-                Dispatcher<EventT>* disp = 0;
-                if( it != _dispatchTable.end() )
-                {
-                    IDispatcher* d = it->second;
-                    disp = static_cast<Dispatcher<EventT>*>(d);
-                }
-                else
-                {
-                    disp = new Dispatcher<EventT>;
-                    std::pair<const std::type_info*const, EventSource::IDispatcher*> p( &ti, disp);
-                    _dispatchTable.insert( p );
-                }
-
-                disp->add(sink);
+                disp = new Dispatcher<EventT>;
+                std::pair<const std::type_info*const, EventSource::IDispatcher*> p( &ti, disp);
+                _dispatchTable.insert( p );
             }
 
-        protected:
-            void removeSink(EventSink& sink);
+            disp->add(sink);
+        }
 
-        private:
-            typedef std::map< const std::type_info*, 
-                              IDispatcher*, 
-                              CompareTypeInfo2 > DispatchTable;
+    protected:
+        void removeSink(EventSink& sink);
 
-            DispatchTable _dispatchTable;
+    private:
+        typedef std::map< const std::type_info*, 
+                            IDispatcher*, 
+                            CompareTypeInfo2 > DispatchTable;
 
-            mutable Mutex _mutex;
-            mutable std::list<EventSink*> _sinks;
-            mutable EventSourceSentry* _sentry;
-            mutable bool _sending;
-            mutable bool _dirty;
-    };
+        DispatchTable _dispatchTable;
 
-
-
-
-
+        mutable Mutex _mutex;
+        mutable std::list<EventSink*> _sinks;
+        mutable EventSourceSentry* _sentry;
+        mutable bool _sending;
+        mutable bool _dirty;
+};
 
 } // namespace System
 

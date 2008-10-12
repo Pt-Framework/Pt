@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/System/EventSource.h"
 #include "Pt/System/EventSink.h"
+#include "Pt/System/EventSource.h"
 #include <algorithm>
 
 namespace Pt {
