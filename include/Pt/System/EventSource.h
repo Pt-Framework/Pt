@@ -32,8 +32,6 @@ namespace Pt {
 
 namespace System {
 
-class EventSink;
-class EventSourceSentry;
 
 struct PT_SYSTEM_API CompareTypeInfo2
 {
@@ -45,83 +43,6 @@ struct PT_SYSTEM_API CompareTypeInfo2
     }
 };
 
-class PT_SYSTEM_API EventRouter : protected Pt::NonCopyable
-{
-    public:
-        struct IEventRoute
-        {
-            virtual ~IEventRoute() {}
-            virtual void send(const Event&) = 0;
-            virtual bool equals(IEventRoute& route) = 0;
-        };
-
-        /*template <typename EventT>
-        struct EventRoute : public IEventRoute
-        {
-            typedef Invokable<EventT> Target;
-
-            EventRoute(Target& target)
-            : _target(0)
-            {
-                _target = target.clone();
-            }
-
-            ~EventRoute
-            ( delete _target)
-
-            Target* _target;
-        };*/
-
-    public:
-        EventRouter()
-        {}
-
-        virtual ~EventRouter()
-        {}
-
-        template <typename EventT>
-        IEventRoute* findRoute()
-        {
-            const std::type_info& ti = typeid(EventT);
-            RouteMap::iterator it = _routes.find( &ti );
-
-            if( it != _routes.end() )
-            {
-                return it->second;
-            }
-
-            return 0;
-        }
-
-        void addRoute(IEventRoute& route)
-        {
-        }
-
-        void removeRoute(IEventRoute& route)
-        {
-            RouteMap::iterator it;
-            for(it = _routes.begin(); it != _routes.end(); ++it)
-            {
-                if( it->second->equals(route) )
-                {
-                    _routes.erase(it);
-                    return;
-                }
-            }
-        }
-
-        void send(const Event& ev)
-        {}
-
-    private:
-        typedef std::multimap< const std::type_info*,
-                                IEventRoute*,
-                                CompareTypeInfo2 > RouteMap;
-
-        RouteMap _routes;
-};
-
-class EventRoute;
 
 class IEventHandler
 {
@@ -130,13 +51,9 @@ class IEventHandler
 
         virtual IEventHandler* clone() const = 0;
 
-        virtual const void* invokable() const = 0;
+        virtual void send(const Pt::Event& ev) = 0;
 
-        virtual bool opened(const EventRoute& r) = 0;
-
-        virtual void closed(const EventRoute& r) = 0;
-
-        virtual bool equals(const IEventHandler& eh) const = 0;
+        virtual bool involves(const void* object) const = 0;
 };
 
 
@@ -148,55 +65,29 @@ class EventHandler : public IEventHandler
         : _method(m)
         {}
 
-        virtual ~EventHandler() {}
+        virtual ~EventHandler()
+        {}
 
-        virtual EventHandler* clone() const = 0;
+        virtual IEventHandler* clone() const
+        {
+            return new EventHandler(*this);
+        }
 
-        virtual const void* invokable() const = 0;
+        virtual void send(const Pt::Event& ev)
+        {
+            const EventT& event = static_cast<const EventT&>(ev);
+            _method.call(event);
+        }
 
-        virtual bool opened(const EventRoute& r) = 0;
-
-        virtual void closed(const EventRoute& r) = 0;
-
-        virtual bool equals(const EventHandler& eh) const = 0;
+        virtual bool involves(const void* object) const
+        { return object == &(_method.object()); }
 
     private:
         Method<void, C, EventT> _method;
 };
 
-class EventSource;
 
-class PT_SYSTEM_API EventRoute
-{
-    public:
-        EventRoute(EventSource& source, const IEventHandler& eh)
-        {}
-
-        ~EventRoute()
-        {}
-
-        //bool valid() const
-        //{ return _data->valid(); }
-
-        //const EventSource& sender() const
-        //{ return _data->sender(); }
-
-        //const Slot& slot() const
-        //{ return _data->slot(); }
-
-        //bool operator!() const
-        //{ return this->valid() == false; }
-
-        //void close();
-
-        //EventRoute& operator=(const EventRoute& r);
-
-        //bool operator==(const EventRoute& r) const;
-
-    private:
-        //EventRouteData* _data;
-};
-
+class EventSink;
 
 /** @brief Sends Events to receivers in other threads
 
@@ -209,39 +100,6 @@ class PT_SYSTEM_API EventRoute
 class PT_SYSTEM_API EventSource : public NonCopyable
 {
     friend class EventSink;
-    friend class EventSourceSentry;
-
-    public:
-        // TODO call EventRoute
-        struct IDispatcher
-        {
-            virtual ~IDispatcher() {}
-            virtual void send(const Event&) = 0;
-        };
-
-        template <typename EventT>
-        struct Dispatcher : public IDispatcher
-        {
-            typedef Invokable<EventT> Target;
-
-            virtual void send(const Event& e)
-            {
-                const EventT& event = static_cast<const EventT&>(e);
-                typename std::list<Target*>::iterator it;
-                for(it = _sinks.begin(); it != _sinks.end(); ++it)
-                {
-                    (*it)->commitEvent(event);
-                }
-            }
-
-            void add(Target& target)
-            { _sinks.push_back(&target); }
-
-            void remove(Target& target)
-            { _sinks.remove(&target); }
-
-            std::list<Target*> _sinks;
-        };
 
     public:
         EventSource();
@@ -254,51 +112,48 @@ class PT_SYSTEM_API EventSource : public NonCopyable
 
         void send(const Pt::Event& ev);
 
-        template <typename EventT>
-        void subscribe(EventSink& sink)
-        {
-            EventHandler<EventSink, EventT> handler( callable( sink, &EventSink::commitEvent ) );
-            EventRoute route(*this, handler);
-        }
-
-
-        template <typename EventT>
-        void subscribe_old(EventSink& sink)
+        template <typename SinkT, typename EventT>
+        void subscribe(SinkT& sink)
         {
             MutexLock lock(_mutex);
 
             const std::type_info& ti = typeid(EventT);
-            DispatchTable::iterator it = _dispatchTable.find( &ti );
+            IEventHandler* handler = new EventHandler<SinkT, EventT>( callable( sink, &SinkT::commitEvent ) );
+            _handlers.insert( std::make_pair(&ti, handler) );
+            sink.addSource(*this);
+        }
 
-            Dispatcher<EventT>* disp = 0;
-            if( it != _dispatchTable.end() )
-            {
-                IDispatcher* d = it->second;
-                disp = static_cast<Dispatcher<EventT>*>(d);
-            }
-            else
-            {
-                disp = new Dispatcher<EventT>;
-                std::pair<const std::type_info*const, EventSource::IDispatcher*> p( &ti, disp);
-                _dispatchTable.insert( p );
-            }
-
-            disp->add(sink);
+        template <typename EventT>
+        void unsubscribe(EventSink& sink)
+        {
+            const std::type_info& ti = typeid(EventT);
+            this->disconnect( sink, typeid(EventT) );
         }
 
     protected:
         void removeSink(EventSink& sink);
 
-    private:
-        typedef std::map< const std::type_info*, 
-                            IDispatcher*, 
-                            CompareTypeInfo2 > DispatchTable;
+        void disconnect(EventSink& sink, const std::type_info& ti);
 
-        DispatchTable _dispatchTable;
+    private:
+        typedef std::multimap< const std::type_info*,
+                               IEventHandler*,
+                               CompareTypeInfo2 > HandlerMap;
+
+        HandlerMap _handlers;
+
+		struct Sentry
+		{
+			Sentry(const EventSource* es);
+			~Sentry();
+			void detach();
+			bool operator!() const;
+			const EventSource* _es;
+		};
 
         mutable Mutex _mutex;
         mutable std::list<EventSink*> _sinks;
-        mutable EventSourceSentry* _sentry;
+        mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;
 };

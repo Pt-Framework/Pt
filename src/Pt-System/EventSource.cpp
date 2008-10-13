@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/System/EventSink.h"
 #include "Pt/System/EventSource.h"
+#include "Pt/System/EventSink.h"
 #include <algorithm>
 
 namespace Pt {
@@ -27,56 +27,56 @@ namespace System {
 static Mutex pt_evt_mtx(Mutex::Normal);
 
 
-struct EventSourceSentry
+EventSource::Sentry::Sentry(const EventSource* es)
+: _es(es)
 {
-    EventSourceSentry(const EventSource* es)
-    : _es(es)
-    {
-        _es->_sentry = this;
-        _es->_sending = true;
-        _es->_dirty = false;
-    }
+	_es->_sentry = this;
+	_es->_sending = true;
+	_es->_dirty = false;
+}
 
-    ~EventSourceSentry()
-    {
-        if( _es )
-            this->detach();
-    }
 
-    void detach()
-    {
-        _es->_sending = false;
+EventSource::Sentry::~Sentry()
+{
+	if( _es )
+		this->detach();
+}
 
-        if( _es->_dirty == false )
-        {
-            _es->_sentry = 0;
-            _es = 0;
-            return;
-        }
 
-        std::list<EventSink*>::iterator it = _es->_sinks.begin();
-        while( it != _es->_sinks.end() )
-        {
-            if( *it )
-            {
-                ++it;
-            }
-            else
-            {
-                it = _es->_sinks.erase(it);
-            }
-        }
+void EventSource::Sentry::detach()
+{
+	_es->_sending = false;
 
-        _es->_dirty = false;
-        _es->_sentry = 0;
-        _es = 0;
-    }
+	if( _es->_dirty == false )
+	{
+		_es->_sentry = 0;
+		_es = 0;
+		return;
+	}
 
-    bool operator!() const
-    { return _es == 0; }
+	std::list<EventSink*>::iterator it = _es->_sinks.begin();
+	while( it != _es->_sinks.end() )
+	{
+		if( *it )
+		{
+			++it;
+		}
+		else
+		{
+			it = _es->_sinks.erase(it);
+		}
+	}
 
-    const EventSource* _es;
-};
+	_es->_dirty = false;
+	_es->_sentry = 0;
+	_es = 0;
+}
+
+
+bool EventSource::Sentry::operator!() const
+{
+     return _es == 0;
+}
 
 
 EventSource::EventSource()
@@ -136,24 +136,33 @@ void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
 
-    EventSourceSentry sentry(this);
+    Sentry sentry(this);
 
     std::list<EventSink*>::const_iterator it = _sinks.begin();
     for(; it != _sinks.end(); ++it)
     {
         EventSink* sink = *it;
-        sink->commitEvent(ev);
+        if(sink)
+            sink->commitEvent(ev);
 
         if( ! sentry )
             return;
     }
 
-//     const std::type_info& ti = ev.typeInfo();
-//     DispatchTable::iterator it2 = _dispatchTable.find(&ti);
-//     if( it2 != _dispatchTable.end() )
-//     {
-//         it2->second->send(ev);
-//     }
+    const std::type_info& ti = ev.typeInfo();
+    HandlerMap::iterator hit = _handlers.lower_bound(&ti);
+    while(hit != _handlers.end() && *(hit->first) == ti)
+    {
+        IEventHandler* handler = hit->second;
+
+        if(handler)
+            handler->send(ev);
+
+        if( ! sentry )
+            return;
+
+        ++hit;
+    }
 }
 
 
@@ -161,6 +170,37 @@ void EventSource::removeSink(EventSink& sink)
 {
     MutexLock lock(_mutex);
     _sinks.remove(&sink);
+}
+
+
+void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
+{
+	MutexLock lock(_mutex);
+
+	std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
+	range = _handlers.equal_range(&ti);
+
+	HandlerMap::iterator it = range.first;
+	for(it = range.first; it != range.second; ++it)
+	{
+		IEventHandler* handler = it->second;
+		if( handler->involves(&sink) )
+		{
+			if( _sending )
+			{
+				_dirty = true;
+				delete it->second;
+				it->second = 0;
+			}
+			else
+			{
+				_handlers.erase(it);
+			}
+
+			sink.removeSource(*this);
+			return;
+		}
+	}
 }
 
 } // namespace System

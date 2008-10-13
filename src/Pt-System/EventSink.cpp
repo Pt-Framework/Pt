@@ -66,7 +66,16 @@ void EventSink::addSource(EventSource& source)
 void EventSink::removeSource(EventSource& source)
 {
     MutexLock lock(_mutex);
-    _sources.remove(&source);
+    std::list<EventSource*>::iterator it;
+
+    for(it = _sources.begin(); it != _sources.end(); ++it)
+    {
+        if(*it == &source)
+        {
+            _sources.erase(it);
+            return;
+        }
+    }
 }
 
 } // namespace System
