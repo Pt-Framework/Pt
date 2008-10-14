@@ -60,19 +60,53 @@ namespace System {
             struct IDispatcher
             {
                 virtual ~IDispatcher() {}
-                virtual void send(const Event&) = 0;
+
+                virtual IDispatcher* clone() const = 0;
+                virtual void send(const Pt::Event& ev) = 0;
+                virtual bool involves(const void* object) const = 0; 
             };
 
             //! @internal
             template <typename EventT>
             struct Dispatcher: public IDispatcher
             {
+                Dispatcher()
+                : _slot(0)
+                {}
+
+                Dispatcher(BasicSlot<void, const Pt::Event&>& slot)
+                : _slot(0)
+                {
+                    _slot = slot.clone();
+                }
+
+                virtual ~Dispatcher()
+                {}
+
+                virtual IDispatcher* clone() const
+                {
+                    return new Dispatcher(*this);
+                }
+
                 virtual void send(const Event& e)
                 {
                     const EventT& event = static_cast<const EventT&>(e);
                     signal.send(event);
+
+                    typedef Invokable<const EventT&> InvokableT;
+                    if(_slot)
+                    {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( _slot->callable() );
+                        invokable->invoke(event);
+                    }
                 }
 
+                virtual bool involves(const void* object) const
+                {
+                    return false;
+                }
+
+                BasicSlot<void, const Pt::Event&>* _slot;
                 Signal<const EventT&> signal;
             };
 
@@ -111,6 +145,35 @@ namespace System {
             Signal<const Event&> event;
 
             template <typename EventT>
+            void subscribe( const BasicSlot<void, const EventT&>& slot )
+            {
+                const std::type_info& ti = typeid(EventT);
+                IDispatcher* disp = new Dispatcher<EventT>(slot);
+                _dispatcher.insert( std::make_pair(&ti, disp) );
+            }
+
+            template <typename EventT>
+            void unsubscribe( const BasicSlot<void, const EventT&>& slot )
+            {
+                const std::type_info& ti = typeid(EventT);
+
+				/*std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
+				range = _handlers.equal_range(&ti);
+
+				HandlerMap::iterator it = range.first;
+				for(it = range.first; it != range.second; ++it)
+				{
+					IEventHandler* handler = it->second;
+					if( handler->involves(&sink) )
+					{
+							_handlers.erase(it);
+							sink.removeSource(*this);
+							return;
+					}
+				}*/
+            }
+
+            template <typename EventT>
             void addEventHandler( const BasicSlot<void, const EventT&>& slot )
             {
                 const std::type_info& ti = typeid(EventT);
@@ -146,8 +209,14 @@ namespace System {
             void dispatchEvent(const Event& ev);
 
         private:
-            typedef std::map< const std::type_info*, 
-                              IDispatcher*, 
+            typedef std::multimap< const std::type_info*,
+                                   IDispatcher*,
+                                   CompareTypeInfo > DispatchMap;
+
+            DispatchMap _dispatcher;
+
+            typedef std::map< const std::type_info*,
+                              IDispatcher*,
                               CompareTypeInfo > DispatchTable;
 
             DispatchTable _dispatchTable;

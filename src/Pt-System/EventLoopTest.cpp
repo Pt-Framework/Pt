@@ -70,9 +70,9 @@ class EventLoopTest : public Pt::Unit::TestSuite
 
             el.setIdleTimeout(1000);
 
-            el.queueEvent( E1() );
-            el.queueEvent( E2()/*, Pt::IEventLoop::PRIO_HIGH*/ );
-            el.queueEvent( E1() );
+            el.commitEvent( E1() );
+            el.commitEvent( E2() );
+            el.commitEvent( E1() );
             el.run();
 
             PT_UNIT_ASSERT(_cnt == 3);
