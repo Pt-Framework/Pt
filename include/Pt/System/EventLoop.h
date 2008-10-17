@@ -40,13 +40,6 @@ namespace System {
     class Application;
     class Selectable;
 
-    struct PT_SYSTEM_API CompareTypeInfo
-    {
-        bool operator()(const std::type_info* t1, 
-                        const std::type_info* t2) const;
-    };
-
-
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
      */
     class PT_SYSTEM_API EventLoopBase : public SelectorBase

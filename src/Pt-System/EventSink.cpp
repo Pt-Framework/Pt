@@ -24,6 +24,12 @@ namespace Pt {
 
 namespace System {
 
+bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
+{
+    return t1->before(*t2) != 0;
+}
+
+
 EventSink::EventSink()
 : _mutex(Pt::System::Mutex::Recursive)
 { }
@@ -31,21 +37,28 @@ EventSink::EventSink()
 
 EventSink::~EventSink()
 {
-    EventSource* source = 0;
-
     while( true )
     {
+        MutexLock lock( _mutex );
+
+        if( _connections.empty() )
         {
-            MutexLock lock( _mutex );
-
-            if( _sources.empty() )
-                break;
-
-            source = _sources.front();
-            _sources.remove(source);
+            return;
         }
 
-        source->removeSink(*this);
+        Connection connection = _connections.front();
+
+        //const Slot& slot = connection.slot();
+
+        Mutex* other = 0;
+        if( other->tryLock() )
+        {
+            connection.close();
+            other->unlock();
+        }
+
+        lock.unlock();
+        Thread::yield();
     }
 }
 
@@ -56,26 +69,18 @@ void EventSink::commitEvent(const Event& event)
 }
 
 
-void EventSink::addSource(EventSource& source)
+bool EventSink::opened(const Connection& c)
 {
-    MutexLock lock(_mutex);
-    _sources.push_back(&source);
+	MutexLock lock(_mutex);
+	Connectable::opened(c);
+	return true;
 }
 
 
-void EventSink::removeSource(EventSource& source)
+void EventSink::closed(const Connection& c)
 {
-    MutexLock lock(_mutex);
-    std::list<EventSource*>::iterator it;
-
-    for(it = _sources.begin(); it != _sources.end(); ++it)
-    {
-        if(*it == &source)
-        {
-            _sources.erase(it);
-            return;
-        }
-    }
+	MutexLock lock(_mutex);
+	Connectable::closed(c);
 }
 
 } // namespace System

@@ -21,6 +21,7 @@
 #define PT_SYSTEM_EVENTSINK_H
 
 #include <Pt/Event.h>
+#include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <list>
@@ -31,29 +32,31 @@ namespace System {
 
     class EventSource;
 
-    class EventSink : protected NonCopyable
+    struct PT_SYSTEM_API CompareTypeInfo
     {
-        friend class EventSource;
+        bool operator()(const std::type_info* t1, 
+                        const std::type_info* t2) const;
+    };
 
+    class EventSink : public Connectable
+                    , protected NonCopyable
+    {
         public:
             EventSink();
 
             virtual ~EventSink();
 
-            /** @brief Adds an event and wakes up the loop.
-             */
             void commitEvent(const Event& event);
 
         protected:
             virtual void onCommitEvent(const Event& event) = 0;
 
-        protected:
-            void addSource(EventSource& source);
-            void removeSource(EventSource& source);
+            bool opened(const Connection& c);
+
+            void closed(const Connection& c);
 
         private:
             mutable Mutex _mutex;
-            std::list<EventSource*> _sources;
     };
 
 } // namespace System

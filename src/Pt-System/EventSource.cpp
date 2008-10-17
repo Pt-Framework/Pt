@@ -24,9 +24,6 @@ namespace Pt {
 
 namespace System {
 
-static Mutex pt_evt_mtx(Mutex::Normal);
-
-
 EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
@@ -54,18 +51,18 @@ void EventSource::Sentry::detach()
 		return;
 	}
 
-	std::list<EventSink*>::iterator it = _es->_sinks.begin();
-	while( it != _es->_sinks.end() )
-	{
-		if( *it )
-		{
-			++it;
-		}
-		else
-		{
-			it = _es->_sinks.erase(it);
-		}
-	}
+    std::list<Connection>::iterator it = _es->_connections.begin();
+    while( it != _es->_connections.end() )
+    {
+        if( it->valid() )
+        {
+            ++it;
+        }
+        else
+        {
+            it = _es->_connections.erase(it);
+        }
+    }
 
 	_es->_dirty = false;
 	_es->_sentry = 0;
@@ -88,19 +85,29 @@ EventSource::~EventSource()
 {
     while( true )
     {
-        MutexLock lock1( pt_evt_mtx );
-        MutexLock lock2( _mutex );
+        MutexLock lock( _mutex );
 
         if(_sentry)
             _sentry->detach();
 
-        if( _sinks.empty() )
-            break;
+        if( _connections.empty() )
+        {
+            return;
+        }
 
-        EventSink* sink = _sinks.front();
-        _sinks.remove(sink);
+        Connection connection = _connections.front();
 
-        sink->removeSource(*this);
+        //const Slot& slot = connection.slot();
+
+        Mutex* other = 0;
+        if( other->tryLock() )
+        {
+            connection.close();
+            other->unlock();
+        }
+
+        lock.unlock();
+        Thread::yield();
     }
 }
 
@@ -108,8 +115,7 @@ EventSource::~EventSource()
 void EventSource::connect(EventSink& sink)
 {
     MutexLock lock(_mutex);
-    sink.addSource(*this);
-    _sinks.push_back(&sink);
+    //Connection con(*this, slot(sink, &EventSink::commitEvent).clone() );
 }
 
 
@@ -120,14 +126,11 @@ void EventSource::disconnect(EventSink& sink)
     if( _sending )
     {
         _dirty = true;
-        EventSink* ns = 0;
-        std::replace(_sinks.begin(), _sinks.end(), &sink, ns );
-        sink.removeSource(*this);
+
     }
     else
     {
-        _sinks.remove(&sink);
-        sink.removeSource(*this);
+
     }
 }
 
@@ -137,17 +140,6 @@ void EventSource::send(const Pt::Event& ev)
     MutexLock lock(_mutex);
 
     Sentry sentry(this);
-
-    std::list<EventSink*>::const_iterator it = _sinks.begin();
-    for(; it != _sinks.end(); ++it)
-    {
-        EventSink* sink = *it;
-        if(sink)
-            sink->commitEvent(ev);
-
-        if( ! sentry )
-            return;
-    }
 
     const std::type_info& ti = ev.typeInfo();
     HandlerMap::iterator hit = _handlers.lower_bound(&ti);
@@ -166,16 +158,11 @@ void EventSource::send(const Pt::Event& ev)
 }
 
 
-void EventSource::removeSink(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    _sinks.remove(&sink);
-}
-
-
 void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
 {
 	MutexLock lock(_mutex);
+
+	MethodSlot<void, EventSink, const Pt::Event&> ms = slot(sink, &EventSink::commitEvent);
 
 	std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
 	range = _handlers.equal_range(&ti);
@@ -184,7 +171,7 @@ void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
 	for(it = range.first; it != range.second; ++it)
 	{
 		IEventHandler* handler = it->second;
-		if( handler->involves(&sink) )
+		if( handler->slot().equals(ms) )
 		{
 			if( _sending )
 			{
@@ -197,10 +184,36 @@ void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
 				_handlers.erase(it);
 			}
 
-			sink.removeSource(*this);
+			break;
+		}
+	}
+
+	std::list<Connection>::iterator iter = Connectable::connections().begin();
+	std::list<Connection>::iterator end = Connectable::connections().end();
+
+	for(; iter != end; ++iter)
+	{
+		if( iter->slot().equals(ms) )
+		{
+			iter->close();
 			return;
 		}
 	}
+}
+
+
+bool EventSource::opened(const Connection& c)
+{
+	MutexLock lock(_mutex);
+	Connectable::opened(c);
+	return true;
+}
+
+
+void EventSource::closed(const Connection& c)
+{
+	MutexLock lock(_mutex);
+	Connectable::closed(c);
 }
 
 } // namespace System

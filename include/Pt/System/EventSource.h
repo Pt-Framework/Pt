@@ -22,8 +22,10 @@
 
 #include <Pt/Event.h>
 #include <Pt/Method.h>
+#include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/System/EventSink.h>
 #include <list>
 #include <map>
 #include <typeinfo>
@@ -32,58 +34,44 @@ namespace Pt {
 
 namespace System {
 
-
-struct PT_SYSTEM_API CompareTypeInfo2
-{
-    bool operator()(const std::type_info* t1, 
-                    const std::type_info* t2) const
-
-    {
-        return t1->before(*t2) != 0;
-    }
-};
-
-
 class IEventHandler
 {
     public:
         virtual ~IEventHandler() {}
 
-        virtual IEventHandler* clone() const = 0;
-
         virtual void send(const Pt::Event& ev) = 0;
 
-        virtual bool involves(const void* object) const = 0;
+        virtual Slot& slot() = 0;
 };
 
 
-template <typename C, typename EventT>
+template <typename EventT>
 class EventHandler : public IEventHandler
 {
     public:
-        EventHandler(Method<void, C, EventT>& m)
-        : _method(m)
-        {}
+        EventHandler(BasicSlot<void, EventT>& slot)
+        : _slot(0)
+        {
+            _slot = slot.clone();
+        }
 
         virtual ~EventHandler()
-        {}
-
-        virtual IEventHandler* clone() const
         {
-            return new EventHandler(*this);
+            delete _slot;
         }
 
         virtual void send(const Pt::Event& ev)
         {
             const EventT& event = static_cast<const EventT&>(ev);
-            _method.call(event);
+            if(_slot)
+                static_cast< const Invokable<EventT>* >(_slot)->invoke(event);
         }
 
-        virtual bool involves(const void* object) const
-        { return object == &(_method.object()); }
+        virtual Slot& slot()
+        { return *_slot; }
 
     private:
-        Method<void, C, EventT> _method;
+        Slot* _slot;
 };
 
 
@@ -97,10 +85,9 @@ class EventSink;
     of the %EventSource itself (connection, disconnecting...) and not the
     slot.
 */
-class PT_SYSTEM_API EventSource : public NonCopyable
+class PT_SYSTEM_API EventSource : protected Connectable
+                                , protected NonCopyable
 {
-    friend class EventSink;
-
     public:
         EventSource();
 
@@ -112,15 +99,16 @@ class PT_SYSTEM_API EventSource : public NonCopyable
 
         void send(const Pt::Event& ev);
 
-        template <typename SinkT, typename EventT>
-        void subscribe(SinkT& sink)
+        template <typename EventT>
+        void subscribe(EventSink& sink)
         {
             MutexLock lock(_mutex);
 
+            Connection conn(*this, sink, &EventSink::commitEvent);
+
             const std::type_info& ti = typeid(EventT);
-            IEventHandler* handler = new EventHandler<SinkT, EventT>( callable( sink, &SinkT::commitEvent ) );
+            IEventHandler* handler = new EventHandler<EventT>( conn.slot() );
             _handlers.insert( std::make_pair(&ti, handler) );
-            sink.addSource(*this);
         }
 
         template <typename EventT>
@@ -131,14 +119,16 @@ class PT_SYSTEM_API EventSource : public NonCopyable
         }
 
     protected:
-        void removeSink(EventSink& sink);
+        bool opened(const Connection& c);
+
+        void closed(const Connection& c);
 
         void disconnect(EventSink& sink, const std::type_info& ti);
 
     private:
         typedef std::multimap< const std::type_info*,
                                IEventHandler*,
-                               CompareTypeInfo2 > HandlerMap;
+                               CompareTypeInfo > HandlerMap;
 
         HandlerMap _handlers;
 
@@ -152,7 +142,6 @@ class PT_SYSTEM_API EventSource : public NonCopyable
 		};
 
         mutable Mutex _mutex;
-        mutable std::list<EventSink*> _sinks;
         mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;

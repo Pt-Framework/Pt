@@ -81,12 +81,6 @@ void EventLoopBase::dispatchEvent(const Event& ev)
 }
 
 
-bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
-{
-    return t1->before(*t2) != 0;
-}
-
-
 EventLoop::EventLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)
