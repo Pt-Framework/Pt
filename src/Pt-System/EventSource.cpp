@@ -24,6 +24,54 @@ namespace Pt {
 
 namespace System {
 
+void EventDispatcher::dispatch(const Pt::Event& ev)
+{
+    const std::type_info& ti = ev.typeInfo();
+    HandlerMap::iterator hit = _handlers.lower_bound(&ti);
+    while(hit != _handlers.end() && *(hit->first) == ti)
+    {
+        IEventHandler* handler = hit->second;
+
+        if(handler)
+            handler->send(ev);
+
+        ++hit;
+    }
+}
+
+
+void EventDispatcher::unsubscribe(const Slot& slot, const std::type_info& ti)
+{
+	std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
+	range = _handlers.equal_range(&ti);
+
+	HandlerMap::iterator it = range.first;
+	for(it = range.first; it != range.second; ++it)
+	{
+		IEventHandler* handler = it->second;
+		if( handler->slot().equals(slot) )
+		{
+			_handlers.erase(it);
+			break;
+		}
+	}
+}
+
+
+void EventDispatcher::unsubscribeAll(const Slot& slot)
+{
+	HandlerMap::iterator it;
+	for(it = _handlers.begin(); it != _handlers.end(); ++it)
+	{
+		IEventHandler* handler = it->second;
+		if( handler->slot().equals(slot) )
+		{
+			_handlers.erase(it);
+		}
+	}
+}
+
+
 EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
@@ -78,6 +126,7 @@ bool EventSource::Sentry::operator!() const
 
 EventSource::EventSource()
 : _mutex(Pt::System::Mutex::Recursive)
+, _dmutex(Pt::System::Mutex::Recursive)
 { }
 
 
@@ -85,52 +134,21 @@ EventSource::~EventSource()
 {
     while( true )
     {
+        if( ! _dmutex.tryLock() )
+        {
+            Thread::yield();
+            continue;
+        }
+
         MutexLock lock( _mutex );
 
-        if(_sentry)
-            _sentry->detach();
-
         if( _connections.empty() )
-        {
             return;
-        }
 
-        Connection connection = _connections.front();
-
-        //const Slot& slot = connection.slot();
-
-        Mutex* other = 0;
-        if( other->tryLock() )
-        {
-            connection.close();
-            other->unlock();
-        }
-
+        _dispatcher.unsubscribeAll( _connections.front().slot() );
+        _connections.front().close();
         lock.unlock();
-        Thread::yield();
-    }
-}
-
-
-void EventSource::connect(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-    //Connection con(*this, slot(sink, &EventSink::commitEvent).clone() );
-}
-
-
-void EventSource::disconnect(EventSink& sink)
-{
-    MutexLock lock(_mutex);
-
-    if( _sending )
-    {
-        _dirty = true;
-
-    }
-    else
-    {
-
+        _dmutex.unlock();
     }
 }
 
@@ -138,63 +156,24 @@ void EventSource::disconnect(EventSink& sink)
 void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
-
     Sentry sentry(this);
 
-    const std::type_info& ti = ev.typeInfo();
-    HandlerMap::iterator hit = _handlers.lower_bound(&ti);
-    while(hit != _handlers.end() && *(hit->first) == ti)
-    {
-        IEventHandler* handler = hit->second;
-
-        if(handler)
-            handler->send(ev);
-
-        if( ! sentry )
-            return;
-
-        ++hit;
-    }
+    _dispatcher.dispatch(ev);
 }
 
 
-void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
+void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
 {
-	MutexLock lock(_mutex);
-
-	MethodSlot<void, EventSink, const Pt::Event&> ms = slot(sink, &EventSink::commitEvent);
-
-	std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
-	range = _handlers.equal_range(&ti);
-
-	HandlerMap::iterator it = range.first;
-	for(it = range.first; it != range.second; ++it)
-	{
-		IEventHandler* handler = it->second;
-		if( handler->slot().equals(ms) )
-		{
-			if( _sending )
-			{
-				_dirty = true;
-				delete it->second;
-				it->second = 0;
-			}
-			else
-			{
-				_handlers.erase(it);
-			}
-
-			break;
-		}
-	}
+	MethodSlot<void, EventSink, const Pt::Event&> eslot = slot(sink, &EventSink::commitEvent);
 
 	std::list<Connection>::iterator iter = Connectable::connections().begin();
 	std::list<Connection>::iterator end = Connectable::connections().end();
 
 	for(; iter != end; ++iter)
 	{
-		if( iter->slot().equals(ms) )
+		if( iter->slot().equals(eslot) )
 		{
+			_dispatcher.unsubscribe(iter->slot(), ti);
 			iter->close();
 			return;
 		}
@@ -204,6 +183,7 @@ void EventSource::disconnect(EventSink& sink, const std::type_info& ti)
 
 bool EventSource::opened(const Connection& c)
 {
+	MutexLock lock1(_dmutex);
 	MutexLock lock(_mutex);
 	Connectable::opened(c);
 	return true;
@@ -212,7 +192,8 @@ bool EventSource::opened(const Connection& c)
 
 void EventSource::closed(const Connection& c)
 {
-	MutexLock lock(_mutex);
+	MutexLock lock1(_dmutex);
+	MutexLock lock2(_mutex);
 	Connectable::closed(c);
 }
 

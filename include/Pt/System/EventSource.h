@@ -75,6 +75,42 @@ class EventHandler : public IEventHandler
 };
 
 
+class EventDispatcher
+{
+    public:
+        EventDispatcher()
+        {}
+
+        void dispatch(const Pt::Event& ev);
+
+        template <typename EventT>
+        void subscribe(Slot& slot)
+        {
+            const std::type_info& ti = typeid(EventT);
+            IEventHandler* handler = new EventHandler<EventT>( slot );
+            _handlers.insert( std::make_pair(&ti, handler) );
+        }
+
+        template <typename EventT>
+        void unsubscribe(Slot& slot)
+        {
+            const std::type_info& ti = typeid(EventT);
+            this->unsubscribe( slot, typeid(EventT) );
+        }
+
+        void unsubscribe(const Slot& slot, const std::type_info& ti);
+
+        void unsubscribeAll(const Slot& slot);
+
+    private:
+        typedef std::multimap< const std::type_info*,
+                               IEventHandler*,
+                               CompareTypeInfo > HandlerMap;
+
+        HandlerMap _handlers;
+};
+
+
 class EventSink;
 
 /** @brief Sends Events to receivers in other threads
@@ -93,29 +129,21 @@ class PT_SYSTEM_API EventSource : protected Connectable
 
         ~EventSource();
 
-        void connect(EventSink& sink);
-
-        void disconnect(EventSink& sink);
-
         void send(const Pt::Event& ev);
 
         template <typename EventT>
         void subscribe(EventSink& sink)
         {
             MutexLock lock(_mutex);
-
             Connection conn(*this, sink, &EventSink::commitEvent);
-
-            const std::type_info& ti = typeid(EventT);
-            IEventHandler* handler = new EventHandler<EventT>( conn.slot() );
-            _handlers.insert( std::make_pair(&ti, handler) );
+            _dispatcher.subscribe<EventT>( conn.slot() );
         }
 
         template <typename EventT>
         void unsubscribe(EventSink& sink)
         {
-            const std::type_info& ti = typeid(EventT);
-            this->disconnect( sink, typeid(EventT) );
+            MutexLock lock(_mutex);
+            this->unsubscribe( sink, typeid(EventT) );
         }
 
     protected:
@@ -123,7 +151,7 @@ class PT_SYSTEM_API EventSource : protected Connectable
 
         void closed(const Connection& c);
 
-        void disconnect(EventSink& sink, const std::type_info& ti);
+        void unsubscribe(EventSink& sink, const std::type_info& ti);
 
     private:
         typedef std::multimap< const std::type_info*,
@@ -131,6 +159,8 @@ class PT_SYSTEM_API EventSource : protected Connectable
                                CompareTypeInfo > HandlerMap;
 
         HandlerMap _handlers;
+
+		EventDispatcher _dispatcher;
 
 		struct Sentry
 		{
@@ -142,6 +172,7 @@ class PT_SYSTEM_API EventSource : protected Connectable
 		};
 
         mutable Mutex _mutex;
+        mutable Mutex _dmutex;
         mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;
