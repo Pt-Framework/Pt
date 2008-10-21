@@ -38,9 +38,10 @@ namespace System {
                         const std::type_info* t2) const;
     };
 
-    class EventSink : public Connectable
-                    , protected NonCopyable
+    class PT_SYSTEM_API EventSink : protected NonCopyable
     {
+        friend class EventSource;
+
         public:
             EventSink();
 
@@ -51,12 +52,9 @@ namespace System {
         protected:
             virtual void onCommitEvent(const Event& event) = 0;
 
-            bool opened(const Connection& c);
-
-            void closed(const Connection& c);
-
         private:
             mutable Mutex _mutex;
+            std::list<EventSource*> _sources;
     };
 
 } // namespace System

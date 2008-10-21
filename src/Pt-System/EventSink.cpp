@@ -41,20 +41,16 @@ EventSink::~EventSink()
     {
         MutexLock lock( _mutex );
 
-        if( _connections.empty() )
-        {
+        if( _sources.empty() )
             return;
-        }
 
-        Connection connection = _connections.front();
-
-        //const Slot& slot = connection.slot();
-
-        Mutex* other = 0;
-        if( other->tryLock() )
+        EventSource* source = _sources.front();
+        if( source->_dmutex.tryLock() )
         {
-            connection.close();
-            other->unlock();
+            MutexLock block(source->_mutex);
+            _sources.remove(source);
+            source->_sinks.remove(this);
+            continue;
         }
 
         lock.unlock();
@@ -66,21 +62,6 @@ EventSink::~EventSink()
 void EventSink::commitEvent(const Event& event)
 {
     this->onCommitEvent(event);
-}
-
-
-bool EventSink::opened(const Connection& c)
-{
-	MutexLock lock(_mutex);
-	Connectable::opened(c);
-	return true;
-}
-
-
-void EventSink::closed(const Connection& c)
-{
-	MutexLock lock(_mutex);
-	Connectable::closed(c);
 }
 
 } // namespace System

@@ -72,7 +72,7 @@ void EventDispatcher::unsubscribeAll(const Slot& slot)
 }
 
 
-EventSource::Sentry::Sentry(const EventSource* es)
+/*EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
 	_es->_sentry = this;
@@ -121,7 +121,7 @@ void EventSource::Sentry::detach()
 bool EventSource::Sentry::operator!() const
 {
      return _es == 0;
-}
+}*/
 
 
 EventSource::EventSource()
@@ -132,69 +132,54 @@ EventSource::EventSource()
 
 EventSource::~EventSource()
 {
+    MutexLock dlock(_dmutex);
+
     while( true )
     {
-        if( ! _dmutex.tryLock() )
-        {
-            Thread::yield();
-            continue;
-        }
+        MutexLock alock( _mutex );
 
-        MutexLock lock( _mutex );
-
-        if( _connections.empty() )
+        if( _sinks.empty() )
             return;
 
-        _dispatcher.unsubscribeAll( _connections.front().slot() );
-        _connections.front().close();
-        lock.unlock();
-        _dmutex.unlock();
+        EventSink* sink = _sinks.front();
+        MutexLock block( sink->_mutex );
+
+       _sinks.remove(sink);
+        sink->_sources.remove(this);
     }
+}
+
+
+void EventSource::connect(EventSink& sink)
+{
+    MutexLock lock1( sink._mutex );
+    MutexLock lock2( _mutex );
+
+   _sinks.push_back(&sink);
+    sink._sources.push_back(this);
+}
+
+
+void EventSource::disconnect(EventSink& sink)
+{
+    MutexLock lock1( sink._mutex );
+    MutexLock lock2( _mutex );
+
+   _sinks.remove(&sink);
+    sink._sources.remove(this);
 }
 
 
 void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
-    Sentry sentry(this);
 
-    _dispatcher.dispatch(ev);
-}
-
-
-void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
-{
-	MethodSlot<void, EventSink, const Pt::Event&> eslot = slot(sink, &EventSink::commitEvent);
-
-	std::list<Connection>::iterator iter = Connectable::connections().begin();
-	std::list<Connection>::iterator end = Connectable::connections().end();
-
-	for(; iter != end; ++iter)
-	{
-		if( iter->slot().equals(eslot) )
-		{
-			_dispatcher.unsubscribe(iter->slot(), ti);
-			iter->close();
-			return;
-		}
-	}
-}
-
-
-bool EventSource::opened(const Connection& c)
-{
-	MutexLock lock1(_dmutex);
-	MutexLock lock(_mutex);
-	Connectable::opened(c);
-	return true;
-}
-
-
-void EventSource::closed(const Connection& c)
-{
-	MutexLock lock1(_dmutex);
-	MutexLock lock2(_mutex);
-	Connectable::closed(c);
+    std::list<EventSink*>::iterator it;
+    for(it = _sinks.begin(); it != _sinks.end(); ++it)
+    {
+        EventSink* sink = *it;
+        sink->commitEvent(ev);
+    }
 }
 
 } // namespace System

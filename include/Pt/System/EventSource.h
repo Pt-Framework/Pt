@@ -113,6 +113,7 @@ class EventDispatcher
 
 class EventSink;
 
+
 /** @brief Sends Events to receivers in other threads
 
     The Signal class is not thread-safe and can only be used for
@@ -121,9 +122,10 @@ class EventSink;
     of the %EventSource itself (connection, disconnecting...) and not the
     slot.
 */
-class PT_SYSTEM_API EventSource : protected Connectable
-                                , protected NonCopyable
+class PT_SYSTEM_API EventSource : protected NonCopyable
 {
+    friend class EventSink;
+
     public:
         EventSource();
 
@@ -131,49 +133,33 @@ class PT_SYSTEM_API EventSource : protected Connectable
 
         void send(const Pt::Event& ev);
 
+        void connect(EventSink& sink);
+
+        void disconnect(EventSink& sink);
+
         template <typename EventT>
         void subscribe(EventSink& sink)
         {
-            MutexLock lock(_mutex);
-            Connection conn(*this, sink, &EventSink::commitEvent);
-            _dispatcher.subscribe<EventT>( conn.slot() );
         }
 
         template <typename EventT>
         void unsubscribe(EventSink& sink)
         {
-            MutexLock lock(_mutex);
-            this->unsubscribe( sink, typeid(EventT) );
         }
 
-    protected:
-        bool opened(const Connection& c);
-
-        void closed(const Connection& c);
-
-        void unsubscribe(EventSink& sink, const std::type_info& ti);
-
-    private:
-        typedef std::multimap< const std::type_info*,
-                               IEventHandler*,
-                               CompareTypeInfo > HandlerMap;
-
-        HandlerMap _handlers;
-
-		EventDispatcher _dispatcher;
-
-		struct Sentry
+		/*struct Sentry
 		{
 			Sentry(const EventSource* es);
 			~Sentry();
 			void detach();
 			bool operator!() const;
 			const EventSource* _es;
-		};
+		};*/
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
-        mutable Sentry* _sentry;
+        mutable std::list<EventSink*> _sinks;
+        //mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;
 };
