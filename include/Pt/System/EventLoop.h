@@ -146,12 +146,6 @@ namespace System {
             void dispatchEvent(const Event& ev);
 
         private:
-            typedef std::multimap< const std::type_info*,
-                                   IDispatcher*,
-                                   CompareTypeInfo > DispatchMap;
-
-            DispatchMap _dispatcher;
-
             typedef std::map< const std::type_info*,
                               IDispatcher*,
                               CompareTypeInfo > DispatchTable;
