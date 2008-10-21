@@ -55,6 +55,7 @@ namespace System {
             {
                 virtual ~IDispatcher() {}
                 virtual void send(const Pt::Event& ev) = 0;
+                virtual const void* callable() const = 0;
             };
 
             //! @internal
@@ -73,6 +74,10 @@ namespace System {
                     signal.send(event);
                 }
 
+                virtual const void* callable() const
+                { return _slot->callable(); }
+
+                BasicSlot<void, const EventT&>* _slot;
                 Signal<const EventT&> signal;
             };
 

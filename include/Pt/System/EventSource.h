@@ -41,7 +41,7 @@ class IEventHandler
 
         virtual void send(const Pt::Event& ev) = 0;
 
-        virtual Slot& slot() = 0;
+        virtual const void* callable() const = 0;
 };
 
 
@@ -49,29 +49,27 @@ template <typename EventT>
 class EventHandler : public IEventHandler
 {
     public:
-        EventHandler(BasicSlot<void, EventT>& slot)
-        : _slot(0)
-        {
-            _slot = slot.clone();
-        }
+        EventHandler(EventSink& sink)
+        : _sink(&sink)
+        { }
 
         virtual ~EventHandler()
-        {
-            delete _slot;
-        }
+        { }
 
         virtual void send(const Pt::Event& ev)
         {
             const EventT& event = static_cast<const EventT&>(ev);
-            if(_slot)
-                static_cast< const Invokable<EventT>* >(_slot)->invoke(event);
+            if(_sink)
+                _sink->commitEvent(event);
         }
 
-        virtual Slot& slot()
-        { return *_slot; }
+        virtual const void* callable() const
+        {
+            return _sink;
+        }
 
     private:
-        Slot* _slot;
+        EventSink* _sink; // TODO: store Callable*
 };
 
 
@@ -84,7 +82,7 @@ class EventDispatcher
         void dispatch(const Pt::Event& ev);
 
         template <typename EventT>
-        void subscribe(Slot& slot)
+        void subscribe(EventSink& sink)
         {
             const std::type_info& ti = typeid(EventT);
             IEventHandler* handler = new EventHandler<EventT>( slot );
@@ -92,15 +90,10 @@ class EventDispatcher
         }
 
         template <typename EventT>
-        void unsubscribe(Slot& slot)
+        void unsubscribe(EventSink& sink)
         {
             const std::type_info& ti = typeid(EventT);
-            this->unsubscribe( slot, typeid(EventT) );
         }
-
-        void unsubscribe(const Slot& slot, const std::type_info& ti);
-
-        void unsubscribeAll(const Slot& slot);
 
     private:
         typedef std::multimap< const std::type_info*,
@@ -147,18 +140,24 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
         {
         }
 
-		/*struct Sentry
-		{
-			Sentry(const EventSource* es);
-			~Sentry();
-			void detach();
-			bool operator!() const;
-			const EventSource* _es;
-		};*/
+    private:
+        /*struct Sentry
+        {
+            Sentry(const EventSource* es);
+            ~Sentry();
+            void detach();
+            bool operator!() const;
+            const EventSource* _es;
+        };*/
+
+        typedef std::multimap< const std::type_info*,
+                               EventSink*,
+                               CompareTypeInfo > HandlerMap;
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
-        mutable std::list<EventSink*> _sinks;
+        mutable std::list<EventSink*> _sinks; // TODO: store Method
+        HandlerMap _handlers;
         //mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;

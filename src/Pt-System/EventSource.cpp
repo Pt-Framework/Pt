@@ -40,64 +40,32 @@ void EventDispatcher::dispatch(const Pt::Event& ev)
 }
 
 
-void EventDispatcher::unsubscribe(const Slot& slot, const std::type_info& ti)
-{
-	std::pair<HandlerMap::iterator, HandlerMap::iterator> range;
-	range = _handlers.equal_range(&ti);
-
-	HandlerMap::iterator it = range.first;
-	for(it = range.first; it != range.second; ++it)
-	{
-		IEventHandler* handler = it->second;
-		if( handler->slot().equals(slot) )
-		{
-			_handlers.erase(it);
-			break;
-		}
-	}
-}
-
-
-void EventDispatcher::unsubscribeAll(const Slot& slot)
-{
-	HandlerMap::iterator it;
-	for(it = _handlers.begin(); it != _handlers.end(); ++it)
-	{
-		IEventHandler* handler = it->second;
-		if( handler->slot().equals(slot) )
-		{
-			_handlers.erase(it);
-		}
-	}
-}
-
-
 /*EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
-	_es->_sentry = this;
-	_es->_sending = true;
-	_es->_dirty = false;
+    _es->_sentry = this;
+    _es->_sending = true;
+    _es->_dirty = false;
 }
 
 
 EventSource::Sentry::~Sentry()
 {
-	if( _es )
-		this->detach();
+    if( _es )
+        this->detach();
 }
 
 
 void EventSource::Sentry::detach()
 {
-	_es->_sending = false;
+    _es->_sending = false;
 
-	if( _es->_dirty == false )
-	{
-		_es->_sentry = 0;
-		_es = 0;
-		return;
-	}
+    if( _es->_dirty == false )
+    {
+        _es->_sentry = 0;
+        _es = 0;
+        return;
+    }
 
     std::list<Connection>::iterator it = _es->_connections.begin();
     while( it != _es->_connections.end() )
@@ -112,9 +80,9 @@ void EventSource::Sentry::detach()
         }
     }
 
-	_es->_dirty = false;
-	_es->_sentry = 0;
-	_es = 0;
+    _es->_dirty = false;
+    _es->_sentry = 0;
+    _es = 0;
 }
 
 
