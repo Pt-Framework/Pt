@@ -26,6 +26,8 @@ namespace System {
 
 void EventDispatcher::dispatch(const Pt::Event& ev)
 {
+    _signal.send(ev);
+
     const std::type_info& ti = ev.typeInfo();
     HandlerMap::iterator hit = _handlers.lower_bound(&ti);
     while(hit != _handlers.end() && *(hit->first) == ti)
@@ -36,6 +38,26 @@ void EventDispatcher::dispatch(const Pt::Event& ev)
             handler->send(ev);
 
         ++hit;
+    }
+}
+
+
+bool EventDispatcher::opened(const Connection& c)
+{
+    return true;
+}
+
+
+void EventDispatcher::closed(const Connection& c)
+{
+    const Slot& slot = c.slot();
+
+    HandlerMap::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    {
+        if(slot.callable() == it->second->callable())
+        {
+        }
     }
 }
 

@@ -30,7 +30,7 @@ Connection::Connection()
 }
 
 
-Connection::Connection(Connectable& sender, Slot* slot)
+Connection::Connection(IConnectable& sender, Slot* slot)
 {
     std::auto_ptr<ConnectionData> data( new ConnectionData(sender, slot) );
     _data = data.get();

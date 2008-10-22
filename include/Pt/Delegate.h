@@ -56,7 +56,7 @@ namespace Pt {
 
             virtual bool opened(const Connection& c)
             {
-                const Connectable& sender = c.sender();
+                const IConnectable& sender = c.sender();
 
                 if( &sender == this )
                 {

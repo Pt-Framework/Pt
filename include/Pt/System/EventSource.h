@@ -23,6 +23,7 @@
 #include <Pt/Event.h>
 #include <Pt/Method.h>
 #include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
@@ -73,7 +74,8 @@ class EventHandler : public IEventHandler
 };
 
 
-class EventDispatcher
+class EventDispatcher : public IConnectable
+                      , protected NonCopyable
 {
     public:
         EventDispatcher()
@@ -81,21 +83,39 @@ class EventDispatcher
 
         void dispatch(const Pt::Event& ev);
 
+        Connection connect( const BasicSlot<void, const Pt::Event&>& slot )
+        {
+            return _signal.connect(slot);
+        }
+
+        void disconnect( const BasicSlot<void, const Pt::Event&>& slot )
+        {
+            _signal.disconnect(slot);
+        }
+
         template <typename EventT>
-        void subscribe(EventSink& sink)
+        void subscribe( const BasicSlot<void, const EventT&>& slot )
         {
             const std::type_info& ti = typeid(EventT);
             IEventHandler* handler = new EventHandler<EventT>( slot );
             _handlers.insert( std::make_pair(&ti, handler) );
+
+            Connection conn( *this, slot.clone() );
         }
 
         template <typename EventT>
-        void unsubscribe(EventSink& sink)
+        void unsubscribe( const BasicSlot<void, const EventT&>& slot )
         {
             const std::type_info& ti = typeid(EventT);
         }
 
+        virtual bool opened(const Connection& c);
+
+        virtual void closed(const Connection& c);
+
     private:
+        Pt::Signal<const Pt::Event&> _signal;
+
         typedef std::multimap< const std::type_info*,
                                IEventHandler*,
                                CompareTypeInfo > HandlerMap;

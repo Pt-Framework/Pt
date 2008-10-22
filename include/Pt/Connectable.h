@@ -26,6 +26,14 @@
 
 namespace Pt {
 
+    class PT_API IConnectable
+    {
+        public:
+            virtual ~IConnectable() {}
+            virtual bool opened(const Connection& c) = 0;
+            virtual void closed(const Connection& c) = 0;
+    };
+
     /** @brief Connection management for signal and slot objects
 
         This class implements connection management for signal and slot
@@ -34,7 +42,7 @@ namespace Pt {
         overload Connectable::opened and Connectable::closed to tune
         connection managenment.
     */
-    class PT_API Connectable
+    class PT_API Connectable : public IConnectable
     {
         public:
             /** @brief Default constructor.

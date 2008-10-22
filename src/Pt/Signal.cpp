@@ -91,7 +91,7 @@ SignalBase& SignalBase::operator=(const SignalBase& other)
 
     for( ; it != end; ++it)
     {
-        const Connectable& signal = it->sender();
+        const IConnectable& signal = it->sender();
         if( &signal == &other)
         {
             const Slot& slot = it->slot();

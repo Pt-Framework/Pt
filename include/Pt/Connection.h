@@ -8,7 +8,7 @@
 
 namespace Pt {
 
-    class Connectable;
+    class IConnectable;
 
     class PT_API ConnectionData : public RefCounted {
         public:
@@ -19,7 +19,7 @@ namespace Pt {
             , _sender(0)
             { }
 
-            ConnectionData(Connectable& sender, Slot* slot)
+            ConnectionData(IConnectable& sender, Slot* slot)
             : _refs(1)
             , _valid(true)
             , _slot(slot)
@@ -44,10 +44,10 @@ namespace Pt {
             void setValid(bool valid)
             { _valid = valid; }
 
-            Connectable& sender()
+            IConnectable& sender()
             { return *_sender; }
 
-            const Connectable& sender() const
+            const IConnectable& sender() const
             { return *_sender; }
 
             Slot& slot()
@@ -60,7 +60,7 @@ namespace Pt {
             atomic_t _refs;
             bool _valid;
             Slot* _slot;
-            Connectable* _sender;
+            IConnectable* _sender;
     };
 
 
@@ -69,7 +69,7 @@ namespace Pt {
         public:
             Connection();
 
-            Connection(Connectable& sender, Slot* slot);
+            Connection(IConnectable& sender, Slot* slot);
 
             Connection(const Connection& connection);
 
@@ -78,7 +78,7 @@ namespace Pt {
             bool valid() const
             { return _data->valid(); }
 
-            const Connectable& sender() const
+            const IConnectable& sender() const
             { return _data->sender(); }
 
             const Slot& slot() const
