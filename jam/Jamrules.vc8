@@ -37,6 +37,7 @@ C++         = $(CC) ;
 C++FLAGS   += $(CCFLAGS) ;
 LINK        = $(VISUALC)\\vc\\bin\\link /nologo ;
 #LINKFLAGS += /MANIFEST:NO ;
+LINKFLAGS += /MANIFEST ;
 LINKLIBS   ?= "" ;
 UNDEFFLAG   = "/u _" ;
 
@@ -53,11 +54,11 @@ rule EmbedManifest
   Mt $(<) : $(>) ;
 }
 
+
 actions Mt
 {
   set PATH=$(VISUALC)\vc\bin;%PATH%
   "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
-  $(RM) $(>)
 }
 
 
