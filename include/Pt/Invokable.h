@@ -24,6 +24,15 @@
 
 namespace Pt {
 
+class Callback
+{
+    public:
+        virtual ~Callback() {}
+
+        virtual bool equals(const Callback& cb) const
+        { return false; }
+};
+
 #include <Pt/Invokable.tpp>
 
 } // namespace Pt

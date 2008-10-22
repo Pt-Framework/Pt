@@ -5,7 +5,7 @@ the invoke() member. It serves as a base type
 for other types in the Pt signals/slots framework.
 */
 template <class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
-class Invokable {
+class Invokable : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -18,7 +18,7 @@ class Invokable {
 // BEGIN_Invokable 9
 // specialization
 template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> {
+class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -31,7 +31,7 @@ class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> {
 // BEGIN_Invokable 8
 // specialization
 template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> {
+class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -44,7 +44,7 @@ class Invokable<A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> {
 // BEGIN_Invokable 7
 // specialization
 template <class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-class Invokable<A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> {
+class Invokable<A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -57,7 +57,7 @@ class Invokable<A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> {
 // BEGIN_Invokable 6
 // specialization
 template <class A1, class A2, class A3, class A4, class A5, class A6>
-class Invokable<A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> {
+class Invokable<A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -70,7 +70,7 @@ class Invokable<A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> {
 // BEGIN_Invokable 5
 // specialization
 template <class A1, class A2, class A3, class A4, class A5>
-class Invokable<A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> {
+class Invokable<A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -83,7 +83,7 @@ class Invokable<A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> {
 // BEGIN_Invokable 4
 // specialization
 template <class A1, class A2, class A3, class A4>
-class Invokable<A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> {
+class Invokable<A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -96,7 +96,7 @@ class Invokable<A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> {
 // BEGIN_Invokable 3
 // specialization
 template <class A1, class A2, class A3>
-class Invokable<A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> {
+class Invokable<A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -109,7 +109,7 @@ class Invokable<A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> {
 // BEGIN_Invokable 2
 // specialization
 template <class A1, class A2>
-class Invokable<A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> {
+class Invokable<A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -122,7 +122,7 @@ class Invokable<A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> {
 // BEGIN_Invokable 1
 // specialization
 template <class A1>
-class Invokable<A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> {
+class Invokable<A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()
@@ -135,7 +135,7 @@ class Invokable<A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> {
 // BEGIN_Invokable 0
 // specialization
 template <>
-class Invokable<Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> {
+class Invokable<Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callback {
     public:
         /** Does nothing. Does not throw. */
         virtual ~Invokable()

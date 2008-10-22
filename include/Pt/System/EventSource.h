@@ -35,40 +35,30 @@ namespace Pt {
 
 namespace System {
 
-class IEventHandler
+typedef std::multimap< const std::type_info*,
+                       Invokable<const Pt::Event&>*,
+                       CompareTypeInfo > EventHandlerMap;
+
+class PT_SYSTEM_API EventDispatcher : public Connectable
+                                    , protected NonCopyable
 {
-    public:
-        virtual ~IEventHandler() {}
+    template <typename EventT>
+    class EventRoute : public Invokable<const Pt::Event&>
+    {
+        public:
+            EventRoute(Connection& target)
+            : _target(target)
+            { }
 
-        virtual void send(const Pt::Event& ev) = 0;
-};
+            virtual void invoke(const Pt::Event& ev)
+            {
+                const EventT& event = static_cast<const EventT&>(ev);
+            }
 
+        private:
+            Connection _target;
+    };
 
-template <typename EventT>
-class EventHandler : public IEventHandler
-{
-    public:
-        EventHandler(const Connection& target)
-        : _target(target)
-        { }
-
-        virtual ~EventHandler()
-        { }
-
-        virtual void send(const Pt::Event& ev)
-        {
-            const EventT& event = static_cast<const EventT&>(ev);
-
-        }
-
-    private:
-        Connection _target;
-};
-
-
-class EventDispatcher : public IConnectable
-                      , protected NonCopyable
-{
     public:
         EventDispatcher()
         {}
@@ -80,7 +70,8 @@ class EventDispatcher : public IConnectable
         {
             Connection conn( *this, slot.clone() );
 
-            IEventHandler* handler = new EventHandler<EventT>( conn );
+            Invokable<const Pt::Event&>* handler =
+                static_cast<Invokable<const Pt::Event&>*>( conn.slot().callable() );
 
             const std::type_info& ti = typeid(EventT);
             _handlers.insert( std::make_pair(&ti, handler) );
@@ -92,16 +83,10 @@ class EventDispatcher : public IConnectable
             const std::type_info& ti = typeid(EventT);
         }
 
-        virtual bool opened(const Connection& c);
-
-        virtual void closed(const Connection& c);
-
     private:
-        typedef std::multimap< const std::type_info*,
-                               IEventHandler*,
-                               CompareTypeInfo > HandlerMap;
-
-        HandlerMap _handlers;
+        // TODO: separate Connectable for type specific dispatch
+        // specialize Signal<Event>
+        EventHandlerMap _handlers;
 };
 
 
@@ -151,14 +136,15 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
             const EventSource* _es;
         };*/
 
+        // TODO: keep all EventSinks in one container
         typedef std::multimap< const std::type_info*,
                                EventSink*,
-                               CompareTypeInfo > HandlerMap;
+                               CompareTypeInfo > SinkMap;
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
         mutable std::list<EventSink*> _sinks;
-        HandlerMap _handlers;
+        SinkMap _handlers;
         //mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;
