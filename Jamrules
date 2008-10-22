@@ -5,7 +5,7 @@ if $(TARGET_OS:L) = "nt"
 {
     SYS     ?= win32 ;
     GUI     ?= gdi ;
-    SYSLIBS = version.lib Winmm.lib Psapi.lib ;
+    SYSLIBS = version.lib Psapi.lib ;
     NETLIBS = wsock32.lib ws2_32.lib ;
 
     if $(MINGW) || $(TOOLSET) = "gcc"
