@@ -83,16 +83,6 @@ class EventDispatcher : public IConnectable
 
         void dispatch(const Pt::Event& ev);
 
-        Connection connect( const BasicSlot<void, const Pt::Event&>& slot )
-        {
-            return _signal.connect(slot);
-        }
-
-        void disconnect( const BasicSlot<void, const Pt::Event&>& slot )
-        {
-            _signal.disconnect(slot);
-        }
-
         template <typename EventT>
         void subscribe( const BasicSlot<void, const EventT&>& slot )
         {
@@ -114,8 +104,6 @@ class EventDispatcher : public IConnectable
         virtual void closed(const Connection& c);
 
     private:
-        Pt::Signal<const Pt::Event&> _signal;
-
         typedef std::multimap< const std::type_info*,
                                IEventHandler*,
                                CompareTypeInfo > HandlerMap;

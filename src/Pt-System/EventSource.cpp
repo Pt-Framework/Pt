@@ -26,8 +26,6 @@ namespace System {
 
 void EventDispatcher::dispatch(const Pt::Event& ev)
 {
-    _signal.send(ev);
-
     const std::type_info& ti = ev.typeInfo();
     HandlerMap::iterator hit = _handlers.lower_bound(&ti);
     while(hit != _handlers.end() && *(hit->first) == ti)
