@@ -2,7 +2,6 @@
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 #include <time.h>
-#include <mmsystem.h>
 
 namespace Pt {
 
@@ -39,7 +38,7 @@ ClockImpl::~ClockImpl()
 
 void ClockImpl::start()
 {
-    _secondStartValue =   timeGetTime();
+    _secondStartValue = GetTickCount();
     QueryPerformanceCounter( &_startValue );
 }
 
@@ -47,7 +46,7 @@ void ClockImpl::start()
 Timespan ClockImpl::stop()
 {
     QueryPerformanceCounter( &_stopValue );
-    _secondStopValue = timeGetTime();
+    _secondStopValue = GetTickCount();
 
     LARGE_INTEGER delta;
     delta.QuadPart      = _stopValue.QuadPart - _startValue.QuadPart;
@@ -78,13 +77,13 @@ Pt::DateTime ClockImpl::getLocalTime()
                 systemTime.wHour,
                 systemTime.wMinute,
                 systemTime.wSecond,
-                systemTime.wMilliseconds    );    
+                systemTime.wMilliseconds    );
 }
 
 
 Timespan ClockImpl::getSystemTicks()
 {
-    return Timespan( 1000 * timeGetTime() );
+    return Timespan( 1000 * GetTickCount() );
 }
 
 } // namespace Pt
