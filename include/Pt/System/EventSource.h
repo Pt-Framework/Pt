@@ -41,8 +41,6 @@ class IEventHandler
         virtual ~IEventHandler() {}
 
         virtual void send(const Pt::Event& ev) = 0;
-
-        virtual const void* callable() const = 0;
 };
 
 
@@ -50,8 +48,8 @@ template <typename EventT>
 class EventHandler : public IEventHandler
 {
     public:
-        EventHandler(EventSink& sink)
-        : _sink(&sink)
+        EventHandler(const Connection& target)
+        : _target(target)
         { }
 
         virtual ~EventHandler()
@@ -60,17 +58,11 @@ class EventHandler : public IEventHandler
         virtual void send(const Pt::Event& ev)
         {
             const EventT& event = static_cast<const EventT&>(ev);
-            if(_sink)
-                _sink->commitEvent(event);
-        }
 
-        virtual const void* callable() const
-        {
-            return _sink;
         }
 
     private:
-        EventSink* _sink; // TODO: store Callable*
+        Connection _target;
 };
 
 
@@ -86,11 +78,12 @@ class EventDispatcher : public IConnectable
         template <typename EventT>
         void subscribe( const BasicSlot<void, const EventT&>& slot )
         {
-            const std::type_info& ti = typeid(EventT);
-            IEventHandler* handler = new EventHandler<EventT>( slot );
-            _handlers.insert( std::make_pair(&ti, handler) );
-
             Connection conn( *this, slot.clone() );
+
+            IEventHandler* handler = new EventHandler<EventT>( conn );
+
+            const std::type_info& ti = typeid(EventT);
+            _handlers.insert( std::make_pair(&ti, handler) );
         }
 
         template <typename EventT>
@@ -164,7 +157,7 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
-        mutable std::list<EventSink*> _sinks; // TODO: store Method
+        mutable std::list<EventSink*> _sinks;
         HandlerMap _handlers;
         //mutable Sentry* _sentry;
         mutable bool _sending;

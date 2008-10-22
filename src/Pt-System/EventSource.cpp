@@ -53,9 +53,7 @@ void EventDispatcher::closed(const Connection& c)
     HandlerMap::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
-        if(slot.callable() == it->second->callable())
-        {
-        }
+
     }
 }
 
