@@ -126,66 +126,6 @@ void Application::exit()
 }
 
 
-void Application::commitEvent(const Event& event)
-{ 
-    _loop->commitEvent(event); 
-}
-
-
-void Application::processEvents()
-{ 
-    _loop->processEvents();
-}
-
-
-void Application::wake()
-{ 
-    _loop->wake();
-}
-
-
-void Application::add( Selectable& s )
-{ 
-    _loop->add(s); 
-}
-
-
-void Application::remove( Selectable& s )
-{ 
-    _loop->remove(s); 
-}
-
-
-void Application::add(Timer& timer)
-{ 
-    _loop->add(timer); 
-}
-
-
-void Application::remove( Timer& timer )
-{ 
-    _loop->remove(timer); 
-}
-
-
-Signal<>& Application::timeout()
-{ 
-    return _loop->timeout; 
-}
-
-
-Signal<const Event&>& Application::event()
-{ 
-    return _loop->event; 
-}
-
-
-void Application::setIdleTimeout(unsigned msec)
-{ 
-    _loop->setIdleTimeout(msec); 
-}
-
-
 ApplicationImpl& Application::impl()
 {
     return *_impl;

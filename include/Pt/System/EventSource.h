@@ -21,13 +21,9 @@
 #define PT_SYSTEM_EVENTSOURCE_H
 
 #include <Pt/Event.h>
-#include <Pt/Method.h>
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
-#include <list>
 #include <map>
 #include <typeinfo>
 
@@ -35,63 +31,7 @@ namespace Pt {
 
 namespace System {
 
-typedef std::multimap< const std::type_info*,
-                       Invokable<const Pt::Event&>*,
-                       CompareTypeInfo > EventHandlerMap;
-
-class PT_SYSTEM_API EventDispatcher : public Connectable
-                                    , protected NonCopyable
-{
-    template <typename EventT>
-    class EventRoute : public Invokable<const Pt::Event&>
-    {
-        public:
-            EventRoute(Connection& target)
-            : _target(target)
-            { }
-
-            virtual void invoke(const Pt::Event& ev)
-            {
-                const EventT& event = static_cast<const EventT&>(ev);
-            }
-
-        private:
-            Connection _target;
-    };
-
-    public:
-        EventDispatcher()
-        {}
-
-        void dispatch(const Pt::Event& ev);
-
-        template <typename EventT>
-        void subscribe( const BasicSlot<void, const EventT&>& slot )
-        {
-            Connection conn( *this, slot.clone() );
-
-            Invokable<const Pt::Event&>* handler =
-                static_cast<Invokable<const Pt::Event&>*>( conn.slot().callable() );
-
-            const std::type_info& ti = typeid(EventT);
-            _handlers.insert( std::make_pair(&ti, handler) );
-        }
-
-        template <typename EventT>
-        void unsubscribe( const BasicSlot<void, const EventT&>& slot )
-        {
-            const std::type_info& ti = typeid(EventT);
-        }
-
-    private:
-        // TODO: separate Connectable for type specific dispatch
-        // specialize Signal<Event>
-        EventHandlerMap _handlers;
-};
-
-
 class EventSink;
-
 
 /** @brief Sends Events to receivers in other threads
 
@@ -100,6 +40,7 @@ class EventSink;
     use an %EventSource instead. Thread-safety only refers to the usage
     of the %EventSource itself (connection, disconnecting...) and not the
     slot.
+    Construction and destruction must always occur in isolation.
 */
 class PT_SYSTEM_API EventSource : protected NonCopyable
 {
@@ -136,16 +77,15 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
             const EventSource* _es;
         };*/
 
-        // TODO: keep all EventSinks in one container
+        //mutable Sentry* _sentry;
+
         typedef std::multimap< const std::type_info*,
                                EventSink*,
                                CompareTypeInfo > SinkMap;
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
-        mutable std::list<EventSink*> _sinks;
-        SinkMap _handlers;
-        //mutable Sentry* _sentry;
+        mutable SinkMap _handlers;
         mutable bool _sending;
         mutable bool _dirty;
 };

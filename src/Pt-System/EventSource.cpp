@@ -24,22 +24,6 @@ namespace Pt {
 
 namespace System {
 
-void EventDispatcher::dispatch(const Pt::Event& ev)
-{
-    const std::type_info& ti = ev.typeInfo();
-    EventHandlerMap::iterator hit = _handlers.lower_bound(&ti);
-    while(hit != _handlers.end() && *(hit->first) == ti)
-    {
-        Invokable<const Pt::Event&>* handler = hit->second;
-
-        if(handler)
-            handler->invoke(ev);
-
-        ++hit;
-    }
-}
-
-
 /*EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
@@ -106,14 +90,11 @@ EventSource::~EventSource()
     {
         MutexLock lock( _mutex );
 
-        if( _sinks.empty() )
+        if( _handlers.empty() )
             return;
 
-        EventSink* sink = _sinks.front();
-        MutexLock block( sink->_mutex );
-
-       _sinks.remove(sink);
-        sink->_sources.remove(this);
+        EventSink* sink = _handlers.begin()->second;
+        this->disconnect(*sink);
     }
 }
 
@@ -123,7 +104,8 @@ void EventSource::connect(EventSink& sink)
     MutexLock lock1( sink._mutex );
     MutexLock lock2( _mutex );
 
-    _sinks.push_back(&sink);
+    const std::type_info* ti = 0;
+    _handlers.insert( std::make_pair(ti, &sink) );
     sink._sources.push_back(this);
 }
 
@@ -133,7 +115,15 @@ void EventSource::disconnect(EventSink& sink)
     MutexLock lock1( sink._mutex );
     MutexLock lock2( _mutex );
 
-   _sinks.remove(&sink);
+   SinkMap::iterator it = _handlers.begin();
+   while( it != _handlers.end() )
+   {
+       if(it->second == &sink)
+           _handlers.erase(it);
+       else
+           ++it;
+   }
+
     sink._sources.remove(this);
 }
 
@@ -142,10 +132,10 @@ void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
 
-    std::list<EventSink*>::iterator it;
-    for(it = _sinks.begin(); it != _sinks.end(); ++it)
+    SinkMap::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
-        EventSink* sink = *it;
+        EventSink* sink = it->second;
         sink->commitEvent(ev);
     }
 }

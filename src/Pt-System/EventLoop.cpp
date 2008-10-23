@@ -26,19 +26,11 @@ namespace System {
 
 EventLoopBase::EventLoopBase()
 : _timeout(WaitInfinite)
-{
-    connect(event, *this, &EventLoopBase::dispatchEvent);
-}
+{}
 
 
 EventLoopBase::~EventLoopBase()
-{
-    DispatchTable::iterator it;
-    for( it =_dispatchTable.begin(); it != _dispatchTable.end(); ++it)
-    {
-        delete it->second;
-    }
-}
+{}
 
 
 void EventLoopBase::run()
@@ -67,17 +59,6 @@ unsigned int EventLoopBase::idleTimeout() const
 void EventLoopBase::processEvents()
 {
     this->onProcessEvents();
-}
-
-
-void EventLoopBase::dispatchEvent(const Event& ev)
-{
-    const std::type_info& ti = ev.typeInfo();
-    DispatchTable::iterator it = _dispatchTable.find(&ti);
-    if( it != _dispatchTable.end() )
-    {
-        it->second->send(ev);
-    }
 }
 
 

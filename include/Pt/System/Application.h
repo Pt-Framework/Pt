@@ -76,34 +76,6 @@ namespace System {
 
             void exit();
 
-            void commitEvent(const Event& event);
-
-            void processEvents();
-
-            void wake();
-
-            void add( Selectable& s );
-
-            void remove( Selectable& s );
-
-            void add(Timer& timer);
-
-            void remove( Timer& timer );
-
-            template <typename EventT>
-            void addEventHandler( BasicSlot<void, const EventT&>& slot )
-            {
-                EventLoopBase* loop = this->loop();
-                if( loop )
-                    loop->addEventHandler(slot);
-            }
-
-            Signal<>& timeout();
-
-            Signal<const Event&>& event();
-
-            void setIdleTimeout(unsigned msec);
-
             bool catchSystemSignal(int sig);
 
             bool raiseSystemSignal(int sig);

@@ -20,8 +20,8 @@
 #ifndef PT_SYSTEM_EVENTLOOP_H
 #define PT_SYSTEM_EVENTLOOP_H
 
-#include <Pt/Signal.h>
 #include <Pt/Event.h>
+#include <Pt/Signal.h>
 #include <Pt/Allocator.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
@@ -50,37 +50,6 @@ namespace System {
         public:
             static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
-            //! @internal
-            struct IDispatcher
-            {
-                virtual ~IDispatcher() {}
-                virtual void send(const Pt::Event& ev) = 0;
-                virtual const void* callable() const = 0;
-            };
-
-            //! @internal
-            template <typename EventT>
-            struct Dispatcher: public IDispatcher
-            {
-                Dispatcher()
-                {}
-
-                virtual ~Dispatcher()
-                {}
-
-                virtual void send(const Event& e)
-                {
-                    const EventT& event = static_cast<const EventT&>(e);
-                    signal.send(event);
-                }
-
-                virtual const void* callable() const
-                { return _slot->callable(); }
-
-                BasicSlot<void, const EventT&>* _slot;
-                Signal<const EventT&> signal;
-            };
-
             /** @brief Destructs the EventLoop
              */
             virtual ~EventLoopBase();
@@ -96,6 +65,9 @@ namespace System {
             /** @brief Stops the %EventLoop.
              */
             void exit();
+
+            Signal<const Event&>& dispatcher()
+            { return event; }
 
             /** @brief Sets the idle timeout
             */
@@ -115,28 +87,6 @@ namespace System {
             */
             Signal<const Event&> event;
 
-            template <typename EventT>
-            void addEventHandler( const BasicSlot<void, const EventT&>& slot )
-            {
-                const std::type_info& ti = typeid(EventT);
-                DispatchTable::iterator it = _dispatchTable.lower_bound( &ti );
-
-                Dispatcher<EventT>* disp = 0;
-                if(it != _dispatchTable.end() && !(_dispatchTable.key_comp()(&ti, it->first)))
-                {
-                    IDispatcher* d = it->second;
-                    disp = static_cast<Dispatcher<EventT>*>(d);
-                }
-                else
-                {
-                    disp = new Dispatcher<EventT>;
-                    std::pair<const std::type_info*const, EventLoopBase::IDispatcher*> p( &ti, disp);
-                    _dispatchTable.insert( it, p );
-                }
-
-                disp->signal.connect(slot);
-            }
-
         protected:
             /** @brief Constructs the EventLoop
             */
@@ -148,14 +98,7 @@ namespace System {
 
             virtual void onProcessEvents() = 0;
 
-            void dispatchEvent(const Event& ev);
-
         private:
-            typedef std::map< const std::type_info*,
-                              IDispatcher*,
-                              CompareTypeInfo > DispatchTable;
-
-            DispatchTable _dispatchTable;
             unsigned int _timeout;
             void* _reserved;
     };

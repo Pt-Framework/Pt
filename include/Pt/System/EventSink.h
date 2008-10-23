@@ -21,6 +21,7 @@
 #define PT_SYSTEM_EVENTSINK_H
 
 #include <Pt/Event.h>
+#include <Pt/Signal.h>
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>

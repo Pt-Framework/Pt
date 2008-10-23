@@ -26,6 +26,12 @@ namespace System {
 
 bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
 {
+    if(t2 == 0)
+        return false;
+
+    if(t1 == 0)
+        return true;
+
     return t1->before(*t2) != 0;
 }
 
@@ -47,9 +53,7 @@ EventSink::~EventSink()
         EventSource* source = _sources.front();
         if( source->_dmutex.tryLock() )
         {
-            MutexLock block(source->_mutex);
-            _sources.remove(source);
-            source->_sinks.remove(this);
+            source->disconnect(*this);
             continue;
         }
 

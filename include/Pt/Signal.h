@@ -23,11 +23,13 @@
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
+#include <Pt/Event.h>
 #include <Pt/Function.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Connectable.h>
 
+#include <map>
 #include <list>
 #include <algorithm>
 
@@ -71,8 +73,130 @@ namespace Pt {
             mutable bool _dirty;
     };
 
-
 #include <Pt/Signal.tpp>
+
+struct PT_API CompareEventTypeInfo
+{
+	bool operator()( const std::type_info* t1,
+	                 const std::type_info* t2 ) const;
+};
+
+template <>
+class PT_API Signal<const Pt::Event&> : public Connectable
+                                      , protected NonCopyable
+{
+	struct PT_API Sentry
+	{
+		Sentry(const Signal* signal);
+
+		~Sentry();
+
+		void detach();
+
+		bool operator!() const
+		{ return _signal == 0; }
+
+		const Signal* _signal;
+	};
+
+	class IEventRoute
+	{
+		public:
+			IEventRoute(Connection& target)
+			: _target(target)
+			{ }
+
+			virtual ~IEventRoute() {}
+
+			virtual void route(const Pt::Event& ev)
+			{
+				typedef Invokable<const Pt::Event&> InvokableT;
+				const InvokableT* invokable = static_cast<const InvokableT*>( _target.slot().callable() );
+				invokable->invoke(ev);
+			}
+
+			Connection& connection()
+			{ return _target; }
+
+			bool valid() const
+			{ return _target.valid(); }
+
+		private:
+			Connection _target;
+	};
+
+	template <typename EventT>
+	class EventRoute : public IEventRoute
+	{
+		public:
+			EventRoute(Connection& target)
+			: IEventRoute(target)
+			{ }
+
+			virtual void route(const Pt::Event& ev)
+			{
+				typedef Invokable<const Pt::Event&> InvokableT;
+				const InvokableT* invokable = static_cast<const InvokableT*>( connection().slot().callable() );
+
+				const EventT& event = static_cast<const EventT&>(ev);
+				invokable->invoke(event);
+			}
+	};
+
+	typedef std::multimap< const std::type_info*,
+	                       IEventRoute*,
+	                       CompareEventTypeInfo > RouteMap;
+
+	public:
+		Signal();
+
+		~Signal();
+
+		void send(const Pt::Event& ev) const;
+
+		template <typename R>
+		Connection connect(const BasicSlot<R, const Pt::Event&>& slot)
+		{
+			Connection conn( *this, slot.clone() );
+			addRoute( 0, new IEventRoute(conn) );
+			return conn;
+		}
+
+		template <typename R>
+		void disconnect(const BasicSlot<R, const Pt::Event&>& slot)
+		{
+			disconnectSlot(slot);
+		}
+
+		template <typename EventT>
+		void subscribe( const BasicSlot<void, const EventT&>& slot )
+		{
+			Connection conn( *this, slot.clone() );
+			const std::type_info& ti = typeid(EventT);
+			addRoute( &ti, new EventRoute<EventT>(conn) );
+		}
+
+		template <typename EventT>
+		void unsubscribe( const BasicSlot<void, const EventT&>& slot )
+		{
+			const std::type_info& ti = typeid(EventT);
+		}
+
+		virtual bool opened(const Connection& c);
+
+		virtual void closed(const Connection& c);
+
+	protected:
+		void addRoute(const std::type_info* ti, IEventRoute* route);
+
+		void disconnectSlot(Slot& slot);
+
+	private:
+		mutable RouteMap _routes;
+		mutable Sentry* _sentry;
+		mutable bool _sending;
+		mutable bool _dirty;
+};
 
 } // !namespace Pt
 
