@@ -165,7 +165,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		template <typename R>
 		void disconnect(const BasicSlot<R, const Pt::Event&>& slot)
 		{
-			disconnectSlot(slot);
+			removeRoute(slot);
 		}
 
 		template <typename EventT>
@@ -180,6 +180,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		void unsubscribe( const BasicSlot<void, const EventT&>& slot )
 		{
 			const std::type_info& ti = typeid(EventT);
+			removeRoute(&ti, slot);
 		}
 
 		virtual bool opened(const Connection& c);
@@ -189,7 +190,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 	protected:
 		void addRoute(const std::type_info* ti, IEventRoute* route);
 
-		void disconnectSlot(Slot& slot);
+		void removeRoute(const std::type_info* ti, Slot& slot);
 
 	private:
 		mutable RouteMap _routes;
