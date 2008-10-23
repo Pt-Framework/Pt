@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2008 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -31,11 +31,48 @@ Stroke::Stroke()
 Stroke::~Stroke()
 { }
         
+void Stroke::stroke( Pt::Gfx::ARgbImage& image, const Pen& pen, ssize_t xpos, ssize_t ypos)
+{
+    if( xpos < 0  || xpos >= image.width())
+        return;
+
+    if( ypos <0 || ypos >= image.height())
+        return;
+
+    image.pixel(xpos,ypos) = pen.color();
+}
+
 void Stroke::stroke( Pt::Gfx::ARgbImage& image, const Pen& pen, ssize_t xpos, ssize_t ypos, size_t length )
 {
-   const Pt::Gfx::ARgbImage& colorBuffer = pen.buffer();
+    const Pt::Gfx::ARgbImage& colorBuffer = pen.buffer();
 
-    // copy pixels blockwise to the target image
+    //Clip the span
+    if( ypos< 0 )
+        return;
+
+    if( ypos >= (Pt::ssize_t)image.height() )
+        return;
+
+    if( xpos >= (Pt::ssize_t) image.width() )
+        return;
+
+    if( xpos < 0 )
+    {
+        if(  static_cast<ssize_t>(length) > -xpos  )
+        {
+            length += xpos;
+            xpos = 0;
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    if( (xpos + length) > image.width() )
+        length =  image.width() - xpos;
+
+    // Copy pixels blockwise to the target image.
     while(length)
     {
         const size_t fillLength = std::min( length, colorBuffer.width() );

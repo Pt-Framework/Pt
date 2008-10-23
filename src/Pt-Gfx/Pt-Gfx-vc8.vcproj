@@ -26,9 +26,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
 				Output="$(OutDir)\Pt-Gfxd.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
@@ -84,9 +84,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
 				Output="$(OutDir)\Pt-Gfx.dll"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
@@ -195,15 +195,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DrawThickLine.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\DrawThinEllipse.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\DrawThinLine.cpp"
+				RelativePath=".\DrawThinPolyline.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DrawWidePolyline.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DrawWideSolidPolyline.cpp"
 				>
 			</File>
 			<File
@@ -378,6 +382,18 @@
 			</File>
 			<File
 				RelativePath=".\DrawThinLine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DrawThinPolyline.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DrawWidePolyline.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DrawWideSolidPolyline.h"
 				>
 			</File>
 			<File

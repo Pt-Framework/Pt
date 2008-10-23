@@ -16,19 +16,17 @@ DrawWideDashPolyline::DrawWideDashPolyline()
 DrawWideDashPolyline::~DrawWideDashPolyline()
 { }
 
-
-
 void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::Point* pPts, size_t npt )
 {
     int	      x1, y1, x2, y2;
-    int	      dashNum;		    // absolute number of dash, starts with 0
-    int       dashIndex;		    // index into array (i.e. dashNum % length)
-    int       dashOffset;		    // offset into selected dash */
+    int	      dashNum;					// Absolute number of dash, starts with 0
+    int       dashIndex;				// index into array (i.e. dashNum % length)
+    int       dashOffset;				// Offset into selected dash */
     int       startPaintType, endPaintType = 0, prevEndPaintType = 0;
-    int       firstPaintType = 0;	// used only for closed polylines; will be 1
+    int       firstPaintType = 0;		// Used only for closed polylines; will be 1
     int       numPixels;
-    bool	  selfJoin;		    // polyline is closed?
-    bool	  first;		        // first line segment of polyline
+    bool	  selfJoin;					// Polyline is closed?
+    bool	  first;					// First line segment of polyline
     bool	  somethingDrawn = false;
     bool	  projectLeft, projectRight;
     LineFace  leftFace, rightFace, prevRightFace;
@@ -36,8 +34,8 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
 
     //Define the dash patter.
     unsigned  int dashes[2];
-    dashes[0] = pen.size() * 3; // Length of `on' dashes.
-    dashes[1] = pen.size(); // Length of `off' dashes.
+    dashes[0] = pen.size() * 2; // Length of `on' dashes.
+    dashes[1] = pen.size() * 2;	// Length of `off' dashes.
 
     // Ensure we have >=1 points
     if( npt <= 0 )
@@ -55,7 +53,7 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
 
     // Dash segments (except for the last) will not project right; and
     // (except for the first) will not project left
-    projectLeft  = false;
+    projectLeft  = (pen.capStyle() == Pen::ProjectingCap) && !selfJoin;
     projectRight = false;
 
     // perform initial offsetting into the dash sequence
@@ -64,7 +62,6 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
     dashOffset  = 0; // index into selected dash
 
     Dash::stepDash( 0, &dashNum, &dashIndex, dashes, 2, &dashOffset );
-    //miStepDash (pGC->dashOffset, &dashNum, &dashIndex, pGC->dash, pGC->numInDashList, &dashOffset);
 
     // How many paint types?  (Will cycle through 0..numPixels-1, beginning
     // with 1, with `off' dashes defined as those with paint type #0.)
@@ -82,37 +79,33 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
         x2 = pPts->x();
         y2 = pPts->y();
 
-        // have a line segment of nonzero length.
+        // Have a line segment of nonzero length.
         if( x1 != x2 || y1 != y2 )
         {
-            int prevDashNum, lastPaintedDashNum;
+            int prevDashNum;
+            int lastPaintedDashNum;
 
             // Final point; and need a projecting cap here.
-
             if( npt == 1 && pen.capStyle() ==Pen::ProjectingCap  && (!selfJoin || (firstPaintType == 0)))
                 projectRight = true;
 
-
             prevDashNum = dashNum;
 
-            // draw dashed segment, updating dashNum, dashIndex and dashOffset, returning faces
+            // Draw dashed segment, updating dashNum, dashIndex and dashOffset, returning faces
             dashSegment( image, pen,  &dashNum, &dashIndex, &dashOffset, x1, y1, x2, y2, projectLeft, projectRight, &leftFace, &rightFace, dashes);
 
-            // determine paint types used at start and end of just-drawn segment
+            // Determine paint types used at start and end of just-drawn segment
             startPaintType = ((dashNum & 1) ? 0 : 1 + ((dashNum / 2) % (numPixels - 1)));
 
             lastPaintedDashNum = (dashOffset != 0 ? dashNum : dashNum - 1);
 
             endPaintType = ((lastPaintedDashNum & 1) ? 0 : 1 + ((dashNum / 2) % (numPixels - 1)));
 
-            // add round cap or line join at left end of just-drawn segment;
-            //if DashStyle, do so only if segment began with an `on' dash
+            // Add round cap or line join at left end of just-drawn segment;
+            // if DashStyle, do so only if segment began with an `on' dash
             if( pen.style() == Pen::DoubleDash || (startPaintType != 0))
             {
-                //                pixel = pGC->pixels[startPaintType];
-
-                // draw cap at left end, unless this is first segment of a
-                // closed polyline
+                // Draw cap at left end, unless this is first segment of a closed polyline
                 if( first || (pen.style() == Pen::DashStyle && prevEndPaintType == 0 ) )
                 {
                     if( first && selfJoin )
@@ -121,7 +114,7 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
                         firstPaintType = startPaintType;
                     }
                     else if( pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap )
-                    { // invoke lineArc to draw round cap, isInt = true
+                    {
                         lineArc( image, pen, &leftFace, (LineFace *)NULL, (double)0.0, (double)0.0, true);
                     }
                 }
@@ -139,15 +132,13 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
             projectLeft = false;
         }
 
-        // last point of a nonempty polyline, so add line join or round cap
+        // Last point of a nonempty polyline, so add line join or round cap
         // if appropriate, i.e. if we're doing DashStyle and ended on an
         // `on' dash, or if we're doing DoubleDash
         if( npt == 1 && somethingDrawn )
         {
             if( pen.style() == Pen::DoubleDash || (endPaintType != 0) )
             {
-                //                pixel = pGC->pixels[endPaintType];
-
                 // closed, so draw a join
                 if (selfJoin && (pen.style() == Pen::DoubleDash  || (firstPaintType != 0)))
                 {
@@ -155,7 +146,6 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
                 }
                 else
                 {
-                    // invoke lineArc, isInt = true, to draw a round cap
                     if( pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap )
                         lineArc( image, pen, (LineFace *)NULL, &rightFace, (double)0.0, (double)0.0, true );
                 }
@@ -164,11 +154,8 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
             {
                 if( selfJoin && (firstPaintType != 0 ) )  // closed; if projecting or round caps are being used, draw one on the first face
                 {
-                    //                    pixel = pGC->pixels[firstPaintType];
-
                     if( pen.capStyle() == Pen::ProjectingCap)
                         lineProjectingCap( image, pen,  &firstFace, true, true);
-                    // invoke miLineArc, isInt = true, to draw a round cap
                     else if (pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap )
                         lineArc(image, pen, &firstFace, (LineFace *)NULL, (double)0.0, (double)0.0, true);
                 }
@@ -176,46 +163,30 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
         }
     }
 
-    // handle `all points coincident' crock, nothing yet drawn
+    // Handle `all points coincident' crock, nothing yet drawn
     if( !somethingDrawn && (pen.style() == Pen::DoubleDash || !(dashNum & 1)) )
     {
         unsigned int w1;
 
-        //pixel = (dashNum & 1) ? pGC->pixels[0] : pGC->pixels[1];
-
         switch( pen.capStyle() )
         {
-        case Pen::RoundCap:
-        case Pen::TriangularCap: // invoke miLineArc, isInt = false, to draw a round disk
-            lineArc( image, pen, (LineFace *)NULL, (LineFace *)NULL, (double)x2, (double)y2, false );
+            case Pen::RoundCap:
+            case Pen::TriangularCap:
+                lineArc( image, pen, (LineFace *)NULL, (LineFace *)NULL, (double)x2, (double)y2, false );
             break;
 
-        case Pen::ProjectingCap: // draw a square box with edge size equal to line width
-            w1 = pen.size();
-            fillRect(image, pen, (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
+            case Pen::ProjectingCap: // Draw a square box with edge size equal to line width
+                w1 = pen.size();
+                fillRect(image, pen, (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
             break;
 
-        case Pen::ButtCap:
-        default:
+            case Pen::ButtCap:			
+            default:
+
             break;
         }
     }
 }
-
-/* Helper function, called by miWideDash().  Draw a single dashed line
-   segment, i.e. a sequence of dashes including a possible final incomplete
-   dash, and step DashNum, DashIndex and DashOffset appropriately.  Also
-   pass back left and right faces for the line segment, for possible use in
-   adding caps or joins.  If the LineOnOffDash line style is used, each
-   dash will be given a round cap if lines are drawn in the rounded cap
-   style, and a projecting cap if lines are drawn in the projecting cap
-   style.
-
-     const miGC *pGC;
-     int *pDashNum;		// absolute number of dash
-     int *pDashIndex;   // index into array (i.e. dashNum % length)
-     int *pDashOffset;	// offset into selected dash
-*/
 
 void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash)
 {
@@ -253,7 +224,6 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     // compute color of current dash
     numPixels = 2;
     paintType = (dashNum & 1) ? 0 : 1 + ((dashNum / 2) % (numPixels - 1));
-    //pixel = pGC->pixels[paintType];
 
     // Compute e.g. L, the distance to go (for dashing).
     l = 0.5 * ((double) pen.size() );
@@ -285,8 +255,8 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     }
     else // Neither horizontal nor vertical.
     {
-        L = Pt::Math::hypot ((double) dx, (double) dy);
-        r = l / L;		/* this is ell / L, not 1 / L */
+        L = Pt::Math::hypot((double) dx, (double) dy);
+        r = l / L;		// this is ell / L, not 1 / L
         rdx = r * dx;
         rdy = r * dy;
     }
@@ -324,7 +294,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     vertices[V_BOTTOM].setY( rdx );
     vertices[V_LEFT].setY( rdx );
 
-    // offset the vertices appropriately
+    // Offset the vertices appropriately
     if (projectLeft)
     {
         vertices[V_TOP].setX( vertices[V_TOP].x() - rdx );
@@ -336,7 +306,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         slopes[V_LEFT].setK( rdx * dx + rdy * dy );
     }
 
-    // starting point for first dash (floating point)
+    // Starting point for first dash (floating point)
     lcenterx = x1;
     lcentery = y1;
 
@@ -354,7 +324,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         rcapFace.setY( y1 );
     }
 
-    // draw dashes until end of line segment is reached, and no additional
+    // Draw dashes until end of line segment is reached, and no additional
     // (complete) dash can be drawn.
     LRemain = L;
 
@@ -404,14 +374,14 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
                 slopes[V_RIGHT].setK( vertices[V_RIGHT].x() * slopes[V_RIGHT].dy() - vertices[V_RIGHT].y() * slopes[V_RIGHT].dx() );
             }
 
-            // build lists of left and right edges for the dash, using the
-            //just-computed array of slopes
+            // Build lists of left and right edges for the dash, using the
+            // just-computed array of slopes
             y = polyBuildPoly( vertices, slopes, 4, x1, y1, left, right, &nleft, &nright, &h );
 
-            // fill the dash, with either fg or bg color (alternates)
+            // Fill the dash, with either fg or bg color (alternates)
             fillLine( image, pen, y, h, left, right, nleft, nright);
 
-            // if doing DashStyle, add caps if any
+            // If doing DashStyle, add caps if any
             if( pen.style() == Pen::DashStyle )
             {
                 switch( pen.capStyle() )
@@ -419,7 +389,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
                     case Pen::ButtCap:
                     default:
                     break;
-                    // use saved vertices
+                    // Use saved vertices
                     case Pen::ProjectingCap:
                         vertices[V_BOTTOM] = saveBottom;
                         vertices[V_RIGHT]  = saveRight;
@@ -442,10 +412,11 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
                                 lcapFace.setYA(  vertices[V_TOP].y() );
                                 lcapFace.setK( -slopes[V_LEFT].k() );
                             }
-                            // invoke miLineArc, isInt = false, to draw half-disk
+                            // Invoke miLineArc, isInt = false, to draw half-disk
                             // on left end of dash (only if dash is not first)
                             lineArc(image, pen, &lcapFace, (LineFace *) NULL, lcenterx, lcentery, false);
                         }
+
                         if (dx < 0)
                         {
                             rcapFace.setXA( vertices[V_BOTTOM].x() );
@@ -459,7 +430,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
                             rcapFace.setK( -slopes[V_RIGHT].k() );
                         }
 
-                        // invoke miLineArc, isInt = false, to draw half-disk on
+                        // Invoke miLineArc, isInt = false, to draw half-disk on
                         // right end of dash
                         lineArc(image, pen,  (LineFace *)NULL, &rcapFace, rcenterx, rcentery, false);
                     break;
@@ -467,15 +438,15 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
             }
         }
 
-        // we just drew a dash, or (in the OnOff case) we either drew a dash
+        // We just drew a dash, or (in the OnOff case) we either drew a dash
         // or we didn't
 
-        // decrement float by int (distance over which we just drew, i.e. the remainder
+        // Decrement float by int (distance over which we just drew, i.e. the remainder
         // of current dash)
 
         LRemain -= dashRemain;
 
-        // bump absolute dash number, and index of dash in array (cyclically)
+        // Bump absolute dash number, and index of dash in array (cyclically)
         ++dashNum;
         ++dashIndex;
 
@@ -484,9 +455,8 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
 
         dashRemain = (int)(dash[dashIndex]); // whole new dash now `remains'
 
-        // compute color of next dash
+        // Compute color of next dash
         paintType = (dashNum & 1) ? 0 : 1 + ((dashNum / 2) % (numPixels - 1));
-//        pixel = pGC->pixels[paintType];
 
         // next dash will start where previous one ended
         lcenterx = rcenterx;
@@ -495,11 +465,11 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         vertices[V_TOP] = vertices[V_RIGHT];
         vertices[V_LEFT] = vertices[V_BOTTOM];
         slopes[V_LEFT].setK( -slopes[V_RIGHT].k() );
-        // no longer first dash of line segment
+        // No longer first dash of line segment
         first = false;
     }
 
-    // final portion of segment is dashed specially, with an incomplete dash
+    // Final portion of segment is dashed specially, with an incomplete dash
     if( pen.style() == Pen::DoubleDash || !(paintType == 0))
     {
         vertices[V_TOP].setX( vertices[V_TOP].x() - dx );
@@ -514,7 +484,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         vertices[V_BOTTOM].setX( -rdy );
         vertices[V_BOTTOM].setY( rdx );
 
-        // offset appropriately
+        // Offset appropriately
         if( projectRight )
         {
             vertices[V_RIGHT].setX( vertices[V_RIGHT].x() + rdx );
@@ -531,7 +501,6 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
 
         // If DashStyle line style and cap mode is projecting, offset the
         // face, so as to draw a projecting cap
-
         if( !first && ( pen.style() == Pen::DashStyle)  && ( pen.capStyle() == Pen::ProjectingCap ) )
         {
             vertices[V_TOP].setX( vertices[V_TOP].x() - rdx );
@@ -544,18 +513,18 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         }
         else
         {
-        //    slopes[V_LEFT].k += dx * dx + dy * dy;
+            //Slopes[V_LEFT].k += dx * dx + dy * dy;
             slopes[V_LEFT].setK( slopes[V_LEFT].k() + ( dx * dx + dy * dy ) );
         }
 
-        // build lists of left and right edges for the final incomplete dash,
+        // Build lists of left and right edges for the final incomplete dash,
         // using the just-computed vertices and slopes
         y = polyBuildPoly( vertices, slopes, 4, x2, y2, left, right, &nleft, &nright, &h);
 
-        // fill the final dash
+        // Fill the final dash
         fillLine( image, pen,  y, h, left, right, nleft, nright);
 
-        // if DashStyle line style and cap mode is round, draw a round cap
+        // If DashStyle line style and cap mode is round, draw a round cap
         if( !first && ( pen.style() == Pen::DashStyle) && ( pen.capStyle() == Pen::RoundCap) || ( pen.capStyle() == Pen::TriangularCap) )
         {
             lcapFace.setX( x2 );
@@ -574,12 +543,12 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
                 lcapFace.setK( -slopes[V_LEFT].k() );
             }
 
-            // invoke miLineArc, isInt = false, to draw disk on end
+            // Invoke miLineArc, isInt = false, to draw disk on end
             lineArc(image, pen, &lcapFace, (LineFace *) 0, rcenterx, rcentery, false);
         }
     }
 
-    // work out left and right faces of the dashed segment, to pass back
+    // Work out left and right faces of the dashed segment, to pass back
     leftFace->setX( x1 );
     leftFace->setY( y1 );
     leftFace->setDX( dx );
@@ -596,16 +565,16 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     rightFace->setYA( rdx );
     rightFace->setK( k );
 
-    // update absolute dash number, dash index, dash offset
+    // Update absolute dash number, dash index, dash offset
     dashRemain = (int)(((double) dashRemain) - LRemain);
 
-    // on to next dash in array
+    // On to next dash in array
     if( dashRemain == 0 )
     {
         dashNum++;		// bump absolute dash number
         dashIndex++;
 
-        if (dashIndex == numInDashList) /* wrap */
+        if (dashIndex == numInDashList) // wrap
             dashIndex = 0;
 
         dashRemain = (int)(dash[dashIndex]);

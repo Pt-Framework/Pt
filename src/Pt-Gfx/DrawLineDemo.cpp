@@ -36,6 +36,7 @@
 
 
 using namespace Pt;
+using namespace Pt::Gfx;
 
 class DrawLineDemo : public Pt::Gui::Widget
 {
@@ -50,6 +51,7 @@ class DrawLineDemo : public Pt::Gui::Widget
 
         void drawStar(Gfx::Painter& painter, const Pt::Math::Point& center, size_t lineWidth)
         {
+
             painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()-120 ),
                                     Pt::Math::Point( center.x(), center.y()-50 ));
@@ -62,11 +64,11 @@ class DrawLineDemo : public Pt::Gui::Widget
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()-120 ),
                                     Pt::Math::Point( center.x(), center.y()-30 ));
 
-            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0xcccc) , Pen::SolidStyle, Pen::TriangularCap));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()-120 ),
                                     Pt::Math::Point( center.x(), center.y()-30 ));
 
-            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
+            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0, 0xcccc),Pen::SolidStyle, Pen::TriangularCap ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()-70 ),
                                     Pt::Math::Point( center.x(), center.y()-20 ));
 
@@ -96,42 +98,45 @@ class DrawLineDemo : public Pt::Gui::Widget
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+20 ),
                                     Pt::Math::Point( center.x(), center.y()+10 ));
 
-            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
+            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0),Pen::DashStyle ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+70 ),
                                     Pt::Math::Point( center.x(), center.y()+20 ));
 
-            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0),Pen::DoubleDash ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+70 ),
                                     Pt::Math::Point( center.x(), center.y()+20 ));
 
-            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
+            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0),Pen::DoubleDash ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+30 ));
 
-            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+
+            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0),Pen::DoubleDash ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+30 ));
 
-           painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
+            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0),Pen::DoubleDash ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+50 ));
 
-            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0),Pen::DoubleDash));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+50 ));
         }
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
-        {
+        {	
             this->drawStar( _imagePainter, Pt::Math::Point(60, 150), 2);
             this->drawStar( _imagePainter, Pt::Math::Point(120, 150), 3);
             this->drawStar( _imagePainter, Pt::Math::Point(180, 150), 4);
-            this->drawStar( _imagePainter, Pt::Math::Point(240, 150), 5);
+            this->drawStar( _imagePainter, Pt::Math::Point(240, 150), 5);			
             this->drawStar( _imagePainter, Pt::Math::Point(300, 150), 6);
             this->drawStar( _imagePainter, Pt::Math::Point(360, 150), 8);
+            
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
-
+            
             Gui::Painter widgetPainter = painter();
+            
             this->drawStar( widgetPainter, Pt::Math::Point(60, 450), 2);
             this->drawStar( widgetPainter,Pt::Math::Point(120, 450), 3);
             this->drawStar( widgetPainter,Pt::Math::Point(180, 450), 4);
@@ -161,7 +166,7 @@ int main( int argc, char* argv[] )
         DrawLineDemo demo;
         connect( demo.closed, app, &Pt::Gui::Application::exit );
 
-        demo.resize(400, 600);
+        demo.resize(600, 800);
         demo.show();
         return app.run();
     }

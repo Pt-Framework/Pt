@@ -37,17 +37,40 @@ class DrawWidePolyline : public DrawPolyline
         DrawWidePolyline();
         virtual ~DrawWidePolyline();
     
+        //miPolyBuildPoly
         int polyBuildPoly( const Pt::Math::PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h );
+        
+        //miPolyBuildEdge
         int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
+
+        //miFillRectPolyHelper
         void fillRect( ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h );
+        
+        //miFillPolyHelper
         void fillLine( ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
+
+        //miLineArc
         void lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt );
+        
+        //miRoundJoinClip
         void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
+
+        //miRoundCapClip
         int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
+
+        //miLineArcI
         int lineArcI( const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths);
+
+        //miLineArcD
         int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
+
+        //miRoundJoinFace
         int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
+        
+        //miLineJoin
         void lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLeft, LineFace *pRight );
+
+        //miLineProjectingCap
         void lineProjectingCap( ARgbImage& image,const Pen& pen, const LineFace *face, bool isLeft, bool isInt );
         
     private:
@@ -56,6 +79,33 @@ class DrawWidePolyline : public DrawPolyline
         {  
             return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr))); 
         }        
+
+        inline void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft )
+        {
+            if (ybase != edgey)
+                return;
+            
+            if (edgeleft)
+            {
+                if (edge->x() > xcl)
+                    xcl = edge->x();
+            }
+            else
+            {
+                if (edge->x() < xcr)
+                    xcr = edge->x();
+            }
+
+            edgey++;
+            edge->setX( edge->x() + edge->stepx() );
+            edge->setE( edge->e() + edge->dx());
+            
+            if (edge->e() > 0)
+            {
+                edge->setX( edge->x() + edge->signdx() );
+                edge->setE( edge->e() - edge->dy() );
+            } 			
+        }
 };
 
 } //namespace Gfx

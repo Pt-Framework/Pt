@@ -31,7 +31,9 @@ class Stroke
     public:
         Stroke();
         virtual ~Stroke();        
-        
+
+        virtual void stroke( Pt::Gfx::ARgbImage& image, const Pen& pen, ssize_t xpos, ssize_t ypos);
+
         virtual void stroke( Pt::Gfx::ARgbImage& image, const Pen& pen,
                              ssize_t xpos, ssize_t ypos, size_t length );
 };

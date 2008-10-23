@@ -27,9 +27,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
 				Output="$(OutDir)\Ptd.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
@@ -85,9 +85,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
 				Output="$(OutDir)\Pt.dll"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
