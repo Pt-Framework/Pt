@@ -66,7 +66,7 @@ namespace System {
              */
             void exit();
 
-            Signal<const Event&>& dispatcher()
+            Signal<const Event&>& eventDispatcher()
             { return event; }
 
             /** @brief Sets the idle timeout

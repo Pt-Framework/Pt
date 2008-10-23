@@ -65,8 +65,8 @@ class EventLoopTest : public Pt::Unit::TestSuite
             Pt::System::EventLoop el;
             connect(el.timeout, el, &Pt::System::EventLoop::exit);
 
-            el.dispatcher().subscribe( slot(*this, &EventLoopTest::onE1) );
-            el.dispatcher().subscribe( slot(*this, &EventLoopTest::onE2) );
+            el.eventDispatcher().subscribe( slot(*this, &EventLoopTest::onE1) );
+            el.eventDispatcher().subscribe( slot(*this, &EventLoopTest::onE2) );
 
             el.setIdleTimeout(1000);
 

@@ -190,6 +190,8 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 	protected:
 		void addRoute(const std::type_info* ti, IEventRoute* route);
 
+		void removeRoute(Slot& slot);
+
 		void removeRoute(const std::type_info* ti, Slot& slot);
 
 	private:
