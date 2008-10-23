@@ -70,6 +70,7 @@ void SignalBase::Sentry::detach()
 SignalBase::SignalBase()
 : _sentry(0)
 , _sending(false)
+, _dirty(false)
 { }
 
 
@@ -191,7 +192,7 @@ void Signal<const Pt::Event&>::Sentry::detach()
         }
         else
         {
-            _signal->_routes.erase(it);
+            _signal->_routes.erase(it++);
         }
     }
 
@@ -309,7 +310,7 @@ void Signal<const Pt::Event&>::closed(const Connection& c)
 			if(route->connection() == c )
 			{
 				delete route;
-				_routes.erase(it);
+				_routes.erase(it++);
 				return;
 			}
 		}

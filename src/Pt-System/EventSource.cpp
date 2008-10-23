@@ -24,7 +24,7 @@ namespace Pt {
 
 namespace System {
 
-/*EventSource::Sentry::Sentry(const EventSource* es)
+EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
     _es->_sentry = this;
@@ -44,23 +44,19 @@ void EventSource::Sentry::detach()
 {
     _es->_sending = false;
 
-    if( _es->_dirty == false )
+    if( _es->_dirty )
     {
-        _es->_sentry = 0;
-        _es = 0;
-        return;
-    }
-
-    std::list<Connection>::iterator it = _es->_connections.begin();
-    while( it != _es->_connections.end() )
-    {
-        if( it->valid() )
+        SinkMap::iterator it = _es->_handlers.begin();
+        while( it != _es->_handlers.end() )
         {
-            ++it;
-        }
-        else
-        {
-            it = _es->_connections.erase(it);
+            if( it->second )
+            {
+                ++it;
+            }
+            else
+            {
+                _es->_handlers.erase(it++);
+            }
         }
     }
 
@@ -73,12 +69,15 @@ void EventSource::Sentry::detach()
 bool EventSource::Sentry::operator!() const
 {
      return _es == 0;
-}*/
+}
 
 
 EventSource::EventSource()
 : _mutex(Pt::System::Mutex::Recursive)
 , _dmutex(Pt::System::Mutex::Recursive)
+, _sentry(0)
+, _sending(false)
+, _dirty(false)
 { }
 
 
@@ -89,6 +88,9 @@ EventSource::~EventSource()
     while( true )
     {
         MutexLock lock( _mutex );
+
+        if(_sentry)
+            _sentry->detach();
 
         if( _handlers.empty() )
             return;
@@ -115,14 +117,24 @@ void EventSource::disconnect(EventSink& sink)
     MutexLock lock1( sink._mutex );
     MutexLock lock2( _mutex );
 
-   SinkMap::iterator it = _handlers.begin();
-   while( it != _handlers.end() )
-   {
-       if(it->second == &sink)
-           _handlers.erase(it);
-       else
-           ++it;
-   }
+    SinkMap::iterator it = _handlers.begin();
+    while( it != _handlers.end() )
+    {
+        if(it->second == &sink)
+        {
+            if(_sending)
+            {
+                _dirty = true;
+                it->second = 0;
+            }
+            else
+            {
+                _handlers.erase(it);
+            }
+        }
+        else
+            ++it;
+    }
 
     sink._sources.remove(this);
 }
@@ -131,12 +143,18 @@ void EventSource::disconnect(EventSink& sink)
 void EventSource::send(const Pt::Event& ev)
 {
     MutexLock lock(_mutex);
+    EventSource::Sentry sentry(this);
 
     SinkMap::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
         EventSink* sink = it->second;
-        sink->commitEvent(ev);
+
+        if(sink)
+            sink->commitEvent(ev);
+
+        if( ! sentry )
+            return;
     }
 }
 

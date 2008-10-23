@@ -46,6 +46,19 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
 {
     friend class EventSink;
 
+    struct Sentry
+    {
+        Sentry(const EventSource* es);
+
+        ~Sentry();
+
+        void detach();
+
+        bool operator!() const;
+
+        const EventSource* _es;
+    };
+
     public:
         EventSource();
 
@@ -68,17 +81,6 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
         }
 
     private:
-        /*struct Sentry
-        {
-            Sentry(const EventSource* es);
-            ~Sentry();
-            void detach();
-            bool operator!() const;
-            const EventSource* _es;
-        };*/
-
-        //mutable Sentry* _sentry;
-
         typedef std::multimap< const std::type_info*,
                                EventSink*,
                                CompareTypeInfo > SinkMap;
@@ -86,6 +88,7 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
         mutable Mutex _mutex;
         mutable Mutex _dmutex;
         mutable SinkMap _handlers;
+        mutable Sentry* _sentry;
         mutable bool _sending;
         mutable bool _dirty;
 };
