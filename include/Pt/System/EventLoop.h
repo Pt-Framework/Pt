@@ -66,6 +66,8 @@ namespace System {
              */
             void exit();
 
+            /** @brief Reports all events
+            */
             Signal<const Event&>& eventDispatcher()
             { return event; }
 
