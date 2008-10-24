@@ -66,11 +66,6 @@ namespace System {
              */
             void exit();
 
-            /** @brief Reports all events
-            */
-            Signal<const Event&>& eventDispatcher()
-            { return event; }
-
             /** @brief Sets the idle timeout
             */
             void setIdleTimeout(unsigned int msecs);
@@ -86,6 +81,7 @@ namespace System {
             Signal<> timeout;
 
             /** @brief Reports all events
+                TODO: rename to eventReady
             */
             Signal<const Event&> event;
 

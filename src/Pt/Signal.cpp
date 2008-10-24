@@ -192,7 +192,7 @@ void Signal<const Pt::Event&>::Sentry::detach()
         }
         else
         {
-            delete route;
+            delete it->second;
             _signal->_routes.erase(it++);
         }
     }
