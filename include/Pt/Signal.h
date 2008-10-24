@@ -169,7 +169,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		}
 
 		template <typename EventT>
-		void connect( const BasicSlot<void, const EventT&>& slot )
+		void connectF( const BasicSlot<void, const EventT&>& slot )
 		{
 			Connection conn( *this, slot.clone() );
 			const std::type_info& ti = typeid(EventT);
@@ -177,7 +177,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		}
 
 		template <typename EventT>
-		void disconnect( const BasicSlot<void, const EventT&>& slot )
+		void disconnectF( const BasicSlot<void, const EventT&>& slot )
 		{
 			const std::type_info& ti = typeid(EventT);
 			this->removeRoute(&ti, slot);

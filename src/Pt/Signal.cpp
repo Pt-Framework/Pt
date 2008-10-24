@@ -258,6 +258,8 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
 		// will be detached. In this case we bail out immediately
 		if( !sentry )
 			return;
+
+		++it;
 	}
 
 	const std::type_info& ti = ev.typeInfo();
