@@ -61,11 +61,10 @@ namespace Pt {
                 if( &sender == this )
                 {
                     _target.close();
-                    Connectable::opened(c);
                     _target = c;
                 }
 
-                return Connectable::opened(c);
+                Connectable::opened(c);
             }
 
             virtual void closed(const Connection& c)
