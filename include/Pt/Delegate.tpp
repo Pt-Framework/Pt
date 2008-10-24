@@ -77,16 +77,14 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
                 return &_method;
             }
 
-            virtual bool opened(const Connection& c)
+            virtual void opened(const Connection& c)
             {
-                Connectable& connectable = _method.object();
-                return connectable.opened(c);
+                _method.object().opened(c);
             }
 
             virtual void closed(const Connection& c)
             {
-                Connectable& connectable = _method.object();
-                connectable.closed(c);
+                _method.object().closed(c);
             }
 
             virtual bool equals(const Slot& slot) const

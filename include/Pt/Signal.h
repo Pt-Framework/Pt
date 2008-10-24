@@ -60,7 +60,7 @@ namespace Pt {
 
             SignalBase& operator=(const SignalBase& other);
 
-            virtual bool opened(const Connection& c);
+            virtual void opened(const Connection& c);
 
             virtual void closed(const Connection& c);
 
@@ -158,41 +158,41 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		Connection connect(const BasicSlot<R, const Pt::Event&>& slot)
 		{
 			Connection conn( *this, slot.clone() );
-			addRoute( 0, new IEventRoute(conn) );
+			this->addRoute( 0, new IEventRoute(conn) );
 			return conn;
 		}
 
 		template <typename R>
 		void disconnect(const BasicSlot<R, const Pt::Event&>& slot)
 		{
-			removeRoute(slot);
+			this->removeRoute(slot);
 		}
 
 		template <typename EventT>
-		void subscribe( const BasicSlot<void, const EventT&>& slot )
+		void connect( const BasicSlot<void, const EventT&>& slot )
 		{
 			Connection conn( *this, slot.clone() );
 			const std::type_info& ti = typeid(EventT);
-			addRoute( &ti, new EventRoute<EventT>(conn) );
+			this->addRoute( &ti, new EventRoute<EventT>(conn) );
 		}
 
 		template <typename EventT>
-		void unsubscribe( const BasicSlot<void, const EventT&>& slot )
+		void disconnect( const BasicSlot<void, const EventT&>& slot )
 		{
 			const std::type_info& ti = typeid(EventT);
-			removeRoute(&ti, slot);
+			this->removeRoute(&ti, slot);
 		}
 
-		virtual bool opened(const Connection& c);
+		virtual void opened(const Connection& c);
 
 		virtual void closed(const Connection& c);
 
 	protected:
 		void addRoute(const std::type_info* ti, IEventRoute* route);
 
-		void removeRoute(Slot& slot);
+		void removeRoute(const Slot& slot);
 
-		void removeRoute(const std::type_info* ti, Slot& slot);
+		void removeRoute(const std::type_info* ti, const Slot& slot);
 
 	private:
 		mutable RouteMap _routes;

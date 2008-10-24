@@ -53,10 +53,9 @@ Connectable& Connectable::operator=(const Connectable&)
 }
 
 
-bool Connectable::opened(const Connection& c)
+void Connectable::opened(const Connection& c)
 {
     _connections.push_back(c);
-    return true;
 }
 
 

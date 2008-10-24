@@ -30,7 +30,7 @@ namespace Pt {
     {
         public:
             virtual ~IConnectable() {}
-            virtual bool opened(const Connection& c) = 0;
+            virtual void opened(const Connection& c) = 0;
             virtual void closed(const Connection& c) = 0;
     };
 
@@ -60,6 +60,8 @@ namespace Pt {
 
             /** @brief Registers a Connection with the %Connectable.
 
+                TODO: rename onConnect
+
                 This function is called when a new Connection involving
                 this object is opened. The default implementation adds
                 the connection to a list, so the destructor can close it.
@@ -67,9 +69,11 @@ namespace Pt {
                 @param c Connection being opened
                 @return True if the Connection was accepted
             */
-            virtual bool opened(const Connection& c);
+            virtual void opened(const Connection& c);
 
             /** @brief Unregisters a Connection from the %Connectable.
+
+                TODO: rename onDisconnect
 
                 This function is called when a new Connection involving
                 this object is closed. The default implementation removes

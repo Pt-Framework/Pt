@@ -67,8 +67,8 @@ class FunctionSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         Slot* clone() const
         { return new FunctionSlot(*this); }
 
-        virtual bool opened(const Connection& c)
-        { return true; }
+        virtual void opened(const Connection& c)
+        { }
 
         virtual void closed(const Connection& c)
         { }

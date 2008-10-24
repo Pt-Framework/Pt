@@ -54,20 +54,15 @@ namespace Pt {
                 return *this;
             }
 
-            virtual bool opened(const Connection& c)
+            virtual void opened(const Connection& c)
             {
                 const IConnectable& sender = c.sender();
 
                 if( &sender == this )
                 {
                     _target.close();
-
-                    bool accept = Connectable::opened(c);
-
-                    if(accept)
-                        _target = c;
-
-                    return accept;
+                    Connectable::opened(c);
+                    _target = c;
                 }
 
                 return Connectable::opened(c);
