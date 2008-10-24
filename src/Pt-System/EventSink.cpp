@@ -24,18 +24,6 @@ namespace Pt {
 
 namespace System {
 
-bool CompareTypeInfo::operator()(const std::type_info* t1, const std::type_info* t2) const
-{
-    if(t2 == 0)
-        return false;
-
-    if(t1 == 0)
-        return true;
-
-    return t1->before(*t2) != 0;
-}
-
-
 EventSink::EventSink()
 : _mutex(Pt::System::Mutex::Recursive)
 { }
@@ -66,6 +54,38 @@ EventSink::~EventSink()
 void EventSink::commitEvent(const Event& event)
 {
     this->onCommitEvent(event);
+}
+
+
+void EventSink::onConnect(EventSource& source)
+{
+    MutexLock lock1( _mutex );
+
+    _sources.push_back(&source);
+}
+
+
+void EventSink::onDisconnect(EventSource& source)
+{
+    MutexLock lock1( _mutex );
+
+    _sources.remove(&source);
+}
+
+
+void EventSink::onUnsubscribe(EventSource& source)
+{
+    MutexLock lock1( _mutex );
+
+    std::list<EventSource*>::iterator it;
+    for(it = _sources.begin(); it != _sources.end(); ++it)
+    {
+        if(&source == *it)
+        {
+            _sources.erase(it);
+            return;
+        }
+    }
 }
 
 } // namespace System

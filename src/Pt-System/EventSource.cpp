@@ -24,6 +24,18 @@ namespace Pt {
 
 namespace System {
 
+bool EventSourceCmp::operator()(const std::type_info* t1, const std::type_info* t2) const
+{
+    if(t2 == 0)
+        return false;
+
+    if(t1 == 0)
+        return true;
+
+    return t1->before(*t2) != 0;
+}
+
+
 EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
 {
@@ -103,19 +115,20 @@ EventSource::~EventSource()
 
 void EventSource::connect(EventSink& sink)
 {
-    MutexLock lock1( sink._mutex );
-    MutexLock lock2( _mutex );
+    MutexLock lock( _mutex );
+
+    sink.onConnect(*this);
 
     const std::type_info* ti = 0;
     _handlers.insert( std::make_pair(ti, &sink) );
-    sink._sources.push_back(this);
 }
 
 
 void EventSource::disconnect(EventSink& sink)
 {
-    MutexLock lock1( sink._mutex );
-    MutexLock lock2( _mutex );
+    MutexLock lock( _mutex );
+
+    sink.onDisconnect(*this);
 
     SinkMap::iterator it = _handlers.begin();
     while( it != _handlers.end() )
@@ -129,14 +142,50 @@ void EventSource::disconnect(EventSink& sink)
             }
             else
             {
-                _handlers.erase(it);
+                _handlers.erase(it++);
+                continue;
             }
         }
-        else
-            ++it;
-    }
 
-    sink._sources.remove(this);
+        ++it;
+    }
+}
+
+
+void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
+{
+    MutexLock lock( _mutex );
+
+    sink.onConnect(*this);
+    _handlers.insert( std::make_pair(&ti, &sink) );
+}
+
+
+void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
+{
+    MutexLock lock( _mutex );
+
+    sink.onUnsubscribe(*this);
+
+    SinkMap::iterator it = _handlers.lower_bound(&ti);
+    while( it != _handlers.end() && *(it->first) == ti )
+    {
+        if(it->second == &sink)
+        {
+            if(_sending)
+            {
+                _dirty = true;
+                it->second = 0;
+            }
+            else
+            {
+                _handlers.erase(it++);
+                continue;
+            }
+        }
+
+        ++it;
+    }
 }
 
 

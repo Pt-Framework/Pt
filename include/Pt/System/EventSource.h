@@ -33,6 +33,12 @@ namespace System {
 
 class EventSink;
 
+struct PT_SYSTEM_API EventSourceCmp
+{
+	bool operator()(const std::type_info* t1,
+	                const std::type_info* t2) const;
+};
+
 /** @brief Sends Events to receivers in other threads
 
     The Signal class is not thread-safe and can only be used for
@@ -73,17 +79,23 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
         template <typename EventT>
         void subscribe(EventSink& sink)
         {
+            subscribe( sink, typeid(EventT) );
         }
 
         template <typename EventT>
         void unsubscribe(EventSink& sink)
         {
+            unsubscribe( sink, typeid(EventT) );
         }
+
+    private:
+        void subscribe(EventSink& sink, const std::type_info& ti);
+        void unsubscribe(EventSink& sink, const std::type_info& ti);
 
     private:
         typedef std::multimap< const std::type_info*,
                                EventSink*,
-                               CompareTypeInfo > SinkMap;
+                               EventSourceCmp > SinkMap;
 
         mutable Mutex _mutex;
         mutable Mutex _dmutex;

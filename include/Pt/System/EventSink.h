@@ -31,12 +31,6 @@ namespace System {
 
     class EventSource;
 
-    struct PT_SYSTEM_API CompareTypeInfo
-    {
-        bool operator()(const std::type_info* t1, 
-                        const std::type_info* t2) const;
-    };
-
     class PT_SYSTEM_API EventSink : protected NonCopyable
     {
         friend class EventSource;
@@ -50,6 +44,11 @@ namespace System {
 
         protected:
             virtual void onCommitEvent(const Event& event) = 0;
+
+        private:
+            void onConnect(EventSource& source);
+            void onDisconnect(EventSource& source);
+            void onUnsubscribe(EventSource& source);
 
         private:
             mutable Mutex _mutex;
