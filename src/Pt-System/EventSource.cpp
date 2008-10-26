@@ -18,23 +18,12 @@
  ***************************************************************************/
 #include "Pt/System/EventSource.h"
 #include "Pt/System/EventSink.h"
-#include <algorithm>
 
 namespace Pt {
 
 namespace System {
 
-bool EventSourceCmp::operator()(const std::type_info* t1, const std::type_info* t2) const
-{
-    if(t2 == 0)
-        return false;
-
-    if(t1 == 0)
-        return true;
-
-    return t1->before(*t2) != 0;
-}
-
+Mutex dmx(Mutex::Recursive);
 
 EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
@@ -86,7 +75,7 @@ bool EventSource::Sentry::operator!() const
 
 EventSource::EventSource()
 : _mutex(Pt::System::Mutex::Recursive)
-, _dmutex(Pt::System::Mutex::Recursive)
+, _dmutex(&dmx)
 , _sentry(0)
 , _sending(false)
 , _dirty(false)
@@ -95,7 +84,7 @@ EventSource::EventSource()
 
 EventSource::~EventSource()
 {
-    MutexLock dlock(_dmutex);
+    MutexLock dlock(*_dmutex);
 
     while( true )
     {

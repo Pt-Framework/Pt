@@ -39,7 +39,7 @@ EventSink::~EventSink()
             return;
 
         EventSource* source = _sources.front();
-        if( source->_dmutex.tryLock() )
+        if( source->_dmutex->tryLock() )
         {
             source->disconnect(*this);
             continue;

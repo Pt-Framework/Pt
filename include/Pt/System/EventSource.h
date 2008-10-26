@@ -21,6 +21,7 @@
 #define PT_SYSTEM_EVENTSOURCE_H
 
 #include <Pt/Event.h>
+#include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
@@ -32,12 +33,6 @@ namespace Pt {
 namespace System {
 
 class EventSink;
-
-struct PT_SYSTEM_API EventSourceCmp
-{
-	bool operator()(const std::type_info* t1,
-	                const std::type_info* t2) const;
-};
 
 /** @brief Sends Events to receivers in other threads
 
@@ -95,10 +90,10 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
     private:
         typedef std::multimap< const std::type_info*,
                                EventSink*,
-                               EventSourceCmp > SinkMap;
+                               CompareEventTypeInfo > SinkMap;
 
         mutable Mutex _mutex;
-        mutable Mutex _dmutex;
+        mutable Mutex* _dmutex;
         mutable SinkMap _handlers;
         mutable Sentry* _sentry;
         mutable bool _sending;
