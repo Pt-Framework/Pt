@@ -84,7 +84,10 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
         }
 
     private:
+        bool tryDisconnect(EventSink& sink);
+
         void subscribe(EventSink& sink, const std::type_info& ti);
+
         void unsubscribe(EventSink& sink, const std::type_info& ti);
 
     private:

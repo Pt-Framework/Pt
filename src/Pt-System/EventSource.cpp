@@ -141,6 +141,19 @@ void EventSource::disconnect(EventSink& sink)
 }
 
 
+bool EventSource::tryDisconnect(EventSink& sink)
+{
+    if( _dmutex->tryLock() )
+    {
+        this->disconnect(sink);
+        _dmutex->unlock();
+        return true;
+    }
+
+    return false;
+}
+
+
 void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
 {
     MutexLock lock( _mutex );

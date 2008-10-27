@@ -39,14 +39,11 @@ EventSink::~EventSink()
             return;
 
         EventSource* source = _sources.front();
-        if( source->_dmutex->tryLock() )
+        if( ! source->tryDisconnect(*this) )
         {
-            source->disconnect(*this);
-            continue;
+            lock.unlock();
+            Thread::yield();
         }
-
-        lock.unlock();
-        Thread::yield();
     }
 }
 
