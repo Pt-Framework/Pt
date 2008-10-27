@@ -30,7 +30,7 @@ namespace System{
 
 SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : _device(device)
-, _eventThread( *self() )
+, _eventThread(0)
 , _terminateThread(false)
 , _ioReady(0)
 , _beginWait(0)
@@ -62,7 +62,7 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
     HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
 
     size_t err = GetLastError();
-    
+
     if( h == 0  || h == INVALID_HANDLE_VALUE )
         throw OpenFailed("Could not open port" , PT_SOURCEINFO);
 
@@ -79,22 +79,23 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
         comTimeOut.ReadTotalTimeoutConstant     = MAXDWORD;
         comTimeOut.WriteTotalTimeoutMultiplier  = 0;
         comTimeOut.WriteTotalTimeoutConstant    = 1;
-        
+
         if( ! SetCommTimeouts( h, &comTimeOut ) )
-            throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);        
-    }        
+            throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);
+
+        _terminateThread = false;
+
+        if (mode & IODevice::Async)
+        {
+            _eventThread = new Thread( callable(*this, &SerialDeviceImpl::run) );
+            _eventThread->start();
+        }
+    }
     catch( ... )
     {
         CloseHandle(h);
-        h = 0;        
+        h = 0;
         throw;
-    }    
-    
-    _terminateThread = false;
-
-    if (mode & IODevice::Async)
-    {
-        _eventThread.start();    
     }
 }
 
@@ -117,7 +118,9 @@ void SerialDeviceImpl::close()
     CloseHandle( handle() );
 
     // Wait for comm event thread termination
-    _eventThread.wait();    
+    _eventThread->wait();
+    delete _eventThread;
+    _eventThread = 0;
 
     CloseHandle( _ioReady );
     CloseHandle( _beginWait );

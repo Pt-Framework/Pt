@@ -34,7 +34,6 @@ namespace Pt{
 namespace System{
 
 class SerialDeviceImpl : public Pt::System::IODeviceImpl
-                       , public Pt::System::Runnable
 {
     public:
         SerialDeviceImpl(SerialDevice& device);
@@ -107,7 +106,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         HANDLE _ioReady;
         HANDLE _beginWait;
         DCB _orgCommState;        
-        Thread _eventThread;  
+        Thread* _eventThread;  
         bool _terminateThread;
         DWORD _rlen;
         size_t _wlen;
