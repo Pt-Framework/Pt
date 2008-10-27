@@ -65,7 +65,7 @@ void EventLoopBase::processEvents()
 EventLoop::EventLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)
-, _queueMutex(Mutex::Normal)
+, _queueMutex(Mutex::Recursive)
 {
     _selector = new SelectorImpl();
 }
