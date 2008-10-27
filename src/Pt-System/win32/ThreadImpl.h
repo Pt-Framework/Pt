@@ -12,7 +12,6 @@
     #include <process.h>
 #endif
 
-
 namespace Pt {
 
 namespace System {
@@ -23,18 +22,8 @@ namespace System {
     typedef  unsigned threadid_t;
 #endif
 
-    class ThreadImpl {
-        public:
-            enum Priority
-            {
-                LowestPriority  = 0,
-                LowPriority     = 1,
-                NormalPriority  = 2,
-                HighPriority    = 3,
-                HighestPriority = 4,
-                InheritPriority = 5
-            };
-
+    class ThreadImpl 
+	{
         public:
             ThreadImpl(Thread& obj, Thread::Mode mode);
 
@@ -52,18 +41,13 @@ namespace System {
 
             void wait();
 
-            void setPriority(Priority prio);
-
-            Priority priority() const
-            { return _priority; }
-
-            static void exit() throw();
+            static void exit();
 
             void terminate();
 
-            static void yield() throw();
+            static void yield();
 
-            static void sleep(unsigned int ms) throw();
+            static void sleep(unsigned int ms);
 
         public:
             static threadid_t WINAPI entry(void* arg)
@@ -81,11 +65,9 @@ namespace System {
             Thread& _thread;
             HANDLE  _handle;
             threadid_t _id;
-            Priority _priority;
             Thread::State _state;
             Thread::Mode _mode;
     };
-
 
 } // namespace System
 
