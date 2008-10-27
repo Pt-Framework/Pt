@@ -24,7 +24,6 @@
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
-#include "Pt/System/Runnable.h"
 #include "Pt/System/Thread.h"
 #include <string>
 #include <windows.h>
