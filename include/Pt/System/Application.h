@@ -82,10 +82,6 @@ namespace System {
 
             Signal<int> systemSignal;
 
-            Signal<> aboutToStart;
-
-            Signal<> aboutToExit;
-
             ApplicationImpl& impl();
 
         protected:

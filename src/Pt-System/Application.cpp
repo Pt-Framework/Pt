@@ -114,9 +114,7 @@ void Application::init(EventLoopBase& loop)
 
 void Application::run()
 {
-    aboutToStart.send();
     _loop->run();
-    aboutToExit.send();
 }
 
 
