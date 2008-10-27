@@ -17,25 +17,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ThreadImpl.h"
-#include "Pt/System/Thread.h"
 #include "Pt/SourceInfo.h"
+#include "Pt/System/Thread.h"
+#include <Pt/System/EventLoop.h>
 #include <stdexcept>
 
 namespace Pt {
 
 namespace System {
 
-Thread::Thread(Runnable& runnable, Mode mode)
+Thread::Thread(const Callable<void>& cb, Mode mode)
 : _impl(0)
-, _runnable(&runnable)
+, _cb(0)
 {
     _impl = new ThreadImpl(*this, mode);
+    _cb = cb.clone();
+}
+
+
+Thread::Thread(EventLoopBase& loop, Mode mode)
+: _impl(0)
+, _cb(0)
+{
+    _impl = new ThreadImpl(*this, mode);
+    _cb = callable(loop, &EventLoopBase::run).clone();
 }
 
 
 Thread::Thread(Mode mode)
 : _impl(0)
-, _runnable(0)
+, _cb(0)
 {
     _impl = new ThreadImpl(*this, mode);
 }
@@ -43,13 +54,10 @@ Thread::Thread(Mode mode)
 
 Thread::~Thread()
 {
+    if( this->joinable() && this->state() == Running )
+        this->wait();
+
     delete _impl;
-}
-
-
-void Thread::init(Runnable& runnable)
-{
-    _runnable = &runnable;
 }
 
 
@@ -136,10 +144,10 @@ void Thread::sleep(unsigned int ms)
 
 void Thread::run()
 {
-    if(_runnable == 0)
+    if(_cb == 0)
         throw std::logic_error("No runnable given to thread." + PT_SOURCEINFO);
 
-    _runnable->run();
+    _cb->invoke();
 }
 
 } // namespace System

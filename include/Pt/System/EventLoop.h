@@ -25,12 +25,9 @@
 #include <Pt/Allocator.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/Runnable.h>
 #include <Pt/System/Selector.h>
 #include <Pt/System/EventSink.h>
-#include <map>
 #include <deque>
-#include <typeinfo>
 
 namespace Pt {
 
@@ -45,7 +42,6 @@ namespace System {
     class PT_SYSTEM_API EventLoopBase : public SelectorBase
                                       , public EventSink
                                       , public Connectable
-                                      , public Runnable
     {
         public:
             static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);

@@ -29,20 +29,21 @@ namespace Pt {
 namespace Log {
 
 SerialChannel::SerialChannel()
-: Pt::System::Thread( _threadLoop )
-, Channel()
+: Channel()
+, _threadLoop()
+, _thread(_threadLoop)
 , _mutex(Pt::System::Mutex::Normal)
+, _n(0)
 {
-    _n = 0;
     Pt::connect( _threadLoop.event, *this, &SerialChannel::processEvent);
-    System::Thread::start();
+    _thread.start();
 }
 
 
 SerialChannel::~SerialChannel()
 {
     _threadLoop.exit();
-    System::Thread::wait();
+    _thread.wait();
     this->close();
 }
 

@@ -44,22 +44,25 @@ class TestEvent : public Pt::Event
 };
 
 
-class TestThread : public Pt::System::Thread
+class TestThread
 {
     public:
         TestThread()
+        : _loop()
+        , _thread( callable(_loop, &Pt::System::EventLoop::run) )
         {
-            init(_loop);
+            _thread.start();
         }
 
         ~TestThread()
         {
             // NOTE: must end thread before loop is destructed
-            this->wait();
+            _thread.wait();
         }
 
     private:
         Pt::System::EventLoop _loop;
+        Pt::System::Thread _thread;
 };
 
 
@@ -70,7 +73,6 @@ int main( int argc, char* argv[] )
         Pt::System::Application app;
 
         TestThread thread;
-        thread.start();
 
         app.run();
     }

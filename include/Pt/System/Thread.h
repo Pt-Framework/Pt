@@ -19,13 +19,15 @@
 #if !defined(PT_SYSTEM_THREAD_H)
 #define PT_SYSTEM_THREAD_H
 
-#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/System/Runnable.h>
+#include <Pt/Callable.h>
+#include <Pt/System/Api.h>
 
 namespace Pt {
 
 namespace System {
+
+    class EventLoopBase;
 
     /** @brief Platform independent threads
 
@@ -123,7 +125,9 @@ namespace System {
                 Thread is not started on construction, but when Thread::start()
                 is called. The \a mode can either be Detached or Joinable.
             */
-            Thread(Runnable& runnable, Mode mode = Joinable);
+            Thread(const Callable<void>& cb, Mode mode = Joinable);
+
+            Thread(EventLoopBase& loop, Mode mode = Joinable);
 
             /** @brief Destructor
 
@@ -196,8 +200,6 @@ namespace System {
             */
             Thread(Mode mode = Joinable);
 
-            void init(Runnable& runnable);
-
             /** @brief Thread entry point
 
                 This function needs to be overridden by derived classes.
@@ -207,7 +209,7 @@ namespace System {
             virtual void run();
 
         private:
-            Runnable* _runnable;
+            Callable<void>* _cb;
     };
 
 } // !namespace System

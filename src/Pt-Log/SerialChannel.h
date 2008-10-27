@@ -67,8 +67,7 @@ class PT_LOG_API WriteEvent : public Pt::Event
 };
 
 
-class PT_LOG_API SerialChannel : public Pt::System::Thread
-                               , public Pt::Connectable
+class PT_LOG_API SerialChannel : public Pt::Connectable
                                , public Channel
 {
     public:
@@ -86,10 +85,11 @@ class PT_LOG_API SerialChannel : public Pt::System::Thread
         virtual void _write(const std::string& message, bool isAsync);
 
     private:
-        size_t _n;
-        Pt::System::Mutex _mutex;
         Pt::System::EventLoop _threadLoop;
+        Pt::System::Thread _thread;
         Pt::System::SerialDevice _device;
+        Pt::System::Mutex _mutex;
+        size_t _n;
 };
 
 } // namespace Log
