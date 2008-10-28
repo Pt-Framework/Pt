@@ -196,17 +196,11 @@ void EventLoop::onProcessEvents()
     {
         MutexLock lock(_queueMutex);
 
-        Event* ev = 0;
-
-        if ( !_eventQueue.empty() )
-        {
-            ev = _eventQueue.front();
-            _eventQueue.pop_front();
-        }
-        else
-        {
+        if ( _eventQueue.empty() || _exitLoop )
             break;
-        }
+
+        Event* ev = _eventQueue.front();
+        _eventQueue.pop_front();
 
         try
         {
