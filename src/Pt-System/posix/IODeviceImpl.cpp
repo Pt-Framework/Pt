@@ -22,9 +22,9 @@
 #include <cerrno>
 #include <cassert>
 
-namespace Pt{
+namespace Pt {
 
-namespace System{
+namespace System {
 
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
@@ -118,9 +118,9 @@ bool IODeviceImpl::wait(unsigned int msecs)
 
     if( this->fd() > 0 )
     {
-        if(_device._rbuf)
+        if( _device.rbuf() )
             FD_SET(this->fd(), &rfds);
-        if(_device._wbuf)
+        if( _device.wbuf() )
             FD_SET(this->fd(), &wfds);
     }
 
@@ -155,7 +155,7 @@ size_t IODeviceImpl::endRead(bool& eof)
 		FD_CLR( this->fd(), _rfds );
 	}
 
-    size_t n = this->read( _device._rbuf, _device._rbuflen, eof );
+    size_t n = this->read( _device.rbuf(), _device.rbuflen(), eof );
     return n;
 }
 
@@ -219,7 +219,7 @@ size_t IODeviceImpl::endWrite()
 		FD_CLR( this->fd(), _wfds );
 	}
 
-    size_t n = this->write( _device._wbuf, _device._wbuflen );
+    size_t n = this->write( _device.wbuf(), _device.wbuflen() );
     return n;
 }
 
@@ -279,9 +279,9 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
     if( this->fd() > 0)
     {
-        if(_device._rbuf)
+        if( _device.rbuf() )
             FD_SET(this->fd(), _rfds);
-        if(_device._wbuf)
+        if( _device.wbuf() )
             FD_SET(this->fd(), _wfds);
     }
 
@@ -317,13 +317,13 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         ++avail;
     }
 
-    if( _device._wbuf && FD_ISSET(this->fd(), &wfds) )
+    if( _device.wbuf() && FD_ISSET(this->fd(), &wfds) )
     {
         _device.outputReady(_device);
         ++avail;
     }
 
-    if( _device._rbuf && FD_ISSET(this->fd(), &rfds) )
+    if( _device.rbuf() && FD_ISSET(this->fd(), &rfds) )
     {
         _device.inputReady(_device);
         ++avail;

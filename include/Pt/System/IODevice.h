@@ -83,8 +83,6 @@ class IODeviceImpl;
 */
 class PT_SYSTEM_API IODevice : public Selectable
 {
-    friend class IODeviceImpl;
-
     public:
         typedef std::char_traits<char>::pos_type pos_type;
 
@@ -229,6 +227,18 @@ class PT_SYSTEM_API IODevice : public Selectable
         Signal<IODevice&> errorOccured;
 
         virtual IODeviceImpl& ioimpl() = 0;
+
+        char* rbuf() const
+        { return _rbuf; }
+
+        size_t rbuflen() const
+        { return _rbuflen; }
+
+        const char* wbuf() const
+        { return _wbuf; }
+
+        size_t wbuflen() const
+        { return _wbuflen; }
 
     protected:
         //! @brief Default Constructor
