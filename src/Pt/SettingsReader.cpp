@@ -20,25 +20,6 @@
 
 namespace Pt {
 
-SettingsReader::OnComment SettingsReader::onComment;
-SettingsReader::BeginStatement SettingsReader::beginStatement;
-SettingsReader::OnSection SettingsReader::onSection;
-SettingsReader::BeginType SettingsReader::beginType;
-SettingsReader::AfterName SettingsReader::afterName;
-SettingsReader::OnEqual SettingsReader::onEqual;
-SettingsReader::OnCurly SettingsReader::onCurly;
-SettingsReader::OnCloseCurly SettingsReader::onCloseCurly;
-SettingsReader::OnQoutedValue SettingsReader::onQoutedValue;
-SettingsReader::AfterQoutedValue SettingsReader::afterQoutedValue;
-SettingsReader::OnRValue SettingsReader::onRValue;
-SettingsReader::AfterRValue SettingsReader::afterRValue;
-SettingsReader::BeginTypedValue SettingsReader::beginTypedValue;
-SettingsReader::OnTypedValue SettingsReader::onTypedValue;
-SettingsReader::OnQoutedTypedValue SettingsReader::onQoutedTypedValue;
-SettingsReader::EndTypedValue SettingsReader::endTypedValue;
-SettingsReader::AfterValue SettingsReader::afterValue;
-
-
 SettingsReader::SettingsReader(std::basic_istream<Pt::Char>& is)
 : state(0)
 , _beforeComment(0)
@@ -53,7 +34,7 @@ SettingsReader::SettingsReader(std::basic_istream<Pt::Char>& is)
 void SettingsReader::parse(SerializationInfo& si)
 {
     _current = &si;
-    state = &beginStatement;
+    state = BeginStatement::instance();
     _line  = 1;
     _isDotted = false;
     Pt::Char ch = 0;

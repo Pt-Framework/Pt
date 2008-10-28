@@ -155,7 +155,7 @@ class SettingsReader
                 virtual State* onHash(Pt::Char c, SettingsReader& reader)
                 {
                     reader.beginComment(); // save current state
-                    return &onComment;
+                    return OnComment::instance();
                 }
 
                 virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -172,7 +172,7 @@ class SettingsReader
         };
 
 
-        static class OnComment : public State
+        class OnComment : public State
         {
             public:
                 State* onChar(Pt::Char c, SettingsReader& reader)
@@ -185,10 +185,16 @@ class SettingsReader
 
                     return this;
                 }
-        } onComment;
+
+                static State* instance()
+                {
+                    static OnComment _state;
+                    return &_state;
+                }
+        };
 
 
-        static class BeginStatement : public State
+        class BeginStatement : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -200,35 +206,42 @@ class SettingsReader
                 if(reader.depth() == 0)
                     throw SettingsError("unexpected token ','", reader.line() );
 
-                return &onQoutedValue;
+                return OnQoutedValue::instance();
             }
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.beginSection();
-                return &onSection;
+                return OnSection::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.enterMember();
-                return &onCurly;
+                return OnCurly::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.buildToken(c);
-                return &beginType;
+                return BeginType::instance();
             }
 
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
-        } beginStatement;
+
+            public:
+                static State* instance()
+                {
+                    static BeginStatement _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnSection : public State
+        class OnSection : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -237,7 +250,7 @@ class SettingsReader
 
             virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
             {
-                return &beginStatement;
+                return BeginStatement::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -245,14 +258,21 @@ class SettingsReader
                 reader.buildSection(c);
                 return this;
             }
-        } onSection;
+
+            public:
+                static State* instance()
+                {
+                    static OnSection _state;
+                    return &_state;
+                }
+        };
 
 
-        static class BeginType : public State
+        class BeginType : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
-                return &afterName;
+                return AfterName::instance();
             }
 
             virtual State* onEqual(Pt::Char c, SettingsReader& reader)
@@ -262,7 +282,7 @@ class SettingsReader
                 else
                     reader.pushName();
 
-                return &SettingsReader::onEqual;
+                return OnEqual::instance();
             }
 
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
@@ -270,13 +290,13 @@ class SettingsReader
                 reader.pushValue();
                 reader.leaveMember();
                 reader.enterMember();
-                return &beginStatement;
+                return BeginStatement::instance();
             }
 
             virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushTypeName();
-                return &beginTypedValue;
+                return BeginTypedValue::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -286,7 +306,7 @@ class SettingsReader
 
                 reader.pushTypeName();
                 reader.enterMember();
-                return &onCurly;
+                return OnCurly::instance();
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -294,7 +314,7 @@ class SettingsReader
                 reader.pushValue();
                 reader.leaveMember();
                 reader.leaveMember();
-                return &onCloseCurly;
+                return OnCloseCurly::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -302,10 +322,17 @@ class SettingsReader
                 reader.buildToken(c);
                 return this;
             }
-        } beginType;
+
+            public:
+                static State* instance()
+                {
+                    static BeginType _state;
+                    return &_state;
+                }
+        };
 
 
-        static class AfterName : public BeginType
+        class AfterName : public BeginType
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -317,10 +344,17 @@ class SettingsReader
                 throw SettingsError("unexpected token", reader.line() );
                 return this;
             }
-        } afterName;
+
+            public:
+                static State* instance()
+                {
+                    static AfterName _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnEqual : public State
+        class OnEqual : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -329,24 +363,31 @@ class SettingsReader
 
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                return &onQoutedValue;
+                return OnQoutedValue::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.enterMember();
-                return &onCurly;
+                return OnCurly::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.buildToken(c);
-                return &onRValue;
+                return OnRValue::instance();
             }
-        } onEqual;
+
+            public:
+                static State* instance()
+                {
+                    static OnEqual _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnQoutedValue : public State
+        class OnQoutedValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -357,7 +398,7 @@ class SettingsReader
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushValue();
-                return &afterQoutedValue;
+                return AfterQoutedValue::instance();
             }
 
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
@@ -422,10 +463,17 @@ class SettingsReader
                 reader.buildToken(c);
                 return this;
             }
-        } onQoutedValue;
+
+            public:
+                static State* instance()
+                {
+                    static OnQoutedValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class AfterValue : public State
+        class AfterValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -436,21 +484,21 @@ class SettingsReader
             {
                 reader.leaveMember();
                 reader.enterMember();
-                return &beginStatement;
+                return BeginStatement::instance();
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
                 reader.leaveMember();
-                return &onCloseCurly;
+                return OnCloseCurly::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
                 reader.buildToken(c);
-                return &beginType;
+                return BeginType::instance();
             }
 
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
@@ -461,10 +509,17 @@ class SettingsReader
 
                 return this;
             }
-        } afterValue;
+
+            public:
+                static State* instance()
+                {
+                    static AfterValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class AfterQoutedValue : public AfterValue
+        class AfterQoutedValue : public AfterValue
         {
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
@@ -476,17 +531,23 @@ class SettingsReader
             {
                 reader.leaveMember();
                 reader.beginSection();
-                return &onSection;
+                return OnSection::instance();
             }
 
-        } afterQoutedValue ;
+            public:
+                static State* instance()
+                {
+                    static AfterQoutedValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnRValue : public State
+        class OnRValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
-                return &afterRValue;
+                return AfterRValue::instance();
             }
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
@@ -495,20 +556,20 @@ class SettingsReader
                 reader.leaveMember();
 
                 reader.beginSection();
-                return &onSection;
+                return OnSection::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushTypeName();
                 reader.enterMember();
-                return &onCurly;
+                return OnCurly::instance();
             }
 
             virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushTypeName();
-                return &beginTypedValue;
+                return BeginTypedValue::instance();
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -516,7 +577,7 @@ class SettingsReader
                 reader.pushValue();
                 reader.leaveMember();
                 reader.leaveMember();
-                return &onCloseCurly;
+                return OnCloseCurly::instance();
             }
 
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
@@ -524,7 +585,7 @@ class SettingsReader
                 reader.pushValue();
                 reader.leaveMember();
                 reader.enterMember();
-                return &beginStatement;
+                return BeginStatement::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -537,12 +598,19 @@ class SettingsReader
             {
                 reader.pushValue();
                 reader.leaveMember();
-                return &beginStatement;
+                return BeginStatement::instance();
             }
-        } onRValue;
+
+            public:
+                static State* instance()
+                {
+                    static OnRValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class AfterRValue : public OnRValue
+        class AfterRValue : public OnRValue
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -554,12 +622,19 @@ class SettingsReader
                 reader.pushValue();
                 reader.leaveMember();
                 reader.buildToken(c);
-                return &beginType;
+                return BeginType::instance();
             }
-        } afterRValue;
+
+            public:
+                static State* instance()
+                {
+                    static AfterRValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnCurly : public State
+        class OnCurly : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -569,29 +644,36 @@ class SettingsReader
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.enterMember();
-                return &onCurly;
+                return OnCurly::instance();
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
-                return &onCloseCurly;
+                return OnCloseCurly::instance();
             }
 
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                return &onQoutedValue;
+                return OnQoutedValue::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.buildToken(c);
-                return &beginType;
+                return BeginType::instance();
             }
-        } onCurly;
+
+            public:
+                static State* instance()
+                {
+                    static OnCurly _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnCloseCurly : public State
+        class OnCloseCurly : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -601,7 +683,7 @@ class SettingsReader
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.beginSection();
-                return &onSection;
+                return OnSection::instance();
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -618,13 +700,13 @@ class SettingsReader
                 }
 
                 reader.enterMember();
-                return &beginStatement;
+                return BeginStatement::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.buildToken(c);
-                return &beginType;
+                return BeginType::instance();
             }
 
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
@@ -634,10 +716,17 @@ class SettingsReader
 
                 return this;
             }
-        } onCloseCurly;
+
+            public:
+                static State* instance()
+                {
+                    static OnCloseCurly _state;
+                    return &_state;
+                }
+        };
 
 
-        static class BeginTypedValue : public State
+        class BeginTypedValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -646,28 +735,35 @@ class SettingsReader
 
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                return &onQoutedTypedValue;
+                return OnQoutedTypedValue::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 reader.buildToken(c);
-                return &onTypedValue;
+                return OnTypedValue::instance();
             }
-        } beginTypedValue;
+
+            public:
+                static State* instance()
+                {
+                    static BeginTypedValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnTypedValue : public State
+        class OnTypedValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
-                return &endTypedValue;
+                return EndTypedValue::instance();
             }
 
             virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushValue();
-                return &afterValue;
+                return AfterValue::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -675,26 +771,47 @@ class SettingsReader
                 reader.buildToken(c);
                 return this;
             }
-        } onTypedValue;
+
+            public:
+                static State* instance()
+                {
+                    static OnTypedValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class OnQoutedTypedValue : public OnQoutedValue
+        class OnQoutedTypedValue : public OnQoutedValue
         {
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                return &endTypedValue;
+                return EndTypedValue::instance();
             }
-        } onQoutedTypedValue;
+
+            public:
+                static State* instance()
+                {
+                    static OnQoutedTypedValue _state;
+                    return &_state;
+                }
+        };
 
 
-        static class EndTypedValue : public OnTypedValue
+        class EndTypedValue : public OnTypedValue
         {
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 throw SettingsError("unexpected token", reader.line() );
                 return this;
             }
-        } endTypedValue;
+
+            public:
+                static State* instance()
+                {
+                    static EndTypedValue _state;
+                    return &_state;
+                }
+        };
 
     public:
         SettingsReader(std::basic_istream<Pt::Char>& is);
@@ -754,6 +871,31 @@ class SettingsReader
 
         Pt::String _section;
 };
+
+
+static struct SettingsReaderInit
+{
+    SettingsReaderInit()
+    {
+        SettingsReader::OnComment::instance();
+        SettingsReader::BeginStatement::instance();
+        SettingsReader::OnSection::instance();
+        SettingsReader::BeginType::instance();
+        SettingsReader::AfterName::instance();
+        SettingsReader::OnEqual::instance();
+        SettingsReader::OnCurly::instance();
+        SettingsReader::OnCloseCurly::instance();
+        SettingsReader::OnQoutedValue::instance();
+        SettingsReader::AfterQoutedValue::instance();
+        SettingsReader::OnRValue::instance();
+        SettingsReader::AfterRValue::instance();
+        SettingsReader::BeginTypedValue::instance();
+        SettingsReader::OnTypedValue::instance();
+        SettingsReader::OnQoutedTypedValue::instance();
+        SettingsReader::EndTypedValue::instance();
+        SettingsReader::AfterValue::instance();
+    }
+} settingsReaderInit;
 
 } // namespace Pt
 
