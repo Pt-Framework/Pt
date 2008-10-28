@@ -47,17 +47,36 @@ namespace System {
 
     class Application;
     class Clock;
+    class Condition;
     class Directory;
     class EventSource;
     class EventSink;
     class EventLoop;
     class EventLoopBase;
     class File;
+    class FileDevice;
     class FileInfo;
     class IODevice;
+    class IOStream;
+    class IStream;
     class Mutex;
+    class OStream;
+    class Pipe;
+    class PluginId;
+    class Process;
+    class ReadWriteMutex;
+    class Selectable;
+    class Selector;
+    class SelectorBase;
+    class Semaphore;
+    class SerialDevice;
+    class SharedLib;
+    class StreamBuffer;
+    class SystemError;
     class SpinLock;
     class Thread;
+    class Timer;
+    class Url;
 }
 
 }
