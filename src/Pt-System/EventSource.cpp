@@ -47,8 +47,8 @@ void EventSource::Sentry::detach()
 
     if( _es->_dirty )
     {
-        SinkMap::iterator it = _es->_handlers.begin();
-        while( it != _es->_handlers.end() )
+        SinkMap::iterator it = _es->_sinks.begin();
+        while( it != _es->_sinks.end() )
         {
             if( it->second )
             {
@@ -56,7 +56,7 @@ void EventSource::Sentry::detach()
             }
             else
             {
-                _es->_handlers.erase(it++);
+                _es->_sinks.erase(it++);
             }
         }
     }
@@ -93,11 +93,16 @@ EventSource::~EventSource()
         if(_sentry)
             _sentry->detach();
 
-        if( _handlers.empty() )
+        if( _sinks.empty() )
             return;
 
-        EventSink* sink = _handlers.begin()->second;
-        this->disconnect(*sink);
+        EventSink* sink = _sinks.begin()->second;
+
+        if( ! this->tryDisconnect(*sink) )
+        {
+            lock.unlock();
+            Thread::yield();
+        }
     }
 }
 
@@ -109,7 +114,7 @@ void EventSource::connect(EventSink& sink)
     sink.onConnect(*this);
 
     const std::type_info* ti = 0;
-    _handlers.insert( std::make_pair(ti, &sink) );
+    _sinks.insert( std::make_pair(ti, &sink) );
 }
 
 
@@ -119,8 +124,8 @@ void EventSource::disconnect(EventSink& sink)
 
     sink.onDisconnect(*this);
 
-    SinkMap::iterator it = _handlers.begin();
-    while( it != _handlers.end() )
+    SinkMap::iterator it = _sinks.begin();
+    while( it != _sinks.end() )
     {
         if(it->second == &sink)
         {
@@ -131,7 +136,7 @@ void EventSource::disconnect(EventSink& sink)
             }
             else
             {
-                _handlers.erase(it++);
+                _sinks.erase(it++);
                 continue;
             }
         }
@@ -159,7 +164,7 @@ void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
     MutexLock lock( _mutex );
 
     sink.onConnect(*this);
-    _handlers.insert( std::make_pair(&ti, &sink) );
+    _sinks.insert( std::make_pair(&ti, &sink) );
 }
 
 
@@ -169,8 +174,8 @@ void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
 
     sink.onUnsubscribe(*this);
 
-    SinkMap::iterator it = _handlers.lower_bound(&ti);
-    while( it != _handlers.end() && *(it->first) == ti )
+    SinkMap::iterator it = _sinks.lower_bound(&ti);
+    while( it != _sinks.end() && *(it->first) == ti )
     {
         if(it->second == &sink)
         {
@@ -181,7 +186,7 @@ void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
             }
             else
             {
-                _handlers.erase(it++);
+                _sinks.erase(it++);
                 continue;
             }
         }
@@ -197,7 +202,7 @@ void EventSource::send(const Pt::Event& ev)
     EventSource::Sentry sentry(this);
 
     SinkMap::iterator it;
-    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    for(it = _sinks.begin(); it != _sinks.end(); ++it)
     {
         EventSink* sink = it->second;
 

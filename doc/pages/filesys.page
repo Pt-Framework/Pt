@@ -1,0 +1,18 @@
+/** \page "File System Operations"
+!!! File System Operations
+%File systems are typically node based and contain file sytem objects of various types, i.e. files, directories. PPR models this through the FileSystemNode interface,
+which provides functions that are applicable to possible objects usually found as
+nodes in file systems. The FileSystem singleton class serves as a factory, which can create
+FileSytemNodes from a path. The two most important classes that implement the
+FileSystemNode interface are File and Directory.
+
+A File object is not meant to be used for File I/O, but only for file system operations
+such as creating, renaming, moving or removing files. For File I/O use a FileDevice
+instead.
+
+The Directory class has a special meaning and can be seen as a container for
+file system objects. The DirectoryIterator can be used to traverse through the
+entries in a Directory. It can be used easily with all the iterator based
+algorithms in the C++ standard library.
+*/
+

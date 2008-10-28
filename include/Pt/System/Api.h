@@ -48,6 +48,10 @@ namespace System {
     class Application;
     class Clock;
     class Directory;
+    class EventSource;
+    class EventSink;
+    class EventLoop;
+    class EventLoopBase;
     class File;
     class FileInfo;
     class IODevice;
