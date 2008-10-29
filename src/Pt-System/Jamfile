@@ -17,6 +17,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
                           [ FDirName $(SYS:L) ProcessImpl.cpp ]
                           [ FDirName $(SYS:L) PipeImpl.cpp ]
+						  [ FDirName $(SYS:L) SharedLibImpl.cpp ]
                           [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
                           Application.cpp
                           Clock.cpp

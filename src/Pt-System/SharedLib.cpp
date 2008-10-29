@@ -121,12 +121,6 @@ SharedLib& SharedLib::open(const std::string& path)
 }
 
 
-void* SharedLib::operator[](const char* symbol)
-{
-  return _impl->resolve(symbol);
-}
-
-
 void* SharedLib::resolve(const char* symbol)
 {
   return _impl->resolve(symbol);
@@ -166,19 +160,21 @@ std::string SharedLib::find(const std::string& path_)
 {
     std::string path = path_;
 
-    if( FileInfo::exists( path.c_str() ) )
+    if( FileInfo::exists( path ) )
         return path;
 
     std::string::size_type idx = path.find( Directory::sep() );
 
-    if(++idx == path.length())
+    if( ++idx == path.length() )
     {
-        throw SystemError("Invalid file name " + path , PT_SOURCEINFO);
+	    throw FileNotFound(path , PT_SOURCEINFO);
     }
 
     path += suffix();
-    if( FileInfo::exists( path.c_str() ) )
+    if( FileInfo::exists( path ) )
+	{
         return path;
+	}
 
     if(idx == std::string::npos)
     {
@@ -186,9 +182,9 @@ std::string SharedLib::find(const std::string& path_)
     }
     path.insert( idx, prefix() );
 
-    if( ! FileInfo::exists( path.c_str() ) )
+    if( ! FileInfo::exists( path ) )
     {
-        throw FileNotFound(path_ , PT_SOURCEINFO);
+        throw FileNotFound(path , PT_SOURCEINFO);
     }
 
     return path;
