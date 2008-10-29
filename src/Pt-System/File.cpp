@@ -34,12 +34,6 @@ namespace Pt {
 
 namespace System {
 
-FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
-: SystemError("File not found: " + path, si)
-{
-}
-
-
 FileNotFound::~FileNotFound() throw()
 {
 }
@@ -55,7 +49,7 @@ File::File(const std::string& path)
 : _path(path)
 , _impl(0)
 {
-    if( ! File::exists( path.c_str() ) )
+    if( ! File::exists( _path) )
         throw FileNotFound(path, PT_SOURCEINFO);
 }
 
@@ -78,6 +72,7 @@ File::File(const File& file)
 
 File::~File()
 {
+    // delete _impl;
 }
 
 
@@ -90,70 +85,32 @@ File& File::operator=(const File& file)
 
 std::size_t File::size() const
 {
-    return FileImpl::size( path().c_str() );
+    return FileImpl::size( path() );
 }
 
 
 void File::resize(std::size_t newSize)
 {
-    FileImpl::resize(path().c_str(), newSize);
+    FileImpl::resize(path(), newSize);
 }
 
 
 void File::remove()
 {
-    FileImpl::remove( path().c_str() );
+    FileImpl::remove( path() );
 }
 
 
 void File::copy(const std::string& to) const
 {
-    return _impl->copy( path().c_str(), to.c_str() );
+    FileImpl::copy( _path, to );
 }
 
 
 void File::move(const std::string& to)
 {
-    FileImpl::move(path().c_str(), to.c_str());
+    FileImpl::move( _path, to );
     _path = to;
-}
-
-// TODO This should be done on a file system basis. If we'd have a relative file here,
-// with no path, and try to determine the parent, an empty string would be returned,
-// though a parent is available.
-// TODO This is identical to Directory::parentPath(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string File::dirName() const
-{
-    // Find last slash. This separates the file name from the path.
-    std::string::size_type separatorPos = path().find_last_of( Directory::sep() );
-
-    // If there is no separator, the file is relative to the current directory. So an empty path is returned.
-    if (separatorPos == std::string::npos)
-    {
-        return "";
-    }
-
-    // Include trailing separator to be able to distinguish between no path ("") and a path
-    // which is relative to the root ("/"), for example.
-    return path().substr(0, separatorPos + 1);
-}
-
-
-// TODO This is identical to Directory::name(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string File::name() const
-{
-    std::string::size_type separatorPos = path().rfind( Directory::sep() );
-
-    if (separatorPos != std::string::npos)
-    {
-        return path().substr(separatorPos + 1);
-    }
-    else
-    {
-        return path();
-    }
 }
 
 
@@ -193,14 +150,14 @@ std::string File::extension() const
 
 File File::create(const std::string& path)
 {
-    FileImpl::create( path.c_str() );
+    FileImpl::create(path);
     return File(path);
 }
 
 
 bool File::exists(const std::string& path)
 {
-    return FileInfo::getType( path.c_str() ) == FileInfo::File;
+    return FileInfo::getType(path) == FileInfo::File;
 }
 
 

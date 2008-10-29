@@ -38,8 +38,10 @@ SystemError::SystemError(const std::string & what, const SourceInfo& si)
 { }
 
 
+/*
 SystemError::~SystemError() throw()
 { }
+*/
 
 } // namespace System
 

@@ -45,7 +45,7 @@ FileInfo::FileInfo(const std::string& path)
 : _path(path)
 , _reserved(0)
 {
-    _type = FileInfoImpl::getType( path.c_str() );
+    _type = FileInfoImpl::getType( _path );
 }
 
 
@@ -70,37 +70,25 @@ FileInfo& FileInfo::operator=(const FileInfo& fi)
 }
 
 
-FileInfo::Type FileInfo::type() const
+std::string FileInfo::name(const std::string path)
 {
-	return _type;
-}
-
-
-std::string FileInfo::name() const
-{
-    std::string::size_type pos = _path.rfind( DirectoryImpl::sep() );
+    std::string::size_type pos = path.rfind( DirectoryImpl::sep() );
 
     if (pos != std::string::npos)
     {
-        return _path.substr(pos + 1);
+        return path.substr(pos + 1);
     }
     else
     {
-        return _path;
+        return path;
     }
 }
 
 
-const std::string& FileInfo::path() const
-{
-    return _path;
-}
-
-
-std::string FileInfo::dirName() const
+std::string FileInfo::dirName(const std::string& path)
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type pos = _path.find_last_of( DirectoryImpl::sep() );
+    std::string::size_type pos = path.find_last_of( DirectoryImpl::sep() );
 
     // If there is no separator, the file is relative to the current 
     // directory. So an empty path is returned.
@@ -111,7 +99,7 @@ std::string FileInfo::dirName() const
 
     // Include trailing separator to be able to distinguish between no 
     // path ("") and a path which is relative to the root ("/"), for example.
-    return _path.substr(0, pos + 1);
+    return path.substr(0, pos + 1);
 }
 
 
@@ -119,50 +107,10 @@ std::size_t FileInfo::size() const
 {
     if(_type == FileInfo::File)
     {
-        return FileImpl::size( _path.c_str() );
+        return FileImpl::size( _path );
     }
 
     return 0;
-}
-
-
-bool FileInfo::isDirectory() const
-{
-    return _type == FileInfo::Directory;
-}
-
-
-bool FileInfo::isFile() const
-{
-    return _type == FileInfo::File;
-}
-
-
-void FileInfo::remove()
-{
-    if(_type == FileInfo::File)
-    {
-        return FileImpl::remove( _path.c_str() );
-    }
-
-    return DirectoryImpl::remove( _path.c_str() );
-}
-
-
-void FileInfo::move(const std::string& to)
-{
-    if(_type == FileInfo::File)
-    {
-        return FileImpl::move( _path.c_str(), to.c_str() );
-    }
-
-    return DirectoryImpl::move( _path.c_str(), to.c_str() );
-}
-
-
-bool FileInfo::exists(const std::string& path)
-{
-    return FileInfo::getType( path ) != FileInfo::Invalid;
 }
 
 

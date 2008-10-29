@@ -33,26 +33,14 @@ namespace Pt {
 
 namespace System {
 
-DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
-: SystemError("Directory not found: " + path, si)
-{
-}
-
-
 DirectoryNotFound::~DirectoryNotFound() throw()
 {
 }
 
 
-
-DirectoryIterator::DirectoryIterator()
-: _impl(0)
-{ }
-
-
 DirectoryIterator::DirectoryIterator(const std::string& path)
 {
-    _impl = new DirectoryIteratorImpl( path.c_str() );
+    _impl = new DirectoryIteratorImpl( path );
 }
 
 
@@ -68,7 +56,8 @@ DirectoryIterator::DirectoryIterator(const DirectoryIterator& it)
 
 DirectoryIterator::~DirectoryIterator()
 {
-    if( _impl && 0 == _impl->deref() ) {
+    if( _impl && 0 == _impl->deref() )
+    {
         delete _impl;
     }
 }
@@ -155,6 +144,7 @@ Directory::Directory(const Directory& dir)
 
 Directory::~Directory()
 {
+    // delete impl
 }
 
 
@@ -162,12 +152,6 @@ Directory& Directory::operator=(const Directory& dir)
 {
 	_path = dir._path;
 	return *this;
-}
-
-
-std::size_t Directory::size() const
-{
-    return 0;
 }
 
 
@@ -193,43 +177,6 @@ void Directory::move(const std::string& to)
 {
     DirectoryImpl::move(path(), to);
     _path = to;
-}
-
-
-// TODO This is identical to File::parentPath(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string Directory::dirName() const
-{
-    // Find last slash. This separates the last path segment from the rest of the path
-    std::string::size_type separatorPos = path().find_last_of( this->sep() );
-
-    // If there is no separator, this directory is relative to the current current directory.
-    // So an empty path is returned.
-    if (separatorPos == std::string::npos)
-    {
-        return "";
-    }
-
-    // Include trailing separator to be able to distinguish between no path ("") and a path
-    // which is relative to the root ("/"), for example.
-    return path().substr(0, separatorPos + 1);
-}
-
-
-// TODO This is identical to File::name(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string Directory::name() const
-{
-    std::string::size_type separatorPos = path().rfind( this->sep() );
-
-    if (separatorPos != std::string::npos)
-    {
-        return path().substr(separatorPos + 1);
-    }
-    else
-    {
-        return path();
-    }
 }
 
 

@@ -28,19 +28,22 @@
  ***************************************************************************/
 #include "Pt/Api.h"
 #include "Pt/Types.h"
+#include "Pt/System/SystemError.h"
 #include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
 
 namespace Pt {
 
 namespace System {
 
-class PT_API FileImpl 
+class FileImpl
 {
     public:
-        FileImpl();
-
-        ~FileImpl();
-
         static std::size_t size(const std::string& path);
 
         static void resize(const std::string& path, std::size_t n);

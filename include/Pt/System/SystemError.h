@@ -43,9 +43,10 @@ namespace System {
     class PT_SYSTEM_API SystemError : public std::runtime_error
     {
         public:
-            SystemError(const std::string & what, const SourceInfo& si);
+            SystemError(const std::string& what, const SourceInfo& si);
 
-            ~SystemError() throw();
+            ~SystemError() throw()
+            {}
     };
 
 } // namespace System

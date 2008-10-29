@@ -27,27 +27,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FileImpl.h"
-#include "Pt/System/SystemError.h"
-#include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 
 namespace Pt {
 
 namespace System {
-
-FileImpl::FileImpl()
-{
-}
-
-
-FileImpl::~FileImpl()
-{
-}
-
 
 std::size_t FileImpl::size(const std::string& path)
 {

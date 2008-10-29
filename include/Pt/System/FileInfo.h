@@ -70,16 +70,25 @@ class PT_SYSTEM_API FileInfo
         FileInfo& operator=(const FileInfo& fi);
 
         //! @brief Returns the type of the file node
-        Type type() const;
+        Type type() const
+        {
+            return _type;
+        }
 
-        const std::string& path() const;
+        const std::string& path() const
+        { return _path; }
 
         /** @brief Returns the full path of node in the file-system
 
             This method may return a relative path, or a fully qualified one
             depending on how this object was constructed.
         */
-        std::string name() const;
+        std::string name() const
+        {
+            return FileInfo::dirName(_path);
+        }
+
+        static std::string name(const std::string path);
 
         /** @brief Returns the parent directory path
 
@@ -89,33 +98,34 @@ class PT_SYSTEM_API FileInfo
             returned directory path always ends with a trailing path separator
             character. (A backslash in Windows and a slash in Unix, for example.)
         */
-        std::string dirName() const;
+        std::string dirName() const
+        {
+            return FileInfo::dirName(_path);
+        }
+
+        static std::string dirName(const std::string& path);
 
         //! @brief Returns the size of the file in bytes
         std::size_t size() const;
 
         //! @brief Returns true if the node is a directory
-        bool isDirectory() const;
+        bool isDirectory() const
+        {
+            return _type == FileInfo::Directory;
+        }
 
         //! @brief Returns true if the node is a file
-        bool isFile() const;
-
-        /** @brief Removes the file node.
-
-            This object will be invalid after calling this method.
-        */
-        void remove();
-
-        /** @brief Moves the file node to the location given by \a to
-
-            The object will stay valid after this method was called and
-            point to the moved file node.
-        */
-        void move(const std::string& to);
+        bool isFile() const
+        {
+            return _type == FileInfo::File;
+        }
 
     public:
         //! @brief Returns true if a file or directory exists at \a path
-        static bool exists(const std::string& path);
+        static bool exists(const std::string& path)
+        {
+            return FileInfo::getType( path ) != FileInfo::Invalid;
+        }
 
         //! @brief Returns the type of file at \a path
         static Type getType(const std::string& path);

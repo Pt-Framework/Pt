@@ -34,22 +34,30 @@ namespace Pt {
 
 namespace System {
 
-class PT_API DirectoryIteratorImpl
+class DirectoryIteratorImpl
 {
     public:
-        DirectoryIteratorImpl();
+        DirectoryIteratorImpl()
+        : _refs(1),
+          _handle(0),
+          _current(0),
+          _dirty(true)
+        { }
 
-        DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const std::string& path);
 
         ~DirectoryIteratorImpl();
 
-        const std::string& name() const;
+        const std::string& name() const
+        { return _name; }
 
         const std::string& path() const;
 
-        int ref();
+		int ref()
+		{ return ++_refs; }
 
-        int deref();
+		int deref()
+		{ return --_refs; }
 
         bool advance();
 
@@ -78,15 +86,27 @@ class PT_API DirectoryImpl
 
         static std::string cwd();
 
-        static std::string curdir();
+        static std::string curdir()
+        {
+            return ".";
+        }
 
-        static std::string updir();
+        static std::string updir()
+        {
+            return "..";
+        }
 
-        static std::string rootdir();
+        static std::string rootdir()
+        {
+            return "/";
+        }
 
         static std::string tmpdir();
 
-        static std::string sep();
+        static std::string sep()
+        {
+            return "/";
+        }
 };
 
 } // namespace System

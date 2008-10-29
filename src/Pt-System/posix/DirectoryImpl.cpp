@@ -40,23 +40,14 @@ namespace Pt {
 
 namespace System {
 
-DirectoryIteratorImpl::DirectoryIteratorImpl()
-: _refs(1),
-  _handle(0),
-  _current(0),
-  _dirty(true)
-{
-}
-
-
-DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
+DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
   _path(path),
   _handle(0),
   _current(0),
   _dirty(true)
 {
-    _handle = ::opendir( path );
+    _handle = ::opendir( path.c_str() );
 
     // EACCES Permission denied.
     // EMFILE Too many file descriptors in use by process.
@@ -86,12 +77,6 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
-const std::string& DirectoryIteratorImpl::name() const
-{
-    return _name;
-}
-
-
 const std::string& DirectoryIteratorImpl::path() const
 {
     if(_dirty)
@@ -114,18 +99,6 @@ const std::string& DirectoryIteratorImpl::path() const
 }
 
 
-int DirectoryIteratorImpl::ref()
-{
-    return ++_refs;
-}
-
-
-int DirectoryIteratorImpl::deref()
-{
-    return --_refs;
-}
-
-
 bool DirectoryIteratorImpl::advance()
 {
     _dirty  = true;
@@ -140,8 +113,6 @@ bool DirectoryIteratorImpl::advance()
 }
 
 
-
-
 void DirectoryImpl::create(const std::string& path)
 {
     if( -1 == ::mkdir(path.c_str(), 0777) )
@@ -149,6 +120,7 @@ void DirectoryImpl::create(const std::string& path)
         throw SystemError("Could not create directory '" + path + "'" , PT_SOURCEINFO);
     }
 }
+
 
 bool DirectoryImpl::exists(const std::string& path)
 {
@@ -210,24 +182,6 @@ std::string DirectoryImpl::cwd()
 }
 
 
-std::string DirectoryImpl::curdir()
-{
-    return ".";
-}
-
-
-std::string DirectoryImpl::updir()
-{;
-    return "..";
-}
-
-
-std::string DirectoryImpl::rootdir()
-{
-    return "/";
-}
-
-
 std::string DirectoryImpl::tmpdir()
 {
     const char* tmpdir = getenv("TEMP");
@@ -244,12 +198,6 @@ std::string DirectoryImpl::tmpdir()
     }
 
     return DirectoryImpl::exists("/tmp") ? "/tmp" : curdir();
-}
-
-
-std::string DirectoryImpl::sep()
-{
-    return "/";
 }
 
 } // namespace System

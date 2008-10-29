@@ -43,9 +43,18 @@ namespace System {
 class PT_SYSTEM_API FileNotFound : public SystemError
 {
     public:
-        FileNotFound(const std::string& path, const SourceInfo& si);
+        FileNotFound(const std::string& path, const SourceInfo& si)
+		: SystemError("File not found", si)
+        , _path(path)
+		{}
 
         ~FileNotFound() throw();
+
+        const std::string& path() const
+        { return _path; }
+
+    private:
+        std::string _path;
 };
 
 /** @brief Provides common operations on files.
@@ -95,10 +104,16 @@ class PT_SYSTEM_API File
             returned directory path always ends with a trailing path separator
             character. (A backslash in Windows and a slash in Unix, for example.)
         */
-        std::string dirName() const;
+        std::string dirName() const
+        {
+            return FileInfo::dirName(_path);
+        }
 
         //! @brief Returns the file name including an exension
-        std::string name() const;
+        std::string name() const
+        {
+            return FileInfo::name(_path);
+        }
 
         //! @brief Returns the file name without the exension
         std::string baseName() const;
@@ -143,6 +158,7 @@ class PT_SYSTEM_API File
         //! @internal
         class FileImpl* _impl;
 };
+
 
 inline bool operator<(const File& a, const File& b)
 {

@@ -52,10 +52,19 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
             could not be found and the location in the source code where
             he exception was thrown.
         */
-        DirectoryNotFound(const std::string& path, const SourceInfo& si);
+        DirectoryNotFound(const std::string& path, const SourceInfo& si)
+        : SystemError("Directory not found", si)
+        , _path(path)
+        { }
 
         //! @brief Destructor
         ~DirectoryNotFound() throw();
+
+        const std::string& path() const
+        { return _path; }
+
+    private:
+        std::string _path;
 };
 
 /** @brief Iterates over entries of a directory.
@@ -83,7 +92,9 @@ class PT_SYSTEM_API DirectoryIterator
         typedef const std::string& reference;
 
         //! @brief Default constructor
-        DirectoryIterator();
+        DirectoryIterator()
+        : _impl(0)
+        { }
 
         //! @brief Constructs an iterator pointing at the file given by �a path
         DirectoryIterator(const std::string& path);
@@ -174,7 +185,8 @@ class PT_SYSTEM_API Directory
         { return _path; }
 
         //! @brief Returns the size of the directory in bytes
-        std::size_t size() const;
+        std::size_t size() const
+        { return 0; }
 
         /** @brief Returns the parent directory path
 
@@ -184,10 +196,16 @@ class PT_SYSTEM_API Directory
             returned directory path always ends with a trailing path separator
             character. (A backslash in Windows and a slash in Unix, for example.)
         */
-        std::string dirName() const;
+        std::string dirName() const
+        {
+            return FileInfo::dirName(_path);
+        }
 
         //! @brief Returns the name of the directory excluding the path.
-        std::string name() const;
+        std::string name() const
+        {
+            return FileInfo::name(_path);
+        }
 
         /** @brief Removes the directory
 
