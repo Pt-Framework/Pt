@@ -22,10 +22,10 @@ namespace win32 {
 
         std::vector<char> str(length);
         int ret = WideCharToMultiByte(CP_ACP, 0, from, -1, &str[0], length, NULL, NULL);
-		if(ret == 0)
-			throw std::runtime_error(PT_SOURCEINFO + "WideCharToMultiByte failed");
-        
-		return std::string(&str[0], length-1);
+        if(ret == 0)
+            throw std::runtime_error(PT_SOURCEINFO + "WideCharToMultiByte failed");
+
+        return std::string(&str[0], length-1);
     }
 
 
@@ -33,7 +33,8 @@ namespace win32 {
     {
         return std::string(from);
     }
-
+
+
 #ifdef _UNICODE
     inline std::wstring fromMultiByte(const std::string& from)
     {
@@ -42,10 +43,10 @@ namespace win32 {
         // condsider using a vector<wchar_t> as buffer
         wchar_t* wbuf = new wchar_t[length];
         length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, wbuf, length);
-		if(length == 0)
-			throw std::runtime_error(PT_SOURCEINFO + "MultiByteToWideChar failed");
-        
-		std::wstring wstr(wbuf, length-1);
+        if(length == 0)
+            throw std::runtime_error(PT_SOURCEINFO + "MultiByteToWideChar failed");
+
+        std::wstring wstr(wbuf, length-1);
         delete[] wbuf;
         return wstr;
     }

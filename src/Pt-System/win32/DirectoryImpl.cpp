@@ -30,15 +30,8 @@ namespace Pt {
 
 namespace System {
 
-DirectoryIteratorImpl::DirectoryIteratorImpl()
-: _refs(1),
-  _findHandle(INVALID_HANDLE_VALUE),
-  _dirty(true)
-{
-}
 
-
-DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
+DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
   _path(path),
   _findHandle(INVALID_HANDLE_VALUE),
@@ -69,18 +62,6 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
-int DirectoryIteratorImpl::ref()
-{
-    return ++_refs;
-}
-
-
-int DirectoryIteratorImpl::deref()
-{
-    return --_refs;
-}
-
-
 bool DirectoryIteratorImpl::advance()
 {
     // the current node becomes invalid now
@@ -97,12 +78,6 @@ bool DirectoryIteratorImpl::advance()
 
     _name = win32::toMultiByte( _current.cFileName );
     return true;
-}
-
-
-const std::string& DirectoryIteratorImpl::name() const
-{
-    return _name;
 }
 
 
@@ -123,7 +98,7 @@ const std::string& DirectoryIteratorImpl::path() const
             _path += win32::toMultiByte( _current.cFileName );
         }
     }
-    
+
     return _path;
 }
 
@@ -134,7 +109,7 @@ bool DirectoryImpl::exists(const std::string& path)
     std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
     DWORD file_attr = ::GetFileAttributes( str.c_str() );
-    
+
     return (file_attr != 0xffffffff) && (file_attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
@@ -156,19 +131,19 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
     std::basic_string<TCHAR> to   = win32::fromMultiByte( newName );
 
     #ifdef _WIN32_WCE
-    
+
         if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
         {
             throw SystemError("Could not move directory" , PT_SOURCEINFO);
         }
-        
+
     #else
-    
+
         if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
         {
             throw SystemError("Could not move/rename directory '" + from + "' to '" + to + "'", PT_SOURCEINFO);
         }
-            
+
     #endif
 }
 
@@ -187,16 +162,16 @@ void DirectoryImpl::remove(const std::string& path)
 void DirectoryImpl::chdir(const std::string& path)
 {
     #ifdef _WIN32_WCE
-    
+
         throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
-        
+
     #else
-    
+
         if (FALSE == ::SetCurrentDirectory(path.c_str()))
         {
             throw SystemError("Could not change current directory to '" + path + "'", PT_SOURCEINFO);
         }
-        
+
     #endif
 }
 
@@ -217,24 +192,6 @@ std::string DirectoryImpl::cwd()
 }
 
 
-std::string DirectoryImpl::curdir()
-{
-    return ".";
-}
-
-
-std::string DirectoryImpl::updir()
-{
-    return "..";
-}
-
-
-std::string DirectoryImpl::rootdir()
-{
-    return "c:\\";
-}
-
-
 std::string DirectoryImpl::tmpdir()
 {
     std::string tmpDir = Process::getEnvVar("TEMP");
@@ -246,11 +203,6 @@ std::string DirectoryImpl::tmpdir()
     return tmpDir;
 }
 
-
-std::string DirectoryImpl::sep()
-{
-    return "\\";
-}
-
 } // namespace System
+
 } // namespace Pt

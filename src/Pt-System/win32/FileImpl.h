@@ -30,10 +30,6 @@ namespace System {
 class FileImpl
 {
     public:
-        FileImpl();
-
-        ~FileImpl();
-
         static std::size_t size(const std::string& path);
 
         static void resize(const std::string& path, std::size_t n);

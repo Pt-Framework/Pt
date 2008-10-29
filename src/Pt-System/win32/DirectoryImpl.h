@@ -30,19 +30,32 @@ class DirectoryIteratorImpl
 {
     public:
         DirectoryIteratorImpl();
+        : _refs(1),
+        _findHandle(INVALID_HANDLE_VALUE),
+        _dirty(true)
+        { }
 
-        DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const std::string& path);
 
         ~DirectoryIteratorImpl();
-        
-        int ref();
 
-        int deref();
+        int ref()
+        {
+            return ++_refs;
+        }
+
+        int deref()
+        {
+            return --_refs;
+        }
 
         bool advance();
 
         const std::string& name() const;
-        
+        {
+            return _name;
+        }
+
         const std::string& path() const;
 
     private:
@@ -75,15 +88,29 @@ class DirectoryImpl
 
         static std::string cwd();
 
-        static std::string curdir();
+        std::string DirectoryImpl::curdir()
+        {
+            return ".";
+        }
 
-        static std::string updir();
 
-        static std::string rootdir();
+        std::string DirectoryImpl::updir()
+        {
+            return "..";
+        }
+
+
+        std::string DirectoryImpl::rootdir()
+        {
+            return "c:\\";
+        }
 
         static std::string tmpdir();
 
-        static std::string sep();
+        std::string DirectoryImpl::sep()
+        {
+            return "\\";
+        }
 };
 
 } // namespace System

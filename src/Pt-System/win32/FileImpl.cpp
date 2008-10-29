@@ -29,16 +29,6 @@ namespace Pt {
 
 namespace System {
 
-FileImpl::FileImpl()
-{
-}
-
-
-FileImpl::~FileImpl()
-{
-}
-
-
 std::size_t FileImpl::size(const std::string& path)
 {
     WIN32_FIND_DATA data;
@@ -53,7 +43,7 @@ std::size_t FileImpl::size(const std::string& path)
     LARGE_INTEGER li;
     li.HighPart = data.nFileSizeHigh;
     li.LowPart = data.nFileSizeLow;
-    
+
     return static_cast<std::size_t>(li.QuadPart);
 }
 
