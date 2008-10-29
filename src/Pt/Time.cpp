@@ -94,7 +94,7 @@ Time Time::addSecs(int secs) const
 
 int Time::secsTo(const Time &t) const
 {
-    return (t._msecs - _msecs) / 1000;
+    return static_cast<int>( msecsTo(t) / 1000 );
 }
 
 
@@ -117,7 +117,10 @@ Time Time::addMSecs(Pt::int64_t ms) const
 
 Pt::int64_t Time::msecsTo(const Time &t) const
 {
-    return t._msecs - _msecs;
+    if(t._msecs > _msecs)
+        return t._msecs - _msecs;
+
+    return MSecsPerDay - (_msecs - t._msecs);
 }
 
 
