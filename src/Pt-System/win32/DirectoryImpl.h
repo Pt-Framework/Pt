@@ -29,7 +29,7 @@ namespace System {
 class DirectoryIteratorImpl 
 {
     public:
-        DirectoryIteratorImpl();
+        DirectoryIteratorImpl()
         : _refs(1),
         _findHandle(INVALID_HANDLE_VALUE),
         _dirty(true)
@@ -51,7 +51,7 @@ class DirectoryIteratorImpl
 
         bool advance();
 
-        const std::string& name() const;
+        const std::string& name() const
         {
             return _name;
         }
@@ -71,11 +71,6 @@ class DirectoryIteratorImpl
 class DirectoryImpl
 {
     public:
-        DirectoryImpl();
-
-        ~DirectoryImpl();
-
-    public:
         static void create(const std::string& path);
 
         static void remove(const std::string& path);
@@ -88,26 +83,24 @@ class DirectoryImpl
 
         static std::string cwd();
 
-        std::string DirectoryImpl::curdir()
+        static std::string curdir()
         {
             return ".";
         }
 
-
-        std::string DirectoryImpl::updir()
+        static std::string updir()
         {
             return "..";
         }
 
-
-        std::string DirectoryImpl::rootdir()
+        static std::string rootdir()
         {
             return "c:\\";
         }
 
         static std::string tmpdir();
 
-        std::string DirectoryImpl::sep()
+        static std::string sep()
         {
             return "\\";
         }

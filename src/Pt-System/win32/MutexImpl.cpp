@@ -18,18 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "MutexImpl.h"
-
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/Mutex.h"
 
-
 namespace Pt {
 
 namespace System {
-
 
 MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
 : _mutex(mutex)
@@ -90,7 +86,6 @@ void MutexImpl::unlock()
         throw SystemError("Could not release mutex", PT_SOURCEINFO);
     }
 }
-
 
 } // namespace System
 

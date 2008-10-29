@@ -29,11 +29,6 @@ ConditionImpl::~ConditionImpl()
     DeleteCriticalSection(&_critSec);
 }
 
-void ConditionImpl::wait(Mutex& mtx)
-{
-    ConditionImpl::wait(mtx, INFINITE);
-}
-
 
 bool ConditionImpl::wait(Mutex& mtx, unsigned int ms )
 {

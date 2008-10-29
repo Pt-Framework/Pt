@@ -18,14 +18,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_MUTEXIMPL_H
 #define PT_MUTEXIMPL_H
 
 #include "Pt/Api.h"
 #include "Pt/System/Mutex.h"
 #include <windows.h>
-
 
 namespace Pt {
 
@@ -37,7 +35,8 @@ namespace System {
         of the Mutex class. It is used as delegate from the common
         Mutex class.
     */
-    class MutexImpl {
+    class MutexImpl 
+	{
         public:
             //! @brief Default Constructor
             MutexImpl(Mutex& mutex, Mutex::Mode mode);

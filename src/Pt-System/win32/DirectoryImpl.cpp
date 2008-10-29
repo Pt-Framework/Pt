@@ -25,11 +25,9 @@
 #include <vector>
 #include <windows.h>
 
-
 namespace Pt {
 
 namespace System {
-
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),

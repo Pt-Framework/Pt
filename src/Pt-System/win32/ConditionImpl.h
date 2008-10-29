@@ -4,15 +4,15 @@
 
 #include "Pt/Api.h"
 #include "Pt/System/Mutex.h"
-
 #include <windows.h>
-
 
 namespace Pt {
 
 namespace System {
+
         //! @brief MS Windows specific implementation of the Condition class.
-        class ConditionImpl {
+        class ConditionImpl 
+		{
         public:
             //! @brief Default Constructor
             /**
@@ -30,9 +30,12 @@ namespace System {
             /**
                 @see Condition#wait()
              */
-            void wait(Mutex& mtx);
-
-            //! @brief Wait until condition becomes signalled. Returns true if successful,
+			void wait(Mutex& mtx)
+			{
+			    ConditionImpl::wait(mtx, INFINITE);
+			}
+            
+			//! @brief Wait until condition becomes signalled. Returns true if successful,
             //! @brief false if a timeout occurred.
             /**
                 @see Condition#wait()
