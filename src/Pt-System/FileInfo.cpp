@@ -70,7 +70,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fi)
 }
 
 
-std::string FileInfo::name(const std::string path)
+std::string FileInfo::name(const std::string& path)
 {
     std::string::size_type pos = path.rfind( DirectoryImpl::sep() );
 
@@ -94,7 +94,7 @@ std::string FileInfo::dirName(const std::string& path)
     // directory. So an empty path is returned.
     if (pos == std::string::npos)
     {
-        return "";
+        return std::string();
     }
 
     // Include trailing separator to be able to distinguish between no 

@@ -88,7 +88,7 @@ class PT_SYSTEM_API FileInfo
             return FileInfo::dirName(_path);
         }
 
-        static std::string name(const std::string path);
+        static std::string name(const std::string& path);
 
         /** @brief Returns the parent directory path
 
