@@ -96,6 +96,9 @@ namespace System {
              */
             void wait( Mutex& mtx);
 
+            void wait( MutexLock& m)
+            { this->wait( m.mutex() ); }
+
             //! @brief Wait until condition becomes signalled. Returns true if successful,
             //! @brief false if a timeout occurred.
             /**
@@ -111,6 +114,9 @@ namespace System {
                 a timeout occurred
              */
             bool wait( Mutex& mtx, unsigned int ms);
+
+            void wait( MutexLock& m, unsigned int ms)
+            { this->wait( m.mutex(), ms ); }
 
             //! @brief Unblock a single blocked thread.
             void signal();

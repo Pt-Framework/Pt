@@ -87,6 +87,8 @@ namespace System {
             /// unlocked when the lock-count is zero.
             void unlock();
 
+            bool unlockNoThrow();
+
             //! @brief Returns if Mutex is recursive or non-recursive
             Mode mode() const
             { return _mode;}
@@ -153,12 +155,8 @@ namespace System {
              */
             ~MutexLock()
             {
-                try
-                {
-                    if(_isLocked)
-                        _mutex.unlock();
-                }
-                catch(...) {}
+                if(_isLocked)
+                    _mutex.unlockNoThrow();
             }
 
             void lock()
@@ -240,6 +238,8 @@ class PT_SYSTEM_API ReadWriteMutex : public NonCopyable
         //! @brief Releases the read or write lock.
         void unlock();
 
+        bool unlockNoThrow();
+
     private:
         //! @internal
         class ReadWriteMutexImpl* _impl;
@@ -259,13 +259,8 @@ class ReadLock
 
         ~ReadLock()
         {
-            try
-            {
-                if(_locked)
-                    this->unlock();
-            }
-            catch(...)
-            {}
+            if(_locked)
+                _mutex.unlockNoThrow();
         }
 
         void lock()
@@ -286,6 +281,9 @@ class ReadLock
             }
         }
 
+        ReadWriteMutex& mutex()
+        { return _mutex; }
+
     private:
         ReadWriteMutex& _mutex;
         bool _locked;
@@ -305,13 +303,8 @@ class WriteLock
 
         ~WriteLock()
         {
-            try
-            {
-                if(_locked)
-                    this->unlock();
-            }
-            catch(...)
-            {}
+            if(_locked)
+                _mutex.unlockNoThrow();
         }
 
         void lock()
@@ -331,6 +324,9 @@ class WriteLock
                 _locked = false;
             }
         }
+
+        ReadWriteMutex& mutex()
+        { return _mutex; }
 
     private:
         ReadWriteMutex& _mutex;

@@ -56,6 +56,19 @@ void Mutex::unlock()
 }
 
 
+bool Mutex::unlockNoThrow()
+{
+    try
+    {
+        _impl->unlock();
+        return true;
+    }
+    catch(...)
+    {}
+
+    return false;
+}
+
 ReadWriteMutex::ReadWriteMutex()
 {
     _impl = new ReadWriteMutexImpl();
@@ -95,6 +108,19 @@ bool ReadWriteMutex::tryWriteLock()
 void ReadWriteMutex::unlock()
 {
     _impl->unlock();
+}
+
+bool ReadWriteMutex::unlockNoThrow()
+{
+    try
+    {
+        _impl->unlock();
+        return true;
+    }
+    catch(...)
+    {}
+
+    return false;
 }
 
 }
