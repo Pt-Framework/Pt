@@ -36,7 +36,6 @@ Connection::Connection(IConnectable& sender, Slot* slot)
     _data = data.get();
     _data->setValid(false);
 
-
     sender.opened(*this);
     slot->opened(*this);
    _data->setValid(true);

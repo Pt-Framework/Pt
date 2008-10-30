@@ -79,7 +79,7 @@ namespace System {
         friend class Timer;
 
         public:
-            static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
+            static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
             //! @brief Destructor
             virtual ~SelectorBase();
@@ -118,7 +118,7 @@ namespace System {
 
                 @param msecs timeout in miliseconds
             */
-            bool wait(unsigned int msecs = WaitInfinite);
+            bool wait(std::size_t msecs = WaitInfinite);
 
             /** @brief Wakes the selctor from waiting
 
@@ -144,7 +144,7 @@ namespace System {
 
             virtual void onChanged(Selectable& s) = 0;
 
-            virtual bool onWait(unsigned int msecs) = 0;
+            virtual bool onWait(std::size_t msecs) = 0;
 
             virtual void onWake() = 0;
 
@@ -156,7 +156,10 @@ namespace System {
             bool updateTimer(size_t& timeout);
 
             //! @internal
-            std::multimap<Timespan, Timer*> _timers;
+            typedef std::multimap<Timespan, Timer*> TimerMap;
+
+            //! @internal
+            TimerMap _timers;
 
             void* _reserved;
     };
@@ -177,7 +180,7 @@ namespace System {
 
             void onChanged(Selectable&);
 
-            bool onWait(unsigned int msecs = WaitInfinite);
+            bool onWait(std::size_t msecs = WaitInfinite);
 
             void onWake();
 

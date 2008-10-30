@@ -79,7 +79,7 @@ void SelectorBase::onTimerChanged(Timer& timer)
 }
 
 
-bool SelectorBase::updateTimer(size_t& lowestTimeout)
+bool SelectorBase::updateTimer(std::size_t& lowestTimeout)
 {
     if( _timers.empty() )
         return false;
@@ -144,7 +144,7 @@ bool SelectorBase::updateTimer(size_t& lowestTimeout)
 }*/
 
 
-bool SelectorBase::wait(unsigned int msecs)
+bool SelectorBase::wait(std::size_t msecs)
 {
     size_t timerTimeout = Selector::WaitInfinite;
 
@@ -201,14 +201,6 @@ Selector::~Selector()
 }
 
 
-
-/*void Selector::setParent(Application* app)
-{
-    _impl->setParent(app);
-}*/
-
-
-
 void Selector::onAdd( Selectable& selectable )
 {
     _impl->add(selectable);
@@ -227,7 +219,7 @@ void Selector::onChanged(Selectable& s)
 }
 
 
-bool Selector::onWait(unsigned int msecs)
+bool Selector::onWait(std::size_t msecs)
 {
     return _impl->wait(msecs);
 }
