@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace System {
 
-    class PT_SYSTEM_API FileInfoImpl
+    class FileInfoImpl
     {
         public:
             static FileInfo::Type getType(const std::string& path)

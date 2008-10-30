@@ -53,11 +53,11 @@ class DirectoryIteratorImpl
 
         const std::string& path() const;
 
-		int ref()
-		{ return ++_refs; }
+        int ref()
+        { return ++_refs; }
 
-		int deref()
-		{ return --_refs; }
+        int deref()
+        { return --_refs; }
 
         bool advance();
 
@@ -71,7 +71,7 @@ class DirectoryIteratorImpl
 };
 
 
-class PT_API DirectoryImpl
+class DirectoryImpl
 {
     public:
         static void create(const std::string& path);

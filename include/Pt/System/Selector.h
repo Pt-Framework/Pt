@@ -21,9 +21,9 @@
 #ifndef PT_SYSTEM_SELECTOR_H
 #define PT_SYSTEM_SELECTOR_H
 
-#include <Pt/Signal.h>
 #include <Pt/Timespan.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <map>
 
@@ -72,7 +72,8 @@ namespace System {
         continously. The %EventLoop and %Application classes provide the same API
         as the Selector itself.
     */
-    class PT_SYSTEM_API SelectorBase : public NonCopyable
+    class PT_SYSTEM_API SelectorBase : public Connectable
+                                     , protected NonCopyable
     {
         friend class Selectable;
         friend class Timer;

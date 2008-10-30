@@ -160,7 +160,6 @@ bool File::exists(const std::string& path)
     return FileInfo::getType(path) == FileInfo::File;
 }
 
-
 } // namespace System
 
 } // namespace Pt

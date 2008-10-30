@@ -16,31 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/Thread.h"
 #include <pthread.h>
-
 
 namespace Pt {
 
 namespace System {
 
-    class ThreadImpl {
-        public:
-            enum Priority
-            {
-                LowestPriority  = 0,
-                LowPriority     = 1,
-                NormalPriority  = 2,
-                HighPriority    = 3,
-                HighestPriority = 4,
-                InheritPriority = 5
-            };
-
+    class ThreadImpl
+    {
         public:
             ThreadImpl(Thread& obj, Thread::Mode mode);
 
-            ~ThreadImpl();
+            ~ThreadImpl()
+            {}
 
             Thread::Mode mode() const
             { return _mode; }
@@ -49,11 +38,6 @@ namespace System {
             { return _state; }
 
             void detach();
-
-            void setPriority(Priority prio);
-
-            Priority priority() const
-            { return _priority; }
 
             void start(Thread::Mode mode);
 
@@ -79,7 +63,6 @@ namespace System {
         private:
             Thread& _thread;
             pthread_t _id;
-            Priority _priority;
             Thread::State _state;
             Thread::Mode _mode;
     };

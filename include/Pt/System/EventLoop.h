@@ -41,7 +41,6 @@ namespace System {
      */
     class PT_SYSTEM_API EventLoopBase : public SelectorBase
                                       , public EventSink
-                                      , public Connectable
     {
         public:
             static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);

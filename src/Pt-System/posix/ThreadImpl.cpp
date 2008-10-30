@@ -16,32 +16,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "ThreadImpl.h"
-
 #include "Pt/System/SystemError.h"
-
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
-
 
 namespace Pt {
 
 namespace System {
 
-
 ThreadImpl::ThreadImpl(Thread& obj, Thread::Mode mode)
 : _thread(obj),
   _id(0),
-  _priority(InheritPriority),
   _state(Thread::Ready),
   _mode(mode)
-{
-}
-
-
-ThreadImpl::~ThreadImpl()
 {
 }
 
@@ -57,36 +46,6 @@ void ThreadImpl::detach()
         throw SystemError("Could not detach thread. ", PT_SOURCEINFO);
 
     _mode = Thread::Detached;
-}
-
-
-void ThreadImpl::setPriority(Priority prio)
-{
-    _priority = prio;
-
-    // only save new priority if thread is not running
-    if(_state != Thread::Running) {
-        return;
-    }
-
-    // TODO: InheritPriority ???
-
-    sched_param sched;
-    int policy = 0;
-
-    if( 0 !=  pthread_getschedparam(_id, &policy, &sched))
-		throw SystemError("Could not get schedul parameter.", PT_SOURCEINFO);
-
-    int priomin = sched_get_priority_min(policy);
-    int priomax = sched_get_priority_max(policy);
-
-    // currently we have 5 priorities, therefore divide range by 4
-    int step = (priomax - priomin) / 4;
-    int n = step * _priority;
-    sched.sched_priority = std::min(priomax, priomin+n);
-
-    if( 0 !=  pthread_setschedparam(_id, policy, &sched) )
-        throw SystemError("Could not set priority.", PT_SOURCEINFO);
 }
 
 
@@ -118,11 +77,6 @@ void ThreadImpl::start(Thread::Mode mode)
     }
 
     _state = Thread::Running;
-
-    // setPriority() might have been called before start()
-    if(_priority != InheritPriority) {
-        this->setPriority(_priority);
-    }
 }
 
 
@@ -173,7 +127,6 @@ void ThreadImpl::sleep(unsigned int ms)
     usleep(ms * 1000);
 }
 
-
-
 }
+
 }
