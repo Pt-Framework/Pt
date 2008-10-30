@@ -160,7 +160,7 @@ namespace System {
 
             /** @brief Wait until a joinable thread has exited.
             */
-            void wait();
+            void join();
 
             /** @brief Terminates the thread.
 
@@ -212,6 +212,35 @@ namespace System {
             Callable<void>* _cb;
     };
 
+/*
+    class AttachedThread : public Thread
+    {
+        public:
+            AttachedThread(const Callable<void>& cb);
+            ~AttachedThread();
+
+            void start();
+            void join();
+    };
+
+
+    class DetachedThread : public Thread
+    {
+        public:
+            DetachedThread& create(const Callable<void>& cb);
+            DetachedThread& create();
+
+            void start();
+
+        protected:
+            virtual void run();
+
+            DetachedThread();
+
+        private:
+            ~DetachedThread();
+    };
+*/
 } // !namespace System
 
 } // !namespace Pt

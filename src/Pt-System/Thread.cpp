@@ -55,7 +55,7 @@ Thread::Thread(Mode mode)
 Thread::~Thread()
 {
     if( this->joinable() && this->state() == Running )
-        this->wait();
+        this->join();
 
     delete _impl;
     delete _cb;
@@ -95,7 +95,7 @@ void Thread::start()
 }
 
 
-void Thread::wait()
+void Thread::join()
 {
     if( this->detached() )
         throw std::logic_error(PT_SOURCEINFO + "Can not wait on a detached thread");
