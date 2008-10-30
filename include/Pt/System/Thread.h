@@ -221,6 +221,7 @@ namespace System {
 
             void start();
             void join();
+            void terminate();
     };
 
 
