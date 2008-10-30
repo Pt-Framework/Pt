@@ -139,9 +139,9 @@ namespace System {
 
                 \param m the enclosing Mutex object
             */
-            MutexLock(Mutex& m, bool doLock = true)
+            MutexLock(Mutex& m, bool doLock = true, bool isLocked = false)
             : _mutex(m)
-            , _isLocked(false)
+            , _isLocked(isLocked)
             {
                 if(doLock)
                     this->lock();
@@ -249,9 +249,9 @@ class PT_SYSTEM_API ReadWriteMutex : public NonCopyable
 class ReadLock
 {
     public:
-        ReadLock(ReadWriteMutex& m, bool doLock = true)
+        ReadLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
-        , _locked(false)
+        , _locked(isLocked)
         {
             if(doLock)
                 this->lock();
@@ -295,9 +295,9 @@ class ReadLock
 class WriteLock
 {
     public:
-        WriteLock(ReadWriteMutex& m, bool doLock = true)
+        WriteLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
-        , _locked(false)
+        , _locked(isLocked)
         {
             if(doLock)
                 this->lock();
@@ -404,9 +404,9 @@ private:
 class SpinLock
 {
     public:
-        SpinLock(SpinMutex& m, bool doLock = true)
+        SpinLock(SpinMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
-        , _locked(false)
+        , _locked(isLocked)
         {
             if(doLock)
                 this->lock();
