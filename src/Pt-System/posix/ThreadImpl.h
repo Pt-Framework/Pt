@@ -56,6 +56,10 @@ namespace System {
             {
                 ThreadImpl* impl = (ThreadImpl*)arg;
                 impl->_thread.run();
+
+                // impl->callable->call();
+                // if detached
+                //     delete impl;
                 impl->_state = Thread::Finished;
                 return 0;
             }

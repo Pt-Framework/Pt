@@ -21,6 +21,7 @@
 
 #include <Pt/NonCopyable.h>
 #include <Pt/Callable.h>
+#include <Pt/Method.h>
 #include <Pt/System/Api.h>
 
 namespace Pt {
@@ -101,7 +102,7 @@ namespace System {
     {
         friend class ThreadImpl;
 
-        private:
+        protected:
             class ThreadImpl* _impl;
 
         public:
@@ -213,35 +214,70 @@ namespace System {
     };
 
 /*
+    // TODO: pass callable to thread_entry
     class AttachedThread : public Thread
     {
         public:
-            AttachedThread(const Callable<void>& cb);
-            ~AttachedThread();
+            AttachedThread(const Callable<void>& cb)
+            : Thread(cb)
+            {}
+
+            ~AttachedThread()
+            { join(); }
 
             void start();
-            void join();
-            void terminate();
+
+            void join()
+            {
+                //if( !_joined )
+                //    _impl->join();
+            }
+
+            void terminate()
+            {
+                //if( !_joined )
+                //    _impl->terminate();
+            }
+
+        private:
+            bool _joined;
     };
 
 
     class DetachedThread : public Thread
     {
         public:
-            DetachedThread& create(const Callable<void>& cb);
-            DetachedThread& create();
+            DetachedThread& create(const Callable<void>& cb)
+            {
+                DetachedThread* thread = new DetachedThread(cb);
+                return *thread;
+            }
+
+            DetachedThread& create()
+            {
+                DetachedThread* thread = new DetachedThread();
+                return *thread;
+            }
 
             void start();
 
         protected:
             virtual void run();
 
-            DetachedThread();
+            DetachedThread(const Callable<void>& cb)
+            : Thread(cb)
+            {}
+
+            DetachedThread()
+            : Thread( callable(*this, &DetachedThread::run) )
+            {}
 
         private:
-            ~DetachedThread();
+            ~DetachedThread()
+            {}
     };
 */
+
 } // !namespace System
 
 } // !namespace Pt
