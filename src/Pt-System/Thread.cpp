@@ -58,6 +58,7 @@ Thread::~Thread()
         this->wait();
 
     delete _impl;
+    delete _cb;
 }
 
 
