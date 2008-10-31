@@ -213,8 +213,7 @@ namespace System {
             Callable<void>* _cb;
     };
 
-
-    // TODO: pass callable to thread_entry
+/*
     class AttachedThread : public Thread
     {
         public:
@@ -247,35 +246,48 @@ namespace System {
     class DetachedThread : public Thread
     {
         public:
-            DetachedThread& create(const Callable<void>& cb)
-            {
-                DetachedThread* thread = new DetachedThread(cb);
-                return *thread;
-            }
-
-            DetachedThread& create()
-            {
-                DetachedThread* thread = new DetachedThread();
-                return *thread;
-            }
+            DetachedThread* create();
 
             void start();
 
         protected:
-            virtual void run();
-
-            DetachedThread(const Callable<void>& cb)
-            : Thread(cb)
-            {}
+            virtual void run() = 0;
 
             DetachedThread()
-            : Thread( callable(*this, &DetachedThread::run) )
+            : Thread( callable(*this, &DetachedThread::exec), Detached )
             {}
 
-        private:
             ~DetachedThread()
             {}
+
+            virtual void destroy() = 0;
+
+        private:
+            void exec()
+            {
+                this->run();
+                delete this;
+            }
     };
+
+    class MyThread : public DetachedThread
+    {
+        public:
+            MyThread()
+            : n(0)
+            {}
+
+            void destroy()
+            { delete this; }
+
+        protected:
+            virtual void run()
+            { n++; }
+
+        private:
+            int n;
+    };
+*/
 
 } // !namespace System
 
