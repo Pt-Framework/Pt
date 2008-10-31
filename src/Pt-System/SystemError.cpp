@@ -42,7 +42,12 @@ SystemError::SystemError(const std::string & what, const SourceInfo& si)
 SystemError::~SystemError() throw()
 { }
 */
-
+/*
+void SystemError::throwIt(const std::string& what, const SourceInfo& si)
+{
+    throw SystemError(what, si);
+}
+*/
 } // namespace System
 
 } // namespace Ptv

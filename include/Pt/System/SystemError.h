@@ -47,6 +47,8 @@ namespace System {
 
             ~SystemError() throw()
             {}
+
+            //static void throwIt(const std::string& what, const SourceInfo& si);
     };
 
 } // namespace System

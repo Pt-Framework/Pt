@@ -213,7 +213,7 @@ namespace System {
             Callable<void>* _cb;
     };
 
-/*
+
     // TODO: pass callable to thread_entry
     class AttachedThread : public Thread
     {
@@ -276,7 +276,6 @@ namespace System {
             ~DetachedThread()
             {}
     };
-*/
 
 } // !namespace System
 
