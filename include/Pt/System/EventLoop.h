@@ -142,7 +142,7 @@ namespace System {
 
             virtual void onRun();
 
-            virtual bool onWait(unsigned int msecs);
+            virtual bool onWait(std::size_t msecs);
 
             virtual void onWake();
 

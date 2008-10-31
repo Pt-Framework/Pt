@@ -131,7 +131,7 @@ void EventLoop::onRun()
 }
 
 
-bool EventLoop::onWait(unsigned int msecs)
+bool EventLoop::onWait(std::size_t msecs)
 {
     if( _selector->wait(msecs) )
     {
