@@ -57,7 +57,7 @@ class TestThread
         ~TestThread()
         {
             // NOTE: must end thread before loop is destructed
-            _thread.wait();
+            _thread.join();
         }
 
     private:

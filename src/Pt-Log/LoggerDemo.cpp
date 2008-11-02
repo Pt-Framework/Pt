@@ -98,12 +98,12 @@ int main( int argc, char* argv[] )
         LogThread lt4("thread 4", "LoggerDemo2");
         lt4.start();
 
-        lt1.wait();
-        lt2.wait();
-        lt3.wait();
-        lt4.wait();
+        lt1.join();
+        lt2.join();
+        lt3.join();
+        lt4.join();
 
-        lt0.wait();
+        lt0.join();
         return 0;
     }
     catch(const std::exception& e)
