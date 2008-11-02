@@ -43,7 +43,7 @@ SerialChannel::SerialChannel()
 SerialChannel::~SerialChannel()
 {
     _threadLoop.exit();
-    _thread.wait();
+    _thread.join();
     this->close();
 }
 

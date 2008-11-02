@@ -118,7 +118,7 @@ void SerialDeviceImpl::close()
     CloseHandle( handle() );
 
     // Wait for comm event thread termination
-    _eventThread->wait();
+    _eventThread->join();
     delete _eventThread;
     _eventThread = 0;
 
