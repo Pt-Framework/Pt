@@ -105,7 +105,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         HANDLE _ioReady;
         HANDLE _beginWait;
         DCB _orgCommState;        
-        Thread* _eventThread;  
+        AttachedThread* _thread;  
         bool _terminateThread;
         DWORD _rlen;
         size_t _wlen;

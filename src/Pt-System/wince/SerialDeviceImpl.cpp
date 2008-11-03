@@ -30,7 +30,7 @@ namespace System{
 
 SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : _device(device)
-, _eventThread(0)
+, _thread(0)
 , _terminateThread(false)
 , _ioReady(0)
 , _beginWait(0)
@@ -87,8 +87,8 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 
         if (mode & IODevice::Async)
         {
-            _eventThread = new Thread( callable(*this, &SerialDeviceImpl::run) );
-            _eventThread->start();
+            _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
+            _thread->start();
         }
     }
     catch( ... )
@@ -118,9 +118,9 @@ void SerialDeviceImpl::close()
     CloseHandle( handle() );
 
     // Wait for comm event thread termination
-    _eventThread->join();
-    delete _eventThread;
-    _eventThread = 0;
+    _thread->join();
+    delete _thread;
+    _thread = 0;
 
     CloseHandle( _ioReady );
     CloseHandle( _beginWait );

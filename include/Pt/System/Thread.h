@@ -63,6 +63,14 @@ namespace System {
             };
 
         protected:
+            /** @brief Default Constructor
+
+                Constructs a thread object without a thread entry. Use
+				the init() method to set a callable. The thread will 
+				terminate immediately, if no thread entry is set.
+            */
+			Thread();
+
             /** @brief Contructs a thread with a thread entry
 
                 Constructs a thread object to execute the %Callable \a cb.
@@ -78,6 +86,13 @@ namespace System {
                 but when start() is called.
             */
             Thread(EventLoopBase& loop);
+
+			/** @brief Initialize with a thread entry
+
+                The callable \a cb will be used as the thread entry. If 
+				another thread entry was set previously it will be replaced.
+            */
+			void init(const Callable<void>& cb);
 
         public:
             /** @brief Destructor
@@ -271,8 +286,9 @@ namespace System {
                 overloaded ti call delete.
             */
             DetachedThread()
-            : Thread( callable(*this, &DetachedThread::exec) )
+            : Thread()
             {
+				Thread::init( callable(*this, &DetachedThread::exec) );
                 Thread::detach();
             }
 

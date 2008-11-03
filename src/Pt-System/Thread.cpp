@@ -26,11 +26,20 @@ namespace Pt {
 
 namespace System {
 
+Thread::Thread()
+: _state(Thread::Ready)
+, _impl(0)
+{
+    _impl = new ThreadImpl();
+}
+
+
 Thread::Thread(const Callable<void>& cb)
 : _state(Thread::Ready)
 , _impl(0)
 {
-    _impl = new ThreadImpl(cb);
+    _impl = new ThreadImpl();
+	_impl->init(cb);
 }
 
 
@@ -38,13 +47,20 @@ Thread::Thread(EventLoopBase& loop)
 : _state(Thread::Ready)
 , _impl(0)
 {
-    _impl = new ThreadImpl( callable(loop, &EventLoopBase::run) );
+    _impl = new ThreadImpl();
+	_impl->init( callable(loop, &EventLoopBase::run) );
 }
 
 
 Thread::~Thread()
 {
     delete _impl;
+}
+
+
+void Thread::init(const Callable<void>& cb)
+{
+	_impl->init(cb);
 }
 
 

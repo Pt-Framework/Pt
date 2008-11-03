@@ -25,36 +25,41 @@ namespace System {
     class ThreadImpl 
 	{
         public:
-            ThreadImpl(Thread& obj, Thread::Mode mode);
+            ThreadImpl()
+			: _cb(0)
+			, _handle(0)
+			, _id(0)
+			{}
 
             ~ThreadImpl();
 
-            Thread::Mode mode() const
-            { return _mode; }
+			void init(const Callable<void>& cb);
 
-            Thread::State state() const
-            { return _state; }
+            void start();
 
-            void start(Thread::Mode mode);
+			void detach()
+			{ this->close(); }
 
-            void detach();
-
-            void wait();
-
-            static void exit();
+            void join();
 
             void terminate();
 
-            static void yield();
+            static void exit();
 
-            static void sleep(unsigned int ms);
+			static void yield()
+			{ sleep(0);	}
+
+			static void sleep(unsigned int ms);
+
+            const Callable<void>* cb()
+            { return _cb; }
 
         public:
             static threadid_t WINAPI entry(void* arg)
             {
                 ThreadImpl* impl = (ThreadImpl*)arg;
-                impl->_thread.run();
-                impl->_state = Thread::Finished;
+                const Callable<void>* cb = impl->cb();
+				if(cb) cb->call();
                 return 0;
             }
 
@@ -62,11 +67,9 @@ namespace System {
             void close();
 
         private:
-            Thread& _thread;
+            const Callable<void>* _cb;
             HANDLE  _handle;
             threadid_t _id;
-            Thread::State _state;
-            Thread::Mode _mode;
     };
 
 } // namespace System

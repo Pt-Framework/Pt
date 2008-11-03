@@ -2,7 +2,6 @@
  *   Copyright (C) 2006 by PTV AG                                          *
  *                                                                         *
  ***************************************************************************/
-
 #include "ThreadImpl.h"
 #include "Pt/Types.h"
 #include "Pt/System/SystemError.h"
@@ -11,21 +10,21 @@ namespace Pt {
 
 namespace System {
 
-ThreadImpl::ThreadImpl(Thread& obj, Thread::Mode mode)
-: _thread(obj),
-  _handle(0),
-  _id(0),
-  _state(Thread::Ready),
-  _mode(mode)
-{
-}
-
-
 ThreadImpl::~ThreadImpl()
 {
     this->close();
+	delete _cb;
 }
 
+
+void ThreadImpl::init(const Callable<void>& cb)
+{
+	if(_cb)
+	{
+		delete _cb;
+		_cb = cb.clone();
+	}
+}
 
 void ThreadImpl::close()
 {
@@ -37,7 +36,7 @@ void ThreadImpl::close()
 }
 
 
-void ThreadImpl::start(Thread::Mode mode) 
+void ThreadImpl::start() 
 {
     SIZE_T stackSize = 0;
 
@@ -52,29 +51,24 @@ void ThreadImpl::start(Thread::Mode mode)
         _id = 0;
         throw SystemError("Thread creation failed", PT_SOURCEINFO);
     }
-
-    _state = Thread::Running;
-
-    if(_mode == Thread::Detached)
-        this->close();
 }
 
 
-void ThreadImpl::detach()
-{
-    // simply close the thread control handle.
-    this->close();
-    _mode = Thread::Detached;
-}
-
-
-void ThreadImpl::wait()
+void ThreadImpl::join()
 {
     DWORD status = ::WaitForSingleObject(_handle, INFINITE);
     if( status != WAIT_OBJECT_0 )
         throw SystemError("Could not join thread", PT_SOURCEINFO);
 
-    _state = Thread::Finished;
+    _id = 0;
+}
+
+
+void ThreadImpl::terminate()
+{
+    if( ! TerminateThread(_handle, 0) )
+        throw SystemError("Could not kill thread.", PT_SOURCEINFO);
+
     _id = 0;
 }
 
@@ -91,32 +85,12 @@ void ThreadImpl::exit()
 }
 
 
-void ThreadImpl::terminate()
-{
-    if( ! TerminateThread(_handle, 0) )
-        throw SystemError("Could not kill thread.", PT_SOURCEINFO);
-
-    _state = Thread::Finished;
-    _id = 0;
-}
-
-
-void ThreadImpl::yield()
-{
-#ifdef _WIN32_WCE
-    ::Sleep(0);
-#else
-    ::SleepEx(0, FALSE);
-#endif
-}
-
-
 void ThreadImpl::sleep(unsigned int ms)
 {
 #ifdef _WIN32_WCE
-    ::Sleep(ms);
+	::Sleep(ms);
 #else
-    ::SleepEx(ms, FALSE);
+	::SleepEx(ms, FALSE);
 #endif
 }
 
