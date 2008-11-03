@@ -32,100 +32,58 @@ namespace System {
 
     /** @brief Platform independent threads
 
+        This is a thread base class, which is flexible, but hard to use. Try
+        to use either an AttachedThread or a DetachedThread instead !!!
+
         A Thread represents a separate thread of control within the program.
         It shares data with all the other threads within the process but
         executes independently in the way that a separate program does on a
-        multitasking operating system. Threads can either run as Joinable,
-        so you can wait for them, or be Detached, so they run indepentently.
+        multitasking operating system. Each thread gets its own stack, which
+        size is determinated by the operating system.
 
-        The execution of a thread starts either by calling its virtual method
-        Thread::run(), which can be reimplemented in a derived class.
-        Alternatively, an instance of Runnable object can be passed to the
-        constructor. To create your own threads, subclass %Runnable and
-        reimplement run().
+        The execution of a thread starts either by calling the start() which
+        calls the thread entry object passed to the constructor. Threads can
+        either be joined, so you can wait for them, or be detached, so they
+        run indepentently. A thread can be forced to terminate by calling
+        terminate(), however, doing so is dangerous and discouraged.
 
-        For example:
-        @code
-        class MyRunnable : public Runnable
-        {
-            public:
-                void run();
-        };
-
-        MyRunnable runnable;
-        Thread     thread(runnable);
-        thread.start();
-        @endcode
-
-        A Thread can be easily given its own Eventloop, since the EventLoop
-        is a %Runnable. This makes it possible to use certain classes that
-        require the presence of an %EventLoop such as a Timer or perform
-        I/O multiplexing in a dedicated thread. At the same time the %Thread
-        can be controlled by sending it %Events.
-
-        @code
-        class AsyncObject : public Pt::System::Thread
-        {
-            public:
-                AsyncObject()
-                : Thread( Pt::System::Thread::Joinable)
-                {
-                    Pt::System::Thread::setRunnable(_loop);
-                    connect(_loop.event, *this, AsyncObject::processEvent);
-                }
-
-                AsyncObject()
-                {
-                    _loop.exit();
-                    Pt::System::Thread::wait();
-                }
-
-                // callback to handle events
-                void processEvent(Pt& Event& ev);
-
-            private:
-                EventLoop _loop;
-        };
-        @endcode
-
-        Each thread gets its own stack, which size is determinated by the
-        operating system. A thread can be forced to terminate by calling
-        Thread::terminate(), however, doing so is dangerous and discouraged.
-        Thread also provides platform independent sleep function.
-        Thread::start begins the execution by calling the reimplemented
-        Thread::run member function. If the Thread is Joinable, it can be
-        waited on by calling Thread::wait on it.
-        A thread can give up CPU time either by calling Thread::yield() or
-        Thread::sleep() to stop for a specified periode of time.
+        Thread also provides a platform independent sleep function. A thread
+        can give up CPU time either by calling Thread::yield() or sleep() to
+        stop for a specified periode of time.
     */
     class PT_SYSTEM_API Thread : protected NonCopyable
     {
         public:
+            //! @brief Status of a thread
             enum State
             {
-                Ready    = 0,
-                Running  = 1,
-                Finished = 2
+                Ready    = 0, //!< Thread was not started yet
+                Running  = 1, //!< Thread was started
+                Finished = 2  //!< Thread has Finished
             };
 
         protected:
-            /** @brief Contruct a thread with a runnable and mode.
+            /** @brief Contructs a thread with a thread entry
 
-                Constructs a thread object to execute the \a runnable. The
-                Thread is not started on construction, but when Thread::start()
-                is called. The \a mode can either be Detached or Joinable.
+                Constructs a thread object to execute the %Callable \a cb.
+                The Thread is not started on construction, but when start()
+                is called.
             */
             Thread(const Callable<void>& cb);
 
+            /** @brief Contructs a thread with an event loop
+
+                Constructs a thread object to run the event loop \a loop in
+                a separate thread. The Thread is not started on construction,
+                but when start() is called.
+            */
             Thread(EventLoopBase& loop);
 
         public:
             /** @brief Destructor
 
-                Deleting a running joinable Thread (i.e. state is Running )
-                will block until the thread ha finished. You can wait()
-                on a thread to make sure that it has finished. Detached
-                Threads do not depend on the Thread object lifetime.
+                The thread must either be joined or detached before the
+                destructor is called.
             */
             virtual ~Thread();
 
@@ -135,89 +93,206 @@ namespace System {
 
             /** @brief Starts the thread
 
-                This starts the execution of the thread. This means Thread::run()
-                will be called, which needs to be overriden in derived classes.
-                Returns a self reference for error checking
+                This starts the execution of the thread by calling the thread
+                entry. Throws a SystemError on failure.
             */
             void start();
 
-            /** @brief Exits a joinable thread.
+            /** @brief Exits athread.
 
-                This function is meant to be called from within a thread. Thread::exit()
-                is implicitly called when Thread::run() returns.
+                This function is meant to be called from within a thread to
+                leave the thread at once. Implicitly called when the thread
+                entry is left. Throws a SystemError on failure.
             */
             static void exit();
 
             /** @brief Yield CPU time
 
-                This function is meant to be called from within a thread.
+                This function is meant to be called from within a thread to
+                give up the CPU to other threads. Throws a SystemError on
+                failure.
             */
             static void yield();
 
             /** @brief Sleep for some time
 
-                The calling thread sleeps for \a ms milliseconds.
+                The calling thread sleeps for \a ms milliseconds. Throws a
+                SystemError on failure.
             */
             static void sleep(unsigned int ms);
 
         protected:
+            //! @brief Detaches the thread
             void detach();
 
+            //! @brief Joins the thread
             void join();
 
+            //! @brief Joins the thread
             bool joinNoThrow();
 
+            //! @brief Terminates the thread
             void terminate();
 
         private:
+            //! @internal
             Thread::State _state;
+
+            //! @internal
             class ThreadImpl* _impl;
     };
 
+    /** @brief Platform independent joinable thread
 
+		%AttachedThreads are threads, which are managed by the creator,
+		and are normally created on the stack. The creator must wait,
+		until the thread terminates either explicitly by calling join()
+		or implicitly by the destructor. The life-time of the callable
+		object must exceed the life-time of the thread. Mind the order
+		of destruction if the %AttachedThread is a member variable of
+		a class.
+		
+		Example:
+		\code
+		struct Operation
+		{
+			void run()
+			{
+				// implement, whatever needs to be done in parallel
+			}
+		};
+
+		int main()
+		{
+			Operation op;
+			MyThread thread( Pt::callable(op, &Operation::run) );
+			thread.start();
+
+			// the thread runs and we can do something else in parallel
+
+			doMoreWork();
+
+			// the thread's destructor waits for the thread to join
+			// the op object outlives the thread object
+			return 0;
+		}
+		\endcode
+    */
     class AttachedThread : public Thread
     {
         public:
+            /** @brief Contructs a thread with a thread entry
+
+                Constructs a thread object to execute the %Callable \a cb.
+                The Thread is not started on construction, but when start()
+                is called.
+            */
             AttachedThread(const Callable<void>& cb)
             : Thread(cb)
             {}
 
+            /** @brief Contructs a thread with an event loop
+
+                Constructs a thread object to run the event loop \a loop in
+                a separate thread. The Thread is not started on construction,
+                but when start() is called.
+            */
             AttachedThread(EventLoopBase& loop)
             : Thread(loop)
             {}
 
+			//! @brief Joins the thread, if not already joined.
             ~AttachedThread()
             {
                 Thread::joinNoThrow();
             }
 
+			/** @brief Wait explicitly for the thread to terminate.
+
+				Join() is called automatically in the destructor if not
+				already called. Throws SystemError on failure
+			*/
             void join()
             {
                 Thread::join();
             }
 
+			/** @brief Terminates the thread.
+
+				Forces the thread to terminate is dangerous and discouraged.
+			*/
             void terminate()
             {
                 Thread::terminate();
             }
     };
 
+	/** @brief Platform independent detached thread
 
+	    A detached thread runs just for its own. The user does not need
+	    (actually can not even) wait for the thread to stop. The object
+	    is normally created on the heap.
+
+	    Example:
+		\code
+		class MyThread : public Pt::System::::DetachedThread
+		{
+			protected:
+				void run();
+		};
+
+		void MyThread::run()
+		{
+			// implement, whatever needs to be done in parallel
+		}
+
+		void someFunc()
+		{
+			MyThread *thread = new MyThread();
+			thread->start();
+
+			// here the thread runs and the program can do something
+			// else in parallel. It continues to run even after this
+			// function returns. The object is automatically destroyed,
+			// when the thread has finished.
+		}
+
+		\endcode
+	*/
     class DetachedThread : public Thread
     {
         protected:
+            /** @brief Contructs a detched thread
+
+                Constructs a thread object to execute the virtual method
+                run() when start() is called. %DetachedThreads are always
+                destructed by the virtual method destroy(). If objects
+                of this class are created by new, destroy() must be
+                overloaded ti call delete.
+            */
             DetachedThread()
             : Thread( callable(*this, &DetachedThread::exec) )
             {
                 Thread::detach();
             }
 
+            /** @brief Destroys a detched thread
+
+                This method is called after the thread has finished. The
+                default implementation uses delete to destruct this object.
+            */
             virtual void destroy()
             { delete this; }
 
+            /** @brief Thread entry method
+
+                This method is executed in a separate thread once start()
+                is called. Override this method to implement a thread.
+            */
             virtual void run() = 0;
 
         private:
+            //! @internal
             void exec()
             {
                 this->run();
