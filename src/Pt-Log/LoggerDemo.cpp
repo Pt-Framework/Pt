@@ -25,13 +25,15 @@
 #include <fstream>
 
 
-class LogThread : public Pt::System::Thread
+class LogThread
 {
     public:
         LogThread( const std::string& message, const std::string& loggerName = "root")
-        : _loggerName(loggerName)
+        : _thread( Pt::callable(*this, &LogThread::run) )
+        , _loggerName(loggerName)
         , _message(message)
         {
+            _thread.start();
         }
 
     protected:
@@ -46,7 +48,7 @@ class LogThread : public Pt::System::Thread
                     logger.info(PT_SOURCEINFO) << _message << Pt::Log::endlog;
 
                     Pt::System::Thread::sleep(1000);
-                    this->yield();
+                    Pt::System::Thread::yield();
                 }
                 catch(const std::exception& e)
                 {
@@ -56,6 +58,7 @@ class LogThread : public Pt::System::Thread
         }
 
     private:
+        Pt::System::AttachedThread _thread;
         std::string _loggerName;
         std::string _message;
 };
@@ -84,26 +87,11 @@ int main( int argc, char* argv[] )
 
         //return 0;
         LogThread lt0("Message from thread 0", "LoggerDemo");
-        lt0.start();
-
         LogThread lt1("Thread 1 sends a message", "LoggerDemo");
-        lt1.start();
-
         LogThread lt2("Another message from thread 2", "LoggerDemo");
-        lt2.start();
-
         LogThread lt3("thread 3", "LoggerDemo2");
-        lt3.start();
-
         LogThread lt4("thread 4", "LoggerDemo2");
-        lt4.start();
 
-        lt1.join();
-        lt2.join();
-        lt3.join();
-        lt4.join();
-
-        lt0.join();
         return 0;
     }
     catch(const std::exception& e)

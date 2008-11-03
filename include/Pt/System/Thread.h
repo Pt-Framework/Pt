@@ -98,13 +98,8 @@ namespace System {
         A thread can give up CPU time either by calling Thread::yield() or
         Thread::sleep() to stop for a specified periode of time.
     */
-    class PT_SYSTEM_API Thread : public NonCopyable
+    class PT_SYSTEM_API Thread : protected NonCopyable
     {
-        friend class ThreadImpl;
-
-        protected:
-            class ThreadImpl* _impl;
-
         public:
             enum State
             {
@@ -113,23 +108,18 @@ namespace System {
                 Finished = 2
             };
 
-            enum Mode
-            {
-                Joinable = 0,
-                Detached = 1
-            };
-
-        public:
+        protected:
             /** @brief Contruct a thread with a runnable and mode.
 
                 Constructs a thread object to execute the \a runnable. The
                 Thread is not started on construction, but when Thread::start()
                 is called. The \a mode can either be Detached or Joinable.
             */
-            Thread(const Callable<void>& cb, Mode mode = Joinable);
+            Thread(const Callable<void>& cb);
 
-            Thread(EventLoopBase& loop, Mode mode = Joinable);
+            Thread(EventLoopBase& loop);
 
+        public:
             /** @brief Destructor
 
                 Deleting a running joinable Thread (i.e. state is Running )
@@ -139,17 +129,9 @@ namespace System {
             */
             virtual ~Thread();
 
-            //! @brief Returns the current mode of the thread.
-            Mode mode() const;
-
             //! @brief Returns the current state of the thread.
-            State state() const;
-
-            //! @brief Returns true if thread is detached.
-            bool detached() const;
-
-            //! @brief Returns true if thread is joinable.
-            bool joinable() const;
+            State state() const
+            { return _state; }
 
             /** @brief Starts the thread
 
@@ -158,24 +140,6 @@ namespace System {
                 Returns a self reference for error checking
             */
             void start();
-
-            /** @brief Wait until a joinable thread has exited.
-            */
-            void join();
-
-            /** @brief Terminates the thread.
-
-                Terminates the thread without respect for any allocated resources.
-                Use with caution.
-            */
-            void terminate();
-
-            /** @brief Detaches a joinable thread.
-
-                Detached threads can not be waited on and become independent of the lifetime
-                of the Thread object, since no resources need to be reclaimed for them.
-            */
-            void detach();
 
             /** @brief Exits a joinable thread.
 
@@ -197,23 +161,20 @@ namespace System {
             static void sleep(unsigned int ms);
 
         protected:
-            /** @brief Constructor a joinable or detached thread
-            */
-            Thread(Mode mode = Joinable);
+            void detach();
 
-            /** @brief Thread entry point
+            void join();
 
-                This function needs to be overridden by derived classes.
-                Starting the thread causes the object's run method to be called
-                in that separately executing thread.
-            */
-            virtual void run();
+            bool joinNoThrow();
+
+            void terminate();
 
         private:
-            Callable<void>* _cb;
+            Thread::State _state;
+            class ThreadImpl* _impl;
     };
 
-/*
+
     class AttachedThread : public Thread
     {
         public:
@@ -221,46 +182,42 @@ namespace System {
             : Thread(cb)
             {}
 
-            ~AttachedThread()
-            { join(); }
+            AttachedThread(EventLoopBase& loop)
+            : Thread(loop)
+            {}
 
-            void start();
+            ~AttachedThread()
+            {
+                Thread::joinNoThrow();
+            }
 
             void join()
             {
-                //if( !_joined )
-                //    _impl->join();
+                Thread::join();
             }
 
             void terminate()
             {
-                //if( !_joined )
-                //    _impl->terminate();
+                Thread::terminate();
             }
-
-        private:
-            bool _joined;
     };
 
 
     class DetachedThread : public Thread
     {
-        public:
-            DetachedThread* create();
-
-            void start();
-
         protected:
-            virtual void run() = 0;
-
             DetachedThread()
-            : Thread( callable(*this, &DetachedThread::exec), Detached )
-            {}
+            : Thread( callable(*this, &DetachedThread::exec) )
+            {
+                Thread::detach();
+            }
 
             ~DetachedThread()
             {}
 
             virtual void destroy() = 0;
+
+            virtual void run() = 0;
 
         private:
             void exec()
@@ -269,25 +226,6 @@ namespace System {
                 delete this;
             }
     };
-
-    class MyThread : public DetachedThread
-    {
-        public:
-            MyThread()
-            : n(0)
-            {}
-
-            void destroy()
-            { delete this; }
-
-        protected:
-            virtual void run()
-            { n++; }
-
-        private:
-            int n;
-    };
-*/
 
 } // !namespace System
 

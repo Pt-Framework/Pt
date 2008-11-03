@@ -26,108 +26,41 @@ namespace Pt {
 
 namespace System {
 
-Thread::Thread(const Callable<void>& cb, Mode mode)
-: _impl(0)
-, _cb(0)
+Thread::Thread(const Callable<void>& cb)
+: _state(Thread::Ready)
+, _impl(0)
 {
-    _impl = new ThreadImpl(*this, mode);
-    _cb = cb.clone();
+    _impl = new ThreadImpl(cb);
 }
 
 
-Thread::Thread(EventLoopBase& loop, Mode mode)
-: _impl(0)
-, _cb(0)
+Thread::Thread(EventLoopBase& loop)
+: _state(Thread::Ready)
+, _impl(0)
 {
-    _impl = new ThreadImpl(*this, mode);
-    _cb = callable(loop, &EventLoopBase::run).clone();
-}
-
-
-Thread::Thread(Mode mode)
-: _impl(0)
-, _cb(0)
-{
-    _impl = new ThreadImpl(*this, mode);
+    _impl = new ThreadImpl( callable(loop, &EventLoopBase::run) );
 }
 
 
 Thread::~Thread()
 {
-    if( this->joinable() && this->state() == Running )
-        this->join();
-
     delete _impl;
-    delete _cb;
-}
-
-
-Thread::State Thread::state() const
-{
-    return _impl->state();
-}
-
-
-Thread::Mode Thread::mode() const
-{
-    return _impl->mode();
-}
-
-
-bool Thread::detached() const
-{
-    return _impl->mode() == Detached;
-}
-
-
-bool Thread::joinable() const
-{
-    return _impl->mode() == Joinable;
 }
 
 
 void Thread::start()
 {
-    if( this->state() != Ready )
-        throw std::logic_error(PT_SOURCEINFO + "Thread already started");
-
-    _impl->start( this->mode() );
-}
-
-
-void Thread::join()
-{
-    if( this->detached() )
-        throw std::logic_error(PT_SOURCEINFO + "Can not wait on a detached thread");
-
-    if( this->state() != Running )
-        throw std::logic_error(PT_SOURCEINFO + "Thread is not running");
-
-    _impl->wait();
+    if( this->state() == Ready )
+    {
+        _impl->start();
+        _state = Thread::Running;
+    }
 }
 
 
 void Thread::exit()
 {
     ThreadImpl::exit();
-}
-
-
-void Thread::terminate()
-{
-    if( this->state() != Running )
-        throw std::logic_error(PT_SOURCEINFO + "Thread is not running");
-
-    _impl->terminate();
-}
-
-
-void Thread::detach()
-{
-    if( ! this->joinable() )
-        throw std::logic_error(PT_SOURCEINFO + "Thread is not joinable");
-
-    _impl->detach();
 }
 
 
@@ -143,12 +76,40 @@ void Thread::sleep(unsigned int ms)
 }
 
 
-void Thread::run()
+void Thread::detach()
 {
-    if(_cb == 0)
-        throw std::logic_error("No runnable given to thread." + PT_SOURCEINFO);
+    _impl->detach();
+}
 
-    _cb->invoke();
+
+void Thread::join()
+{
+    _impl->join();
+    _state = Thread::Finished;
+}
+
+
+bool Thread::joinNoThrow()
+{
+    bool ret = true;
+    try
+    {
+        _impl->join();
+    }
+    catch(...)
+    {
+        ret = false;
+    }
+
+    _state = Thread::Finished;
+    return ret;
+}
+
+
+void Thread::terminate()
+{
+    _impl->terminate();
+    _state = Thread::Finished;
 }
 
 } // namespace System

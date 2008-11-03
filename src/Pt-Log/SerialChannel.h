@@ -86,7 +86,7 @@ class PT_LOG_API SerialChannel : public Pt::Connectable
 
     private:
         Pt::System::EventLoop _threadLoop;
-        Pt::System::Thread _thread;
+        Pt::System::AttachedThread _thread;
         Pt::System::SerialDevice _device;
         Pt::System::Mutex _mutex;
         size_t _n;

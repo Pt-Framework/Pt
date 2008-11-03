@@ -26,49 +26,31 @@ namespace System {
     class ThreadImpl
     {
         public:
-            ThreadImpl(Thread& obj, Thread::Mode mode);
+            ThreadImpl(const Callable<void>& cb);
 
             ~ThreadImpl()
-            {}
-
-            Thread::Mode mode() const
-            { return _mode; }
-
-            Thread::State state() const
-            { return _state; }
+            { delete _cb; }
 
             void detach();
 
-            void start(Thread::Mode mode);
+            void start();
 
-            void wait();
-
-            static void exit();
+            void join();
 
             void terminate();
+
+            static void exit();
 
             static void yield();
 
             static void sleep(unsigned int ms);
 
-        public:
-            static void* entry(void* arg)
-            {
-                ThreadImpl* impl = (ThreadImpl*)arg;
-                impl->_thread.run();
-
-                // impl->callable->call();
-                // if detached
-                //     delete impl;
-                impl->_state = Thread::Finished;
-                return 0;
-            }
+            const Callable<void>& cb()
+            { return *_cb; }
 
         private:
-            Thread& _thread;
+            const Callable<void>* _cb;
             pthread_t _id;
-            Thread::State _state;
-            Thread::Mode _mode;
     };
 
 }

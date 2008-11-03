@@ -18,69 +18,68 @@
  ***************************************************************************/
 #include "ThreadImpl.h"
 #include "Pt/System/SystemError.h"
+#include <sched.h>
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
+
+extern "C"
+{
+	static void* thread_entry(void* arg)
+	{
+		Pt::System::ThreadImpl* impl = (Pt::System::ThreadImpl*)arg;
+		impl->cb().call();
+
+		return 0;
+	}
+}
 
 namespace Pt {
 
 namespace System {
 
-ThreadImpl::ThreadImpl(Thread& obj, Thread::Mode mode)
-: _thread(obj),
-  _id(0),
-  _state(Thread::Ready),
-  _mode(mode)
+ThreadImpl::ThreadImpl(const Callable<void>& cb)
+: _cb(0)
+, _id(0)
 {
+    _cb = cb.clone();
 }
 
 
 void ThreadImpl::detach()
 {
-    if( !_id ) {
+    if( !_id )
         return;
-    }
 
     int ret = pthread_detach(_id);
     if( ret != 0 )
         throw SystemError("Could not detach thread. ", PT_SOURCEINFO);
-
-    _mode = Thread::Detached;
 }
 
 
-void ThreadImpl::start(Thread::Mode mode)
+void ThreadImpl::start()
 {
     size_t stacksize = 0;
 
     pthread_attr_t attrs;
     pthread_attr_init(&attrs);
-     pthread_attr_setinheritsched(&attrs, PTHREAD_INHERIT_SCHED);
+    pthread_attr_setinheritsched(&attrs, PTHREAD_INHERIT_SCHED);
 
-    if(stacksize > 0){
+    if(stacksize > 0)
         pthread_attr_setstacksize(&attrs ,stacksize);
-    }
 
-    if(mode == Thread::Detached){
-        pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-    }
-    else {
-        pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_JOINABLE);
-    }
-
-    int ret = pthread_create(&_id, &attrs, this->entry, this);
+    int ret = pthread_create(&_id, &attrs, thread_entry, this);
     pthread_attr_destroy(&attrs);
 
-    if(ret != 0) {
+    if(ret != 0)
+    {
         _id = 0;
         throw SystemError("Could not create thread. ", PT_SOURCEINFO);
     }
-
-    _state = Thread::Running;
 }
 
 
-void ThreadImpl::wait()
+void ThreadImpl::join()
 {
     void* threadRet = 0;
     int ret = pthread_join(_id, &threadRet);
@@ -88,7 +87,6 @@ void ThreadImpl::wait()
     if(ret != 0)
         throw SystemError("Could not join thread. ", PT_SOURCEINFO);
 
-    _state = Thread::Finished;
     _id = 0;
 }
 
@@ -106,14 +104,13 @@ void ThreadImpl::terminate()
     if(ret != 0)
         throw SystemError("Could not terminate thread. ", PT_SOURCEINFO);
 
-    _state = Thread::Finished;
     _id = 0;
 }
 
 
 void ThreadImpl::yield()
 {
-    sched_yield();
+    ::sched_yield();
 }
 
 

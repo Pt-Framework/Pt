@@ -62,7 +62,7 @@ class TestThread
 
     private:
         Pt::System::EventLoop _loop;
-        Pt::System::Thread _thread;
+        Pt::System::AttachedThread _thread;
 };
 
 
