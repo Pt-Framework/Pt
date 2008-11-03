@@ -212,10 +212,8 @@ namespace System {
                 Thread::detach();
             }
 
-            ~DetachedThread()
-            {}
-
-            virtual void destroy() = 0;
+            virtual void destroy()
+            { delete this; }
 
             virtual void run() = 0;
 
@@ -223,7 +221,7 @@ namespace System {
             void exec()
             {
                 this->run();
-                delete this;
+                this->destroy();
             }
     };
 

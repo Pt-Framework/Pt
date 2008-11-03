@@ -84,8 +84,11 @@ void Thread::detach()
 
 void Thread::join()
 {
-    _impl->join();
-    _state = Thread::Finished;
+    if( this->state() == Running )
+    {
+        _impl->join();
+        _state = Thread::Finished;
+    }
 }
 
 
