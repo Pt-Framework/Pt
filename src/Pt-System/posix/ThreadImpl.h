@@ -18,40 +18,56 @@
  ***************************************************************************/
 #include "Pt/System/Thread.h"
 #include <pthread.h>
+#include <sched.h>
+#include <unistd.h>
 
 namespace Pt {
 
 namespace System {
 
-    class ThreadImpl
-    {
-        public:
-            ThreadImpl(const Callable<void>& cb);
+class ThreadImpl
+{
+    public:
+        ThreadImpl()
+        : _cb(0)
+        , _id(0)
+        { }
 
-            ~ThreadImpl()
-            { delete _cb; }
+        ~ThreadImpl()
+        { delete _cb; }
 
-            void detach();
+        void init(const Callable<void>& cb);
 
-            void start();
+        void detach();
 
-            void join();
+        void start();
 
-            void terminate();
+        void join();
 
-            static void exit();
+        void terminate();
 
-            static void yield();
+        static void exit()
+        {
+            ::pthread_exit( NULL );
+        }
 
-            static void sleep(unsigned int ms);
+        static void yield()
+        {
+            ::sched_yield();
+        }
 
-            const Callable<void>& cb()
-            { return *_cb; }
+        static void sleep(unsigned int ms)
+        {
+            usleep(ms * 1000);
+        }
 
-        private:
-            const Callable<void>* _cb;
-            pthread_t _id;
-    };
+        const Callable<void>* cb()
+        { return _cb; }
+
+    private:
+        const Callable<void>* _cb;
+        pthread_t _id;
+};
 
 }
 

@@ -18,42 +18,53 @@
  ***************************************************************************/
 #include "ThreadImpl.h"
 #include "Pt/System/SystemError.h"
-#include <sched.h>
-#include <unistd.h>
-#include <signal.h>
 #include <errno.h>
 
 extern "C"
 {
-	static void* thread_entry(void* arg)
-	{
-		Pt::System::ThreadImpl* impl = (Pt::System::ThreadImpl*)arg;
-		impl->cb().call();
+    static void* thread_entry(void* arg)
+    {
+        Pt::System::ThreadImpl* impl = (Pt::System::ThreadImpl*)arg;
+        if( impl->cb() )
+            impl->cb()->call();
 
-		return 0;
-	}
+        return 0;
+    }
+}
+
+namespace
+{
+    void throwIf(int& ret, pthread_t& id, const char* msg, const Pt::SourceInfo& si)
+    {
+        if(ret != 0)
+        {
+            id = 0;
+            throw Pt::System::SystemError(msg, si);
+        }
+    }
 }
 
 namespace Pt {
 
 namespace System {
 
-ThreadImpl::ThreadImpl(const Callable<void>& cb)
-: _cb(0)
-, _id(0)
+void ThreadImpl::detach()
 {
-    _cb = cb.clone();
+    if( _id )
+    {
+        int ret = pthread_detach(_id);
+        throwIf(ret, _id, "Could not detach thread. ", PT_SOURCEINFO);
+    }
 }
 
 
-void ThreadImpl::detach()
+void ThreadImpl::init(const Callable<void>& cb)
 {
-    if( !_id )
-        return;
-
-    int ret = pthread_detach(_id);
-    if( ret != 0 )
-        throw SystemError("Could not detach thread. ", PT_SOURCEINFO);
+    if(_cb)
+    {
+        delete _cb;
+        _cb = cb.clone();
+    }
 }
 
 
@@ -71,11 +82,7 @@ void ThreadImpl::start()
     int ret = pthread_create(&_id, &attrs, thread_entry, this);
     pthread_attr_destroy(&attrs);
 
-    if(ret != 0)
-    {
-        _id = 0;
-        throw SystemError("Could not create thread. ", PT_SOURCEINFO);
-    }
+    throwIf(ret, _id, "Could not create thread. ", PT_SOURCEINFO);
 }
 
 
@@ -84,16 +91,7 @@ void ThreadImpl::join()
     void* threadRet = 0;
     int ret = pthread_join(_id, &threadRet);
 
-    if(ret != 0)
-        throw SystemError("Could not join thread. ", PT_SOURCEINFO);
-
-    _id = 0;
-}
-
-
-void ThreadImpl::exit()
-{
-    ::pthread_exit( NULL );
+    throwIf(ret, _id, "Could not join thread. ", PT_SOURCEINFO);
 }
 
 
@@ -101,27 +99,7 @@ void ThreadImpl::terminate()
 {
     int ret = pthread_kill(_id, SIGKILL);
 
-    if(ret != 0)
-        throw SystemError("Could not terminate thread. ", PT_SOURCEINFO);
-
-    _id = 0;
-}
-
-
-void ThreadImpl::yield()
-{
-    ::sched_yield();
-}
-
-
-void ThreadImpl::sleep(unsigned int ms)
-{
-    //struct timespec ts;
-    //ts.tv_sec  = ms / 1000;
-    //ts.tv_nsec = (ms % 1000) * 1000000;
-    //pthread_delay(ts);
-
-    usleep(ms * 1000);
+    throwIf(ret, _id, "Could not terminate thread. ", PT_SOURCEINFO);
 }
 
 }
