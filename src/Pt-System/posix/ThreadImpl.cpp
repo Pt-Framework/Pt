@@ -29,6 +29,7 @@
 #include "ThreadImpl.h"
 #include "Pt/System/SystemError.h"
 #include <errno.h>
+#include <signal.h>
 
 extern "C"
 {
