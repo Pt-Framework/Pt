@@ -17,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_System_Url_h
 #define Pt_System_Url_h
 
@@ -29,14 +28,13 @@
 #include <string>
 
 namespace Pt {
+
 namespace System {
 
 class PT_SYSTEM_API InvalidUrl : public std::logic_error
 {
 public:
-    inline InvalidUrl(const char* _what, const SourceInfo& _si)
-    : std::logic_error(_what + _si)
-    { }
+    inline InvalidUrl(const char* _what, const SourceInfo& _si);
 
     ~InvalidUrl() throw()
     {}
@@ -66,13 +64,11 @@ class PT_SYSTEM_API Url {
         //! Parse Url constructor
         Url(const std::string& url);
 
-        //! Parse Url constructor
-        Url(const char* url);
-
         //! Copy constructor
         Url(const Url& url);
 
-        ~Url();
+        ~Url()
+		{}
 
         void clear();
 

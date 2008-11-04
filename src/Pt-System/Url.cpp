@@ -19,18 +19,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/Url.h"
-
 #include <sstream>
 #include <iomanip>
-#include <cstdlib> // atoi()
-using namespace std;
-
+#include <cstdlib> 
 
 namespace Pt {
 
 namespace System {
+
+InvalidUrl::InvalidUrl(const char* _what, const SourceInfo& _si)
+: std::logic_error(_what + _si)
+{ }
 
 
 Url::Url()
@@ -47,21 +47,10 @@ Url::Url(const std::string& url)
 }
 
 
-Url::Url(const char* url)
-{
-    *this = url;
-}
-
-
 Url::Url(const Url& url)
 : _proto(url._proto), _host(url._host), _user(url._user),
   _passwd(url._passwd), _port(url._port), _path(url._path),
   _args(url._args), _anchor(url._anchor)
-{
-}
-
-
-Url::~Url()
 {
 }
 
@@ -233,6 +222,7 @@ void Url::addArg(const std::string& name, const std::string& value)
     _args[name] = value;
 }
 
+
 const std::string& Url::arg(const std::string& name) const
 {
     static std::string emptyStr;
@@ -299,12 +289,6 @@ Url& Url::operator=(const Url& url)
 
     return *this;
 }
-
-
-/*Url& Url::operator=(const String& url) throw(InvalidUrl)
-{
-    return this->operator=( url.toUtf8() );
-}*/
 
 
 Url& Url::operator=(const char* url)
