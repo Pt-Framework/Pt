@@ -32,17 +32,8 @@ IOError::IOError(const std::string& what, const SourceInfo& si)
 }
 
 
-IOError::~IOError() throw()
-{
-}
-
 OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
 : IOError(what , si)
-{
-}
-
-
-OpenFailed::~OpenFailed() throw()
 {
 }
 
@@ -53,18 +44,8 @@ CloseFailed::CloseFailed(const std::string& what, const SourceInfo& si)
 }
 
 
-CloseFailed::~CloseFailed() throw()
-{
-}
-
-
 IOPending::IOPending(const std::string& what, const SourceInfo& si)
 : IOError(what, si)
-{
-}
-
-
-IOPending::~IOPending() throw()
 {
 }
 

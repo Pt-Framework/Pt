@@ -29,70 +29,6 @@
 
 namespace Pt {
 
-DateTime::DateTime()
-{
-}
-
-
-DateTime::DateTime(int year, unsigned month, unsigned day,
-                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
-: _date(year, month, day)
-, _time(hour, minute, second, msec)
-{
-}
-
-
-DateTime::DateTime(const DateTime& dateTime)
-: _date( dateTime.date() )
-, _time( dateTime.time() )
-{
-}
-
-
-DateTime::~DateTime()
-{
-}
-
-
-DateTime& DateTime::operator=(const DateTime& dateTime)
-{
-    _date = dateTime.date();
-    _time = dateTime.time();
-    return *this;
-}
-
-
-DateTime& DateTime::operator=(unsigned julianDay)
-{
-    _time = Time(0, 0, 0, 0);
-    _date.setJulian(julianDay);
-    return *this;
-}
-
-
-void DateTime::set(int year, unsigned month, unsigned day,
-                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
-{
-    _date.set(year, month, day);
-    _time.set(hour, minute, second, msec);
-}
-
-
-void DateTime::get(int& y, unsigned& month, unsigned& d,
-                   unsigned& h, unsigned& min, unsigned& s, unsigned& ms) const
-{
-    _date.get(y, month, d);
-    _time.get(h, min, s, ms);
-}
-
-
-bool DateTime::isValid(int year, unsigned month, unsigned day,
-                       unsigned hour, unsigned minute, unsigned second, unsigned msec)
-{
-    return Date::isValid(year, month, day) && Time::isValid(hour, minute, second, msec);
-}
-
-
 inline unsigned short getNumber2(const char* s)
 {
     if (!std::isdigit(s[0])
@@ -112,6 +48,7 @@ inline unsigned short getNumber3(const char* s)
         + (s[1] - '0') * 10
         + (s[2] - '0');
 }
+
 
 inline unsigned short getNumber4(const char* s)
 {

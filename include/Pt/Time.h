@@ -37,7 +37,8 @@ class PT_API InvalidTime : public std::invalid_argument
     public:
         InvalidTime(const SourceInfo& si);
 
-        ~InvalidTime() throw();
+        ~InvalidTime() throw()
+		{}
 };
 
 

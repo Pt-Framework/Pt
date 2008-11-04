@@ -34,28 +34,32 @@ namespace System {
         public:
             IOError(const std::string& what, const SourceInfo& si);
 
-            ~IOError() throw();
+            ~IOError() throw()
+			{}
     };
 
     class PT_SYSTEM_API OpenFailed : public IOError {
         public:
             OpenFailed(const std::string& what, const SourceInfo& si);
 
-            ~OpenFailed() throw();
+            ~OpenFailed() throw()
+			{}
     };
 
     class PT_SYSTEM_API CloseFailed : public IOError {
         public:
             CloseFailed(const std::string& what, const SourceInfo& si);
 
-            ~CloseFailed() throw();
+            ~CloseFailed() throw()
+			{}
     };
 
     class PT_SYSTEM_API IOPending : public IOError {
         public:
             IOPending(const std::string& what, const SourceInfo& si);
 
-            ~IOPending() throw();
+            ~IOPending() throw()
+			{}
     };
 
 } // namespace System

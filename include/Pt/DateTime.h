@@ -35,12 +35,12 @@ namespace Pt {
 class PT_API DateTime
 {
     public:
-        DateTime();
-
         DateTime(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
-        DateTime(const DateTime& dateTime);
+		DateTime(const DateTime& dateTime);
+
+		DateTime& operator=(const DateTime& dateTime);
 
         ~DateTime();
 
@@ -67,7 +67,7 @@ class PT_API DateTime
             return dt + ts;
         }
 
-        DateTime& operator=(const DateTime& dateTime);
+        //DateTime& operator=(const DateTime& dateTime);
 
         DateTime& operator=(unsigned julianDay);
 
@@ -247,6 +247,62 @@ class PT_API DateTime
 PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 
 PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
+
+
+inline DateTime::DateTime(int year, unsigned month, unsigned day,
+                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
+: _date(year, month, day)
+, _time(hour, minute, second, msec)
+{ }
+
+
+inline DateTime::DateTime(const DateTime& dateTime)
+: _date( dateTime.date() )
+, _time( dateTime.time() )
+{ }
+
+
+inline DateTime& DateTime::operator=(const DateTime& dateTime)
+{
+	_date = dateTime.date();
+	_time = dateTime.time();
+	return *this;
+}
+
+
+inline DateTime::~DateTime()
+{}
+
+
+inline DateTime& DateTime::operator=(unsigned julianDay)
+{
+    _time = Time(0, 0, 0, 0);
+    _date.setJulian(julianDay);
+    return *this;
+}
+
+
+inline void DateTime::set(int year, unsigned month, unsigned day,
+                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
+{
+    _date.set(year, month, day);
+    _time.set(hour, minute, second, msec);
+}
+
+
+inline void DateTime::get(int& y, unsigned& month, unsigned& d,
+                   unsigned& h, unsigned& min, unsigned& s, unsigned& ms) const
+{
+    _date.get(y, month, d);
+    _time.get(h, min, s, ms);
+}
+
+
+inline bool DateTime::isValid(int year, unsigned month, unsigned day,
+                       unsigned hour, unsigned minute, unsigned second, unsigned msec)
+{
+    return Date::isValid(year, month, day) && Time::isValid(hour, minute, second, msec);
+}
 
 }
 

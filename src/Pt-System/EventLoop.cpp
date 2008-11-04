@@ -24,44 +24,6 @@ namespace Pt {
 
 namespace System {
 
-EventLoopBase::EventLoopBase()
-: _timeout(WaitInfinite)
-{}
-
-
-EventLoopBase::~EventLoopBase()
-{}
-
-
-void EventLoopBase::run()
-{
-    this->onRun();
-}
-
-
-void EventLoopBase::exit()
-{
-    this->onExit();
-}
-
-void EventLoopBase::setIdleTimeout(unsigned int msecs)
-{ 
-    _timeout = msecs; 
-}
-
-
-unsigned int EventLoopBase::idleTimeout() const
-{ 
-    return _timeout; 
-}
-
-
-void EventLoopBase::processEvents()
-{
-    this->onProcessEvents();
-}
-
-
 EventLoop::EventLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)

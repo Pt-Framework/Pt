@@ -70,11 +70,14 @@ namespace System {
 
             static Application& instance();
 
-            EventLoopBase& loop();
+            EventLoopBase& loop()
+			{ return *_loop; }
 
-            void run();
+            void run()
+			{ _loop->run(); }
 
-            void exit();
+            void exit()
+			{ _loop->exit(); }
 
             bool catchSystemSignal(int sig);
 
@@ -82,7 +85,8 @@ namespace System {
 
             Signal<int> systemSignal;
 
-            ApplicationImpl& impl();
+            ApplicationImpl& impl()
+			{ return *_impl; }
 
         protected:
             void init(EventLoopBase& loop);

@@ -31,11 +31,6 @@ InvalidTime::InvalidTime(const SourceInfo& si)
 }
 
 
-InvalidTime::~InvalidTime() throw()
-{
-}
-
-
 Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)
 {
     set(h, m, s, ms);

@@ -39,35 +39,39 @@ namespace System {
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
      */
-    class PT_SYSTEM_API EventLoopBase : public SelectorBase
-                                      , public EventSink
+    class EventLoopBase : public SelectorBase
+                        , public EventSink
     {
         public:
-            static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
-
             /** @brief Destructs the EventLoop
              */
-            virtual ~EventLoopBase();
+            virtual ~EventLoopBase()
+			{}
 
             /** @brief Starts the event loop
              */
-            void run();
+            void run()
+			{ this->onRun(); }
 
             /** @brief Processes all events which are currently in the event queue
              */
-            void processEvents();
+            void processEvents()
+			{ this->onProcessEvents(); }
 
             /** @brief Stops the %EventLoop.
              */
-            void exit();
+            void exit()
+			{ this->onExit(); }
 
             /** @brief Sets the idle timeout
             */
-            void setIdleTimeout(unsigned int msecs);
-
-            /** @brief Returns the idle timeout
+            void setIdleTimeout(unsigned int msecs)
+			{ _timeout = msecs; }
+            
+			/** @brief Returns the idle timeout
             */
-            unsigned int idleTimeout() const;
+            unsigned int idleTimeout() const
+			{ return _timeout; }
 
             /** @brief Notifies about wait timeouts
                 This signal is send when the timeout given to a wait
@@ -83,7 +87,9 @@ namespace System {
         protected:
             /** @brief Constructs the EventLoop
             */
-            EventLoopBase();
+            EventLoopBase()
+			: _timeout(WaitInfinite)
+			{}
 
             virtual void onRun() = 0;
 
@@ -93,7 +99,6 @@ namespace System {
 
         private:
             unsigned int _timeout;
-            void* _reserved;
     };
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
@@ -158,7 +163,6 @@ namespace System {
             Allocator _allocator;
             std::deque<Event* > _eventQueue;
             Mutex _queueMutex;
-            void* _reserved;
     };
 
 } // namespace System

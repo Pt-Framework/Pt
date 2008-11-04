@@ -98,35 +98,10 @@ bool Application::raiseSystemSignal(int sig)
 }
 
 
-EventLoopBase& Application::loop()
-{ 
-    return *_loop;
-}
-
-
 void Application::init(EventLoopBase& loop)
 {
     _loop = &loop;
-    //_loop->setParent(this);
     _impl->init(*_loop);
-}
-
-
-void Application::run()
-{
-    _loop->run();
-}
-
-
-void Application::exit()
-{
-    _loop->exit();
-}
-
-
-ApplicationImpl& Application::impl()
-{
-    return *_impl;
 }
 
 } // namespace System

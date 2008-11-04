@@ -38,11 +38,6 @@ InvalidDate::InvalidDate(const SourceInfo& si)
 }
 
 
-InvalidDate::~InvalidDate() throw()
-{
-}
-
-
 void Date::greg2jul(unsigned& jd, int y, int m, int d)
 {
     if( !isValid(y, m, d) )
