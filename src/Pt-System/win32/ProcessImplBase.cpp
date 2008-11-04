@@ -118,7 +118,7 @@ int ProcessImplBase::wait()
     if( WAIT_FAILED == WaitForSingleObject(m_pid.hProcess, INFINITE) )
     {
         _state = Process::Failed;
-        throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
+        throw SystemError("System call WaitForSingleObject() Failed!", PT_SOURCEINFO);
     }
 
     DWORD exitCode;

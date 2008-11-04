@@ -30,7 +30,7 @@ namespace Pt {
 namespace System {
 
 //! Process parameters
-class PT_SYSTEM_API ProcessInfo
+class ProcessInfo
 {
     public:
         //! process info can contain at least the command
@@ -154,6 +154,111 @@ class PT_SYSTEM_API Process
     private:
         class ProcessImpl *_impl;
 };
+
+
+inline ProcessInfo::ProcessInfo(const std::string& command)
+: _command(command)
+, _stdin(0)
+, _stdinClosed(false)
+, _stdout(0)
+, _stdoutClosed(false)
+, _stderr(0)
+, _stderrClosed(false)
+{
+}
+
+
+inline const std::string& ProcessInfo::command() const
+{
+    return _command;
+}
+
+
+inline void ProcessInfo::addArg(const std::string& argument)
+{
+    _args.push_back(argument);
+}
+
+
+inline void ProcessInfo::setStdInput(IODevice* dev)
+{
+    if( dev )
+        _stdinClosed = false;
+    else
+        _stdinClosed = true;
+
+    _stdin = dev;
+}
+
+
+inline IODevice* ProcessInfo::stdInput() const
+{
+    return _stdin;
+}
+
+
+inline bool ProcessInfo::stdInputClosed() const
+{
+    return _stdinClosed;
+}
+
+
+inline void ProcessInfo::setStdOutput(IODevice* dev)
+{
+    if( dev )
+        _stdoutClosed = false;
+    else
+        _stdoutClosed = true;
+
+    _stdout = dev;
+}
+
+
+inline IODevice* ProcessInfo::stdOutput() const
+{
+    return _stdout;
+}
+
+
+inline bool ProcessInfo::stdOutputClosed() const
+{
+    return _stdoutClosed;
+}
+
+
+inline void ProcessInfo::setStdError(IODevice* dev)
+{
+    if( dev )
+        _stderrClosed = false;
+    else
+        _stderrClosed = true;
+
+    _stderr = dev;
+}
+
+
+inline IODevice* ProcessInfo::stdError() const
+{
+    return _stderr;
+}
+
+
+inline bool ProcessInfo::stdErrorClosed() const
+{
+    return _stderrClosed;
+}
+
+
+inline unsigned ProcessInfo::argCount() const
+{
+    return _args.size();
+}
+
+
+inline const std::string& ProcessInfo::arg(unsigned idx) const
+{
+    return _args.at(idx);
+}
 
 }
 

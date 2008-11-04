@@ -20,14 +20,11 @@
 #define PT_ProcessImplBase_h
 
 #include "Pt/System/Process.h"
-
 #include <windows.h>
 #include <stdlib.h>
-
 #include <cstdlib>
 #include <sstream>
 #include <vector>
-#include <bitset>
 
 namespace Pt {
 
