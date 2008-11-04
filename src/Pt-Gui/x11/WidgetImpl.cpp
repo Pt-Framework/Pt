@@ -26,7 +26,7 @@
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Text/TextStream.h>
-#include <Pt/Text/Utf16Codec.h>
+#include <Pt/Text/Utf8Codec.h>
 
 #include <iostream>
 #include <sstream>
@@ -159,16 +159,18 @@ void WidgetImpl::setTitle(const Pt::String& text)
     XTextProperty tp;
 
     std::stringstream ss;
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
+    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
     textStream << text << Char(0); // Append extra \0 for proper line termination.
     textStream.flush();
 
     std::string textString = ss.str();
     const char* addressOfTextString = textString.c_str();
-    XwcTextListToTextProperty(display, (wchar_t**)&addressOfTextString, 1, XStringStyle, &tp);
-
-    XSetWMName(display, _drawable, &tp);
-    XFree( tp.value );
+    if (XmbTextListToTextProperty(display, (char**)&addressOfTextString, 1, XStringStyle, &tp) >= 0)
+    {
+        //no error occured, but possibly not all characters could be converted
+        XSetWMName(display, _drawable, &tp);
+        XFree( tp.value );
+    }
     XSync(display, false);
 }
 
