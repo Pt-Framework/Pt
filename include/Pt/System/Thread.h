@@ -66,10 +66,10 @@ namespace System {
             /** @brief Default Constructor
 
                 Constructs a thread object without a thread entry. Use
-				the init() method to set a callable. The thread will 
-				terminate immediately, if no thread entry is set.
+                the init() method to set a callable. The thread will
+                terminate immediately, if no thread entry is set.
             */
-			Thread();
+            Thread();
 
             /** @brief Contructs a thread with a thread entry
 
@@ -87,12 +87,12 @@ namespace System {
             */
             Thread(EventLoopBase& loop);
 
-			/** @brief Initialize with a thread entry
+            /** @brief Initialize with a thread entry
 
-                The callable \a cb will be used as the thread entry. If 
-				another thread entry was set previously it will be replaced.
+                The callable \a cb will be used as the thread entry. If
+                another thread entry was set previously it will be replaced.
             */
-			void init(const Callable<void>& cb);
+            void init(const Callable<void>& cb);
 
         public:
             /** @brief Destructor
@@ -159,39 +159,39 @@ namespace System {
 
     /** @brief Platform independent joinable thread
 
-		%AttachedThreads are threads, which are managed by the creator,
-		and are normally created on the stack. The creator must wait,
-		until the thread terminates either explicitly by calling join()
-		or implicitly by the destructor. The life-time of the callable
-		object must exceed the life-time of the thread. Mind the order
-		of destruction if the %AttachedThread is a member variable of
-		a class.
-		
-		Example:
-		\code
-		struct Operation
-		{
-			void run()
-			{
-				// implement, whatever needs to be done in parallel
-			}
-		};
+        %AttachedThreads are threads, which are managed by the creator,
+        and are normally created on the stack. The creator must wait,
+        until the thread terminates either explicitly by calling join()
+        or implicitly by the destructor. The life-time of the callable
+        object must exceed the life-time of the thread. Mind the order
+        of destruction if the %AttachedThread is a member variable of
+        a class.
 
-		int main()
-		{
-			Operation op;
-			MyThread thread( Pt::callable(op, &Operation::run) );
-			thread.start();
+        Example:
+        \code
+        struct Operation
+        {
+            void run()
+            {
+                // implement, whatever needs to be done in parallel
+            }
+        };
 
-			// the thread runs and we can do something else in parallel
+        int main()
+        {
+            Operation op;
+            MyThread thread( Pt::callable(op, &Operation::run) );
+            thread.start();
 
-			doMoreWork();
+            // the thread runs and we can do something else in parallel
 
-			// the thread's destructor waits for the thread to join
-			// the op object outlives the thread object
-			return 0;
-		}
-		\endcode
+            doMoreWork();
+
+            // the thread's destructor waits for the thread to join
+            // the op object outlives the thread object
+            return 0;
+        }
+        \endcode
     */
     class AttachedThread : public Thread
     {
@@ -216,64 +216,64 @@ namespace System {
             : Thread(loop)
             {}
 
-			//! @brief Joins the thread, if not already joined.
+            //! @brief Joins the thread, if not already joined.
             ~AttachedThread()
             {
                 Thread::joinNoThrow();
             }
 
-			/** @brief Wait explicitly for the thread to terminate.
+            /** @brief Wait explicitly for the thread to terminate.
 
-				Join() is called automatically in the destructor if not
-				already called. Throws SystemError on failure
-			*/
+                Join() is called automatically in the destructor if not
+                already called. Throws SystemError on failure
+            */
             void join()
             {
                 Thread::join();
             }
 
-			/** @brief Terminates the thread.
+            /** @brief Terminates the thread.
 
-				Forces the thread to terminate is dangerous and discouraged.
-			*/
+                Forces the thread to terminate is dangerous and discouraged.
+            */
             void terminate()
             {
                 Thread::terminate();
             }
     };
 
-	/** @brief Platform independent detached thread
+    /** @brief Platform independent detached thread
 
-	    A detached thread runs just for its own. The user does not need
-	    (actually can not even) wait for the thread to stop. The object
-	    is normally created on the heap.
+        A detached thread runs just for its own. The user does not need
+        (actually can not even) wait for the thread to stop. The object
+        is normally created on the heap.
 
-	    Example:
-		\code
-		class MyThread : public Pt::System::::DetachedThread
-		{
-			protected:
-				void run();
-		};
+        Example:
+        \code
+        class MyThread : public Pt::System::::DetachedThread
+        {
+            protected:
+                void run();
+        };
 
-		void MyThread::run()
-		{
-			// implement, whatever needs to be done in parallel
-		}
+        void MyThread::run()
+        {
+            // implement, whatever needs to be done in parallel
+        }
 
-		void someFunc()
-		{
-			MyThread *thread = new MyThread();
-			thread->start();
+        void someFunc()
+        {
+            MyThread *thread = new MyThread();
+            thread->start();
 
-			// here the thread runs and the program can do something
-			// else in parallel. It continues to run even after this
-			// function returns. The object is automatically destroyed,
-			// when the thread has finished.
-		}
+            // here the thread runs and the program can do something
+            // else in parallel. It continues to run even after this
+            // function returns. The object is automatically destroyed,
+            // when the thread has finished.
+        }
 
-		\endcode
-	*/
+        \endcode
+    */
     class DetachedThread : public Thread
     {
         protected:
@@ -288,7 +288,7 @@ namespace System {
             DetachedThread()
             : Thread()
             {
-				Thread::init( callable(*this, &DetachedThread::exec) );
+                Thread::init( callable(*this, &DetachedThread::exec) );
                 Thread::detach();
             }
 
