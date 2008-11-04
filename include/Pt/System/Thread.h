@@ -31,6 +31,7 @@
 
 #include <Pt/NonCopyable.h>
 #include <Pt/Callable.h>
+#include <Pt/Function.h>
 #include <Pt/Method.h>
 #include <Pt/System/Api.h>
 
@@ -286,6 +287,15 @@ namespace System {
     */
     class DetachedThread : public Thread
     {
+        typedef void (*FuncPtrT)();
+
+        public:
+            explicit DetachedThread(FuncPtrT fp)
+            : Thread( callable(fp) )
+            {
+                Thread::detach();
+            }
+
         protected:
             /** @brief Contructs a detched thread
 
