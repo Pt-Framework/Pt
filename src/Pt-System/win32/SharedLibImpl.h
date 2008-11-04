@@ -19,13 +19,9 @@
 #ifndef PT_SHAREDLIBIMPL_H
 #define PT_SHAREDLIBIMPL_H
 
-#include "Pt/Atomicity.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/SharedLib.h"
 #include "win32.h"
-#include <vector>
-#include <iostream>
-#include <sstream>
 #include <windows.h>
 
 namespace Pt {
@@ -53,19 +49,19 @@ class SharedLibImpl
                 ::FreeLibrary(_handle);
         }
 
-        Pt::atomic_t refs() const
+        unsigned refs() const
         {
             return _refs;
         }
 
-        Pt::atomic_t ref()
+        unsigned ref()
         {
-            return Pt::atomicIncrement(_refs);
+            return ++_refs;
         }
 
-        Pt::atomic_t unref()
+        unsigned unref()
         {
-            return Pt::atomicDecrement(_refs);
+            return --_refs;
         }
 
         void open(const std::string& path);
@@ -86,7 +82,7 @@ class SharedLibImpl
         }
 
     private:
-        Pt::atomic_t _refs;
+        unsigned _refs;
         HMODULE _handle;
 };
 

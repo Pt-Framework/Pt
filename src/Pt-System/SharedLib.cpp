@@ -35,17 +35,9 @@ OpenLibraryFailed::OpenLibraryFailed(const std::string& msg, const Pt::SourceInf
 { }
 
 
-OpenLibraryFailed::~OpenLibraryFailed() throw()
-{ }
-
-
 SymbolNotFound::SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si)
 : SystemError("symbol not found: " + sym, si)
 , _symbol(sym)
-{ }
-
-
-SymbolNotFound::~SymbolNotFound() throw()
 { }
 
 

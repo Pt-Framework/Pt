@@ -1,6 +1,5 @@
 #include "SharedLibImpl.h"
 
-
 namespace Pt {
 
 namespace System {
@@ -15,9 +14,7 @@ void SharedLibImpl::open(const std::string& path)
 
 	if(_handle == 0)
 	{
-		std::stringstream ss;
-		ss << "Could not open shared library " << path << " error " << GetLastError();
-		throw OpenLibraryFailed( ss.str(), PT_SOURCEINFO );
+		throw OpenLibraryFailed( path, PT_SOURCEINFO );
 	}
 }
 

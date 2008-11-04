@@ -38,7 +38,8 @@ class PT_SYSTEM_API OpenLibraryFailed : public SystemError
         OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si);
 
         //! @brief Destructor
-        ~OpenLibraryFailed() throw();
+        ~OpenLibraryFailed() throw()
+		{}
 };
 
 /** @brief Thrown, when a symbol is not found in a library
@@ -51,7 +52,8 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
         SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si);
 
         //! @brief Destructor
-        ~SymbolNotFound() throw();
+        ~SymbolNotFound() throw()
+		{}
 
         //! @brief Returns the symbol, which was not found
         const std::string& symbol() const
