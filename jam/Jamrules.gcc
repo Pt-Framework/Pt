@@ -17,7 +17,7 @@ RANLIB		?= ranlib ;
 #
 if $(GCC_HIDE_SYMBOLS) = "yes"
 {
-    CCFLAGS += -fvisibility=hidden ; # -fvisibility-inlines-hidden ;
+    CCFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden ;
 }
 
 if $(CONFIG:L) = debug
@@ -28,7 +28,7 @@ if $(CONFIG:L) = debug
 else
 {
 	CCFLAGS += -DNDEBUG ;
-	OPTIM	  ?= -O1 ;
+	OPTIM	  ?= -Os ;
 }
 
 WARN ?= -Wall ;
