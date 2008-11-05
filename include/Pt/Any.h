@@ -23,6 +23,8 @@
 #include <Pt/TypeTraits.h>
 #include <typeinfo>
 #include <cstring>
+#include <algorithm>
+#include <utility>
 
 namespace Pt {
 
@@ -66,14 +68,14 @@ namespace Pt {
             d \< c;
         @endcode
     */
-    class PT_API Any
+    class Any
     {
         template <typename T>
         friend T any_cast(const Any&);
 
         public:
             /** @internal */
-            class PT_API Value
+            class Value
             {
                 public:
                     virtual ~Value() {}
@@ -152,7 +154,9 @@ namespace Pt {
                 Constructs an empty any. No memory needs to be allocated for
                 empty Anys.
             */
-            Any();
+            Any()
+            : _value(0)
+            { }
 
             /** @brief Assigns an abstract value
             */
@@ -174,7 +178,10 @@ namespace Pt {
                 Deallocates the memory needed to hold the value. This will
                 also destruct the contained type.
             */
-            ~Any();
+            ~Any()
+            {
+                delete _value;
+            }
 
             /** @brief Clear content
 
@@ -182,7 +189,11 @@ namespace Pt {
                 for the stored type. All memory required to hold the value
                 is deallocated.
             */
-            void clear();
+            void clear()
+            {
+                delete _value;
+                _value = 0;
+            }
 
             /** @brief Check if empty
 
@@ -338,6 +349,69 @@ namespace Pt {
 
         throw std::bad_cast();
     }
+
+
+inline Any& Any::assign(Value* value)
+{
+    if(_value)
+        delete _value;
+
+    _value = value;
+    return *this;
+}
+
+
+inline Any::Any(const Any& val)
+: _value(0)
+{
+    _value = val._value ? val._value->clone() : 0;
+}
+
+
+inline Any& Any::swap(Any& rhs)
+{
+    std::swap(_value, rhs._value);
+    return *this;
+}
+
+
+inline Any& Any::operator=(const Any& rhs)
+{
+    Any(rhs).swap(*this);
+    return *this;
+}
+
+
+inline bool Any::operator==(const Any& a) const
+{
+    if(_value && a._value)
+    {
+        return _value->equal( *(a._value) );
+    }
+
+    // if one or both of the Anys is not initialised
+    // they are considered equal if both have NULL values.
+    return _value == a._value;
+}
+
+
+inline bool Any::operator!=(const Any& a) const
+{
+    return !( this->operator==(a) );
+}
+
+
+inline bool Any::operator<(const Any& a) const
+{
+    if(_value && a._value)
+    {
+        return _value->lt( *(a._value) );
+    }
+
+    // if one of the Anys is not initialised the
+    //one having a NULL valueis considered less.
+    return _value < a._value;
+}
 
 } // namespace Pt
 
