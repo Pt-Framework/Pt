@@ -88,7 +88,7 @@ namespace System {
                 The Thread is not started on construction, but when start()
                 is called.
             */
-            Thread(const Callable<void>& cb);
+            explicit Thread(const Callable<void>& cb);
 
             /** @brief Contructs a thread with an event loop
 
@@ -96,7 +96,7 @@ namespace System {
                 a separate thread. The Thread is not started on construction,
                 but when start() is called.
             */
-            Thread(EventLoopBase& loop);
+            explicit Thread(EventLoopBase& loop);
 
             /** @brief Initialize with a thread entry
 
@@ -213,7 +213,7 @@ namespace System {
                 The Thread is not started on construction, but when start()
                 is called.
             */
-            AttachedThread(const Callable<void>& cb)
+            explicit AttachedThread(const Callable<void>& cb)
             : Thread(cb)
             {}
 
@@ -223,7 +223,7 @@ namespace System {
                 a separate thread. The Thread is not started on construction,
                 but when start() is called.
             */
-            AttachedThread(EventLoopBase& loop)
+            explicit AttachedThread(EventLoopBase& loop)
             : Thread(loop)
             {}
 

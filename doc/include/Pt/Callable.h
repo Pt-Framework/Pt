@@ -2,12 +2,13 @@
 namespace Pt {
 
 /** @brief An interface for all callable entities
+    @ingroup sigslot
 
     The %Callable interface extends the %Invokable interface to handle
     return values. There are partial specializations of this class
     template for up to ten arguments.
 */
-template <typename R, ARGUMENTS>
+template <typename R, typename ARGUMENTS>
 class Callable : public Invokable<ARGUMENTS>
 {
     public:

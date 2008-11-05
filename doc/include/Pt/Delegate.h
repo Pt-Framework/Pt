@@ -2,13 +2,14 @@
 namespace Pt {
 
     /** @brief Connects to one slot and handle return value.
+        @ingroup sigslot
 
         Delegates can only be connected to one slot, but have the advantage
         that they return the return value of the connected slot when called.
         There are partial specializations of this class template for up to 
         ten arguments.
     */
-    template < typename R, ARGUMENTS>
+    template < typename R, typename ARGUMENTS>
     class Delegate : Connectable
     {
         public:

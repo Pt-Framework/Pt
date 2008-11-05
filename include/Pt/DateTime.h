@@ -35,12 +35,14 @@ namespace Pt {
 class PT_API DateTime
 {
     public:
+        DateTime();
+
         DateTime(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
-		DateTime(const DateTime& dateTime);
+        DateTime(const DateTime& dateTime);
 
-		DateTime& operator=(const DateTime& dateTime);
+        DateTime& operator=(const DateTime& dateTime);
 
         ~DateTime();
 
@@ -247,6 +249,11 @@ class PT_API DateTime
 PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 
 PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
+
+
+inline DateTime::DateTime()
+{
+}
 
 
 inline DateTime::DateTime(int year, unsigned month, unsigned day,

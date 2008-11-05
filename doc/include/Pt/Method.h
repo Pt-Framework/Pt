@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,39 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Invokable_h
-#define Pt_Invokable_h
 
-#include <Pt/Api.h>
-#include <Pt/Void.h>
+#ifndef Pt_Method_h
+#define Pt_Method_h
+
+#include <Pt/Callable.h>
+#include <Pt/Connectable.h>
+#include <Pt/Slot.h>
 
 namespace Pt {
 
-/** @brief Interface for invokable entities
-    @ingroup sigslot
+#include <Pt/Method.tpp>
 
-    Invokable is a type which can be "called" via the invoke() member with a
-    number of arguments, but does not provide a return value. It serves as
-    a base type for other types in the Pt signals/slots framework.
-*/
-template <typename ARGUMENTS>
-class Invokable {
-    public:
-        /** @brief Default Constructor
-            Does nothing. Does not throw.
-        */
-        virtual ~Invokable()
-        {}
+} // !namespace Pt
 
-        /** @brief Invokes the invokable entity with the given arguments
-
-            This class template is partially specialized and the passed
-            arguments \a ARGUMENTS must match the template parameters.
-        */
-        virtual void invoke(ARGUMENTS) const = 0;
-};
-
-} // namespace Pt
 
 
 #endif
