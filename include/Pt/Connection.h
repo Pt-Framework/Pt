@@ -10,6 +10,8 @@ namespace Pt {
 
     class IConnectable;
 
+    /** @internal
+    */
     class PT_API ConnectionData : public RefCounted {
         public:
             ConnectionData()
@@ -63,7 +65,9 @@ namespace Pt {
             IConnectable* _sender;
     };
 
-
+    /** @brief Represents a connection between a Signal/Delegate and a slot
+        @ingroup sigslot
+    */
     class PT_API Connection
     {
         public:

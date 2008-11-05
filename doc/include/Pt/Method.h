@@ -1,22 +1,3 @@
-/***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 #ifndef Pt_Method_h
 #define Pt_Method_h
 
@@ -26,10 +7,46 @@
 
 namespace Pt {
 
-#include <Pt/Method.tpp>
+/** @brief Adapter for class methods
+    @ingroup sigslot
 
-} // !namespace Pt
+    The %Method class wraps member functions as Callable objects
+    so that they can be used with the signals/slots framework. There are 
+    partial specializations of this class template for up to ten arguments.
+*/
+template <typename R, class ClassT, typename ARGUMENTS>
+class Method : public Callable<R, ARGUMENTS>
+{
+    public:
+        /** @brief The wrapped member function signature. */
+        typedef R (ClassT::*MemFuncT)(ARGUMENTS);
 
+        /** @brief Wraps the given object/member pair. */
+        explicit Method(ClassT& object, MemFuncT ptr);
 
+        /** @brief Returns a reference to this object's wrapped ClassT object. */
+        ClassT& object();
+
+        /** @brief Returns a const reference to the wrapped ClassT object. */
+        const ClassT& object() const;
+
+        /** @brief Returns a reference to the wrapped member function. */
+        const MemFuncT& method() const;
+
+        // inherit doc
+        inline R operator()(ARGUMENTS0) const;
+
+        // inherit doc
+        Method<R, ClassT, ARGUMENTS>* clone() const;
+
+        //! @brief Returns true if both use the same object and function pointer
+        bool operator==(const Method& rhs) const;
+
+    private:
+        ClassT* _object;
+        MemFuncT _memFunc;
+};
+
+} // namespace Pt
 
 #endif

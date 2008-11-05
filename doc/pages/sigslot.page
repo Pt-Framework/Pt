@@ -2,22 +2,23 @@
 
 @section sigslot_intro Introduction
 
-Callback mechanisms for event handling have become ubiqitous in todays application frameworks. Older examples are the use of function pointers as callbacks or the message maps found in the MFC toolkit and more modern approaches include the .NET delegates and so-called signal-slot techniques. When signals and slots are used, objects can communicate with each other by connecting a signal of one object to the slot of another object. In most cases connection management features are built-in so that an object closes all it connections automatically when it gets destroyed. After the connection has been established, each time a signal is send, all registered slots are being called. Connecting signals to slots is type-safe i.e. a signal can only be connected to a slot that matches the signal's signature. At the same time it allows a great deal of flexibility (loose coupling), since the caller has no intimite knowledge of the callee. A simple but real example might look like this:
+Callback mechanisms for event handling have become ubiqitous in todays application frameworks. Older examples are the use of function pointers as callbacks or the message maps found in the MFC toolkit. More modern approaches include the .NET delegates and so-called signal-slot techniques. When signals and slots are used, objects can communicate with each other by connecting a signal of one object to the slot of another object. In most cases connection management features are built-in so that an object closes all it connections automatically when it gets destroyed. After the connection has been established, each time a signal is send, all registered slots are being called. Connecting signals to slots is type-safe i.e. a signal can only be connected to a slot that matches the signal's signature. At the same time it allows a great deal of flexibility (loose coupling), since the caller has no intimite knowledge of the callee. A simple but real example might look like this:
 
 @code
 int main()
 {
-    Pt::Gui::Application app;
-    Pt::Gui::Button b;
-    connect( b.clicked, app, &Pt::Gui::Application::exit);
+    Pt::System::Timer timer;
+    timer.start(1000);
 
-    b.setText(L"Quit");
-    b.show();
+    Pt::System::Application app;
+    app.add(timer);
+    connect( timer.timeout, app, &Pt::System::Application::exit);
+
     return app.run();
 }
 @endcode
 
-The application will simply quit if the button is clicked. The Pt::Gui:.Application object is the callee and the Pt::Gui::Button is the caller, which has a signal called clicked. In this case Pt::Gui::Application::exit is a regular member function.
+The application will simply quit when the timer expires after 1000 ms. The Application object is the callee and the Timer is the caller, which has a signal called timeout. In this case Application::exit is a regular member function.
 
 
 @section sigslot_Signals Signals
@@ -27,7 +28,7 @@ Pt::Signal is a class template and can be instantiated like any other object. Us
 @code
 Pt::Signal<> sig0;                        // Signal without arguments
 Pt::Signal<int> sig1;                     // Signal with one argument
-Pt::Signal<const std::string&, int> sig2; // Signal with two arguments
+Pt::Signal<int, int> sig2; // Signal with two arguments
 @endcode
 
 

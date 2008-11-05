@@ -19,12 +19,10 @@ ThreadImpl::~ThreadImpl()
 
 void ThreadImpl::init(const Callable<void>& cb)
 {
-	if(_cb)
-	{
-		delete _cb;
-		_cb = cb.clone();
-	}
+    delete _cb;
+    _cb = cb.clone();
 }
+
 
 void ThreadImpl::close()
 {
