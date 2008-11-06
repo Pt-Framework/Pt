@@ -92,7 +92,7 @@ SignalBase& SignalBase::operator=(const SignalBase& other)
 
     for( ; it != end; ++it)
     {
-        const IConnectable& signal = it->sender();
+        const Connectable& signal = it->sender();
         if( &signal == &other)
         {
             const Slot& slot = it->slot();
@@ -104,13 +104,13 @@ SignalBase& SignalBase::operator=(const SignalBase& other)
 }
 
 
-void SignalBase::opened(const Connection& c)
+void SignalBase::onConnectionOpen(const Connection& c)
 {
-    Connectable::opened(c);
+    Connectable::onConnectionOpen(c);
 }
 
 
-void SignalBase::closed(const Connection& c)
+void SignalBase::onConnectionClose(const Connection& c)
 {
     // if the signal is currently calling its slots, do not
     // remove the connection now, but only set the cleanup flag
@@ -122,7 +122,7 @@ void SignalBase::closed(const Connection& c)
     }
     else
     {
-        Connectable::closed(c);
+        Connectable::onConnectionClose(c);
     }
 }
 
@@ -282,17 +282,17 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
 }
 
 
-void Signal<const Pt::Event&>::opened(const Connection& c)
+void Signal<const Pt::Event&>::onConnectionOpen(const Connection& c)
 {
-	const IConnectable& sender = c.sender();
+	const Connectable& sender = c.sender();
 	if(&sender != this)
 	{
-		return Connectable::opened(c);
+		return Connectable::onConnectionOpen(c);
 	}
 }
 
 
-void Signal<const Pt::Event&>::closed(const Connection& c)
+void Signal<const Pt::Event&>::onConnectionClose(const Connection& c)
 {
 	// if the signal is currently calling its slots, do not
 	// remove the connection now, but only set the cleanup flag
@@ -316,7 +316,7 @@ void Signal<const Pt::Event&>::closed(const Connection& c)
 			}
 		}
 
-		Connectable::closed(c);
+		Connectable::onConnectionClose(c);
 	}
 }
 

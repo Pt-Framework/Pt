@@ -60,9 +60,9 @@ namespace Pt {
 
             SignalBase& operator=(const SignalBase& other);
 
-            virtual void opened(const Connection& c);
+            virtual void onConnectionOpen(const Connection& c);
 
-            virtual void closed(const Connection& c);
+            virtual void onConnectionClose(const Connection& c);
 
         protected:
             void disconnectSlot(const Slot&);
@@ -183,9 +183,9 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 			this->removeRoute(&ti, slot);
 		}
 
-		virtual void opened(const Connection& c);
+		virtual void onConnectionOpen(const Connection& c);
 
-		virtual void closed(const Connection& c);
+		virtual void onConnectionClose(const Connection& c);
 
 	protected:
 		void addRoute(const std::type_info* ti, IEventRoute* route);

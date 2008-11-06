@@ -35,52 +35,7 @@ namespace Pt {
         overload Connectable::opened and Connectable::closed to tune
         connection managenment.
     */
-    class PT_API IConnectable
-    {
-        public:
-            /** @brief Closes all connections.
-
-                When a %Connectable object is destroyed, it closes all its
-                connections automatically.
-            */
-            virtual ~IConnectable() {}
-
-            /** @brief Registers a Connection with the %Connectable.
-
-                TODO: rename onConnect
-
-                This function is called when a new Connection involving
-                this object is opened. The default implementation adds
-                the connection to a list, so the destructor can close it.
-
-                @param c Connection being opened
-                @return True if the Connection was accepted
-            */
-            virtual void opened(const Connection& c) = 0;
-
-            /** @brief Unregisters a Connection from the %Connectable.
-
-                TODO: rename onDisconnect
-
-                This function is called when a new Connection involving
-                this object is closed. The default implementation removes
-                the connection from its list of connections.
-
-                @param c Connection being opened
-            */
-            virtual void closed(const Connection& c) = 0;
-    };
-
-    /** @brief %Connection management for signal and slot objects
-        @ingroup sigslot
-
-        This class implements connection management for signal and slot
-        objects. It makes sure that all connections where this object
-        is involved are closed on destruction. Deriving classes can
-        overload Connectable::opened and Connectable::closed to tune
-        connection managenment.
-    */
-    class PT_API Connectable : public IConnectable
+    class PT_API Connectable
     {
         public:
             /** @brief Default constructor.
@@ -98,8 +53,6 @@ namespace Pt {
 
             /** @brief Registers a Connection with the %Connectable.
 
-                TODO: rename onConnect
-
                 This function is called when a new Connection involving
                 this object is opened. The default implementation adds
                 the connection to a list, so the destructor can close it.
@@ -107,11 +60,9 @@ namespace Pt {
                 @param c Connection being opened
                 @return True if the Connection was accepted
             */
-            virtual void opened(const Connection& c);
+            virtual void onConnectionOpen(const Connection& c);
 
             /** @brief Unregisters a Connection from the %Connectable.
-
-                TODO: rename onDisconnect
 
                 This function is called when a new Connection involving
                 this object is closed. The default implementation removes
@@ -119,7 +70,7 @@ namespace Pt {
 
                 @param c Connection being opened
             */
-            virtual void closed(const Connection& c);
+            virtual void onConnectionClose(const Connection& c);
 
             //! @internal @brief For unit tests only.
             std::size_t connectionCount() const

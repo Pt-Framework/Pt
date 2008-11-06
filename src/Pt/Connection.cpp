@@ -30,14 +30,14 @@ Connection::Connection()
 }
 
 
-Connection::Connection(IConnectable& sender, Slot* slot)
+Connection::Connection(Connectable& sender, Slot* slot)
 {
     std::auto_ptr<ConnectionData> data( new ConnectionData(sender, slot) );
     _data = data.get();
     _data->setValid(false);
 
-    sender.opened(*this);
-    slot->opened(*this);
+    sender.onConnectionOpen(*this);
+    slot->onConnect(*this);
    _data->setValid(true);
     data.release();
 }
@@ -72,14 +72,14 @@ void Connection::close()
     if( !this->valid() )
         return;
 
-    _data->slot().closed( *this );
+    _data->slot().onDisconnect( *this );
     // We set the valid flag here to false since the call above may 
     // fail for any reason. If setting the valid flag before, a
     // connection may pretend to be closed but it is not and it 
     // may reside e.g. in the list of connections of the 
     // Connectable class and then provoke an infinite loop.
     _data->setValid(false);
-    _data->sender().closed( *this );
+    _data->sender().onConnectionClose( *this );
 }
 
 

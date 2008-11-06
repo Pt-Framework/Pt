@@ -76,16 +76,14 @@ class ConstMethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         virtual const void* callable() const
         { return &_method; }
 
-        virtual void opened(const Connection& c)
+        virtual void onConnect(const Connection& c)
         {
-            IConnectable& obj = _method.object();
-            obj.opened(c);
+            _method.object().onConnectionOpen(c);
         }
 
-        virtual void closed(const Connection& c) 
+        virtual void onDisconnect(const Connection& c)
         {
-            IConnectable& obj = _method.object();
-            obj.closed(c);
+            _method.object().onConnectionClose(c);
         }
         virtual bool equals(const Slot& slot) const
         {

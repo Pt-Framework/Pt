@@ -8,7 +8,7 @@
 
 namespace Pt {
 
-    class IConnectable;
+    class Connectable;
 
     /** @internal
     */
@@ -21,7 +21,7 @@ namespace Pt {
             , _sender(0)
             { }
 
-            ConnectionData(IConnectable& sender, Slot* slot)
+            ConnectionData(Connectable& sender, Slot* slot)
             : _refs(1)
             , _valid(true)
             , _slot(slot)
@@ -32,10 +32,10 @@ namespace Pt {
             { delete _slot; }
 
             atomic_t ref()
-            { return atomicIncrement(_refs); }
+            { return ++_refs; }
 
             atomic_t unref()
-            { return atomicDecrement(_refs); }
+            { return --_refs; }
 
             atomic_t refs() const
             { return _refs; }
@@ -46,10 +46,10 @@ namespace Pt {
             void setValid(bool valid)
             { _valid = valid; }
 
-            IConnectable& sender()
+            Connectable& sender()
             { return *_sender; }
 
-            const IConnectable& sender() const
+            const Connectable& sender() const
             { return *_sender; }
 
             Slot& slot()
@@ -62,7 +62,7 @@ namespace Pt {
             atomic_t _refs;
             bool _valid;
             Slot* _slot;
-            IConnectable* _sender;
+            Connectable* _sender;
     };
 
     /** @brief Represents a connection between a Signal/Delegate and a slot
@@ -73,7 +73,7 @@ namespace Pt {
         public:
             Connection();
 
-            Connection(IConnectable& sender, Slot* slot);
+            Connection(Connectable& sender, Slot* slot);
 
             Connection(const Connection& connection);
 
@@ -82,7 +82,7 @@ namespace Pt {
             bool valid() const
             { return _data->valid(); }
 
-            const IConnectable& sender() const
+            const Connectable& sender() const
             { return _data->sender(); }
 
             const Slot& slot() const

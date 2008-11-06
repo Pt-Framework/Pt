@@ -44,9 +44,9 @@ namespace Pt {
 
             virtual const void* callable() const = 0;
 
-            virtual void opened(const Connection& c) = 0;
+            virtual void onConnect(const Connection& c) = 0;
 
-            virtual void closed(const Connection& c) = 0;
+            virtual void onDisconnect(const Connection& c) = 0;
 
             virtual bool equals(const Slot& slot) const = 0;
     };

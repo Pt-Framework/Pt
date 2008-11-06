@@ -53,13 +53,13 @@ Connectable& Connectable::operator=(const Connectable&)
 }
 
 
-void Connectable::opened(const Connection& c)
+void Connectable::onConnectionOpen(const Connection& c)
 {
     _connections.push_back(c);
 }
 
 
-void Connectable::closed(const Connection& c)
+void Connectable::onConnectionClose(const Connection& c)
 {
     _connections.remove(c);
 }

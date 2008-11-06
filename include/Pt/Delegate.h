@@ -54,9 +54,9 @@ namespace Pt {
                 return *this;
             }
 
-            virtual void opened(const Connection& c)
+            virtual void onConnectionOpen(const Connection& c)
             {
-                const IConnectable& sender = c.sender();
+                const Connectable& sender = c.sender();
 
                 if( &sender == this )
                 {
@@ -64,12 +64,12 @@ namespace Pt {
                     _target = c;
                 }
 
-                Connectable::opened(c);
+                Connectable::onConnectionOpen(c);
             }
 
-            virtual void closed(const Connection& c)
+            virtual void onConnectionClose(const Connection& c)
             {
-                Connectable::closed(c);
+                Connectable::onConnectionClose(c);
             }
 
             bool isConnected() const

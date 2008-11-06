@@ -112,15 +112,15 @@
             }
 
             /** ??? */
-            virtual void opened(const Connection& c)
+            virtual void onConnect(const Connection& c)
             {
-                _method.object().opened(c);
+                _method.object().onConnectionOpen(c);
             }
 
             /** ??? */
-            virtual void closed(const Connection& c)
+            virtual void onDisconnect(const Connection& c)
             {
-                _method.object().closed(c);
+                _method.object().onConnectionClose(c);
             }
             /** returns true if this object and rhs are equivalent. */
             virtual bool equals(const Slot& rhs) const
