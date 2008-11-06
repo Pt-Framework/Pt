@@ -24,12 +24,6 @@
 
 namespace Pt {
 
-Connection::Connection()
-{
-    _data = new ConnectionData();
-}
-
-
 Connection::Connection(Connectable& sender, Slot* slot)
 {
     std::auto_ptr<ConnectionData> data( new ConnectionData(sender, slot) );
@@ -40,13 +34,6 @@ Connection::Connection(Connectable& sender, Slot* slot)
     slot->onConnect(*this);
    _data->setValid(true);
     data.release();
-}
-
-
-Connection::Connection(const Connection& connection)
-{
-    _data = connection._data;
-    _data->ref();
 }
 
 
@@ -94,13 +81,6 @@ Connection& Connection::operator=(const Connection& connection)
     _data = connection._data;
     _data->ref();
     return (*this);
-}
-
-
-bool Connection::operator==(const Connection& connection) const
-{
-    // compare pointers or callable?
-    return _data == connection._data;
 }
 
 } //namespace Pt

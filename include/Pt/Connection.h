@@ -3,7 +3,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Slot.h>
-#include <Pt/Atomicity.h>
 #include <Pt/RefCounted.h>
 
 namespace Pt {
@@ -12,7 +11,7 @@ namespace Pt {
 
     /** @internal
     */
-    class PT_API ConnectionData : public RefCounted {
+    class ConnectionData {
         public:
             ConnectionData()
             : _refs(1)
@@ -31,13 +30,13 @@ namespace Pt {
             ~ConnectionData()
             { delete _slot; }
 
-            atomic_t ref()
+            unsigned ref()
             { return ++_refs; }
 
-            atomic_t unref()
+            unsigned unref()
             { return --_refs; }
 
-            atomic_t refs() const
+            unsigned refs() const
             { return _refs; }
 
             bool valid() const
@@ -59,7 +58,7 @@ namespace Pt {
             { return *_slot; }
 
         private:
-            atomic_t _refs;
+            unsigned _refs;
             bool _valid;
             Slot* _slot;
             Connectable* _sender;
@@ -71,11 +70,18 @@ namespace Pt {
     class PT_API Connection
     {
         public:
-            Connection();
+            Connection()
+            {
+                _data = new ConnectionData();
+            }
 
             Connection(Connectable& sender, Slot* slot);
 
-            Connection(const Connection& connection);
+            Connection(const Connection& connection)
+            {
+                _data = connection._data;
+                _data->ref();
+            }
 
             ~Connection();
 
@@ -95,7 +101,10 @@ namespace Pt {
 
             Connection& operator=(const Connection& connection);
 
-            bool operator==(const Connection& connection) const;
+            bool operator==(const Connection& connection) const
+            {
+                return _data == connection._data;
+            }
 
         private:
             ConnectionData* _data;
