@@ -24,64 +24,10 @@
 
 namespace Pt {
 
-Connection::Connection(Connectable& sender, Slot* slot)
-{
-    std::auto_ptr<ConnectionData> data( new ConnectionData(sender, slot) );
-    _data = data.get();
-    _data->setValid(false);
-
-    sender.onConnectionOpen(*this);
-    slot->onConnect(*this);
-   _data->setValid(true);
-    data.release();
-}
 
 
-Connection::~Connection()
-{
-    if( _data->unref() > 0) {
-        return;
-    }
-
-    // close the connection if its still valid
-    if( this->valid() ) {
-        this->close();
-    }
-
-    // delete the shared data
-    delete _data;
-    _data = 0;
-}
 
 
-void Connection::close()
-{
-    if( !this->valid() )
-        return;
-
-    _data->slot().onDisconnect( *this );
-    // We set the valid flag here to false since the call above may 
-    // fail for any reason. If setting the valid flag before, a
-    // connection may pretend to be closed but it is not and it 
-    // may reside e.g. in the list of connections of the 
-    // Connectable class and then provoke an infinite loop.
-    _data->setValid(false);
-    _data->sender().onConnectionClose( *this );
-}
-
-
-Connection& Connection::operator=(const Connection& connection)
-{
-    if( 0 == _data->unref()) 
-    {
-        this->close();
-        delete _data;
-    }
-
-    _data = connection._data;
-    _data->ref();
-    return (*this);
-}
 
 } //namespace Pt
 

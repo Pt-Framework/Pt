@@ -110,6 +110,34 @@ namespace Pt {
             void clear();
     };
 
+	
+
+inline ConnectionData::ConnectionData(Connection& c, Connectable& sender, Slot* slot)
+: _refs(1)
+, _valid(true)
+, _slot(slot)
+, _sender(&sender)
+{ 
+	sender.onConnectionOpen(c);
+	slot->onConnect(c);
+}
+
+inline void Connection::close()
+{
+    if( !this->valid() )
+        return;
+
+    _data->slot().onDisconnect( *this );
+    // We set the valid flag here to false since the call above may 
+    // fail for any reason. If setting the valid flag before, a
+    // connection may pretend to be closed but it is not and it 
+    // may reside e.g. in the list of connections of the 
+    // Connectable class and then provoke an infinite loop.
+    _data->setValid(false);
+    _data->sender().onConnectionClose( *this );
+}
+
+	
 } // namespace Pt
 
 
