@@ -80,11 +80,11 @@ class FunctionSlot : public BasicSlot<R, ARGUMENTS>
         { return new FunctionSlot(*this); }
 
         // inherit doc
-        virtual void opened(const Connection& c)
+        virtual void onConnect(const Connection& c)
         { }
 
         // inherit doc
-        virtual void closed(const Connection& c)
+        virtual void onDisconnect(const Connection& c)
         { }
 
         // inherit doc

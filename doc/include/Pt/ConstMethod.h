@@ -69,10 +69,10 @@ class ConstMethodSlot : public BasicSlot<R, ARGUMENTS>
         virtual const void* callable() const;
 
         // inherit doc
-        virtual void opened(const Connection& c);
+        virtual void onConnect(const Connection& c);
 
         // inherit doc
-        virtual void closed(const Connection& c);
+        virtual void onDisconnect(const Connection& c);
 
         // inherit doc
         virtual bool equals(const Slot& slot) const;

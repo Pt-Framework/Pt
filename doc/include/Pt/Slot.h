@@ -24,10 +24,10 @@ class Slot
         virtual const void* callable() const = 0;
 
         //! @brief Notifies of connects
-        virtual void opened(const Connection& c) = 0;
+        virtual void onConnect(const Connection& c) = 0;
 
         //! @brief Notifies of disconnects
-        virtual void closed(const Connection& c) = 0;
+        virtual void onDisconnect(const Connection& c) = 0;
 
         //! @brief Returns true if two slots are equal in value
         virtual bool equals(const Slot& slot) const = 0;
