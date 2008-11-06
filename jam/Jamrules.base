@@ -1317,12 +1317,6 @@ rule SubDirObjects
 }
 
 
-rule SubDirLocateTargets
-{
-    LOCATE_TARGET += $(ALL_LOCATE_TARGET) $(SUBDIR) ;
-}
-
-
 rule SubDirCcFlags
 {
     SUBDIRCCFLAGS += $(<) ;
