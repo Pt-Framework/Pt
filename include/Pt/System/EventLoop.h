@@ -38,40 +38,40 @@ namespace System {
     class Selectable;
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
-     */
+    */
     class EventLoopBase : public SelectorBase
                         , public EventSink
     {
         public:
             /** @brief Destructs the EventLoop
-             */
+            */
             virtual ~EventLoopBase()
-			{}
+            {}
 
             /** @brief Starts the event loop
-             */
+            */
             void run()
-			{ this->onRun(); }
+            { this->onRun(); }
 
             /** @brief Processes all events which are currently in the event queue
-             */
+            */
             void processEvents()
-			{ this->onProcessEvents(); }
+            { this->onProcessEvents(); }
 
             /** @brief Stops the %EventLoop.
-             */
+            */
             void exit()
-			{ this->onExit(); }
+            { this->onExit(); }
 
             /** @brief Sets the idle timeout
             */
             void setIdleTimeout(unsigned int msecs)
-			{ _timeout = msecs; }
-            
-			/** @brief Returns the idle timeout
+            { _timeout = msecs; }
+
+            /** @brief Returns the idle timeout
             */
             unsigned int idleTimeout() const
-			{ return _timeout; }
+            { return _timeout; }
 
             /** @brief Notifies about wait timeouts
                 This signal is send when the timeout given to a wait
@@ -88,8 +88,8 @@ namespace System {
             /** @brief Constructs the EventLoop
             */
             EventLoopBase()
-			: _timeout(WaitInfinite)
-			{}
+            : _timeout(WaitInfinite)
+            {}
 
             virtual void onRun() = 0;
 

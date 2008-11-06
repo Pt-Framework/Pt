@@ -43,9 +43,56 @@ class Method : public Callable<R, ARGUMENTS>
         bool operator==(const Method& rhs) const;
 
     private:
+        //! @internal
         ClassT* _object;
+        //! @internal
         MemFuncT _memFunc;
 };
+
+
+/** @brief Wraps %Method objects so that they can act as Slots.
+    @ingroup sigslot
+*/
+template < typename R, typename ClassT,class ARGUMENTS>
+class MethodSlot : public BasicSlot<R, ARGUMENTS>
+{
+    public:
+        //! @brief Constructs from callable
+        MethodSlot(const Method<R, ClassT, ARGUMENTS>& method);
+
+        // inherit doc
+        Slot* clone() const;
+
+        // inherit doc
+        virtual const void* callable() const;
+
+        // inherit doc
+        virtual void opened(const Connection& c);
+
+        // inherit doc
+        virtual void closed(const Connection& c);
+
+        // inherit doc
+        virtual bool equals(const Slot& slot) const;
+
+    private:
+        //! @internal
+        Method<R, ClassT, ARGUMENTS0> _method;
+};
+
+
+/** @brief Returns a %Method object for the given object/method pair.
+    @ingroup sigslot
+*/
+template <class R, class BaseT, class ClassT, typename ARGS>
+Method<R,ClassT, ARGS> callable( ClassT & obj, R (BaseT::*ptr)(ARGS));
+
+
+/** @brief Returns a slot object for the given object/member pair.
+    @ingroup sigslot
+*/
+template <class R, class BaseT, class ClassT, typename ARGS>
+MethodSlot<R, ClassT, ARGS> slot( ClassT& obj, R (BaseT::*memFunc)(ARGS) );
 
 } // namespace Pt
 

@@ -15,9 +15,14 @@ RANLIB		?= ranlib ;
 # TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
 #       options below can be enabled ???
 #
-if $(GCC_HIDE_SYMBOLS) = "yes"
+if $(GCC_HIDE_SYMBOLS)
 {
-    CCFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden ;
+    CCFLAGS += -fvisibility=hidden ;
+}
+
+if $(GCC_HIDE_INLINES)
+{
+    CCFLAGS += -fvisibility-inlines-hidden ;
 }
 
 if $(CONFIG:L) = debug

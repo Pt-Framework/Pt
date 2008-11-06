@@ -58,6 +58,61 @@ class Function : public Callable<R, ARGUMENTS>
         FuncT _funcPtr;
 };
 
+
+/** @brief Wraps %Function objects so that they can act as slots.
+    @ingroup sigslot
+*/
+template < typename R, typename ARGUMENTS>
+class FunctionSlot : public BasicSlot<R, ARGUMENTS>
+{
+    public:
+        //! @brief Constructs from callable
+        FunctionSlot(const Function<R, ARGUMENTS>& func)
+        : _func( func )
+        {}
+
+        // inherit doc
+        virtual const void* callable() const
+        { return &_func; }
+
+        // inherit doc
+        Slot* clone() const
+        { return new FunctionSlot(*this); }
+
+        // inherit doc
+        virtual void opened(const Connection& c)
+        { }
+
+        // inherit doc
+        virtual void closed(const Connection& c)
+        { }
+
+        // inherit doc
+        virtual bool equals(const Slot& slot) const
+        {
+            const FunctionSlot* fs = dynamic_cast<const FunctionSlot*>(&slot);
+            return fs ? (_func == fs->_func) : false;
+        }
+
+    private:
+        //! @internal
+        Function<R, ARGUMENTS> _func;
+};
+
+
+/** @brief Returns a %Function wrapper for the given free/static function.
+    @ingroup sigslot
+*/
+template <typename R, typename ARGS>
+Function<R, ARGS> callable( R (*func)(ARGS) );
+
+
+/** @brief Returns a slot object for the given free/static function.
+    @ingroup sigslot
+*/
+template <typename R, typename ARGS>
+FunctionSlot<R, ARGS> slot( R (*func)(ARGS) );
+
 } // !namespace Pt
 
 
