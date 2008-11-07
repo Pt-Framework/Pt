@@ -92,7 +92,7 @@ inline void TestThread::run()
 
 inline void ThreadTest::Attached()
 {
-    Pt::System::AttachedThread thread( callable(*this, &ThreadTest::thread1) );
+    Pt::System::AttachedThread thread( Pt::callable(*this, &ThreadTest::thread1) );
     thread.start();
     thread.join();
     PT_UNIT_ASSERT( flag() );
