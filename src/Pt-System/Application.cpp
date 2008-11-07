@@ -42,10 +42,10 @@ Application::Application(int argc, char** argv)
 , _loop(0)
 , _owner(0)
 {
-    _impl = new ApplicationImpl;
-
     // base class already throws if constructed twice
     ::getSystemAppPtr() = this;
+
+    _impl = new ApplicationImpl;
 
     _owner = new EventLoop();
     this->init(*_owner);
@@ -54,16 +54,16 @@ Application::Application(int argc, char** argv)
 
 Application::Application(EventLoopBase* loop, int argc, char** argv)
 : Pt::Application(argc, argv)
-, _loop(loop)
+, _loop(0)
 , _owner(0)
 {
-    _impl = new ApplicationImpl;
-
-    if(_loop)
-        this->init(*_loop);
-
     // base class already throws if constructed twice
     ::getSystemAppPtr() = this;
+
+    _impl = new ApplicationImpl;
+
+    if(loop)
+        this->init(*loop);
 }
 
 

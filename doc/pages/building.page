@@ -24,6 +24,8 @@ and show how to cross-compile.
         <LI>
             <b><a href="#clean">Cleaning the project</a></b>
         <LI>
+            <b><a href="#testing">Build Verification Tests</a></b>
+        <LI>
             <b><a href="#options">Common Build Options</a></b>
         <LI>
             <b><a href="#build_unix">Building for Unix, Linux and OS-X</a></b>
@@ -178,6 +180,17 @@ will remove all artefacts that were created by a build with default options:
 
 @code
 jam.sh clean
+@endcode
+
+@section testing Build Verification Tests
+The pseudo-target 'test' causes jam to build all unit-test and execute them.
+If a unit-test fails the whole build will be reported to have failed. The target
+test is not a dependent of the target all, so unit-tests are not built and
+executed by default. The following example builds the whole projects and
+executes the unit-test.
+
+@code
+jam.sh -q test
 @endcode
 
 @section options Common Build Options
