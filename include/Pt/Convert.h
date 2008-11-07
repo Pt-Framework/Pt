@@ -40,9 +40,11 @@ class PT_API ConversionError : public std::runtime_error
     public:
         ConversionError(const char* msg, const SourceInfo& si);
 
-        virtual ~ConversionError() throw();
+		~ConversionError() throw()
+		{}
 
-        const Pt::SourceInfo& where() const;
+		const Pt::SourceInfo& where() const
+		{ return _si; }
 
     private:
         Pt::SourceInfo _si;

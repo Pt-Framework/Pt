@@ -21,7 +21,12 @@ namespace Pt {
             , _sender(0)
             { }
 
-            ConnectionData(Connection& c, Connectable& sender, Slot* slot);
+            ConnectionData(Connectable& sender, Slot* slot)
+			: _refs(1)
+			, _valid(true)
+			, _slot(slot)
+			, _sender(&sender)
+			{ }
 
             ~ConnectionData()
             { delete _slot; }
@@ -63,17 +68,15 @@ namespace Pt {
     /** @brief Represents a connection between a Signal/Delegate and a slot
         @ingroup sigslot
     */
-    class Connection
+    class PT_API Connection
     {
         public:
             Connection()
-            {
-                _data = new ConnectionData();
-            }
+            { _data = new ConnectionData(); }
 
-            Connection(Connectable& sender, Slot* slot);
+			Connection(Connectable& sender, Slot* slot);
 
-            Connection(const Connection& connection)
+			Connection(const Connection& connection)
             {
                 _data = connection._data;
                 _data->ref();
@@ -95,8 +98,18 @@ namespace Pt {
 
             void close();
 
-            Connection& operator=(const Connection& connection);
+            Connection& operator=(const Connection& connection)
+			{
+			    if( 0 == _data->unref() ) 
+			    {
+			        this->close();
+			        delete _data;
+			    }
 
+			    _data = connection._data;
+			    _data->ref();
+			    return (*this);
+			}
             bool operator==(const Connection& connection) const
             {
                 return _data == connection._data;
@@ -105,45 +118,7 @@ namespace Pt {
         private:
             ConnectionData* _data;
     };
-	
-inline Connection::Connection(Connectable& sender, Slot* slot)
-: _data(0)
-{
-    _data = new ConnectionData(*this, sender, slot);
-}
-	
-inline Connection::~Connection()
-{
-    if( _data->unref() > 0) {
-        return;
-    }
 
-    // close the connection if its still valid
-    if( this->valid() ) {
-        this->close();
-    }
-
-    // delete the shared data
-    delete _data;
-    _data = 0;
-}
-
-
-
-
-
-inline Connection& Connection::operator=(const Connection& connection)
-{
-    if( 0 == _data->unref()) 
-    {
-        this->close();
-        delete _data;
-    }
-
-    _data = connection._data;
-    _data->ref();
-    return (*this);
-}
 } // namespace Pt
 
 #endif

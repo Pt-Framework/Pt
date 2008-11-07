@@ -32,10 +32,10 @@
 
 namespace std {
 
-    class PT_API locale
+    class locale
     {
         public:
-            class PT_API facet
+            class facet
             {
                 public:
                     facet(size_t refs)
@@ -55,7 +55,7 @@ namespace std {
     };
 
 
-    class PT_API ctype_base
+    class ctype_base
     {
         public:
             enum {
@@ -88,7 +88,7 @@ namespace std {
     };
 
 
-    class PT_API codecvt_base
+    class codecvt_base
     {
         public:
             enum {
@@ -408,8 +408,6 @@ namespace std {
     
 #if (defined _MSC_VER || defined __QNX__)
 
-    class PT_API codecvt_base;
-
     template<>
     class PT_API codecvt<Pt::Char, char, std::mbstate_t> : public codecvt_base {
 
@@ -497,7 +495,7 @@ _STLP_END_NAMESPACE
     
 namespace Pt {
 
-static struct PT_API InitLocale
+static struct InitLocale
 {
     InitLocale()
     {

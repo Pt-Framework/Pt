@@ -16,7 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
-
 #include "Pt/Connectable.h"
 #include "Pt/Callable.h"
 #include <iostream>
@@ -24,11 +23,53 @@
 
 namespace Pt {
 
+Connection::Connection(Connectable& sender, Slot* slot)
+: _data(0)
+{
+	_data = new ConnectionData(sender, slot);
+
+	try 
+	{
+		sender.onConnectionOpen(*this);
+		slot->onConnect(*this);
+	}
+	catch(...)
+	{
+	    delete _data;
+		throw;
+	}
+}
 
 
+Connection::~Connection()
+{
+    if( _data->unref() > 0) {
+        return;
+    }
+
+    // close the connection if its still valid
+    if( this->valid() ) {
+        this->close();
+    }
+
+    // delete the shared data
+    delete _data;
+}
 
 
+void Connection::close()
+{
+    if( this->valid() )
+    {
+	    _data->slot().onDisconnect( *this );
+	    // We set the valid flag here to false since the call above may 
+	    // fail for any reason. If setting the valid flag before, a
+	    // connection may pretend to be closed but it is not and it 
+	    // may reside e.g. in the list of connections of the 
+	    // Connectable class and then provoke an infinite loop.
+	    _data->setValid(false);
+	    _data->sender().onConnectionClose( *this );
+	}
+}
 
 } //namespace Pt
-
-

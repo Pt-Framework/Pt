@@ -26,16 +26,5 @@ ConversionError::ConversionError(const char* msg, const SourceInfo& si)
 {
 }
 
-
-ConversionError::~ConversionError() throw()
-{
-}
-
-
-const Pt::SourceInfo& ConversionError::where() const
-{
-    return _si;
-}
-
 }
 
