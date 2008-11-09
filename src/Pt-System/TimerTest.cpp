@@ -14,10 +14,10 @@ class TimerTest : public Pt::Unit::TestSuite
         , _timer(0)
         , _count(0)
         {
-            this->registerMethod("Timeout", *this, &TimerTest::Timeout);
+            //this->registerMethod("Timeout", *this, &TimerTest::Timeout);
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
-            this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
-            this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
+            //this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
+            //this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
         }
 
         void setUp()
