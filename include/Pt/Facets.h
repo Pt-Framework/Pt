@@ -495,7 +495,7 @@ _STLP_END_NAMESPACE
     
 namespace Pt {
 
-static struct InitLocale
+static struct PT_API InitLocale
 {
     InitLocale()
     {
