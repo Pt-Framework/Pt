@@ -35,16 +35,25 @@ namespace Pt {
 class PT_API DateTime
 {
     public:
-        DateTime();
+		DateTime()
+		{ }
 
-        DateTime(int year, unsigned month, unsigned day,
-                 unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
+		DateTime(int year, unsigned month, unsigned day,
+		                   unsigned hour = 0, unsigned minute = 0, 
+						   unsigned second = 0, unsigned msec = 0)
+		: _date(year, month, day)
+		, _time(hour, minute, second, msec)
+		{ }
 
-        DateTime(const DateTime& dateTime);
+		DateTime(const DateTime& dateTime)
+		: _date( dateTime.date() )
+		, _time( dateTime.time() )
+		{ }
 
         DateTime& operator=(const DateTime& dateTime);
 
-        ~DateTime();
+        ~DateTime()
+		{}
 
         static inline DateTime fromJulianDays(unsigned julianDays)
         {
@@ -251,34 +260,12 @@ PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
 
 
-inline DateTime::DateTime()
-{
-}
-
-
-inline DateTime::DateTime(int year, unsigned month, unsigned day,
-                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
-: _date(year, month, day)
-, _time(hour, minute, second, msec)
-{ }
-
-
-inline DateTime::DateTime(const DateTime& dateTime)
-: _date( dateTime.date() )
-, _time( dateTime.time() )
-{ }
-
-
 inline DateTime& DateTime::operator=(const DateTime& dateTime)
 {
 	_date = dateTime.date();
 	_time = dateTime.time();
 	return *this;
 }
-
-
-inline DateTime::~DateTime()
-{}
 
 
 inline DateTime& DateTime::operator=(unsigned julianDay)
