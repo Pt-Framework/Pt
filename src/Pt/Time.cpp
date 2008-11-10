@@ -31,104 +31,10 @@ InvalidTime::InvalidTime(const SourceInfo& si)
 }
 
 
-Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)
+std::string toIsoString(const Time& time)
 {
-    set(h, m, s, ms);
-}
-
-
-unsigned Time::hour() const
-{
-    return _msecs / MSecsPerHour;
-}
-
-
-unsigned Time::minute() const
-{
-    return (_msecs % MSecsPerHour) / MSecsPerMinute;
-}
-
-
-unsigned Time::second() const
-{
-    return (_msecs / 1000) % SecondsPerMinute;
-}
-
-
-unsigned Time::msec() const
-{
-    return _msecs % 1000;
-}
-
-
-void Time::set(unsigned h, unsigned m, unsigned s, unsigned ms)
-{
-    if ( !isValid(h, m, s ,ms) )
-    {
-        throw InvalidTime(PT_SOURCEINFO);
-    }
-
-    _msecs = (h*SecondsPerHour + m*SecondsPerMinute + s) * 1000 + ms;
-}
-
-
-void Time::get(unsigned& h, unsigned& m, unsigned& s, unsigned& ms) const
-{
-    h = hour();
-    m = minute();
-    s = second();
-    ms = msec();
-}
-
-
-Time Time::addSecs(int secs) const
-{
-    return addMSecs(secs * 1000);
-}
-
-
-int Time::secsTo(const Time &t) const
-{
-    return static_cast<int>( msecsTo(t) / 1000 );
-}
-
-
-Time Time::addMSecs(Pt::int64_t ms) const
-{
-    Time t;
-    if (ms < 0)
-    {
-        Pt::int64_t negdays = (MSecsPerDay - ms) / MSecsPerDay;
-        t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
-    }
-    else
-    {
-        t._msecs = static_cast<unsigned>((_msecs + ms) % MSecsPerDay);
-    }
-
-    return t;
-}
-
-
-Pt::int64_t Time::msecsTo(const Time &t) const
-{
-    if(t._msecs > _msecs)
-        return t._msecs - _msecs;
-
-    return MSecsPerDay - (_msecs - t._msecs);
-}
-
-
-bool Time::isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
-{
-    return h < 24 && m < 60 && s < 60 && ms < 1000;
-}
-
-
-std::string Time::toIsoString() const
-{
-    unsigned hour, minute, second, msec;
-    this->get(hour, minute, second, msec);
+	unsigned hour = 0, minute = 0, second = 0, msec = 0;
+	time.get(hour, minute, second, msec);
 
     // format hh:mm:ss.sssss
     //        0....+....1....+
@@ -173,8 +79,10 @@ inline unsigned short getNumber3(const char* s)
 }
 
 
-Time Time::fromIsoString(const std::string& s)
+void fromIsoString(const std::string& s, Time& time)
 {
+    unsigned hour = 0, min = 0, sec = 0, msec = 0;
+
     if( s.size() < 11 || s.at(2) != ':'
         || s.at(5) != ':' || s.at(8) != '.')
     {
@@ -182,8 +90,12 @@ Time Time::fromIsoString(const std::string& s)
     }
 
     const char* d = s.data();
-    return Time(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),
-                getNumber3(d + 9));
+    hour = getNumber2(d);
+	min = getNumber2(d + 3);
+    sec = getNumber2(d + 6);
+    msec = getNumber3(d + 9);
+	
+	time.set(hour, min, sec, msec);
 }
 
 
@@ -213,43 +125,3 @@ void operator <<=(SerializationInfo& si, const Time& time)
 }
 
 } // namespace Pt
-
-
-/*
-Time Time::currentTime()
-{
-    Time ct;
-
-#if defined(Q_OS_WIN)
-    SYSTEMTIME st;
-    memset(&st, 0, sizeof(SYSTEMTIME));
-    GetLocalTime(&st);
-    ct._msecs = MSecsPerHour * st.wHour + MSecsPerMin * st.wMinute + 1000 * st.wSecond
-             + st.wMilliseconds;
-#elif defined(Q_OS_UNIX)
-    // posix compliant system
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    time_t ltime = tv.tv_sec;
-    tm *t;
-
-#if !defined(QT_NO_THREAD) && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    // use the reentrant version of localtime() where available
-    tm res;
-    t = localtime_r(&ltime, &res);
-#else
-    t = localtime(&ltime);
-#endif
-
-    ct._msecs = MSecsPerHour * t->tm_hour + MSecsPerMin * t->tm_min + 1000 * t->tm_sec
-             + tv.tv_usec / 1000;
-#else
-    time_t ltime; // no millisecond resolution
-    ::time(&ltime);
-    tm *t;
-    localtime(&ltime);
-    ct._msecs = MSecsPerHour * t->tm_hour + MSecsPerMin * t->tm_min + 1000 * t->tm_sec;
-#endif
-    return ct;
-}
-*/
