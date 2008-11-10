@@ -13,38 +13,14 @@ namespace {
 
     Pt::System::Pipe* pt_signal_pipe = 0;
     static char _signalBuffer[128];
-    //int signalPipe[2] = {-1, -1};
 
     void initSignalPipe()
     {
         if( ! pt_signal_pipe )
         {
             pt_signal_pipe = new Pt::System::Pipe(Pt::System::Pipe::Async);
+            pt_signal_pipe->input().beginRead( _signalBuffer, sizeof(_signalBuffer) );
         }
-
-        /*if (signalPipe[0] == -1)
-        {
-            if (pipe(signalPipe) == -1)
-            {
-                throw std::runtime_error("error creating signal pipe");
-            }
-
-            int flags = ::fcntl(signalPipe[0], F_GETFL);
-            if(-1 == flags)
-                throw std::runtime_error("Could not get pipe flags." + PT_SOURCEINFO);
-
-            int ret = ::fcntl(signalPipe[0], F_SETFL, flags|O_NONBLOCK);
-            if(-1 == ret)
-                throw std::runtime_error("Could not set pipe to non-blocking." + PT_SOURCEINFO);
-
-            flags = ::fcntl(signalPipe[1], F_GETFL);
-            if(-1 == flags)
-                throw std::runtime_error("Could not get pipe flags." + PT_SOURCEINFO);
-
-            ret = ::fcntl(signalPipe[1], F_SETFL, flags|O_NONBLOCK);
-            if(-1 == ret)
-                throw std::runtime_error("Could not set pipe to non-blocking." + PT_SOURCEINFO);
-        }*/
     }
 
     void processSignal(Pt::System::IODevice& device)
@@ -81,9 +57,6 @@ extern "C" void pt_system_application_sighandler(int sigNo)
     {
         pt_signal_pipe->output().write( (char*)&sigNo, sizeof(sigNo) );
     }
-
-    //if (signalPipe[1] != -1)
-    //    write(signalPipe[1], &sigNo, sizeof(sigNo));
 }
 
 namespace Pt {
@@ -98,6 +71,7 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
+    disconnect(pt_signal_pipe->input().inputReady, processSignal);
 }
 
 
@@ -105,7 +79,6 @@ void ApplicationImpl::init(SelectorBase& s)
 {
     pt_signal_pipe->input().setSelector(&s);
     connect(pt_signal_pipe->input().inputReady, processSignal);
-    pt_signal_pipe->input().beginRead( _signalBuffer, sizeof(_signalBuffer) );
 }
 
 
@@ -146,12 +119,6 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
 	
 	return false;
 }
-
-
-/*int ApplicationImpl::signalFd() const
-{
-    return signalPipe[0];
-}*/
 
 } // namespace System
 
