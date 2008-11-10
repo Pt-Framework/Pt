@@ -68,7 +68,7 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             {}
 
             /** Creates a copy of this object and returns it. Caller owns the returned object. */
-            BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
+            Slot* clone() const
             { return new DelegateSlot(*this); }
 
             /** Returns a pointer to this object's internal Callable. */
@@ -138,8 +138,8 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -236,8 +236,8 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -334,8 +334,8 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -432,8 +432,8 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -530,8 +530,8 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -628,8 +628,8 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -726,8 +726,8 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -824,8 +824,8 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2, class A3>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -922,8 +922,8 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1, class A2>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1,A2) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1,A2) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -1020,8 +1020,8 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT,class A1>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)(A1) const)
+    template <typename R, class BaseT, class ClassT,class A1>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(A1) const)
     {
         return connect( delegate, slot(object, memFunc) );
     }
@@ -1118,8 +1118,8 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
 
     /** Connect a Delegate to a const member function.
     */
-    template <typename R, class ClassT>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)() const)
+    template <typename R, class BaseT, class ClassT>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)() const)
     {
         return connect( delegate, slot(object, memFunc) );
     }

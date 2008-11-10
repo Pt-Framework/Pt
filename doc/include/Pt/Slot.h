@@ -40,9 +40,20 @@ template < typename R, typename ARGUMENTS>
 class BasicSlot : public Slot
 {
     public:
-        /** @brief Returns a copy of this objects created by new
-        */
+        //! @brief Clone this object with new
         virtual Slot* clone() const = 0;
+
+        //! @brief Returns a pointer to the contained callable
+        virtual const void* callable() const = 0;
+
+        //! @brief Notifies of connects
+        virtual void onConnect(const Connection& c) = 0;
+
+        //! @brief Notifies of disconnects
+        virtual void onDisconnect(const Connection& c) = 0;
+
+        //! @brief Returns true if two slots are equal in value
+        virtual bool equals(const Slot& slot) const = 0;
 };
 
 }

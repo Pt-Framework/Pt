@@ -102,7 +102,7 @@
 
             /** Creates a clone of this object and returns it. Caller owns
             the returned object. */
-            BasicSlot<void,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
+            Slot* clone() const
             { return new SignalSlot(*this); }
 
             /** Returns a pointer to this object's internal Callable object. */
@@ -165,8 +165,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -198,8 +198,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
+    template <typename R, class BaseT, class ClassT, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -316,8 +316,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -349,8 +349,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -467,8 +467,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -500,8 +500,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -618,8 +618,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -651,8 +651,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, ClassT & object, R(BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -769,8 +769,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+    Connection connect(Signal<A1,A2,A3,A4,A5,A6>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -802,8 +802,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -920,8 +920,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5>
-    Connection connect(Signal<A1,A2,A3,A4,A5>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5>
+    Connection connect(Signal<A1,A2,A3,A4,A5>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -953,8 +953,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5>
-    void disconnect(Signal<A1,A2,A3,A4,A5>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5>
+    void disconnect(Signal<A1,A2,A3,A4,A5>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -1071,8 +1071,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3, class A4>
-    Connection connect(Signal<A1,A2,A3,A4>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4>
+    Connection connect(Signal<A1,A2,A3,A4>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -1104,8 +1104,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3, class A4>
-    void disconnect(Signal<A1,A2,A3,A4>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4>
+    void disconnect(Signal<A1,A2,A3,A4>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -1222,8 +1222,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2, class A3>
-    Connection connect(Signal<A1,A2,A3>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3>
+    Connection connect(Signal<A1,A2,A3>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -1255,8 +1255,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2, class A3>
-    void disconnect(Signal<A1,A2,A3>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2,A3) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3>
+    void disconnect(Signal<A1,A2,A3>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -1373,8 +1373,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1, class A2>
-    Connection connect(Signal<A1,A2>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2) const)
+    template <typename R, class BaseT, class ClassT,class A1, class A2>
+    Connection connect(Signal<A1,A2>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -1406,8 +1406,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1, class A2>
-    void disconnect(Signal<A1,A2>& signal, ClassT & object, R(ClassT::*memFunc)(A1,A2) const)
+    template <typename R, class BaseT, typename ClassT,class A1, class A2>
+    void disconnect(Signal<A1,A2>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -1524,8 +1524,8 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT,class A1>
-    Connection connect(Signal<A1>& signal, ClassT& object, R(ClassT::*memFunc)(A1) const)
+    template <typename R, class BaseT, class ClassT,class A1>
+    Connection connect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1) const)
     {
         return connect( signal, slot(object, memFunc) );
     }
@@ -1557,8 +1557,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT,class A1>
-    void disconnect(Signal<A1>& signal, ClassT & object, R(ClassT::*memFunc)(A1) const)
+    template <typename R, class BaseT, typename ClassT,class A1>
+    void disconnect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1) const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }
@@ -1675,20 +1675,11 @@
     }
 
     //! Connects a Signal to a const member function.
-    template <typename R, class ClassT>
-    Connection connect(Signal<>& signal, ClassT& object, R(ClassT::*memFunc)() const)
+    template <typename R, class BaseT, class ClassT>
+    Connection connect(Signal<>& signal, BaseT& object, R(ClassT::*memFunc)() const)
     {
         return connect( signal, slot(object, memFunc) );
     }
-
-    /// Connects a Signal to another Signal
-/**
-    template <>
-    Connection connect(Signal<>& sender, Signal<>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
 
     template <typename R>
     void disconnect(Signal<>& signal, const BasicSlot<R>& slot)
@@ -1708,8 +1699,8 @@
         signal.disconnect( slot( object, memFunc ) );
     }
 
-    template <typename R, typename ClassT>
-    void disconnect(Signal<>& signal, ClassT & object, R(ClassT::*memFunc)() const)
+    template <typename R, class BaseT, typename ClassT>
+    void disconnect(Signal<>& signal, BaseT& object, R(ClassT::*memFunc)() const)
     {
         signal.disconnect( slot( object, memFunc ) );
     }

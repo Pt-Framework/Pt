@@ -64,13 +64,13 @@ class Signal : public SignalBase {
 /** @brief  Wraps %Signal objects so that they can act as Slots.
     @ingroup sigslot
 
-    SignalSlot is a "slot wrapper" for Signal objects. That is, it
-    effectively converts a Signal object into a Slot object, so that it
-    can be used as the target of another Signal. This allows chaining of
-    Signals.
+    SignalSlot is a "slot wrapper" for %Signal objects. That is, it
+    effectively converts a %Signal object into a Slot object, so that it
+    can be used as the target of another %Signal. This allows chaining of
+    %Signals.
 */
 template <typename ARGUMENTS>
-class SignalSlot : public BasicSlot<void, ARGUMENTS>
+class SignalSlot : public BasicSlot<R, ARGUMENTS>
 {
     public:
         //! @brief Constructs from signal
