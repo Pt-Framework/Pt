@@ -233,19 +233,26 @@ Date Date::fromIsoString(const std::string& s)
 
 void operator >>=(const SerializationInfo& si, Date& date)
 {
-    int year = si.getValue<int>("year");
-    unsigned month = si.getValue<unsigned>("month");
-    unsigned day = si.getValue<unsigned>("day");
-    date.set(year, month, day);
+    std::string s = si.toValue<std::string>();
+    date = Date::fromIsoString(s);
+
+    //int year = si.getValue<int>("year");
+    //unsigned month = si.getValue<unsigned>("month");
+    //unsigned day = si.getValue<unsigned>("day");
+    //date.set(year, month, day);
 }
 
 
 void operator <<=(SerializationInfo& si, const Date& date)
 {
-    si.addValue("year",  date.year() );
-    si.addValue("month", date.month() );
-    si.addValue("day",   date.day() );
+    std::string s = date.toIsoString();
+    si.setValue(s);
     si.setTypeName( "Date");
+
+    //si.addValue("year",  date.year() );
+    //si.addValue("month", date.month() );
+    //si.addValue("day",   date.day() );
+    //si.setTypeName( "Date");
 }
 
 // Return current local date

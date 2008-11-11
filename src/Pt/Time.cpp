@@ -101,27 +101,34 @@ void fromIsoString(const std::string& s, Time& time)
 
 void operator >>=(const SerializationInfo& si, Time& time)
 {
-    unsigned hour = si.getValue<unsigned>("hour");
-    unsigned min = si.getValue<unsigned>("minute");
-    unsigned sec = si.getValue<unsigned>("second");
-    unsigned msec = si.getValue<unsigned>("millisec");
-    time.set(hour, min, sec, msec);
+    std::string s = si.toValue<std::string>();
+    time = Time::fromIsoString(s);
+
+    //unsigned hour = si.getValue<unsigned>("hour");
+    //unsigned min = si.getValue<unsigned>("minute");
+    //unsigned sec = si.getValue<unsigned>("second");
+    //unsigned msec = si.getValue<unsigned>("millisec");
+    //time.set(hour, min, sec, msec);
 }
 
 
 void operator <<=(SerializationInfo& si, const Time& time)
 {
-    unsigned hour = 0;
-    unsigned min = 0;
-    unsigned sec = 0;
-    unsigned msec = 0;
-    time.get(hour, min, sec, msec);
-
-    si.addValue("hour", hour );
-    si.addValue("minute", min );
-    si.addValue("second", sec );
-    si.addValue("millisec", msec );
+    std::string s = time.toIsoString();
+    si.setValue(s);
     si.setTypeName("Time");
+
+    //unsigned hour = 0;
+    //unsigned min = 0;
+    //unsigned sec = 0;
+    //unsigned msec = 0;
+    //time.get(hour, min, sec, msec);
+
+    //si.addValue("hour", hour );
+    //si.addValue("minute", min );
+    //si.addValue("second", sec );
+    //si.addValue("millisec", msec );
+    //si.setTypeName("Time");
 }
 
 } // namespace Pt

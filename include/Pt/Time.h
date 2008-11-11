@@ -293,12 +293,12 @@ class Time
 	PT_API void fromIsoString(const std::string& s, Pt::Time& time);
 
 	inline std::string Time::toIsoString() const
-	{ 
+	{
 		return Pt::toIsoString(*this); 
 	}
-	
-	inline Time fromIsoString(const std::string& s)
-	{ 
+
+	inline Time Time::fromIsoString(const std::string& s)
+	{
 		Time time;
 		Pt::fromIsoString(s, time); 
 		return time;
