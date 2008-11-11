@@ -288,21 +288,23 @@ class Time
 
     PT_API void operator <<=(SerializationInfo& si, const Time& time);
 
-	PT_API std::string toIsoString(const Pt::Time& time);
-	
-	PT_API void fromIsoString(const std::string& s, Pt::Time& time);
+    PT_API void convert(std::string& str, const Pt::Time& time);
 
-	inline std::string Time::toIsoString() const
-	{
-		return Pt::toIsoString(*this); 
-	}
+    PT_API void convert(Pt::Time& time, const std::string& s);
 
-	inline Time Time::fromIsoString(const std::string& s)
-	{
-		Time time;
-		Pt::fromIsoString(s, time); 
-		return time;
-	}
+    inline std::string Time::toIsoString() const
+    {
+        std::string str;
+        convert(str, *this);
+        return str;
+    }
+
+    inline Time Time::fromIsoString(const std::string& s)
+    {
+        Time time;
+        convert(time, s);
+        return time;
+    }
 }
 
 #endif // PT_TIME_H

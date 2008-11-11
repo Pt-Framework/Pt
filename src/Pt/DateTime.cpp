@@ -129,30 +129,32 @@ void convert(std::string& str, const DateTime& dt)
 
 void operator >>=(const SerializationInfo& si, DateTime& datetime)
 {
-    //std::string s = si.toValue<std::string>();
-    //datetime = DateTime::fromIsoString(s);
+    std::string s = si.toValue<std::string>();
+    convert(datetime, s);
 
-    Date date(1,1,1);
-    si.getMember("date") >>= date;
-    datetime.setDate(date);
+    //Date date(1,1,1);
+    //si.getMember("date") >>= date;
+    //datetime.setDate(date);
 
-    Time time;
-    si.getMember("time") >>= time;
-    datetime.setTime(time);
+    //Time time;
+    //si.getMember("time") >>= time;
+    //datetime.setTime(time);
 }
 
 
 void operator <<=(SerializationInfo& si, const DateTime& datetime)
 {
-    //std::string s = datetime.toIsoString();
-    //si.setValue(s);
+    std::string s;
+    convert(s, datetime);
+    si.setValue(s);
+    si.setTypeName( "DateTime");
 
-    si.setTypeName("DateTime");
-    SerializationInfo& date = si.addMember("date");
+    //si.setTypeName("DateTime");
+    //SerializationInfo& date = si.addMember("date");
 
-    date <<= datetime.date();
-    SerializationInfo& time  = si.addMember("time");
-    time <<= datetime.time();
+    //date <<= datetime.date();
+    //SerializationInfo& time  = si.addMember("time");
+    //time <<= datetime.time();
 }
 
 }

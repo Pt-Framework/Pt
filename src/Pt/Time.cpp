@@ -31,34 +31,6 @@ InvalidTime::InvalidTime(const SourceInfo& si)
 }
 
 
-std::string toIsoString(const Time& time)
-{
-	unsigned hour = 0, minute = 0, second = 0, msec = 0;
-	time.get(hour, minute, second, msec);
-
-    // format hh:mm:ss.sssss
-    //        0....+....1....+
-    char ret[14];
-    ret[0] = '0' + hour / 10;
-    ret[1] = '0' + hour % 10;
-    ret[2] = ':';
-    ret[3] = '0' + minute / 10;
-    ret[4] = '0' + minute % 10;
-    ret[5] = ':';
-    ret[6] = '0' + second / 10;
-    ret[7] = '0' + second % 10;
-    ret[8] = '.';
-    unsigned short n = msec;
-    ret[11] = '0' + n % 10;
-    n /= 10;
-    ret[10] = '0' + n % 10;
-    n /= 10;
-    ret[9] = '0' + n % 10;
-
-    return std::string(ret, 12);
-}
-
-
 inline unsigned short getNumber2(const char* s)
 {
     if ( !std::isdigit(s[0]) || !std::isdigit(s[1]) )
@@ -79,7 +51,7 @@ inline unsigned short getNumber3(const char* s)
 }
 
 
-void fromIsoString(const std::string& s, Time& time)
+void convert(Time& time, const std::string& s)
 {
     unsigned hour = 0, min = 0, sec = 0, msec = 0;
 
@@ -99,10 +71,38 @@ void fromIsoString(const std::string& s, Time& time)
 }
 
 
+void convert(std::string& str, const Time& time)
+{
+    unsigned hour = 0, minute = 0, second = 0, msec = 0;
+    time.get(hour, minute, second, msec);
+
+    // format hh:mm:ss.sssss
+    //        0....+....1....+
+    char ret[14];
+    ret[0] = '0' + hour / 10;
+    ret[1] = '0' + hour % 10;
+    ret[2] = ':';
+    ret[3] = '0' + minute / 10;
+    ret[4] = '0' + minute % 10;
+    ret[5] = ':';
+    ret[6] = '0' + second / 10;
+    ret[7] = '0' + second % 10;
+    ret[8] = '.';
+    unsigned short n = msec;
+    ret[11] = '0' + n % 10;
+    n /= 10;
+    ret[10] = '0' + n % 10;
+    n /= 10;
+    ret[9] = '0' + n % 10;
+
+    str.assign(ret, 12);
+}
+
+
 void operator >>=(const SerializationInfo& si, Time& time)
 {
     std::string s = si.toValue<std::string>();
-    time = Time::fromIsoString(s);
+    convert(time, s);
 
     //unsigned hour = si.getValue<unsigned>("hour");
     //unsigned min = si.getValue<unsigned>("minute");
@@ -114,9 +114,10 @@ void operator >>=(const SerializationInfo& si, Time& time)
 
 void operator <<=(SerializationInfo& si, const Time& time)
 {
-    std::string s = time.toIsoString();
+    std::string s;
+    convert(s, time);
     si.setValue(s);
-    si.setTypeName("Time");
+    si.setTypeName("Date");
 
     //unsigned hour = 0;
     //unsigned min = 0;

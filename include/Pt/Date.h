@@ -37,7 +37,6 @@ class PT_API InvalidDate : public std::invalid_argument
 		{}
 };
 
-
 PT_API void greg2jul(unsigned& jd, int y, int m, int d);
 
 PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
