@@ -40,7 +40,8 @@ class PT_API SerializationError : public std::logic_error
         SerializationError(const std::string& msg, const SourceInfo& si);
 
         //! @brief Destructor
-        ~SerializationError() throw();
+        ~SerializationError() throw()
+        {}
 };
 
 
@@ -61,7 +62,8 @@ class PT_API SerializationInfo
 
         SerializationInfo(const SerializationInfo& si);
 
-        ~SerializationInfo();
+        ~SerializationInfo()
+        {}
 
         void reserve(size_t n);
 

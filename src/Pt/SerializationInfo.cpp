@@ -25,9 +25,6 @@ SerializationError::SerializationError(const std::string& msg, const SourceInfo&
 { }
 
 
-SerializationError::~SerializationError() throw()
-{}
-
 
 SerializationInfo::SerializationInfo()
 : _parent(0)
@@ -63,18 +60,6 @@ SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
     _fixupAddr = si._fixupAddr;
     _fixupInfo = si._fixupInfo;
     return *this;
-}
-
-
-SerializationInfo::~SerializationInfo()
-{
-///
-    /*Nodes::iterator it;
-    for(it = _nodes.begin(); it != _nodes.end(); ++it)
-    {
-        delete *it;
-    }*/
-///
 }
 
 
