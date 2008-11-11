@@ -77,7 +77,9 @@ void XmlSerializer::write(const SerializationInfo& si)
 
     if( si.category() == SerializationInfo::Value )
     {
-        _writer->writeElement( Pt::String::widen( si.name() ), si.toString() );
+        Attribute attr( Pt::String(L"id"), Pt::String::widen( si.id() ) ); /// NEW
+        _writer->writeElement( Pt::String::widen( si.name() ), &attr, 1, si.toString() ); /// NEW
+        ///OLD: _writer->writeElement( Pt::String::widen( si.name() ), si.toString() );
     }
     else if( si.category() == SerializationInfo::Object )
     {

@@ -89,7 +89,7 @@ void Deserializer::fixup(const Pt::SerializationInfo& si)
     {
         if(it->category() == Pt::SerializationInfo::Reference)
         {
-            void* obj = _objects[ it->toValue<std::string>() ];
+            void* obj = _objects[ it->toValue<std::string>() ]; //TODO check that it exists
             void* fixme = it->fixupAddr();
             Fixup fixupHandler = _fixups[ it->toValue<std::string>() ];
             fixupHandler( (void**)(&fixme), it->fixupInfo(), obj);

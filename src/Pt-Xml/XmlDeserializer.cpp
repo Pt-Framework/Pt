@@ -85,7 +85,9 @@ void XmlDeserializer::onRootElement(const Node& node)
             const Characters& chars = static_cast<const Characters&>(node);
             if(Pt::String::npos != chars.content().find_first_not_of(L" \t\n\r") )
             {
-                throw std::logic_error("Invalid element" + PT_SOURCEINFO);
+                /// OLD: throw std::logic_error("Invalid element" + PT_SOURCEINFO);
+                _current->setValue( chars.content() ); /// NEW
+                _processNode = &XmlDeserializer::onContent;
             }
             else
             {
