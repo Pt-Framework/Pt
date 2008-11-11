@@ -34,7 +34,7 @@ class PT_API InvalidDate : public std::invalid_argument
         InvalidDate(const SourceInfo& si);
 
         ~InvalidDate() throw()
-		{}
+        {}
 };
 
 PT_API void greg2jul(unsigned& jd, int y, int m, int d);
