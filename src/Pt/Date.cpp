@@ -21,15 +21,6 @@
 #include <sstream>
 #include <cctype>
 
-namespace {
-
-static const unsigned char monthDays[13]=
-{
-    0,31,28,31,30,31,30,31,31,30,31,30,31
-};
-
-}
-
 namespace Pt {
 
 InvalidDate::InvalidDate(const SourceInfo& si)
@@ -38,9 +29,9 @@ InvalidDate::InvalidDate(const SourceInfo& si)
 }
 
 
-void Date::greg2jul(unsigned& jd, int y, int m, int d)
+void greg2jul(unsigned& jd, int y, int m, int d)
 {
-    if( !isValid(y, m, d) )
+    if( ! Date::isValid(y, m, d) )
     {
         throw InvalidDate(PT_SOURCEINFO);
     }
@@ -49,7 +40,7 @@ void Date::greg2jul(unsigned& jd, int y, int m, int d)
 }
 
 
-void Date::jul2greg(unsigned jd, int& y, int& m, int& d)
+void jul2greg(unsigned jd, int& y, int& m, int& d)
 {
   register int l,n,i,j;
   l=jd+68569;
@@ -62,134 +53,6 @@ void Date::jul2greg(unsigned jd, int& y, int& m, int& d)
   l=j/11;
   m=j+2-(12*l);
   y=100*(n-49)+i+l;
-}
-
-
-Date::Date(int y, unsigned m, unsigned d)
-{
-    greg2jul(_julian, y, m, d);
-}
-
-
-void Date::set(int y, unsigned m, unsigned d)
-{
-    greg2jul(_julian, y, m, d);
-}
-
-
-void Date::get(int& y, unsigned& m, unsigned& d) const
-{
-    int mon, day;
-    jul2greg(_julian, y, mon, day);
-    m = mon;
-    d = day;
-}
-
-
-bool Date::leapYear(int y)
-{
-    return ((y%4==0) && (y%100!=0)) || (y%400==0);
-}
-
-
-unsigned Date::day() const
-{
-    int d,m,y;
-    jul2greg(_julian, y ,m, d);
-    return d;
-}
-
-
-unsigned Date::month() const
-{
-    int d,m,y;
-    jul2greg(_julian, y, m, d);
-    return m;
-}
-
-
-int Date::year() const
-{
-    int d,m,y;
-    jul2greg(_julian, y, m, d);
-    return y;
-}
-
-
-unsigned Date::dayOfWeek() const
-{
-    return (_julian+1) % 7;
-}
-
-
-unsigned Date::daysInMonth() const
-{
-    int y, m, d;
-    jul2greg(_julian, y, m, d);
-
-    if( m==2 && leapYear(y) )
-        return 29;
-
-    return monthDays[m];
-}
-
-
-unsigned Date::dayOfYear() const
-{
-    int y,m,d;
-    unsigned jd;
-    jul2greg(_julian,y,m,d);
-
-    greg2jul(jd,y,1,1);
-    return _julian-jd+1;
-}
-
-
-bool Date::leapYear() const
-{
-    int d,m,y;
-    jul2greg(_julian,y,m,d);
-    return leapYear(y);
-}
-
-
-bool Date::isValid(int y, int m, int d)
-{
-    if(m<1 || m>12 || d<1 || d>31)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-
-std::string Date::toIsoString() const
-{
-    // format YYYY-MM-DD
-    //        0....+....1
-
-    int year, month, day;
-    jul2greg(_julian,year, month, day);
-
-    char ret[10];
-    unsigned short n = year;
-
-    ret[3] = '0' + n % 10;
-    n /= 10;
-    ret[2] = '0' + n % 10;
-    n /= 10;
-    ret[1] = '0' + n % 10;
-    n /= 10;
-    ret[0] = '0' + n % 10;
-    ret[4] = '-';
-    ret[5] = '0' + month / 10;
-    ret[6] = '0' + month % 10;
-    ret[7] = '-';
-    ret[8] = '0' + day / 10;
-    ret[9] = '0' + day % 10;
-
-    return std::string(ret, 10);
 }
 
 
@@ -218,7 +81,36 @@ inline unsigned short getNumber4(const char* s)
 }
 
 
-Date Date::fromIsoString(const std::string& s)
+void convert(std::string& str, const Date& date)
+{
+    // format YYYY-MM-DD
+    //        0....+....1
+
+    int year, month, day;
+    jul2greg(date.julian(), year, month, day);
+
+    char ret[10];
+    unsigned short n = year;
+
+    ret[3] = '0' + n % 10;
+    n /= 10;
+    ret[2] = '0' + n % 10;
+    n /= 10;
+    ret[1] = '0' + n % 10;
+    n /= 10;
+    ret[0] = '0' + n % 10;
+    ret[4] = '-';
+    ret[5] = '0' + month / 10;
+    ret[6] = '0' + month % 10;
+    ret[7] = '-';
+    ret[8] = '0' + day / 10;
+    ret[9] = '0' + day % 10;
+
+    str.assign(ret, 10);
+}
+
+
+void convert(Date& date, const std::string& s)
 {
     if (s.size() < 10
         || s.at(4) != '-'
@@ -227,14 +119,14 @@ Date Date::fromIsoString(const std::string& s)
     }
 
     const char* d = s.data();
-    return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
 }
 
 
-void operator >>=(const SerializationInfo& si, Date& date)
+void operator>>=(const SerializationInfo& si, Date& date)
 {
     std::string s = si.toValue<std::string>();
-    date = Date::fromIsoString(s);
+    convert(date, s);
 
     //int year = si.getValue<int>("year");
     //unsigned month = si.getValue<unsigned>("month");
@@ -243,9 +135,10 @@ void operator >>=(const SerializationInfo& si, Date& date)
 }
 
 
-void operator <<=(SerializationInfo& si, const Date& date)
+void operator<<=(SerializationInfo& si, const Date& date)
 {
-    std::string s = date.toIsoString();
+    std::string s;
+    convert(s, date);
     si.setValue(s);
     si.setTypeName( "Date");
 

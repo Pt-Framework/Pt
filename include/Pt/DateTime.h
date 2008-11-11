@@ -32,7 +32,7 @@ namespace Pt {
 /** @brief Combined %Date and %Time value
     @ingroup DateTime
 */
-class PT_API DateTime
+class DateTime
 {
     public:
 		DateTime()
@@ -40,7 +40,7 @@ class PT_API DateTime
 
 		DateTime(int year, unsigned month, unsigned day,
 		                   unsigned hour = 0, unsigned minute = 0, 
-						   unsigned second = 0, unsigned msec = 0)
+		                   unsigned second = 0, unsigned msec = 0)
 		: _date(year, month, day)
 		, _time(hour, minute, second, msec)
 		{ }
@@ -55,7 +55,7 @@ class PT_API DateTime
         ~DateTime()
 		{}
 
-        static inline DateTime fromJulianDays(unsigned julianDays)
+        static DateTime fromJulianDays(unsigned julianDays)
         {
             return DateTime(julianDays);
         }
@@ -156,9 +156,9 @@ class PT_API DateTime
             return (*this - dt).totalMSecs();
         }
 
-        static DateTime fromIsoString(const std::string& s);
-
         std::string toIsoString() const;
+
+        static DateTime fromIsoString(const std::string& s);
 
         static bool isValid(int year, unsigned month, unsigned day,
                             unsigned hour, unsigned minute, unsigned second, unsigned msec);
@@ -258,6 +258,26 @@ class PT_API DateTime
 PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 
 PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
+
+PT_API void convert(DateTime& dt, const std::string& s);
+
+PT_API void convert(std::string& str, const DateTime& dt);
+
+
+inline DateTime DateTime::fromIsoString(const std::string& s)
+{
+    DateTime dt;
+    convert(dt, s);
+    return dt;
+}
+
+
+inline std::string DateTime::toIsoString() const
+{
+    std::string str;
+    convert(str, *this);
+    return str;
+}
 
 
 inline DateTime& DateTime::operator=(const DateTime& dateTime)

@@ -28,7 +28,6 @@ namespace Pt {
 
 class SerializationInfo;
 
-
 class PT_API InvalidDate : public std::invalid_argument
 {
     public:
@@ -38,6 +37,11 @@ class PT_API InvalidDate : public std::invalid_argument
 		{}
 };
 
+
+PT_API void greg2jul(unsigned& jd, int y, int m, int d);
+
+PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
+
 /*
   Notes:
   - Henry F. Fliegel and Thomas C. Van Flandern, "A Machine Algorithm for
@@ -46,7 +50,7 @@ class PT_API InvalidDate : public std::invalid_argument
 /** @brief %Date expressed in year, month, and day
     @ingroup DateTime
 */
-class PT_API Date
+class Date
 {
     public:
         enum Month
@@ -155,7 +159,10 @@ class PT_API Date
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        Date(int y, unsigned m, unsigned d);
+        Date(int y, unsigned m, unsigned d)
+        {
+            greg2jul(_julian, y, m, d);
+        }
 
         /** \brief Constructs a Date from a julian day
         */
@@ -178,7 +185,10 @@ class PT_API Date
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        void set(int year, unsigned month, unsigned day);
+        void set(int year, unsigned month, unsigned day)
+        {
+            greg2jul(_julian, year, month, day);
+        }
 
         /** @brief Gets the year, month and day
         */
@@ -308,14 +318,6 @@ class PT_API Date
         */
         static bool leapYear(int year);
 
-        /** @brief Converts a gergorian date to a julian day
-        */
-        static void greg2jul(unsigned& jd, int y, int m, int d);
-
-        /** @brief Converts a julian day to a gregorian date
-        */
-        static void jul2greg(unsigned jd, int& y, int& m, int& d);
-
     private:
         //! @internal
         unsigned _julian;
@@ -325,11 +327,126 @@ PT_API void operator >>=(const SerializationInfo& si, Date& date);
 
 PT_API void operator <<=(SerializationInfo& si, const Date& date);
 
+PT_API void convert(std::string& str, const Date& date);
+
+PT_API void convert(Date& date, const std::string& s);
+
+
+inline void Date::get(int& y, unsigned& m, unsigned& d) const
+{
+    int mon, day;
+    jul2greg(_julian, y, mon, day);
+    m = mon;
+    d = day;
+}
+
+
+inline bool Date::leapYear(int y)
+{
+    return ((y%4==0) && (y%100!=0)) || (y%400==0);
+}
+
+
+inline unsigned Date::day() const
+{
+    int d,m,y;
+    jul2greg(_julian, y ,m, d);
+    return d;
+}
+
+
+inline unsigned Date::month() const
+{
+    int d,m,y;
+    jul2greg(_julian, y, m, d);
+    return m;
+}
+
+
+inline int Date::year() const
+{
+    int d,m,y;
+    jul2greg(_julian, y, m, d);
+    return y;
+}
+
+
+inline unsigned Date::dayOfWeek() const
+{
+    return (_julian+1) % 7;
+}
+
+
+inline unsigned Date::daysInMonth() const
+{
+    static const unsigned char monthDays[13]=
+    {
+        0,31,28,31,30,31,30,31,31,30,31,30,31
+    };
+
+    int y, m, d;
+    jul2greg(_julian, y, m, d);
+
+    if( m==2 && leapYear(y) )
+        return 29;
+
+    return monthDays[m];
+}
+
+
+inline unsigned Date::dayOfYear() const
+{
+    int y,m,d;
+    unsigned jd;
+    jul2greg(_julian,y,m,d);
+
+    greg2jul(jd,y,1,1);
+    return _julian-jd+1;
+}
+
+
+inline bool Date::leapYear() const
+{
+    int d,m,y;
+    jul2greg(_julian,y,m,d);
+    return leapYear(y);
+}
+
+
+inline bool Date::isValid(int y, int m, int d)
+{
+    if(m<1 || m>12 || d<1 || d>31)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+
+inline std::string Date::toIsoString() const
+{
+    std::string str;
+    convert(str, *this);
+    return str;
+}
+
+
+inline Date Date::fromIsoString(const std::string& s)
+{
+    Date date;
+    convert(date, s);
+    return date;
+}
+
+
 inline Date operator+(const Date& d, int days)
 { return Date(d._julian + days); }
 
+
 inline Date operator+(int days, const Date& d)
 { return Date(days + d._julian); }
+
 
 inline int operator-(const Date& a, const Date& b)
 { return a._julian - b._julian; }

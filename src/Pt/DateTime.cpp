@@ -64,7 +64,7 @@ inline unsigned short getNumber4(const char* s)
 }
 
 
-DateTime DateTime::fromIsoString(const std::string& s)
+void convert(DateTime& dt, const std::string& s)
 {
     if (s.size() < 23
         || s.at(4) != '-'
@@ -77,22 +77,22 @@ DateTime DateTime::fromIsoString(const std::string& s)
 
     const char* d = s.data();
 
-    return DateTime( getNumber4(d),
-                     getNumber2(d + 5),
-                     getNumber2(d + 8),
-                     getNumber2(d + 11),
-                     getNumber2(d + 14),
-                     getNumber2(d + 17),
-                     getNumber3(d + 20) );
+    dt= DateTime( getNumber4(d),
+                  getNumber2(d + 5),
+                  getNumber2(d + 8),
+                  getNumber2(d + 11),
+                  getNumber2(d + 14),
+                  getNumber2(d + 17),
+                  getNumber3(d + 20) );
 }
 
 
-std::string DateTime::toIsoString() const
+void convert(std::string& str, const DateTime& dt)
 {
     // format YYYY-MM-DD hh:mm:ss.sssss
     //        0....+....1....+....2....+
     char ret[25];
-    unsigned short n = this->date().year();
+    unsigned short n = dt.date().year();
     ret[3] = '0' + n % 10;
     n /= 10;
     ret[2] = '0' + n % 10;
@@ -101,29 +101,29 @@ std::string DateTime::toIsoString() const
     n /= 10;
     ret[0] = '0' + n % 10;
     ret[4] = '-';
-    ret[5] = '0' + this->date().month() / 10;
-    ret[6] = '0' + this->date().month() % 10;
+    ret[5] = '0' + dt.date().month() / 10;
+    ret[6] = '0' + dt.date().month() % 10;
     ret[7] = '-';
-    ret[8] = '0' + this->date().day() / 10;
-    ret[9] = '0' + this->date().day() % 10;
+    ret[8] = '0' + dt.date().day() / 10;
+    ret[9] = '0' + dt.date().day() % 10;
     ret[10] = ' ';
-    ret[11] = '0' + this->time().hour() / 10;
-    ret[12] = '0' + this->time().hour() % 10;
+    ret[11] = '0' + dt.time().hour() / 10;
+    ret[12] = '0' + dt.time().hour() % 10;
     ret[13] = ':';
-    ret[14] = '0' + this->time().minute() / 10;
-    ret[15] = '0' + this->time().minute() % 10;
+    ret[14] = '0' + dt.time().minute() / 10;
+    ret[15] = '0' + dt.time().minute() % 10;
     ret[16] = ':';
-    ret[17] = '0' + this->time().second() / 10;
-    ret[18] = '0' + this->time().second() % 10;
+    ret[17] = '0' + dt.time().second() / 10;
+    ret[18] = '0' + dt.time().second() % 10;
     ret[19] = '.';
-    n = this->time().msec();
+    n = dt.time().msec();
     ret[22] = '0' + n % 10;
     n /= 10;
     ret[21] = '0' + n % 10;
     n /= 10;
     ret[20] = '0' + n % 10;
 
-    return std::string(ret, 23);
+    str.assign(ret, 23);
 }
 
 
