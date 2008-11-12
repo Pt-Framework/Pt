@@ -39,23 +39,48 @@ namespace Pt {
             virtual ~RefCounted()
             { }
 
-            virtual atomic_t addRef()
-            { return atomicIncrement(_refs); }
+            virtual unsigned addRef()
+            { return ++_refs; }
 
             virtual void release()
             {
-                if (atomicDecrement(_refs) == 0)
-                {
+                if(--_refs == 0)
                     delete this;
-                }
             }
 
-            atomic_t refs() const
-            { return atomicGet(_refs); }
+            unsigned refs() const
+            { return _refs; }
 
         private:
-            mutable volatile atomic_t _refs;
+            unsigned _refs;
     };
+
+  class AtomicRefCounted : private NonCopyable
+  {
+      mutable volatile atomic_t _refs;
+
+      public:
+        AtomicRefCounted()
+        : _refs(0)
+        { }
+
+        explicit AtomicRefCounted(unsigned refs)
+        : _refs(refs)
+        { }
+
+        virtual ~AtomicRefCounted()
+        { }
+
+        virtual atomic_t addRef()
+        { return atomicIncrement(_refs); }
+
+        virtual void release()
+        { if (atomicDecrement(_refs) == 0) delete this; }
+
+        atomic_t refs() const
+        { return atomicGet(_refs); }
+  };
+
 }
 
 #endif // PT_REFCOUNTED_H
