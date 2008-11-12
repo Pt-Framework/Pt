@@ -23,7 +23,6 @@ SharedLibrary Pt : Atomicity.cpp
                    Signal.cpp
                    StringStream.cpp
                    Time.cpp
-                   Timespan.cpp
                    Unicode.cpp ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
