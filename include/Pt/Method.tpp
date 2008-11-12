@@ -19,7 +19,6 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -49,10 +48,8 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -146,7 +143,6 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -176,10 +172,8 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -260,10 +254,8 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -314,7 +306,6 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -344,10 +335,8 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -428,10 +417,8 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -482,7 +469,6 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
         : Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -512,10 +498,8 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -566,7 +550,6 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
         : Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -596,10 +579,8 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -650,7 +631,6 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
         : Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -680,10 +660,8 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -734,7 +712,6 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
         : Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -764,10 +741,8 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -818,7 +793,6 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
         : Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -848,10 +822,8 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
@@ -902,7 +874,6 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
         : Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
-
         /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
@@ -932,10 +903,8 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
         /** Deeply copies rhs. */
         Method& operator=(const Method& rhs)
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
+            _object = rhs._object;
+            _memFunc = rhs._memFunc;
             return (*this);
         }
 
