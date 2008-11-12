@@ -67,25 +67,55 @@ class PT_API SerializationInfo
 
         void reserve(size_t n);
 
-        Category category() const;
+        Category category() const
+        {
+            return _category;
+        }
 
-        void setCategory(Category cat);
+        void setCategory(Category cat)
+        {
+            _category = cat;
+        }
 
-        SerializationInfo* parent();
+        SerializationInfo* parent()
+        {
+            return _parent;
+        }
 
-        const SerializationInfo* parent() const;
+        const SerializationInfo* parent() const
+        {
+            return _parent;
+        }
 
-        const std::string& typeName() const;
+        const std::string& typeName() const
+        {
+            return _type;
+        }
 
-        void setTypeName(const std::string& type);
+        void setTypeName(const std::string& type)
+        {
+            _type = type;
+        }
 
-        const std::string& name() const;
+        const std::string& name() const
+        {
+            return _name;
+        }
 
-        void setName(const std::string& name);
+        void setName(const std::string& name)
+        {
+            _name = name;
+        }
 
-        void setId(const std::string& id);
+        void setId(const std::string& id)
+        {
+            _id = id;
+        }
 
-        const std::string& id() const;
+        const std::string& id() const
+        {
+            return _id;
+        }
 
         void setReference(void* ref);
 
@@ -171,7 +201,10 @@ class PT_API SerializationInfo
         */
         SerializationInfo* findMember(const std::string& name);
 
-        size_t memberCount() const;
+        size_t memberCount() const
+        {
+            return _nodes.size();
+        }
 
         Iterator begin();
 
@@ -206,7 +239,7 @@ class PT_API SerializationInfo
 };
 
 
-class PT_API SerializationInfo::Iterator
+class SerializationInfo::Iterator
 {
     public:
         Iterator();
@@ -230,7 +263,7 @@ class PT_API SerializationInfo::Iterator
 };
 
 
-class PT_API SerializationInfo::ConstIterator
+class SerializationInfo::ConstIterator
 {
     public:
         ConstIterator();
@@ -252,6 +285,100 @@ class PT_API SerializationInfo::ConstIterator
     private:
         const SerializationInfo* _info;
 };
+
+
+inline SerializationInfo::Iterator::Iterator()
+: _info(0)
+{}
+
+
+inline SerializationInfo::Iterator::Iterator(const Iterator& other)
+: _info(other._info)
+{}
+
+
+inline SerializationInfo::Iterator::Iterator(SerializationInfo* info)
+: _info(info)
+{}
+
+
+inline SerializationInfo::Iterator& SerializationInfo::Iterator::operator=(const Iterator& other)
+{
+    _info = other._info;
+    return *this;
+}
+
+
+inline SerializationInfo::Iterator& SerializationInfo::Iterator::operator++()
+{
+    ++_info;
+    return *this;
+}
+
+
+inline SerializationInfo& SerializationInfo::Iterator::operator*()
+{
+    return *_info;
+}
+
+
+inline SerializationInfo* SerializationInfo::Iterator::operator->()
+{
+    return _info;
+}
+
+
+inline bool SerializationInfo::Iterator::operator!=(const Iterator& other) const
+{
+    return _info != other._info;
+}
+
+
+inline SerializationInfo::ConstIterator::ConstIterator()
+: _info(0)
+{}
+
+
+inline SerializationInfo::ConstIterator::ConstIterator(const ConstIterator& other)
+: _info(other._info)
+{}
+
+
+inline SerializationInfo::ConstIterator::ConstIterator(const SerializationInfo* info)
+: _info(info)
+{}
+
+
+inline SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator=(const ConstIterator& other)
+{
+    _info = other._info;
+    return *this;
+}
+
+
+inline SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator++()
+{
+    ++_info;
+    return *this;
+}
+
+
+inline const SerializationInfo& SerializationInfo::ConstIterator::operator*() const
+{
+    return *_info;
+}
+
+
+inline const SerializationInfo* SerializationInfo::ConstIterator::operator->() const
+{
+    return _info;
+}
+
+
+inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& other) const
+{
+    return _info != other._info;
+}
 
 
 template <typename T>
