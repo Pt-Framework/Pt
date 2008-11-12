@@ -16,7 +16,7 @@ namespace Pt {
         for example in an EventLoop and the latter one is used to dispatch
         events by type.
      */
-    class PT_EXPORT Event 
+    class Event
     {
         public:
             /** \brief Destructor.
