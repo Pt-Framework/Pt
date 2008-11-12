@@ -21,7 +21,7 @@
 namespace Pt {
 
 SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
-: std::logic_error(msg + "'" + si)
+: std::logic_error(msg + si)
 { }
 
 

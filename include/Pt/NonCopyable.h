@@ -45,7 +45,7 @@ namespace Pt {
      *
      *    Trying to copy a NonCopyable object will cause compile-time error.
      */
-    class PT_API NonCopyable {
+    class  NonCopyable {
         public:
             /** @brief Default constructor
             */

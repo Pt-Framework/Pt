@@ -24,8 +24,14 @@
 
 namespace Pt {
 
+SettingsError::SettingsError(const std::string& what, unsigned line, const SourceInfo& si)
+: SerializationError(what, si)
+, _line(line)
+{}
+
+
 SettingsError::SettingsError(const std::string& what, unsigned line)
-: std::runtime_error(what)
+: SerializationError(what, PT_SOURCEINFO)
 , _line(line)
 {}
 
