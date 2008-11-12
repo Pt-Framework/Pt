@@ -58,9 +58,8 @@ void jul2greg(unsigned jd, int& y, int& m, int& d)
 
 inline unsigned short getNumber2(const char* s)
 {
-    if (!std::isdigit(s[0])
-    || !std::isdigit(s[1]))
-    throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
+    if (!std::isdigit(s[0]) || !std::isdigit(s[1]))
+    throw ConversionError("Invalid date format", PT_SOURCEINFO);
     return (s[0] - '0') * 10
         + (s[1] - '0');
 }
@@ -68,11 +67,9 @@ inline unsigned short getNumber2(const char* s)
 
 inline unsigned short getNumber4(const char* s)
 {
-    if (!std::isdigit(s[0])
-    || !std::isdigit(s[1])
-    || !std::isdigit(s[2])
-    || !std::isdigit(s[3]))
-    throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
+    if ( ! std::isdigit(s[0]) || !std::isdigit(s[1])
+        || !std::isdigit(s[2])  || !std::isdigit(s[3]))
+    throw ConversionError("Illegal date format.", PT_SOURCEINFO);
 
     return (s[0] - '0') * 1000
         + (s[1] - '0') * 100
@@ -112,11 +109,8 @@ void convert(std::string& str, const Date& date)
 
 void convert(Date& date, const std::string& s)
 {
-    if (s.size() < 10
-        || s.at(4) != '-'
-        || s.at(7) != '-') {
-        throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
-    }
+    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
+        throw ConversionError("Illegal date format.", PT_SOURCEINFO);
 
     const char* d = s.data();
     date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));

@@ -22,9 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/TypeTraits.h>
 #include <list>
-
 
 namespace Pt {
 
@@ -36,20 +34,15 @@ namespace Pt {
     *
     * See std::list for more details.
     */
-    class PT_API StringList : public std::list<Pt::String> {
+    class StringList : public std::list<Pt::String>
+    {
         public:
             typedef std::list<Pt::String>::iterator Iterator;
             typedef std::list<Pt::String>::const_iterator ConstIterator;
 
         public:
-            StringList();
-    };
-
-
-    template <>
-    struct TypeTraits<Pt::StringList> {
-        static const char* typeName()
-        { return "Pt::StringList"; }
+            StringList()
+            {}
     };
 
 } // namespace Pt

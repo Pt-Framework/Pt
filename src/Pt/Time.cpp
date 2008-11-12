@@ -19,6 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Time.h"
+#include "Pt/Convert.h"
 #include "Pt/SerializationInfo.h"
 #include <sstream>
 #include <cctype>
@@ -27,14 +28,13 @@ namespace Pt {
 
 InvalidTime::InvalidTime(const SourceInfo& si)
 : std::invalid_argument("Invalid time" + si)
-{
-}
+{ }
 
 
 inline unsigned short getNumber2(const char* s)
 {
-    if ( !std::isdigit(s[0]) || !std::isdigit(s[1]) )
-        throw InvalidTime(PT_SOURCEINFO);
+    if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
+        throw ConversionError("Invalid Time format", PT_SOURCEINFO);
 
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
@@ -42,12 +42,10 @@ inline unsigned short getNumber2(const char* s)
 
 inline unsigned short getNumber3(const char* s)
 {
-    if( !std::isdigit(s[0]) || !std::isdigit(s[1]) || !std::isdigit(s[2]) )
-        throw InvalidTime(PT_SOURCEINFO);
+    if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
+       throw ConversionError("Invalid Time format", PT_SOURCEINFO);
 
-    return ( s[0] - '0') * 100
-             + (s[1] - '0') * 10
-             + (s[2] - '0' );
+    return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
 }
 
 
@@ -55,18 +53,15 @@ void convert(Time& time, const std::string& s)
 {
     unsigned hour = 0, min = 0, sec = 0, msec = 0;
 
-    if( s.size() < 11 || s.at(2) != ':'
-        || s.at(5) != ':' || s.at(8) != '.')
-    {
-        throw InvalidTime(PT_SOURCEINFO);
-    }
+    if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
+        throw ConversionError("Invalid Time format", PT_SOURCEINFO);
 
-    const char* d = s.data();
-    hour = getNumber2(d);
+	const char* d = s.data();
+	hour = getNumber2(d);
 	min = getNumber2(d + 3);
-    sec = getNumber2(d + 6);
-    msec = getNumber3(d + 9);
-	
+	sec = getNumber2(d + 6);
+	msec = getNumber3(d + 9);
+
 	time.set(hour, min, sec, msec);
 }
 

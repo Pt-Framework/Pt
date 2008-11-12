@@ -22,7 +22,6 @@ SharedLibrary Pt : Atomicity.cpp
                    SettingsWriter.cpp
                    Signal.cpp
                    StringStream.cpp
-                   StringList.cpp
                    Time.cpp
                    Timespan.cpp
                    Unicode.cpp ;
