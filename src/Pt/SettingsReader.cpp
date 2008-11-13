@@ -20,15 +20,11 @@
 
 namespace Pt {
 
-SettingsReader::SettingsReader(std::basic_istream<Pt::Char>& is)
-: state(0)
-, _beforeComment(0)
-, _current(0)
-, _is(&is)
-, _line(1)
-, _depth(0)
-, _isDotted(false)
-{ }
+void SettingsReader::State::syntaxError(unsigned line, const SourceInfo& si)
+{
+	std::string msg("syntax error");
+	throw SettingsError(msg, line, si );
+}
 
 
 void SettingsReader::parse(SerializationInfo& si)
@@ -67,30 +63,39 @@ void SettingsReader::enterMember()
     //
     if( _depth == 0 )
     {
-        std::string name = _token.narrow();
+        std::string name;
         if( _section.size() )
-            name = _section.narrow() + '.' + name;
+        {
+            name += _section.narrow();
+            name += '.';
+            name += _token.narrow();
+        }
+        else
+        {
+            name = _token.narrow();
+        }
 
         //
         // Add a serialization node for the parent if not present.
         // In this example the parent is a.b
         //
-        size_t pos  = name.rfind('.');
+        size_t pos = name.rfind('.');
         if(pos != std::string::npos)
         {
-            Pt::SerializationInfo* current = _current->findMember( name.substr( 0, pos ) );
+            std::string root = name.substr( 0, pos );
+            Pt::SerializationInfo* current = _current->findMember( root );
             if(current == 0)
-                current = &( _current->addMember( name.substr( 0, pos ) ) );
+                current = &( _current->addMember( root ) );
 
             _current = current;
             ++_depth;
 
             _isDotted = true; // remember that we have to leave twice later
-            name = name.substr( ++pos );
+            name = name.substr( ++pos ); // TODO: use remove or erase
         }
 
         //
-        // Add a node for the actual value if not present. I this
+        // Add a node for the actual value if not present. In this
         // example c is a parent of a.b
         //
         Pt::SerializationInfo* current = _current->findMember( name );
@@ -98,14 +103,13 @@ void SettingsReader::enterMember()
             current = &( _current->addMember( name ) );
 
         _current = current;
-        ++_depth;
     }
     else
     {
         _current = &( _current->addMember( _token.narrow() ) );
-        ++_depth;
     }
 
+    ++_depth;
     _token.clear();
 }
 
@@ -115,7 +119,7 @@ void SettingsReader::leaveMember()
     //std::cerr << "@" << std::endl;
 
     if(0 == _current->parent() )
-        throw SettingsError("too many closing braces", _line);
+        throw SettingsError("too many closing braces", _line, PT_SOURCEINFO);
 
     _current = _current->parent();
     --_depth;
@@ -155,21 +159,18 @@ Pt::Char SettingsReader::getEscaped()
 {
     Pt::Char ch;
     if( ! _is->get(ch) )
-        throw SettingsError("unexpected EOF", _line);
+        throw SettingsError("unexpected EOF", _line, PT_SOURCEINFO);
 
     switch( ch.value() )
     {
         case 'n':
             return Pt::Char(L'\n');
-            break;
 
         case 'r':
             return Pt::Char(L'\r');
-            break;
     }
 
     return ch;
 }
-
 
 }

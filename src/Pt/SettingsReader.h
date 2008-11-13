@@ -84,7 +84,7 @@ class SettingsReader
                                 return this->onAlpha(c, reader);
                     }
 
-                    throw SettingsError( "Unexpected token", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return 0;
                 }
 
@@ -94,61 +94,61 @@ class SettingsReader
             private:
                 virtual State* onSpace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected whitespace", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onQoute(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '\"'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onComma(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token ','", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onEqual(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '='", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '{'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '}'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '('", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token ')'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token '['", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected token ']'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
@@ -160,15 +160,18 @@ class SettingsReader
 
                 virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected character", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
 
                 virtual State* onEof(Pt::Char c, SettingsReader& reader)
                 {
-                    throw SettingsError("unexpected EOF", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                     return this;
                 }
+
+            protected:
+                void syntaxError(unsigned line, const SourceInfo& si);
         };
 
 
@@ -204,7 +207,7 @@ class SettingsReader
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    throw SettingsError("unexpected token ','", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
 
                 return OnQoutedValue::instance();
             }
@@ -302,7 +305,7 @@ class SettingsReader
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    throw SettingsError("unexpected token '{'", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
 
                 reader.pushTypeName();
                 reader.enterMember();
@@ -341,7 +344,7 @@ class SettingsReader
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                throw SettingsError("unexpected token", reader.line() );
+                this->syntaxError(reader.line(), PT_SOURCEINFO);
                 return this;
             }
 
@@ -505,7 +508,7 @@ class SettingsReader
             {
                 reader.leaveMember();
                 if(reader.depth() > 1)
-                    throw SettingsError("unexpected EOF", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
 
                 return this;
             }
@@ -696,7 +699,7 @@ class SettingsReader
             {
                 if(reader.depth() == 0)
                 {
-                    throw SettingsError("unexpected token ','", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
                 }
 
                 reader.enterMember();
@@ -712,7 +715,7 @@ class SettingsReader
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() != 0)
-                    throw SettingsError("unexpected EOF", reader.line() );
+                    this->syntaxError(reader.line(), PT_SOURCEINFO);
 
                 return this;
             }
@@ -801,7 +804,7 @@ class SettingsReader
         {
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                throw SettingsError("unexpected token", reader.line() );
+                this->syntaxError(reader.line(), PT_SOURCEINFO);
                 return this;
             }
 
@@ -814,7 +817,15 @@ class SettingsReader
         };
 
     public:
-        SettingsReader(std::basic_istream<Pt::Char>& is);
+        SettingsReader(std::basic_istream<Pt::Char>& is)
+		: state(0)
+		, _beforeComment(0)
+		, _current(0)
+		, _is(&is)
+		, _line(1)
+		, _depth(0)
+		, _isDotted(false)
+		{ }
 
         void parse(SerializationInfo& si);
 

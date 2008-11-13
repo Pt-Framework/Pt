@@ -30,12 +30,6 @@ SettingsError::SettingsError(const std::string& what, unsigned line, const Sourc
 {}
 
 
-SettingsError::SettingsError(const std::string& what, unsigned line)
-: SerializationError(what, PT_SOURCEINFO)
-, _line(line)
-{}
-
-
 Settings::Settings()
 {}
 
