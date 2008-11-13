@@ -20,12 +20,12 @@
 
 #include "Pt/Gui/ProgressBar.h"
 
+#include "Pt/StringStream.h"
+#include "Pt/Text/TextStream.h"
 #include "Pt/Gfx/Brush.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Gfx/Pen.h"
-#include "Pt/StringStream.h"
-
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
 #include "Pt/Gfx/Rect.h"
