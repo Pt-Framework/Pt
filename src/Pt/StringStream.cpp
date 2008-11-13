@@ -19,7 +19,7 @@
 #include "Pt/StringStream.h"
 
 namespace Pt {
-
+/*
 BasicStringStreamBuffer::BasicStringStreamBuffer(std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(mode)
 {
@@ -49,12 +49,12 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
 //    }
 #endif
 }
-
+*/
 } // namespace Pt
 
 
 namespace std {
-
+/*
 basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
 : basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
 { }
@@ -82,5 +82,5 @@ void basic_stringstream<Pt::Char>::str(const Pt::String& newStr)
 {
     _buffer->str(newStr);
 }
-
+*/
 } // namespace std
