@@ -23,7 +23,6 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Text/TextStream.h"
 #include <iostream>
 
 
