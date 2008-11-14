@@ -52,7 +52,7 @@ void ProcessTest::RedirectIO()
     procInfo.addArg( "testString");
 
     Pt::System::Pipe pipe;
-    procInfo.setStdOutput(&pipe.output());
+    procInfo.setStdOutput(&pipe.in());
     procInfo.setStdError(0);
 
     Pt::System::Process p(procInfo);
@@ -62,7 +62,7 @@ void ProcessTest::RedirectIO()
     p.wait();
 
     char buffer[1024];
-    int n = pipe.input().read( buffer, 1024);
+    int n = pipe.out().read( buffer, 1024);
     buffer[n] = '\0';
 
     reportMessage( std::string("child output: ") + buffer);

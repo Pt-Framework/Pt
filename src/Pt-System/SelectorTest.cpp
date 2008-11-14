@@ -43,13 +43,13 @@ class IOStreamTest : public Pt::Unit::TestSuite
         void AsyncIO()
         {
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            eloop.add( pipe.output() );
-            eloop.add( pipe.input() );
+            eloop.add( pipe.in() );
+            eloop.add( pipe.out() );
 
-            outbuf.attach( pipe.output() );
+            outbuf.attach( pipe.in() );
             connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
-            inbuf.attach( pipe.input() );
+            inbuf.attach( pipe.out() );
             connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
             std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;
@@ -143,13 +143,13 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
             std::string out("Hello World, where do you want to GOTO day!");
 
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            pipe.output().write( out.c_str(), out.size() );
+            pipe.in().write( out.c_str(), out.size() );
 
-            pipe.input().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.input().inputReady, *this, &SelectorTest::onRead);
+            pipe.out().beginRead(_buffer, sizeof(_buffer));
+            connect(pipe.out().inputReady, *this, &SelectorTest::onRead);
 
             Pt::System::Selector selector;
-            selector.add( pipe.input() );
+            selector.add( pipe.out() );
             while(_result.size() < out.size())
             {
                 bool avail = selector.wait(5000);
@@ -175,11 +175,11 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
 
             _pos = 0;
             std::memcpy(_buffer, _out.c_str(),  sizeof(_buffer));
-            pipe.output().beginWrite(_buffer, sizeof(_buffer));
-            connect(pipe.output().outputReady, *this, &SelectorTest::onWrite);
+            pipe.in().beginWrite(_buffer, sizeof(_buffer));
+            connect(pipe.in().outputReady, *this, &SelectorTest::onWrite);
 
             Pt::System::Selector selector;
-            selector.add( pipe.output() );
+            selector.add( pipe.in() );
             while(_pos < _out.size())
             {
                 bool avail = selector.wait(5000);
@@ -187,7 +187,7 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
             }
 
             char buffer[1024];
-            size_t n = pipe.input().read(buffer, sizeof(buffer));
+            size_t n = pipe.out().read(buffer, sizeof(buffer));
             std::string inp(buffer, n);
             this->reportMessage(inp);
 
@@ -207,13 +207,13 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
             std::string out("Hello World, where do you want to GOTO day!");
 
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            pipe.output().write( out.c_str(), out.size() );
+            pipe.in().write( out.c_str(), out.size() );
 
-            pipe.input().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.input().inputReady, *this, &SelectorTest::onReadRemove);
+            pipe.out().beginRead(_buffer, sizeof(_buffer));
+            connect(pipe.out().inputReady, *this, &SelectorTest::onReadRemove);
 
             Pt::System::Selector selector;
-            selector.add( pipe.input() );
+            selector.add( pipe.out() );
 
             bool avail = selector.wait(5000);
             PT_UNIT_ASSERT(avail);

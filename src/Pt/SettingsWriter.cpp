@@ -144,7 +144,4 @@ void SettingsWriter::writeSection(const Pt::String& prefix)
     *_os << Pt::String(L"[") << prefix << Pt::String(L"]") << std::endl;
 }
 
-
-
-
 }

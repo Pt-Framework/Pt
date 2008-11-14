@@ -19,7 +19,7 @@ namespace {
         if( ! pt_signal_pipe )
         {
             pt_signal_pipe = new Pt::System::Pipe(Pt::System::Pipe::Async);
-            pt_signal_pipe->input().beginRead( _signalBuffer, sizeof(_signalBuffer) );
+            pt_signal_pipe->out().beginRead( _signalBuffer, sizeof(_signalBuffer) );
         }
     }
 
@@ -55,7 +55,7 @@ extern "C" void pt_system_application_sighandler(int sigNo)
 {
     if(pt_signal_pipe)
     {
-        pt_signal_pipe->output().write( (char*)&sigNo, sizeof(sigNo) );
+        pt_signal_pipe->in().write( (char*)&sigNo, sizeof(sigNo) );
     }
 }
 
@@ -71,14 +71,14 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
-    disconnect(pt_signal_pipe->input().inputReady, processSignal);
+    disconnect(pt_signal_pipe->out().inputReady, processSignal);
 }
 
 
 void ApplicationImpl::init(SelectorBase& s)
 {
-    pt_signal_pipe->input().setSelector(&s);
-    connect(pt_signal_pipe->input().inputReady, processSignal);
+    pt_signal_pipe->out().setSelector(&s);
+    connect(pt_signal_pipe->out().inputReady, processSignal);
 }
 
 

@@ -87,13 +87,13 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
             @return An IODevice used to read from the pipe
         */
-        IODevice& input();
+        IODevice& out();
 
         /** @brief Endpoint of the pipe to write to
 
             @return An IODevice used to write to the pipe
         */
-        IODevice& output();
+        IODevice& in();
 };
 
 } // namespace System

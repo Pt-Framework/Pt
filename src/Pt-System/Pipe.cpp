@@ -38,12 +38,12 @@ Pipe::~Pipe()
 }
 
 
-IODevice& Pipe::input()
+IODevice& Pipe::out()
 {
     return _impl->input();
 }
 
-IODevice& Pipe::output()
+IODevice& Pipe::in()
 {
     return _impl->output();
 }
