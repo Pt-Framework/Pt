@@ -23,27 +23,27 @@ void demo2()
     Pt::System::Pipe pipe(Pt::System::IODevice::Async);
     Pt::System::Pipe pipe2(Pt::System::IODevice::Async);
 
-    pipe2.output().write("ABCDE", 5);
+    pipe2.in().write("ABCDE", 5);
 
-    selector.add( pipe.input() );
-    selector.add( pipe2.input() );
+    selector.add( pipe.out() );
+    selector.add( pipe2.out() );
     selector.wait(100);
    
     char buffer[10];
-    pipe2.input().beginRead(buffer, 1);
+    pipe2.out().beginRead(buffer, 1);
    
     char buf[10];
-    pipe.input().beginRead(buf, 5);
+    pipe.out().beginRead(buf, 5);
 
     std::cerr << "WAITING 5000 ms" << std::endl;
-    pipe.output().write("Hello", 5);
+    pipe.in().write("Hello", 5);
     selector.wait(5000);
 
-    unsigned n = pipe2.input().endRead();
+    unsigned n = pipe2.out().endRead();
     std::cerr << "READ: " << n << std::endl;
     std::cerr.write(buffer, 1) << std::endl;
     
-    n = pipe.input().endRead();
+    n = pipe.out().endRead();
     std::cerr << "READ: " << n << std::endl;
     std::cerr.write(buf, 5) << std::endl;
 }
@@ -56,21 +56,21 @@ void demo1()
     std::size_t bytes = 0;
 
     Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-    connect(pipe.input().inputReady, onInput);
-    connect(pipe.output().outputReady, onOutput);
+    connect(pipe.out().inputReady, onInput);
+    connect(pipe.in().outputReady, onOutput);
 
     Pt::System::Selector selector;
     
-    pipe.input().beginRead(buffer, 10);
+    pipe.out().beginRead(buffer, 10);
 
-    selector.add( pipe.input() );
+    selector.add( pipe.out() );
     bool avail = selector.wait(500);
 
-    pipe.output().beginWrite( out.c_str() + bytes, out.size() - bytes ); 
+    pipe.in().beginWrite( out.c_str() + bytes, out.size() - bytes ); 
 
-    avail = pipe.input().wait(500);
-    unsigned x = pipe.input().endRead();
-    //selector.add( pipe.output() );
+    avail = pipe.out().wait(500);
+    unsigned x = pipe.out().endRead();
+    //selector.add( pipe.in() );
 }
 
 int main( int argc, char* argv[] )
@@ -86,16 +86,16 @@ int main( int argc, char* argv[] )
         std::size_t bytes = 0;
     
         Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-        connect(pipe.input().inputReady, onInput);
-        connect(pipe.output().outputReady, onOutput);
+        connect(pipe.out().inputReady, onInput);
+        connect(pipe.in().outputReady, onOutput);
     
         Pt::System::Selector selector;
-        selector.add( pipe.input() );
-        selector.add( pipe.output() );
+        selector.add( pipe.out() );
+        selector.add( pipe.in() );
         
         while(true)
         {
-            pipe.output().beginWrite( out.c_str() + bytes, out.size() - bytes ); 
+            pipe.in().beginWrite( out.c_str() + bytes, out.size() - bytes ); 
             bool active = selector.wait(500);
             if(active == false)
             {
@@ -103,17 +103,17 @@ int main( int argc, char* argv[] )
                 return -1;
             }
     
-            bytes += pipe.output().endWrite();
+            bytes += pipe.in().endWrite();
             if( bytes == out.size() )
                 break;
         }
         
-        selector.remove( pipe.output() );
+        selector.remove( pipe.in() );
         
         bytes = 0;
         while(true)
         {
-            pipe.input().beginRead(buffer, size);
+            pipe.out().beginRead(buffer, size);
         
             bool active = selector.wait(500);
             if(active == false)
@@ -122,7 +122,7 @@ int main( int argc, char* argv[] )
                 return -1;
             }
     
-            bytes += pipe.input().endRead();
+            bytes += pipe.out().endRead();
             std::cerr.write( buffer, bytes ) << "\n";
             
             if( bytes == out.size() )
