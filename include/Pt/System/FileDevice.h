@@ -68,7 +68,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
         bool onSeekable() const
         { return true; }
 
-        bool onWait(unsigned n);
+        bool onWait(std::size_t n);
 
         pos_type onSeek(off_type offset, std::ios::seekdir sd) ;
 

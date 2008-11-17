@@ -127,7 +127,7 @@ void FileDeviceImpl::detach(SelectorBase& s)
 }
 
 
-bool FileDeviceImpl::wait(unsigned int msecs)
+bool FileDeviceImpl::wait(std::size_t msecs)
 {
 #ifndef _WIN32_WCE
     if( _device.avail() )

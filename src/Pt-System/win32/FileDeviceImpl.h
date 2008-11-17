@@ -47,7 +47,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void detach(SelectorBase& s);
  
-        virtual bool wait(unsigned int msecs);
+        virtual bool wait(std::size_t msecs);
         
         virtual bool setWaitHandle(HANDLE h, bool& avail);
         

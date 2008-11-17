@@ -97,7 +97,7 @@ void IODeviceImpl::close()
 }
 
 
-bool IODeviceImpl::wait(unsigned int msecs)
+bool IODeviceImpl::wait(std::size_t msecs)
 {
     fd_set rfds;
     fd_set wfds;

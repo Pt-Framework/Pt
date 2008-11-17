@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dï¿½rner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -45,7 +45,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void detach(SelectorBase& s);
 
-        bool wait(unsigned int msecs);
+        bool wait(std::size_tmsecs);
         
         bool setWaitHandle(HANDLE h, bool& active);
         

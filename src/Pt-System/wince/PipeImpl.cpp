@@ -100,7 +100,7 @@ bool PipeIODevice::checkEvent()
 }
 
 
-bool PipeIODevice::onWait(unsigned int msecs)
+bool PipeIODevice::onWait(std::size_t msecs)
 {
     if(_bufferSize)
     {

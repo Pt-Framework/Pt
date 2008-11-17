@@ -48,7 +48,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         void detach(SelectorBase& mon);
 
-        bool wait(unsigned int msecs);
+        bool wait(std::size_t msecs);
 
         bool setWaitHandle(HANDLE h, bool& avail);
 		

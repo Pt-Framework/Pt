@@ -18,7 +18,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
         // TODO: use size_t instread of unsigned
-        static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
+        static const std::size_t WaitInfinite = Selector::WaitInfinite;
 
         enum State
         {
@@ -44,7 +44,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         */
         void close();
 
-        bool wait(unsigned int msecs = WaitInfinite);
+        bool wait(std::size_t msecs = WaitInfinite);
 
         //! @brief Test if the I/O device object is enabled
         /*!
@@ -75,7 +75,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Closes the Selector
         virtual void onClose() = 0;
 
-        virtual bool onWait(unsigned int msecs) = 0;
+        virtual bool onWait(std::size_t msecs) = 0;
 
         virtual void onAttach(SelectorBase&) = 0;
 

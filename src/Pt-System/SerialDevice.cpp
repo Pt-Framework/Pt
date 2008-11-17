@@ -169,7 +169,7 @@ void SerialDevice::onClose()
 }
 
 
-bool SerialDevice::onWait(unsigned n)
+bool SerialDevice::onWait(std::size_t n)
 {
     return _impl->wait(n);
 }

@@ -103,7 +103,7 @@ size_t FileDevice::size() const
 }
 
 
-bool FileDevice::onWait(unsigned n)
+bool FileDevice::onWait(std::size_t n)
 {
     return _impl->wait(n);
 }

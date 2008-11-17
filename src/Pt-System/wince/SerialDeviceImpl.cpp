@@ -141,7 +141,7 @@ void SerialDeviceImpl::detach(SelectorBase& mon)
 }
 
 
-bool SerialDeviceImpl::wait(unsigned int msecs)
+bool SerialDeviceImpl::wait(std::size_t msecs)
 {
     return false;
 }

@@ -172,7 +172,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
     protected:
         void onClose();
 
-        bool onWait(unsigned n);
+        bool onWait(std::size_t n);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

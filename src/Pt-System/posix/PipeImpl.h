@@ -42,7 +42,7 @@ class PipeIODevice : public Pt::System::IODevice
         void onClose()
         { _impl.close(); }
 
-        bool onWait(unsigned int msecs);
+        bool onWait(std::size_t msecs);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

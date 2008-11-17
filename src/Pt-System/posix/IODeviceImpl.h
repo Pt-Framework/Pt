@@ -48,7 +48,7 @@ namespace System {
 
             virtual void close();
 
-            virtual bool wait(unsigned int msecs);
+            virtual bool wait(std::size_t msecs);
 
             virtual size_t beginRead(char* buffer, size_t n, bool& eof);
 

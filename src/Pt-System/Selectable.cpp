@@ -71,7 +71,7 @@ void Selectable::close()
     }
 }
 
-bool Selectable::wait(unsigned int msecs)
+bool Selectable::wait(std::size_t msecs)
 {
     return this->onWait(msecs); 
 }

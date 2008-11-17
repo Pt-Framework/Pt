@@ -63,7 +63,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         size_t onEndWrite();
 
-        bool onWait(unsigned n);
+        bool onWait(std::size_t n);
         
         //! @brief Closes the I/O device
         virtual void onClose();

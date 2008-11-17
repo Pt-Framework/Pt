@@ -70,7 +70,7 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
 }
 
 
-bool PipeIODevice::onWait(unsigned int msecs)
+bool PipeIODevice::onWait(std::size_t msecs)
 {
     if( this->avail() )
     {

@@ -52,7 +52,7 @@ void PipeIODevice::open(int fd, bool isAsync)
 }
 
 
-bool PipeIODevice::onWait(unsigned int msecs)
+bool PipeIODevice::onWait(std::size_t msecs)
 {
     return _impl.wait(msecs);
 }
