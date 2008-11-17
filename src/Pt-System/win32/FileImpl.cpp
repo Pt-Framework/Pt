@@ -92,16 +92,6 @@ void FileImpl::remove(const std::string& path)
 }
 
 
-void FileImpl::copy(const std::string& path, const std::string& to)
-{
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
-    std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
-
-    if(FALSE == ::CopyFile( tpath.c_str(), tto.c_str(), FALSE ))
-        throw SystemError("Could not copy file", PT_SOURCEINFO);
-}
-
-
 void FileImpl::move(const std::string& path, const std::string& to)
 {
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
