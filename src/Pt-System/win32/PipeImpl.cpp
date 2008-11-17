@@ -375,8 +375,8 @@ PipeImpl::PipeImpl(bool isAsync)
     if(outputHandle == INVALID_HANDLE_VALUE)
         throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
 
-    _inputDevice.open(inputHandle, isAsync);
-    _outputDevice.open(outputHandle, isAsync);
+    _out.open(inputHandle, isAsync);
+    _in.open(outputHandle, isAsync);
 
     _nameId++;
 }
@@ -390,13 +390,13 @@ PipeImpl::~PipeImpl()
 
 IODevice& PipeImpl::input()
 {
-    return _inputDevice;
+    return _out;
 }
 
 
 IODevice& PipeImpl::output()
 {
-    return _outputDevice;
+    return _in;
 }
 
 

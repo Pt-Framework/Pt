@@ -291,8 +291,8 @@ void PipeIODevice::onSync() const
 
 
 PipeImpl::PipeImpl(bool isAsync)
-: _inputDevice(PipeIODevice::Read)
-, _outputDevice(PipeIODevice::Write)
+: _out(PipeIODevice::Read)
+, _in(PipeIODevice::Write)
 {
     MSGQUEUEOPTIONS writeOpts, readOpts;
 
@@ -318,8 +318,8 @@ PipeImpl::PipeImpl(bool isAsync)
         throw IOError("Could not open message queue handle", PT_SOURCEINFO);
     }
 
-    _inputDevice.open(inputHandle, isAsync);
-    _outputDevice.open(outputHandle, isAsync);
+    _out.open(inputHandle, isAsync);
+    _in.open(outputHandle, isAsync);
 }
 
 
@@ -328,14 +328,14 @@ PipeImpl::~PipeImpl()
 }
 
 
-IODevice& PipeImpl::input()
+IODevice& PipeImpl::out()
 {
-    return _inputDevice;
+    return _out;
 }
 
-IODevice& PipeImpl::output()
+IODevice& PipeImpl::in()
 {
-    return _outputDevice;
+    return _in;
 }
 
 } // namespace System

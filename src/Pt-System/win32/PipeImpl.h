@@ -87,13 +87,13 @@ class PipeImpl
 
         ~PipeImpl();
 
-        IODevice& input();
+        IODevice& in();
 
-        IODevice& output();
+        IODevice& out();
 
     private:
-        PipeIODevice        _inputDevice;
-        PipeIODevice        _outputDevice;
+        PipeIODevice        _in;
+        PipeIODevice        _out;
         static Pt::uint32_t _nameId;
 };
 

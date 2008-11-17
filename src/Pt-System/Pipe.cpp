@@ -40,12 +40,12 @@ Pipe::~Pipe()
 
 IODevice& Pipe::out()
 {
-    return _impl->input();
+    return _impl->out();
 }
 
 IODevice& Pipe::in()
 {
-    return _impl->output();
+    return _impl->in();
 }
 
 } // namespace System

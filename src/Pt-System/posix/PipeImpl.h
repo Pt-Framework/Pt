@@ -82,13 +82,13 @@ class PipeImpl
 
         ~PipeImpl();
 
-        IODevice& input();
+        IODevice& in();
 
-        IODevice& output();
+        IODevice& out();
 
     private:
-        PipeIODevice _input;
-        PipeIODevice _output;
+        PipeIODevice _out;
+        PipeIODevice _in;
 };
 
 } // namespace System

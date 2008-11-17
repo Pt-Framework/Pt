@@ -106,8 +106,8 @@ PipeImpl::PipeImpl(bool isAsync)
     if(-1 == ::pipe(fds) )
         throw OpenFailed("pipe", PT_SOURCEINFO);
 
-    _input.open( fds[0] ,isAsync );
-    _output.open( fds[1], isAsync );
+    _out.open( fds[0] ,isAsync );
+    _in.open( fds[1], isAsync );
 }
 
 
@@ -116,14 +116,14 @@ PipeImpl::~PipeImpl()
 }
 
 
-IODevice& PipeImpl::input()
+IODevice& PipeImpl::out()
 {
-    return _input;
+    return _out;
 }
 
-IODevice& PipeImpl::output()
+IODevice& PipeImpl::in()
 {
-    return _output;
+    return _in;
 }
 
 } // namespace System
