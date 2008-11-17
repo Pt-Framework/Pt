@@ -34,10 +34,10 @@ InvalidUrl::InvalidUrl(const char* _what, const SourceInfo& _si)
 
 
 Url::Url()
+: _proto("file")
+, _port(0)
+, _path("/")
 {
-    _proto = "file";
-    _port  = 0;
-    _path  = "/";
 }
 
 
@@ -67,69 +67,9 @@ void Url::clear() {
 }
 
 
-void Url::setProtocol(const std::string& proto)
-{
-    _proto = proto;
-}
-
-
-const std::string& Url::protocol() const
-{
-    return _proto;
-}
-
-
-void Url::setHost(const std::string& host)
-{
-    _host = host;
-}
-
-
-const std::string& Url::host() const
-{
-    return _host;
-}
-
-
-void Url::setUser(const std::string& user)
-{
-    _user = user;
-}
-
-
-const std::string& Url::user() const
-{
-    return _user;
-}
-
-
-void Url::setPassword(const std::string& passwd)
-{
-  _passwd = passwd;
-}
-
-
-const std::string& Url::password() const
-{
-    return _passwd;
-}
-
-
-void Url::setPort(unsigned short port)
-{
-    _port = port;
-}
-
-
-unsigned short Url::port() const
-{
-    return _port;
-}
-
-
 void Url::setPath(const std::string& path)
 {
-    if(path.empty())
+    if( path.empty() )
     {
         _path = "/";
     }
@@ -141,12 +81,6 @@ void Url::setPath(const std::string& path)
         else
             _path = path;
     }
-}
-
-
-const std::string& Url::path() const
-{
-    return _path;
 }
 
 
@@ -264,18 +198,6 @@ void Url::clearArgs()
 }
 
 
-void Url::setAnchor(const std::string& anch)
-{
-    _anchor = anch;
-}
-
-
-const std::string& Url::anchor() const
-{
-    return _anchor;
-}
-
-
 Url& Url::operator=(const Url& url)
 {
     _proto  = url._proto;
@@ -293,7 +215,7 @@ Url& Url::operator=(const Url& url)
 
 Url& Url::operator=(const char* url)
 {
-    return this->operator=(std::string(url));
+    return this->operator=( std::string(url) );
 }
 
 

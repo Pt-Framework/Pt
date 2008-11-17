@@ -68,26 +68,43 @@ class PT_SYSTEM_API Url {
         Url(const Url& url);
 
         ~Url()
-		{}
+        {}
 
         void clear();
 
-        const std::string& protocol() const;
-        void setProtocol(const std::string& proto);
+        const std::string& protocol() const
+        { return _proto; }
 
-        const std::string& host() const;
-        void setHost(const std::string& host);
+        void setProtocol(const std::string& proto)
+        { _proto = proto; }
 
-        const std::string& user() const;
-        void setUser(const std::string& user);
+        const std::string& host() const
+        { return _host; }
 
-        const std::string& password() const;
-        void setPassword(const std::string& passwd);
+        void setHost(const std::string& host)
+        { _host = host; }
 
-        unsigned short port() const;
-        void setPort(unsigned short port);
+        const std::string& user() const
+        { return _user; }
 
-        const std::string& path() const;
+        void setUser(const std::string& user)
+        { _user = user; }
+
+        const std::string& password() const
+        { return _passwd; }
+
+        void setPassword(const std::string& passwd)
+        { _passwd = passwd; }
+
+        unsigned short port() const
+        { return _port; }
+
+        void setPort(unsigned short port)
+        { _port = port; }
+
+        const std::string& path() const
+        { return _path; }
+
         void setPath(const std::string& path);
 
         //! Returns the argument for the given key
@@ -112,10 +129,12 @@ class PT_SYSTEM_API Url {
         void clearArgs();
 
         //! Returns the anchor
-        const std::string& anchor() const;
+        const std::string& anchor() const
+        { return _anchor; }
 
         //! Sets the anchor
-        void setAnchor(const std::string& anch);
+        void setAnchor(const std::string& anch)
+        { _anchor = anch; }
 
         //! Url assignment operator
         Url& operator=(const Url& url);
