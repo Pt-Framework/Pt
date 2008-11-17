@@ -25,58 +25,56 @@ namespace System {
 
 RecursiveMutex dmx;
 
-EventSource::Sentry::Sentry(const EventSource* es)
-: _es(es)
+struct EventSource::Sentry
 {
-    _es->_sentry = this;
-    _es->_sending = true;
-    _es->_dirty = false;
-}
-
-
-EventSource::Sentry::~Sentry()
-{
-    if( _es )
-        this->detach();
-}
-
-
-void EventSource::Sentry::detach()
-{
-    _es->_sending = false;
-
-    if( _es->_dirty )
+    Sentry(const EventSource* es)
+    : _es(es)
     {
-        SinkMap::iterator it = _es->_sinks.begin();
-        while( it != _es->_sinks.end() )
-        {
-            if( it->second )
-            {
-                ++it;
-            }
-            else
-            {
-                _es->_sinks.erase(it++);
-            }
-        }
+        _es->_sentry = this;
+        _es->_dirty = false;
     }
 
-    _es->_dirty = false;
-    _es->_sentry = 0;
-    _es = 0;
-}
+    ~Sentry()
+    {
+        if( _es )
+            this->detach();
+    }
 
+    void detach()
+    {
+        if( _es->_dirty )
+        {
+            SinkMap::iterator it = _es->_sinks.begin();
+            while( it != _es->_sinks.end() )
+            {
+                if( it->second )
+                {
+                    ++it;
+                }
+                else
+                {
+                    _es->_sinks.erase(it++);
+                }
+            }
+        }
 
-bool EventSource::Sentry::operator!() const
-{
-     return _es == 0;
-}
+        _es->_dirty = false;
+        _es->_sentry = 0;
+        _es = 0;
+    }
+
+    bool operator!() const
+    {
+        return _es == 0;
+    }
+
+    const EventSource* _es;
+};
 
 
 EventSource::EventSource()
 : _dmutex(&dmx)
 , _sentry(0)
-, _sending(false)
 , _dirty(false)
 { }
 
@@ -128,7 +126,7 @@ void EventSource::disconnect(EventSink& sink)
     {
         if(it->second == &sink)
         {
-            if(_sending)
+            if(_sentry)
             {
                 _dirty = true;
                 it->second = 0;
@@ -178,7 +176,7 @@ void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
     {
         if(it->second == &sink)
         {
-            if(_sending)
+            if(_sentry)
             {
                 _dirty = true;
                 it->second = 0;
