@@ -154,7 +154,6 @@ void GDIRegistry::unregisterWindowClasses()
 
 GDIEventLoop::GDIEventLoop()
 : _messageLoopThreadId(0)
-, _queueMutex(Pt::System::Mutex::Normal)
 {
 }
 

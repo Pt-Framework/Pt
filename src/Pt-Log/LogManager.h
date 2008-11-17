@@ -63,7 +63,7 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         Target* _rootTarget;
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
-        Pt::System::Mutex _mutex;
+        Pt::System::RecursiveMutex _mutex;
         Settings _settings;
         Pt::System::PluginManager<Channel> _pluginManager;
         Logger* _logger;

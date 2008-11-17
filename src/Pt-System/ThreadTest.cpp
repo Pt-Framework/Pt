@@ -43,7 +43,6 @@ class ThreadTest : public Pt::Unit::TestSuite
     public:
         ThreadTest()
         : Pt::Unit::TestSuite("ThreadTest")
-        , _mutex(Pt::System::Mutex::Normal)
         , _flag(false)
         {
             Pt::Unit::TestSuite::registerMethod( "Attached", *this, &ThreadTest::Attached );

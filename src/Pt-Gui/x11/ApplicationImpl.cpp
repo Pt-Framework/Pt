@@ -834,7 +834,6 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 X11EventLoop::X11EventLoop()
 : _stop(false)
 , _display(0)
-, _queueMutex(Pt::System::Mutex::Normal)
 {
     // Open a X11 display connection
     _display = XOpenDisplay(NULL);

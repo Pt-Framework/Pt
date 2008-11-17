@@ -38,7 +38,6 @@ namespace Log {
 
 LogManager::LogManager()
 : _rootTarget(0)
-, _mutex(Pt::System::Mutex::Recursive)
 , _logger(0)
 {
     // builtin plugins

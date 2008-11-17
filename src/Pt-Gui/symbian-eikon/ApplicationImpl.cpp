@@ -220,7 +220,7 @@ void ApplicationImpl::processEvents()
 }
 
 // assuring that there is only one Application instance at a time
-System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
+System::Mutex ApplicationImpl::_mutex;
 
 void ApplicationImpl::lockAppInstance()
 {
