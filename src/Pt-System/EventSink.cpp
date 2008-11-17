@@ -25,7 +25,6 @@ namespace Pt {
 namespace System {
 
 EventSink::EventSink()
-: _mutex(Pt::System::Mutex::Recursive)
 { }
 
 

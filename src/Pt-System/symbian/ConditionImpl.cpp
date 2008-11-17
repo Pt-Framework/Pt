@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dï¿½rner                        *
  *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -47,7 +47,7 @@ ConditionImpl::~ConditionImpl()
 
 void ConditionImpl::wait(Mutex& mtx)
 {
-    if ( pthread_cond_wait(&_cond, mtx.impl()->handle() ) != 0)
+    if ( pthread_cond_wait(&_cond, mtx.impl().handle() ) != 0)
        throw std::runtime_error("Could not wait for Mutex." + PT_SOURCEINFO);
 }
 
@@ -65,7 +65,7 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
     ts.tv_nsec = ts.tv_nsec % 1000000000;
 
     do{
-        result = pthread_cond_timedwait(&_cond, mtx.impl()->handle(), &ts);
+        result = pthread_cond_timedwait(&_cond, mtx.impl().handle(), &ts);
     }
     while(result == EINTR);
 

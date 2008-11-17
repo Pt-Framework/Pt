@@ -6,7 +6,6 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
 SharedLibrary Pt : Atomicity.cpp
-                   Callable.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp

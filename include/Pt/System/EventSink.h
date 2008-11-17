@@ -51,7 +51,7 @@ namespace System {
             void onUnsubscribe(EventSource& source);
 
         private:
-            mutable Mutex _mutex;
+            mutable RecursiveMutex _mutex;
             std::list<EventSource*> _sources;
     };
 

@@ -23,7 +23,7 @@ namespace Pt {
 
 namespace System {
 
-Mutex dmx(Mutex::Recursive);
+RecursiveMutex dmx;
 
 EventSource::Sentry::Sentry(const EventSource* es)
 : _es(es)
@@ -74,8 +74,7 @@ bool EventSource::Sentry::operator!() const
 
 
 EventSource::EventSource()
-: _mutex(Pt::System::Mutex::Recursive)
-, _dmutex(&dmx)
+: _dmutex(&dmx)
 , _sentry(0)
 , _sending(false)
 , _dirty(false)

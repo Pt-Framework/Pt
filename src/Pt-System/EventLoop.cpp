@@ -27,7 +27,6 @@ namespace System {
 EventLoop::EventLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)
-, _queueMutex(Mutex::Recursive)
 {
     _selector = new SelectorImpl();
 }

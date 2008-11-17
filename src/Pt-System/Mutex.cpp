@@ -25,8 +25,13 @@ namespace Pt {
 
 namespace System {
 
+Mutex::Mutex()
+{
+    _impl = new MutexImpl(*this, Mutex::Normal);
+}
+
+
 Mutex::Mutex(Mode mode)
-: _mode(mode)
 {
     _impl = new MutexImpl(*this, mode);
 }
@@ -68,6 +73,7 @@ bool Mutex::unlockNoThrow()
 
     return false;
 }
+
 
 ReadWriteMutex::ReadWriteMutex()
 {

@@ -95,8 +95,8 @@ class PT_SYSTEM_API EventSource : protected NonCopyable
                                EventSink*,
                                CompareEventTypeInfo > SinkMap;
 
-        mutable Mutex _mutex;
-        mutable Mutex* _dmutex;
+        mutable RecursiveMutex _mutex;
+        mutable RecursiveMutex* _dmutex;
         mutable SinkMap _sinks;
         mutable Sentry* _sentry;
         mutable bool _sending;

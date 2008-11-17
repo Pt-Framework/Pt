@@ -28,174 +28,183 @@ namespace Pt {
 
 namespace System {
 
-    //! /brief Mutex synchronization object
-    ///
-    ///    A Mutex is a mutual exclusion device. It is used to synchronize
-    ///    the access to data which is accessed by more than one thread or
-    ///    process at the same time. Mutexes are recursive, that is the
-    ///    same thread can lock a mutex multiple times without deadlocking.
-    ///    When unlocking the mutex, unlock() must be called for each time
-    ///    a thread has successfully called lock() or tryLock().
-    class PT_SYSTEM_API Mutex : public NonCopyable
-    {
-        friend class MutexImpl;
+//! /brief Mutex synchronization object
+///
+///    A Mutex is a mutual exclusion device. It is used to synchronize
+///    the access to data which is accessed by more than one thread or
+///    process at the same time. Mutexes are recursive, that is the
+///    same thread can lock a mutex multiple times without deadlocking.
+///    When unlocking the mutex, unlock() must be called for each time
+///    a thread has successfully called lock() or tryLock().
+class PT_SYSTEM_API Mutex : public NonCopyable
+{
+    friend class MutexImpl;
 
-        private:
-            //! Implementation
-            class MutexImpl* _impl;
+    private:
+        //! @internal
+        class MutexImpl* _impl;
 
-        public:
-            //! @brief Enumeration to select recursive or non-recursive mode.
-            /// 
-            /// Mutex can be created either as recursive or as non-recursive Mutex.
-            /// A Mutex to be used in conjunction within the Condition-Class has to be 
-            /// non-recursive.
-            enum Mode
+    public:
+        //! @brief Default constructor
+        Mutex();
+
+        //! Destructor
+        ///
+        /// The destructor destroys the mutex. The mutex must be in unlocked
+        /// state when the destructor is called.
+        ~Mutex();
+
+        //! @brief Lock the mutex
+        ///
+        /// Locks the mutex. If the mutex is currently locked by another
+        /// thread, the calling thread suspends until no other thread holds
+        /// a lock on it. If the mutex is already locked by the calling
+        /// thread the function returns immediatly with incrementing the lock-
+        /// count of the mutex. This prevents a thread from dead-locking while
+        /// waiting for a mutex it already owns. To release its ownership under
+        /// such circumstances the thread must unlock the mutex once for each
+        /// time the thread has locked the mutex.
+        void lock();
+
+        bool tryLock();
+
+        //! @brief Unlock the mutex
+        ///
+        /// Unlocks the mutex. If the mutex was locked more than one time by the
+        /// same thread unlock decrements the lock-count. The mutex is actually
+        /// unlocked when the lock-count is zero.
+        void unlock();
+
+        bool unlockNoThrow();
+
+        //! @brief Access to platform specific implementation
+        MutexImpl& impl()
+        { return *_impl; }
+
+    protected:
+        //! @brief Enumeration to select recursive or non-recursive mode.
+        ///
+        /// Mutex can be created either as recursive or as non-recursive Mutex.
+        /// A Mutex to be used in conjunction within the Condition-Class has to be
+        /// non-recursive.
+        enum Mode
+        {
+            Normal = 0,
+            Recursive  = 1
+        };
+
+        //! @brief Construct recursive or normal
+        explicit Mutex(Mode mode);
+};
+
+/** @brief Recursive mutual exclusion device
+*/
+class RecursiveMutex : public Mutex
+{
+    public:
+        RecursiveMutex()
+        : Mutex(Mutex::Recursive)
+        {}
+
+        ~RecursiveMutex()
+        {}
+};
+
+/** @brief MutexLock class for Mutex.
+
+    The MutexLock class adds functionality for scoped
+    locking. In the constructor of a  MutexLock, the mutex is locked
+    and in the destructor it is unlocked. This way if for example an
+    exception occures in the protected section the Mutex will be unlocked
+    during stack unwinding when the MutexLock is destructed.
+
+    @code
+            // example how to make a member function thread-safe
+            #include <Pt/System/Mutex.h>
+
+            class MyClass
             {
-                Normal = 0,
-                Recursive  = 1
+                public:
+                    void function()
+                    {
+                        MutexLock lock(_lock);
+
+                        //
+                        // protected operations
+                        //
+
+                    // dtor of MutexLock unlocks _lock
+                    }
+
+                private:
+                    Pt::System::Mutex _lock;
             };
-            //! @brief Default constructor
-            ///
-            /// Construct the Mutex object.
-            explicit Mutex(Mode mode);
+    @endcode
+*/
+class MutexLock
+{
+    public:
+        //! @brief Constructor
+        /**
+            Construct a MutexLock object and lock the enclosing mutex.
 
-            //! Destructor
-            ///
-            /// The destructor destroys the mutex. The mutex must be in unlocked
-            /// state when the destructor is called.
-            ~Mutex();
+            \param m the enclosing Mutex object
+        */
+        MutexLock(Mutex& m, bool doLock = true, bool isLocked = false)
+        : _mutex(m)
+        , _isLocked(isLocked)
+        {
+            if(doLock)
+                this->lock();
+        }
 
-            //! @brief Lock the mutex
-            ///
-            /// Locks the mutex. If the mutex is currently locked by another
-            /// thread, the calling thread suspends until no other thread holds
-            /// a lock on it. If the mutex is already locked by the calling
-            /// thread the function returns immediatly with incrementing the lock-
-            /// count of the mutex. This prevents a thread from dead-locking while
-            /// waiting for a mutex it already owns. To release its ownership under
-            /// such circumstances the thread must unlock the mutex once for each
-            /// time the thread has locked the mutex.
-            void lock();
+        //! @brief Destructor
+        /**
+            The destructor unlocks the mutex.
+            */
+        ~MutexLock()
+        {
+            if(_isLocked)
+                _mutex.unlockNoThrow();
+        }
 
-            bool tryLock();
+        void lock()
+        {
+            if(!_isLocked)
+            {
+                _mutex.lock();
+                _isLocked = true;
+            }
+        }
 
-            //! @brief Unlock the mutex
-            ///
-            /// Unlocks the mutex. If the mutex was locked more than one time by the
-            /// same thread unlock decrements the lock-count. The mutex is actually
-            /// unlocked when the lock-count is zero.
-            void unlock();
+        //! @brief Unlock so that the destructor does not unlock
+        void unlock()
+        {
+            if(_isLocked)
+            {
+                _mutex.unlock();
+                _isLocked = false;
+            }
+        }
 
-            bool unlockNoThrow();
+            //! @brief Get the mutex object
+            /**
+                \return the enclosing Mutex object
+            */
+        Mutex& mutex()
+        { return _mutex; }
 
-            //! @brief Returns if Mutex is recursive or non-recursive
-            Mode mode() const
-            { return _mode;}
-
-           //! @brief Access to platform specific implementation
-            MutexImpl* impl()
-            { return _impl; }
+            //! @brief Get the mutex object
+            /**
+                \return the enclosing Mutex object
+            */
+        const Mutex& mutex() const
+        { return _mutex; }
 
         private:
-            Mode _mode;
-    };
-
-    /** @brief MutexLock class for Mutex.
-
-        The MutexLock class adds functionality for scoped
-        locking. In the constructor of a  MutexLock, the mutex is locked
-        and in the destructor it is unlocked. This way if for example an
-        exception occures in the protected section the Mutex will be unlocked
-        during stack unwinding when the MutexLock is destructed.
-
-        @code
-             // example how to make a member function thread-safe
-             #include <Pt/System/Mutex.h>
-
-             class MyClass
-             {
-                 public:
-                     void function()
-                     {
-                         MutexLock lock(_lock);
-
-                         //
-                         // protected operations
-                         //
-
-                        // dtor of MutexLock unlocks _lock
-                     }
-
-                 private:
-                     Pt::System::Mutex _lock;
-             };
-        @endcode
-    */
-    class MutexLock
-    {
-        public:
-            //! @brief Constructor
-            /**
-                Construct a MutexLock object and lock the enclosing mutex.
-
-                \param m the enclosing Mutex object
-            */
-            MutexLock(Mutex& m, bool doLock = true, bool isLocked = false)
-            : _mutex(m)
-            , _isLocked(isLocked)
-            {
-                if(doLock)
-                    this->lock();
-            }
-
-            //! @brief Destructor
-            /**
-                The destructor unlocks the mutex.
-             */
-            ~MutexLock()
-            {
-                if(_isLocked)
-                    _mutex.unlockNoThrow();
-            }
-
-            void lock()
-            {
-                if(!_isLocked)
-                {
-                    _mutex.lock();
-                    _isLocked = true;
-                }
-            }
-
-            //! @brief Unlock so that the destructor does not unlock
-            void unlock()
-            {
-                if(_isLocked)
-                {
-                    _mutex.unlock();
-                    _isLocked = false;
-                }
-            }
-
-             //! @brief Get the mutex object
-             /**
-                 \return the enclosing Mutex object
-              */
-            Mutex& mutex()
-            { return _mutex; }
-
-             //! @brief Get the mutex object
-             /**
-                 \return the enclosing Mutex object
-              */
-            const Mutex& mutex() const
-            { return _mutex; }
-
-            private:
-                Mutex& _mutex;
-                bool _isLocked;
-    };
+            Mutex& _mutex;
+            bool _isLocked;
+};
 
 /** @brief Synchronisation device similar to a POSIX rwlock
 

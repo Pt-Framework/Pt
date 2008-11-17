@@ -162,7 +162,7 @@ namespace System {
             SelectorImpl* _selector;
             Allocator _allocator;
             std::deque<Event* > _eventQueue;
-            Mutex _queueMutex;
+            RecursiveMutex _queueMutex;
     };
 
 } // namespace System

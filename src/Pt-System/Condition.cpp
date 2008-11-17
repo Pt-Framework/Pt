@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr Marc Boris Dürner                       *
+ *   Copyright (C) 2005-2006 by Dr Marc Boris Dï¿½rner                       *
  *   Copyright (C) 2005-2006 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -46,16 +46,12 @@ Condition::~Condition()
 
 void Condition::wait(Mutex& mtx)
 {
-   if (mtx.mode() == Mutex::Recursive)
-        throw SystemError("Condition accepts only non recursive mutexes: ", PT_SOURCEINFO);
    _impl->wait(mtx);
 }
 
 
 bool Condition::wait(Mutex& mtx, unsigned int ms)
 {
-     if (mtx.mode() == Mutex::Recursive)
-        throw SystemError("Condition accepts only non recursive mutexes: ", PT_SOURCEINFO);
     return _impl->wait(mtx, ms);
 }
 
