@@ -19,36 +19,4 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <pthread.h>
-#include "Pt/System/Mutex.h"
-
-namespace Pt {
-
-namespace System {
-
-    class MutexImpl {
-        public:
-           MutexImpl(Mutex& mutex, Mutex::Mode mode);
-
-            ~MutexImpl();
-
-            void lock();
-
-            bool tryLock();
-
-            void unlock();
-
-            pthread_mutex_t* handle()
-            { return &_handle; }
-
-            const pthread_mutex_t* handle() const
-            { return &_handle; }
-
-        private:
-            Mutex& _mutex;
-            pthread_mutex_t _handle;
-    };
-
-} // !namepsace System
-
-} // !namespace Pt
+#include "../posix/MutexImpl.h"
