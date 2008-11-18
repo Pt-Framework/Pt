@@ -18,50 +18,87 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "MutexImpl.h"
-#include "ReadWriteMutexImpl.h"
 #include "Pt/System/Mutex.h"
 
 namespace Pt {
 
 namespace System {
 
-MutexBase::MutexBase()
+Mutex::Mutex()
 {
     _impl = new MutexImpl();
 }
 
 
-MutexBase::MutexBase(int recursive)
-{
-    _impl = new MutexImpl(recursive);
-}
-
-
-MutexBase::~MutexBase()
+Mutex::~Mutex()
 {
     delete _impl;
 }
 
 
-void MutexBase::lock()
+void Mutex::lock()
 {
     _impl->lock();
 }
 
 
-bool MutexBase::tryLock()
+bool Mutex::tryLock()
 {
     return _impl->tryLock();
 }
 
 
-void MutexBase::unlock()
+void Mutex::unlock()
 {
     _impl->unlock();
 }
 
 
-bool MutexBase::unlockNoThrow()
+bool Mutex::unlockNoThrow()
+{
+    try
+    {
+        _impl->unlock();
+        return true;
+    }
+    catch(...)
+    {}
+
+    return false;
+}
+
+
+RecursiveMutex::RecursiveMutex()
+{
+    _impl = new MutexImpl(1);
+}
+
+
+RecursiveMutex::~RecursiveMutex()
+{
+    delete _impl;
+}
+
+
+void RecursiveMutex::lock()
+{
+    _impl->lock();
+}
+
+
+bool RecursiveMutex::tryLock()
+{
+    return _impl->tryLock();
+}
+
+
+void RecursiveMutex::unlock()
+{
+    _impl->unlock();
+}
+
+
+bool RecursiveMutex::unlockNoThrow()
 {
     try
     {

@@ -22,52 +22,61 @@
 #define PT_MUTEXIMPL_H
 
 #include "Pt/Api.h"
-#include "Pt/System/Mutex.h"
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
 
-    //! @brief MS Windows specific mutex class
-    /**
-        This class represents the MS Windows specific implementation
-        of the Mutex class. It is used as delegate from the common
-        Mutex class.
-    */
-    class MutexImpl 
-	{
-        public:
-            //! @brief Default Constructor
-            MutexImpl();
+class MutexImpl 
+{
+	public:
+		MutexImpl();
 
-            MutexImpl(int recursive);
+		MutexImpl(int recursive);
 
-            //! @brief Destructor
-            ~MutexImpl();
+		~MutexImpl();
 
-            //! @brief MS Windows specific implementation of lock()
-            /**
-                @see Mutex#lock()
-            */
-            void lock();
+		void lock();
 
-            //! @brief MS Windows specific implementation of tryLock()
-            /**
-                @see Mutex#tryLock()
-            */
-            bool tryLock();
+		bool tryLock();
 
-            //! @brief MS Windows specific implementation of unlock()
-            /**
-                @see Mutex#unlock()
-            */
-            void unlock();
+		void unlock();
 
-        private:
-            HANDLE _handle;
-    };
+	private:
+		HANDLE _handle;
+};
 
+class ReadWriteMutexImpl
+{
+    public:
+        ReadWriteMutexImpl();
+
+        ~ReadWriteMutexImpl();
+
+        void readLock();
+
+        bool tryReadLock();
+
+        void writeLock();
+
+        bool tryWriteLock();
+
+        void unlock();
+
+    private:
+        void addWriter();
+
+        void removeWriter();
+
+	private:
+        HANDLE   _mutex;
+        HANDLE   _readEvent;
+        HANDLE   _writeEvent;
+        unsigned _readers;
+        unsigned _writers;
+};
+	
 } // namespace System
 
 } // namespace Pt

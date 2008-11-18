@@ -21,7 +21,6 @@
 #include "MutexImpl.h"
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/Mutex.h"
 
 namespace Pt {
 
@@ -93,6 +92,170 @@ void MutexImpl::unlock()
         DWORD error =  GetLastError();
         throw SystemError("Could not release mutex", PT_SOURCEINFO);
     }
+}
+
+
+ReadWriteMutexImpl::ReadWriteMutexImpl()
+: _readers(0), _writers(0)
+{
+	_mutex = CreateMutex(NULL, FALSE, NULL);
+
+	if(_mutex == NULL)
+		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+
+	_readEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	if(_readEvent == NULL)
+		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+
+	_writeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	if(_writeEvent == NULL)
+		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+}
+
+
+ReadWriteMutexImpl::~ReadWriteMutexImpl()
+{
+	CloseHandle(_mutex);
+	CloseHandle(_readEvent);
+	CloseHandle(_writeEvent);
+}
+
+
+void ReadWriteMutexImpl::readLock()
+{
+	HANDLE h[2];
+	h[0] = _mutex;
+	h[1] = _readEvent;
+
+	switch( WaitForMultipleObjects(2, h, TRUE, INFINITE) )
+	{
+		case WAIT_OBJECT_0:
+		case WAIT_OBJECT_0 + 1:
+			++_readers;
+			ResetEvent(_writeEvent);
+			ReleaseMutex(_mutex);
+			break;
+		default:
+			throw SystemError("Could not aquire reader lock", PT_SOURCEINFO);
+	}
+}
+
+
+bool ReadWriteMutexImpl::tryReadLock()
+{
+	HANDLE h[2];
+	h[0] = _mutex;
+	h[1] = _readEvent;
+
+	switch( WaitForMultipleObjects(2, h, TRUE, 1) )
+	{
+		case WAIT_OBJECT_0:
+		case WAIT_OBJECT_0 + 1:
+			++_readers;
+			ResetEvent(_writeEvent);
+			ReleaseMutex(_mutex);
+			return true;
+		case WAIT_TIMEOUT:
+			return false;
+		default:
+			throw SystemError("Could not aquire reader lock", PT_SOURCEINFO);
+	}
+}
+
+
+void ReadWriteMutexImpl::writeLock()
+{
+	this->addWriter();
+
+	HANDLE h[2];
+	h[0] = _mutex;
+	h[1] = _writeEvent;
+
+	switch( WaitForMultipleObjects(2, h, TRUE, INFINITE) )
+	{
+		case WAIT_OBJECT_0:
+		case WAIT_OBJECT_0 + 1:
+			--_writers;
+			++_readers;
+			ResetEvent(_readEvent);
+			ResetEvent(_writeEvent);
+			ReleaseMutex(_mutex);
+			break;
+		default:
+			this->removeWriter();
+			throw SystemError("Could not aquire writer lock", PT_SOURCEINFO);
+	}
+}
+
+
+bool ReadWriteMutexImpl::tryWriteLock()
+{
+	this->addWriter();
+
+	HANDLE h[2];
+	h[0] = _mutex;
+	h[1] = _writeEvent;
+
+	switch (WaitForMultipleObjects(2, h, TRUE, 1))
+	{
+		case WAIT_OBJECT_0:
+		case WAIT_OBJECT_0 + 1:
+			--_writers;
+			++_readers;
+			ResetEvent(_readEvent);
+			ResetEvent(_writeEvent);
+			ReleaseMutex(_mutex);
+			return true;
+		case WAIT_TIMEOUT:
+			this->removeWriter();
+			return false;
+		default:
+			removeWriter();
+			throw SystemError("Could not aquire writer lock", PT_SOURCEINFO);
+	}
+}
+
+
+void ReadWriteMutexImpl::unlock()
+{
+	switch (WaitForSingleObject(_mutex, INFINITE))
+	{
+		case WAIT_OBJECT_0:
+			if (_writers == 0) SetEvent(_readEvent);
+			if (--_readers == 0) SetEvent(_writeEvent);
+			ReleaseMutex(_mutex);
+			break;
+		default:
+			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+	}
+}
+
+
+void ReadWriteMutexImpl::addWriter()
+{
+	switch ( WaitForSingleObject(_mutex, INFINITE) )
+	{
+		case WAIT_OBJECT_0:
+			if (++_writers == 1) ResetEvent(_readEvent);
+			ReleaseMutex(_mutex);
+			break;
+		default:
+			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+	}
+}
+
+
+void ReadWriteMutexImpl::removeWriter()
+{
+	switch( WaitForSingleObject(_mutex, INFINITE) )
+	{
+		case WAIT_OBJECT_0:
+			if (--_writers == 0) SetEvent(_readEvent);
+			ReleaseMutex(_mutex);
+			break;
+		default:
+			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+	}
 }
 
 } // namespace System

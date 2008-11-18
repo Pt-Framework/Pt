@@ -28,32 +28,6 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API MutexBase : public NonCopyable
-{
-    private:
-        class MutexImpl* _impl;
-
-    public:
-        ~MutexBase();
-
-        void lock();
-
-        bool tryLock();
-
-        void unlock();
-
-        bool unlockNoThrow();
-
-        MutexImpl& impl()
-        { return *_impl; }
-
-    protected:
-        MutexBase();
-
-        explicit MutexBase(int recursive);
-};
-
-
 //! /brief Mutex synchronization object
 ///
 ///    A Mutex is a mutual exclusion device. It is used to synchronize
@@ -62,19 +36,20 @@ class PT_SYSTEM_API MutexBase : public NonCopyable
 ///    same thread can lock a mutex multiple times without deadlocking.
 ///    When unlocking the mutex, unlock() must be called for each time
 ///    a thread has successfully called lock() or tryLock().
-class Mutex : private MutexBase
+class PT_SYSTEM_API Mutex : private NonCopyable
 {
+    private:
+        class MutexImpl* _impl;
+
     public:
         //! @brief Default constructor
-        Mutex()
-        {}
+        Mutex();
 
         //! Destructor
         ///
         /// The destructor destroys the mutex. The mutex must be in unlocked
         /// state when the destructor is called.
-        ~Mutex()
-        {}
+        ~Mutex();
 
         //! @brief Lock the mutex
         ///
@@ -86,26 +61,22 @@ class Mutex : private MutexBase
         /// waiting for a mutex it already owns. To release its ownership under
         /// such circumstances the thread must unlock the mutex once for each
         /// time the thread has locked the mutex.
-        void lock()
-        { MutexBase::lock(); }
+        void lock();
 
-        bool tryLock()
-        { return MutexBase::tryLock(); }
+        bool tryLock();
 
         //! @brief Unlock the mutex
         ///
         /// Unlocks the mutex. If the mutex was locked more than one time by the
         /// same thread unlock decrements the lock-count. The mutex is actually
         /// unlocked when the lock-count is zero.
-        void unlock()
-        { MutexBase::unlock(); }
+        void unlock();
 
-        bool unlockNoThrow()
-        { return MutexBase::unlockNoThrow(); }
+        bool unlockNoThrow();
 
         //! @brief Access to platform specific implementation
         MutexImpl& impl()
-        { return MutexBase::impl();  }
+        { return *_impl;  }
 };
 
 /** @brief MutexLock class for Mutex.
@@ -206,35 +177,23 @@ class MutexLock
 
 /** @brief Recursive mutual exclusion device
 */
-class RecursiveMutex : private MutexBase
+class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 {
+    private:
+        class MutexImpl* _impl;
+
     public:
-        RecursiveMutex()
-        : MutexBase(1)
-        {}
+        RecursiveMutex();
 
-        ~RecursiveMutex()
-        {}
+        ~RecursiveMutex();
 
-        void lock()
-        {
-            MutexBase::lock();
-        }
+        void lock();
 
-        bool tryLock()
-        {
-            return MutexBase::tryLock();
-        }
+        bool tryLock();
 
-        void unlock()
-        {
-            MutexBase::unlock();
-        }
+        void unlock();
 
-        bool unlockNoThrow()
-        {
-            return MutexBase::unlockNoThrow();
-        }
+        bool unlockNoThrow();
 };
 
 /** @brief Lock class for recursive mutexes.
