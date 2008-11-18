@@ -97,19 +97,6 @@ class PT_SYSTEM_API Mutex : public NonCopyable
         explicit Mutex(Mode mode);
 };
 
-/** @brief Recursive mutual exclusion device
-*/
-class RecursiveMutex : public Mutex
-{
-    public:
-        RecursiveMutex()
-        : Mutex(Mutex::Recursive)
-        {}
-
-        ~RecursiveMutex()
-        {}
-};
-
 /** @brief MutexLock class for Mutex.
 
     The MutexLock class adds functionality for scoped
@@ -203,6 +190,106 @@ class MutexLock
 
         private:
             Mutex& _mutex;
+            bool _isLocked;
+};
+
+/** @brief Recursive mutual exclusion device
+*/
+class RecursiveMutex : private Mutex
+{
+    public:
+        RecursiveMutex()
+        : Mutex(Mutex::Recursive)
+        {}
+
+        ~RecursiveMutex()
+        {}
+
+        void lock()
+        {
+            Mutex::lock();
+        }
+
+        bool tryLock()
+        {
+            return Mutex::tryLock();
+        }
+
+        void unlock()
+        {
+            Mutex::unlock();
+        }
+
+        bool unlockNoThrow()
+        {
+            return Mutex::unlockNoThrow();
+        }
+};
+
+/** @brief Lock class for recursive mutexes.
+*/
+class RecursiveLock
+{
+    public:
+        //! @brief Constructor
+        /**
+            Construct a RecursiveLock object and lock the enclosing mutex.
+
+            \param m the enclosing Mutex object
+        */
+        RecursiveLock(RecursiveMutex& m, bool doLock = true, bool isLocked = false)
+        : _mutex(m)
+        , _isLocked(isLocked)
+        {
+            if(doLock)
+                this->lock();
+        }
+
+        //! @brief Destructor
+        /**
+            The destructor unlocks the mutex.
+            */
+        ~RecursiveLock()
+        {
+            if(_isLocked)
+                _mutex.unlockNoThrow();
+        }
+
+        void lock()
+        {
+            if(!_isLocked)
+            {
+                _mutex.lock();
+                _isLocked = true;
+            }
+        }
+
+        //! @brief Unlock so that the destructor does not unlock
+        void unlock()
+        {
+            if(_isLocked)
+            {
+                _mutex.unlock();
+                _isLocked = false;
+            }
+        }
+
+            //! @brief Get the mutex object
+            /**
+                \return the enclosing Mutex object
+            */
+        RecursiveMutex& mutex()
+        { return _mutex; }
+
+            //! @brief Get the mutex object
+            /**
+                \return the enclosing Mutex object
+            */
+        const RecursiveMutex& mutex() const
+        { return _mutex; }
+
+        private:
+            RecursiveMutex& _mutex;
             bool _isLocked;
 };
 

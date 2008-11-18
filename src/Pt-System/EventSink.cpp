@@ -32,7 +32,7 @@ EventSink::~EventSink()
 {
     while( true )
     {
-        MutexLock lock( _mutex );
+        RecursiveLock lock( _mutex );
 
         if( _sources.empty() )
             return;
@@ -55,7 +55,7 @@ void EventSink::commitEvent(const Event& event)
 
 void EventSink::onConnect(EventSource& source)
 {
-    MutexLock lock1( _mutex );
+    RecursiveLock lock1( _mutex );
 
     _sources.push_back(&source);
 }
@@ -63,7 +63,7 @@ void EventSink::onConnect(EventSource& source)
 
 void EventSink::onDisconnect(EventSource& source)
 {
-    MutexLock lock1( _mutex );
+    RecursiveLock lock1( _mutex );
 
     _sources.remove(&source);
 }
@@ -71,7 +71,7 @@ void EventSink::onDisconnect(EventSource& source)
 
 void EventSink::onUnsubscribe(EventSource& source)
 {
-    MutexLock lock1( _mutex );
+    RecursiveLock lock1( _mutex );
 
     std::list<EventSource*>::iterator it;
     for(it = _sources.begin(); it != _sources.end(); ++it)

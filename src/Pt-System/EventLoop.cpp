@@ -72,7 +72,7 @@ void EventLoop::onRun()
 {
     while( true )
     {
-        MutexLock lock(_queueMutex);
+        RecursiveLock lock(_queueMutex);
 
         if(_exitLoop)
             break;
@@ -96,7 +96,7 @@ bool EventLoop::onWait(std::size_t msecs)
 {
     if( _selector->wait(msecs) )
     {
-        MutexLock lock(_queueMutex);
+        RecursiveLock lock(_queueMutex);
 
         if( !_eventQueue.empty() )
         {
@@ -119,7 +119,7 @@ void EventLoop::onWake()
 
 void EventLoop::onExit()
 {
-    MutexLock lock(_queueMutex);
+    RecursiveLock lock(_queueMutex);
     _exitLoop = true;
     lock.unlock();
 
@@ -130,7 +130,7 @@ void EventLoop::onExit()
 void EventLoop::onCommitEvent(const Event& ev)
 {
     {
-        MutexLock lock( _queueMutex );
+        RecursiveLock lock( _queueMutex );
 
         // TODO: use a continuous block of memory to store events
         // this avoids new/delete
@@ -155,7 +155,7 @@ void EventLoop::onProcessEvents()
 {
     while( false == _exitLoop )
     {
-        MutexLock lock(_queueMutex);
+        RecursiveLock lock(_queueMutex);
 
         if ( _eventQueue.empty() || _exitLoop )
             break;

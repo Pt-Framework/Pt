@@ -110,7 +110,7 @@ Target& LogManager::target(const std::string& name)
 {
     Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
 
-    Pt::System::MutexLock lock( _mutex );
+    Pt::System::RecursiveLock lock( _mutex );
 
     // find requested logger amongst the existing ones
     std::map<std::string, Target*>::iterator it = _targetMap.find(name);
@@ -204,7 +204,7 @@ Target& LogManager::target(const std::string& name)
 void LogManager::updateChildLogLevels(Target &target)
 {
     Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
-    Pt::System::MutexLock lock( _mutex );
+    Pt::System::RecursiveLock lock( _mutex );
 
     // Find the direct children of this target and set their LogLevels,
     // if their LogLevels haven't been set explicitely
@@ -239,7 +239,7 @@ void LogManager::updateChildLogLevels(Target &target)
 
 void LogManager::setChannel(Target& target, const std::string& url)
 {
-    Pt::System::MutexLock lock( _mutex );
+    Pt::System::RecursiveLock lock( _mutex );
 
     Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
 
@@ -252,7 +252,7 @@ void LogManager::setChannel(Target& target, const std::string& url)
 
 void LogManager::log(Target& target, const Message& message, bool isAsync)
 {
-    Pt::System::MutexLock lock( _mutex );
+    Pt::System::RecursiveLock lock( _mutex );
 
     // sreach target hierachy upwards for a valid channel
     for( Target* current = &target; current != 0; current = current->_parent )

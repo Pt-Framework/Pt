@@ -81,11 +81,11 @@ EventSource::EventSource()
 
 EventSource::~EventSource()
 {
-    MutexLock dlock(*_dmutex);
+    RecursiveLock dlock(*_dmutex);
 
     while( true )
     {
-        MutexLock lock( _mutex );
+        RecursiveLock lock( _mutex );
 
         if(_sentry)
             _sentry->detach();
@@ -106,7 +106,7 @@ EventSource::~EventSource()
 
 void EventSource::connect(EventSink& sink)
 {
-    MutexLock lock( _mutex );
+    RecursiveLock lock( _mutex );
 
     sink.onConnect(*this);
 
@@ -117,7 +117,7 @@ void EventSource::connect(EventSink& sink)
 
 void EventSource::disconnect(EventSink& sink)
 {
-    MutexLock lock( _mutex );
+    RecursiveLock lock( _mutex );
 
     sink.onDisconnect(*this);
 
@@ -158,7 +158,7 @@ bool EventSource::tryDisconnect(EventSink& sink)
 
 void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
 {
-    MutexLock lock( _mutex );
+    RecursiveLock lock( _mutex );
 
     sink.onConnect(*this);
     _sinks.insert( std::make_pair(&ti, &sink) );
@@ -167,7 +167,7 @@ void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
 
 void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
 {
-    MutexLock lock( _mutex );
+    RecursiveLock lock( _mutex );
 
     sink.onUnsubscribe(*this);
 
@@ -195,7 +195,7 @@ void EventSource::unsubscribe(EventSink& sink, const std::type_info& ti)
 
 void EventSource::send(const Pt::Event& ev)
 {
-    MutexLock lock(_mutex);
+    RecursiveLock lock(_mutex);
     EventSource::Sentry sentry(this);
 
     SinkMap::iterator it;
