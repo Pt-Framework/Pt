@@ -37,6 +37,9 @@ SystemError::SystemError(const std::string & what, const SourceInfo& si)
 : std::runtime_error(what + si)
 { }
 
+SystemError::SystemError(const char* what)
+: std::runtime_error(what)
+{ }
 
 /*
 SystemError::~SystemError() throw()

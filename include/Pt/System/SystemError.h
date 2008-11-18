@@ -45,6 +45,8 @@ namespace System {
         public:
             SystemError(const std::string& what, const SourceInfo& si);
 
+			SystemError(const char* what);
+
             ~SystemError() throw()
             {}
 

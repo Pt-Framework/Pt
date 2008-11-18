@@ -31,7 +31,7 @@ MutexImpl::MutexImpl()
     _handle = CreateMutex(NULL, FALSE, NULL);
 
     if( !_handle )
-        throw SystemError("Could not create mutex", PT_SOURCEINFO);
+        throw SystemError( PT_SOURCEINFO_MSG("Could not create mutex") );
 }
 
 
@@ -40,7 +40,7 @@ MutexImpl::MutexImpl(int recursive)
     _handle = CreateMutex(NULL, FALSE, NULL);
 
     if( !_handle )
-        throw SystemError("Could not create mutex", PT_SOURCEINFO);
+        throw SystemError( PT_SOURCEINFO_MSG("Could not create mutex") );
 }
 
 
@@ -61,7 +61,7 @@ void MutexImpl::lock()
     if(ret != WAIT_OBJECT_0)
     {
         DWORD error =  GetLastError();
-        throw SystemError ("Could not wait for mutex", PT_SOURCEINFO);
+        throw SystemError( PT_SOURCEINFO_MSG("Could not wait for mutex") );
     }
 }
 
@@ -80,7 +80,7 @@ bool MutexImpl::tryLock()
     if(ret == WAIT_TIMEOUT)
         return false;
 
-    throw SystemError ("Could not wait for mutex", PT_SOURCEINFO);
+    throw SystemError( PT_SOURCEINFO_MSG("Could not wait for mutex") );
     return false;
 }
 
@@ -90,7 +90,7 @@ void MutexImpl::unlock()
     if( ! ReleaseMutex(_handle) )
     {
         DWORD error =  GetLastError();
-        throw SystemError("Could not release mutex", PT_SOURCEINFO);
+        throw SystemError( PT_SOURCEINFO_MSG("Could not release mutex") );
     }
 }
 
@@ -101,15 +101,15 @@ ReadWriteMutexImpl::ReadWriteMutexImpl()
 	_mutex = CreateMutex(NULL, FALSE, NULL);
 
 	if(_mutex == NULL)
-		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+		throw SystemError( PT_SOURCEINFO_MSG("Could not create reader/writer lock") );
 
 	_readEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 	if(_readEvent == NULL)
-		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+		throw SystemError( PT_SOURCEINFO_MSG("Could not create reader/writer lock") );
 
 	_writeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 	if(_writeEvent == NULL)
-		throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
+		throw SystemError( PT_SOURCEINFO_MSG("Could not create reader/writer lock") );
 }
 
 
@@ -136,7 +136,7 @@ void ReadWriteMutexImpl::readLock()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError("Could not aquire reader lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not aquire reader lock") );
 	}
 }
 
@@ -158,7 +158,7 @@ bool ReadWriteMutexImpl::tryReadLock()
 		case WAIT_TIMEOUT:
 			return false;
 		default:
-			throw SystemError("Could not aquire reader lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not aquire reader lock") );
 	}
 }
 
@@ -183,7 +183,7 @@ void ReadWriteMutexImpl::writeLock()
 			break;
 		default:
 			this->removeWriter();
-			throw SystemError("Could not aquire writer lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not aquire writer lock") );
 	}
 }
 
@@ -211,7 +211,7 @@ bool ReadWriteMutexImpl::tryWriteLock()
 			return false;
 		default:
 			removeWriter();
-			throw SystemError("Could not aquire writer lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not aquire writer lock") );
 	}
 }
 
@@ -226,7 +226,7 @@ void ReadWriteMutexImpl::unlock()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not lock reader/writer lock") );
 	}
 }
 
@@ -240,7 +240,7 @@ void ReadWriteMutexImpl::addWriter()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not lock reader/writer lock") );
 	}
 }
 
@@ -254,7 +254,7 @@ void ReadWriteMutexImpl::removeWriter()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
+			throw SystemError( PT_SOURCEINFO_MSG("Could not lock reader/writer lock") );
 	}
 }
 
