@@ -25,43 +25,43 @@ namespace Pt {
 
 namespace System {
 
-Mutex::Mutex()
+MutexBase::MutexBase()
 {
-    _impl = new MutexImpl(*this, Mutex::Normal);
+    _impl = new MutexImpl();
 }
 
 
-Mutex::Mutex(Mode mode)
+MutexBase::MutexBase(int recursive)
 {
-    _impl = new MutexImpl(*this, mode);
+    _impl = new MutexImpl(recursive);
 }
 
 
-Mutex::~Mutex()
+MutexBase::~MutexBase()
 {
     delete _impl;
 }
 
 
-void Mutex::lock()
+void MutexBase::lock()
 {
     _impl->lock();
 }
 
 
-bool Mutex::tryLock()
+bool MutexBase::tryLock()
 {
     return _impl->tryLock();
 }
 
 
-void Mutex::unlock()
+void MutexBase::unlock()
 {
     _impl->unlock();
 }
 
 
-bool Mutex::unlockNoThrow()
+bool MutexBase::unlockNoThrow()
 {
     try
     {

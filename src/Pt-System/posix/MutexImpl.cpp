@@ -20,32 +20,29 @@
  ***************************************************************************/
 
 #include "MutexImpl.h"
-
 #include "Pt/System/SystemError.h"
 #include "Pt/System/Mutex.h"
-
 #include <sys/time.h>
 #include <errno.h>
-
 
 namespace Pt {
 
 namespace System {
 
-
-MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
-: _mutex(mutex)
+MutexImpl::MutexImpl()
 {
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
-    if (mode == Mutex::Recursive)
-    {
-        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE );
-    }
-    else
-    {
-        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK  );
-    }
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK  );
+    pthread_mutex_init(&_handle, &attr);
+}
+
+
+MutexImpl::MutexImpl(int recursive)
+{
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE );
     pthread_mutex_init(&_handle, &attr);
 }
 

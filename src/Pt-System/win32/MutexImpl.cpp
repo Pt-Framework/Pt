@@ -27,8 +27,16 @@ namespace Pt {
 
 namespace System {
 
-MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
-: _mutex(mutex)
+MutexImpl::MutexImpl()
+{
+    _handle = CreateMutex(NULL, FALSE, NULL);
+
+    if( !_handle )
+        throw SystemError("Could not create mutex", PT_SOURCEINFO);
+}
+
+
+MutexImpl::MutexImpl(int recursive)
 {
     _handle = CreateMutex(NULL, FALSE, NULL);
 
@@ -80,7 +88,7 @@ bool MutexImpl::tryLock()
 
 void MutexImpl::unlock()
 {
-    if( !ReleaseMutex(_handle) )
+    if( ! ReleaseMutex(_handle) )
     {
         DWORD error =  GetLastError();
         throw SystemError("Could not release mutex", PT_SOURCEINFO);

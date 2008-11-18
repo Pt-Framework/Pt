@@ -28,7 +28,9 @@ namespace System {
 
     class MutexImpl {
         public:
-           MutexImpl(Mutex& mutex, Mutex::Mode mode);
+           explicit MutexImpl();
+
+           MutexImpl(int n);
 
             ~MutexImpl();
 
@@ -45,7 +47,6 @@ namespace System {
             { return &_handle; }
 
         private:
-            Mutex& _mutex;
             pthread_mutex_t _handle;
     };
 

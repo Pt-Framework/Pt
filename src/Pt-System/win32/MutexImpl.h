@@ -39,7 +39,9 @@ namespace System {
 	{
         public:
             //! @brief Default Constructor
-            MutexImpl(Mutex& mutex, Mutex::Mode mode);
+            MutexImpl();
+
+            MutexImpl(int recursive);
 
             //! @brief Destructor
             ~MutexImpl();
@@ -63,7 +65,6 @@ namespace System {
             void unlock();
 
         private:
-            Mutex& _mutex;
             HANDLE _handle;
     };
 
