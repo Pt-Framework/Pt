@@ -83,7 +83,7 @@ class SourceInfo {
     public:
         /** @brief Copy constructor
         */
-        inline SourceInfo(const SourceInfo& si) throw()
+        inline SourceInfo(const SourceInfo& si)
         : _file(si._file), _line(si._line), _func(si._func), _msg(si._msg)
         { }
 
@@ -93,18 +93,18 @@ class SourceInfo {
             macro to take advantage of compiler specific macros to
             indicate the source file name, position and function name.
         */
-        inline SourceInfo(const char* file, unsigned int line, const char* func, const char* msg) throw()
+        inline SourceInfo(const char* file, unsigned int line, const char* func, const char* msg)
         : _file(file), _line(line), _func(func), _msg(msg)
         { }
 
         /**  @brief Returns the filename
         */
-        inline const char* file() const throw()
+        inline const char* file() const
         { return _file; }
 
         /** @brief Returns the line number
         */
-        inline unsigned int line() const throw()
+        inline unsigned int line() const
         { return _line; }
 
         operator std::string() const
@@ -117,12 +117,12 @@ class SourceInfo {
 
         /** @brief Returns the function signature
         */
-        inline const char* func() const throw()
+        inline const char* func() const
         { return _func; }
 
         /** @brief Assignment operator
         */
-        SourceInfo& operator=(const SourceInfo& si) throw()
+        SourceInfo& operator=(const SourceInfo& si)
         {
             _file = si._file;
             _line = si._line;

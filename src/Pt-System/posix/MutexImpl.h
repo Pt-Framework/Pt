@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 - 2007 by Marc Boris D�rner                        *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Duerner                       *
  *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
  *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
@@ -19,6 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "Pt/SourceInfo.h"
 #include <pthread.h>
 #include <errno.h>
 
@@ -46,6 +47,8 @@ class MutexImpl
 
         const pthread_mutex_t* handle() const
         { return &_handle; }
+
+        static void throw_if(bool flag, const char* msg, const Pt::SourceInfo& si);
 
     private:
         pthread_mutex_t _handle;

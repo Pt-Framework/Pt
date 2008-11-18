@@ -28,6 +28,15 @@ namespace Pt {
 
 namespace System {
 
+void MutexImpl::throw_if(bool flag, const char* msg, const Pt::SourceInfo& si)
+{
+   if(flag)
+   {
+        throw SystemError(msg, si);
+   }
+}
+
+
 MutexImpl::MutexImpl()
 {
     pthread_mutexattr_t attr;
@@ -54,8 +63,8 @@ MutexImpl::~MutexImpl()
 
 void MutexImpl::lock()
 {
-   if(pthread_mutex_lock(&_handle) != 0)
-        throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
+   throw_if( pthread_mutex_lock(&_handle) != 0,
+             "Could not lock mutex: ", PT_SOURCEINFO );
 }
 
 
@@ -65,25 +74,21 @@ bool MutexImpl::tryLock()
     if (ret == EBUSY)
         return false;
 
-    if (ret == 0)
-        return true;
-
-    throw SystemError("Could not lock mutex", PT_SOURCEINFO);
-    return false;
+    throw_if(ret != 0, "Could not lock mutex", PT_SOURCEINFO);
+    return true;
 }
 
 
 void MutexImpl::unlock()
 {
-   if(pthread_mutex_unlock(&_handle) != 0)
-        throw SystemError("Could not unlock mutex: ", PT_SOURCEINFO);
+   throw_if( pthread_mutex_unlock(&_handle) != 0, "Could not unlock mutex", PT_SOURCEINFO);
 }
 
 
 ReadWriteMutexImpl::ReadWriteMutexImpl()
 {
-    if( pthread_rwlock_init(&_rwl, NULL) )
-        throw SystemError("Could not create rwlock", PT_SOURCEINFO);
+    MutexImpl::throw_if( pthread_rwlock_init(&_rwl, NULL),
+                         "Could not create rwlock", PT_SOURCEINFO );
 }
 
 
@@ -95,48 +100,44 @@ ReadWriteMutexImpl::~ReadWriteMutexImpl()
 
 void ReadWriteMutexImpl::readLock()
 {
-    if( pthread_rwlock_rdlock(&_rwl) )
-        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+    MutexImpl::throw_if( pthread_rwlock_rdlock(&_rwl) != 0,
+                         "Could not lock rwlock", PT_SOURCEINFO );
 }
 
 
 bool ReadWriteMutexImpl::tryReadLock()
 {
     int rc = pthread_rwlock_tryrdlock(&_rwl);
-    if (rc == 0)
-        return true;
-    else if (rc == EBUSY)
+    if(rc == EBUSY)
         return false;
-    else
-        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
 
+    MutexImpl::throw_if(rc != 0, "Could not lock rwlock", PT_SOURCEINFO);
+    return true;
 }
 
 
 void ReadWriteMutexImpl::writeLock()
 {
-    if( pthread_rwlock_wrlock(&_rwl) )
-        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+    MutexImpl::throw_if( pthread_rwlock_wrlock(&_rwl) != 0,
+                         "Could not lock rwlock", PT_SOURCEINFO );
 }
 
 
 bool ReadWriteMutexImpl::tryWriteLock()
 {
     int rc = pthread_rwlock_trywrlock(&_rwl);
-    if(rc == 0)
-        return true;
-    else if (rc == EBUSY)
+    if(rc == EBUSY)
         return false;
-    else
-        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
 
+    MutexImpl::throw_if(rc != 0, "Could not lock rwlock", PT_SOURCEINFO);
+    return true;
 }
 
 
 void ReadWriteMutexImpl::unlock()
 {
-    if( pthread_rwlock_unlock(&_rwl) )
-        throw SystemError("Could not unlock mutex", PT_SOURCEINFO);
+    MutexImpl::throw_if( pthread_rwlock_unlock(&_rwl) != 0,
+                         "Could not unlock mutex", PT_SOURCEINFO );
 }
 
 } // !namepsace System
