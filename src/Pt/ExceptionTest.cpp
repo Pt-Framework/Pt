@@ -35,7 +35,11 @@ class ExceptionTest : public Pt::Unit::TestCase
 
         void test()
         {
-            try {
+            std::string msg( PT_SOURCEINFO_MSG("hello world") );
+            PT_UNIT_ASSERT(msg.find("hello world") != std::string::npos);
+
+            try
+            {
                 throw std::invalid_argument( "test" + PT_SOURCEINFO);
             }
             catch(const std::exception& ex)
