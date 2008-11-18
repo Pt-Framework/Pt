@@ -20,35 +20,58 @@
  ***************************************************************************/
 
 #include <pthread.h>
-#include "Pt/System/Mutex.h"
+#include <errno.h>
 
 namespace Pt {
 
 namespace System {
 
-    class MutexImpl {
-        public:
-           explicit MutexImpl();
+class MutexImpl
+{
+    public:
+        explicit MutexImpl();
 
-           MutexImpl(int n);
+        MutexImpl(int n);
 
-            ~MutexImpl();
+        ~MutexImpl();
 
-            void lock();
+        void lock();
 
-            bool tryLock();
+        bool tryLock();
 
-            void unlock();
+        void unlock();
 
-            pthread_mutex_t* handle()
-            { return &_handle; }
+        pthread_mutex_t* handle()
+        { return &_handle; }
 
-            const pthread_mutex_t* handle() const
-            { return &_handle; }
+        const pthread_mutex_t* handle() const
+        { return &_handle; }
 
-        private:
-            pthread_mutex_t _handle;
-    };
+    private:
+        pthread_mutex_t _handle;
+};
+
+
+class ReadWriteMutexImpl
+{
+    public:
+        ReadWriteMutexImpl();
+
+        ~ReadWriteMutexImpl();
+
+        void readLock();
+
+        bool tryReadLock();
+
+        void writeLock();
+
+        bool tryWriteLock();
+
+        void unlock();
+
+    private:
+        pthread_rwlock_t _rwl;
+};
 
 } // !namepsace System
 

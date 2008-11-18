@@ -25,66 +25,6 @@ namespace Pt {
 namespace System {
 
 
-class ReadWriteMutexImpl
-{
-    public:
-        ReadWriteMutexImpl()
-        {
-            if( pthread_rwlock_init(&_rwl, NULL) )
-                throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
-        }
-
-        ~ReadWriteMutexImpl()
-        {
-            pthread_rwlock_destroy(&_rwl);
-        }
-
-        void readLock()
-        {
-            if( pthread_rwlock_rdlock(&_rwl) )
-                throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
-        }
-
-        bool tryReadLock()
-        {
-            int rc = pthread_rwlock_tryrdlock(&_rwl);
-            if (rc == 0)
-                return true;
-            else if (rc == EBUSY)
-                return false;
-            else
-                throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
-
-        }
-
-        void writeLock()
-        {
-            if( pthread_rwlock_wrlock(&_rwl) )
-                throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
-        }
-
-        bool tryWriteLock()
-        {
-            int rc = pthread_rwlock_trywrlock(&_rwl);
-            if(rc == 0)
-                return true;
-            else if (rc == EBUSY)
-                return false;
-            else
-                throw SystemError("Could not lock reader/writer lock", PT_SOURCEINFO);
-
-        }
-
-        void unlock()
-        {
-            if( pthread_rwlock_unlock(&_rwl) )
-                throw SystemError("Could not unlock mutex", PT_SOURCEINFO);
-        }
-
-    private:
-        pthread_rwlock_t _rwl;
-};
-
 } // namespace System
 
 } // namespace Pt

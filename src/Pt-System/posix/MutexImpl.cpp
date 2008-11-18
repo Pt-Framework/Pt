@@ -21,7 +21,6 @@
 
 #include "MutexImpl.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/Mutex.h"
 #include <sys/time.h>
 #include <errno.h>
 
@@ -80,6 +79,65 @@ void MutexImpl::unlock()
         throw SystemError("Could not unlock mutex: ", PT_SOURCEINFO);
 }
 
+
+ReadWriteMutexImpl::ReadWriteMutexImpl()
+{
+    if( pthread_rwlock_init(&_rwl, NULL) )
+        throw SystemError("Could not create rwlock", PT_SOURCEINFO);
+}
+
+
+ReadWriteMutexImpl::~ReadWriteMutexImpl()
+{
+    pthread_rwlock_destroy(&_rwl);
+}
+
+
+void ReadWriteMutexImpl::readLock()
+{
+    if( pthread_rwlock_rdlock(&_rwl) )
+        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+}
+
+
+bool ReadWriteMutexImpl::tryReadLock()
+{
+    int rc = pthread_rwlock_tryrdlock(&_rwl);
+    if (rc == 0)
+        return true;
+    else if (rc == EBUSY)
+        return false;
+    else
+        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+
+}
+
+
+void ReadWriteMutexImpl::writeLock()
+{
+    if( pthread_rwlock_wrlock(&_rwl) )
+        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+}
+
+
+bool ReadWriteMutexImpl::tryWriteLock()
+{
+    int rc = pthread_rwlock_trywrlock(&_rwl);
+    if(rc == 0)
+        return true;
+    else if (rc == EBUSY)
+        return false;
+    else
+        throw SystemError("Could not lock rwlock", PT_SOURCEINFO);
+
+}
+
+
+void ReadWriteMutexImpl::unlock()
+{
+    if( pthread_rwlock_unlock(&_rwl) )
+        throw SystemError("Could not unlock mutex", PT_SOURCEINFO);
+}
 
 } // !namepsace System
 
