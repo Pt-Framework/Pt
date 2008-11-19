@@ -57,7 +57,7 @@ class PT_API Deserializer
         static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
         {
             if( fixmeInfo != typeid(T) )
-                throw SerializationError("reference fixup failed, type mismatch", PT_SOURCEINFO);
+                throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
 
             *( (T**)(fixme) ) = (T*)(obj);
         }

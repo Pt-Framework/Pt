@@ -23,7 +23,6 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/RegisterTest.h"
-
 #include <stdexcept>
 
 class ExceptionTest : public Pt::Unit::TestCase
@@ -35,7 +34,7 @@ class ExceptionTest : public Pt::Unit::TestCase
 
         void test()
         {
-            std::string msg( PT_SOURCEINFO_MSG("hello world") );
+            std::string msg( PT_ERROR_MSG("hello world") );
             PT_UNIT_ASSERT(msg.find("hello world") != std::string::npos);
 
             try

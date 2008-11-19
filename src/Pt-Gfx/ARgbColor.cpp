@@ -48,7 +48,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
     Pt::StringStream ss2;
 
     if( ss.get() != '#' )
-        throw SerializationError("Invalid color value", PT_SOURCEINFO);
+        throw SerializationError( PT_ERROR_MSG("Invalid color value") );
 
     int r,g,b;
 

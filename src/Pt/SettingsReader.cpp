@@ -20,10 +20,9 @@
 
 namespace Pt {
 
-void SettingsReader::State::syntaxError(unsigned line, const SourceInfo& si)
+void SettingsReader::State::syntaxError(unsigned line)
 {
-	std::string msg("syntax error");
-	throw SettingsError(msg, line, si );
+	throw SettingsError( PT_ERROR_MSG("syntax error"), line);
 }
 
 
@@ -119,7 +118,7 @@ void SettingsReader::leaveMember()
     //std::cerr << "@" << std::endl;
 
     if(0 == _current->parent() )
-        throw SettingsError("too many closing braces", _line, PT_SOURCEINFO);
+        throw SettingsError( PT_ERROR_MSG("too many closing braces"), _line);
 
     _current = _current->parent();
     --_depth;
@@ -159,7 +158,7 @@ Pt::Char SettingsReader::getEscaped()
 {
     Pt::Char ch;
     if( ! _is->get(ch) )
-        throw SettingsError("unexpected EOF", _line, PT_SOURCEINFO);
+        throw SettingsError( PT_ERROR_MSG("unexpected EOF"), _line );
 
     switch( ch.value() )
     {

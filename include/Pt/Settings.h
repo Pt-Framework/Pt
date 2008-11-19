@@ -31,7 +31,7 @@ namespace Pt {
 class PT_API SettingsError : public SerializationError
 {
     public:
-        SettingsError(const std::string& what, unsigned line, const SourceInfo& si);
+        SettingsError(const char* what, unsigned line);
 
         //! @brief Destructor
         ~SettingsError() throw()

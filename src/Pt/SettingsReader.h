@@ -84,7 +84,7 @@ class SettingsReader
                                 return this->onAlpha(c, reader);
                     }
 
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return 0;
                 }
 
@@ -94,61 +94,61 @@ class SettingsReader
             private:
                 virtual State* onSpace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onQoute(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onComma(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onEqual(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
@@ -160,18 +160,18 @@ class SettingsReader
 
                 virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
                 virtual State* onEof(Pt::Char c, SettingsReader& reader)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                     return this;
                 }
 
             protected:
-                void syntaxError(unsigned line, const SourceInfo& si);
+                void syntaxError(unsigned line);
         };
 
 
@@ -207,7 +207,7 @@ class SettingsReader
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
 
                 return OnQoutedValue::instance();
             }
@@ -305,7 +305,7 @@ class SettingsReader
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
 
                 reader.pushTypeName();
                 reader.enterMember();
@@ -344,7 +344,7 @@ class SettingsReader
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                this->syntaxError(reader.line(), PT_SOURCEINFO);
+                this->syntaxError(reader.line());
                 return this;
             }
 
@@ -508,7 +508,7 @@ class SettingsReader
             {
                 reader.leaveMember();
                 if(reader.depth() > 1)
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
 
                 return this;
             }
@@ -699,7 +699,7 @@ class SettingsReader
             {
                 if(reader.depth() == 0)
                 {
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
                 }
 
                 reader.enterMember();
@@ -715,7 +715,7 @@ class SettingsReader
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() != 0)
-                    this->syntaxError(reader.line(), PT_SOURCEINFO);
+                    this->syntaxError(reader.line());
 
                 return this;
             }
@@ -804,7 +804,7 @@ class SettingsReader
         {
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                this->syntaxError(reader.line(), PT_SOURCEINFO);
+                this->syntaxError(reader.line());
                 return this;
             }
 

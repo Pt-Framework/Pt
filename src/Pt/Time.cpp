@@ -34,7 +34,7 @@ InvalidTime::InvalidTime(const SourceInfo& si)
 inline unsigned short getNumber2(const char* s)
 {
     if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
-        throw ConversionError("Invalid Time format", PT_SOURCEINFO);
+        throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
 
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
@@ -43,7 +43,7 @@ inline unsigned short getNumber2(const char* s)
 inline unsigned short getNumber3(const char* s)
 {
     if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
-       throw ConversionError("Invalid Time format", PT_SOURCEINFO);
+       throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
 
     return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
 }
@@ -54,7 +54,7 @@ void convert(Time& time, const std::string& s)
     unsigned hour = 0, min = 0, sec = 0, msec = 0;
 
     if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
-        throw ConversionError("Invalid Time format", PT_SOURCEINFO);
+        throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
 
 	const char* d = s.data();
 	hour = getNumber2(d);

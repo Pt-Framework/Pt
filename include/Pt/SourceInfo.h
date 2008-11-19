@@ -44,19 +44,19 @@
     #define PT_FUNCTION "unknown symbol"
 #endif
 
-#define PT_SOURCEINFO_STRINGIFY(x) #x
-#define PT_SOURCEINFO_TOSTRING(x) PT_SOURCEINFO_STRINGIFY(x)
+#define PT_STRINGIFY(x) #x
+#define PT_TOSTRING(x) PT_STRINGIFY(x)
 
-/** @brief Builds a message including source information
+/** @brief Builds an error message including source information
     @ingroup Pt
 */
-#define PT_SOURCEINFO_MSG(msg) __FILE__ ":" PT_SOURCEINFO_TOSTRING(__LINE__) ": " #msg
+#define PT_ERROR_MSG(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
 
 /** @brief Construct a Pt::SourceInfo object
     @ingroup Pt
 */
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, \
-                                     __FILE__ ":" PT_SOURCEINFO_TOSTRING(__LINE__) )
+                                     __FILE__ ":" PT_TOSTRING(__LINE__) )
 
 namespace Pt {
 

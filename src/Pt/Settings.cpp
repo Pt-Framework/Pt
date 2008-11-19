@@ -24,8 +24,8 @@
 
 namespace Pt {
 
-SettingsError::SettingsError(const std::string& what, unsigned line, const SourceInfo& si)
-: SerializationError(what, si)
+SettingsError::SettingsError(const char* what, unsigned line)
+: SerializationError(what)
 , _line(line)
 {}
 

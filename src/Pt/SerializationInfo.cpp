@@ -25,6 +25,11 @@ SerializationError::SerializationError(const std::string& msg, const SourceInfo&
 { }
 
 
+SerializationError::SerializationError(const char* msg)
+: std::logic_error(msg)
+{ }
+
+
 SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)

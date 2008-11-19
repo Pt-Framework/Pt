@@ -20,9 +20,8 @@
 
 namespace Pt {
 
-ConversionError::ConversionError(const char* msg, const SourceInfo& si)
+ConversionError::ConversionError(const char* msg)
 : std::runtime_error(msg)
-, _si(si)
 {
 }
 

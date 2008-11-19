@@ -39,6 +39,8 @@ class PT_API SerializationError : public std::logic_error
         */
         SerializationError(const std::string& msg, const SourceInfo& si);
 
+        SerializationError(const char* msg);
+
         //! @brief Destructor
         ~SerializationError() throw()
         {}

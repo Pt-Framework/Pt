@@ -31,23 +31,17 @@
 #include <limits>
 
 #define PT_CONVERSIONERROR(to, from) \
-    "conversion to " #to " from " #from " failed", PT_SOURCEINFO
+    PT_ERROR_MSG("conversion from " #from " to " #to " failed")
 
 namespace Pt {
 
 class PT_API ConversionError : public std::runtime_error
 {
     public:
-        ConversionError(const char* msg, const SourceInfo& si);
+        ConversionError(const char* msg);
 
-		~ConversionError() throw()
-		{}
-
-		const Pt::SourceInfo& where() const
-		{ return _si; }
-
-    private:
-        Pt::SourceInfo _si;
+        ~ConversionError() throw()
+        {}
 };
 
 
