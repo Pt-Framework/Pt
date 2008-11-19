@@ -100,7 +100,7 @@ void operator >>=(const SerializationInfo& si, Gfx::Font& f)
     ss >> fontDirection;
 
     if( ss.fail() )
-        throw ConversionError("Font", PT_SOURCEINFO);
+        throw ConversionError( PT_ERROR_MSG("Font") );
 
     f = Gfx::Font( fontName.narrow(), fontSize, (Gfx::Font::FontStyle)fontStyle,
                    fontAngle, (Gfx::Font::Direction)fontDirection );
