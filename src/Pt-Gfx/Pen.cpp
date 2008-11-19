@@ -115,7 +115,7 @@ void operator >>=(const SerializationInfo& si, Gfx::Pen& pen)
     ss >> penStyle;
 
     if( ss.fail() )
-        throw ConversionError("Pen", PT_SOURCEINFO);
+        throw ConversionError( PT_ERROR_MMSG("Pen") );
 
     pen = Gfx::Pen(penSize, Gfx::ARgbColor::fromHtml(html), (Gfx::Pen::PenStyle)penStyle);
 }
