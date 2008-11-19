@@ -33,9 +33,10 @@ namespace Pt {
 
 namespace System {
 
-DirectoryNotFound::~DirectoryNotFound() throw()
-{
-}
+DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
+: SystemError("Directory not found", si)
+, _path(path)
+{ }
 
 
 DirectoryIterator::DirectoryIterator(const std::string& path)

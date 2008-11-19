@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "FileImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/File.h"
 #include "win32.h"
 #include <string>
 #include <iostream>
@@ -36,7 +37,7 @@ std::size_t FileImpl::size(const std::string& path)
 
     HANDLE h = FindFirstFile(tpath.c_str(), &data);
     if(h == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not get file size.", PT_SOURCEINFO);
+        throw FileNotFound(path, PT_SOURCEINFO);
 
     FindClose(h);
 
@@ -70,16 +71,16 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
     DWORD ret = ::SetFilePointer(fileHandle, newSize, NULL, FILE_BEGIN);
     if(ret == INVALID_SET_FILE_POINTER) {
         ::CloseHandle(fileHandle);
-        throw SystemError("Could not set file pointer", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not set file pointer") );
     }
 
     if( FALSE == ::SetEndOfFile(fileHandle) ) {
         ::CloseHandle(fileHandle);
-        throw SystemError("Could not truncate file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not truncate file") );
     }
 
     if( FALSE == ::CloseHandle(fileHandle) )
-        throw SystemError("Could not close file handle", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not close file handle") );
 }
 
 
@@ -88,7 +89,7 @@ void FileImpl::remove(const std::string& path)
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
     if(FALSE == ::DeleteFile( tpath.c_str() ))
-        throw SystemError("Could not unlink file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not unlink file") );
 }
 
 
@@ -99,10 +100,10 @@ void FileImpl::move(const std::string& path, const std::string& to)
 
 #ifdef _WIN32_WCE
     if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-        throw SystemError("Could not move file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not move file") );
 #else
     if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
-        throw SystemError("Could not move file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not move file") );
 #endif
 }
 
@@ -112,8 +113,7 @@ void FileImpl::create(const std::string& path)
     HANDLE hFile;
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
-// WinCE does not support overlapped I/O
-#ifdef _WIN32_WCE
+
     hFile = CreateFile(tpath.c_str(),   // file to create
             GENERIC_WRITE,          // open for writing
             0,                      // do not share
@@ -122,20 +122,10 @@ void FileImpl::create(const std::string& path)
             FILE_ATTRIBUTE_NORMAL | // normal file
             NULL,                   // asynchronous I/O
             NULL);
-#else
-    hFile = CreateFile(tpath.c_str(),   // file to create
-            GENERIC_WRITE,          // open for writing
-            0,                      // do not share
-            NULL,                   // default security
-            CREATE_ALWAYS,          // overwrite existing
-            FILE_ATTRIBUTE_NORMAL | // normal file
-            FILE_FLAG_OVERLAPPED,   // asynchronous I/O
-            NULL);                  // no attr. template
-#endif
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        throw SystemError( "Could not create file" , PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create file") );
     }
 
     CloseHandle(hFile);

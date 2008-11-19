@@ -21,6 +21,7 @@
 #include "win32.h"
 #include "DirectoryImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/Directory.h"
 #include "Pt/System/Process.h"
 #include <vector>
 #include <windows.h>
@@ -45,7 +46,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
     if(_findHandle == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not open find handle.", PT_SOURCEINFO);
+        throw DirectoryNotFound(path, PT_SOURCEINFO);
 
     _path = path;
     if( ! _path.empty() && _path[_path.size()-1] != '\\')
@@ -161,7 +162,7 @@ void DirectoryImpl::chdir(const std::string& path)
 {
     #ifdef _WIN32_WCE
 
-        throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
+        throw std::runtime_error( PT_ERROR_MSG("SetCurrentDirectory not supported.") );
 
     #else
 
@@ -178,7 +179,7 @@ std::string DirectoryImpl::cwd()
 {
 #ifdef _WIN32_WCE
 
-    throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
+    throw std::runtime_error( PT_ERROR_MSG("GetCurrentDirectory not supported.") );
 
 #else
 

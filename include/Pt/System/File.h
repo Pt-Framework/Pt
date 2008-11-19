@@ -43,12 +43,10 @@ namespace System {
 class PT_SYSTEM_API FileNotFound : public SystemError
 {
     public:
-        FileNotFound(const std::string& path, const SourceInfo& si)
-		: SystemError("File not found", si)
-        , _path(path)
-		{}
+        FileNotFound(const std::string& path, const SourceInfo& si);
 
-        ~FileNotFound() throw();
+        ~FileNotFound() throw()
+		{}
 
         const std::string& path() const
         { return _path; }

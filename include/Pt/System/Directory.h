@@ -52,13 +52,11 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
             could not be found and the location in the source code where
             he exception was thrown.
         */
-        DirectoryNotFound(const std::string& path, const SourceInfo& si)
-        : SystemError("Directory not found", si)
-        , _path(path)
-        { }
+        DirectoryNotFound(const std::string& path, const SourceInfo& si);
 
         //! @brief Destructor
-        ~DirectoryNotFound() throw();
+        ~DirectoryNotFound() throw()
+		{}
 
         const std::string& path() const
         { return _path; }

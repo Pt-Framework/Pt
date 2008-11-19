@@ -36,7 +36,7 @@ FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 #ifndef _WIN32_WCE
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 #endif
 
     _readOv.Offset = 0;

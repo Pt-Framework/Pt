@@ -1,5 +1,6 @@
 #include "ClockImpl.h"
 #include "Pt/SourceInfo.h"
+#include "Pt/System/SystemError.h"
 #include <stdexcept>
 #include <time.h>
 
@@ -17,17 +18,17 @@ ClockImpl::ClockImpl()
 #ifndef _WIN32_WCE
 
     if( !GetProcessAffinityMask( _currentProcessHandle,  &_procAffinity, &_sysAffinity ))
-        throw std::runtime_error("GetProcessAffinityMask failed" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("GetProcessAffinityMask failed") );
 
     if( !SetProcessAffinityMask( _currentProcessHandle, 0x01 ) )
-        throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
 
     if( !SetThreadAffinityMask( GetCurrentThread(), 0x01 ) )
-        throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
 #endif
 
     if( !QueryPerformanceFrequency( &_frequency ) )
-        throw std::runtime_error("QueryPerformanceFrequency failed" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("QueryPerformanceFrequency failed") );
 }
 
 

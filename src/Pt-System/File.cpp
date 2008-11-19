@@ -34,9 +34,10 @@ namespace Pt {
 
 namespace System {
 
-FileNotFound::~FileNotFound() throw()
-{
-}
+FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
+: SystemError("File not found", si)
+, _path(path)
+{}
 
 
 File::File()
