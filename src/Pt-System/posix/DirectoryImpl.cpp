@@ -59,7 +59,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 
     if( !_handle )
     {
-        throw SystemError("Could not open directory", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not open directory") );
     }
 
     // append a trailing slash if not empty, so we can add the
@@ -118,7 +118,7 @@ void DirectoryImpl::create(const std::string& path)
 {
     if( -1 == ::mkdir(path.c_str(), 0777) )
     {
-        throw SystemError("Could not create directory '" + path + "'" , PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create directory") );
     }
 }
 
@@ -135,7 +135,7 @@ bool DirectoryImpl::exists(const std::string& path)
             return false;
         }
 
-        throw SystemError("Could not stat file '" + path + "'", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not stat file") );
     }
 
     return true;
@@ -144,9 +144,23 @@ bool DirectoryImpl::exists(const std::string& path)
 
 void DirectoryImpl::remove(const std::string& path)
 {
+	//EACCES Write  access  to  the directory containing pathname was not allowed
+	//EBUSY  pathname is currently in use by the system or some process that prevents its  removal.
+	//EFAULT pathname points outside your accessible address space.
+	//EINVAL pathname has .  as last component.
+	//ELOOP  Too many symbolic links were encountered in resolving pathname.
+	//ENAMETOOLONG pathname was too long.
+	//ENOENT A directory component in pathname does not exist or is a dangling symbolic link.
+	//ENOMEM Insufficient kernel memory was available.
+	//ENOTDIR pathname, or a component used as a directory in pathname, is not, in fact, a directory.
+	//ENOTEMPTY pathname contains entries other than . and .. ; or, pathname has ..  as its final component.
+	//EPERM  The directory containing pathname has the sticky bit (S_ISVTX) set
+	//EPERM  The filesystem containing pathname does not support the removal of directories.
+	//EROFS  pathname refers to a file on a read-only filesystem.
+
     if( -1 == ::rmdir(path.c_str()) )
     {
-        throw SystemError("Could not remove directory '" + path + "'", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not remove directory") );
     }
 }
 
@@ -155,7 +169,7 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
     if (0 != ::rename(oldName.c_str(), newName.c_str()))
     {
-        throw SystemError("Could not move directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not move directory") );
     }
 }
 
@@ -164,7 +178,7 @@ void DirectoryImpl::chdir(const std::string& path)
 {
     if( -1 == ::chdir(path.c_str()) )
     {
-        throw SystemError("Could not change working directory to '" + path + "'", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not change working directory") );
     }
 }
 
@@ -173,11 +187,11 @@ std::string DirectoryImpl::cwd()
 {
     const long size = pathconf(".", _PC_PATH_MAX);
     if(size == -1)
-        throw SystemError("pathconf failed for .", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("pathconf failed for .") );
 
     std::vector<char> buffer(size);
     if( ! getcwd(&buffer[0], size) )
-        throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not get current working directroy") );
 
     return std::string( &buffer[0] );
 }
