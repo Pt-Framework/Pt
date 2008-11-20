@@ -37,7 +37,7 @@ std::size_t FileImpl::size(const std::string& path)
     struct stat buff;
 
     if( 0 != stat(path.c_str(), &buff) )
-        throw SystemError("Could not stat file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not stat file") );
 
     return buff.st_size;
 }
@@ -51,21 +51,21 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
     } while ( ret == EINTR );
 
     if(ret != 0)
-        throw SystemError("Could not truncate file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not truncate file") );
 }
 
 
 void FileImpl::remove(const std::string& path)
 {
     if(0 != ::remove(path.c_str()))
-        throw SystemError("Could not remove file", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not remove file") );
 }
 
 
 void FileImpl::move(const std::string& path, const std::string& to)
 {
     if (0 != ::rename(path.c_str(), to.c_str()))
-        throw SystemError("Could not move file " + path + " to " + to, PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not move file") );
 }
 
 
@@ -73,7 +73,7 @@ void FileImpl::create(const std::string& path)
 {
     FILE* f = fopen(path.c_str(), "w");
     if (!f)
-        throw SystemError("Could not create file " + path, PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create file") );
 
     fclose(f);
 }
