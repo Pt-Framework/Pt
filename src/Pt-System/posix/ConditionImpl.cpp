@@ -35,7 +35,7 @@ namespace System {
 ConditionImpl::ConditionImpl()
 {
     if ( pthread_cond_init( &_cond, NULL ) != 0)
-        throw std::runtime_error("Could not initialize Condition." + PT_SOURCEINFO);
+        throw std::runtime_error( PT_ERROR_MSG("Could not initialize Condition.") );
 }
 
 
@@ -48,7 +48,7 @@ ConditionImpl::~ConditionImpl()
 void ConditionImpl::wait(Mutex& mtx)
 {
     if ( pthread_cond_wait(&_cond, mtx.impl().handle() ) != 0)
-       throw std::runtime_error("Could not wait for Mutex." + PT_SOURCEINFO);
+       throw std::runtime_error( PT_ERROR_MSG("Could not wait for Mutex.") );
 }
 
 
@@ -77,7 +77,7 @@ void ConditionImpl::signal()
 {
 
     if ( pthread_cond_signal( &_cond ) != 0)
-        throw std::runtime_error("Could not signal Condition." + PT_SOURCEINFO);;
+        throw std::runtime_error( PT_ERROR_MSG("Could not signal Condition.") );
 }
 
 

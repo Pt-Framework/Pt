@@ -95,7 +95,7 @@ bool ApplicationImpl::catchSystemSignal(int sig)
 
         if (-1 == ::sigaction(sig, &act, NULL))
         {
-            throw SystemError("sigaction failed", PT_SOURCEINFO);
+            throw SystemError( PT_ERROR_MSG("sigaction failed") );
         }
 		
 		return true;
@@ -111,7 +111,7 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
     {
 		if( 0 != ::raise(sig) )
         {
-            throw SystemError("sigaction failed", PT_SOURCEINFO);
+            throw SystemError( PT_ERROR_MSG("sigaction failed") );
         }
 
 		return true;
