@@ -34,8 +34,10 @@ namespace System {
         public:
             IOError(const std::string& what, const SourceInfo& si);
 
+            IOError(const char* what);
+
             ~IOError() throw()
-			{}
+            {}
     };
 
     class PT_SYSTEM_API OpenFailed : public IOError {
@@ -46,18 +48,12 @@ namespace System {
 			{}
     };
 
-    class PT_SYSTEM_API CloseFailed : public IOError {
-        public:
-            CloseFailed(const std::string& what, const SourceInfo& si);
-
-            ~CloseFailed() throw()
-			{}
-    };
-
     class PT_SYSTEM_API IOPending : public IOError {
         public:
             IOPending(const std::string& what, const SourceInfo& si);
 
+            IOPending(const char* what);
+            
             ~IOPending() throw()
 			{}
     };

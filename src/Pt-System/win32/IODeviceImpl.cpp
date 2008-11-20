@@ -27,13 +27,11 @@ namespace System{
 IODeviceImpl::IODeviceImpl()
 : _handle(INVALID_HANDLE_VALUE)
 {
-
 }
 
 
 IODeviceImpl::~IODeviceImpl()
 { 
-
 }
 
 

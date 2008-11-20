@@ -16,7 +16,7 @@ SemaphoreImpl::SemaphoreImpl(unsigned int initial)
     _handle = CreateSemaphore(NULL, initial, LONG_MAX, 0);
 
     if( !_handle )
-        throw SystemError("Could not create semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create semaphore.") );
 }
 
 
@@ -30,7 +30,7 @@ void SemaphoreImpl::wait()
 {
     DWORD ret = WaitForSingleObject(_handle, INFINITE);
     if(ret == WAIT_FAILED)
-        throw SystemError("Could not wait on semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not wait on semaphore"));
 }
 
 
@@ -38,7 +38,7 @@ bool SemaphoreImpl::tryWait()
 {
     DWORD ret = WaitForSingleObject(_handle, 0);
     if(ret == WAIT_FAILED) {
-        throw SystemError("Could not wait on semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not wait on semaphore") );
     }
     else if(ret == WAIT_OBJECT_0) {
         return true;
@@ -51,9 +51,8 @@ bool SemaphoreImpl::tryWait()
 void SemaphoreImpl::post()
 {
     if( 0 == ReleaseSemaphore(_handle, 1, NULL) )
-        throw SystemError("Could not post semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not post semaphore") );
 }
-
 
 } // namespace System;
 

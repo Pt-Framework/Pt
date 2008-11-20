@@ -38,13 +38,13 @@ SelectorImpl::SelectorImpl()
 
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
         
     _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _ioEvent == NULL )
     {
         CloseHandle( _wakeEvent );
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
     }
     
     _handles.add( _wakeEvent, 0 );
@@ -178,7 +178,7 @@ bool SelectorImpl::wait( unsigned umsecs )
     if(result == WAIT_FAILED)
     {
         //DWORD err = GetLastError();
-        throw IOError("WaitForMultipleObjects failed", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
     }
 
     bool avail = false;

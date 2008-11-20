@@ -105,7 +105,7 @@ void ProcessImplBase::kill()
 {
     if( 0 == TerminateProcess(m_pid.hProcess, -1) )
     {
-        throw SystemError("System call TerminateProcess() Failed!", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("TerminateProcess failed") );
     }
 }
 
@@ -118,7 +118,7 @@ int ProcessImplBase::wait()
     if( WAIT_FAILED == WaitForSingleObject(m_pid.hProcess, INFINITE) )
     {
         _state = Process::Failed;
-        throw SystemError("System call WaitForSingleObject() Failed!", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("WaitForSingleObject Failed!") );
     }
 
     DWORD exitCode;
@@ -147,7 +147,7 @@ bool ProcessImplBase::tryWait(int& status)
         return true;
     }
 
-    throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
+    throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
     return false;
 }
 

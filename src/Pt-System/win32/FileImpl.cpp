@@ -63,7 +63,7 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
 
     if(fileHandle == INVALID_HANDLE_VALUE)
     {
-        throw SystemError("Could not open file.", PT_SOURCEINFO);
+        throw SystemError(PT_ERROR_MSG("Could not open file") );
     }
 
     // under Win32 resizing is done by moving to the desired position

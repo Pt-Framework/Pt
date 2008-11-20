@@ -70,12 +70,12 @@ StreamBuffer::~StreamBuffer()
 void StreamBuffer::attach(IODevice& ioDevice)
 {
     if( ioDevice.busy() )
-        throw IOPending("IODevice in use", PT_SOURCEINFO);
+        throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
     if(_ioDevice)
     {
         if( _ioDevice->busy() )
-            throw IOPending("IODevice in use", PT_SOURCEINFO);
+            throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
         disconnect(ioDevice.inputReady, *this, &StreamBuffer::onSync);
         disconnect(ioDevice.outputReady, *this, &StreamBuffer::onFlush);
@@ -114,7 +114,7 @@ void StreamBuffer::beginSync()
         char* from = this->gptr() - putback;
 
         if(to == from)
-            throw std::logic_error(PT_SOURCEINFO + "StreamBuffer is full");
+            throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
 
         leftover = egptr() - gptr();
         std::memmove( to, from, putback + leftover );

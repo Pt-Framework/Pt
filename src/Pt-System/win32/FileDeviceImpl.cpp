@@ -95,7 +95,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     HANDLE h = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
     if(h == INVALID_HANDLE_VALUE)
-        throw IOError("Could not open file handle", PT_SOURCEINFO); // OpenFailed
+        throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
 
     this->setHandle(h);
 
@@ -156,7 +156,7 @@ bool FileDeviceImpl::wait(std::size_t msecs)
     }
 
     if(result != WAIT_TIMEOUT)
-        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
           
     return false;
 
@@ -279,7 +279,7 @@ size_t FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
             return 0;
         }
         
-        throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
     }
     
     return readBytes;
@@ -307,7 +307,7 @@ size_t FileDeviceImpl::endRead(bool& eof)
         }
         else
         {
-            throw IOError("Could not end read from file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
         }
     }
     
@@ -337,7 +337,7 @@ size_t FileDeviceImpl::beginWrite(const char* buffer, size_t n)
             return 0;
         }
         
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
     }
 
     return writtenBytes;
@@ -356,7 +356,7 @@ size_t FileDeviceImpl::endWrite()
  
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
-        throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG"GetOverlappedResult failed") );
     }
 
 #else
@@ -395,7 +395,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
     DWORD ret = SetFilePointer(handle(), offset, NULL, whence);
 
     if(ret == INVALID_SET_FILE_POINTER)
-        throw IOError("Could not set file pointer", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not set file pointer") );
 
     _readOv.Offset = ret;
     _writeOv.Offset = ret;
@@ -408,7 +408,7 @@ size_t FileDeviceImpl::size()
 {
     DWORD sz = GetFileSize(handle(), NULL);
     if(sz == INVALID_FILE_SIZE)
-        throw IOError("Could not get file size", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not get file size") );
 
     return sz;
 }
@@ -432,13 +432,13 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
         {
             if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
             {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
             }
         }
 #endif
         else
         {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
         }
     }
 
@@ -456,7 +456,7 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count)
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {
-            throw IOError("Could not write to file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("Could not write to file handle") );
         }
 
 #ifndef _WIN32_WCE
@@ -489,7 +489,7 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
 void FileDeviceImpl::sync() const
 {
     if( false == ::FlushFileBuffers(handle()) ) {
-        throw IOError("Could not flush file buffer", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
     }
 }
 

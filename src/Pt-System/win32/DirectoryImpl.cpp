@@ -119,7 +119,7 @@ void DirectoryImpl::create(const std::string& path)
 
     if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
     {
-        throw SystemError("Could not create directory '" + path + "'", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create directory") );
     }
 }
 
@@ -133,14 +133,14 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 
         if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
         {
-            throw SystemError("Could not move directory" , PT_SOURCEINFO);
+            throw SystemError( PT_ERROR_MSG("Could not move directory") );
         }
 
     #else
 
         if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
         {
-            throw SystemError("Could not move/rename directory '" + from + "' to '" + to + "'", PT_SOURCEINFO);
+            throw SystemError( PT_ERROR_MSG("Could not move directory") );
         }
 
     #endif
@@ -153,7 +153,7 @@ void DirectoryImpl::remove(const std::string& path)
 
     if( FALSE == ::RemoveDirectory( str.c_str() ) )
     {
-        throw SystemError("Could not remove directory '" + path + "'" , PT_SOURCEINFO);
+        throw SystemError(  PT_ERROR_MSG("Could not remove directory") );
     }
 }
 
@@ -168,7 +168,7 @@ void DirectoryImpl::chdir(const std::string& path)
 
         if (FALSE == ::SetCurrentDirectory(path.c_str()))
         {
-            throw SystemError("Could not change current directory to '" + path + "'", PT_SOURCEINFO);
+            throw SystemError( PT_ERROR_MSG("Could not change current directory") );
         }
 
     #endif
@@ -179,7 +179,7 @@ std::string DirectoryImpl::cwd()
 {
 #ifdef _WIN32_WCE
 
-    throw std::runtime_error( PT_ERROR_MSG("GetCurrentDirectory not supported.") );
+    throw std::runtime_error( PT_ERROR_MSG("DirectoryImpl::cwd not supported.") );
 
 #else
 

@@ -262,7 +262,7 @@ size_t SerialDeviceImpl::endRead(bool& eof)
 
     // no data read previously, but data is available
     if( ! ReadFile( handle(), _device._rbuf, _device._rbuflen, &len, 0 ) )
-        throw IOError("ReadFile failed" , PT_SOURCEINFO);
+        throw IOError(  PT_ERROR_MSG("ReadFile failed") );
 
     if( len == 0 )     
        eof = true;
@@ -316,7 +316,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     DWORD length = 0;
 
     if( ! ReadFile( handle(), buffer, count, &length, 0 ) )
-        throw IOError("Read port failed" , PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Read port failed") );
 
     if( length == 0 )     
        eof = true;
@@ -331,8 +331,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 
     if( ! WriteFile( handle(), buffer, count, &length, 0 ) )
     {
-        DWORD error = GetLastError();
-        throw IOError("Could not write to file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not write to file handle") );
     }
 
     return length;
@@ -342,14 +341,14 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 void SerialDeviceImpl::writeCommState( DCB& commState )
 {
     if( ! SetCommState( handle(), &commState ) )
-        throw IOError("Changing port state failed" , PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Changing port state failed") );
 }
 
 
 void SerialDeviceImpl::readCommState( DCB& commState ) const
 {
     if( ! GetCommState( handle(), &commState ) )
-        throw IOError("Get port state failed" , PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Get port state failed") );
 }
 
 
@@ -366,7 +365,6 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
     DCB commState;
-    
     readCommState( commState );
     return static_cast<SerialDevice::BaudRate>( commState.BaudRate );
 }
@@ -375,7 +373,6 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 void SerialDeviceImpl::setCharSize( int size )
 {
     DCB commState;
-    
     readCommState( commState );
     
     commState.ByteSize  = size;
@@ -439,8 +436,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
         break;
     }
 
-    throw std::runtime_error( "Unknown stop bits" + PT_SOURCEINFO);
-
+    throw std::runtime_error( PT_ERROR_MSG("Unknown stop bits") );
     return SerialDevice::OneStopBit;
 }
 
@@ -473,7 +469,6 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 SerialDevice::Parity SerialDeviceImpl::parity() const
 {
     DCB commState;
-    
     readCommState( commState );
     
     switch( commState.Parity )
@@ -491,7 +486,7 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
         break;
     }
 
-    throw std::runtime_error( "Invalid parity" + PT_SOURCEINFO);
+    throw std::runtime_error(  PT_ERROR_MSG("Invalid parity") );
     return SerialDevice::ParityEven;
 }
 
@@ -531,7 +526,6 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
     DCB commState;
-    
     readCommState( commState );
     
     //Check for both.
@@ -547,8 +541,7 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     if( commState.fInX == commState.fOutX && commState.fInX == 1 )
        return SerialDevice::FlowControlSoft;
 
-    throw std::runtime_error( "Unknown flow control" + PT_SOURCEINFO );
-
+    throw std::runtime_error( PT_ERROR_MSG("Unknown flow control") );
     return SerialDevice::FlowControlBoth;
 }
 

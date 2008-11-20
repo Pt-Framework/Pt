@@ -108,28 +108,24 @@ bool PipeIODevice::onWait(std::size_t msecs)
     }
 
     DWORD result = WaitForSingleObject(handle(), msecs);
-    
-    if(result == WAIT_FAILED)
-        throw IOError("WaitForSingleObject failed", PT_SOURCEINFO);
-    
-    if(result == WAIT_TIMEOUT)
-        return false;
 
     if(result == WAIT_OBJECT_0)
     {
         this->checkEvent();
-        return true;
+    }
+    else if(result == WAIT_FAILED)
+    {
+        throw IOError( PT_ERROR_MSG("WaitForSingleObject failed") );
     }
 
-    throw IOError("Unknown return from WaitForSingleObject", PT_SOURCEINFO);
-    return false;
+    return result == WAIT_OBJECT_0;
 }
 
 
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
-        throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
     
 	if(_bufferSize)
 		return std::min(_bufferSize, n);
@@ -150,13 +146,12 @@ size_t PipeIODevice::onEndRead(bool& eof)
     }
     else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, INFINITE, &flags) )
     {
-        throw IOError("Could not read from message queue handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not read from message queue handle") );
     }
 
     DWORD bytesToCopy = std::min<DWORD>(_rbuflen, readBytes);
 
     memcpy(_rbuf, &_buffer[0], bytesToCopy);
-
     _bufferSize = 0;
 
     if (_rbuflen >= readBytes)
@@ -175,7 +170,7 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
     if( Write != _mode )
     {
-        throw IOError("Could not write on a read only pipe", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
     }
 	
 	return 0;
@@ -188,9 +183,7 @@ size_t PipeIODevice::onEndWrite()
 
     if ( FALSE == WriteMsgQueue(handle(), (LPVOID) _wbuf, bytesToWrite, 0, 0))
     {
-        std::ostringstream errorMsg;
-        errorMsg << "system error code: " << GetLastError() << std::endl;
-        throw IOError("WriteMsgQueue failed, " + errorMsg.str(), PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("WriteMsgQueue failed") );
     }
     
     return bytesToWrite;
@@ -203,9 +196,7 @@ void PipeIODevice::onClose()
     {
         if( FALSE == ::CloseMsgQueue(handle()) )
         {
-            std::ostringstream errorMsg;
-            errorMsg << "system error code: " << GetLastError() << std::endl;
-            throw IOError( "Could not close file handle, " + errorMsg.str(), PT_SOURCEINFO);
+            throw IOError( "CloseMsgQueue failed", PT_SOURCEINFO );
         }
 
         this->setHandle(INVALID_HANDLE_VALUE);
@@ -215,26 +206,23 @@ void PipeIODevice::onClose()
 
 size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
-    if( Read != _mode ) {
-        throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
-    }
+    if( Read != _mode )
+        throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
 
     DWORD readBytes = 0;
     DWORD flags     = 0;
     eof = false;
 
-    if (_bufferSize) 
+    if(_bufferSize) 
     {
         readBytes = _bufferSize;
     }
     else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, INFINITE, &flags) ) 
     {
-        throw IOError("Could not read from message queue handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("ReadMsgQueue failed") );
     }
 
-    std::cerr << "onRead " << readBytes<< std::endl;
     memcpy(buffer, &_buffer[0], count);
-
     _bufferSize = 0;
 
     if (count >= readBytes)
@@ -251,34 +239,29 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 
 void PipeIODevice::writeMessage(const char* buffer, size_t count)
 {
-    if( Write != _mode ) {
-        throw IOError("Could not write on a read only pipe", PT_SOURCEINFO);
-    }
-
-    if ( TRUE == WriteMsgQueue(handle(), (LPVOID) buffer, count, 0, 0)) {
-        return;
-    }
-
-    WaitForSingleObject(handle(), INFINITE);
-
-    throw std::logic_error("WriteMsgQueue failed" + PT_SOURCEINFO);
+    if( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, count, INFINITE, 0) )
+        throw IOError( PT_ERROR_MSG("WriteMsgQueue failed") );
 }
 
 
 size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 {
+    if( Write != _mode )
+        throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
+
     size_t offset = 0;
-    for (int n = count; ; n -= _msgSize )
+    for(size_t n = count; ; n -= _msgSize )
     {
-        if (n <= (int) _msgSize)
+        if (n <= _msgSize)
         {
             writeMessage( (buffer + offset), n );
             break;
         }
-        writeMessage( (buffer + offset), _msgSize );
 
+        writeMessage( (buffer + offset), _msgSize );
         offset += _msgSize;
     }
+
     return count;
 }
 
@@ -286,8 +269,6 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 void PipeIODevice::onSync() const
 {
 }
-
-
 
 
 PipeImpl::PipeImpl(bool isAsync)
@@ -309,14 +290,12 @@ PipeImpl::PipeImpl(bool isAsync)
     readOpts.bReadAccess     = TRUE;
 
     HANDLE outputHandle = CreateMsgQueue(NULL, &writeOpts);
-    if (outputHandle == INVALID_HANDLE_VALUE) {
-        throw IOError("Could not create message queue handle", PT_SOURCEINFO);
-    }
+    if (outputHandle == INVALID_HANDLE_VALUE)
+        throw IOError( PT_ERROR_MSG("Could not create message queue handle") );
 
     HANDLE inputHandle  = OpenMsgQueue(::GetCurrentProcess(), outputHandle, &readOpts);
-    if (inputHandle == INVALID_HANDLE_VALUE) {
-        throw IOError("Could not open message queue handle", PT_SOURCEINFO);
-    }
+    if (inputHandle == INVALID_HANDLE_VALUE)
+        throw IOError( PT_ERROR_MSG("Could not open message queue handle") );
 
     _out.open(inputHandle, isAsync);
     _in.open(outputHandle, isAsync);

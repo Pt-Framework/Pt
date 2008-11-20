@@ -32,20 +32,25 @@ IOError::IOError(const std::string& what, const SourceInfo& si)
 }
 
 
+IOError::IOError(const char* msg)
+: std::ios::failure(msg)
+{
+}
+
+
 OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
 : IOError(what , si)
 {
 }
 
 
-CloseFailed::CloseFailed(const std::string& what, const SourceInfo& si)
+IOPending::IOPending(const std::string& what, const SourceInfo& si)
 : IOError(what, si)
 {
 }
 
-
-IOPending::IOPending(const std::string& what, const SourceInfo& si)
-: IOError(what, si)
+IOPending::IOPending(const char* msg)
+: IOError(msg)
 {
 }
 

@@ -35,7 +35,7 @@ PipeIODevice::PipeIODevice()
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -98,7 +98,7 @@ bool PipeIODevice::onWait(std::size_t msecs)
     }
 
     if(result != WAIT_TIMEOUT)
-        throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
           
     return false;
 }
@@ -197,7 +197,7 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
             return 0;
         }
         
-        throw IOError("Could not begin read from file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
     }
     
     return readBytes;
@@ -227,7 +227,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
         }
         else
         {
-            throw IOError("Could not end read from file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
         }
     }
 
@@ -252,12 +252,12 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
         {
             if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
             {
-                throw IOError("Could not read from file handle", PT_SOURCEINFO);
+                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
             }
         }
         else
         {
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
         }
     }
 
@@ -281,7 +281,7 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
             return 0;
         }
         
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
     }
 
     return writtenBytes;
@@ -298,7 +298,7 @@ size_t PipeIODevice::onEndWrite()
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
-        throw IOError("GetOverlappedResult failed", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("GetOverlappedResult failed") );
     }
 
     _writeOv.Offset += writtenBytes;
@@ -320,7 +320,7 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {
-            throw IOError("Could not write to file handle", PT_SOURCEINFO);
+            throw IOError(PT_ERROR_MSG("Could not write to file handle") );
         }
         if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
         {
@@ -337,7 +337,7 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 void PipeIODevice::onSync() const
 {
     if( FALSE == ::FlushFileBuffers( handle() ) )
-        throw IOError("Could not flush file buffer", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
 }
 
 

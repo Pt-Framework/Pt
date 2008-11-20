@@ -47,7 +47,7 @@ void ThreadImpl::start()
     if(_handle == NULL) 
 	{
         _id = 0;
-        throw SystemError("Thread creation failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Thread creation failed") );
     }
 }
 
@@ -56,7 +56,7 @@ void ThreadImpl::join()
 {
     DWORD status = ::WaitForSingleObject(_handle, INFINITE);
     if( status != WAIT_OBJECT_0 )
-        throw SystemError("Could not join thread", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not join thread") );
 
     _id = 0;
 }
@@ -65,7 +65,7 @@ void ThreadImpl::join()
 void ThreadImpl::terminate()
 {
     if( ! TerminateThread(_handle, 0) )
-        throw SystemError("Could not kill thread.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not kill thread.") );
 
     _id = 0;
 }

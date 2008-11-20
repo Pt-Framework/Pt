@@ -45,7 +45,7 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
 
     if(ret != ERROR_SUCCESS)
     {
-        throw std::runtime_error("Could not open Registry" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not open Registry") );
     }
 
     DWORD type = REG_SZ;
@@ -59,7 +59,7 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
 
     if(ret != ERROR_SUCCESS)
     {
-        throw std::runtime_error("Could not query Registry" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not query Registry") );
     }
 
     if( byteLength == 0 || data[0] == 0 )
@@ -84,7 +84,7 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
                             &ret );
     if(ret != ERROR_SUCCESS)
     {
-        throw std::runtime_error("Could not create Registry key" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not create Registry key") );
     }
 
     std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
@@ -97,7 +97,7 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
     RegCloseKey(hk);
 
     if(lret != ERROR_SUCCESS)
-        throw std::runtime_error("Could not set Registry value" + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("Could not set Registry value") );
 }
 
 } // namespace Pt
