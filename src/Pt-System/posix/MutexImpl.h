@@ -48,8 +48,6 @@ class MutexImpl
         const pthread_mutex_t* handle() const
         { return &_handle; }
 
-        static void throw_if(bool flag, const char* msg);
-
     private:
         pthread_mutex_t _handle;
 };
