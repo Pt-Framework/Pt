@@ -41,16 +41,14 @@ SystemError::SystemError(const char* what)
 : std::runtime_error(what)
 { }
 
-/*
-SystemError::~SystemError() throw()
-{ }
-*/
-/*
-void SystemError::throwIt(const std::string& what, const SourceInfo& si)
+void SystemErrorIf(bool flag, const char* msg)
 {
-    throw SystemError(what, si);
+   if(flag)
+   {
+        throw SystemError(msg);
+   }
 }
-*/
+
 } // namespace System
 
 } // namespace Ptv

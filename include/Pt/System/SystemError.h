@@ -45,13 +45,13 @@ namespace System {
         public:
             SystemError(const std::string& what, const SourceInfo& si);
 
-			SystemError(const char* what);
+            SystemError(const char* what);
 
             ~SystemError() throw()
             {}
-
-            //static void throwIt(const std::string& what, const SourceInfo& si);
     };
+
+    void SystemErrorIf(bool flag, const char* msg);
 
 } // namespace System
 

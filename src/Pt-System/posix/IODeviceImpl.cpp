@@ -69,6 +69,18 @@ void IODeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
     _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
         throw OpenFailed("open failed", PT_SOURCEINFO);
+
+	// AccessDenied
+	//EACCES  The requested access to the file is not allowed,
+	//EPERM   caller was not privileged (CAP_FOWNER).
+	//EROFS   pathname refers to a file on a read-only filesystem and write access was requested.
+	//ETXTBSY pathname refers to an executable image which is currently being executed.
+
+	// FileNotFound
+	//EISDIR       pathname refers to a directory and the access requested involved writing
+	//ENAMETOOLONG pathname was too long.
+	//ENOENT       O_CREAT is not set and the named file does not exist.
+	//ENOTDIR      A component used as a directory in pathname is not, in fact, a directory
 }
 
 
