@@ -27,17 +27,46 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FileImpl.h"
+#include "Pt/System/IOError.h"
 
 namespace Pt {
 
 namespace System {
+
+void throwByErrno(int err_no, const std::string& path, const Pt::SourceInfo& si)
+{
+    switch(err_no)
+    {
+        case EIO:
+            throw IOError( strerror(errno), si );
+
+        case EACCES:
+        case EBUSY:
+        case EPERM:
+        case EROFS:
+            throw PermissionDenied(path, si);
+
+        case ELOOP:
+        case ENAMETOOLONG:
+        case ENOENT:
+        case ENOTDIR:
+        case EISDIR:
+            throw FileNotFound(path, si);
+
+        default: // ENOMEM, EFAULT, EBADF
+            throw SystemError( strerror(errno), si );
+    }
+}
+
 
 std::size_t FileImpl::size(const std::string& path)
 {
     struct stat buff;
 
     if( 0 != stat(path.c_str(), &buff) )
-        throw SystemError( PT_ERROR_MSG("Could not stat file") );
+    {
+        throwByErrno(errno, path, PT_SOURCEINFO);
+    }
 
     return buff.st_size;
 }
@@ -46,34 +75,36 @@ std::size_t FileImpl::size(const std::string& path)
 void FileImpl::resize(const std::string& path, std::size_t newSize)
 {
     int ret = 0;
-    do {
+    do
+    {
         ret = truncate(path.c_str(), newSize);
-    } while ( ret == EINTR );
+    }
+    while ( ret == EINTR );
 
     if(ret != 0)
-        throw SystemError( PT_ERROR_MSG("Could not truncate file") );
+        throwByErrno(errno, path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::remove(const std::string& path)
 {
     if(0 != ::remove(path.c_str()))
-        throw SystemError( PT_ERROR_MSG("Could not remove file") );
+        throwByErrno(errno, path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::move(const std::string& path, const std::string& to)
 {
-    if (0 != ::rename(path.c_str(), to.c_str()))
-        throw SystemError( PT_ERROR_MSG("Could not move file") );
+    if( 0 != ::rename(path.c_str(), to.c_str()) )
+        throwByErrno(errno, path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::create(const std::string& path)
 {
     FILE* f = fopen(path.c_str(), "w");
-    if (!f)
-        throw SystemError( PT_ERROR_MSG("Could not create file") );
+    if( ! f )
+        throwByErrno(errno, path, PT_SOURCEINFO);
 
     fclose(f);
 }

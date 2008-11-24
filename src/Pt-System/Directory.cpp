@@ -33,12 +33,6 @@ namespace Pt {
 
 namespace System {
 
-DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
-: AccessFailed("Directory not found", si)
-, _path(path)
-{ }
-
-
 DirectoryIterator::DirectoryIterator(const std::string& path)
 {
     _impl = new DirectoryIteratorImpl( path );

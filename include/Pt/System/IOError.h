@@ -52,6 +52,57 @@ namespace System {
             {}
     };
 
+    class PT_SYSTEM_API PermissionDenied : public AccessFailed
+    {
+        public:
+            PermissionDenied(const std::string& what, const SourceInfo& si);
+
+            ~PermissionDenied() throw()
+            {}
+    };
+
+
+    class PT_SYSTEM_API FileNotFound : public AccessFailed
+    {
+        public:
+            FileNotFound(const std::string& path, const SourceInfo& si);
+
+            ~FileNotFound() throw()
+            {}
+
+            const std::string& path() const
+            { return _path; }
+
+        private:
+            std::string _path;
+    };
+
+
+    /** @brief A directory could not be found at a given path
+    */
+    class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
+    {
+        public:
+            /** @brief Construct from path and source info
+
+                Constructs the exception from the path where the directory
+                could not be found and the location in the source code where
+                he exception was thrown.
+            */
+            DirectoryNotFound(const std::string& path, const SourceInfo& si);
+
+            //! @brief Destructor
+            ~DirectoryNotFound() throw()
+            {}
+
+            const std::string& path() const
+            { return _path; }
+
+        private:
+            std::string _path;
+    };
+
+
     class PT_SYSTEM_API IOPending : public IOError
     {
         public:

@@ -50,6 +50,24 @@ AccessFailed::AccessFailed(const char* msg)
 }
 
 
+PermissionDenied::PermissionDenied(const std::string& what, const SourceInfo& si)
+: AccessFailed(what , si)
+{
+}
+
+
+FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
+: AccessFailed("File not found", si)
+, _path(path)
+{}
+
+
+DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
+: AccessFailed("Directory not found", si)
+, _path(path)
+{ }
+
+
 IOPending::IOPending(const std::string& what, const SourceInfo& si)
 : IOError(what, si)
 {

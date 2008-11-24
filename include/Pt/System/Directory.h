@@ -41,30 +41,6 @@ namespace Pt {
 
 namespace System {
 
-/** @brief A directory could not be found at a given path
-*/
-class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
-{
-    public:
-        /** @brief Construct from path and source info
-
-            Constructs the exception from the path where the directory
-            could not be found and the location in the source code where
-            he exception was thrown.
-        */
-        DirectoryNotFound(const std::string& path, const SourceInfo& si);
-
-        //! @brief Destructor
-        ~DirectoryNotFound() throw()
-		{}
-
-        const std::string& path() const
-        { return _path; }
-
-    private:
-        std::string _path;
-};
-
 /** @brief Iterates over entries of a directory.
 
     A %DirectoryIterator is created by the Directory class and

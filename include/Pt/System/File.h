@@ -40,21 +40,6 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API FileNotFound : public AccessFailed
-{
-    public:
-        FileNotFound(const std::string& path, const SourceInfo& si);
-
-        ~FileNotFound() throw()
-        {}
-
-        const std::string& path() const
-        { return _path; }
-
-    private:
-        std::string _path;
-};
-
 /** @brief Provides common operations on files.
  */
 class PT_SYSTEM_API File
