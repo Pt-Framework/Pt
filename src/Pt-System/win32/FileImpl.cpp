@@ -33,25 +33,50 @@ namespace System {
 
 void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
 {
+//INVALID_DATA,		EINVAL
+//INVALID_PARAMETER,		EINVAL
+//NOT_ENOUGH_MEMORY,		ENOMEM
+//OUTOFMEMORY,		ENOMEM
+//NOT_SAME_DEVICE,		EXDEV
+//DIR_NOT_EMPTY,		ENOTEMPTY
+//HANDLE_EOF,		ENODATA
+//FILE_EXISTS,		EEXIST
+//ALREADY_EXISTS,		EEXIST
+//CANNOT_MAKE,		EPERM
+//DISK_FULL,			ENOSPC
+//HANDLE_DISK_FULL    ENOSPC
+
     switch(error)
     {
         case ERROR_READ_FAULT:
         case ERROR_WRITE_FAULT:
+        case ERROR_CRC:
+        case ERROR_IO_DEVICE:
+        case ERROR_NOT_READY:
+        case ERROR_BUSY:
             throw IOError(path, si);
 
         case ERROR_WRITE_PROTECT:
         case ERROR_ACCESS_DENIED:
+        case ERROR_SHARING_VIOLATION:
+        case ERROR_LOCK_VIOLATION:
+        case ERROR_NOT_OWNER:
             throw PermissionDenied(path, si);
 
         case ERROR_BAD_UNIT:
         case ERROR_INVALID_DRIVE:
+        case ERROR_INVALID_NAME:
         case ERROR_FILE_NOT_FOUND:
+        case ERROR_PATH_NOT_FOUND:
         case ERROR_BAD_PATHNAME:
+        case ERROR_DIRECTORY:
+        case ERROR_BAD_DEVICE:
+        case ERROR_FILENAME_EXCED_RANGE:
             throw FileNotFound(path, si);
 
-        case ERROR_NOT_READY:
+        case ERROR_FILE_CORRUPT:
+        case ERROR_FILE_INVALID:
         case ERROR_OPEN_FAILED:
-        case ERROR_INVALID_NAME:
             throw AccessFailed(path, si);
 
         default:
