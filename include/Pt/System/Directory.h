@@ -33,7 +33,7 @@
 #include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <Pt/System/SystemError.h>
+#include <Pt/System/IOError.h>
 #include <string>
 #include <iterator>
 
@@ -43,7 +43,7 @@ namespace System {
 
 /** @brief A directory could not be found at a given path
 */
-class PT_SYSTEM_API DirectoryNotFound : public SystemError
+class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
 {
     public:
         /** @brief Construct from path and source info

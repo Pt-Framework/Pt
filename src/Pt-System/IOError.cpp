@@ -38,8 +38,14 @@ IOError::IOError(const char* msg)
 }
 
 
-OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
+AccessFailed::AccessFailed(const std::string& what, const SourceInfo& si)
 : IOError(what , si)
+{
+}
+
+
+AccessFailed::AccessFailed(const char* msg)
+: IOError(msg)
 {
 }
 
@@ -48,6 +54,7 @@ IOPending::IOPending(const std::string& what, const SourceInfo& si)
 : IOError(what, si)
 {
 }
+
 
 IOPending::IOPending(const char* msg)
 : IOError(msg)

@@ -68,7 +68,7 @@ void IODeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 
     _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
-        throw OpenFailed("open failed", PT_SOURCEINFO);
+        throw AccessFailed("open failed", PT_SOURCEINFO);
 
 	// AccessDenied
 	//EACCES  The requested access to the file is not allowed,

@@ -63,7 +63,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     _fd = ::open(path, flags, 0644);
 
     if(_fd == -1) {
-        throw OpenFailed("open failed", PT_SOURCEINFO);
+        throw AccessFailed("open failed", PT_SOURCEINFO);
     }
 
     try {

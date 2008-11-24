@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PipeImpl.h"
+#include "Pt/System/SystemError.h"
 #include <memory>
 #include <cerrno>
 #include <unistd.h>
@@ -104,7 +105,7 @@ PipeImpl::PipeImpl(bool isAsync)
 {
     int fds[2];
     if(-1 == ::pipe(fds) )
-        throw OpenFailed("pipe", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("pipe failed") );
 
     _out.open( fds[0] ,isAsync );
     _in.open( fds[1], isAsync );

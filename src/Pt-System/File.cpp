@@ -35,7 +35,7 @@ namespace Pt {
 namespace System {
 
 FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
-: SystemError("File not found", si)
+: AccessFailed("File not found", si)
 , _path(path)
 {}
 

@@ -30,7 +30,8 @@ namespace Pt {
 
 namespace System {
 
-    class PT_SYSTEM_API IOError : public std::ios::failure {
+    class PT_SYSTEM_API IOError : public std::ios::failure
+    {
         public:
             IOError(const std::string& what, const SourceInfo& si);
 
@@ -40,22 +41,26 @@ namespace System {
             {}
     };
 
-    class PT_SYSTEM_API OpenFailed : public IOError {
+    class PT_SYSTEM_API AccessFailed : public IOError
+    {
         public:
-            OpenFailed(const std::string& what, const SourceInfo& si);
+            AccessFailed(const std::string& what, const SourceInfo& si);
 
-            ~OpenFailed() throw()
-			{}
+            AccessFailed(const char* what);
+
+            ~AccessFailed() throw()
+            {}
     };
 
-    class PT_SYSTEM_API IOPending : public IOError {
+    class PT_SYSTEM_API IOPending : public IOError
+    {
         public:
             IOPending(const std::string& what, const SourceInfo& si);
 
             IOPending(const char* what);
-            
+
             ~IOPending() throw()
-			{}
+            {}
     };
 
 } // namespace System

@@ -34,7 +34,7 @@ namespace Pt {
 namespace System {
 
 DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
-: SystemError("Directory not found", si)
+: AccessFailed("Directory not found", si)
 , _path(path)
 { }
 
