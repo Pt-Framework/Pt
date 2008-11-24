@@ -76,14 +76,14 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 
 
     if( h == 0  || h == INVALID_HANDLE_VALUE )
-        throw OpenFailed("Could not open port" , PT_SOURCEINFO);
+        throw AccessFailed("Could not open port" , PT_SOURCEINFO);
 
     this->setHandle(h);
 
     try
     {
         if( ! GetCommState( h, &_orgCommState ) )
-            throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
+            throw AccessFailed("Get port state failed" , PT_SOURCEINFO);
 
 		// Do not use timeouts, return read data immediately.
         COMMTIMEOUTS comTimeOut;

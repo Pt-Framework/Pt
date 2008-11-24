@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "FileImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/File.h"
 #include "win32.h"
 #include <string>
@@ -30,6 +31,34 @@ namespace Pt {
 
 namespace System {
 
+void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
+{
+    switch(error)
+    {
+        case ERROR_READ_FAULT:
+        case ERROR_WRITE_FAULT:
+            throw IOError(path, si);
+
+        case ERROR_WRITE_PROTECT:
+        case ERROR_ACCESS_DENIED:
+            throw PermissionDenied(path, si);
+
+        case ERROR_BAD_UNIT:
+        case ERROR_INVALID_DRIVE:
+        case ERROR_FILE_NOT_FOUND:
+        case ERROR_BAD_PATHNAME:
+            throw FileNotFound(path, si);
+
+        case ERROR_NOT_READY:
+        case ERROR_OPEN_FAILED:
+        case ERROR_INVALID_NAME:
+            throw AccessFailed(path, si);
+
+        default:
+            throw SystemError(path, si);
+    }
+}
+
 std::size_t FileImpl::size(const std::string& path)
 {
     WIN32_FIND_DATA data;
@@ -37,7 +66,7 @@ std::size_t FileImpl::size(const std::string& path)
 
     HANDLE h = FindFirstFile(tpath.c_str(), &data);
     if(h == INVALID_HANDLE_VALUE)
-        throw FileNotFound(path, PT_SOURCEINFO);
+        throwError(GetLastError(), path, PT_SOURCEINFO);
 
     FindClose(h);
 

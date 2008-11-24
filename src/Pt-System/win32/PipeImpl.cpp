@@ -369,11 +369,11 @@ PipeImpl::PipeImpl(bool isAsync)
                                            1000,
                                            NULL );
     if (inputHandle == INVALID_HANDLE_VALUE)
-        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);
+        throw SystemError("Could not create named pipe", PT_SOURCEINFO);
 
     HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
     if(outputHandle == INVALID_HANDLE_VALUE)
-        throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
+        throw SystemError("Could not open file handle", PT_SOURCEINFO);
 
     _out.open(inputHandle, isAsync);
     _in.open(outputHandle, isAsync);
