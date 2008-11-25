@@ -28,22 +28,43 @@
  ***************************************************************************/
 #include "FileImpl.h"
 #include "Pt/System/IOError.h"
+#include <new>
 
 namespace Pt {
 
 namespace System {
 
-void throwByErrno(int err_no, const std::string& path, const Pt::SourceInfo& si)
+// EACCES Permission denied.
+// EMFILE Too many file descriptors in use by process.
+// ENOENT Directory does not exist, or name is an empty string.
+// ENOTDIR name is not a directory.
+// EBUSY  pathname is currently in use by the system or some process that prevents its  removal.
+// EFAULT pathname points outside your accessible address space.
+// EINVAL pathname has .  as last component.
+// ELOOP  Too many symbolic links were encountered in resolving pathname.
+// ENAMETOOLONG pathname was too long.
+// ENOMEM Insufficient kernel memory was available.
+// ENOTEMPTY pathname contains entries other than . and .. ; or, pathname has ..  as its final component.
+// EPERM  The directory containing pathname has the sticky bit (S_ISVTX) set
+// EPERM  The filesystem containing pathname does not support the removal of directories.
+// EROFS  pathname refers to a file on a read-only filesystem.
+void throwErrno(const std::string& path, const Pt::SourceInfo& si)
 {
-    switch(err_no)
+    switch(errno)
     {
         case EIO:
+        case EBADF:
+        case EBUSY:
+        case ENOSPC:
+        case EMLINK:
+        case ENOTEMPTY:
+        case EXDEV:
             throw IOError( strerror(errno), si );
 
         case EACCES:
-        case EBUSY:
         case EPERM:
         case EROFS:
+        case ENXIO:
             throw PermissionDenied(path, si);
 
         case ELOOP:
@@ -53,8 +74,33 @@ void throwByErrno(int err_no, const std::string& path, const Pt::SourceInfo& si)
         case EISDIR:
             throw FileNotFound(path, si);
 
-        default: // ENOMEM, EFAULT, EBADF
+        case ENODEV:
+            throw DeviceNotFound(path, si);
+
+        case EEXIST:
+            throw AccessFailed(path, si);
+
+       case ENOMEM:
+           throw std::bad_alloc();
+
+        default: // EFAULT EMFILE EOVERFLOW
             throw SystemError( strerror(errno), si );
+    }
+}
+
+
+void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
+{
+    switch(errno)
+    {
+        case ELOOP:
+        case ENAMETOOLONG:
+        case ENOENT:
+        case ENOTDIR:
+        case EISDIR:
+            throw FileNotFound(path, si);
+
+        default: throwErrno(path, si);
     }
 }
 
@@ -65,7 +111,7 @@ std::size_t FileImpl::size(const std::string& path)
 
     if( 0 != stat(path.c_str(), &buff) )
     {
-        throwByErrno(errno, path, PT_SOURCEINFO);
+        throwFileErrno(path, PT_SOURCEINFO);
     }
 
     return buff.st_size;
@@ -82,21 +128,21 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
     while ( ret == EINTR );
 
     if(ret != 0)
-        throwByErrno(errno, path, PT_SOURCEINFO);
+        throwFileErrno( path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::remove(const std::string& path)
 {
     if(0 != ::remove(path.c_str()))
-        throwByErrno(errno, path, PT_SOURCEINFO);
+        throwFileErrno(path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::move(const std::string& path, const std::string& to)
 {
     if( 0 != ::rename(path.c_str(), to.c_str()) )
-        throwByErrno(errno, path, PT_SOURCEINFO);
+        throwFileErrno(path, PT_SOURCEINFO);
 }
 
 
@@ -104,7 +150,7 @@ void FileImpl::create(const std::string& path)
 {
     FILE* f = fopen(path.c_str(), "w");
     if( ! f )
-        throwByErrno(errno, path, PT_SOURCEINFO);
+        throwFileErrno(path, PT_SOURCEINFO);
 
     fclose(f);
 }

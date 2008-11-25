@@ -44,21 +44,37 @@ namespace System {
     class PT_SYSTEM_API AccessFailed : public IOError
     {
         public:
-            AccessFailed(const std::string& what, const SourceInfo& si);
-
-            AccessFailed(const char* what);
+            AccessFailed(const std::string& resource, const SourceInfo& si);
 
             ~AccessFailed() throw()
             {}
+
+            const std::string& resource() const
+            { return _resource; }
+
+        private:
+            std::string _resource;
     };
 
     class PT_SYSTEM_API PermissionDenied : public AccessFailed
     {
         public:
-            PermissionDenied(const std::string& what, const SourceInfo& si);
+            PermissionDenied(const std::string& resource, const SourceInfo& si);
 
             ~PermissionDenied() throw()
             {}
+    };
+
+    class PT_SYSTEM_API DeviceNotFound : public AccessFailed
+    {
+        public:
+            DeviceNotFound(const std::string& device, const SourceInfo& si);
+
+            ~DeviceNotFound() throw()
+            {}
+
+            const std::string& device() const
+            { return resource(); }
     };
 
 
@@ -71,12 +87,8 @@ namespace System {
             {}
 
             const std::string& path() const
-            { return _path; }
-
-        private:
-            std::string _path;
+            { return resource(); }
     };
-
 
     /** @brief A directory could not be found at a given path
     */
@@ -96,12 +108,8 @@ namespace System {
             {}
 
             const std::string& path() const
-            { return _path; }
-
-        private:
-            std::string _path;
+            { return resource(); }
     };
-
 
     class PT_SYSTEM_API IOPending : public IOError
     {

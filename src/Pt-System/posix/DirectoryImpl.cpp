@@ -27,11 +27,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "DirectoryImpl.h"
+#include "FileInfoImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/IOError.h"
+#include <vector>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <vector>
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
@@ -41,6 +43,25 @@ namespace Pt {
 
 namespace System {
 
+void throwErrno(const std::string& path, const Pt::SourceInfo& si);
+
+
+void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
+{
+    switch(errno)
+    {
+        case ELOOP:
+        case ENAMETOOLONG:
+        case ENOENT:
+        case ENOTDIR:
+        case EISDIR:
+            throw DirectoryNotFound(path, si);
+
+        default: throwErrno(path, si);
+    }
+}
+
+
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
   _path(path),
@@ -49,17 +70,9 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
   _dirty(true)
 {
     _handle = ::opendir( path.c_str() );
-
-    // EACCES Permission denied.
-    // EMFILE Too many file descriptors in use by process.
-    // ENFILE Too many files are currently open in the system.
-    // ENOENT Directory does not exist, or name is an empty string.
-    // ENOMEM Insufficient memory to complete the operation.
-    // ENOTDIR name is not a directory.
-
     if( !_handle )
     {
-        throw SystemError( PT_ERROR_MSG("Could not open directory") );
+        throwDirectoryErrno(path, PT_SOURCEINFO);
     }
 
     // append a trailing slash if not empty, so we can add the
@@ -118,49 +131,16 @@ void DirectoryImpl::create(const std::string& path)
 {
     if( -1 == ::mkdir(path.c_str(), 0777) )
     {
-        throw SystemError( PT_ERROR_MSG("Could not create directory") );
+        throwDirectoryErrno(path, PT_SOURCEINFO);
     }
-}
-
-
-bool DirectoryImpl::exists(const std::string& path)
-{
-    struct stat buff;
-    int err = stat(path.c_str(), &buff);
-
-    if (err == -1 )
-    {
-        if (errno == ENOENT || errno == ENOTDIR)
-        {
-            return false;
-        }
-
-        throw SystemError( PT_ERROR_MSG("Could not stat file") );
-    }
-
-    return true;
 }
 
 
 void DirectoryImpl::remove(const std::string& path)
 {
-	//EACCES Write  access  to  the directory containing pathname was not allowed
-	//EBUSY  pathname is currently in use by the system or some process that prevents its  removal.
-	//EFAULT pathname points outside your accessible address space.
-	//EINVAL pathname has .  as last component.
-	//ELOOP  Too many symbolic links were encountered in resolving pathname.
-	//ENAMETOOLONG pathname was too long.
-	//ENOENT A directory component in pathname does not exist or is a dangling symbolic link.
-	//ENOMEM Insufficient kernel memory was available.
-	//ENOTDIR pathname, or a component used as a directory in pathname, is not, in fact, a directory.
-	//ENOTEMPTY pathname contains entries other than . and .. ; or, pathname has ..  as its final component.
-	//EPERM  The directory containing pathname has the sticky bit (S_ISVTX) set
-	//EPERM  The filesystem containing pathname does not support the removal of directories.
-	//EROFS  pathname refers to a file on a read-only filesystem.
-
     if( -1 == ::rmdir(path.c_str()) )
     {
-        throw SystemError( PT_ERROR_MSG("Could not remove directory") );
+        throwDirectoryErrno(path, PT_SOURCEINFO);
     }
 }
 
@@ -169,7 +149,7 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
     if (0 != ::rename(oldName.c_str(), newName.c_str()))
     {
-        throw SystemError( PT_ERROR_MSG("Could not move directory") );
+        throwDirectoryErrno(oldName, PT_SOURCEINFO);
     }
 }
 
@@ -178,7 +158,7 @@ void DirectoryImpl::chdir(const std::string& path)
 {
     if( -1 == ::chdir(path.c_str()) )
     {
-        throw SystemError( PT_ERROR_MSG("Could not change working directory") );
+        throwDirectoryErrno(path, PT_SOURCEINFO);
     }
 }
 
@@ -187,11 +167,13 @@ std::string DirectoryImpl::cwd()
 {
     const long size = pathconf(".", _PC_PATH_MAX);
     if(size == -1)
-        throw SystemError( PT_ERROR_MSG("pathconf failed for .") );
+        throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
 
     std::vector<char> buffer(size);
     if( ! getcwd(&buffer[0], size) )
-        throw SystemError( PT_ERROR_MSG("Could not get current working directroy") );
+    {
+        throw SystemError( PT_ERROR_MSG("getcwd() failed") );
+    }
 
     return std::string( &buffer[0] );
 }
@@ -212,7 +194,7 @@ std::string DirectoryImpl::tmpdir()
         return tmpdir;
     }
 
-    return DirectoryImpl::exists("/tmp") ? "/tmp" : curdir();
+    return FileInfoImpl::getType("/tmp") == FileInfo::Directory ? "/tmp" : curdir();
 }
 
 } // namespace System

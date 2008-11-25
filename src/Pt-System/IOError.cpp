@@ -38,33 +38,31 @@ IOError::IOError(const char* msg)
 }
 
 
-AccessFailed::AccessFailed(const std::string& what, const SourceInfo& si)
-: IOError(what , si)
+AccessFailed::AccessFailed(const std::string& resource, const SourceInfo& si)
+: IOError("could not access " + resource, si)
 {
 }
 
 
-AccessFailed::AccessFailed(const char* msg)
-: IOError(msg)
+PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo& si)
+: AccessFailed(resource , si)
 {
 }
 
 
-PermissionDenied::PermissionDenied(const std::string& what, const SourceInfo& si)
-: AccessFailed(what , si)
-{
-}
+DeviceNotFound::DeviceNotFound(const std::string& device, const SourceInfo& si)
+: AccessFailed(device, si)
+{}
+
 
 
 FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
-: AccessFailed("File not found", si)
-, _path(path)
+: AccessFailed(path, si)
 {}
 
 
 DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
-: AccessFailed("Directory not found", si)
-, _path(path)
+: AccessFailed(path, si)
 { }
 
 

@@ -47,6 +47,8 @@
 #define PT_STRINGIFY(x) #x
 #define PT_TOSTRING(x) PT_STRINGIFY(x)
 
+#define PT_SOURCEINFO_STR __FILE__ ":" PT_TOSTRING(__LINE__)
+
 /** @brief Builds an error message including source information
     @ingroup Pt
 */
