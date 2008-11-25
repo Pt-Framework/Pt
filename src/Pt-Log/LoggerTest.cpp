@@ -219,7 +219,7 @@ class LoggerTest : public Pt::Unit::TestSuite
                     logger << Pt::Log::info << "Info Message on serial device" << Pt::Log::endlog;
                 }
             }
-            catch( const Pt::System::OpenFailed& )
+            catch( const Pt::System::AccessFailed& )
             {
                 reportMessage( "No such serial device: " + url ); 
             }

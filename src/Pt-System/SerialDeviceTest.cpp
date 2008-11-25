@@ -100,7 +100,7 @@ void SerialDeviceTest::ReadPnp()
 
         PT_UNIT_ASSERT(pnpString.empty() == false);
     }
-    catch(const Pt::System::OpenFailed& f)
+    catch(const Pt::System::AccessFailed& f)
     {
         reportMessage("No device found");
         // do not fail in case no device is connected.

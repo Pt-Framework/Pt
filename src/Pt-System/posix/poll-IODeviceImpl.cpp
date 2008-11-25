@@ -75,7 +75,7 @@ void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode, b
 
     _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
-        throw OpenFailed("open failed", PT_SOURCEINFO);
+        throw AccessFailed("open failed", PT_SOURCEINFO);
 }
 
 

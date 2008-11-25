@@ -53,7 +53,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
 {
     if ((mode & std::ios_base::out) || !(mode & std::ios_base::in))    
     {
-        throw OpenFailed("open: Writing to the port is currently not supported.", PT_SOURCEINFO);                
+        throw AccessFailed("open: Writing to the port is currently not supported.", PT_SOURCEINFO);
     }
     
     // try to determine whether user tries to connect BTCOMM
@@ -63,7 +63,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
     
     if (pos == std::string::npos)
     {
-        throw OpenFailed("open: Failed to open port. Wrong port name syntax.", PT_SOURCEINFO);        
+        throw AccessFailed("open: Failed to open port. Wrong port name syntax.", PT_SOURCEINFO);
     }
 
     // extract base name
@@ -71,7 +71,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
 
     if (strDeviceName != "BTCOMM")
     {
-        throw OpenFailed("open: Failed to open port. Unknown port.", PT_SOURCEINFO);                
+        throw AccessFailed("open: Failed to open port. Unknown port.", PT_SOURCEINFO);
     }
     
     std::string strPortNumber = path.substr(pos+2, path.length());
@@ -89,7 +89,7 @@ TBTDevAddr SerialDeviceImpl::doBluetoothDeviceQuery()
     RNotifier notifier;
     TInt err = notifier.Connect();
     if (err != KErrNone)
-        throw OpenFailed("open: Can't query bluetooth devices (RNotifier::Connect() failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't query bluetooth devices (RNotifier::Connect() failed)", PT_SOURCEINFO);
 
     // 2. Start the device selection plug-in
     TBTDeviceSelectionParams selectionFilter;
@@ -106,7 +106,7 @@ TBTDevAddr SerialDeviceImpl::doBluetoothDeviceQuery()
     User::WaitForRequest(status);
     err = status.Int();
     if (err != KErrNone)
-        throw OpenFailed("open: Can't query bluetooth devices (Waiting for StartNotifierAndGetResponse failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't query bluetooth devices (Waiting for StartNotifierAndGetResponse failed)", PT_SOURCEINFO);
         
     // 4. Clean up
     notifier.CancelNotifier(KDeviceSelectionNotifierUid);
@@ -124,7 +124,7 @@ void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNu
     if (err != KErrNone && err != KErrAlreadyExists)
     {
         _servConnected = false;
-        throw OpenFailed("open: Can't open Bluetooth socket (RSocketServ::Connect() failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't open Bluetooth socket (RSocketServ::Connect() failed)", PT_SOURCEINFO);
     }
     
     _servConnected = true;
@@ -134,13 +134,13 @@ void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNu
     err = _socketServ.FindProtocol(KRfComm(), pdesc);
     if (err != KErrNone)
     {
-        throw OpenFailed("open: Can't open Bluetooth socket (RSocketServ::FindProtocol() failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't open Bluetooth socket (RSocketServ::FindProtocol() failed)", PT_SOURCEINFO);
     }
 
     err = _listenSock.Open(_socketServ, pdesc.iAddrFamily, pdesc.iSockType, KRFCOMM);
     if (err != KErrNone)
     {
-        throw OpenFailed("open: Can't open Bluetooth socket (RSocket::Open() failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't open Bluetooth socket (RSocket::Open() failed)", PT_SOURCEINFO);
     }
     
     // Bluetooth socket address object
@@ -155,7 +155,7 @@ void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNu
     err = stat.Int();    
     if (err != KErrNone)
     {
-        throw OpenFailed("open: Can't open Bluetooth socket (Waiting for RSocket::Connect() failed)", PT_SOURCEINFO);
+        throw AccessFailed("open: Can't open Bluetooth socket (Waiting for RSocket::Connect() failed)", PT_SOURCEINFO);
     }
     
     _socketConnected = true;
@@ -165,7 +165,7 @@ void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNu
 
 void SerialDeviceImpl::open(int fd, bool isAsync)
 {
-    throw OpenFailed("Open with file descriptor not supported on Symbian", PT_SOURCEINFO);    
+    throw AccessFailed("Open with file descriptor not supported on Symbian", PT_SOURCEINFO);
 }
 
 void SerialDeviceImpl::close()
