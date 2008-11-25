@@ -2,8 +2,6 @@
  *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
- *   This code is based on code written by Christian Prochnow              *
- *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
  *   published by the Free Software Foundation; either version 2 of the    *
