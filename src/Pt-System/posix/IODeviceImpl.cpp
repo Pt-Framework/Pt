@@ -41,49 +41,6 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
-{
-    int flags = O_RDONLY;
-
-    if( (mode & IODevice::Read ) && (mode & IODevice::Write) )
-    {
-        flags |= O_RDWR;
-    }
-    else if(mode & IODevice::Write)
-    {
-        flags |= O_WRONLY;
-    }
-    else if(mode & IODevice::Read  )
-    {
-        flags |= O_RDONLY;
-    }
-
-    if(mode & IODevice::Async)
-        flags |= O_NONBLOCK;
-
-    if(mode & IODevice::Trunc)
-        flags |= O_TRUNC;
-
-    flags |=  O_NOCTTY;
-
-    _fd = ::open( path.c_str(), flags );
-    if(_fd == -1)
-        throw AccessFailed("open failed", PT_SOURCEINFO);
-
-	// AccessDenied
-	//EACCES  The requested access to the file is not allowed,
-	//EPERM   caller was not privileged (CAP_FOWNER).
-	//EROFS   pathname refers to a file on a read-only filesystem and write access was requested.
-	//ETXTBSY pathname refers to an executable image which is currently being executed.
-
-	// FileNotFound
-	//EISDIR       pathname refers to a directory and the access requested involved writing
-	//ENAMETOOLONG pathname was too long.
-	//ENOENT       O_CREAT is not set and the named file does not exist.
-	//ENOTDIR      A component used as a directory in pathname is not, in fact, a directory
-}
-
-
 void IODeviceImpl::open(int fd, bool isAsync)
 {
     _fd = fd;

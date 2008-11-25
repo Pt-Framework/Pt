@@ -42,9 +42,7 @@ namespace System {
             int fd() const
             { return _fd; }
 
-            virtual void open(const std::string& path, IODevice::OpenMode mode);
-
-            virtual void open(int fd, bool isAsync);
+            void open(int fd, bool isAsync);
 
             virtual void close();
 

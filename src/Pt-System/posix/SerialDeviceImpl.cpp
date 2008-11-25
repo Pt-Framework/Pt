@@ -55,7 +55,34 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 {
-    IODeviceImpl::open(path, mode);
+    int flags = O_RDONLY;
+
+    if( (mode & IODevice::Read ) && (mode & IODevice::Write) )
+    {
+        flags |= O_RDWR;
+    }
+    else if(mode & IODevice::Write)
+    {
+        flags |= O_WRONLY;
+    }
+    else if(mode & IODevice::Read  )
+    {
+        flags |= O_RDONLY;
+    }
+
+    if(mode & IODevice::Async)
+        flags |= O_NONBLOCK;
+
+    if(mode & IODevice::Trunc)
+        flags |= O_TRUNC;
+
+    flags |=  O_NOCTTY;
+
+    _fd = ::open( path.c_str(), flags );
+    if( -1 == _fd )
+    {
+        throw DeviceNotFound(path, PT_SOURCEINFO);
+    }
 
     struct termios ios;
     if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
