@@ -119,16 +119,21 @@ void Thread::join()
 bool Thread::joinNoThrow()
 {
     bool ret = true;
-    try
+
+    if( this->state() == Running )
     {
-        _impl->join();
-    }
-    catch(...)
-    {
-        ret = false;
+        try
+        {
+            _impl->join();
+        }
+        catch(...)
+        {
+            ret = false;
+        }
+
+        _state = Thread::Finished;
     }
 
-    _state = Thread::Finished;
     return ret;
 }
 
