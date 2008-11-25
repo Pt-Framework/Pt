@@ -50,7 +50,8 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 {
-    std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
+    std::basic_string<TCHAR> port;
+    win32::fromMultiByte( port_, port );
 
     DWORD openFlags = 0;
     if( mode & IODevice::Write )

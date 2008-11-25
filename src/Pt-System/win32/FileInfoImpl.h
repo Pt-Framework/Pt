@@ -30,7 +30,8 @@ class FileInfoImpl
     public:
         static FileInfo::Type getType(const std::string& path)
         {
-            std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+            std::basic_string<TCHAR> tpath;
+            win32::fromMultiByte(path, tpath);
             DWORD attr = GetFileAttributes( tpath.c_str() );
 
             if(attr == 0xffffffff)

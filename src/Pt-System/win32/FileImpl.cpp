@@ -45,7 +45,7 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
 //CANNOT_MAKE,		EPERM
 //DISK_FULL,			ENOSPC
 //HANDLE_DISK_FULL    ENOSPC
-
+    
     switch(error)
     {
         case ERROR_READ_FAULT:
@@ -54,6 +54,7 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
         case ERROR_IO_DEVICE:
         case ERROR_NOT_READY:
         case ERROR_BUSY:
+        case ERROR_CANNOT_MAKE:
             throw IOError(path, si);
 
         case ERROR_WRITE_PROTECT:
@@ -61,19 +62,24 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
         case ERROR_SHARING_VIOLATION:
         case ERROR_LOCK_VIOLATION:
         case ERROR_NOT_OWNER:
+        case ERROR_ALREADY_EXISTS:
+        case ERROR_FILE_EXISTS:
+        case ERROR_CURRENT_DIRECTORY:
             throw PermissionDenied(path, si);
 
-        case ERROR_BAD_UNIT:
-        case ERROR_INVALID_DRIVE:
-        case ERROR_INVALID_NAME:
         case ERROR_FILE_NOT_FOUND:
-        case ERROR_PATH_NOT_FOUND:
-        case ERROR_BAD_PATHNAME:
-        case ERROR_DIRECTORY:
-        case ERROR_BAD_DEVICE:
         case ERROR_FILENAME_EXCED_RANGE:
             throw FileNotFound(path, si);
 
+        case ERROR_DIRECTORY:
+            throw DirectoryNotFound(path, si);
+
+        case ERROR_BAD_UNIT:
+        case ERROR_BAD_DEVICE:  
+            throw DeviceNotFound(path, si);
+
+        case ERROR_BAD_PATHNAME:
+        case ERROR_PATH_NOT_FOUND:
         case ERROR_FILE_CORRUPT:
         case ERROR_FILE_INVALID:
         case ERROR_OPEN_FAILED:
@@ -84,105 +90,116 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
     }
 }
 
+
+void throwFileError(const std::string& path, const Pt::SourceInfo& si)
+{
+    DWORD error = GetLastError();
+    switch(error)
+    {
+        case ERROR_BAD_PATHNAME:
+        case ERROR_PATH_NOT_FOUND:
+        case ERROR_OPEN_FAILED:
+            throw FileNotFound(path, si);
+
+        default:
+            throwError(error, path, si);
+    }
+}
+
+
 std::size_t FileImpl::size(const std::string& path)
 {
     WIN32_FIND_DATA data;
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
 
     HANDLE h = FindFirstFile(tpath.c_str(), &data);
     if(h == INVALID_HANDLE_VALUE)
-        throwError(GetLastError(), path, PT_SOURCEINFO);
+        throwFileError( path, PT_SOURCEINFO);
 
     FindClose(h);
 
     LARGE_INTEGER li;
     li.HighPart = data.nFileSizeHigh;
     li.LowPart = data.nFileSizeLow;
-
     return static_cast<std::size_t>(li.QuadPart);
 }
 
 
 void FileImpl::resize(const std::string& path, std::size_t newSize)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
 
-    HANDLE fileHandle = ::CreateFile(tpath.c_str(),
-                                     GENERIC_READ|GENERIC_WRITE,
-                                     FILE_SHARE_READ|FILE_SHARE_WRITE,
-                                     NULL,
-                                     OPEN_EXISTING,
-                                     0,
-                                     NULL);
+    HANDLE h = ::CreateFile( tpath.c_str(),
+                             GENERIC_READ|GENERIC_WRITE,
+                             FILE_SHARE_READ|FILE_SHARE_WRITE,
+                             NULL,
+                             OPEN_EXISTING,
+                             0,
+                             NULL );
 
-    if(fileHandle == INVALID_HANDLE_VALUE)
+    if(h == INVALID_HANDLE_VALUE)
+        throwFileError(path, PT_SOURCEINFO);
+
+    if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, newSize, NULL, FILE_BEGIN) ||
+        FALSE == ::SetEndOfFile(h) )
     {
-        throw SystemError(PT_ERROR_MSG("Could not open file") );
+        ::CloseHandle(h);
+        throwFileError(path, PT_SOURCEINFO);
     }
 
-    // under Win32 resizing is done by moving to the desired position
-    // and then calling SetEndOfFile on the handle.
-    DWORD ret = ::SetFilePointer(fileHandle, newSize, NULL, FILE_BEGIN);
-    if(ret == INVALID_SET_FILE_POINTER) {
-        ::CloseHandle(fileHandle);
-        throw SystemError( PT_ERROR_MSG("Could not set file pointer") );
-    }
-
-    if( FALSE == ::SetEndOfFile(fileHandle) ) {
-        ::CloseHandle(fileHandle);
-        throw SystemError( PT_ERROR_MSG("Could not truncate file") );
-    }
-
-    if( FALSE == ::CloseHandle(fileHandle) )
-        throw SystemError( PT_ERROR_MSG("Could not close file handle") );
+    if( FALSE == ::CloseHandle(h) )
+        throwFileError(path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::remove(const std::string& path)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
 
-    if(FALSE == ::DeleteFile( tpath.c_str() ))
-        throw SystemError( PT_ERROR_MSG("Could not unlink file") );
+    if( FALSE == ::DeleteFile( tpath.c_str() ) )
+        throwFileError(path, PT_SOURCEINFO);
 }
 
 
 void FileImpl::move(const std::string& path, const std::string& to)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
-    std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
+    
+    std::basic_string<TCHAR> tto;
+    win32::fromMultiByte(to, tto);
 
 #ifdef _WIN32_WCE
     if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-        throw SystemError( PT_ERROR_MSG("Could not move file") );
+         throwFileError(path, PT_SOURCEINFO);
 #else
     if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
-        throw SystemError( PT_ERROR_MSG("Could not move file") );
+         throwFileError(path, PT_SOURCEINFO);
 #endif
 }
 
 
 void FileImpl::create(const std::string& path)
 {
-    HANDLE hFile;
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
 
+    HANDLE h = CreateFile( tpath.c_str(), // file to create
+                           GENERIC_WRITE, // open for writing
+                           0, // do not share
+                           NULL,
+                           CREATE_ALWAYS,
+                           FILE_ATTRIBUTE_NORMAL,                  
+                           NULL);
 
-    hFile = CreateFile(tpath.c_str(),   // file to create
-            GENERIC_WRITE,          // open for writing
-            0,                      // do not share
-            NULL,                   // default security
-            CREATE_ALWAYS,          // overwrite existing
-            FILE_ATTRIBUTE_NORMAL | // normal file
-            NULL,                   // asynchronous I/O
-            NULL);
+    if (h == INVALID_HANDLE_VALUE)
+        throwFileError(path, PT_SOURCEINFO);
 
-    if (hFile == INVALID_HANDLE_VALUE)
-    {
-        throw SystemError( PT_ERROR_MSG("Could not create file") );
-    }
-
-    CloseHandle(hFile);
+    if( FALSE == ::CloseHandle(h) )
+        throwFileError(path, PT_SOURCEINFO);
 }
 
 } // namespace System

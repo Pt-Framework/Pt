@@ -72,9 +72,6 @@ namespace System {
 
             ~DeviceNotFound() throw()
             {}
-
-            const std::string& device() const
-            { return resource(); }
     };
 
 
@@ -85,9 +82,6 @@ namespace System {
 
             ~FileNotFound() throw()
             {}
-
-            const std::string& path() const
-            { return resource(); }
     };
 
     /** @brief A directory could not be found at a given path
@@ -106,9 +100,6 @@ namespace System {
             //! @brief Destructor
             ~DirectoryNotFound() throw()
             {}
-
-            const std::string& path() const
-            { return resource(); }
     };
 
     class PT_SYSTEM_API IOPending : public IOError

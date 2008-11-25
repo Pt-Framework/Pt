@@ -51,7 +51,8 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
     DWORD type = REG_SZ;
     DWORD byteLength = MAX_PATH * sizeof(TCHAR);
     TCHAR data[MAX_PATH] = {0};
-    std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
+    std::basic_string<TCHAR> wname;
+    win32::fromMultiByte(name, wname);
 
     ret = RegQueryValueEx(hk, wname.c_str(), NULL, &type, (LPBYTE)data, &byteLength);
 
@@ -87,8 +88,10 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
         throw SystemError( PT_ERROR_MSG("Could not create Registry key") );
     }
 
-    std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
-    std::basic_string<TCHAR> wvalue = win32::fromMultiByte(value);
+    std::basic_string<TCHAR> wname;
+    win32::fromMultiByte(name, wname);
+    std::basic_string<TCHAR> wvalue;
+    win32::fromMultiByte(value, wvalue);
 
     LPBYTE data = (LPBYTE)wvalue.c_str();
     DWORD size = wvalue.size() * sizeof(TCHAR);

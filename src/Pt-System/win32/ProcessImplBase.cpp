@@ -87,8 +87,10 @@ void ProcessImplBase::start()
         args += _procInfo.arg(i);
     }
 
-    std::basic_string<TCHAR> tcmd  = win32::fromMultiByte( _procInfo.command() );
-    std::basic_string<TCHAR> targs = win32::fromMultiByte( args );
+    std::basic_string<TCHAR> tcmd;
+    win32::fromMultiByte( _procInfo.command(), tcmd );
+    std::basic_string<TCHAR> targs;
+    win32::fromMultiByte( args, targs );
 
     BOOL ret = CreateProcess( tcmd.c_str(), targs.c_str(), NULL, NULL,
                               0, 0, NULL, NULL, &m_startUp, &m_pid);

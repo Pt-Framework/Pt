@@ -30,6 +30,25 @@ namespace Pt {
 
 namespace System {
 
+void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si);
+
+
+void throwDirError(const std::string& path, const Pt::SourceInfo& si)
+{
+    DWORD error = GetLastError();
+    switch(error)
+    {
+        case ERROR_BAD_PATHNAME:
+        case ERROR_PATH_NOT_FOUND:
+        case ERROR_OPEN_FAILED:
+            throw DirectoryNotFound(path, si);
+
+        default:
+            throwError(error, path, si);
+    }
+}
+
+
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
   _path(path),
@@ -42,11 +61,12 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 
     firstFile += '*';
 
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte( firstFile, tpath );
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
     if(_findHandle == INVALID_HANDLE_VALUE)
-        throw DirectoryNotFound(path, PT_SOURCEINFO);
+        throwDirError(path, PT_SOURCEINFO);
 
     _path = path;
     if( ! _path.empty() && _path[_path.size()-1] != '\\')
@@ -102,46 +122,32 @@ const std::string& DirectoryIteratorImpl::path() const
 }
 
 
-
-bool DirectoryImpl::exists(const std::string& path)
-{
-    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
-
-    DWORD file_attr = ::GetFileAttributes( str.c_str() );
-
-    return (file_attr != 0xffffffff) && (file_attr & FILE_ATTRIBUTE_DIRECTORY);
-}
-
-
 void DirectoryImpl::create(const std::string& path)
 {
-    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
+    std::basic_string<TCHAR> str;
+    win32::fromMultiByte( path, str );
 
     if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
-    {
-        throw SystemError( PT_ERROR_MSG("Could not create directory") );
-    }
+        throwDirError(path, PT_SOURCEINFO);
 }
 
 
 void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
-    std::basic_string<TCHAR> from = win32::fromMultiByte( oldName );
-    std::basic_string<TCHAR> to   = win32::fromMultiByte( newName );
+    std::basic_string<TCHAR> from;
+    win32::fromMultiByte( oldName, from );
+    std::basic_string<TCHAR> to;
+    win32::fromMultiByte( newName, to );
 
     #ifdef _WIN32_WCE
 
         if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
-        {
-            throw SystemError( PT_ERROR_MSG("Could not move directory") );
-        }
+            throwDirError(oldName, PT_SOURCEINFO);
 
     #else
 
         if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
-        {
-            throw SystemError( PT_ERROR_MSG("Could not move directory") );
-        }
+            throwDirError(oldName, PT_SOURCEINFO);
 
     #endif
 }
@@ -149,12 +155,11 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 
 void DirectoryImpl::remove(const std::string& path)
 {
-    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
+    std::basic_string<TCHAR> str;
+    win32::fromMultiByte( path, str );
 
     if( FALSE == ::RemoveDirectory( str.c_str() ) )
-    {
-        throw SystemError(  PT_ERROR_MSG("Could not remove directory") );
-    }
+        throwDirError(path, PT_SOURCEINFO);
 }
 
 
@@ -166,10 +171,8 @@ void DirectoryImpl::chdir(const std::string& path)
 
     #else
 
-        if (FALSE == ::SetCurrentDirectory(path.c_str()))
-        {
-            throw SystemError( PT_ERROR_MSG("Could not change current directory") );
-        }
+        if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
+            throwDirError(path, PT_SOURCEINFO);
 
     #endif
 }

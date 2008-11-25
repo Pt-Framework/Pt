@@ -36,7 +36,7 @@ namespace win32 {
 
 
 #ifdef _UNICODE
-    inline std::wstring fromMultiByte(const std::string& from)
+    inline void fromMultiByte(const std::string& from, std::wstring& to)
     {
         size_t length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, NULL, 0);
 
@@ -46,14 +46,13 @@ namespace win32 {
         if(length == 0)
             throw std::runtime_error(PT_SOURCEINFO + "MultiByteToWideChar failed");
 
-        std::wstring wstr(wbuf, length-1);
+        to.assign(wbuf, length-1);
         delete[] wbuf;
-        return wstr;
     }
 #else
-    inline std::string fromMultiByte(const std::string& from)
+    inline void fromMultiByte(const std::string& from, std::string& to)
     {
-        return from;
+        to = from;
     }
 #endif
 

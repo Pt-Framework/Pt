@@ -41,14 +41,6 @@ SystemError::SystemError(const char* what)
 : std::runtime_error(what)
 { }
 
-void SystemErrorIf(bool flag, const char* msg)
-{
-   if(flag)
-   {
-        throw SystemError(msg);
-   }
-}
-
 } // namespace System
 
 } // namespace Ptv

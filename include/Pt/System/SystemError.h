@@ -51,8 +51,6 @@ namespace System {
             {}
     };
 
-    void SystemErrorIf(bool flag, const char* msg);
-
 } // namespace System
 
 } // namespace Pt

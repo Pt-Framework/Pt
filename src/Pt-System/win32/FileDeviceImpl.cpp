@@ -91,7 +91,8 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 #endif
     }
 
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+    std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte(path, tpath);
     HANDLE h = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
     if(h == INVALID_HANDLE_VALUE)

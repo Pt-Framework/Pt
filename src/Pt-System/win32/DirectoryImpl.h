@@ -77,8 +77,6 @@ class DirectoryImpl
 
         static void move(const std::string& oldName, const std::string& newName);
 
-        static bool exists(const std::string& path);
-
         static void chdir(const std::string& path);
 
         static std::string cwd();
