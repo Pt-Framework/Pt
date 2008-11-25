@@ -65,7 +65,7 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
     size_t err = GetLastError();
 
     if( h == 0  || h == INVALID_HANDLE_VALUE )
-        throw AccessFailed("Could not open port" , PT_SOURCEINFO);
+        throw DeviceNotFound(port_, PT_SOURCEINFO);
 
     this->setHandle(h);
 

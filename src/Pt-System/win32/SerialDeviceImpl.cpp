@@ -74,9 +74,8 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
         h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
 
-
     if( h == 0  || h == INVALID_HANDLE_VALUE )
-        throw AccessFailed("Could not open port" , PT_SOURCEINFO);
+        throw DeviceNotFound("Could not open port" , PT_SOURCEINFO);
 
     this->setHandle(h);
 

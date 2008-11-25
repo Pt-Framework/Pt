@@ -96,7 +96,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     HANDLE h = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
     if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed("Could not open file handle", PT_SOURCEINFO);
+        throw FileNotFound(path, PT_SOURCEINFO);
 
     this->setHandle(h);
 
