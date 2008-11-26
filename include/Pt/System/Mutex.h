@@ -110,7 +110,7 @@ class PT_SYSTEM_API Mutex : private NonCopyable
             };
     @endcode
 */
-class MutexLock
+class MutexLock : private NonCopyable
 {
     public:
         //! @brief Constructor
@@ -198,7 +198,7 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 
 /** @brief Lock class for recursive mutexes.
 */
-class RecursiveLock
+class RecursiveLock : private NonCopyable
 {
     public:
         //! @brief Constructor
@@ -312,7 +312,7 @@ class PT_SYSTEM_API ReadWriteMutex : public NonCopyable
 };
 
 
-class ReadLock
+class ReadLock : private NonCopyable
 {
     public:
         ReadLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
@@ -356,7 +356,7 @@ class ReadLock
 };
 
 
-class WriteLock
+class WriteLock : private NonCopyable
 {
     public:
         WriteLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
@@ -463,7 +463,7 @@ private:
 };
 
 
-class SpinLock
+class SpinLock : private NonCopyable
 {
     public:
         SpinLock(SpinMutex& m, bool doLock = true, bool isLocked = false)

@@ -54,8 +54,8 @@ MutexImpl::~MutexImpl()
 
 void MutexImpl::lock()
 {
-   SystemErrorIf( pthread_mutex_lock(&_handle) != 0,
-                  PT_ERROR_MSG("pthread_mutex_lock failed") );
+   if( pthread_mutex_lock(&_handle) != 0 )
+       throw SystemError( PT_ERROR_MSG("pthread_mutex_lock failed") );
 }
 
 
@@ -63,8 +63,8 @@ bool MutexImpl::tryLock()
 {
     int rc = pthread_mutex_trylock(&_handle);
 
-    Pt::System::SystemErrorIf( rc != 0 && rc != EBUSY,
-                               PT_ERROR_MSG("pthread_mutex_trylock failed") );
+    if( rc != 0 && rc != EBUSY )
+        throw SystemError( PT_ERROR_MSG("pthread_mutex_trylock failed") );
 
     return rc != EBUSY;
 }
@@ -72,15 +72,15 @@ bool MutexImpl::tryLock()
 
 void MutexImpl::unlock()
 {
-   SystemErrorIf( pthread_mutex_unlock(&_handle) != 0,
-                  PT_ERROR_MSG("pthread_mutex_unlock failed") );
+   if( pthread_mutex_unlock(&_handle) != 0 )
+       throw SystemError( PT_ERROR_MSG("pthread_mutex_unlock failed") );
 }
 
 
 ReadWriteMutexImpl::ReadWriteMutexImpl()
 {
-    SystemErrorIf( pthread_rwlock_init(&_rwl, NULL),
-                   PT_ERROR_MSG("pthread_rwlock_init failed") );
+    if( pthread_rwlock_init(&_rwl, NULL) )
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_init failed") );
 }
 
 
@@ -92,8 +92,8 @@ ReadWriteMutexImpl::~ReadWriteMutexImpl()
 
 void ReadWriteMutexImpl::readLock()
 {
-    SystemErrorIf( pthread_rwlock_rdlock(&_rwl) != 0,
-                   PT_ERROR_MSG("pthread_rwlock_rdlock failed") );
+    if( pthread_rwlock_rdlock(&_rwl) != 0 )
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_rdlock failed") );
 }
 
 
@@ -101,8 +101,8 @@ bool ReadWriteMutexImpl::tryReadLock()
 {
     int rc = pthread_rwlock_tryrdlock(&_rwl);
 
-    SystemErrorIf( rc != 0 && rc != EBUSY,
-                   PT_ERROR_MSG("pthread_rwlock_tryrdlock failed") );
+    if( rc != 0 && rc != EBUSY )
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_tryrdlock failed") );
 
     return rc != EBUSY;
 }
@@ -110,8 +110,8 @@ bool ReadWriteMutexImpl::tryReadLock()
 
 void ReadWriteMutexImpl::writeLock()
 {
-    SystemErrorIf( pthread_rwlock_wrlock(&_rwl) != 0,
-                   PT_ERROR_MSG("pthread_rwlock_wrlock failed") );
+    if( pthread_rwlock_wrlock(&_rwl) != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_wrlock failed") );
 }
 
 
@@ -119,8 +119,8 @@ bool ReadWriteMutexImpl::tryWriteLock()
 {
     int rc = pthread_rwlock_trywrlock(&_rwl);
 
-    SystemErrorIf( rc != 0 && rc != EBUSY,
-                   PT_ERROR_MSG("pthread_rwlock_trywrlock failed") );
+    if( rc != 0 && rc != EBUSY)
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_trywrlock failed") );
 
     return rc != EBUSY;
 }
@@ -128,8 +128,8 @@ bool ReadWriteMutexImpl::tryWriteLock()
 
 void ReadWriteMutexImpl::unlock()
 {
-    SystemErrorIf( pthread_rwlock_unlock(&_rwl) != 0,
-                   PT_ERROR_MSG("pthread_rwlock_unlock failed") );
+    if( pthread_rwlock_unlock(&_rwl) != 0 )
+        throw SystemError( PT_ERROR_MSG("pthread_rwlock_unlock failed") );
 }
 
 } // !namepsace System

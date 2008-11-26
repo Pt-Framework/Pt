@@ -53,7 +53,6 @@ DeviceNotFound::DeviceNotFound(const std::string& device, const SourceInfo& si)
 {}
 
 
-
 FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
 : AccessFailed(path, si)
 {}
