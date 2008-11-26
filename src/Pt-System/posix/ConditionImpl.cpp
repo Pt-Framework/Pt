@@ -19,23 +19,19 @@
  ***************************************************************************/
 #include "ConditionImpl.h"
 #include "MutexImpl.h"
-#include "Pt/SourceInfo.h"
-
+#include "Pt/System/SystemError.h"
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
-
-#include <stdexcept>
 
 namespace Pt {
 
 namespace System {
 
-
 ConditionImpl::ConditionImpl()
 {
     if ( pthread_cond_init( &_cond, NULL ) != 0)
-        throw std::runtime_error( PT_ERROR_MSG("Could not initialize Condition.") );
+        throw SystemError( PT_ERROR_MSG("pthread_cond_init failed") );
 }
 
 
@@ -48,7 +44,7 @@ ConditionImpl::~ConditionImpl()
 void ConditionImpl::wait(Mutex& mtx)
 {
     if ( pthread_cond_wait(&_cond, mtx.impl().handle() ) != 0)
-       throw std::runtime_error( PT_ERROR_MSG("Could not wait for Mutex.") );
+       throw SystemError( PT_ERROR_MSG("pthread_cond_wait failed") );
 }
 
 
@@ -64,10 +60,14 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
     ts.tv_sec = (ms/1000) + (ts.tv_nsec/1000000000) + tv.tv_sec;
     ts.tv_nsec = ts.tv_nsec % 1000000000;
 
-    do{
+    do
+    {
         result = pthread_cond_timedwait(&_cond, mtx.impl().handle(), &ts);
     }
     while(result == EINTR);
+
+    if(result != 0 && result != ETIMEDOUT)
+        throw SystemError( PT_ERROR_MSG("pthread_cond_timedwait failed") );
 
     return result != ETIMEDOUT;
 }
@@ -75,17 +75,16 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 
 void ConditionImpl::signal()
 {
-
-    if ( pthread_cond_signal( &_cond ) != 0)
-        throw std::runtime_error( PT_ERROR_MSG("Could not signal Condition.") );
+    if( pthread_cond_signal( &_cond ) != 0 )
+        throw SystemError( PT_ERROR_MSG("pthread_cond_signal failed") );
 }
 
 
 void ConditionImpl::broadcast()
 {
-    pthread_cond_broadcast( &_cond );
+    if( pthread_cond_broadcast( &_cond ) != 0 )
+        throw SystemError( PT_ERROR_MSG("pthread_cond_broadcast failed") );
 }
-
 
 }
 

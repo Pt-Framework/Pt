@@ -43,18 +43,6 @@ extern "C"
     }
 }
 
-namespace
-{
-    void throwIf(int ret, pthread_t& id, const char* msg, const Pt::SourceInfo& si)
-    {
-        if(ret != 0)
-        {
-            id = 0;
-            throw Pt::System::SystemError(msg, si);
-        }
-    }
-}
-
 namespace Pt {
 
 namespace System {
@@ -64,7 +52,8 @@ void ThreadImpl::detach()
     if( _id )
     {
         int ret = pthread_detach(_id);
-        throwIf(ret, _id, "Could not detach thread. ", PT_SOURCEINFO);
+        if(ret != 0)
+            throw SystemError( PT_ERROR_MSG("pthread_detach") );
     }
 }
 
@@ -90,7 +79,8 @@ void ThreadImpl::start()
     int ret = pthread_create(&_id, &attrs, thread_entry, this);
     pthread_attr_destroy(&attrs);
 
-    throwIf(ret, _id, "Could not create thread. ", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_create") );
 }
 
 
@@ -99,15 +89,16 @@ void ThreadImpl::join()
     void* threadRet = 0;
     int ret = pthread_join(_id, &threadRet);
 
-    throwIf(ret, _id, "Could not join thread. ", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_join") );
 }
 
 
 void ThreadImpl::terminate()
 {
     int ret = pthread_kill(_id, SIGKILL);
-
-    throwIf(ret, _id, "Could not terminate thread. ", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_kill") );
 }
 
 }

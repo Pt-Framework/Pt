@@ -28,7 +28,7 @@ SemaphoreImpl::SemaphoreImpl(unsigned int initial)
 {
     int ret = sem_init(&_handle, 0, initial);
     if( ret == -1 )
-        throw SystemError("Could not create semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("sem_init failed") );
 }
 
 
@@ -42,7 +42,7 @@ void SemaphoreImpl::wait()
 {
     int ret = sem_wait(&_handle);
     if(ret == -1)
-        throw SystemError ("Could not wait on semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("sem_wait failed") );
 }
 
 
@@ -54,7 +54,7 @@ bool SemaphoreImpl::tryWait()
         if(errno == EAGAIN)
             return false;
 
-        throw SystemError("Could not wait on semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("sem_trywait failed") );
     }
 
     return true;
@@ -69,7 +69,7 @@ void SemaphoreImpl::post()
         if(errno == EINTR)
             goto again;
 
-        throw SystemError ("Could not post semaphore.", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("sem_post failed") );
     }
 }
 

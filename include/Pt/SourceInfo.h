@@ -57,7 +57,7 @@
 /** @brief Construct a Pt::SourceInfo object
     @ingroup Pt
 */
-//#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, \
+//#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, 
 //                                     __FILE__ ":" PT_TOSTRING(__LINE__) )
 
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__, PT_TOSTRING(__LINE__), PT_FUNCTION)

@@ -26,7 +26,8 @@ namespace Pt {
 
 namespace System {
 
-    class PT_API SemaphoreImpl {
+    class SemaphoreImpl
+    {
         public:
             SemaphoreImpl(unsigned int initial = 0);
 
