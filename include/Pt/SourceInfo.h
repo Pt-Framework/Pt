@@ -57,8 +57,10 @@
 /** @brief Construct a Pt::SourceInfo object
     @ingroup Pt
 */
-#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, \
-                                     __FILE__ ":" PT_TOSTRING(__LINE__) )
+
+//#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, __FILE__ ":" PT_TOSTRING(__LINE__) )
+
+#define PT_SOURCEINFO Pt::SourceInfo(__FILE__ ":" PT_TOSTRING(__LINE__), PT_FUNCTION)
 
 namespace Pt {
 
@@ -86,7 +88,7 @@ class SourceInfo {
         /** @brief Copy constructor
         */
         inline SourceInfo(const SourceInfo& si)
-        : _file(si._file), _line(si._line), _func(si._func), _msg(si._msg)
+        : _file(si._file)/*, _line(si._line)*/, _func(si._func)//, _msg(si._msg)
         { }
 
         /** @brief Constructor
@@ -95,8 +97,8 @@ class SourceInfo {
             macro to take advantage of compiler specific macros to
             indicate the source file name, position and function name.
         */
-        inline SourceInfo(const char* file, unsigned int line, const char* func, const char* msg)
-        : _file(file), _line(line), _func(func), _msg(msg)
+        inline SourceInfo(const char* where, /*const char* line, */const char* func/*, const char* msg*/)
+        : _file(where)/*, _line(line)*/, _func(func)//, _msg(msg)
         { }
 
         /**  @brief Returns the filename
@@ -106,16 +108,16 @@ class SourceInfo {
 
         /** @brief Returns the line number
         */
-        inline unsigned int line() const
-        { return _line; }
+        inline const char* line() const
+        { return "3"; }
 
-        operator std::string() const
-        { return std::string(_msg); }
+        //operator std::string() const
+        //{ return std::string(_msg); }
 
         /** @brief Returns a string describing the location
         */
         inline const char* where() const
-        { return _msg; }
+        { return _file; }
 
         /** @brief Returns the function signature
         */
@@ -127,38 +129,38 @@ class SourceInfo {
         SourceInfo& operator=(const SourceInfo& si)
         {
             _file = si._file;
-            _line = si._line;
+            //_line = si._line;
             _func = si._func;
-            _msg = si._msg;
+            //_msg = si._msg;
             return *this;
         }
 
     private:
         const char*  _file;
-        unsigned int _line;
+        //const char*  _line;
         const char*  _func;
-        const char* _msg;
+        //const char* _msg;
 };
 
 
 inline std::string operator+(const std::string& what, const SourceInfo& info)
 {
-    return std::string( info.where() ) + ": " + what;
+    return std::string( info.where() ) + ": " += what;
 }
 
 inline std::string operator+(const char* what, const SourceInfo& info)
 {
-    return std::string( info.where() ) + ": " + what;
+    return std::string( info.where() ) + ": " += what;
 }
 
 inline std::string operator+( const SourceInfo& info, const std::string& what)
 {
-    return std::string( info.where() ) + ": " + what;
+    return std::string( info.where() ) + ": " += what;
 }
 
 inline std::string operator+(const SourceInfo& info, const char* what)
 {
-    return std::string( info.where() ) + ": " + what;
+    return std::string( info.where() ) + ": " += what;
 }
 
 } // namespace Pt
