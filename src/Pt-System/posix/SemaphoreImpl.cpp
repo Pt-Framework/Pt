@@ -71,7 +71,6 @@ void SemaphoreImpl::post()
 
         throw SystemError ("Could not post semaphore.", PT_SOURCEINFO);
     }
-
 }
 
 } // namespace System;
