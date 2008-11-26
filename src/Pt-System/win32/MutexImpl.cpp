@@ -31,7 +31,7 @@ MutexImpl::MutexImpl()
     _handle = CreateMutex(NULL, FALSE, NULL);
 
     if( !_handle )
-        throw SystemError( PT_ERROR_MSG("Could not create mutex") );
+        throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
 }
 
 
@@ -40,7 +40,7 @@ MutexImpl::MutexImpl(int recursive)
     _handle = CreateMutex(NULL, FALSE, NULL);
 
     if( !_handle )
-        throw SystemError( PT_ERROR_MSG("Could not create mutex") );
+        throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
 }
 
 
@@ -59,10 +59,7 @@ void MutexImpl::lock()
     #endif
 
     if(ret != WAIT_OBJECT_0)
-    {
-        DWORD error =  GetLastError();
-        throw SystemError( PT_ERROR_MSG("Could not wait for mutex") );
-    }
+        throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
 }
 
 
@@ -74,14 +71,10 @@ bool MutexImpl::tryLock()
         DWORD ret = WaitForSingleObjectEx(_handle, 0, FALSE);
     #endif
 
-    if(ret == WAIT_OBJECT_0)
-        return true;
+    if(ret != WAIT_OBJECT_0 && ret != WAIT_TIMEOUT)
+        throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
 
-    if(ret == WAIT_TIMEOUT)
-        return false;
-
-    throw SystemError( PT_ERROR_MSG("Could not wait for mutex") );
-    return false;
+    return ret == WAIT_OBJECT_0;
 }
 
 
@@ -89,8 +82,7 @@ void MutexImpl::unlock()
 {
     if( ! ReleaseMutex(_handle) )
     {
-        DWORD error =  GetLastError();
-        throw SystemError( PT_ERROR_MSG("Could not release mutex") );
+        throw SystemError( PT_ERROR_MSG("ReleaseMutex failed") );
     }
 }
 
@@ -101,15 +93,15 @@ ReadWriteMutexImpl::ReadWriteMutexImpl()
 	_mutex = CreateMutex(NULL, FALSE, NULL);
 
 	if(_mutex == NULL)
-		throw SystemError( PT_ERROR_MSG("Could not create reader/writer lock") );
+		throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
 
 	_readEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 	if(_readEvent == NULL)
-		throw SystemError( PT_ERROR_MSG("Could not create reader/writer lock") );
+		throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 
 	_writeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 	if(_writeEvent == NULL)
-		throw SystemError( PT_ERROR_MSG("Could not create reader/writer lock") );
+		throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 }
 
 
@@ -136,7 +128,7 @@ void ReadWriteMutexImpl::readLock()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError( PT_ERROR_MSG("Could not aquire reader lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
 	}
 }
 
@@ -158,7 +150,7 @@ bool ReadWriteMutexImpl::tryReadLock()
 		case WAIT_TIMEOUT:
 			return false;
 		default:
-			throw SystemError( PT_ERROR_MSG("Could not aquire reader lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
 	}
 }
 
@@ -183,7 +175,7 @@ void ReadWriteMutexImpl::writeLock()
 			break;
 		default:
 			this->removeWriter();
-			throw SystemError( PT_ERROR_MSG("Could not aquire writer lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
 	}
 }
 
@@ -211,7 +203,7 @@ bool ReadWriteMutexImpl::tryWriteLock()
 			return false;
 		default:
 			removeWriter();
-			throw SystemError( PT_ERROR_MSG("Could not aquire writer lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
 	}
 }
 
@@ -226,7 +218,7 @@ void ReadWriteMutexImpl::unlock()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError( PT_ERROR_MSG("Could not lock reader/writer lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
 	}
 }
 
@@ -240,7 +232,7 @@ void ReadWriteMutexImpl::addWriter()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError( PT_ERROR_MSG("Could not lock reader/writer lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
 	}
 }
 
@@ -254,7 +246,7 @@ void ReadWriteMutexImpl::removeWriter()
 			ReleaseMutex(_mutex);
 			break;
 		default:
-			throw SystemError( PT_ERROR_MSG("Could not lock reader/writer lock") );
+			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
 	}
 }
 
