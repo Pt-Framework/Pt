@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,11 +19,9 @@
 #include "SemaphoreImpl.h"
 #include "Pt/System/Semaphore.h"
 
-
 namespace Pt {
 
 namespace System {
-
 
 Semaphore::Semaphore(unsigned int initial)
 {

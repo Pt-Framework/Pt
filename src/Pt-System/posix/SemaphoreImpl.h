@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,13 +16,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_SemaphoreImpl_h
 #define Pt_SemaphoreImpl_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <semaphore.h>
-
 
 namespace Pt {
 

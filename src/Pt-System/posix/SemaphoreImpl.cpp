@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,19 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "SemaphoreImpl.h"
-
 #include "Pt/System/SystemError.h"
-
-#include <climits>
 #include <cerrno>
-
 
 namespace Pt {
 
 namespace System {
-
 
 SemaphoreImpl::SemaphoreImpl(unsigned int initial)
 {
@@ -55,7 +49,8 @@ void SemaphoreImpl::wait()
 bool SemaphoreImpl::tryWait()
 {
     int ret = sem_trywait( &_handle );
-    if(ret == -1) {
+    if(ret == -1)
+    {
         if(errno == EAGAIN)
             return false;
 
@@ -69,7 +64,8 @@ bool SemaphoreImpl::tryWait()
 void SemaphoreImpl::post()
 {
     again:
-    if( 0 != sem_post(&_handle) ) {
+    if( 0 != sem_post(&_handle) )
+    {
         if(errno == EINTR)
             goto again;
 
@@ -77,7 +73,6 @@ void SemaphoreImpl::post()
     }
 
 }
-
 
 } // namespace System;
 

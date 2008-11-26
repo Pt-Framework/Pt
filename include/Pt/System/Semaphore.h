@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,38 +16,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Semaphore_h
 #define Pt_Semaphore_h
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 
-
 namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API Semaphore : public NonCopyable {
+class PT_SYSTEM_API Semaphore : public NonCopyable
+{
     friend class SemaphoreImpl;
 
     public:
-        //! Unnamed semaphore constructor
+        //! @brief Construct with initial count
         Semaphore(unsigned int initial = 0);
 
-        //! Destructor. Does not signal...
+        //! @brief Destructor. Does not signal...
         ~Semaphore();
 
-        //! Wait for the semaphore to become signaled
+        //! @brief Wait for the semaphore to become signaled
         Semaphore& wait();
 
-        //! Non-blocking wait
+        //! @brief Non-blocking wait
         bool tryWait();
 
-        //! Signal the semaphore
+        //! @brief Signal the semaphore
         Semaphore& post();
 
     private:
+        //! @internal @brief Implementation
         class SemaphoreImpl* _impl;
 };
 
