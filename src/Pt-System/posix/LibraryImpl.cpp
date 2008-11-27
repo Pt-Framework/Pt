@@ -36,7 +36,7 @@ void LibraryImpl::open(const std::string& path)
     _handle = ::dlopen(path.c_str(), flags);
     if( !_handle )
     {
-        throw OpenLibraryFailed( dlerror(), PT_SOURCEINFO );
+        throw OpenLibraryFailed( path, PT_SOURCEINFO );
     }
 }
 

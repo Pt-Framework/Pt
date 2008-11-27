@@ -59,7 +59,7 @@ void IODeviceImpl::close()
     if(_fd != -1)
     {
         if( ::close(_fd) != 0 )
-            throw IOError("Could not close file handle", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("close failed") );
 
         _fd = -1;
     }
@@ -100,7 +100,7 @@ bool IODeviceImpl::wait(std::size_t msecs)
             break;
 
         if( errno != EINTR )
-            throw IOError( "select failed", PT_SOURCEINFO );
+            throw IOError( PT_ERROR_MSG("select failed") );
     }
 
     return this->checkEvent(rfds, wfds, efds);
@@ -157,13 +157,13 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
                     break;
 
                 if( errno != EINTR )
-                    throw IOError( "select failed", PT_SOURCEINFO );
+                    throw IOError(  PT_ERROR_MSG("select failed")  );
             }
 
             continue;
         }
 
-        throw IOError("read failed", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("read failed") );
     }
 
     return ret;
@@ -219,13 +219,13 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
                     break;
 
                 if( errno != EINTR )
-                    throw IOError( "select failed", PT_SOURCEINFO );
+                    throw IOError( PT_ERROR_MSG("select failed") );
             }
 
             continue;
         }
 
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("write failed") );
     }
 
     return ret;
@@ -236,7 +236,7 @@ void IODeviceImpl::sync() const
 {
     int ret = fsync(_fd);
     if(ret != 0)
-        throw IOError("Could not sync handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("sync failed") );
 }
 
 

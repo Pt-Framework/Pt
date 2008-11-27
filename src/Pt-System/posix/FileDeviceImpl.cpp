@@ -25,9 +25,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace System{
+namespace System {
 
 FileDeviceImpl::FileDeviceImpl(FileDevice& device)
 : IODeviceImpl(device)
@@ -92,7 +92,6 @@ bool FileDeviceImpl::seekable() const
 }
 
 
-
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd )
 {
     int whence = std::ios::cur;
@@ -116,25 +115,27 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 
     off_t ret = lseek(_fd, offset, whence);
     if( ret == (off_t)-1 )
-        throw IOError("Could not seek on file handle", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("lseek failed") );
 
     return ret;
 }
+
 
 void FileDeviceImpl::resize(off_type size)
 {
     int ret = ::ftruncate(_fd, size);
     if(ret != 0)
-        throw IOError("Could not truncate file", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("ftruncate failed") );
 
 }
+
 
 size_t FileDeviceImpl::size()
 {
     struct stat buff;
     int ret = fstat(_fd, &buff);
     if(ret != 0)
-        throw IOError("Could not stat file", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("fstat failed") );
 
     return buff.st_size;
 }
@@ -152,21 +153,6 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
     return ret;
 }
 
+} //namespace System
 
-/*
-const IOEvent& FileDeviceImpl::event( FdsType fdsType )
-{
-    switch( fdsType )
-    {
-        case ReadFds:
-            return _readEvent;
-        break;
-        case WriteFds:
-            return _writeEvent;
-        break;
-    }
-}
-*/
-
-} //namespace System 
 } //namespace Pt

@@ -35,7 +35,7 @@ void ProcessImpl::start()
     {
         m_pid = -1;
         _state = Process::Failed;
-        throw SystemError("fork failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("fork failed") );
     }
 
     if( m_pid == 0) // child Process
@@ -108,7 +108,7 @@ void ProcessImpl::kill()
     }
     if( m_pid != ::wait(NULL) )
     {
-        throw SystemError(std::strerror(errno),PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("kill failed") );
     }
 }
 
@@ -119,7 +119,7 @@ int ProcessImpl::wait()
     if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
     {
         _state = Process::Failed;
-        throw SystemError(std::strerror(errno),PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("waitpid failed") );
     }
 
     _state = Process::Finished;
@@ -148,14 +148,14 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
 {
     if( 0 > setenv(name.c_str(),value.c_str(),1) )
     {
-        throw SystemError("not Enough Memory in Environment!",PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("setenv failed") );
     }
 }
 
 
 void ProcessImpl::unsetEnvVar(const std::string& name)
 {
-    unsetenv(name.c_str());
+    unsetenv( name.c_str() );
 }
 
 
@@ -183,7 +183,7 @@ unsigned long ProcessImpl::usedMemory()
     struct rusage usage;
     int r =  getrusage(RUSAGE_SELF, &usage);
     if( r == -1)
-        throw SystemError("getrusage failed", PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("getrusage failed") );
 
     return usage.ru_idrss;
 }

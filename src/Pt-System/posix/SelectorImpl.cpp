@@ -19,16 +19,14 @@
  ***************************************************************************/
 #include "SelectorImpl.h"
 #include "IODeviceImpl.h"
-#include "ApplicationImpl.h"
 #include "Pt/System/IOError.h"
-#include "Pt/System/Application.h"
+#include "Pt/System/SystemError.h"
 #include "Pt/System/Selector.h"
-#include <cerrno>
+#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <cassert>
-#include <iostream>
+
 
 namespace Pt {
 
@@ -41,23 +39,23 @@ SelectorImpl::SelectorImpl()
 
     //Open a pipe to send wake up message.
     if( ::pipe( _wakePipe ) )
-        throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("pipe failed") );
 
     int flags = ::fcntl(_wakePipe[0], F_GETFL);
     if(-1 == flags)
-        throw std::runtime_error("Could not get pipe flags." + PT_SOURCEINFO);
+        throw SystemError(PT_ERROR_MSG("fcntl failed"));
 
     int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
     if(-1 == ret)
-        throw std::runtime_error("Could not set pipe to non-blocking." + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
 
     flags = ::fcntl(_wakePipe[1], F_GETFL);
     if(-1 == flags)
-        throw std::runtime_error("Could not get pipe flags." + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
 
     ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
     if(-1 == ret)
-        throw std::runtime_error("Could not set pipe to non-blocking." + PT_SOURCEINFO);
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
 
     FD_ZERO(&_rfds);
     FD_ZERO(&_wfds);
@@ -153,7 +151,7 @@ bool SelectorImpl::wait(std::size_t msecs)
 
         if( avail < 0 && errno != EINTR )
         {
-            throw IOError( "select failed", PT_SOURCEINFO );
+            throw IOError( PT_ERROR_MSG("select failed") );
         }
 
         if(msecs == SelectorBase::WaitInfinite)
@@ -167,7 +165,7 @@ bool SelectorImpl::wait(std::size_t msecs)
 
     if( FD_ISSET(_wakePipe[0], &efds) )
     {
-        throw IOError("select error on event pipe", PT_SOURCEINFO);
+        throw IOError( PT_ERROR_MSG("pipe failed") );
     }
 
     if( FD_ISSET(_wakePipe[0], &rfds) )
@@ -193,38 +191,9 @@ bool SelectorImpl::wait(std::size_t msecs)
                     break;
             }
 
-            throw IOError("Cound not read from pipe", PT_SOURCEINFO);
+            throw IOError( PT_ERROR_MSG("pipe read failed") );
         }
     }
-
-    /*if (_app && FD_ISSET( _app->impl().signalFd(), &rfds ) )
-    {
-        int sigNo = 0;
-        ssize_t size = 0;
-        --avail;
-
-        while(true)
-        {
-            int ret = ::read(_app->impl().signalFd(), &sigNo + size, sizeof(sigNo) - size);
-            if(ret > 0)
-            {
-                size += ret;
-                if( size == sizeof(sigNo) )
-                {
-                    _app->systemSignal.send(sigNo);
-                    size = 0;
-                }
-            }
-            else if(ret == -1 && errno == EAGAIN && size == 0)
-            {
-                break;
-            }
-            else if( ret == 0 || (ret == -1 && errno != EINTR) )
-            {
-                throw IOError("Cound not read from signal pipe", PT_SOURCEINFO);
-            }
-        }
-    }*/
 
     try
     {

@@ -49,8 +49,6 @@ class SelectorImpl
 
         void wake();
 
-        //void setParent(Application* app);
-
     private:
         int _wakePipe[2];
         fd_set _rfds;
@@ -58,7 +56,6 @@ class SelectorImpl
         fd_set _efds;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
-        //Application* _app;
         Clock _clock;
 };
 
