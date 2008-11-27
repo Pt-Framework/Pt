@@ -1,7 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,8 +19,6 @@
 #ifndef PT_SHAREDLIBIMPL_H
 #define PT_SHAREDLIBIMPL_H
 
-#include "Pt/Atomicity.h"
-#include "Pt/System/SharedLib.h"
 #include "Pt/System/SystemError.h"
 #include <string>
 #include <dlfcn.h>
@@ -52,48 +48,24 @@ class SharedLibImpl
                 ::dlclose(_handle);
         }
 
-        Pt::atomic_t refs() const
+        unsigned refs() const
         {
             return _refs;
         }
 
-        Pt::atomic_t ref()
+        unsigned ref()
         {
-            return Pt::atomicIncrement(_refs);
+            return ++_refs;
         }
 
-        Pt::atomic_t unref()
+        unsigned unref()
         {
-            return Pt::atomicDecrement(_refs);
+            return --_refs;
         }
 
-        void open(const std::string& path)
-        {
-            if(_handle)
-                return;
+        void open(const std::string& path);
 
-            /* RTLD_NOW: since lazy loading is not supported by every target platform
-               RTLD_GLOBAL: make the external symbols in the loaded library available for subsequent libraries.
-                           see also http://gcc.gnu.org/faq.html#dso
-            */
-            int flags = RTLD_NOW | RTLD_GLOBAL;
-
-            _handle = ::dlopen(path.c_str(), flags);
-            if( !_handle )
-            {
-                throw OpenLibraryFailed( dlerror(), PT_SOURCEINFO );
-            }
-        }
-
-        void* resolve(const char* symbol)
-        {
-            if(_handle)
-            {
-                return ::dlsym(_handle, symbol);
-            }
-
-            return 0;
-        }
+        void* resolve(const char* symbol);
 
         bool failed()
         { return _handle == 0; }
@@ -109,7 +81,7 @@ class SharedLibImpl
         }
 
     private:
-        Pt::atomic_t _refs;
+        unsigned _refs;
         void* _handle;
 };
 

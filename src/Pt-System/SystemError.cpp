@@ -37,8 +37,20 @@ SystemError::SystemError(const std::string & what, const SourceInfo& si)
 : std::runtime_error(what + si)
 { }
 
+
 SystemError::SystemError(const char* what)
 : std::runtime_error(what)
+{ }
+
+
+OpenLibraryFailed::OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si)
+: SystemError(msg, si)
+{ }
+
+
+SymbolNotFound::SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si)
+: SystemError("symbol not found: " + sym, si)
+, _symbol(sym)
 { }
 
 } // namespace System
