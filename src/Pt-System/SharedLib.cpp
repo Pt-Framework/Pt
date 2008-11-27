@@ -23,7 +23,6 @@
 #include "Pt/System/Directory.h"
 #include <string>
 #include <iostream>
-#include <sstream>
 #include <memory>
 
 namespace Pt {
