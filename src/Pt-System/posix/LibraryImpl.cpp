@@ -16,77 +16,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SHAREDLIBIMPL_H
-#define PT_SHAREDLIBIMPL_H
-
-#include "Pt/System/SystemError.h"
-#include <string>
-#include <dlfcn.h>
+#include "LibraryImpl.h"
 
 namespace Pt {
 
 namespace System {
 
-class SharedLibImpl
+void LibraryImpl::open(const std::string& path)
 {
-    public:
-        SharedLibImpl()
-        : _refs(1)
-        , _handle(0)
-        { }
+    if(_handle)
+        return;
 
-        SharedLibImpl(const std::string& path)
-        : _refs(1)
-        , _handle(0)
-        {
-            this->open(path);
-        }
+    /* RTLD_NOW: since lazy loading is not supported by every target platform
+        RTLD_GLOBAL: make the external symbols in the loaded library available for subsequent libraries.
+                    see also http://gcc.gnu.org/faq.html#dso
+    */
+    int flags = RTLD_NOW | RTLD_GLOBAL;
 
-        ~SharedLibImpl()
-        {
-            if(_handle)
-                ::dlclose(_handle);
-        }
+    _handle = ::dlopen(path.c_str(), flags);
+    if( !_handle )
+    {
+        throw OpenLibraryFailed( dlerror(), PT_SOURCEINFO );
+    }
+}
 
-        unsigned refs() const
-        {
-            return _refs;
-        }
 
-        unsigned ref()
-        {
-            return ++_refs;
-        }
+void LibraryImpl::close()
+{
+    if(_handle)
+        ::dlclose(_handle);
+}
 
-        unsigned unref()
-        {
-            return --_refs;
-        }
 
-        void open(const std::string& path);
+void* LibraryImpl::resolve(const char* symbol) const
+{
+    if(_handle)
+    {
+        return ::dlsym(_handle, symbol);
+    }
 
-        void* resolve(const char* symbol);
-
-        bool failed()
-        { return _handle == 0; }
-
-        static std::string suffix()
-        {
-            return ".so";
-        }
-
-        static std::string prefix()
-        {
-            return "lib";
-        }
-
-    private:
-        unsigned _refs;
-        void* _handle;
-};
+    return 0;
+}
 
 } // namespace System
 
 } // namespace Pt
-
-#endif

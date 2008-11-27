@@ -2,7 +2,7 @@
 #define PT_CMA_COMPONENTLIBRARY_H
 
 #include <Pt/Api.h>
-#include <Pt/System/SharedLib.h>
+#include <Pt/System/Library.h>
 #include <Pt/Cma/IComponentBuilder.h>
 #include <map>
 #include <string>
@@ -14,7 +14,7 @@ namespace Cma {
     /**
      *  Class to handle dynamic libraries that contain components.
      */
-    class PT_EXPORT ComponentLibrary : protected Pt::System::SharedLib
+    class PT_EXPORT ComponentLibrary : protected Pt::System::Library
     {
         public:
             typedef std::map<TypeId,IComponentBuilder*> BuilderMap;

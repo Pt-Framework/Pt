@@ -7,7 +7,7 @@ namespace Pt {
 namespace Cma {
 
 ComponentLibrary::ComponentLibrary(const std::string& file)
-: SharedLib(file)
+: Library(file)
 {
     IComponentBuilder** builderList = (IComponentBuilder**) this->resolve("Ptv_ComponentList");
 
@@ -68,7 +68,7 @@ size_t ComponentLibrary::size() const
 
 const std::string& ComponentLibrary::path() const
 {
-    return SharedLib::path();
+    return Library::path();
 }
 
 }

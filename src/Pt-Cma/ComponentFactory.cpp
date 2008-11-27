@@ -4,9 +4,8 @@
 #include "Pt/Cma/IPrefs.h"
 #include "Pt/Cma/IUnknown.h"
 #include "Pt/Cma/TypeId.h"
-#include "Pt/SourceInfo.h"
-#include "Pt/System/SharedLib.h"
 #include "Pt/System/File.h"
+#include "Pt/SourceInfo.h"
 #include <stdexcept>
 
 namespace Pt {
@@ -31,7 +30,7 @@ void ComponentFactory::loadLibrary(const std::string& file)
 
 bool ComponentFactory::unload(const std::string& file)
 {
-    std::string path = System::SharedLib::find(file);
+    std::string path = System::Library::find(file);
     if( path.empty() )
     {
         return false;
@@ -164,7 +163,7 @@ ComponentLibrary* ComponentFactory::_loadLibrary(const std::string& file)
 
 ComponentLibrary* ComponentFactory::library(const std::string& file)
 {
-    std::string path = System::SharedLib::find(file);
+    std::string path = System::Library::find(file);
     if( path.empty() )
     {
         return 0;

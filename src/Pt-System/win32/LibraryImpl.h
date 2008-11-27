@@ -16,11 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SHAREDLIBIMPL_H
-#define PT_SHAREDLIBIMPL_H
+#ifndef PT_LIBRARYIMPL_H
+#define PT_LIBRARYIMPL_H
 
 #include "Pt/System/SystemError.h"
-#include "Pt/System/SharedLib.h"
 #include "win32.h"
 #include <windows.h>
 
@@ -28,22 +27,22 @@ namespace Pt {
 
 namespace System {
 
-class SharedLibImpl
+class LibraryImpl
 {
     public:
-        SharedLibImpl()
+        LibraryImpl()
         : _refs(1)
         , _handle(0)
         { }
 
-        SharedLibImpl(const std::string& path)
+        LibraryImpl(const std::string& path)
         : _refs(1)
         , _handle(0)
         {
             this->open(path);
         }
 
-        ~SharedLibImpl() throw()
+        ~LibraryImpl() throw()
         {
             if(_handle != 0)
                 ::FreeLibrary(_handle);
@@ -66,7 +65,9 @@ class SharedLibImpl
 
         void open(const std::string& path);
 
-        void* resolve(const char* symbol);
+        void close();
+
+        void* resolve(const char* symbol) const;
 
         bool failed()
         { return _handle == 0; }

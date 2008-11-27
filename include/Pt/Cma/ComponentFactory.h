@@ -1,15 +1,12 @@
 #ifndef PT_CMA_COMPONENTFACTORY_H
 #define PT_CMA_COMPONENTFACTORY_H
 
-#include <Pt/Api.h>
-#include <list>
-#include <string>
-
-#include <Pt/System/SharedLib.h>
+#include <Pt/Cma/Api.h>
 #include <Pt/Cma/ComponentLibrary.h>
 #include <Pt/Cma/IUnknown.h>
 #include <Pt/Cma/IComponentBuilder.h>
-
+#include <list>
+#include <string>
 
 namespace Pt {
 
@@ -34,7 +31,7 @@ namespace Cma {
      *    IUnknown* _unknown = factory.createComponent("someComponent");
      * \endcode
      */
-    class PT_EXPORT ComponentFactory
+    class PT_CMA_API ComponentFactory
     {
         public:
             typedef std::list<ComponentLibrary*> LibraryList;

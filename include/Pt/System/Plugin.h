@@ -4,7 +4,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/Directory.h>
-#include <Pt/System/SharedLib.h>
+#include <Pt/System/Library.h>
 #include <typeinfo>
 #include <list>
 #include <map>
@@ -156,7 +156,7 @@ namespace System {
             const std::type_info& _iface;
 
             /// A list of all loaded libraries
-			std::list<SharedLib> _libs;
+			std::list<Library> _libs;
 
             /// A map of a feature string and the Plugin* which handles it.
             PluginMap _plugins;
@@ -181,7 +181,7 @@ namespace System {
     template <class IfaceT, typename PluginT >
     void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path)
     {       
-        SharedLib shlib(path);
+        Library shlib(path);
 
     	void* symbol = shlib.resolve( "PluginList" );
     	if( ! symbol )

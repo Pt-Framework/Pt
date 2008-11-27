@@ -1,10 +1,11 @@
-#include "SharedLibImpl.h"
+#include "LibraryImpl.h"
+#include "win32.h"
 
 namespace Pt {
 
 namespace System {
 
-void SharedLibImpl::open(const std::string& path)
+void LibraryImpl::open(const std::string& path)
 {
 	if(_handle != 0)
 		return;
@@ -20,7 +21,14 @@ void SharedLibImpl::open(const std::string& path)
 }
 
 
-void* SharedLibImpl::resolve(const char* symbol)
+void LibraryImpl::close()
+{
+    if(_handle != 0)
+        ::FreeLibrary(_handle);
+}
+
+
+void* LibraryImpl::resolve(const char* symbol) const
 {
 	if(_handle == 0)
 		return 0;

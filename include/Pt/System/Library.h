@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_SHAREDLIB_H
-#define PT_SYSTEM_SHAREDLIB_H
+#ifndef PT_SYSTEM_LIBRARY_H
+#define PT_SYSTEM_LIBRARY_H
 
 #include <Pt/System/Api.h>
 #include <string>
@@ -32,10 +32,10 @@ class Symbol;
 
     This class can be used to dynamically load shared libraries and
     resolve symbols from it. The example below shows how to retrieve
-    the address of the function 'myProcedure' in library 'MySharedLib':
+    the address of the function 'myProcedure' in library 'MyLibrary':
 
     @code
-        SharedLib shlib("MySharedLib.dll");
+        Library shlib("MyLibrary.dll");
         void* procAddr = shlib["myProcedure"];
 
         typedef int (*MyProcType)();
@@ -43,12 +43,12 @@ class Symbol;
         int result = proc();
     @endcode
 */
-class PT_SYSTEM_API SharedLib
+class PT_SYSTEM_API Library
 {
     public:
         /** @brief Default Constructor which does not load a library.
          */
-        SharedLib();
+        Library();
 
         /** @brief Loads a shared library.
 
@@ -58,15 +58,15 @@ class PT_SYSTEM_API SharedLib
 
              The library is loaded immediately.
         */
-        SharedLib(const std::string& path);
+        Library(const std::string& path);
 
-        SharedLib(const SharedLib& other);
+        Library(const Library& other);
 
-        SharedLib& operator=(const SharedLib& other);
+        Library& operator=(const Library& other);
 
         /** @brief The destructor unloads the shared library from memory.
          */
-        ~SharedLib();
+        ~Library();
 
         /** @brief Loads a shared library.
 
@@ -75,24 +75,26 @@ class PT_SYSTEM_API SharedLib
              shared library prefix. If still no file can be found an exception is thrown.
              Calling this method twice might close the previously loaded library.
         */
-        SharedLib& open(const std::string& path);
+        Library& open(const std::string& path);
+
+        void close();
 
         /** @brief Resolves the symbol \a symbol from the shared library
             Returns the address of the symbol or 0 if it was not found.
          */
-        void* operator[](const char* symbol)
+        void* operator[](const char* symbol) const
 		{ return this->resolve(symbol); }
 
         /** @brief Resolves the symbol \a symbol from the shared library
             Returns the address of the symbol or 0 if it was not found.
          */
-        void* resolve(const char* symbol);
+        void* resolve(const char* symbol) const;
 
         /** @brief Returns null if invalid
          */
         operator const void*() const;
 
-        Symbol getSymbol(const char* symbol);
+        Symbol getSymbol(const char* symbol) const;
 
         /** @brief Returns true if invalid
          */
@@ -121,7 +123,7 @@ class PT_SYSTEM_API SharedLib
 
     private:
         //! @internal
-        class SharedLibImpl* _impl;
+        class LibraryImpl* _impl;
 
         //! @internal
         std::string _path;
@@ -136,21 +138,21 @@ class Symbol
         : _sym(0)
         { }
 
-        Symbol(const SharedLib& lib, void* sym)
+        Symbol(const Library& lib, void* sym)
         : _lib(lib), _sym(sym)
         { }
 
         void* sym() const
         { return _sym; }
 
-        const SharedLib& library() const
+        const Library& library() const
         { return _lib; }
 
         operator void*() const
         { return _sym; }
 
     private:
-        SharedLib _lib;
+        Library _lib;
         void* _sym;
 };
 
@@ -160,7 +162,7 @@ class Symbol
 
 extern "C" {
     //! @internal
-    PT_SYSTEM_API void pt_system_testSharedLib();
+    PT_SYSTEM_API void pt_system_testLibrary();
 
 }
 
