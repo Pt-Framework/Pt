@@ -21,7 +21,7 @@
 namespace std {
 
 inline basic_string<Pt::Char>::basic_string()
-: _data( &Pt::EmptyStringData )
+: _data( &Pt::StringData::emptyInstance() )
 {
     _data->ref();
 }

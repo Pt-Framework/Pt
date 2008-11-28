@@ -167,6 +167,12 @@ class StringData {
 
         void reserve(size_type length);
 
+        static StringData& emptyInstance()
+        {
+            static StringData empty;
+            return empty;
+        }
+
     protected:
         void allocate(size_type length);
         void updateInternalStringData();
@@ -186,10 +192,16 @@ class StringData {
 #endif
 };
 
-static StringData EmptyStringData;
+//! @internal
+static struct StringStaticInitializer
+{
+    StringStaticInitializer()
+    {
+        StringData::emptyInstance();
+    }
+} pt_string_static_initializer;
 
 } // namespace Pt
-
 
 // Include the implementation header
 #include <Pt/StringData.tpp>
