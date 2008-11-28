@@ -134,7 +134,7 @@ namespace Pt {
             //! \brief unlink a smart pointer from a managed object
             bool unlink(T* object)
             {
-                if ( _count && !atomicDecrement(*_count))
+                if ( _count && --*_count <= 0)
                 {
                     delete _count;
                     // no need to set _count to 0 since the pointer is either
@@ -151,12 +151,12 @@ namespace Pt {
                 if(object)
                 {
                     if(ptr._count == 0) {
-                        _count = new atomic_t(1);
+                        _count = new unsigned(1);
                     }
                     else
                     {
                         _count = ptr._count;
-                        atomicIncrement(*_count);
+                        ++*_count;
                     }
                 }
                 else
@@ -164,9 +164,52 @@ namespace Pt {
             }
 
         private:
-            atomic_t* _count;
+            unsigned* _count;
     };
 
+    template <typename T>
+    class ExternalAtomicRefCounted
+    {
+        volatile atomic_t* rc;
+
+        protected:
+            ExternalAtomicRefCounted()
+            : rc(0)
+            { }
+
+            bool unlink(T* object)
+            {
+                if (object && atomicDecrement(*rc) <= 0)
+                {
+                    delete rc;
+                    // no need to set rc to 0 since the pointer is either
+                    // destroyed or another object is linked in
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            void link(const ExternalAtomicRefCounted& ptr, T* object)
+            {
+                if (object)
+                {
+                    if (ptr.rc == 0)
+                        rc = new atomic_t(1);
+                    else
+                    {
+                        rc = ptr.rc;
+                        atomicIncrement(*rc);
+                    }
+                }
+                else
+                    rc = 0;
+            }
+
+        public:
+            atomic_t refs() const
+            { return rc ? *rc : 0; }
+    };
 
     /**
         \param T The managed object type
