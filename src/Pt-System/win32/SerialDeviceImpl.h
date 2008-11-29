@@ -45,7 +45,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void detach(SelectorBase& s);
 
-        bool wait(std::size_tmsecs);
+        bool wait(std::size_t msecs);
         
         bool setWaitHandle(HANDLE h, bool& active);
         

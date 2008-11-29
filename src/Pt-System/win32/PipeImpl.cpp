@@ -388,13 +388,13 @@ PipeImpl::~PipeImpl()
 }
 
 
-IODevice& PipeImpl::input()
+IODevice& PipeImpl::out()
 {
     return _out;
 }
 
 
-IODevice& PipeImpl::output()
+IODevice& PipeImpl::in()
 {
     return _in;
 }

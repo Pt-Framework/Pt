@@ -67,10 +67,13 @@ void ProcessImplBase::start()
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
-    std::basic_string<TCHAR> tcmd = win32::fromMultiByte( _procInfo.command() );
+    std::basic_string<TCHAR> tcmd;
+	win32::fromMultiByte( _procInfo.command(), tcmd );
     for( unsigned i = 0; i < _procInfo.argCount(); i++)
     {
-        tcmd += win32::fromMultiByte( " " + _procInfo.arg(i) );
+		std::basic_string<TCHAR> targ;
+        win32::fromMultiByte( " " + _procInfo.arg(i), targ );
+		tcmd += targ;
     }
     
     std::vector<TCHAR> m_buffer( tcmd.begin(), tcmd.end() );
@@ -105,7 +108,7 @@ void ProcessImplBase::start()
 
 void ProcessImplBase::kill()
 {
-    if( 0 == TerminateProcess(m_pid.hProcess, -1) )
+    if( 0 == TerminateProcess(m_pid.hProcess, 1) )
     {
         throw SystemError( PT_ERROR_MSG("TerminateProcess failed") );
     }

@@ -23,6 +23,7 @@
 #include "Pt/System/IODevice.h"
 #include "Pt/System/Selector.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/IOError.h"
 #include <cassert>
 
 namespace Pt {
@@ -357,7 +358,7 @@ size_t FileDeviceImpl::endWrite()
  
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
-        throw IOError( PT_ERROR_MSG"GetOverlappedResult failed") );
+        throw IOError( PT_ERROR_MSG("GetOverlappedResult failed") );
     }
 
 #else

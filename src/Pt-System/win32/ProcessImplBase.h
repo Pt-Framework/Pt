@@ -56,8 +56,8 @@ namespace System {
 
     private:
         PROCESS_INFORMATION m_pid;
-        Process::State _state;
         ProcessInfo _procInfo;
+        Process::State _state;
     };
 
 } // namespace System
