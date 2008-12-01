@@ -1,7 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 - 2007 by Marc Boris D�rner                        *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Duerner                       *
  *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
- *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "MutexImpl.h"
 #include "Pt/System/SystemError.h"
 #include <sys/time.h>
@@ -33,7 +31,10 @@ MutexImpl::MutexImpl()
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK  );
-    pthread_mutex_init(&_handle, &attr);
+
+    int ret = pthread_mutex_init(&_handle, &attr);
+    if (ret != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_mutex_init failed") );
 }
 
 
@@ -42,7 +43,10 @@ MutexImpl::MutexImpl(int recursive)
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE );
-    pthread_mutex_init(&_handle, &attr);
+
+    int ret = pthread_mutex_init(&_handle, &attr);
+    if (ret != 0)
+        throw SystemError( PT_ERROR_MSG("pthread_mutex_init failed") );
 }
 
 

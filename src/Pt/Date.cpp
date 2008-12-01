@@ -18,7 +18,6 @@
  ***************************************************************************/
 #include "Pt/Date.h"
 #include "Pt/SerializationInfo.h"
-#include <sstream>
 #include <cctype>
 
 namespace Pt {
