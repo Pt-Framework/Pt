@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,53 +28,51 @@ namespace Pt {
 
 namespace System {
 
-//! /brief Mutex synchronization object
-///
-///    A Mutex is a mutual exclusion device. It is used to synchronize
-///    the access to data which is accessed by more than one thread or
-///    process at the same time. Mutexes are recursive, that is the
-///    same thread can lock a mutex multiple times without deadlocking.
-///    When unlocking the mutex, unlock() must be called for each time
-///    a thread has successfully called lock() or tryLock().
+/** @brief Mutual exclusion device.
+
+    A Mutex is a mutual exclusion device. It is used to synchronize
+    the access to data which is accessed by more than one thread or
+    process at the same time. Mutexes are not recursive, that is the
+    same thread can not lock a mutex multiple times without deadlocking.
+*/
 class PT_SYSTEM_API Mutex : private NonCopyable
 {
     private:
         class MutexImpl* _impl;
 
     public:
-        //! @brief Default constructor
+        //! @brief Default constructor.
         Mutex();
 
-        //! Destructor
-        ///
-        /// The destructor destroys the mutex. The mutex must be in unlocked
-        /// state when the destructor is called.
+        /** @brief Destructor.
+
+           The destructor destroys the mutex. The mutex must be in unlocked
+           state when the destructor is called.
+        */
         ~Mutex();
 
-        //! @brief Lock the mutex
-        ///
-        /// Locks the mutex. If the mutex is currently locked by another
-        /// thread, the calling thread suspends until no other thread holds
-        /// a lock on it. If the mutex is already locked by the calling
-        /// thread the function returns immediatly with incrementing the lock-
-        /// count of the mutex. This prevents a thread from dead-locking while
-        /// waiting for a mutex it already owns. To release its ownership under
-        /// such circumstances the thread must unlock the mutex once for each
-        /// time the thread has locked the mutex.
+        /** @brief Lock the mutex.
+
+            If the mutex is currently locked by another
+            thread, the calling thread suspends until no other thread holds
+            a lock on it. If the mutex is already locked by the calling
+            thread a deadlock occurs.
+        */
         void lock();
 
         bool tryLock();
 
-        //! @brief Unlock the mutex
-        ///
-        /// Unlocks the mutex. If the mutex was locked more than one time by the
-        /// same thread unlock decrements the lock-count. The mutex is actually
-        /// unlocked when the lock-count is zero.
+        //! @brief Unlocks the mutex.
         void unlock();
 
+        /** @brief Unlocks the mutex.
+
+            This method does not throw an exception if unlocking the mutex
+            fails but simply returns false.
+        */
         bool unlockNoThrow();
 
-        //! @brief Access to platform specific implementation
+        //! @internal @brief Access to platform specific implementation
         MutexImpl& impl()
         { return *_impl;  }
 };
@@ -96,28 +94,29 @@ class PT_SYSTEM_API Mutex : private NonCopyable
                 public:
                     void function()
                     {
-                        MutexLock lock(_lock);
+                        MutexLock lock(_mtx);
 
                         //
                         // protected operations
                         //
 
-                    // dtor of MutexLock unlocks _lock
+                        // dtor of MutexLock unlocks _mtx
                     }
 
                 private:
-                    Pt::System::Mutex _lock;
+                    Pt::System::Mutex _mtx;
             };
     @endcode
 */
 class MutexLock : private NonCopyable
 {
     public:
-        //! @brief Constructor
-        /**
-            Construct a MutexLock object and lock the enclosing mutex.
+        /** @brief Construct to guard a %Mutex
 
-            \param m the enclosing Mutex object
+            Constructs a MutexLock object and locks the enclosing mutex
+            if \a doLock is true. If \a isLocked is true, the %MutexLock
+            will only unlock the given mutex in the destructor, but not
+            lock it in the constructor.
         */
         MutexLock(Mutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
@@ -127,10 +126,7 @@ class MutexLock : private NonCopyable
                 this->lock();
         }
 
-        //! @brief Destructor
-        /**
-            The destructor unlocks the mutex.
-            */
+        //! @brief Unlocks the mutex unless %unlock() was called
         ~MutexLock()
         {
             if(_isLocked)
@@ -156,17 +152,11 @@ class MutexLock : private NonCopyable
             }
         }
 
-            //! @brief Get the mutex object
-            /**
-                \return the enclosing Mutex object
-            */
+        //! @brief Returns the guarded the mutex object
         Mutex& mutex()
         { return _mutex; }
 
-            //! @brief Get the mutex object
-            /**
-                \return the enclosing Mutex object
-            */
+        //! @brief Returns the guarded the mutex object
         const Mutex& mutex() const
         { return _mutex; }
 
@@ -191,6 +181,12 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 
         bool tryLock();
 
+        /** @brief Unlocks the mutex.
+
+            If the mutex was locked more than one time by the
+            same thread unlock decrements the lock-count. The mutex is actually
+            unlocked when the lock-count is zero.
+        **/
         void unlock();
 
         bool unlockNoThrow();
@@ -201,11 +197,12 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 class RecursiveLock : private NonCopyable
 {
     public:
-        //! @brief Constructor
-        /**
-            Construct a RecursiveLock object and lock the enclosing mutex.
+        /** @brief Construct to guard a %RecursiveMutex
 
-            \param m the enclosing Mutex object
+            Constructs a %RecursiveLock object and locks the enclosing
+            recursive mutex if \a doLock is true. If \a isLocked is true,
+            the %RecursiveLock will only unlock the given mutex in the
+            destructor, but not lock it in the constructor.
         */
         RecursiveLock(RecursiveMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
@@ -215,10 +212,7 @@ class RecursiveLock : private NonCopyable
                 this->lock();
         }
 
-        //! @brief Destructor
-        /**
-            The destructor unlocks the mutex.
-            */
+        //! @brief Unlocks the mutex unless %unlock() was called
         ~RecursiveLock()
         {
             if(_isLocked)
@@ -244,17 +238,11 @@ class RecursiveLock : private NonCopyable
             }
         }
 
-            //! @brief Get the mutex object
-            /**
-                \return the enclosing Mutex object
-            */
+        //! @brief Returns the guarded the mutex object
         RecursiveMutex& mutex()
         { return _mutex; }
 
-            //! @brief Get the mutex object
-            /**
-                \return the enclosing Mutex object
-            */
+        //! @brief Returns the guarded the mutex object
         const RecursiveMutex& mutex() const
         { return _mutex; }
 
@@ -400,38 +388,40 @@ class WriteLock : private NonCopyable
 };
 
 
-//! @brief Spinmutex class.
-/**
-*  The most lightweight synchronisation object is the Spinlock. It is
-*  usually implemented with a status variable that can be set to Locked
-*  and Unlocked and atomic operations to change and inspect the status.
-*  When Spinlock::lock is called, the status is changed to Locked.
-*  Subsequent calls of Spinlock::lock from other threads will block until
-*  the first thread has called Spinlock::unlock and the state of
-*  the Spinlock has changed to Unlocked. Note that Spinlocks are not recursive.
-*  When a Spinlock::lock blocks a busy-wait happens, therefore a Spinlock is only
-*  usable in cases where resources need to be locked for a very short time, but in
-*  these cases a higher performance can be achieved.
+/** @brief Spinmutex class.
+
+   The most lightweight synchronisation object is the Spinlock. It is
+   usually implemented with a status variable that can be set to Locked
+   and Unlocked and atomic operations to change and inspect the status.
+   When Spinlock::lock is called, the status is changed to Locked.
+   Subsequent calls of Spinlock::lock from other threads will block until
+   the first thread has called Spinlock::unlock and the state of
+   the Spinlock has changed to Unlocked. Note that Spinlocks are not recursive.
+   When a Spinlock::lock blocks a busy-wait happens, therefore a Spinlock is only
+   usable in cases where resources need to be locked for a very short time, but in
+   these cases a higher performance can be achieved.
 */
 class SpinMutex : public NonCopyable
 {
     public:
-        //! Default Constructor.
+        //! @brief Default Constructor.
         SpinMutex()
         : _count(0)
         {}
 
-        //! Destructor.
+        //! @brief Destructor.
         ~SpinMutex()
         {}
 
 
-        //! @brief Lock.
-        /// Locks the Spinlock. If the Spinlock is currently locked
-        /// by another thread, the calling thread suspends until no
-        /// other thread holds a lock on it. This happens
-        /// performing a  busy-wait. Spinlocks are not recursive
-        /// locking it multiple times before unlocking it is undefined.
+        /** @brief Lock.
+
+            Locks the Spinlock. If the Spinlock is currently locked
+            by another thread, the calling thread suspends until no
+            other thread holds a lock on it. This happens
+            performing a  busy-wait. Spinlocks are not recursive
+            locking it multiple times before unlocking it is undefined.
+        */
         inline void lock()
         {
             // busy loop until unlock
@@ -446,15 +436,14 @@ class SpinMutex : public NonCopyable
            return ! atomicCompareExchange(_count, 1, 0);
         }
 
-        //! @brief Unlock.
-        /// Unlocks the Spinlock.
+        //! @brief Unlocks the Spinlock.
         void unlock()
         {
             // set unlocked
             atomicExchange(_count, 0);
         }
 
-        /// @internal for unit test only
+        //! @internal for unit test only
         bool testIsLocked() const
         { return _count != 0; }
 
