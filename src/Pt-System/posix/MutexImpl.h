@@ -17,10 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/SourceInfo.h"
+#include "Pt/System/Api.h"
 #include <pthread.h>
-#include <errno.h>
 
 namespace Pt {
 

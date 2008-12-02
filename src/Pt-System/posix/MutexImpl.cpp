@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "MutexImpl.h"
 #include "Pt/System/SystemError.h"
-#include <sys/time.h>
 #include <errno.h>
 
 namespace Pt {
