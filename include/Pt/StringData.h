@@ -87,7 +87,7 @@ namespace Pt {
 */
 class StringData {
     public:
-        typedef volatile atomic_t atomic_type;
+        typedef atomic_t atomic_type;
 
         typedef size_t size_type;
         typedef Pt::Char value_type;
