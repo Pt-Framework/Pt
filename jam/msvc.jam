@@ -81,13 +81,52 @@ if $(CONFIGURE)
     }
 }
 
-AR          = $(VCDIR)\\bin\\lib ;
-AS          = masm386 ;
-CC          = $(VCDIR)\\bin\\cl /nologo ;
-C++         = $(CC) ;
-RC          = $(VCDIR)\\bin\\rc ;
-MT          = $(VCDIR)\\bin\\mt -nologo ;
-LINK        = $(VCDIR)\\bin\\link /nologo ;
+if $(TARGET_OS) = "wince"
+{
+    CC   = $(VCDIR)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+    C++  = $(CC) ;
+    LINK = $(VCDIR)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+
+    CCFLAGS += /D "_WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" ;
+    CCFLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /W3 ;
+    LINKFLAGS     += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
+    LINKFLAGS     += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
+    MAINLINKFLAGS += /ENTRY:"mainWCRTStartup" ;
+
+    STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" 
+              \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
+}
+else
+{
+    AR = $(VCDIR)\\bin\\lib ;
+    AS = masm386 ;
+    CC = $(VCDIR)\\bin\\cl /nologo ;
+    C++ = $(CC) ;
+    RC = $(VCDIR)\\bin\\rc ;
+    MT = $(VCDIR)\\bin\\mt -nologo ;
+    LINK = $(VCDIR)\\bin\\link /nologo ;
+}
+
+if $(TARGET_OSPLAT) = "arm"
+{
+    LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\SmartDevices\\SDK\\PocketPC2003\\Lib\\armv4"\" ;
+    LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\VC\\ce\\lib\\armv4"\" ;
+    LINKFLAGS += /ARMPADCODE ;
+    LINKFLAGS += /machine:ARM ;
+    CCFLAGS   += /D ARM /D _ARM_ /QRarch4 ;
+
+    # TODO: move to Jamconfig
+    LINKLIBS += coredll.lib 
+                corelibc.lib
+                ccrtrtti.lib
+                secchk.lib 
+                #ole32.lib
+                #oleaut32.lib
+                #uuid.lib
+                #commctrl.lib
+                #comsuppwd.lib
+                ;
+}
 
 ##############################################################################
 # Compiler and linker flags
@@ -136,14 +175,14 @@ WARN       ?= /W3 ;
 
 if $(CONFIG:L) = debug 
 {
-    CCFLAGS   += /MDd /Zi /RTC1 ;
+    CCFLAGS   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ; #/RTC1
     OPTIM     ?= /Od ;
     LINKFLAGS += /DEBUG ;
 }
 else if $(CONFIG:L) = release 
 {
     CCFLAGS += /MD /D "NDEBUG" ;
-    OPTIM   ?= /Ox /Ot /Oy ;
+    OPTIM   ?= /O1 /Oy ;
 }
 else if $(CONFIG:L) = aqtime
 {
@@ -152,7 +191,7 @@ else if $(CONFIG:L) = aqtime
     LINKFLAGS += /DEBUG ;
 }
 
-C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /Zc:wchar_t ;
+C++FLAGS += $(CCFLAGS) /EHsc /GR /fp:fast /FD /Zc:wchar_t /TP ;
 
 if $(CONFIGURE)
 {
@@ -181,14 +220,17 @@ rule FIncludes
 
 rule EmbedManifest
 {
-  MFTYPE on $(<) = 1 ;
-  
-  if $(<:S) = $(SUFDLL:S)
-  {
-    MFTYPE on $(<) = 2 ;
-  }
+    if $(MT)
+    {
+        MFTYPE on $(<) = 1 ;
 
-  Mt $(<) : $(>) ;
+        if $(<:S) = $(SUFDLL:S)
+        {
+            MFTYPE on $(<) = 2 ;
+        }
+
+        Mt $(<) : $(>) ;
+    }
 }
 
 
