@@ -21,6 +21,7 @@
 #define PT_STRINGDATA_H
 
 #include <Pt/Api.h>
+#include <Pt/Atomicity.h>
 #include <Pt/Char.h>
 #include <string>
 #include <iterator>
@@ -86,7 +87,7 @@ namespace Pt {
 */
 class StringData {
     public:
-        typedef unsigned int atomic_type;
+        typedef volatile atomic_t atomic_type;
 
         typedef size_t size_type;
         typedef Pt::Char value_type;
@@ -107,14 +108,14 @@ class StringData {
         allocator_type get_allocator() const
         { return _allocator; }
 
-        const atomic_type& refs() const;
+        atomic_type refs() const;
 
-        atomic_type& ref();
+        atomic_type ref();
 
-        atomic_type& unref();
+        atomic_type unref();
 
         void setInitial()
-        { _n = atomic_type(1); }
+        { atomicSet(_n, atomic_type(1)); }
 
         /** @brief Check if in busy state
 
@@ -125,7 +126,7 @@ class StringData {
             invalidate an iterator even if the class was not shared.
         */
         bool busy() const
-        { return _n == atomic_type(-1); }
+        { return refs() == atomic_type(-1); }
 
         /** @brief Enter busy state
 
@@ -134,10 +135,13 @@ class StringData {
             normally invalidate any iterator as well.
         */
         void setBusy()
-        { _n = atomic_type(-1); }
+        { atomicSet(_n, atomic_type(-1)); }
 
         bool shared() const
-        { return (_n > 1) && ( _n != atomic_type(-1) ); }
+        {
+            atomic_t n = refs();
+            return (n > 1) && ( n != atomic_type(-1) );
+        }
 
         Pt::Char* str();
 
@@ -184,7 +188,7 @@ class StringData {
         size_type _length;
         size_type _capacity;
         allocator_type _allocator;
-        atomic_type _n;
+        volatile mutable atomic_type _n;
 
 #ifndef NDEBUG
         static const Pt::size_t _wstrSize = 100;

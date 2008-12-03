@@ -81,23 +81,21 @@ inline StringData::~StringData()
 }
 
 
-inline const StringData::atomic_type& StringData::refs() const
+inline StringData::atomic_type StringData::refs() const
 {
-    return _n;
+    return atomicGet(_n);
 }
 
 
-inline StringData::atomic_type& StringData::ref()
+inline StringData::atomic_type StringData::ref()
 {
-    ++_n;
-    return _n;
+    return atomicIncrement(_n);
 }
 
 
-inline StringData::atomic_type& StringData::unref()
+inline StringData::atomic_type StringData::unref()
 {
-    --_n;
-    return _n;
+    return atomicDecrement(_n);
 }
 
 
