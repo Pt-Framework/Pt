@@ -65,7 +65,7 @@ namespace System {
 
             /** @brief Sets the idle timeout
             */
-            void setIdleTimeout(unsigned int msecs)
+            void setIdleTimeout(size_t msecs)
             { _timeout = msecs; }
 
             /** @brief Returns the idle timeout
@@ -98,7 +98,7 @@ namespace System {
             virtual void onProcessEvents() = 0;
 
         private:
-            unsigned int _timeout;
+            size_t _timeout;
     };
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
