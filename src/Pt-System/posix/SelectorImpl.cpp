@@ -157,7 +157,7 @@ bool SelectorImpl::wait(std::size_t msecs)
         if(msecs == SelectorBase::WaitInfinite)
             continue;
 
-        if(elapsed >= msecs)
+        if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
             return false;
 
         msecs -= int(elapsed);
