@@ -29,6 +29,7 @@
 #include "FileImpl.h"
 #include "Pt/System/IOError.h"
 #include <new>
+#include <cstring>
 
 namespace Pt {
 
