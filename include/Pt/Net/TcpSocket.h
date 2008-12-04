@@ -63,7 +63,7 @@ namespace Net {
             { System::SelectableImpl* impl = 0; return *impl; }
             
         protected:
-            virtual bool onWait(unsigned int msecs)
+            virtual bool onWait(size_t msecs)
             { return false; }
 
             virtual void onAttach(System::SelectorBase&)
