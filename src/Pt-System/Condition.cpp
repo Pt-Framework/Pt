@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr Marc Boris D�rner                       *
+ *   Copyright (C) 2005-2006 by Dr Marc Boris Duerner                      *
  *   Copyright (C) 2005-2006 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,18 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ConditionImpl.h"
-
 #include "Pt/System/Condition.h"
-#include "Pt/SourceInfo.h"
-#include "Pt/System/SystemError.h"
-#include <iostream>
-using namespace std;
-
 
 namespace Pt {
 
 namespace System {
-
 
 Condition::Condition()
 {
@@ -66,7 +59,6 @@ void Condition::broadcast()
 {
     _impl->broadcast();
 }
-
 
 } // namespace System
 

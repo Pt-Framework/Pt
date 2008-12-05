@@ -106,6 +106,7 @@ namespace sqlite {
         int ret = ::sqlite3_exec(_Db, query.c_str(), 0, 0, &errmsg);
         if(ret != SQLITE_OK)
         {
+            sqlite3_free(errmsg);
             Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
         }
         
