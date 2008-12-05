@@ -233,7 +233,7 @@ inline void StringData::replace(size_type pos, size_type n, const Pt::Char* str,
     else if(n2 < n) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n2));
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n));
         //cerr << "moved b: " << (_length - pos - n2) << endl;
     }
 
@@ -258,7 +258,7 @@ inline void StringData::replace(size_type pos, size_type n, size_type n2, Pt::Ch
     else if(n2 < n) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n2));
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n));
         //cerr << "moved b: " << (_length - pos - n2) << endl;
     }
 
