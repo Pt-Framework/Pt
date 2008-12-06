@@ -61,7 +61,7 @@
 #define Ptv_IO_Utf16Codec_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Text/TextCodec.h>
+#include <Pt/TextCodec.h>
 
 namespace Pt {
 

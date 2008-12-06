@@ -21,7 +21,7 @@
 
 #include <Pt/Text/Api.h>
 #include <Pt/Char.h>
-#include <Pt/Text/TextCodec.h>
+#include <Pt/TextCodec.h>
 
 namespace Pt {
 

@@ -23,7 +23,7 @@
 
 #include <Pt/Text/Api.h>
 #include <Pt/Types.h>
-#include <Pt/Text/TextCodec.h>
+#include <Pt/TextCodec.h>
 #include <locale>
 
 

@@ -21,7 +21,7 @@
 #define Pt_Text_Base64Stream_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Text/BasicTextStream.h>
+#include <Pt/BasicTextStream.h>
 #include <Pt/Text/Base64Codec.h>
 
 
