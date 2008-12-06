@@ -46,6 +46,11 @@ namespace Pt {
             mutable const RefLinked* next;
 
         protected:
+            RefLinked()
+            : prev(0),
+              next(0)
+              { }
+
             //! \brief Unlink a smart pointer from a managed object
             bool unlink(T* object)
             {
@@ -70,10 +75,13 @@ namespace Pt {
             //! \brief Link a smart pointer to a managed object
             void link(const RefLinked& ptr, T* object)
             {
-                prev = &ptr;
-                next = ptr.next;
-                prev->next = this;
-                next->prev = this;
+                if (object)
+                {
+                    prev = &ptr;
+                    next = ptr.next;
+                    prev->next = this;
+                    next->prev = this;
+                }
             }
     };
 
