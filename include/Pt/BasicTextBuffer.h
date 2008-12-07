@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -75,13 +75,13 @@ namespace Pt {
                 this->btinit();
             }
 
-			void attach(std::basic_streambuf<ExternT>* buffer)
-			{ 			
-				_streambuf = buffer;
-				this->btinit();
-			}
+            void attach(std::basic_streambuf<ExternT>* buffer)
+            {
+                _streambuf = buffer;
+                this->btinit();
+            }
 
-			~BasicTextBuffer() throw()
+            ~BasicTextBuffer() throw()
             { delete _codec; }
 
             InternT* begin()
@@ -144,7 +144,7 @@ namespace Pt {
         _bufferSize = 1024;
         _putbackMax = 4;
         _readBuffer.reserve(_bufferSize);
-		_readBuffer.resize(0);
+        _readBuffer.resize(0);
 
         // TODO: use size factor from TextCodec to determine
         // optimum buffer size ratios

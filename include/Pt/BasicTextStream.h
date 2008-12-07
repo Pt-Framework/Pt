@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -78,11 +78,11 @@ namespace Pt {
             ~BasicTextIStream()
             { delete _buffer; }
 
-			void attach(std::basic_iostream<ExternT>& ios)
-			{
-				_buffer->attach( ios.rdbuf() );
-				this->clear();
-			}
+            void attach(std::basic_iostream<ExternT>& ios)
+            {
+                _buffer->attach( ios.rdbuf() );
+                this->clear();
+            }
 
         private:
             BasicTextBuffer<InternT, ExternT>* _buffer;
@@ -140,11 +140,11 @@ namespace Pt {
             ~BasicTextOStream()
             { delete _buffer; }
 
-			void attach(std::basic_iostream<ExternT>& ios)
-			{
-				_buffer->attach( ios.rdbuf() );
-				this->clear();
-			}
+            void attach(std::basic_iostream<ExternT>& ios)
+            {
+                _buffer->attach( ios.rdbuf() );
+                this->clear();
+            }
 
         private:
             BasicTextBuffer<InternT, ExternT>* _buffer;
@@ -196,17 +196,17 @@ namespace Pt {
             BasicTextStream(std::basic_iostream<ExternT>& os, CodecT* codec)
             : std::basic_iostream<InternT>( _buffer = new BasicTextBuffer<InternT, ExternT>( os.rdbuf() , codec) )
             { 
-			}
+            }
 
             //! @brief Destructs this object freeing the internal buffer.
             ~BasicTextStream()
             { delete _buffer; }
 
-			void attach(std::basic_iostream<ExternT>& ios)
-			{
-				_buffer->attach( ios.rdbuf() );
-				this->clear();
-			}
+            void attach(std::basic_iostream<ExternT>& ios)
+            {
+                _buffer->attach( ios.rdbuf() );
+                this->clear();
+            }
 
         private:
             BasicTextBuffer<InternT, ExternT>* _buffer;
