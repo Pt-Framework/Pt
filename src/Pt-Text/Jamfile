@@ -5,9 +5,7 @@ SubDirC++Flags [ FDefines PT_TEXT_API_EXPORT ] ;
 SharedLibrary Pt-Text : AsciiCodec.cpp
                         #Base64Codec.cpp
                         #Base64Stream.cpp
-                        TextCodec.cpp
                         TextStream.cpp
-                        Utf.cpp
                         Utf8Codec.cpp
                         Utf16Codec.cpp
                         Utf32Codec.cpp ;
