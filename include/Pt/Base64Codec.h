@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,19 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
+#ifndef Pt_Base64Codec_h
+#define Pt_Base64Codec_h
 
-#ifndef Pt_Text_Base64Codec_h
-#define Pt_Text_Base64Codec_h
-
-#include <Pt/Text/Api.h>
+#include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <Pt/TextCodec.h>
-#include <locale>
-
 
 namespace Pt {
 
-    class PT_TEXT_API Base64Codec : public TextCodec<char, char> {
+    class PT_API Base64Codec : public TextCodec<char, char> {
         public:
             explicit Base64Codec(size_t ref = 0);
 
@@ -65,7 +62,6 @@ namespace Pt {
             // move to state type
             mutable size_t _padSize;
     };
-
 
 } //namespace Pt
 
