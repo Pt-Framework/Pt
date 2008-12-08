@@ -1,26 +1,10 @@
-#ifndef PT_Text_Text_H
-#define PT_Text_Text_H
-
-
-namespace Pt {
-    /** @namespace Pt::Text
-        @brief Test Processing
-
-        This module offers classes and concepts for advanced text processing
-        , Encodings and character conversion.
-    */
-    namespace Text {
-
-    }
-}
-
-/** \page "Using TextStreams"
-!!! Using TextStreams
+/** \page textstreams "Using TextStreams"
+@section textstreams_usage Using TextStreams
 
 This tutorial will show how to use a TextStream object to read data from or write data to a stream while the character
 data is automatically decoded or encoded.
 
-!!Unicode character encoding
+@subsection text_encode Unicode character encoding
 
 One of the most common standards for character encoding is the ASCII-standard. Each character is encoded using 7 bits of
 a byte, so 128 different characters can be adressed. As those 128 characters are not enough to store most special characters
@@ -40,7 +24,7 @@ a single character table. Each character has a defined position in the table and
 Unicode usually uses 16 bit to adress one character and so needs 2 bytes per character. This makes it possible to store
 65536 different characters. Currently there are over 100.000 characters defined by the Unicode standard, so using 32 bits
 becomes more common. This allows the storage of over 4 billion different characters. Pt uses a 32-bit value to store a single
-character with the class Pt::Text::Char. So a 32-bit Unicode character can be stored directly using Pt.
+character with the class Pt::Char. So a 32-bit Unicode character can be stored directly using Pt.
 
 As most legacy systems can only store and handle 8-bit values there were several encodings introduced to store Unicode characters
 using only 8 bits. One character of Unicode is encoded into a character sequence of 1 or more bytes that will also function
@@ -53,8 +37,7 @@ order. One character in 7-bit-ASCII is the exact same as in UTF-8.
 
 Besides Unicode encoding a lot more encoders/decoders are common, for example for Base64, BCD, ... encoding/decoding.
 
-
-!!Codecs
+@subsection text_codecs Text codecs
 
 A character which was encoded using UTF-8 (or any other available encoding) can usually not used directly; a decoding has first to
 be performed to determine the original 32-bit value which describes the character's position in the Unicode table. The general
@@ -72,14 +55,13 @@ passed to the constructor of the text stream class of Pt. The following code dem
 
 \code
     std::stringstream ss;
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream textStream(ss, new Pt::Utf8Codec());
 \endcode
 The text stream classes of Pt wrap another stream ($ss$), in this case a stringstream of the STL. Other streams like file-streams
 are supported as well. This stream is passed to the TextStream-constructor along with the codec (Utf8) to use for encoding/decoding.
 Reading a text will use this Codec to decode the read data. Writing will use this Codec for encoding.
 
-
-!!Example 1 - Reading ASCII using the UTF8-Codec
+@subsection text_example1 Example 1 - Reading ASCII using the UTF8-Codec
 
 This example demonstrates how to read 7-bit ASCII text. The Utf8Codec is used here although we only provide ASCII data. This is
 correct as ASCII is compatible to UTF8 as mentioned above. This code is supposed to only demonstrate the general TextStream and
@@ -89,9 +71,9 @@ Codec usage in Pt. As we use an ASCII text the text will not be encoded/decoded 
 std::stringstream ss;
 ss << "abcdef";
 
-Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+Pt::TextStream textStream(ss, new Pt::Utf8Codec());
 
-Pt::Text::String s;
+Pt::String s;
 getline(textStream, s);
 
 cout << s.str() << endl;
@@ -107,7 +89,7 @@ abcdef
 \endcode
 
 
-!!Example 2 - Reading UTF8 using the UTF8-Codec
+@subsection text_example2 Example 2 - Reading UTF8 using the UTF8-Codec
 
 The usage of the TextStream class in combination with the Utf8Codec is more useful when reading real UTF8-data. The following
 example demonstrates this usage:
@@ -118,9 +100,9 @@ char utf8Data[] = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char)0xb9, 
 
 std::stringstream ss(utf8Data);
 
-Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+Pt::TextStream textStream(ss, new Pt::Utf8Codec());
 
-Pt::Text::String s;
+Pt::String s;
 getline(textStream, s);
 \endcode
 The first two lines of code create a char-array which contains a UTF8-encoded word (5 characters) using some greek characters.
@@ -129,28 +111,25 @@ stringstream $ss$. In a real world program this stream may more likely be a file
 a XML-file with UTF-8-encoding.
 
 In the 3rd line a TextStream object is created for the stringstream using a UTF8-codec. The following lines of code read one
-line from the TextStream and store the read data in a Pt::Text::String which can handle 32-bit Unicode characters directly.
+line from the TextStream and store the read data in a Pt::String which can handle 32-bit Unicode characters directly.
 While reading the UTF8 data it is decoded to Unicode data and stored into the String object.
 
-When printing the String $s$ to a device that supports the output of Unicode characters the following text will be visible:
 
-| \image ppr-text-tutorial1-Unicode_String.png
-
-
-!!Example 3 - Writing UTF8 using the UTF8-Codec
+@subsection text_example3 Example 3 - Writing UTF8 using the UTF8-Codec
 
 Writing a Unicode String using UTF8-encoding is as simple as reading UTF8-data as demonstrates in example 2. Basically a TextStream
 object is created to which the wrapped output stream and the Codec object is passed. The following code demonstrates this behaviour:
 
 \code
-Pt::Text::Char unicodeData[] = { 954, 8057, 963, 956, 949, 0 };
+Pt::Char unicodeData[] = { 954, 8057, 963, 956, 949, 0 };
 
 std::stringstream ss;
-Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+Pt::TextStream textStream(ss, new Pt::Utf8Codec());
 
 textStream << unicodeData;
 \endcode
-The Unicode character data to convert to UTF8 is written into a Pt::Text::Char-array in the first line. This Char class
+
+The Unicode character data to convert to UTF8 is written into a Pt::Char-array in the first line. This Char class
 uses 32-bit values to store Unicode characters and can thus store the Unicode characters directly without encoding. The
 Unicode-text is the same as used in example 2.
 
@@ -163,7 +142,4 @@ UTF8 and written to the stringstream $ss$. Reading the data in $ss$ will return 
 first line of the example code of example 2.
 
 */
-
-
-#endif
 

@@ -58,10 +58,11 @@
         <div class="docs-page-header">Concepts</div>
         <div class="docs-page-body">
           <ul>
-            <li><a href="byteorder.html">Byteorder handling</a></li>
+            <li><a href="byteorder.html">Byteorder Handling</a></li>
             <li><a href="sigslot.html">Signals and Delegates</a></li>
             <li><a href="group__Reflection.html">Reflection</a></li>
             <li><a href="group__DateTime.html">Dates and Times</a></li>
+            <li><a href="textstreams.html">Character Conversion</a></li>
             <li><a href="plugins.html">Plugins</a></li>
             <li><a href="unittests.html">Unit Testing</a></li>
           </ul>
