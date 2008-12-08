@@ -22,9 +22,9 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-//#include <iostream>
 #include <string>
-#include <cstring> // memcpy/memmove()
+#include <cstring>
+
 namespace Pt {
 
     /**
