@@ -51,6 +51,7 @@ PT_TESTS = AnyTest.cpp
            SmartPtrTest.cpp
            StringStreamTest.cpp
            StringTest.cpp
+           TextStreamTest.cpp
            TimeTest.cpp
            TimespanTest.cpp
            TypesTest.cpp

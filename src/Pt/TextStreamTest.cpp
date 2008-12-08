@@ -19,25 +19,21 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Api.h"
-#include <string>
-#include <sstream>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Text/Utf8Codec.h"
-#include "Pt/Text/Utf16Codec.h"
-#include "Pt/Text/Utf32Codec.h"
-#include "Pt/Text/TextStream.h"
-
-
-using namespace std;
+#include "Pt/Utf8Codec.h"
+#include "Pt/Utf16Codec.h"
+#include "Pt/Utf32Codec.h"
+#include "Pt/TextStream.h"
+#include <string>
+#include <sstream>
 
 class Utf8Converter
 {
     public:
         Utf8Converter()
-        : _ts( _in, new Pt::Text::Utf8Codec() )
+        : _ts( _in, new Pt::Utf8Codec() )
         {}
 
         void convert(const char* from, std::basic_string<Pt::Char>& to)
@@ -51,7 +47,7 @@ class Utf8Converter
 
     private:
         std::istringstream    _in;
-        Pt::Text::TextIStream _ts;
+        Pt::TextIStream _ts;
 };
 
 
@@ -106,10 +102,10 @@ Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 void TextStreamTest::InvalidUTF8String()
 {
     std::stringstream ss;
-    Pt::Text::TextStream ts( ss, new Pt::Text::Utf8Codec() );
+    Pt::TextStream ts( ss, new Pt::Utf8Codec() );
  
 	std::string invalid = "Xevil";
-	invalid[0] = std::char_traits<char>::to_char_type(159); //"Ÿevil"
+	invalid[0] = std::char_traits<char>::to_char_type(159); //"ï¿½evil"
     ss.str(invalid);
     PT_UNIT_ASSERT( !ss.fail() );
     
@@ -131,7 +127,7 @@ void TextStreamTest::testTextStreamDirectFromUTF8ToUnicode()
 {
     std::stringstream ss(_TextUTF8);
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     PT_UNIT_ASSERT(TextStream.get() == _TextUnicode[0].value());
     PT_UNIT_ASSERT(TextStream.get() == _TextUnicode[1].value());
@@ -146,7 +142,7 @@ void TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode()
     std::stringstream ss;
     ss << _TextUTF8;
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     Pt::Char c[6];
     TextStream.getline(c, 6);
@@ -164,7 +160,7 @@ void TextStreamTest::testTextBufferFromUnicodeToUTF8()
 {
     std::stringstream ss;
 
-    Pt::Text::TextBuffer TextBuffer(ss.rdbuf(), new Pt::Text::Utf8Codec());
+    Pt::TextBuffer TextBuffer(ss.rdbuf(), new Pt::Utf8Codec());
     TextBuffer.sputn(_TextUnicode, 5);
     TextBuffer.pubsync();
 
@@ -179,7 +175,7 @@ void TextStreamTest::testTextStreamFromUnicodeToUTF8()
 {
     std::stringstream ss;
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
     TextStream << _TextUnicode;
 
     std::string str = ss.str();
@@ -193,7 +189,7 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 {
     std::stringstream ss;
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf32Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf32Codec());
     TextStream << _TextUnicode;
 
     Pt::Char c[6];
@@ -213,9 +209,9 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 
 void TextStreamTest::testGetline()
 {
-    stringstream ss("Hello world");
+    std::stringstream ss("Hello world");
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     Pt::String s;
     getline(TextStream, s);
@@ -226,9 +222,9 @@ void TextStreamTest::testGetline()
 
 void TextStreamTest::testNum_get()
 {
-    stringstream ss("3.1415");
+    std::stringstream ss("3.1415");
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     float f;
     TextStream >> f;
@@ -239,9 +235,9 @@ void TextStreamTest::testNum_get()
 
 void TextStreamTest::testNum_put()
 {
-    stringstream ss;
+    std::stringstream ss;
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     TextStream << 3.1415f;
     TextStream.flush();
@@ -252,9 +248,9 @@ void TextStreamTest::testNum_put()
 
 void TextStreamTest::testNumpunct()
 {
-    stringstream ss;
+    std::stringstream ss;
 
-    Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream TextStream(ss, new Pt::Utf8Codec());
 
     TextStream << 123456789L;
     TextStream.flush();

@@ -15,7 +15,6 @@ if $(GUI) != none
     SubInclude TOP src Pt-Gui ;
 }
 
-SubInclude TOP src Pt-Text ;
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Math ;
 SubInclude TOP src Pt-Xml ;
