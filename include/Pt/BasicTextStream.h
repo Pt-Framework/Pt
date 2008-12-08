@@ -66,7 +66,8 @@ namespace Pt {
                also be deleted on destruction
             */
             BasicTextIStream(std::basic_istream<ExternT>& is, CodecT* codec)
-            : _buffer( is.rdbuf() , codec )
+            : std::basic_istream<I>(0)
+            , _buffer( is.rdbuf() , codec )
             {
                 init(&_buffer);
             }
@@ -124,7 +125,8 @@ namespace Pt {
                by this class and be deleted on destruction
             */
             BasicTextOStream(std::basic_ostream<ExternT>& os, CodecT* codec)
-            : _buffer( os.rdbuf() , codec )
+            : std::basic_ostream<I>(0)
+            , _buffer( os.rdbuf() , codec )
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
@@ -181,7 +183,8 @@ namespace Pt {
                be managed by this class and be deleted on destruction
             */
             BasicTextStream(std::basic_iostream<ExternT>& ios, CodecT* codec)
-            : _buffer( ios.rdbuf() , codec)
+            : std::basic_iostream<I>(0)
+            , _buffer( ios.rdbuf() , codec)
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
