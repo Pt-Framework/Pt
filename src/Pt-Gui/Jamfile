@@ -28,16 +28,16 @@ SharedLibrary Pt-Gui :  Application.cpp
                         VerticalLayout.cpp
                        ;
 SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
-SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
+SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx  ;
 LINKLIBS on $(PRELIB)Pt-Gui$(SUFDLL) = $(LINKLIBS) $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
 
 Main WidgetDemo : WidgetDemo.cpp ;
-Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
+Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui  ;
 Main_MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
 
 Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
+Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui  ;
 Main_MakeLocate Scribble : $(OUTPUT_TARGET) ;
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;

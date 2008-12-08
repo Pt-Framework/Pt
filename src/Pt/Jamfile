@@ -5,7 +5,8 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
-SharedLibrary Pt : Atomicity.cpp
+SharedLibrary Pt : AsciiCodec.cpp
+                   Atomicity.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp
@@ -21,8 +22,13 @@ SharedLibrary Pt : Atomicity.cpp
                    SettingsWriter.cpp
                    Signal.cpp
                    StringStream.cpp
+                   TextStream.cpp
                    Time.cpp
-                   Unicode.cpp ;
+                   Unicode.cpp
+                   Utf8Codec.cpp
+                   Utf16Codec.cpp
+                   Utf32Codec.cpp
+                   ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt ;
@@ -53,7 +59,7 @@ PT_TESTS = AnyTest.cpp
            ;
 
 PtUnitTest Pt-test : Pt-test.cpp $(PT_TESTS) ;
-Main_LinkSharedLibraries Pt-test : Pt Pt-System Pt-Text Pt-Unit ;
+Main_LinkSharedLibraries Pt-test : Pt Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate Pt-test : $(OUTPUT_TARGET) ;
 
 NOTFILE Pt-all ;

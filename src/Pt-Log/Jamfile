@@ -12,19 +12,19 @@ PT_LOG_SOURCES = ConsoleChannel.cpp
                  ;
 
 SharedLibrary Pt-Log : $(PT_LOG_SOURCES) ; 
-SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-Reflex Pt-Text Pt-System ;
+SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-Reflex  Pt-System ;
 SharedLibrary_MakeLocate Pt-Log : $(OUTPUT_TARGET) ;
 
 SharedLibrary DllLoggerTest : DllLoggerTest.cpp ;
-SharedLibrary_LinkSharedLibraries DllLoggerTest : Pt Pt-Text Pt-Log ;
+SharedLibrary_LinkSharedLibraries DllLoggerTest : Pt  Pt-Log ;
 SharedLibrary_MakeLocate DllLoggerTest : $(OUTPUT_TARGET) ;
 
 Main LoggerDemo : LoggerDemo.cpp ;
-Main_LinkSharedLibraries LoggerDemo : Pt Pt-Text Pt-System Pt-Log ;
+Main_LinkSharedLibraries LoggerDemo : Pt  Pt-System Pt-Log ;
 Main_MakeLocate LoggerDemo : $(OUTPUT_TARGET) ;
 
 Main LoggerTest : LoggerTest.cpp ;
-Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit DllLoggerTest ;
+Main_LinkSharedLibraries LoggerTest : Pt Pt-Log  Pt-System Pt-Unit DllLoggerTest ;
 Main_MakeLocate LoggerTest : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects

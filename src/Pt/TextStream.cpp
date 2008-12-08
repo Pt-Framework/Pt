@@ -16,53 +16,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "Pt/TextStream.h"
 
-#include "Pt/Text/Utf32Codec.h"
+namespace Pt {
 
-using namespace Pt;
-using namespace Pt::Text;
-
-
-Utf32Codec::Utf32Codec(size_t ref)
-: Pt::TextCodec<Char, char>(ref)
-{
-}
+TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
+: BasicTextBuffer<Pt::Char, char>(buffer, codec)
+{ }
 
 
-Utf32Codec::~Utf32Codec()
-{
-}
+TextIStream::TextIStream(std::istream& is, CodecT* codec)
+: BasicTextIStream<Char, char>( is, codec )
+{ }
 
 
-Utf32Codec::result Utf32Codec::do_in(std::mbstate_t& s, const char* fromBegin,
-                                    const char* fromEnd, const char*& fromNext,
-                                    Char* toBegin, Char* toEnd, Char*& toNext) const
-{
-    return Utf32Codec::noconv;
-}
+TextIStream::~TextIStream()
+{ }
 
 
-Utf32Codec::result Utf32Codec::do_out(std::mbstate_t& s, const Char* fromBegin,
-                                     const Char* fromEnd, const Char*& fromNext,
-                                     char* toBegin, char* toEnd, char*& toNext) const
-{
-    return Utf32Codec::noconv;
-}
+TextOStream::TextOStream(std::ostream& os, CodecT* codec)
+: BasicTextOStream<Char, char>( os, codec )
+{ }
 
 
-int Utf32Codec::do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
-{
-    return (fromEnd - fromBegin)/4;
-}
+TextOStream::~TextOStream()
+{ }
 
 
-int Utf32Codec::do_max_length() const throw()
-{
-    return 4;
-}
+TextStream::TextStream(std::iostream& ios, CodecT* codec)
+: BasicTextStream<Char, char>( ios, codec )
+{ }
 
 
-bool Utf32Codec::do_always_no_conv() const throw()
-{
-    return true;
-}
+TextStream::~TextStream()
+{ }
+
+} // namespace Pt

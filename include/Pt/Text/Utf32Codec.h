@@ -19,45 +19,13 @@
 #ifndef Ptv_Utf32Codec_h
 #define Ptv_Utf32Codec_h
 
-#include <Pt/Text/Api.h>
-#include <Pt/Char.h>
-#include <Pt/TextCodec.h>
+#include <Pt/Utf32Codec.h>
 
 namespace Pt {
 
 namespace Text {
 
-    class PT_TEXT_API Utf32Codec : public TextCodec<Char, char> {
-        public:
-            /**
-             * @brief Constructs a new Utf32Codec object.
-             *
-             * The internal type is Pt::Char and external type is $char$
-             *
-             * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
-             * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
-             */
-            Utf32Codec(size_t ref = 0);
-
-            //! Empty destructor
-            virtual ~Utf32Codec();
-
-            virtual Utf32Codec::result do_in(std::mbstate_t& s, const char* fromBegin,
-                                             const char* fromEnd, const char*& fromNext,
-                                             Char* toBegin, Char* toEnd, Char*& toNext) const;
-
-            virtual Utf32Codec::result do_out(std::mbstate_t& s, const Char* fromBegin, const Char* fromEnd, const Char*& fromNext,
-                                             char* toBegin, char* toEnd, char*& toNext) const;
-
-            // inheritdoc
-            virtual int do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
-
-            // inheritdoc
-            virtual int do_max_length() const throw();
-
-            // inheritdoc
-            virtual bool do_always_no_conv() const throw();
-    };
+    using Pt::Utf32Codec;;
 
 } //namespace Text
 

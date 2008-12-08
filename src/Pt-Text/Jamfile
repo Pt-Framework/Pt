@@ -2,19 +2,8 @@ SubDir TOP src Pt-Text ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_TEXT_API_EXPORT ] ;
 
-SharedLibrary Pt-Text : AsciiCodec.cpp
-                        #Base64Codec.cpp
-                        #Base64Stream.cpp
-                        TextStream.cpp
-                        Utf8Codec.cpp
-                        Utf16Codec.cpp
-                        Utf32Codec.cpp ;
-
-SharedLibrary_LinkSharedLibraries Pt-Text : Pt ;
-SharedLibrary_MakeLocate Pt-Text : $(OUTPUT_TARGET) ;
-
 PtUnitTest TextStreamTest : TextStreamTest.cpp ;
-Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt Pt-Unit ;
+Main_LinkSharedLibraries TextStreamTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate TextStreamTest : $(OUTPUT_TARGET) ;
 
 

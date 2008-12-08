@@ -14,5 +14,5 @@ Library Pt-Gui-cocoa : Application.mm
 Library_MakeLocate Pt-Gui-cocoa : $(OUTPUT_TARGET) ;
 
 Main nstest : nstest.cpp ;
-Main_LinkSharedLibraries nstest : Pt Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries nstest : Pt Pt-Gfx Pt-Gui ;
 Main_MakeLocate nstest : $(OUTPUT_TARGET) ;

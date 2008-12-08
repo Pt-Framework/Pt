@@ -10,5 +10,5 @@ PT_CMA_SOURCES = Component.cpp
                  ;
 
 SharedLibrary Pt-Cma : $(PT_CMA_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Cma : Pt Pt-System Pt-Text ;
+SharedLibrary_LinkSharedLibraries Pt-Cma : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Cma : $(OUTPUT_TARGET) ;

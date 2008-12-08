@@ -33,67 +33,67 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        Stroke.cpp
                        ;
 
-SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;
+SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt  Pt-System ;
 SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 SharedLibrary_MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
-Main_LinkSharedLibraries GreyscaleTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries GreyscaleTest : Pt Pt-System  Pt-Gfx ;
 Main_MakeLocate GreyscaleTest : $(OUTPUT_TARGET) ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
-Main_LinkSharedLibraries BlockscaleTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries BlockscaleTest : Pt Pt-System  Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : $(OUTPUT_TARGET) ;
 
 if $(GUI) != none
 {
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
-Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate ImagePainterDemo : $(OUTPUT_TARGET) ;
 
 Main DrawLineDemo : DrawLineDemo.cpp ;
-Main_LinkSharedLibraries DrawLineDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries DrawLineDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawLineDemo : $(OUTPUT_TARGET) ;
 
 Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
-Main_LinkSharedLibraries DrawLineBenchmark : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries DrawLineBenchmark : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawLineBenchmark : $(OUTPUT_TARGET) ;
 
 Main DrawRectDemo : DrawRectDemo.cpp ;
-Main_LinkSharedLibraries DrawRectDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries DrawRectDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawRectDemo : $(OUTPUT_TARGET) ;
 
 Main FillPolygonDemo : FillPolygonDemo.cpp ;
-Main_LinkSharedLibraries FillPolygonDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries FillPolygonDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate FillPolygonDemo : $(OUTPUT_TARGET) ;
 
 Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
-Main_LinkSharedLibraries DrawEllipseDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries DrawEllipseDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawEllipseDemo : $(OUTPUT_TARGET) ;
 
 Main GfxPerf : GfxPerf.cpp ;
-Main_LinkSharedLibraries GfxPerf : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
 Main_MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
 
 }
 
 PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
-Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx Pt-Unit ;
+Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System  Pt-Gfx Pt-Unit ;
 PtUnitTest_MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest PlanarImageTest : PlanarImageTest.cpp ;
-Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Text Pt-System Pt-Unit ;
+Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx  Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate PlanarImageTest : $(OUTPUT_TARGET) ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
 Main_MakeLocate MakeFontHeader : $(OUTPUT_TARGET) ;
 
 Main ColorTest : ColorTest.cpp ;
-Main_LinkSharedLibraries ColorTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries ColorTest : Pt Pt-System  Pt-Gfx ;
 Main_MakeLocate ColorTest : $(OUTPUT_TARGET) ;
 
 Main ImageTest : ImageTest.cpp ;
-Main_LinkSharedLibraries ImageTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries ImageTest : Pt Pt-System  Pt-Gfx ;
 Main_MakeLocate ImageTest : $(OUTPUT_TARGET) ;
 
 

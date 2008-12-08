@@ -53,7 +53,7 @@ LINKLIBS on $(PRELIB)Pt-System$(SUFDLL) = $(LINKLIBS) $(SYSLIBS) ;
 SharedLibrary_MakeLocate Pt-System : $(OUTPUT_TARGET) ;
 
 SharedLibrary TestPlugin : TestPlugin.cpp ;
-SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-Text Pt-System ;
+SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-System ;
 SharedLibrary_MakeLocate TestPlugin : $(OUTPUT_TARGET) ;
 
 Main PluginDemo : PluginDemo.cpp ;
@@ -61,15 +61,15 @@ Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : $(OUTPUT_TARGET) ;
 
 Main EventSinkDemo : EventSinkDemo.cpp ;
-Main_LinkSharedLibraries EventSinkDemo : Pt Pt-System Pt-Text ;
+Main_LinkSharedLibraries EventSinkDemo : Pt Pt-System  ;
 Main_MakeLocate EventSinkDemo : $(OUTPUT_TARGET) ;
 
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
-Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
+Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System  ;
 Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
 
 Main PipeDemo : PipeDemo.cpp ;
-Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
+Main_LinkSharedLibraries PipeDemo : Pt Pt-System  ;
 Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
 PT_SYSTEM_TESTS = ApplicationTest.cpp
@@ -84,7 +84,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   ;
 
 PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
-Main_LinkSharedLibraries Pt-System-test : Pt Pt-System Pt-Text Pt-Unit ;
+Main_LinkSharedLibraries Pt-System-test : Pt Pt-System  Pt-Unit ;
 PtUnitTest_MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
 
 Main ProcessTestChild : ProcessTestChild.cpp ;

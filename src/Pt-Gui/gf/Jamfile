@@ -14,5 +14,5 @@ Library_MakeLocate Pt-Gui-gf : $(OUTPUT_TARGET) ;
 
 Main GfTest : GfTest.cpp  ;
               
-Main_LinkSharedLibraries GfTest : Pt-System Pt Pt-Gfx Pt-Text Pt-Gui ;
+Main_LinkSharedLibraries GfTest : Pt-System Pt Pt-Gfx Pt-Gui ;
 Main_MakeLocate GfTest : bin ;

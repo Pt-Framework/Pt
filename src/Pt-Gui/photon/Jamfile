@@ -15,5 +15,5 @@ Library_MakeLocate Pt-Gui-photon : $(OUTPUT_TARGET) ;
 #Main phtest : phtest.cpp  ;
 #LINKLIBS  += $(GUILIBS) ;
 #Main_LinkLibraries phtest : Pt-Gui-photon ;
-#Main_LinkSharedLibraries phtest : Pt-System Pt-Text Pt-Gfx ;
+#Main_LinkSharedLibraries phtest : Pt-System Pt-Gfx ;
 #Main_MakeLocate phtest : bin ;
