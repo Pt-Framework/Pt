@@ -135,6 +135,8 @@ void SmartPtrTest::RefLinked()
         Pt::SmartPtr<Object, Pt::RefLinked<Object> > smartPtr(obj);
         Pt::SmartPtr<Object, Pt::RefLinked<Object> > second(smartPtr);
         Pt::SmartPtr<Object, Pt::RefLinked<Object> > third;
+        Pt::SmartPtr<Object, Pt::RefLinked<Object> > fourth(third);
+
         third = second;
     }
 

@@ -26,28 +26,27 @@
 
 namespace Pt {
 
-    /**
-     * @brief Generic Text-buffer which wraps a streaming buffer and converts its character
-     * data on-the-fly using a Codec.
-     *
-     * This class derives from std::basic_streambuf which is the super-class of all stream buffer
-     * classes. Stream buffer classes are used to connect to an external device, transport characters
-     * from and to this external device and buffer the characters in an internal buffer.
-     *
-     * The internal character set can be specified using the template parameters 'InternT_', the
-     * external character set using 'ExternT_'. The external type is the input type and output
-     * type when reading from or writing to the external device. The internal type is the type
-     * which is used to internally store the data from the external device after the external
-     * format was converted using the Codec which is passed when constructing an object of this
-     * class.
-     *
-     * The Codec object which is passed as pointer to the constructor will afterwards be completely
-     * managed by this class and also be deleted by this class when it's destructed!
-     *
-     * @see std::basic_streambuf
-     */
+    /** @brief Converts character sequences with different encodings.
+
+        This class derives from std::basic_streambuf which is the super-class of all stream buffer
+        classes. Stream buffer classes are used to connect to an external device, transport characters
+        from and to this external device and buffer the characters in an internal buffer.
+
+        The internal character set can be specified using the template parameters 'InternT_', the
+        external character set using 'ExternT_'. The external type is the input type and output
+        type when reading from or writing to the external device. The internal type is the type
+        which is used to internally store the data from the external device after the external
+        format was converted using the Codec which is passed when constructing an object of this
+        class.
+
+        The Codec object which is passed as pointer to the constructor will afterwards be completely
+        managed by this class and also be deleted by this class when it's destructed!
+
+      @see std::basic_streambuf
+    */
     template <typename InternT_, typename ExternT_>
-    class BasicTextBuffer : public std::basic_streambuf<InternT_> {
+    class BasicTextBuffer : public std::basic_streambuf<InternT_>
+    {
         public:
             typedef InternT_ InternT;
             typedef ExternT_ ExternT;
@@ -56,19 +55,16 @@ namespace Pt {
             typedef TextCodec<InternT, ExternT> CodecT;
 
         public:
-            /**
-             * @brief Creates a BasicTextBuffer using the given stream buffer and codec.
-             *
-             * The given stream buffer is used as external device, buffered by this Text buffer
-             * and all input from and output to the external device is converted using the
-             * given codec class.
-             *
-             * Note: The Codec object which is passed as pointer will afterwards be completely
-             * managed by this class and also be deleted by this class when it's destructed!
-             *
-             * @param buffer The buffer (external device) which is wrapped by this object.
-             * @param codec The codec which is used to convert data from or to the external device.
-             */
+            /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
+
+                The given stream buffer @a buffer is used as external device,
+                buffered by this Text buffer and all input from and output to
+                the external device is converted using the codec @a codec.
+
+                Note: The Codec object which is passed as pointer will be
+                managed by this class and also be deleted by this class
+                on destruction.
+            */
             BasicTextBuffer(std::basic_streambuf<ExternT>* buffer, CodecT* codec)
             : _streambuf(buffer), _codec(codec)
             {
@@ -108,6 +104,23 @@ namespace Pt {
 
             // inheritdoc - reimplemented from basic_streambuf
             virtual IntT underflow();
+
+            template <typename CharT>
+            void copyChars(CharT* s1, const CharT* s2, size_t n)
+            {
+                copy(s1, s2, n);
+            }
+
+            template <typename CharA, typename CharB>
+            void copyChars(CharA* s1, const CharB* s2, size_t n)
+            {
+                while(n-- > 0)
+                {
+                    *s1 = *s2;
+                    ++s1;
+                    ++s2;
+                }
+            }
 
         private:
             //! The external device (stream buffer) from which data is read and to which data is written.
@@ -179,7 +192,8 @@ namespace Pt {
             return TraitsT::eof();
 
         // return if input buffer is not empty.
-        if( this->gptr() != 0 && this->gptr() < this->egptr() ) {
+        if( this->gptr() != 0 && this->gptr() < this->egptr() )
+        {
             return TraitsT::to_int_type( *(this->gptr()) );
         }
 
@@ -195,9 +209,8 @@ namespace Pt {
         size_t readSize = _streambuf->sgetn( &(_readBuffer[0]) + currentSize,
                                              _readBuffer.size() - currentSize );
         _readBuffer.resize(currentSize + readSize);
-        if(readSize <= 0) {
+        if(readSize <= 0)
             return TraitsT::eof();
-        }
 
         // set pointers to source and destination
         const ExternT* fromBegin = &(_readBuffer[0]);
@@ -207,32 +220,44 @@ namespace Pt {
         InternT* toEnd = &(_inBuffer[0]) + _inBuffer.capacity();
         InternT* toNext = toBegin;
 
-        typename CodecT::result result = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-        switch(result) {
-            case CodecT::ok: {
+        typename CodecT::result r;
+        r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+        switch(r)
+        {
+            case CodecT::ok:
+            {
                 _readBuffer.resize(0);
                 break;
             }
-            case CodecT::partial: {
+            case CodecT::partial:
+            {
                 // move converted chars
                 const size_t leftover = fromEnd - fromNext;
                 std::char_traits<ExternT>::move( &(_readBuffer[0]), fromNext, leftover );
                 _readBuffer.resize(leftover);
                 break;
             }
-            case CodecT::noconv: {
-                //std::copy(fromBegin, fromEnd, toBegin);
-                //_readBuffer.resize(0);
+            case CodecT::noconv:
+            {
+                // If no conversion is required, fromNext is set to fromBegin
+                // and toNext is set to toBegin. codecvt::max_length ensures
+                // that the buffer to keep the converted chars is large enough
+                size_t sz = _readBuffer.size();
+                this->copyChars( toBegin, fromBegin, sz );
+                fromNext += sz;
+                toNext += sz;
+                _readBuffer.resize(0);
                 break;
             }
-            case CodecT::error: {
+            case CodecT::error:
+            {
                 return TraitsT::eof();
                 break;
             }
         }
 
-        this->setg(&(_inBuffer[0]) + (_putbackMax - putbackSize), // start of read buffer
-                   &(_inBuffer[0]) + _putbackMax,                     // gptr position
+        this->setg(&(_inBuffer[0]) + (_putbackMax - putbackSize),        // start of read buffer
+                   &(_inBuffer[0]) + _putbackMax,                        // gptr position
                    &(_inBuffer[0]) + _putbackMax + (toNext - toBegin) ); // end of read buffer
 
         return TraitsT::to_int_type( *(this->gptr()) );
@@ -253,36 +278,52 @@ namespace Pt {
         ExternT* toNext = toBegin;
 
         // encode chars
-        typename CodecT::result result = _codec->out(_state, fromNext, fromEnd, fromNext, toNext, toEnd, toNext);
-        if(result == CodecT::partial) {
+        typename CodecT::result r;
+        r = _codec->out(_state, fromNext, fromEnd, fromNext, toNext, toEnd, toNext);
+        if(r == CodecT::partial)
+        {
             // move leftover to front
             const size_t leftover = fromEnd - fromNext;
             std::char_traits<InternT>::move( &(_outBuffer[0]), fromNext, leftover);
         }
-        else if(result == CodecT::noconv) {
-            //std::copy(fromBegin, fromEnd, toBegin);
-            //fromNext = fromEnd;
+        else if(r == CodecT::noconv)
+        {
+            // If no conversion is required, fromNext is set to fromBegin
+            // and toNext is set to toBegin. codecvt::max_length ensures
+            // that the buffer to keep the converted chars is large enough
+            size_t sz = fromEnd - fromBegin;
+            this->copyChars( toBegin, fromBegin, fromEnd - fromBegin );
+            fromNext += sz;
+            toNext += sz;
         }
-        else if(result == CodecT::error) {
+        else if(r == CodecT::error)
+        {
             return TraitsT::eof();
         }
 
         // unshift if EOF is reached
-        if( TraitsT::eq_int_type(ch, TraitsT::eof()) ) {
-            //typename CodecT::result r =
-            _codec->unshift(_state, toNext, toEnd, toNext);
+        if( TraitsT::eq_int_type(ch, TraitsT::eof()) )
+        {
+            typename CodecT::result res;
+            res = _codec->unshift(_state, toNext, toEnd, toNext);
+            if(res != CodecT::ok)
+            {
+                throw std::runtime_error("unshift of EOF character failed");
+            }
         }
 
         //write encoded chars
         const size_t writeSize = _streambuf->sputn(toBegin, toNext - toBegin);
-        if( writeSize == 0 ) {
+        if( writeSize == 0 )
+        {
             return TraitsT::eof();
         }
 
         this->setp( &_outBuffer[0] + (fromEnd - fromNext),
                     &_outBuffer[0] + _outBuffer.size() );
 
-        if( !TraitsT::eq_int_type(ch, TraitsT::eof()) ) {
+        if( !TraitsT::eq_int_type(ch, TraitsT::eof()) )
+        {
             *( this->pptr() ) = TraitsT::to_char_type(ch);
             this->pbump(1);
         }
