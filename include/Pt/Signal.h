@@ -201,6 +201,31 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		mutable bool _dirty;
 };
 
+template <typename R>
+Connection connect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))
+{
+    return signal.connect( slot(func) );
+}
+
+template <typename R, class BaseT, class ClassT>
+Connection connect( Signal<const Pt::Event&>& signal,
+                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) )
+{
+    return signal.connect( slot(object, memFunc) );
+}
+
+template <typename R, class BaseT, class ClassT>
+Connection connect( Signal<const Pt::Event&>& signal,
+                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) const )
+{
+    return signal.connect( slot(object, memFunc) );
+}
+
+inline Connection connect(Signal<const Pt::Event&>& sender, Signal<const Pt::Event&>& receiver)
+{
+    return sender.connect( slot(receiver) );
+}
+
 } // !namespace Pt
 
 #endif
