@@ -1,5 +1,5 @@
 /** \defgroup unittest Unit Testing
-    @brief Protocol and data driven Unit-testing.
+    @brief Protocol and data driven unit testing.
 
 This module provides a complete framework for effective unit testing.
 Data-driven, as well as and protocol-driven testing is possible. %Unit
