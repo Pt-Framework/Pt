@@ -1,6 +1,13 @@
-/** @page unittests Unit Testing
+/** \defgroup unittest Unit Testing
+    @brief Protocol and data driven Unit-testing.
 
-@section SimpleTests A Simple Test Case
+This module provides a complete framework for effective Unit testing.
+Data-driven, as well as and protocol-driven testing is possible. %Unit
+tests can easily be integrated into the build process and test results
+can be reported and logged. The output format for reports and logs is
+configurable.
+
+@section unittest_SimpleTests A Simple Test Case
 
 The TestCase class can be used to implement simple Unit test. This is simply
 done by deriving from TestCase and implementing the %TestCase::test method.
@@ -40,7 +47,7 @@ class MyTestCase : public Pt::Unit::TestCase
 @endcode
 
 
-@section BuildSystemIntegration Build System Integration
+@section unittest_BuildSystemIntegration Build System Integration
 
 The Jamrules.Unit rule set containes rules to build a Unit test and have it
 automatically run after it has been build. Instead of the rule 'Main' the rule
@@ -50,11 +57,11 @@ automatically run after it has been build. Instead of the rule 'Main' the rule
 PtUnitTest mytest : mytest.cpp ;
 @endcode
 
-This will cause the jam tool to report a failed build if the Unit
-test does not run through, which is the desired behaviour. This way
-Unit tests can easily be integrated in automated builds.
+This will cause the jam tool to report a failed build if the %unit
+test does not succeed, This way %unit tests can easily be integrated
+in automated builds.
 
-@section DataDrivenTesting Data Driven Testing
+@section unittest_DataDrivenTesting Data Driven Testing
 
 Sometimes it is desirable to repeat a test with different data. This is achieved
 by registering methods that take arguments (the test data) in a TestSuite.
@@ -64,12 +71,12 @@ class MyTestSuite
 {
     public:
         MyTestSuite()
-        : Pt::Unit::TestSuite("MyTestSuite")
+        : xpr::unit::TestSuite("MyTestSuite")
         {
-            this->registerMethod("AdditionTest", *this, &MyTestSuite::AdditionTest);
+            this->registerMethod("Addition", *this, &MyTestSuite::Addition);
         }
 
-        void AdditionTest(int a, int b)
+        void Addition(int a, int b)
         {
             // testing code
         }
@@ -77,42 +84,40 @@ class MyTestSuite
 @endcode
 
 A protocol can then by used to call the AdditionTest method multiple times
-with different data. For convenience, such a protocol is included in the Unit
-test module already and is called TestSchedule. Here we can assign data to
-tests.
+with different data. The data has to be provided as SerializationInfo
+objects, which works for many types without additional code.
 
 @code
-class MyTestSchedule : public Pt::Unit::TestSchedule
+class MyTestProtocol : public Pt::Unit::TestProtocol
 {
     public:
-        MyTestSchedule()
-        , _first(1, 1)
-        , _second(2, 2)
-        , _three(3, 3)
+        void run(Pt::Unit::TestSuite& suite)
         {
-            this->includeTest("AdditionTest", _first);
-            this->includeTest("AdditionTest", _second);
-            this->includeTest("AdditionTest", _third);
-        }
+            SerializationInfo data[2];
 
-    private:
-        Args _first;
-        Args _second;
-        Args _third;
+            data[0] <<= 4;
+            data[1] <<= 9;
+            suite.runTest( "Addition", data, 2 );
+
+            data[0] <<= 13;
+            data[1] <<= 2;
+            suite.runTest( "Addition", data, 2 );
+        }
 };
 @endcode
 
-When this protocol is applied to MyTestSuite, the AdditionTest will be called
-three times with different test data. It is very possible to read data from a
-file or another data source.
+When this protocol is applied to MyTestSuite, the Addition will be called
+twice with different test data. It is very possible to read data from a
+file or another data source, instead of hardcoding it. The next paragraph
+explains how a protocol is applied to a test.
 
-@section ProtocolDrivenTesting Protocol Driven Testing
+@section unittest_ProtocolDrivenTesting Protocol Driven Testing
 
 Protocol driven testing implements the idea to control the order in which
 tests are executed, or to run test methods multiple times. To accomplish this
-a protocol is defined by deriving from the TestProtocol class.The
-following example will run a test called 'MyTest' three times and sleeps
-between the tests for 1 second.
+a protocol is defined by deriving from the TestProtocol class.The following
+example will run a test called 'MyTest' three times and sleeps between
+the tests for 1 second.
 
 @code
 #include <Pt/Unit/TestProtocol.h>
@@ -126,22 +131,22 @@ class MyProtocol : public Pt::Unit::TestProtocol
 
         void run(Pt::Unit::TestSuite& suite)
         {
-            suite.runTest( "MyTest" );
+            suite.runTest( "MyTestMethod" );
             Pt::System::Process::sleep(1000);
-            suite.runTest( "MyTest" );
+            suite.runTest( "MyTestMethod" );
             Pt::System::Process::sleep(1000);
-            suite.runTest( "MyTest" );
+            suite.runTest( "MyTestMethod" );
         }
 };
 @endcode
 
-The protocol can then be applied to a TestSuite. The methods are
-resolved using object reflection. The TestSuite class requires
-that all runnable tests are registered for reflection. TestSuite inherits
-reflection capabilities from Pt::Reflectable. If a test can not be executed
-through the TestSuite::runTest method an exception of the type %Pt::LogicError
-is thrown and the test fails if it is allowed to propagate. The new protocol
-can be assigned to a TestSuite in the constructor:
+The protocol can then be applied to a TestSuite. The methods are resolved
+by the name they have been registered with. If a test can not be executed
+through the TestSuite::runTest method an exception of the type
+std::runtime_error is thrown and the test fails if the exception is allowed
+to propagate out of the TestProtocol::run method.
+
+The new protocol can be assigned to a TestSuite in the constructor:
 
 @code
 MyProtocol protocol;
@@ -152,20 +157,20 @@ class MyTestSuite
         MyTestSuite()
         : Pt::Unit::TestSuite("MyTestSuite", protocol)
         {
-            this->registerMethod("MyTest", *this, &MyTestSuite::MyTest);
+            this->registerMethod("MyTestMethod", *this, &MyTestSuite::MyTestMethod);
         }
 
-        void MyTest()
+        void MyTestMethod()
         {
             // testing code
         }
 };
 @endcode
 
-Alternatively, a protocol can be set using the Unit::TestSuite::setProtocol
+Alternatively, a protocol can be set using the TestSuite::setProtocol
 method. It is entirely possible to load and assign protocols at run-time.
 
-@section unittests_RunningTests Running Tests
+@section unittest_RunningTests Running Tests
 
 All tests can be run by the Application object of the %Unit module. To register
 a test with the application object the RegisterTest class template can be used
