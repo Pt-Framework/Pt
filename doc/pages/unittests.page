@@ -1,7 +1,7 @@
 /** \defgroup unittest Unit Testing
     @brief Protocol and data driven Unit-testing.
 
-This module provides a complete framework for effective Unit testing.
+This module provides a complete framework for effective unit testing.
 Data-driven, as well as and protocol-driven testing is possible. %Unit
 tests can easily be integrated into the build process and test results
 can be reported and logged. The output format for reports and logs is
@@ -9,7 +9,7 @@ configurable.
 
 @section unittest_SimpleTests A Simple Test Case
 
-The TestCase class can be used to implement simple Unit test. This is simply
+The TestCase class can be used to implement simple unit test. This is simply
 done by deriving from TestCase and implementing the %TestCase::test method.
 The member functions %TestCase::setUp and %TestCase::tearDown can be used
 to manage any resources the test might require. The PT_UNIT_ASSERT macro
@@ -49,7 +49,7 @@ class MyTestCase : public Pt::Unit::TestCase
 
 @section unittest_BuildSystemIntegration Build System Integration
 
-The Jamrules.Unit rule set containes rules to build a Unit test and have it
+The Jamrules.unit rule set containes rules to build a Unit test and have it
 automatically run after it has been build. Instead of the rule 'Main' the rule
 'PtUnitTest' has to be used in a Jamfile:
 
