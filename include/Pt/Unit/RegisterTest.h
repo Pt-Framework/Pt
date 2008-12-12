@@ -31,16 +31,13 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Application.h>
 
-
 namespace Pt {
 
 namespace Unit {
 
-    /**
-        @param TestT The type of test to register
-    */
     template <class TestT>
     /** @brief Registers tests to an application
+        @ingroup unittest
 
         Tests can be registered easily with the RegisterTest<> class
         template to an Unit::Application at program initialisation.

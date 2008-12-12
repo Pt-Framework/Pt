@@ -38,7 +38,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief %Test %Assertion exception
-        @ingroup UnitTests
+        @ingroup unittest
 
         Assertions are modeled as an exception type, which is thrown by Unit
         tests when an assertion has failed. This class implements

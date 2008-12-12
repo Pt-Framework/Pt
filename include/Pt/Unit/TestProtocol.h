@@ -40,7 +40,7 @@ namespace Unit {
     class TestSuite;
 
     /** @brief Protocol for test suites
-        @ingroup UnitTests
+        @ingroup unittest
 
         This is the base class for protocols that can be used to run a test
         suite. The default implementation will simply run each registered

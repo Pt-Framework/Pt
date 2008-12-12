@@ -38,7 +38,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Single test with setup and teardown
-        @ingroup UnitTests
+        @ingroup unittest
 
         A %TestCase can be used for simple tests that require a initialization
         and deinitialization of resources. The implementor is supposed to

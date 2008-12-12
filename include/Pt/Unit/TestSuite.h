@@ -42,7 +42,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Protocol and data driven testing
-        @ingroup UnitTests
+        @ingroup unittest
 
         The TestSuite is used to implement protocol and data driven tests.
         It inherits its ability to register methods and properties from

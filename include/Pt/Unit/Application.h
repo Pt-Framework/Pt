@@ -38,6 +38,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Run registered tests
+        @ingroup unittest
 
         The application class serves as an environment for a number of tests
         to be run. An application object is usually created in the main loop

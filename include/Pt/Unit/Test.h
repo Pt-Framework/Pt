@@ -42,7 +42,7 @@ namespace Unit {
     class TestContext;
 
     /** @brief Test base class
-        @ingroup UnitTests
+        @ingroup unittest
 
         This is the base class for all types of tests that can be registered
         and run in a test application. It provides a virtual method run that
