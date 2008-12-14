@@ -302,6 +302,19 @@ namespace Pt {
             Pt::uint32_t _value;
     };
 
+    struct MBState
+    {
+        MBState()
+        : n(0)
+        {}
+        
+        int n;
+        union {
+            Pt::uint32_t wchars[4];
+            char mbytes[16];
+        } value;
+    };
+    
 } // namespace Pt
 
 

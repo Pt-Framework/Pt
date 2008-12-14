@@ -82,6 +82,7 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNumpunct );
         }
 
+        void MBStateInit();
 		void InvalidUTF8String();
         void testTextStreamDirectFromUTF8ToUnicode();
         void testTextStreamGetLineFromUTF8ToUnicode();
@@ -107,6 +108,12 @@ char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (cha
 
 Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
+
+void TextStreamTest::MBStateInit()
+{
+    Pt::MBState state;
+    PT_UNIT_ASSERT( state.n == 0 );
+}
 
 void TextStreamTest::InvalidUTF8String()
 {
