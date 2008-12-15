@@ -104,7 +104,7 @@ bool Timer::update(const Timespan& now)
 
     bool hasElapsed = now >= _finished;
 
-    while( now >= _finished )
+    while( _active && now >= _finished )
     {
         _finished += (_interval * 1000);
         timeout.send();
