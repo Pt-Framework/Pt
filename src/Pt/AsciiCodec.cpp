@@ -38,7 +38,7 @@ AsciiCodec::~AsciiCodec()
 {}
 
 
-AsciiCodec::result AsciiCodec::do_in(std::mbstate_t& s, const char* fromBegin,
+AsciiCodec::result AsciiCodec::do_in(MBState& s, const char* fromBegin,
                                      const char* fromEnd, const char*& fromNext,
                                      Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
 {
@@ -55,7 +55,7 @@ AsciiCodec::result AsciiCodec::do_in(std::mbstate_t& s, const char* fromBegin,
 }
 
 
-AsciiCodec::result AsciiCodec::do_out(std::mbstate_t& s, const Pt::Char* fromBegin,
+AsciiCodec::result AsciiCodec::do_out(MBState& s, const Pt::Char* fromBegin,
                                       const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
 {
@@ -76,7 +76,7 @@ AsciiCodec::result AsciiCodec::do_out(std::mbstate_t& s, const Pt::Char* fromBeg
 }
 
 
-int AsciiCodec::do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int AsciiCodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
     return fromEnd-fromBegin;
 }

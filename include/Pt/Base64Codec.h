@@ -82,7 +82,7 @@ namespace Pt {
 			virtual ~Base64Codec()
 			{}
 
-            virtual result do_in(mbstate_t& s, const char* fromBegin,
+            virtual result do_in(MBState& s, const char* fromBegin,
                                  const char* fromEnd, const char*& fromNext,
                                  char* toBegin, char* toEnd, char*& toNext) const
 			{
@@ -124,7 +124,7 @@ namespace Pt {
 				return partial;
 			}
 
-            virtual result do_out(mbstate_t& s, const char* fromBegin,
+            virtual result do_out(MBState& s, const char* fromBegin,
                                   const char* fromEnd, const char*& fromNext,
                                   char* toBegin, char* toEnd, char*& toNext) const
 			{
@@ -168,7 +168,7 @@ namespace Pt {
 				return ok;
 			}
 
-            virtual result do_unshift(mbstate_t& state, char* to,
+            virtual result do_unshift(MBState& state, char* to,
                                      char* to_end, char*& to_next) const
 			{
 				return ok;

@@ -418,12 +418,12 @@ namespace std {
 #if (defined _MSC_VER || defined __QNX__)
 
     template<>
-    class PT_API codecvt<Pt::Char, char, std::mbstate_t> : public codecvt_base {
+    class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
 
 #else
 
     template<>
-    class PT_API codecvt<Pt::Char, char, std::mbstate_t> : public codecvt_base, public locale::facet {
+    class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
 #endif
 
         public:
@@ -434,16 +434,16 @@ namespace std {
 
             virtual ~codecvt();
 
-            codecvt_base::result out(std::mbstate_t& state, const Pt::Char* from,
+            codecvt_base::result out(Pt::MBState& state, const Pt::Char* from,
                                      const Pt::Char* from_end, const Pt::Char*& from_next,
                                      char* to, char* to_end, char*& to_next) const
             { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
 
-            codecvt_base::result unshift(std::mbstate_t& state, char* to, char* to_end,
+            codecvt_base::result unshift(Pt::MBState& state, char* to, char* to_end,
                                          char*& to_next) const
             { return this->do_unshift(state, to, to_end, to_next); }
 
-            codecvt_base::result in(std::mbstate_t& state, const char* from,
+            codecvt_base::result in(Pt::MBState& state, const char* from,
                                     const char* from_end, const char*& from_next,
                                     Pt::Char* to, Pt::Char* to_end, Pt::Char*& to_next) const
             { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
@@ -454,7 +454,7 @@ namespace std {
             bool always_noconv() const
             { return this->do_always_noconv(); }
 
-            int length(std::mbstate_t& state, const char* from,
+            int length(Pt::MBState& state, const char* from,
                        const char* end, size_t max) const
             { return this->do_length(state, from, end, max); }
 
@@ -462,14 +462,14 @@ namespace std {
             { return this->do_max_length(); }
 
         protected:
-            virtual codecvt_base::result do_out(std::mbstate_t& state, const Pt::Char* from,
+            virtual codecvt_base::result do_out(Pt::MBState& state, const Pt::Char* from,
                                                 const Pt::Char* from_end, const Pt::Char*& from_next,
                                                 char* to, char* to_end, char*& to_next) const = 0;
 
-            virtual codecvt_base::result do_unshift(std::mbstate_t& state, char* to,
+            virtual codecvt_base::result do_unshift(Pt::MBState& state, char* to,
                                                     char* to_end, char*& to_next) const = 0;
 
-            virtual codecvt_base::result do_in(std::mbstate_t& state,
+            virtual codecvt_base::result do_in(Pt::MBState& state,
                                                const char* from, const char* from_end,
                                                const char*& from_next, Pt::Char* to, Pt::Char* to_end,
                                                Pt::Char*& to_next) const = 0;
@@ -478,7 +478,7 @@ namespace std {
 
             virtual bool do_always_noconv() const throw() = 0;
 
-            virtual int do_length(std::mbstate_t&, const char* from,
+            virtual int do_length(Pt::MBState&, const char* from,
                                   const char* end, size_t max) const = 0;
 
             virtual int do_max_length() const throw() = 0;

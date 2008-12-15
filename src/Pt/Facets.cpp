@@ -403,25 +403,25 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
 //
 // codecvt facet
 //
-std::locale::id codecvt<Pt::Char, char, mbstate_t>::id;
+std::locale::id codecvt<Pt::Char, char, Pt::MBState>::id;
 
 
 #if defined _MSC_VER || __QNX__
 
-codecvt<Pt::Char, char, mbstate_t>::codecvt(size_t ref)
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
 : codecvt_base(ref)
 {}
 
 #else
 
-codecvt<Pt::Char, char, mbstate_t>::codecvt(size_t ref)
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
 : locale::facet(ref)
 {}
 
 #endif
 
 
-codecvt<Pt::Char, char, mbstate_t>::~codecvt()
+codecvt<Pt::Char, char, Pt::MBState>::~codecvt()
 {}
 
 } // namespace std

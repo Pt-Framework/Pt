@@ -103,12 +103,12 @@ namespace Pt {
             {}
 
             //! @brief Decodes UTF-8 to UTF-32.
-            virtual result do_in(std::mbstate_t& s, const char* fromBegin,
+            virtual result do_in(MBState& s, const char* fromBegin,
                                             const char* fromEnd, const char*& fromNext,
                                             Char* toBegin, Char* toEnd, Char*& toNext) const;
 
             //! @brief Encodes UTF-32 to UTF-8.
-            virtual result do_out(std::mbstate_t& s, const Char* fromBegin,
+            virtual result do_out(MBState& s, const Char* fromBegin,
                                              const Char* fromEnd, const Char*& fromNext,
                                              char* toBegin, char* toEnd, char*& toNext) const;
 
@@ -116,7 +116,7 @@ namespace Pt {
             virtual bool do_always_noconv() const throw();
 
             // inheritdoc
-            virtual int do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
             // inheritdoc
             virtual int do_max_length() const throw();

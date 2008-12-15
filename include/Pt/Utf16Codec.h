@@ -89,18 +89,18 @@ namespace Pt {
             virtual ~Utf16Codec();
 
             //! @brief Decodes UTF-16 to UTF-32.
-            virtual result do_in(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+            virtual result do_in(MBState& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
                                                  Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const;
 
             //! @brief Encodes UTF-32 to UTF-16.
-            virtual result do_out(std::mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
+            virtual result do_out(MBState& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                                  char* toBegin, char* toEnd, char*& toNext) const;
 
             // inheritdoc
             virtual bool do_always_no_conv() const throw();
 
             // inheritdoc
-            virtual int do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
             // inheritdoc
             virtual int do_max_length() const throw();

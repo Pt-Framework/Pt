@@ -56,7 +56,7 @@ namespace Pt {
      * @see Utf32Codec
      */
     template <typename I, typename E>
-    class TextCodec : public std::codecvt<I, E, std::mbstate_t> 
+    class TextCodec : public std::codecvt<I, E, Pt::MBState>
 	{
         public:
             typedef I InternT;
@@ -72,7 +72,7 @@ namespace Pt {
              * of deleting the facet. If ref == 1 the locale does not destroy the facet.
              */
             TextCodec(size_t ref = 0)
-            : std::codecvt<InternT, ExternT, std::mbstate_t>(ref)
+            : std::codecvt<InternT, ExternT, MBState>(ref)
             {}
 
             //! Empty desctructor
@@ -81,7 +81,7 @@ namespace Pt {
 
         protected:
             // inheritdoc
-            std::codecvt_base::result do_unshift(std::mbstate_t&, ExternT*, ExternT*, ExternT*&) const
+            std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
             { return std::codecvt_base::ok; }
 
             // inheritdoc

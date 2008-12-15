@@ -307,14 +307,14 @@ namespace Pt {
         MBState()
         : n(0)
         {}
-        
+
         int n;
         union {
             Pt::uint32_t wchars[4];
             char mbytes[16];
         } value;
     };
-    
+
 } // namespace Pt
 
 
@@ -328,7 +328,7 @@ namespace std {
         typedef Pt::uint32_t int_type;
         typedef streamoff off_type;
         typedef streampos pos_type;
-        typedef std::mbstate_t state_type;
+        typedef Pt::MBState state_type;
 
         inline static void assign(char_type& c1, const char_type& c2);
 

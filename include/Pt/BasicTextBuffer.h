@@ -117,7 +117,7 @@ namespace Pt {
             template <typename CharT>
             void copyChars(CharT* s1, const CharT* s2, size_t n)
             {
-                copy(s1, s2, n);
+                std::char_traits<CharT>::copy(s1, s2, n);
             }
 
             template <typename CharA, typename CharB>
@@ -136,7 +136,7 @@ namespace Pt {
             std::basic_streambuf<ExternT>* _streambuf;
 
             //! Contains the state of conversion.
-            std::mbstate_t _state;
+            MBState _state;
 
             //! The codec which is used to convert character data from or to the external device.
             CodecT* _codec;
