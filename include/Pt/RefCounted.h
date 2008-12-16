@@ -41,7 +41,7 @@ namespace Pt {
             : _refs(0)
             { }
 
-            explicit RefCounted(atomic_t refs)
+            explicit RefCounted(unsigned refs)
             : _refs(refs)
             { }
 
