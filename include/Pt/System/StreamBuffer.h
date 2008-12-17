@@ -83,9 +83,9 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
 
         IODevice* device();
 
-        void beginSync();
+        void beginRead();
 
-        void beginFlush();
+        void beginWrite();
 
         Signal<StreamBuffer&> inputReady;
 
@@ -113,13 +113,13 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
         virtual pos_type seekpos(pos_type p, std::ios::openmode mode );
 
     private:
-        void onSync(IODevice& dev);
+        void onRead(IODevice& dev);
 
-        void endSync();
+        void endRead();
 
-        void onFlush(IODevice& dev);
+        void onWrite(IODevice& dev);
 
-        void endFlush();
+        void endWrite();
 
     private:
         IODevice* _ioDevice;

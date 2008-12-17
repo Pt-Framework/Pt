@@ -86,13 +86,13 @@ void StreamBuffer::attach(IODevice& ioDevice)
         if( _ioDevice->busy() )
             throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
-        disconnect(ioDevice.inputReady, *this, &StreamBuffer::onSync);
-        disconnect(ioDevice.outputReady, *this, &StreamBuffer::onFlush);
+        disconnect(ioDevice.inputReady, *this, &StreamBuffer::onRead);
+        disconnect(ioDevice.outputReady, *this, &StreamBuffer::onWrite);
     }
 
     _ioDevice = &ioDevice;
-    connect(ioDevice.inputReady, *this, &StreamBuffer::onSync);
-    connect(ioDevice.outputReady, *this, &StreamBuffer::onFlush);
+    connect(ioDevice.inputReady, *this, &StreamBuffer::onRead);
+    connect(ioDevice.outputReady, *this, &StreamBuffer::onWrite);
 }
 
 
@@ -102,7 +102,7 @@ IODevice* StreamBuffer::device()
 }
 
 
-void StreamBuffer::beginSync()
+void StreamBuffer::beginRead()
 {
     if(_syncing || _ioDevice == 0)
         return;
@@ -139,14 +139,14 @@ void StreamBuffer::beginSync()
 }
 
 
-void StreamBuffer::onSync(IODevice& dev)
+void StreamBuffer::onRead(IODevice& dev)
 {
-    this->endSync();
+    this->endRead();
     inputReady.send(*this);
 }
 
 
-void StreamBuffer::endSync()
+void StreamBuffer::endRead()
 {
     size_t readSize = _ioDevice->endRead();
     _syncing = false;
@@ -163,7 +163,7 @@ StreamBuffer::int_type StreamBuffer::underflow()
         return traits_type::eof();
 
     if(_syncing)
-        this->endSync();
+        this->endRead();
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *(this->gptr()) );
@@ -205,7 +205,7 @@ std::streamsize StreamBuffer::showmanyp()
 }
 
 
-void StreamBuffer::beginFlush()
+void StreamBuffer::beginWrite()
 {
     if(_flushing || _ioDevice == 0 )
         return;
@@ -222,14 +222,14 @@ void StreamBuffer::beginFlush()
 }
 
 
-void StreamBuffer::onFlush(IODevice& dev)
+void StreamBuffer::onWrite(IODevice& dev)
 {
-    this->endFlush();
+    this->endWrite();
     outputReady.send(*this);
 }
 
 
-void StreamBuffer::endFlush()
+void StreamBuffer::endWrite()
 {
     _flushing = false;
     size_t leftover = 0;
@@ -263,7 +263,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     if(_flushing)
     {
-        this->endFlush();
+        this->endWrite();
     }
     else if( this->pptr() > this->pbase() )
     {
@@ -347,12 +347,12 @@ StreamBuffer::seekoff(off_type off, std::ios::seekdir dir, std::ios::openmode)
 
     if(_flushing)
     {
-        this->endFlush();
+        this->endWrite();
     }
 
     if(_syncing)
     {
-        this->endSync();
+        this->endRead();
     }
 
     ret = _ioDevice->seek(off, dir);

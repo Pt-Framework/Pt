@@ -56,7 +56,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             std::cerr << "Writing: " << "Hello world!" << std::endl;
             outbuf.sputn("Hello world!", 12);
             std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
-            outbuf.beginFlush();
+            outbuf.beginWrite();
 
             eloop.run();
 
@@ -77,7 +77,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
         {
             std::cerr << "Closing pipe" << std::endl;
             buffer.device()->close();
-            inbuf.beginSync();
+            inbuf.beginRead();
         }
 
     private:
