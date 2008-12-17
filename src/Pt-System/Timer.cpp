@@ -66,6 +66,9 @@ std::size_t Timer::interval() const
 
 void Timer::start(std::size_t interval)
 {
+    if(_active)
+        this->stop();
+
     _active = true;
     _interval = interval;
     _remaining = Pt::int64_t(_interval) * 1000;
