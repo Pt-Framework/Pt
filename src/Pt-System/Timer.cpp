@@ -68,7 +68,7 @@ void Timer::start(std::size_t interval)
 {
     _active = true;
     _interval = interval;
-    _remaining = _interval * 1000;
+    _remaining = Pt::int64_t(_interval) * 1000;
     _finished = Clock::getSystemTicks() + _remaining;
 
     if(_selector)
