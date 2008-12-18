@@ -131,46 +131,88 @@ namespace Pt {
 				fromNext = fromBegin;
 				toNext = toBegin;
 
-				if(fromBegin == fromEnd)
-				{
-					return ok;
-				}
-
-				if(fromEnd - fromBegin < 3 || toEnd - toNext < 4)
-				{
-					return error;
-				}
-
 				// process until two or less characters are left
 				while( (fromNext + 2) < fromEnd )
 				{
 					if(toEnd - toNext < 4)
+					{
 						return partial;
+					}
 
 					Pt::uint8_t* first = (Pt::uint8_t*)(fromNext);
 					Pt::uint8_t* second = (Pt::uint8_t*)(first+1);
 					Pt::uint8_t* third = (Pt::uint8_t*)(first+2);
 
-					*toNext     = toBase64( (*first >> 2) & 0x3f );
-					*(++toNext) = toBase64( ((*first << 4) + ((*second) >> 4)) & 0x3f );
-					*(++toNext) = toBase64( ((*second << 2) + ((*third) >> 6)) & 0x3f );
-					*(++toNext) = toBase64( *third & 0x3f );
+					*toNext     = base64( (*first >> 2) & 0x3f );
+					*(++toNext) = base64( ((*first << 4) + ((*second) >> 4)) & 0x3f );
+					*(++toNext) = base64( ((*second << 2) + ((*third) >> 6)) & 0x3f );
+					*(++toNext) = base64( *third & 0x3f );
 
 					++toNext;
 					fromNext = fromNext + 3;
 				}
 
-				if(fromEnd != fromNext)
+				switch( fromEnd - fromNext )
+				{
+					case 2:
+						state.value.mbytes[0]  = (Pt::uint8_t)( *fromNext );
+						state.value.mbytes[1] = (Pt::uint8_t)( *(fromNext+1) );
+						state.n = 2;
+						fromNext += 2;
+						return partial;
+
+					case 1:
+						state.value.mbytes[0] = (Pt::uint8_t)(*fromNext);
+						state.n = 1;
+						fromNext += 1;
+						return partial;
+
+					case 0:
+						state = MBState();
+						return ok;
+
+					default:
+						return error;
+				}
+
+				return error;
+			}
+
+            virtual result do_unshift(MBState& state,
+                                      char* toBegin, char* toEnd, char*& toNext) const
+			{
+				toNext = toBegin;
+
+				if(toEnd - toBegin < 4)
 				{
 					return partial;
 				}
 
-				return ok;
-			}
+				switch(state.n)
+				{
+					case 2:
+						*toNext     = base64( (_first >> 2) & 0x3f );
+						*(++toNext) = base64( (_first << 4) & 0x3f );
+						*(++toNext) = '=';
+						*(++toNext) = '=';
+						break;
 
-            virtual result do_unshift(MBState& state, char* to,
-                                     char* to_end, char*& to_next) const
-			{
+					case 1:
+						*toNext     = base64( (_first >> 2) & 0x3f );
+						*(++toNext) = base64( ((_first << 4) + ((_second) >> 4)) & 0x3f );
+						*(++toNext) = base64( (_second << 2) &  0x3f );
+						*(++toNext) = '=';
+						break;
+
+					case 0:
+						return noconv;
+
+					default:
+						return error;
+				}
+
+				state = MBState()
+				++toNext;
 				return ok;
 			}
 
