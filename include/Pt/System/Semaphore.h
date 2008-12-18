@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API Semaphore : public NonCopyable
+class PT_SYSTEM_API Semaphore : private NonCopyable
 {
     friend class SemaphoreImpl;
 
