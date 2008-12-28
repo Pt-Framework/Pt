@@ -7,6 +7,7 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : AsciiCodec.cpp
                    Atomicity.cpp
+				   Base64Codec.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp

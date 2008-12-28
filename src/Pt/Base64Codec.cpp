@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 by Marc Boris D�rner
+ * Copyright (C) 2005 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,254 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Text/Base64Codec.h"
-
-#include <iostream>
-using namespace std;
-
+#include "Pt/Base64Codec.h"
 
 namespace Pt {
 
+char toBase64(uint8_t n)
+{
+    static char b64Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    return b64Table[n];
+}
+
+uint8_t fromBase64(char b64)
+{
+    switch(b64) {
+        case 'A': return 0; case 'B': return 1; case 'C': return 2;
+        case 'D': return 3; case 'E': return 4; case 'F': return 5;
+        case 'G': return 6; case 'H': return 7; case 'I': return 8;
+        case 'J': return 9; case 'K': return 10; case 'L': return 11;
+        case 'M': return 12; case 'N': return 13; case 'O': return 14;
+        case 'P': return 15; case 'Q': return 16; case 'R': return 17;
+        case 'S': return 18; case 'T': return 19; case 'U': return 20;
+        case 'V': return 21; case 'W': return 22; case 'X': return 23;
+        case 'Y': return 24; case 'Z': return 25; case 'a': return 26;
+        case 'b': return 27; case 'c': return 28; case 'd': return 29;
+        case 'e': return 30; case 'f': return 31; case 'g': return 32;
+        case 'h': return 33; case 'i': return 34; case 'j': return 35;
+        case 'k': return 36; case 'l': return 37; case 'm': return 38;
+        case 'n': return 39; case 'o': return 40; case 'p': return 41;
+        case 'q': return 42; case 'r': return 43; case 's': return 44;
+        case 't': return 45; case 'u': return 46; case 'v': return 47;
+        case 'w': return 48; case 'x': return 49; case 'y': return 50;
+        case 'z': return 51; case '0': return 52; case '1': return 53;
+        case '2': return 54; case '3': return 55; case '4': return 56;
+        case '5': return 57; case '6': return 58; case '7': return 59;
+        case '8': return 60; case '9': return 61; case '+': return 62;
+        case '/': return 63; case '=': return 64;
+
+        default:
+            return 0;
+    }
+}
+    
+Base64Codec::Base64Codec(size_t ref)
+: TextCodec<char, char>(ref)
+{}
+
+Base64Codec::~Base64Codec()
+{
+}
+
+Base64Codec::result Base64Codec::do_in(MBState& s, 
+                                       const char* fromBegin,
+                                       const char* fromEnd, 
+                                       const char*& fromNext,
+                                       char* toBegin, 
+                                       char* toEnd, 
+                                       char*& toNext) const
+{
+    fromNext = fromBegin;
+    toNext = toBegin;
+
+    if(fromBegin == fromEnd)
+    {
+        return std::codecvt_base::ok;
+    }
+
+    if( (toEnd - toNext) < 3 ||(fromEnd - fromNext) < 4 )
+    {
+        return std::codecvt_base::error;
+    }
+
+    while( (fromEnd - fromNext) >= 4 && (toEnd - toNext) >= 3 )
+    {
+        Pt::uint8_t first  = fromBase64( *fromNext );
+        Pt::uint8_t second = fromBase64( *(++fromNext) );
+        Pt::uint8_t third  = fromBase64( *(++fromNext) );
+        Pt::uint8_t fourth = fromBase64( *(++fromNext) );
+
+        *toNext = (first << 2) + (second >> 4);
+        *(++toNext) = (second << 4) + (third >> 2);
+
+        if(fourth != 64) {
+            *(++toNext) = (third << 6) + (fourth);
+        }
+
+        ++toNext;
+        ++fromNext;
+
+        if( fromEnd == fromNext ) {
+            return std::codecvt_base::ok;
+        }
+    }
+
+    return std::codecvt_base::partial;
+}
+
+Base64Codec::result Base64Codec::do_out(Pt::MBState& state, 
+                                        const char* fromBegin,
+                                        const char* fromEnd, 
+                                        const char *& fromNext,
+                                        char* toBegin, 
+                                        char* toEnd, 
+                                        char*& toNext) const
+{
+    fromNext = fromBegin;
+    toNext = toBegin;
+
+    const char* first = 0;
+    const char* second = 0;
+    const char* third = 0;
+
+    if(fromEnd - fromNext < 1)
+        return std::codecvt_base::partial;
+
+    if(toEnd - toNext < 4)
+        return std::codecvt_base::partial;
+    
+    switch( state.n )
+    {
+        case 2:
+            first  = &state.value.mbytes[0];
+            second = &state.value.mbytes[1];
+            third  = fromNext++;
+            break;
+
+        case 1:
+            if(fromEnd - fromNext < 2)
+            {
+                state.value.mbytes[1] = *fromNext++;
+                state.n = 2;
+                return std::codecvt_base::partial;
+            }
+            
+            first  = &state.value.mbytes[0];
+            second = fromNext++;
+            third  = fromNext++;
+            break;
+
+        default:
+            first  = fromNext++;
+            second = fromNext++;
+            third  = fromNext++;
+            break;
+    }
+
+    do 
+    {
+        *toNext++   = toBase64( (*first >> 2) & 0x3f );
+        *(toNext++) = toBase64( ((*first << 4) + ((*second) >> 4)) & 0x3f );
+        *(toNext++) = toBase64( ((*second << 2) + ((*third) >> 6)) & 0x3f );
+        *(toNext++) = toBase64( *third & 0x3f );
+
+        if(toEnd - toNext < 4)
+            return std::codecvt_base::partial;
+
+        if( fromEnd - fromNext < 3 )
+            break;
+
+        first =  fromNext++;
+        second = fromNext++;
+        third =  fromNext++;
+    } 
+    while(fromNext < fromEnd) ;
+
+    switch( fromEnd - fromNext )
+    {
+        case 2:
+            state.value.mbytes[0] = *fromNext++;
+            state.value.mbytes[1] = *fromNext++;
+            state.n = 2;
+            break;
+
+        case 1:
+            state.value.mbytes[0] = *fromNext++;
+            state.n = 1;
+            break;
+
+        default:
+            state = MBState();
+            break;
+    }
+
+    return std::codecvt_base::ok;
+}
+
+Base64Codec::result Base64Codec::do_unshift(MBState& state, 
+                                            char* toBegin, 
+                                            char* toEnd, 
+                                            char*& toNext) const
+{
+    toNext = toBegin;
+
+    if(toEnd - toBegin < 4)
+    {
+        return std::codecvt_base::partial;
+    }
+
+    switch(state.n)
+    {
+        case 2:
+            *toNext++   = toBase64( (state.value.mbytes[0] >> 2) & 0x3f );
+            *(toNext++) = toBase64( ((state.value.mbytes[0] << 4) + ((state.value.mbytes[1]) >> 4)) & 0x3f );
+            *(toNext++) = toBase64( (state.value.mbytes[1] << 2) &  0x3f );
+            *(toNext++) = '=';
+            break;
+        
+        case 1:
+            *toNext++   = toBase64( (state.value.mbytes[0] >> 2) & 0x3f );
+            *(toNext++) = toBase64( (state.value.mbytes[0] << 4) & 0x3f );
+            *(toNext++) = '=';
+            *(toNext++) = '=';
+            break;
+
+        case 0:
+            return std::codecvt_base::noconv;
+    }
+
+    state = MBState();
+    return std::codecvt_base::ok;
+}
+
+bool Base64Codec::do_always_noconv() const throw()
+{ 
+    return false; 
+}
+
+int Base64Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
+{ 
+    return 0;
+}
+
+int Base64Codec::do_encoding() const throw()
+{ 
+    // stateful encoding
+    return -1; 
+} 
+
+int Base64Codec::do_max_length() const throw()
+{ 
+    //worst case: XX== -> x
+    return 4; 
+} 
+
+}
+
+/*
+#include "Pt/Text/Base64Codec.h"
+
+namespace Pt {
 
 char base64(uint8_t n)
 {
@@ -245,3 +485,5 @@ bool Base64Codec::do_always_noconv() const throw()
 }
 
 } // namespace Pt
+
+*/

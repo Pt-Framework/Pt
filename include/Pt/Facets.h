@@ -434,18 +434,28 @@ namespace std {
 
             virtual ~codecvt();
 
-            codecvt_base::result out(Pt::MBState& state, const Pt::Char* from,
-                                     const Pt::Char* from_end, const Pt::Char*& from_next,
-                                     char* to, char* to_end, char*& to_next) const
+            codecvt_base::result out(Pt::MBState& state, 
+                                     const Pt::Char* from,
+                                     const Pt::Char* from_end, 
+                                     const Pt::Char*& from_next,
+                                     char* to, 
+                                     char* to_end, 
+                                     char*& to_next) const
             { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
 
-            codecvt_base::result unshift(Pt::MBState& state, char* to, char* to_end,
+            codecvt_base::result unshift(Pt::MBState& state, 
+                                         char* to, 
+                                         char* to_end,
                                          char*& to_next) const
             { return this->do_unshift(state, to, to_end, to_next); }
 
-            codecvt_base::result in(Pt::MBState& state, const char* from,
-                                    const char* from_end, const char*& from_next,
-                                    Pt::Char* to, Pt::Char* to_end, Pt::Char*& to_next) const
+            codecvt_base::result in(Pt::MBState& state, 
+                                    const char* from,
+                                    const char* from_end, 
+                                    const char*& from_next,
+                                    Pt::Char* to, 
+                                    Pt::Char* to_end, 
+                                    Pt::Char*& to_next) const
             { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
 
             int encoding() const
@@ -462,28 +472,128 @@ namespace std {
             { return this->do_max_length(); }
 
         protected:
-            virtual codecvt_base::result do_out(Pt::MBState& state, const Pt::Char* from,
-                                                const Pt::Char* from_end, const Pt::Char*& from_next,
-                                                char* to, char* to_end, char*& to_next) const = 0;
+            virtual codecvt_base::result do_out(Pt::MBState& state, 
+                                                const Pt::Char* from,
+                                                const Pt::Char* from_end, 
+                                                const Pt::Char*& from_next,
+                                                char* to, 
+                                                char* to_end, 
+                                                char*& to_next) const = 0;
 
-            virtual codecvt_base::result do_unshift(Pt::MBState& state, char* to,
-                                                    char* to_end, char*& to_next) const = 0;
+            virtual codecvt_base::result do_unshift(Pt::MBState& state, 
+                                                    char* to,
+                                                    char* to_end, 
+                                                    char*& to_next) const = 0;
 
             virtual codecvt_base::result do_in(Pt::MBState& state,
-                                               const char* from, const char* from_end,
-                                               const char*& from_next, Pt::Char* to, Pt::Char* to_end,
+                                               const char* from, 
+                                               const char* from_end,
+                                               const char*& from_next, 
+                                               Pt::Char* to, 
+                                               Pt::Char* to_end,
                                                Pt::Char*& to_next) const = 0;
 
             virtual int do_encoding() const throw() = 0;
 
             virtual bool do_always_noconv() const throw() = 0;
 
-            virtual int do_length(Pt::MBState&, const char* from,
-                                  const char* end, size_t max) const = 0;
+            virtual int do_length(Pt::MBState&, 
+                                  const char* from,
+                                  const char* end, 
+                                  size_t max) const = 0;
 
             virtual int do_max_length() const throw() = 0;
     };
 
+#if (defined _MSC_VER || defined __QNX__)
+
+    template<>
+    class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base {
+
+#else
+
+    template<>
+    class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public locale::facet {
+#endif
+
+        public:
+            static locale::id id;
+
+        public:
+            explicit codecvt(size_t ref = 0);
+
+            virtual ~codecvt();
+
+            codecvt_base::result out(Pt::MBState& state, 
+                                     const char* from,
+                                     const char* from_end, 
+                                     const char*& from_next,
+                                     char* to, 
+                                     char* to_end, 
+                                     char*& to_next) const
+            { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
+
+            codecvt_base::result unshift(Pt::MBState& state, 
+                                         char* to, 
+                                         char* to_end,
+                                         char*& to_next) const
+            { return this->do_unshift(state, to, to_end, to_next); }
+
+            codecvt_base::result in(Pt::MBState& state, 
+                                    const char* from,
+                                    const char* from_end, 
+                                    const char*& from_next,
+                                    char* to, char* to_end, 
+                                    char*& to_next) const
+            { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
+
+            int encoding() const
+            { return this->do_encoding(); }
+
+            bool always_noconv() const
+            { return this->do_always_noconv(); }
+
+            int length(Pt::MBState& state, const char* from,
+                       const char* end, size_t max) const
+            { return this->do_length(state, from, end, max); }
+
+            int max_length() const
+            { return this->do_max_length(); }
+
+        protected:
+            virtual codecvt_base::result do_out(Pt::MBState& state, 
+                                                const char* from,
+                                                const char* from_end, 
+                                                const char*& from_next,
+                                                char* to, 
+                                                char* to_end, 
+                                                char*& to_next) const = 0;
+
+            virtual codecvt_base::result do_unshift(Pt::MBState& state, 
+                                                    char* to,
+                                                    char* to_end, 
+                                                    char*& to_next) const = 0;
+
+            virtual codecvt_base::result do_in(Pt::MBState& state,
+                                               const char* from, 
+                                               const char* from_end,
+                                               const char*& from_next, 
+                                               char* to, 
+                                               char* to_end,
+                                               char*& to_next) const = 0;
+
+            virtual int do_encoding() const throw() = 0;
+
+            virtual bool do_always_noconv() const throw() = 0;
+
+            virtual int do_length(Pt::MBState&, 
+                                  const char* from,
+                                  const char* end, 
+                                  size_t max) const = 0;
+
+            virtual int do_max_length() const throw() = 0;
+    };
+    
 }
 
 // TODO: Move this into STLport?

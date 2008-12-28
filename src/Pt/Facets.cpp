@@ -401,10 +401,9 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
 }
 
 //
-// codecvt facet
+// codecvt facet for Char/char
 //
 std::locale::id codecvt<Pt::Char, char, Pt::MBState>::id;
-
 
 #if defined _MSC_VER || __QNX__
 
@@ -420,8 +419,29 @@ codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
 
 #endif
 
-
 codecvt<Pt::Char, char, Pt::MBState>::~codecvt()
+{}
+
+//
+// codecvt facet for char/char
+//
+std::locale::id codecvt<char, char, Pt::MBState>::id;
+
+#if defined _MSC_VER || __QNX__
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: codecvt_base(ref)
+{}
+
+#else
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: locale::facet(ref)
+{}
+
+#endif
+
+codecvt<char, char, Pt::MBState>::~codecvt()
 {}
 
 } // namespace std

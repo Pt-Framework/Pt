@@ -31,13 +31,14 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/Base64Codec.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/Utf16Codec.h"
 #include "Pt/Utf32Codec.h"
 #include "Pt/TextStream.h"
 #include <string>
 #include <sstream>
-
+ 
 class Utf8Converter
 {
     public:
@@ -66,6 +67,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
         TextStreamTest()
         : Pt::Unit::TestSuite("TextStreamTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "Base64",
+                                                 *this, &TextStreamTest::Base64 );
             Pt::Unit::TestSuite::registerMethod( "InvalidUTF8String",
                                                  *this, &TextStreamTest::InvalidUTF8String );
             Pt::Unit::TestSuite::registerMethod( "testTextStreamDirectFromUTF8ToUnicode",
@@ -80,9 +83,9 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNum_get );
             Pt::Unit::TestSuite::registerMethod( "testNumpunct",
                                                  *this, &TextStreamTest::testNumpunct );
-        }
+		}
 
-        void MBStateInit();
+        void Base64();
 		void InvalidUTF8String();
         void testTextStreamDirectFromUTF8ToUnicode();
         void testTextStreamGetLineFromUTF8ToUnicode();
@@ -109,10 +112,37 @@ char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (cha
 Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
 
-void TextStreamTest::MBStateInit()
+void TextStreamTest::Base64()
 {
+    char to[100];
+    char* nextTo;
+    const char* nextFrom;
     Pt::MBState state;
-    PT_UNIT_ASSERT( state.n == 0 );
+    Pt::Base64Codec b64c;
+
+    const char* from = "abc";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+
+    b64c.do_out(state, from, from+3, nextFrom, to, to+100, nextTo);
+    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("YWJj", to) == 0 );
+
+    const char* from2 = "abcd";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+
+    b64c.do_out(state, from2, from2+4, nextFrom, to, to+100, nextTo);
+    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("YWJjZA==", to) == 0 );
+    
+    const char* from3 = "abcde";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+
+    b64c.do_out(state, from3, from3+5, nextFrom, to, to+100, nextTo);
+    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("YWJjZGU=", to) == 0 );
 }
 
 void TextStreamTest::InvalidUTF8String()

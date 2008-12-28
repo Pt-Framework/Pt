@@ -298,6 +298,9 @@ namespace Pt {
             friend Char operator&(const Char& a, const Char& b)
             { return a.value() & b.value(); }
 
+            friend Char operator&(const Char& a, int b)
+            { return a.value() & b; }
+            
         private:
             Pt::uint32_t _value;
     };
