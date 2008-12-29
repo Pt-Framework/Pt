@@ -353,6 +353,11 @@ class basic_string< Pt::Char > {
         basic_string& operator+=(Pt::Char c)
         { return this->append(1, c); }
 
+        const Pt::StringData& sdata() const
+        {
+            return *_data;
+        }
+
     public:
         void invariant();
 
