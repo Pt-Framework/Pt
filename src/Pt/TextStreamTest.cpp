@@ -39,27 +39,65 @@
 #include <string>
 #include <sstream>
  
-class Utf8Converter
+#include "Pt/System/Thread.h"
+ 
+const Pt::Char abc[] = {L'a', L'b', L'c', 0};
+const Pt::Char def[] = {L'd', L'e', L'f', 0};
+Pt::String str = abc;
+bool exitThreads = false;
+
+void str_modify()
 {
-    public:
-        Utf8Converter()
-        : _ts( _in, new Pt::Utf8Codec() )
-        {}
+    while( ! exitThreads )
+    {
+        Pt::String s;
+        s = str;
+        s += def;
 
-        void convert(const char* from, std::basic_string<Pt::Char>& to)
-        {
-            static const Pt::Char _eof = std::char_traits<Pt::Char>::eof();
-            _ts.clear();
-            _in.clear();
-            _in.str(from);
-            std::getline( _ts, to, _eof );
+        unsigned idx = s.find('f');
+        if(idx == Pt::String::npos || s.length() != 6)
+        { 
+            std::cerr << "f not found" << std::endl; 
+            std::exit(1);
         }
+    }
+}
 
-    private:
-        std::istringstream    _in;
-        Pt::TextIStream _ts;
-};
+void str_read()
+{
+    while( ! exitThreads )
+    {
+        Pt::String s = str;
+        unsigned idx = s.find('c');
+        if(idx == Pt::String::npos || s.length() != 3)
+        { 
+            std::cerr << "c not found" << std::endl; 
+            std::exit(1);}
+        }
+}
 
+void test_string()
+{
+    Pt::System::AttachedThread th1( Pt::callable(str_modify) );
+    Pt::System::AttachedThread th2( Pt::callable(str_read) );
+    Pt::System::AttachedThread th3( Pt::callable(str_modify) );
+    Pt::System::AttachedThread th4( Pt::callable(str_read) );
+    std::cerr << "\nstarting threads" << std::endl; 
+    th1.start();
+    th2.start();
+    th3.start();
+    th4.start();
+    Pt::System::Thread::sleep(10000);
+    std::cerr << "joining threads" << std::endl;
+    exitThreads = true;
+    th1.join();
+    th2.join();
+    th3.join();
+    th4.join();
+    
+    std::cerr << "refcount: " << str.sdata().refs() << std::endl;
+    std::exit(0);
+}
 
 class TextStreamTest : public Pt::Unit::TestSuite
 {
