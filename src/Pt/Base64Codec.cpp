@@ -32,7 +32,7 @@ namespace Pt {
 
 char toBase64(uint8_t n)
 {
-    static char b64Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static const char b64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     return b64Table[n];
 }
 
@@ -61,10 +61,9 @@ uint8_t fromBase64(char b64)
         case '5': return 57; case '6': return 58; case '7': return 59;
         case '8': return 60; case '9': return 61; case '+': return 62;
         case '/': return 63; case '=': return 64;
-
-        default:
-            return 0;
     }
+
+    return 255;
 }
     
 Base64Codec::Base64Codec(size_t ref)
@@ -86,37 +85,24 @@ Base64Codec::result Base64Codec::do_in(MBState& s,
     fromNext = fromBegin;
     toNext = toBegin;
 
-    if(fromBegin == fromEnd)
-    {
-        return std::codecvt_base::ok;
-    }
-
-    if( (toEnd - toNext) < 3 ||(fromEnd - fromNext) < 4 )
-    {
-        return std::codecvt_base::error;
-    }
-
     while( (fromEnd - fromNext) >= 4 && (toEnd - toNext) >= 3 )
     {
-        Pt::uint8_t first  = fromBase64( *fromNext );
-        Pt::uint8_t second = fromBase64( *(++fromNext) );
-        Pt::uint8_t third  = fromBase64( *(++fromNext) );
-        Pt::uint8_t fourth = fromBase64( *(++fromNext) );
+        Pt::uint8_t first  = fromBase64( *(fromNext++) );
+        Pt::uint8_t second = fromBase64( *(fromNext++) );
+        Pt::uint8_t third  = fromBase64( *(fromNext++) );
+        Pt::uint8_t fourth = fromBase64( *(fromNext++) );
 
-        *toNext = (first << 2) + (second >> 4);
-        *(++toNext) = (second << 4) + (third >> 2);
+        *(toNext++) = (first << 2) + (second >> 4);
+        
+        if(third != 64)
+            *(toNext++) = (second << 4) + (third >> 2);
 
-        if(fourth != 64) {
-            *(++toNext) = (third << 6) + (fourth);
-        }
-
-        ++toNext;
-        ++fromNext;
-
-        if( fromEnd == fromNext ) {
-            return std::codecvt_base::ok;
-        }
+        if(fourth != 64)
+            *(toNext++) = (third << 6) + (fourth);
     }
+
+    if( fromEnd == fromNext )
+        return std::codecvt_base::ok;
 
     return std::codecvt_base::partial;
 }
@@ -124,7 +110,7 @@ Base64Codec::result Base64Codec::do_in(MBState& s,
 Base64Codec::result Base64Codec::do_out(Pt::MBState& state, 
                                         const char* fromBegin,
                                         const char* fromEnd, 
-                                        const char *& fromNext,
+                                        const char*& fromNext,
                                         char* toBegin, 
                                         char* toEnd, 
                                         char*& toNext) const
@@ -253,7 +239,9 @@ bool Base64Codec::do_always_noconv() const throw()
 
 int Base64Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
 { 
-    return 0;
+    const int from = (fromEnd - fromBegin) / 4;
+    const int to = max / 3;
+    return to > from ? from * 4 : to * 4;
 }
 
 int Base64Codec::do_encoding() const throw()

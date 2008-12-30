@@ -78,19 +78,6 @@ namespace Pt {
             //! Empty desctructor
             virtual ~TextCodec()
             {}
-
-        protected:
-            // inheritdoc
-            std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
-            { return std::codecvt_base::ok; }
-
-            // inheritdoc
-            int do_encoding() const throw()
-            { return 0; }
-
-            // inheritdoc
-            bool do_always_noconv() const throw()
-            { return false; }
     };
 
 } //namespace Pt

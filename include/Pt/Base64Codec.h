@@ -42,6 +42,7 @@ class PT_API Base64Codec : public TextCodec<char, char>
 
         virtual ~Base64Codec();
 
+    protected:
         result do_in(MBState& s, 
                      const char* fromBegin,
                      const char* fromEnd, 

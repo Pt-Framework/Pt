@@ -64,6 +64,18 @@ namespace Pt {
 
             // inheritdoc
             virtual bool do_always_no_conv() const throw();
+            
+            // inheritdoc
+            std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
+            { return std::codecvt_base::ok; }
+
+            // inheritdoc
+            int do_encoding() const throw()
+            { return 0; }
+
+            // inheritdoc
+            bool do_always_noconv() const throw()
+            { return false; }    
     };
 
 } //namespace Pt

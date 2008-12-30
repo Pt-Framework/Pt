@@ -53,12 +53,12 @@ namespace Pt {
 
       @see std::basic_streambuf
     */
-    template <typename InternT_, typename ExternT_>
-    class BasicTextBuffer : public std::basic_streambuf<InternT_>
+    template <typename I, typename E>
+    class BasicTextBuffer : public std::basic_streambuf<I>
     {
         public:
-            typedef InternT_ InternT;
-            typedef ExternT_ ExternT;
+            typedef I InternT;
+            typedef E ExternT;
             typedef typename std::basic_streambuf<InternT>::int_type IntT;
             typedef typename std::basic_streambuf<InternT>::traits_type TraitsT;
             typedef TextCodec<InternT, ExternT> CodecT;
@@ -79,27 +79,20 @@ namespace Pt {
             {
                 this->btinit();
             }
-
+            
+            ~BasicTextBuffer() throw()
+            { delete _codec; }
+            
             void attach(std::basic_streambuf<ExternT>* buffer)
             {
                 _streambuf = buffer;
                 this->btinit();
             }
 
-            ~BasicTextBuffer() throw()
-            { delete _codec; }
-
-            InternT* begin()
-            { return this->gptr(); }
-
-            const InternT* in_begin() const
-            { return this->gptr(); }
-
-            void in_bump(size_t n)
-            { this->gbump(n); }
-
-            const InternT* in_end() const
-            { return this->egptr(); }
+            void close()
+            {
+                //TODO: unshift external sequence
+            }
 
         protected:
             //! Initializes this Text buffer by creating the internal buffer.
@@ -114,12 +107,14 @@ namespace Pt {
             // inheritdoc - reimplemented from basic_streambuf
             virtual IntT underflow();
 
+            //TODO: signature like codecvt with ptr refs
             template <typename CharT>
             void copyChars(CharT* s1, const CharT* s2, size_t n)
             {
                 std::char_traits<CharT>::copy(s1, s2, n);
             }
 
+            //TODO: signature like codecvt with ptr refs
             template <typename CharA, typename CharB>
             void copyChars(CharA* s1, const CharB* s2, size_t n)
             {
@@ -189,7 +184,6 @@ namespace Pt {
         }
 
         _streambuf->pubsync();
-
         return 0;
     }
 
@@ -197,18 +191,16 @@ namespace Pt {
     template <typename I, typename E>
     typename BasicTextBuffer<I, E>::IntT BasicTextBuffer<I, E>::underflow()
     {
-        if( !_codec )
+        if( ! _codec )
             return TraitsT::eof();
 
-        // return if input buffer is not empty.
-        if( this->gptr() != 0 && this->gptr() < this->egptr() )
-        {
+        // return current char if input buffer is not empty.
+        if( this->gptr() < this->egptr() )
             return TraitsT::to_int_type( *(this->gptr()) );
-        }
 
         // keep chars for putback
         size_t putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-        std::char_traits<InternT>::copy( &(_inBuffer[0]) + (_putbackMax - putbackSize),
+        std::char_traits<InternT>::move( &(_inBuffer[0]) + (_putbackMax - putbackSize),
                                          this->gptr() - putbackSize,
                                          putbackSize );
 
@@ -253,14 +245,12 @@ namespace Pt {
                 // that the buffer to keep the converted chars is large enough
                 size_t sz = _readBuffer.size();
                 this->copyChars( toBegin, fromBegin, sz );
-                fromNext += sz;
-                toNext += sz;
                 _readBuffer.resize(0);
                 break;
             }
             case CodecT::error:
             {
-                return TraitsT::eof();
+                return TraitsT::eof(); // TODO: throw exception
                 break;
             }
         }
@@ -275,7 +265,7 @@ namespace Pt {
     template <typename I, typename E>
     typename BasicTextBuffer<I, E>::IntT BasicTextBuffer<I, E>::overflow(IntT ch)
     {
-        if(!_codec)
+        if( ! _codec )
             return TraitsT::eof();
 
         // set pointers for codec to source and destination
@@ -307,7 +297,7 @@ namespace Pt {
         }
         else if(r == CodecT::error)
         {
-            return TraitsT::eof();
+            return TraitsT::eof(); // TODO: throw exception
         }
 
         // unshift if EOF is reached

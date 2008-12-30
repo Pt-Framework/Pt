@@ -104,6 +104,14 @@ namespace Pt {
 
             // inheritdoc
             virtual int do_max_length() const throw();
+            
+            // inheritdoc
+            std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
+            { return std::codecvt_base::ok; }
+
+            // inheritdoc
+            int do_encoding() const throw()
+            { return 0; }
     };
 
 } //namespace Pt

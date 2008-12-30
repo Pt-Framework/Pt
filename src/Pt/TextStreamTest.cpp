@@ -105,8 +105,10 @@ class TextStreamTest : public Pt::Unit::TestSuite
         TextStreamTest()
         : Pt::Unit::TestSuite("TextStreamTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Base64",
-                                                 *this, &TextStreamTest::Base64 );
+            Pt::Unit::TestSuite::registerMethod( "Base64In",
+                                                 *this, &TextStreamTest::Base64In );
+            Pt::Unit::TestSuite::registerMethod( "Base64Out",
+                                                 *this, &TextStreamTest::Base64Out );
             Pt::Unit::TestSuite::registerMethod( "InvalidUTF8String",
                                                  *this, &TextStreamTest::InvalidUTF8String );
             Pt::Unit::TestSuite::registerMethod( "testTextStreamDirectFromUTF8ToUnicode",
@@ -123,7 +125,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNumpunct );
 		}
 
-        void Base64();
+        void Base64Out();
+        void Base64In();
 		void InvalidUTF8String();
         void testTextStreamDirectFromUTF8ToUnicode();
         void testTextStreamGetLineFromUTF8ToUnicode();
@@ -150,7 +153,7 @@ char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (cha
 Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
 
-void TextStreamTest::Base64()
+void TextStreamTest::Base64Out()
 {
     char to[100];
     char* nextTo;
@@ -161,26 +164,53 @@ void TextStreamTest::Base64()
     const char* from = "abc";
     memset(to, 0, sizeof(to));
     state = Pt::MBState();
-
-    b64c.do_out(state, from, from+3, nextFrom, to, to+100, nextTo);
-    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    b64c.out(state, from, from+3, nextFrom, to, to+100, nextTo);
+    b64c.unshift(state, nextTo, to+100, nextTo);
     PT_UNIT_ASSERT( strcmp("YWJj", to) == 0 );
 
     const char* from2 = "abcd";
     memset(to, 0, sizeof(to));
     state = Pt::MBState();
-
-    b64c.do_out(state, from2, from2+4, nextFrom, to, to+100, nextTo);
-    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    b64c.out(state, from2, from2+4, nextFrom, to, to+100, nextTo);
+    b64c.unshift(state, nextTo, to+100, nextTo);
     PT_UNIT_ASSERT( strcmp("YWJjZA==", to) == 0 );
     
     const char* from3 = "abcde";
     memset(to, 0, sizeof(to));
     state = Pt::MBState();
-
-    b64c.do_out(state, from3, from3+5, nextFrom, to, to+100, nextTo);
-    b64c.do_unshift(state, nextTo, to+100, nextTo);
+    b64c.out(state, from3, from3+5, nextFrom, to, to+100, nextTo);
+    b64c.unshift(state, nextTo, to+100, nextTo);
     PT_UNIT_ASSERT( strcmp("YWJjZGU=", to) == 0 );
+}
+
+void TextStreamTest::Base64In()
+{
+    char to[100];
+    char* nextTo;
+    const char* nextFrom;
+    Pt::MBState state;
+    Pt::Base64Codec b64c;
+
+    const char* from = "YWJj";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+    b64c.in(state, from, from+4, nextFrom, to, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("abc", to) == 0 );
+    PT_UNIT_ASSERT( nextTo - to == 3 );
+
+    const char* from2 = "YWJjZGU=";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+    b64c.in(state, from2, from2+8, nextFrom, to, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("abcde", to) == 0 );
+    PT_UNIT_ASSERT( nextTo - to == 5 );
+    
+    const char* from3 = "YWJjZA==";
+    memset(to, 0, sizeof(to));
+    state = Pt::MBState();
+    b64c.in(state, from3, from3+8, nextFrom, to, to+100, nextTo);
+    PT_UNIT_ASSERT( strcmp("abcd", to) == 0 );
+    PT_UNIT_ASSERT( nextTo - to == 4 );
 }
 
 void TextStreamTest::InvalidUTF8String()
