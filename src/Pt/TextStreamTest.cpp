@@ -40,11 +40,14 @@
 #include <sstream>
  
 #include "Pt/System/Thread.h"
- 
+#include "Pt/System/Mutex.h"
+
 const Pt::Char abc[] = {L'a', L'b', L'c', 0};
 const Pt::Char def[] = {L'd', L'e', L'f', 0};
 Pt::String str = abc;
+
 bool exitThreads = false;
+Pt::System::Mutex exitMtx;
 
 void str_modify()
 {
@@ -78,24 +81,42 @@ void str_read()
 
 void test_string()
 {
-    Pt::System::AttachedThread th1( Pt::callable(str_modify) );
-    Pt::System::AttachedThread th2( Pt::callable(str_read) );
-    Pt::System::AttachedThread th3( Pt::callable(str_modify) );
-    Pt::System::AttachedThread th4( Pt::callable(str_read) );
-    std::cerr << "\nstarting threads" << std::endl; 
-    th1.start();
-    th2.start();
-    th3.start();
-    th4.start();
-    Pt::System::Thread::sleep(10000);
-    std::cerr << "joining threads" << std::endl;
-    exitThreads = true;
-    th1.join();
-    th2.join();
-    th3.join();
-    th4.join();
-    
-    std::cerr << "refcount: " << str.sdata().refs() << std::endl;
+    for(unsigned n = 0; n < 500 ; ++n)
+    {
+        Pt::System::AttachedThread th1( Pt::callable(str_modify) );
+        Pt::System::AttachedThread th2( Pt::callable(str_read) );
+        Pt::System::AttachedThread th3( Pt::callable(str_modify) );
+        Pt::System::AttachedThread th4( Pt::callable(str_read) );
+        
+        std::cerr << "starting threads" << std::endl; 
+        exitMtx.lock();
+        exitThreads = false;
+        exitMtx.unlock();
+
+        th1.start();
+        th2.start();
+        th3.start();
+        th4.start();
+        Pt::System::Thread::sleep(5000);
+
+        std::cerr << "joining threads" << std::endl;
+        exitMtx.lock();
+        exitThreads = true;
+        exitMtx.unlock();
+
+        th1.join();
+        th2.join();
+        th3.join();
+        th4.join();
+        
+        std::cerr << "=> refcount: " << str.sdata().refs() << " content: " << str.narrow() << std::endl;
+        if(str.sdata().refs() != 1)
+        {
+            std::exit(1);
+        }
+    }
+
+    std::cerr << "all OK." << std::endl;
     std::exit(0);
 }
 
