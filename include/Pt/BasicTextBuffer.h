@@ -81,7 +81,10 @@ namespace Pt {
             }
             
             ~BasicTextBuffer() throw()
-            { delete _codec; }
+            { 
+                if(_codec->refs() == 0)
+                    delete _codec; 
+            }
             
             void attach(std::basic_streambuf<ExternT>* buffer)
             {
@@ -92,6 +95,7 @@ namespace Pt {
             void close()
             {
                 //TODO: unshift external sequence
+                _state = MBState();
             }
 
         protected:
