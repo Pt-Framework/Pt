@@ -73,11 +73,18 @@ namespace Pt {
              */
             TextCodec(size_t ref = 0)
             : std::codecvt<InternT, ExternT, MBState>(ref)
+            , _refs(ref)
             {}
 
             //! Empty desctructor
             virtual ~TextCodec()
             {}
+            
+            size_t refs() const
+            { return _refs; }
+        
+        private:
+            size_t _refs;
     };
 
 } //namespace Pt
