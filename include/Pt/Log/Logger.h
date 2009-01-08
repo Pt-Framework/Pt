@@ -32,6 +32,9 @@
 #include <Pt/Log/LogLevel.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/NonCopyable.h>
+
+#include <Pt/System/Mutex.h>
+
 #include <list>
 #include <string>
 #include <sstream>
@@ -200,6 +203,9 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         //! @internal
         void* _reserved;
+
+        //! @internal
+        Pt::System::Mutex _mutex;
 };
 
 

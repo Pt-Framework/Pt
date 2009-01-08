@@ -40,7 +40,7 @@ namespace detail {
 template <class CharT, class TraitsT>
 class basic_ios : public std::ios_base
 {
-  friend class std::ios_base;
+    friend class ios_base;
 
     public:
         typedef CharT                      char_type;

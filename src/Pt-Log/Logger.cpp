@@ -41,6 +41,7 @@ Logger::Logger(const std::string& name, LogLevel level)
 : _target( &LogManager::instance().target(name) )
 , _level(level)
 , _msg( 0 )
+, _mutex()
 {
     _msg = this->init( name, level );
 }
@@ -84,6 +85,7 @@ Logger& Logger::beginLog(const Pt::SourceInfo& si)
 {
     if( this->enabled() )
     {
+        Pt::System::MutexLock lock(_mutex);
         _msg->setSourceInfo(si);
         _msg->setTimestamp( System::Clock::getLocalTime() );
     }
@@ -174,6 +176,7 @@ void Logger::endlog()
 {
     if( this->enabled() )
     {
+        Pt::System::MutexLock lock(_mutex);
         _msg->setText(_ss.str() );
         _target->log( *_msg );
 

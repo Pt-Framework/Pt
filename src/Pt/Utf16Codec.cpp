@@ -175,7 +175,7 @@ int Utf16Codec::do_max_length() const throw()
 }
 
 
-bool Utf16Codec::do_always_no_conv() const throw()
+bool Utf16Codec::do_always_noconv() const throw()
 {
     return false;
 }

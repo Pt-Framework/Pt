@@ -97,7 +97,7 @@ namespace Pt {
                                                  char* toBegin, char* toEnd, char*& toNext) const;
 
             // inheritdoc
-            virtual bool do_always_no_conv() const throw();
+            virtual bool do_always_noconv() const throw();
 
             // inheritdoc
             virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;

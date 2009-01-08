@@ -38,20 +38,22 @@
 #include <stdexcept>
 #include <iomanip>
 #include <limits>
+#include <iostream>
+
 
 #define PT_CONVERSIONERROR(to, from) \
     PT_ERROR_MSG("conversion from " #from " to " #to " failed")
 
 namespace Pt {
 
-class PT_API ConversionError : public std::runtime_error
-{
+    class PT_API ConversionError : public std::runtime_error
+    {
     public:
         ConversionError(const char* msg);
 
         ~ConversionError() throw()
         {}
-};
+    };
 
 
 template <typename T>
@@ -68,6 +70,11 @@ inline void convert(T& t, const Pt::String& str)
 {
     Pt::StringStream is(str);
     is >> t;
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(T, Pt::String) );
+    }
 }
 
 
@@ -85,6 +92,11 @@ inline void convert(T& t, const std::string& str)
 {
     std::istringstream is(str);
     is >> t;
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(T, std::string) );
+    }
 }
 
 
@@ -101,16 +113,75 @@ inline void convert(Pt::String& s, bool value)
         Pt::String::widen("false");
 }
 
-
 inline void convert(bool& n, const Pt::String& str)
 {
-    n = ( str.size() == 4 ) &&
+    if( ( str.size() == 4 ) &&
         ( str[0] == Pt::Char('t') ) &&
         ( str[1] == Pt::Char('r') ) &&
         ( str[2] == Pt::Char('u') ) &&
-        ( str[3] == Pt::Char('e') );
+        ( str[3] == Pt::Char('e') ) )
+    {
+        n = true;
+    }
+    else if( ( str.size() == 5 ) &&
+        ( str[0] == Pt::Char('f') ) &&
+        ( str[1] == Pt::Char('a') ) &&
+        ( str[2] == Pt::Char('l') ) &&
+        ( str[3] == Pt::Char('s') ) &&
+        ( str[4] == Pt::Char('e') ) )
+    {
+        n = false;
+    }
+    else if( ( str.size() == 1 ) &&
+        ( str[0] == Pt::Char('1') ) )
+    {
+        n = true;
+    }
+    else if( ( str.size() == 1 ) &&
+        ( str[0] == Pt::Char('0') ) )
+    {
+        n = false;
+    }
+    else
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(bool, Pt::String) );
+    }
 }
 
+inline void convert(bool& n, const std::string& str)
+{
+    if( ( str.size() == 4 ) &&
+        ( str[0] == 't' ) &&
+        ( str[1] == 'r' ) &&
+        ( str[2] == 'u' ) &&
+        ( str[3] == 'e' ) )
+    {
+        n = true;
+    }
+    else if( ( str.size() == 5 ) &&
+        ( str[0] == 'f' ) &&
+        ( str[1] == 'a' ) &&
+        ( str[2] == 'l' ) &&
+        ( str[3] == 's' ) &&
+        ( str[4] == 'e' ) )
+    {
+        n = false;
+    }
+    else if( ( str.size() == 1 ) &&
+        ( str[0] == '1' ) )
+    {
+        n = true;
+    }
+    else if( ( str.size() == 1 ) &&
+        ( str[0] == '0' ) )
+    {
+        n = false;
+    }
+    else
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(bool, std::string) );
+    }
+}
 
 inline void convert(Pt::String& s, char value)
 {
@@ -145,6 +216,11 @@ inline void convert(unsigned char& n, const Pt::String& str)
     Pt::StringStream ss(str);
     unsigned int i = 0;
     ss >> i;
+    const std::ios::iostate iostate = ss.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(unsigned char, Pt::String) );
+    }
     n = static_cast<unsigned char>(i);
 }
 
@@ -167,6 +243,11 @@ inline void convert(signed char& n, const Pt::String& str)
     Pt::StringStream ss(str);
     int i = 0;
     ss >> i;
+    const std::ios::iostate iostate = ss.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(signed char, Pt::String) );
+    }
     n = static_cast<signed char>(i);
 }
 
@@ -210,8 +291,11 @@ inline void convert(float& n, const Pt::String& str)
     Pt::StringStream is(str);
     is >> n;
 
-    if( is.fail() )
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
         throw Pt::ConversionError( PT_CONVERSIONERROR(float, Pt::String) );
+    }
 }
 
 
@@ -242,10 +326,80 @@ inline void convert(double& n, const Pt::String& str)
     Pt::StringStream is(str);
     is >> std::fixed >> std::setprecision(15) >> n;
 
-    if( is.fail() )
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
         throw Pt::ConversionError( PT_CONVERSIONERROR(double, Pt::String) );
+    }
 }
 
+inline void convert(std::string& s, float value)
+{
+    // not a number
+    if(value != value)
+    {
+        s = "NAN";
+        return;
+    }
+
+    std::ostringstream os;
+    os << value;
+    s = os.str();
+}
+
+
+inline void convert(float& n, const std::string& str)
+{
+    // not a number
+    if(str == "NAN")
+    {
+        n = std::numeric_limits<float>::quiet_NaN();
+        return;
+    }
+
+    std::istringstream is(str);
+    is >> n;
+
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(float, std::string) );
+    }
+}
+
+
+inline void convert(std::string& s, double value)
+{
+    // not a number
+    if(value != value)
+    {
+        s = "NAN";
+        return;
+    }
+
+    std::ostringstream os;
+    os << std::fixed << std::setprecision(15) << value;
+    s = os.str();
+}
+
+inline void convert(double& n, const std::string& str)
+{
+    // not a number
+    if(str == "NAN")
+    {
+        n = std::numeric_limits<float>::quiet_NaN();
+        return;
+    }
+
+    std::stringstream is(str);
+    is >> std::fixed >> std::setprecision(15) >> n;
+
+    const std::ios::iostate iostate = is.rdstate();
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    {
+        throw Pt::ConversionError( PT_CONVERSIONERROR(double, std::string) );
+    }
+}
 
 template<typename T, typename S>
 void convert(T& to, const S& from)
