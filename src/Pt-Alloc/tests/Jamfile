@@ -1,6 +1,10 @@
 SubDir TOP src Pt-Alloc tests ;
 SubDirHdrs $(TOP)/include ;
 
-PtUnitTest Pt-Alloc-test : test.cpp ;
-Main_LinkSharedLibraries Pt-Alloc-test: Pt Pt-Unit ;
+PT_ALLOC_TEST	 = ChunkTest.cpp 
+                   ;
+
+PtUnitTest Pt-Alloc-test : Pt-Alloc-test.cpp $(PT_ALLOC_TEST) ;
+Main_LinkSharedLibraries Pt-Alloc-test : Pt Pt-System Pt-Unit Pt-Alloc ;
 PtUnitTest_MakeLocate Pt-Alloc-test : $(OUTPUT_TARGET) ;
+

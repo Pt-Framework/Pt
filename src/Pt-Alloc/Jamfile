@@ -1,10 +1,16 @@
 SubDir TOP src Pt-Alloc ;
 SubDirHdrs $(TOP)/include ;
+
 SubDirC++Flags [ FDefines PT_ALLOC_API_EXPORT ] ;
 
-SharedLibrary Pt-Alloc : Alloc.cpp ;
+PT_ALLOC_SOURCES = Chunk.cpp 
+				   PoolFactory.cpp 
+				   PoolAllocator.cpp 
+				   ;
 
-SharedLibrary_LinkSharedLibraries Pt-Alloc : Pt ;
+SharedLibrary Pt-Alloc : $(PT_ALLOC_SOURCES) ;
+SharedLibrary_LinkSharedLibraries Pt-Alloc : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Alloc : $(OUTPUT_TARGET) ;
 
 SubInclude TOP src Pt-Alloc tests ;
+
