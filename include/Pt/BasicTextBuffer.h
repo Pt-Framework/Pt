@@ -79,13 +79,13 @@ namespace Pt {
             {
                 this->btinit();
             }
-            
+
             ~BasicTextBuffer() throw()
             { 
                 if(_codec->refs() == 0)
                     delete _codec; 
             }
-            
+
             void attach(std::basic_streambuf<ExternT>* buffer)
             {
                 _streambuf = buffer;
@@ -94,8 +94,42 @@ namespace Pt {
 
             void close()
             {
-                //TODO: unshift external sequence
-                _state = MBState();
+                bool ok = true;
+                if( this->pbase() < this->pptr() )
+                {
+                    const IntT n = this->overflow();
+                    if( TraitsT::eq_int_type(n, TraitsT::eof()) )
+                        ok = false;
+                }
+
+                if( ! _codec->always_noconv() && ok)
+                {
+                    const std::size_t buflen = 128;
+                    ExternT buf[buflen];
+                    typename CodecT::result res;
+                    std::streamsize len = 0;
+
+                    do
+                    {
+                        ExternT* next = 0;
+                        res = _codec->unshift(_state, buf, buf + buflen, next);
+                        if(res == CodecT::error)
+                        {
+                            ok = false;
+                        }
+                        else if (res == CodecT::ok || res == CodecT::partial)
+                        {
+                            len = next - buf;
+                            if(len > 0)
+                            {
+                                const std::streamsize n = _streambuf->sputn(buf, len);
+                                if (n != len)
+                                    ok = false;
+                            }
+                        }
+                    }
+                    while (res == CodecT::partial && len > 0 && ok);
+                }
             }
 
         protected:
@@ -302,17 +336,6 @@ namespace Pt {
         else if(r == CodecT::error)
         {
             return TraitsT::eof(); // TODO: throw exception
-        }
-
-        // unshift if EOF is reached
-        if( TraitsT::eq_int_type(ch, TraitsT::eof()) )
-        {
-            typename CodecT::result res;
-            res = _codec->unshift(_state, toNext, toEnd, toNext);
-            if(res != CodecT::ok)
-            {
-                throw std::runtime_error("unshift of EOF character failed");
-            }
         }
 
         //write encoded chars
