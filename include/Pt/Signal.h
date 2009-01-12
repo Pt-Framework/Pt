@@ -223,12 +223,12 @@ Connection connect( Signal<const Pt::Event&>& signal,
     return signal.connect( slot(object, memFunc) );
 }
 
-//template <typename r, class baset, class classt>
-//connection connect( signal<const pt::event&>& signal,
-//                    baset& object, r(classt::*memfunc)(const pt::event&) const )
-//{
-//    return signal.connect( slot(object, memfunc) );
-//}
+template <typename R, class BaseT, class ClassT>
+Connection connect( Signal<const Pt::Event&>& signal,
+                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) const )
+{
+    return signal.connect( slot(object, memFunc) );
+}
 
 inline Connection connect(Signal<const Pt::Event&>& sender, Signal<const Pt::Event&>& receiver)
 {
