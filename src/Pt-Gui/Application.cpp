@@ -39,8 +39,6 @@
 #include "Pt/Gui/KeyEvent.h"
 #include "Pt/Gui/Widget.h"
 
-using namespace std;
-
 
 namespace Pt {
 
@@ -95,7 +93,7 @@ void Application::processEvents()
 }
 
 
-void Application::dispatchEvent(const Pt::Event& e) const
+void Application::dispatchEvent(const Pt::Event& e)
 {
     const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
 
