@@ -110,7 +110,7 @@ namespace Gui {
              *
              * @param event An event that will be dispatched to the corresponding widget.
              */
-            void dispatchEvent(const Pt::Event& ev) const;
+            void dispatchEvent(const Pt::Event& ev);
     };
 
 } // namespace gui
