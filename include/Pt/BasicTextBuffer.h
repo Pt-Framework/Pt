@@ -140,7 +140,7 @@ namespace Pt {
             virtual int sync();
 
             // inheritdoc - reimplemented from basic_streambuf
-            virtual IntT overflow(IntT ch);
+            virtual IntT overflow(IntT ch = TraitsT::eof());
 
             // inheritdoc - reimplemented from basic_streambuf
             virtual IntT underflow();
