@@ -196,6 +196,7 @@ namespace std {
 			#endif
 
             static locale::id id;
+            virtual locale::id& __get_id (void) const { return id; }
 
         public:
 
@@ -255,6 +256,7 @@ namespace std {
             typedef ctype_base::mask mask;
 
             static locale::id id;
+            virtual locale::id& __get_id (void) const { return id; }
 
         public:
             explicit ctype(size_t refs = 0);
@@ -376,6 +378,7 @@ namespace std {
             const void* val) const;
 
         static locale::id id;
+        virtual locale::id& __get_id (void) const { return id; }
 
 	protected:
         virtual ~num_put()
@@ -428,6 +431,7 @@ namespace std {
 
         public:
             static locale::id id;
+            virtual locale::id& __get_id (void) const { return id; }
 
         public:
             explicit codecvt(size_t ref = 0);
@@ -518,6 +522,7 @@ namespace std {
 
         public:
             static locale::id id;
+            virtual locale::id& __get_id (void) const { return id; }
 
         public:
             explicit codecvt(size_t ref = 0);
