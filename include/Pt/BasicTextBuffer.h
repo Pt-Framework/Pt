@@ -41,7 +41,7 @@ namespace Pt {
         classes. Stream buffer classes are used to connect to an external device, transport characters
         from and to this external device and buffer the characters in an internal buffer.
 
-        The internal character set can be specified using the template parameters 'InternT_', the
+        The internal character set can be specified using the template parameters 'char_type_', the
         external character set using 'ExternT_'. The external type is the input type and output
         type when reading from or writing to the external device. The internal type is the type
         which is used to internally store the data from the external device after the external
@@ -53,15 +53,17 @@ namespace Pt {
 
       @see std::basic_streambuf
     */
-    template <typename I, typename E>
-    class BasicTextBuffer : public std::basic_streambuf<I>
+    template <typename CharT, typename E>
+    class BasicTextBuffer : public std::basic_streambuf<CharT>
     {
         public:
-            typedef I InternT;
             typedef E ExternT;
-            typedef typename std::basic_streambuf<InternT>::int_type IntT;
-            typedef typename std::basic_streambuf<InternT>::traits_type TraitsT;
-            typedef TextCodec<InternT, ExternT> CodecT;
+            typedef CharT char_type;
+            typedef typename std::char_traits<CharT> traits_type;
+            typedef typename traits_type::int_type int_type;
+            typedef typename traits_type::pos_type pos_type;
+            typedef typename traits_type::off_type off_type;
+            typedef TextCodec<char_type, ExternT> CodecT;
 
         public:
             /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
@@ -75,86 +77,60 @@ namespace Pt {
                 on destruction.
             */
             BasicTextBuffer(std::basic_streambuf<ExternT>* buffer, CodecT* codec)
-            : _streambuf(buffer), _codec(codec)
+            : _streambuf(buffer)
+            , _codec(codec)
+            , _ibufsize(0)
             {
-                this->btinit();
+                _bufferSize = 1024;
+
+                this->setg(0, 0, 0);
+                //_readBuffer.reserve(_bufferSize);
+                //_readBuffer.resize(0);
+
+                // TODO: use size factor from TextCodec to determine
+                // optimum buffer size ratios
+                //_inBuffer.resize( _putbackMax + (_bufferSize*4) );
+                //this->setg( &(_inBuffer[0]) + _putbackMax,
+                //            &(_inBuffer[0]) + _putbackMax,
+                //            &(_inBuffer[0]) + _putbackMax );
+
+                _outBuffer.resize(_bufferSize);
+                _writeBuffer.resize(_bufferSize * 4);
+                this->setp(&_outBuffer[0], &_outBuffer[0] + _outBuffer.size());
             }
 
             ~BasicTextBuffer() throw()
-            { 
+            {
+                this->close();
+
                 if(_codec->refs() == 0)
-                    delete _codec; 
+                    delete _codec;
             }
 
-            void attach(std::basic_streambuf<ExternT>* buffer)
-            {
-                _streambuf = buffer;
-                this->btinit();
-            }
+            void attach(std::basic_streambuf<ExternT>* buffer);
 
-            void close()
-            {
-                bool ok = true;
-                if( this->pbase() < this->pptr() )
-                {
-                    const IntT n = this->overflow();
-                    if( TraitsT::eq_int_type(n, TraitsT::eof()) )
-                        ok = false;
-                }
-
-                if( ! _codec->always_noconv() && ok)
-                {
-                    const std::size_t buflen = 128;
-                    ExternT buf[buflen];
-                    typename CodecT::result res;
-                    std::streamsize len = 0;
-
-                    do
-                    {
-                        ExternT* next = 0;
-                        res = _codec->unshift(_state, buf, buf + buflen, next);
-                        if(res == CodecT::error)
-                        {
-                            ok = false;
-                        }
-                        else if (res == CodecT::ok || res == CodecT::partial)
-                        {
-                            len = next - buf;
-                            if(len > 0)
-                            {
-                                const std::streamsize n = _streambuf->sputn(buf, len);
-                                if (n != len)
-                                    ok = false;
-                            }
-                        }
-                    }
-                    while (res == CodecT::partial && len > 0 && ok);
-                }
-            }
+            void close();
 
         protected:
-            //! Initializes this Text buffer by creating the internal buffer.
-            void btinit();
-
             // inheritdoc - reimplemented from basic_streambuf
             virtual int sync();
 
             // inheritdoc - reimplemented from basic_streambuf
-            virtual IntT overflow(IntT ch = TraitsT::eof());
+            virtual int_type overflow( int_type ch = traits_type::eof() );
 
             // inheritdoc - reimplemented from basic_streambuf
-            virtual IntT underflow();
+            virtual int_type underflow();
 
             //TODO: signature like codecvt with ptr refs
-            template <typename CharT>
-            void copyChars(CharT* s1, const CharT* s2, size_t n)
+            template <typename T>
+            void copyChars(T* s1, const T* s2, size_t n)
             {
-                std::char_traits<CharT>::copy(s1, s2, n);
+                std::char_traits<T>::copy(s1, s2, n);
             }
 
             //TODO: signature like codecvt with ptr refs
-            template <typename CharA, typename CharB>
-            void copyChars(CharA* s1, const CharB* s2, size_t n)
+            template <typename A, typename B>
+            void copyChars(A* s1, const B* s2, size_t n)
             {
                 while(n-- > 0)
                 {
@@ -177,16 +153,23 @@ namespace Pt {
             //! The size of the internal input and output buffer.
             size_t _bufferSize;
 
-            size_t _putbackMax;
+            static const int _pbmax = 4;
 
             //! Buffer for reading encoded chars
-            std::vector<ExternT> _readBuffer;
+            //std::vector<ExternT> _readBuffer;
+
+            static const int _ibufmax = 1024;
+            ExternT _ibuf[_ibufmax];
+            int _ibufsize;
 
             //! Input buffer for the decoded chars, used by the stream
-            std::vector<InternT> _inBuffer;
+            //std::vector<char_type> _inBuffer;
+
+            static const int _gbufmax = 1024;
+            char_type _gbuf[_gbufmax + _pbmax];
 
             //! Output buffer for the decoded chars, used by the stream
-            std::vector<InternT> _outBuffer;
+            std::vector<char_type> _outBuffer;
 
             //! Buffer for writing ecoded chars
             std::vector<ExternT> _writeBuffer;
@@ -194,51 +177,159 @@ namespace Pt {
 
 
     template <typename I, typename E>
-    void BasicTextBuffer<I, E>::btinit()
+    void BasicTextBuffer<I, E>::attach(std::basic_streambuf<ExternT>* buffer)
     {
-        _bufferSize = 1024;
-        _putbackMax = 4;
-        _readBuffer.reserve(_bufferSize);
-        _readBuffer.resize(0);
+        _streambuf = buffer;
+        this->setg(0, 0, 0);
+        _ibufsize = 0;
+    }
 
-        // TODO: use size factor from TextCodec to determine
-        // optimum buffer size ratios
-        _inBuffer.resize( _putbackMax + (_bufferSize*4) );
-        this->setg( &(_inBuffer[0]) + _putbackMax,
-                    &(_inBuffer[0]) + _putbackMax,
-                    &(_inBuffer[0]) + _putbackMax );
 
-        _outBuffer.resize(_bufferSize);
-        _writeBuffer.resize(_bufferSize * 4);
-        this->setp(&_outBuffer[0], &_outBuffer[0] + _outBuffer.size());			
+    template <typename I, typename E>
+    void BasicTextBuffer<I, E>::close()
+    {
+        bool ok = true;
+        if( this->pbase() < this->pptr() )
+        {
+            const int_type n = this->overflow();
+            if( traits_type::eq_int_type(n, traits_type::eof()) )
+                ok = false;
+        }
+
+        if( ! _codec->always_noconv() && ok)
+        {
+            const std::size_t buflen = 128;
+            ExternT buf[buflen];
+            typename CodecT::result res;
+            std::streamsize len = 0;
+
+            do
+            {
+                ExternT* next = 0;
+                res = _codec->unshift(_state, buf, buf + buflen, next);
+                if(res == CodecT::error)
+                {
+                    ok = false;
+                }
+                else if (res == CodecT::ok || res == CodecT::partial)
+                {
+                    len = next - buf;
+                    if(len > 0)
+                    {
+                        const std::streamsize n = _streambuf->sputn(buf, len);
+                        if (n != len)
+                            ok = false;
+                    }
+                }
+            }
+            while (res == CodecT::partial && len > 0 && ok);
+        }
+
+        _state = MBState();
+        _streambuf = 0;
     }
 
 
     template <typename I, typename E>
     int BasicTextBuffer<I, E>::sync()
     {
-        if( this->overflow( TraitsT::eof() ) == TraitsT::eof() ) {
-            return -1;
+        if( this->pptr() )
+        {
+            while( this->pptr() > this->pbase() )
+            {
+                if( this->overflow( traits_type::eof() ) == traits_type::eof() ) {
+                    return -1;
+                }
+
+                _streambuf->pubsync();
+            }
         }
 
-        _streambuf->pubsync();
         return 0;
     }
 
 
     template <typename I, typename E>
-    typename BasicTextBuffer<I, E>::IntT BasicTextBuffer<I, E>::underflow()
+    typename BasicTextBuffer<I, E>::int_type BasicTextBuffer<I, E>::underflow()
     {
-        if( ! _codec )
-            return TraitsT::eof();
+        if( ! _codec || ! _streambuf )
+            return traits_type::eof();
 
-        // return current char if input buffer is not empty.
         if( this->gptr() < this->egptr() )
-            return TraitsT::to_int_type( *(this->gptr()) );
+            return traits_type::to_int_type( *(this->gptr()) );
+
+        if(_ibufsize == 0)
+        {
+            _ibufsize = _streambuf->sgetn( _ibuf, _ibufmax );
+        }
+
+        size_t putback = _pbmax;
+
+        if( this->gptr() )
+        {
+            putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
+            std::char_traits<char_type>::move( _gbuf + _pbmax - putback,
+                                               this->gptr() - putback,
+                                               putback );
+        }
+
+        const ExternT* fromBegin = _ibuf;
+        const ExternT* fromEnd   = _ibuf + _ibufsize;
+        const ExternT* fromNext  = _ibuf;
+        char_type* toBegin       = _gbuf + _pbmax;
+        char_type* toEnd         = _gbuf + _pbmax + _gbufmax;
+        char_type* toNext        = _gbuf;
+
+        typename CodecT::result r;
+        r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+        switch(r)
+        {
+            case CodecT::ok:
+            {
+                _ibufsize = 0;
+                break;
+            }
+            case CodecT::partial:
+            {
+                // move converted chars
+                _ibufsize = fromEnd - fromNext;
+                std::char_traits<ExternT>::move( _ibuf, fromNext, _ibufsize );
+                break;
+            }
+            case CodecT::noconv:
+            {
+                // If no conversion is required, we simply need to copy
+                // fromNext is set to fromBegin and toNext is set to toBegin.
+                int n =_ibufsize > _gbufmax ? _gbufmax : _ibufsize ;
+                this->copyChars(toBegin, fromBegin, n);
+
+                _ibufsize -= n;
+                if(_ibufsize > 0)
+                {
+                    std::char_traits<ExternT>::move( _ibuf, _ibuf + n, _ibufsize );
+                }
+
+                break;
+            }
+            case CodecT::error:
+            {
+                return traits_type::eof(); // TODO: throw exception
+                break;
+            }
+        }
+
+        this->setg(_gbuf + _pbmax - putback,              // start of read buffer
+                   _gbuf + _pbmax,                        // gptr position
+                   _gbuf + _pbmax + (toNext - toBegin) ); // end of read buffer
+
+        return traits_type::to_int_type( *(this->gptr()) );
+
+
+/*
 
         // keep chars for putback
         size_t putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-        std::char_traits<InternT>::move( &(_inBuffer[0]) + (_putbackMax - putbackSize),
+        std::char_traits<char_type>::move( &(_inBuffer[0]) + (_putbackMax - putbackSize),
                                          this->gptr() - putbackSize,
                                          putbackSize );
 
@@ -246,18 +337,18 @@ namespace Pt {
         size_t currentSize = _readBuffer.size();
         _readBuffer.resize(_bufferSize);
         size_t readSize = _streambuf->sgetn( &(_readBuffer[0]) + currentSize,
-                                             _readBuffer.size() - currentSize );
+                                              _readBuffer.size() - currentSize );
         _readBuffer.resize(currentSize + readSize);
         if(readSize <= 0)
-            return TraitsT::eof();
+            return traits_type::eof();
 
         // set pointers to source and destination
         const ExternT* fromBegin = &(_readBuffer[0]);
         const ExternT* fromEnd = fromBegin + (currentSize + readSize);
         const ExternT* fromNext = fromBegin;
-        InternT* toBegin = &(_inBuffer[0]) + _putbackMax;
-        InternT* toEnd = &(_inBuffer[0]) + _inBuffer.capacity();
-        InternT* toNext = toBegin;
+        char_type* toBegin = &(_inBuffer[0]) + _putbackMax;
+        char_type* toEnd = &(_inBuffer[0]) + _inBuffer.capacity();
+        char_type* toNext = toBegin;
 
         typename CodecT::result r;
         r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
@@ -288,7 +379,7 @@ namespace Pt {
             }
             case CodecT::error:
             {
-                return TraitsT::eof(); // TODO: throw exception
+                return traits_type::eof(); // TODO: throw exception
                 break;
             }
         }
@@ -297,19 +388,20 @@ namespace Pt {
                    &(_inBuffer[0]) + _putbackMax,                        // gptr position
                    &(_inBuffer[0]) + _putbackMax + (toNext - toBegin) ); // end of read buffer
 
-        return TraitsT::to_int_type( *(this->gptr()) );
+        return traits_type::to_int_type( *(this->gptr()) );
+        */
     }
 
     template <typename I, typename E>
-    typename BasicTextBuffer<I, E>::IntT BasicTextBuffer<I, E>::overflow(IntT ch)
+    typename BasicTextBuffer<I, E>::int_type BasicTextBuffer<I, E>::overflow(int_type ch)
     {
         if( ! _codec )
-            return TraitsT::eof();
+            return traits_type::eof();
 
         // set pointers for codec to source and destination
-        const InternT* fromBegin = &(_outBuffer[0]);
-        const InternT* fromEnd = fromBegin + (this->pptr() - this->pbase());
-        const InternT* fromNext = fromBegin;
+        const char_type* fromBegin = &(_outBuffer[0]);
+        const char_type* fromEnd = fromBegin + (this->pptr() - this->pbase());
+        const char_type* fromNext = fromBegin;
         ExternT* toBegin = &(_writeBuffer[0]);
         ExternT* toEnd = &(_writeBuffer[0]) + _writeBuffer.capacity();
         ExternT* toNext = toBegin;
@@ -321,7 +413,7 @@ namespace Pt {
         {
             // move leftover to front
             const size_t leftover = fromEnd - fromNext;
-            std::char_traits<InternT>::move( &(_outBuffer[0]), fromNext, leftover);
+            std::char_traits<char_type>::move( &(_outBuffer[0]), fromNext, leftover);
         }
         else if(r == CodecT::noconv)
         {
@@ -335,26 +427,26 @@ namespace Pt {
         }
         else if(r == CodecT::error)
         {
-            return TraitsT::eof(); // TODO: throw exception
+            return traits_type::eof(); // TODO: throw exception
         }
 
         //write encoded chars
         const size_t writeSize = _streambuf->sputn(toBegin, toNext - toBegin);
         if( writeSize == 0 )
         {
-            return TraitsT::eof();
+            return traits_type::eof();
         }
 
         this->setp( &_outBuffer[0] + (fromEnd - fromNext),
                     &_outBuffer[0] + _outBuffer.size() );
 
-        if( !TraitsT::eq_int_type(ch, TraitsT::eof()) )
+        if( !traits_type::eq_int_type(ch, traits_type::eof()) )
         {
-            *( this->pptr() ) = TraitsT::to_char_type(ch);
+            *( this->pptr() ) = traits_type::to_char_type(ch);
             this->pbump(1);
         }
 
-        return TraitsT::not_eof(ch);
+        return traits_type::not_eof(ch);
     }
 
 } // namespace Pt
