@@ -115,19 +115,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 		, _codec(codec)
 		, _ibufsize(0)
 		{
-			_bufferSize = 1024;
-
 			this->setg(0, 0, 0);
-			//_readBuffer.reserve(_bufferSize);
-			//_readBuffer.resize(0);
 
-			// TODO: use size factor from TextCodec to determine
-			// optimum buffer size ratios
-			//_inBuffer.resize( _putbackMax + (_bufferSize*4) );
-			//this->setg( &(_inBuffer[0]) + _putbackMax,
-			//            &(_inBuffer[0]) + _putbackMax,
-			//            &(_inBuffer[0]) + _putbackMax );
-
+			_bufferSize = 1024;
 			_outBuffer.resize(_bufferSize);
 			_writeBuffer.resize(_bufferSize * 4);
 			this->setp(&_outBuffer[0], &_outBuffer[0] + _outBuffer.size());
@@ -150,6 +140,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
 		void close()
 		{
+			//TODO: check for _strembuf and _codec
+			//TODO: separate _states for in and out
 			bool ok = true;
 			if( this->pbase() < this->pptr() )
 			{
