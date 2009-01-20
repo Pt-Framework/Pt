@@ -75,6 +75,9 @@ namespace Pt {
 
             // interhitdoc
             virtual int do_max_length() const throw();
+
+            virtual std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
+            { return std::codecvt_base::noconv; }
     };
 
 } //namespace Pt

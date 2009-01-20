@@ -122,8 +122,8 @@ namespace Pt {
             virtual int do_max_length() const throw();
             
             // inheritdoc
-            std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
-            { return std::codecvt_base::ok; }
+            std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
+            { return std::codecvt_base::noconv; }
 
             // inheritdoc
             int do_encoding() const throw()

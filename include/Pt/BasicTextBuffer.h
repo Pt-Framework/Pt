@@ -135,7 +135,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
 		~BasicTextBuffer() throw()
 		{
-			//this->close();
+			this->close();
 
 			if(_codec->refs() == 0)
 				delete _codec;
@@ -162,13 +162,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 			{
 				const std::size_t buflen = 128;
 				ExternT buf[buflen];
-				typename CodecT::result res;
+				typename CodecT::result res = CodecT::error;
 				std::streamsize len = 0;
 
 				do
 				{
 					ExternT* next = 0;
 					res = _codec->unshift(_state, buf, buf + buflen, next);
+
 					if(res == CodecT::error)
 					{
 						ok = false;
@@ -179,6 +180,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 						if(len > 0)
 						{
 							const std::streamsize n = _streambuf->sputn(buf, len);
+
 							if (n != len)
 								ok = false;
 						}

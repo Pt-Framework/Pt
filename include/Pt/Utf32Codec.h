@@ -67,7 +67,7 @@ namespace Pt {
             
             // inheritdoc
             std::codecvt_base::result do_unshift(Pt::MBState&, ExternT*, ExternT*, ExternT*&) const
-            { return std::codecvt_base::ok; }
+            { return std::codecvt_base::noconv; }
 
             // inheritdoc
             int do_encoding() const throw()
