@@ -247,12 +247,12 @@ void TextStreamTest::InvalidUTF8String()
     Pt::String str;
     std::getline(ts, str);
     PT_UNIT_ASSERT( ts.fail() );
-    
+
 	// attaching the TextStream also clears state
 	std::stringstream ss2( _TextUTF8 );
 	ts.attach(ss2);
     PT_UNIT_ASSERT( !ts.fail() );
-	
+
 	std::getline(ts, str);
     PT_UNIT_ASSERT( !ts.fail() );
 }

@@ -135,7 +135,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
 		~BasicTextBuffer() throw()
 		{
-			this->close();
+			//this->close();
 
 			if(_codec->refs() == 0)
 				delete _codec;
@@ -274,11 +274,13 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 				return traits_type::eof();
 
 			if( this->gptr() < this->egptr() )
-				return traits_type::to_int_type( *(this->gptr()) );
+				return traits_type::to_int_type( *this->gptr() );
 
 			if(_ibufsize == 0)
 			{
 				_ibufsize = _streambuf->sgetn( _ibuf, _ibufmax );
+				if(_ibufsize <= 0)
+					return traits_type::eof();
 			}
 
 			size_t putback = _pbmax;
@@ -340,73 +342,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 					   _gbuf + _pbmax,                        // gptr position
 					   _gbuf + _pbmax + (toNext - toBegin) ); // end of read buffer
 
-			return traits_type::to_int_type( *(this->gptr()) );
-
-/*
-
-			// keep chars for putback
-			size_t putbackSize = std::min<size_t>(this->gptr() - this->eback(), _putbackMax);
-			std::char_traits<char_type>::move( &(_inBuffer[0]) + (_putbackMax - putbackSize),
-											 this->gptr() - putbackSize,
-											 putbackSize );
-
-			// get encoded characters
-			size_t currentSize = _readBuffer.size();
-			_readBuffer.resize(_bufferSize);
-			size_t readSize = _streambuf->sgetn( &(_readBuffer[0]) + currentSize,
-												  _readBuffer.size() - currentSize );
-			_readBuffer.resize(currentSize + readSize);
-			if(readSize <= 0)
-				return traits_type::eof();
-
-			// set pointers to source and destination
-			const ExternT* fromBegin = &(_readBuffer[0]);
-			const ExternT* fromEnd = fromBegin + (currentSize + readSize);
-			const ExternT* fromNext = fromBegin;
-			char_type* toBegin = &(_inBuffer[0]) + _putbackMax;
-			char_type* toEnd = &(_inBuffer[0]) + _inBuffer.capacity();
-			char_type* toNext = toBegin;
-
-			typename CodecT::result r;
-			r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-			switch(r)
-			{
-				case CodecT::ok:
-				{
-					_readBuffer.resize(0);
-					break;
-				}
-				case CodecT::partial:
-				{
-					// move converted chars
-					const size_t leftover = fromEnd - fromNext;
-					std::char_traits<ExternT>::move( &(_readBuffer[0]), fromNext, leftover );
-					_readBuffer.resize(leftover);
-					break;
-				}
-				case CodecT::noconv:
-				{
-					// If no conversion is required, fromNext is set to fromBegin
-					// and toNext is set to toBegin. codecvt::max_length ensures
-					// that the buffer to keep the converted chars is large enough
-					size_t sz = _readBuffer.size();
-					this->copyChars( toBegin, fromBegin, sz );
-					_readBuffer.resize(0);
-					break;
-				}
-				case CodecT::error:
-				{
-					return traits_type::eof(); // TODO: throw exception
-					break;
-				}
-			}
-
-			this->setg(&(_inBuffer[0]) + (_putbackMax - putbackSize),        // start of read buffer
-					   &(_inBuffer[0]) + _putbackMax,                        // gptr position
-					   &(_inBuffer[0]) + _putbackMax + (toNext - toBegin) ); // end of read buffer
-
-			return traits_type::to_int_type( *(this->gptr()) );
-			*/
+			return traits_type::to_int_type( *this->gptr() );
 		}
 
 		//TODO: signature like codecvt with ptr refs
