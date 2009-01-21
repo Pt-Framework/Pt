@@ -131,8 +131,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         void close()
         {
-            //TODO: check for _strembuf and _codec
-            //TODO: separate _states for in and out
+            if( ! _codec || ! _streambuf )
+                return ;
+
             bool ok = true;
             if( this->pbase() < this->pptr() )
             {
@@ -187,13 +188,12 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() ) {
                         return -1;
                     }
-
-                    _streambuf->pubsync();
                 }
             }
 
             return 0;
         }
+
 
         // inheritdoc - reimplemented from basic_streambuf
         virtual int_type overflow( int_type ch = traits_type::eof() )
@@ -201,74 +201,62 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( ! _codec || ! _streambuf )
                 return traits_type::eof();
 
-            if( ! this->pptr() )
+            size_t leftover = 0;
+            if( this->pptr() )
             {
-                this->setp(_pbuf, _pbuf + _pbufmax);
+				const char_type* fromBegin = _pbuf;
+				const char_type* fromEnd   = this->pptr();
+				const char_type* fromNext  = _pbuf;
+				ExternT* toBegin           = _obuf + _obufsize;
+				ExternT* toEnd             = _obuf + _obufmax;
+				ExternT* toNext            = _obuf + _obufsize;
 
-                if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
-                {
-                    *( this->pptr() ) = traits_type::to_char_type(ch);
-                    this->pbump(1);
-                }
+				typename CodecT::result res;
+				res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+				switch(res)
+				{
+					case CodecT::noconv:
+					{
+						// If no conversion is required, fromNext is set to fromBegin
+						// and toNext is set to toBegin.
+						size_t fromSize = fromEnd - fromBegin;
+						size_t toSize   = toEnd - toBegin;
+						size_t size     = toSize < fromSize ? toSize : fromSize;
 
-                return traits_type::not_eof(ch);
-            }
+						this->copyChars( toBegin, fromBegin, size );
+						fromNext += size;
+						toNext += size;
+						break;
+					}
+					case CodecT::error:
+					{
+						return traits_type::eof();
+					}
+					case CodecT::ok:
+					case CodecT::partial:
+						break;
+				}
 
-            const char_type* fromBegin = _pbuf;
-            const char_type* fromEnd   = this->pptr();
-            const char_type* fromNext  = _pbuf;
-            ExternT* toBegin           = _obuf + _obufsize;
-            ExternT* toEnd             = _obuf + _obufmax;
-            ExternT* toNext            = _obuf + _obufsize;
+				_obufsize      += toNext - toBegin;
+				size_t leftover = fromEnd - fromNext;
+				if(leftover)
+				{
+					std::char_traits<char_type>::move(_pbuf, fromNext, leftover);
+				}
 
-            typename CodecT::result res;
-            res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-            switch(res)
-            {
-                case CodecT::ok:
-                {
-                    _obufsize = toNext - toBegin;
-                    break;
-                }
-                case CodecT::partial:
-                {
-                    _obufsize = toNext - toBegin;
-                    const size_t leftover = fromEnd - fromNext;
-                    std::char_traits<char_type>::move(_pbuf, fromNext, leftover);
-                    break;
-                }
-                case CodecT::noconv:
-                {
-                    // If no conversion is required, fromNext is set to fromBegin
-                    // and toNext is set to toBegin. codecvt::max_length ensures
-                    // that the buffer to keep the converted chars is large enough
-                    // TODO: check size
-                    size_t sz = fromEnd - fromBegin;
-                    this->copyChars( toBegin, fromBegin, fromEnd - fromBegin );
-                    fromNext += sz;
-                    toNext += sz;
-                    break;
-                }
-                case CodecT::error:
-                {
-                    return traits_type::eof(); // TODO: throw exception
-                }
-            }
+				std::streamsize olen = _streambuf->sputn(_obuf, _obufsize);
+				_obufsize -= olen;
+				if( olen < _obufsize )
+				{
+					if(olen)
+					{
+						std::char_traits<ExternT>::move(_obuf, _obuf + olen, _obufsize);
+					}
+					return traits_type::eof();
+				}
+			}
 
-            const size_t n = _streambuf->sputn(_obuf, _obufsize);
-            if( n == 0 )
-            {
-                return traits_type::eof();
-            }
-
-            _obufsize -= n;
-            if(_obufsize)
-            {
-                std::char_traits<ExternT>::move(_obuf, _obuf + n, _obufsize);
-            }
-
-            this->setp( _gbuf + (fromEnd - fromNext),
-                        _gbuf + _gbufmax );
+            this->setp( _pbuf + leftover, _pbuf + _pbufmax );
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
             {
@@ -278,6 +266,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
             return traits_type::not_eof(ch);
         }
+
 
         // inheritdoc - reimplemented from basic_streambuf
         virtual int_type underflow()
@@ -345,7 +334,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 }
                 case CodecT::error:
                 {
-                    return traits_type::eof(); // TODO: throw exception
+                    return traits_type::eof();
                     break;
                 }
             }
@@ -357,7 +346,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return traits_type::to_int_type( *this->gptr() );
         }
 
-        //TODO: signature like codecvt with ptr refs
         template <typename T>
         void copyChars(T* s1, const T* s2, size_t n)
         {
