@@ -113,7 +113,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         ~BasicTextBuffer() throw()
         {
-            this->close();
+            // TODO error handling
+            this->sync();
+            this->unshift();
 
             if(_codec->refs() == 0)
                 delete _codec;
@@ -121,6 +123,10 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         void attach(std::basic_streambuf<ExternT>* buffer)
         {
+            // TODO error handling
+            this->sync();
+            this->unshift();
+
             _streambuf = buffer;
             this->setg(0, 0, 0);
             _ibufsize = 0;
@@ -129,11 +135,12 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _obufsize = 0;
         }
 
-        void close()
+        void unshift()
         {
             if( ! _codec || ! _streambuf )
                 return ;
 
+            // TODO error handling
             bool ok = true;
             if( this->pbase() < this->pptr() )
             {
@@ -185,9 +192,21 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             {
                 while( this->pptr() > this->pbase() )
                 {
-                    if( this->overflow( traits_type::eof() ) == traits_type::eof() ) {
+                    if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
-                    }
+                }
+            }
+
+            if(_obufsize)
+            {
+                _obufsize -= _streambuf->sputn(_obuf, _obufsize);
+                if( _obufsize )
+                {
+                    size_t remain = _obufmax - _obufsize;
+                    if(remain)
+                        std::char_traits<ExternT>::move(_obuf, _obuf + _obufsize, remain);
+
+                    return -1;
                 }
             }
 
@@ -201,62 +220,69 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( ! _codec || ! _streambuf )
                 return traits_type::eof();
 
-            size_t leftover = 0;
-            if( this->pptr() )
+            if( this->pptr() <= this->pbase() )
             {
-				const char_type* fromBegin = _pbuf;
-				const char_type* fromEnd   = this->pptr();
-				const char_type* fromNext  = _pbuf;
-				ExternT* toBegin           = _obuf + _obufsize;
-				ExternT* toEnd             = _obuf + _obufmax;
-				ExternT* toNext            = _obuf + _obufsize;
+                this->setp( _pbuf, _pbuf + _pbufmax );
+            }
+            else
+            {
+                if(_obufsize)
+                {
+                    _obufsize -= _streambuf->sputn(_obuf, _obufsize);
+                    if( _obufsize )
+                    {
+                        size_t remain = _obufmax - _obufsize;
+                        if(remain)
+                        {
+                            std::char_traits<ExternT>::move(_obuf, _obuf + _obufsize, remain);
+                        }
 
-				typename CodecT::result res;
-				res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-				switch(res)
-				{
-					case CodecT::noconv:
-					{
-						// If no conversion is required, fromNext is set to fromBegin
-						// and toNext is set to toBegin.
-						size_t fromSize = fromEnd - fromBegin;
-						size_t toSize   = toEnd - toBegin;
-						size_t size     = toSize < fromSize ? toSize : fromSize;
+                        return traits_type::eof();
+                    }
+                }
 
-						this->copyChars( toBegin, fromBegin, size );
-						fromNext += size;
-						toNext += size;
-						break;
-					}
-					case CodecT::error:
-					{
-						return traits_type::eof();
-					}
-					case CodecT::ok:
-					case CodecT::partial:
-						break;
-				}
+                const char_type* fromBegin = _pbuf;
+                const char_type* fromEnd   = this->pptr();
+                const char_type* fromNext  = _pbuf;
+                ExternT* toBegin           = _obuf + _obufsize;
+                ExternT* toEnd             = _obuf + _obufmax;
+                ExternT* toNext            = _obuf + _obufsize;
 
-				_obufsize      += toNext - toBegin;
-				size_t leftover = fromEnd - fromNext;
-				if(leftover)
-				{
-					std::char_traits<char_type>::move(_pbuf, fromNext, leftover);
-				}
+                typename CodecT::result res;
+                res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+                switch(res)
+                {
+                    case CodecT::noconv:
+                    {
+                        // If no conversion is required, fromNext is set to fromBegin
+                        // and toNext is set to toBegin.
+                        size_t fromSize = fromEnd - fromBegin;
+                        size_t toSize   = toEnd - toBegin;
+                        size_t size     = toSize < fromSize ? toSize : fromSize;
 
-				std::streamsize olen = _streambuf->sputn(_obuf, _obufsize);
-				_obufsize -= olen;
-				if( olen < _obufsize )
-				{
-					if(olen)
-					{
-						std::char_traits<ExternT>::move(_obuf, _obuf + olen, _obufsize);
-					}
-					return traits_type::eof();
-				}
-			}
+                        this->copyChars( toBegin, fromBegin, size );
+                        fromNext += size;
+                        toNext += size;
+                        break;
+                    }
+                    case CodecT::error:
+                    {
+                        return traits_type::eof();
+                    }
+                    case CodecT::ok:
+                    case CodecT::partial:
+                        break;
+                }
 
-            this->setp( _pbuf + leftover, _pbuf + _pbufmax );
+                _obufsize += toNext - toBegin;
+                size_t leftover = fromEnd - fromNext;
+                if(leftover)
+                {
+                    std::char_traits<char_type>::move(_pbuf, fromNext, leftover);
+                }
+
+                this->setp( _pbuf + leftover, _pbuf + _pbufmax );
+            }
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
             {
