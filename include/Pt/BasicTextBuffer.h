@@ -63,7 +63,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         typedef typename traits_type::int_type int_type;
         typedef typename traits_type::pos_type pos_type;
         typedef typename traits_type::off_type off_type;
-        typedef TextCodec<char_type, extern_type> CodecT;
+        typedef TextCodec<char_type, extern_type> CodecType;
 
     private:
         //! The external device (stream buffer) from which data is read and to which data is written.
@@ -73,7 +73,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         MBState _state;
 
         //! The codec which is used to convert character data from or to the external device.
-        CodecT* _codec;
+        CodecType* _codec;
 
         static const int _pbmax = 4;
 
@@ -102,7 +102,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             managed by this class and also be deleted by this class
             on destruction.
         */
-        BasicTextBuffer(std::basic_streambuf<extern_type>* buffer, CodecT* codec)
+        BasicTextBuffer(std::basic_streambuf<extern_type>* buffer, CodecType* codec)
         : _streambuf(buffer)
         , _codec(codec)
         , _ibufsize(0)
@@ -154,7 +154,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             {
                 const std::size_t buflen = 128;
                 extern_type buf[buflen];
-                typename CodecT::result res = CodecT::error;
+                typename CodecType::result res = CodecType::error;
                 std::streamsize len = 0;
 
                 do
@@ -162,11 +162,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     extern_type* next = 0;
                     res = _codec->unshift(_state, buf, buf + buflen, next);
 
-                    if(res == CodecT::error)
+                    if(res == CodecType::error)
                     {
                         ok = false;
                     }
-                    else if (res == CodecT::ok || res == CodecT::partial)
+                    else if (res == CodecType::ok || res == CodecType::partial)
                     {
                         len = next - buf;
                         if(len > 0)
@@ -178,7 +178,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         }
                     }
                 }
-                while (res == CodecT::partial && len > 0 && ok);
+                while (res == CodecType::partial && len > 0 && ok);
             }
 
             _state = MBState();
@@ -249,11 +249,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 extern_type* toEnd             = _obuf + _obufmax;
                 extern_type* toNext            = _obuf + _obufsize;
 
-                typename CodecT::result res;
+                typename CodecType::result res;
                 res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
                 switch(res)
                 {
-                    case CodecT::noconv:
+                    case CodecType::noconv:
                     {
                         // If no conversion is required, fromNext is set to fromBegin
                         // and toNext is set to toBegin.
@@ -266,12 +266,12 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         toNext += size;
                         break;
                     }
-                    case CodecT::error:
+                    case CodecType::error:
                     {
                         return traits_type::eof();
                     }
-                    case CodecT::ok:
-                    case CodecT::partial:
+                    case CodecType::ok:
+                    case CodecType::partial:
                         break;
                 }
 
@@ -328,23 +328,23 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             char_type* toEnd         = _gbuf + _pbmax + _gbufmax;
             char_type* toNext        = _gbuf;
 
-            typename CodecT::result r;
+            typename CodecType::result r;
             r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
             switch(r)
             {
-                case CodecT::ok:
+                case CodecType::ok:
                 {
                     _ibufsize = 0;
                     break;
                 }
-                case CodecT::partial:
+                case CodecType::partial:
                 {
                     // move converted chars
                     _ibufsize = fromEnd - fromNext;
                     std::char_traits<extern_type>::move( _ibuf, fromNext, _ibufsize );
                     break;
                 }
-                case CodecT::noconv:
+                case CodecType::noconv:
                 {
                     // If no conversion is required, we simply need to copy
                     // fromNext is set to fromBegin and toNext is set to toBegin.
@@ -359,7 +359,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
                     break;
                 }
-                case CodecT::error:
+                case CodecType::error:
                 {
                     return traits_type::eof();
                     break;
