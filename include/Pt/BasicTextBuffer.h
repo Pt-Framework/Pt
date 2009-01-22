@@ -41,7 +41,7 @@ namespace Pt {
 	from and to this external device and buffer the characters in an internal buffer.
 
 	The internal character set can be specified using the template parameters 'char_type_', the
-	external character set using 'ExternT_'. The external type is the input type and output
+	external character set using 'extern_type_'. The external type is the input type and output
 	type when reading from or writing to the external device. The internal type is the type
 	which is used to internally store the data from the external device after the external
 	format was converted using the Codec which is passed when constructing an object of this
@@ -52,21 +52,22 @@ namespace Pt {
 
   @see std::basic_streambuf
 */
-template <typename CharT, typename E>
+template <typename CharT, typename ByteT>
 class BasicTextBuffer : public std::basic_streambuf<CharT>
 {
     public:
-        typedef E ExternT;
+        typedef ByteT extern_type;
+        typedef CharT intern_type;
         typedef CharT char_type;
         typedef typename std::char_traits<CharT> traits_type;
         typedef typename traits_type::int_type int_type;
         typedef typename traits_type::pos_type pos_type;
         typedef typename traits_type::off_type off_type;
-        typedef TextCodec<char_type, ExternT> CodecT;
+        typedef TextCodec<char_type, extern_type> CodecT;
 
     private:
         //! The external device (stream buffer) from which data is read and to which data is written.
-        std::basic_streambuf<ExternT>* _streambuf;
+        std::basic_streambuf<extern_type>* _streambuf;
 
         //! Contains the state of conversion.
         MBState _state;
@@ -77,14 +78,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         static const int _pbmax = 4;
 
         static const int _ibufmax = 1024;
-        ExternT _ibuf[_ibufmax];
+        extern_type _ibuf[_ibufmax];
         int _ibufsize;
 
         static const int _gbufmax = 1024;
         char_type _gbuf[_gbufmax + _pbmax];
 
         static const int _obufmax = 1024;
-        ExternT _obuf[_obufmax];
+        extern_type _obuf[_obufmax];
         int _obufsize;
 
         static const int _pbufmax = 1024;
@@ -101,7 +102,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             managed by this class and also be deleted by this class
             on destruction.
         */
-        BasicTextBuffer(std::basic_streambuf<ExternT>* buffer, CodecT* codec)
+        BasicTextBuffer(std::basic_streambuf<extern_type>* buffer, CodecT* codec)
         : _streambuf(buffer)
         , _codec(codec)
         , _ibufsize(0)
@@ -121,7 +122,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 delete _codec;
         }
 
-        void attach(std::basic_streambuf<ExternT>* buffer)
+        void attach(std::basic_streambuf<extern_type>* buffer)
         {
             // TODO error handling
             this->sync();
@@ -152,13 +153,13 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( ! _codec->always_noconv() && ok)
             {
                 const std::size_t buflen = 128;
-                ExternT buf[buflen];
+                extern_type buf[buflen];
                 typename CodecT::result res = CodecT::error;
                 std::streamsize len = 0;
 
                 do
                 {
-                    ExternT* next = 0;
+                    extern_type* next = 0;
                     res = _codec->unshift(_state, buf, buf + buflen, next);
 
                     if(res == CodecT::error)
@@ -204,7 +205,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 {
                     size_t remain = _obufmax - _obufsize;
                     if(remain)
-                        std::char_traits<ExternT>::move(_obuf, _obuf + _obufsize, remain);
+                        std::char_traits<extern_type>::move(_obuf, _obuf + _obufsize, remain);
 
                     return -1;
                 }
@@ -234,7 +235,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         size_t remain = _obufmax - _obufsize;
                         if(remain)
                         {
-                            std::char_traits<ExternT>::move(_obuf, _obuf + _obufsize, remain);
+                            std::char_traits<extern_type>::move(_obuf, _obuf + _obufsize, remain);
                         }
 
                         return traits_type::eof();
@@ -244,9 +245,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 const char_type* fromBegin = _pbuf;
                 const char_type* fromEnd   = this->pptr();
                 const char_type* fromNext  = _pbuf;
-                ExternT* toBegin           = _obuf + _obufsize;
-                ExternT* toEnd             = _obuf + _obufmax;
-                ExternT* toNext            = _obuf + _obufsize;
+                extern_type* toBegin           = _obuf + _obufsize;
+                extern_type* toEnd             = _obuf + _obufmax;
+                extern_type* toNext            = _obuf + _obufsize;
 
                 typename CodecT::result res;
                 res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
@@ -320,9 +321,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                                                    putback );
             }
 
-            const ExternT* fromBegin = _ibuf;
-            const ExternT* fromEnd   = _ibuf + _ibufsize;
-            const ExternT* fromNext  = _ibuf;
+            const extern_type* fromBegin = _ibuf;
+            const extern_type* fromEnd   = _ibuf + _ibufsize;
+            const extern_type* fromNext  = _ibuf;
             char_type* toBegin       = _gbuf + _pbmax;
             char_type* toEnd         = _gbuf + _pbmax + _gbufmax;
             char_type* toNext        = _gbuf;
@@ -340,7 +341,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 {
                     // move converted chars
                     _ibufsize = fromEnd - fromNext;
-                    std::char_traits<ExternT>::move( _ibuf, fromNext, _ibufsize );
+                    std::char_traits<extern_type>::move( _ibuf, fromNext, _ibufsize );
                     break;
                 }
                 case CodecT::noconv:
@@ -353,7 +354,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     _ibufsize -= n;
                     if(_ibufsize > 0)
                     {
-                        std::char_traits<ExternT>::move( _ibuf, _ibuf + n, _ibufsize );
+                        std::char_traits<extern_type>::move( _ibuf, _ibuf + n, _ibufsize );
                     }
 
                     break;
