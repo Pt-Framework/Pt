@@ -68,7 +68,7 @@ namespace Pt {
     class PT_API TextIStream : public BasicTextIStream<Char, char>
     {
         public:
-            typedef TextCodec<Pt::Char, char> CodecT;
+            typedef TextCodec<Pt::Char, char> Codec;
 
         public:
             /** @brief Constructs a new TextIStream object using the given input-stream as external device and
@@ -79,7 +79,7 @@ namespace Pt {
              * @param is The input-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data from the external device.
              */
-            TextIStream(std::istream& is, CodecT* codec);
+            TextIStream(std::istream& is, Codec* codec);
 
             //! @brief Destructs this object freeing the internal buffer.
             ~TextIStream();
@@ -96,7 +96,7 @@ namespace Pt {
     class PT_API TextOStream : public BasicTextOStream<Char, char>
     {
         public:
-            typedef TextCodec<Pt::Char, char> CodecT;
+            typedef TextCodec<Pt::Char, char> Codec;
 
         public:
             /** @brief Constructs a new TextOStream object using the given output-stream as external device and
@@ -107,7 +107,7 @@ namespace Pt {
              * @param os The output-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data to the external device.
              */
-            TextOStream(std::ostream& os, CodecT* codec);
+            TextOStream(std::ostream& os, Codec* codec);
 
             //! @brief Destructs this object freeing the internal buffer.
             ~TextOStream();
@@ -124,7 +124,7 @@ namespace Pt {
     class PT_API TextStream : public BasicTextStream<Char, char>
     {
         public:
-            typedef TextCodec<Pt::Char, char> CodecT;
+            typedef TextCodec<Pt::Char, char> Codec;
 
         public:
             /** @brief Constructs a new TextStream object using the given I/O-stream as external device and
@@ -135,7 +135,7 @@ namespace Pt {
              * @param ios The I/O-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data from or to the external device.
              */
-            TextStream(std::iostream& ios, CodecT* codec);
+            TextStream(std::iostream& ios, Codec* codec);
 
             //! @brief Destructs this object freeing the internal buffer.
             ~TextStream();

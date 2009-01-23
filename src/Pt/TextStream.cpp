@@ -29,12 +29,12 @@
 
 namespace Pt {
 
-TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
+TextBuffer::TextBuffer(std::streambuf* buffer, Codec* codec)
 : BasicTextBuffer<Pt::Char, char>(buffer, codec)
 { }
 
 
-TextIStream::TextIStream(std::istream& is, CodecT* codec)
+TextIStream::TextIStream(std::istream& is, Codec* codec)
 : BasicTextIStream<Char, char>( is, codec )
 { }
 
@@ -43,7 +43,7 @@ TextIStream::~TextIStream()
 { }
 
 
-TextOStream::TextOStream(std::ostream& os, CodecT* codec)
+TextOStream::TextOStream(std::ostream& os, Codec* codec)
 : BasicTextOStream<Char, char>( os, codec )
 { }
 
@@ -52,7 +52,7 @@ TextOStream::~TextOStream()
 { }
 
 
-TextStream::TextStream(std::iostream& ios, CodecT* codec)
+TextStream::TextStream(std::iostream& ios, Codec* codec)
 : BasicTextStream<Char, char>( ios, codec )
 { }
 
