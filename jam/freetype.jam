@@ -1,0 +1,15 @@
+if ! $(FREETYPE_JAM) {
+FREETYPE_JAM = true ;
+
+FREETYPE_INCLUDE_PATHS = /usr/include/freetype2 ;
+
+rule FreeTypeIncludes
+{
+    local incl = [ GLOB $(FREETYPE_INCLUDE_PATHS) : freetype  ] ;
+    Echo "Checking for freetype includes... " $(incl[0]) ;
+
+    # return empty string if no libs were found
+    return -I$(incl[0]) ;
+}
+
+} # FREETYPE_JAM
