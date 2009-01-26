@@ -77,19 +77,13 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         static const int _pbmax = 4;
 
+        static const int _ebufmax = 1024;
+        extern_type _ebuf[_ebufmax];
+        int _ebufsize;
+
         static const int _ibufmax = 1024;
-        extern_type _ibuf[_ibufmax];
+        intern_type _ibuf[_ibufmax];
         int _ibufsize;
-
-        static const int _gbufmax = 1024;
-        char_type _gbuf[_gbufmax + _pbmax];
-
-        static const int _obufmax = 1024;
-        extern_type _obuf[_obufmax];
-        int _obufsize;
-
-        static const int _pbufmax = 1024;
-        char_type _pbuf[_pbufmax];
 
     public:
         /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
@@ -105,8 +99,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         BasicTextBuffer(std::basic_streambuf<extern_type>* buffer, CodecType* codec)
         : _streambuf(buffer)
         , _codec(codec)
-        , _ibufsize(0)
-        , _obufsize(0)
+        , _ebufsize(0)
         {
             this->setg(0, 0, 0);
             this->setp(0, 0);
@@ -115,8 +108,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         ~BasicTextBuffer() throw()
         {
             // TODO error handling
-            this->sync();
-            this->unshift();
+            this->terminate();
 
             if(_codec->refs() == 0)
                 delete _codec;
@@ -125,68 +117,66 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         void attach(std::basic_streambuf<extern_type>* buffer)
         {
             // TODO error handling
-            this->sync();
-            this->unshift();
-
+            this->terminate();
             _streambuf = buffer;
-            this->setg(0, 0, 0);
-            _ibufsize = 0;
-
-            this->setp(0, 0);
-            _obufsize = 0;
         }
 
-        void unshift()
+        void detach()
         {
-            if( ! _codec || ! _streambuf )
-                return ;
-
             // TODO error handling
-            bool ok = true;
-            if( this->pbase() < this->pptr() )
-            {
-                const int_type n = this->overflow();
-                if( traits_type::eq_int_type(n, traits_type::eof()) )
-                    ok = false;
-            }
-
-            if( ! _codec->always_noconv() && ok)
-            {
-                const std::size_t buflen = 128;
-                extern_type buf[buflen];
-                typename CodecType::result res = CodecType::error;
-                std::streamsize len = 0;
-
-                do
-                {
-                    extern_type* next = 0;
-                    res = _codec->unshift(_state, buf, buf + buflen, next);
-
-                    if(res == CodecType::error)
-                    {
-                        ok = false;
-                    }
-                    else if (res == CodecType::ok || res == CodecType::partial)
-                    {
-                        len = next - buf;
-                        if(len > 0)
-                        {
-                            const std::streamsize n = _streambuf->sputn(buf, len);
-
-                            if (n != len)
-                                ok = false;
-                        }
-                    }
-                }
-                while (res == CodecType::partial && len > 0 && ok);
-            }
-
-            _state = MBState();
+            this->terminate();
             _streambuf = 0;
         }
 
+        int terminate()
+        {
+            if( this->pptr() )
+            {
+                if( -1 == this->sync() )
+                    return -1;
+
+                if( ! _codec->always_noconv() )
+                {
+                    typename CodecType::result res = CodecType::error;
+                    do
+                    {
+                        extern_type* next = 0;
+                        res = _codec->unshift(_state, _ebuf, _ebuf + _ebufmax, next);
+                        _ebufsize = next - _ebuf;
+
+                        if(res == CodecType::error)
+                        {
+                            return -1;
+                        }
+                        else if(res == CodecType::ok || res == CodecType::partial)
+                        {
+                            if(_ebufsize > 0)
+                            {
+                                const std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                                _ebufsize -= n;
+                                if(_ebufsize)
+                                {
+                                    if(_ebufsize < _ebufmax)
+                                        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
+
+                                    return -1;
+                                }
+                            }
+                        }
+                    }
+                    while(res == CodecType::partial);
+                }
+            }
+
+            this->setp(0, 0);
+            this->setg(0, 0, 0);
+            _ebufsize = 0;
+            _state = MBState();
+            return 0;
+        }
+
     protected:
-        // inheritdoc - reimplemented from basic_streambuf
+        // inheritdoc
         virtual int sync()
         {
             if( this->pptr() )
@@ -196,27 +186,26 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
                 }
-            }
 
-            if(_obufsize)
-            {
-                _obufsize -= _streambuf->sputn(_obuf, _obufsize);
-                if( _obufsize )
+                if(_ebufsize)
                 {
-                    size_t remain = _obufmax - _obufsize;
-                    if(remain)
-                        std::char_traits<extern_type>::move(_obuf, _obuf + _obufsize, remain);
+                    const std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                    _ebufsize -= n;
+                    if(_ebufsize > 0)
+                    {
+                        if(_ebufsize < _ebufmax)
+                            std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
-                    return -1;
+                        return -1;
+                    }
                 }
             }
 
-            this->setp(0, 0);
             return 0;
         }
 
 
-        // inheritdoc - reimplemented from basic_streambuf
+        // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
             if( ! _codec || ! _streambuf || this->gptr() )
@@ -224,31 +213,29 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
             if( this->pptr() <= this->pbase() )
             {
-                this->setp( _pbuf, _pbuf + _pbufmax );
+                this->setp( _ibuf, _ibuf + _ibufmax );
             }
             else
             {
-                if(_obufsize)
+                if(_ebufsize > 0)
                 {
-                    _obufsize -= _streambuf->sputn(_obuf, _obufsize);
-                    if( _obufsize )
+                    std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                    _ebufsize -= n;
+                    if( _ebufsize )
                     {
-                        size_t remain = _obufmax - _obufsize;
-                        if(remain)
-                        {
-                            std::char_traits<extern_type>::move(_obuf, _obuf + _obufsize, remain);
-                        }
+                        if(_ebufsize < _ebufmax)
+                            std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
                         return traits_type::eof();
                     }
                 }
 
-                const char_type* fromBegin = _pbuf;
+                const char_type* fromBegin = _ibuf;
                 const char_type* fromEnd   = this->pptr();
-                const char_type* fromNext  = _pbuf;
-                extern_type* toBegin           = _obuf + _obufsize;
-                extern_type* toEnd             = _obuf + _obufmax;
-                extern_type* toNext            = _obuf + _obufsize;
+                const char_type* fromNext  = _ibuf;
+                extern_type* toBegin       = _ebuf + _ebufsize;
+                extern_type* toEnd         = _ebuf + _ebufmax;
+                extern_type* toNext        = _ebuf + _ebufsize;
 
                 typename CodecType::result res;
                 res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
@@ -276,14 +263,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         break;
                 }
 
-                _obufsize += toNext - toBegin;
+                _ebufsize += toNext - toBegin;
                 size_t leftover = fromEnd - fromNext;
                 if(leftover)
                 {
-                    std::char_traits<char_type>::move(_pbuf, fromNext, leftover);
+                    std::char_traits<char_type>::move(_ibuf, fromNext, leftover);
                 }
 
-                this->setp( _pbuf + leftover, _pbuf + _pbufmax );
+                this->setp( _ibuf + leftover, _ibuf + _ibufmax );
             }
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
@@ -296,7 +283,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         }
 
 
-        // inheritdoc - reimplemented from basic_streambuf
+        // inheritdoc
         virtual int_type underflow()
         {
             if( ! _codec || ! _streambuf )
@@ -307,17 +294,17 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
             if( this->pptr() )
             {
-                if(-1 == this->sync())
+                if(-1 == this->terminate())
                     return traits_type::eof();
             }
 
-            if(_ibufsize == 0)
+            if(_ebufsize == 0)
             {
-                _ibufsize = _streambuf->sgetn( _ibuf, _ibufmax );
-                if(_ibufsize <= 0)
+                _ebufsize = _streambuf->sgetn( _ebuf, _ebufmax );
+                if(_ebufsize <= 0)
                 {
                     this->setg(0, 0, 0);
-                    _ibufsize = 0;
+                    _ebufsize = 0;
                     return traits_type::eof();
                 }
             }
@@ -327,17 +314,17 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( this->gptr() )
             {
                 putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
-                std::char_traits<char_type>::move( _gbuf + _pbmax - putback,
+                std::char_traits<char_type>::move( _ibuf + _pbmax - putback,
                                                    this->gptr() - putback,
                                                    putback );
             }
 
-            const extern_type* fromBegin = _ibuf;
-            const extern_type* fromEnd   = _ibuf + _ibufsize;
-            const extern_type* fromNext  = _ibuf;
-            char_type* toBegin       = _gbuf + _pbmax;
-            char_type* toEnd         = _gbuf + _pbmax + _gbufmax;
-            char_type* toNext        = _gbuf;
+            const extern_type* fromBegin = _ebuf;
+            const extern_type* fromEnd   = _ebuf + _ebufsize;
+            const extern_type* fromNext  = _ebuf;
+            char_type* toBegin       = _ibuf + _pbmax;
+            char_type* toEnd         = _ibuf + _pbmax + _ibufmax;
+            char_type* toNext        = _ibuf;
 
             typename CodecType::result r;
             r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
@@ -345,41 +332,41 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             {
                 case CodecType::ok:
                 {
-                    _ibufsize = 0;
+                    _ebufsize = 0;
                     break;
                 }
                 case CodecType::partial:
                 {
                     // move converted chars
-                    _ibufsize = fromEnd - fromNext;
-                    std::char_traits<extern_type>::move( _ibuf, fromNext, _ibufsize );
+                    _ebufsize = fromEnd - fromNext;
+                    std::char_traits<extern_type>::move( _ebuf, fromNext, _ebufsize );
                     break;
                 }
                 case CodecType::noconv:
                 {
                     // If no conversion is required, we simply need to copy
                     // fromNext is set to fromBegin and toNext is set to toBegin.
-                    int n =_ibufsize > _gbufmax ? _gbufmax : _ibufsize ;
+                    int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
                     this->copyChars(toBegin, fromBegin, n);
 
-                    _ibufsize -= n;
-                    if(_ibufsize > 0)
+                    _ebufsize -= n;
+                    if(_ebufsize > 0)
                     {
-                        std::char_traits<extern_type>::move( _ibuf, _ibuf + n, _ibufsize );
+                        std::char_traits<extern_type>::move( _ebuf, _ebuf + n, _ebufsize );
                     }
 
                     break;
                 }
                 case CodecType::error:
                 {
+                    // TODO: keep converted
                     return traits_type::eof();
-                    break;
                 }
             }
 
-            this->setg(_gbuf + _pbmax - putback,              // start of read buffer
-                       _gbuf + _pbmax,                        // gptr position
-                       _gbuf + _pbmax + (toNext - toBegin) ); // end of read buffer
+            this->setg(_ibuf + _pbmax - putback,              // start of read buffer
+                       _ibuf + _pbmax,                        // gptr position
+                       _ibuf + _pbmax + (toNext - toBegin) ); // end of read buffer
 
             return traits_type::to_int_type( *this->gptr() );
         }
