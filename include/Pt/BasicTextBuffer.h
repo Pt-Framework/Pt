@@ -211,6 +211,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 }
             }
 
+            this->setp(0, 0);
             return 0;
         }
 
@@ -218,7 +219,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc - reimplemented from basic_streambuf
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
-            if( ! _codec || ! _streambuf )
+            if( ! _codec || ! _streambuf || this->gptr() )
                 return traits_type::eof();
 
             if( this->pptr() <= this->pbase() )
@@ -304,11 +305,21 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( this->gptr() < this->egptr() )
                 return traits_type::to_int_type( *this->gptr() );
 
+            if( this->pptr() )
+            {
+                if(-1 == this->sync())
+                    return traits_type::eof();
+            }
+
             if(_ibufsize == 0)
             {
                 _ibufsize = _streambuf->sgetn( _ibuf, _ibufmax );
                 if(_ibufsize <= 0)
+                {
+                    this->setg(0, 0, 0);
+                    _ibufsize = 0;
                     return traits_type::eof();
+                }
             }
 
             size_t putback = _pbmax;
