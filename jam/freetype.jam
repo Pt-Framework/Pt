@@ -1,7 +1,8 @@
 if ! $(FREETYPE_JAM) {
 FREETYPE_JAM = true ;
 
-FREETYPE_INCLUDE_PATHS = /usr/include/freetype2 ;
+FREETYPE_INCLUDE_PATHS = /usr/include/freetype2
+                         /usr/sfw/include/freetype2 ;
 
 rule FreeTypeIncludes
 {
@@ -10,6 +11,18 @@ rule FreeTypeIncludes
 
     # return empty string if no libs were found
     return -I$(incl[0]) ;
+}
+
+FREETYPE_LIBRARY_PATHS = /usr/lib
+                         /usr/sfw/lib ;
+
+rule FreeTypeLibs
+{
+    local libs = [ GLOB $(FREETYPE_LIBRARY_PATHS) : *freetype.* ] ;
+    Echo "Checking for freetype libraries... " $(libs[0]:P) ;
+
+    # return empty string if no libs were found
+    return -L$(libs[0]:P)" -lX11" ;
 }
 
 } # FREETYPE_JAM
