@@ -77,6 +77,21 @@ if $(TARGET_OS:L) = "symbian"
 }
 
 #############################################################################
+# Gfx libraries and includes
+#############################################################################
+JamInclude freetype.jam ;
+
+FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
+FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
+
+if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
+{
+    FREETYPE_INCLUDES = $(TOP)/src/Pt-Gfx/freetype/include ;
+    FREETYPE_LINKFLAGS = "" ;
+    Echo "    INFO: freetype not found, using builtin version." ;
+}
+
+#############################################################################
 # GUI libraries and includes
 #############################################################################
 if $(GUI:L) = "gdi"

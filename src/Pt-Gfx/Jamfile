@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Gfx ;
 SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
+SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 
 SharedLibrary Pt-Gfx : ARgbColor.cpp
@@ -34,7 +34,14 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt  Pt-System ;
-SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
+if $(FREETYPE_LINKFLAGS)
+{
+    SharedLibrary_LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
+}
+else
+{
+    SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
+}
 SharedLibrary_MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
@@ -97,5 +104,7 @@ Main_LinkSharedLibraries ImageTest : Pt Pt-System  Pt-Gfx ;
 Main_MakeLocate ImageTest : $(OUTPUT_TARGET) ;
 
 
-
-SubInclude TOP src Pt-Gfx freetype ;
+if ! $(FREETYPE_LINKFLAGS)
+{
+    SubInclude TOP src Pt-Gfx freetype ;
+}
