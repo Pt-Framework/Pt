@@ -304,6 +304,17 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     return traits_type::eof();
             }
 
+            size_t putback = _pbmax;
+
+            if( this->gptr() )
+            {
+                putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
+                std::char_traits<char_type>::move( _ibuf + _pbmax - putback,
+                                                   this->gptr() - putback,
+                                                   putback );
+                this->setg(_ibuf + _pbmax - putback, _ibuf + _pbmax, _ibuf + _pbmax);
+            }
+
             if(_ebufsize < _ebufmax)
             {
                 _ebufsize += _streambuf->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
@@ -313,16 +324,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     _ebufsize = 0;
                     return traits_type::eof();
                 }
-            }
-
-            size_t putback = _pbmax;
-
-            if( this->gptr() )
-            {
-                putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
-                std::char_traits<char_type>::move( _ibuf + _pbmax - putback,
-                                                   this->gptr() - putback,
-                                                   putback );
             }
 
             const extern_type* fromBegin = _ebuf;
@@ -344,7 +345,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 case CodecType::error:
                 case CodecType::partial:
                 {
-                    // TODO
+                    // TODO partial before eof
                     _ebufsize = fromEnd - fromNext;
                     std::char_traits<extern_type>::move( _ebuf, fromNext, _ebufsize );
                     break;
