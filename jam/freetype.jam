@@ -9,8 +9,10 @@ rule FreeTypeIncludes
     local incl = [ GLOB $(FREETYPE_INCLUDE_PATHS) : freetype2  ] ;
     Echo "Checking for freetype includes... " $(incl[0]) ;
 
-    # return empty string if no libs were found
-    return $(incl[0]:P) $(incl[0]) ;
+    # ft2build.h may be somewhere else
+    local incl2 = [ GLOB $(FREETYPE_INCLUDE_PATHS) : ft2build.h  ] ;
+
+    return $(incl2[0]:P) $(incl[0]) ;
 }
 
 FREETYPE_LIBRARY_PATHS = /usr/lib
@@ -21,7 +23,6 @@ rule FreeTypeLinkFlags
     local libs = [ GLOB $(FREETYPE_LIBRARY_PATHS) : *freetype.* ] ;
     Echo "Checking for freetype libraries... " $(libs[0]:P) ;
 
-    # return empty string if no libs were found
     return -L$(libs[0]:P)" -lfreetype" ;
 }
 

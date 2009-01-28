@@ -1,8 +1,6 @@
 SubDir TOP src Pt-Gui x11 ;
 SubDirHdrs $(TOP)/include ;
-SubDirHdrs /usr/include/freetype2 ;
-SubDirHdrs /usr/sfw/include ;
-SubDirHdrs /usr/sfw/include/freetype2 ;
+SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirHdrs /usr/include/X11 ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
