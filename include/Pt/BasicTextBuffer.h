@@ -329,9 +329,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             const extern_type* fromBegin = _ebuf;
             const extern_type* fromEnd   = _ebuf + _ebufsize;
             const extern_type* fromNext  = _ebuf;
-            char_type* toBegin       = _ibuf + _pbmax;
-            char_type* toEnd         = _ibuf + _pbmax + _ibufmax;
-            char_type* toNext        = _ibuf;
+            char_type* toBegin           = _ibuf + _pbmax;
+            char_type* toEnd             = _ibuf + _pbmax + _ibufmax;
+            char_type* toNext            = _ibuf;
 
             typename CodecType::result r;
             r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
