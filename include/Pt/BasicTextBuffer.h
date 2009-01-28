@@ -107,8 +107,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         ~BasicTextBuffer() throw()
         {
-            // TODO error handling
-            this->terminate();
+            try
+            {
+                this->terminate();
+            }
+            catch(...) {}
 
             if(_codec->refs() == 0)
                 delete _codec;
@@ -255,9 +258,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         break;
                     }
                     case CodecType::error:
-                    {
-                        return traits_type::eof();
-                    }
+                    //{
+                    //    return traits_type::eof();
+                    //}
                     case CodecType::ok:
                     case CodecType::partial:
                         break;
@@ -271,6 +274,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 }
 
                 this->setp( _ibuf + leftover, _ibuf + _ibufmax );
+
+                if(res == CodecType::error)
+                    return traits_type::eof();
             }
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
@@ -298,10 +304,10 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     return traits_type::eof();
             }
 
-            if(_ebufsize == 0)
+            if(_ebufsize < _ebufmax)
             {
-                _ebufsize = _streambuf->sgetn( _ebuf, _ebufmax );
-                if(_ebufsize <= 0)
+                _ebufsize += _streambuf->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
+                if(_ebufsize == 0)
                 {
                     this->setg(0, 0, 0);
                     _ebufsize = 0;
@@ -335,16 +341,17 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     _ebufsize = 0;
                     break;
                 }
+                case CodecType::error:
                 case CodecType::partial:
                 {
-                    // move converted chars
+                    // TODO
                     _ebufsize = fromEnd - fromNext;
                     std::char_traits<extern_type>::move( _ebuf, fromNext, _ebufsize );
                     break;
                 }
                 case CodecType::noconv:
                 {
-                    // If no conversion is required, we simply need to copy
+                    // If no conversion is required, we simply need to copy.
                     // fromNext is set to fromBegin and toNext is set to toBegin.
                     int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
                     this->copyChars(toBegin, fromBegin, n);
@@ -357,16 +364,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
                     break;
                 }
-                case CodecType::error:
-                {
-                    // TODO: keep converted
-                    return traits_type::eof();
-                }
             }
 
             this->setg(_ibuf + _pbmax - putback,              // start of read buffer
                        _ibuf + _pbmax,                        // gptr position
                        _ibuf + _pbmax + (toNext - toBegin) ); // end of read buffer
+
+            if(r == CodecType::error)
+                return traits_type::eof();
 
             return traits_type::to_int_type( *this->gptr() );
         }
