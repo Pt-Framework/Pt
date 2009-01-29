@@ -77,11 +77,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         static const int _pbmax = 4;
 
-        static const int _ebufmax = 1024;
+        static const int _ebufmax = 256;
         extern_type _ebuf[_ebufmax];
         int _ebufsize;
 
-        static const int _ibufmax = 1024;
+        static const int _ibufmax = 256;
         intern_type _ibuf[_ibufmax];
         int _ibufsize;
 
@@ -184,15 +184,21 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         {
             if( this->pptr() )
             {
-                while( this->pptr() > this->pbase() )
+                std::streamsize n = this->pptr() - this->pbase();
+                while( n > 0 )
                 {
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
+
+                    if( n == this->pptr() - this->pbase() )
+                        return -1;
+
+                    n = this->pptr() - this->pbase();
                 }
 
                 if(_ebufsize)
                 {
-                    const std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                    n = _streambuf->sputn(_ebuf, _ebufsize);
                     _ebufsize -= n;
                     if(_ebufsize > 0)
                     {
@@ -214,70 +220,68 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( ! _codec || ! _streambuf || this->gptr() )
                 return traits_type::eof();
 
-            if( this->pptr() <= this->pbase() )
+            if( this->pptr() <= this->pbase() ) // no put area
             {
                 this->setp( _ibuf, _ibuf + _ibufmax );
+				if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
+				{
+					*( this->pptr() ) = traits_type::to_char_type(ch);
+					this->pbump(1);
+				}
+
+				return traits_type::not_eof(ch);
             }
-            else
-            {
-                if(_ebufsize > 0)
-                {
-                    std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
-                    _ebufsize -= n;
-                    if( _ebufsize )
-                    {
-                        if(_ebufsize < _ebufmax)
-                            std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
-                        return traits_type::eof();
-                    }
-                }
+		typename CodecType::result res = CodecType::ok;
+		while( this->pptr() > this->pbase() )
+		{
+			if(_ebufsize)
+			{
+				std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+				_ebufsize -= n;
+				if( _ebufsize )
+				{
+					if(_ebufsize < _ebufmax)
+						std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
-                const char_type* fromBegin = _ibuf;
-                const char_type* fromEnd   = this->pptr();
-                const char_type* fromNext  = _ibuf;
-                extern_type* toBegin       = _ebuf + _ebufsize;
-                extern_type* toEnd         = _ebuf + _ebufmax;
-                extern_type* toNext        = _ebuf + _ebufsize;
+					return traits_type::eof();
+				}
+			}
 
-                typename CodecType::result res;
-                res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-                switch(res)
-                {
-                    case CodecType::noconv:
-                    {
-                        // If no conversion is required, fromNext is set to fromBegin
-                        // and toNext is set to toBegin.
-                        size_t fromSize = fromEnd - fromBegin;
-                        size_t toSize   = toEnd - toBegin;
-                        size_t size     = toSize < fromSize ? toSize : fromSize;
+			const char_type* fromBegin = _ibuf;
+			const char_type* fromEnd   = this->pptr();
+			const char_type* fromNext  = _ibuf;
+			extern_type* toBegin       = _ebuf + _ebufsize;
+			extern_type* toEnd         = _ebuf + _ebufmax;
+			extern_type* toNext        = _ebuf + _ebufsize;
 
-                        this->copyChars( toBegin, fromBegin, size );
-                        fromNext += size;
-                        toNext += size;
-                        break;
-                    }
-                    case CodecType::error:
-                    //{
-                    //    return traits_type::eof();
-                    //}
-                    case CodecType::ok:
-                    case CodecType::partial:
-                        break;
-                }
+			res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+			if(res == CodecType::noconv)
+			{
+				// If no conversion is required, fromNext is set to fromBegin
+				// and toNext is set to toBegin.
+				size_t fromSize = fromEnd - fromBegin;
+				size_t toSize   = toEnd - toBegin;
+				size_t size     = toSize < fromSize ? toSize : fromSize;
 
-                _ebufsize += toNext - toBegin;
-                size_t leftover = fromEnd - fromNext;
-                if(leftover)
-                {
-                    std::char_traits<char_type>::move(_ibuf, fromNext, leftover);
-                }
+				this->copyChars( toBegin, fromBegin, size );
+				fromNext += size;
+				toNext += size;
+			}
 
-                this->setp( _ibuf + leftover, _ibuf + _ibufmax );
+			_ebufsize += toNext - toBegin;
+			size_t leftover = fromEnd - fromNext;
+			if(leftover)
+			{
+				std::char_traits<char_type>::move(_ibuf, fromNext, leftover);
+			}
 
-                if(res == CodecType::error)
-                    return traits_type::eof();
-            }
+			this->setp( _ibuf + leftover, _ibuf + _ibufmax );
+
+			if(res == CodecType::error)
+				return traits_type::eof();
+		}
+
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
             {
@@ -315,66 +319,60 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 this->setg(_ibuf + _pbmax - putback, _ibuf + _pbmax, _ibuf + _pbmax);
             }
 
-            if(_ebufsize < _ebufmax)
-            {
-                _ebufsize += _streambuf->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
-                if(_ebufsize == 0)
-                {
-                    this->setg(0, 0, 0);
-                    _ebufsize = 0;
-                    return traits_type::eof();
-                }
-            }
+			bool atEof = false;
+			if( _ebufsize < _ebufmax)
+			{
+				std::streamsize n = _streambuf->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
+				_ebufsize += n;
+				if(n == 0)
+					atEof = true;
+			}
 
-            const extern_type* fromBegin = _ebuf;
-            const extern_type* fromEnd   = _ebuf + _ebufsize;
-            const extern_type* fromNext  = _ebuf;
-            char_type* toBegin           = _ibuf + _pbmax;
-            char_type* toEnd             = _ibuf + _pbmax + _ibufmax;
-            char_type* toNext            = _ibuf;
+			const extern_type* fromBegin = _ebuf;
+			const extern_type* fromEnd   = _ebuf + _ebufsize;
+			const extern_type* fromNext  = _ebuf;
+			char_type* toBegin           = _ibuf + _pbmax;
+			char_type* toEnd             = _ibuf + _pbmax + _ibufmax;
+			char_type* toNext            = _ibuf;
 
-            typename CodecType::result r;
-            r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
-            switch(r)
-            {
-                case CodecType::ok:
-                {
-                    _ebufsize = 0;
-                    break;
-                }
-                case CodecType::error:
-                case CodecType::partial:
-                {
-                    // TODO partial before eof
-                    _ebufsize = fromEnd - fromNext;
-                    std::char_traits<extern_type>::move( _ebuf, fromNext, _ebufsize );
-                    break;
-                }
-                case CodecType::noconv:
-                {
-                    // If no conversion is required, we simply need to copy.
-                    // fromNext is set to fromBegin and toNext is set to toBegin.
-                    int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
-                    this->copyChars(toBegin, fromBegin, n);
+			typename CodecType::result r = CodecType::error;
+			r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
 
-                    _ebufsize -= n;
-                    if(_ebufsize > 0)
-                    {
-                        std::char_traits<extern_type>::move( _ebuf, _ebuf + n, _ebufsize );
-                    }
+			if(r == CodecType::noconv)
+			{
+				// copy characters and advance fromNext and toNext
+				int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
+				this->copyChars(toBegin, fromBegin, n);
+				_ebufsize -= n;
+				fromNext += n;
+				toNext += n;
+			}
 
-                    break;
-                }
-            }
+			std::streamsize consumed = fromNext - fromBegin;
+			if(consumed)
+			{
+				std::char_traits<extern_type>::move( _ebuf, _ebuf + consumed, _ebufsize );
+				_ebufsize -= consumed;
+			}
 
-            this->setg(_ibuf + _pbmax - putback,              // start of read buffer
-                       _ibuf + _pbmax,                        // gptr position
-                       _ibuf + _pbmax + (toNext - toBegin) ); // end of read buffer
+			std::streamsize generated = toNext - toBegin;
+			if(generated)
+			{
+				this->setg(_ibuf + _pbmax - putback,     // start of read buffer
+				           _ibuf + _pbmax,               // gptr position
+				           _ibuf + _pbmax + generated ); // end of read buffer
+			}
 
-            if(r == CodecType::error)
-                return traits_type::eof();
+			if(r == CodecType::error)
+				return traits_type::eof();
 
-            return traits_type::to_int_type( *this->gptr() );
+			if( this->gptr() < this->egptr() )
+				return traits_type::to_int_type( *this->gptr() );
+
+			if(r == CodecType::partial && atEof)
+				return traits_type::eof();
+
+            return traits_type::eof();
         }
 
         template <typename T>
