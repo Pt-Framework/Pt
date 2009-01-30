@@ -64,13 +64,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         typedef typename traits_type::pos_type pos_type;
         typedef typename traits_type::off_type off_type;
         typedef TextCodec<char_type, extern_type> CodecType;
+        typedef typename traits_type::state_type state_type;
 
     private:
         //! The external device (stream buffer) from which data is read and to which data is written.
         std::basic_streambuf<extern_type>* _streambuf;
 
         //! Contains the state of conversion.
-        MBState _state;
+        state_type _state;
 
         //! The codec which is used to convert character data from or to the external device.
         CodecType* _codec;
@@ -174,7 +175,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             this->setp(0, 0);
             this->setg(0, 0, 0);
             _ebufsize = 0;
-            _state = MBState();
+            _state = state_type();
             return 0;
         }
 

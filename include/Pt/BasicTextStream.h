@@ -58,13 +58,19 @@ namespace Pt {
 
         @see std::basic_istream
     */
-    template <typename I, typename E>
-    class BasicTextIStream : public std::basic_istream<I>
+    template <typename CharT, typename ByteT>
+    class BasicTextIStream : public std::basic_istream<CharT>
     {
         public:
-            typedef I InternT;
-            typedef E ExternT;
-            typedef TextCodec<InternT, ExternT> CodecT;
+			typedef ByteT extern_type;
+			typedef CharT intern_type;
+			typedef CharT char_type;
+			typedef typename std::char_traits<CharT> traits_type;
+			typedef typename traits_type::int_type int_type;
+			typedef typename traits_type::pos_type pos_type;
+			typedef typename traits_type::off_type off_type;
+			typedef std::basic_istream<extern_type> StreamType;
+			typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by input stream and codec.
@@ -74,9 +80,9 @@ namespace Pt {
                passed as pointer will afterwards be managed by this class and
                also be deleted on destruction
             */
-            BasicTextIStream(std::basic_istream<ExternT>& is, CodecT* codec)
-            : std::basic_istream<I>(0)
-            , _buffer( is.rdbuf() , codec )
+            BasicTextIStream(StreamType& is, CodecType* codec)
+            : std::basic_istream<intern_type>(0)
+            , _buffer( is.rdbuf(), codec )
             {
                 init(&_buffer);
             }
@@ -85,14 +91,25 @@ namespace Pt {
             ~BasicTextIStream()
             {  }
 
-            void attach(std::basic_iostream<ExternT>& ios)
+            void attach(StreamType& is)
             {
-                _buffer.attach( ios.rdbuf() );
+                _buffer.attach( is.rdbuf() );
                 this->clear();
             }
 
+            void detach()
+            {
+                _buffer.detach();
+                this->clear();
+            }
+
+            void terminate()
+            {
+                _buffer.terminate();
+            }
+
         private:
-            BasicTextBuffer<InternT, ExternT> _buffer;
+            BasicTextBuffer<intern_type, extern_type> _buffer;
     };
 
 
@@ -118,12 +135,19 @@ namespace Pt {
 
         @see std::basic_istream
     */
-    template <typename I, typename E>
-    class BasicTextOStream : public std::basic_ostream<I> {
+    template <typename CharT, typename ByteT>
+    class BasicTextOStream : public std::basic_ostream<CharT>
+    {
         public:
-            typedef I InternT;
-            typedef E ExternT;
-            typedef TextCodec<InternT, ExternT> CodecT;
+			typedef ByteT extern_type;
+			typedef CharT intern_type;
+			typedef CharT char_type;
+			typedef typename std::char_traits<CharT> traits_type;
+			typedef typename traits_type::int_type int_type;
+			typedef typename traits_type::pos_type pos_type;
+			typedef typename traits_type::off_type off_type;
+			typedef std::basic_ostream<extern_type> StreamType;
+			typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by output stream and codec.
@@ -133,8 +157,8 @@ namespace Pt {
                object which is passed as pointer will afterwards be managed
                by this class and be deleted on destruction
             */
-            BasicTextOStream(std::basic_ostream<ExternT>& os, CodecT* codec)
-            : std::basic_ostream<I>(0)
+            BasicTextOStream(StreamType& os, CodecType* codec)
+            : std::basic_ostream<intern_type>(0)
             , _buffer( os.rdbuf() , codec )
             { init(&_buffer); }
 
@@ -142,14 +166,25 @@ namespace Pt {
             ~BasicTextOStream()
             {  }
 
-            void attach(std::basic_iostream<ExternT>& ios)
+            void attach(StreamType& os)
             {
-                _buffer.attach( ios.rdbuf() );
+                _buffer.attach( os.rdbuf() );
                 this->clear();
             }
 
+            void detach()
+            {
+                _buffer.detach();
+                this->clear();
+            }
+
+            void terminate()
+            {
+                _buffer.terminate();
+            }
+
         private:
-            BasicTextBuffer<InternT, ExternT> _buffer;
+            BasicTextBuffer<intern_type, extern_type> _buffer;
     };
 
 
@@ -175,12 +210,19 @@ namespace Pt {
 
         @see std::basic_istream
     */
-    template <typename I, typename E>
-    class BasicTextStream : public std::basic_iostream<I> {
+    template <typename CharT, typename ByteT>
+    class BasicTextStream : public std::basic_iostream<CharT>
+    {
         public:
-            typedef I InternT;
-            typedef E ExternT;
-            typedef TextCodec<InternT, ExternT> CodecT;
+			typedef ByteT extern_type;
+			typedef CharT intern_type;
+			typedef CharT char_type;
+			typedef typename std::char_traits<CharT> traits_type;
+			typedef typename traits_type::int_type int_type;
+			typedef typename traits_type::pos_type pos_type;
+			typedef typename traits_type::off_type off_type;
+			typedef std::basic_iostream<extern_type> StreamType;
+			typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by stream and codec.
@@ -191,8 +233,8 @@ namespace Pt {
                The codec object which is passed as pointer will afterwards
                be managed by this class and be deleted on destruction
             */
-            BasicTextStream(std::basic_iostream<ExternT>& ios, CodecT* codec)
-            : std::basic_iostream<I>(0)
+            BasicTextStream(StreamType& ios, CodecType* codec)
+            : std::basic_iostream<intern_type>(0)
             , _buffer( ios.rdbuf() , codec)
             { init(&_buffer); }
 
@@ -200,14 +242,25 @@ namespace Pt {
             ~BasicTextStream()
             { }
 
-            void attach(std::basic_iostream<ExternT>& ios)
+            void attach(StreamType& ios)
             {
                 _buffer.attach( ios.rdbuf() );
                 this->clear();
             }
 
+            void detach()
+            {
+                _buffer.detach();
+                this->clear();
+            }
+
+            void terminate()
+            {
+                _buffer.terminate();
+            }
+
         private:
-            BasicTextBuffer<InternT, ExternT> _buffer;
+            BasicTextBuffer<intern_type, extern_type> _buffer;
     };
 
 } // namespace Pt
