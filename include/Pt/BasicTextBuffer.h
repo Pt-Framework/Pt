@@ -118,14 +118,12 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         void attach(std::basic_ios<extern_type>& target)
         {
-            // TODO error handling
             this->terminate();
             _target = &target;
         }
 
         void detach()
         {
-            // TODO error handling
             this->terminate();
             _target = 0;
         }
@@ -148,7 +146,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
                         if(res == CodecType::error)
                         {
-                            return -1;
+                            return -1; // TODO error handling
                         }
                         else if(res == CodecType::ok || res == CodecType::partial)
                         {
@@ -190,7 +188,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
 
-                    if( p == this->pptr() )
+                    if( p == this->pptr() ) // TODO error handling
                         return -1;
                 }
             }
