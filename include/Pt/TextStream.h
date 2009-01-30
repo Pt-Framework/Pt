@@ -54,7 +54,7 @@ namespace Pt {
              * @param buffer The buffer (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data from and to the external device.
              */
-            TextBuffer(std::streambuf* buffer, Codec* codec);
+            TextBuffer(std::ios* buffer, Codec* codec);
     };
 
 

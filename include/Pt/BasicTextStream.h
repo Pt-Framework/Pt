@@ -62,15 +62,15 @@ namespace Pt {
     class BasicTextIStream : public std::basic_istream<CharT>
     {
         public:
-			typedef ByteT extern_type;
-			typedef CharT intern_type;
-			typedef CharT char_type;
-			typedef typename std::char_traits<CharT> traits_type;
-			typedef typename traits_type::int_type int_type;
-			typedef typename traits_type::pos_type pos_type;
-			typedef typename traits_type::off_type off_type;
-			typedef std::basic_istream<extern_type> StreamType;
-			typedef TextCodec<char_type, extern_type> CodecType;
+            typedef ByteT extern_type;
+            typedef CharT intern_type;
+            typedef CharT char_type;
+            typedef typename std::char_traits<CharT> traits_type;
+            typedef typename traits_type::int_type int_type;
+            typedef typename traits_type::pos_type pos_type;
+            typedef typename traits_type::off_type off_type;
+            typedef std::basic_istream<extern_type> StreamType;
+            typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by input stream and codec.
@@ -82,7 +82,7 @@ namespace Pt {
             */
             BasicTextIStream(StreamType& is, CodecType* codec)
             : std::basic_istream<intern_type>(0)
-            , _buffer( is.rdbuf(), codec )
+            , _buffer( &is, codec )
             {
                 init(&_buffer);
             }
@@ -93,7 +93,7 @@ namespace Pt {
 
             void attach(StreamType& is)
             {
-                _buffer.attach( is.rdbuf() );
+                _buffer.attach( is );
                 this->clear();
             }
 
@@ -139,15 +139,15 @@ namespace Pt {
     class BasicTextOStream : public std::basic_ostream<CharT>
     {
         public:
-			typedef ByteT extern_type;
-			typedef CharT intern_type;
-			typedef CharT char_type;
-			typedef typename std::char_traits<CharT> traits_type;
-			typedef typename traits_type::int_type int_type;
-			typedef typename traits_type::pos_type pos_type;
-			typedef typename traits_type::off_type off_type;
-			typedef std::basic_ostream<extern_type> StreamType;
-			typedef TextCodec<char_type, extern_type> CodecType;
+            typedef ByteT extern_type;
+            typedef CharT intern_type;
+            typedef CharT char_type;
+            typedef typename std::char_traits<CharT> traits_type;
+            typedef typename traits_type::int_type int_type;
+            typedef typename traits_type::pos_type pos_type;
+            typedef typename traits_type::off_type off_type;
+            typedef std::basic_ostream<extern_type> StreamType;
+            typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by output stream and codec.
@@ -159,7 +159,7 @@ namespace Pt {
             */
             BasicTextOStream(StreamType& os, CodecType* codec)
             : std::basic_ostream<intern_type>(0)
-            , _buffer( os.rdbuf() , codec )
+            , _buffer( &os , codec )
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
@@ -168,7 +168,7 @@ namespace Pt {
 
             void attach(StreamType& os)
             {
-                _buffer.attach( os.rdbuf() );
+                _buffer.attach( os );
                 this->clear();
             }
 
@@ -214,15 +214,15 @@ namespace Pt {
     class BasicTextStream : public std::basic_iostream<CharT>
     {
         public:
-			typedef ByteT extern_type;
-			typedef CharT intern_type;
-			typedef CharT char_type;
-			typedef typename std::char_traits<CharT> traits_type;
-			typedef typename traits_type::int_type int_type;
-			typedef typename traits_type::pos_type pos_type;
-			typedef typename traits_type::off_type off_type;
-			typedef std::basic_iostream<extern_type> StreamType;
-			typedef TextCodec<char_type, extern_type> CodecType;
+            typedef ByteT extern_type;
+            typedef CharT intern_type;
+            typedef CharT char_type;
+            typedef typename std::char_traits<CharT> traits_type;
+            typedef typename traits_type::int_type int_type;
+            typedef typename traits_type::pos_type pos_type;
+            typedef typename traits_type::off_type off_type;
+            typedef std::basic_iostream<extern_type> StreamType;
+            typedef TextCodec<char_type, extern_type> CodecType;
 
         public:
             /** @brief Construct by stream and codec.
@@ -235,7 +235,7 @@ namespace Pt {
             */
             BasicTextStream(StreamType& ios, CodecType* codec)
             : std::basic_iostream<intern_type>(0)
-            , _buffer( ios.rdbuf() , codec)
+            , _buffer( &ios, codec)
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
@@ -244,7 +244,7 @@ namespace Pt {
 
             void attach(StreamType& ios)
             {
-                _buffer.attach( ios.rdbuf() );
+                _buffer.attach( ios );
                 this->clear();
             }
 

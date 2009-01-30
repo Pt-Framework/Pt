@@ -67,15 +67,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         typedef typename traits_type::state_type state_type;
 
     private:
-        //! The external device (stream buffer) from which data is read and to which data is written.
-        std::basic_streambuf<extern_type>* _streambuf;
-
-        //! Contains the state of conversion.
-        state_type _state;
-
-        //! The codec which is used to convert character data from or to the external device.
-        CodecType* _codec;
-
         static const int _pbmax = 4;
 
         static const int _ebufmax = 256;
@@ -84,12 +75,19 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         static const int _ibufmax = 256;
         intern_type _ibuf[_ibufmax];
-        int _ibufsize;
+
+        //! Contains the state of conversion.
+        state_type _state;
+
+        //! The codec which is used to convert character data from or to the external device.
+        CodecType* _codec;
+
+        std::basic_ios<extern_type>* _target;
 
     public:
         /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
 
-            The given stream buffer @a buffer is used as external device,
+            The given stream buffer @a target is used as external device,
             buffered by this Text buffer and all input from and output to
             the external device is converted using the codec @a codec.
 
@@ -97,10 +95,10 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             managed by this class and also be deleted by this class
             on destruction.
         */
-        BasicTextBuffer(std::basic_streambuf<extern_type>* buffer, CodecType* codec)
-        : _streambuf(buffer)
-        , _codec(codec)
-        , _ebufsize(0)
+        BasicTextBuffer(std::basic_ios<extern_type>* target, CodecType* codec)
+        : _ebufsize(0)
+        , _codec(codec) 
+        , _target(target)
         {
             this->setg(0, 0, 0);
             this->setp(0, 0);
@@ -118,18 +116,18 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 delete _codec;
         }
 
-        void attach(std::basic_streambuf<extern_type>* buffer)
+        void attach(std::basic_ios<extern_type>& target)
         {
             // TODO error handling
             this->terminate();
-            _streambuf = buffer;
+            _target = &target;
         }
 
         void detach()
         {
             // TODO error handling
             this->terminate();
-            _streambuf = 0;
+            _target = 0;
         }
 
         int terminate()
@@ -156,7 +154,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         {
                             if(_ebufsize > 0)
                             {
-                                const std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                                const std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
                                 _ebufsize -= n;
                                 if(_ebufsize)
                                 {
@@ -204,7 +202,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
-            if( ! _codec || ! _streambuf || this->gptr() )
+            if( ! _codec || ! _target || this->gptr() )
                 return traits_type::eof();
 
             if( ! this->pptr() )
@@ -250,7 +248,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if(res == CodecType::partial && _ebufsize == 0)
                     break;
 
-                std::streamsize n = _streambuf->sputn(_ebuf, _ebufsize);
+                std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
                 _ebufsize -= n;
                 if( _ebufsize )
                 {
@@ -274,7 +272,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type underflow()
         {
-            if( ! _codec || ! _streambuf )
+            if( ! _codec || ! _target )
                 return traits_type::eof();
 
             if( this->gptr() < this->egptr() )
@@ -300,7 +298,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             bool atEof = false;
             if( _ebufsize < _ebufmax)
             {
-                std::streamsize n = _streambuf->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
+                std::streamsize n = _target->rdbuf()->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
                 _ebufsize += n;
                 if(n == 0)
                     atEof = true;

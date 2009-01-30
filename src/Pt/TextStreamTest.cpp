@@ -295,7 +295,7 @@ void TextStreamTest::testTextBufferFromUnicodeToUTF8()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer TextBuffer(ss.rdbuf(), new Pt::Utf8Codec());
+    Pt::TextBuffer TextBuffer(&ss, new Pt::Utf8Codec());
     TextBuffer.sputn(_TextUnicode, 5);
     TextBuffer.pubsync();
 

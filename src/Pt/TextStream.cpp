@@ -29,8 +29,8 @@
 
 namespace Pt {
 
-TextBuffer::TextBuffer(std::streambuf* buffer, Codec* codec)
-: BasicTextBuffer<Pt::Char, char>(buffer, codec)
+TextBuffer::TextBuffer(std::ios* s, Codec* codec)
+: BasicTextBuffer<Pt::Char, char>(s, codec)
 { }
 
 
