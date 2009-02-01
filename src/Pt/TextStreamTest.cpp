@@ -195,13 +195,12 @@ void TextStreamTest::Base64Out()
     b64c.out(state, from2, from2+4, nextFrom, to, to+100, nextTo);
     b64c.unshift(state, nextTo, to+100, nextTo);
     PT_UNIT_ASSERT( strcmp("YWJjZA==", to) == 0 );
-    
-    const char* from3 = "abcde";
-    memset(to, 0, sizeof(to));
-    state = Pt::MBState();
-    b64c.out(state, from3, from3+5, nextFrom, to, to+100, nextTo);
-    b64c.unshift(state, nextTo, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("YWJjZGU=", to) == 0 );
+
+    std::stringstream ss3;
+    Pt::BasicTextStream<char, char> ts3(ss3, new Pt::Base64Codec);
+    ts3 << "abcde";
+    ts3.terminate();
+    PT_UNIT_ASSERT( ss3.str() == "YWJjZGU=" );
 }
 
 void TextStreamTest::Base64In()
@@ -225,13 +224,12 @@ void TextStreamTest::Base64In()
     b64c.in(state, from2, from2+8, nextFrom, to, to+100, nextTo);
     PT_UNIT_ASSERT( strcmp("abcde", to) == 0 );
     PT_UNIT_ASSERT( nextTo - to == 5 );
-    
-    const char* from3 = "YWJjZA==";
-    memset(to, 0, sizeof(to));
-    state = Pt::MBState();
-    b64c.in(state, from3, from3+8, nextFrom, to, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("abcd", to) == 0 );
-    PT_UNIT_ASSERT( nextTo - to == 4 );
+
+    std::stringstream ss3("YWJjZA==");
+    Pt::BasicTextStream<char, char> ts3(ss3, new Pt::Base64Codec);
+    std::string token;
+    ts3 >> token;
+    PT_UNIT_ASSERT( token == "abcd" );
 }
 
 void TextStreamTest::InvalidUTF8String()

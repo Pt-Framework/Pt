@@ -30,6 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/TextCodec.h>
+#include <Pt/ConversionError.h>
 #include <iostream>
 
 namespace Pt {
@@ -64,7 +65,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         typedef typename traits_type::pos_type pos_type;
         typedef typename traits_type::off_type off_type;
         typedef TextCodec<char_type, extern_type> CodecType;
-        typedef typename traits_type::state_type state_type;
+        typedef MBState state_type;
 
     private:
         static const int _pbmax = 4;
@@ -146,7 +147,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
                         if(res == CodecType::error)
                         {
-                            return -1; // TODO error handling
+                            throw ConversionError("character conversion failed");
                         }
                         else if(res == CodecType::ok || res == CodecType::partial)
                         {
@@ -159,7 +160,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                                     if(_ebufsize < _ebufmax)
                                         std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
-                                    return -1;
+                                    return -1; //TODO: error handling
                                 }
                             }
                         }
@@ -181,6 +182,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         {
             if( this->pptr() )
             {
+                // Try to write out the whole buffer to the underlying stream.
+                // Fail if we can not make progress, because more characters
+                // are needed to continue a multi-byte sequence.
                 while( this->pptr() > this->pbase() )
                 {
                     const char_type* p = this->pptr();
@@ -188,8 +192,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
 
-                    if( p == this->pptr() ) // TODO error handling
-                        return -1;
+                    if( p == this->pptr() )
+                        throw ConversionError("character conversion failed");
                 }
             }
 
@@ -241,7 +245,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 this->setp( _ibuf + leftover, _ibuf + _ibufmax );
 
                 if(res == CodecType::error)
-                    return traits_type::eof();
+                    throw ConversionError("character conversion failed");
 
                 if(res == CodecType::partial && _ebufsize == 0)
                     break;
@@ -253,7 +257,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if(_ebufsize < _ebufmax)
                         std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
 
-                    return traits_type::eof();
+                    return traits_type::eof(); // TODO: error handling
                 }
             }
 
@@ -338,13 +342,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             }
 
             if(r == CodecType::error)
-                return traits_type::eof();
+                throw ConversionError("character conversion failed");
 
             if( this->gptr() < this->egptr() )
                 return traits_type::to_int_type( *this->gptr() );
 
+            // fail if partial charactes are at the end of the stream
             if(r == CodecType::partial && atEof)
-                return traits_type::eof();
+                throw ConversionError("character conversion failed");
 
             return traits_type::eof();
         }
