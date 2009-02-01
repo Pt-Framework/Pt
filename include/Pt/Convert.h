@@ -31,7 +31,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/SourceInfo.h>
+//#include <Pt/SourceInfo.h>
+#include <Pt/ConversionError.h>
 #include <Pt/StringStream.h>
 #include <sstream>
 #include <string>
@@ -41,20 +42,7 @@
 #include <iostream>
 
 
-#define PT_CONVERSIONERROR(to, from) \
-    PT_ERROR_MSG("conversion from " #from " to " #to " failed")
-
 namespace Pt {
-
-    class PT_API ConversionError : public std::runtime_error
-    {
-    public:
-        ConversionError(const char* msg);
-
-        ~ConversionError() throw()
-        {}
-    };
-
 
 template <typename T>
 inline void convert(Pt::String& s, const T& value)

@@ -11,7 +11,7 @@ SharedLibrary Pt : AsciiCodec.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp
-                   Convert.cpp
+                   ConversionError.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
