@@ -31,7 +31,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-//#include <Pt/SourceInfo.h>
 #include <Pt/ConversionError.h>
 #include <Pt/StringStream.h>
 #include <sstream>
