@@ -27,8 +27,8 @@ SharedLibrary Pt : AsciiCodec.cpp
                    Time.cpp
                    Unicode.cpp
                    Utf8Codec.cpp
-                   Utf16Codec.cpp
-                   Utf32Codec.cpp
+                   #Utf16Codec.cpp
+                   #Utf32Codec.cpp
                    ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
