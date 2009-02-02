@@ -153,15 +153,19 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         {
                             if(_ebufsize > 0)
                             {
-                                const std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
-                                _ebufsize -= n;
+                                _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
                                 if(_ebufsize)
-                                {
-                                    if(_ebufsize < _ebufmax)
-                                        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
+                                    return -1;
 
-                                    return -1; //TODO: error handling
-                                }
+                                //const std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
+                                //_ebufsize -= n;
+                                //if(_ebufsize)
+                                //{
+                                //    if(_ebufsize < _ebufmax)
+                                //        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
+                                //
+                                //    return -1; //TODO: error handling
+                                //}
                             }
                         }
                     }
@@ -250,15 +254,19 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if(res == CodecType::partial && _ebufsize == 0)
                     break;
 
-                std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
-                _ebufsize -= n;
-                if( _ebufsize )
-                {
-                    if(_ebufsize < _ebufmax)
-                        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
+                _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
+                if(_ebufsize)
+                    return traits_type::eof();
 
-                    return traits_type::eof(); // TODO: error handling
-                }
+                //std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
+                //_ebufsize -= n;
+                //if( _ebufsize )
+                //{
+                //    if(_ebufsize < _ebufmax)
+                //        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
+                //
+                //    return traits_type::eof(); // TODO: error handling
+                //}
             }
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
@@ -336,7 +344,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             std::streamsize generated = toNext - toBegin;
             if(generated)
             {
-                this->setg(_ibuf + _pbmax - putback,     // start of read buffer
+                this->setg(_ibuf + _pbmax - putback,  // start of read buffer
                         _ibuf + _pbmax,               // gptr position
                         _ibuf + _pbmax + generated ); // end of read buffer
             }
