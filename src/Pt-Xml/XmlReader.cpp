@@ -56,7 +56,7 @@ XmlReader::XmlReader(std::istream& is)
 , _depth(0)
 , _tokenMax(512)
 {
-    _buffer = new Text::TextBuffer( is.rdbuf(), new Pt::Text::Utf8Codec() );
+    _buffer = new Text::TextBuffer( &is, new Pt::Text::Utf8Codec() );
     _textBuffer = _buffer;
 
     this->init();
