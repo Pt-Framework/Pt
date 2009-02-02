@@ -5,7 +5,7 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
-SharedLibrary Pt : AsciiCodec.cpp
+SharedLibrary Pt : #AsciiCodec.cpp
                    Atomicity.cpp
 				   Base64Codec.cpp
                    Char.cpp

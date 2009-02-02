@@ -40,7 +40,6 @@
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf16Codec.h"
 
 #include <iostream>
 #include <sstream>

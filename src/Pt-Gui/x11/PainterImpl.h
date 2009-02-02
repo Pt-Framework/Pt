@@ -45,7 +45,6 @@
 #include <Pt/String.h>
 
 #include <sstream>
-#include "Pt/Text/Utf16Codec.h"
 #include "Pt/Text/TextStream.h"
 
 struct _XftFont;
