@@ -40,6 +40,7 @@
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/TextStream.h"
+#include "Pt/Utf16Codec.h"
 
 #include <iostream>
 #include <sstream>
@@ -60,7 +61,7 @@ PainterImpl::PainterImpl(Gui::Drawable& drawable)
 , _brushGc(0)
 , _xftDraw(0)
 , _xftFont(0)
-, _textStream(_stringStream, new Pt::Text::Utf16Codec())
+, _textStream(_stringStream, new Pt::Utf16Codec())
 {
     Display* display = X11EventLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
