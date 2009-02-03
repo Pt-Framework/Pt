@@ -20,7 +20,6 @@
 #ifndef PT_GUI_GDI_PAINTERIMPL_H
 #define PT_GUI_GDI_PAINTERIMPL_H
 
-
 #include <Pt/Api.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Gfx.h>
@@ -35,10 +34,6 @@
 #include <Pt/Gfx/Region.h>
 
 #include "Drawable.h"
-
-#include <sstream>
-#include "Pt/Text/Utf16Codec.h"
-#include "Pt/Text/TextStream.h"
 
 #include <windows.h>
 
@@ -167,17 +162,12 @@ namespace Gui {
                 }
             }
 
-
         protected:
             Drawable&  _drawable;
-
             Gfx::Pen   _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-
-            mutable std::stringstream    _stringStream;
-            mutable Pt::Text::TextStream _textStream;
-
+            mutable std::wstring _text;
             std::list<std::string> _fontNamesList;
 
         private:

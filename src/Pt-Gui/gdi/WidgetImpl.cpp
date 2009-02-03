@@ -36,14 +36,9 @@
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/PaintEvent.h>
-#include <Pt/Text/TextStream.h>
-#include <Pt/Text/Utf16Codec.h>
-#include <Pt/Text/Utf8Codec.h>
-
-#include <iostream>
+#include <Pt/Utf8Codec.h>
+#include <Pt/TextStream.h>
 #include <sstream>
-using namespace std;
-
 
 namespace Pt {
 
@@ -136,12 +131,9 @@ WidgetImpl::~WidgetImpl()
 
 void WidgetImpl::setTitle(const Pt::String& text)
 {
-    std::stringstream ss;
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
-    textStream << text << Char(0); // Append extra \0 for proper line termination.
-    textStream.flush();
-
-    SetWindowTextW(_hwnd, (wchar_t*)ss.str().c_str());
+    std::wstring wtext;
+    win32::convertUtf16(text.begin(), text.end(), std::back_inserter(wtext));
+    SetWindowTextW( _hwnd, wtext.c_str() );
 }
 
 
@@ -153,7 +145,7 @@ Pt::String WidgetImpl::title()
     GetWindowTextW(_hwnd, &buffer[0], length);
 
     std::stringstream ss(Pt::win32::toUTF8(&buffer[0]));
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream textStream(ss, new Pt::Utf8Codec());
     Pt::String result;
     getline(textStream, result);
     

@@ -37,7 +37,7 @@
 
 namespace Pt {
 
-class ConversionError : public std::runtime_error
+class PT_API ConversionError : public std::runtime_error
 {
     public:
         ConversionError(const char* msg);
