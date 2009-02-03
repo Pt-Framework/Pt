@@ -41,7 +41,6 @@ Condition::Condition()
 
 Condition::~Condition()
 {
-    _impl->broadcast();
     delete _impl;
 }
 
