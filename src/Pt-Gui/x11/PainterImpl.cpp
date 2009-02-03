@@ -39,13 +39,7 @@
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Text/TextStream.h"
-#include "Pt/Utf16Codec.h"
 
-#include <iostream>
-#include <sstream>
-
-using namespace std;
 using namespace Pt::Gfx;
 
 
@@ -61,7 +55,6 @@ PainterImpl::PainterImpl(Gui::Drawable& drawable)
 , _brushGc(0)
 , _xftDraw(0)
 , _xftFont(0)
-, _textStream(_stringStream, new Pt::Utf16Codec())
 {
     Display* display = X11EventLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
@@ -322,19 +315,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
     Display* display = X11EventLoop::instance().display();
     XGlyphInfo info;
 
-    // Convert the 32-bit string into 16 bit (using UTF-16).
-        _textStream.clear();
-        _stringStream.str("");
-        _textStream << text;
-        _textStream.flush();
-
-        // Calculate the width and height for the text.
-        std::string utf16Text = _stringStream.str();
-
-        // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
-        size_t utf16Length = utf16Text.length() / 2;
-
-        XftTextExtents16(display, _xftFont, (XftChar16*)utf16Text.c_str(), utf16Length, &info);
+    XftTextExtents32(display, _xftFont, (XftChar32*)text.c_str(), text.size(), &info);
 
     return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, info.width, _xftFont->height);
 #else
@@ -406,19 +387,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     xftColor.color.blue  = _pen.color().blue();
     xftColor.color.alpha = 0xffff;
 
-    // Convert the 32-bit string into 16 bit (using UTF-16).
-    _textStream.clear();
-    _stringStream.str("");
-    _textStream << text;
-    _textStream.flush();
-
-    // Calculate the width and height for the text.
-    std::string utf16Text = _stringStream.str();
-
-    // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
-    size_t utf16Length = utf16Text.length() / 2;
-
-    XftDrawString16(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (XftChar16*)utf16Text.c_str(), utf16Length);
+    XftDrawString32(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (XftChar32*)text.c_str(), text.size());
 #endif
 }
 
