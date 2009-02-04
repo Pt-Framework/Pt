@@ -1038,16 +1038,12 @@ inline basic_string<Pt::Char> basic_string<Pt::Char>::fromUtf16(InIterT from, In
 	for( ; from != fromEnd; ++from)
 	{
 		unsigned ch = *from;
-		
-		if(ch < 0xDC00 || ch > 0xDFFF) // no surrogate
+
+		// high surrogate
+		if (ch >= 0xD800 && ch <= 0xDBFF) 
 		{
-			ret += Pt::Char(ch);
-		}
-		else if (ch >= 0xD800 && ch <= 0xDBFF) // high surrogate
-		{
-			if(++from == fromEnd || 
-			   *from < 0xDC00 || 
-			   *from > 0xDFFF) // invalid lo surrogate
+			// invalid or missing low surrogate
+			if(++from == fromEnd || *from < 0xDC00 || *from > 0xDFFF) 
 			{
 				ret += Pt::Char(0xFFFD);
 				break;
@@ -1057,12 +1053,18 @@ inline basic_string<Pt::Char> basic_string<Pt::Char>::fromUtf16(InIterT from, In
 			ch = ((ch - 0xD800) << 10) + (lo - 0xDC00) + 0x0010000U;
 			ret += Pt::Char(ch);
 		}
+		// not a surrogate
+		else if(ch < 0xDC00 || ch > 0xDFFF)
+		{
+			ret += Pt::Char(ch);
+		}
+		// not a valid unicode point
 		else
 		{
 		    ret += Pt::Char(0xFFFD);
 		}
 	}
-	
+
 	return ret;
 }
 
