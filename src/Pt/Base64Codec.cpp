@@ -60,13 +60,7 @@ uint8_t fromBase64(char b64)
     
     return b64dec[(int)b64];
 }
-    
-Base64Codec::Base64Codec(size_t ref)
-: TextCodec<char, char>(ref)
-{}
 
-Base64Codec::~Base64Codec()
-{}
 
 Base64Codec::result Base64Codec::do_in(MBState& s, 
                                        const char* fromBegin,
