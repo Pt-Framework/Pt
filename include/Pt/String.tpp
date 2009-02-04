@@ -1029,5 +1029,42 @@ inline OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to) const
     return to;
 }
 
+
+template <typename InIterT>
+inline basic_string<Pt::Char> basic_string<Pt::Char>::fromUtf16(InIterT from, InIterT fromEnd)
+{
+	std::basic_string<Pt::Char> ret;
+
+	for( ; from != fromEnd; ++from)
+	{
+		unsigned ch = *from;
+		
+		if(ch < 0xDC00 || ch > 0xDFFF) // no surrogate
+		{
+			ret += Pt::Char(ch);
+		}
+		else if (ch >= 0xD800 && ch <= 0xDBFF) // high surrogate
+		{
+			if(++from == fromEnd || 
+			   *from < 0xDC00 || 
+			   *from > 0xDFFF) // invalid lo surrogate
+			{
+				ret += Pt::Char(0xFFFD);
+				break;
+			}
+
+			const unsigned lo = *from;
+			ch = ((ch - 0xD800) << 10) + (lo - 0xDC00) + 0x0010000U;
+			ret += Pt::Char(ch);
+		}
+		else
+		{
+		    ret += Pt::Char(0xFFFD);
+		}
+	}
+	
+	return ret;
+}
+
 }
 

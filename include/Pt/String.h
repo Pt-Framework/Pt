@@ -337,6 +337,9 @@ class basic_string< Pt::Char > {
         template <typename OutIterT>
         OutIterT toUtf16(OutIterT to) const;
 
+        template <typename InIterT>
+        static basic_string fromUtf16(InIterT from, InIterT fromEnd);
+
     public:
         basic_string& operator=(const basic_string& str)
         { return this->assign(str); }

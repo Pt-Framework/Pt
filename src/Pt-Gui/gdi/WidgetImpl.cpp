@@ -36,9 +36,6 @@
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/PaintEvent.h>
-#include <Pt/Utf8Codec.h>
-#include <Pt/TextStream.h>
-#include <sstream>
 
 namespace Pt {
 
@@ -143,12 +140,12 @@ Pt::String WidgetImpl::title()
     std::vector<wchar_t> buffer(length + 1);
     GetWindowTextW(_hwnd, &buffer[0], length);
 
-    std::stringstream ss(Pt::win32::toUTF8(&buffer[0]));
-    Pt::TextStream textStream(ss, new Pt::Utf8Codec());
-    Pt::String result;
-    getline(textStream, result);
+    //std::stringstream ss(Pt::win32::toUTF8(&buffer[0]));
+    //Pt::TextStream textStream(ss, new Pt::Utf8Codec());
+    //Pt::String result;
+    //getline(textStream, result);
     
-    return result;
+    return Pt::String::fromUtf16( buffer.begin(), buffer.end() );
 }
 
 
