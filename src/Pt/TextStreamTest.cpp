@@ -33,8 +33,6 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Base64Codec.h"
 #include "Pt/Utf8Codec.h"
-#include "Pt/Utf16Codec.h"
-#include "Pt/Utf32Codec.h"
 #include "Pt/TextStream.h"
 #include <string>
 #include <sstream>
@@ -154,7 +152,6 @@ class TextStreamTest : public Pt::Unit::TestSuite
         void testTextStreamGetLineFromUTF8ToUnicode();
         void testTextBufferFromUnicodeToUTF8();
         void testTextStreamFromUnicodeToUTF8();
-        void testTextStreamFromUTF32ToUnicode();
         void testGetline();
         void testNum_get();
         void testNum_put();
@@ -317,28 +314,6 @@ void TextStreamTest::testTextStreamFromUnicodeToUTF8()
         //PT_UNIT_ASSERT(str[i] == _TextUTF8[i]);
     }
 }
-
-
-void TextStreamTest::testTextStreamFromUTF32ToUnicode()
-{
-    std::stringstream ss;
-
-    Pt::TextStream TextStream(ss, new Pt::Utf32Codec());
-    TextStream << _TextUnicode;
-
-    Pt::Char c[6];
-    TextStream.getline(c, 6);
-
-    //std::cerr << c[0] << std::endl;
-
-    //PT_UNIT_ASSERT(c[0] == _TextUnicode[0]);
-    //PT_UNIT_ASSERT(c[1] == _TextUnicode[1]);
-    //PT_UNIT_ASSERT(c[2] == _TextUnicode[2]);
-    //PT_UNIT_ASSERT(c[3] == _TextUnicode[3]);
-    //PT_UNIT_ASSERT(c[4] == _TextUnicode[4]);
-    //PT_UNIT_ASSERT(c[5] == _TextUnicode[5]);
-}
-
 
 
 void TextStreamTest::testGetline()
