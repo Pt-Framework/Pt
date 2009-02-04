@@ -998,5 +998,36 @@ inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& s
     return ret;
 }
 
+
+template <typename OutIterT>
+inline OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to)
+{
+    const_iterator from = this->begin();
+    const_iterator fromEnd = this->end();
+
+    for( ; from != fromEnd; ++from)
+    {
+        const int ch = *from;
+
+        if( ch < 0xD800 ||
+           (ch > 0xDFFF && ch <= 0xFFFF) )
+        {
+            *to++ = *from;
+        }
+        else if(ch > 0xFFFF && ch <= 0x0010FFFF)
+        {
+            const int n = (ch - 0x0010000UL);
+            *to++ = ((n >> 10) + 0xD800);
+            *to++ = ((n & 0x3FFU) + 0xDC00);
+        }
+        else
+        {
+            *to++ = 0xFFFD;
+        }
+    }
+
+    return to;
+}
+
 }
 
