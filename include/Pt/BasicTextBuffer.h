@@ -113,7 +113,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             }
             catch(...) {}
 
-            if(_codec->refs() == 0)
+            if(_codec && _codec->refs() == 0)
                 delete _codec;
         }
 
@@ -136,7 +136,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if( -1 == this->sync() )
                     return -1;
 
-                if( ! _codec->always_noconv() )
+                if( _codec && ! _codec->always_noconv() )
                 {
                     typename CodecType::result res = CodecType::error;
                     do
@@ -208,7 +208,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
-            if( ! _codec || ! _target || this->gptr() )
+            if( ! _target || this->gptr() )
                 return traits_type::eof();
 
             if( ! this->pptr() )
@@ -220,13 +220,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             {
                 const char_type* fromBegin = _ibuf;
                 const char_type* fromEnd   = this->pptr();
-                const char_type* fromNext  = _ibuf;
+                const char_type* fromNext  = fromBegin;
                 extern_type* toBegin       = _ebuf + _ebufsize;
                 extern_type* toEnd         = _ebuf + _ebufmax;
-                extern_type* toNext        = _ebuf + _ebufsize;
+                extern_type* toNext        = toBegin;
 
-                typename CodecType::result res = CodecType::error;
-                res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+                typename CodecType::result res = CodecType::noconv;
+                if(_codec)
+                    res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+
                 if(res == CodecType::noconv)
                 {
                     size_t fromSize = fromEnd - fromBegin;
@@ -282,7 +284,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type underflow()
         {
-            if( ! _codec || ! _target )
+            if( ! _target )
                 return traits_type::eof();
 
             if( this->gptr() < this->egptr() )
@@ -316,13 +318,14 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
             const extern_type* fromBegin = _ebuf;
             const extern_type* fromEnd   = _ebuf + _ebufsize;
-            const extern_type* fromNext  = _ebuf;
+            const extern_type* fromNext  = fromBegin;
             char_type* toBegin           = _ibuf + _pbmax;
             char_type* toEnd             = _ibuf + _pbmax + _ibufmax;
-            char_type* toNext            = _ibuf;
+            char_type* toNext            = toBegin;
 
-            typename CodecType::result r = CodecType::error;
-            r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+            typename CodecType::result r = CodecType::noconv;
+            if(_codec)
+                r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
 
             if(r == CodecType::noconv)
             {

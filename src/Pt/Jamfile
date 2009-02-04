@@ -5,9 +5,8 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
-SharedLibrary Pt : #AsciiCodec.cpp
-                   Atomicity.cpp
-				   Base64Codec.cpp
+SharedLibrary Pt : Atomicity.cpp
+                   Base64Codec.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp
@@ -27,8 +26,6 @@ SharedLibrary Pt : #AsciiCodec.cpp
                    Time.cpp
                    Unicode.cpp
                    Utf8Codec.cpp
-                   #Utf16Codec.cpp
-                   #Utf32Codec.cpp
                    ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
