@@ -1000,7 +1000,7 @@ inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& s
 
 
 template <typename OutIterT>
-inline OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to)
+inline OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to) const
 {
     const_iterator from = this->begin();
     const_iterator fromEnd = this->end();

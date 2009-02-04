@@ -362,7 +362,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     //GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)utf16Text.c_str(), utf16Length, &textSize);
 
     _text.clear();
-    win32::convertUtf16(text.begin(), text.end(), std::back_inserter(_text));
+	text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_drawable.deviceContext(), _text.c_str(), _text.length(), &textSize);
 
     return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
@@ -484,7 +484,7 @@ void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
     //DrawTextW(_drawable.deviceContext(), (wchar_t*)_stringStream.str().c_str(), -1, &rectangle, DT_NOCLIP);
     
     _text.clear();
-    win32::convertUtf16(text.begin(), text.end(), std::back_inserter(_text));
+	text.toUtf16( std::back_inserter(_text) );
     DrawTextW(_drawable.deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP);
 }
 

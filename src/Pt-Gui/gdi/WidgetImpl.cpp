@@ -123,7 +123,6 @@ WidgetImpl::~WidgetImpl()
     // Destroy GDI window.
     DestroyWindow(_hwnd);
 
-
     // Release this window's device context.
     ReleaseDC(_hwnd, _deviceContext);
 }
@@ -132,7 +131,7 @@ WidgetImpl::~WidgetImpl()
 void WidgetImpl::setTitle(const Pt::String& text)
 {
     std::wstring wtext;
-    win32::convertUtf16(text.begin(), text.end(), std::back_inserter(wtext));
+    text.toUtf16( std::back_inserter(wtext) );
     SetWindowTextW( _hwnd, wtext.c_str() );
 }
 

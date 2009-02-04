@@ -335,7 +335,7 @@ class basic_string< Pt::Char > {
         static basic_string widen(const std::string& str);
 
         template <typename OutIterT>
-        OutIterT toUtf16(OutIterT to);
+        OutIterT toUtf16(OutIterT to) const;
 
     public:
         basic_string& operator=(const basic_string& str)

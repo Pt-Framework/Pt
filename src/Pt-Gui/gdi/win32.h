@@ -32,33 +32,6 @@ namespace Pt {
 
 namespace win32 {
 
-template <typename InputIteratorT, typename OutputIteratorT>
-inline OutputIteratorT convertUtf16(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
-{
-    for( ; from != fromEnd; ++from)
-    {
-        const int ch = *from;
-
-        if( ch < 0xD800 ||
-           (ch > 0xDFFF && ch <= 0xFFFF) )
-        {
-            *to++ = *from;
-        }
-        else if(ch > 0xFFFF && ch <= 0x0010FFFF)
-        {
-            const int n = (ch - 0x0010000UL);
-            *to++ = ((n >> 10) + 0xD800);
-            *to++ = ((n & 0x3FFU) + 0xDC00);
-        }
-        else
-        {
-            *to++ = 0xFFFD;
-        }
-    }
-
-    return to;
-}
-
     inline std::string toMultiByte(const wchar_t* from)
     {
         size_t length = WideCharToMultiByte(CP_ACP, 0, from, -1, NULL, 0, NULL, NULL);
