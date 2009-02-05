@@ -196,10 +196,13 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         virtual std::streamsize showmanyc()
         {
-            if( ! _target || this->pptr() )
+            if( ! _target || this->pptr() || ! _target->in_avail() )
             {
                 return 0;
             }
+
+            // update the input buffer by in_avail chars from target
+            // in refill() method
 
             return 0;
         }
