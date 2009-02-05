@@ -156,16 +156,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                                 _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
                                 if(_ebufsize)
                                     return -1;
-
-                                //const std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
-                                //_ebufsize -= n;
-                                //if(_ebufsize)
-                                //{
-                                //    if(_ebufsize < _ebufmax)
-                                //        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
-                                //
-                                //    return -1; //TODO: error handling
-                                //}
                             }
                         }
                     }
@@ -259,16 +249,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
                 if(_ebufsize)
                     return traits_type::eof();
-
-                //std::streamsize n = _target->rdbuf()->sputn(_ebuf, _ebufsize);
-                //_ebufsize -= n;
-                //if( _ebufsize )
-                //{
-                //    if(_ebufsize < _ebufmax)
-                //        std::char_traits<extern_type>::move(_ebuf, _ebuf + n, _ebufsize);
-                //
-                //    return traits_type::eof(); // TODO: error handling
-                //}
             }
 
             if( ! traits_type::eq_int_type(ch, traits_type::eof()) )
