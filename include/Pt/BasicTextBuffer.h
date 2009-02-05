@@ -194,6 +194,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return 0;
         }
 
+        virtual std::streamsize showmanyc()
+        {
+            if( ! _target || this->pptr() )
+            {
+                return 0;
+            }
+
+            return 0;
+        }
 
         // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
