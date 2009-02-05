@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-class PT_API Base64Codec : public TextCodec<char, char>
+class Base64Codec : public TextCodec<char, char>
 {
     public:
         explicit Base64Codec(size_t ref = 0)
@@ -68,7 +68,7 @@ class PT_API Base64Codec : public TextCodec<char, char>
 
         bool do_always_noconv() const throw()
         {
-            return false; 
+            return false;
         }
 
         int do_length(MBState& s, const char* fromBegin,
@@ -82,20 +82,20 @@ class PT_API Base64Codec : public TextCodec<char, char>
         int do_encoding() const throw()
         {
             // stateful encoding
-            return -1; 
+            return -1;
         }
 
         int do_max_length() const throw()
         {
             //worst case: XX== -> x
-            return 4; 
+            return 4;
         }
 };
 
 
 inline char toBase64(uint8_t n)
 {
-    static const char b64enc[] 
+    static const char b64enc[]
         = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     return b64enc[n];
@@ -104,7 +104,7 @@ inline char toBase64(uint8_t n)
 
 inline uint8_t fromBase64(char b64)
 {
-    static const char b64dec[] 
+    static const char b64dec[]
         = { 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
             255,255,255,255,255,255,255,255,255,255,255,62,255,255,255,63,
@@ -112,7 +112,7 @@ inline uint8_t fromBase64(char b64)
             255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,
             15,16,17,18,19,20,21,22,23,24,25,255,255,255,255,255,
             255,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-            41,42,43,44,45,46,47,48,49,50,51,255,255,255,255,255, 
+            41,42,43,44,45,46,47,48,49,50,51,255,255,255,255,255,
             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
@@ -126,12 +126,12 @@ inline uint8_t fromBase64(char b64)
 }
 
 
-inline Base64Codec::result Base64Codec::do_in(MBState& s, 
+inline Base64Codec::result Base64Codec::do_in(MBState& s,
                                        const char* fromBegin,
-                                       const char* fromEnd, 
+                                       const char* fromEnd,
                                        const char*& fromNext,
-                                       char* toBegin, 
-                                       char* toEnd, 
+                                       char* toBegin,
+                                       char* toEnd,
                                        char*& toNext) const
 {
     fromNext = fromBegin;
@@ -160,12 +160,12 @@ inline Base64Codec::result Base64Codec::do_in(MBState& s,
 }
 
 
-inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state, 
+inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
                                         const char* fromBegin,
-                                        const char* fromEnd, 
+                                        const char* fromEnd,
                                         const char*& fromNext,
-                                        char* toBegin, 
-                                        char* toEnd, 
+                                        char* toBegin,
+                                        char* toEnd,
                                         char*& toNext) const
 {
     fromNext = fromBegin;
@@ -209,7 +209,7 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
             break;
     }
 
-    do 
+    do
     {
         *toNext++   = toBase64( (*first >> 2) & 0x3f );
         *(toNext++) = toBase64( ((*first << 4) + ((*second) >> 4)) & 0x3f );
@@ -225,7 +225,7 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
         first =  fromNext++;
         second = fromNext++;
         third =  fromNext++;
-    } 
+    }
     while(fromNext < fromEnd) ;
 
     switch( fromEnd - fromNext )
@@ -250,9 +250,9 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
 }
 
 
-inline Base64Codec::result Base64Codec::do_unshift(MBState& state, 
-                                            char* toBegin, 
-                                            char* toEnd, 
+inline Base64Codec::result Base64Codec::do_unshift(MBState& state,
+                                            char* toBegin,
+                                            char* toEnd,
                                             char*& toNext) const
 {
     toNext = toBegin;
