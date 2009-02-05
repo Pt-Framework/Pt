@@ -80,6 +80,10 @@
     #endif
 #endif
 
+#define PT_VERSION_MAJOR 1
+#define PT_VERSION_MINOR 0
+#define PT_VERSION_REVISION 0
+
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
     #define PT_EXPORT __declspec(dllexport)
     #define PT_IMPORT __declspec(dllimport)
@@ -106,7 +110,41 @@
     #define PT_API PT_IMPORT
 #endif
 
-#endif
+/** @defgroup DateTime
+    @brief Dates and Times
+
+    The Pt core module contains some simple types to represent times and
+    dates. They can be used for comparison, sorting and in calculations
+    including other dates, times and timespans.
+*/
+
+/** @defgroup Unicode
+    @brief Unicode string handling
+
+    Pt extends the string handling of the standard C++ library by
+    a unicode capable character type and a specialization of the
+    std:basic_string<> template for this charcter type. Localization
+    factes are provides that allow the use of i/o streams with the
+    unicode charcter type.
+*/
+
+/** @namespace Pt
+    @brief Core module
+
+    This module is the base module for all other modules and has no dependency
+    to any system specific libraries except the standard c++ library. It
+    provides some basic types, support for byte-order handling, atomic integer
+    operations, type-traits, an unicode string and character class, serialization
+    and a signals/delegates based callback mechanism.
+*/
+namespace Pt {
+
+    class Any;
+    class Connectable;
+    class Connection;
+    class SourceInfo;
+    class NonCopyable;
+}
 
 /*______ _       _   _                         _____
   | ___ \ |     | | (_)                       /  __ \ _     _
@@ -121,3 +159,5 @@
   | | | | | (_| | | | | | |  __/\ V  V / (_) | |  |   <
   \_| |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\
 */
+
+#endif
