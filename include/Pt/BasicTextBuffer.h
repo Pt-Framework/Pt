@@ -196,7 +196,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         virtual std::streamsize showmanyc()
         {
-            if( ! _target || this->pptr() || ! _target->in_avail() )
+            if( ! _target || this->pptr() || ! _target->rdbuf()->in_avail() )
             {
                 return 0;
             }
