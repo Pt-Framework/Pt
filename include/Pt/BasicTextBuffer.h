@@ -170,6 +170,16 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return 0;
         }
 
+        int import(std::streamsize n)
+        {
+            if( _target )
+            {
+                do_underflow(n);
+            }
+
+            return this->in_avail();
+        }
+
     protected:
         // inheritdoc
         virtual int sync()
@@ -196,14 +206,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         virtual std::streamsize showmanyc()
         {
-            if( ! _target || this->pptr() || ! _target->rdbuf()->in_avail() )
-            {
-                return 0;
-            }
-
-            // update the input buffer by in_avail chars from target
-            // in refill() method
-
             return 0;
         }
 
@@ -282,27 +284,38 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( this->gptr() < this->egptr() )
                 return traits_type::to_int_type( *this->gptr() );
 
+            return do_underflow(_ebufmax);
+        }
+
+
+        virtual int_type do_underflow(std::streamsize size)
+        {
             if( this->pptr() )
             {
-                if(-1 == this->terminate())
+                if( -1 == this->terminate() )
                     return traits_type::eof();
             }
 
-            size_t putback = _pbmax;
-
-            if( this->gptr() )
+            if( ! this->gptr() )
             {
-                putback = std::min<size_t>(this->gptr() - this->eback(), _pbmax);
-                std::char_traits<char_type>::move( _ibuf + _pbmax - putback,
-                                                   this->gptr() - putback,
-                                                   putback );
-                this->setg(_ibuf + _pbmax - putback, _ibuf + _pbmax, _ibuf + _pbmax);
+                this->setg(_ibuf, _ibuf, _ibuf);
+            }
+
+            if( this->gptr() - this->eback() > _pbmax)
+            {
+                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
+                std::char_traits<char_type>::move( _ibuf,
+                                                   this->gptr() - _pbmax,
+                                                   movelen );
+                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
             }
 
             bool atEof = false;
-            if( _ebufsize < _ebufmax)
+            const std::streamsize bufavail = _ebufmax - _ebufsize;
+            size = bufavail < size ? bufavail : size;
+            if(size)
             {
-                std::streamsize n = _target->rdbuf()->sgetn( _ebuf + _ebufsize, _ebufmax - _ebufsize );
+                std::streamsize n = _target->rdbuf()->sgetn( _ebuf + _ebufsize, size );
                 _ebufsize += n;
                 if(n == 0)
                     atEof = true;
@@ -311,8 +324,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             const extern_type* fromBegin = _ebuf;
             const extern_type* fromEnd   = _ebuf + _ebufsize;
             const extern_type* fromNext  = fromBegin;
-            char_type* toBegin           = _ibuf + _pbmax;
-            char_type* toEnd             = _ibuf + _pbmax + _ibufmax;
+            char_type* toBegin           = this->egptr();
+            char_type* toEnd             = _ibuf + _ibufmax;
             char_type* toNext            = toBegin;
 
             typename CodecType::result r = CodecType::noconv;
@@ -339,9 +352,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             std::streamsize generated = toNext - toBegin;
             if(generated)
             {
-                this->setg(_ibuf + _pbmax - putback,  // start of read buffer
-                        _ibuf + _pbmax,               // gptr position
-                        _ibuf + _pbmax + generated ); // end of read buffer
+                this->setg(this->eback(),              // start of read buffer
+                           this->gptr(),               // gptr position
+                           this->egptr() + generated ); // end of read buffer
             }
 
             if(r == CodecType::error)
