@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2009 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,30 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_NET_API_H
-#define PT_NET_API_H
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
 
-#include <Pt/Api.h>
-
-#define PT_NET_VERSION_MAJOR 1
-#define PT_NET_VERSION_MINOR 0
-#define PT_NET_VERSION_REVISION 0 
- 
-#if defined(PT_NET_API_EXPORT)
-#    define PT_NET_API PT_EXPORT
-#  else
-#    define PT_NET_API PT_IMPORT
-#  endif
-
-namespace Pt {
-
-/** @namespace Pt::Net
-    @brief Network and Socket Programming
-*/
-namespace Net {
-
-} // namespace Net
-
-} // namespace Pt
- 
-#endif
+class PtNetTest : public Pt::Unit::TestSuite
+{
+    public:
+        PtNetTest()
+        : Pt::Unit::TestSuite("Pt-Net-test")
+        {
+        }
+};

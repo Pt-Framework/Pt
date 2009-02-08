@@ -30,25 +30,10 @@
 
 #include <Pt/Api.h>
 
-#define PT_NET_VERSION_MAJOR 1
-#define PT_NET_VERSION_MINOR 0
-#define PT_NET_VERSION_REVISION 0 
- 
 #if defined(PT_NET_API_EXPORT)
 #    define PT_NET_API PT_EXPORT
 #  else
 #    define PT_NET_API PT_IMPORT
 #  endif
 
-namespace Pt {
-
-/** @namespace Pt::Net
-    @brief Network and Socket Programming
-*/
-namespace Net {
-
-} // namespace Net
-
-} // namespace Pt
- 
 #endif
