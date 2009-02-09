@@ -39,15 +39,14 @@ TcpServerSocket::~TcpServerSocket()
 }
 
 
-void TcpServerSocket::listen(const std::string& ipaddr, unsigned short int port, unsigned backlog)
+void TcpServerSocket::listen(const std::string& ipaddr, unsigned short int port, int backlog)
 {
     if( ! _impl )
     {
         _impl = new TcpServerSocketImpl();
     }
 
-    _impl->bind(ipaddr, port);
-    _impl->listen(backlog);
+    _impl->listen(ipaddr, port, backlog);
 }
 
 } // namespace Net

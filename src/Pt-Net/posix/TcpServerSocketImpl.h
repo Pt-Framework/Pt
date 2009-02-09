@@ -41,12 +41,7 @@ namespace Net
             ~TcpServerSocketImpl()
             {}
 
-            void bind(const std::string& ipaddr, unsigned short int port)
-            {
-
-            }
-
-            void listen(unsigned backlog)
+            void listen(const std::string& ipaddr, unsigned short int port, int backlog)
             {
 
             }

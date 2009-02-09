@@ -47,13 +47,13 @@ namespace Net {
             : _impl(0)
             { }
 
-            TcpServerSocket(const std::string& ipaddr, unsigned short int port, unsigned backlog = 5)
+            TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog = 5)
             : _impl(0)
             { listen(ipaddr, port, backlog); }
 
             ~TcpServerSocket();
 
-            void listen(const std::string& ipaddr, unsigned short int port, unsigned backlog = 5);
+            void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
     };
 
 } // namespace Net
