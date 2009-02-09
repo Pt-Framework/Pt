@@ -27,6 +27,7 @@
  */
 #include "AddrInfo.h"
 #include "Pt/SourceInfo.h"
+#include "Pt/System/SystemError.h"
 #include <stdexcept>
 
 namespace Pt {
@@ -42,13 +43,13 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinf
     if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
     {
         // TODO: exception type
-        throw std::invalid_argument( PT_ERROR_MSG("invalid netork address") ); 
+        throw System::SystemError( PT_ERROR_MSG("invalid netork address") );
     }
 
     if (ai == 0)
     {
         // TODO: exception type
-        throw std::runtime_error( PT_ERROR_MSG("getaddrinfo failed") ); 
+        throw System::SystemError( PT_ERROR_MSG("getaddrinfo failed") );
     }
 }
 
