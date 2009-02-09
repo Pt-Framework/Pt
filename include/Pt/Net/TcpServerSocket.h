@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Net {
 
-    class PT_NET_API TcpServerSocket // : public Pt::System::Selectable
+    class PT_NET_API TcpServerSocket : public Pt::System::Selectable
     {
         private:
             class TcpServerSocketImpl* _impl;
@@ -56,8 +56,8 @@ namespace Net {
             void listen(const std::string& ipaddr, unsigned short int port, unsigned backlog = 5);
     };
 
-} // !namespace Net
+} // namespace Net
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif
