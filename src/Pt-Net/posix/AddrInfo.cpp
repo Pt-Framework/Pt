@@ -29,13 +29,33 @@
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
 #include <stdexcept>
+#include <string.h>
 
 namespace Pt {
 
 namespace Net {
 
-AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
 : ai(0)
+{
+    struct addrinfo hints;
+
+    // give some useful default values to use for getaddrinfo()
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+
+    init(ipaddr, port, hints);
+}
+
+
+AddrInfo::~AddrInfo()
+{
+    if (ai)
+        ::freeaddrinfo(ai);
+}
+
+
+void AddrInfo::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
 {
     std::ostringstream p;
     p << port;
@@ -51,13 +71,6 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinf
         // TODO: exception type
         throw System::SystemError( PT_ERROR_MSG("getaddrinfo failed") );
     }
-}
-
-
-AddrInfo::~AddrInfo()
-{
-    if (ai)
-        ::freeaddrinfo(ai);
 }
 
 }

@@ -44,6 +44,9 @@ class AddrInfo
     private:
         ::addrinfo* ai;
 
+    protected:
+        void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
+
     public:  
         class const_iterator
         {
@@ -86,14 +89,20 @@ class AddrInfo
         };
 
     public:
-        AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
+        AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+        : ai(0)
+        {
+            init(ipaddr, port, hints);
+        }
 
-        ~AddrInfo();  
+        AddrInfo(const std::string& ipaddr, unsigned short port);
 
-        const_iterator begin() const  
+        ~AddrInfo();
+
+        const_iterator begin() const
         { return const_iterator(ai); }
 
-        const_iterator end() const    
+        const_iterator end() const
         { return const_iterator(); }
 };
 
