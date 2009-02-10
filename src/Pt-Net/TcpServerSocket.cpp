@@ -33,6 +33,26 @@ namespace Pt {
 
 namespace Net {
 
+AddressInUse::AddressInUse()
+: IOError("address in use")
+{ }
+
+
+TcpServerSocket::TcpServerSocket()
+: _impl(0)
+{
+    _impl = new TcpServerSocketImpl();
+}
+
+
+TcpServerSocket::TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog)
+: _impl(0)
+{
+    _impl = new TcpServerSocketImpl();
+    this->listen(ipaddr, port, backlog);
+}
+
+
 TcpServerSocket::~TcpServerSocket()
 {
     delete _impl;
@@ -41,11 +61,7 @@ TcpServerSocket::~TcpServerSocket()
 
 void TcpServerSocket::listen(const std::string& ipaddr, unsigned short int port, int backlog)
 {
-    if( ! _impl )
-    {
-        _impl = new TcpServerSocketImpl();
-    }
-
+    this->close();
     _impl->listen(ipaddr, port, backlog);
 }
 

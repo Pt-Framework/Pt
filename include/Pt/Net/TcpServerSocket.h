@@ -30,6 +30,7 @@
 #define Pt_Net_TcpServerSocket_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/System/IOError.h>
 #include <Pt/System/Selectable.h>
 #include <string>
 
@@ -37,24 +38,32 @@ namespace Pt {
 
 namespace Net {
 
-    class PT_NET_API TcpServerSocket : public Pt::System::Selectable
-    {
-        private:
-            class TcpServerSocketImpl* _impl;
+class AddressInUse : public System::IOError
+{
+    public:
+        AddressInUse();
 
-        public:
-            TcpServerSocket()
-            : _impl(0)
-            { }
+        ~AddressInUse() throw()
+        {}
+};
 
-            TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog = 5)
-            : _impl(0)
-            { listen(ipaddr, port, backlog); }
 
-            ~TcpServerSocket();
+class PT_NET_API TcpServerSocket : public Pt::System::Selectable
+{
+    private:
+        class TcpServerSocketImpl* _impl;
 
-            void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
-    };
+    public:
+        TcpServerSocket();
+
+        /** @brief Creates a server socket and listens on an address
+        */
+        TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+
+        ~TcpServerSocket();
+
+        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+};
 
 } // namespace Net
 
