@@ -63,6 +63,8 @@ class PT_NET_API TcpServerSocket : public Pt::System::Selectable
         ~TcpServerSocket();
 
         void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+
+        Signal<> connectionPending;
 };
 
 } // namespace Net
