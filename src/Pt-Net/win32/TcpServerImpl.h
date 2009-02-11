@@ -31,6 +31,7 @@
 
 #include "SelectableImpl.h"
 #include <string>
+#include <windows.h>
 
 namespace Pt {
 
@@ -56,9 +57,6 @@ class TcpServerImpl : public System::SelectableImpl
 
         void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
-        const struct sockaddr_storage& getAddr() const
-        { return servaddr; }
-
         int fd() const
         { return 0; }
 
@@ -69,13 +67,13 @@ class TcpServerImpl : public System::SelectableImpl
         void detach(System::SelectorBase& s);
 
         // implementation using WSAEventSelect
-        virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
+        virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         // implementation using WSAEventSelect
-        virtual void getWaitHandles(HandleMap& handles, bool& avail);
+        virtual void getWaitHandles(System::HandleMap& handles, bool& avail);
 
         // implementation using WSAEventSelect
-        virtual bool checkEvent() = 0;
+        virtual bool checkEvent();
 };
 
 } // namespace Net

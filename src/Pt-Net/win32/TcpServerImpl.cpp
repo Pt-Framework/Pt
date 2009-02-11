@@ -172,7 +172,7 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 }
 
 
-void TcpServerImpl::getWaitHandles(HandleMap& handles, bool& avail)
+void TcpServerImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 {
     log_debug("getWaitHandles");
 
