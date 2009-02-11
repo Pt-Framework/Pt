@@ -53,13 +53,14 @@ void ComponentFactory::loadLibrary(const std::string& file)
 }
 
 
-bool ComponentFactory::unload(const std::string& file)
+bool ComponentFactory::unload(const std::string& path)
 {
-    std::string path = System::Library::find(file);
-    if( path.empty() )
-    {
-        return false;
-    }
+    // do not do this. libraries with relative paths will never be unloaded
+    //std::string path = System::Library::find(file);
+    //if( path.empty() )
+    //{
+    //    return false;
+    //}
 
     LibraryList::iterator iter;
     for (iter = _libraries.begin(); iter != _libraries.end(); iter++)
@@ -186,13 +187,14 @@ ComponentLibrary* ComponentFactory::_loadLibrary(const std::string& file)
 }
 
 
-ComponentLibrary* ComponentFactory::library(const std::string& file)
+ComponentLibrary* ComponentFactory::library(const std::string& path)
 {
-    std::string path = System::Library::find(file);
-    if( path.empty() )
-    {
-        return 0;
-    }
+    // don't do this, relative paths will never be found
+    //std::string path = System::Library::find(file);
+    //if( path.empty() )
+    //{
+    //    return 0;
+    //}
 
     LibraryList::iterator iter;
     for (iter = _libraries.begin(); iter != _libraries.end(); iter++)
