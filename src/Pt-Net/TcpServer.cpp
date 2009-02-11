@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "TcpServerSocketImpl.h"
-#include "Pt/Net/TcpServerSocket.h"
+#include "TcpServerImpl.h"
+#include "Pt/Net/TcpServer.h"
 
 namespace Pt {
 
