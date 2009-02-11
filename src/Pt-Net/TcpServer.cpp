@@ -74,10 +74,10 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int b
 }
 
 
-const struct sockaddr_storage& TcpServer::getAddr() const
-{
-    return _impl->getAddr();
-}
+//const struct sockaddr_storage& TcpServer::getAddr() const
+//{
+//    return _impl->getAddr();
+//}
 
 
 int TcpServer::getFd() const

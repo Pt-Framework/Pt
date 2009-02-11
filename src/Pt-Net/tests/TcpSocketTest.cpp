@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006 - 2007 by Marc Boris Duerner
+ * Copyright (C) 2006 - 2007 by Tommi Maekitalo
+ * Copyright (C) 2006 - 2007 by Sebastian Pieck
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,60 +28,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_TcpServerImpl_H
-#define PT_NET_TcpServerImpl_H
-
-#include "SelectableImpl.h"
+#include "Pt/Net/TcpServer.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestCase.h"
+#include "Pt/Unit/RegisterTest.h"
 #include <string>
 
-namespace Pt {
 
-namespace System {
-    class SelectorBase;
-}
-
-namespace Net {
-
-class TcpServer;
-
-class TcpServerImpl : public System::SelectableImpl
+class TcpSocketTest : public Pt::Unit::TestCase
 {
-    private:
-        TcpServer& _server;
-
     public:
-        TcpServerImpl(TcpServer& server);
+        TcpSocketTest()
+        : TestCase("TcpSocketTest")
+        { }
 
-        void create(int domain, int type, int protocol);
+        void setUp()
+        {
 
-        void close();
+        }
 
-        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+        void test()
+        {
+            Pt::Net::TcpServer server;
 
-        const struct sockaddr_storage& getAddr() const
-        { return servaddr; }
+            Pt::System::Selector selector;
+            selector.add(server);
 
-        int fd() const
-        { return 0; }
+            server.listen("127.0.0.1", 8000);
+            selector.wait(5000);
+        }
 
-        bool wait(std::size_t msecs);
+        void tearDown()
+        {
 
-        void attach(System::SelectorBase& s);
+        }
 
-        void detach(System::SelectorBase& s);
+    private:
 
-        // implementation using WSAEventSelect
-        virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
-
-        // implementation using WSAEventSelect
-        virtual void getWaitHandles(HandleMap& handles, bool& avail);
-
-        // implementation using WSAEventSelect
-        virtual bool checkEvent() = 0;
 };
 
-} // namespace Net
-
-} // namespace Pt
-
-#endif
+Pt::Unit::RegisterTest<TcpSocketTest> register_TcpSocketTest;

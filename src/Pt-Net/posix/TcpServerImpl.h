@@ -45,50 +45,46 @@ namespace System {
 
 namespace Net {
 
-  class TcpServer;
+class TcpServer;
 
-  class TcpServerImpl : public System::SelectableImpl
-  {
+class TcpServerImpl : public System::SelectableImpl
+{
     private:
-      TcpServer& _server;
-      struct sockaddr_storage servaddr;
-      int m_fd;
-      int* _pfd;
+        TcpServer& _server;
+        int _fd;
+        fd_set* _rfds;
+        struct sockaddr_storage servaddr;
 
     public:
-      TcpServerImpl(TcpServer& server);
+        TcpServerImpl(TcpServer& server);
 
-      void create(int domain, int type, int protocol);
+        void create(int domain, int type, int protocol);
 
-      void close();
+        void close();
 
-      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
-      const struct sockaddr_storage& getAddr() const
-      { return servaddr; }
+        const struct sockaddr_storage& getAddr() const
+        { return servaddr; }
 
-      int fd() const
-      { return m_fd; }
+        int fd() const
+        { return _fd; }
 
-      bool wait(std::size_t msecs);
+        bool wait(std::size_t msecs);
 
-      void attach(System::SelectorBase& s);
+        void attach(System::SelectorBase& s);
 
-      void detach(System::SelectorBase& s);
+        void detach(System::SelectorBase& s);
 
-      // implementation using select
-      virtual int initSelect(fd_set&, fd_set&, fd_set&)
-      { return 0; }
+        // implementation using select
+        virtual int initSelect(fd_set&, fd_set&, fd_set&);
 
-      // implementation using select
-      virtual void exitSelect()
-      { }
+        // implementation using select
+        virtual void exitSelect();
 
-      // implementation using select
-      virtual int checkEvent(fd_set&, fd_set&, fd_set&)
-      { return 0; }
-
-  };
+        // implementation using select
+        virtual int checkEvent(fd_set&, fd_set&, fd_set&);
+};
 
 } // namespace Net
 

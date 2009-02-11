@@ -64,7 +64,7 @@ class PT_NET_API AddressInUse : public System::IOError
       void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
       /// @brief TODO
-      const struct sockaddr_storage& getAddr() const;
+      //const struct sockaddr_storage& getAddr() const;
 
       /// @brief TODO
       int getFd() const;
