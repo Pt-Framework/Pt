@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,31 +38,87 @@ AddressInUse::AddressInUse()
 { }
 
 
-TcpServerSocket::TcpServerSocket()
+TcpServer::TcpServer()
 : _impl(0)
 {
-    _impl = new TcpServerSocketImpl();
+    _impl = new TcpServerImpl(*this);
 }
 
 
-TcpServerSocket::TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog)
+TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, int backlog)
 : _impl(0)
 {
-    _impl = new TcpServerSocketImpl();
+    _impl = new TcpServerImpl(*this);
     this->listen(ipaddr, port, backlog);
 }
 
 
-TcpServerSocket::~TcpServerSocket()
+TcpServer::~TcpServer()
 {
+    try
+    {
+        this->close();
+    }
+    catch(...)
+    {}
+
     delete _impl;
 }
 
 
-void TcpServerSocket::listen(const std::string& ipaddr, unsigned short int port, int backlog)
+void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int backlog)
 {
     this->close();
     _impl->listen(ipaddr, port, backlog);
+    this->setEnabled(true);
+}
+
+
+const struct sockaddr_storage& TcpServer::getAddr() const
+{
+    return _impl->getAddr();
+}
+
+
+int TcpServer::getFd() const
+{
+    return _impl->fd();
+}
+
+
+System::SelectableImpl& TcpServer::simpl()
+{
+    return *_impl;
+}
+
+
+TcpServerImpl& TcpServer::impl() const
+{
+    return *_impl;
+}
+
+
+void TcpServer::onClose()
+{
+    _impl->close();
+}
+
+
+bool TcpServer::onWait(std::size_t msecs)
+{
+    return _impl->wait(msecs);
+}
+
+
+void TcpServer::onAttach(System::SelectorBase& sb)
+{
+    _impl->attach(sb);
+}
+
+
+void TcpServer::onDetach(System::SelectorBase& sb)
+{
+    _impl->detach(sb);
 }
 
 } // namespace Net

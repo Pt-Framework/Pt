@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,27 +26,72 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_TcpServerSocketImpl_h
-#define Pt_Net_TcpServerSocketImpl_h
+#ifndef PT_NET_TcpServerImpl_H
+#define PT_NET_TcpServerImpl_H
 
+#include "SelectableImpl.h"
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <unistd.h>
 
-namespace Pt
-{
-namespace Net
-{
-    class TcpServerSocketImpl
-    {
-        public:
-            ~TcpServerSocketImpl()
-            {}
+namespace Pt {
 
-            void listen(const std::string& ipaddr, unsigned short int port, int backlog)
-            {
-
-            }
-    };
+namespace System {
+    class SelectorBase;
 }
-}
+
+namespace Net {
+
+  class TcpServer;
+
+  class TcpServerImpl : public System::SelectableImpl
+  {
+    private:
+      TcpServer& _server;
+      struct sockaddr_storage servaddr;
+      int m_fd;
+      int* _pfd;
+
+    public:
+      TcpServerImpl(TcpServer& server);
+
+      void create(int domain, int type, int protocol);
+
+      void close();
+
+      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+
+      const struct sockaddr_storage& getAddr() const
+      { return servaddr; }
+
+      int fd() const
+      { return m_fd; }
+
+      bool wait(std::size_t msecs);
+
+      void attach(System::SelectorBase& s);
+
+      void detach(System::SelectorBase& s);
+
+      // implementation using select
+      virtual int initSelect(fd_set&, fd_set&, fd_set&)
+      { return 0; }
+
+      // implementation using select
+      virtual void exitSelect()
+      { }
+
+      // implementation using select
+      virtual int checkEvent(fd_set&, fd_set&, fd_set&)
+      { return 0; }
+
+  };
+
+} // namespace Net
+
+} // namespace Pt
 
 #endif

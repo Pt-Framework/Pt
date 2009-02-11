@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_TcpServerSocket_h
-#define Pt_Net_TcpServerSocket_h
+#ifndef Pt_Net_TcpServer_h
+#define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
 #include <Pt/System/IOError.h>
@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Net {
 
-class AddressInUse : public System::IOError
+class PT_NET_API AddressInUse : public System::IOError
 {
     public:
         AddressInUse();
@@ -48,24 +48,47 @@ class AddressInUse : public System::IOError
 };
 
 
-class PT_NET_API TcpServerSocket : public Pt::System::Selectable
-{
-    private:
-        class TcpServerSocketImpl* _impl;
+  class PT_NET_API TcpServer : public System::Selectable
+  {
+    class TcpServerImpl* _impl;
 
     public:
-        TcpServerSocket();
+      TcpServer();
 
-        /** @brief Creates a server socket and listens on an address
-        */
-        TcpServerSocket(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+      /** @brief Creates a server socket and listens on an address
+      */
+      TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
-        ~TcpServerSocket();
+      ~TcpServer();
 
-        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
-        Signal<> connectionPending;
-};
+      /// @brief TODO
+      const struct sockaddr_storage& getAddr() const;
+
+      /// @brief TODO
+      int getFd() const;
+
+      // inherit doc
+      virtual System::SelectableImpl& simpl();
+
+      TcpServerImpl& impl() const;
+
+      Signal<TcpServer&> connectionPending;
+
+    protected:
+      // inherit doc
+      virtual void onClose();
+
+      // inherit doc
+      virtual bool onWait(std::size_t msecs);
+
+      // inherit doc
+      virtual void onAttach(System::SelectorBase&);
+
+      // inherit doc
+      virtual void onDetach(System::SelectorBase&);
+  };
 
 } // namespace Net
 

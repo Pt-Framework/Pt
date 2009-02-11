@@ -2,6 +2,7 @@ SubDir TOP src Pt-Net ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 SubDirHdrs $(TOP)/src/Pt-Net/$(SYS:L) ;
+SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 
 PT_NET_SUBDIR = [ FDirName $(TOP) src Pt-Net $(SYS:L) ] ;
 PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
