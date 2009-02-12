@@ -42,6 +42,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("TcpSocketTest")
         {
             this->registerMethod( "NonBlockingWithSelector", *this, &TcpSocketTest::NonBlockingWithSelector);
+            this->registerMethod( "NonBlockingWithWait", *this, &TcpSocketTest::NonBlockingWithWait);
         }
 
         void setUp()
@@ -58,7 +59,16 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             selector.add(server);
 
             server.listen("127.0.0.1", 8000);
-            selector.wait(5000);
+            selector.wait(3000);
+        }
+
+        void NonBlockingWithWait()
+        {
+            Pt::Net::TcpServer server;
+            connect(server.connectionPending, *this, &TcpSocketTest::reply);
+
+            server.listen("127.0.0.1", 8000);
+            server.wait(3000);
         }
 
         void tearDown()
