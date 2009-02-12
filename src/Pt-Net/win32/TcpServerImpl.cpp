@@ -37,8 +37,22 @@
 
 #define log_debug(x)
 
-namespace Pt{
-namespace Net{
+namespace Pt {
+
+namespace Net {
+
+// Das sollte funktionieren. MSDN sagt WSAStartup und WSACleanup sind
+// refcounted, die beiden Funktionen muessen nuch gleich oft aufgerufen
+// werden.
+static struct WsaInit
+{
+    WsaInit()
+    { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd); }
+
+    ~WsaInit()
+    { WSACleanup(); }
+} wsaInit;
+
 
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
@@ -51,16 +65,21 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
+    // Ich glaube ich habe irgendwo mal gelesen das man die WSA- funktionen
+    // anstelle der Berkley socket funktionen nehmen muss wenn man
+    // mit WaitForMultipleObjects arbeiten will
     _fd = ::socket(domain, type, protocol);
 
     if (_fd == INVALID_SOCKET)
     {
         log_debug("Error at socket(): "<< WSAGetLastError());
         //freeaddrinfo(adrInfo);
-        WSACleanup();
+        //WSACleanup();
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
 
+    // besser in den ctor verschieben. Spaeter willst du diese Methode wahrscheinlich
+    // in eine SocketImpl auslagern. Pruefe ob wir nicht auf FD_ACCEPT horchen muessen
     _waitEvent = WSACreateEvent();
     attachEvent(_waitEvent, FD_CONNECT);
 }
@@ -79,27 +98,27 @@ void TcpServerImpl::close()
     if (_fd == INVALID_SOCKET)
         return;
 
+    // Event besser im dtor schliessen. Wir koenten wieder geoeffnet werden
     WSACloseEvent(_waitEvent);
     _waitEvent = INVALID_HANDLE_VALUE;
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
-    WSACleanup();
+    //WSACleanup();
 }
 
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog)
 {
     log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
 
-    Pt::System::MutexLock lock(_mutex);    
+    //Pt::System::MutexLock lock(_mutex);    
 
-    //Initialize WSA
-    if (WSAStartup(MAKEWORD(2,2), &_wsaData) != 0)
-    {
-        log_debug("WSAStartup failed");
-        throw System::SystemError( PT_ERROR_MSG("initializing Winsocks failed") );
-    }
-
+    // Initialize WSA in globalem Objekt ???
+    //if (WSAStartup(MAKEWORD(2,2), &_wsaData) != 0)
+    //{
+    //    log_debug("WSAStartup failed");
+    //    throw System::SystemError( PT_ERROR_MSG("initializing Winsocks failed") );
+    //}
 
     AddrInfo ai(ipaddr, port);
 
@@ -119,7 +138,8 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
         }
 
         // NOTE: set a socket option to reuse an address immediately after being closed
-        // use WSA functions
+
+        //  use WSA functions : das denke ich auch
 
         log_debug("setsockopt SO_REUSEADDR");
 
@@ -139,7 +159,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
             {
                 ::closesocket(_fd);
                 _fd = INVALID_SOCKET;
-                WSACleanup();
+                //WSACleanup();
 
                 if (WSAGetLastError() == WSAEADDRINUSE)
                     throw AddressInUse();
@@ -154,9 +174,20 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
     throw System::SystemError("bind");
 }
 
-bool TcpServerImpl::wait(std::size_t msecs)
+bool TcpServerImpl::wait(std::size_t umsecs)
 {
     log_debug("wait " << msecs);
+
+    // convert unsigned to signed
+    int msecs = umsecs;
+    if(umsecs == SelectorBase::WaitInfinite) 
+    {
+        msecs = INFINITE;
+    }
+    else if( umsecs > std::numeric_limits<int>::max() )
+    {
+        msecs = std::numeric_limits<int>::max();
+    }
 
     if(WSAWaitForMultipleEvents(1, &_waitEvent, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
     {
@@ -175,13 +206,15 @@ void TcpServerImpl::attach(System::SelectorBase& s)
 void TcpServerImpl::detach(System::SelectorBase& s)
 {
     log_debug("detach from selector");
+    // Muessen wir FD_ACCEPT nicht aus dem Event Handle der Selectors abmelden?
+    // Evtl event handle vorher merken z.B. in setWaitHandle() unten
 }
 
 bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     log_debug("setWaitHandle");
 
-    attachEvent(h, FD_CONNECT);
+    attachEvent(h, FD_CONNECT); // FD_ACCEPT
     avail = true;
 
     return true;
@@ -201,7 +234,7 @@ bool TcpServerImpl::checkEvent()
     if(WSAEnumNetworkEvents(_fd, 0, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");
 
-    if((events.lNetworkEvents & FD_CONNECT) != FD_CONNECT)
+    if((events.lNetworkEvents & FD_CONNECT) != FD_CONNECT) // FD_ACCEPT
         return false;
 
     _server.connectionPending.send(_server);
@@ -209,4 +242,5 @@ bool TcpServerImpl::checkEvent()
 }
 
 } // namespace Net
+
 } // namespace Pt

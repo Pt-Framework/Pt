@@ -56,7 +56,7 @@ class TcpServerImpl : public System::SelectableImpl
         TcpServer&			_server;
         SOCKET				_fd;
         SOCKADDR			_servaddr;
-        WSADATA				_wsaData;
+        //WSADATA             _wsaData;
         WSAEVENT			_waitEvent;
         Pt::System::Mutex	_mutex;
 
