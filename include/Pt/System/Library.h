@@ -113,8 +113,6 @@ class PT_SYSTEM_API Library
          */
         const std::string& path() const;
 
-        static std::string find(const std::string& path);
-
         /** @brief Returns the extension for shared libraries
 
             Returns ".so" on Linux, ".dll" on Windows.

@@ -48,8 +48,9 @@ Library::Library()
 Library::Library(const std::string& path)
 : _impl(0)
 {
-    _path = find(path);
-    _impl = new LibraryImpl(_path);
+    std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
+    impl->open(path);
+    _impl = impl.release();
 }
 
 
@@ -100,12 +101,45 @@ void Library::detach()
         delete x;
 }
 
-Library& Library::open(const std::string& path)
+Library& Library::open(const std::string& libname)
 {
     this->detach();
 
-    _path = find(path);
+    try
+    {
+        //log_debug("search for library \"" << libname << '"');
+        _impl->open(libname);
+        _path = libname;
+    }
+    catch(const OpenLibraryFailed&)
+    { }
+
+    std::string path = libname;
+    path += suffix();
+    try
+    {
+        //log_debug("search for library \"" << path << '"');
+        _impl->open(path);
+        _path = path;
+    }
+    catch(const OpenLibraryFailed&)
+    { }
+
+    std::string::size_type idx = path.rfind( Directory::sep() );
+    if(idx == std::string::npos)
+    {
+        idx = 0;
+    }
+    else if( ++idx == path.length() )
+    {
+        throw OpenLibraryFailed(path, PT_SOURCEINFO);
+    }
+
+    path.insert( idx, prefix() );
+    //log_debug("search for library \"" << path << '"');
     _impl->open(path);
+    _path = path;
+
     return *this;
 }
 
@@ -150,41 +184,6 @@ bool Library::operator!() const
 const std::string& Library::path() const
 {
     return _path;
-}
-
-
-std::string Library::find(const std::string& path_)
-{
-    std::string path = path_;
-
-    if( FileInfo::exists( path ) )
-        return path;
-
-    std::string::size_type idx = path.find( Directory::sep() );
-
-    if( ++idx == path.length() )
-    {
-	    throw FileNotFound(path , PT_SOURCEINFO);
-    }
-
-    path += suffix();
-    if( FileInfo::exists( path ) )
-	{
-        return path;
-	}
-
-    if(idx == std::string::npos)
-    {
-        idx = 0;
-    }
-    path.insert( idx, prefix() );
-
-    if( ! FileInfo::exists( path ) )
-    {
-        throw FileNotFound(path , PT_SOURCEINFO);
-    }
-
-    return path;
 }
 
 
