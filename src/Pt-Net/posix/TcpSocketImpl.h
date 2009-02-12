@@ -26,48 +26,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "TcpSocketImpl.h"
-#include "Pt/Net/TcpSocket.h"
+#ifndef PT_NET_TcpSocketImpl_H
+#define PT_NET_TcpSocketImpl_H
 
 namespace Pt {
 
 namespace Net {
 
-TcpSocket::TcpSocket()
-: _impl(0)
+class TcpServer;
+
+class TcpSocketImpl
 {
-    _impl = new TcpSocketImpl();
-}
+    public:
+        TcpSocketImpl();
 
+        ~TcpSocketImpl();
 
-TcpSocket::TcpSocket(TcpServer& server)
-: _impl(0)
-{
-    _impl = new TcpSocketImpl();
-    this->accept(server);
-}
+        void close();
 
-
-TcpSocket::~TcpSocket()
-{
-    //try
-    //{
-    //    this->close();
-    //}
-    //catch(...)
-    //{}
-
-    delete _impl;
-}
-
-
-void TcpSocket::accept(TcpServer& server)
-{
-    //this->close();
-    _impl->accept(server);
-    //this->setEnabled(true);
-}
+        void accept(TcpServer& server);
+};
 
 } // namespace Net
 
 } // namespace Pt
+
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,45 +27,34 @@
  */
 
 #include "TcpSocketImpl.h"
-#include "Pt/Net/TcpSocket.h"
+
+#define log_debug(x)
 
 namespace Pt {
 
 namespace Net {
 
-TcpSocket::TcpSocket()
-: _impl(0)
+TcpSocketImpl::TcpSocketImpl()
 {
-    _impl = new TcpSocketImpl();
+
 }
 
 
-TcpSocket::TcpSocket(TcpServer& server)
-: _impl(0)
+TcpSocketImpl::~TcpSocketImpl()
 {
-    _impl = new TcpSocketImpl();
-    this->accept(server);
+
 }
 
 
-TcpSocket::~TcpSocket()
+void TcpSocketImpl::close()
 {
-    //try
-    //{
-    //    this->close();
-    //}
-    //catch(...)
-    //{}
 
-    delete _impl;
 }
 
 
-void TcpSocket::accept(TcpServer& server)
+void TcpSocketImpl::accept(TcpServer& server)
 {
-    //this->close();
-    _impl->accept(server);
-    //this->setEnabled(true);
+
 }
 
 } // namespace Net
