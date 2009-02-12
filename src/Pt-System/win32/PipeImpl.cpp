@@ -355,7 +355,7 @@ void PipeIODevice::onSync() const
 PipeImpl::PipeImpl(bool isAsync)
 {
     std::stringstream ss;
-    ss<<"\\\\.\\pipe\\ptpipe"<<_nameId;
+    ss<<"\\\\.\\pipe\\pt-" << GetCurrentProcessId() << '-' << _nameId;
 
     DWORD pflags = PIPE_ACCESS_DUPLEX;
     DWORD access = GENERIC_WRITE;
@@ -387,7 +387,7 @@ PipeImpl::PipeImpl(bool isAsync)
     _out.open(inputHandle, isAsync);
     _in.open(outputHandle, isAsync);
 
-    _nameId++;
+    InterlockedIncrement(_nameId);
 }
 
 
@@ -409,7 +409,7 @@ IODevice& PipeImpl::in()
 }
 
 
-Pt::uint32_t  PipeImpl::_nameId = 0;
+LONG PipeImpl::_nameId = 0;
 
 } // namespace System
 

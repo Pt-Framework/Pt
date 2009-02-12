@@ -94,7 +94,7 @@ class PipeImpl
     private:
         PipeIODevice        _in;
         PipeIODevice        _out;
-        static Pt::uint32_t _nameId;
+        static LONG _nameId;
 };
 
 } // namespace System
