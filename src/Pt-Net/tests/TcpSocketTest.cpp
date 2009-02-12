@@ -28,12 +28,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Net/TcpServer.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/Net/TcpServer.h"
+#include "Pt/Net/TcpSocket.h"
 #include <string>
-
 
 class TcpSocketTest : public Pt::Unit::TestSuite
 {
@@ -41,7 +41,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         TcpSocketTest()
         : Pt::Unit::TestSuite("TcpSocketTest")
         {
-            this->registerMethod( "SelectorListen", *this, &TcpSocketTest::SelectorListen);
+            this->registerMethod( "NonBlockingWithSelector", *this, &TcpSocketTest::NonBlockingWithSelector);
         }
 
         void setUp()
@@ -49,10 +49,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         }
 
-        void SelectorListen()
+        void NonBlockingWithSelector()
         {
             Pt::Net::TcpServer server;
-            connect(server.connectionPending, *this, &TcpSocketTest::acceptConnection);
+            connect(server.connectionPending, *this, &TcpSocketTest::reply);
 
             Pt::System::Selector selector;
             selector.add(server);
@@ -66,9 +66,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         }
 
-        void acceptConnection(Pt::Net::TcpServer& server)
+        void reply(Pt::Net::TcpServer& server)
         {
             this->reportMessage("NEW CONNECTON AVAILABLE");
+            Pt::Net::TcpSocket socket(server);
         }
 
     private:

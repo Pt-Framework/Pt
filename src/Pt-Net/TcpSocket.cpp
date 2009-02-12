@@ -39,6 +39,13 @@ TcpSocket::TcpSocket()
 }
 
 
+TcpSocket::TcpSocket(TcpServer& server)
+: _impl(0)
+{
+
+}
+
+
 TcpSocket::~TcpSocket()
 {
 

@@ -44,6 +44,8 @@ class PT_NET_API TcpSocket
     public:
         TcpSocket();
 
+        TcpSocket(TcpServer& server);
+
         ~TcpSocket();
 
         void accept(TcpServer& server);

@@ -27,7 +27,7 @@
  */
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
- 
+
 class PtNetTest : public Pt::Unit::TestSuite
 {
     public:
