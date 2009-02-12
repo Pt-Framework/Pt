@@ -30,37 +30,45 @@
 
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Unit/Assertion.h"
-#include "Pt/Unit/TestCase.h"
+#include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
 
-class TcpSocketTest : public Pt::Unit::TestCase
+class TcpSocketTest : public Pt::Unit::TestSuite
 {
     public:
         TcpSocketTest()
-        : TestCase("TcpSocketTest")
-        { }
+        : Pt::Unit::TestSuite("TcpSocketTest")
+        {
+            this->registerMethod( "SelectorListen", *this, &TcpSocketTest::SelectorListen);
+        }
 
         void setUp()
         {
 
         }
 
-        void test()
+        void SelectorListen()
         {
             Pt::Net::TcpServer server;
+            connect(server.connectionPending, *this, &TcpSocketTest::acceptConnection);
 
             Pt::System::Selector selector;
             selector.add(server);
 
             server.listen("127.0.0.1", 8000);
-            selector.wait(5000);
+            selector.wait();
         }
 
         void tearDown()
         {
 
+        }
+
+        void acceptConnection(Pt::Net::TcpServer& server)
+        {
+            this->reportMessage("NEW CONNECTON AVAILABLE");
         }
 
     private:
