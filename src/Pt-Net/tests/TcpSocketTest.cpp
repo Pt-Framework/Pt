@@ -58,7 +58,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             selector.add(server);
 
             server.listen("127.0.0.1", 8000);
-            selector.wait();
+            selector.wait(5000);
         }
 
         void tearDown()
