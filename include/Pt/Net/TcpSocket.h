@@ -30,6 +30,7 @@
 #define Pt_Net_TcpSocket_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/System/Selectable.h>
 
 namespace Pt {
 
@@ -37,7 +38,7 @@ namespace Net {
 
 class TcpServer;
 
-class PT_NET_API TcpSocket
+class PT_NET_API TcpSocket : public System::Selectable
 {
     class TcpSocketImpl* _impl;
 
@@ -49,6 +50,22 @@ class PT_NET_API TcpSocket
         ~TcpSocket();
 
         void accept(TcpServer& server);
+
+        // inherit doc
+        virtual System::SelectableImpl& simpl();
+
+    protected:
+        // inherit doc
+        virtual void onClose();
+
+        // inherit doc
+        virtual bool onWait(std::size_t msecs);
+
+        // inherit doc
+        virtual void onAttach(System::SelectorBase&);
+
+        // inherit doc
+        virtual void onDetach(System::SelectorBase&);
   };
 
 } // namespace Net

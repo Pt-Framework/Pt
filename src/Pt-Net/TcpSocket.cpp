@@ -28,6 +28,7 @@
 
 #include "TcpSocketImpl.h"
 #include "Pt/Net/TcpSocket.h"
+#include <stdexcept>
 
 namespace Pt {
 
@@ -50,12 +51,12 @@ TcpSocket::TcpSocket(TcpServer& server)
 
 TcpSocket::~TcpSocket()
 {
-    //try
-    //{
-    //    this->close();
-    //}
-    //catch(...)
-    //{}
+    try
+    {
+        this->close();
+    }
+    catch(...)
+    {}
 
     delete _impl;
 }
@@ -63,9 +64,42 @@ TcpSocket::~TcpSocket()
 
 void TcpSocket::accept(TcpServer& server)
 {
-    //this->close();
+    this->close();
     _impl->accept(server);
-    //this->setEnabled(true);
+    this->setEnabled(true);
+}
+
+
+System::SelectableImpl& TcpSocket::simpl()
+{
+    throw std::runtime_error("not implemented");
+    System::SelectableImpl* impl = 0;
+    return *impl;
+}
+
+
+void TcpSocket::onClose()
+{
+    _impl->close();
+}
+
+
+bool TcpSocket::onWait(std::size_t msecs)
+{
+    //return _impl->wait(msecs);
+    return false;
+}
+
+
+void TcpSocket::onAttach(System::SelectorBase& sb)
+{
+    //_impl->attach(sb);
+}
+
+
+void TcpSocket::onDetach(System::SelectorBase& sb)
+{
+    //_impl->detach(sb);
 }
 
 } // namespace Net
