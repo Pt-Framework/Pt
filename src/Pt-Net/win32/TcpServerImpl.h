@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,9 +29,16 @@
 #ifndef PT_NET_TcpServerImpl_H
 #define PT_NET_TcpServerImpl_H
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include "SelectableImpl.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <string>
 #include <windows.h>
+#include <Pt/System/Mutex.h>
 
 namespace Pt {
 
@@ -46,7 +53,14 @@ class TcpServer;
 class TcpServerImpl : public System::SelectableImpl
 {
     private:
-        TcpServer& _server;
+        TcpServer&			_server;
+        SOCKET				_fd;
+        SOCKADDR			_servaddr;
+        WSADATA				_wsaData;
+        WSAEVENT			_waitEvent;
+        Pt::System::Mutex	_mutex;
+
+        void attachEvent(HANDLE ev, long events);
 
     public:
         TcpServerImpl(TcpServer& server);

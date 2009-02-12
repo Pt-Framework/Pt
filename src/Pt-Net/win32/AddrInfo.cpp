@@ -51,7 +51,7 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
 AddrInfo::~AddrInfo()
 {
     if (ai)
-        ::freeaddrinfo(ai);
+        ::freeaddrinfo(ai);	
 }
 
 
@@ -59,9 +59,10 @@ void AddrInfo::init(const std::string& ipaddr, unsigned short port, const addrin
 {
     std::ostringstream p;
     p << port;
-
+    
     if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
     {
+         WSACleanup();
         // TODO: exception type
         throw System::SystemError( PT_ERROR_MSG("invalid netork address") );
     }
