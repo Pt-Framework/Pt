@@ -29,6 +29,10 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
+#include "Pt/Net/Api.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+
 namespace Pt {
 
 namespace Net {
@@ -37,6 +41,10 @@ class TcpServer;
 
 class TcpSocketImpl
 {
+    private:
+        int _fd;
+        struct sockaddr_storage _peeraddr;
+
     public:
         TcpSocketImpl();
 

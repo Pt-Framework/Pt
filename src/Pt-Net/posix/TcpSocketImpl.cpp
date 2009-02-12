@@ -27,6 +27,9 @@
  */
 
 #include "TcpSocketImpl.h"
+#include "TcpServerImpl.h"
+#include "Pt/Net/TcpServer.h"
+#include "Pt/System/SystemError.h"
 
 #define log_debug(x)
 
@@ -35,33 +38,37 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl()
+: _fd(-1)
 {
 
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
-{
-
-}
+{ }
 
 
 void TcpSocketImpl::close()
 {
-
+  if (_fd >= 0)
+  {
+    log_debug("close socket");
+    ::close(_fd);
+    _fd = -1;
+  }
 }
 
 
 void TcpSocketImpl::accept(TcpServer& server)
 {
-    //socklen_t peeraddr_len;
-    //peeraddr_len = sizeof(peeraddr);
-    //log_debug("accept " << server.getFd());
-    //int fd = ::accept(server.getFd(), reinterpret_cast <struct sockaddr *> (&peeraddr), &peeraddr_len);
-    //if (fd < 0)
-    //  throw SystemError("accept");
-    //setFd(fd);
-    //log_debug("accepted " << server.getFd() << " => " << getFd());
+    socklen_t peeraddr_len = sizeof(_peeraddr);
+
+    log_debug( "accept " << server.impl().fd() );
+    _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
+    if( _fd < 0 )
+      throw System::SystemError("accept");
+
+    log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }
 
 } // namespace Net
