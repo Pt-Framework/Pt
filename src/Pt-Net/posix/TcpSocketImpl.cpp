@@ -54,7 +54,14 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::accept(TcpServer& server)
 {
-
+    //socklen_t peeraddr_len;
+    //peeraddr_len = sizeof(peeraddr);
+    //log_debug("accept " << server.getFd());
+    //int fd = ::accept(server.getFd(), reinterpret_cast <struct sockaddr *> (&peeraddr), &peeraddr_len);
+    //if (fd < 0)
+    //  throw SystemError("accept");
+    //setFd(fd);
+    //log_debug("accepted " << server.getFd() << " => " << getFd());
 }
 
 } // namespace Net
