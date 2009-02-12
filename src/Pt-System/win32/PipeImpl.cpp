@@ -387,7 +387,7 @@ PipeImpl::PipeImpl(bool isAsync)
     _out.open(inputHandle, isAsync);
     _in.open(outputHandle, isAsync);
 
-    InterlockedIncrement(_nameId);
+    InterlockedIncrement(&_nameId);
 }
 
 
