@@ -72,54 +72,55 @@ void TcpServerImpl::close()
 
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog)
 {
-  log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
+    log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
 
-  AddrInfo ai(ipaddr, port);
+    AddrInfo ai(ipaddr, port);
 
-  int reuseAddr = 1;
+    int reuseAddr = 1;
 
-  // getaddrinfo() may return more than one addrinfo structure, so work
-  // them all out, until we find a pretty useable one
-  for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
-  {
-    try
+    // getaddrinfo() may return more than one addrinfo structure, so work
+    // them all out, until we find a pretty useable one
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
-      this->create(it->ai_family, SOCK_STREAM, 0);
+        try
+        {
+            this->create(it->ai_family, SOCK_STREAM, 0);
+        }
+        catch (const System::SystemError&)
+        {
+            continue;
+        }
+
+        log_debug("setsockopt SO_REUSEADDR");
+        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr)) < 0)
+        {
+            close();
+            throw System::SystemError("setsockopt");
+        }
+
+        log_debug("bind");
+        if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
+        {
+            // save our information
+            std::memmove(&servaddr, it->ai_addr, it->ai_addrlen);
+
+            log_debug("listen");
+            if( ::listen(_fd, backlog) < 0 )
+            {
+                close();
+
+                if (errno == EADDRINUSE)
+                    throw AddressInUse();
+                else
+                    throw System::SystemError("listen");
+            }
+
+            return;
+        }
     }
-    catch (const System::SystemError&)
-    {
-      continue;
-    }
 
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    log_debug("setsockopt SO_REUSEADDR");
-    if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr)) < 0)
-      throw System::SystemError("setsockopt");
-
-    log_debug("bind");
-    if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
-    {
-      // save our information
-      std::memmove(&servaddr, it->ai_addr, it->ai_addrlen);
-
-      log_debug("listen");
-      if (::listen(_fd, backlog) < 0)
-      {
-        if (errno == EADDRINUSE)
-          throw AddressInUse();
-        else
-          throw System::SystemError("listen");
-      }
-
-    return;
-    }
-  }
-
-  throw System::SystemError("bind");
+    close();
+    throw System::SystemError("bind");
 }
 
 
@@ -172,6 +173,11 @@ bool TcpServerImpl::wait(std::size_t msecs)
 void TcpServerImpl::attach(System::SelectorBase& s)
 {
     log_debug("attach to selector");
+
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
 }
 
 
