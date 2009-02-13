@@ -91,6 +91,11 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
       continue;
     }
 
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
     log_debug("setsockopt SO_REUSEADDR");
     if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr)) < 0)
       throw System::SystemError("setsockopt");
@@ -153,12 +158,6 @@ bool TcpServerImpl::wait(std::size_t msecs)
     }
 
     int avail = 0;
-
-    // TODO: this can only be OOB data
-    //if ( FD_ISSET(this->fd(), &efds) )
-    //{
-    //    ++avail;
-    //}
 
     if( FD_ISSET(this->fd(), &rfds) )
     {
