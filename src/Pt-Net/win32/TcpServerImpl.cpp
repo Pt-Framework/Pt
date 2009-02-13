@@ -69,7 +69,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-	_fd = WSASocket(domain, type, protocol, NULL ,0,0);
+	_fd = WSASocket(domain, type, protocol, NULL ,0,WSA_FLAG_OVERLAPPED);
 
     if (_fd == INVALID_SOCKET)
     {
