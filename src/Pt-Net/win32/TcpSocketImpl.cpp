@@ -57,6 +57,11 @@ void TcpSocketImpl::accept(TcpServer& server)
 
 }
 
+
+void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
+{
+}
+
 } // namespace Net
 
 } // namespace Pt

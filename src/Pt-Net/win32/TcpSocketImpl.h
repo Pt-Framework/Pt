@@ -45,6 +45,8 @@ class TcpSocketImpl
         void close();
 
         void accept(TcpServer& server);
+
+        void connect(const std::string& ipaddr, unsigned short int port);
 };
 
 } // namespace Net

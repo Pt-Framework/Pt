@@ -29,6 +29,7 @@
 #include "TcpSocketImpl.h"
 #include "Pt/Net/TcpSocket.h"
 #include <stdexcept>
+#include <memory>
 
 namespace Pt {
 
@@ -45,7 +46,23 @@ TcpSocket::TcpSocket(TcpServer& server)
 : _impl(0)
 {
     _impl = new TcpSocketImpl();
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
     this->accept(server);
+
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
+: _impl(0)
+{
+    _impl = new TcpSocketImpl();
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    this->connect(ipaddr, port);
+
+    impl.release();
 }
 
 
@@ -61,6 +78,13 @@ TcpSocket::~TcpSocket()
     delete _impl;
 }
 
+
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
+{
+    this->close();
+    _impl->connect(ipaddr, port);
+    this->setEnabled(true);
+}
 
 void TcpSocket::accept(TcpServer& server)
 {

@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "AddrInfo.h"
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
 #include "Pt/Net/TcpServer.h"
@@ -48,6 +49,15 @@ TcpSocketImpl::~TcpSocketImpl()
 { }
 
 
+void TcpSocketImpl::create(int domain, int type, int protocol)
+{
+    log_debug("create socket");
+    _fd = ::socket(domain, type, protocol);
+    if (_fd < 0)
+      throw System::SystemError("socket");
+}
+
+
 void TcpSocketImpl::close()
 {
   if (_fd >= 0)
@@ -59,6 +69,60 @@ void TcpSocketImpl::close()
 }
 
 
+void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
+{
+    log_debug("connect to " << ipaddr << " port " << port);
+
+    AddrInfo ai(ipaddr, port);
+
+    log_debug("do connect");
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    {
+        try
+        {
+            this->create(it->ai_family, SOCK_STREAM, 0);
+        }
+        catch (const System::SystemError&)
+        {
+            continue;
+        }
+
+        if (::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0)
+        {
+            // save our information
+            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+            return;
+        }
+
+        // TODO add timeout handling
+        //if (errno == EINPROGRESS && getTimeout() > 0)
+        {
+            //poll(POLLOUT);
+
+            int sockerr;
+            socklen_t optlen = sizeof(sockerr);
+            if (::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0)
+            {
+                this->close();
+                throw System::SystemError("getsockopt");
+            }
+
+            if(sockerr != 0)
+            {
+                this->close();
+                throw System::SystemError("connect");
+            }
+
+            // save our information
+            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+            return;
+        }
+    }
+
+    throw System::SystemError("connect");
+}
+
+
 void TcpSocketImpl::accept(TcpServer& server)
 {
     socklen_t peeraddr_len = sizeof(_peeraddr);
@@ -67,6 +131,8 @@ void TcpSocketImpl::accept(TcpServer& server)
     _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
     if( _fd < 0 )
       throw System::SystemError("accept");
+
+    //TODO ECONNABORTED EINTR EPERM
 
     log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }

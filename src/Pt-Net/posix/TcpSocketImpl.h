@@ -30,6 +30,7 @@
 #define PT_NET_TcpSocketImpl_H
 
 #include "Pt/Net/Api.h"
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -50,7 +51,14 @@ class TcpSocketImpl
 
         ~TcpSocketImpl();
 
+        int fd() const
+        { return _fd; }
+
+        void create(int domain, int type, int protocol);
+
         void close();
+
+        void connect(const std::string& ipaddr, unsigned short int port);
 
         void accept(TcpServer& server);
 };

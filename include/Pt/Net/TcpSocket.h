@@ -47,9 +47,13 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         TcpSocket(TcpServer& server);
 
+        TcpSocket(const std::string& ipaddr, unsigned short int port);
+
         ~TcpSocket();
 
         void accept(TcpServer& server);
+
+        void connect(const std::string& ipaddr, unsigned short int port);
 
         // inherit doc
         virtual System::SelectableImpl& simpl();
