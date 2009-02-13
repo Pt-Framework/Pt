@@ -56,14 +56,15 @@ class TcpServerImpl : public System::SelectableImpl
         TcpServer&			_server;
         SOCKET				_fd;
         SOCKADDR			_servaddr;
-        //WSADATA             _wsaData;
         WSAEVENT			_waitEvent;
         Pt::System::Mutex	_mutex;
+		HANDLE				_selectorHandle;
 
         void attachEvent(HANDLE ev, long events);
 
     public:
         TcpServerImpl(TcpServer& server);
+		~TcpServerImpl();
 
         void create(int domain, int type, int protocol);
 

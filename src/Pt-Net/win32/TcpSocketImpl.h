@@ -29,6 +29,8 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
+#include <string>
+
 namespace Pt {
 
 namespace Net {
