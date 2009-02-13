@@ -128,6 +128,11 @@ bool TcpServerImpl::wait(std::size_t msecs)
 {
     log_debug("wait " << msecs);
 
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
     fd_set rfds;
     fd_set efds;
     FD_ZERO(&rfds);
