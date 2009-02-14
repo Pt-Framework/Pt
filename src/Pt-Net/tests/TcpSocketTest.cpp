@@ -50,16 +50,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         }
 
-        void NonBlockingWithSelector()
+        void tearDown()
         {
-            Pt::Net::TcpServer server;
-            connect(server.connectionPending, *this, &TcpSocketTest::reply);
 
-            Pt::System::Selector selector;
-            selector.add(server);
-
-            server.listen("127.0.0.1", 8000);
-            selector.wait(3000);
         }
 
         void NonBlockingWithWait()
@@ -71,15 +64,37 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             server.wait(3000);
         }
 
-        void tearDown()
+        void NonBlockingWithSelector()
         {
+            std::cout << std::endl;
+            Pt::System::Selector selector;
 
+            Pt::Net::TcpServer server("127.0.0.1", 8000);
+            connect(server.connectionPending, *this, &TcpSocketTest::reply);
+            selector.add(server);            
+
+            Pt::Net::TcpSocket client;
+            client.beginConnect("127.0.0.1", 8000);
+            connect(client.connected, *this, &TcpSocketTest::request);
+            selector.add(client);
+
+            selector.wait(2000);
+            selector.wait(2000);
+
+            this->reportMessage("FINISHED");
+            std::exit(0);
         }
 
         void reply(Pt::Net::TcpServer& server)
         {
-            this->reportMessage("NEW CONNECTON AVAILABLE");
+            this->reportMessage("CLIENT CONNECTION ACCEPTED");
             Pt::Net::TcpSocket socket(server);
+        }
+
+        void request(Pt::Net::TcpSocket& socket)
+        {
+            this->reportMessage("CONNECTED TO SERVER");
+            socket.endConnect();
         }
 
     private:

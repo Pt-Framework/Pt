@@ -29,6 +29,7 @@
 #ifndef PT_NET_TcpServerImpl_H
 #define PT_NET_TcpServerImpl_H
 
+#include "Pt/Net/Api.h"
 #include "SelectableImpl.h"
 #include <string>
 #include <sys/types.h>

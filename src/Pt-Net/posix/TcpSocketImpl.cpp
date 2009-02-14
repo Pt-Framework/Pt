@@ -30,16 +30,23 @@
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
 #include "Pt/Net/TcpServer.h"
+#include "Pt/Net/TcpSocket.h"
 #include "Pt/System/SystemError.h"
+#include <cerrno>
+#include <fcntl.h>
 
-#define log_debug(x)
+//#include <iostream>
+#define log_debug(x) //std::cout << x << std::endl;
 
 namespace Pt {
 
 namespace Net {
 
-TcpSocketImpl::TcpSocketImpl()
-: _fd(-1)
+TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
+: _socket(socket)
+, _fd(-1)
+, _rfds(0)
+, _wfds(0)
 {
 
 }
@@ -51,18 +58,19 @@ TcpSocketImpl::~TcpSocketImpl()
 
 void TcpSocketImpl::create(int domain, int type, int protocol)
 {
-    log_debug("create socket");
     _fd = ::socket(domain, type, protocol);
     if (_fd < 0)
       throw System::SystemError("socket");
+      
+    log_debug("create socket " << _fd);
 }
 
 
 void TcpSocketImpl::close()
 {
-  if (_fd >= 0)
+  if (_fd != -1)
   {
-    log_debug("close socket");
+    log_debug("*** close socket " << _fd);
     ::close(_fd);
     _fd = -1;
   }
@@ -123,6 +131,83 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 }
 
 
+bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
+{
+    log_debug("begin connect to " << ipaddr << " port " << port);
+
+    AddrInfo ai(ipaddr, port);
+
+    log_debug("checking address information");
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    {
+        try
+        {
+            this->create(it->ai_family, SOCK_STREAM, 0);
+        }
+        catch (const System::SystemError&)
+        {
+            continue;
+        }
+
+        int flags = fcntl(_fd, F_GETFL);
+        flags |= O_NONBLOCK ;
+        fcntl(_fd, F_SETFL, O_NONBLOCK);
+
+        memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+
+        log_debug("created socket, tying connect");
+
+        if( ::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0 )
+        {
+            log_debug("connected successfuly");
+            return true;
+        }
+
+        if(errno != EINPROGRESS)
+        {
+            close();
+            throw System::SystemError("connect failed");
+        }
+
+        log_debug("connect in progress");
+        if(_wfds)
+	    {
+		    FD_SET( this->fd(), _wfds );
+	    }
+        
+        memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        return false;
+    }
+
+    throw System::SystemError("invalid address information");
+}
+
+
+void TcpSocketImpl::endConnect()
+{
+    log_debug("ending connect");
+    
+    if(_wfds)
+	{
+		FD_CLR( this->fd(), _wfds );
+	}
+    
+    int sockerr;
+    socklen_t optlen = sizeof(sockerr);
+    if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+    {
+        this->close();
+        throw System::SystemError("getsockopt");
+    }
+
+    if(sockerr != 0)
+    {
+        this->close();
+        throw System::SystemError("connect");
+    }
+}
+
+
 void TcpSocketImpl::accept(TcpServer& server)
 {
     socklen_t peeraddr_len = sizeof(_peeraddr);
@@ -135,6 +220,70 @@ void TcpSocketImpl::accept(TcpServer& server)
     //TODO ECONNABORTED EINTR EPERM
 
     log_debug( "accepted " << server.impl().fd() << " => " << _fd );
+}
+
+
+bool TcpSocketImpl::wait(std::size_t msecs)
+{
+    return false;
+}
+
+
+void TcpSocketImpl::attach(System::SelectorBase& sb)
+{
+    log_debug("attach to selector");
+}
+
+
+void TcpSocketImpl::detach(System::SelectorBase& sb)
+{
+    log_debug("detach from selector " << _fd);
+    this->exitSelect();
+}
+
+
+int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    log_debug("TcpSocketImpl::initSelect");
+    
+    _wfds = &wfds;
+
+    if( this->fd() > 0)
+    {
+        FD_SET(this->fd(), _wfds);
+    }
+
+    return this->fd();
+}
+
+
+void TcpSocketImpl::exitSelect()
+{
+    log_debug("TcpSocketImpl::exitSelect " << _fd);
+    
+    if( _wfds && this->fd() > 0)
+    {
+        FD_CLR(this->fd(), _wfds);
+    }
+
+    _wfds = 0;
+}
+
+
+int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    log_debug("TcpSocketImpl::checkEvent");
+
+    if( this->fd() < 0)
+        return 0;
+
+    if( FD_ISSET(this->fd(), &wfds) )
+    {
+        _socket.connected.send(_socket);
+        return 1;
+    }
+
+    return 0;
 }
 
 } // namespace Net

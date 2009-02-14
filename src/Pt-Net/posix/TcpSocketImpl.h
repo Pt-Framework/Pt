@@ -30,24 +30,38 @@
 #define PT_NET_TcpSocketImpl_H
 
 #include "Pt/Net/Api.h"
+#include "Pt/Signal.h"
+#include "SelectableImpl.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 namespace Pt {
+
+namespace System {
+    class SelectorBase;
+}
 
 namespace Net {
 
 class TcpServer;
+class TcpSocket;
 
-class TcpSocketImpl
+class TcpSocketImpl : public System::SelectableImpl
 {
     private:
+        TcpSocket& _socket;
         int _fd;
         struct sockaddr_storage _peeraddr;
-
+        fd_set* _rfds;
+        fd_set* _wfds;
+    
     public:
-        TcpSocketImpl();
+        TcpSocketImpl(TcpSocket& socket);
 
         ~TcpSocketImpl();
 
@@ -60,7 +74,23 @@ class TcpSocketImpl
 
         void connect(const std::string& ipaddr, unsigned short int port);
 
+        bool beginConnect(const std::string& ipaddr, unsigned short int port);
+
+        void endConnect();
+
         void accept(TcpServer& server);
+        
+        bool wait(std::size_t msecs);
+
+        void attach(System::SelectorBase& sb);
+
+        void detach(System::SelectorBase& sb);
+        
+        virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+
+        virtual void exitSelect();
+
+        virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };
 
 } // namespace Net

@@ -30,8 +30,8 @@
 #define Pt_Net_TcpSocket_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/Signal.h>
 #include <Pt/System/Selectable.h>
-
 namespace Pt {
 
 namespace Net {
@@ -54,9 +54,12 @@ class PT_NET_API TcpSocket : public System::Selectable
         void accept(TcpServer& server);
 
         void connect(const std::string& ipaddr, unsigned short int port);
+        
+        void beginConnect(const std::string& ipaddr, unsigned short int port);
+        
+        void endConnect();
 
-        // inherit doc
-        virtual System::SelectableImpl& simpl();
+        Signal<TcpSocket&> connected;
 
     protected:
         // inherit doc
@@ -70,7 +73,11 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         // inherit doc
         virtual void onDetach(System::SelectorBase&);
-  };
+        
+    public:
+        // inherit doc
+        virtual System::SelectableImpl& simpl();
+};
 
 } // namespace Net
 
