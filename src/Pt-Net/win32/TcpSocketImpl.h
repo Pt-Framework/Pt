@@ -29,18 +29,26 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
+#include "Pt/Net/Api.h"
+#include "Pt/Signal.h"
+#include "SelectableImpl.h"
 #include <string>
 
 namespace Pt {
 
+namespace System {
+    class SelectorBase;
+}
+
 namespace Net {
 
 class TcpServer;
+class TcpSocket;
 
-class TcpSocketImpl
+class TcpSocketImpl : public System::SelectableImpl
 {
     public:
-        TcpSocketImpl();
+        TcpSocketImpl(TcpSocket& socket);
 
         ~TcpSocketImpl();
 
@@ -49,6 +57,21 @@ class TcpSocketImpl
         void accept(TcpServer& server);
 
         void connect(const std::string& ipaddr, unsigned short int port);
+
+        bool beginConnect(const std::string& ipaddr, unsigned short int port)
+        {return false;}
+
+        void endConnect()
+        {}
+        
+        bool wait(std::size_t msecs)
+        { return false; }
+
+        void attach(System::SelectorBase& sb)
+        { }
+
+        void detach(System::SelectorBase& sb)
+        { }
 };
 
 } // namespace Net
