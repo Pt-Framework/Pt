@@ -48,12 +48,12 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _rfds(0)
 , _wfds(0)
 {
-
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
-{ }
+{
+}
 
 
 void TcpSocketImpl::create(int domain, int type, int protocol)
@@ -62,7 +62,7 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
     if (_fd < 0)
       throw System::SystemError("socket");
       
-    log_debug("create socket " << _fd);
+    log_debug("create socket " << _fd << " max: " << FD_SETSIZE);
 }
 
 
@@ -70,7 +70,7 @@ void TcpSocketImpl::close()
 {
   if (_fd != -1)
   {
-    log_debug("*** close socket " << _fd);
+    log_debug("close socket " << _fd);
     ::close(_fd);
     _fd = -1;
   }
@@ -79,55 +79,12 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
-    log_debug("connect to " << ipaddr << " port " << port);
-
-    AddrInfo ai(ipaddr, port);
-
-    log_debug("do connect");
-    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    bool isConnected = this->beginConnect(ipaddr, port);
+    if( ! isConnected )
     {
-        try
-        {
-            this->create(it->ai_family, SOCK_STREAM, 0);
-        }
-        catch (const System::SystemError&)
-        {
-            continue;
-        }
-
-        if (::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0)
-        {
-            // save our information
-            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-            return;
-        }
-
-        // TODO add timeout handling
-        //if (errno == EINPROGRESS && getTimeout() > 0)
-        {
-            //poll(POLLOUT);
-
-            int sockerr;
-            socklen_t optlen = sizeof(sockerr);
-            if (::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0)
-            {
-                this->close();
-                throw System::SystemError("getsockopt");
-            }
-
-            if(sockerr != 0)
-            {
-                this->close();
-                throw System::SystemError("connect");
-            }
-
-            // save our information
-            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-            return;
-        }
+        this->wait(5000); //TODO use timeout value
+        this->endConnect();
     }
-
-    throw System::SystemError("connect");
 }
 
 
@@ -225,7 +182,44 @@ void TcpSocketImpl::accept(TcpServer& server)
 
 bool TcpSocketImpl::wait(std::size_t msecs)
 {
-    return false;
+    log_debug("wait " << msecs);
+
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
+    struct timeval* timeout = 0;
+    struct timeval tv;
+    if(msecs != System::Selector::WaitInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    fd_set rfds;
+    fd_set wfds;
+    fd_set efds;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    FD_ZERO(&efds);
+    if( this->fd() > 0 )
+    {
+        FD_SET(this->fd(), &wfds);
+    }
+
+    while( true )
+    {
+        int ret = ::select(this->fd() + 1, 0, &wfds, 0, timeout);
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw System::IOError( "select failed" );
+    }
+
+    return checkEvent(rfds, wfds, efds);
 }
 
 
@@ -245,7 +239,8 @@ void TcpSocketImpl::detach(System::SelectorBase& sb)
 int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::initSelect");
-    
+   
+    _rfds = &rfds;
     _wfds = &wfds;
 
     if( this->fd() > 0)
@@ -266,6 +261,12 @@ void TcpSocketImpl::exitSelect()
         FD_CLR(this->fd(), _wfds);
     }
 
+    if( _rfds && this->fd() > 0)
+    {
+        FD_CLR(this->fd(), _rfds);
+    }
+    
+    _rfds = 0;
     _wfds = 0;
 }
 

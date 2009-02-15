@@ -87,11 +87,12 @@ void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
 }
 
 
-void TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
 {
     this->close();
-    _impl->beginConnect(ipaddr, port);
+    bool ret = _impl->beginConnect(ipaddr, port);
     this->setEnabled(true);
+    return ret;
 }
 
 

@@ -57,16 +57,23 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithWait()
         {
-            Pt::Net::TcpServer server;
-            connect(server.connectionPending, *this, &TcpSocketTest::reply);
+            this->reportMessage("\nSTART");
+            
+            Pt::Net::TcpServer server("127.0.0.1", 8000);
+            connect(server.connectionPending, *this, &TcpSocketTest::reply);        
 
-            server.listen("127.0.0.1", 8000);
+            Pt::Net::TcpSocket client;
+            client.beginConnect("127.0.0.1", 8000);
+            connect(client.connected, *this, &TcpSocketTest::request);
+
             server.wait(3000);
+            client.wait(3000);
+            this->reportMessage("FINISHED");
         }
 
         void NonBlockingWithSelector()
         {
-            std::cout << std::endl;
+            this->reportMessage("\nSTART");
             Pt::System::Selector selector;
 
             Pt::Net::TcpServer server("127.0.0.1", 8000);
@@ -82,7 +89,6 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             selector.wait(2000);
 
             this->reportMessage("FINISHED");
-            std::exit(0);
         }
 
         void reply(Pt::Net::TcpServer& server)

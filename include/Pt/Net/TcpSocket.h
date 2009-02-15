@@ -55,7 +55,7 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         void connect(const std::string& ipaddr, unsigned short int port);
         
-        void beginConnect(const std::string& ipaddr, unsigned short int port);
+        bool beginConnect(const std::string& ipaddr, unsigned short int port);
         
         void endConnect();
 
