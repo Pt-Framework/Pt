@@ -66,8 +66,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             client.beginConnect("127.0.0.1", 8000);
             connect(client.connected, *this, &TcpSocketTest::request);
 
-            server.wait(3000);
-            client.wait(3000);
+            server.wait(2000);
+            client.wait(2000);
             this->reportMessage("FINISHED");
         }
 

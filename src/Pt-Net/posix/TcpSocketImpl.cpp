@@ -226,6 +226,10 @@ bool TcpSocketImpl::wait(std::size_t msecs)
 void TcpSocketImpl::attach(System::SelectorBase& sb)
 {
     log_debug("attach to selector");
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
 }
 
 
