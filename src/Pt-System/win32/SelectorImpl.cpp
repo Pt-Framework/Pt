@@ -150,17 +150,17 @@ void SelectorImpl::wake()
 }
 
 
-bool SelectorImpl::wait( unsigned umsecs )
+bool SelectorImpl::wait( std::size_t umsecs )
 {
     // convert unsigned to signed
-    int msecs = umsecs;
+    DWORD msecs = umsecs;
     if(umsecs == Selector::WaitInfinite) 
     {
         msecs = INFINITE;
     }
-    else if( umsecs > unsigned( std::numeric_limits<int>::max() ) )
+    else if( umsecs > std::numeric_limits<DWORD>::max() )
     {
-        msecs = std::numeric_limits<int>::max();
+        msecs = std::numeric_limits<DWORD>::max();
     }
 
     std::set<Selectable*>::iterator iter;
