@@ -31,14 +31,15 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Signal.h>
-#include <Pt/System/Selectable.h>
+#include <Pt/System/IODevice.h>
+
 namespace Pt {
 
 namespace Net {
 
 class TcpServer;
 
-class PT_NET_API TcpSocket : public System::Selectable
+class PT_NET_API TcpSocket : public System::IODevice
 {
     class TcpSocketImpl* _impl;
 
@@ -82,10 +83,31 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         // inherit doc
         virtual void onDetach(System::SelectorBase&);
-        
+
+        // inherit doc
+        virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);
+
+        // inherit doc
+        virtual size_t onEndRead(bool& eof);
+
+        // inherit doc
+        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+
+        // inherit doc
+        virtual size_t onBeginWrite(const char* buffer, size_t n);
+
+        // inherit doc
+        virtual size_t onEndWrite();
+
+        // inherit doc
+        virtual size_t onWrite(const char* buffer, size_t count);
+
     public:
         // inherit doc
         virtual System::SelectableImpl& simpl();
+
+        // inherit doc
+        virtual System::IODeviceImpl& ioimpl();
 };
 
 } // namespace Net
