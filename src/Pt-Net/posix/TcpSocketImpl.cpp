@@ -267,6 +267,7 @@ bool TcpSocketImpl::wait(std::size_t msecs)
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     FD_ZERO(&efds);
+
     if( this->fd() > 0 )
     {
         if( ! _isConnected )
@@ -296,59 +297,20 @@ bool TcpSocketImpl::wait(std::size_t msecs)
     return this->checkEvent(rfds, wfds, efds);
 }
 
-/*
-void TcpSocketImpl::attach(System::SelectorBase& sb)
-{
-    log_debug("attach to selector");
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-}
-
-
-void TcpSocketImpl::detach(System::SelectorBase& sb)
-{
-    log_debug("detach from selector " << _fd);
-    this->exitSelect();
-}
-*/
 
 int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::initSelect");
 
-    int ret = System::IODeviceImpl::initSelect(rfds, wfds, efds);
-
     if( this->fd() > 0 )
     {
         if( ! _isConnected )
-            FD_SET(this->fd(), _wfds);
+            FD_SET(this->fd(), &wfds);
     }
 
-    return ret;
+    return System::IODeviceImpl::initSelect(rfds, wfds, efds);
 }
 
-/*
-void TcpSocketImpl::exitSelect()
-{
-    log_debug("TcpSocketImpl::exitSelect " << _fd);
-    return System::IODeviceImpl::exitSelect();
-
-    if( _wfds && this->fd() > 0)
-    {
-        FD_CLR(this->fd(), _wfds);
-    }
-
-    if( _rfds && this->fd() > 0)
-    {
-        FD_CLR(this->fd(), _rfds);
-    }
-
-    _rfds = 0;
-    _wfds = 0;
-}
-*/
 
 int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {

@@ -97,14 +97,8 @@ class TcpSocketImpl : public System::IODeviceImpl
         size_t write(const char* buffer, size_t count);
 */
         bool wait(std::size_t msecs);
-/*
-        void attach(System::SelectorBase& sb);
 
-        void detach(System::SelectorBase& sb);
-*/
         virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-//        virtual void exitSelect();
 
         virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };

@@ -45,8 +45,11 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 
 
 IODeviceImpl::~IODeviceImpl()
-{ 
-	this->exitSelect();
+{
+    assert(_rfds == 0);
+    assert(_wfds == 0);
+    assert(_efds == 0);
+    //this->exitSelect();
 }
 
 
@@ -72,6 +75,21 @@ void IODeviceImpl::close()
 
         _fd = -1;
     }
+}
+
+
+void IODeviceImpl::attach(SelectorBase& s)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+}
+
+
+void IODeviceImpl::detach(SelectorBase& s)
+{
+    this->exitSelect();
 }
 
 
@@ -121,10 +139,11 @@ bool IODeviceImpl::wait(std::size_t msecs)
 
 size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
-	if(_rfds)
-	{
-		FD_SET( this->fd(), _rfds );
-	}
+    if(_rfds)
+    {
+        FD_SET( this->fd(), _rfds );
+    }
+
     return 0;
 }
 
@@ -184,21 +203,21 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
-	if(_wfds)
-	{
-		FD_SET( this->fd(), _wfds );
-	}
+    if(_wfds)
+    {
+        FD_SET( this->fd(), _wfds );
+    }
 
-	return 0;
+    return 0;
 }
 
 
 size_t IODeviceImpl::endWrite()
 {
-	if(_wfds)
-	{
-		FD_CLR( this->fd(), _wfds );
-	}
+    if(_wfds)
+    {
+        FD_CLR( this->fd(), _wfds );
+    }
 
     size_t n = this->write( _device.wbuf(), _device.wbuflen() );
     return n;
@@ -254,9 +273,9 @@ void IODeviceImpl::sync() const
 
 int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-	_rfds = &rfds;
-	_wfds = &wfds;
-	_efds = &efds;
+    _rfds = &rfds;
+    _wfds = &wfds;
+    _efds = &efds;
 
     if( this->fd() > 0)
     {
@@ -272,11 +291,14 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
 void IODeviceImpl::exitSelect()
 {
-    if( _rfds && this->fd() > 0)
+    if( this->fd() > 0)
     {
-        FD_CLR(this->fd(), _rfds);
-        FD_CLR(this->fd(), _wfds);
-        FD_CLR(this->fd(), _efds);
+        if(_rfds)
+            FD_CLR(this->fd(), _rfds);
+        if(_wfds)
+            FD_CLR(this->fd(), _wfds);
+        if(_efds)
+            FD_CLR(this->fd(), _efds);
     }
 
     _rfds = 0;

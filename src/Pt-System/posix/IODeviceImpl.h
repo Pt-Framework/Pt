@@ -68,13 +68,9 @@ namespace System {
 
             virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            void attach(SelectorBase& s)
-            {}
+            virtual void attach(SelectorBase& s);
 
-            void detach(SelectorBase& s)
-            {
-                this->exitSelect();
-            }
+            virtual void detach(SelectorBase& s);
 
         protected:
             IODevice& _device;
