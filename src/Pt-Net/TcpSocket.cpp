@@ -79,6 +79,18 @@ TcpSocket::~TcpSocket()
 }
 
 
+void TcpSocket::setTimeout(std::size_t msecs)
+{
+    _impl->setTimeout(msecs);
+}
+
+
+std::size_t TcpSocket::timeout() const
+{
+    return _impl->timeout();
+}
+
+
 void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
 {
     this->close();

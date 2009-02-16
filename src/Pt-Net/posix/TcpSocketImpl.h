@@ -38,7 +38,6 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 namespace Pt {
 
@@ -57,6 +56,7 @@ class TcpSocketImpl : public System::SelectableImpl
         TcpSocket& _socket;
         bool _isConnected;
         int _fd;
+        std::size_t _timeout;
         struct sockaddr_storage _peeraddr;
         fd_set* _rfds;
         fd_set* _wfds;
@@ -70,6 +70,12 @@ class TcpSocketImpl : public System::SelectableImpl
         { return _fd; }
 
         void close();
+
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
+
+        std::size_t timeout() const
+        { return _timeout; }
 
         bool isConnected() const
         { return _isConnected; }

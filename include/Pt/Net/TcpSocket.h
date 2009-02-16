@@ -51,12 +51,19 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         ~TcpSocket();
 
+        void setTimeout(std::size_t msecs);
+
+        std::size_t timeout() const;
+
+        std::size_t getTimeout() const
+        { return timeout(); }
+
         void accept(TcpServer& server);
 
         void connect(const std::string& ipaddr, unsigned short int port);
-        
+
         bool beginConnect(const std::string& ipaddr, unsigned short int port);
-        
+
         void endConnect();
 
         Signal<TcpSocket&> connected;

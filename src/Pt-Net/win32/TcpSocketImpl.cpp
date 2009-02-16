@@ -36,6 +36,7 @@ namespace Net {
 
 TcpSocketImpl::TcpSocketImpl()
 : _isConnected(false)
+, _timeout(System::Selectable::WaitInfinite)
 {
 }
 

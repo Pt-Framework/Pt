@@ -34,8 +34,9 @@
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
 #include <cerrno>
-#include <fcntl.h>
 #include <cstring>
+#include <cassert>
+#include <fcntl.h>
 
 //#include <iostream>
 #define log_debug(x) //std::cout << x << std::endl;
@@ -48,6 +49,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _socket(socket)
 , _isConnected(false)
 , _fd(-1)
+, _timeout(System::Selectable::WaitInfinite)
 , _rfds(0)
 , _wfds(0)
 {
@@ -79,7 +81,7 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
     bool isConnected = this->beginConnect(ipaddr, port);
     if( ! isConnected )
     {
-        bool ret = this->wait(5000); //TODO use timeout value
+        bool ret = this->wait(_timeout);
         if(false == ret)
         {
             close();
@@ -220,7 +222,16 @@ bool TcpSocketImpl::wait(std::size_t msecs)
             throw System::IOError( "select failed" );
     }
 
-    return checkEvent(rfds, wfds, efds);
+    if( FD_ISSET(this->fd(), &wfds) )
+    {
+        if( ! _isConnected )
+        {
+            _socket.connected.send(_socket);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 

@@ -49,6 +49,7 @@ class TcpSocketImpl : public System::SelectableImpl
 {
     private:
         bool _isConnected;
+        std::size_t _timeout;
 
     public:
         TcpSocketImpl(TcpSocket& socket);
@@ -56,6 +57,12 @@ class TcpSocketImpl : public System::SelectableImpl
         ~TcpSocketImpl();
 
         void close();
+
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
+
+        std::size_t timeout() const
+        { return _timeout; }
 
         void accept(TcpServer& server);
 
