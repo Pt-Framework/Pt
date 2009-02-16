@@ -73,6 +73,9 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
+    // TODO: decide whether this should send the "connected" signal
+    log_debug("connect to " << ipaddr << " port " << port);
+
     bool isConnected = this->beginConnect(ipaddr, port);
     if( ! isConnected )
     {
@@ -107,7 +110,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
-        log_debug("created socket, tying connect");
+        log_debug("created socket " << _fd << " max: " << FD_SETSIZE);
 
         if( ::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0 )
         {
