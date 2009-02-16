@@ -78,15 +78,6 @@ void IODeviceImpl::close()
 }
 
 
-void IODeviceImpl::attach(SelectorBase& s)
-{
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-}
-
-
 size_t IODeviceImpl::endRead(bool& eof)
 {
 	if(_rfds)
@@ -210,6 +201,14 @@ void IODeviceImpl::sync() const
 }
 
 
+void IODeviceImpl::attach(SelectorBase& s)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+}
+
 
 void IODeviceImpl::detach(SelectorBase& s)
 {
@@ -230,20 +229,6 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 
 bool IODeviceImpl::wait(std::size_t msecs)
 {
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != Selector::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
     fd_set rfds;
     fd_set wfds;
     fd_set efds;
@@ -251,28 +236,13 @@ bool IODeviceImpl::wait(std::size_t msecs)
     FD_ZERO(&wfds);
     FD_ZERO(&efds);
     this->initWait(rfds, wfds, efds);
-
-    while( true )
-    {
-        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
-        if( ret != -1 )
-            break;
-
-        if( errno != EINTR )
-            throw IOError( PT_ERROR_MSG("select failed") );
-    }
-
+    this->wait(msecs, &rfds, &wfds, &efds);
     return this->checkEvent(rfds, wfds, efds);
 }
 
 
 bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
 {
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
     struct timeval* timeout = 0;
     struct timeval tv;
     if(msecs != Selector::WaitInfinite)
@@ -299,6 +269,11 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
 
 void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
     if( this->fd() > 0 )
     {
         if( _device.rbuf() )

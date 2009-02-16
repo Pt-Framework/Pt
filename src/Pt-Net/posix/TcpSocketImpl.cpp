@@ -105,13 +105,28 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
     bool isConnected = this->beginConnect(ipaddr, port);
     if( ! isConnected )
     {
-        fd_set wfds;
-        FD_ZERO(&wfds);
-        bool ret = this->wait(_timeout, 0, &wfds, 0);
-        if(false == ret)
+        try
+        {
+            if( this->fd() > FD_SETSIZE )
+            {
+                throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+            }
+
+            fd_set wfds;
+            FD_ZERO(&wfds);
+            FD_SET(this->fd(), &wfds);
+            bool ret = this->wait(_timeout, 0, &wfds, 0);
+            if(false == ret)
+            {
+                throw System::IOTimeout();
+            }
+
+            this->endConnect();
+        }
+        catch(...)
         {
             close();
-            throw System::IOTimeout();
+            throw;
         }
     }
 }
