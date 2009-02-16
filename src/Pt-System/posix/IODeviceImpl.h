@@ -46,8 +46,6 @@ namespace System {
 
             virtual void close();
 
-            virtual bool wait(std::size_t msecs);
-
             virtual size_t beginRead(char* buffer, size_t n, bool& eof);
 
             virtual size_t endRead( bool& eof);
@@ -61,6 +59,10 @@ namespace System {
             virtual size_t write( const char* buffer, size_t count );
 
             virtual void sync() const;
+
+            virtual bool wait(std::size_t msecs);
+
+            virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
             virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 

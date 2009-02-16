@@ -93,50 +93,6 @@ void IODeviceImpl::detach(SelectorBase& s)
 }
 
 
-bool IODeviceImpl::wait(std::size_t msecs)
-{
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != Selector::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    fd_set rfds;
-    fd_set wfds;
-    fd_set efds;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&efds);
-    if( this->fd() > 0 )
-    {
-        if( _device.rbuf() )
-            FD_SET(this->fd(), &rfds);
-        if( _device.wbuf() )
-            FD_SET(this->fd(), &wfds);
-    }
-
-    while( true )
-    {
-        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
-        if( ret != -1 )
-            break;
-
-        if( errno != EINTR )
-            throw IOError( PT_ERROR_MSG("select failed") );
-    }
-
-    return this->checkEvent(rfds, wfds, efds);
-}
-
-
 size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
     if(_rfds)
@@ -271,19 +227,66 @@ void IODeviceImpl::sync() const
 }
 
 
+bool IODeviceImpl::wait(std::size_t msecs)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
+    struct timeval* timeout = 0;
+    struct timeval tv;
+    if(msecs != Selector::WaitInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    fd_set rfds;
+    fd_set wfds;
+    fd_set efds;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    FD_ZERO(&efds);
+    this->initWait(rfds, wfds, efds);
+
+    while( true )
+    {
+        int ret = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw IOError( PT_ERROR_MSG("select failed") );
+    }
+
+    return this->checkEvent(rfds, wfds, efds);
+}
+
+
+void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    if( this->fd() > 0 )
+    {
+        if( _device.rbuf() )
+        {
+            FD_SET(this->fd(), &rfds);
+        }
+        if( _device.wbuf() )
+        {
+            FD_SET(this->fd(), &wfds);
+        }
+    }
+}
+
+
 int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     _rfds = &rfds;
     _wfds = &wfds;
     _efds = &efds;
-
-    if( this->fd() > 0)
-    {
-        if( _device.rbuf() )
-            FD_SET(this->fd(), _rfds);
-        if( _device.wbuf() )
-            FD_SET(this->fd(), _wfds);
-    }
+    this->initWait(rfds, wfds, efds);
 
     return this->fd();
 }

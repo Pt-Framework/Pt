@@ -83,24 +83,24 @@ class TcpSocketImpl : public System::IODeviceImpl
         void endConnect();
 
         void accept(TcpServer& server);
-/*
-        size_t beginRead(char* buffer, size_t n, bool& eof);
 
-        size_t endRead(bool& eof);
+        //size_t beginRead(char* buffer, size_t n, bool& eof);
 
-        size_t read(char* buffer, size_t count, bool& eof);
+        //size_t endRead(bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        //size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endWrite();
+        //size_t beginWrite(const char* buffer, size_t n);
 
-        size_t write(const char* buffer, size_t count);
-*/
-        bool wait(std::size_t msecs);
+        //size_t endWrite();
 
-        virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        //size_t write(const char* buffer, size_t count);
 
-        virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+
+        int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+
+        int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };
 
 } // namespace Net

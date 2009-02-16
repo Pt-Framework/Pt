@@ -130,12 +130,6 @@ void TcpSocket::accept(TcpServer& server)
 }
 
 
-System::SelectableImpl& TcpSocket::simpl()
-{
-    return *_impl;
-}
-
-
 void TcpSocket::onClose()
 {
     _impl->close();
@@ -193,6 +187,12 @@ size_t TcpSocket::onEndWrite()
 size_t TcpSocket::onWrite(const char* buffer, size_t count)
 {
     return _impl->write(buffer, count);
+}
+
+
+System::SelectableImpl& TcpSocket::simpl()
+{
+    return *_impl;
 }
 
 

@@ -243,30 +243,10 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 }
 */
 
-bool TcpSocketImpl::wait(std::size_t msecs)
+
+void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-    log_debug("wait " << msecs);
-
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != System::Selector::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    fd_set rfds;
-    fd_set wfds;
-    fd_set efds;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&efds);
+    log_debug("TcpSocketImpl::initWait");
 
     if( this->fd() > 0 )
     {
@@ -274,27 +254,9 @@ bool TcpSocketImpl::wait(std::size_t msecs)
         {
             FD_SET(this->fd(), &wfds);
         }
-        if( _socket.rbuf() )
-        {
-            FD_SET(this->fd(), &rfds);
-        }
-        if( _socket.wbuf() )
-        {
-            FD_SET(this->fd(), &wfds);
-        }
     }
 
-    while( true )
-    {
-        int ret = ::select(this->fd() + 1, &rfds, &wfds, &efds, timeout);
-        if( ret != -1 )
-            break;
-
-        if( errno != EINTR )
-            throw System::IOError( "select failed" );
-    }
-
-    return this->checkEvent(rfds, wfds, efds);
+    System::IODeviceImpl::initWait(rfds, wfds, efds);
 }
 
 
