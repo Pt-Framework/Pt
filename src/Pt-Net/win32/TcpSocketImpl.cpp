@@ -66,6 +66,42 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
 }
 
+
+size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    return 0;
+}
+
+
+size_t TcpSocketImpl::endRead(bool& eof)
+{
+    return 0;
+}
+
+
+size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
+{
+    return 0;
+}
+
+
+size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
+{
+    return 0;
+}
+
+
+size_t TcpSocketImpl::endWrite()
+{
+    return 0;
+}
+
+
+size_t TcpSocketImpl::write(const char* buffer, size_t count)
+{
+    return 0;
+}
+
 } // namespace Net
 
 } // namespace Pt
