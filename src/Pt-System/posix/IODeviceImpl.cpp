@@ -87,23 +87,6 @@ void IODeviceImpl::attach(SelectorBase& s)
 }
 
 
-void IODeviceImpl::detach(SelectorBase& s)
-{
-    this->exitSelect();
-}
-
-
-size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
-{
-    if(_rfds)
-    {
-        FD_SET( this->fd(), _rfds );
-    }
-
-    return 0;
-}
-
-
 size_t IODeviceImpl::endRead(bool& eof)
 {
 	if(_rfds)
@@ -227,6 +210,24 @@ void IODeviceImpl::sync() const
 }
 
 
+
+void IODeviceImpl::detach(SelectorBase& s)
+{
+    this->exitSelect();
+}
+
+
+size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+{
+    if(_rfds)
+    {
+        FD_SET( this->fd(), _rfds );
+    }
+
+    return 0;
+}
+
+
 bool IODeviceImpl::wait(std::size_t msecs)
 {
     if( this->fd() > FD_SETSIZE )
@@ -262,6 +263,37 @@ bool IODeviceImpl::wait(std::size_t msecs)
     }
 
     return this->checkEvent(rfds, wfds, efds);
+}
+
+
+bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
+    struct timeval* timeout = 0;
+    struct timeval tv;
+    if(msecs != Selector::WaitInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    int ret = -1;
+    while( true )
+    {
+        ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw IOError( PT_ERROR_MSG("select failed") );
+    }
+
+    return ret > 0;
 }
 
 

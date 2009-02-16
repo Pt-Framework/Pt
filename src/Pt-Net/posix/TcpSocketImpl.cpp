@@ -100,20 +100,19 @@ std::string TcpSocketImpl::getSockAddr() const
 
 void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
-    // TODO: decide whether this should send the "connected" signal
     log_debug("connect to " << ipaddr << " port " << port);
 
     bool isConnected = this->beginConnect(ipaddr, port);
     if( ! isConnected )
     {
-        bool ret = this->wait(_timeout);
+        fd_set wfds;
+        FD_ZERO(&wfds);
+        bool ret = this->wait(_timeout, 0, &wfds, 0);
         if(false == ret)
         {
             close();
             throw System::IOTimeout();
         }
-
-        this->endConnect();
     }
 }
 

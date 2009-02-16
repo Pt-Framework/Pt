@@ -60,7 +60,13 @@ namespace System {
 
             virtual void sync() const;
 
+            virtual void attach(SelectorBase& s);
+
+            virtual void detach(SelectorBase& s);
+
             virtual bool wait(std::size_t msecs);
+
+            virtual bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
             virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
@@ -69,10 +75,6 @@ namespace System {
             virtual void exitSelect();
 
             virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-            virtual void attach(SelectorBase& s);
-
-            virtual void detach(SelectorBase& s);
 
         protected:
             IODevice& _device;
