@@ -69,10 +69,6 @@ class TcpSocketImpl : public System::SelectableImpl
         int fd() const
         { return _fd; }
 
-        //void create(const std::string& ipaddr, unsigned short int port);
-
-        void create(int domain, int type, int protocol);
-
         void close();
 
         bool isConnected() const

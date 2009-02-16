@@ -58,16 +58,6 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
-void TcpSocketImpl::create(int domain, int type, int protocol)
-{
-    _fd = ::socket(domain, type, protocol);
-    if (_fd < 0)
-      throw System::SystemError("socket");
-
-    log_debug("create socket " << _fd << " max: " << FD_SETSIZE);
-}
-
-
 void TcpSocketImpl::close()
 {
   if (_fd != -1)
@@ -100,14 +90,9 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
     log_debug("checking address information");
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
-        try
-        {
-            this->create(it->ai_family, SOCK_STREAM, 0);
-        }
-        catch (const System::SystemError&)
-        {
-            continue;
-        }
+        _fd = ::socket(it->ai_family, SOCK_STREAM, 0);
+        if (_fd < 0)
+            continue
 
         int flags = fcntl(_fd, F_GETFL);
         flags |= O_NONBLOCK ;
@@ -165,6 +150,8 @@ void TcpSocketImpl::endConnect()
         this->close();
         throw System::SystemError("connect");
     }
+
+    _isConnected = true;
 }
 
 
@@ -289,7 +276,6 @@ int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     {
         if( ! _isConnected )
         {
-            _isConnected = true;
             _socket.connected.send(_socket);
             return 1;
         }
