@@ -71,7 +71,8 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
-: _socket(socket)
+: System::IODeviceImpl(socket)
+, _socket(socket)
 , _isConnected(false)
 , _fd(-1)
 , _timeout(System::Selectable::WaitInfinite)

@@ -31,7 +31,7 @@
 
 #include "Pt/Net/Api.h"
 #include "Pt/Signal.h"
-#include "SelectableImpl.h"
+#include "IODeviceImpl.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -50,7 +50,7 @@ namespace Net {
 class TcpServer;
 class TcpSocket;
 
-class TcpSocketImpl : public System::SelectableImpl
+class TcpSocketImpl : public System::IODeviceImpl
 {
     private:
         TcpSocket& _socket;
