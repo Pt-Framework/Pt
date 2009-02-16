@@ -34,6 +34,7 @@
 #include "Pt/System/SystemError.h"
 #include <cerrno>
 #include <fcntl.h>
+#include <cstring>
 
 //#include <iostream>
 #define log_debug(x) //std::cout << x << std::endl;
@@ -110,7 +111,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
         flags |= O_NONBLOCK ;
         fcntl(_fd, F_SETFL, O_NONBLOCK);
 
-        memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
         log_debug("created socket, tying connect");
 
