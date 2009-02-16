@@ -126,13 +126,6 @@ void SelectorImpl::changed(Selectable& s)
 }
 
 
-/*void SelectorImpl::setParent(Application* app)
-{
-    _app = app;
-    //FD_SET(_app->impl().signalFd(), &_rfds);
-}*/
-
-
 bool SelectorImpl::wait(std::size_t msecs)
 {
     fd_set rfds = _rfds;
