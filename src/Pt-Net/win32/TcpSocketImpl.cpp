@@ -46,6 +46,12 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
+std::string TcpSocketImpl::getSockAddr() const
+{
+    return "";
+}
+
+
 void TcpSocketImpl::close()
 {
 }

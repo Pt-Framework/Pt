@@ -66,6 +66,8 @@ class TcpSocketImpl : public System::SelectableImpl
 
         ~TcpSocketImpl();
 
+        std::string getSockAddr() const;
+
         int fd() const
         { return _fd; }
 

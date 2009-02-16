@@ -51,6 +51,8 @@ class PT_NET_API TcpSocket : public System::Selectable
 
         ~TcpSocket();
 
+        std::string getSockAddr() const;
+
         void setTimeout(std::size_t msecs);
 
         std::size_t timeout() const;
