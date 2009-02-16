@@ -47,6 +47,9 @@ class TcpSocket;
 
 class TcpSocketImpl : public System::SelectableImpl
 {
+    private:
+        bool _isConnected;
+
     public:
         TcpSocketImpl(TcpSocket& socket);
 
@@ -56,6 +59,9 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void accept(TcpServer& server);
 
+        bool isConnected() const
+        { return _isConnected; }
+
         void connect(const std::string& ipaddr, unsigned short int port);
 
         bool beginConnect(const std::string& ipaddr, unsigned short int port)
@@ -63,7 +69,7 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void endConnect()
         {}
-        
+
         bool wait(std::size_t msecs)
         { return false; }
 

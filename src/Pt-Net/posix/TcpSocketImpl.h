@@ -55,11 +55,12 @@ class TcpSocketImpl : public System::SelectableImpl
 {
     private:
         TcpSocket& _socket;
+        bool _isConnected;
         int _fd;
         struct sockaddr_storage _peeraddr;
         fd_set* _rfds;
         fd_set* _wfds;
-    
+
     public:
         TcpSocketImpl(TcpSocket& socket);
 
@@ -74,6 +75,9 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void close();
 
+        bool isConnected() const
+        { return _isConnected; }
+
         void connect(const std::string& ipaddr, unsigned short int port);
 
         bool beginConnect(const std::string& ipaddr, unsigned short int port);
@@ -81,13 +85,13 @@ class TcpSocketImpl : public System::SelectableImpl
         void endConnect();
 
         void accept(TcpServer& server);
-        
+
         bool wait(std::size_t msecs);
 
         void attach(System::SelectorBase& sb);
 
         void detach(System::SelectorBase& sb);
-        
+
         virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
         virtual void exitSelect();

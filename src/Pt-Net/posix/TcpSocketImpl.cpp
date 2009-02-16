@@ -45,6 +45,7 @@ namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _socket(socket)
+, _isConnected(false)
 , _fd(-1)
 , _rfds(0)
 , _wfds(0)
@@ -62,7 +63,7 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
     _fd = ::socket(domain, type, protocol);
     if (_fd < 0)
       throw System::SystemError("socket");
-      
+
     log_debug("create socket " << _fd << " max: " << FD_SETSIZE);
 }
 
@@ -74,6 +75,7 @@ void TcpSocketImpl::close()
     log_debug("close socket " << _fd);
     ::close(_fd);
     _fd = -1;
+    _isConnected = false;
   }
 }
 
@@ -129,10 +131,10 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
         log_debug("connect in progress");
         if(_wfds)
-	    {
-		    FD_SET( this->fd(), _wfds );
-	    }
-        
+        {
+            FD_SET( this->fd(), _wfds );
+        }
+
         memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
         return false;
     }
@@ -144,12 +146,12 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 void TcpSocketImpl::endConnect()
 {
     log_debug("ending connect");
-    
+
     if(_wfds)
-	{
-		FD_CLR( this->fd(), _wfds );
-	}
-    
+    {
+        FD_CLR( this->fd(), _wfds );
+    }
+
     int sockerr;
     socklen_t optlen = sizeof(sockerr);
     if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
@@ -244,7 +246,7 @@ void TcpSocketImpl::detach(System::SelectorBase& sb)
 int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::initSelect");
-   
+
     _rfds = &rfds;
     _wfds = &wfds;
 
@@ -260,7 +262,7 @@ int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 void TcpSocketImpl::exitSelect()
 {
     log_debug("TcpSocketImpl::exitSelect " << _fd);
-    
+
     if( _wfds && this->fd() > 0)
     {
         FD_CLR(this->fd(), _wfds);
@@ -270,7 +272,7 @@ void TcpSocketImpl::exitSelect()
     {
         FD_CLR(this->fd(), _rfds);
     }
-    
+
     _rfds = 0;
     _wfds = 0;
 }
@@ -285,8 +287,12 @@ int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
     if( FD_ISSET(this->fd(), &wfds) )
     {
-        _socket.connected.send(_socket);
-        return 1;
+        if( ! _isConnected )
+        {
+            _isConnected = true;
+            _socket.connected.send(_socket);
+            return 1;
+        }
     }
 
     return 0;

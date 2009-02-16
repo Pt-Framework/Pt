@@ -35,26 +35,23 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl()
+: _isConnected(false)
 {
-
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-
 }
 
 
 void TcpSocketImpl::close()
 {
-
 }
 
 
 void TcpSocketImpl::accept(TcpServer& server)
 {
-
 }
 
 
