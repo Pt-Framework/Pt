@@ -32,6 +32,7 @@
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/IOError.h"
 #include <cerrno>
 #include <fcntl.h>
 #include <cstring>
@@ -75,7 +76,13 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
     bool isConnected = this->beginConnect(ipaddr, port);
     if( ! isConnected )
     {
-        this->wait(5000); //TODO use timeout value
+        bool ret = this->wait(5000); //TODO use timeout value
+        if(false == ret)
+        {
+            close();
+            throw System::IOTimeout();
+        }
+
         this->endConnect();
     }
 }
@@ -92,7 +99,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
     {
         _fd = ::socket(it->ai_family, SOCK_STREAM, 0);
         if (_fd < 0)
-            continue
+            continue;
 
         int flags = fcntl(_fd, F_GETFL);
         flags |= O_NONBLOCK ;
@@ -104,6 +111,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
         if( ::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0 )
         {
+            _isConnected = true;
             log_debug("connected successfuly");
             return true;
         }
