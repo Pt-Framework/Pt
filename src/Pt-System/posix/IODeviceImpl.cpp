@@ -77,13 +77,10 @@ void IODeviceImpl::close()
 
 bool IODeviceImpl::wait(std::size_t msecs)
 {
-    fd_set rfds;
-    fd_set wfds;
-    fd_set efds;
-
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&efds);
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
 
     struct timeval* timeout = 0;
     struct timeval tv;
@@ -94,6 +91,12 @@ bool IODeviceImpl::wait(std::size_t msecs)
         timeout = &tv;
     }
 
+    fd_set rfds;
+    fd_set wfds;
+    fd_set efds;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    FD_ZERO(&efds);
     if( this->fd() > 0 )
     {
         if( _device.rbuf() )
@@ -287,7 +290,7 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     int avail = 0;
 
     if( this->fd() < 0)
-        return avail;
+        return 0;
 
     if ( FD_ISSET(this->fd(), &efds) )
     {

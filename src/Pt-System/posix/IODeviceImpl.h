@@ -73,7 +73,7 @@ namespace System {
 
             void detach(SelectorBase& s)
             {
-				this->exitSelect();
+                this->exitSelect();
             }
 
         protected:

@@ -110,6 +110,7 @@ bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
     this->close();
     bool ret = _impl->beginConnect(ipaddr, port);
     this->setEnabled(true);
+    this->setAsync(true);
     return ret;
 }
 
@@ -125,6 +126,7 @@ void TcpSocket::accept(TcpServer& server)
     this->close();
     _impl->accept(server);
     this->setEnabled(true);
+    this->setAsync(true);
 }
 
 
@@ -196,9 +198,7 @@ size_t TcpSocket::onWrite(const char* buffer, size_t count)
 
 System::IODeviceImpl& TcpSocket::ioimpl()
 {
-    throw std::runtime_error("TcpSocket::ioimpl() not implemented");
-    System::IODeviceImpl* impl = 0;
-    return *impl;
+    return *_impl;
 }
 
 } // namespace Net

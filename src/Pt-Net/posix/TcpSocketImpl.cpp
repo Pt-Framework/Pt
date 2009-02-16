@@ -74,10 +74,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : System::IODeviceImpl(socket)
 , _socket(socket)
 , _isConnected(false)
-, _fd(-1)
 , _timeout(System::Selectable::WaitInfinite)
-, _rfds(0)
-, _wfds(0)
 {
 }
 
@@ -89,13 +86,9 @@ TcpSocketImpl::~TcpSocketImpl()
 
 void TcpSocketImpl::close()
 {
-  if (_fd != -1)
-  {
     log_debug("close socket " << _fd);
-    ::close(_fd);
-    _fd = -1;
+    System::IODeviceImpl::close();
     _isConnected = false;
-  }
 }
 
 
@@ -134,13 +127,11 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
     log_debug("checking address information");
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
-        _fd = ::socket(it->ai_family, SOCK_STREAM, 0);
-        if (_fd < 0)
+        int fd = ::socket(it->ai_family, SOCK_STREAM, 0);
+        if (fd < 0)
             continue;
 
-        int flags = fcntl(_fd, F_GETFL);
-        flags |= O_NONBLOCK ;
-        fcntl(_fd, F_SETFL, O_NONBLOCK);
+        IODeviceImpl::open(fd, true);
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
@@ -177,7 +168,7 @@ void TcpSocketImpl::endConnect()
 {
     log_debug("ending connect");
 
-    if(_wfds)
+    if(_wfds && ! _socket.wbuf() )
     {
         FD_CLR( this->fd(), _wfds );
     }
@@ -211,10 +202,11 @@ void TcpSocketImpl::accept(TcpServer& server)
 
     //TODO ECONNABORTED EINTR EPERM
 
+    _isConnected = true;
     log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }
 
-
+/*
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
     return 0;
@@ -249,7 +241,7 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
     return 0;
 }
-
+*/
 
 bool TcpSocketImpl::wait(std::size_t msecs)
 {
@@ -277,12 +269,23 @@ bool TcpSocketImpl::wait(std::size_t msecs)
     FD_ZERO(&efds);
     if( this->fd() > 0 )
     {
-        FD_SET(this->fd(), &wfds);
+        if( ! _isConnected )
+        {
+            FD_SET(this->fd(), &wfds);
+        }
+        if( _socket.rbuf() )
+        {
+            FD_SET(this->fd(), &rfds);
+        }
+        if( _socket.wbuf() )
+        {
+            FD_SET(this->fd(), &wfds);
+        }
     }
 
     while( true )
     {
-        int ret = ::select(this->fd() + 1, 0, &wfds, 0, timeout);
+        int ret = ::select(this->fd() + 1, &rfds, &wfds, &efds, timeout);
         if( ret != -1 )
             break;
 
@@ -290,19 +293,10 @@ bool TcpSocketImpl::wait(std::size_t msecs)
             throw System::IOError( "select failed" );
     }
 
-    if( FD_ISSET(this->fd(), &wfds) )
-    {
-        if( ! _isConnected )
-        {
-            _socket.connected.send(_socket);
-            return true;
-        }
-    }
-
-    return false;
+    return this->checkEvent(rfds, wfds, efds);
 }
 
-
+/*
 void TcpSocketImpl::attach(System::SelectorBase& sb)
 {
     log_debug("attach to selector");
@@ -318,27 +312,28 @@ void TcpSocketImpl::detach(System::SelectorBase& sb)
     log_debug("detach from selector " << _fd);
     this->exitSelect();
 }
-
+*/
 
 int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::initSelect");
 
-    _rfds = &rfds;
-    _wfds = &wfds;
+    int ret = System::IODeviceImpl::initSelect(rfds, wfds, efds);
 
-    if( this->fd() > 0)
+    if( this->fd() > 0 )
     {
-        FD_SET(this->fd(), _wfds);
+        if( ! _isConnected )
+            FD_SET(this->fd(), _wfds);
     }
 
-    return this->fd();
+    return ret;
 }
 
-
+/*
 void TcpSocketImpl::exitSelect()
 {
     log_debug("TcpSocketImpl::exitSelect " << _fd);
+    return System::IODeviceImpl::exitSelect();
 
     if( _wfds && this->fd() > 0)
     {
@@ -353,25 +348,25 @@ void TcpSocketImpl::exitSelect()
     _rfds = 0;
     _wfds = 0;
 }
-
+*/
 
 int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::checkEvent");
 
+    int avail = 0;
+
     if( this->fd() < 0)
         return 0;
 
-    if( FD_ISSET(this->fd(), &wfds) )
+    if( ! _isConnected && FD_ISSET(this->fd(), &wfds) )
     {
-        if( ! _isConnected )
-        {
-            _socket.connected.send(_socket);
-            return 1;
-        }
+        _socket.connected.send(_socket);
+        ++avail;
     }
 
-    return 0;
+    avail += System::IODeviceImpl::checkEvent(rfds, wfds, efds);
+    return avail;
 }
 
 } // namespace Net

@@ -55,11 +55,8 @@ class TcpSocketImpl : public System::IODeviceImpl
     private:
         TcpSocket& _socket;
         bool _isConnected;
-        int _fd;
         std::size_t _timeout;
         struct sockaddr_storage _peeraddr;
-        fd_set* _rfds;
-        fd_set* _wfds;
 
     public:
         TcpSocketImpl(TcpSocket& socket);
@@ -67,9 +64,6 @@ class TcpSocketImpl : public System::IODeviceImpl
         ~TcpSocketImpl();
 
         std::string getSockAddr() const;
-
-        int fd() const
-        { return _fd; }
 
         void close();
 
@@ -89,7 +83,7 @@ class TcpSocketImpl : public System::IODeviceImpl
         void endConnect();
 
         void accept(TcpServer& server);
-
+/*
         size_t beginRead(char* buffer, size_t n, bool& eof);
 
         size_t endRead(bool& eof);
@@ -101,16 +95,16 @@ class TcpSocketImpl : public System::IODeviceImpl
         size_t endWrite();
 
         size_t write(const char* buffer, size_t count);
-
+*/
         bool wait(std::size_t msecs);
-
+/*
         void attach(System::SelectorBase& sb);
 
         void detach(System::SelectorBase& sb);
-
+*/
         virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-        virtual void exitSelect();
+//        virtual void exitSelect();
 
         virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };

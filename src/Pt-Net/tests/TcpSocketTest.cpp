@@ -41,33 +41,39 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         TcpSocketTest()
         : Pt::Unit::TestSuite("TcpSocketTest")
         {
-            this->registerMethod( "NonBlockingWithSelector", *this, &TcpSocketTest::NonBlockingWithSelector);
-            this->registerMethod( "NonBlockingWithWait", *this, &TcpSocketTest::NonBlockingWithWait);
+            this->registerMethod( "NonBlockingWithSelector", *this,
+                                  &TcpSocketTest::NonBlockingWithSelector);
+            this->registerMethod( "NonBlockingWithWait", *this,
+                                  &TcpSocketTest::NonBlockingWithWait);
         }
 
         void setUp()
         {
-
+            _acceptor = new Pt::Net::TcpSocket();
         }
 
         void tearDown()
         {
-
+            delete _acceptor;
         }
 
         void NonBlockingWithWait()
         {
             this->reportMessage("\nSTART");
-            
+
             Pt::Net::TcpServer server("127.0.0.1", 8000);
-            connect(server.connectionPending, *this, &TcpSocketTest::reply);        
+            connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
+
+            connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
 
             Pt::Net::TcpSocket client;
             client.beginConnect("127.0.0.1", 8000);
-            connect(client.connected, *this, &TcpSocketTest::request);
+            connect(client.connected, *this, &TcpSocketTest::onConnect);
+            connect(client.outputReady, *this, &TcpSocketTest::onOutput);
 
-            server.wait(2000);
-            client.wait(2000);
+            server.wait(1000);
+            client.wait(1000);
+            _acceptor->wait(1000);
             this->reportMessage("FINISHED");
         }
 
@@ -77,33 +83,61 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             Pt::System::Selector selector;
 
             Pt::Net::TcpServer server("127.0.0.1", 8000);
-            connect(server.connectionPending, *this, &TcpSocketTest::reply);
-            selector.add(server);            
+            connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
+            selector.add(server);
+
+            connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
+            selector.add(*_acceptor);
 
             Pt::Net::TcpSocket client;
             client.beginConnect("127.0.0.1", 8000);
-            connect(client.connected, *this, &TcpSocketTest::request);
+            connect(client.connected, *this, &TcpSocketTest::onConnect);
+            connect(client.outputReady, *this, &TcpSocketTest::onOutput);
             selector.add(client);
 
-            selector.wait(2000);
-            selector.wait(2000);
+            selector.wait(1000);
+            selector.wait(1000);
+            selector.wait(1000);
+            selector.wait(1000);
 
             this->reportMessage("FINISHED");
         }
 
-        void reply(Pt::Net::TcpServer& server)
+        void onAccept(Pt::Net::TcpServer& server)
         {
             this->reportMessage("CLIENT CONNECTION ACCEPTED");
-            Pt::Net::TcpSocket socket(server);
+            _acceptor->accept(server);
+            _acceptor->beginRead(input, 200);
         }
 
-        void request(Pt::Net::TcpSocket& socket)
+        void onConnect(Pt::Net::TcpSocket& socket)
         {
             this->reportMessage("CONNECTED TO SERVER");
             socket.endConnect();
+
+            static const char buffer[] = "Hello World !!!";
+            socket.beginWrite(buffer, sizeof(buffer));
+        }
+
+        void onInput(Pt::System::IODevice& device)
+        {
+            std::size_t n = device.endRead();
+            std::string msg("INPUT RECEIVED: ");
+            msg.append(input, n);
+            this->reportMessage(msg);
+            PT_UNIT_ASSERT(n > 5);
+        }
+
+        void onOutput(Pt::System::IODevice& device)
+        {
+            std::size_t n = device.endWrite();
+            this->reportMessage("OUTPUT SENT");
+            PT_UNIT_ASSERT(n > 5);
         }
 
     private:
+        Pt::Net::TcpSocket* _acceptor;
+        char input[200];
 
 };
 
