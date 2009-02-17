@@ -57,7 +57,7 @@ class TcpSocketImpl : public System::SelectableImpl
 {
 	private:
         SOCKET	      _fd;
-		SOCKADDR      _addr;
+		SOCKADDR      _peeraddr;
 		TcpSocket&    _socket;
 		WSAEVENT      _waitEvent;
 		std::size_t	  _timeout;
@@ -69,6 +69,8 @@ class TcpSocketImpl : public System::SelectableImpl
 		HANDLE		  _currentEventHandle;
 
 		void attachEvent(HANDLE ev, long events);
+		size_t checkReceiveResult(bool& eof);
+		size_t TcpSocketImpl::checkSendResult();
 
     public:
         TcpSocketImpl(TcpSocket& socket);
@@ -99,6 +101,8 @@ class TcpSocketImpl : public System::SelectableImpl
 		size_t write(const char* buffer, size_t count);
 
 		std::string getSockAddr() const;
+		
+		std::string getPeerAddr() const;
 
 		void setTimeout(std::size_t msecs)
 		{ 

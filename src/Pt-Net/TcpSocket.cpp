@@ -205,7 +205,8 @@ System::SelectableImpl& TcpSocket::simpl()
 
 System::IODeviceImpl& TcpSocket::ioimpl()
 {
-    return *_impl;
+	System::IODeviceImpl* dev = (System::IODeviceImpl*)  _impl;
+    return *dev;
 }
 
 } // namespace Net

@@ -44,14 +44,17 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
 {
-	memset(&_connectOverlapped, 0, sizeof(WSAOVERLAPPED));
 	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
 	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
 
-	_currentEventHandle = _waitEvent;
+	//NOTE: We have 2 handle one from _waitEvent and may be one from selector
+	// If we have a selector handle is this the _currentEventHandle if don't have
+	// a selector handle is the _currentEventHandle the _waitEvent.
+	// If an event occure than the _currentEventHandle is signalized.
+	// The wait method use the _currentEventHandle for wait. A better idee?
+	_currentEventHandle		  = _waitEvent;
 	_sendOverlapped.hEvent	  = _currentEventHandle;
 	_receiveOverlapped.hEvent = _currentEventHandle;
-	_sendOverlapped.hEvent	  = _currentEventHandle;
 }
 
 TcpSocketImpl::~TcpSocketImpl()
@@ -73,7 +76,9 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
         throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
     }
 
-	attachEvent(_waitEvent, FD_CONNECT|FD_WRITE|FD_READ);
+	attachEvent(_currentEventHandle, FD_CONNECT | FD_READ | FD_WRITE);
+	_sendOverlapped.hEvent    = _currentEventHandle;
+	_receiveOverlapped.hEvent = _currentEventHandle;
 }
 
 void TcpSocketImpl::close()
@@ -105,42 +110,14 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
         try
         {
 			this->create(it->ai_family, SOCK_STREAM, 0);
-
-			_sendOverlapped.hEvent    = _currentEventHandle;
-			_receiveOverlapped.hEvent = _currentEventHandle;
-			_connectOverlapped.hEvent = _currentEventHandle;
-
-			attachEvent(_currentEventHandle, FD_CONNECT|FD_READ|FD_WRITE);
         }
         catch (const System::SystemError&)
         {
           continue;
         }
 
-  	    DWORD dwBytesSent = 0;
+		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
-		// Load ConnectEx
-		GUID GuidConnectEx = WSAID_CONNECTEX;
-		LPFN_CONNECTEX lpfnConnectEx = NULL;
-		DWORD dwBytes = 0;
-
-		if( WSAIoctl(_fd, SIO_GET_EXTENSION_FUNCTION_POINTER, &GuidConnectEx, sizeof(GuidConnectEx), &lpfnConnectEx, sizeof(lpfnConnectEx), &dwBytes, NULL, NULL ) == SOCKET_ERROR )
-		{
-			close();
-			throw System::SystemError("connect failed");
-		}
-
-		// Connect to server.
-		if( lpfnConnectEx(_fd, it->ai_addr, (int)it->ai_addrlen, NULL, 0, &dwBytesSent, &_connectOverlapped) == FALSE)
-		{
-			if( WSAGetLastError() != ERROR_IO_PENDING)
-			{
-				close();
-				throw System::SystemError("connect failed");
-			}
-		}		
-
-/* NOTE: das klapt 
 		if( ::connect(_fd, it->ai_addr, (int)it->ai_addrlen) == SOCKET_ERROR)
 		{
 			if( WSAGetLastError() != WSAEWOULDBLOCK)
@@ -149,9 +126,9 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 				throw System::SystemError("connect failed");
 			}
 		}
-*/		
-		 std::memmove(&_addr, it->ai_addr, it->ai_addrlen);
-         return true;
+
+		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        return true;
     }
 
 	close();
@@ -161,14 +138,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
 void TcpSocketImpl::endConnect()
 {
-	DWORD bytes;
-	DWORD flags;
-    BOOL rc = WSAGetOverlappedResult(_fd, &_connectOverlapped, &bytes, FALSE, &flags);
-    
-	if (rc == FALSE) 
-		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
-
-	WSAResetEvent(_connectOverlapped.hEvent);
+	//Not needed.
 }
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
@@ -191,8 +161,7 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 
 void TcpSocketImpl::accept(TcpServer& server)
 {
-	_fd =  WSAAccept(server.impl().fd(), NULL,NULL,NULL,0);
-//	_fd = ::accept(server.impl().fd(), NULL,NULL);
+	_fd =  WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
 
 	if( _fd == INVALID_SOCKET)
 	      throw System::SystemError("accept");
@@ -236,7 +205,6 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 		
 		_sendOverlapped.hEvent = _currentEventHandle;
 		_receiveOverlapped.hEvent = _currentEventHandle;
-		_connectOverlapped.hEvent = _currentEventHandle;
 
 		avail = checkEvent();
 	}
@@ -255,13 +223,29 @@ void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 
 std::string TcpSocketImpl::getSockAddr() const
 {
-	return _addr.sa_data;
+	SOCKADDR sockadr;
+	int len = sizeof(sockadr);
+	int ret = getsockname(_fd, &sockadr, &len);
+
+	if( ret == SOCKET_ERROR)
+		throw System::SystemError( PT_ERROR_MSG("getSockAddr failed") );
+
+	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&sockadr);
+    return inet_ntoa(sa->sin_addr);
+}
+
+std::string TcpSocketImpl::getPeerAddr() const
+{
+	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
+    return inet_ntoa(sa->sin_addr);
 }
 
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
 	DWORD numberOfBytesRecvd = 0;
-	DWORD flags = 0;
+	DWORD flags = MSG_PEEK; // NOTE: We don't remove the data only peek it => WSARecv generate a FD_READ event if data available
+	                        // If we read out the data no event is generated, we can not later decided if an event occurres or not.
+	                        // A better idee? May be a flag or direct emit the event?
 
 	_receiveBuffer.buf = buffer;
 	_receiveBuffer.len = n;
@@ -279,24 +263,59 @@ size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 
 size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-	int numberOfBytesRecvd = recv(_fd, buffer, count, 0);
-	
-	if( numberOfBytesRecvd == SOCKET_ERROR )
-		throw System::SystemError( PT_ERROR_MSG("recv failed") );
-
-	return static_cast<size_t>(numberOfBytesRecvd);
+	return 0;
 }
 
 size_t TcpSocketImpl::endRead(bool& eof)
 {
-	DWORD bytes;
-	DWORD flags;
-    BOOL rc = WSAGetOverlappedResult(_fd, &_receiveOverlapped, &bytes, FALSE, &flags);
-    
-	if (rc == FALSE) 
-		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
+	DWORD bytes = 0;
+	DWORD flags = 0;
+
+	//NOTE: Clear the internal read buffer from WSARecv (A better idee?)
+	if(WSARecv(_fd, &_receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
+		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+
+	bytes = checkReceiveResult(eof);
+
+	if(bytes > 0)
+	{
+		WSAResetEvent(_receiveOverlapped.hEvent);
+		return bytes;
+	}
+
+	if(!this->wait(_timeout))
+	{
+		eof = true;
+		return 0;
+	}
+	
+	bytes = checkReceiveResult(eof);
+
+	if(bytes == 0)
+		eof = true;
 
 	WSAResetEvent(_receiveOverlapped.hEvent);
+
+	return bytes;
+}
+
+size_t TcpSocketImpl::checkReceiveResult(bool& eof)
+{
+	DWORD bytes = 0;
+	DWORD flags = 0;
+
+	BOOL rc = WSAGetOverlappedResult(_fd, &_receiveOverlapped, &bytes, FALSE, &flags);
+
+	if (rc == FALSE) 
+	{
+		int err = WSAGetLastError();
+		
+		if( err == WSAECONNRESET)
+			eof = true;
+		else
+			throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+	}
+
 	return bytes;
 }
 
@@ -318,6 +337,21 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 
 size_t TcpSocketImpl::endWrite()
 {
+	size_t bytes = checkSendResult();
+	if( bytes > 0)
+	{
+		WSAResetEvent(_sendOverlapped.hEvent);
+		return bytes;
+	}
+
+	this->wait(_timeout);
+	WSAResetEvent(_sendOverlapped.hEvent);
+
+	return checkSendResult();
+}
+
+size_t TcpSocketImpl::checkSendResult()
+{
 	DWORD sendBytes;
 	DWORD flags;
     BOOL rc = WSAGetOverlappedResult(_fd, &_sendOverlapped, &sendBytes, FALSE, &flags);
@@ -325,18 +359,12 @@ size_t TcpSocketImpl::endWrite()
 	if (rc == FALSE) 
 		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
 
-	WSAResetEvent(_sendOverlapped.hEvent);
 	return sendBytes;
 }
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-	int numberOfBytesSend = send( _fd, buffer, static_cast<int>(count), 0);
-	
-	if( numberOfBytesSend == SOCKET_ERROR )
-		throw System::SystemError( PT_ERROR_MSG("recv failed") );
-
-	return static_cast<size_t>(numberOfBytesSend);
+	return 0;
 }
 
 bool TcpSocketImpl::checkEvent()
@@ -345,7 +373,7 @@ bool TcpSocketImpl::checkEvent()
 
     WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd, 0, &events) == SOCKET_ERROR)
+    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");
 
 	bool ev = false;
