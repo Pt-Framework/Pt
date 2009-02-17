@@ -54,6 +54,8 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         std::string getSockAddr() const;
 
+        std::string getPeerAddr() const;
+
         void setTimeout(std::size_t msecs);
 
         std::size_t timeout() const;

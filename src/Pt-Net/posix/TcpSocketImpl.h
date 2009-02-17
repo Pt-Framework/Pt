@@ -65,6 +65,8 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         std::string getSockAddr() const;
 
+        std::string getPeerAddr() const;
+
         void close();
 
         void setTimeout(std::size_t msecs)

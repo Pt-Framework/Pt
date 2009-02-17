@@ -104,15 +104,17 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void onAccept(Pt::Net::TcpServer& server)
         {
             _acceptor->accept(server);
-            this->reportMessage("ACCEPTED IP: " + _acceptor->getSockAddr() + " PEER: ");
+            this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
+                                 " PEER: " + _acceptor->getPeerAddr() );
 
             _acceptor->beginRead(input, 200);
         }
 
         void onConnect(Pt::Net::TcpSocket& socket)
         {
-            this->reportMessage("CONNECTED IP: " + socket.getSockAddr() + " PEER: ");
             socket.endConnect();
+            this->reportMessage( "CONNECTED IP: " + socket.getSockAddr() +
+                                 " PEER: " + socket.getPeerAddr() );
 
             static const char buffer[] = "Hello World !!!";
             socket.beginWrite(buffer, sizeof(buffer));
