@@ -100,7 +100,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
         ret = ::read(_fd, (void*)buffer, count);
         eof = (ret == 0) ;
 
-        if(ret >= 0)
+        if(ret >= 0 || errno == ECONNRESET)
             break;
 
         if(errno == EINTR) // signal interrupt
@@ -162,7 +162,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
     {
         ret = ::write(_fd, (const void*)buffer, count);
 
-        if(ret >= 0)
+        if(ret >= 0 || errno == ECONNRESET || errno == EPIPE)
             break;
 
         if(errno == EINTR) // signal interrupt
