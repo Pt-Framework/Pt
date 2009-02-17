@@ -225,42 +225,47 @@ void TcpSocketImpl::accept(TcpServer& server)
     log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }
 
-/*
-size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
-{
-    return 0;
-}
-
 
 size_t TcpSocketImpl::endRead(bool& eof)
 {
-    return 0;
-}
+    size_t n = IODeviceImpl::endRead(eof);
+    if(n > 0)
+    {
+        return n;
+    }
 
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(this->fd(), &rfds);
+    bool ret = this->wait(_timeout, &rfds, 0, 0);
+    if(false == ret)
+    {
+        throw System::IOTimeout();
+    }
 
-size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
-{
-    return 0;
-}
-
-
-size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
-{
-    return 0;
+    return IODeviceImpl::endRead(eof);
 }
 
 
 size_t TcpSocketImpl::endWrite()
 {
-    return 0;
-}
+    size_t n = IODeviceImpl::endWrite();
+    if(n > 0)
+    {
+        return n;
+    }
 
+    fd_set wfds;
+    FD_ZERO(&wfds);
+    FD_SET(this->fd(), &wfds);
+    bool ret = this->wait(_timeout, 0, &wfds, 0);
+    if(false == ret)
+    {
+        throw System::IOTimeout();
+    }
 
-size_t TcpSocketImpl::write(const char* buffer, size_t count)
-{
-    return 0;
+    return IODeviceImpl::endWrite();
 }
-*/
 
 
 void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
