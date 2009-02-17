@@ -69,7 +69,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-	_fd = WSASocket(domain, type, protocol, NULL ,0,WSA_FLAG_OVERLAPPED);
+	_fd = WSASocket(domain, type, protocol, NULL , 0, WSA_FLAG_OVERLAPPED);
 
     if (_fd == INVALID_SOCKET)
     {
@@ -163,8 +163,6 @@ bool TcpServerImpl::wait(std::size_t umsecs)
     log_debug("wait " << msecs);
 
     // convert unsigned to signed
-	//NOTE: Die logik verstehen ich nicht=> WSAWaitForMultipleEvents erwartet ein DWORD 32Bit unsigned in millsec???
-	// warum ein signed draus machen?
     int msecs = umsecs;
 	if(umsecs == Pt::System::SelectorBase::WaitInfinite) 
     {

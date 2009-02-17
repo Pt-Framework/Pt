@@ -72,8 +72,8 @@ class TcpServerImpl : public System::SelectableImpl
 
         void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
-        int fd() const
-        { return 0; }
+        inline SOCKET fd() const
+        { return _fd; }
 
         bool wait(std::size_t msecs);
 

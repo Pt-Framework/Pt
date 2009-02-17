@@ -29,10 +29,18 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include "Pt/Net/Api.h"
 #include "Pt/Signal.h"
 #include "SelectableImpl.h"
+#include "SelectableImpl.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <string>
+#include <windows.h>
 
 namespace Pt {
 
@@ -47,58 +55,73 @@ class TcpSocket;
 
 class TcpSocketImpl : public System::SelectableImpl
 {
-    private:
-        bool _isConnected;
-        std::size_t _timeout;
+	private:
+        SOCKET	      _fd;
+		SOCKADDR      _addr;
+		TcpSocket&    _socket;
+		WSAEVENT      _waitEvent;
+		std::size_t	  _timeout;
+		WSAOVERLAPPED _connectOverlapped;
+		WSAOVERLAPPED _sendOverlapped;
+		WSAOVERLAPPED _receiveOverlapped;
+		WSABUF        _receiveBuffer;
+		WSABUF        _sendBuffer;
+		HANDLE		  _currentEventHandle;
+
+		void attachEvent(HANDLE ev, long events);
 
     public:
         TcpSocketImpl(TcpSocket& socket);
+		~TcpSocketImpl();
 
-        ~TcpSocketImpl();
-
-        std::string getSockAddr() const;
+		void create(int domain, int type, int protocol);
 
         void close();
 
-        void setTimeout(std::size_t msecs)
-        { _timeout = msecs; }
-
-        std::size_t timeout() const
-        { return _timeout; }
-
         void accept(TcpServer& server);
-
-        bool isConnected() const
-        { return _isConnected; }
 
         void connect(const std::string& ipaddr, unsigned short int port);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port)
-        {return false;}
+        bool beginConnect(const std::string& ipaddr, unsigned short int port);
 
-        void endConnect()
-        {}
+        void endConnect();             		
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+		size_t beginRead(char* buffer, size_t n, bool& eof);
 
-        size_t endRead(bool& eof);
+		size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t read(char* buffer, size_t count, bool& eof);
+		size_t endRead(bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+		size_t beginWrite(const char* buffer, size_t n);
 
-        size_t endWrite();
+		size_t endWrite();
 
-        size_t write(const char* buffer, size_t count);
+		size_t write(const char* buffer, size_t count);
 
-        bool wait(std::size_t msecs)
-        { return false; }
+		std::string getSockAddr() const;
+
+		void setTimeout(std::size_t msecs)
+		{ 
+			_timeout = msecs;
+		}
+		
+		std::size_t timeout() const
+		{
+			return _timeout;
+		}
+			
+        bool wait(std::size_t msecs);
 
         void attach(System::SelectorBase& sb)
         { }
 
-        void detach(System::SelectorBase& sb)
-        { }
+        void detach(System::SelectorBase& sb);
+
+		bool setWaitHandle(HANDLE h, bool& avail);
+
+		void getWaitHandles(System::HandleMap& handles, bool& avail);
+
+		bool checkEvent();
 };
 
 } // namespace Net
