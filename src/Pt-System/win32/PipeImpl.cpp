@@ -196,6 +196,10 @@ void PipeIODevice::onAttach(SelectorBase& s)
 
 void PipeIODevice::onDetach(SelectorBase& s)
 {
+    // handle the case when we were added to a Selector and beginRead
+    // was called with data possibly available. setWaitHandle() will
+    // cancel the overlapped operation or set the active flag in which
+    // case we set Avail so the next waiter knows data is available
     bool active = false;
     this->setWaitHandle(_waitHandle, active);
 
