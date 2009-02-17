@@ -95,8 +95,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         void setEnabled(bool isEnabled);
 
         //TODO: tell Selector more specifically what changed
-        //      add following methods to Selector:
-        //      onEnable() onDisable()
+        //      add onReinit() to Selector:
         //      pass old state as second arg with onChanged()
         void setState(State state);
 
