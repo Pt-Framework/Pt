@@ -65,7 +65,7 @@ PipeIODevice::~PipeIODevice()
     catch(...)
     {
     }
-    
+
     ::CloseHandle(_waitHandle);
 }
 
@@ -99,7 +99,7 @@ bool PipeIODevice::onWait(std::size_t msecs)
     }
 
     DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
-    
+
     if(result == WAIT_OBJECT_0)
     {
         this->checkEvent();
@@ -108,15 +108,26 @@ bool PipeIODevice::onWait(std::size_t msecs)
 
     if(result != WAIT_TIMEOUT)
         throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
-          
+
     return false;
 }
 
 
 bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 {
+    // set avail to true if data is immediately available. This will
+    // let the Selector check the other Selectables with a timeout of
+    // 0 and call checkEvent on this object
+
+    // the previous handle might be this objects event handle
+    // or the one assigned by the Selector
     HANDLE prevHandle = _readOv.hEvent;
 
+    // if the handle changes, we need to stop any previous I/O operation
+    // unless it has already completed. _rbuf is set by an IODevice when
+    // beginRead has been called. The event handle is NULL when this
+    // method is called for the first time. If either one is not set, then
+    // there were no I/O operations scheduled before.
     if( prevHandle != h )
     {
         if(_rbuf && _readOv.hEvent)
@@ -130,7 +141,11 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
         _readOv.hEvent = h;
         _writeOv.hEvent = h;
     }
-    
+
+    // If _rbuf is set by IODevice::beginRead but the previous event used in
+    // the overlapped structs is NULL, IODevice::beginRead was called before
+    // the IODevice was added to a Selector or IODevice::wait was called for
+    // the first time.
     if( ! prevHandle && _rbuf )
     {
         bool eof = false;
@@ -141,13 +156,15 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
         this->setEof(eof);
     }
 
+    // see above. onBeginWrite could not do anything when it was called
     if( ! prevHandle && _wbuf)
     {
         size_t n = this->onBeginWrite(_wbuf, _wbuflen);
         if(n > 0)
             avail = true;
     }
- 
+
+    // we accept the HANDLE h
     return true;
 }
 
@@ -161,7 +178,7 @@ bool PipeIODevice::checkEvent()
         outputReady.send(*this);
         avail = true;
     }
-    
+
     if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
     {
         inputReady.send(*this);
@@ -181,17 +198,22 @@ void PipeIODevice::onDetach(SelectorBase& s)
 {
     bool active = false;
     this->setWaitHandle(_waitHandle, active);
-    
+
     if(active)
         this->setState(Selectable::Avail);
 }
 
 
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
-{  
+{
+    // IODevice::beginRead was called before the IODevice was added to
+    // a selector or IODevice::wait was called for the first time
     if(_readOv.hEvent == NULL)
         return 0;
 
+    // if we can can read data immediately, we return the number of bytes
+    // that were read, so the Selector calls checkEvent on us even if the
+    // event in the overlapped struct is not fired
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
@@ -205,10 +227,10 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
         {
             return 0;
         }
-        
+
         throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
     }
-    
+
     return readBytes;
 }
 
@@ -221,11 +243,15 @@ size_t PipeIODevice::onEndRead(bool& eof)
         return 0;
     }
 
+    // a IODevice::beginRead outside a Selector was followed by an endRead
+    // This happens when the IODevice is async, but used synchronously
     if(_readOv.hEvent == NULL)
     {
         return this->onRead(_rbuf, _rbuflen, eof);
     }
 
+    // finishes the overlapped operation. Blocks until data is available
+    // This was beginRead can be ended by endRead without a wait step.
     DWORD readBytes = 0;
     if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
