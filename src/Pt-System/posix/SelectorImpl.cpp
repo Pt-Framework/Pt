@@ -123,6 +123,14 @@ void SelectorImpl::remove(Selectable& s)
 
 void SelectorImpl::changed(Selectable& s)
 {
+    if( s.avail() )
+    {
+        _avail.insert(&s);
+    }
+    else
+    {
+        _avail.erase(&s);
+    }
 }
 
 
@@ -132,7 +140,9 @@ bool SelectorImpl::wait(std::size_t msecs)
     fd_set wfds = _wfds;
     fd_set efds = _efds;
 
-    int avail = 0;
+    msecs = _avail.size() ? 0 : msecs;
+    int avail = -1;
+
     while( true )
     {
         struct timeval* timeout = 0;
@@ -148,13 +158,13 @@ bool SelectorImpl::wait(std::size_t msecs)
         avail = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
         Pt::int64_t elapsed = _clock.stop().totalMSecs();
 
-        if( avail > 0 )
-            break;
-
         if( avail < 0 && errno != EINTR )
         {
             throw IOError( PT_ERROR_MSG("select failed") );
         }
+
+        if( avail > 0 || _avail.size() )
+            break;
 
         if(msecs == SelectorBase::WaitInfinite)
             continue;
