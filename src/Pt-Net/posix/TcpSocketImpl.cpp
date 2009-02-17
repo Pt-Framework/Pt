@@ -94,47 +94,34 @@ void TcpSocketImpl::close()
 
 std::string TcpSocketImpl::getSockAddr() const
 {
-    return "";
+    struct sockaddr_storage addr;
+
+    socklen_t slen = sizeof(addr);
+    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
+        throw System::SystemError("getsockname");
+
+    std::string ret;
+    formatIp(addr, ret);
+    return ret;
 }
 
 
 void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
     log_debug("connect to " << ipaddr << " port " << port);
-
-    bool isConnected = this->beginConnect(ipaddr, port);
-    if( ! isConnected )
-    {
-        try
-        {
-            if( this->fd() > FD_SETSIZE )
-            {
-                throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-            }
-
-            fd_set wfds;
-            FD_ZERO(&wfds);
-            FD_SET(this->fd(), &wfds);
-            bool ret = this->wait(_timeout, 0, &wfds, 0);
-            if(false == ret)
-            {
-                throw System::IOTimeout();
-            }
-
-            this->endConnect();
-        }
-        catch(...)
-        {
-            close();
-            throw;
-        }
-    }
+    this->beginConnect(ipaddr, port);
+    this->endConnect();
 }
 
 
 bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
 {
     log_debug("begin connect to " << ipaddr << " port " << port);
+
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
 
     AddrInfo ai(ipaddr, port);
 
@@ -187,21 +174,39 @@ void TcpSocketImpl::endConnect()
         FD_CLR( this->fd(), _wfds );
     }
 
-    int sockerr;
-    socklen_t optlen = sizeof(sockerr);
-    if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+    if( ! _isConnected )
     {
-        this->close();
-        throw System::SystemError("getsockopt");
-    }
+        try
+        {
+            fd_set wfds;
+            FD_ZERO(&wfds);
+            FD_SET(this->fd(), &wfds);
+            bool ret = this->wait(_timeout, 0, &wfds, 0);
+            if(false == ret)
+            {
+                throw System::IOTimeout();
+            }
 
-    if(sockerr != 0)
-    {
-        this->close();
-        throw System::SystemError("connect");
-    }
+            int sockerr;
+            socklen_t optlen = sizeof(sockerr);
+            if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+            {
+                throw System::SystemError("getsockopt");
+            }
 
-    _isConnected = true;
+            if(sockerr != 0)
+            {
+                throw System::SystemError("connect");
+            }
+
+            _isConnected = true;
+        }
+        catch(...)
+        {
+            close();
+            throw;
+        }
+    }
 }
 
 
