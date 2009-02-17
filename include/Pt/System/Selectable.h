@@ -94,6 +94,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Sets or unsets the device enabled
         void setEnabled(bool isEnabled);
 
+        //TODO: tell Selector more specifically what changed
         void setState(State state);
 
         //! @brief Closes the Selector
