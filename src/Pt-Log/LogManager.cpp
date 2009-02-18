@@ -87,7 +87,7 @@ LogManager::LogManager()
 
 LogManager::~LogManager()
 {
-    ///_logger->beginLog(PT_SOURCEINFO) << info << "Logging system shutdown" << endlog;
+    _logger->beginLog(PT_SOURCEINFO) << info << "Logging system shutdown" << endlog;
 
     // logger for Pt::Log
     delete _logger;
@@ -153,7 +153,7 @@ Target& LogManager::target(const std::string& name)
 
         if( token.empty() )
         {
-            ///_logger->beginLog(PT_SOURCEINFO) << error << "invalid target: " << name << endlog;
+            _logger->beginLog(PT_SOURCEINFO) << error << "invalid target: " << name << endlog;
             throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
         }
 
@@ -168,7 +168,7 @@ Target& LogManager::target(const std::string& name)
         begin = end + 1;
         if( begin >= name.size() )
         {
-            ///_logger->beginLog(PT_SOURCEINFO) << error << "invalid target: " << name << endlog;
+            _logger->beginLog(PT_SOURCEINFO) << error << "invalid target: " << name << endlog;
             throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
         }
 
@@ -178,7 +178,7 @@ Target& LogManager::target(const std::string& name)
         std::map<std::string, Target*>::iterator it = _targetMap.find(targetName);
         if( it != _targetMap.end() )
         {
-            ///_logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
+            _logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
             foundTarget = it->second;
             if (foundTarget->logLevelExplicitelySet())
             {
@@ -187,7 +187,7 @@ Target& LogManager::target(const std::string& name)
         }
         else
         {
-            ///_logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName << ", parent: " << foundTarget->name() << endlog;
+            _logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName << ", parent: " << foundTarget->name() << endlog;
             foundTarget = new Target(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
 
@@ -220,26 +220,26 @@ void LogManager::updateChildLogLevels(Target &target)
 
     std::string::size_type startPos;
     std::string::size_type endPos;
-    
+
     std::map<std::string, Target*>::iterator it;
     for (it = _targetMap.upper_bound(targetName); it != _targetMap.end(); ++it)
     {
         Target* foundTarget = it->second;
-        
+
         const std::string& childTargetName = foundTarget->name();
         startPos = childTargetName.find(targetName);
-        
+
         if (startPos != 0)
         {
             break;  // It's not a child. Leave this loop/method.
         }
-        
+
         // Is it a direct child? Update the target's log level and descent recursivly.
         endPos = childTargetName.find(".", targetName.size());
         if (endPos == std::string::npos && !foundTarget->logLevelExplicitelySet())
-        {            
+        {
             foundTarget->setLogLevelImplicitely(target.logLevel());
-            LogManager::instance().updateChildLogLevels(*foundTarget);            
+            LogManager::instance().updateChildLogLevels(*foundTarget);
         }
     }
 }
@@ -251,7 +251,7 @@ void LogManager::setChannel(Target& target, const std::string& url)
 
     Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
 
-    ///_logger->beginLog(PT_SOURCEINFO) << info << target.name()<< " set to " << url << endlog;
+    _logger->beginLog(PT_SOURCEINFO) << info << target.name()<< " set to " << url << endlog;
 
     Channel& chan = this->channel(url);
     target.assignChannel( chan );
@@ -293,7 +293,7 @@ Channel& LogManager::channel(const std::string& url)
     size_t colon = url.find(':');
     if(colon == std::string::npos)
     {
-        ///_logger->beginLog(PT_SOURCEINFO) << error << "invalid channel url: " << url << endlog;
+        _logger->beginLog(PT_SOURCEINFO) << error << "invalid channel url: " << url << endlog;
         throw  std::invalid_argument("Invalid channel url" + PT_SOURCEINFO);
     }
 
@@ -302,14 +302,14 @@ Channel& LogManager::channel(const std::string& url)
     Channel* ch = _pluginManager.create(protocol);
     if(ch == 0)
     {
-        ///_logger->beginLog(PT_SOURCEINFO) << error << "No such channel: " << url << endlog;
+        _logger->beginLog(PT_SOURCEINFO) << error << "No such channel: " << url << endlog;
         throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
     }
 
 
     // TODO: handle exceptions from open()
     ch->open(url);
-    ///_logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
+    _logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
 
     _channelMap[url] =  ch;
     return *ch;
