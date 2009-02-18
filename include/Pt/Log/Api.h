@@ -36,6 +36,10 @@
 #    define PT_LOG_API PT_IMPORT
 #  endif
 
+#define PT_LOG_VERSION_MAJOR 1
+#define PT_LOG_VERSION_MINOR 0
+#define PT_LOG_VERSION_REVISION 0
+
 /** @defgroup Logging Logging
     @brief Configurable and thread-safe logging framework
 
