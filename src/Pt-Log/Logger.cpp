@@ -28,48 +28,33 @@
 #include "LogManager.h"
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
-#include <memory>
-
+#include "Pt/System/Clock.h"
+#include <iostream>
 
 namespace Pt {
 
 namespace Log {
 
-Logger::Logger(const std::string& name, LogLevel level)
+Logger::Logger(const std::string& name)
 : _target( &LogManager::instance().target(name) )
-, _level(level)
-//, _msg( 0 )
-//, _mutex()
 {
-    //_msg = this->init( name, level );
 }
 
 
-Logger::Logger(Target& target, LogLevel level)
+Logger::Logger(Target& target)
 : _target( &target )
-, _level(level)
-//, _msg( 0 )
 {
-    //_msg = this->init( target.name(), level );
 }
 
 
 Logger::~Logger()
 {
-    //delete _msg;
 }
-
-
-/*void Logger::setLogLevel(LogLevel level)
-{
-    _level = level;
-    //_msg->setLogLevel(level);
-}*/
 
 
 LogLevel Logger::logLevel() const
 {
-    return _level;
+    return _target->logLevel();
 }
 
 
@@ -79,126 +64,24 @@ Target& Logger::target() const
 }
 
 
-/*Logger& Logger::beginLog(const Pt::SourceInfo& si)
+bool Logger::enabled(LogLevel level) const
 {
-    if( this->enabled() )
+    return level <= _target->logLevel();
+}
+
+
+void Message::send()
+{
+    if( _logger->enabled(_level) )
     {
-        Pt::System::MutexLock lock(_mutex);
-        _msg->setSourceInfo(si);
-        _msg->setTimestamp( System::Clock::getLocalTime() );
-    }
-
-    return *this;
-}*/
-
-/*
-Logger& Logger::trace(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::trace(*this);
-}
-
-
-Logger& Logger::debug(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::debug(*this);
-}
-
-
-Logger& Logger::info(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::info(*this);
-}
-
-
-Logger& Logger::warn(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::warn(*this);
-}
-
-
-Logger& Logger::error(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::error(*this);
-}
-
-
-Logger& Logger::fatal(const Pt::SourceInfo& si)
-{
-    this->beginLog(si);
-    return Pt::Log::fatal(*this);
-}
-
-
-Logger& Logger::trace()
-{
-    return Pt::Log::trace(*this);
-}
-
-
-Logger& Logger::debug()
-{
-    return Pt::Log::debug(*this);
-}
-
-
-Logger& Logger::info()
-{
-    return Pt::Log::info(*this);
-}
-
-
-Logger& Logger::warn()
-{
-    return Pt::Log::warn(*this);
-}
-
-
-Logger& Logger::error()
-{
-    return Pt::Log::error(*this);
-}
-
-
-Logger& Logger::fatal()
-{
-    return Pt::Log::fatal(*this);
-}
-*/
-/*
-void Logger::endlog()
-{
-    if( this->enabled() )
-    {
-        Pt::System::MutexLock lock(_mutex);
-        _msg->setText(_ss.str() );
-        _target->log( *_msg );
-
-        _ss.str("");
-        _ss.clear();
+        _target = _logger->target().name();
+        setTimestamp( System::Clock::getLocalTime() );
+        setThreadId(0);
+        setProcessId(0);
+        setTimestamp( System::Clock::getLocalTime() );
+        _logger->target().log( *this );
     }
 }
-*/
-
-bool Logger::enabled() const
-{
-    return this->logLevel() <= _target->logLevel();
-}
-
-
-/*Message* Logger::init(const std::string& name, LogLevel level)
-{
-    std::auto_ptr<Message> msg( new Message(name, level) );
-    msg->setThreadId(0);
-    msg->setProcessId(0);
-    msg->setTimestamp( System::Clock::getLocalTime() );
-    return msg.release();
-}*/
-
 
 } // namespace Log
 
