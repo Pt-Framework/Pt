@@ -47,11 +47,6 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
 	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
 
-	//NOTE: We have 2 handle one from _waitEvent and may be one from selector
-	// If we have a selector handle is this the _currentEventHandle if don't have
-	// a selector handle is the _currentEventHandle the _waitEvent.
-	// If an event occure than the _currentEventHandle is signalized.
-	// The wait method use the _currentEventHandle for wait. A better idee?
 	_currentEventHandle		  = _waitEvent;
 	_sendOverlapped.hEvent	  = _currentEventHandle;
 	_receiveOverlapped.hEvent = _currentEventHandle;
@@ -94,7 +89,7 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
     bool isConnected = this->beginConnect(ipaddr, port);
 
-    if( ! isConnected )
+    if( !isConnected )
     {
         this->wait(_timeout);
         this->endConnect();
@@ -116,11 +111,16 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
           continue;
         }
 
-		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);		
 
 		if( ::connect(_fd, it->ai_addr, (int)it->ai_addrlen) == SOCKET_ERROR)
 		{
-			if( WSAGetLastError() != WSAEWOULDBLOCK)
+			if( WSAGetLastError() == WSAEWOULDBLOCK)
+			{
+				std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+				return false;
+			}
+			else
 			{
 				close();
 				throw System::SystemError("connect failed");
@@ -132,13 +132,12 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
     }
 
 	close();
-    throw System::SystemError("bind");
+    throw System::SystemError("connect failed");
 	return false;
 }
 
 void TcpSocketImpl::endConnect()
 {
-	//Not needed.
 }
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
@@ -154,7 +153,7 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
-        log_debug("Set event failed: "<< WSAGetLastError());
+        log_debug("set event failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("attach event to socket failed") );
     }
 }
@@ -178,7 +177,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     {
         msecs = INFINITE;
     }
-    else if( umsecs > std::numeric_limits<int>::max() )
+    else if( umsecs > static_cast<size_t>(std::numeric_limits<int>::max()))
     {
         msecs = std::numeric_limits<int>::max();
     }
@@ -242,23 +241,11 @@ std::string TcpSocketImpl::getPeerAddr() const
 
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-	DWORD numberOfBytesRecvd = 0;
-	DWORD flags = MSG_PEEK; // NOTE: We don't remove the data only peek it => WSARecv generate a FD_READ event if data available
-	                        // If we read out the data no event is generated, we can not later decided if an event occurres or not.
-	                        // A better idee? May be a flag or direct emit the event?
-
 	_receiveBuffer.buf = buffer;
 	_receiveBuffer.len = n;
 
-	int rc = WSARecv(_fd, &_receiveBuffer, 1, &numberOfBytesRecvd, &flags, &_receiveOverlapped, NULL);
-	
-	if (rc == SOCKET_ERROR && (WSA_IO_PENDING == WSAGetLastError()))
-		return numberOfBytesRecvd;
-
-	if( rc == SOCKET_ERROR)
-		throw System::SystemError( PT_ERROR_MSG("WSARecv failed") );
-
-	return numberOfBytesRecvd;
+	attachEvent(_currentEventHandle, FD_CONNECT | FD_READ | FD_WRITE);
+	return 0;
 }
 
 size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
@@ -271,7 +258,6 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	DWORD bytes = 0;
 	DWORD flags = 0;
 
-	//NOTE: Clear the internal read buffer from WSARecv (A better idee?)
 	if(WSARecv(_fd, &_receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
 		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 
