@@ -234,64 +234,6 @@ void TcpSocketImpl::accept(TcpServer& server)
 }
 
 
-/*size_t TcpSocketImpl::endRead(bool& eof)
-{
-    ssize_t n = 0;
-    while(true)
-    {
-        n = ::read( _fd, _device.rbuf(), _device.rbuflen() );
-        eof = (n == 0) ;
-
-        if(n >= 0)
-        {
-            eof = true;
-            return n;
-        }
-
-        if(errno == ECONNRESET)
-            return 0;
-
-        if(errno == EAGAIN)
-            break;
-
-        if(errno != EINTR)
-            throw System::IOError( "read failed", PT_SOURCEINFO );
-    }
-
-    fd_set rfds;
-    FD_ZERO(&rfds);
-    FD_SET(this->fd(), &rfds);
-    bool ret = this->wait(_timeout, &rfds, 0, 0);
-    if(false == ret)
-    {
-        throw System::IOTimeout();
-    }
-
-    return IODeviceImpl::endRead(eof);
-}*/
-
-
-/*size_t TcpSocketImpl::endWrite()
-{
-    size_t n = IODeviceImpl::endWrite();
-    if(n > 0)
-    {
-        return n;
-    }
-
-    fd_set wfds;
-    FD_ZERO(&wfds);
-    FD_SET(this->fd(), &wfds);
-    bool ret = this->wait(_timeout, 0, &wfds, 0);
-    if(false == ret)
-    {
-        throw System::IOTimeout();
-    }
-
-    return IODeviceImpl::endWrite();
-}*/
-
-
 void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::initWait");

@@ -79,10 +79,6 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void accept(TcpServer& server);
 
-        //size_t endRead(bool& eof);
-
-        //size_t endWrite();
-
         void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
         int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
