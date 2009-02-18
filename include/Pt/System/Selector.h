@@ -159,6 +159,12 @@ namespace System {
             */
             virtual void onRemove(Selectable&) = 0;
 
+            /** @brief A Selectable is reinitialised and needs to be updated
+
+                Do not throw exceptions.
+            */
+            virtual void onReinit(Selectable&) = 0;
+
             /** @brief A Selectable in this %Selector has changed
 
                 Do not throw exceptions.
@@ -198,6 +204,8 @@ namespace System {
             void onAdd( Selectable& dev );
 
             void onRemove( Selectable& dev );
+
+            void onReinit(Selectable&);
 
             void onChanged(Selectable&);
 

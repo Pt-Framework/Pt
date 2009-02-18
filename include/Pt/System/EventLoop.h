@@ -154,6 +154,8 @@ namespace System {
 
             virtual void onChanged(Selectable& s);
 
+            virtual void onReinit(Selectable& s);
+
             virtual void onRun();
 
             virtual bool onWait(std::size_t msecs);

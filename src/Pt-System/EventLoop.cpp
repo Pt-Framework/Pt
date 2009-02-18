@@ -71,6 +71,11 @@ void EventLoop::onRemove( Selectable& s )
 }
 
 
+void EventLoop::onReinit(Selectable& s)
+{
+}
+
+
 void EventLoop::onChanged(Selectable& s)
 {
     _selector->changed(s);
