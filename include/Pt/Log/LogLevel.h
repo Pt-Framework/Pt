@@ -110,6 +110,40 @@ inline LogLevel toLogLevel(std::string levelString)
     throw std::logic_error("Specified log level string doesn't fit to a log level in LogLevel::toLogLevel() method.");
 }
 
+inline LogLevel trace()
+{
+    return Pt::Log::Trace;
+}
+
+
+inline LogLevel info()
+{
+    return Pt::Log::Info;
+}
+
+
+inline LogLevel debug()
+{
+    return Pt::Log::Debug;
+}
+
+
+inline LogLevel warn()
+{
+    return Pt::Log::Warn;
+}
+
+
+inline LogLevel error()
+{
+    return Pt::Log::Error;
+}
+
+
+inline LogLevel fatal()
+{
+    return Pt::Log::Fatal;
+}
 
 }
 

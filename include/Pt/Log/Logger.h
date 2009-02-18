@@ -44,7 +44,12 @@ namespace Log {
 class Target;
 class Message;
 
-
+/// TODO:
+/*
+    Message before Logger -> less inline methods at end
+    join Target into Logger
+    Hierachy
+*/
 /** @brief Write log-messages to a target
     @ingroup Logging
 
@@ -143,6 +148,8 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         Message fatal();
 
+        Message operator<<( LogLevel (*pf)() );
+
     protected:
         //! @internal Used by the LogManager on initialisation
         Logger(Target& target);
@@ -163,20 +170,16 @@ class PT_LOG_API Message : protected Pt::NonCopyable
     public:
         Message(Logger& logger, const LogLevel level, const SourceInfo& source)
         : _logger(&logger)
-        , _text()
         , _level(level)
         , _source(source)
-        , _dateTime()
         , _threadId(-1)
         , _procId(-1)
         {}
 
         Message(Logger& logger, const LogLevel level)
         : _logger(&logger)
-        , _text()
         , _level(level)
         , _source("unknown", "unknown", "unknown")
-        , _dateTime()
         , _threadId(-1)
         , _procId(-1)
         {}
@@ -245,6 +248,12 @@ class PT_LOG_API Message : protected Pt::NonCopyable
             return *this;
         }
 
+        Message& operator<<( LogLevel (*pf)() )
+        {
+            setLogLevel( pf() );
+            return *this;
+        }
+
         Message& operator<<( Message& (*pf)(Message&) )
         {
             return pf(*this);
@@ -275,42 +284,6 @@ class PT_LOG_API Message : protected Pt::NonCopyable
         long               _threadId;
         long               _procId;
 };
-
-
-/** @brief Manipulator to set the log-level of a logger to Fatal
-*/
-inline Message& fatal(Message& msg)
-{ msg.setLogLevel(Pt::Log::Fatal); return msg; }
-
-
-/** @brief Manipulator to set the log-level of a logger to Error
-*/
-inline Message& error(Message& msg)
-{ msg.setLogLevel(Pt::Log::Error); return msg; }
-
-
-/** @brief Manipulator to set the log-level of a logger to Warn
-*/
-inline Message& warn(Message& msg)
-{ msg.setLogLevel(Pt::Log::Warn); return msg; }
-
-
-/** @brief Manipulator to set the log-level of a logger to Info
-*/
-inline Message& info(Message& msg)
-{ msg.setLogLevel(Pt::Log::Info); return msg; }
-
-
-/** @brief Manipulator to set the log-level of a logger to Debug
-*/
-inline Message& debug(Message& msg)
-{ msg.setLogLevel(Pt::Log::Debug); return msg; }
-
-
-/** @brief Manipulator to set the log-level of a logger to Trace
-*/
-inline Message& trace(Message& msg)
-{ msg.setLogLevel(Pt::Log::Trace); return msg; }
 
 
 /** @brief Manipulator to end a log-message
@@ -369,6 +342,7 @@ inline Message Logger::fatal(const Pt::SourceInfo& si)
     return Message(*this, Pt::Log::Fatal, si);
 }
 
+
 inline Message Logger::trace()
 {
     return Message(*this, Pt::Log::Trace);
@@ -402,6 +376,12 @@ inline Message Logger::error()
 inline Message Logger::fatal()
 {
     return Message(*this, Pt::Log::Fatal);
+}
+
+
+inline Message Logger::operator<<( LogLevel (*pf)() )
+{
+    return Message( *this, pf() );
 }
 
 

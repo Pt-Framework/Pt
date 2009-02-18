@@ -171,37 +171,37 @@ class LoggerTest : public Pt::Unit::TestSuite
         void LogFatal()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::fatal << "Fatal message" << Pt::Log::endlog;
+            logger.fatal() << "Fatal message" << Pt::Log::endlog;
         }
 
         void LogError()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::error << "Error message" << Pt::Log::endlog;
+            logger.error() << "Error message" << Pt::Log::endlog;
         }
 
         void LogWarn()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::warn << "Warn message" << Pt::Log::endlog;
+            logger.warn() << "Warn message" << Pt::Log::endlog;
         }
 
         void LogInfo()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::info << "Info message" << Pt::Log::endlog;
+            logger.info() << "Info message" << Pt::Log::endlog;
         }
 
         void LogDebug()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::debug << "Debug message" << Pt::Log::endlog;
+            logger.debug() << "Debug message" << Pt::Log::endlog;
         }
 
         void LogTrace()
         {
             Pt::Log::Logger logger("LoggerTest");
-            logger << Pt::Log::trace << "Trace message" << Pt::Log::endlog;
+            logger.trace() << "Trace message" << Pt::Log::endlog;
         }
 
         void DllLoggerTest()
@@ -225,7 +225,7 @@ class LoggerTest : public Pt::Unit::TestSuite
     
                 for(int n = 0; n < 10; ++n)
                 {
-                    logger << Pt::Log::info << "Info Message on serial device" << Pt::Log::endlog;
+                    logger.info() << "Info Message on serial device" << Pt::Log::endlog;
                 }
             }
             catch( const Pt::System::AccessFailed& )
