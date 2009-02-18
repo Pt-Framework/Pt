@@ -26,19 +26,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Message.h"
+#include "Pt/Log/Message.h"
+#include "Pt/Log/Logger.h"
+#include "Pt/Log/Target.h"
+#include "Pt/System/Clock.h"
 #include <iostream>
 
-
 namespace Pt {
+
 namespace Log {
 
-
-Message::Message(const std::string& target, const LogLevel level)
-: _target(target)
+Message::Message(Logger& logger, const LogLevel level, const SourceInfo& source)
+: _logger(&logger)
 , _text()
 , _level(level)
-, _source(PT_SOURCEINFO)
+, _source(source)
 , _dateTime()
 , _threadId(-1)
 , _procId(-1)
@@ -51,5 +53,20 @@ Message::~Message()
 {
 }
 
+
+void Message::send()
+{
+	if( _logger->enabled() )
+	{
+		_target = _logger->target().name();
+		setTimestamp( System::Clock::getLocalTime() );
+		setThreadId(0);
+		setProcessId(0);
+		setTimestamp( System::Clock::getLocalTime() );
+		_logger->target().log( *this );
+	}
+}
+
 } // namespace Log
+
 } // namespace Pt

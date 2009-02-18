@@ -30,6 +30,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/LogLevel.h>
+#include <Pt/Log/Message.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/NonCopyable.h>
 
@@ -100,7 +101,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             The logger will report all its messages using the given log-level.
             The log-level can be set more comfortably via the streaming API.
         */
-        void setLogLevel(LogLevel level);
+        //void setLogLevel(LogLevel level);
 
         /** @brief Returns the current log-level
         */
@@ -128,8 +129,11 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             the logger is disabled this function only performs a integer
             comparison.
         */
-        Logger& beginLog(const Pt::SourceInfo& si);
-
+        Message beginLog(const Pt::SourceInfo& si)
+        {
+            return Message(*this, _level, si);
+        }
+/*
         Logger& trace(const Pt::SourceInfo& si);
 
         Logger& debug(const Pt::SourceInfo& si);
@@ -153,7 +157,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         Logger& error();
 
         Logger& fatal();
-
+*/
         /** @brief Append a type as string to the message
 
             This method allows to append arbitrary types to the log-message.
@@ -161,7 +165,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             here. If the logger is disabled only an integer comparison is
             performed.
         */
-        template <typename T>
+        /*template <typename T>
         Logger& write(const T& value)
         {
             if( this->enabled() )
@@ -170,7 +174,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             }
 
             return *this;
-        }
+        }*/
 
         /** @brief Ends a log-message
 
@@ -179,14 +183,14 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             to end a log-message. If the logger is disabled this function only
             performs an integer comparison.
         */
-        void endlog();
+        //void endlog();
 
     protected:
         //! @internal Used by the LogManager on initialisation
         Logger(Target& target, LogLevel level = Trace);
 
         //! @internal
-        Message* init(const std::string& name, LogLevel level);
+        //Message* init(const std::string& name, LogLevel level);
 
     private:
         //! @internal
@@ -196,16 +200,16 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         LogLevel _level;
 
         //! @internal
-        Message* _msg;
+        //Message* _msg;
 
         //! @internal
-        std::stringstream _ss;
+        //std::stringstream _ss;
 
         //! @internal
         void* _reserved;
 
         //! @internal
-        Pt::System::Mutex _mutex;
+        //Pt::System::Mutex _mutex;
 };
 
 
@@ -216,68 +220,73 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
     here. If the logger is disabled only an integer comparison is
     performed.
 */
-template <typename T>
-Logger& operator<<(Logger& logger, const T& value)
-{
-    return logger.write(value);
-}
+//template <typename T>
+//Message& operator<<(Message& msg, const T& value)
+//{
+//    return msg.append(value);
+//}
 
 
 //! @internal
-inline Logger& operator<<(Logger& logger, std::ios_base& (*pf)(std::ios_base&))
-{
-    return logger;
-}
+//inline Message& operator<<(Message& msg, std::ios_base& (*pf)(std::ios_base&))
+//{
+//    return msg;
+//}
 
 
 //! @internal
-inline Logger& operator<<(Logger& stream, Logger& (*pf)(Logger&))
-{
-    return pf(stream);
-}
+//inline Message& operator<<(Message& msg, Message& (*pf)(Message&))
+//{
+//    return pf(msg);
+//}
 
 
 /** @brief Manipulator to set the log-level of a logger to Fatal
 */
-inline Logger& fatal(Logger& str)
-{ str.setLogLevel(Pt::Log::Fatal); return str; }
+//inline Logger& fatal(Logger& str)
+//{ str.setLogLevel(Pt::Log::Fatal); return str; }
 
 
 /** @brief Manipulator to set the log-level of a logger to Error
 */
-inline Logger& error(Logger& str)
-{ str.setLogLevel(Pt::Log::Error); return str; }
+//inline Logger& error(Logger& str)
+//{ str.setLogLevel(Pt::Log::Error); return str; }
 
 
 /** @brief Manipulator to set the log-level of a logger to Warn
 */
-inline Logger& warn(Logger& str)
-{ str.setLogLevel(Pt::Log::Warn); return str; }
+//inline Logger& warn(Logger& str)
+//{ str.setLogLevel(Pt::Log::Warn); return str; }
 
 
 /** @brief Manipulator to set the log-level of a logger to Info
 */
-inline Logger& info(Logger& str)
-{ str.setLogLevel(Pt::Log::Info); return str; }
+//inline Message& info(Message& msg)
+//{ msg.setLogLevel(Pt::Log::Info); return msg; }
 
 
 /** @brief Manipulator to set the log-level of a logger to Debug
 */
-inline Logger& debug(Logger& str)
-{ str.setLogLevel(Pt::Log::Debug); return str; }
+//inline Logger& debug(Logger& str)
+//{ str.setLogLevel(Pt::Log::Debug); return str; }
 
 
 /** @brief Manipulator to set the log-level of a logger to Trace
 */
-inline Logger& trace(Logger& str)
-{ str.setLogLevel(Pt::Log::Trace); return str; }
+//inline Logger& trace(Logger& str)
+//{ str.setLogLevel(Pt::Log::Trace); return str; }
 
 
 /** @brief Manipulator to end a log-message
 */
-inline Logger& endlog(Logger& str)
-{ str.endlog(); return str; }
+//inline Logger& endlog(Logger& str)
+//{ str.endlog(); return str; }
 
+//inline Message& endlog(Message& msg)
+//{
+//    msg.send();
+//    return msg;
+//}
 
 /** @brief Sentry class to log a scope
     @ingroup Logging
@@ -315,9 +324,9 @@ class LoggedScope
         , _si(si)
         , _level(level)
         {
-            _logger.beginLog(_si);
-            _logger.setLogLevel(_level);
-            _logger << "Enter " << _si.func() << endlog;
+            //_logger.beginLog(_si);
+            //_logger.setLogLevel(_level);
+            //_logger << "Enter " << _si.func() << endlog;
         }
 
         /** @brief Destructor
@@ -326,9 +335,9 @@ class LoggedScope
         */
         ~LoggedScope()
         {
-            _logger.beginLog(_si);
-            _logger.setLogLevel(_level);
-            _logger << "Leave " << _si.func() << endlog;
+            //_logger.beginLog(_si);
+            //_logger.setLogLevel(_level);
+            //_logger << "Leave " << _si.func() << endlog;
         }
 
     private:

@@ -23,31 +23,39 @@
 #include <Pt/Log/LogLevel.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/DateTime.h>
+#include <Pt/NonCopyable.h>
 #include <string>
-
+#include <sstream>
 
 namespace Pt {
 
 namespace Log {
 
+    class Logger;
+
     /** @brief %Log message
         @ingroup Logging
     */
-    class PT_LOG_API Message
+    class PT_LOG_API Message : protected Pt::NonCopyable
     {
         public:
-            Message(const std::string& target, LogLevel level);
+            Message(Logger& logger, LogLevel level, const SourceInfo& source);
+
+            Message(const Message& other)
+            : _source(other._source)
+            {}
 
             ~Message();
 
             const std::string& target() const
             { return _target; }
 
-            void setText(const std::string& text)
-            { _text = text; }
+            template <typename T>
+            void append(const T& t)
+            { _text << t; }
 
-            const std::string& text() const
-            { return _text; }
+            std::string text() const
+            { return _text.str(); }
 
             void setLogLevel(const LogLevel level)
             { _level = level; }
@@ -79,16 +87,45 @@ namespace Log {
             void setProcessId(const long id)
             { _procId = id; }
 
+			template <typename T>
+			Message& operator<<(const T& value)
+			{
+				//if( _logger->enabled() )
+				    _text << value;
+
+				return *this;
+			}
+
+			Message& operator<<( Message& (*pf)(Message&) )
+			{
+				return pf(*this);
+			}
+
+            void send();
+
         private:
-            std::string    _target;
-            std::string    _text;
-            LogLevel       _level;
-            Pt::SourceInfo _source;
-            Pt::DateTime   _dateTime;
-            long           _threadId;
-            long           _procId;
-            void*          _reserved;
+            Logger*            _logger;
+            std::string        _target;
+            std::ostringstream _text;
+            LogLevel           _level;
+            Pt::SourceInfo     _source;
+            Pt::DateTime       _dateTime;
+            long               _threadId;
+            long               _procId;
+            void*              _reserved;
     };
+
+inline Message& info(Message& msg)
+{
+    msg.setLogLevel(Pt::Log::Info);
+    return msg;
+}
+
+inline Message& endlog(Message& msg)
+{
+    msg.send();
+    return msg;
+}
 
 } // namespace Log
 

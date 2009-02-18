@@ -26,10 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "LogManager.h"
-#include "Message.h"
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
-#include "Pt/System/Clock.h"
 #include <memory>
 
 
@@ -40,33 +38,33 @@ namespace Log {
 Logger::Logger(const std::string& name, LogLevel level)
 : _target( &LogManager::instance().target(name) )
 , _level(level)
-, _msg( 0 )
-, _mutex()
+//, _msg( 0 )
+//, _mutex()
 {
-    _msg = this->init( name, level );
+    //_msg = this->init( name, level );
 }
 
 
 Logger::Logger(Target& target, LogLevel level)
 : _target( &target )
 , _level(level)
-, _msg( 0 )
+//, _msg( 0 )
 {
-    _msg = this->init( target.name(), level );
+    //_msg = this->init( target.name(), level );
 }
 
 
 Logger::~Logger()
 {
-    delete _msg;
+    //delete _msg;
 }
 
 
-void Logger::setLogLevel(LogLevel level)
+/*void Logger::setLogLevel(LogLevel level)
 {
     _level = level;
-    _msg->setLogLevel(level);
-}
+    //_msg->setLogLevel(level);
+}*/
 
 
 LogLevel Logger::logLevel() const
@@ -81,7 +79,7 @@ Target& Logger::target() const
 }
 
 
-Logger& Logger::beginLog(const Pt::SourceInfo& si)
+/*Logger& Logger::beginLog(const Pt::SourceInfo& si)
 {
     if( this->enabled() )
     {
@@ -91,9 +89,9 @@ Logger& Logger::beginLog(const Pt::SourceInfo& si)
     }
 
     return *this;
-}
+}*/
 
-
+/*
 Logger& Logger::trace(const Pt::SourceInfo& si)
 {
     this->beginLog(si);
@@ -170,8 +168,8 @@ Logger& Logger::fatal()
 {
     return Pt::Log::fatal(*this);
 }
-
-
+*/
+/*
 void Logger::endlog()
 {
     if( this->enabled() )
@@ -184,7 +182,7 @@ void Logger::endlog()
         _ss.clear();
     }
 }
-
+*/
 
 bool Logger::enabled() const
 {
@@ -192,14 +190,14 @@ bool Logger::enabled() const
 }
 
 
-Message* Logger::init(const std::string& name, LogLevel level)
+/*Message* Logger::init(const std::string& name, LogLevel level)
 {
     std::auto_ptr<Message> msg( new Message(name, level) );
     msg->setThreadId(0);
     msg->setProcessId(0);
     msg->setTimestamp( System::Clock::getLocalTime() );
     return msg.release();
-}
+}*/
 
 
 } // namespace Log

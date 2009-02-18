@@ -147,10 +147,10 @@ namespace Log {
             */
             bool logLevelExplicitelySet();
 
-        protected:
             //! @internal Used by Logger
             void log(const Message& msg);
 
+        protected:
             //! @internal Property callback
             std::string logLevelString() const;
 
