@@ -74,7 +74,6 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : System::IODeviceImpl(socket)
 , _socket(socket)
 , _isConnected(false)
-, _timeout(System::Selectable::WaitInfinite)
 {
 }
 
@@ -227,6 +226,7 @@ void TcpSocketImpl::accept(TcpServer& server)
     if( _fd < 0 )
       throw System::SystemError("accept");
 
+    System::IODeviceImpl::open(_fd, true);
     //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;
@@ -234,12 +234,28 @@ void TcpSocketImpl::accept(TcpServer& server)
 }
 
 
-size_t TcpSocketImpl::endRead(bool& eof)
+/*size_t TcpSocketImpl::endRead(bool& eof)
 {
-    size_t n = IODeviceImpl::endRead(eof);
-    if(n > 0)
+    ssize_t n = 0;
+    while(true)
     {
-        return n;
+        n = ::read( _fd, _device.rbuf(), _device.rbuflen() );
+        eof = (n == 0) ;
+
+        if(n >= 0)
+        {
+            eof = true;
+            return n;
+        }
+
+        if(errno == ECONNRESET)
+            return 0;
+
+        if(errno == EAGAIN)
+            break;
+
+        if(errno != EINTR)
+            throw System::IOError( "read failed", PT_SOURCEINFO );
     }
 
     fd_set rfds;
@@ -252,10 +268,10 @@ size_t TcpSocketImpl::endRead(bool& eof)
     }
 
     return IODeviceImpl::endRead(eof);
-}
+}*/
 
 
-size_t TcpSocketImpl::endWrite()
+/*size_t TcpSocketImpl::endWrite()
 {
     size_t n = IODeviceImpl::endWrite();
     if(n > 0)
@@ -273,7 +289,7 @@ size_t TcpSocketImpl::endWrite()
     }
 
     return IODeviceImpl::endWrite();
-}
+}*/
 
 
 void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)

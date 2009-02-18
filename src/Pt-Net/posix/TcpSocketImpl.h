@@ -55,7 +55,6 @@ class TcpSocketImpl : public System::IODeviceImpl
     private:
         TcpSocket& _socket;
         bool _isConnected;
-        std::size_t _timeout;
         struct sockaddr_storage _peeraddr;
 
     public:
@@ -69,12 +68,6 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void close();
 
-        void setTimeout(std::size_t msecs)
-        { _timeout = msecs; }
-
-        std::size_t timeout() const
-        { return _timeout; }
-
         bool isConnected() const
         { return _isConnected; }
 
@@ -86,9 +79,9 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void accept(TcpServer& server);
 
-        size_t endRead(bool& eof);
+        //size_t endRead(bool& eof);
 
-        size_t endWrite();
+        //size_t endWrite();
 
         void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 

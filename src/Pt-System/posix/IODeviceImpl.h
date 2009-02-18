@@ -42,6 +42,12 @@ namespace System {
             int fd() const
             { return _fd; }
 
+            void setTimeout(std::size_t msecs)
+            { _timeout = msecs; }
+
+            std::size_t timeout() const
+            { return _timeout; }
+
             void open(int fd, bool isAsync);
 
             virtual void close();
@@ -79,6 +85,7 @@ namespace System {
         protected:
             IODevice& _device;
             int _fd;
+            std::size_t _timeout;
             fd_set* _rfds;
             fd_set* _wfds;
             fd_set* _efds;

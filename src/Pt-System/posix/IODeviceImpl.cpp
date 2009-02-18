@@ -38,6 +38,7 @@ namespace System {
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
 , _fd(-1)
+, _timeout(System::Selectable::WaitInfinite)
 , _rfds(0)
 , _wfds(0)
 , _efds(0)
@@ -78,53 +79,58 @@ void IODeviceImpl::close()
 }
 
 
+size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+{
+    if(_rfds)
+    {
+        FD_SET( this->fd(), _rfds );
+    }
+
+    return 0;
+}
+
+
 size_t IODeviceImpl::endRead(bool& eof)
 {
-	if(_rfds)
-	{
-		FD_CLR( this->fd(), _rfds );
-	}
+    if(_rfds)
+    {
+        FD_CLR( this->fd(), _rfds );
+    }
 
-    size_t n = this->read( _device.rbuf(), _device.rbuflen(), eof );
-    return n;
+    return this->read( _device.rbuf(), _device.rbuflen(), eof );
 }
 
 
 size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
-    eof = false;
     ssize_t ret = 0;
 
     while(true)
     {
-        ret = ::read(_fd, (void*)buffer, count);
-        eof = (ret == 0) ;
-
-        if(ret >= 0 || errno == ECONNRESET)
+        ret = ::read( _fd, (void*)buffer, count);
+        if(ret > 0)
             break;
 
-        if(errno == EINTR) // signal interrupt
-            continue;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
+        if(ret == 0 || errno == ECONNRESET)
         {
-            fd_set fds;
-            FD_ZERO(&fds);
-            FD_SET(this->fd(), &fds);
-            while( true )
-            {
-                int r = ::select(_fd+1, &fds, 0, 0, 0);
-                if( r != -1 )
-                    break;
-
-                if( errno != EINTR )
-                    throw IOError(  PT_ERROR_MSG("select failed")  );
-            }
-
-            continue;
+            eof = true;
+            return 0;
         }
 
-        throw IOError( PT_ERROR_MSG("read failed") );
+        if(errno == EINTR)
+            continue;
+
+        if(errno != EAGAIN)
+            throw IOError("read failed", PT_SOURCEINFO);
+
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(this->fd(), &rfds);
+        bool ret = this->wait(_timeout, &rfds, 0, 0);
+        if(false == ret)
+        {
+            throw System::IOTimeout();
+        }
     }
 
     return ret;
@@ -149,9 +155,10 @@ size_t IODeviceImpl::endWrite()
         FD_CLR( this->fd(), _wfds );
     }
 
-    size_t n = this->write( _device.wbuf(), _device.wbuflen() );
-    return n;
+    return this->write( _device.wbuf(), _device.wbuflen() );
 }
+
+
 
 
 size_t IODeviceImpl::write( const char* buffer, size_t count )
@@ -161,32 +168,26 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
     while(true)
     {
         ret = ::write(_fd, (const void*)buffer, count);
-
-        if(ret >= 0 || errno == ECONNRESET || errno == EPIPE)
+        if(ret > 0)
             break;
 
-        if(errno == EINTR) // signal interrupt
+        if(ret == 0 || errno == ECONNRESET || errno == EPIPE)
+            return 0;
+
+        if(errno == EINTR)
             continue;
 
-        if(errno == EAGAIN) // non-blocking and no data yet
+        if(errno != EAGAIN)
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+
+        fd_set wfds;
+        FD_ZERO(&wfds);
+        FD_SET(this->fd(), &wfds);
+        bool ret = this->wait(_timeout, 0, &wfds, 0);
+        if(false == ret)
         {
-            fd_set fds;
-            FD_ZERO(&fds);
-            FD_SET(this->fd(), &fds);
-            while( true )
-            {
-                int r = ::select(_fd+1, 0, &fds, 0, 0);
-                if( r != -1 )
-                    break;
-
-                if( errno != EINTR )
-                    throw IOError( PT_ERROR_MSG("select failed") );
-            }
-
-            continue;
+            throw System::IOTimeout();
         }
-
-        throw IOError( PT_ERROR_MSG("write failed") );
     }
 
     return ret;
@@ -213,17 +214,6 @@ void IODeviceImpl::attach(SelectorBase& s)
 void IODeviceImpl::detach(SelectorBase& s)
 {
     this->exitSelect();
-}
-
-
-size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
-{
-    if(_rfds)
-    {
-        FD_SET( this->fd(), _rfds );
-    }
-
-    return 0;
 }
 
 
