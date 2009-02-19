@@ -49,6 +49,7 @@ class Logger;
 /*
     - join Target into Logger
     - Hierachy of Targets
+    - Initialization method
 */
 
 /** @brief %Log message
