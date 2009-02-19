@@ -43,13 +43,145 @@ namespace Log {
 
 class Target;
 class Message;
+class Logger;
 
 /// TODO:
 /*
-    Message before Logger -> less inline methods at end
-    join Target into Logger
-    Hierachy
+    - join Target into Logger
+    - Hierachy of Targets
+    - Remove dependency on Reflex
 */
+
+/** @brief %Log message
+    @ingroup Logging
+*/
+class PT_LOG_API Message : protected Pt::NonCopyable
+{
+    friend class Message;
+
+    public:
+        Message(Logger& logger, const LogLevel level, const SourceInfo& source)
+        : _logger(&logger)
+        , _level(level)
+        , _source(source)
+        , _threadId(-1)
+        , _procId(-1)
+        {}
+
+        Message(Logger& logger, const LogLevel level)
+        : _logger(&logger)
+        , _level(level)
+        , _source("unknown", "unknown", "unknown")
+        , _threadId(-1)
+        , _procId(-1)
+        {}
+
+        ~Message()
+        {}
+
+        const std::string& target() const
+        { return _target; }
+
+        /** @brief Append a type as string to the message
+
+            This method allows to append arbitrary types to the log-message.
+            All types that have a stream output operator defined can be used
+            here.
+        */
+        template <typename T>
+        void append(const T& t)
+        { _text << t; }
+
+        std::string text() const
+        { return _text.str(); }
+
+        void setLogLevel(const LogLevel level)
+        { _level = level; }
+
+        LogLevel logLevel() const
+        { return _level; }
+
+        const DateTime& timestamp() const
+        { return _dateTime; }
+
+        void setTimestamp(const Pt::DateTime& dateTime)
+        { _dateTime = dateTime; }
+
+        const Pt::SourceInfo& sourceInfo() const
+        { return _source; }
+
+        void setSourceInfo(const SourceInfo& source)
+        { _source = source; }
+
+        long threadId() const
+        { return _threadId; }
+
+        void setThreadId(const long id)
+        { _threadId = id; }
+
+        long processId() const
+        { return _procId; }
+
+        void setProcessId(const long id)
+        { _procId = id; }
+
+        template <typename T>
+        Message& operator<<(const T& value);
+
+        Message& operator<<( LogLevel (*pf)() )
+        {
+            setLogLevel( pf() );
+            return *this;
+        }
+
+        Message& operator<<( Message& (*pf)(Message&) )
+        {
+            return pf(*this);
+        }
+
+        inline Message& operator<<(std::ios_base& (*pf)(std::ios_base&))
+        {
+            pf(_text);
+            return *this;
+        }
+
+        /** @brief Sends a log-message
+
+            This method ends a log message and sends it to the logger target
+            if the logger is enabled. Alternatively, the stream API can be used
+            to end a log-message. If the logger is disabled this function only
+            performs an integer comparison.
+        */
+        void send();
+
+    protected:
+        Message(const Message& other)
+        : _logger(other._logger)
+        , _level(other._level)
+        , _source(other._source)
+        {}
+
+    private:
+        Logger*            _logger;
+        std::string        _target;
+        std::ostringstream _text;
+        LogLevel           _level;
+        Pt::SourceInfo     _source;
+        Pt::DateTime       _dateTime;
+        long               _threadId;
+        long               _procId;
+};
+
+
+/** @brief Manipulator to end a log-message
+*/
+inline Message& endlog(Message& msg)
+{
+    msg.send();
+    return msg;
+}
+
+
 /** @brief Write log-messages to a target
     @ingroup Logging
 
@@ -120,35 +252,80 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             the logger is disabled this function only performs a integer
             comparison.
         */
-        Message beginLog(const Pt::SourceInfo& si);
+		Message beginLog(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Trace, si);
+		}
 
-        Message beginLog(LogLevel level, const Pt::SourceInfo& si);
+		Message beginLog(LogLevel level, const Pt::SourceInfo& si)
+		{
+			return Message(*this, level, si);
+		}
 
-        Message trace(const Pt::SourceInfo& si);
+		Message trace(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Trace, si);
+		}
 
-        Message debug(const Pt::SourceInfo& si);
+		Message debug(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Debug, si);
+		}
 
-        Message info(const Pt::SourceInfo& si);
+		Message info(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Info, si);
+		}
 
-        Message warn(const Pt::SourceInfo& si);
+		Message warn(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Warn, si);
+		}
 
-        Message error(const Pt::SourceInfo& si);
+		Message error(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Error, si);
+		}
 
-        Message fatal(const Pt::SourceInfo& si);
+		Message fatal(const Pt::SourceInfo& si)
+		{
+			return Message(*this, Pt::Log::Fatal, si);
+		}
 
-        Message trace();
+		Message trace()
+		{
+			return Message(*this, Pt::Log::Trace);
+		}
 
-        Message debug();
+		Message debug()
+		{
+			return Message(*this, Pt::Log::Debug);
+		}
 
-        Message info();
+		Message info()
+		{
+			return Message(*this, Pt::Log::Info);
+		}
 
-        Message warn();
+		Message warn()
+		{
+			return Message(*this, Pt::Log::Warn);
+		}
 
-        Message error();
+		Message error()
+		{
+			return Message(*this, Pt::Log::Error);
+		}
 
-        Message fatal();
+		Message fatal()
+		{
+			return Message(*this, Pt::Log::Fatal);
+		}
 
-        Message operator<<( LogLevel (*pf)() );
+		Message operator<<( LogLevel (*pf)() )
+		{
+			return Message( *this, pf() );
+		}
 
     protected:
         //! @internal Used by the LogManager on initialisation
@@ -162,228 +339,15 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         void* _reserved;
 };
 
-/** @brief %Log message
-    @ingroup Logging
-*/
-class PT_LOG_API Message : protected Pt::NonCopyable
+
+template <typename T>
+Message& Message::operator<<(const T& value)
 {
-    public:
-        Message(Logger& logger, const LogLevel level, const SourceInfo& source)
-        : _logger(&logger)
-        , _level(level)
-        , _source(source)
-        , _threadId(-1)
-        , _procId(-1)
-        {}
+    if( _logger->enabled(_level) )
+        _text << value;
 
-        Message(Logger& logger, const LogLevel level)
-        : _logger(&logger)
-        , _level(level)
-        , _source("unknown", "unknown", "unknown")
-        , _threadId(-1)
-        , _procId(-1)
-        {}
-
-        Message(const Message& other)
-        : _logger(other._logger)
-        , _level(other._level)
-        , _source(other._source)
-        {}
-
-        ~Message()
-        {}
-
-        const std::string& target() const
-        { return _target; }
-
-        /** @brief Append a type as string to the message
-
-            This method allows to append arbitrary types to the log-message.
-            All types that have a stream output operator defined can be used
-            here.
-        */
-        template <typename T>
-        void append(const T& t)
-        { _text << t; }
-
-        std::string text() const
-        { return _text.str(); }
-
-        void setLogLevel(const LogLevel level)
-        { _level = level; }
-
-        LogLevel logLevel() const
-        { return _level; }
-
-        const DateTime& timestamp() const
-        { return _dateTime; }
-
-        void setTimestamp(const Pt::DateTime& dateTime)
-        { _dateTime = dateTime; }
-
-        const Pt::SourceInfo& sourceInfo() const
-        { return _source; }
-
-        void setSourceInfo(const SourceInfo& source)
-        { _source = source; }
-
-        long threadId() const
-        { return _threadId; }
-
-        void setThreadId(const long id)
-        { _threadId = id; }
-
-        long processId() const
-        { return _procId; }
-
-        void setProcessId(const long id)
-        { _procId = id; }
-
-        template <typename T>
-        Message& operator<<(const T& value)
-        {
-            if( _logger->enabled(_level) )
-                _text << value;
-
-            return *this;
-        }
-
-        Message& operator<<( LogLevel (*pf)() )
-        {
-            setLogLevel( pf() );
-            return *this;
-        }
-
-        Message& operator<<( Message& (*pf)(Message&) )
-        {
-            return pf(*this);
-        }
-
-        inline Message& operator<<(std::ios_base& (*pf)(std::ios_base&))
-        {
-            pf(_text);
-            return *this;
-        }
-
-        /** @brief Sends a log-message
-
-            This method ends a log message and sends it to the logger target
-            if the logger is enabled. Alternatively, the stream API can be used
-            to end a log-message. If the logger is disabled this function only
-            performs an integer comparison.
-        */
-        void send();
-
-    private:
-        Logger*            _logger;
-        std::string        _target;
-        std::ostringstream _text;
-        LogLevel           _level;
-        Pt::SourceInfo     _source;
-        Pt::DateTime       _dateTime;
-        long               _threadId;
-        long               _procId;
-};
-
-
-/** @brief Manipulator to end a log-message
-*/
-inline Message& endlog(Message& msg)
-{
-    msg.send();
-    return msg;
+    return *this;
 }
-
-
-inline Message Logger::beginLog(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Trace, si);
-}
-
-
-inline Message Logger::beginLog(LogLevel level, const Pt::SourceInfo& si)
-{
-    return Message(*this, level, si);
-}
-
-
-inline Message Logger::trace(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Trace, si);
-}
-
-
-inline Message Logger::debug(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Debug, si);
-}
-
-
-inline Message Logger::info(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Info, si);
-}
-
-
-inline Message Logger::warn(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Warn, si);
-}
-
-
-inline Message Logger::error(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Error, si);
-}
-
-
-inline Message Logger::fatal(const Pt::SourceInfo& si)
-{
-    return Message(*this, Pt::Log::Fatal, si);
-}
-
-
-inline Message Logger::trace()
-{
-    return Message(*this, Pt::Log::Trace);
-}
-
-
-inline Message Logger::debug()
-{
-    return Message(*this, Pt::Log::Debug);
-}
-
-
-inline Message Logger::info()
-{
-    return Message(*this, Pt::Log::Info);
-}
-
-
-inline Message Logger::warn()
-{
-    return Message(*this, Pt::Log::Warn);
-}
-
-
-inline Message Logger::error()
-{
-    return Message(*this, Pt::Log::Error);
-}
-
-
-inline Message Logger::fatal()
-{
-    return Message(*this, Pt::Log::Fatal);
-}
-
-
-inline Message Logger::operator<<( LogLevel (*pf)() )
-{
-    return Message( *this, pf() );
-}
-
 
 /** @brief Sentry class to log a scope
     @ingroup Logging
