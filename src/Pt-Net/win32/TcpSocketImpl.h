@@ -64,11 +64,11 @@ class TcpSocketImpl : public System::SelectableImpl
 		WSAOVERLAPPED _connectOverlapped;
 		WSAOVERLAPPED _sendOverlapped;
 		WSAOVERLAPPED _receiveOverlapped;
-		WSABUF        _receiveBuffer;
 		WSABUF        _sendBuffer;
 		HANDLE		  _currentEventHandle;
 
 		void attachEvent(HANDLE ev, long events);
+		void attachEvent();
 		size_t checkReceiveResult(bool& eof);
 		size_t TcpSocketImpl::checkSendResult();
 

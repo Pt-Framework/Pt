@@ -71,7 +71,6 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
         throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
     }
 
-	attachEvent(_currentEventHandle, FD_CONNECT | FD_READ | FD_WRITE);
 	_sendOverlapped.hEvent    = _currentEventHandle;
 	_receiveOverlapped.hEvent = _currentEventHandle;
 }
@@ -97,7 +96,7 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 }
 
 bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
-{
+{	
     AddrInfo ai(ipaddr, port);
 
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
@@ -105,6 +104,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
         try
         {
 			this->create(it->ai_family, SOCK_STREAM, 0);
+			attachEvent(_currentEventHandle, FD_CONNECT);
         }
         catch (const System::SystemError&)
         {
@@ -146,7 +146,17 @@ void TcpSocketImpl::detach(System::SelectorBase& sb)
 		attachEvent(_currentEventHandle,0);
 
 	_currentEventHandle = _waitEvent;
-	attachEvent(_currentEventHandle, FD_CONNECT|FD_READ|FD_WRITE);	
+	attachEvent();
+}
+
+void TcpSocketImpl::attachEvent()
+{
+	if( _socket.rbuf() == 0 && _socket.wbuf() == 0)
+		attachEvent(_currentEventHandle, FD_CONNECT);
+	else if(_socket.rbuf() != 0 && _socket.wbuf() == 0)
+		attachEvent(_currentEventHandle, FD_READ);
+	else if(_socket.rbuf() == 0 && _socket.wbuf() != 0)
+		attachEvent(_currentEventHandle, FD_WRITE);	
 }
 
 void TcpSocketImpl::attachEvent(HANDLE ev, long events)
@@ -163,9 +173,7 @@ void TcpSocketImpl::accept(TcpServer& server)
 	_fd =  WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
 
 	if( _fd == INVALID_SOCKET)
-	      throw System::SystemError("accept");
-
-	attachEvent(_currentEventHandle, FD_CONNECT|FD_READ|FD_WRITE);	
+	      throw System::SystemError("accept");	
 }
 
 bool TcpSocketImpl::wait(std::size_t umsecs)
@@ -200,8 +208,8 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 	{
 		_currentEventHandle = h;
 
-		attachEvent(_currentEventHandle, FD_CONNECT|FD_READ|FD_WRITE);
-		
+		attachEvent();
+	
 		_sendOverlapped.hEvent = _currentEventHandle;
 		_receiveOverlapped.hEvent = _currentEventHandle;
 
@@ -241,10 +249,7 @@ std::string TcpSocketImpl::getPeerAddr() const
 
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-	_receiveBuffer.buf = buffer;
-	_receiveBuffer.len = n;
-
-	attachEvent(_currentEventHandle, FD_CONNECT | FD_READ | FD_WRITE);
+	attachEvent(_currentEventHandle, FD_READ);
 	return 0;
 }
 
@@ -258,7 +263,15 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	DWORD bytes = 0;
 	DWORD flags = 0;
 
-	if(WSARecv(_fd, &_receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
+	WSABUF receiveBuffer;
+		
+	receiveBuffer.buf = _socket.rbuf();
+    receiveBuffer.len = _socket.rbuflen();
+
+	if( receiveBuffer.buf == 0)
+		 throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+
+	if(WSARecv(_fd, &receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
 		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 
 	bytes = checkReceiveResult(eof);
