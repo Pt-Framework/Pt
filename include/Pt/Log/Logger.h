@@ -57,7 +57,7 @@ class Logger;
 */
 class PT_LOG_API Message : protected Pt::NonCopyable
 {
-    friend class Message;
+    friend class Logger;
 
     public:
         Message(Logger& logger, const LogLevel level, const SourceInfo& source)
