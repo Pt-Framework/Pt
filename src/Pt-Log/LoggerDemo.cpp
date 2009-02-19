@@ -77,8 +77,7 @@ int main( int argc, char* argv[] )
 {
     try {
         Pt::Log::Target::get("");
-        Pt::Log::Logger logger("test");
-        return 0;
+
         /*Pt::Log::Logger logger("logger1", Pt::Log::Trace);
         logger << Pt::Log::info << "test " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
 

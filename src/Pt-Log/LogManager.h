@@ -28,7 +28,6 @@
 #include <string>
 #include <map>
 
-
 namespace Pt {
 
 namespace Log {
@@ -36,7 +35,6 @@ namespace Log {
 class Channel;
 class Message;
 class Logger;
-
 
 class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 {

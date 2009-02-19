@@ -49,7 +49,6 @@ class Logger;
 /*
     - join Target into Logger
     - Hierachy of Targets
-    - Remove dependency on Reflex
 */
 
 /** @brief %Log message

@@ -28,26 +28,18 @@
 #include "LogManager.h"
 #include "Pt/Log/Target.h"
 
-
 namespace Pt {
 
 namespace Log {
 
 Target::Target(const std::string& name, Target* parent)
-: Reflectable(name)
-, _name(name)
+: _name(name)
 , _async(false)
 , _logLevel(Fatal)
 , _parent(parent)
 , _channel(0)
 , _logLevelExplicitelySet(false)
 {
-    void (Target::*setter)(const std::string&);
-    setter = &Target::setLogLevel;
-
-    this->registerProperty("logLevel", *this, &Target::logLevelString, setter);
-    this->registerProperty("channel", *this, &Target::channel, &Target::setChannel);
-    this->registerProperty("async", *this, &Target::async, &Target::setAsync);
 }
 
 
@@ -116,10 +108,12 @@ Target& Target::get(const std::string& name)
     return LogManager::instance().target(name);
 }
 
+
 bool Target::logLevelExplicitelySet()
 {
     return _logLevelExplicitelySet;
 }
+
 
 std::string Target::logLevelString() const
 {
@@ -159,14 +153,38 @@ void Target::setLogLevel(const std::string& level)
     }
 }
 
+
 void Target::setLogLevelImplicitely(LogLevel level)
 {
     _logLevel = level;
 }
 
+
 void Target::assignChannel(Channel& ch)
 {
     _channel = &ch;
+}
+
+
+void operator>>= (const SerializationInfo& si, Target& target)
+{
+    const SerializationInfo* member = si.findMember("logLevel");
+    if(member)
+    {
+        target.setLogLevel( member->toString().narrow() );
+    }
+
+    member = si.findMember("channel");
+    if(member)
+    {
+        target.setChannel( member->toString().narrow() );
+    }
+
+    member = si.findMember("async");
+    if(member)
+    {
+        target.setAsync( member->toValue<bool>() );
+    }
 }
 
 }
