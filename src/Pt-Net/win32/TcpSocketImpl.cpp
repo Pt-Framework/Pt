@@ -127,6 +127,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 			}
 		}
 
+		// _isConnected = true;
 		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
         return true;
     }
@@ -138,6 +139,28 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
 void TcpSocketImpl::endConnect()
 {
+    // FD_CONNECT abschalten
+
+	//if( ! _isConnected )
+    {
+		// auf FD_CONNECT warten aussed checkEvent hat das schon getan
+	
+		int sockerr;
+		socklen_t optlen = sizeof(sockerr);
+		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
+		{
+			close();
+			throw System::SystemError("getsockopt");
+		}
+
+		if(sockerr != 0)
+		{
+		    close();
+			throw System::SystemError("connect");
+		}
+		
+		//_isConnected = true;
+	}
 }
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
