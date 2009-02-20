@@ -117,34 +117,8 @@ std::string Target::logLevelString() const
 
 void Target::setLogLevel(const std::string& level)
 {
-    if(level == "None")
-    {
-        this->setLogLevel(None);
-    }
-    if(level == "Fatal")
-    {
-        this->setLogLevel(Fatal);
-    }
-    else if(level == "Error")
-    {
-        this->setLogLevel(Error);
-    }
-    else if(level == "Warn")
-    {
-        this->setLogLevel(Warn);
-    }
-    else if(level == "Info")
-    {
-        this->setLogLevel(Info);
-    }
-    else if( level == "Debug")
-    {
-        this->setLogLevel(Debug);
-    }
-    else if(level == "Trace")
-    {
-        this->setLogLevel(Trace);
-    }
+    LogLevel l = toLogLevel(level);
+    this->setLogLevel(l);
 }
 
 

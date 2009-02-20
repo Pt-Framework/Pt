@@ -90,7 +90,7 @@ inline LogLevel toLogLevel(std::string levelString)
     {
         return Error;
     }
-    else if(levelString == "Warning")
+    else if(levelString == "Warn")
     {
         return Warn;
     }
@@ -107,7 +107,7 @@ inline LogLevel toLogLevel(std::string levelString)
         return Trace;
     }
 
-    throw std::logic_error("Specified log level string doesn't fit to a log level in LogLevel::toLogLevel() method.");
+    throw std::logic_error("invalid logevel");
 }
 
 inline LogLevel trace()
