@@ -31,7 +31,7 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-#include <Mswsock.h>
+//#include <Mswsock.h>
 
 #define log_debug(x)
 
