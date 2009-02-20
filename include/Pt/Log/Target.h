@@ -29,10 +29,13 @@
 #define Pt_Log_Target_h
 
 #include <Pt/Log/Api.h>
-#include <Pt/Log/Logger.h>
+#include <Pt/Log/LogLevel.h>
+#include <Pt/NonCopyable.h>
 #include <string>
 
 namespace Pt {
+
+class SerializationInfo;
 
 namespace Log {
 
@@ -104,7 +107,10 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 
             This method is thread-safe.
         */
-        LogLevel logLevel() const;
+        LogLevel logLevel() const
+        {
+            return _logLevel;
+        }
 
         /** @brief Sets the log-level of the target explicitely
 

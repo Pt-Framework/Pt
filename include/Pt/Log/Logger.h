@@ -30,6 +30,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/LogLevel.h>
+#include <Pt/Log/Target.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/DateTime.h>
 #include <Pt/NonCopyable.h>
@@ -235,7 +236,8 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         /** @brief Returns true if the log level is enabled
         */
-        bool enabled(LogLevel level) const;
+        bool enabled(LogLevel level) const
+        { return level <= _target->logLevel(); }
 
         /** @brief Returns the target of this logger
 

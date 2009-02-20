@@ -64,12 +64,6 @@ Target& Logger::target() const
 }
 
 
-bool Logger::enabled(LogLevel level) const
-{
-    return level <= _target->logLevel();
-}
-
-
 void Message::send()
 {
     if( _logger->enabled(_level) )

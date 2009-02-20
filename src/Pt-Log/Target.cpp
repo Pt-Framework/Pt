@@ -66,12 +66,6 @@ void Target::setAsync(bool isAsync)
 }
 
 
-LogLevel Target::logLevel() const
-{
-    return _logLevel;
-}
-
-
 void Target::setLogLevel(LogLevel level)
 {
     _logLevel = level;
