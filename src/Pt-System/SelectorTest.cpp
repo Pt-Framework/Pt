@@ -68,7 +68,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
 
             char in[20];
-            size_t n = buffer.sgetn(in, 20);
+            size_t n = buffer.sgetn( in, buffer.in_avail() );
             std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
             eloop.exit();
         }
