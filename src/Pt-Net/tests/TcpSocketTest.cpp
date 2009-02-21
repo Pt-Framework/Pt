@@ -52,6 +52,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
+            _acceptor->close();
             delete _acceptor;
         }
 
@@ -59,13 +60,13 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             this->reportMessage("\nSTART");
 
-            Pt::Net::TcpServer server("127.0.0.1", 8000);
+            Pt::Net::TcpServer server("127.0.0.1", 8001);
             connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
 
             connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
 
             Pt::Net::TcpSocket client;
-            client.beginConnect("127.0.0.1", 8000);
+            client.beginConnect("127.0.0.1", 8001);
             connect(client.connected, *this, &TcpSocketTest::onConnect);
             connect(client.outputReady, *this, &TcpSocketTest::onOutput);
 
