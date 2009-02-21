@@ -287,7 +287,6 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	DWORD flags = 0;
 
 	WSABUF receiveBuffer;
-		
 	receiveBuffer.buf = _socket.rbuf();
     receiveBuffer.len = _socket.rbuflen();
 
@@ -295,7 +294,10 @@ size_t TcpSocketImpl::endRead(bool& eof)
 		 throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 
 	if(WSARecv(_fd, &receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
-		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+    {
+        if(GetLastError() != WSA_IO_PENDING)
+	        throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+    }
 
 	bytes = checkReceiveResult(eof);
 
