@@ -32,16 +32,21 @@ rule Configure
 
 rule TryCommand
 {
-    local _cmd  = $(1) " 2>&1 > check.log" ;
-    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
+    local _cmd  = $(1) ; #" 2>&1 > check.log" ;
+    
+    # Echo "command: " $(_cmd:J=" ") ;
+    # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
+    local _result = [ EXEC $(_cmd:J=" ") ] ;
+
+    # Echo result $(_result) ;
 
     if [ CHECK_IF_FILE check.log ] && $(RM)
     {
         _cmd = $(RM) check.log ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+        EXEC $(_cmd:J=" ") ;
     }
 
-    if $(_result[2]) = 0
+    if $(_result) = 0
     {
         return 1 ;
     }
@@ -294,7 +299,7 @@ rule ConfigureLn
  
     if ! $(LN)
     {
-        Exit "Checking for link command... FAILED!" ;
+        Echo "Checking for link command... not supported" ;
     }
 }
 
@@ -361,7 +366,7 @@ rule ConfigureToolset
             WriteFile check.c : "#include <string.h>" ;
             WriteFile check.c : "int main() { return 0; } " ;
 
-            if [ TryCommand "cl /Fo$(_obj) /Fe$(_out) check.c" ]
+            if [ TryCommand "cl /nologo /Fo$(_obj) /Fe$(_out) check.c" ]
             {
                 WriteFile config.jam : "TOOLSET = msvc ;"  ;
                 TOOLSET = msvc ;
