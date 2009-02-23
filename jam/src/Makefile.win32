@@ -4,6 +4,9 @@
 # People with DevStudio settings already in shell environment.
 #
 # Unset conflicting MAKEFLAGS when QNX SDK is installed
+# possibly add /I c:\Programme\PSDK2003Server\Include
+# set LIB environment var
+# nmake /f Makefile.win32
 #
 CC = cl /nologo
 CFLAGS = -DNT /RTC1 /MT /Os -wd4996 kernel32.lib advapi32.lib
