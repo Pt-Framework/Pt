@@ -24,6 +24,7 @@
 # include "compile.h"
 # include "native.h"
 # include "variable.h"
+# include "execcmd.h"
 # include <ctype.h>
 
 /*
@@ -346,6 +347,12 @@ load_builtins()
               builtin_shell, 0, args );
           bind_builtin( "COMMAND",
               builtin_shell, 0, args );
+      }
+
+      {
+          //char * args[] = { "exec", ":", "*", 0 };
+          bind_builtin( "EXEC",
+              builtin_exec, 0, 0 );
       }
 
       /* Initialize builtin modules */
@@ -1743,6 +1750,34 @@ LIST *builtin_shell( PARSE *parse, FRAME *frame )
         result = list_new( result, newstr( buffer ) );
     }
     
+    return result;
+}
+
+static void exec_closure(void *closure, int status, timing_info* time)
+{
+    int * exit_code = (int*)closure;
+    *(exit_code) = status;
+}
+
+LIST *builtin_exec( PARSE *parse, FRAME *frame )
+{
+    LIST* shell = 0;
+    LIST* result = 0;
+    LIST* command = 0;
+    struct timing_info ti;
+    char buffer[1024];
+    int exit_code = 1;
+
+    command = lol_get( frame->args, 0 );
+    if( ! command )
+        return L0;
+
+    shell = var_get( "JAMSHELL" );
+    execcmd( command->string, exec_closure, &exit_code, shell);
+    execwait();
+
+    sprintf (buffer, "%d", exit_code);
+    result = list_new( result, newstr( buffer ) );
     return result;
 }
 
