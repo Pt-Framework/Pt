@@ -30,9 +30,16 @@ rule Configure
 }
 
 
+TONULL = " 2>&1 > /dev/null" ;
+if $(OS:L) = "nt"
+{
+    TONULL = " 2>1 1>NUL" ;
+}
+
+
 rule TryCommand
 {
-    local _cmd  = $(1) ; #" 2>&1 > check.log" ;
+    local _cmd  = $(1) $(TONULL) ;
     
     # Echo "command: " $(_cmd:J=" ") ;
     # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
