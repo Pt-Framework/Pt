@@ -11,16 +11,14 @@ rule TryCompile
     local _L = $(5) ;
 
     local _cmd = $(_cc) /c /Fo$(_prog:S=$(SUFOBJ)) $(_flags) /I$(STDHDRS) /Tp $(_prog) ;
-    #Echo $(_cmd) ;
     local _r = [ TryCommand $(_cmd) ] ;
-    #Echo cc $(_r) ;
+    #Echo $(_cmd) was $(_r) ;
 
     if $(_r)
     {
-        _cmd = link /nologo /out:$(_prog:S=$(SUFEXE)) $(_prog:S=$(SUFOBJ)) /LIBPATH:$(STDLIBS) /LIBPATH:$(_L) $(_l) ;
-        #Echo $(_cmd) ;
+        _cmd = $(LINK) /out:$(_prog:S=$(SUFEXE)) $(_prog:S=$(SUFOBJ)) /LIBPATH:$(STDLIBS) /LIBPATH:$(_L) $(_l) ;
         _r = [ TryCommand $(_cmd) ] ;
-        #Echo link $(_r) ;
+        #Echo $(_cmd) was $(_r) ;
     }
 
     return $(_r) ;
@@ -37,7 +35,7 @@ rule TryC++
 {
     return [ TryCompile $(C++) : $(2) : $(3) : $(4) : $(5) ] ;
 }
-
+# c:\Programme\VisualStudio9\VC\ce\bin\x86_arm\link /nologo /out:checkd.exe check.obj /LIBPATH:"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\lib" 
 #############################################################################
 # Tools and utilities
 #############################################################################
@@ -83,9 +81,9 @@ if $(CONFIGURE)
 
 if $(TARGET_OS) = "wince"
 {
-    CC   = $(VCDIR)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+    CC   = "\"$(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl"\" /nologo ;
     C++  = $(CC) ;
-    LINK = $(VCDIR)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+    LINK = "\"$(VISUALC)\\VC\\ce\\bin\\x86_arm\\link"\" /nologo ;
 
     CCFLAGS += /D "_WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" ;
     CCFLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /W3 ;
@@ -95,16 +93,18 @@ if $(TARGET_OS) = "wince"
 
     STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" 
               \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
+              
+    PLATFORMSDK = $(VISUALC)\\smartdevices\\sdk\\pocketpc2003 ;
 }
 else
 {
-    AR = $(VCDIR)\\bin\\lib ;
+    AR = "\"$(VCDIR)\\bin\\lib"\" ;
     AS = masm386 ;
-    CC = $(VCDIR)\\bin\\cl /nologo ;
+    CC = "\"$(VCDIR)\\bin\\cl"\" /nologo ;
     C++ = $(CC) ;
-    RC = $(VCDIR)\\bin\\rc ;
-    MT = $(VCDIR)\\bin\\mt -nologo ;
-    LINK = $(VCDIR)\\bin\\link /nologo ;
+    RC = "\"$(VCDIR)\\bin\\rc"\" ;
+    MT = "\"$(VCDIR)\\bin\\mt"\" /nologo ;
+    LINK = "\"$(VCDIR)\\bin\\link"\" /nologo ;
 }
 
 if $(TARGET_OSPLAT) = "arm"
@@ -196,12 +196,17 @@ C++FLAGS += $(CCFLAGS) /EHsc /GR /fp:fast /FD /Zc:wchar_t /TP ;
 if $(CONFIGURE)
 {
     ConfigureCc HAS_PLATFORMSDK : "#include <windows.h>" 
+                                  "int wmain(int n, wchar_t**) { return 0; }"
                                   "int main() { return 0; }" 
-                                : /I\"$(PLATFORMSDK)\\include\" 
-                                : 
-                                : \"$(PLATFORMSDK)\\lib\" ;
-}
+                                : /I\"$(PLATFORMSDK)\\include\" $(CCFLAGS) 
+                                : /ENTRY:"mainWCRTStartup" $(LINKFLAGS) $(LINKLIBS) 
+                                : \"$(PLATFORMSDK)\\lib\"
+                                : ;
 
+                               
+}
+#c:\Programme\VisualStudio9\VC\ce\bin\x86_arm\cl /nologo /c /Focheck.obj /I"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\include" /I"c:\Programme\VisualStudio9\vc\ce\include" /I"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include" /I"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\include" /Tp check.c 
+# c:\Programme\VisualStudio9\VC\ce\bin\x86_arm\link /nologo /out:checkd.exe check.obj /LIBPATH:"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\lib" /LIBPATH:"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\lib" /ENTRY:mainWCRTStartup coredll.lib corelibc.lib ccrtrtti.lib secchk.lib /MANIFEST:NO /NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /LIBPATH:"c:\Programme\VisualStudio9\SmartDevices\SDK\PocketPC2003\Lib\armv4"/LIBPATH:"c:\Programme\VisualStudio9\VC\ce\lib\armv4" /ARMPADCODE /machine:ARM /LIBPATH:"c:\Programme\VisualStudio9\smartdevices\sdk\pocketpc2003\include\lib" /INCREMENTAL:NO /DEBUG was
 ##############################################################################
 # Build rules
 ##############################################################################
