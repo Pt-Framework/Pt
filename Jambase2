@@ -30,10 +30,10 @@ rule Configure
 }
 
 
-TONULL = " 2>1 > /dev/null" ;
+TONULL = " 2>/dev/null 1>/dev/null" ;
 if $(OS:L) = "nt"
 {
-    TONULL = " 2>1 1>NUL" ;
+    TONULL = " 2>NUL 1>NUL" ;
 }
 
 
