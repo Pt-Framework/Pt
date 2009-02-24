@@ -36,10 +36,15 @@ Target::Target(const std::string& name, Target* parent)
 : _name(name)
 , _async(false)
 , _logLevel(Fatal)
+, _inheritLogLevel(true)
 , _parent(parent)
 , _channel(0)
-, _logLevelExplicitelySet(false)
+, _inheritChannel(true)
+, _reserved(0)
+
 {
+    if(parent)
+        _logLevel = _parent->_logLevel;
 }
 
 
@@ -54,7 +59,7 @@ const std::string& Target::name() const
 }
 
 
-bool Target::async() const
+/*bool Target::async() const
 {
     return _async;
 }
@@ -63,16 +68,13 @@ bool Target::async() const
 void Target::setAsync(bool isAsync)
 {
     _async = isAsync;
-}
+}*/
 
 
 void Target::setLogLevel(LogLevel level)
 {
-    _logLevel = level;
-    _logLevelExplicitelySet = true;
-
-    // Iterate through childs and set new LogLevels
-    LogManager::instance().updateChildLogLevels(*this);
+    // thread-safe
+    LogManager::instance().setLogLevel(*this, level);
 }
 
 
@@ -89,13 +91,6 @@ void Target::setChannel(const std::string& url)
 }
 
 
-void Target::log(const Message& message)
-{
-    // thread-safe
-    LogManager::instance().log(*this, message, _async);
-}
-
-
 Target& Target::get(const std::string& name)
 {
     // thread-safe
@@ -103,28 +98,29 @@ Target& Target::get(const std::string& name)
 }
 
 
-bool Target::logLevelExplicitelySet()
+void Target::log(const Message& message)
 {
-    return _logLevelExplicitelySet;
+    // thread-safe
+    LogManager::instance().log(*this, message, _async);
 }
 
 
-std::string Target::logLevelString() const
+bool Target::inheritsLogLevel() const
 {
-    return toString(_logLevel);
+    return _inheritLogLevel;
 }
 
 
-void Target::setLogLevel(const std::string& level)
-{
-    LogLevel l = toLogLevel(level);
-    this->setLogLevel(l);
-}
-
-
-void Target::setLogLevelImplicitely(LogLevel level)
+void Target::assignLogLevel(LogLevel level, bool inherited)
 {
     _logLevel = level;
+    _inheritLogLevel = inherited;
+}
+
+
+bool Target::inheritsChannel() const
+{
+    return _inheritChannel;
 }
 
 
@@ -139,7 +135,8 @@ void operator>>= (const SerializationInfo& si, Target& target)
     const SerializationInfo* member = si.findMember("logLevel");
     if(member)
     {
-        target.setLogLevel( member->toString().narrow() );
+        LogLevel l = toLogLevel( member->toString().narrow() );
+        target.assignLogLevel( l, false );
     }
 
     member = si.findMember("channel");
@@ -148,11 +145,11 @@ void operator>>= (const SerializationInfo& si, Target& target)
         target.setChannel( member->toString().narrow() );
     }
 
-    member = si.findMember("async");
+    /*member = si.findMember("async");
     if(member)
     {
         target.setAsync( member->toValue<bool>() );
-    }
+    }*/
 }
 
 }

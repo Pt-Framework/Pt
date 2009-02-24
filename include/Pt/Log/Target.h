@@ -75,6 +75,7 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 {
     friend class LogManager;
     friend class Logger;
+    friend void operator >>= (const SerializationInfo& si, Target& target);
 
     protected:
         //! @internal Used within logging-manager
@@ -94,14 +95,14 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 
             This method is thread-safe.
         */
-        bool async() const;
+        //bool async() const;
 
         /** @brief Enables or disables the async-mode
 
             This method is thread-safe. The async-mode can also be set
             in the properties file of the logging-manager.
         */
-        void setAsync(bool isAsync);
+        //void setAsync(bool isAsync);
 
         /** @brief Returns the log-level of the target
 
@@ -135,7 +136,6 @@ class PT_LOG_API Target : protected Pt::NonCopyable
         */
         void setChannel(const std::string& url);
 
-
         /** @brief Get a target from the logging manager
 
             The target is created if it does not exist, otherwise the
@@ -145,28 +145,18 @@ class PT_LOG_API Target : protected Pt::NonCopyable
         */
         static Target& get(const std::string& name);
 
-        /** @brief Returns, if a log level was explicitely set via .settings file or setLogLevel()
-            *
-            *  @return True, if LogLevel was explicitely set, otherwise false
-        */
-        bool logLevelExplicitelySet();
-
         //! @internal Used by Logger
         void log(const Message& msg);
 
-        //! @internal Property callback
-        std::string logLevelString() const;
-
-        //! @internal Property callback
-        void setLogLevel(const std::string&);
-
     protected:
-        /** @brief Sets the log-level of the target implicitely
+        //! @internal Only used on LogManager initialisation
+        bool inheritsLogLevel() const;
 
-            This method is thread-safe. The children of this
-            target don't inherit the given LogLevel.
-        */
-        void setLogLevelImplicitely(LogLevel level);
+        //! @internal Only used on LogManager initialisation
+        void assignLogLevel(LogLevel level, bool inherited);
+
+        //! @internal Only used on LogManager initialisation
+        bool inheritsChannel() const;
 
         //! @internal Only used on LogManager initialisation
         void assignChannel(Channel& ch);
@@ -174,11 +164,15 @@ class PT_LOG_API Target : protected Pt::NonCopyable
     private:
         //! @internal
         std::string _name;
+
         //! @internal
         bool _async;
 
         //! @internal
         LogLevel _logLevel;
+
+        //! @internal
+        bool _inheritLogLevel;
 
         //! @internal
         Target* _parent;
@@ -187,10 +181,10 @@ class PT_LOG_API Target : protected Pt::NonCopyable
         Channel* _channel;
 
         //! @internal
-        void* _reserved;
+        bool _inheritChannel;
 
         //! @internal
-        bool _logLevelExplicitelySet;
+        void* _reserved;
 };
 
 PT_LOG_API void operator >>= (const SerializationInfo& si, Target& target);
