@@ -228,11 +228,8 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         /** @brief Destructor
         */
-        ~Logger();
-
-        /** @brief Returns the current log-level of the target
-        */
-        LogLevel logLevel() const;
+        ~Logger()
+        {}
 
         /** @brief Returns true if the log level is enabled
         */
@@ -244,7 +241,8 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             The life-time of the target is bound to the life-time of the
             logger.
         */
-        Target& target() const;
+        Target& target() const
+        { return *_target; }
 
         /** @brief Start a new log-message
 
@@ -254,80 +252,80 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             the logger is disabled this function only performs a integer
             comparison.
         */
-		Message beginLog(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Trace, si);
-		}
+        Message beginLog(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Trace, si);
+        }
 
-		Message beginLog(LogLevel level, const Pt::SourceInfo& si)
-		{
-			return Message(*this, level, si);
-		}
+        Message beginLog(LogLevel level, const Pt::SourceInfo& si)
+        {
+            return Message(*this, level, si);
+        }
 
-		Message trace(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Trace, si);
-		}
+        Message trace(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Trace, si);
+        }
 
-		Message debug(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Debug, si);
-		}
+        Message debug(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Debug, si);
+        }
 
-		Message info(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Info, si);
-		}
+        Message info(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Info, si);
+        }
 
-		Message warn(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Warn, si);
-		}
+        Message warn(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Warn, si);
+        }
 
-		Message error(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Error, si);
-		}
+        Message error(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Error, si);
+        }
 
-		Message fatal(const Pt::SourceInfo& si)
-		{
-			return Message(*this, Pt::Log::Fatal, si);
-		}
+        Message fatal(const Pt::SourceInfo& si)
+        {
+            return Message(*this, Pt::Log::Fatal, si);
+        }
 
-		Message trace()
-		{
-			return Message(*this, Pt::Log::Trace);
-		}
+        Message trace()
+        {
+            return Message(*this, Pt::Log::Trace);
+        }
 
-		Message debug()
-		{
-			return Message(*this, Pt::Log::Debug);
-		}
+        Message debug()
+        {
+            return Message(*this, Pt::Log::Debug);
+        }
 
-		Message info()
-		{
-			return Message(*this, Pt::Log::Info);
-		}
+        Message info()
+        {
+            return Message(*this, Pt::Log::Info);
+        }
 
-		Message warn()
-		{
-			return Message(*this, Pt::Log::Warn);
-		}
+        Message warn()
+        {
+            return Message(*this, Pt::Log::Warn);
+        }
 
-		Message error()
-		{
-			return Message(*this, Pt::Log::Error);
-		}
+        Message error()
+        {
+            return Message(*this, Pt::Log::Error);
+        }
 
-		Message fatal()
-		{
-			return Message(*this, Pt::Log::Fatal);
-		}
+        Message fatal()
+        {
+            return Message(*this, Pt::Log::Fatal);
+        }
 
-		Message operator<<( LogLevel (*pf)() )
-		{
-			return Message( *this, pf() );
-		}
+        Message operator<<( LogLevel (*pf)() )
+        {
+            return Message( *this, pf() );
+        }
 
     protected:
         //! @internal Used by the LogManager on initialisation
@@ -336,9 +334,6 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
     private:
         //! @internal
         Target* _target;
-
-        //! @internal
-        void* _reserved;
 };
 
 

@@ -47,23 +47,6 @@ Logger::Logger(Target& target)
 }
 
 
-Logger::~Logger()
-{
-}
-
-
-LogLevel Logger::logLevel() const
-{
-    return _target->logLevel();
-}
-
-
-Target& Logger::target() const
-{
-    return *_target;
-}
-
-
 void Message::send()
 {
     if( _logger->enabled(_level) )

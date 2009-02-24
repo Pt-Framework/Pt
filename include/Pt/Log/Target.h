@@ -166,7 +166,7 @@ class PT_LOG_API Target : protected Pt::NonCopyable
         std::string _name;
 
         //! @internal
-        bool _async;
+        //bool _async;
 
         //! @internal
         LogLevel _logLevel;

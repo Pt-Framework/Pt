@@ -34,7 +34,7 @@ namespace Log {
 
 Target::Target(const std::string& name, Target* parent)
 : _name(name)
-, _async(false)
+//, _async(false)
 , _logLevel(Fatal)
 , _inheritLogLevel(true)
 , _parent(parent)
@@ -101,7 +101,7 @@ Target& Target::get(const std::string& name)
 void Target::log(const Message& message)
 {
     // thread-safe
-    LogManager::instance().log(*this, message, _async);
+    LogManager::instance().log(*this, message); //, _async);
 }
 
 
