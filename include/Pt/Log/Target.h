@@ -71,11 +71,12 @@ class Message;
     target ping writes messages with a log-level of Error of higher
     asnychronously to the serial port.
 */
+ 
 class PT_LOG_API Target : protected Pt::NonCopyable
 {
     friend class LogManager;
     friend class Logger;
-    friend void operator >>= (const SerializationInfo& si, Target& target);
+    friend PT_LOG_API void operator >>= (const SerializationInfo& si, Target& target);
 
     protected:
         //! @internal Used within logging-manager
