@@ -49,12 +49,13 @@ class Logger;
 /// TODO:
 /*
     - Remove async flag
-    - check settings attributes for root target
+    - use formatting optimizations (cxxtools log)
     - allow settings for channels
     - log_define at al macros
     - LOG macros with logger instance
     - always set channel pointer in Target
     - file rolling
+    - create LogManager instance on static initialization
     - Initialization method
 */
 
