@@ -16,12 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_LogManager_h
-#define Pt_LogManager_h
+#ifndef Pt_Log_LogManager_h
+#define Pt_Log_LogManager_h
 
-#include "Pt/Settings.h"
-#include <Pt/Log/Api.h>
-#include <Pt/Log/Target.h>
+#include "Pt/Log/Api.h"
+#include "Pt/Log/Target.h"
+#include "ConsoleChannel.h"
+#include "FileChannel.h"
+#include "SerialChannel.h"
+#include <Pt/Settings.h>
 #include <Pt/Singleton.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Plugin.h>
@@ -60,12 +63,15 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         Channel& channel(const std::string& url);
 
     private:
+        Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> _consolePlugin;
+        Pt::System::BasicPlugin<Pt::Log::FileChannel, Pt::Log::Channel> _filePlugin;
+        Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> _serialPlugin;
+        Pt::System::PluginManager<Channel> _pluginManager;
         Target* _rootTarget;
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
         Pt::System::RecursiveMutex _mutex;
         Settings _settings;
-        Pt::System::PluginManager<Channel> _pluginManager;
         Logger* _logger;
 };
 

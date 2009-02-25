@@ -26,9 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "LogManager.h"
-#include "ConsoleChannel.h"
-#include "FileChannel.h"
-#include "SerialChannel.h"
 #include <Pt/Log/Target.h>
 #include <Pt/Log/Logger.h>
 #include <Pt/Text/TextStream.h>
@@ -36,22 +33,21 @@
 #include <memory>
 #include <fstream>
 
-static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
-static Pt::System::BasicPlugin<Pt::Log::FileChannel, Pt::Log::Channel> filePlugin("file", "0.0.1");
-static Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> serialPlugin("comm", "0.0.1");
-
 namespace Pt {
 
 namespace Log {
 
 LogManager::LogManager()
-: _rootTarget(0)
+: _consolePlugin("console", "1.0.0")
+, _filePlugin("file", "1.0.0")
+, _serialPlugin("comm", "1.0.0")
+, _rootTarget(0)
 , _logger(0)
 {
     // builtin plugins
-    _pluginManager.registerPlugin( consolePlugin );
-    _pluginManager.registerPlugin( filePlugin );
-    _pluginManager.registerPlugin( serialPlugin );
+    _pluginManager.registerPlugin( _consolePlugin );
+    _pluginManager.registerPlugin( _filePlugin );
+    _pluginManager.registerPlugin( _serialPlugin );
 
     // initialise settings if .settings exist
     std::ifstream fs("Pt-Log.settings");
@@ -64,7 +60,7 @@ LogManager::LogManager()
     _targetMap[""] = _rootTarget;
     _rootTarget->assignLogLevel(Pt::Log::Error, false);
     _rootTarget->setChannel("console://");
-    _settings.getObject( *_rootTarget, "" );
+    _settings >>= *_rootTarget;
 
     // logger for Pt::Log
     std::auto_ptr<Target> logTarget( new Target("Pt-Log", _rootTarget) );
@@ -74,7 +70,7 @@ LogManager::LogManager()
     std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
     _logger = logger.get();
 
-    _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
+    _logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
 
     logger.release();
     logTarget.release();
@@ -84,7 +80,7 @@ LogManager::LogManager()
 
 LogManager::~LogManager()
 {
-    _logger->beginLog(PT_SOURCEINFO) << info << "Logging system shutdown" << endlog;
+    _logger->info(PT_SOURCEINFO) << "Logging system shutdown" << endlog;
 
     // logger for Pt::Log
     delete _logger;

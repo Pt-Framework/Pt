@@ -48,8 +48,13 @@ class Logger;
 
 /// TODO:
 /*
-    - join Target into Logger
-    - Hierachy of Targets
+    - Remove async flag
+    - check settings attributes for root target
+    - allow settings for channels
+    - log_define at al macros
+    - LOG macros with logger instance
+    - always set channel pointer in Target
+    - file rolling
     - Initialization method
 */
 
