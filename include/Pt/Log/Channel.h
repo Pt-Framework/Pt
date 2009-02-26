@@ -75,13 +75,9 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
         { this->_close(); }
 
         /** @brief Writes data to the channel
-
-            This method writes a message to its physical location. It the
-            isAsync flag is true, the method will not block until the message
-            is written.
         */
-        void write(const std::string& message, bool isAsync = false)
-        { this->_write( message, isAsync ); }
+        void write(const std::string& message)
+        { this->_write( message); }
 
     protected:
         /** @brief Open the channel from URL
@@ -96,12 +92,8 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
         virtual void _close() = 0;
 
         /** @brief Writes data to the channel
-
-            This method writes a message to its physical location. It the
-            isAsync flag is true, the method will not block until the message
-            is written.
         */
-        virtual void _write(const std::string& message, bool isAsync) = 0;
+        virtual void _write(const std::string& message) = 0;
 };
 
 }

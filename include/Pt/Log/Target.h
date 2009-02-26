@@ -60,7 +60,6 @@ class Message;
     foobar.channel = console://
 
     foobar.ping.channel = comm:///dev/ttyS0
-    foobar.ping.async = true
     foobar.ping.logLevel = Error
 
     foobar.pong.logLevel = Trace
@@ -91,19 +90,6 @@ class PT_LOG_API Target : protected Pt::NonCopyable
             This method is thread-safe.
         */
         const std::string& name() const;
-
-        /** @brief Returns true if target is in async-mode
-
-            This method is thread-safe.
-        */
-        //bool async() const;
-
-        /** @brief Enables or disables the async-mode
-
-            This method is thread-safe. The async-mode can also be set
-            in the properties file of the logging-manager.
-        */
-        //void setAsync(bool isAsync);
 
         /** @brief Returns the log-level of the target
 
@@ -165,9 +151,6 @@ class PT_LOG_API Target : protected Pt::NonCopyable
     private:
         //! @internal
         std::string _name;
-
-        //! @internal
-        //bool _async;
 
         //! @internal
         LogLevel _logLevel;

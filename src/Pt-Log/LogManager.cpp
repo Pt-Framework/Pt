@@ -239,7 +239,7 @@ void LogManager::setChannel(Target& target, const std::string& url)
 }
 
 
-void LogManager::log(Target& target, const Message& message) //, bool isAsync)
+void LogManager::log(Target& target, const Message& message)
 {
     Pt::System::RecursiveLock lock( _mutex );
 

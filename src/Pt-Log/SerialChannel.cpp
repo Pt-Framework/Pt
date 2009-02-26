@@ -39,37 +39,22 @@ namespace Log {
 
 SerialChannel::SerialChannel()
 : Channel()
-, _threadLoop()
-, _thread(_threadLoop)
-, _n(0)
 {
-    Pt::connect( _threadLoop.event, *this, &SerialChannel::processEvent);
-    _thread.start();
 }
 
 
 SerialChannel::~SerialChannel()
 {
-    _threadLoop.exit();
-    _thread.join();
-    this->close();
-}
-
-
-void SerialChannel::processEvent(const Pt::Event& ev)
-{
-    const WriteEvent* wev = dynamic_cast<const WriteEvent*>(&ev);
-    if(wev)
-        this->_write( wev->message(), false );
-
-     --_n;
+    try
+    {
+        this->close();
+    }
+    catch(...) {}
 }
 
 
 void SerialChannel::_open(const std::string& urlstr)
 {
-    Pt::System::MutexLock lock( _mutex );
-
     //TODO Use System::Url for "comm" scheme as soon as protocol handler for "comm" is implemented
     //System::Url url(urlstr);
     std::stringstream sStream(urlstr);
@@ -99,31 +84,12 @@ void SerialChannel::_open(const std::string& urlstr)
 
 void SerialChannel::_close()
 {
-    Pt::System::MutexLock lock( _mutex );
-
     _device.close();
 }
 
 
-void SerialChannel::_write(const std::string& message, bool isAsync)
+void SerialChannel::_write(const std::string& message)
 {
-    if( isAsync )
-    {
-        if(_n > 10)
-        {
-            return;
-        }
-
-        ++_n;
-
-        WriteEvent wev(message);
-        _threadLoop.commitEvent(wev);
-
-        return;
-    }
-
-    Pt::System::MutexLock lock( _mutex );
-
     if(_device.enabled() == false)
         return;
 

@@ -40,7 +40,7 @@ class PT_LOG_API ConsoleChannel : public Channel
 
         virtual void _close();
 
-        virtual void _write(const std::string& message, bool isAsync);
+        virtual void _write(const std::string& message);
 };
 
 } // namespace Log

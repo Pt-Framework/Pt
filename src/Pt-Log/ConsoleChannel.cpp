@@ -55,7 +55,7 @@ void ConsoleChannel::_close()
 }
 
 
-void ConsoleChannel::_write(const std::string& message, bool )
+void ConsoleChannel::_write(const std::string& message)
 {
     std::cerr << message;
 }

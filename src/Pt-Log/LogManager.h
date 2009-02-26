@@ -53,7 +53,7 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 
         void setChannel(Target& target, const std::string& url);
 
-        void log(Target& target, const Message& message); //, bool isAsync = false);
+        void log(Target& target, const Message& message);
 
         void setLogLevel(Target &target, LogLevel level);
 

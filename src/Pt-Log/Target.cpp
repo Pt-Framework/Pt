@@ -34,7 +34,6 @@ namespace Log {
 
 Target::Target(const std::string& name, Target* parent)
 : _name(name)
-//, _async(false)
 , _logLevel(Fatal)
 , _inheritLogLevel(true)
 , _parent(parent)
@@ -57,18 +56,6 @@ const std::string& Target::name() const
 {
     return _name;
 }
-
-
-/*bool Target::async() const
-{
-    return _async;
-}
-
-
-void Target::setAsync(bool isAsync)
-{
-    _async = isAsync;
-}*/
 
 
 void Target::setLogLevel(LogLevel level)
@@ -101,7 +88,7 @@ Target& Target::get(const std::string& name)
 void Target::log(const Message& message)
 {
     // thread-safe
-    LogManager::instance().log(*this, message); //, _async);
+    LogManager::instance().log(*this, message);
 }
 
 
@@ -144,12 +131,6 @@ void operator>>= (const SerializationInfo& si, Target& target)
     {
         target.setChannel( member->toString().narrow() );
     }
-
-    /*member = si.findMember("async");
-    if(member)
-    {
-        target.setAsync( member->toValue<bool>() );
-    }*/
 }
 
 }

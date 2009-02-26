@@ -58,7 +58,7 @@ void FileChannel::_close()
 }
 
 
-void FileChannel::_write(const std::string& message, bool )
+void FileChannel::_write(const std::string& message)
 {
     m_out << message << std::flush;
 }

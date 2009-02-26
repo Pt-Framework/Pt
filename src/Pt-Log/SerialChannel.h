@@ -21,51 +21,12 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Channel.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/Thread.h>
-#include <Pt/System/EventLoop.h>
 #include <Pt/System/SerialDevice.h>
 #include <string>
 
 namespace Pt {
 
 namespace Log {
-
-class PT_LOG_API WriteEvent : public Pt::Event
-{
-    public:
-        WriteEvent(const std::string& msg)
-        : _msg(msg)
-        {
-        }
-
-        const std::string& message() const
-        { return _msg; }
-
-        ~WriteEvent()
-        {
-        }
-
-        const std::type_info& typeInfo() const
-        {
-            return typeid(WriteEvent);
-        }
-
-	    Pt::Event& clone(Pt::Allocator& allocator) const
-	    {
-	        void* m = allocator.allocate( sizeof(WriteEvent) );
-	        return *( new (m)WriteEvent(*this) );
-	    }
-
-	    void destroy(Pt::Allocator& allocator)
-	    {
-	        allocator.deallocate(this, sizeof(WriteEvent));
-	    }
-
-    private:
-        std::string _msg;
-};
-
 
 class PT_LOG_API SerialChannel : public Pt::Connectable
                                , public Channel
@@ -82,14 +43,10 @@ class PT_LOG_API SerialChannel : public Pt::Connectable
 
         virtual void _close();
 
-        virtual void _write(const std::string& message, bool isAsync);
+        virtual void _write(const std::string& message);
 
     private:
-        Pt::System::EventLoop _threadLoop;
-        Pt::System::AttachedThread _thread;
         Pt::System::SerialDevice _device;
-        Pt::System::Mutex _mutex;
-        size_t _n;
 };
 
 } // namespace Log

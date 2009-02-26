@@ -42,7 +42,7 @@ class PT_LOG_API FileChannel : public Channel
 
         virtual void _close();
 
-        virtual void _write(const std::string& message, bool isAsync);
+        virtual void _write(const std::string& message);
 
 
 
