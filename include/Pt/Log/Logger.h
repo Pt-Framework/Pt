@@ -58,7 +58,6 @@ class Logger;
 
 /// TODO:
 /*
-    - Remove async flag
     - use formatting optimizations (cxxtools log)
     - allow settings for channels
     - log_define at al macros
