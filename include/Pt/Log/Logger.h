@@ -38,6 +38,16 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef NLOG
+    #define PT_LOG(logger, level, message) \
+    if( logger.enabled(level) ) \
+    { \
+        logger.beginLog(PT_SOURCEINFO) << level << message << Pt::Log::endlog; \
+    }
+#else
+    #define PT_LOG(logger, level, message)
+#endif
+
 namespace Pt {
 
 namespace Log {
