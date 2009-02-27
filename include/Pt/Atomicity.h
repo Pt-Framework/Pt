@@ -64,6 +64,11 @@
 
         #define PT_ATOMICITY_H <Pt/Atomicity.gcc.arm.h>
 
+    #elif defined(PT_AVR32) || \
+          defined (AVR) || defined(__AVR__)
+
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.avr32.h>
+
     #elif defined(PT_PPC) || \
           defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
