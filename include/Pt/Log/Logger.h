@@ -231,6 +231,14 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         */
         Logger(const std::string& name);
 
+        /** @brief Constructs a new logger for a target and log-level
+
+            The constructed logger will log to the target name with at an
+            initial log-level level. If the target does not exist yet within
+            the loggin framework it will be created and configured.
+        */
+        Logger(const char* name);
+
         /** @brief Destructor
         */
         ~Logger()

@@ -41,6 +41,12 @@ Logger::Logger(const std::string& name)
 }
 
 
+Logger::Logger(const char* name)
+: _target( &LogManager::instance().target(name) )
+{
+}
+
+
 Logger::Logger(Target& target)
 : _target( &target )
 {
