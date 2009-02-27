@@ -245,12 +245,21 @@ namespace Pt {
     };
 
     template <typename T>
-    class Free
+    class FreeDestroyPolicy
     {
         protected:
             void destroy(T* ptr)
             { free(ptr); }
     };
+
+    template <typename objectType>
+    class ArrayDestroyPolicy
+    {
+        protected:
+            static void destroy(objectType* ptr)
+            { delete[] ptr; }
+    };
+
 
     /** \param T Contained type
         \param Model Model for linking/unlinking
