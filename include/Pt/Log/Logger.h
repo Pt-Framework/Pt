@@ -38,16 +38,6 @@
 #include <iostream>
 #include <sstream>
 
-#ifndef NLOG
-    #define PT_LOG(logger, level, message) \
-    if( logger.enabled(level) ) \
-    { \
-        logger.beginLog(PT_SOURCEINFO) << level << message << Pt::Log::endlog; \
-    }
-#else
-    #define PT_LOG(logger, level, message)
-#endif
-
 namespace Pt {
 
 namespace Log {
@@ -415,8 +405,68 @@ class LoggedScope
         LogLevel _level;
 };
 
+struct LogDefine
+{
+    LogDefine(const char* category)
+    {
+        logger = getLogger(category);
+    }
+
+    ~LogDefine()
+    {
+        logger = 0;
+    }
+
+    static Pt::Log::Logger* getLogger(const char* category)
+    {
+        static Pt::Log::Logger s_logger(category);
+        return &s_logger;
+    }
+
+    volatile Pt::Log::Logger* logger;
+};
+
 }
 
 }
+
+#ifndef NLOG
+
+    #define PT_LOG(logger, level, expr) \
+    if( logger.enabled(level) ) \
+    { \
+        logger.beginLog(PT_SOURCEINFO) << level << expr << Pt::Log::endlog; \
+    }
+
+    #define log_define(category) \
+    static Pt:.Log::LogDefine pt_logdef(category);
+
+    #define log_xxxx(level, expr)   \
+    do { \
+        Pt::Log::Logger* _pt_logger = LogDefine::getLogger(); \
+        if( _pt_logger->isEnabled(Pt::Log:: ## level) ) \
+        { \
+            _pt_logger->beginLog(level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
+        } \
+    } while (false)
+
+    #define log_fatal(expr)     log_xxxx(Fatal, expr)
+    #define log_error(expr)     log_xxxx(Error, expr)
+    #define log_warn(expr)      log_xxxx(Warn, expr)
+    #define log_info(expr)      log_xxxx(Info, expr)
+    #define log_debug(expr)     log_xxxx(Debug, expr)
+    #define log_trace(expr)     log_xxxx(Trace, expr)
+
+#else
+    #define PT_LOG(logger, level, message)
+
+    #define log_define(category)
+    #define log_fatal(expr)
+    #define log_error(expr)
+    #define log_warn(expr)
+    #define log_info(expr)
+    #define log_debug(expr)
+    #define log_trace(expr)
+#endif
 
 #endif
