@@ -417,12 +417,7 @@ struct LogDefine
 {
     LogDefine(const char* category)
     {
-        logger = getLogger(category);
-    }
-
-    ~LogDefine()
-    {
-        logger = 0;
+        getLogger(category);
     }
 
     static Pt::Log::Logger* getLogger(const char* category)
@@ -430,8 +425,6 @@ struct LogDefine
         static Pt::Log::Logger s_logger(category);
         return &s_logger;
     }
-
-    volatile Pt::Log::Logger* logger;
 };
 
 }
@@ -443,7 +436,7 @@ struct LogDefine
     #define PT_LOG(logger, level, expr) \
     if( logger.enabled(level) ) \
     { \
-        logger.beginLog(PT_SOURCEINFO) << level << expr << Pt::Log::endlog; \
+        logger.beginLog(level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
     }
 
     #define log_define(category) \
