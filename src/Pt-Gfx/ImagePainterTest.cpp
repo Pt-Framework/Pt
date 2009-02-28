@@ -301,7 +301,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             metrics  = _imagePainter.fontMetrics( text );
             PT_UNIT_ASSERT( metrics.ascent() == 13 );
             PT_UNIT_ASSERT( metrics.descent() == 4 );
-            PT_UNIT_ASSERT( metrics.width() >= 90 && metrics.width() <= 110 );
+            PT_UNIT_ASSERT( metrics.width() >= 90 && metrics.width() <= 120 );
             PT_UNIT_ASSERT( metrics.height() >= 12 && metrics.height() <= 20 );
 
             _imagePainter.setFont( Font("Vera", 12, Font::NormalStyle, 340 ) );
