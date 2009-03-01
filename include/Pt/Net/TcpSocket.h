@@ -32,6 +32,7 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/System/IODevice.h>
+#include <string>
 
 namespace Pt {
 

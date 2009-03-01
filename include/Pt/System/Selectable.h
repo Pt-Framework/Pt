@@ -31,7 +31,6 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Selector.h>
-#include <limits>
 
 namespace Pt {
 
