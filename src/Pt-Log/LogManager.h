@@ -24,6 +24,7 @@
 #include "ConsoleChannel.h"
 #include "FileChannel.h"
 #include "SerialChannel.h"
+#include <Pt/DateTime.h>
 #include <Pt/Settings.h>
 #include <Pt/Singleton.h>
 #include <Pt/System/Mutex.h>

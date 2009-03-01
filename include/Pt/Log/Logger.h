@@ -70,34 +70,23 @@ class PT_LOG_API Message : protected Pt::NonCopyable
         : _logger(&logger)
         , _level(level)
         , _source(source)
-        , _threadId(-1)
-        , _procId(-1)
         {}
 
         Message(Logger& logger, const LogLevel level)
         : _logger(&logger)
         , _level(level)
         , _source("unknown", "unknown", "unknown")
-        , _threadId(-1)
-        , _procId(-1)
         {}
 
         ~Message()
         {}
 
-        const std::string& target() const
-        { return _target; }
-
-        /** @brief Append a type as string to the message
-
-            This method allows to append arbitrary types to the log-message.
-            All types that have a stream output operator defined can be used
-            here.
-        */
-        template <typename T>
-        void append(const T& t)
-        { _text << t; }
-
+        void clear()
+        {
+            _text.str( std::string() );
+            _text.clear();
+        }
+        
         std::string text() const
         { return _text.str(); }
 
@@ -107,29 +96,11 @@ class PT_LOG_API Message : protected Pt::NonCopyable
         LogLevel logLevel() const
         { return _level; }
 
-        const DateTime& timestamp() const
-        { return _dateTime; }
-
-        void setTimestamp(const Pt::DateTime& dateTime)
-        { _dateTime = dateTime; }
-
         const Pt::SourceInfo& sourceInfo() const
         { return _source; }
 
         void setSourceInfo(const SourceInfo& source)
         { _source = source; }
-
-        long threadId() const
-        { return _threadId; }
-
-        void setThreadId(const long id)
-        { _threadId = id; }
-
-        long processId() const
-        { return _procId; }
-
-        void setProcessId(const long id)
-        { _procId = id; }
 
         template <typename T>
         Message& operator<<(const T& value);
@@ -169,13 +140,9 @@ class PT_LOG_API Message : protected Pt::NonCopyable
 
     private:
         Logger*            _logger;
-        std::string        _target;
         std::ostringstream _text;
         LogLevel           _level;
         Pt::SourceInfo     _source;
-        Pt::DateTime       _dateTime;
-        long               _threadId;
-        long               _procId;
 };
 
 
@@ -196,11 +163,9 @@ inline Message& endlog(Message& msg)
     by the logging framework. A logger is created by passing a string that
     identifies the target uniquely to the constructor. If the target does not
     exist yet, it will be created. If several loggers are created with the
-    same target string they will indeed use the same target. A logger should
-    be kept within a single thread, but different loggers can log to the
-    same target from  different threads. The creation of a logger requires
-    a lookup in the logging manager, so it is beneficial to keep created logger
-    at the class level for as-long as they are needed.
+    same target string they will indeed use the same target. The creation of 
+    a logger requires a lookup in the logging manager, so it is beneficial to
+    keep created loggers at the class level for as-long as they are needed.
     Logging is most convenient using the stream API. The complete IOStreams
     API is supported, but a few manipulators should be avoided that would
     conflict with the typical format of a log-message. Some extra manipulators
@@ -209,14 +174,17 @@ inline Message& endlog(Message& msg)
     produce a log-message:
 
     @code
-    Pt::Logger logger(unique.loggerid);
-    logger.beginLog(PT_SOURCEINFO) << Pt::Log::info << "Pi is exactly " << 3 <<
+    Pt::Logger logger("mylog");
+    logger.beginLog(Pt::Log::info, PT_SOURCEINFO) << "Pi is exactly " << 3 <<
                                   << " No, I was kidding, its really " << 3.14
                                   << Pt::Log::endlog;
     @endcode
 
-    If the logger is disabled, meaning its log-level is lower than the log-level
-    of its target, each call to the logger will only cost an integer comparison.
+    If the logger is disabled, meaning that the log-level of its target is 
+    lower than the log-level of its target, the log message is discarded.
+    To avoid this cost, either check wheter the logger is enabled at the 
+    desired level by calling Logger::enabled, or use one of the logging
+    macros instead.
 */
 class PT_LOG_API Logger : protected Pt::NonCopyable
 {
@@ -225,17 +193,17 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
     public:
         /** @brief Constructs a new logger for a target and log-level
 
-            The constructed logger will log to the target name with at an
-            initial log-level level. If the target does not exist yet within
-            the loggin framework it will be created and configured.
+            The constructed logger will log to the target with the given name.
+            If the target does not exist yet within the loggin framework it 
+            will be created and configured.
         */
         Logger(const std::string& name);
 
         /** @brief Constructs a new logger for a target and log-level
 
-            The constructed logger will log to the target name with at an
-            initial log-level level. If the target does not exist yet within
-            the loggin framework it will be created and configured.
+            The constructed logger will log to the target with the given name.
+            If the target does not exist yet within the loggin framework it 
+            will be created and configured.
         */
         Logger(const char* name);
 
@@ -244,19 +212,23 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         ~Logger()
         {}
 
-        /** @brief Returns true if the log level is enabled
+        /** @brief Returns true if the log level is enabled for the target
         */
         bool enabled(LogLevel level) const
         { return level <= _target->logLevel(); }
 
         /** @brief Returns the target of this logger
-
-            The life-time of the target is bound to the life-time of the
-            logger.
         */
         Target& target() const
         { return *_target; }
 
+        void log(const Message& msg)
+        {
+            if( this->enabled( msg.logLevel() ) )
+            {
+                _target->log( msg );
+            }
+        }
         /** @brief Start a new log-message
 
             This method begins a new log-message. Use the PT_SOURCEINFO
@@ -342,7 +314,9 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
     protected:
         //! @internal Used by the LogManager on initialisation
-        Logger(Target& target);
+        Logger(Target& target)
+        : _target( &target )
+        {}
 
     private:
         //! @internal
@@ -351,13 +325,20 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
 
 template <typename T>
-Message& Message::operator<<(const T& value)
+inline Message& Message::operator<<(const T& value)
 {
     if( _logger->enabled(_level) )
         _text << value;
 
     return *this;
 }
+
+
+inline void Message::send()
+{
+    _logger->log(*this);
+}
+
 
 /** @brief Sentry class to log a scope
     @ingroup Logging

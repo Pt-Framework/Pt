@@ -30,6 +30,7 @@
 #include <Pt/Log/Logger.h>
 #include <Pt/Text/TextStream.h>
 #include <Pt/Text/Utf8Codec.h>
+ #include <Pt/System/Clock.h>
 #include <memory>
 #include <fstream>
 
@@ -242,7 +243,7 @@ void LogManager::setChannel(Target& target, const std::string& url)
 void LogManager::log(Target& target, const Message& message)
 {
     Pt::System::RecursiveLock lock( _mutex );
-
+    ;
     // sreach target hierachy upwards for a valid channel
     for( Target* current = &target; current != 0; current = current->_parent )
     {
@@ -250,7 +251,9 @@ void LogManager::log(Target& target, const Message& message)
         {
             // format the message string
             std::string level = toString( message.logLevel() );
-            std::string str = message.timestamp().toIsoString() + " [" + message.target() + "] " + level + " - "  + message.text() + "\n";
+            Pt::DateTime time = System::Clock::getLocalTime();
+            std::string str = time.toIsoString() + " [" + target.name() + "] " +
+                              level + " - "  + message.text() + "\n";
 
             // write data to channel
             current->_channel->write(str);

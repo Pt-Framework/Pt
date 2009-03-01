@@ -53,7 +53,7 @@ class Message;
     Once a target is created a channel can be assigned to it. If no channel
     is assigned to a target, it will use the channel of the next of its parent
     targets. Channels can either be assigned by the class API or in
-    the properties file that the logging-manager reads ion startup.
+    the properties file that the logging-manager reads on startup.
     Here is an example of how ping and pong would be configured:
 
     @code
@@ -85,7 +85,7 @@ class PT_LOG_API Target : protected Pt::NonCopyable
         //! @brief Destructor
         virtual ~Target();
 
-        /** @brief Returns the ID of the target
+        /** @brief Returns the name of the target
 
             This method is thread-safe.
         */
@@ -118,7 +118,7 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 
             Throws a invalid_argument exception if the channel can not
             be created. This function might block until the channel could
-            be opened. This method is thread-safe.The channel can also be
+            be opened. This method is thread-safe. The channel can also be
             set in the properties file of the logging-manager.
         */
         void setChannel(const std::string& url);

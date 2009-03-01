@@ -28,7 +28,6 @@
 #include "LogManager.h"
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
-#include "Pt/System/Clock.h"
 #include <iostream>
 
 namespace Pt {
@@ -44,26 +43,6 @@ Logger::Logger(const std::string& name)
 Logger::Logger(const char* name)
 : _target( &LogManager::instance().target(name) )
 {
-}
-
-
-Logger::Logger(Target& target)
-: _target( &target )
-{
-}
-
-
-void Message::send()
-{
-    if( _logger->enabled(_level) )
-    {
-        _target = _logger->target().name();
-        setTimestamp( System::Clock::getLocalTime() );
-        setThreadId(0);
-        setProcessId(0);
-        setTimestamp( System::Clock::getLocalTime() );
-        _logger->target().log( *this );
-    }
 }
 
 } // namespace Log
