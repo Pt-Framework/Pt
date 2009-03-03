@@ -412,12 +412,16 @@ struct LogDefine
 
 }
 
-#ifndef NLOG
+#ifdef NLOG
+    #define PT_LOG(logger, level, message)
 
+    #define log_define(category)
+    #define log_xxxx(level, expr)
+#else
     #define PT_LOG(logger, level, expr) \
-    if( logger.enabled(level) ) \
+    if( logger.enabled( Pt::Log::level() ) ) \
     { \
-        logger.beginLog(level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
+        logger.beginLog( Pt::Log::level(), PT_SOURCEINFO) << expr << Pt::Log::endlog; \
     }
 
     #define log_define(category) \
@@ -431,24 +435,20 @@ struct LogDefine
             _pt_logger->beginLog(level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
         } \
     } while (false)
-
-    #define log_fatal(expr)     log_xxxx(Fatal, expr)
-    #define log_error(expr)     log_xxxx(Error, expr)
-    #define log_warn(expr)      log_xxxx(Warn, expr)
-    #define log_info(expr)      log_xxxx(Info, expr)
-    #define log_debug(expr)     log_xxxx(Debug, expr)
-    #define log_trace(expr)     log_xxxx(Trace, expr)
-
-#else
-    #define PT_LOG(logger, level, message)
-
-    #define log_define(category)
-    #define log_fatal(expr)
-    #define log_error(expr)
-    #define log_warn(expr)
-    #define log_info(expr)
-    #define log_debug(expr)
-    #define log_trace(expr)
 #endif
+
+#define PT_LOG_FATAL(logger, expr) PT_LOG(logger, fatal, expr)
+#define PT_LOG_ERROR(logger, expr) PT_LOG(logger, error, expr)
+#define PT_LOG_WARN(logger, expr)  PT_LOG(logger, warn, expr)
+#define PT_LOG_INFO(logger, expr)  PT_LOG(logger, info, expr)
+#define PT_LOG_DEBUG(logger, expr) PT_LOG(logger, debug, expr)
+#define PT_LOG_TRACE(logger, expr) PT_LOG(logger, trace, expr)
+
+#define log_fatal(expr) log_xxxx(Fatal, expr)
+#define log_error(expr) log_xxxx(Error, expr)
+#define log_warn(expr)  log_xxxx(Warn, expr)
+#define log_info(expr)  log_xxxx(Info, expr)
+#define log_debug(expr) log_xxxx(Debug, expr)
+#define log_trace(expr) log_xxxx(Trace, expr)
 
 #endif

@@ -50,7 +50,6 @@ enum LogLevel {
     Trace = 600
 };
 
-
 /** @brief Converts a log-level to a string
     @ingroup Logging
 */
@@ -76,7 +75,7 @@ inline std::string toString(LogLevel level)
  * @param levelStr The log level string to convert.
  * @return The appropriate log level object.
  */
-inline LogLevel toLogLevel(std::string levelString)
+inline LogLevel toLogLevel(const std::string& levelString)
 {
     if(levelString == "None")
     {
@@ -109,6 +108,7 @@ inline LogLevel toLogLevel(std::string levelString)
 
     throw std::logic_error("invalid logevel");
 }
+
 
 inline LogLevel trace()
 {
