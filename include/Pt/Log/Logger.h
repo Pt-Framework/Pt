@@ -50,8 +50,6 @@ class Logger;
 /*
     - use formatting optimizations (cxxtools log)
     - allow settings for channels
-    - log_define at al macros
-    - LOG macros with logger instance
     - always set channel pointer in Target
     - file rolling
     - create LogManager instance on static initialization
@@ -86,7 +84,7 @@ class PT_LOG_API Message : protected Pt::NonCopyable
             _text.str( std::string() );
             _text.clear();
         }
-        
+
         std::string text() const
         { return _text.str(); }
 
