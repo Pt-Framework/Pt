@@ -34,6 +34,7 @@
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/EndDocument.h"
+#include "Pt/Xml/ParseError.h"
 #include "Pt/String.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
@@ -49,17 +50,504 @@ namespace Pt {
 
 namespace Xml {
 
+struct XmlParseState
+{
+    virtual ~XmlParseState()
+    {}
+
+    XmlParseState* onChar(Pt::Char c, XmlReader& reader)
+    {
+        //std::cerr << "onChar: " << c.narrow('_') << std::endl;
+
+        if( c == std::char_traits<Pt::Char>::to_char_type( std::char_traits<Pt::Char>::eof() ) )
+        {
+            return this->onEof(c, reader);
+        }
+
+        switch( c.value() )
+        {
+                case '\n':
+                case ' ':
+                case '\t':
+                case '\r':
+                    return this->onSpace(c, reader);
+
+                case '<':
+                    return this->onOpenBracket(c, reader);
+
+                case '>':
+                    return this->onCloseBracket(c, reader);
+
+                case ':':
+                    return this->onColon(c, reader);
+
+                case '/':
+                    return this->onSlash(c, reader);
+
+                case '=':
+                    return this->onEqual(c, reader);
+
+                case '"':
+                case '\'':
+                    return this->onQoute(c, reader);
+
+                case '!':
+                    return this->onExclam(c, reader);
+
+                case '?':
+                    return this->onQuest(c, reader);
+
+                default:
+                    return this->onAlpha(c, reader);
+        }
+
+        this->syntaxError(reader.line());
+        return 0;
+    }
+
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError( reader.line() );
+        return this;
+    }
+
+    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onColon(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onSlash(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onExclam(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    virtual XmlParseState* onEof(Pt::Char c, XmlReader& reader)
+    {
+        this->syntaxError(reader.line());
+        return this;
+    }
+
+    void syntaxError(unsigned line)
+    {
+        std::cerr << "error in line " << line << std::endl;
+        throw ParseError("syntax error", line);
+    }
+};
+
+
+struct XmlParser {
+
+struct OnEmptyElement : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+        return this;
+    }
+
+    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
+        reader._endElem.name() = reader._startElem.name();
+        reader._current = &(reader._endElem);
+        reader._depth--;
+        return BeforeRootElement::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnEmptyElement _state;
+        return &_state;
+    }
+};
+
+
+struct OnElementName : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << "not implemented"<< std::endl;
+        return 0;
+    }
+
+    virtual XmlParseState* onSlash(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+        reader._current = &(reader._startElem);
+        reader._depth++;
+        return OnEmptyElement::instance();
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+       std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+        reader._startElem.name() += c;
+        return this;
+    }
+
+    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    {
+        return 0; /// TODO normal start element
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnElementName _state;
+        return &_state;
+    }
+};
+
+
+struct OnElement : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+        return this;
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+        reader._startElem.clear();
+        reader._startElem.name() += c;
+        return OnElementName::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnElement _state;
+        return &_state;
+    }
+};
+
+
+struct BeforeRootElement : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
+        return this;
+    }
+
+    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
+    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
+        return OnElement::instance();
+    }
+
+    virtual XmlParseState* onEof(Pt::Char c, XmlReader& reader)
+    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
+        reader._current = &( reader.documentEnd() );
+        return this;
+    }
+
+    static XmlParseState* instance()
+    {
+        static BeforeRootElement _state;
+        return &_state;
+    }
+};
+
+
+struct OnProcessingInstructionEnd : public XmlParseState
+{
+    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    {
+        reader._current = &(reader._procInstr);
+        return BeforeRootElement::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnProcessingInstructionEnd _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclValue : public XmlParseState
+{
+    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
+    {
+        static const Pt::Char version[] = { 'v', 'e', 'r', 's', 'i', 'o', 'n', 0};
+        static const Pt::Char encoding[] = { 'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g',  0};
+        static const Pt::Char standalone[] = { 's', 't', 'a', 'n', 'd', 'a', 'l', 'o', 'n','e', 0};
+        static const Pt::Char trueval[] = { 't', 'r', 'u', 'e', 0};
+
+        if(reader._attr.name() == version)
+        {
+            reader._version = reader._attr.value();
+        }
+        else if(reader._attr.name() == encoding)
+        {
+            reader._encoding = reader._attr.value();
+        }
+        else if(reader._attr.name() == standalone)
+        {
+            if(reader._attr.value() == trueval)
+                reader._standalone = true;
+        }
+
+        return OnXmlDeclBeforeAttr::instance();
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        reader._attr.value() += c;;
+        return this;
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclValue _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclBeforeValue : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        return this;
+    }
+
+    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclValue::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclBeforeValue _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclAfterName : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        return this;
+    }
+
+    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclBeforeValue::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclAfterName _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclAttr : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclAfterName::instance();
+    }
+
+    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclBeforeValue::instance();
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        reader._attr.name() += c;
+        return this;
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclAttr _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclEnd : public XmlParseState
+{
+    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    {
+        return BeforeRootElement::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclEnd _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclBeforeAttr : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        return this;
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        reader._attr.clear();
+        reader._attr.name() += c;
+        return OnXmlDeclAttr::instance();
+    }
+
+    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclEnd::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclBeforeAttr _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclName : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        static const Pt::Char xml[] = { 'x', 'm', 'l', 0};
+
+        if( reader._procInstr.target() == xml )
+            return OnXmlDeclBeforeAttr::instance();
+
+        return 0; /// TODO it is a normal processing instruction
+    }
+
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        reader._procInstr.target() += c;
+        return this;
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclName _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDeclQMark : public XmlParseState
+{
+    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+    {
+        reader._procInstr.target().clear();
+        reader._procInstr.target() += c;
+        return OnXmlDeclName::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDeclQMark _state;
+        return &_state;
+    }
+};
+
+
+struct OnXmlDecl : public XmlParseState
+{
+    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDeclQMark::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnXmlDecl _state;
+        return &_state;
+    }
+};
+
+
+struct OnDocumentBegin : public XmlParseState
+{
+    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    {
+        return BeforeRootElement::instance();
+    }
+
+    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
+    {
+        return OnXmlDecl::instance();
+    }
+
+    static XmlParseState* instance()
+    {
+        static OnDocumentBegin _state;
+        return &_state;
+    }
+};
+
+}; // XmlParser
+
 
 XmlReader::XmlReader(std::istream& is)
 : _textBuffer(0)
 , _buffer(0)
 , _depth(0)
-, _tokenMax(512)
+, _line(1)
+, _standalone(true)
+, _current(0)
 {
+    _state = XmlParser::OnDocumentBegin::instance();
+
     _buffer = new Text::TextBuffer( &is, new Pt::Text::Utf8Codec() );
     _textBuffer = _buffer;
-
-    this->init();
 }
 
 
@@ -67,164 +555,71 @@ XmlReader::XmlReader(Text::TextStream& is)
 : _textBuffer(is.rdbuf())
 , _buffer( 0 )
 , _depth(0)
-, _tokenMax(512)
+, _line(1)
+, _standalone(true)
+, _current(0)
 {
-    this->init();
-}
-
-
-void XmlReader::init()
-{
-    const std::char_traits<Pt::Char>::int_type eof = std::char_traits<Pt::Char>::eof();
-
-    // read magic bytes
-    Char firstBytes[8];
-    size_t size = _textBuffer->sgetn(firstBytes, 8);
-    String start(firstBytes, size);
-
-    // see if byte order mark and a valid XML declaration is present
-    static const String xmlDeclStart(L"<?xml");
-    size_t pos = start.find(xmlDeclStart);
-    if(pos == String::npos)
-        throw std::runtime_error("Invalid XML document." + PT_SOURCEINFO);
-
-    // read the whole XML declaration
-    while( true )
-    {
-        Char ch = _textBuffer->sbumpc();
-
-        if(ch.value() == eof)
-            throw std::runtime_error("Invalid XML document" + PT_SOURCEINFO);
-
-        if(ch == '>')
-            break;
-
-        start.append( 1, ch );
-    }
-
-    const String whitespace(L" \t\n\r");
-
-    // read whitespace to root element
-    while( true )
-    {
-        Char ch = _textBuffer->sbumpc();
-        if( whitespace.find(ch) == Pt::String::npos )
-        {
-            _textBuffer->sputbackc(ch);
-            break;
-        }
-    }
+    _state = XmlParser::OnDocumentBegin::instance();
 }
 
 
 XmlReader::~XmlReader()
 {
-    while( !_nodeBuffer.empty() )
-    {
-        delete _nodeBuffer.front();
-        _nodeBuffer.pop();
-    }
-
     delete _buffer;
-}
-
-
-size_t XmlReader::depth() const
-{
-    return _depth;
-}
-
-
-XmlReader::Iterator XmlReader::current()
-{
-    return Iterator(*this);
-}
-
-
-XmlReader::Iterator XmlReader::end() const
-{
-    return Iterator();
 }
 
 
 const Node& XmlReader::get()
 {
-    if( _nodeBuffer.empty() )
-        return this->next();
+    if( ! _current )
+    {
+        this->next();
+    }
 
-    return *_nodeBuffer.front();
+    return *_current;
 }
 
 
 const Node& XmlReader::next()
 {
-    if( _nodeBuffer.size() > 0 )
+    const Pt::Char eof = std::char_traits<char>::eof();
+
+    _current = 0;
+    Pt::Char ch = 0;
+    do
     {
-        delete _nodeBuffer.front();
-        _nodeBuffer.pop();
-    }
+        ch = _textBuffer->sbumpc();
+        _state = _state->onChar(ch, *this);
 
-    if( !_nodeBuffer.empty() )
-    {
-        Node* node = _nodeBuffer.front();
-
-        if(node->type() == Node::StartElement)
-            _depth++;
-        else if(node->type() == Node::EndElement)
-            _depth--;
-
-        return *node;
-    }
-
-    switch( _textBuffer->sgetc() )
-    {
-        case uint32_t(-1): // EOF
+        if(ch == '\n')
         {
-            return this->documentEnd();
+            ++_line;
         }
-
-        case '<':
-        {
-            switch( _textBuffer->snextc() )
-            {
-                case '/':
-                    _textBuffer->snextc();
-                    this->onEndElement();
-                    _depth--;
-                    break;
-
-                case '!':
-                    switch( _textBuffer->snextc() )
-                    {
-                        case 'D': this->onDocType(); break;
-                        case '-': this->onComment(); break;
-                    }
-
-                    break;
-
-                case '?':
-                    throw std::logic_error("Processing instruction not yet supported" + PT_SOURCEINFO);
-
-                default:
-                    this->onStartElement();
-                    _depth++;
-                    break;
-            }
-
-            break;
-        }
-
-        default:
-            this->onTextElement();
-            break;
     }
+    while ( !_current && ch != eof);
 
-    if( _nodeBuffer.empty() )
+    return *_current;
+}
+
+
+bool XmlReader::advance()
+{
+    const Pt::Char eof = std::char_traits<char>::eof();
+
+    _current = 0;
+    Pt::Char ch = 0;
+    while( ! _current && _textBuffer->in_avail() > 0 )
     {
-        return this->documentEnd();
+        ch = _textBuffer->sbumpc();
+        _state = _state->onChar(ch, *this);
+
+        if(ch == '\n')
+        {
+            ++_line;
+        }
     }
 
-    return *_nodeBuffer.front();
+    return _current != 0;
 }
 
 
@@ -278,198 +673,30 @@ const Node& XmlReader::nextTag()
     return this->get();
 }
 
-
+/*
 XmlReader& XmlReader::operator>>(StartElement& to)
 {
-    // check if there is a node in the buffer
-    if( !_nodeBuffer.empty() )
-    {
-        const StartElement* elem = dynamic_cast<const StartElement*>( _nodeBuffer.front() );
-        if(elem)
-        {
-            to = *elem;
-            delete _nodeBuffer.front();
-            _nodeBuffer.pop();
-            return *this;
-        }
-
-        throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
-    }
-
-    if( '<' != _textBuffer->sgetc() )
-        throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
-
-    if( '/' != _textBuffer->snextc() )
-        throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
-
-    _textBuffer->snextc();
-
-    this->parseStartElement(to);
-
-    ++_depth;
     return *this;
 }
 
 
 XmlReader& XmlReader::operator>>(EndElement& to)
 {
-    // check if there is a node in the buffer
-    if( !_nodeBuffer.empty() )
-    {
-        const EndElement* elem = dynamic_cast<const EndElement*>( _nodeBuffer.front() );
-        if(elem)
-        {
-            to = *elem;
-            delete _nodeBuffer.front();
-            _nodeBuffer.pop();
-            return *this;
-        }
-
-        throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
-    }
-
-    if( '<' != _textBuffer->sgetc() )
-        throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
-
-    if( '/' == _textBuffer->snextc() )
-        throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
-
-    this->parseEndElement(to);
-
-    --_depth;
     return *this;
 }
 
 
 XmlReader& XmlReader::operator>>(Characters& to)
 {
-    // check if there is a node in the buffer
-    if( !_nodeBuffer.empty() )
-    {
-        const Characters* elem = dynamic_cast<const Characters*>( _nodeBuffer.front() );
-        if(elem)
-        {
-            to = *elem;
-            delete _nodeBuffer.front();
-            _nodeBuffer.pop();
-            return *this;
-        }
 
-        throw std::logic_error("Requested XML element is not a text element." + PT_SOURCEINFO);
-    }
-
-    if( '<' == _textBuffer->sgetc() )
-        throw std::logic_error("Requested XML element is not text element." + PT_SOURCEINFO);
-
-    this->parseTextElement(to);
     return *this;
-}
-
-
-void XmlReader::onDocType()
-{
-    Char buffer[7];
-    _textBuffer->sgetn(buffer, 7);
-    String content(buffer, 7);
-
-    if( content != String(L"DOCTYPE") )
-        throw std::logic_error("Invalid DOCTYPE declaration." + PT_SOURCEINFO);
-
-    // read the whole DOCTYPE declaration
-    this->getUntil(content, L">");
-    _nodeBuffer.push( new DocTypeDeclaration(content) );
-
-    _textBuffer->snextc();
-}
-
-
-void XmlReader::onStartElement()
-{
-    std::auto_ptr<Xml::StartElement> elem( new Xml::StartElement() );
-    bool isStandalone = this->parseStartElement(*elem);
-
-    _nodeBuffer.push( elem.get() );
-
-    if (isStandalone)
-    {
-        _nodeBuffer.push( new Xml::EndElement(elem->name()) );
-    }
-
-    elem.release();
-}
-
-
-void XmlReader::onEndElement()
-{
-    std::auto_ptr<Xml::EndElement> elem( new Xml::EndElement() );
-    this->parseEndElement(*elem);
-    _nodeBuffer.push( elem.release() );
-}
-
-
-void XmlReader::onTextElement()
-{
-    std::auto_ptr<Xml::Characters> elem( new Xml::Characters() );
-    this->parseTextElement(*elem);
-    _nodeBuffer.push( elem.release() );
-}
-
-
-void XmlReader::onComment()
-{
-    static const String commentEnd(L">");
-
-    String text;
-    this->getUntil(text, commentEnd);
-    _textBuffer->snextc();
-    _nodeBuffer.push( new Comment(text) );
-}
-
-
-/*
-bool XmlReader::parseAttribute(String& name, String& value)
-{
-    typedef std::char_traits<Pt::Char> CharTraits;
-    //static const uint32_t eof = CharTraits::eof();
-
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
-        return false;
-    }
-
-    static const String attributeNameBegin(L"> /");
-    Pt::Char last = this->findNotOf(attributeNameBegin);
-
-    if( last == '>' || last == '/') {
-        return false;
-    }
-
-    static const String attributeNameEnd(L">/= ");
-    this->getUntil(name, attributeNameEnd);
-
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
-        throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
-    }
-
-    static const String attributeValueBegin(L">/\"\'");
-    this->findOf(attributeValueBegin);
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
-        throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
-    }
-
-    _textBuffer->snextc();
-
-    static const String attributeValueEnd(L"\"\'>/");
-    this->getUntil(value, attributeValueEnd);
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
-        throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
-    }
-
-    _textBuffer->snextc();
-
-    return true;
 }
 */
 
+
+
+
+/*
 bool XmlReader::parseAttribute(String& name, String& value)
 {
     enum AttributeParseState
@@ -594,174 +821,16 @@ bool XmlReader::parseAttribute(String& name, String& value)
     }
 
     return true;
-}
+}*/
 
 
-bool XmlReader::parseStartElement(StartElement& to)
-{
-    bool isStandalone = false;
-
-    static const String startElementBegin(L">/ \t");
-
-    Pt::Char last = this->findNotOf(startElementBegin);
-    if( last == '>' || last == '/') {
-        throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
-    }
-
-    static const String startElementEnd(L"> \t/");
-    this->getUntil(to.name(), startElementEnd);
-
-    while(true)
-    {
-        String attrName, attrValue;
-        if( false == this->parseAttribute( attrName, attrValue ) )
-            break;
-
-        to.addAttribute( Attribute( attrName, attrValue ) );
-    }
-
-    if( _textBuffer->sgetc() == '/' )
-    {
-        isStandalone = true;
-        _textBuffer->snextc();
-    }
-
-    _textBuffer->snextc();
-
-    return isStandalone;
-}
 
 
-void XmlReader::parseEndElement(EndElement& to)
-{
-    static const String endElementBegin(L">/ \t");
-
-    Pt::Char last = this->findNotOf(endElementBegin);
-
-    if( last == '>' || last == '/') {
-        throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
-    }
-
-    static const String endElementEnd(L"> \t/");
-    this->getUntil(to.name(), endElementEnd);
-
-    _textBuffer->snextc();
-}
 
 
-void XmlReader::parseTextElement(Characters& to)
-{
-    static const String textElementEnd(L"<");
-    this->getUntil(to.content(), textElementEnd);
-    this->resolveEntities(to.content());
-}
 
 
-/*
-const Char* XmlReader::refill(const Char* current)
-{
-    const std::char_traits<Pt::Char>::int_type eof = std::char_traits<Pt::Char>::eof();
 
-    // refill buffer if neccessary
-    if( current == _textBuffer->in_end() )
-    {
-        _textBuffer->in_bump( _textBuffer->in_avail() );
-        if( eof == _textBuffer->sgetc() )
-            throw std::logic_error("Reached EOF within elemwnt" + PT_SOURCEINFO);
-
-        current = _textBuffer->in_begin();
-    }
-
-    return current;
-}
-*/
-
-void XmlReader::findOf(const String& str)
-{
-    typedef std::char_traits<Pt::Char> CharTraits;
-    const Char eof = CharTraits::to_char_type( CharTraits::eof() );
-    for( Char ch = _textBuffer->sgetc(); eof != ch; ch = _textBuffer->snextc() )
-    {
-        if( String::npos != str.find( ch ) )
-            break;
-    }
-}
-
-
-Pt::Char XmlReader::findNotOf(const String& str)
-{
-    Pt::Char last = _textBuffer->sgetc();
-    typedef std::char_traits<Pt::Char> CharTraits;
-    const Char eof = CharTraits::to_char_type( CharTraits::eof() );
-
-    for( Char ch = _textBuffer->sgetc(); eof != ch; ch = _textBuffer->snextc() )
-    {
-        if( String::npos == str.find( ch ) )
-        {
-            return last;
-        }
-        last = ch;
-    }
-
-    return last;
-}
-
-
-void XmlReader::getUntil(String& buffer, const String& stop)
-{
-/*
-    const Char* current = _textBuffer->in_begin();
-    const Char* begin = _textBuffer->in_begin();
-    const Char* end = 0;
-
-    // move to end of name
-    for(; ; ++current)
-    {
-        // refill buffer if neccessary
-        if( current == _textBuffer->in_end() )
-        {
-            // save what was read so far
-            buffer.append( begin, current - begin );
-            current = this->refill(current);
-            begin = current;
-        }
-
-        if( stop.find( *current ) != String::npos )
-        {
-            end = current;
-            break;
-        }
-    }
-
-    // copy to target buffer
-    buffer.append(begin, end - begin);
-
-    // adjust buffer pointers
-    _textBuffer->in_bump( current - _textBuffer->in_begin() );
-*/
-
-    typedef std::char_traits<Pt::Char> CharTraits;
-    const Char eof = CharTraits::to_char_type( CharTraits::eof() );
-
-    size_t n = 0;
-    for( _token[n] = _textBuffer->sgetc(); eof != _token[n]; _token[n] = _textBuffer->snextc() )
-    {
-        if( stop.find( _token[n] ) != String::npos )
-            break;
-
-        if(n == _tokenMax - 1)
-        {
-            buffer.append(_token, n+1);
-            n = 0;
-        }
-        else
-        {
-            ++n;
-        }
-    }
-
-    buffer.append(_token, n);
-}
 
 
 void XmlReader::resolveEntities(String& str)

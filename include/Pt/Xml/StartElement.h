@@ -75,6 +75,9 @@ namespace Xml {
             const String& name() const
             {return _name;}
 
+            String& name()
+            {return _name;}
+
             /**
              * @brief Sets the name of this attribute.
              * @param name The new name of this attribute.
@@ -89,12 +92,18 @@ namespace Xml {
             const String& value() const
             {return _value;}
 
+            String& value()
+            {return _value;}
+
             /**
              * @brief Sets the value of this attribute.
              * @param value The new value of this attribute.
              */
             void setValue(const String value)
             {_value = value;}
+
+            void clear()
+            { _name.clear(); _value.clear(); }
 
         private:
             //! The name of this attribute.
@@ -147,6 +156,12 @@ namespace Xml {
             StartElement* clone() const
             {return new StartElement(*this);}
 
+
+            void clear()
+            {
+                _name.clear();
+                _attributes.clear();
+            }
 
             /**
              * @brief Returns the tag name of the opening tag for which this StartElement object was created.

@@ -72,6 +72,9 @@ namespace Pt {
                  */
                 const String& target() const;
 
+                String& target()
+                { return _target; }
+
                 /**
                  * @brief Sets the processor instruction's target.
                  *

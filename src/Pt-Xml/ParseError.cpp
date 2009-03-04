@@ -30,8 +30,9 @@ namespace Pt {
 
 namespace Xml {
 
-ParseError::ParseError(const std::string& what, const Pt::SourceInfo& info)
-: std::runtime_error(what + info)
+ParseError::ParseError(const char* what, std::size_t line)
+: std::runtime_error(what)
+, _line(line)
 {
 }
 

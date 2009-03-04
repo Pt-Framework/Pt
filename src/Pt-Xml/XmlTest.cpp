@@ -61,19 +61,19 @@ class XmlTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("XmlTest")
         {
 
-            this->registerMethod("MissingXmlDeclaration"       , *this, &XmlTest::MissingXmlDeclaration);
+            //this->registerMethod("MissingXmlDeclaration"       , *this, &XmlTest::MissingXmlDeclaration);
             this->registerMethod("EmptyDocument"               , *this, &XmlTest::EmptyDocument);
-            this->registerMethod("DoctypeDeclaration"          , *this, &XmlTest::DoctypeDeclaration);
+            //this->registerMethod("DoctypeDeclaration"          , *this, &XmlTest::DoctypeDeclaration);
             this->registerMethod("EmptyElementTag"             , *this, &XmlTest::EmptyElementTag);
-            this->registerMethod("InvalidTag1"                 , *this, &XmlTest::InvalidTag1);
-            this->registerMethod("InvalidTag2"                 , *this, &XmlTest::InvalidTag2);
-            this->registerMethod("NextElement"                 , *this, &XmlTest::NextElement);
-            this->registerMethod("NextTag"                     , *this, &XmlTest::NextTag);
-            this->registerMethod("ElementWithContent"          , *this, &XmlTest::ElementWithContent);
-            this->registerMethod("DefaultEntities"             , *this, &XmlTest::DefaultEntities);
-            this->registerMethod("AttributeWithSimpleText"     , *this, &XmlTest::AttributeWithSimpleText);
-            this->registerMethod("AttributeWithUTF8"           , *this, &XmlTest::AttributeWithUTF8);
-            this->registerMethod("MultipleAttributesIteration" , *this, &XmlTest::MultipleAttributesIteration);
+            //this->registerMethod("InvalidTag1"                 , *this, &XmlTest::InvalidTag1);
+            //this->registerMethod("InvalidTag2"                 , *this, &XmlTest::InvalidTag2);
+            //this->registerMethod("NextElement"                 , *this, &XmlTest::NextElement);
+            //this->registerMethod("NextTag"                     , *this, &XmlTest::NextTag);
+            //this->registerMethod("ElementWithContent"          , *this, &XmlTest::ElementWithContent);
+            //this->registerMethod("DefaultEntities"             , *this, &XmlTest::DefaultEntities);
+            //this->registerMethod("AttributeWithSimpleText"     , *this, &XmlTest::AttributeWithSimpleText);
+            //this->registerMethod("AttributeWithUTF8"           , *this, &XmlTest::AttributeWithUTF8);
+            //this->registerMethod("MultipleAttributesIteration" , *this, &XmlTest::MultipleAttributesIteration);
             //this->registerMethod("CDATA " , *this, &XmlTest::CDATA );
             //CPPUNIT_TEST( testDoctypeDeclaration );
 
@@ -152,6 +152,20 @@ void XmlTest::MissingXmlDeclaration()
 }
 
 
+/*void XmlTest::EmptyXmlDeclaration()
+{
+    stringstream input;
+    input << "<?xml ?>";
+
+    XmlReader reader( input );
+
+    XmlReader::Iterator it = reader.current();
+    const Xml::Node& n = *it;
+
+    PT_UNIT_ASSERT(n.type() == Node::EndDocument);
+}*/
+
+
 void XmlTest::EmptyDocument()
 {
     stringstream input;
@@ -163,6 +177,9 @@ void XmlTest::EmptyDocument()
     const Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Node::EndDocument);
+    PT_UNIT_ASSERT(reader.version() == L"1.0")
+    PT_UNIT_ASSERT(reader.encoding() == L"UTF-8")
+    PT_UNIT_ASSERT(reader.standalone() == true)
 }
 
 

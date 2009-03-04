@@ -42,7 +42,7 @@ using namespace Pt;
 using namespace Pt::Xml;
 using namespace std;
 
-/*
+
 void perfTest()
 {
     stringstream input;
@@ -63,7 +63,7 @@ void perfTest()
     {}
     cerr << clock() - begin << endl;
 }
-*/
+
 void test()
 {
     stringstream input;
