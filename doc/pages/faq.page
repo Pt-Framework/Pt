@@ -5,7 +5,12 @@
 \htmlonly
 
     <div id="content">
-        <h3>No FAQs are available yet.</h3>
+        <h3>Can I write closed source applications using Pt?</h3>
+        <p>
+            Yes, you can. Pt is distributed under the LGPL with two license
+            exceptions that also allow static linking and incorporation of
+            inline code from the Pt header files (i.e. C++ class templates).
+        </p>
 
         <br><br><br><br><br><br><br><br><br><br>
         <br><br><br><br><br><br><br><br><br><br>
