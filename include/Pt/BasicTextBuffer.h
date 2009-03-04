@@ -170,10 +170,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return 0;
         }
 
-        int import(std::streamsize n)
+        std::streamsize import()
         {
             if( _target )
             {
+                std::streamsize n = _target->rdbuf().in_avail();
                 do_underflow(n);
             }
 
