@@ -31,7 +31,6 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-//#include <Mswsock.h>
 
 #define log_debug(x)
 
@@ -43,6 +42,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _socket(socket)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
+, _isConnected(false)
 {
 	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
 	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
@@ -54,9 +54,15 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 
 TcpSocketImpl::~TcpSocketImpl()
 {
+	WSAResetEvent(_waitEvent);
+
+	if( _fd != INVALID_SOCKET)
+		WSAEventSelect(_fd,_currentEventHandle,0);
+
+	close();
+
     WSACloseEvent(_waitEvent);
     _waitEvent = INVALID_HANDLE_VALUE;
-	close();
 }
 
 void TcpSocketImpl::create(int domain, int type, int protocol)
@@ -86,19 +92,15 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
-    bool isConnected = this->beginConnect(ipaddr, port);
-
-    if( !isConnected )
-    {
-        this->wait(_timeout);
-        this->endConnect();
-    }
+	this->beginConnect(ipaddr, port);
+    this->endConnect();
 }
 
 bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
 {	
     AddrInfo ai(ipaddr, port);
-
+	_isConnected = false;
+	
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         try
@@ -127,8 +129,8 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 			}
 		}
 
-		// _isConnected = true;
 		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+		_isConnected = true;
         return true;
     }
 
@@ -139,12 +141,14 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
 void TcpSocketImpl::endConnect()
 {
-    // FD_CONNECT abschalten
+	if( _isConnected )
+		return;
 
-	//if( ! _isConnected )
+	if(!this->wait(_timeout))
+		 throw System::IOTimeout();
+
+	try
     {
-		// auf FD_CONNECT warten aussed checkEvent hat das schon getan
-	
 		int sockerr;
 		socklen_t optlen = sizeof(sockerr);
 		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
@@ -155,11 +159,14 @@ void TcpSocketImpl::endConnect()
 
 		if(sockerr != 0)
 		{
-		    close();
+			close();
 			throw System::SystemError("connect");
-		}
-		
-		//_isConnected = true;
+		}	
+    }
+    catch(...)
+    {
+        close();
+        throw;
 	}
 }
 
@@ -180,6 +187,8 @@ void TcpSocketImpl::attachEvent()
 		attachEvent(_currentEventHandle, FD_READ);
 	else if(_socket.rbuf() == 0 && _socket.wbuf() != 0)
 		attachEvent(_currentEventHandle, FD_WRITE);	
+	else if( _socket.rbuf() != 0 && _socket.wbuf() != 0)
+		attachEvent(_currentEventHandle, FD_WRITE|FD_READ);	
 }
 
 void TcpSocketImpl::attachEvent(HANDLE ev, long events)
@@ -272,7 +281,11 @@ std::string TcpSocketImpl::getPeerAddr() const
 
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-	attachEvent(_currentEventHandle, FD_READ);
+	if(_socket.wbuf() != 0)
+		attachEvent(_currentEventHandle, FD_READ|FD_WRITE);
+	else
+		attachEvent(_currentEventHandle, FD_READ);
+
 	return 0;
 }
 
@@ -286,14 +299,14 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	DWORD bytes = 0;
 	DWORD flags = 0;
 
-	WSABUF receiveBuffer;
-	receiveBuffer.buf = _socket.rbuf();
-    receiveBuffer.len = _socket.rbuflen();
 
-	if( receiveBuffer.buf == 0)
+	_receiveBuffer.buf = _socket.rbuf();
+    _receiveBuffer.len = _socket.rbuflen();
+
+	if( _receiveBuffer.buf == 0)
 		 throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 
-	if(WSARecv(_fd, &receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
+	if(WSARecv(_fd, &_receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
     {
         if(GetLastError() != WSA_IO_PENDING)
 	        throw System::SystemError( PT_ERROR_MSG("endRead failed") );
@@ -348,7 +361,12 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 	_sendBuffer.buf = const_cast<char*>(buffer);
 	_sendBuffer.len = n;
 	DWORD numberOfBytesSent = 0;
-
+	
+/*	if(_socket.rbuf() != 0 )
+		attachEvent(_currentEventHandle, FD_WRITE|FD_READ);	
+	else
+		attachEvent(_currentEventHandle, FD_WRITE);	
+*/
 	int rc = WSASend( _fd, &_sendBuffer, 1, &numberOfBytesSent, 0, &_sendOverlapped, NULL);
 
 	if ((rc == SOCKET_ERROR) && (WSA_IO_PENDING != WSAGetLastError())) 
@@ -376,12 +394,15 @@ size_t TcpSocketImpl::endWrite()
 
 size_t TcpSocketImpl::checkSendResult()
 {
-	DWORD sendBytes;
-	DWORD flags;
+	DWORD sendBytes = 0;
+	DWORD flags = 0;
     BOOL rc = WSAGetOverlappedResult(_fd, &_sendOverlapped, &sendBytes, FALSE, &flags);
     
 	if (rc == FALSE) 
+	{
+		int error = WSAGetLastError();
 		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
+	}
 
 	return sendBytes;
 }
@@ -405,6 +426,7 @@ bool TcpSocketImpl::checkEvent()
     if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT)        
 	{
 		ev = true;
+		_isConnected = true;
 		_socket.connected.send(_socket);
 	}
 

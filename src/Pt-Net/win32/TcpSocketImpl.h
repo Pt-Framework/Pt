@@ -66,6 +66,8 @@ class TcpSocketImpl : public System::SelectableImpl
 		WSAOVERLAPPED _receiveOverlapped;
 		WSABUF        _sendBuffer;
 		HANDLE		  _currentEventHandle;
+		WSABUF		  _receiveBuffer;
+		bool          _isConnected;
 
 		void attachEvent(HANDLE ev, long events);
 		void attachEvent();

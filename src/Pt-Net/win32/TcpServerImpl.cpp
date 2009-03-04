@@ -34,6 +34,7 @@
 #include <cerrno>
 #include <cassert>
 #include <cstring>
+#include <limits>
 
 #define log_debug(x)
 
@@ -61,6 +62,9 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 
 TcpServerImpl::~TcpServerImpl()
 {
+	WSAResetEvent(_waitEvent);
+	close();
+
     WSACloseEvent(_waitEvent);
     _waitEvent = INVALID_HANDLE_VALUE;
 }

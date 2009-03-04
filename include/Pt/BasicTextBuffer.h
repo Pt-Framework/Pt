@@ -174,7 +174,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         {
             if( _target )
             {
-                std::streamsize n = _target->rdbuf().in_avail();
+                std::streamsize n = _target->rdbuf()->in_avail();
                 do_underflow(n);
             }
 

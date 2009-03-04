@@ -34,6 +34,7 @@
 #include "Pt/System/Selector.h"
 #include "Pt/System/Application.h"
 #include <algorithm>
+#include <limits>
 
 namespace Pt {
 
