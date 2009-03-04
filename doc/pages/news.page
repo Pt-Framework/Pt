@@ -5,15 +5,42 @@
 \htmlonly
 
     <div id="content">
-        
-        <table cellspacing="0" class="news-article">            <tr>
+
+        <table cellspacing="0" class="news-article">
+            <tr>
+                <th class="news-article-header" >
+                    <b>TR-4 coming soon</b>
+                    <br/>
+                    <i>Posted on February 28, 2009</i>
+                </th>
+            </tr>
+            <tr>
+                <td class="news-article-body">
+                    The fourth technical release will include a complete
+                    review of the systems programming module (Pt::System),
+                    and the networking module (Pt-Net), minor adjustments
+                    to the logging facilities and text handling classes.
+                    The Pt::Text module has been inegrated into the Pt core
+                    module, which reduced binary size considerably.
+                    The following modules will be part of the 1.0 release:
+                    Pt (core), Pt::System, Pt-Net, Pt-Unit, Pt-Log, Pt-Math
+                    Pt-Xml.
+                </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>TR-3 released</b>
                     <br/>
                     <i>Posted on February 15, 2008</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     Starting with this TR, the Pt core module is in a soft-freeze, 
                     thus source compatibility should not be broken except in case of
                     critical bugs. Changes and additions can still be made of course,
@@ -21,143 +48,168 @@
                     New features include support for Solaris, and OS-X. The GUI module
                     for Mac OS-X uses the Objective-C Cocoa API's, though it is not yet
                     complete.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
-        
-        <table cellspacing="0" class="news-article">            <tr>
+
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>TR-2 released</b>
                     <br/>
                     <i>Posted on October 16, 2007</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     Besides all the features anounced previously, TR-2 includes support
                     for AIX, a new module for reflection and updates to the Unit testing
                     framework. %Pt has been shown to compile and run successfully on symbian
                     based operating systems (UIQ3 and symbian 9.1).
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
     
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>TR-2 coming soon</b>
                     <br/>
                     <i>Posted on May 5, 2007</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
-            The release of a second techincal review will include support for
+            <tr>
+                <td class="news-article-body">
+            The release of a second technical release will include support for
             async I/O and I/O multiplexing on all available I/O devices, atomic
             operations for integers and pointers, a logging framework and date
             and time classes.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>New Project Website</b>
                     <br/>
                     <i>Posted on February 25, 2007</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     The new project website integrates the generated doxygen
                     documentation into the project pages. The online reference
                     documentation was improved and contains class groups for easier
                     navigation.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>TR-1 released</b>
                     <br/>
                     <i>Posted on February 5, 2007</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     This slightly longer development sprint has lead to the TR-1
                     release. Many improvements have been made to the core module
                     and the %Gfx module. A new module for network programming was
                     added (%Pt::Net). %Pt can now be built wit the intel compiler
                     on win32. The code is available as a tarball in the download
                     section or as a tag in the subversion repository (tags/tr1).
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>Development News</b>
                     <br/>
                     <i>Posted on February 5, 2007</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     During the last month, enhancements have been made to the
                     Gfx module and the core module, Most notably to the image
                     classes and the reflection API. A new module for unit testing
                     was added. Pt::Unit allows protocol- and data-driven testing.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
         
         <br/>
         
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>New Project Management</b>
                     <br/>
                     <i>Posted on November 1, 2006</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
             The project management can now be used by developers to coordinate
             their efforts to improve Pt. It is not mandatory to take
             part in this process, but highly encouraged. Progress
             can be monitored on the "Project Overview" link on the Pt website.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>Pt and Tntnet at LinuxWorldExpo in Cologne</b>
                     <br/>
                     <i>Posted on October 14, 2006</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     Platinum was presented together with Tntnet, the open-source
                     web application server, at LinuxWorldExpo in Cologne in the
                     open source pavillion.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
 
-        <table cellspacing="0" class="news-article">            <tr>
+        <table cellspacing="0" class="news-article">
+            <tr>
                 <th class="news-article-header" >
                     <b>Pt on Sourceforge</b>
                     <br/>
                     <i>Posted on September 22, 2006</i>
                 </th>
             </tr>
-            <tr>                <td class="news-article-body">
+            <tr>
+                <td class="news-article-body">
                     The Platinum C++ framework is now hosted on sourceforge.net.
                     The source code is available through an SVN repository and
                     generated documentation can be viewed online now.
-                </td>            </tr>
+                </td>
+            </tr>
         </table>
 
         <br/>
