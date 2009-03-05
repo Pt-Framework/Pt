@@ -148,7 +148,7 @@ inline void basic_string<Pt::Char>::resize(size_t n, Pt::Char ch)
         this->append(n - size, ch);
     }
     else if(n < size) {
-        this->erase(0, n);
+        this->erase(n);
     }
 
     // do nothing if n == size
