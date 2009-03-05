@@ -17,7 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 namespace std {
 
 inline basic_string<Pt::Char>::basic_string()
@@ -188,18 +187,26 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
         if( _data->unref() < 1)
         {
             // just in case two threads are trying this at once
-			delete newBuffer;
+            delete newBuffer;
         }
         else
         {
-			_data = newBuffer;
-		}
+            _data = newBuffer;
+        }
     }
     // just resizing
     else
     {
         _data->reserve( reserveSize );
     }
+}
+
+
+inline void basic_string<Pt::Char>::clear()
+{
+    this->detach(0);
+    _data->setInitial();
+    _data->clear();
 }
 
 
@@ -501,17 +508,6 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(iterator p, size_t
     _data->insert(pos, n, ch);
 
     return *this;
-}
-
-
-inline void basic_string<Pt::Char>::clear()
-{
-    if( _data->busy() || _data->unref() < 1 ) {
-        delete _data;
-        _data = 0;
-    }
-
-    _data = new Pt::StringData();
 }
 
 

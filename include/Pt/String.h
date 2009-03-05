@@ -220,7 +220,6 @@ class basic_string< Pt::Char > {
         //template <typename InputIterator>
         //basic_string& insert(iterator p, InputIterator first, InputIterator last);
 
-        // check MT
         void clear();
 
         basic_string& erase(size_type pos = 0, size_type n = npos);

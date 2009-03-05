@@ -160,6 +160,8 @@ class StringData {
 
         size_type capacity() const;
 
+        void clear();
+
         void assign(const Pt::Char* s, size_type length);
 
         void assign(size_type length, Pt::Char ch);

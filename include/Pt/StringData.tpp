@@ -123,6 +123,14 @@ inline StringData::size_type StringData::capacity() const
 }
 
 
+inline void StringData::clear()
+{
+    _str[0] = Pt::Char::null();
+    _length = 0;
+    this->updateInternalStringData();
+}
+
+
 inline void StringData::assign(const Pt::Char* s, size_type length)
 {
     this->allocate(length);
@@ -275,6 +283,8 @@ inline void StringData::reserve(size_type n)
     // only resize if necessary
     if(n <= _capacity)
         return;
+
+    n += 16;
 
     // make room for new string AND NULL TERMINATION CHAR
     Pt::Char* newStr = _allocator.allocate(n + 1, _str);
