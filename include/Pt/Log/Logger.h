@@ -53,7 +53,6 @@ class Logger;
     - always set channel pointer in Target
     - file rolling
     - create LogManager instance on static initialization
-    - Initialization method
 */
 
 /** @brief %Log message
