@@ -49,7 +49,8 @@ namespace Pt {
          *
          * @see Node
          */
-        class PT_XML_API Characters : public Node {
+        class PT_XML_API Characters : public Node
+        {
             public:
                 /**
                  * @brief Constructs a new Character object with the given (optional) string as content.
@@ -74,6 +75,9 @@ namespace Pt {
                  * @return $true$ if the content of this Character object is empty; $false$ otherwise.
                  */
                 bool empty() const;
+
+                void clear()
+                { _content.clear(); }
 
                 /**
                  * @brief Returns the content of this Character object.

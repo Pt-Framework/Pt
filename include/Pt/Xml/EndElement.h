@@ -72,6 +72,9 @@ namespace Pt {
                 EndElement* clone() const
                 {return new EndElement(*this);}
 
+                void clear()
+                { _name.clear(); }
+
                 /**
                  * @brief Returns the tag name of the closing tag for which this EndElement object was created.
                  *

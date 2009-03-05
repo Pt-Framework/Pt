@@ -2,8 +2,7 @@ SubDir TOP src Pt-Xml ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 
-PT_XML_SOURCES = CData.cpp
-                 Characters.cpp
+PT_XML_SOURCES = Characters.cpp
                  Comment.cpp
                  DocTypeDeclaration.cpp
                  #EndDocument.cpp
@@ -27,7 +26,7 @@ SharedLibrary_LinkSharedLibraries Pt-Xml :  Pt ;
 SharedLibrary_MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
 
 PT_XML_TESTS = XmlTest.cpp
-               XmlSerializerTest.cpp
+               #XmlSerializerTest.cpp
                #XmlWriterTest.cpp
                ;
 

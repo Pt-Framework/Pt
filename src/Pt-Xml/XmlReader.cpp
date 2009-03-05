@@ -24,602 +24,1431 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/XmlReader.h"
+#include <Pt/Xml/EndDocument.h>
 #include "Pt/Xml/Resolver.h"
 #include <Pt/Xml/XmlDeclaration.h>
 #include <Pt/Xml/DocTypeDeclaration.h>
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
-#include "Pt/Xml/CData.h"
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/Xml/Comment.h"
-#include "Pt/Xml/EndDocument.h"
 #include "Pt/Xml/ParseError.h"
-#include "Pt/String.h"
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/TextStream.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
-#include <sstream>
 #include <iostream>
 
-using namespace std;
-
+#define PT_XML_LOG std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
 
 namespace Pt {
 
 namespace Xml {
 
-struct XmlParseState
+struct XmlReaderImpl
 {
-    virtual ~XmlParseState()
-    {}
-
-    XmlParseState* onChar(Pt::Char c, XmlReader& reader)
+    struct State
     {
-        //std::cerr << "onChar: " << c.narrow('_') << std::endl;
+        virtual ~State()
+        {}
 
-        if( c == std::char_traits<Pt::Char>::to_char_type( std::char_traits<Pt::Char>::eof() ) )
+        State* onChar(Pt::Char c, XmlReaderImpl& reader)
         {
-            return this->onEof(c, reader);
+            //std::cerr << "onChar: " << c.narrow('_') << std::endl;
+
+            if( c == std::char_traits<Pt::Char>::to_char_type( std::char_traits<Pt::Char>::eof() ) )
+            {
+                return this->onEof(c, reader);
+            }
+
+            switch( c.value() )
+            {
+                    case '\n':
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                        return this->onSpace(c, reader);
+
+                    case '<':
+                        return this->onOpenBracket(c, reader);
+
+                    case '>':
+                        return this->onCloseBracket(c, reader);
+
+                    case ':':
+                        return this->onColon(c, reader);
+
+                    case '/':
+                        return this->onSlash(c, reader);
+
+                    case '=':
+                        return this->onEqual(c, reader);
+
+                    case '"':
+                    case '\'':
+                        return this->onQoute(c, reader);
+
+                    case '!':
+                        return this->onExclam(c, reader);
+
+                    case '?':
+                        return this->onQuest(c, reader);
+
+                    default:
+                        return this->onAlpha(c, reader);
+            }
+
+            this->syntaxError(reader.line());
+            return 0;
         }
 
-        switch( c.value() )
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-                case '\n':
-                case ' ':
-                case '\t':
-                case '\r':
-                    return this->onSpace(c, reader);
-
-                case '<':
-                    return this->onOpenBracket(c, reader);
-
-                case '>':
-                    return this->onCloseBracket(c, reader);
-
-                case ':':
-                    return this->onColon(c, reader);
-
-                case '/':
-                    return this->onSlash(c, reader);
-
-                case '=':
-                    return this->onEqual(c, reader);
-
-                case '"':
-                case '\'':
-                    return this->onQoute(c, reader);
-
-                case '!':
-                    return this->onExclam(c, reader);
-
-                case '?':
-                    return this->onQuest(c, reader);
-
-                default:
-                    return this->onAlpha(c, reader);
+            PT_XML_LOG
+            this->syntaxError( reader.line() );
+            return this;
         }
 
-        this->syntaxError(reader.line());
-        return 0;
-    }
-
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError( reader.line() );
-        return this;
-    }
-
-    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onColon(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onSlash(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onExclam(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    virtual XmlParseState* onEof(Pt::Char c, XmlReader& reader)
-    {
-        this->syntaxError(reader.line());
-        return this;
-    }
-
-    void syntaxError(unsigned line)
-    {
-        std::cerr << "error in line " << line << std::endl;
-        throw ParseError("syntax error", line);
-    }
-};
-
-
-struct XmlParser {
-
-struct OnEmptyElement : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
-        return this;
-    }
-
-    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
-        reader._endElem.name() = reader._startElem.name();
-        reader._current = &(reader._endElem);
-        reader._depth--;
-        return BeforeRootElement::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnEmptyElement _state;
-        return &_state;
-    }
-};
-
-
-struct OnElementName : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << "not implemented"<< std::endl;
-        return 0;
-    }
-
-    virtual XmlParseState* onSlash(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
-        reader._current = &(reader._startElem);
-        reader._depth++;
-        return OnEmptyElement::instance();
-    }
-
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
-    {
-       std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
-        reader._startElem.name() += c;
-        return this;
-    }
-
-    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
-    {
-        return 0; /// TODO normal start element
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnElementName _state;
-        return &_state;
-    }
-};
-
-
-struct OnElement : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
-        return this;
-    }
-
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
-    {
-        std::cerr << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
-        reader._startElem.clear();
-        reader._startElem.name() += c;
-        return OnElementName::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnElement _state;
-        return &_state;
-    }
-};
-
-
-struct BeforeRootElement : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
-        return this;
-    }
-
-    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
-    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
-        return OnElement::instance();
-    }
-
-    virtual XmlParseState* onEof(Pt::Char c, XmlReader& reader)
-    {   std::cerr << PT_SOURCEINFO.func() << c.narrow('_') << std::endl;
-        reader._current = &( reader.documentEnd() );
-        return this;
-    }
-
-    static XmlParseState* instance()
-    {
-        static BeforeRootElement _state;
-        return &_state;
-    }
-};
-
-
-struct OnProcessingInstructionEnd : public XmlParseState
-{
-    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
-    {
-        reader._current = &(reader._procInstr);
-        return BeforeRootElement::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnProcessingInstructionEnd _state;
-        return &_state;
-    }
-};
-
-
-struct OnXmlDeclValue : public XmlParseState
-{
-    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
-    {
-        static const Pt::Char version[] = { 'v', 'e', 'r', 's', 'i', 'o', 'n', 0};
-        static const Pt::Char encoding[] = { 'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g',  0};
-        static const Pt::Char standalone[] = { 's', 't', 'a', 'n', 'd', 'a', 'l', 'o', 'n','e', 0};
-        static const Pt::Char trueval[] = { 't', 'r', 'u', 'e', 0};
-
-        if(reader._attr.name() == version)
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._version = reader._attr.value();
-        }
-        else if(reader._attr.name() == encoding)
-        {
-            reader._encoding = reader._attr.value();
-        }
-        else if(reader._attr.name() == standalone)
-        {
-            if(reader._attr.value() == trueval)
-                reader._standalone = true;
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
         }
 
-        return OnXmlDeclBeforeAttr::instance();
-    }
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
 
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        void syntaxError(unsigned line)
+        {
+            std::cerr << "error in line " << line << std::endl;
+            throw ParseError("syntax error", line);
+        }
+    };
+
+
+    struct OnCData : public State
     {
-        reader._attr.value() += c;;
-        return this;
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
 
-    static XmlParseState* instance()
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            const String& content = reader._chars.content();
+            unsigned len = content.length();
+
+            if( len > 2 && content[len-2] == ']' &&
+                content[len-2] == ']')
+            {
+                reader._chars.content().resize(len-2);
+                return AfterTag::instance();
+            }
+
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnCData _state;
+            return &_state;
+        }
+    };
+
+
+    struct BeforeCData : public State
     {
-        static OnXmlDeclValue _state;
-        return &_state;
-    }
-};
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            String& token = reader._token;
+            token += c;
+
+            if(token.length() < 7)
+                return this;
+
+            if(token == L"[CDATA[")
+            {
+                token.clear();
+                return OnCData::instance();
+            }
+
+            this->syntaxError( reader.line() );
+            return this;
+        }
+
+        static State* instance()
+        {
+            static BeforeCData _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclBeforeValue : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    struct OnCharacters : public State
     {
-        return this;
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
 
-    virtual XmlParseState* onQoute(Pt::Char c, XmlReader& reader)
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            // TODO: resolve directly
+            // reader.resolveEntities( reader._chars.content() );
+
+            return OnTag::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            //if(c == '&')
+            //    return OnCharRef:instance()
+
+            reader._chars.content() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnCharacters _state;
+            return &_state;
+        }
+    };
+
+
+    struct AfterEndElementName : public State
     {
-        return OnXmlDeclValue::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
 
-    static XmlParseState* instance()
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._endElem);
+            reader._depth--;
+
+            if(reader.depth() == 0)
+                return OnEpilog::instance();
+
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static AfterEndElementName _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnEndElementName : public State
     {
-        static OnXmlDeclBeforeValue _state;
-        return &_state;
-    }
-};
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return AfterEndElementName::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._endElem.name() += c;
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._endElem);
+            reader._depth--;
+
+            if(reader.depth() == 0)
+                return OnEpilog::instance();
+
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static OnEndElementName _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclAfterName : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    struct OnEndElement : public State
     {
-        return this;
-    }
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._endElem.name() += c;
+            return OnEndElementName::instance();
+        }
 
-    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
+        static State* instance()
+        {
+            static OnEndElement _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnEmptyElement : public State
     {
-        return OnXmlDeclBeforeValue::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
 
-    static XmlParseState* instance()
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._endElem.name() = reader._startElem.name();
+            reader._current = &(reader._endElem);
+            reader._depth--;
+
+            if(reader.depth() == 0)
+                return OnEpilog::instance();
+
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static OnEmptyElement _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnAttributeValue : public State
     {
-        static OnXmlDeclAfterName _state;
-        return &_state;
-    }
-};
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._startElem.addAttribute(reader._attr);
+            return BeforeAttribute::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._attr.value() += c;;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnAttributeValue _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclAttr : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    struct BeforeAttributeValue : public State
     {
-        return OnXmlDeclAfterName::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
 
-    virtual XmlParseState* onEqual(Pt::Char c, XmlReader& reader)
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnAttributeValue::instance();
+        }
+
+        static State* instance()
+        {
+            static BeforeAttributeValue _state;
+            return &_state;
+        }
+    };
+
+
+    struct AfterAttributeName : public State
     {
-        return OnXmlDeclBeforeValue::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
 
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return BeforeAttributeValue::instance();
+        }
+
+        static State* instance()
+        {
+            static AfterAttributeName _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnAttributeName : public State
     {
-        reader._attr.name() += c;
-        return this;
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return AfterAttributeName::instance();
+        }
 
-    static XmlParseState* instance()
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return BeforeAttributeValue::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._attr.name() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnAttributeName _state;
+            return &_state;
+        }
+    };
+
+
+    struct BeforeAttribute : public State
     {
-        static OnXmlDeclAttr _state;
-        return &_state;
-    }
-};
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._startElem);
+            reader._depth++;
+            return OnEmptyElement::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._attr.clear();
+            reader._attr.name() += c;
+            return OnAttributeName::instance();
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._startElem);
+            reader._depth++;
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static BeforeAttribute _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclEnd : public XmlParseState
-{
-    virtual XmlParseState* onCloseBracket(Pt::Char c, XmlReader& reader)
+    struct OnStartElement : public State
     {
-        return BeforeRootElement::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return BeforeAttribute::instance();
+        }
 
-    static XmlParseState* instance()
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._startElem);
+            reader._depth++;
+            return OnEmptyElement::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._startElem.name() += c;
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._startElem);
+            reader._depth++;
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static OnStartElement _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnCommentEnd : public State
     {
-        static OnXmlDeclEnd _state;
-        return &_state;
-    }
-};
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            if(reader.depth() == 0)
+                return OnProlog::instance();
+
+            return AfterTag::instance();
+        }
+
+        static State* instance()
+        {
+            static OnCommentEnd _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclBeforeAttr : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    struct AfterComment : public State
     {
-        return this;
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
 
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnComment::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            if(c == '-')
+                return OnCommentEnd::instance();
+
+            return OnComment::instance();
+        }
+
+        static State* instance()
+        {
+            static AfterComment _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnComment : public State
     {
-        reader._attr.clear();
-        reader._attr.name() += c;
-        return OnXmlDeclAttr::instance();
-    }
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
 
-    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            if(c == '-')
+                return AfterComment::instance();
+
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnComment _state;
+            return &_state;
+        }
+    };
+
+
+    struct BeforeComment: public State
     {
-        return OnXmlDeclEnd::instance();
-    }
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
 
-    static XmlParseState* instance()
+            if(c == '-')
+                return OnComment::instance();
+
+            this->syntaxError(reader.line()); // TODO DOCTYPE
+            return this;
+        }
+
+        static State* instance()
+        {
+            static BeforeComment _state;
+            return &_state;
+        }
+    };
+
+
+    struct AfterTag : public State
     {
-        static OnXmlDeclBeforeAttr _state;
-        return &_state;
-    }
-};
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return OnCharacters::instance();
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            return OnTag::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return OnCharacters::instance();
+        }
+
+        static State* instance()
+        {
+            static AfterTag _state;
+            return &_state;
+        }
+    };
 
 
-struct OnXmlDeclName : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
+    struct OnTagExclam : public State
     {
-        static const Pt::Char xml[] = { 'x', 'm', 'l', 0};
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
 
-        if( reader._procInstr.target() == xml )
+            if(c == '-')
+                return BeforeComment::instance();
+
+            if(c == '[' && reader.depth() > 0)
+            {
+                reader._token.clear();
+                reader._token += c;
+                return BeforeCData::instance();
+            }
+
+            this->syntaxError(reader.line());
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnTagExclam _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnTag : public State
+    {
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return 0;  // processing instruction
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnTagExclam::instance();
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            if( reader._chars.content().length() )
+            {
+                reader._current = &(reader._chars);
+            }
+
+            reader._endElem.clear();
+            return OnEndElement::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            if( reader._chars.content().length() )
+            {
+                reader._current = &(reader._chars);
+            }
+
+            reader._startElem.clear();
+            reader._startElem.name() += c;
+            return OnStartElement::instance();
+        }
+
+        static State* instance()
+        {
+            static OnTag _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnEpilog : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            return OnTag::instance();
+        }
+
+        virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            reader._current = &( reader._endDoc );
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnEpilog _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnProlog : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            return this;
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            return OnTag::instance();
+        }
+
+        virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
+        {   PT_XML_LOG
+            reader._current = &( reader._endDoc );
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnProlog _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnProcessingInstructionEnd : public State
+    {
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._current = &(reader._procInstr);
+            if(reader.depth() == 0)
+                return OnProlog::instance();
+
+            return 0; // onText
+        }
+
+        static State* instance()
+        {
+            static OnProcessingInstructionEnd _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclValue : public State
+    {
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            static const Pt::Char version[] = { 'v', 'e', 'r', 's', 'i', 'o', 'n', 0};
+            static const Pt::Char encoding[] = { 'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g',  0};
+            static const Pt::Char standalone[] = { 's', 't', 'a', 'n', 'd', 'a', 'l', 'o', 'n','e', 0};
+            static const Pt::Char trueval[] = { 't', 'r', 'u', 'e', 0};
+
+            if(reader._attr.name() == version)
+            {
+                reader._version = reader._attr.value();
+            }
+            else if(reader._attr.name() == encoding)
+            {
+                reader._encoding = reader._attr.value();
+            }
+            else if(reader._attr.name() == standalone)
+            {
+                if(reader._attr.value() == trueval)
+                    reader._standalone = true;
+            }
+
             return OnXmlDeclBeforeAttr::instance();
+        }
 
-        return 0; /// TODO it is a normal processing instruction
-    }
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;;
+            return this;
+        }
 
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
+        static State* instance()
+        {
+            static OnXmlDeclValue _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclBeforeValue : public State
     {
-        reader._procInstr.target() += c;
-        return this;
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclValue::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclBeforeValue _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclAfterName : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclBeforeValue::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclAfterName _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclAttr : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclAfterName::instance();
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclBeforeValue::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.name() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclAttr _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclEnd : public State
+    {
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnProlog::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclEnd _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclBeforeAttr : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return this;
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.clear();
+            reader._attr.name() += c;
+            return OnXmlDeclAttr::instance();
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclEnd::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclBeforeAttr _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclName : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            static const Pt::Char xml[] = { 'x', 'm', 'l', 0};
+
+            if( reader._procInstr.target() == xml )
+                return OnXmlDeclBeforeAttr::instance();
+
+            return 0; /// TODO it is a normal processing instruction
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._procInstr.target() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclName _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDeclQMark : public State
+    {
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._procInstr.target().clear();
+            reader._procInstr.target() += c;
+            return OnXmlDeclName::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDeclQMark _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnXmlDecl : public State
+    {
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDeclQMark::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._startElem.clear();
+            reader._startElem.name() += c;
+            return OnStartElement::instance();
+        }
+
+        static State* instance()
+        {
+            static OnXmlDecl _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnDocumentBegin : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnProlog::instance();
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnXmlDecl::instance();
+        }
+
+        static State* instance()
+        {
+            static OnDocumentBegin _state;
+            return &_state;
+        }
+    };
+
+
+    XmlReaderImpl(TextIStream& is)
+    : _textBuffer( is.rdbuf() )
+    , _buffer(0)
+    , _standalone(true)
+    , _depth(0)
+    , _line(1)
+    , _state(0)
+    , _current(0)
+    {
+        _state = XmlReaderImpl::OnDocumentBegin::instance();
     }
 
-    static XmlParseState* instance()
+    XmlReaderImpl(std::istream& is)
+    : _textBuffer(0)
+    , _buffer(0)
+    , _standalone(true)
+    , _depth(0)
+    , _line(1)
+    , _state(0)
+    , _current(0)
     {
-        static OnXmlDeclName _state;
-        return &_state;
+        _state = XmlReaderImpl::OnDocumentBegin::instance();
+        _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+        _textBuffer = _buffer;
     }
+
+    ~XmlReaderImpl()
+    {
+        delete _buffer;
+    }
+
+
+    const Pt::String& version() const
+    { return _version; }
+
+
+    const Pt::String& encoding() const
+    { return _encoding; }
+
+
+    bool standalone() const
+    { return _standalone; }
+
+
+    size_t depth() const
+    {
+        return _depth;
+    }
+
+
+    std::size_t line() const
+    {
+        return _line;
+    }
+
+
+    const Node& get()
+    {
+        if( ! _current )
+        {
+            this->next();
+        }
+
+        return *_current;
+    }
+
+
+    const Node& next()
+    {
+        const Pt::Char eof = std::char_traits<char>::eof();
+
+        _current = 0;
+        Pt::Char ch = 0;
+        do
+        {
+            ch = _textBuffer->sbumpc();
+            _state = _state->onChar(ch, *this);
+
+            if(ch == '\n')
+            {
+                ++_line;
+            }
+        }
+        while ( !_current && ch != eof);
+
+        return *_current;
+    }
+
+
+    bool advance()
+    {
+        const Pt::Char eof = std::char_traits<char>::eof();
+
+        _current = 0;
+        Pt::Char ch = 0;
+        while( ! _current && _textBuffer->in_avail() > 0 )
+        {
+            ch = _textBuffer->sbumpc();
+            _state = _state->onChar(ch, *this);
+
+            if(ch == '\n')
+            {
+                ++_line;
+            }
+        }
+
+        return _current != 0;
+    }
+
+    void resolveEntities(String& str)
+    {
+        size_t entityBegin = 0;
+        size_t entityEnd = 0;
+
+        while( (entityBegin = str.find('&', entityBegin)) != std::string::npos) {
+            entityEnd = str.find(';', entityBegin);
+            if(entityEnd == std::string::npos)
+            {
+                throw std::logic_error( "Invalid XML entitiy reference" + PT_SOURCEINFO );
+            }
+
+            String ref = str.substr(entityBegin+1, entityEnd-entityBegin-1);
+
+            String resolved = _resolver.resolveEntity( str.substr(entityBegin+1, entityEnd-entityBegin-1) );
+
+            str.replace(entityBegin, entityEnd-entityBegin+1, resolved);
+
+            ++entityBegin;
+        }
+    }
+
+    std::basic_streambuf<Char>* _textBuffer;
+    std::basic_streambuf<Char>* _buffer;
+    Resolver _resolver; /// TODO must be EntityResolver
+
+    Pt::String _version;
+    Pt::String _encoding;
+    bool _standalone;
+    size_t _depth;
+    std::size_t _line;
+
+
+    State* _state;
+    Node* _current;
+    String _token;
+    ProcessingInstruction _procInstr;
+    StartElement _startElem;
+    EndElement _endElem;
+    Characters _chars;
+    Attribute _attr;
+    EndDocument _endDoc;
 };
-
-
-struct OnXmlDeclQMark : public XmlParseState
-{
-    virtual XmlParseState* onAlpha(Pt::Char c, XmlReader& reader)
-    {
-        reader._procInstr.target().clear();
-        reader._procInstr.target() += c;
-        return OnXmlDeclName::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnXmlDeclQMark _state;
-        return &_state;
-    }
-};
-
-
-struct OnXmlDecl : public XmlParseState
-{
-    virtual XmlParseState* onQuest(Pt::Char c, XmlReader& reader)
-    {
-        return OnXmlDeclQMark::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnXmlDecl _state;
-        return &_state;
-    }
-};
-
-
-struct OnDocumentBegin : public XmlParseState
-{
-    virtual XmlParseState* onSpace(Pt::Char c, XmlReader& reader)
-    {
-        return BeforeRootElement::instance();
-    }
-
-    virtual XmlParseState* onOpenBracket(Pt::Char c, XmlReader& reader)
-    {
-        return OnXmlDecl::instance();
-    }
-
-    static XmlParseState* instance()
-    {
-        static OnDocumentBegin _state;
-        return &_state;
-    }
-};
-
-}; // XmlParser
 
 
 XmlReader::XmlReader(std::istream& is)
-: _textBuffer(0)
-, _buffer(0)
-, _depth(0)
-, _line(1)
-, _standalone(true)
-, _current(0)
+: _impl(0)
 {
-    _state = XmlParser::OnDocumentBegin::instance();
-
-    _buffer = new Text::TextBuffer( &is, new Pt::Text::Utf8Codec() );
-    _textBuffer = _buffer;
+    _impl = new XmlReaderImpl(is);
 }
 
 
-XmlReader::XmlReader(Text::TextStream& is)
-: _textBuffer(is.rdbuf())
-, _buffer( 0 )
-, _depth(0)
-, _line(1)
-, _standalone(true)
-, _current(0)
+XmlReader::XmlReader(TextIStream& is)
+: _impl(0)
 {
-    _state = XmlParser::OnDocumentBegin::instance();
+    _impl = new XmlReaderImpl(is);
 }
 
 
 XmlReader::~XmlReader()
 {
-    delete _buffer;
+    delete _impl;
+}
+
+
+const Pt::String& XmlReader::version() const
+{
+    return _impl->version();
+}
+
+
+const Pt::String& XmlReader::encoding() const
+{
+    return _impl->encoding();
+}
+
+
+bool XmlReader::standalone() const
+{
+    return _impl->standalone();
+}
+
+
+size_t XmlReader::depth() const
+{
+    return _impl->depth();
+}
+
+
+std::size_t XmlReader::line() const
+{
+    return _impl->line();
 }
 
 
 const Node& XmlReader::get()
 {
-    if( ! _current )
-    {
-        this->next();
-    }
-
-    return *_current;
+    return _impl->get();
 }
 
 
 const Node& XmlReader::next()
 {
-    const Pt::Char eof = std::char_traits<char>::eof();
-
-    _current = 0;
-    Pt::Char ch = 0;
-    do
-    {
-        ch = _textBuffer->sbumpc();
-        _state = _state->onChar(ch, *this);
-
-        if(ch == '\n')
-        {
-            ++_line;
-        }
-    }
-    while ( !_current && ch != eof);
-
-    return *_current;
+    return _impl->next();
 }
 
 
 bool XmlReader::advance()
 {
-    const Pt::Char eof = std::char_traits<char>::eof();
-
-    _current = 0;
-    Pt::Char ch = 0;
-    while( ! _current && _textBuffer->in_avail() > 0 )
-    {
-        ch = _textBuffer->sbumpc();
-        _state = _state->onChar(ch, *this);
-
-        if(ch == '\n')
-        {
-            ++_line;
-        }
-    }
-
-    return _current != 0;
+    return _impl->advance();
 }
 
 
@@ -673,27 +1502,11 @@ const Node& XmlReader::nextTag()
     return this->get();
 }
 
-/*
-XmlReader& XmlReader::operator>>(StartElement& to)
+
+void XmlReader::resolveEntities(String& str)
 {
-    return *this;
+    _impl->resolveEntities(str);
 }
-
-
-XmlReader& XmlReader::operator>>(EndElement& to)
-{
-    return *this;
-}
-
-
-XmlReader& XmlReader::operator>>(Characters& to)
-{
-
-    return *this;
-}
-*/
-
-
 
 
 /*
@@ -822,39 +1635,6 @@ bool XmlReader::parseAttribute(String& name, String& value)
 
     return true;
 }*/
-
-
-
-
-
-
-
-
-
-
-
-void XmlReader::resolveEntities(String& str)
-{
-    size_t entityBegin = 0;
-    size_t entityEnd = 0;
-
-    while( (entityBegin = str.find('&', entityBegin)) != string::npos) {
-        entityEnd = str.find(';', entityBegin);
-        if(entityEnd == string::npos)
-        {
-            throw logic_error( "Invalid XML entitiy reference" + PT_SOURCEINFO );
-        }
-
-        String ref = str.substr(entityBegin+1, entityEnd-entityBegin-1);
-
-        String resolved = _resolver.resolveEntity( str.substr(entityBegin+1, entityEnd-entityBegin-1) );
-
-        str.replace(entityBegin, entityEnd-entityBegin+1, resolved);
-
-        ++entityBegin;
-    }
-}
-
 
 } // namespace Xml
 

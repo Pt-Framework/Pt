@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2009 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,40 +25,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_XmlStream_h
-#define PTV_Xml_XmlStream_h
+#ifndef Pt_Xml_XmlReader_h
+#define Pt_Xml_XmlReader_h
 
 #include <Pt/String.h>
-#include <Pt/Text/TextStream.h>
+#include <Pt/TextStream.h>
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
-#include <Pt/Xml/ProcessingInstruction.h>
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/EndElement.h>
-#include <Pt/Xml/Characters.h>
-#include <Pt/Xml/EndDocument.h>
-#include <Pt/Xml/Resolver.h>
-#include <memory>
-#include <queue>
-
+#include <iosfwd>
 
 namespace Pt {
 
 namespace Xml {
 
     class Node;
-    class XmlDeclaration;
     class StartElement;
-    class EndElement;
-    class EndDocument;
-    class Characters;
-    class ProcessingInstruction;
-    class Comment;
-    class CData;
-    class XmlStreamIterator;
-
-    class XmlParseState;
 
 /** @brief An input stream for parsing an XML document utilizing Pull Parsing.
 
@@ -92,21 +76,17 @@ namespace Xml {
 class PT_XML_API XmlReader
 {
     public:
-        static EndDocument& documentEnd()
-        {
-            static EndDocument _enddoc;
-            return _enddoc;
-        }
-
         class Iterator
         {
             public:
                 Iterator()
-                : _stream(0), _node( &XmlReader::documentEnd() )
+                : _stream(0)
+                , _node(0)
                 { }
 
                 Iterator(XmlReader& xis)
-                : _stream(&xis), _node(0)
+                : _stream(&xis)
+                , _node(0)
                 { _node = &_stream->get(); }
 
                 Iterator(const Iterator& it)
@@ -131,7 +111,11 @@ class PT_XML_API XmlReader
 
                 Iterator& operator++()
                 {
-                    _node = &_stream->next();
+                    if(_node->type() == Node::EndDocument)
+                        _node = 0;
+                    else
+                        _node = &_stream->next();
+
                     return *this;
                 }
 
@@ -149,23 +133,17 @@ class PT_XML_API XmlReader
     public:
         XmlReader(std::istream& is);
 
-        XmlReader(Text::TextStream& is);
+        XmlReader(TextIStream& is);
 
         ~XmlReader();
 
-        const Pt::String& version() const
-        { return _version; }
+        const Pt::String& version() const;
 
-        const Pt::String& encoding() const
-        { return _encoding; }
+        const Pt::String& encoding() const;
 
-        bool standalone() const
-        { return _standalone; }
+        bool standalone() const;
 
-        size_t depth() const
-        {
-            return _depth;
-        }
+        size_t depth() const;
 
         Iterator current()
         {
@@ -188,39 +166,13 @@ class PT_XML_API XmlReader
         const StartElement& nextElement();
 
         const Node& nextTag();
-/*
-        XmlReader& operator>>(StartElement& se);
 
-        XmlReader& operator>>(EndElement& e);
-
-        XmlReader& operator>>(Characters& e);
-*/
-        std::size_t line() const
-        { return _line; }
+        std::size_t line() const;
 
         void resolveEntities(String& str);
 
-    public:
-        std::basic_streambuf<Char>* _textBuffer;
-        std::basic_streambuf<Char>* _buffer;
-        Resolver _resolver; /// TODO must be EntityResolver
-        size_t _depth;
-        std::size_t _line;
-
-    public:
-
-        Pt::String _version;
-        Pt::String _encoding;
-        bool _standalone;
-
-
-        XmlParseState* _state;
-        Node* _current;
-        ProcessingInstruction _procInstr;
-        StartElement _startElem;
-        EndElement _endElem;
-        Characters _chars;
-        Attribute _attr;
+    private:
+        class XmlReaderImpl* _impl;
 };
 
 }

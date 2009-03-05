@@ -47,19 +47,20 @@ void perfTest()
 {
     stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-
+input << "<a>";
     for(int i = 0; i < 50000; ++i)
     {
         input << "<testelem x=\"abc\">";
         input << "0123456789abcdefghijklmnopqrstuvwxyz";
         input << "</testelem>";
     }
-
+input << "</a>";
     cerr << "PrefTest: ";
     XmlReader reader( input );
+    XmlReader::Iterator itEnd = reader.end();
 
     clock_t begin = clock();
-    for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
+    for(XmlReader::Iterator it = reader.current(); it != itEnd; ++it)
     {}
     cerr << clock() - begin << endl;
 }
@@ -136,8 +137,8 @@ void test()
 int main(int argc, char* argv[])
 {
     try {
-        test();
-        //perfTest();
+        //test();
+        perfTest();
     }
     catch(const std::exception& e)
     {
