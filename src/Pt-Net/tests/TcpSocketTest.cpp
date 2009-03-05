@@ -78,26 +78,31 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithSelector()
         {
-            this->reportMessage("\nSTART");
-            Pt::System::Selector selector;
-
             Pt::Net::TcpServer server("127.0.0.1", 8000);
-            connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
-            selector.add(server);
+            //{
+                this->reportMessage("\nSTART");
+                Pt::System::Selector selector;
 
-            connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
-            selector.add(*_acceptor);
+                connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
+                selector.add(server);
 
-            Pt::Net::TcpSocket client;
-            client.beginConnect("127.0.0.1", 8000);
-            connect(client.connected, *this, &TcpSocketTest::onConnect);
-            connect(client.outputReady, *this, &TcpSocketTest::onOutput);
-            selector.add(client);
+                connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
+                selector.add(*_acceptor);
 
-            selector.wait(1000);
-            selector.wait(1000);
-            selector.wait(1000);
-            selector.wait(1000);
+                Pt::Net::TcpSocket client;
+                client.beginConnect("127.0.0.1", 8000);
+                connect(client.connected, *this, &TcpSocketTest::onConnect);
+                connect(client.outputReady, *this, &TcpSocketTest::onOutput);
+                selector.add(client);
+
+                selector.wait(1000);
+                selector.wait(1000);
+                selector.wait(1000);
+                selector.wait(1000);
+
+            //    server.close();
+            //}
+            //server.listen("127.0.0.1", 8000);
 
             this->reportMessage("FINISHED");
         }

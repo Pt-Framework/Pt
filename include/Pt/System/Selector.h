@@ -35,6 +35,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <map>
+#include <list>
 
 namespace Pt {
 
@@ -147,29 +148,41 @@ namespace System {
 
             void onTimerChanged( Timer& timer );
 
+            //void attach(Selectable& s)
+            //{
+            //    _selectables.push_back(&s);
+            //    this->onAdd(s); // TODO: use onAttach
+            //}
+
+            //void detach(Selectable& s)
+            //{
+            //    _selectables.remove(&s);
+            //    this->onRemove(s); // TODO: use onDetach
+            //}
+
             /** @brief A Selectable is added to this %Selector
 
                 Do not throw exceptions.
             */
-            virtual void onAdd(Selectable&) = 0;
+            virtual void onAdd(Selectable&) = 0; // TODO: onEnable
 
             /** @brief A Selectable is removed from this %Selector
 
                 Do not throw exceptions.
             */
-            virtual void onRemove(Selectable&) = 0;
+            virtual void onRemove(Selectable&) = 0; // TODO: onDisable
 
             /** @brief A Selectable is reinitialised and needs to be updated
 
                 Do not throw exceptions.
             */
-            virtual void onReinit(Selectable&) = 0;
+            virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
 
             /** @brief A Selectable in this %Selector has changed
 
                 Do not throw exceptions.
             */
-            virtual void onChanged(Selectable& s) = 0;
+            virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
             virtual bool onWait(std::size_t msecs) = 0;
 
@@ -186,8 +199,15 @@ namespace System {
             typedef std::multimap<Timespan, Timer*> TimerMap;
 
             //! @internal
+            //typedef std::list<Selectable*> SelectableList;
+
+            //! @internal
             TimerMap _timers;
 
+            //! @internal
+            //SelectableList _selectables;
+
+            //! @internal
             void* _reserved;
     };
 

@@ -39,6 +39,12 @@ SelectorBase::~SelectorBase()
        Timer* timer = _timers.begin()->second;
         timer->setSelector(0);
     }
+
+    //while( _selectables.size() )
+    //{
+    //   Selectable* sel = *_selectables.begin();
+    //    sel->setSelector(0);
+    //}
 }
 
 
