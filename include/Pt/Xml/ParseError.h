@@ -27,7 +27,6 @@
 #define PTV_Xml_ParseError_h
 
 #include <Pt/Xml/Api.h>
-#include "Pt/SourceInfo.h"
 #include <stdexcept>
 
 namespace Pt {
@@ -44,13 +43,13 @@ class PT_XML_API ParseError : public std::runtime_error
             * @param what The reason of the parse error.
             * @param info Source info containing information about where the exception occured.
             */
-        ParseError(const char* what, std::size_t line);
+        ParseError(const char* what, unsigned line);
 
-        std::size_t line() const
+        unsigned line() const
         { return _line; }
 
     private:
-        std::size_t _line;
+        unsigned _line;
 };
 
 }

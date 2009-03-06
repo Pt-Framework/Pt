@@ -24,30 +24,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/Resolver.h"
-#include "Pt/Text/TextStream.h"
-
 #include <sstream>
 #include <iostream>
-using namespace std;
-
 
 namespace Pt {
 
 namespace Xml {
 
-Resolver::Resolver()
+EntityResolver::EntityResolver()
 {
     this->clear();
 }
 
 
-Resolver::~Resolver()
+EntityResolver::~EntityResolver()
 {
-
 }
 
 
-void Resolver::clear()
+void EntityResolver::clear()
 {
     _entityMap.clear();
     _entityMap.insert( std::make_pair(L"lt", L"<")  );
@@ -58,22 +53,22 @@ void Resolver::clear()
 }
 
 
-void Resolver::addEntity(const String& entity, const String& token)
+void EntityResolver::addEntity(const String& entity, const String& token)
 {
   _entityMap.insert( std::make_pair<String, String>(entity, token) );
 }
 
 
-String Resolver::resolveEntity(const String& entity)
+String EntityResolver::resolveEntity(const String& entity)
 {
     if( entity.find('#') == 0 )
     {
         int code;
-        stringstream ss1;
+        std::stringstream ss1;
         if( entity.find('x') == 1 )
         {
             ss1 << entity.substr(2).narrow();
-            ss1 << hex;
+            ss1 << std::hex;
         }
         else
         {
@@ -84,7 +79,7 @@ String Resolver::resolveEntity(const String& entity)
         return String( 1, Char(code) );
     }
 
-    map<String, String>::iterator it = _entityMap.find(entity);
+    std::map<String, String>::iterator it = _entityMap.find(entity);
     if( it == _entityMap.end() )
     {
         return String();

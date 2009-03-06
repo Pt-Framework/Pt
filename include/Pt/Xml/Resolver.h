@@ -23,14 +23,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_Resolver_h
-#define PTV_Xml_Resolver_h
+#ifndef Pt_Xml_Resolver_h
+#define Pt_Xml_Resolver_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-
 #include <map>
-
 
 namespace Pt {
 
@@ -43,17 +41,17 @@ namespace Xml {
  * the entity and the resolved entity value. To resolve the resolves value for an entity
  * the method resolveEntity() can be used.
  */
-class PT_XML_API Resolver {
+class PT_XML_API EntityResolver {
     public:
         /**
          * @brief Constructs a new Resolver object and initializes the entity list using the XML default entities.
          *
          * The constructor calls clear() which clears the entity list and adds the XML default entities.
          */
-        Resolver();
+        EntityResolver();
 
         //! Empty destructor.
-        virtual ~Resolver();
+        virtual ~EntityResolver();
 
         /**
          * @brief Resets the entity list to the XML default entities.

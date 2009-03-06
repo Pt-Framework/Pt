@@ -45,17 +45,21 @@ namespace Xml {
      *
      * @see Node
      */
-    class PT_XML_API DocTypeDeclaration : public Node {
+    class PT_XML_API DocTypeDeclaration : public Node
+    {
         public:
             /**
              * @brief Constructs a new DocTypeDeclaration object with the given string as content.
              *
              * @param content The content of the DocTypeDeclaration object.
              */
-            DocTypeDeclaration( const String& content );
+            DocTypeDeclaration();
 
             //! Empty destructor
             ~DocTypeDeclaration();
+
+            void clear()
+            { _content.clear(); }
 
             /**
              * @brief Clones this DocTypeDeclaration object by creating a duplicate on the heap and returning it.
@@ -69,6 +73,9 @@ namespace Xml {
              * @return The content of this DocTypeDeclaration object.
              */
             const String& content() const;
+
+            String& content()
+            { return _content; }
 
             /**
              * @brief Sets the content of this DocTypeDeclaration object.

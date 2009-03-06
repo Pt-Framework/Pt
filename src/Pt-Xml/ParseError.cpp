@@ -25,7 +25,6 @@
  */
 #include "Pt/Xml/ParseError.h"
 
-
 namespace Pt {
 
 namespace Xml {
@@ -35,7 +34,6 @@ ParseError::ParseError(const char* what, std::size_t line)
 , _line(line)
 {
 }
-
 
 } // namespace Xml
 

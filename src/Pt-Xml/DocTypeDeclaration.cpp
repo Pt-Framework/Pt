@@ -31,9 +31,9 @@ namespace Pt {
 namespace Xml {
 
 
-DocTypeDeclaration::DocTypeDeclaration(const String& content)
-: Node(Node::DocType), _content(content) {
-
+DocTypeDeclaration::DocTypeDeclaration()
+: Node(Node::DocType)
+{
 }
 
 

@@ -41,6 +41,7 @@ namespace Xml {
 
     class Node;
     class StartElement;
+    class EntityResolver;
 
 /** @brief An input stream for parsing an XML document utilizing Pull Parsing.
 
@@ -133,7 +134,7 @@ class PT_XML_API XmlReader
     public:
         XmlReader(std::istream& is);
 
-        XmlReader(TextIStream& is);
+        XmlReader(std::basic_istream<Char>& is);
 
         ~XmlReader();
 
@@ -142,6 +143,10 @@ class PT_XML_API XmlReader
         const Pt::String& encoding() const;
 
         bool standalone() const;
+
+        EntityResolver& entityResolver();
+
+        const EntityResolver& entityResolver() const;
 
         size_t depth() const;
 
@@ -168,8 +173,6 @@ class PT_XML_API XmlReader
         const Node& nextTag();
 
         std::size_t line() const;
-
-        void resolveEntities(String& str);
 
     private:
         class XmlReaderImpl* _impl;

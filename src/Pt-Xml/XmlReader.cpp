@@ -40,7 +40,9 @@
 #include <stdexcept>
 #include <iostream>
 
-#define PT_XML_LOG std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+#define PT_XML_LOG
+
+///std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
 
 namespace Pt {
 
@@ -182,7 +184,6 @@ struct XmlReaderImpl
 
         void syntaxError(unsigned line)
         {
-            std::cerr << "error in line " << line << std::endl;
             throw ParseError("syntax error", line);
         }
     };
@@ -309,6 +310,32 @@ struct XmlReaderImpl
     };
 
 
+    struct OnEntityReference : public State
+    {
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+
+            if(c == ';')
+            {
+                reader.resolveEntity(reader._token);
+                reader._chars.content() += reader._token;
+                reader._token.clear();
+                return OnCharacters::instance();
+            }
+
+            reader._token += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnEntityReference _state;
+            return &_state;
+        }
+    };
+
+
     struct OnCharacters : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -321,10 +348,6 @@ struct XmlReaderImpl
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
-
-            // TODO: resolve directly
-            // reader.resolveEntities( reader._chars.content() );
-
             return OnTag::instance();
         }
 
@@ -332,8 +355,11 @@ struct XmlReaderImpl
         {
             PT_XML_LOG
 
-            //if(c == '&')
-            //    return OnCharRef:instance()
+            if(c == '&')
+            {
+                reader._token.clear();
+                return OnEntityReference::instance();
+            }
 
             reader._chars.content() += c;
             return this;
@@ -838,6 +864,13 @@ struct XmlReaderImpl
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+
+            if(c == '&')
+            {
+                reader._token.clear();
+                return OnEntityReference::instance();
+            }
+
             reader._chars.content() += c;
             return OnCharacters::instance();
         }
@@ -845,6 +878,108 @@ struct XmlReaderImpl
         static State* instance()
         {
             static AfterTag _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnDocType : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._current = &(reader._docType);
+            return OnProlog::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._docType.content() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnDocType _state;
+            return &_state;
+        }
+    };
+
+
+    struct BeforeDocType : public State
+    {
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            String& token = reader._docType.content();
+            token += c;
+
+            if(token.length() < 7)
+                return this;
+
+            if(token == L"DOCTYPE")
+            {
+                return OnDocType::instance();
+            }
+
+            token.clear();
+            this->syntaxError( reader.line() );
+            return this;
+        }
+
+        static State* instance()
+        {
+            static BeforeDocType _state;
             return &_state;
         }
     };
@@ -864,6 +999,13 @@ struct XmlReaderImpl
                 reader._token.clear();
                 reader._token += c;
                 return BeforeCData::instance();
+            }
+
+            if(c == 'D' && reader.depth() == 0)
+            {
+                reader._docType.clear();
+                reader._docType.content() += c;
+                return BeforeDocType::instance();
             }
 
             this->syntaxError(reader.line());
@@ -1194,6 +1336,11 @@ struct XmlReaderImpl
             return OnXmlDeclQMark::instance();
         }
 
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            return OnTagExclam::instance();
+        }
+
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
@@ -1230,7 +1377,7 @@ struct XmlReaderImpl
     };
 
 
-    XmlReaderImpl(TextIStream& is)
+    XmlReaderImpl(std::basic_istream<Char>& is)
     : _textBuffer( is.rdbuf() )
     , _buffer(0)
     , _standalone(true)
@@ -1261,30 +1408,27 @@ struct XmlReaderImpl
         delete _buffer;
     }
 
-
     const Pt::String& version() const
     { return _version; }
-
 
     const Pt::String& encoding() const
     { return _encoding; }
 
-
     bool standalone() const
     { return _standalone; }
 
+    EntityResolver& entityResolver()
+    { return _resolver; }
 
     size_t depth() const
     {
         return _depth;
     }
 
-
     std::size_t line() const
     {
         return _line;
     }
-
 
     const Node& get()
     {
@@ -1295,7 +1439,6 @@ struct XmlReaderImpl
 
         return *_current;
     }
-
 
     const Node& next()
     {
@@ -1318,7 +1461,6 @@ struct XmlReaderImpl
         return *_current;
     }
 
-
     bool advance()
     {
         const Pt::Char eof = std::char_traits<char>::eof();
@@ -1339,31 +1481,14 @@ struct XmlReaderImpl
         return _current != 0;
     }
 
-    void resolveEntities(String& str)
+    void resolveEntity(String& str)
     {
-        size_t entityBegin = 0;
-        size_t entityEnd = 0;
-
-        while( (entityBegin = str.find('&', entityBegin)) != std::string::npos) {
-            entityEnd = str.find(';', entityBegin);
-            if(entityEnd == std::string::npos)
-            {
-                throw std::logic_error( "Invalid XML entitiy reference" + PT_SOURCEINFO );
-            }
-
-            String ref = str.substr(entityBegin+1, entityEnd-entityBegin-1);
-
-            String resolved = _resolver.resolveEntity( str.substr(entityBegin+1, entityEnd-entityBegin-1) );
-
-            str.replace(entityBegin, entityEnd-entityBegin+1, resolved);
-
-            ++entityBegin;
-        }
+        str = _resolver.resolveEntity( str );
     }
 
     std::basic_streambuf<Char>* _textBuffer;
     std::basic_streambuf<Char>* _buffer;
-    Resolver _resolver; /// TODO must be EntityResolver
+    EntityResolver _resolver;
 
     Pt::String _version;
     Pt::String _encoding;
@@ -1371,10 +1496,10 @@ struct XmlReaderImpl
     size_t _depth;
     std::size_t _line;
 
-
     State* _state;
     Node* _current;
     String _token;
+    DocTypeDeclaration _docType;
     ProcessingInstruction _procInstr;
     StartElement _startElem;
     EndElement _endElem;
@@ -1391,7 +1516,7 @@ XmlReader::XmlReader(std::istream& is)
 }
 
 
-XmlReader::XmlReader(TextIStream& is)
+XmlReader::XmlReader(std::basic_istream<Char>& is)
 : _impl(0)
 {
     _impl = new XmlReaderImpl(is);
@@ -1419,6 +1544,18 @@ const Pt::String& XmlReader::encoding() const
 bool XmlReader::standalone() const
 {
     return _impl->standalone();
+}
+
+
+EntityResolver& XmlReader::entityResolver()
+{
+    return _impl->entityResolver();
+}
+
+
+const EntityResolver& XmlReader::entityResolver() const
+{
+    return _impl->entityResolver();
 }
 
 
@@ -1501,140 +1638,6 @@ const Node& XmlReader::nextTag()
 
     return this->get();
 }
-
-
-void XmlReader::resolveEntities(String& str)
-{
-    _impl->resolveEntities(str);
-}
-
-
-/*
-bool XmlReader::parseAttribute(String& name, String& value)
-{
-    enum AttributeParseState
-    {
-        BeforeName  = 0,
-        OnName      = 1,
-        BeforeEqual = 2,
-        BeforeValue = 3,
-        OnValue     = 4,
-        AfterValue  = 5
-    };
-
-    AttributeParseState state = BeforeName;
-
-    // stay on '/' or '<' when done.
-    typedef std::char_traits<Pt::Char> CharTraits;
-    const Char eof = CharTraits::to_char_type( CharTraits::eof() );
-    for( Char ch = _textBuffer->sgetc(); eof != ch; ch = _textBuffer->snextc() )
-    {
-        switch(state)
-        {
-            case BeforeName:
-            {
-               if( ch == '>' || ch == '/')
-               {
-                   return false;
-               }
-               else if( isspace(ch) )
-               {
-                   continue;
-               }
-               else
-               {
-                   name += ch;
-                   state = OnName;
-               }
-
-               break;
-            }
-
-            case OnName:
-            {
-               if( isspace(ch) )
-               {
-                   state = BeforeEqual;
-               }
-               else if( ch == '=')
-               {
-                   state = BeforeValue;
-               }
-               else
-               {
-                   name += ch;
-               }
-
-               break;
-            }
-
-            case BeforeEqual:
-            {
-               if( isspace(ch) )
-               {
-                   continue;
-               }
-               else if( ch == '=')
-               {
-                   state = BeforeValue;
-               }
-               else
-                   throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
-
-               break;
-            }
-
-            case BeforeValue:
-            {
-               if( isspace(ch) )
-               {
-                   continue;
-               }
-               else if( ch == '\'' || ch == '"')
-               {
-                   state = OnValue;
-               }
-               else
-               {
-                   throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
-                }
-
-               break;
-            }
-
-            case OnValue:
-            {
-               if( ch == '\'' || ch == '"')
-               {
-                   state = AfterValue;
-               }
-               else
-                   value += ch;
-
-               break;
-            }
-
-            case AfterValue:
-            {
-               if( isspace(ch) )
-               {
-                   continue;
-               }
-               else
-               {
-                   return true;
-               }
-
-               break;
-            }
-
-            default:
-                throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
-        }
-    }
-
-    return true;
-}*/
 
 } // namespace Xml
 
