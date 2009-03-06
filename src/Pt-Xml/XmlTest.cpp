@@ -46,35 +46,38 @@ class XmlTest : public Pt::Unit::TestSuite
         XmlTest()
         : Pt::Unit::TestSuite("XmlTest")
         {
-            this->registerMethod("MissingXmlDeclaration"       , *this, &XmlTest::MissingXmlDeclaration);
-            this->registerMethod("EmptyXmlDeclaration"       , *this, &XmlTest::EmptyXmlDeclaration);
-            this->registerMethod("EmptyDocument"               , *this, &XmlTest::EmptyDocument);
-            this->registerMethod("DoctypeDeclaration"          , *this, &XmlTest::DoctypeDeclaration);
-            this->registerMethod("EmptyElementTag"             , *this, &XmlTest::EmptyElementTag);
-            this->registerMethod("InvalidTag1"                 , *this, &XmlTest::InvalidTag1);
-            this->registerMethod("InvalidTag2"                 , *this, &XmlTest::InvalidTag2);
-            this->registerMethod("InvalidTag3"                 , *this, &XmlTest::InvalidTag3);
-            this->registerMethod("InvalidTag4"                 , *this, &XmlTest::InvalidTag4);
-            this->registerMethod("InvalidTag5"                 , *this, &XmlTest::InvalidTag5);
-            this->registerMethod("NextElement"                 , *this, &XmlTest::NextElement);
-            this->registerMethod("NextTag"                     , *this, &XmlTest::NextTag);
-            this->registerMethod("ElementWithContent"          , *this, &XmlTest::ElementWithContent);
-            this->registerMethod("DefaultEntities"             , *this, &XmlTest::DefaultEntities);
-            this->registerMethod("InvalidAttribute1"                 , *this, &XmlTest::InvalidAttribute1);
-            this->registerMethod("InvalidAttribute2"                 , *this, &XmlTest::InvalidAttribute2);
-            this->registerMethod("InvalidAttribute3"                 , *this, &XmlTest::InvalidAttribute3);
-            this->registerMethod("InvalidAttribute4"                 , *this, &XmlTest::InvalidAttribute4);
-            this->registerMethod("EmptyAttribute"                 , *this, &XmlTest::EmptyAttribute);
-            this->registerMethod("AttributeWithSimpleText"     , *this, &XmlTest::AttributeWithSimpleText);
-            this->registerMethod("AttributeWithUTF8"           , *this, &XmlTest::AttributeWithUTF8);
-            this->registerMethod("MultipleAttributesIteration" , *this, &XmlTest::MultipleAttributesIteration);
-            this->registerMethod("CDATA" , *this, &XmlTest::CDATA );
-            this->registerMethod("CommentInProlog" , *this, &XmlTest::CommentInProlog );
-            this->registerMethod("CommentInElement" , *this, &XmlTest::CommentInElement );
-            this->registerMethod("CommentInEpilog" , *this, &XmlTest::CommentInEpilog );
-            this->registerMethod("EmptyComment" , *this, &XmlTest::EmptyComment );
-            this->registerMethod("CommentBeforeRoot" , *this, &XmlTest::CommentBeforeRoot );
-            this->registerMethod("MissingCloseTag" , *this, &XmlTest::MissingCloseTag );
+            this->registerMethod("MissingXmlDeclaration", *this, &XmlTest::MissingXmlDeclaration);
+            this->registerMethod("EmptyXmlDeclaration", *this, &XmlTest::EmptyXmlDeclaration);
+            this->registerMethod("EmptyDocument", *this, &XmlTest::EmptyDocument);
+            this->registerMethod("DoctypeDeclaration", *this, &XmlTest::DoctypeDeclaration);
+            this->registerMethod("EmptyElementTag", *this, &XmlTest::EmptyElementTag);
+            this->registerMethod("InvalidTag1", *this, &XmlTest::InvalidTag1);
+            this->registerMethod("InvalidTag2", *this, &XmlTest::InvalidTag2);
+            this->registerMethod("InvalidTag3", *this, &XmlTest::InvalidTag3);
+            this->registerMethod("InvalidTag4", *this, &XmlTest::InvalidTag4);
+            this->registerMethod("InvalidTag5", *this, &XmlTest::InvalidTag5);
+            this->registerMethod("NextElement", *this, &XmlTest::NextElement);
+            this->registerMethod("NextTag", *this, &XmlTest::NextTag);
+            this->registerMethod("ElementWithContent", *this, &XmlTest::ElementWithContent);
+            this->registerMethod("DefaultEntities", *this, &XmlTest::DefaultEntities);
+            this->registerMethod("InvalidAttribute1", *this, &XmlTest::InvalidAttribute1);
+            this->registerMethod("InvalidAttribute2", *this, &XmlTest::InvalidAttribute2);
+            this->registerMethod("InvalidAttribute3", *this, &XmlTest::InvalidAttribute3);
+            this->registerMethod("InvalidAttribute4", *this, &XmlTest::InvalidAttribute4);
+            this->registerMethod("EmptyAttribute", *this, &XmlTest::EmptyAttribute);
+            this->registerMethod("AttributeWithSimpleText", *this, &XmlTest::AttributeWithSimpleText);
+            this->registerMethod("AttributeWithUTF8", *this, &XmlTest::AttributeWithUTF8);
+            this->registerMethod("MultipleAttributesIteration", *this, &XmlTest::MultipleAttributesIteration);
+            this->registerMethod("CDATA", *this, &XmlTest::CDATA );
+            this->registerMethod("CommentInProlog", *this, &XmlTest::CommentInProlog );
+            this->registerMethod("CommentInElement", *this, &XmlTest::CommentInElement );
+            this->registerMethod("CommentInEpilog", *this, &XmlTest::CommentInEpilog );
+            this->registerMethod("EmptyComment", *this, &XmlTest::EmptyComment );
+            this->registerMethod("CommentBeforeRoot", *this, &XmlTest::CommentBeforeRoot );
+            this->registerMethod("MissingCloseTag", *this, &XmlTest::MissingCloseTag );
+            this->registerMethod("ProcessingInstructionInProlog", *this, &XmlTest::ProcessingInstructionInProlog );
+            this->registerMethod("ProcessingInstructionInElement", *this, &XmlTest::ProcessingInstructionInElement );
+            this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlTest::ProcessingInstructionInEpilog );
         }
 
     protected:
@@ -108,7 +111,9 @@ class XmlTest : public Pt::Unit::TestSuite
         void InvalidAttribute4();
         void EmptyAttribute();
 
-        void testProcessingInstructions();
+        void ProcessingInstructionInProlog();
+        void ProcessingInstructionInElement();
+        void ProcessingInstructionInEpilog();
         void CheckPerformance();
 };
 
@@ -168,9 +173,9 @@ void XmlTest::EmptyDocument()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
-    PT_UNIT_ASSERT(reader.version() == L"1.0")
-    PT_UNIT_ASSERT(reader.encoding() == L"UTF-8")
-    PT_UNIT_ASSERT(reader.standalone() == true)
+    PT_UNIT_ASSERT(reader.documentVersion() == L"1.0")
+    PT_UNIT_ASSERT(reader.documentEncoding() == L"UTF-8")
+    PT_UNIT_ASSERT(reader.standaloneDocument() == true)
 }
 
 
@@ -538,21 +543,82 @@ void XmlTest::MultipleAttributesIteration()
     PT_UNIT_ASSERT(attributeIter == attributes.end());
 }
 
-void XmlTest::testProcessingInstructions()
+
+void XmlTest::ProcessingInstructionInProlog()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
+    input << "<a/>";
 
     Pt::Xml::XmlReader reader( input );
-
     Pt::Xml::XmlReader::Iterator it = reader.current();
-    const Pt::Xml::Node& processingInstructionNode = *it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
+    const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
+    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
 
-    PT_UNIT_ASSERT(processingInstructionNode.type() == Pt::Xml::Node::ProcessingInstruction);
-    //const Pt::Xml::ProcessingInstruction* pi = dynamic_cast<const Pt::Xml::ProcessingInstruction*>(&processingInstructionNode);
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
-    // TODO Add more testing as soon as Pt::Xml::XmlReader supports ProcessingInstructions.
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlTest::ProcessingInstructionInElement()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a>123";
+    input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
+    input << "456</a>";
+
+    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
+    const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
+    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::Characters);
+    const Pt::Xml::Characters& chars = dynamic_cast<const Pt::Xml::Characters&>(*it);
+    PT_UNIT_ASSERT(chars.content() == L"123456");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlTest::ProcessingInstructionInEpilog()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    input << "<a/>\n";
+    input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
+
+    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
+    const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
+    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
 }
 
 

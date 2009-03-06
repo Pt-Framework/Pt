@@ -41,8 +41,7 @@
 #include <iostream>
 
 #define PT_XML_LOG
-
-///std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+// std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
 
 namespace Pt {
 
@@ -345,6 +344,13 @@ struct XmlReaderImpl
             return this;
         }
 
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._chars.content() += c;
+            return this;
+        }
+
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
@@ -384,6 +390,7 @@ struct XmlReaderImpl
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+            reader._chars.clear();
             reader._current = &(reader._endElem);
             reader._depth--;
 
@@ -419,6 +426,7 @@ struct XmlReaderImpl
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+            reader._chars.clear();
             reader._current = &(reader._endElem);
             reader._depth--;
 
@@ -630,6 +638,7 @@ struct XmlReaderImpl
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+            reader._chars.clear();
             reader._current = &(reader._startElem);
             reader._depth++;
             return OnEmptyElement::instance();
@@ -645,6 +654,7 @@ struct XmlReaderImpl
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+            reader._chars.clear();
             reader._current = &(reader._startElem);
             reader._depth++;
             return AfterTag::instance();
@@ -852,6 +862,9 @@ struct XmlReaderImpl
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
+            if(reader.depth() == 0)
+                return OnProlog::instance();
+
             reader._chars.content() += c;
             return OnCharacters::instance();
         }
@@ -873,6 +886,16 @@ struct XmlReaderImpl
 
             reader._chars.content() += c;
             return OnCharacters::instance();
+        }
+
+        virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            if(reader.depth() > 0)
+                this->syntaxError( reader.line() );
+
+            reader._current = &( reader._endDoc );
+            return this;
         }
 
         static State* instance()
@@ -1025,7 +1048,8 @@ struct XmlReaderImpl
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
-            return 0;  // processing instruction
+            reader._procInstr.clear();
+            return OnProcessingInstruction::instance();
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
@@ -1123,16 +1147,102 @@ struct XmlReaderImpl
     {
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
+            PT_XML_LOG
             reader._current = &(reader._procInstr);
-            if(reader.depth() == 0)
-                return OnProlog::instance();
-
-            return 0; // onText
+            return AfterTag::instance();
         }
 
         static State* instance()
         {
             static OnProcessingInstructionEnd _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnProcessingInstructionData : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnProcessingInstructionEnd::instance();
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.data() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnProcessingInstructionData _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnProcessingInstruction : public State
+    {
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            return OnProcessingInstructionData::instance();
+        }
+
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            PT_XML_LOG
+            reader._procInstr.target() += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnProcessingInstruction _state;
             return &_state;
         }
     };
@@ -1295,7 +1405,7 @@ struct XmlReaderImpl
             if( reader._procInstr.target() == xml )
                 return OnXmlDeclBeforeAttr::instance();
 
-            return 0; /// TODO it is a normal processing instruction
+            return OnProcessingInstructionData::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
@@ -1316,7 +1426,7 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._procInstr.target().clear();
+            reader._procInstr.clear();
             reader._procInstr.target() += c;
             return OnXmlDeclName::instance();
         }
@@ -1529,19 +1639,19 @@ XmlReader::~XmlReader()
 }
 
 
-const Pt::String& XmlReader::version() const
+const Pt::String& XmlReader::documentVersion() const
 {
     return _impl->version();
 }
 
 
-const Pt::String& XmlReader::encoding() const
+const Pt::String& XmlReader::documentEncoding() const
 {
     return _impl->encoding();
 }
 
 
-bool XmlReader::standalone() const
+bool XmlReader::standaloneDocument() const
 {
     return _impl->standalone();
 }

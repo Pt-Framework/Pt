@@ -138,11 +138,11 @@ class PT_XML_API XmlReader
 
         ~XmlReader();
 
-        const Pt::String& version() const;
+        const Pt::String& documentVersion() const;
 
-        const Pt::String& encoding() const;
+        const Pt::String& documentEncoding() const;
 
-        bool standalone() const;
+        bool standaloneDocument() const;
 
         EntityResolver& entityResolver();
 

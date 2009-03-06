@@ -57,17 +57,17 @@ namespace Pt {
                     //! Unknown Node type (may not currently be supported)
                     Unknown = 0,
                     //! Xml declaration (see class XmlDeclaration)
-                    XmlDeclaration,
+                    XmlDeclaration = 1,
                     //! Doctype (see class DocType)
-                    DocType,
+                    DocType = 2,
                     //! End of the document (see EndDocument)
-                    EndDocument,
+                    EndDocument = 3,
                     //! Start element aka opening tag (see StartElement)
-                    StartElement,
+                    StartElement = 4,
                     //! End element aka closing tag (see EndElement)
-                    EndElement,
+                    EndElement = 5,
                     //! Parsed content of a tag's body (see Characters)
-                    Characters,
+                    Characters = 6,
                     //! Unparsed content of an XML document (see CData)
                     CData,
                     //! Comment (see Comment)

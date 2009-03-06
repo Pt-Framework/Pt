@@ -56,6 +56,9 @@ namespace Pt {
                 //! Empty destructor
                 ~ProcessingInstruction();
 
+                void clear()
+                { _target.clear(); _data.clear(); }
+
                 /**
                  * @brief Clones this CData object by creating a duplicate on the heap and returning it.
                  * @return A cloned version of this CData object.
@@ -91,6 +94,9 @@ namespace Pt {
                  * @return The data of this processing instruction.
                  */
                 const String& data() const;
+
+                String& data()
+                { return _data; }
 
                 /**
                  * @brief Sets the processor instruction's data.
