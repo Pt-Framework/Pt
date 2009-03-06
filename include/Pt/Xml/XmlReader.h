@@ -132,6 +132,11 @@ class PT_XML_API XmlReader
         };
 
     public:
+        /* TODO: Consider the following processing flags:
+                     - IgnoreProcessingInstructions
+                     - IgnoreInsignificantWhitespace
+                     - IgnoreComments
+        */
         XmlReader(std::istream& is);
 
         XmlReader(std::basic_istream<Char>& is);
