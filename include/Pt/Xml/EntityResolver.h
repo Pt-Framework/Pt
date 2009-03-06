@@ -23,8 +23,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_Resolver_h
-#define Pt_Xml_Resolver_h
+#ifndef Pt_Xml_EntityResolver_h
+#define Pt_Xml_EntityResolver_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>

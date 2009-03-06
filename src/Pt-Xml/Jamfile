@@ -5,14 +5,13 @@ SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 PT_XML_SOURCES = Characters.cpp
                  Comment.cpp
                  DocTypeDeclaration.cpp
-                 #EndDocument.cpp
+                 EntityResolver.cpp
                  EndElement.cpp
                  Namespace.cpp
                  NamespaceContext.cpp
                  ParseError.cpp
                  ProcessingInstruction.cpp
                  QName.cpp
-                 Resolver.cpp
                  StartElement.cpp
                  XmlDeclaration.cpp
                  XmlDeserializer.cpp
