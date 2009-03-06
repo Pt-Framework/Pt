@@ -43,34 +43,38 @@ namespace Xml {
     class StartElement;
     class EntityResolver;
 
-/** @brief An input stream for parsing an XML document utilizing Pull Parsing.
+/** @brief Reads XML as a Stream of XML Nodes.
 
-     This class operates on another istream or TextStream from which it reads the XML character
-     data, parses it and lastly makes available the parsed XML elements (Nodes).
+     This class operates on an input stream from which XML character data
+     is read and parsed.
 
-     A pull parser will only parse the XML document as far as the user read data from it.
-     To read the current element (Node) the method get() can be used. To parse and read the next
-     element the method next() can be used. Only when next() or any corresponding method or operator
-     is called the next chunk of XML input data is parsed.
+     The parser will only parse the XML document as far as the user read
+     data from it. To read the current element (Node) the method get() can
+     be used. To parse and read the next element the method next() can be
+     used. Only when next() or any corresponding method or operator is
+     called, the next chunk of XML input data is parsed.
 
-     To parse an XML-document an object of this class is created and passed the input stream
-     for the document. The constructor initializes the parser, already parses the Xml-declaration
-     and positions the internal cursor to the first actual element (Node) of the XML document.
+     To parse a XML-document, a XmlReader constructed with an input stream
+     from which the XML document is to be read.
 
-     The current XML element (Node) can be read using get(). Every call to next() will parse the
-     next element, position the cursor to the next element and return the parsed element. The
-     returned element is of type Node, which is the super-class for all XML element classes. The
-     class Node has a method type() which returns the type of the read element. Depending on the
-     type the generic Node object may be cast to the more concrete element object. For example
-     a Node object with a node type of Node::StartElement can be cast to StartElement.
+     The current XML element (Node) can be read using get(). Every call to
+     next() will parse the next element, position the cursor to the next
+     element and return the parsed element. The returned element is of type
+     Node, which is the super-class for all XML element classes. The class
+     Node has a method type() which returns the type of the read element.
+     Depending on the type the generic Node object may be cast to the more
+     concrete element object. For example a Node object with a node type of
+     Node::StartElement can be cast to StartElement.
 
-     Parsing using next() will continue until the end of the document is reached which will result
-     in a EndDocument element to be returned by next() and get().
+     Parsing using next() will continue until the end of the document is
+     reached which will resultin a EndDocument element to be returned by
+     next() and get().
 
-     This class also provides the method current() to obtain an iterator which basically works the
-     same as using using get() and next() directly. The cursor can be set to the next element by
-     using the ++ operator of the iterator. The current element can be accessed by using the *
-     operator.
+     This class also provides the method current() to obtain an iterator
+     which basically works the same way like using using get() and next()
+     directly. The iterator can be set to the next element by using the
+     ++ operator. The current element can be accessed by dereferencing
+     the iterator.
 
      @see Node
 */
