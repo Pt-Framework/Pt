@@ -614,7 +614,7 @@ void StringTest::testReserve()
     String s2 = s;
     s2.reserve(10);
 
-    PT_UNIT_ASSERT( s2.capacity() == 10 );
+    PT_UNIT_ASSERT( s2.capacity() >= 10 );
     PT_UNIT_ASSERT( s2.size() == 4 );
     PT_UNIT_ASSERT( char_traits<Char>::compare(s2.c_str(), c1, 4) == 0 );
 
