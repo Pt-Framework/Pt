@@ -57,7 +57,7 @@ namespace Pt {
                     //! Unknown Node type (may not currently be supported)
                     Unknown = 0,
                     //! Xml declaration (see class XmlDeclaration)
-                    XmlDeclaration = 1,
+                    StartDocument = 1,
                     //! Doctype (see class DocType)
                     DocType = 2,
                     //! End of the document (see EndDocument)

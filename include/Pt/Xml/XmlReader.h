@@ -133,9 +133,10 @@ class PT_XML_API XmlReader
 
     public:
         /* TODO: Consider the following processing flags:
-                     - IgnoreProcessingInstructions
-                     - IgnoreInsignificantWhitespace
-                     - IgnoreComments
+                     - ReportProcessingInstructions
+                     - ReportWhitespaceContent
+                     - ReportComments
+                     - ReportDocumentStart
         */
         XmlReader(std::istream& is);
 

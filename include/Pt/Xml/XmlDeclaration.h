@@ -23,8 +23,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_XmlDeclaration_h
-#define PTV_Xml_XmlDeclaration_h
+#ifndef PTV_Xml_StartDocument_h
+#define PTV_Xml_StartDocument_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
@@ -37,10 +37,10 @@ namespace Xml {
 class PT_XML_API StartDocument : public Node {
     public:
         StartDocument()
-        : Node(Node::XmlDeclaration),
-        _version( L"1.0" ),
-        _encoding( L"UTF-8" ),
-        _standalone(false)
+        : Node(Node::StartDocument)
+        , _version( L"1.0" )
+        , _encoding( L"UTF-8" )
+        , _standalone(false)
         { }
 
         ~StartDocument()
