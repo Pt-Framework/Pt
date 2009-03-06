@@ -13,7 +13,6 @@ PT_XML_SOURCES = Characters.cpp
                  ProcessingInstruction.cpp
                  QName.cpp
                  StartElement.cpp
-                 XmlDeclaration.cpp
                  XmlDeserializer.cpp
                  XmlReader.cpp
                  XmlSerializer.cpp

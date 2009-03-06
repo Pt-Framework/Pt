@@ -30,39 +30,62 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/String.h>
 
-
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
 
-        class PT_XML_API XmlDeclaration : public Node {
-            public:
-                XmlDeclaration();
+class PT_XML_API StartDocument : public Node {
+    public:
+        StartDocument()
+        : Node(Node::XmlDeclaration),
+        _version( L"1.0" ),
+        _encoding( L"UTF-8" ),
+        _standalone(false)
+        { }
 
-                ~XmlDeclaration();
+        ~StartDocument()
+        {}
 
-                XmlDeclaration* clone() const
-                {return new XmlDeclaration(*this);}
+        StartDocument* clone() const
+        { return new StartDocument(*this); }
 
-                const String& version() const;
+        const String& version() const
+        {
+            return _version;
+        }
 
-                void setVersion(const String& version);
+        void setVersion(const String& version)
+        {
+            _version = version;
+        }
 
-                const String& encoding() const;
+        const String& encoding() const
+        {
+            return _encoding;
+        }
 
-                void setEncoding(const String& encoding);
+        void setEncoding(const String& encoding)
+        {
+            _encoding = encoding;
+        }
 
-                bool standalone() const;
+        bool standalone() const
+        {
+            return _standalone;
+        }
 
-                void setStandalone(bool standalone);
-
-            private:
-                String _version;
-                String _encoding;
-                bool _standalone;
-        };
-
-    }
+        void setStandalone(bool standalone)
+        {
+            _standalone = standalone;
+        }
+    private:
+        String _version;
+        String _encoding;
+        bool _standalone;
+};
 
 }
+
+}
+
 #endif
