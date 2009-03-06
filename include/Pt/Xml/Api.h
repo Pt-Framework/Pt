@@ -30,10 +30,25 @@
 
 #include <Pt/Api.h>
 
+#define PT_XML_VERSION_MAJOR 1
+#define PT_XML_VERSION_MINOR 0
+#define PT_XML_VERSION_REVISION 0
+
 #if defined(PT_XML_API_EXPORT)
 #    define PT_XML_API PT_EXPORT
 #  else
 #    define PT_XML_API PT_IMPORT
 #  endif
+
+namespace Pt {
+
+/** @namespace Pt::Xml
+    @brief XML Parsing and Generation
+*/
+namespace Xml {
+
+} // namespace Xml
+
+} // namespace Pt
 
 #endif
