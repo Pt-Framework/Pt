@@ -108,6 +108,9 @@ namespace Pt {
                 _buffer.terminate();
             }
 
+            BasicTextBuffer<intern_type, extern_type>& buffer()
+            { return _buffer; }
+
         private:
             BasicTextBuffer<intern_type, extern_type> _buffer;
     };
@@ -182,6 +185,9 @@ namespace Pt {
             {
                 _buffer.terminate();
             }
+
+            BasicTextBuffer<intern_type, extern_type>& buffer()
+            { return _buffer; }
 
         private:
             BasicTextBuffer<intern_type, extern_type> _buffer;
@@ -258,6 +264,9 @@ namespace Pt {
             {
                 _buffer.terminate();
             }
+
+            BasicTextBuffer<intern_type, extern_type>& buffer()
+            { return _buffer; }
 
         private:
             BasicTextBuffer<intern_type, extern_type> _buffer;
