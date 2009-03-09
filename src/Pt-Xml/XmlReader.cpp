@@ -1487,9 +1487,10 @@ struct XmlReaderImpl
     };
 
 
-    XmlReaderImpl(std::basic_istream<Char>& is)
+    XmlReaderImpl(std::basic_istream<Char>& is, int flags)
     : _textBuffer( is.rdbuf() )
     , _buffer(0)
+    , _flags(flags)
     , _standalone(true)
     , _depth(0)
     , _line(1)
@@ -1499,9 +1500,10 @@ struct XmlReaderImpl
         _state = XmlReaderImpl::OnDocumentBegin::instance();
     }
 
-    XmlReaderImpl(std::istream& is)
+    XmlReaderImpl(std::istream& is, int flags)
     : _textBuffer(0)
     , _buffer(0)
+    , _flags(flags)
     , _standalone(true)
     , _depth(0)
     , _line(1)
@@ -1598,6 +1600,7 @@ struct XmlReaderImpl
 
     std::basic_streambuf<Char>* _textBuffer;
     std::basic_streambuf<Char>* _buffer;
+    int _flags;
     EntityResolver _resolver;
 
     Pt::String _version;
@@ -1619,17 +1622,17 @@ struct XmlReaderImpl
 };
 
 
-XmlReader::XmlReader(std::istream& is)
+XmlReader::XmlReader(std::istream& is, int flags)
 : _impl(0)
 {
-    _impl = new XmlReaderImpl(is);
+    _impl = new XmlReaderImpl(is, flags);
 }
 
 
-XmlReader::XmlReader(std::basic_istream<Char>& is)
+XmlReader::XmlReader(std::basic_istream<Char>& is, int flags)
 : _impl(0)
 {
-    _impl = new XmlReaderImpl(is);
+    _impl = new XmlReaderImpl(is, flags);
 }
 
 
