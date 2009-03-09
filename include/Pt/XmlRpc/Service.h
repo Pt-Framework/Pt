@@ -170,29 +170,33 @@ class MethodCaller
     };
 
     public:
-        MethodCaller(std::istream& is, Service& service)
-        : _ts(is, new Utf8Codec)
-        , _reader(_ts)
+        MethodCaller()
+        : _ts(0)
+        , _reader(0)
         , _state(Default)
         , _proc(0)
-        , _service(service)
+        , _service(0)
         {
         }
 
         void begin(std::istream& is, Service& service)
         {
+            _args.clear();
+            _service = &service;
             _state = Default;
             _proc = 0;
+            _ts = new TextIStream(is, new Utf8Codec);
+            _reader = new Xml::XmlReader(*_ts);
         }
 
-        std::size_t exec()
+        std::size_t advance()
         {
-            std::size_t n = _ts.buffer().import();
+            std::size_t n = _ts->buffer().import();
             if(n)
             {
-                while( _reader.advance() )
+                while( _reader->advance() )
                 {
-                    const Xml::Node& node = _reader.get();
+                    const Xml::Node& node = _reader->get();
                     if(node.type() == Xml::Node::StartElement)
                     {
                         const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -213,7 +217,7 @@ class MethodCaller
                         const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                         if( _state == BeforeMethodName )
                         {
-                            _proc = _service.procedure( chars.content().narrow() );
+                            _proc = _service->procedure( chars.content().narrow() );
                         }
                         else if( _state == BeforeArgument )
                         {
@@ -224,8 +228,6 @@ class MethodCaller
                     }
 
                     _state = Default;
-
-                    //std::cerr << _reader.get().type() << std::endl;
                 }
             }
 
@@ -243,13 +245,13 @@ class MethodCaller
         }
 
     private:
-        TextIStream _ts;
-        Xml::XmlReader _reader;
+        TextIStream* _ts;
+        Xml::XmlReader* _reader;
         State _state;
         RemoteProcedure* _proc;
         std::vector<Pt::SerializationInfo> _args;
         Pt::SerializationInfo _retval;
-        Service& _service;
+        Service* _service;
 };
 
 /*

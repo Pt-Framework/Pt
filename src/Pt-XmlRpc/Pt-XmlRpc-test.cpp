@@ -63,12 +63,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiply);
 
-            Pt::XmlRpc::MethodCaller caller( in, service );
+            Pt::XmlRpc::MethodCaller caller;
+            caller.begin( in, service );
             std::size_t n = 0;
 
             while(n < contentLength)
             {
-                n += caller.exec();
+                n += caller.advance();
             }
 
             std::stringstream out;
