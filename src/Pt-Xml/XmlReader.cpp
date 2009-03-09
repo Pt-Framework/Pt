@@ -1408,6 +1408,12 @@ struct XmlReaderImpl
             return OnProcessingInstructionData::instance();
         }
 
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._procInstr.target() += c;
+            return this;
+        }
+
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
             reader._procInstr.target() += c;
