@@ -31,8 +31,13 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
 
+#include "Pt/TextStream.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/XmlRpc/Service.h"
+#include "Pt/XmlRpc/RequestHandler.h"
 #include <sstream>
+
+
 
 
 class PtXmlRpcTest : public Pt::Unit::TestSuite
@@ -41,6 +46,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
+            testArgs();
+
             std::cerr << "START" << std::endl;
 
             std::stringstream in;
@@ -63,7 +70,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiply);
 
-            Pt::XmlRpc::MethodCaller caller;
+            Pt::XmlRpc::RequestHandler caller;
             caller.begin( in, service );
             std::size_t n = 0;
 
@@ -76,6 +83,41 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             caller.finish(out);
 
             std::cerr << "RESULT: " << out.str() << std::endl;
+            std::exit(0);
+        }
+
+        void testArgs()
+        {
+            std::cerr << "START" << std::endl;
+
+            std::stringstream in;
+            in << "<?xml version=\"1.0\"?>";
+            in << "<params>";
+            in << "    <param>";
+            in << "        <value><i4>2</i4></value>";
+            in << "        </param>";
+            in << "    <param>";
+            in << "        <value><i4>3</i4></value>";
+            in << "    </param>";
+            in << "</params>";
+
+            std::size_t contentLength = in.str().length();
+            std::cerr << "BYTES TO READ: " <<  contentLength << std::endl;
+
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiply);
+
+            Pt::XmlRpc::RequestHandler2 req(service, in);
+
+            std::size_t n = 0;
+            while(n < contentLength)
+            {
+                n += req.advance();
+            }
+
+            std::cerr << "RESULT2: ";
+            req.finish(std::cerr);
+            std::cerr << std::endl;
             std::exit(0);
         }
 

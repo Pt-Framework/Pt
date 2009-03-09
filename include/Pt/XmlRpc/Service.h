@@ -37,6 +37,7 @@
 #include "Pt/Utf8Codec.h"
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
 #include <string>
 #include <vector>
@@ -47,6 +48,204 @@ namespace Pt {
 
 namespace XmlRpc {
 
+template <typename T>
+class BasicValue
+{
+    enum State
+    {
+        OnParamBegin,
+        OnValueBegin,
+        OnTypeBegin,
+        OnContent,
+        OnTypeEnd,
+        OnValueEnd,
+        OnParamEnd
+    };
+
+    public:
+        BasicValue()
+        : _state(OnParamBegin)
+        {}
+
+        bool advance(const Xml::Node& node)
+        {
+            switch(_state)
+            {
+                case OnParamBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement)
+                    {
+                        _state = OnValueBegin;
+                    }
+                    break;
+                }
+
+                case OnValueBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement)
+                    {
+                        _state = OnTypeBegin;
+                    }
+                    break;
+                }
+
+                case OnTypeBegin:
+                {
+                    if(node.type() == Xml::Node::Characters)
+                    {
+                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                        _state = OnContent;
+                        convert( _value, chars.content() );
+                    }
+                    break;
+                }
+
+                case OnContent:
+                {
+                    if(node.type() == Xml::Node::EndElement)
+                    {
+                        _state = OnTypeEnd;
+                    }
+                    break;
+                }
+
+                case OnTypeEnd:
+                {
+                    if(node.type() == Xml::Node::EndElement)
+                    {
+                        _state = OnValueEnd;
+                    }
+                    break;
+                }
+
+                case OnValueEnd:
+                {
+                    if(node.type() == Xml::Node::EndElement)
+                    {
+                        _state = OnParamEnd;
+                        return true;
+                    }
+                    break;
+                }
+                default:
+                {
+                    throw std::runtime_error("OnParamEnd");
+                }
+
+            }
+
+            return false;
+        }
+
+        const T& get() const
+        { return _value; }
+
+    private:
+        T _value;
+        State _state;
+};
+
+
+class Args
+{
+    enum State
+    {
+        OnParams,
+        OnParam
+    };
+
+    public:
+        Args()
+        : _state(OnParams)
+        {}
+
+        void begin()
+        {
+            _state = OnParams;
+            _argNo = 0;
+        }
+
+        bool advance(const Xml::Node& node)
+        {
+            switch(_state)
+            {
+                case OnParams:
+                {
+                    if(node.type() == Xml::Node::StartElement)
+                    {
+                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                        if(se.name() == L"param")
+                        {
+                            _state = OnParam;
+                        }
+                    }
+                    else if(node.type() == Xml::Node::EndElement)
+                    {
+                        const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                        if(ee.name() == L"params")
+                        {
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+                case OnParam:
+                {
+                    bool finished = advanceParam(_argNo, node);
+                    if(finished)
+                    {
+                        ++_argNo;
+                        _state = OnParams;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+    protected:
+        virtual bool advanceParam(unsigned n, const Xml::Node& node) = 0;
+
+    private:
+        State _state;
+        unsigned _argNo;
+};
+
+
+template <typename A1, typename A2>
+class BasicArgs : public Args
+{
+    public:
+        bool advanceParam(unsigned n, const Xml::Node& node)
+        {
+            switch(n)
+            {
+                case 0:
+                    return _a1.advance(node);
+                    break;
+
+                case 1:
+                    return _a2.advance(node);
+                    break;
+            }
+
+            return true;
+        }
+
+        const A1& first() const
+        { return _a1.get(); }
+
+        const A2& second() const
+        { return _a2.get(); }
+
+    private:
+        BasicValue<A1> _a1;
+        BasicValue<A2> _a2;
+};
+
+
 class RemoteProcedure
 {
     public:
@@ -56,7 +255,11 @@ class RemoteProcedure
         virtual ~RemoteProcedure()
         {}
 
+        virtual Args* createArgs() const = 0;
+
         virtual void exec(SerializationInfo& ret, SerializationInfo* si, unsigned argCount) = 0;
+
+        virtual void exec2(std::string& ret, const Args& args) = 0;
 };
 
 
@@ -132,6 +335,16 @@ class BasicRemoteProcedure<R,
             ret <<= r;
             // convert return value r to rpc response
         }
+
+        void exec2(std::string& r, const Args& a)
+        {
+            const BasicArgs<A1, A2>& args = static_cast<const BasicArgs<A1, A2>& >(a);
+            R result = Pt::Method<R, C, A1, A2>::call( args.first(), args.second() );
+            Pt::convert(r, result);
+        }
+
+        Args* createArgs() const
+        { return new BasicArgs<A1, A2>(); }
 };
 
 
@@ -160,98 +373,53 @@ class PT_XMLRPC_API Service //: public ::Responder
 };
 
 
-class MethodCaller
+class RequestHandler2
 {
-    enum State
-    {
-        Default,
-        BeforeMethodName,
-        BeforeArgument
-    };
-
     public:
-        MethodCaller()
-        : _ts(0)
-        , _reader(0)
-        , _state(Default)
-        , _proc(0)
-        , _service(0)
+        RequestHandler2(Service& service, std::istream& is)
+        : _ts(is, new Pt::Utf8Codec)
+        , _reader(_ts)
+        , _service(&service)
+        , _args(0)
         {
+            _args = _service->procedure("multiply")->createArgs();
+            _args->begin();
         }
 
-        void begin(std::istream& is, Service& service)
+        ~RequestHandler2()
         {
-            _args.clear();
-            _service = &service;
-            _state = Default;
-            _proc = 0;
-            _ts = new TextIStream(is, new Utf8Codec);
-            _reader = new Xml::XmlReader(*_ts);
+            delete _args;
         }
 
         std::size_t advance()
         {
-            std::size_t n = _ts->buffer().import();
+            std::size_t n = _ts.buffer().import();
             if(n)
             {
-                while( _reader->advance() )
+                while( _reader.advance() )
                 {
-                    const Xml::Node& node = _reader->get();
-                    if(node.type() == Xml::Node::StartElement)
-                    {
-                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                        if(se.name() == L"methodName")
-                        {
-                            _state = BeforeMethodName;
-                            continue;
-                        }
-                        if(se.name() == L"i4")
-                        {
-                            _state = BeforeArgument;
-                            continue;
-                        }
-                    }
-
-                    if(node.type() == Xml::Node::Characters)
-                    {
-                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                        if( _state == BeforeMethodName )
-                        {
-                            _proc = _service->procedure( chars.content().narrow() );
-                        }
-                        else if( _state == BeforeArgument )
-                        {
-                            Pt::SerializationInfo si;
-                            si.setValue( chars.content() );
-                            _args.push_back(si);
-                        }
-                    }
-
-                    _state = Default;
+                    const Pt::Xml::Node& node = _reader.get();
+                    bool finished = _args->advance(node);
+                    if(finished)
+                        break;
                 }
             }
-
+ 
             return n;
-        };
+        }
 
         void finish(std::ostream& out)
         {
-            // throw if not end of document
-
-            if(_proc)
-                _proc->exec( _retval, &_args[0], _args.size() );
-
-            out << "<value>"<< _retval.toString().narrow() << "</value>";
+            std::string res;
+            _service->procedure("multiply")->exec2(res, *_args);
+            out << res;
         }
 
     private:
-        TextIStream* _ts;
-        Xml::XmlReader* _reader;
-        State _state;
-        RemoteProcedure* _proc;
-        std::vector<Pt::SerializationInfo> _args;
-        Pt::SerializationInfo _retval;
-        Service* _service;
+       Pt::TextIStream _ts;
+       Pt::Xml::XmlReader _reader;
+       Service* _service;
+       Pt::XmlRpc::Args* _args;
 };
 
 /*
