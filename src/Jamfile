@@ -18,3 +18,4 @@ if $(GUI) != none
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Math ;
 SubInclude TOP src Pt-Xml ;
+SubInclude TOP src Pt-XmlRpc ;
