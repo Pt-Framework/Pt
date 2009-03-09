@@ -49,7 +49,26 @@ namespace Pt {
 namespace XmlRpc {
 
 template <typename T>
-class BasicValue
+class TypeBuilder
+{
+    public:
+        TypeBuilder(T& type)
+        : _type(&type)
+        {}
+
+        void setValue(const Pt::String& value)
+        { convert(*_type, value); }
+
+        void addMember(const std::string& name, const Pt::String& value)
+        {}
+
+    private:
+        T* _type;
+};
+
+
+template <typename T>
+class Parameter
 {
     enum State
     {
@@ -63,8 +82,9 @@ class BasicValue
     };
 
     public:
-        BasicValue()
-        : _state(OnParamBegin)
+        Parameter()
+        : _builder(_value)
+        , _state(OnParamBegin)
         {}
 
         bool advance(const Xml::Node& node)
@@ -95,7 +115,7 @@ class BasicValue
                     {
                         const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                         _state = OnContent;
-                        convert( _value, chars.content() );
+                        _builder.setValue( chars.content() );
                     }
                     break;
                 }
@@ -142,6 +162,7 @@ class BasicValue
 
     private:
         T _value;
+        TypeBuilder<T> _builder;
         State _state;
 };
 
@@ -241,8 +262,8 @@ class BasicArgs : public Args
         { return _a2.get(); }
 
     private:
-        BasicValue<A1> _a1;
-        BasicValue<A2> _a2;
+        Parameter<A1> _a1;
+        Parameter<A2> _a2;
 };
 
 
