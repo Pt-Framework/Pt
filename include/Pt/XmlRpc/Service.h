@@ -48,44 +48,207 @@ namespace Pt {
 
 namespace XmlRpc {
 
-template <typename T>
-class TypeBuilder
+class Formatter
 {
     public:
-        TypeBuilder(T& type)
-        : _type(&type)
+        virtual ~Formatter()
         {}
 
-        void setValue(const Pt::String& value)
-        { convert(*_type, value); }
+        virtual void addValue(const std::string& type, const Pt::String& value) = 0;
+};
 
-        void addMember(const std::string& name, const Pt::String& value)
-        {}
+
+class ResponseFormatter : public Formatter
+{
+    public:
+        ResponseFormatter(std::ostream& out)
+        : _out(&out)
+        {
+            *_out << "<?xml version=\"1.0\"?>\n";
+            *_out << "<methodResponse>\n";
+            *_out << "<params>\n";
+        }
+
+        void begin(std::ostream& out)
+        {
+            _out = &out;
+            *_out << "<?xml version=\"1.0\"?>\n";
+            *_out << "<methodResponse>\n";
+            *_out << "<params>\n";
+        }
+
+        void addValue(const std::string& type, const Pt::String& value)
+        {
+            *_out << "<param>\n";
+            *_out << "<value><" << type << ">" << value.narrow();
+            *_out << "</" << type << "></value>\n";
+            *_out << "</param>\n";
+        }
+
+        void finish()
+        {
+            *_out << "</params>\n";
+            *_out << "</methodResponse>\n";
+        }
 
     private:
-        T* _type;
+        std::ostream* _out;
+};
+
+
+class ISerializationHandler
+{
+    public:
+        ISerializationHandler()
+        : _parent(0)
+        {}
+
+        virtual ~ISerializationHandler()
+        {}
+
+        void setParent(ISerializationHandler* parent)
+        { _parent = parent; }
+
+        ISerializationHandler* parent()
+        { return _parent; }
+
+        virtual void setValue(const Pt::String& value) = 0;
+
+        virtual ISerializationHandler* beginMember(const std::string& name) = 0;
+
+        virtual void finishMember() = 0;
+
+        virtual void finish() = 0;
+
+        virtual void decompose(Formatter& f) = 0;
+
+    private:
+        ISerializationHandler* _parent;
 };
 
 
 template <typename T>
-class Parameter
+class SerializationHandler : public ISerializationHandler
+{
+    public:
+        SerializationHandler()
+        : _type(0)
+        , _current(&_si)
+        {}
+
+        void begin(T& type)
+        { _type = & type; }
+
+        virtual void setValue(const Pt::String& value)
+        {
+          _si.setValue(value);
+        }
+
+        virtual ISerializationHandler* beginMember(const std::string& name)
+        {
+            SerializationInfo& child = _current->addMember(name);
+            _current = &child;
+            return this;
+        }
+
+        virtual void finishMember()
+        {
+            _current = _current->parent();
+        }
+
+        virtual void finish()
+        {
+            _si >>= *_type;
+        }
+
+        virtual void decompose(Formatter& formatter)
+        {
+            _si <<= *_type;
+
+            if(_si.category() == SerializationInfo::Value)
+            {
+                formatter.addValue( _si.typeName(), _si.toString() );
+            }
+        }
+
+    private:
+        T* _type;
+        Pt::SerializationInfo _si;
+        Pt::SerializationInfo* _current;
+};
+
+
+template <typename T>
+class SerializationHandler< std::vector<T> > : public ISerializationHandler
+{
+    public:
+        SerializationHandler()
+        : _type(0)
+        {}
+
+        void begin(std::vector<T>& type)
+        { _type = & type; }
+
+        void setValue(const Pt::String& value)
+        { throw std::runtime_error("type mismatch"); }
+
+        ISerializationHandler* beginMember(const std::string& name)
+        {
+            _type->push_back( T() );
+            T& elem = _type->back();
+            _elemBuilder.begin(elem);
+            return &_elemBuilder;
+        }
+
+        void finishMember()
+        { }
+
+        void finish()
+        { }
+
+        void decompose(Formatter& formatter)
+        { }
+
+    private:
+        SerializationHandler<T>  _elemBuilder;
+        std::vector<T>* _type;
+};
+
+
+template <typename T>
+class ParameterReader
 {
     enum State
     {
         OnParamBegin,
         OnValueBegin,
-        OnTypeBegin,
-        OnContent,
-        OnTypeEnd,
         OnValueEnd,
-        OnParamEnd
+        OnParamEnd,
+
+        OnScalarBegin,
+        OnScalar,
+        OnScalarEnd,
+
+        OnStructBegin,
+        OnMemberBegin,
+        OnNameBegin,
+        OnName,
+        OnNameEnd,
+        OnMemberEnd,
+
+        OnArrayBegin,
+        OnDataBegin,
+        OnDataEnd
     };
 
     public:
-        Parameter()
-        : _builder(_value)
+        ParameterReader()
+        : _builder()
+        , _current(&_builder)
         , _state(OnParamBegin)
-        {}
+        {
+            _builder.begin(_value);
+        }
 
         bool advance(const Xml::Node& node)
         {
@@ -93,7 +256,7 @@ class Parameter
             {
                 case OnParamBegin:
                 {
-                    if(node.type() == Xml::Node::StartElement)
+                    if(node.type() == Xml::Node::StartElement) // value
                     {
                         _state = OnValueBegin;
                     }
@@ -102,38 +265,21 @@ class Parameter
 
                 case OnValueBegin:
                 {
-                    if(node.type() == Xml::Node::StartElement)
+                    if(node.type() == Xml::Node::StartElement) // i4, struct, array...
                     {
-                        _state = OnTypeBegin;
-                    }
-                    break;
-                }
-
-                case OnTypeBegin:
-                {
-                    if(node.type() == Xml::Node::Characters)
-                    {
-                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                        _state = OnContent;
-                        _builder.setValue( chars.content() );
-                    }
-                    break;
-                }
-
-                case OnContent:
-                {
-                    if(node.type() == Xml::Node::EndElement)
-                    {
-                        _state = OnTypeEnd;
-                    }
-                    break;
-                }
-
-                case OnTypeEnd:
-                {
-                    if(node.type() == Xml::Node::EndElement)
-                    {
-                        _state = OnValueEnd;
+                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                        if(se.name() == L"struct")
+                        {
+                            _state = OnStructBegin;
+                        }
+                        else if(se.name() == L"array")
+                        {
+                            _state = OnArrayBegin;
+                        }
+                        else
+                        {
+                            _state = OnScalarBegin;
+                        }
                     }
                     break;
                 }
@@ -142,11 +288,146 @@ class Parameter
                 {
                     if(node.type() == Xml::Node::EndElement)
                     {
-                        _state = OnParamEnd;
+                        const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                        if(ee.name() == L"member")
+                        {
+                            _current->finishMember();
+                            _current = _current->parent();
+                            if( ! _current )
+                                throw std::runtime_error("invalid member");
+                        }
+                        else
+                        {
+                            _state = OnParamEnd;
+                        }
+
+                        return true;
+                    }
+                    else if(node.type() == Xml::Node::StartElement)
+                    {
+                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                        if(se.name() == L"value")
+                        {
+                            _current->finishMember();
+                            _current = _current->parent();
+                            if( ! _current )
+                                throw std::runtime_error("invalid array");
+
+                            ISerializationHandler* member = _current->beginMember("");
+                            member->setParent(_current);
+                            _current = member;
+                            _state = OnValueBegin;
+                        }
+
                         return true;
                     }
                     break;
                 }
+
+                case OnStructBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement) //member
+                    {
+                        _state = OnMemberBegin;
+                    }
+                    break;
+                }
+
+                case OnMemberBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement) // name
+                    {
+                        _state = OnNameBegin;
+                    }
+                    break;
+                }
+
+                case OnNameBegin:
+                {
+                    if(node.type() == Xml::Node::Characters) // member-name
+                    {
+                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                        const std::string& name = chars.content().narrow();
+                        ISerializationHandler* member = _current->beginMember(name);
+                        member->setParent(_current);
+                        _current = member;
+                        _state = OnName;
+                    }
+                    break;
+                }
+
+                case OnName:
+                {
+                    if(node.type() == Xml::Node::EndElement)
+                    {
+                        _state = OnNameEnd;
+                    }
+                    break;
+                }
+
+                case OnNameEnd:
+                {
+                    if(node.type() == Xml::Node::StartElement)
+                    {
+                        _state = OnValueBegin;
+                    }
+                    break;
+                }
+
+                case OnScalarBegin:
+                {
+                    if(node.type() == Xml::Node::Characters)
+                    {
+                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                        _state = OnScalar;
+                        _current->setValue( chars.content() );
+                    }
+                    break;
+                }
+
+                case OnScalar:
+                {
+                    if(node.type() == Xml::Node::EndElement) // i4, boolean ...
+                    {
+                        _current->finish();
+                        _state = OnScalarEnd;
+                    }
+                    break;
+                }
+
+                case OnScalarEnd:
+                {
+                    if(node.type() == Xml::Node::EndElement) // </value>
+                    {
+                        _state = OnValueEnd;
+                    }
+                    break;
+                }
+
+                case OnArrayBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement) // data
+                    {
+                        _state = OnDataBegin;
+                    }
+                    break;
+                }
+
+                case OnDataBegin:
+                {
+                    if(node.type() == Xml::Node::StartElement) // value
+                    {
+                        ISerializationHandler* member = _current->beginMember("");
+                        member->setParent(_current);
+                        _current = member;
+                        _state = OnValueBegin;
+                    }
+                    break;
+                }
+
+                case OnDataEnd:
+                    break;
+
                 default:
                 {
                     throw std::runtime_error("OnParamEnd");
@@ -162,7 +443,8 @@ class Parameter
 
     private:
         T _value;
-        TypeBuilder<T> _builder;
+        SerializationHandler<T> _builder;
+        ISerializationHandler* _current;
         State _state;
 };
 
@@ -178,13 +460,11 @@ class Args
     public:
         Args()
         : _state(OnParams)
+        , _argNo(0)
         {}
 
-        void begin()
-        {
-            _state = OnParams;
-            _argNo = 0;
-        }
+        virtual ~Args()
+        {}
 
         bool advance(const Xml::Node& node)
         {
@@ -212,6 +492,7 @@ class Args
 
                     break;
                 }
+
                 case OnParam:
                 {
                     bool finished = advanceParam(_argNo, node);
@@ -262,25 +543,23 @@ class BasicArgs : public Args
         { return _a2.get(); }
 
     private:
-        Parameter<A1> _a1;
-        Parameter<A2> _a2;
+        ParameterReader<A1> _a1;
+        ParameterReader<A2> _a2;
 };
 
 
-class RemoteProcedure
+class ServiceProcedure
 {
     public:
-        RemoteProcedure()
+        ServiceProcedure()
         {}
 
-        virtual ~RemoteProcedure()
+        virtual ~ServiceProcedure()
         {}
 
         virtual Args* createArgs() const = 0;
 
-        virtual void exec(SerializationInfo& ret, SerializationInfo* si, unsigned argCount) = 0;
-
-        virtual void exec2(std::string& ret, const Args& args) = 0;
+        virtual void exec(std::ostream& ret, const Args& args) = 0;
 };
 
 
@@ -294,21 +573,17 @@ template < typename R,
            typename A6 = Pt::Void,
            typename A7 = Pt::Void,
            typename A8 = Pt::Void >
-class BasicRemoteProcedure : public Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>
-                           , public RemoteProcedure
+class BasicServiceProcedure : public Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>
+                            , public ServiceProcedure
 {
     public:
-        typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
 
     public:
-        BasicRemoteProcedure(C& object, MemFuncT ptr)
+        BasicServiceProcedure(C& object, MemFuncT ptr)
         : Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>(object, ptr)
-        , RemoteProcedure()
+        , ServiceProcedure()
         {}
-
-        void exec(SerializationInfo& ret, SerializationInfo* si, unsigned argCount)
-        { }
 };
 
 
@@ -316,56 +591,44 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class BasicRemoteProcedure<R,
-                           C,
-                           A1,
-                           A2,
-                           Pt::Void,
-                           Pt::Void,
-                           Pt::Void,
-                           Pt::Void,
-                           Pt::Void,
-                           Pt::Void> : public Method<R, C, A1, A2>
-                                     , public RemoteProcedure
+class BasicServiceProcedure<R, C, A1, A2,
+                            Pt::Void,
+                            Pt::Void,
+                            Pt::Void,
+                            Pt::Void,
+                            Pt::Void,
+                            Pt::Void> : public Method<R, C, A1, A2>
+                                      , public ServiceProcedure
 {
     public:
-        typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2);
+        typedef typename TypeTraits<A1>::Value V1;
+        typedef typename TypeTraits<A2>::Value V2;
+        typedef typename TypeTraits<R>::Value RV;
 
     public:
-        BasicRemoteProcedure(C& object, MemFuncT ptr)
+        BasicServiceProcedure(C& object, MemFuncT ptr)
         : Method<R, C, A1, A2>(object, ptr)
-        , RemoteProcedure()
+        , ServiceProcedure()
         {}
 
-        void exec(SerializationInfo& ret, SerializationInfo* si, unsigned argCount)
-        {
-            if(argCount != 2)
-                throw std::invalid_argument("invalid number of arguments");
-
-            // convert to arguments A1 ... A3
-
-            A1 a1;
-            si[0] >>= a1;
-
-            A2 a2;
-            si[1] >>= a2;
-
-            R r = Pt::Method<R, C, A1, A2>::call(a1, a2);
-
-            ret <<= r;
-            // convert return value r to rpc response
-        }
-
-        void exec2(std::string& r, const Args& a)
-        {
-            const BasicArgs<A1, A2>& args = static_cast<const BasicArgs<A1, A2>& >(a);
-            R result = Pt::Method<R, C, A1, A2>::call( args.first(), args.second() );
-            Pt::convert(r, result);
-        }
-
         Args* createArgs() const
-        { return new BasicArgs<A1, A2>(); }
+        {
+            return new BasicArgs<V1, V2>();
+        }
+
+        void exec(std::ostream& ret, const Args& a)
+        {
+            const BasicArgs<V1, V2>& args = static_cast<const BasicArgs<V1, V2>& >(a);
+            R result = Pt::Method<R, C, A1, A2>::call( args.first(), args.second() );
+
+            SerializationHandler<R> builder;
+            builder.begin(result);
+
+            ResponseFormatter resp(ret);
+            builder.decompose(resp);
+            resp.finish();
+        }
 };
 
 
@@ -376,72 +639,23 @@ class PT_XMLRPC_API Service //: public ::Responder
 
         virtual ~Service();
 
-        RemoteProcedure* procedure(const std::string& name);
+        ServiceProcedure* procedure(const std::string& name);
 
         template <typename R, class C, typename A1, typename A2>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2) )
         {
-            RemoteProcedure* proc = new BasicRemoteProcedure<R, C, A1, A2>(obj, method);
+            ServiceProcedure* proc = new BasicServiceProcedure<R, C, A1, A2>(obj, method);
             this->registerProcedure(name, proc);
         }
 
     protected:
-        void registerProcedure(const std::string& name, RemoteProcedure* proc);
+        void registerProcedure(const std::string& name, ServiceProcedure* proc);
 
     private:
-        typedef std::map<std::string, RemoteProcedure*> ProcedureMap;
+        typedef std::map<std::string, ServiceProcedure*> ProcedureMap;
         ProcedureMap _procedures;
 };
 
-
-class RequestHandler2
-{
-    public:
-        RequestHandler2(Service& service, std::istream& is)
-        : _ts(is, new Pt::Utf8Codec)
-        , _reader(_ts)
-        , _service(&service)
-        , _args(0)
-        {
-            _args = _service->procedure("multiply")->createArgs();
-            _args->begin();
-        }
-
-        ~RequestHandler2()
-        {
-            delete _args;
-        }
-
-        std::size_t advance()
-        {
-            std::size_t n = _ts.buffer().import();
-            if(n)
-            {
-                while( _reader.advance() )
-                {
-                    const Pt::Xml::Node& node = _reader.get();
-                    bool finished = _args->advance(node);
-                    if(finished)
-                        break;
-                }
-            }
- 
-            return n;
-        }
-
-        void finish(std::ostream& out)
-        {
-            std::string res;
-            _service->procedure("multiply")->exec2(res, *_args);
-            out << res;
-        }
-
-    private:
-       Pt::TextIStream _ts;
-       Pt::Xml::XmlReader _reader;
-       Service* _service;
-       Pt::XmlRpc::Args* _args;
-};
 
 /*
 

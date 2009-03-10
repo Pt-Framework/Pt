@@ -47,7 +47,7 @@ Service::~Service()
 }
 
 
-RemoteProcedure* Service::procedure(const std::string& name)
+ServiceProcedure* Service::procedure(const std::string& name)
 {
     ProcedureMap::iterator it = _procedures.find( name );
     if( it == _procedures.end() )
@@ -59,9 +59,9 @@ RemoteProcedure* Service::procedure(const std::string& name)
 }
 
 
-void Service::registerProcedure(const std::string& name, RemoteProcedure* proc)
+void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 {
-    std::pair<const std::string, RemoteProcedure*> p( name, proc );
+    std::pair<const std::string, ServiceProcedure*> p( name, proc );
     _procedures.insert( p );
 }
 

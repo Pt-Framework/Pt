@@ -26,8 +26,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_RequestHandler_h
-#define Pt_XmlRpc_RequestHandler_h
+#ifndef Pt_XmlRpc_RequestReader_h
+#define Pt_XmlRpc_RequestReader_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/Void.h>
@@ -47,98 +47,152 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API RequestHandler
+class RequestReader
 {
     enum State
     {
-        Default,
-        BeforeMethodName,
-        BeforeArgument
+        OnBegin,
+        OnMethodCallBegin,
+        OnMethodNameBegin,
+        OnMethodName,
+        OnMethodNameEnd,
+        OnParams,
+        OnParamsEnd,
+        OnMethodCallEnd
     };
 
     public:
-        RequestHandler()
-        : _ts(0)
-        , _reader(0)
-        , _state(Default)
+        RequestReader(Service& service, std::istream& is)
+        : _state(OnBegin)
+        , _ts(is, new Pt::Utf8Codec)
+        , _reader(_ts)
+        , _service(&service)
         , _proc(0)
-        , _service(0)
-        {
-        }
+        , _args(0)
+        { }
 
-        void begin(std::istream& is, Service& service)
+        ~RequestReader()
         {
-            _args.clear();
-            _service = &service;
-            _state = Default;
-            _proc = 0;
-            _ts = new TextIStream(is, new Utf8Codec);
-            _reader = new Xml::XmlReader(*_ts);
+            delete _args;
         }
 
         std::size_t advance()
         {
-            std::size_t n = _ts->buffer().import();
-            if(n)
+            std::size_t n = _ts.buffer().import();
+            if(n == 0)
+                return n;
+
+            while( _reader.advance() )
             {
-                while( _reader->advance() )
+                const Pt::Xml::Node& node = _reader.get();
+                switch(_state)
                 {
-                    const Xml::Node& node = _reader->get();
-                    if(node.type() == Xml::Node::StartElement)
+                    case OnBegin:
                     {
-                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                        if(se.name() == L"methodName")
+                        if(node.type() == Xml::Node::StartElement)
                         {
-                            _state = BeforeMethodName;
-                            continue;
+                            _state = OnMethodCallBegin;
                         }
-                        if(se.name() == L"i4")
-                        {
-                            _state = BeforeArgument;
-                            continue;
-                        }
+                        break;
                     }
 
-                    if(node.type() == Xml::Node::Characters)
+                    case OnMethodCallBegin:
                     {
-                        const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                        if( _state == BeforeMethodName )
+                        if(node.type() == Xml::Node::StartElement)
                         {
+                            _state = OnMethodNameBegin;
+                        }
+                        break;
+                    }
+
+                    case OnMethodNameBegin:
+                    {
+                        if(node.type() == Xml::Node::Characters)
+                        {
+                            const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+
                             _proc = _service->procedure( chars.content().narrow() );
+                            if( ! _proc )
+                                throw std::runtime_error("no such procedure");
+
+                            _args = _proc->createArgs();
+                            _state = OnMethodName;
                         }
-                        else if( _state == BeforeArgument )
-                        {
-                            Pt::SerializationInfo si;
-                            si.setValue( chars.content() );
-                            _args.push_back(si);
-                        }
+                        break;
                     }
 
-                    _state = Default;
+                    case OnMethodName:
+                    {
+                        if(node.type() == Xml::Node::EndElement)
+                        {
+                            _state = OnMethodNameEnd;
+                        }
+                        break;
+                    }
+
+                    case OnMethodNameEnd:
+                    {
+                        if(node.type() == Xml::Node::StartElement)
+                        {
+                            _state = OnParams;
+                        }
+                        break;
+                    }
+
+                    case OnParams:
+                    {
+                        if( ! _args )
+                            throw std::runtime_error("invalid XML-RPC request");
+
+                        bool finished = _args->advance(node);
+                        if(finished)
+                        {
+                            _state = OnParamsEnd;
+                        }
+
+                        break;
+                    }
+
+                    case OnParamsEnd:
+                    {
+                        if(node.type() == Xml::Node::EndElement)
+                        {
+                            _state = OnMethodCallEnd;
+                        }
+                        break;
+                    }
+
+                    case OnMethodCallEnd:
+                    {
+                        if(node.type() == Xml::Node::EndDocument)
+                        {
+                            _state = OnMethodCallEnd;
+                        }
+                        break;
+                    }
                 }
             }
 
             return n;
-        };
+        }
 
         void finish(std::ostream& out)
         {
-            // throw if not end of document
+            std::string res;
 
-            if(_proc)
-                _proc->exec( _retval, &_args[0], _args.size() );
+            if( ! _args || ! _proc )
+                throw std::runtime_error("invalid XML-RPC request");
 
-            out << "<value>"<< _retval.toString().narrow() << "</value>";
+            _proc->exec(out, *_args);
         }
 
     private:
-        TextIStream* _ts;
-        Xml::XmlReader* _reader;
-        State _state;
-        RemoteProcedure* _proc;
-        std::vector<Pt::SerializationInfo> _args;
-        Pt::SerializationInfo _retval;
-        Service* _service;
+       State _state;
+       Pt::TextIStream _ts;
+       Pt::Xml::XmlReader _reader;
+       Service* _service;
+       ServiceProcedure* _proc;
+       Args* _args;
 };
 
 }

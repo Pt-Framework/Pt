@@ -30,15 +30,10 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
-
-#include "Pt/TextStream.h"
-#include "Pt/Utf8Codec.h"
 #include "Pt/XmlRpc/Service.h"
+#include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RequestHandler.h"
 #include <sstream>
-
-
-
 
 class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
@@ -46,9 +41,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            testArgs();
+            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
+            this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
+        }
 
-            std::cerr << "START" << std::endl;
+        void Integer()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
 
             std::stringstream in;
             in << "<?xml version=\"1.0\"?>";
@@ -63,65 +63,88 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "         </param>";
             in << "      </params>";
             in << "   </methodCall>";
+ 
+            Pt::XmlRpc::RequestReader req(service, in);
 
             std::size_t contentLength = in.str().length();
-            std::cerr << "BYTES TO READ: " <<  contentLength << std::endl;
-
-            Pt::XmlRpc::Service service;
-            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiply);
-
-            Pt::XmlRpc::RequestHandler caller;
-            caller.begin( in, service );
-            std::size_t n = 0;
-
-            while(n < contentLength)
-            {
-                n += caller.advance();
-            }
-
-            std::stringstream out;
-            caller.finish(out);
-
-            std::cerr << "RESULT: " << out.str() << std::endl;
-            std::exit(0);
-        }
-
-        void testArgs()
-        {
-            std::cerr << "START" << std::endl;
-
-            std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<params>";
-            in << "    <param>";
-            in << "        <value><i4>2</i4></value>";
-            in << "        </param>";
-            in << "    <param>";
-            in << "        <value><i4>3</i4></value>";
-            in << "    </param>";
-            in << "</params>";
-
-            std::size_t contentLength = in.str().length();
-            std::cerr << "BYTES TO READ: " <<  contentLength << std::endl;
-
-            Pt::XmlRpc::Service service;
-            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiply);
-
-            Pt::XmlRpc::RequestHandler2 req(service, in);
-
+            std::cerr << "Request Size: " <<  contentLength << std::endl;
             std::size_t n = 0;
             while(n < contentLength)
             {
                 n += req.advance();
             }
 
-            std::cerr << "RESULT2: ";
-            req.finish(std::cerr);
-            std::cerr << std::endl;
-            std::exit(0);
+            std::stringstream out;
+            req.finish(out);
+
+            Pt::XmlRpc::ResponseReader<int> resp(out);
+
+            contentLength = out.str().length();
+            n = 0;
+            while(n < contentLength)
+            {
+                n += resp.advance();
+            }
+
+            std::cerr << "Result: " << resp.result() << std::endl;
         }
 
-        int multiply(int a, int b)
+        void VectorOfInt()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
+
+            std::stringstream in;
+            in << "<?xml version=\"1.0\"?>";
+            in << "<methodCall>";
+            in << "    <methodName>multiply</methodName>";
+            in << "    <params>";
+            in << "         <param>";
+            in << "             <value><i4>2</i4></value>";
+            in << "         </param>";
+            in << "         <param>";
+            in << "             <value>";
+            in << "                 <array>";
+            in << "                     <data>";
+            in << "                         <value><int>4</int></value>";
+            in << "                    </data>";
+            in << "                </array>";
+            in << "            </value>";
+            in << "        </param>";
+            in << "    </params>";
+            in << "</methodCall>";
+ 
+            Pt::XmlRpc::RequestReader req(service, in);
+
+            std::size_t contentLength = in.str().length();
+            std::cerr << "Request Size: " <<  contentLength << std::endl;
+            std::size_t n = 0;
+            while(n < contentLength)
+            {
+                n += req.advance();
+            }
+
+            std::stringstream out;
+            req.finish(out);
+
+            Pt::XmlRpc::ResponseReader<int> resp(out);
+
+            contentLength = out.str().length();
+            n = 0;
+            while(n < contentLength)
+            {
+                n += resp.advance();
+            }
+
+            std::cerr << "Result: " << resp.result() << std::endl;
+        }
+
+        int multiplyVector(int a, const std::vector<int>& v)
+        {
+            return a * v.back();
+        }
+
+        int multiplyInt(int a, int b)
         {
             return a*b;
         }
