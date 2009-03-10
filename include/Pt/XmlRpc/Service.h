@@ -55,6 +55,12 @@ class Formatter
         {}
 
         virtual void addValue(const std::string& type, const Pt::String& value) = 0;
+
+        virtual void beginArray()
+        {}
+
+        virtual void finishArray()
+        { }
 };
 
 
@@ -67,6 +73,7 @@ class ResponseFormatter : public Formatter
             *_out << "<?xml version=\"1.0\"?>\n";
             *_out << "<methodResponse>\n";
             *_out << "<params>\n";
+            *_out << "<param>\n";
         }
 
         void begin(std::ostream& out)
@@ -86,12 +93,12 @@ class ResponseFormatter : public Formatter
 
         void beginArray()
         {
-            *_out << "<array><data>";
+            *_out << "<value><array><data>";
         }
 
         void finishArray()
         {
-            *_out << "</value></data>\n";
+            *_out << "</data></array></value>\n";
         }
 
         void finish()
@@ -126,9 +133,11 @@ class ISerializationHandler
 
         virtual ISerializationHandler* beginMember(const std::string& name) = 0;
 
-        virtual void finishMember() = 0;
+        virtual void finishMember()
+        { }
 
-        virtual void finish() = 0;
+        virtual void finish()
+        { }
 
         virtual void decompose(Formatter& f) = 0;
 
@@ -210,16 +219,17 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
             return &_elemBuilder;
         }
 
-        void finishMember()
-        { }
-
-        void finish()
-        { }
-
         void decompose(Formatter& formatter)
         {
-            // formatter.beginArray();
-            // formatter.finishArray();
+            formatter.beginArray();
+
+            typename std::vector<T>::iterator it;
+            for(it = _type->begin(); it != _type->end(); ++it)
+            {
+                _elemBuilder.decompose(formatter);
+            }
+
+            formatter.finishArray();
         }
 
     private:
