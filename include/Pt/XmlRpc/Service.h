@@ -75,18 +75,28 @@ class ResponseFormatter : public Formatter
             *_out << "<?xml version=\"1.0\"?>\n";
             *_out << "<methodResponse>\n";
             *_out << "<params>\n";
+            *_out << "<param>\n";
         }
 
         void addValue(const std::string& type, const Pt::String& value)
         {
-            *_out << "<param>\n";
             *_out << "<value><" << type << ">" << value.narrow();
             *_out << "</" << type << "></value>\n";
-            *_out << "</param>\n";
+        }
+
+        void beginArray()
+        {
+            *_out << "<array><data>";
+        }
+
+        void finishArray()
+        {
+            *_out << "</value></data>\n";
         }
 
         void finish()
         {
+            *_out << "</param>\n";
             *_out << "</params>\n";
             *_out << "</methodResponse>\n";
         }
@@ -207,7 +217,10 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
         { }
 
         void decompose(Formatter& formatter)
-        { }
+        {
+            // formatter.beginArray();
+            // formatter.finishArray();
+        }
 
     private:
         SerializationHandler<T>  _elemBuilder;
