@@ -29,77 +29,12 @@
 #define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Formatter.h>
 #include <cstddef>
 
 namespace Pt {
 
 namespace XmlRpc {
-
-class RequestFormatter : public Formatter
-{
-    public:
-        RequestFormatter(std::ostream& out, const std::string& method)
-        : _out(&out)
-        {
-            *_out << "<?xml version=\"1.0\"?>\n";
-            *_out << "<methodCall>\n";
-            *_out << "<methodName>" << method << "</methodName>\n";
-            *_out << "<params>\n";
-        }
-
-        void beginParam()
-        { *_out << "<param>\n"; }
-
-        void finishParam()
-        { *_out << "</param>\n"; }
-
-        void addValue(const std::string& type, const Pt::String& value)
-        {
-            *_out << "<value><" << type << ">" << value.narrow();
-            *_out << "</" << type << "></value>\n";
-        }
-
-        void beginArray()
-        {
-            *_out << "<value><array><data>\n";
-        }
-
-        void finishArray()
-        {
-            *_out << "</data></array></value>\n";
-        }
-
-        void beginObject()
-        {
-            *_out << "<value><struct>\n";
-        }
-
-        void beginMember(const std::string& name)
-        {
-            *_out << "<member>\n";
-            *_out << "<name>" << name << "</name>\n";
-        }
-
-        void finishMember()
-        {
-            *_out << "</member>\n";
-        }
-
-        void finishObject()
-        {
-            *_out << "</struct></value>\n";
-        }
-
-        void finish()
-        {
-            *_out << "</params>\n";
-            *_out << "</methodCall>\n";
-        }
-
-    private:
-        std::ostream* _out;
-};
-
 
 class ResultReader
 {

@@ -30,6 +30,7 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Void.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/Method.h>
@@ -47,105 +48,6 @@
 namespace Pt {
 
 namespace XmlRpc {
-
-class Formatter
-{
-    public:
-        virtual ~Formatter()
-        { }
-
-        virtual void addValue(const std::string& type, const Pt::String& value)
-        { }
-
-        virtual void beginArray()
-        { }
-
-        virtual void finishArray()
-        { }
-
-        virtual void beginObject()
-        { }
-
-        virtual void beginMember(const std::string& name)
-        { }
-
-        virtual void finishMember()
-        { }
-
-        virtual void finishObject()
-        { }
-};
-
-
-class ResponseFormatter : public Formatter
-{
-    public:
-        ResponseFormatter(std::ostream& out)
-        : _out(&out)
-        {
-            *_out << "<?xml version=\"1.0\"?>\n";
-            *_out << "<methodResponse>\n";
-            *_out << "<params>\n";
-            *_out << "<param>\n";
-        }
-
-        void begin(std::ostream& out)
-        {
-            _out = &out;
-            *_out << "<?xml version=\"1.0\"?>\n";
-            *_out << "<methodResponse>\n";
-            *_out << "<params>\n";
-            *_out << "<param>\n";
-        }
-
-        void addValue(const std::string& type, const Pt::String& value)
-        {
-            *_out << "<value><" << type << ">" << value.narrow();
-            *_out << "</" << type << "></value>\n";
-        }
-
-        void beginArray()
-        {
-            *_out << "<value><array><data>\n";
-        }
-
-        void finishArray()
-        {
-            *_out << "</data></array></value>\n";
-        }
-
-        void beginObject()
-        {
-            *_out << "<value><struct>\n";
-        }
-
-        void beginMember(const std::string& name)
-        {
-            *_out << "<member>\n";
-            *_out << "<name>" << name << "</name>\n";
-        }
-
-        void finishMember()
-        {
-            *_out << "</member>\n";
-        }
-
-        void finishObject()
-        {
-            *_out << "</struct></value>\n";
-        }
-
-        void finish()
-        {
-            *_out << "</param>\n";
-            *_out << "</params>\n";
-            *_out << "</methodResponse>\n";
-        }
-
-    private:
-        std::ostream* _out;
-};
-
 
 class ITypeHandler
 {
