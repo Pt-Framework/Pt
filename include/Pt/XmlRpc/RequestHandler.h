@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class RequestReader
+class RequestHandler
 {
     enum State
     {
@@ -62,7 +62,7 @@ class RequestReader
     };
 
     public:
-        RequestReader(Service& service, std::istream& is)
+        RequestHandler(Service& service, std::istream& is)
         : _state(OnBegin)
         , _ts(is, new Pt::Utf8Codec)
         , _reader(_ts)
@@ -71,7 +71,7 @@ class RequestReader
         , _args(0)
         { }
 
-        ~RequestReader()
+        ~RequestHandler()
         {
             delete _args;
         }
@@ -144,7 +144,7 @@ class RequestReader
                         if( ! _args )
                             throw std::runtime_error("invalid XML-RPC request");
 
-                        bool finished = _args->advance(node);
+                        bool finished = _args->compose(node);
                         if(finished)
                         {
                             _state = OnParamsEnd;
@@ -185,6 +185,9 @@ class RequestReader
 
             _proc->exec(out, *_args);
         }
+
+        Args* args()
+        { return _args; }
 
     private:
        State _state;

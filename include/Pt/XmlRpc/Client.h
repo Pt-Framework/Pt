@@ -47,12 +47,47 @@ class RequestFormatter : public Formatter
             *_out << "<params>\n";
         }
 
+        void beginParam()
+        { *_out << "<param>\n"; }
+
+        void finishParam()
+        { *_out << "</param>\n"; }
+
         void addValue(const std::string& type, const Pt::String& value)
         {
-            *_out << "<param>\n";
             *_out << "<value><" << type << ">" << value.narrow();
             *_out << "</" << type << "></value>\n";
-            *_out << "</param>\n";
+        }
+
+        void beginArray()
+        {
+            *_out << "<value><array><data>\n";
+        }
+
+        void finishArray()
+        {
+            *_out << "</data></array></value>\n";
+        }
+
+        void beginObject()
+        {
+            *_out << "<value><struct>\n";
+        }
+
+        void beginMember(const std::string& name)
+        {
+            *_out << "<member>\n";
+            *_out << "<name>" << name << "</name>\n";
+        }
+
+        void finishMember()
+        {
+            *_out << "</member>\n";
+        }
+
+        void finishObject()
+        {
+            *_out << "</struct></value>\n";
         }
 
         void finish()
@@ -246,20 +281,40 @@ template <typename R,
 class PT_XMLRPC_API RemoteMethod
 {
     public:
-        RemoteMethod(const std::string& name)
+        RemoteMethod(std::ostream& os, const std::string& name)
+        : _name(name)
+        , _os(&os)
         {}
 
         virtual ~RemoteMethod()
         {}
 
         void begin(const A1& a1, const A2& a2)
-        {}
+        {
+            RequestFormatter formatter(*_os, _name);
+
+            formatter.beginParam();
+            _a1handler.begin(a1);
+            _a1handler.decompose(formatter);
+            formatter.finishParam();
+
+            formatter.beginParam();
+            _a2handler.begin(a2);
+            _a2handler.decompose(formatter);
+            formatter.finishParam();
+
+            formatter.finish();
+        }
 
         R result()
         { }
 
     private:
-
+        std::string _name;
+        std::ostream* _os;
+        SerializationHandler<R> _rhandler;
+        SerializationHandler<A1> _a1handler;
+        SerializationHandler<A1> _a2handler;
 };
 
 

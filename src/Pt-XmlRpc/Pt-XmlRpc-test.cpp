@@ -77,24 +77,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
 
             std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<methodCall>";
-            in << "   <methodName>multiply</methodName>";
-            in << "   <params>";
-            in << "     <param>";
-            in << "         <value><i4>2</i4></value>";
-            in << "         </param>";
-            in << "     <param>";
-            in << "         <value><i4>3</i4></value>";
-            in << "         </param>";
-            in << "      </params>";
-            in << "   </methodCall>";
- 
-            Pt::XmlRpc::RequestReader req(service, in);
+            Pt::XmlRpc::RemoteMethod<int, int, int> multiply(in, "multiply");
+            multiply.begin(2, 3);
 
-            std::size_t contentLength = in.str().length();
-            std::cerr << "Request Size: " <<  contentLength << std::endl;
+            Pt::XmlRpc::RequestHandler req(service, in);
+
             std::size_t n = 0;
+            std::size_t contentLength = in.str().length();
             while(n < contentLength)
             {
                 n += req.advance();
@@ -105,15 +94,15 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             Pt::XmlRpc::ResponseReader<int> resp(out);
 
-            contentLength = out.str().length();
-            //std::cerr << "Response: " << out.str() << std::endl;
             n = 0;
+            contentLength = out.str().length();
             while(n < contentLength)
             {
                 n += resp.advance();
             }
 
             std::cerr << "Result: " << resp.result() << std::endl;
+            PT_UNIT_ASSERT(resp.result() == 6);
         }
 
         void VectorOfInt()
@@ -142,7 +131,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "    </params>";
             in << "</methodCall>";
  
-            Pt::XmlRpc::RequestReader req(service, in);
+            Pt::XmlRpc::RequestHandler req(service, in);
 
             std::size_t contentLength = in.str().length();
             std::cerr << "Request Size: " <<  contentLength << std::endl;
@@ -186,7 +175,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
-            Pt::XmlRpc::RequestReader req(service, in);
+            Pt::XmlRpc::RequestHandler req(service, in);
 
             std::size_t contentLength = in.str().length();
             std::cerr << "Request Size: " <<  contentLength << std::endl;
@@ -232,7 +221,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
-            Pt::XmlRpc::RequestReader req(service, in);
+            Pt::XmlRpc::RequestHandler req(service, in);
 
             std::size_t contentLength = in.str().length();
             std::cerr << "Request Size: " <<  contentLength << std::endl;

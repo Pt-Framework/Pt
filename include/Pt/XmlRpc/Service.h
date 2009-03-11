@@ -190,6 +190,9 @@ class SerializationHandler : public ISerializationHandler
         void begin(T& type)
         { _type = & type; }
 
+        void begin(const T& type)
+        { _type = const_cast<T*>(&type); }
+
         virtual void setValue(const Pt::String& value)
         { //std::cerr << "-S SET VALUE " << value.narrow() << std::endl;
             _current->setValue(value);
@@ -245,7 +248,7 @@ class SerializationHandler : public ISerializationHandler
                 for(it = si.begin(); it != si.end(); ++it)
                 {
                     formatter.beginMember( it->name() );
-                    this->formatEach(*it, formatter);
+                    formatEach(*it, formatter);
                     formatter.finishMember();
                 }
 
@@ -272,6 +275,9 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
 
         void begin(std::vector<T>& type)
         { _type = & type; }
+
+        void begin(const std::vector<T>& type)
+        { _type = const_cast<std::vector<T>*>(&type); }
 
         void setValue(const Pt::String& value)
         { throw std::runtime_error("type mismatch"); }
@@ -595,7 +601,7 @@ class Args
         virtual ~Args()
         {}
 
-        bool advance(const Xml::Node& node)
+        bool compose(const Xml::Node& node)
         {
             switch(_state)
             {
@@ -624,7 +630,7 @@ class Args
 
                 case OnParam:
                 {
-                    bool finished = advanceParam(_argNo, node);
+                    bool finished = composeParam(_argNo, node);
                     if(finished)
                     {
                         ++_argNo;
@@ -637,7 +643,7 @@ class Args
         }
 
     protected:
-        virtual bool advanceParam(unsigned n, const Xml::Node& node) = 0;
+        virtual bool composeParam(unsigned n, const Xml::Node& node) = 0;
 
     private:
         State _state;
@@ -649,7 +655,7 @@ template <typename A1, typename A2>
 class BasicArgs : public Args
 {
     public:
-        bool advanceParam(unsigned n, const Xml::Node& node)
+        bool composeParam(unsigned n, const Xml::Node& node)
         {
             switch(n)
             {
