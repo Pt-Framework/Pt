@@ -233,6 +233,8 @@ class SerializationHandler : public ISerializationHandler
         {
             if(si.category() == SerializationInfo::Value)
             {
+                // TODO use formatter to adapt typenames to protocol specific typenames
+
                 formatter.addValue( si.typeName(), si.toString() );
             }
             else if(si.category() == SerializationInfo::Object)

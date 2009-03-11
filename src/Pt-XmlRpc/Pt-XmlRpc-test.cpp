@@ -68,6 +68,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
             this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
+            this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
         }
 
         void Integer()
@@ -210,6 +211,52 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             Color color = resp.result();
             std::cerr << "Result: " << color.red << ":" << color.green << ":" << color.blue << std::endl;
+        }
+
+        void ReturnArray()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("getVector", *this, &PtXmlRpcTest::getVector);
+
+            std::stringstream in;
+            in << "<?xml version=\"1.0\"?>";
+            in << "<methodCall>";
+            in << "   <methodName>getVector</methodName>";
+            in << "   <params>";
+            in << "     <param>";
+            in << "         <value><i4>1</i4></value>";
+            in << "         </param>";
+            in << "     <param>";
+            in << "         <value><i4>2</i4></value>";
+            in << "         </param>";
+            in << "      </params>";
+            in << "   </methodCall>";
+ 
+            Pt::XmlRpc::RequestReader req(service, in);
+
+            std::size_t contentLength = in.str().length();
+            std::cerr << "Request Size: " <<  contentLength << std::endl;
+            std::size_t n = 0;
+            while(n < contentLength)
+            {
+                n += req.advance();
+            }
+
+            std::stringstream out;
+            req.finish(out);
+
+            Pt::XmlRpc::ResponseReader< std::vector<int> > resp(out);
+
+            contentLength = out.str().length();
+            //std::cerr << "Response: " << out.str() << std::endl;
+            n = 0;
+            while(n < contentLength)
+            {
+                n += resp.advance();
+            }
+
+            std::vector<int> vec = resp.result();
+            std::cerr << "Result: " << vec.front() << " - " << vec.back() << std::endl;
         }
 
         int multiplyVector(int a, const std::vector<int>& v)

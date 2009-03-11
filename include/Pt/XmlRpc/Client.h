@@ -257,10 +257,12 @@ class PT_XMLRPC_API RemoteMethod
 
         }
 
+        R result()
+        {
+        }
+
     private:
-        SerializationHandler<R> _rbuilder;
-        SerializationHandler<A1> _a1builder;
-        SerializationHandler<A2> _a2builder;
+
 };
 
 
@@ -270,14 +272,6 @@ class PT_XMLRPC_API Client
         Client();
 
         virtual ~Client();
-
-        //template <typename R, typename A1, typename A2>
-        //RemoteMethod<R, A1, A2> call(R& ret, const std::string& methodName, const A1& a1, const A2& a2)
-        //{
-        //    RemoteMethod<R, A1, A2> method(*this, methodName);
-        //    method.begin();
-        //    return method
-        //}
 };
 
 }
