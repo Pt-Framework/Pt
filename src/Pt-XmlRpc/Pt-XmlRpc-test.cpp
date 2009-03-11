@@ -35,6 +35,8 @@
 #include "Pt/XmlRpc/RequestHandler.h"
 #include <sstream>
 
+#include "Pt/System/Clock.h"
+
 struct Color
 {
     int red;
@@ -130,30 +132,40 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "        </param>";
             in << "    </params>";
             in << "</methodCall>";
- 
-            Pt::XmlRpc::RequestHandler req(service, in);
 
-            std::size_t contentLength = in.str().length();
-            std::cerr << "Request Size: " <<  contentLength << std::endl;
-            std::size_t n = 0;
-            while(n < contentLength)
-            {
-                n += req.advance();
-            }
 
-            std::stringstream out;
-            req.finish(out);
+            //Pt::System::Clock clock;
+            //clock.start();
+            //for(int x = 0; x < 5000;++x)
+            //{
+            //    in.clear();
+            //    in.seekg(std::ios::beg);
+                Pt::XmlRpc::RequestHandler req(service, in);
 
-            Pt::XmlRpc::ResponseHandler<int> resp(out);
+                std::size_t contentLength = in.str().length();
+                //std::cerr << "Request Size: " <<  contentLength << std::endl;
+                std::size_t n = 0;
+                while(n < contentLength)
+                {
+                    n += req.advance();
+                }
 
-            contentLength = out.str().length();
-            n = 0;
-            while(n < contentLength)
-            {
-                n += resp.advance();
-            }
+                std::stringstream out;
+                req.finish(out);
 
-            std::cerr << "Result: " << resp.result() << std::endl;
+                Pt::XmlRpc::ResponseHandler<int> resp(out);
+
+                contentLength = out.str().length();
+                n = 0;
+                while(n < contentLength)
+                {
+                    n += resp.advance();
+                }
+
+                std::cerr << "Result: " << resp.result() << std::endl;
+            //}
+            //std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
+            //std::exit(1);
         }
 
         void ReturnStruct()
@@ -250,7 +262,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         int multiplyVector(int a, const std::vector<int>& v)
         {
-            std::cerr << "multiplyVector(" << a << ", " << v.front() << ", " << v.back() << ")" << std::endl;
+            //std::cerr << "multiplyVector(" << a << ", " << v.front() << ", " << v.back() << ")" << std::endl;
             return a * v.front() * v.back();
         }
 

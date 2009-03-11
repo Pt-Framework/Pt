@@ -215,6 +215,50 @@ class TypeHandler< std::vector<T> > : public ITypeHandler
         std::vector<T>* _type;
 };
 
+
+template <>
+class TypeHandler<int> : public ITypeHandler
+{
+    public:
+        TypeHandler()
+        : _type(0)
+        {}
+
+        void begin(int& type)
+        { _type = & type; }
+
+        void begin(const int& type)
+        { _type = const_cast<int*>(&type); }
+
+        void setValue(const Pt::String& value)
+        {
+            convert(*_type, value);
+        }
+
+        ITypeHandler* beginMember(const std::string& name)
+        {
+            return 0;
+        }
+
+        virtual ITypeHandler* leaveMember()
+        {
+            return this->parent();
+        }
+
+        virtual void finish()
+        { }
+
+        void decompose(Formatter& formatter)
+        {
+            String s;
+            convert(s, *_type);
+            formatter.addValue("int", s);
+        }
+
+    private:
+        int* _type;
+};
+
 }
 
 }
