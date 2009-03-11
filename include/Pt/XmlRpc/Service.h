@@ -33,6 +33,7 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Parameter.h>
+#include <Pt/XmlRpc/Args.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include "Pt/TextStream.h"
@@ -49,105 +50,6 @@
 namespace Pt {
 
 namespace XmlRpc {
-
-class Args
-{
-    enum State
-    {
-        OnParams,
-        OnParam
-    };
-
-    public:
-        Args()
-        : _state(OnParams)
-        , _argNo(0)
-        {}
-
-        virtual ~Args()
-        {}
-
-        bool compose(const Xml::Node& node)
-        {
-            switch(_state)
-            {
-                case OnParams:
-                {
-                    if(node.type() == Xml::Node::StartElement)
-                    {
-                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-
-                        if(se.name() == L"param")
-                        {
-                            _state = OnParam;
-                        }
-                    }
-                    else if(node.type() == Xml::Node::EndElement)
-                    {
-                        const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                        if(ee.name() == L"params")
-                        {
-                            return true;
-                        }
-                    }
-
-                    break;
-                }
-
-                case OnParam:
-                {
-                    bool finished = composeParam(_argNo, node);
-                    if(finished)
-                    {
-                        ++_argNo;
-                        _state = OnParams;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-    protected:
-        virtual bool composeParam(unsigned n, const Xml::Node& node) = 0;
-
-    private:
-        State _state;
-        unsigned _argNo;
-};
-
-
-template <typename A1, typename A2>
-class BasicArgs : public Args
-{
-    public:
-        bool composeParam(unsigned n, const Xml::Node& node)
-        {
-            switch(n)
-            {
-                case 0:
-                    return _a1.compose(node);
-                    break;
-
-                case 1:
-                    return _a2.compose(node);
-                    break;
-            }
-
-            return true;
-        }
-
-        const A1& first() const
-        { return _a1.get(); }
-
-        const A2& second() const
-        { return _a2.get(); }
-
-    private:
-        Parameter<A1> _a1;
-        Parameter<A2> _a2;
-};
-
 
 class ServiceProcedure
 {
