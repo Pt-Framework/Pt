@@ -253,13 +253,10 @@ class PT_XMLRPC_API RemoteMethod
         {}
 
         void begin(const A1& a1, const A2& a2)
-        {
-
-        }
+        {}
 
         R result()
-        {
-        }
+        { }
 
     private:
 
@@ -273,6 +270,21 @@ class PT_XMLRPC_API Client
 
         virtual ~Client();
 };
+
+
+/*
+int main()
+{
+    Client client("Calc");
+
+    RemoteMethod<int, int, int> multiply(client, "multiply");
+    int j = multiply(2, 3);
+
+    multiply.begin(2, 3);
+    // ... wait
+    int r = multiply.result();
+}
+*/
 
 }
 

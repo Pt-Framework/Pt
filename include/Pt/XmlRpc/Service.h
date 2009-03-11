@@ -229,7 +229,7 @@ class SerializationHandler : public ISerializationHandler
             this->formatEach(_si, formatter);
         }
 
-        void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
         {
             if(si.category() == SerializationInfo::Value)
             {
