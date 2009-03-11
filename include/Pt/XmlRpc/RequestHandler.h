@@ -38,8 +38,6 @@
 #include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
 #include <string>
-#include <vector>
-#include <map>
 #include <cstddef>
 
 namespace Pt {
