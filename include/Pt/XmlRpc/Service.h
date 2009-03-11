@@ -52,14 +52,27 @@ class Formatter
 {
     public:
         virtual ~Formatter()
-        {}
+        { }
 
-        virtual void addValue(const std::string& type, const Pt::String& value) = 0;
+        virtual void addValue(const std::string& type, const Pt::String& value)
+        { }
 
         virtual void beginArray()
-        {}
+        { }
 
         virtual void finishArray()
+        { }
+
+        virtual void beginObject()
+        { }
+
+        virtual void beginMember(const std::string& name)
+        { }
+
+        virtual void finishMember()
+        { }
+
+        virtual void finishObject()
         { }
 };
 
@@ -93,12 +106,33 @@ class ResponseFormatter : public Formatter
 
         void beginArray()
         {
-            *_out << "<value><array><data>";
+            *_out << "<value><array><data>\n";
         }
 
         void finishArray()
         {
             *_out << "</data></array></value>\n";
+        }
+
+        void beginObject()
+        {
+            *_out << "<value><struct>\n";
+        }
+
+        void beginMember(const std::string& name)
+        {
+            *_out << "<member>\n";
+            *_out << "<name>" << name << "</name>\n";
+        }
+
+        void finishMember()
+        {
+            *_out << "</member>\n";
+        }
+
+        void finishObject()
+        {
+            *_out << "</struct></value>\n";
         }
 
         void finish()
@@ -123,23 +157,21 @@ class ISerializationHandler
         virtual ~ISerializationHandler()
         {}
 
+        virtual void setValue(const Pt::String& value) = 0;
+
+        virtual ISerializationHandler* beginMember(const std::string& name) = 0;
+
+        virtual ISerializationHandler* leaveMember() = 0;
+
+        virtual void finish() = 0;
+
+        virtual void decompose(Formatter& f) = 0;
+
         void setParent(ISerializationHandler* parent)
         { _parent = parent; }
 
         ISerializationHandler* parent()
         { return _parent; }
-
-        virtual void setValue(const Pt::String& value) = 0;
-
-        virtual ISerializationHandler* beginMember(const std::string& name) = 0;
-
-        virtual void finishMember()
-        { }
-
-        virtual void finish()
-        { }
-
-        virtual void decompose(Formatter& f) = 0;
 
     private:
         ISerializationHandler* _parent;
@@ -159,35 +191,66 @@ class SerializationHandler : public ISerializationHandler
         { _type = & type; }
 
         virtual void setValue(const Pt::String& value)
-        {
-          _si.setValue(value);
+        { //std::cerr << "-S SET VALUE " << value.narrow() << std::endl;
+            _current->setValue(value);
         }
 
         virtual ISerializationHandler* beginMember(const std::string& name)
-        {
+        { //std::cerr << "-S BEGIN MEMBER" << std::endl;
             SerializationInfo& child = _current->addMember(name);
             _current = &child;
             return this;
         }
 
-        virtual void finishMember()
-        {
+        virtual ISerializationHandler* leaveMember()
+        { //std::cerr << "-S LEAVE MEMBER" << std::endl;
+            if( ! _current->parent() )
+            {
+                this->finish();
+
+                if( ! this->parent() )
+                    throw std::runtime_error("invalid member");
+
+                return this->parent();
+            }
+
             _current = _current->parent();
+            return this;
         }
 
         virtual void finish()
-        {
-            _si >>= *_type;
+        { //std::cerr << "-S FINISH" << std::endl;
+            *_current >>= *_type;
         }
 
         virtual void decompose(Formatter& formatter)
         {
             _si <<= *_type;
+            this->formatEach(_si, formatter);
+        }
 
-            if(_si.category() == SerializationInfo::Value)
+        void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+        {
+            if(si.category() == SerializationInfo::Value)
             {
-                formatter.addValue( _si.typeName(), _si.toString() );
+                formatter.addValue( si.typeName(), si.toString() );
             }
+            else if(si.category() == SerializationInfo::Object)
+            {
+                formatter.beginObject();
+
+                SerializationInfo::ConstIterator it;
+                for(it = si.begin(); it != si.end(); ++it)
+                {
+                    formatter.beginMember( it->name() );
+                    this->formatEach(*it, formatter);
+                    formatter.finishMember();
+                }
+
+                formatter.finishObject();
+            }
+
+            //TODO arrays should use SerializationInfo Array
         }
 
     private:
@@ -212,12 +275,26 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
         { throw std::runtime_error("type mismatch"); }
 
         ISerializationHandler* beginMember(const std::string& name)
-        {
+        { //std::cerr << "V begin member" << std::endl;
             _type->push_back( T() );
             T& elem = _type->back();
             _elemBuilder.begin(elem);
+            _elemBuilder.setParent(this);
             return &_elemBuilder;
         }
+
+        virtual ISerializationHandler* leaveMember()
+        { //std::cerr << "V begin member" << std::endl;
+            ISerializationHandler* parent = this->parent();
+            if( ! parent )
+                throw std::runtime_error("invalid member");
+
+            _elemBuilder.finish();
+            return parent;
+        }
+
+        virtual void finish()
+        { }
 
         void decompose(Formatter& formatter)
         {
@@ -226,6 +303,7 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
             typename std::vector<T>::iterator it;
             for(it = _type->begin(); it != _type->end(); ++it)
             {
+                _elemBuilder.begin(*it);
                 _elemBuilder.decompose(formatter);
             }
 
@@ -258,10 +336,12 @@ class ParameterReader
         OnName,
         OnNameEnd,
         OnMemberEnd,
+        OnStructEnd,
 
         OnArrayBegin,
         OnDataBegin,
-        OnDataEnd
+        OnDataEnd,
+        OnArrayEnd
     };
 
     public:
@@ -278,7 +358,7 @@ class ParameterReader
             switch(_state)
             {
                 case OnParamBegin:
-                {
+                { //std::cerr << "OnParamBegin" << std::endl;
                     if(node.type() == Xml::Node::StartElement) // value
                     {
                         _state = OnValueBegin;
@@ -287,10 +367,11 @@ class ParameterReader
                 }
 
                 case OnValueBegin:
-                {
+                { //std::cerr << "OnValueBegin" << std::endl;
                     if(node.type() == Xml::Node::StartElement) // i4, struct, array...
                     {
                         const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                        //std::cerr << se.name().narrow() << std::endl;
                         if(se.name() == L"struct")
                         {
                             _state = OnStructBegin;
@@ -308,56 +389,66 @@ class ParameterReader
                 }
 
                 case OnValueEnd:
-                {
+                { //std::cerr << "OnValueEnd" << std::endl;
+
                     if(node.type() == Xml::Node::EndElement)
                     {
                         const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                         if(ee.name() == L"member")
-                        {
-                            _current->finishMember();
-                            _current = _current->parent();
-                            if( ! _current )
-                                throw std::runtime_error("invalid member");
+                        { //std::cerr << "OnValueEnd member" << std::endl;
+                            _current = _current->leaveMember();
+                            _state = OnStructBegin;
                         }
-                        else
-                        {
+                        else if(ee.name() == L"data")
+                        { //std::cerr << "OnValueEnd data" << std::endl;
+                            _current = _current->leaveMember();
+                            _state = OnDataEnd;
+                        }
+                        else if(ee.name() == L"param")
+                        { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
+                            _current->finish();
                             _state = OnParamEnd;
+                            return true;
                         }
-
-                        return true;
                     }
                     else if(node.type() == Xml::Node::StartElement)
                     {
                         const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                         if(se.name() == L"value")
-                        {
-                            _current->finishMember();
-                            _current = _current->parent();
-                            if( ! _current )
-                                throw std::runtime_error("invalid array");
-
-                            ISerializationHandler* member = _current->beginMember("");
-                            member->setParent(_current);
-                            _current = member;
+                        { //std::cerr << "OnValueEnd data value" << std::endl;
+                            _current = _current->leaveMember();
+                            _current = _current->beginMember("");
                             _state = OnValueBegin;
                         }
-
-                        return true;
                     }
+
                     break;
                 }
 
                 case OnStructBegin:
-                {
-                    if(node.type() == Xml::Node::StartElement) //member
+                { //std::cerr << "OnStructBegin" << std::endl;
+                    if(node.type() == Xml::Node::StartElement) // <member>
                     {
                         _state = OnMemberBegin;
+                    }
+                    else if(node.type() == Xml::Node::EndElement) // </struct>
+                    {
+                        _state = OnStructEnd;
+                    }
+                    break;
+                }
+
+                case OnStructEnd:
+                {//std::cerr << "OnStructEnd" << std::endl;
+                    if(node.type() == Xml::Node::EndElement) // </value>
+                    {
+                        _state = OnValueEnd;
                     }
                     break;
                 }
 
                 case OnMemberBegin:
-                {
+                { //std::cerr << "OnMemberBegin" << std::endl;
                     if(node.type() == Xml::Node::StartElement) // name
                     {
                         _state = OnNameBegin;
@@ -366,22 +457,22 @@ class ParameterReader
                 }
 
                 case OnNameBegin:
-                {
+                { //std::cerr << "OnNameBegin" << std::endl;
                     if(node.type() == Xml::Node::Characters) // member-name
                     {
                         const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                         const std::string& name = chars.content().narrow();
-                        ISerializationHandler* member = _current->beginMember(name);
-                        member->setParent(_current);
-                        _current = member;
+
+                        _current = _current->beginMember(name);
+
                         _state = OnName;
                     }
                     break;
                 }
 
                 case OnName:
-                {
-                    if(node.type() == Xml::Node::EndElement)
+                { //std::cerr << "OnName" << std::endl;
+                    if(node.type() == Xml::Node::EndElement) // </name>
                     {
                         _state = OnNameEnd;
                     }
@@ -389,8 +480,8 @@ class ParameterReader
                 }
 
                 case OnNameEnd:
-                {
-                    if(node.type() == Xml::Node::StartElement)
+                { //std::cerr << "OnNameEnd" << std::endl;
+                    if(node.type() == Xml::Node::StartElement) // <value>
                     {
                         _state = OnValueBegin;
                     }
@@ -398,7 +489,7 @@ class ParameterReader
                 }
 
                 case OnScalarBegin:
-                {
+                { //std::cerr << "OnScalarBegin " << std::endl;
                     if(node.type() == Xml::Node::Characters)
                     {
                         const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
@@ -409,17 +500,16 @@ class ParameterReader
                 }
 
                 case OnScalar:
-                {
-                    if(node.type() == Xml::Node::EndElement) // i4, boolean ...
+                { //std::cerr << "OnScalar" << std::endl;
+                    if(node.type() == Xml::Node::EndElement) // </int>, boolean ...
                     {
-                        _current->finish();
                         _state = OnScalarEnd;
                     }
                     break;
                 }
 
                 case OnScalarEnd:
-                {
+                { //std::cerr << "OnScalarEnd" << std::endl;
                     if(node.type() == Xml::Node::EndElement) // </value>
                     {
                         _state = OnValueEnd;
@@ -428,7 +518,7 @@ class ParameterReader
                 }
 
                 case OnArrayBegin:
-                {
+                { //std::cerr << "OnArrayBegin" << std::endl;
                     if(node.type() == Xml::Node::StartElement) // data
                     {
                         _state = OnDataBegin;
@@ -437,23 +527,37 @@ class ParameterReader
                 }
 
                 case OnDataBegin:
-                {
+                { //std::cerr << "OnDataBegin" << std::endl;
                     if(node.type() == Xml::Node::StartElement) // value
                     {
-                        ISerializationHandler* member = _current->beginMember("");
-                        member->setParent(_current);
-                        _current = member;
+                        //std::cerr << _current << std::endl;
+                        _current = _current->beginMember("");
                         _state = OnValueBegin;
                     }
                     break;
                 }
 
                 case OnDataEnd:
+                { //std::cerr << "OnDataEnd" << std::endl;
+                    if(node.type() == Xml::Node::EndElement) // </array>
+                    {
+                        _state = OnArrayEnd;
+                    }
                     break;
+                }
+
+                case OnArrayEnd:
+                { //std::cerr << "OnArrayEnd" << std::endl;
+                    if(node.type() == Xml::Node::EndElement) // </value>
+                    {
+                        _state = OnValueEnd;
+                    }
+                    break;
+                }
 
                 default:
                 {
-                    throw std::runtime_error("OnParamEnd");
+                    throw std::runtime_error("invalid parameters");
                 }
 
             }

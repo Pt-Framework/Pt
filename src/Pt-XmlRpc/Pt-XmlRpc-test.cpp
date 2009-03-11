@@ -35,6 +35,30 @@
 #include "Pt/XmlRpc/RequestHandler.h"
 #include <sstream>
 
+struct Color
+{
+    int red;
+    int green;
+    int blue;
+};
+
+
+void operator >>=(const Pt::SerializationInfo& si, Color& color)
+{
+    color.red = si.getValue<int>("red");
+    color.green = si.getValue<int>("green");
+    color.blue = si.getValue<int>("blue");
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, const Color& color)
+{
+    si.addMember("red") <<= color.red;
+    si.addMember("green") <<= color.green;
+    si.addMember("blue") <<= color.blue;
+}
+
+
 class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
     public:
@@ -43,6 +67,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
+            this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
         }
 
         void Integer()
@@ -80,6 +105,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::ResponseReader<int> resp(out);
 
             contentLength = out.str().length();
+            //std::cerr << "Response: " << out.str() << std::endl;
             n = 0;
             while(n < contentLength)
             {
@@ -106,6 +132,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "             <value>";
             in << "                 <array>";
             in << "                     <data>";
+            in << "                         <value><int>3</int></value>";
             in << "                         <value><int>4</int></value>";
             in << "                    </data>";
             in << "                </array>";
@@ -139,14 +166,79 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::cerr << "Result: " << resp.result() << std::endl;
         }
 
+        void ReturnStruct()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("getColor", *this, &PtXmlRpcTest::getColor);
+
+            std::stringstream in;
+            in << "<?xml version=\"1.0\"?>";
+            in << "<methodCall>";
+            in << "   <methodName>getColor</methodName>";
+            in << "   <params>";
+            in << "     <param>";
+            in << "         <value><i4>10</i4></value>";
+            in << "         </param>";
+            in << "     <param>";
+            in << "         <value><i4>20</i4></value>";
+            in << "         </param>";
+            in << "      </params>";
+            in << "   </methodCall>";
+ 
+            Pt::XmlRpc::RequestReader req(service, in);
+
+            std::size_t contentLength = in.str().length();
+            std::cerr << "Request Size: " <<  contentLength << std::endl;
+            std::size_t n = 0;
+            while(n < contentLength)
+            {
+                n += req.advance();
+            }
+
+            std::stringstream out;
+            req.finish(out);
+
+            Pt::XmlRpc::ResponseReader<Color> resp(out);
+
+            contentLength = out.str().length();
+            //std::cerr << "Response: " << out.str() << std::endl;
+            n = 0;
+            while(n < contentLength)
+            {
+                n += resp.advance();
+            }
+
+            Color color = resp.result();
+            std::cerr << "Result: " << color.red << ":" << color.green << ":" << color.blue << std::endl;
+        }
+
         int multiplyVector(int a, const std::vector<int>& v)
         {
-            return a * v.back();
+            std::cerr << "multiplyVector(" << a << ", " << v.front() << ", " << v.back() << ")" << std::endl;
+            return a * v.front() * v.back();
         }
 
         int multiplyInt(int a, int b)
         {
             return a*b;
+        }
+
+        Color getColor(int a, int b)
+        {
+            Color color;
+            color.red = a;
+            color.green = b;
+            color.blue = a + b;
+            return color;
+        }
+
+        std::vector<int> getVector(int a, int b)
+        {
+            std::vector<int> v;
+            v.push_back(a);
+            v.push_back(b);
+            v.push_back(a+b);
+            return v;
         }
 };
 
