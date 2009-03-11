@@ -32,20 +32,11 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
-#include <Pt/XmlRpc/Parameter.h>
 #include <Pt/XmlRpc/Args.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
-#include "Pt/TextStream.h"
-#include "Pt/Utf8Codec.h"
-#include <Pt/Xml/XmlReader.h>
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/EndElement.h>
-#include <Pt/Xml/Characters.h>
 #include <string>
-#include <vector>
 #include <map>
-#include <cstddef>
 
 namespace Pt {
 
