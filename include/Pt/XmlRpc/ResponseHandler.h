@@ -29,9 +29,10 @@
 #define Pt_XmlRpc_ResponseHandler_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Formatter.h>
-#include <Pt/XmlRpc/Parameter.h>
+#include <Pt/XmlRpc/Result.h>
 #include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EndElement.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <cstddef>
@@ -40,86 +41,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class ResultReader
-{
-    enum State
-    {
-        OnParams,
-        OnParam
-    };
-
-    public:
-        ResultReader()
-        : _state(OnParams)
-        {}
-
-        virtual ~ResultReader()
-        {}
-
-        bool advance(const Xml::Node& node)
-        {
-            switch(_state)
-            {
-                case OnParams:
-                {
-                    if(node.type() == Xml::Node::StartElement)
-                    {
-                        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-
-                        if(se.name() == L"param")
-                        {
-                            _state = OnParam;
-                        }
-                    }
-                    else if(node.type() == Xml::Node::EndElement)
-                    {
-                        const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                        if(ee.name() == L"params")
-                        {
-                            return true;
-                        }
-                    }
-
-                    break;
-                }
-
-                case OnParam:
-                {
-                    bool finished = advanceResult(node);
-                    if(finished)
-                        _state = OnParams;
-                }
-            }
-
-            return false;
-        }
-
-    protected:
-        virtual bool advanceResult(const Xml::Node& node) = 0;
-
-    private:
-        State _state;
-};
-
-
 template <typename R>
-class BasicResultReader : public ResultReader
-{
-    public:
-        bool advanceResult(const Xml::Node& node)
-        {
-            return _r.compose(node);
-        }
-
-        const R& get() const
-        { return _r.get(); }
-
-    private:
-        Parameter<R> _r;
-};
-
-template <typename R>
-class ResponseReader
+class ResponseHandler
 {
     enum State
     {
@@ -131,13 +54,13 @@ class ResponseReader
     };
 
     public:
-        ResponseReader(std::istream& is)
+        ResponseHandler(std::istream& is)
         : _state(OnBegin)
         , _ts(is, new Pt::Utf8Codec)
         , _reader(_ts)
         { }
 
-        ~ResponseReader()
+        ~ResponseHandler()
         { }
 
         std::size_t advance()
@@ -210,7 +133,7 @@ class ResponseReader
        State _state;
        Pt::TextIStream _ts;
        Pt::Xml::XmlReader _reader;
-       BasicResultReader<R> _result;
+       BasicResult<R> _result;
 };
 
 }

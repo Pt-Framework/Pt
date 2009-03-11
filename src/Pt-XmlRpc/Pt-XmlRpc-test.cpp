@@ -92,7 +92,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
-            Pt::XmlRpc::ResponseReader<int> resp(out);
+            Pt::XmlRpc::ResponseHandler<int> resp(out);
 
             n = 0;
             contentLength = out.str().length();
@@ -144,7 +144,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
-            Pt::XmlRpc::ResponseReader<int> resp(out);
+            Pt::XmlRpc::ResponseHandler<int> resp(out);
 
             contentLength = out.str().length();
             n = 0;
@@ -188,7 +188,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
-            Pt::XmlRpc::ResponseReader<Color> resp(out);
+            Pt::XmlRpc::ResponseHandler<Color> resp(out);
 
             contentLength = out.str().length();
             //std::cerr << "Response: " << out.str() << std::endl;
@@ -234,7 +234,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
-            Pt::XmlRpc::ResponseReader< std::vector<int> > resp(out);
+            Pt::XmlRpc::ResponseHandler< std::vector<int> > resp(out);
 
             contentLength = out.str().length();
             //std::cerr << "Response: " << out.str() << std::endl;
