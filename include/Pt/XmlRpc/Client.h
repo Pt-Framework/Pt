@@ -169,14 +169,14 @@ class BasicResultReader : public ResultReader
     public:
         bool advanceResult(const Xml::Node& node)
         {
-            return _r.advance(node);
+            return _r.compose(node);
         }
 
         const R& get() const
         { return _r.get(); }
 
     private:
-        ParameterReader<R> _r;
+        Parameter<R> _r;
 };
 
 template <typename R>
@@ -312,9 +312,9 @@ class PT_XMLRPC_API RemoteMethod
     private:
         std::string _name;
         std::ostream* _os;
-        SerializationHandler<R> _rhandler;
-        SerializationHandler<A1> _a1handler;
-        SerializationHandler<A1> _a2handler;
+        TypeHandler<R> _rhandler;
+        TypeHandler<A1> _a1handler;
+        TypeHandler<A1> _a2handler;
 };
 
 

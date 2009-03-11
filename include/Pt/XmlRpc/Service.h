@@ -147,42 +147,42 @@ class ResponseFormatter : public Formatter
 };
 
 
-class ISerializationHandler
+class ITypeHandler
 {
     public:
-        ISerializationHandler()
+        ITypeHandler()
         : _parent(0)
         {}
 
-        virtual ~ISerializationHandler()
+        virtual ~ITypeHandler()
         {}
 
         virtual void setValue(const Pt::String& value) = 0;
 
-        virtual ISerializationHandler* beginMember(const std::string& name) = 0;
+        virtual ITypeHandler* beginMember(const std::string& name) = 0;
 
-        virtual ISerializationHandler* leaveMember() = 0;
+        virtual ITypeHandler* leaveMember() = 0;
 
         virtual void finish() = 0;
 
         virtual void decompose(Formatter& f) = 0;
 
-        void setParent(ISerializationHandler* parent)
+        void setParent(ITypeHandler* parent)
         { _parent = parent; }
 
-        ISerializationHandler* parent()
+        ITypeHandler* parent()
         { return _parent; }
 
     private:
-        ISerializationHandler* _parent;
+        ITypeHandler* _parent;
 };
 
 
 template <typename T>
-class SerializationHandler : public ISerializationHandler
+class TypeHandler : public ITypeHandler
 {
     public:
-        SerializationHandler()
+        TypeHandler()
         : _type(0)
         , _current(&_si)
         {}
@@ -198,14 +198,14 @@ class SerializationHandler : public ISerializationHandler
             _current->setValue(value);
         }
 
-        virtual ISerializationHandler* beginMember(const std::string& name)
+        virtual ITypeHandler* beginMember(const std::string& name)
         { //std::cerr << "-S BEGIN MEMBER" << std::endl;
             SerializationInfo& child = _current->addMember(name);
             _current = &child;
             return this;
         }
 
-        virtual ISerializationHandler* leaveMember()
+        virtual ITypeHandler* leaveMember()
         { //std::cerr << "-S LEAVE MEMBER" << std::endl;
             if( ! _current->parent() )
             {
@@ -266,10 +266,10 @@ class SerializationHandler : public ISerializationHandler
 
 
 template <typename T>
-class SerializationHandler< std::vector<T> > : public ISerializationHandler
+class TypeHandler< std::vector<T> > : public ITypeHandler
 {
     public:
-        SerializationHandler()
+        TypeHandler()
         : _type(0)
         {}
 
@@ -282,7 +282,7 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
         void setValue(const Pt::String& value)
         { throw std::runtime_error("type mismatch"); }
 
-        ISerializationHandler* beginMember(const std::string& name)
+        ITypeHandler* beginMember(const std::string& name)
         { //std::cerr << "V begin member" << std::endl;
             _type->push_back( T() );
             T& elem = _type->back();
@@ -291,9 +291,9 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
             return &_elemBuilder;
         }
 
-        virtual ISerializationHandler* leaveMember()
+        virtual ITypeHandler* leaveMember()
         { //std::cerr << "V begin member" << std::endl;
-            ISerializationHandler* parent = this->parent();
+            ITypeHandler* parent = this->parent();
             if( ! parent )
                 throw std::runtime_error("invalid member");
 
@@ -319,13 +319,13 @@ class SerializationHandler< std::vector<T> > : public ISerializationHandler
         }
 
     private:
-        SerializationHandler<T>  _elemBuilder;
+        TypeHandler<T>  _elemBuilder;
         std::vector<T>* _type;
 };
 
 
 template <typename T>
-class ParameterReader
+class Parameter
 {
     enum State
     {
@@ -353,7 +353,7 @@ class ParameterReader
     };
 
     public:
-        ParameterReader()
+        Parameter()
         : _builder()
         , _current(&_builder)
         , _state(OnParamBegin)
@@ -361,7 +361,7 @@ class ParameterReader
             _builder.begin(_value);
         }
 
-        bool advance(const Xml::Node& node)
+        bool compose(const Xml::Node& node)
         {
             switch(_state)
             {
@@ -578,8 +578,8 @@ class ParameterReader
 
     private:
         T _value;
-        SerializationHandler<T> _builder;
-        ISerializationHandler* _current;
+        TypeHandler<T> _builder;
+        ITypeHandler* _current;
         State _state;
 };
 
@@ -660,11 +660,11 @@ class BasicArgs : public Args
             switch(n)
             {
                 case 0:
-                    return _a1.advance(node);
+                    return _a1.compose(node);
                     break;
 
                 case 1:
-                    return _a2.advance(node);
+                    return _a2.compose(node);
                     break;
             }
 
@@ -678,8 +678,8 @@ class BasicArgs : public Args
         { return _a2.get(); }
 
     private:
-        ParameterReader<A1> _a1;
-        ParameterReader<A2> _a2;
+        Parameter<A1> _a1;
+        Parameter<A2> _a2;
 };
 
 
@@ -757,7 +757,7 @@ class BasicServiceProcedure<R, C, A1, A2,
             const BasicArgs<V1, V2>& args = static_cast<const BasicArgs<V1, V2>& >(a);
             R result = Pt::Method<R, C, A1, A2>::call( args.first(), args.second() );
 
-            SerializationHandler<R> builder;
+            TypeHandler<R> builder;
             builder.begin(result);
 
             ResponseFormatter resp(ret);
