@@ -7,7 +7,7 @@ SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 PT_NET_SUBDIR = [ FDirName $(TOP) src Pt-Net $(SYS:L) ] ;
 PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
 
-SharedLibrary Pt-Net : $(PT_NET_IMPL) TcpServer.cpp TcpSocket.cpp ;
+SharedLibrary Pt-Net : $(PT_NET_IMPL) TcpServer.cpp TcpSocket.cpp HttpServer.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
 LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
