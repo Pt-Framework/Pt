@@ -67,10 +67,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            //this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
+            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
-            //this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
-            //this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
+            this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
+            this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
         }
 
         void Integer()
@@ -142,10 +142,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "</methodCall>";
 
 
-            Pt::System::Clock clock;
-            clock.start();
-            for(int x = 0; x < 5000;++x)
-            {
+            //Pt::System::Clock clock;
+            //clock.start();
+            //for(int x = 0; x < 5000;++x)
+            //{
                 in.clear();
                 in.seekg(std::ios::beg);
                 Pt::XmlRpc::RequestHandler req(service);
@@ -170,10 +170,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                     n += resp.advance();
                 }
 
-                //std::cerr << "Result: " << resp.result() << std::endl;
-            }
-            std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
-            std::exit(1);
+                std::cerr << "Result: " << resp.result() << std::endl;
+            //}
+            //std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
+            //std::exit(1);
         }
 
         void ReturnStruct()
