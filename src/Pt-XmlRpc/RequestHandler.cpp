@@ -467,6 +467,7 @@ void RequestHandler::finish(std::ostream& out)
 
     ResponseFormatter formatter(out);
     formatEach(ret, formatter);
+    formatter.finish();
 }
 
 }
