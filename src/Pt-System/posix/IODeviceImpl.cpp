@@ -42,6 +42,7 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 , _rfds(0)
 , _wfds(0)
 , _efds(0)
+, _deleted(0)
 { }
 
 
@@ -50,6 +51,10 @@ IODeviceImpl::~IODeviceImpl()
     assert(_rfds == 0);
     assert(_wfds == 0);
     assert(_efds == 0);
+
+    if(_deleted)
+        *_deleted = true;
+
     //this->exitSelect();
 }
 
@@ -314,11 +319,17 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     if( this->fd() < 0)
         return 0;
 
+    bool deleted = false;
+    _deleted = &deleted;
+
     if ( FD_ISSET(this->fd(), &efds) )
     {
         _device.errorOccured(_device);
         ++avail;
     }
+
+    if(deleted)
+        return avail;
 
     if( _device.wbuf() && FD_ISSET(this->fd(), &wfds) )
     {
@@ -326,11 +337,17 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         ++avail;
     }
 
+    if(deleted)
+        return avail;
+
     if( _device.rbuf() && FD_ISSET(this->fd(), &rfds) )
     {
         _device.inputReady(_device);
         ++avail;
     }
+
+    if( ! deleted )
+        _deleted = 0;
 
     return avail;
 }

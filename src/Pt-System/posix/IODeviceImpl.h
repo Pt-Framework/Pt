@@ -89,6 +89,7 @@ namespace System {
             fd_set* _rfds;
             fd_set* _wfds;
             fd_set* _efds;
+            bool* _deleted;
     };
 
 } //namespace System
