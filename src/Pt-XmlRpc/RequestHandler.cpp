@@ -46,6 +46,7 @@ RequestHandler::RequestHandler(Service& service)
 , _service(&service)
 , _proc(0)
 , _args(0)
+, _current(0)
 { }
 
 
@@ -141,7 +142,7 @@ std::size_t RequestHandler::advance(std::istream& is)
             }
 
             case OnParamsEnd:
-            {
+            { //std::cerr << "OnParamsEnd" << std::endl;
                 if(node.type() == Xml::Node::EndElement)
                 {
                     _state = OnMethodCallEnd;
@@ -150,12 +151,270 @@ std::size_t RequestHandler::advance(std::istream& is)
             }
 
             case OnMethodCallEnd:
-            {
+            { //std::cerr << "OnMethodCallEnd" << std::endl;
                 if(node.type() == Xml::Node::EndDocument)
                 {
                     _state = OnMethodCallEnd;
                 }
                 break;
+            }
+
+///
+///
+///
+/*
+            case OnParams:
+            {
+                if(node.type() == Xml::Node::StartElement)
+                {
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                    if(se.name() == L"param")
+                    {
+                        _state = OnParamBegin;
+                    }
+                }
+                else if(node.type() == Xml::Node::EndElement)
+                {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if(ee.name() == L"params")
+                    {
+                        _state = OnParamsEnd;
+                    }
+                }
+
+                break;
+            }
+*/
+            case OnParamBegin:
+            { //std::cerr << "OnParamBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // value
+                {
+                    _argv.push_back( Pt::SerializationInfo() );
+                    _current = &_argv.back();
+                    _state = OnValueBegin;
+                }
+                break;
+            }
+
+            case OnParamEnd:
+            { //std::cerr << "OnParamEnd" << std::endl;
+
+                if(node.type() == Xml::Node::StartElement)
+                {
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                    if(se.name() == L"param")
+                    {
+                        _state = OnParamBegin;
+                    }
+                }
+                else if(node.type() == Xml::Node::EndElement)
+                {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if(ee.name() == L"params")
+                    {
+                        _state = OnParamsEnd;
+                    }
+                }
+                break;
+            }
+
+            case OnValueBegin:
+            { //std::cerr << "OnValueBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // i4, struct, array...
+                {
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                    //std::cerr << se.name().narrow() << std::endl;
+                    if(se.name() == L"struct")
+                    {
+                        _state = OnStructBegin;
+                    }
+                    else if(se.name() == L"array")
+                    {
+                        _state = OnArrayBegin;
+                    }
+                    else
+                    {
+                        _state = OnScalarBegin;
+                    }
+                }
+                break;
+            }
+
+            case OnValueEnd:
+            { //std::cerr << "OnValueEnd" << std::endl;
+
+                if(node.type() == Xml::Node::EndElement)
+                {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if(ee.name() == L"member")
+                    { //std::cerr << "OnValueEnd member" << std::endl;
+                        _current = _current->parent();
+                        _state = OnStructBegin;
+                    }
+                    else if(ee.name() == L"data")
+                    { //std::cerr << "OnValueEnd data" << std::endl;
+                        _current = _current->parent();
+                        _state = OnDataEnd;
+                    }
+                    else if(ee.name() == L"param")
+                    { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
+                        _state = OnParamEnd;
+                    }
+                }
+                else if(node.type() == Xml::Node::StartElement)
+                {
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                    if(se.name() == L"value")
+                    { //std::cerr << "OnValueEnd data value" << std::endl;
+                        _current = _current->parent();
+
+                        SerializationInfo& child = _current->addMember("");
+                        _current = &child;
+
+                        _state = OnValueBegin;
+                    }
+                }
+
+                break;
+            }
+
+            case OnStructBegin:
+            { //std::cerr << "OnStructBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // <member>
+                {
+                    _state = OnMemberBegin;
+                }
+                else if(node.type() == Xml::Node::EndElement) // </struct>
+                {
+                    _state = OnStructEnd;
+                }
+                break;
+            }
+
+            case OnStructEnd:
+            {//std::cerr << "OnStructEnd" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </value>
+                {
+                    _state = OnValueEnd;
+                }
+                break;
+            }
+
+            case OnMemberBegin:
+            { //std::cerr << "OnMemberBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // name
+                {
+                    _state = OnNameBegin;
+                }
+                break;
+            }
+
+            case OnNameBegin:
+            { //std::cerr << "OnNameBegin" << std::endl;
+                if(node.type() == Xml::Node::Characters) // member-name
+                {
+                    const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                    const std::string& name = chars.content().narrow();
+
+                    SerializationInfo& child = _current->addMember(name);
+                    _current = &child;
+
+                    _state = OnName;
+                }
+                break;
+            }
+
+            case OnName:
+            { //std::cerr << "OnName" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </name>
+                {
+                    _state = OnNameEnd;
+                }
+                break;
+            }
+
+            case OnNameEnd:
+            { //std::cerr << "OnNameEnd" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // <value>
+                {
+                    _state = OnValueBegin;
+                }
+                break;
+            }
+
+            case OnScalarBegin:
+            { //std::cerr << "OnScalarBegin " << std::endl;
+                if(node.type() == Xml::Node::Characters)
+                {
+                    const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                    _state = OnScalar;
+                    _current->setValue( chars.content() );
+                }
+                break;
+            }
+
+            case OnScalar:
+            { //std::cerr << "OnScalar" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </int>, boolean ...
+                {
+                    _state = OnScalarEnd;
+                }
+                break;
+            }
+
+            case OnScalarEnd:
+            { //std::cerr << "OnScalarEnd" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </value>
+                {
+                    _state = OnValueEnd;
+                }
+                break;
+            }
+
+            case OnArrayBegin:
+            { //std::cerr << "OnArrayBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // data
+                {
+                    _state = OnDataBegin;
+                }
+                break;
+            }
+
+            case OnDataBegin:
+            { //std::cerr << "OnDataBegin" << std::endl;
+                if(node.type() == Xml::Node::StartElement) // value
+                {
+                    //std::cerr << _current << std::endl;
+                    SerializationInfo& child = _current->addMember("");
+                    _current = &child;
+                    _state = OnValueBegin;
+                }
+                break;
+            }
+
+            case OnDataEnd:
+            { //std::cerr << "OnDataEnd" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </array>
+                {
+                    _state = OnArrayEnd;
+                }
+                break;
+            }
+
+            case OnArrayEnd:
+            { //std::cerr << "OnArrayEnd" << std::endl;
+                if(node.type() == Xml::Node::EndElement) // </value>
+                {
+                    _state = OnValueEnd;
+                }
+                break;
+            }
+
+            default:
+            {
+                throw std::runtime_error("invalid XML-RPC request");
             }
         }
     }
@@ -175,12 +434,6 @@ void RequestHandler::finish(std::ostream& out)
 
     //SerializationInfo ret;
     //_proc->run( ret, &_argv[0], _argv.size() );
-}
-
-
-Args* RequestHandler::args()
-{
-    return _args;
 }
 
 }

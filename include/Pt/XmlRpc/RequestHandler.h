@@ -52,7 +52,30 @@ class RequestHandler
         OnMethodNameEnd,
         OnParams,
         OnParamsEnd,
-        OnMethodCallEnd
+        OnMethodCallEnd,
+
+///
+        OnParamBegin,
+        OnValueBegin,
+        OnValueEnd,
+        OnParamEnd,
+
+        OnScalarBegin,
+        OnScalar,
+        OnScalarEnd,
+
+        OnStructBegin,
+        OnMemberBegin,
+        OnNameBegin,
+        OnName,
+        OnNameEnd,
+        OnMemberEnd,
+        OnStructEnd,
+
+        OnArrayBegin,
+        OnDataBegin,
+        OnDataEnd,
+        OnArrayEnd
     };
 
     public:
@@ -64,8 +87,6 @@ class RequestHandler
 
         void finish(std::ostream& out);
 
-        Args* args();
-
     private:
        State _state;
        Pt::TextIStream* _ts;
@@ -74,6 +95,7 @@ class RequestHandler
        ServiceProcedure* _proc;
        Args* _args;
        std::vector<SerializationInfo> _argv;
+       Pt::SerializationInfo* _current;
 };
 
 }
