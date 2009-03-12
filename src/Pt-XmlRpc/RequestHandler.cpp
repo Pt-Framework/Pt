@@ -39,6 +39,33 @@ namespace Pt {
 
 namespace XmlRpc {
 
+void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+{
+    if(si.category() == SerializationInfo::Value)
+    {
+        // TODO use formatter to adapt typenames to protocol specific typenames
+
+        formatter.addValue( si.typeName(), si.toString() );
+    }
+    else if(si.category() == SerializationInfo::Object)
+    {
+        formatter.beginObject();
+
+        SerializationInfo::ConstIterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            formatter.beginMember( it->name() );
+            formatEach(*it, formatter);
+            formatter.finishMember();
+        }
+
+        formatter.finishObject();
+    }
+
+    //TODO arrays should use SerializationInfo Array
+}
+
+
 RequestHandler::RequestHandler(Service& service)
 : _state(OnBegin)
 , _ts(0)
@@ -47,7 +74,8 @@ RequestHandler::RequestHandler(Service& service)
 , _proc(0)
 , _args(0)
 , _current(0)
-{ }
+{
+}
 
 
 RequestHandler::~RequestHandler()
@@ -126,7 +154,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 }
                 break;
             }
-
+/*
             case OnParams:
             {
                 if( ! _args )
@@ -140,7 +168,7 @@ std::size_t RequestHandler::advance(std::istream& is)
 
                 break;
             }
-
+*/
             case OnParamsEnd:
             { //std::cerr << "OnParamsEnd" << std::endl;
                 if(node.type() == Xml::Node::EndElement)
@@ -162,7 +190,7 @@ std::size_t RequestHandler::advance(std::istream& is)
 ///
 ///
 ///
-/*
+
             case OnParams:
             {
                 if(node.type() == Xml::Node::StartElement)
@@ -185,7 +213,7 @@ std::size_t RequestHandler::advance(std::istream& is)
 
                 break;
             }
-*/
+
             case OnParamBegin:
             { //std::cerr << "OnParamBegin" << std::endl;
                 if(node.type() == Xml::Node::StartElement) // value
@@ -425,15 +453,20 @@ std::size_t RequestHandler::advance(std::istream& is)
 
 void RequestHandler::finish(std::ostream& out)
 {
-    std::string res;
-
+/*
     if( ! _args || ! _proc )
         throw std::runtime_error("invalid XML-RPC request");
 
     _proc->exec(out, *_args);
+*/
 
-    //SerializationInfo ret;
-    //_proc->run( ret, &_argv[0], _argv.size() );
+
+
+    SerializationInfo ret;
+    _proc->run( ret, &_argv[0], _argv.size() );
+
+    ResponseFormatter formatter(out);
+    formatEach(ret, formatter);
 }
 
 }
