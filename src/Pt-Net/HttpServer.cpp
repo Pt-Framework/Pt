@@ -97,8 +97,10 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
     if ( _readHeader )
     {
         // TODO http parser
-        while (sb.in_avail())
-            _stream.ignore(sb.in_avail());
+        while ( sb.in_avail() > 0 )
+        {
+            sb.sbumpc();
+        }
 
         std::string url = "/"; // TODO
         bool ready = true; // TODO
@@ -140,7 +142,7 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
 
     sb.beginWrite();
 
-    if (sb.out_avail() > 0)
+    if (sb.out_avail() != 8192)
     {
         _timer.start(_server.writeTimeout());
     }

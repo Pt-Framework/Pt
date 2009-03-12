@@ -57,7 +57,8 @@ class HttpServerTest : public Pt::Unit::TestSuite
         void serverInstance()
         {
             Pt::System::EventLoop loop;
-            loop.setIdleTimeout(5000);
+            loop.setIdleTimeout(2000);
+            connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
 
             Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
 
@@ -73,27 +74,29 @@ class HttpServerTest : public Pt::Unit::TestSuite
         }
 
     private:
-
         void onConnect(Pt::Net::TcpSocket& socket)
         {
             *clientStream << "GET /foo HTTP/1.0\r\n\r\n";
             clientStream->buffer().beginWrite();
         }
 
-        void onOutput(Pt::System::StreamBuffer& device)
+        void onOutput(Pt::System::StreamBuffer& buffer)
         {
-            if (device.out_avail() != 0)
-                device.beginWrite();
+            if (buffer.out_avail() != 8192)
+            {
+                buffer.beginWrite();
+            }
             else
-                device.beginRead();
+            {
+                buffer.beginRead();
+            }
         }
 
-        void onInput(Pt::System::StreamBuffer& device)
+        void onInput(Pt::System::StreamBuffer& buffer)
         {
-            while (device.in_avail())
+            while ( buffer.in_avail() )
             {
-                char ch;
-                clientStream->get(ch);
+                char ch = buffer.sbumpc();
                 std::cout << ch;
             }
         }
