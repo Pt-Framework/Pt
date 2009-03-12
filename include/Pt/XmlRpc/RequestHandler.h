@@ -26,18 +26,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_RequestReader_h
-#define Pt_XmlRpc_RequestReader_h
+#ifndef Pt_XmlRpc_RequestHandler_h
+#define Pt_XmlRpc_RequestHandler_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Args.h>
+#include <Pt/XmlRpc/Service.h>
 #include <Pt/TextStream.h>
-#include <Pt/Utf8Codec.h>
 #include <Pt/Xml/XmlReader.h>
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/EndElement.h>
-#include <Pt/Xml/Characters.h>
-#include <string>
+#include <iostream>
 #include <cstddef>
 
 namespace Pt {
@@ -59,140 +56,15 @@ class RequestHandler
     };
 
     public:
-        RequestHandler(Service& service)
-        : _state(OnBegin)
-        , _ts(0)
-        , _reader(0)
-        , _service(&service)
-        , _proc(0)
-        , _args(0)
-        { }
+        RequestHandler(Service& service);
 
-        ~RequestHandler()
-        {
-            delete _reader;
-            delete _ts;
-            delete _args;
-        }
+        ~RequestHandler();
 
-        std::size_t advance(std::istream& is)
-        {
-            if( ! _reader )
-            {
-                _ts = new TextIStream(is, new Pt::Utf8Codec);
-                _reader = new Xml::XmlReader(*_ts);
-            }
+        std::size_t advance(std::istream& is);
 
-            std::size_t n = _ts->buffer().import();
-            if(n == 0)
-                return n;
+        void finish(std::ostream& out);
 
-            while( _reader->advance() )
-            {
-                const Pt::Xml::Node& node = _reader->get();
-                switch(_state)
-                {
-                    case OnBegin:
-                    {
-                        if(node.type() == Xml::Node::StartElement)
-                        {
-                            _state = OnMethodCallBegin;
-                        }
-                        break;
-                    }
-
-                    case OnMethodCallBegin:
-                    {
-                        if(node.type() == Xml::Node::StartElement)
-                        {
-                            _state = OnMethodNameBegin;
-                        }
-                        break;
-                    }
-
-                    case OnMethodNameBegin:
-                    {
-                        if(node.type() == Xml::Node::Characters)
-                        {
-                            const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-
-                            _proc = _service->procedure( chars.content().narrow() );
-                            if( ! _proc )
-                                throw std::runtime_error("no such procedure");
-
-                            _args = _proc->createArgs();
-                            _state = OnMethodName;
-                        }
-                        break;
-                    }
-
-                    case OnMethodName:
-                    {
-                        if(node.type() == Xml::Node::EndElement)
-                        {
-                            _state = OnMethodNameEnd;
-                        }
-                        break;
-                    }
-
-                    case OnMethodNameEnd:
-                    {
-                        if(node.type() == Xml::Node::StartElement)
-                        {
-                            _state = OnParams;
-                        }
-                        break;
-                    }
-
-                    case OnParams:
-                    {
-                        if( ! _args )
-                            throw std::runtime_error("invalid XML-RPC request");
-
-                        bool finished = _args->compose(node);
-                        if(finished)
-                        {
-                            _state = OnParamsEnd;
-                        }
-
-                        break;
-                    }
-
-                    case OnParamsEnd:
-                    {
-                        if(node.type() == Xml::Node::EndElement)
-                        {
-                            _state = OnMethodCallEnd;
-                        }
-                        break;
-                    }
-
-                    case OnMethodCallEnd:
-                    {
-                        if(node.type() == Xml::Node::EndDocument)
-                        {
-                            _state = OnMethodCallEnd;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            return n;
-        }
-
-        void finish(std::ostream& out)
-        {
-            std::string res;
-
-            if( ! _args || ! _proc )
-                throw std::runtime_error("invalid XML-RPC request");
-
-            _proc->exec(out, *_args);
-        }
-
-        Args* args()
-        { return _args; }
+        Args* args();
 
     private:
        State _state;

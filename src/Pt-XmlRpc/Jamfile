@@ -2,7 +2,8 @@ SubDir TOP src Pt-XmlRpc ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 
-PT_XMLRPC_SOURCES = Service.cpp ;
+PT_XMLRPC_SOURCES = RequestHandler.cpp
+                    Service.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-System Pt-Net Pt ;
