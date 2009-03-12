@@ -59,10 +59,10 @@ class RequestHandler
     };
 
     public:
-        RequestHandler(Service& service, std::istream& is)
+        RequestHandler(Service& service)
         : _state(OnBegin)
-        , _ts(is, new Pt::Utf8Codec)
-        , _reader(_ts)
+        , _ts(0)
+        , _reader(0)
         , _service(&service)
         , _proc(0)
         , _args(0)
@@ -70,18 +70,26 @@ class RequestHandler
 
         ~RequestHandler()
         {
+            delete _reader;
+            delete _ts;
             delete _args;
         }
 
-        std::size_t advance()
+        std::size_t advance(std::istream& is)
         {
-            std::size_t n = _ts.buffer().import();
+            if( ! _reader )
+            {
+                _ts = new TextIStream(is, new Pt::Utf8Codec);
+                _reader = new Xml::XmlReader(*_ts);
+            }
+
+            std::size_t n = _ts->buffer().import();
             if(n == 0)
                 return n;
 
-            while( _reader.advance() )
+            while( _reader->advance() )
             {
-                const Pt::Xml::Node& node = _reader.get();
+                const Pt::Xml::Node& node = _reader->get();
                 switch(_state)
                 {
                     case OnBegin:
@@ -188,11 +196,12 @@ class RequestHandler
 
     private:
        State _state;
-       Pt::TextIStream _ts;
-       Pt::Xml::XmlReader _reader;
+       Pt::TextIStream* _ts;
+       Pt::Xml::XmlReader* _reader;
        Service* _service;
        ServiceProcedure* _proc;
        Args* _args;
+       std::vector<SerializationInfo> _argv;
 };
 
 }

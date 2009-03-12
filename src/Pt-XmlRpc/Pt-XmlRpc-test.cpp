@@ -82,13 +82,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::RemoteMethod<int, int, int> multiply(in, "multiply");
             multiply.begin(2, 3);
 
-            Pt::XmlRpc::RequestHandler req(service, in);
+            Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t n = 0;
             std::size_t contentLength = in.str().length();
             while(n < contentLength)
             {
-                n += req.advance();
+                n += req.advance(in);
             }
 
             std::stringstream out;
@@ -126,6 +126,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "                     <data>";
             in << "                         <value><int>3</int></value>";
             in << "                         <value><int>4</int></value>";
+            in << "                         <value><int>3</int></value>";
+            in << "                         <value><int>4</int></value>";
+            in << "                         <value><int>3</int></value>";
+            in << "                         <value><int>4</int></value>";
+            in << "                         <value><int>3</int></value>";
+            in << "                         <value><int>4</int></value>";
+            in << "                         <value><int>3</int></value>";
+            in << "                         <value><int>4</int></value>";
             in << "                    </data>";
             in << "                </array>";
             in << "            </value>";
@@ -138,16 +146,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             //clock.start();
             //for(int x = 0; x < 5000;++x)
             //{
-            //    in.clear();
-            //    in.seekg(std::ios::beg);
-                Pt::XmlRpc::RequestHandler req(service, in);
+                in.clear();
+                in.seekg(std::ios::beg);
+                Pt::XmlRpc::RequestHandler req(service);
 
                 std::size_t contentLength = in.str().length();
                 //std::cerr << "Request Size: " <<  contentLength << std::endl;
                 std::size_t n = 0;
                 while(n < contentLength)
                 {
-                    n += req.advance();
+                    n += req.advance(in);
                 }
 
                 std::stringstream out;
@@ -187,14 +195,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
-            Pt::XmlRpc::RequestHandler req(service, in);
+            Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t contentLength = in.str().length();
             std::cerr << "Request Size: " <<  contentLength << std::endl;
             std::size_t n = 0;
             while(n < contentLength)
             {
-                n += req.advance();
+                n += req.advance(in);
             }
 
             std::stringstream out;
@@ -233,14 +241,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
-            Pt::XmlRpc::RequestHandler req(service, in);
+            Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t contentLength = in.str().length();
             std::cerr << "Request Size: " <<  contentLength << std::endl;
             std::size_t n = 0;
             while(n < contentLength)
             {
-                n += req.advance();
+                n += req.advance(in);
             }
 
             std::stringstream out;

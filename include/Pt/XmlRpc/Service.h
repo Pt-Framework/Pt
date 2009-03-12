@@ -33,6 +33,7 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Args.h>
+#include <Pt/SerializationInfo.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <string>
@@ -52,6 +53,8 @@ class ServiceProcedure
         {}
 
         virtual Args* createArgs() const = 0;
+
+        virtual void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc) = 0;
 
         virtual void exec(std::ostream& ret, const Args& args) = 0;
 };
@@ -109,6 +112,25 @@ class BasicServiceProcedure<R, C, A1, A2,
         Args* createArgs() const
         {
             return new BasicArgs<V1, V2>();
+        }
+
+        void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc)
+        {
+            if(argc != 2)
+                throw std::invalid_argument("invalid number of arguments");
+
+            typedef typename TypeTraits<A1>::Value Arg1;
+            typedef typename TypeTraits<A2>::Value Arg2;
+            typedef typename TypeTraits<R>::Value RValue;
+
+            Arg1 a1 = Arg1();
+            argv[0] >>= a1;
+
+            Arg2 a2 = Arg2();
+            argv[1] >>= a2;
+
+            RValue r = Method<R, C, A1, A2>::call(a1, a2);
+            result <<= r;
         }
 
         void exec(std::ostream& ret, const Args& a)
