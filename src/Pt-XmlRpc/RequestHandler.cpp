@@ -28,6 +28,7 @@
  */
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/RequestHandler.h>
+#include <Pt/XmlRpc/Service.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/Xml/StartElement.h>

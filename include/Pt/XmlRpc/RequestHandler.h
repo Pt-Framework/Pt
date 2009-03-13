@@ -31,7 +31,6 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Args.h>
-#include <Pt/XmlRpc/Service.h>
 #include <Pt/TextStream.h>
 #include <Pt/Xml/XmlReader.h>
 #include <iostream>
@@ -40,6 +39,9 @@
 namespace Pt {
 
 namespace XmlRpc {
+
+class Service;
+class ServiceProcedure;
 
 class RequestHandler
 {

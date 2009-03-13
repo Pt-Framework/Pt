@@ -32,16 +32,22 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
-#include <Pt/XmlRpc/Args.h>
+#include <Pt/XmlRpc/RequestHandler.h>
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Net/HttpServer.h>
+#include <Pt/TextStream.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Pt {
 
 namespace XmlRpc {
+
+class Formatter;
 
 class ServiceProcedure
 {
@@ -148,7 +154,7 @@ class BasicServiceProcedure<R, C, A1, A2,
 };
 
 
-class PT_XMLRPC_API Service //: public ::Responder
+class PT_XMLRPC_API Service : public Net::HttpService
 {
     public:
         Service();
@@ -164,6 +170,10 @@ class PT_XMLRPC_API Service //: public ::Responder
             this->registerProcedure(name, proc);
         }
 
+        virtual Net::HttpResponder* createResponder();
+
+        virtual void releaseResponder(Net::HttpResponder* resp);
+
     protected:
         void registerProcedure(const std::string& name, ServiceProcedure* proc);
 
@@ -173,90 +183,61 @@ class PT_XMLRPC_API Service //: public ::Responder
 };
 
 
-/*
-
-class HttpSocket : public TcpSocket
+class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 {
+    enum State
+    {
+        OnBegin,
+        OnMethodCallBegin,
+        OnMethodNameBegin,
+        OnMethodName,
+        OnMethodNameEnd,
+        OnParams,
+        OnParamsEnd,
+        OnMethodCallEnd,
+
+        OnParamBegin,
+        OnValueBegin,
+        OnValueEnd,
+        OnParamEnd,
+
+        OnScalarBegin,
+        OnScalar,
+        OnScalarEnd,
+
+        OnStructBegin,
+        OnMemberBegin,
+        OnNameBegin,
+        OnName,
+        OnNameEnd,
+        OnMemberEnd,
+        OnStructEnd,
+
+        OnArrayBegin,
+        OnDataBegin,
+        OnDataEnd,
+        OnArrayEnd
+    };
+
     public:
-        HttpSocket(Selector s, HttpServer server)
-        {
-            _selector.add(*client);
-            selector.add(timer);
-            connect(client.inputReady, *client, &HttpSocket::onInput);
-        }
+        HttpXmlRpcResponder(Service& service);
 
-        void onInput(TcpSocket& server)
-        {
-            if( readHeader )
-            {
-                url = server.read();
-                caller.set(url);
-            }
-            else
-            {
-                size_t n = caller.exec(*this);
-                _timer->start(timeout);
-                ...
+        ~HttpXmlRpcResponder();
 
-                close();
-                delete this;
-            }
-        }
+        std::size_t advance(std::istream& is);
 
-        void onTimeout()
-        {
-             //timeut error
-             close();
-             delete this;
-        }
+        void finish(std::ostream& os);
 
+        static void formatResult(const Pt::SerializationInfo& si, Formatter& formatter);
     private:
-        Timer _timer;
+       State _state;
+       Pt::TextIStream _ts;
+       Pt::Xml::XmlReader* _reader;
+       Service* _service;
+       ServiceProcedure* _proc;
+       std::vector<SerializationInfo> _argv;
+       Pt::SerializationInfo* _current;
 };
-
-
-class HttpServer : public TcpServer
-{
-    public:
-        HttpServer(Selector& selector)
-        : _selector(selector)
-        {
-            _selector.add(*this);
-            connect(connectionPending, *this, &HttpServer::onConnect)
-        }
-
-        void addResponder(const std::string& url, Responder& resp)
-        { _responder.insert(url, &resp); }
-
-        void onConnect(TcpServer& server)
-        {
-            HttpSocket* client = new HttpSocket(_selector, *this);
-
-        }
-
-    private:
-        std::map<std::string, Resopnder*> _responder;
-        Selector* _selector;
-};
-
-
-int multiply(int a, int b);
-
-
-int main()
-{
-    Application app;
-
-    Service service();
-    service.registerMethod( multiply );
-
-    HttpServer server( app.loop() );
-    server.addResponder("Calc", service);
-
-    app.run();
-}
-
-*/
 
 }
 

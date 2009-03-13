@@ -32,7 +32,6 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Client.h"
-#include "Pt/XmlRpc/RequestHandler.h"
 #include <sstream>
 
 #include "Pt/System/Clock.h"
@@ -142,9 +141,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "</methodCall>";
 
 
-            Pt::System::Clock clock;
-            clock.start();
-            for(int x = 0; x < 5000;++x)
+            //Pt::System::Clock clock;
+            //clock.start();
+            //for(int x = 0; x < 5000;++x)
             {
                 in.clear();
                 in.seekg(std::ios::beg);
@@ -170,10 +169,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                     n += resp.advance();
                 }
 
-                //std::cerr << "Result: " << resp.result() << std::endl;
+                std::cerr << "Result: " << resp.result() << std::endl;
             }
-            std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
-            std::exit(1);
+            //std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
+            //std::exit(1);
         }
 
         void ReturnStruct()
