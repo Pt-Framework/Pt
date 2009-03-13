@@ -32,6 +32,34 @@ namespace Pt {
 
 namespace System {
 
+    struct DestructionSentry
+    {
+        DestructionSentry(DestructionSentry*& sentry)
+        : _deleted(false)
+        , _sentry(sentry)
+        {
+           sentry = this;
+        }
+
+        ~DestructionSentry()
+        {
+            if( ! _deleted )
+                this->detach();
+        }
+
+        bool operator!() const
+        { return _deleted; }
+
+        void detach()
+        {
+            _sentry = 0;
+            _deleted = true;
+        }
+
+        bool _deleted;
+        DestructionSentry*& _sentry;
+    };
+
     class IODeviceImpl : public SelectableImpl
     {
         public:
@@ -89,7 +117,7 @@ namespace System {
             fd_set* _rfds;
             fd_set* _wfds;
             fd_set* _efds;
-            bool* _deleted;
+            DestructionSentry* _sentry;
     };
 
 } //namespace System

@@ -42,7 +42,7 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 , _rfds(0)
 , _wfds(0)
 , _efds(0)
-, _deleted(0)
+, _sentry(0)
 { }
 
 
@@ -52,8 +52,8 @@ IODeviceImpl::~IODeviceImpl()
     assert(_wfds == 0);
     assert(_efds == 0);
 
-    if(_deleted)
-        *_deleted = true;
+    if(_sentry)
+        _sentry->detach();
 
     //this->exitSelect();
 }
@@ -319,8 +319,7 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     if( this->fd() < 0)
         return 0;
 
-    bool deleted = false;
-    _deleted = &deleted;
+    DestructionSentry sentry(_sentry);
 
     if ( FD_ISSET(this->fd(), &efds) )
     {
@@ -328,7 +327,7 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         ++avail;
     }
 
-    if(deleted)
+    if( ! sentry )
         return avail;
 
     if( _device.wbuf() && FD_ISSET(this->fd(), &wfds) )
@@ -337,7 +336,7 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         ++avail;
     }
 
-    if(deleted)
+    if( ! sentry )
         return avail;
 
     if( _device.rbuf() && FD_ISSET(this->fd(), &rfds) )
@@ -345,9 +344,6 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         _device.inputReady(_device);
         ++avail;
     }
-
-    if( ! deleted )
-        _deleted = 0;
 
     return avail;
 }
