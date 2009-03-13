@@ -196,7 +196,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                    if(se.name() == L"param")
+                    if(se.name() == "param")
                     {
                         _state = OnParamBegin;
                     }
@@ -204,7 +204,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 else if(node.type() == Xml::Node::EndElement)
                 {
                     const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if(ee.name() == L"params")
+                    if(ee.name() == "params")
                     {
                         _state = OnParamsEnd;
                     }
@@ -231,7 +231,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                    if(se.name() == L"param")
+                    if(se.name() == "param")
                     {
                         _state = OnParamBegin;
                     }
@@ -239,7 +239,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 else if(node.type() == Xml::Node::EndElement)
                 {
                     const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if(ee.name() == L"params")
+                    if(ee.name() == "params")
                     {
                         _state = OnParamsEnd;
                     }
@@ -253,11 +253,11 @@ std::size_t RequestHandler::advance(std::istream& is)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                     //std::cerr << se.name().narrow() << std::endl;
-                    if(se.name() == L"struct")
+                    if(se.name() == "struct")
                     {
                         _state = OnStructBegin;
                     }
-                    else if(se.name() == L"array")
+                    else if(se.name() == "array")
                     {
                         _state = OnArrayBegin;
                     }
@@ -275,17 +275,17 @@ std::size_t RequestHandler::advance(std::istream& is)
                 if(node.type() == Xml::Node::EndElement)
                 {
                     const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if(ee.name() == L"member")
+                    if(ee.name() == "member")
                     { //std::cerr << "OnValueEnd member" << std::endl;
                         _current = _current->parent();
                         _state = OnStructBegin;
                     }
-                    else if(ee.name() == L"data")
+                    else if(ee.name() == "data")
                     { //std::cerr << "OnValueEnd data" << std::endl;
                         _current = _current->parent();
                         _state = OnDataEnd;
                     }
-                    else if(ee.name() == L"param")
+                    else if(ee.name() == "param")
                     { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
                         _state = OnParamEnd;
                     }
@@ -293,7 +293,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                 else if(node.type() == Xml::Node::StartElement)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if(se.name() == L"value")
+                    if(se.name() == "value")
                     { //std::cerr << "OnValueEnd data value" << std::endl;
                         _current = _current->parent();
 

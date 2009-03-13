@@ -665,6 +665,26 @@ inline int basic_string<Pt::Char>::compare(const Pt::Char* str) const
 }
 
 
+inline int basic_string<Pt::Char>::compare(const char* str) const
+{
+    const size_type size = this->size();
+    const size_type osize = std::char_traits<char>::length(str);
+    size_type n = min(size , osize);
+
+    const Pt::Char* s1 = _data->str();
+    while(n-- > 0)
+    {
+        if( *s1 != *str )
+            return *s1 < Pt::Char(*str) ? -1 : +1;
+
+        ++s1;
+        ++str;
+    }
+
+    return static_cast<int>(size - osize);
+}
+
+
 inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const basic_string& str) const
 {
     const size_type size = n;

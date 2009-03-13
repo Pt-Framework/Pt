@@ -253,6 +253,8 @@ class basic_string< Pt::Char > {
 
         int compare(const Pt::Char* str) const;
 
+        int compare(const char* str) const;
+
         int compare(size_type pos, size_type n, const basic_string& str) const;
 
         int compare(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2) const;
@@ -393,6 +395,11 @@ class basic_string< Pt::Char > {
 
     inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) == 0; }
+
+
+    inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) == 0; }
+
 
     inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) < 0; }

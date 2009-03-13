@@ -291,7 +291,7 @@ struct XmlReaderImpl
             if(token.length() < 7)
                 return this;
 
-            if(token == L"[CDATA[")
+            if(token == "[CDATA[")
             {
                 token.clear();
                 return OnCData::instance();
@@ -990,7 +990,7 @@ struct XmlReaderImpl
             if(token.length() < 7)
                 return this;
 
-            if(token == L"DOCTYPE")
+            if(token == "DOCTYPE")
             {
                 return OnDocType::instance();
             }
@@ -1252,22 +1252,17 @@ struct XmlReaderImpl
     {
         virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
         {
-            static const Pt::Char version[] = { 'v', 'e', 'r', 's', 'i', 'o', 'n', 0};
-            static const Pt::Char encoding[] = { 'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g',  0};
-            static const Pt::Char standalone[] = { 's', 't', 'a', 'n', 'd', 'a', 'l', 'o', 'n','e', 0};
-            static const Pt::Char trueval[] = { 't', 'r', 'u', 'e', 0};
-
-            if(reader._attr.name() == version)
+            if(reader._attr.name() == "version")
             {
                 reader._version = reader._attr.value();
             }
-            else if(reader._attr.name() == encoding)
+            else if(reader._attr.name() == "encoding")
             {
                 reader._encoding = reader._attr.value();
             }
-            else if(reader._attr.name() == standalone)
+            else if(reader._attr.name() == "standalone")
             {
-                if(reader._attr.value() == trueval)
+                if(reader._attr.value() == "true")
                     reader._standalone = true;
             }
 
@@ -1400,9 +1395,7 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            static const Pt::Char xml[] = { 'x', 'm', 'l', 0};
-
-            if( reader._procInstr.target() == xml )
+            if( reader._procInstr.target() == "xml" )
                 return OnXmlDeclBeforeAttr::instance();
 
             return OnProcessingInstructionData::instance();
