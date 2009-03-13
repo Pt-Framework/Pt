@@ -82,7 +82,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
 
         void onOutput(Pt::System::StreamBuffer& buffer)
         {
-            if (buffer.out_avail() != 8192)
+            if ( buffer.out_avail() )
             {
                 buffer.beginWrite();
             }

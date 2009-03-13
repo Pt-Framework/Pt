@@ -142,7 +142,7 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
 
     sb.beginWrite();
 
-    if (sb.out_avail() != 8192)
+    if ( sb.out_avail() )
     {
         _timer.start(_server.writeTimeout());
     }

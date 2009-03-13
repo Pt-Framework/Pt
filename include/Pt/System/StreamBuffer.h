@@ -47,9 +47,9 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
         std::streamsize out_avail()
         {
             if( this->pptr() )
-                return this->epptr() - this->pptr();
+                return this->pptr() - this->pbase();
 
-             return this->showmanyp();
+             return this->showfull();
         }
 
      protected:
@@ -62,7 +62,7 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
             return 1;
         }
 
-        virtual std::streamsize showmanyp()
+        virtual std::streamsize showfull()
         { return 0; }
 };
 
@@ -94,7 +94,7 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
     protected:
         virtual int sync();
 
-        virtual std::streamsize showmanyp();
+        virtual std::streamsize showfull();
 
         virtual std::streamsize xspeekn(char* buffer, std::streamsize size);
 

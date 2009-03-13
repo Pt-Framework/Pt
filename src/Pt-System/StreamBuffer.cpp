@@ -199,7 +199,7 @@ StreamBuffer::int_type StreamBuffer::underflow()
 }
 
 
-std::streamsize StreamBuffer::showmanyp()
+std::streamsize StreamBuffer::showfull()
 {
     return 0;
 }
