@@ -110,9 +110,11 @@ inline void ThreadTest::Attached()
 inline void ThreadTest::Detached()
 {
     TestThread* thread = new TestThread(*this);
-    thread->start();
 
     _mutex.lock();
+
+    thread->start();
+
     _cond.wait(_mutex);
 
     PT_UNIT_ASSERT( _flag );
