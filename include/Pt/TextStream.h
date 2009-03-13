@@ -81,6 +81,8 @@ namespace Pt {
              */
             TextIStream(std::istream& is, Codec* codec);
 
+            TextIStream(Codec* codec);
+
             //! @brief Destructs this object freeing the internal buffer.
             ~TextIStream();
     };
@@ -109,6 +111,8 @@ namespace Pt {
              */
             TextOStream(std::ostream& os, Codec* codec);
 
+            TextOStream(Codec* codec);
+
             //! @brief Destructs this object freeing the internal buffer.
             ~TextOStream();
     };
@@ -136,6 +140,8 @@ namespace Pt {
              * @param codec The codec which is used to convert data from or to the external device.
              */
             TextStream(std::iostream& ios, Codec* codec);
+
+            TextStream(Codec* codec);
 
             //! @brief Destructs this object freeing the internal buffer.
             ~TextStream();

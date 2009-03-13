@@ -68,7 +68,7 @@ void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
 
 RequestHandler::RequestHandler(Service& service)
 : _state(OnBegin)
-, _ts(0)
+, _ts( new Pt::Utf8Codec )
 , _reader(0)
 , _service(&service)
 , _proc(0)
@@ -81,7 +81,6 @@ RequestHandler::RequestHandler(Service& service)
 RequestHandler::~RequestHandler()
 {
     delete _reader;
-    delete _ts;
     delete _args;
 }
 
@@ -90,11 +89,11 @@ std::size_t RequestHandler::advance(std::istream& is)
 {
     if( ! _reader )
     {
-        _ts = new TextIStream(is, new Pt::Utf8Codec);
-        _reader = new Xml::XmlReader(*_ts);
+        _ts.attach(is);
+        _reader = new Xml::XmlReader(_ts);
     }
 
-    std::size_t n = _ts->buffer().import();
+    std::size_t n = _ts.buffer().import();
     if(n == 0)
         return n;
 

@@ -89,7 +89,7 @@ class RequestHandler
 
     private:
        State _state;
-       Pt::TextIStream* _ts;
+       Pt::TextIStream _ts;
        Pt::Xml::XmlReader* _reader;
        Service* _service;
        ServiceProcedure* _proc;

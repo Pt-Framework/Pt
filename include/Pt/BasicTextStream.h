@@ -87,6 +87,13 @@ namespace Pt {
                 init(&_buffer);
             }
 
+            BasicTextIStream(CodecType* codec)
+            : std::basic_istream<intern_type>(0)
+            , _buffer( 0, codec )
+            {
+                init(&_buffer);
+            }
+
             //! @brief Deletes to codec.
             ~BasicTextIStream()
             {  }
@@ -163,6 +170,11 @@ namespace Pt {
             BasicTextOStream(StreamType& os, CodecType* codec)
             : std::basic_ostream<intern_type>(0)
             , _buffer( &os , codec )
+            { init(&_buffer); }
+
+            BasicTextOStream(CodecType* codec)
+            : std::basic_ostream<intern_type>(0)
+            , _buffer( 0 , codec )
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
@@ -242,6 +254,11 @@ namespace Pt {
             BasicTextStream(StreamType& ios, CodecType* codec)
             : std::basic_iostream<intern_type>(0)
             , _buffer( &ios, codec)
+            { init(&_buffer); }
+
+            BasicTextStream(CodecType* codec)
+            : std::basic_iostream<intern_type>(0)
+            , _buffer(0, codec)
             { init(&_buffer); }
 
             //! @brief Deletes to codec.
