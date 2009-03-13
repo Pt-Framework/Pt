@@ -90,11 +90,52 @@ class PT_XMLRPC_API Client
 
 
 /*
+
+class RemoteService
+{
+    public:
+        virtual std::ostream& out() = 0;
+        virtual std::istream& in() = 0;
+};
+
 int main()
 {
     Client client("Calc");
 
     RemoteMethod<int, int, int> multiply(client, "multiply");
+
+    HttpRemoteService service("tpfd1", 8080, "/XmlRpc");
+    RawSocketRemoteService service2("tpfp1", 3456);
+
+    RemoteMethod<int, int, int> multiply(service, "multiply");
+
+    multiply.begin(2, 3);
+    // ... wait
+    int r = multiply.result();
+
+
+
+
+
+
+
+
+
+
+    RemoteMethod<int, int, int> multiplyTpfd1(tpfd1, "multiply");
+    RemoteMethod<int, int, int> multiplyTpfd2(tpfd2, "multiply");
+
+    int j1 = multiplyTpfd1(2, 3);
+    int j2 = multiplyTpfd2(2, 3);
+
+    multiplyTpfd1.begin(2, 3);
+    multiplyTpfd2.begin(2, 3);
+
+    int j1 = multiplyTpfd1.result();
+    int j2 = multiplyTpfd2.result();
+
+
+
     int j = multiply(2, 3);
 
     multiply.begin(2, 3);
