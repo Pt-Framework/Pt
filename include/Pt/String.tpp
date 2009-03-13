@@ -666,7 +666,7 @@ inline int basic_string<Pt::Char>::compare(const Pt::Char* str) const
 
 
 inline int basic_string<Pt::Char>::compare(const char* str) const
-{
+/*{
     const size_type size = this->size();
     const size_type osize = std::char_traits<char>::length(str);
     size_type n = min(size , osize);
@@ -682,6 +682,19 @@ inline int basic_string<Pt::Char>::compare(const char* str) const
     }
 
     return static_cast<int>(size - osize);
+}*/
+{
+    const Pt::Char* self = _data->str();
+    while(*self && *str)
+    {
+        if( *self != *str )
+            return *self < Pt::Char(*str) ? -1 : +1;
+
+        ++self;
+        ++str;
+    }
+
+    return static_cast<int>( *self - Pt::Char(*str) );
 }
 
 
