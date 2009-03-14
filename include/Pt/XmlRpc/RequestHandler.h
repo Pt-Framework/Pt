@@ -43,7 +43,7 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
-class RequestHandler
+class PT_XMLRPC_API RequestHandler
 {
     enum State
     {
