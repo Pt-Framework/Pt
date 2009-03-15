@@ -81,6 +81,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::RemoteMethod<int, int, int> multiply(in, "multiply");
             multiply.begin(2, 3);
 
+            in.seekg(std::ios::beg);
             Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t n = 0;
@@ -93,6 +94,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
+            out.seekg(std::ios::beg);
             Pt::XmlRpc::ResponseHandler<int> resp(out);
 
             n = 0;
@@ -160,6 +162,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 std::stringstream out;
                 req.finish(out);
 
+                out.seekg(std::ios::beg);
                 Pt::XmlRpc::ResponseHandler<int> resp(out);
 
                 contentLength = out.str().length();
@@ -194,6 +197,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
+            in.seekg(std::ios::beg);
             Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t contentLength = in.str().length();
@@ -207,6 +211,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
+            out.seekg(std::ios::beg);
             Pt::XmlRpc::ResponseHandler<Color> resp(out);
 
             contentLength = out.str().length();
@@ -240,6 +245,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             in << "      </params>";
             in << "   </methodCall>";
  
+            in.seekg(std::ios::beg);
             Pt::XmlRpc::RequestHandler req(service);
 
             std::size_t contentLength = in.str().length();
@@ -253,6 +259,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::stringstream out;
             req.finish(out);
 
+            out.seekg(std::ios::beg);
             Pt::XmlRpc::ResponseHandler< std::vector<int> > resp(out);
 
             contentLength = out.str().length();
