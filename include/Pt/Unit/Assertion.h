@@ -81,6 +81,14 @@ namespace Unit {
 
     #define PT_UNIT_ASSERT_MSG(cond, what) if( !(cond) ) throw Pt::Unit::Assertion((what), PT_SOURCEINFO);
 
+    #define PT_UNIT_ASSERT_EQUALS(value1, value2) \
+        if( ! ((value1) == (value2)) ) \
+        { \
+          std::ostringstream _Pt_msg; \
+          _Pt_msg << "not equal: value1 (" #value1 ")=<" << value1 << "> value2 (" #value2 ")=<" << value2 << '>'; \
+          throw Pt::Unit::Assertion(_Pt_msg.str(), PT_SOURCEINFO); \
+        }
+
     #define PT_UNIT_ASSERT_THROW(cond, EX) \
         try { \
             cond; \
