@@ -58,7 +58,7 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
-        virtual Args* createArgs() const = 0;
+        //virtual Args* createArgs() const = 0;
 
         virtual void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc) = 0;
 
@@ -68,40 +68,10 @@ class ServiceProcedure
 
 template < typename R,
            class C,
-           typename A1 = Pt::Void,
-           typename A2 = Pt::Void,
-           typename A3 = Pt::Void,
-           typename A4 = Pt::Void,
-           typename A5 = Pt::Void,
-           typename A6 = Pt::Void,
-           typename A7 = Pt::Void,
-           typename A8 = Pt::Void >
-class BasicServiceProcedure : public Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>
-                            , public ServiceProcedure
-{
-    public:
-        typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
-
-    public:
-        BasicServiceProcedure(C& object, MemFuncT ptr)
-        : Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>(object, ptr)
-        , ServiceProcedure()
-        {}
-};
-
-
-template < typename R,
-           class C,
            typename A1,
            typename A2>
-class BasicServiceProcedure<R, C, A1, A2,
-                            Pt::Void,
-                            Pt::Void,
-                            Pt::Void,
-                            Pt::Void,
-                            Pt::Void,
-                            Pt::Void> : public Method<R, C, A1, A2>
-                                      , public ServiceProcedure
+class BasicServiceProcedure : public Method<R, C, A1, A2>
+                            , public ServiceProcedure
 {
     public:
         typedef R (C::*MemFuncT)(A1, A2);
@@ -118,6 +88,23 @@ class BasicServiceProcedure<R, C, A1, A2,
         Args* createArgs() const
         {
             return new BasicArgs<V1, V2>();
+        }
+
+        ITypeHandler* beginCall()
+        {
+            // return null terminated array of type handler pointers
+            return 0;
+        }
+
+        ITypeHandler* endCall()
+        {
+            // array of arg handler is fileld
+            // R result = Method<R, C, A1, A2>::call(a1, a2);
+            // rhandler.begin
+            // return rhandler;
+
+            // return ptr to prepared return type handler
+            return 0;
         }
 
         void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc)
@@ -161,6 +148,7 @@ class PT_XMLRPC_API Service : public Net::HttpService
 
         virtual ~Service();
 
+        // TODO cache service procedures and clone on demand
         ServiceProcedure* procedure(const std::string& name);
 
         template <typename R, class C, typename A1, typename A2>

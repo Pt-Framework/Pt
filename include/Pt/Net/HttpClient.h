@@ -79,7 +79,7 @@ class HttpClient : public Pt::Connectable
         TcpSocket _socket;
         System::IOStream _stream;
         bool _readHeader;
-        std::size_t _contentSize;
+        long _contentSize;
         bool _requestReady;
         bool _executed;
 

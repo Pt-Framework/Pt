@@ -131,7 +131,7 @@ std::size_t RequestHandler::advance(std::istream& is)
                     if( ! _proc )
                         throw std::runtime_error("no such procedure");
 
-                    _args = _proc->createArgs();
+                    //_args = _proc->createArgs();
                     _state = OnMethodName;
                 }
                 break;

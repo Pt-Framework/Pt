@@ -49,6 +49,12 @@ class ITypeHandler
         virtual ~ITypeHandler()
         {}
 
+        void setParent(ITypeHandler* parent)
+        { _parent = parent; }
+
+        ITypeHandler* parent()
+        { return _parent; }
+
         virtual void setValue(const Pt::String& value) = 0;
 
         virtual ITypeHandler* beginMember(const std::string& name) = 0;
@@ -58,12 +64,6 @@ class ITypeHandler
         virtual void finish() = 0;
 
         virtual void decompose(Formatter& f) = 0;
-
-        void setParent(ITypeHandler* parent)
-        { _parent = parent; }
-
-        ITypeHandler* parent()
-        { return _parent; }
 
     private:
         ITypeHandler* _parent;

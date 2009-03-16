@@ -32,6 +32,9 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/ResponseHandler.h"
+#include "Pt/Net/HttpServer.h"
+#include "Pt/System/EventLoop.h"
 #include <sstream>
 
 #include "Pt/System/Clock.h"
@@ -66,7 +69,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
+            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer2);
             this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
             this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
             this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
@@ -78,8 +81,18 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
 
             std::stringstream in;
-            Pt::XmlRpc::RemoteMethod<int, int, int> multiply(in, "multiply");
-            multiply.begin(2, 3);
+            in << "<?xml version=\"1.0\"?>\n";
+            in << "<methodCall>\n";
+            in << "   <methodName>multiply</methodName>\n";
+            in << "   <params>\n";
+            in << "     <param>\n";
+            in << "         <value><i4>10</i4></value>\n";
+            in << "         </param>\n";
+            in << "     <param>\n";
+            in << "         <value><i4>20</i4></value>\n";
+            in << "         </param>\n";
+            in << "      </params>\n";
+            in << "   </methodCall>\n";
 
             in.seekg(std::ios::beg);
             Pt::XmlRpc::RequestHandler req(service);
@@ -105,7 +118,29 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             }
 
             std::cerr << "Result: " << resp.result() << std::endl;
-            PT_UNIT_ASSERT(resp.result() == 6);
+            PT_UNIT_ASSERT(resp.result() == 200);
+        }
+
+
+        void Integer2()
+        {
+            Pt::System::EventLoop loop;
+            loop.setIdleTimeout(2000);
+            connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
+
+            std::cerr << "\nLISTEN: " << "127.0.0.1:8001" << std::endl;
+            Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
+
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
+
+            Pt::XmlRpc::RemoteService rserv(loop, "127.0.0.1", 8001, "/Calc");
+            Pt::XmlRpc::RemoteMethod<int, int, int> multiply(rserv, "multiply");
+            multiply.begin(2, 3);
+
+           loop.run();
+
+           std::cerr << "\nRESULT: " << multiply.result() << std::endl;
         }
 
         void VectorOfInt()

@@ -29,15 +29,78 @@
 #define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Formatter.h>
-#include <Pt/XmlRpc/ResponseHandler.h>
+#include <Pt/XmlRpc/Serializer.h>
+#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpClient.h>
+#include <Pt/Connectable.h>
+#include <Pt/TextStream.h>
 #include <string>
 #include <cstddef>
 
 namespace Pt {
 
+namespace System {
+
+class SelectorBase;
+
+}
+
 namespace XmlRpc {
+
+class PT_XMLRPC_API RemoteService : public Pt::Connectable
+{
+    enum State
+    {
+        OnBegin,
+        OnMethodResponseBegin,
+        OnParams,
+        OnParamsEnd,
+        OnMethodResponseEnd
+    };
+
+    public:
+        RemoteService(System::SelectorBase& selector, const std::string& addr, unsigned short port, const std::string& url);
+
+        virtual ~RemoteService();
+
+        void beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
+        {
+            _request.body() << "<?xml version=\"1.0\"?>\n";
+            _request.body() << "<methodCall>\n";
+            _request.body() << "<methodName>" << name << "</methodName>\n";
+            _request.body() << "<params>\n";
+
+            _request.body() << "<param>\n";
+            a1.decompose(_serializer);
+            _request.body() << "</param>\n";
+
+            _request.body() << "<param>\n";
+            a2.decompose(_serializer);
+            _request.body() << "</param>\n";
+
+            _request.body() << "</params>\n";
+            _request.body() << "</methodCall>\n";
+
+            _client.beginExecute(_request);
+            _deserializer.begin(r);
+        }
+
+    protected:
+        std::size_t onReplyBody(Net::HttpClient& client);
+
+    private:
+        State _state;
+        std::string _url;
+        Net::HttpClient _client;
+        Net::HttpRequest _request;
+        TextIStream _ts;
+        Xml::XmlReader _reader;
+        Serializer _serializer;
+        Deserializer _deserializer;
+        ITypeHandler* _rhandler;
+};
+
 
 template <typename R,
           typename A1,
@@ -45,119 +108,33 @@ template <typename R,
 class PT_XMLRPC_API RemoteMethod
 {
     public:
-        RemoteMethod(std::ostream& os, const std::string& name)
+        RemoteMethod(RemoteService& service, const std::string& name)
         : _name(name)
-        , _os(&os)
-        {}
+        , _service(&service)
+        { }
 
-        virtual ~RemoteMethod()
+        ~RemoteMethod()
         {}
 
         void begin(const A1& a1, const A2& a2)
         {
-            _formatter.begin(*_os, _name);
-            _formatter.beginParam();
             _a1handler.begin(a1);
-            _a1handler.decompose(_formatter);
-            _formatter.finishParam();
-
-            _formatter.beginParam();
             _a2handler.begin(a2);
-            _a2handler.decompose(_formatter);
-            _formatter.finishParam();
-
-            _formatter.finish();
+            _rhandler.begin(_result);
+            _service->beginCall(_rhandler, _name, _a1handler, _a2handler);
         }
 
-        R result()
-        { }
+        const R& result()
+        { return _result; }
 
     private:
-        RequestFormatter _formatter;
         std::string _name;
-        std::ostream* _os;
+        RemoteService* _service;
+        R _result;
         TypeHandler<R> _rhandler;
         TypeHandler<A1> _a1handler;
         TypeHandler<A1> _a2handler;
 };
-
-
-class PT_XMLRPC_API Client
-{
-    public:
-        Client();
-
-        virtual ~Client();
-};
-
-
-class PT_XMLRPC_API RemoteService
-{
-    public:
-        RemoteService(const std::string& addr, unsigned short port, const std::string& url);
-
-        virtual ~RemoteService();
-
-    private:
-        TextIStream _ts;
-        Xml::XmlReader _reader;
-        Net::HttpClient _client;
-};
-
-/*
-
-class RemoteService
-{
-    public:
-        virtual std::ostream& out() = 0;
-        virtual std::istream& in() = 0;
-};
-
-int main()
-{
-    Client client("Calc");
-
-    RemoteMethod<int, int, int> multiply(client, "multiply");
-
-    HttpRemoteService service("tpfd1", 8080, "/XmlRpc");
-    RawSocketRemoteService service2("tpfp1", 3456);
-
-    RemoteMethod<int, int, int> multiply(service, "multiply");
-
-    multiply.begin(2, 3);
-    // ... wait
-    int r = multiply.result();
-
-
-
-
-
-
-
-
-
-
-    RemoteMethod<int, int, int> multiplyTpfd1(tpfd1, "multiply");
-    RemoteMethod<int, int, int> multiplyTpfd2(tpfd2, "multiply");
-
-    int j1 = multiplyTpfd1(2, 3);
-    int j2 = multiplyTpfd2(2, 3);
-
-    multiplyTpfd1.begin(2, 3);
-    multiplyTpfd2.begin(2, 3);
-
-    int j1 = multiplyTpfd1.result();
-    int j2 = multiplyTpfd2.result();
-
-
-
-    int j = multiply(2, 3);
-
-    multiply.begin(2, 3);
-    // ... wait
-    int r = multiply.result();
-}
-*/
 
 }
 
