@@ -148,6 +148,10 @@ class PT_XML_API XmlReader
 
         ~XmlReader();
 
+        void reset(std::basic_istream<Char>& is, int flags);
+
+        void reset(std::istream& is, int flags);
+
         const Pt::String& documentVersion() const;
 
         const Pt::String& documentEncoding() const;

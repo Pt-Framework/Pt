@@ -1519,6 +1519,39 @@ struct XmlReaderImpl
         delete _buffer;
     }
 
+    void reset(std::basic_istream<Char>& is, int flags)
+    {
+        delete _buffer;
+        _textBuffer = is.rdbuf();
+
+        _state = XmlReaderImpl::OnDocumentBegin::instance();
+        _flags = flags;
+        _version.clear();
+        _encoding.clear();
+        _standalone = true;
+        _depth = 0;
+        _line = 1;
+        _state = 0;
+        _current = 0;
+    }
+
+    void reset(std::istream& is, int flags)
+    {
+        delete _buffer;
+        _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+        _textBuffer = _buffer;
+
+        _state = XmlReaderImpl::OnDocumentBegin::instance();
+        _flags = flags;
+        _version.clear();
+        _encoding.clear();
+        _standalone = true;
+        _depth = 0;
+        _line = 1;
+        _state = 0;
+        _current = 0;
+    }
+
     const Pt::String& version() const
     { return _version; }
 
@@ -1638,6 +1671,18 @@ XmlReader::XmlReader(std::basic_istream<Char>& is, int flags)
 XmlReader::~XmlReader()
 {
     delete _impl;
+}
+
+
+void XmlReader::reset(std::basic_istream<Char>& is, int flags)
+{
+    _impl->reset(is, flags);
+}
+
+
+void XmlReader::reset(std::istream& is, int flags)
+{
+    _impl->reset(is, flags);
 }
 
 
