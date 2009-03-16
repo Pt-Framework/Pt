@@ -98,7 +98,7 @@ void HttpReply::onOutput(System::StreamBuffer& sb)
 
 void HttpReply::onInput(System::StreamBuffer& sb)
 {
-    _readHeader= true; // TODO: parse header first
+    _readHeader = false; // TODO: parse header first
 
     if (_readHeader)
     {

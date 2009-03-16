@@ -114,11 +114,8 @@ class HttpReply : public Pt::Connectable
 
         void setSelector(System::SelectorBase& selector);
 
-       std::string getHeader(const std::string& key) const
-       { return std::string(); }
-
-        std::ostream& out()  // request body is written here
-        { return _request->body(); }
+        std::string getHeader(const std::string& key) const
+        { return std::string(); }
 
         void wait(std::size_t msecs);
 
