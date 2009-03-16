@@ -30,6 +30,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Net/HttpServer.h"
+#include "Pt/Net/HttpClient.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/EventLoop.h"
 #include <string>
@@ -40,19 +41,14 @@ class HttpServerTest : public Pt::Unit::TestSuite
         HttpServerTest()
         : Pt::Unit::TestSuite("HttpServerTest")
         {
-            this->registerMethod( "serverInstance", *this,
-                                  &HttpServerTest::serverInstance);
+            this->registerMethod( "serverInstance", *this, &HttpServerTest::serverInstance);
         }
 
         void setUp()
-        {
-            clientStream = new Pt::System::IOStream();
-        }
+        { }
 
         void tearDown()
-        {
-            delete clientStream;
-        }
+        { }
 
         void serverInstance()
         {
@@ -62,46 +58,40 @@ class HttpServerTest : public Pt::Unit::TestSuite
 
             Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
 
-            Pt::Net::TcpSocket client;
-            clientStream->attachDevice(client);
-            client.beginConnect("127.0.0.1", 8001);
-            connect(client.connected, *this, &HttpServerTest::onConnect);
-            connect(clientStream->buffer().outputReady, *this, &HttpServerTest::onOutput);
-            connect(clientStream->buffer().inputReady, *this, &HttpServerTest::onInput);
-            loop.add(client);
+            Pt::Net::HttpReply reply;
+            reply.setSelector(loop);
+            connect(reply.headerReceived, *this, &HttpServerTest::onReplyHeader);
+            connect(reply.replyReceived, *this, &HttpServerTest::onReply);
+
+            Pt::Net::HttpRequest request("127.0.0.1", 8001, "/index.html");
+            request.setHeader("foo", "bar");
+            reply.beginExecute(request);
 
             loop.run();
         }
 
     private:
-        void onConnect(Pt::Net::TcpSocket& socket)
+        void onReplyHeader(Pt::Net::HttpReply& reply)
         {
-            *clientStream << "GET /foo HTTP/1.0\r\n\r\n";
-            clientStream->buffer().beginWrite();
+            std::cout << "Content-Size=" << reply.getHeader("Content-Size") << std::endl;
         }
 
-        void onOutput(Pt::System::StreamBuffer& buffer)
+        std::size_t onReply(Pt::Net::HttpReply& reply)
         {
-            if ( buffer.out_avail() )
+            std::size_t ret = 0;
+            while ( reply.in().rdbuf()->in_avail() )
             {
-                buffer.beginWrite();
-            }
-            else
-            {
-                buffer.beginRead();
-            }
-        }
-
-        void onInput(Pt::System::StreamBuffer& buffer)
-        {
-            while ( buffer.in_avail() )
-            {
-                char ch = buffer.sbumpc();
+                char ch;
+                reply.in().get(ch);
+                ++ret;
                 std::cout << ch;
             }
-        }
 
-        Pt::System::IOStream* clientStream;
+            if( reply.isReady() )
+                std::cout << "THE END" << std::endl;
+
+            return ret;
+        }
 };
 
 Pt::Unit::RegisterTest<HttpServerTest> register_HttpServerTest;

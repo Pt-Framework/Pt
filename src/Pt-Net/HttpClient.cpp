@@ -33,6 +33,11 @@ namespace Pt {
 namespace Net {
 
 HttpReply::HttpReply()
+: _request(0)
+, _readHeader(true)
+, _contentSize(0)
+, _requestReady(false)
+, _executed(false)
 {
     _stream.attachDevice(_socket);
     connect(_socket.connected, *this, &HttpReply::onConnect);
@@ -40,17 +45,31 @@ HttpReply::HttpReply()
     connect(_stream.buffer().inputReady, *this, &HttpReply::onInput);
 }
 
+
+void HttpReply::setSelector(System::SelectorBase& selector)
+{
+    selector.add(_socket);
+}
+
+
 void HttpReply::beginExecute(HttpRequest& request)
 {
     _requestReady = false;
-    _socket.beginConnect(request.getServer(), request.getPort());
+    _socket.beginConnect( request.server(), request.port() );
     _request = &request;
 }
 
+
+void HttpReply::wait(std::size_t msecs)
+{
+    _socket.wait(msecs);
+}
+
+
 void HttpReply::onConnect(TcpSocket& socket)
 {
-    _stream << _request->getMethod() << ' '
-            << _request->getUrl() << " HTTP/1.1\r\n";
+    _stream << _request->method() << ' '
+            << _request->url() << " HTTP/1.1\r\n";
 
     for (HttpRequest::Headers::const_iterator it = _request->_headers.begin();
         it != _request->_headers.end(); ++it)
@@ -63,34 +82,45 @@ void HttpReply::onConnect(TcpSocket& socket)
     _stream.buffer().beginWrite();
 }
 
-void HttpReply::onOutput(StreamBuffer& sb)
+
+void HttpReply::onOutput(System::StreamBuffer& sb)
 {
-    if (sb.out_avail() > 0)
+    if( sb.out_avail() > 0 )
+    {
         sb.beginWrite();
+    }
+    else
+    {
+        sb.beginRead();
+    }
 }
 
-void HttpReply::onInput(StreamBuffer& sb)
+
+void HttpReply::onInput(System::StreamBuffer& sb)
 {
+    _readHeader= true; // TODO: parse header first
+
     if (_readHeader)
     {
         // TODO parse reply
-        while (sb.in_avail() > 0)
+        while( sb.in_avail() > 0 )
             sb.sbumpc();
 
-        if (ready)
+        bool ready = true;
+        if( ready )
         {
             _contentSize = 0;
             headerReceived(*this);
             _readHeader = false;
 
-            if (sb.in_avail() > 0)
+            if( sb.in_avail() > 0 )
                 replyReceived(*this);
         }
     }
     else
     {
         _contentSize -= replyReceived(*this);
-        if (_contentSize <= 0)
+        if( _contentSize <= 0 )
             _requestReady = true;
     }
 }

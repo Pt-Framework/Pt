@@ -35,9 +35,11 @@
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
+#include <Pt/Delegate.h>
 #include <string>
-#include <cstddef>
+#include <sstream>
 #include <map>
+#include <cstddef>
 
 namespace Pt {
 
@@ -47,56 +49,89 @@ class HttpRequest
 {
         friend class HttpReply;
 
+        std::string _server;
+        unsigned short _port;
+        std::string _url;
         std::ostringstream _body;
         typedef std::map<std::string, std::string> Headers;
         Headers _headers;
 
     public:
-        HttpRequest(const std::string& server, unsigned short int port, const std::string& url);
+        HttpRequest(const std::string& server, unsigned short port, const std::string& url)
+        : _server(server)
+        , _port(port)
+        , _url(url)
+        {}
 
-        void setHeader(const std::string& key, const std::string& value);
-        void setUrl(const std::string& url);
-        std::string getHeader(const std::string& key) const;
+        const std::string& server() const
+        { return _server; }
 
-        std::ostream& body()   { return _body; }
+        unsigned short port() const
+        { return _port; }
+
+        const std::string& url() const
+        { return _url; }
+
+        void setUrl(const std::string& url)
+        {}
+
+        std::string method() const
+        { return "GET"; }
+
+        void setHeader(const std::string& key, const std::string& value)
+        {}
+
+        std::string getHeader(const std::string& key) const
+        { return std::string(); }
+
+        std::ostream& body()
+        { return _body; }
 
 };
 
-class HttpReply
+class HttpReply : public Pt::Connectable
 {
         HttpRequest* _request;
         TcpSocket _socket;
-        IOStream _stream;
+        System::IOStream _stream;
+        bool _readHeader;
         std::size_t _contentSize;
         bool _requestReady;
+        bool _executed;
 
+        typedef std::map<std::string, std::string> Headers;
+        Headers _headers;
+
+    protected:
         void onConnect(TcpSocket& socket);
-        void onOutput(StreamBuffer& sb);
-        void onInput(StreamBuffer& sb);
+        void onOutput(System::StreamBuffer& sb);
+        void onInput(System::StreamBuffer& sb);
 
     public:
         HttpReply();
 
         void beginExecute(HttpRequest& request);
 
-        void setSelector(SelectorBase& selector);
+        void setSelector(System::SelectorBase& selector);
+
+       std::string getHeader(const std::string& key) const
+       { return std::string(); }
 
         std::ostream& out()  // request body is written here
-            { return _request.body(); }
+        { return _request->body(); }
 
-        void wait();
+        void wait(std::size_t msecs);
 
         std::istream& in()   // reply body is received here
         {
-            if (!_executed)
-                wait();
-            return reply.body();
+            return _stream;
         }
 
         bool isReady() const   { return _requestReady; }
 
         Signal<HttpReply&> headerReceived;
-        Delegate<std::size_t, HttpReply&> replyReceived;
+
+        Pt::Delegate<std::size_t, HttpReply&> replyReceived;
 };
 
 } // namespace Net
