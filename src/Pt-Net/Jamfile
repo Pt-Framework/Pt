@@ -11,6 +11,7 @@ SharedLibrary Pt-Net : $(PT_NET_IMPL)
                        TcpServer.cpp
                        TcpSocket.cpp
                        HttpClient.cpp
+                       HttpMessage.cpp
                        HttpServer.cpp
                        HttpParser.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;

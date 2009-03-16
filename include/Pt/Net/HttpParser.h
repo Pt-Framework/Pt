@@ -31,13 +31,13 @@
 
 #include <Pt/Net/Api.h>
 #include <string>
-#include <iosfwd>
+#include <iostream>
 
 namespace Pt {
 
 namespace Net {
 
-class PT_NET_API HttpRequestParser
+class PT_NET_API HttpHeaderParser
 {
     public:
         class PT_NET_API Event
@@ -49,11 +49,12 @@ class PT_NET_API HttpRequestParser
                 virtual void onHttpVersion(unsigned major, unsigned minor);
                 virtual void onKey(const std::string& key);
                 virtual void onValue(const std::string& value);
+                virtual void onHttpReturn(unsigned ret, const std::string& text);
                 virtual void onEnd();
         };
 
     private:
-        typedef void (HttpRequestParser::*state_type)(char);
+        typedef void (HttpHeaderParser::*state_type)(char);
 
         void state_cmd0(char ch);
         void state_cmd(char ch);
@@ -77,6 +78,18 @@ class PT_NET_API HttpRequestParser
         void state_hfieldbody_cr(char ch);
         void state_hfieldbody_crlf(char ch);
         void state_hend_cr(char ch);
+
+        void state_cl_protocol0(char ch);
+        void state_cl_protocol(char ch);
+        void state_cl_version0(char ch);
+        void state_cl_version_major(char ch);
+        void state_cl_version_major_e(char ch);
+        void state_cl_version_minor(char ch);
+        void state_cl_httpresult0(char ch);
+        void state_cl_httpresult(char ch);
+        void state_cl_httpresulttext(char ch);
+        void state_cl_httpresult_cr(char ch);
+
         void state_end(char ch);
         void state_error(char ch);
 
@@ -84,29 +97,33 @@ class PT_NET_API HttpRequestParser
         Event& ev;
 
         std::string token;
+        unsigned value;
 
     public:
-        HttpRequestParser(Event& ev_, bool client)
-            : state(client ? &HttpRequestParser::state_h0 : &HttpRequestParser::state_cmd0),
+        HttpHeaderParser(Event& ev_, bool client)
+            : state(client ? &HttpHeaderParser::state_cl_protocol0 : &HttpHeaderParser::state_cmd0),
               ev(ev_)
             { }
 
         /// parse as many characters as available in buffer without blocking
-        std::size_t advance(std::istream& is);
+        std::size_t advance(std::streambuf& sb);
+
+        std::size_t advance(std::istream& is)
+        { return advance(*is.rdbuf()); }
 
         /// parses a single character and returns true, if message is finished
         bool parse(char ch)
         {
             (this->*state)(ch);
-            return state == &HttpRequestParser::state_end || state == &HttpRequestParser::state_error;
+            return state == &HttpHeaderParser::state_end || state == &HttpHeaderParser::state_error;
         }
 
-        bool end() const    { return state == &HttpRequestParser::state_end; }
-        bool fail() const   { return state == &HttpRequestParser::state_error; }
+        bool end() const    { return state == &HttpHeaderParser::state_end; }
+        bool fail() const   { return state == &HttpHeaderParser::state_error; }
 
         void reset(bool client)
         {
-            state = (client ? &HttpRequestParser::state_h0 : &HttpRequestParser::state_cmd0);
+            state = (client ? &HttpHeaderParser::state_cl_protocol0 : &HttpHeaderParser::state_cmd0);
         }
 };
 

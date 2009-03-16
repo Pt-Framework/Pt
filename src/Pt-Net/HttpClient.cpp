@@ -27,54 +27,78 @@
  */
 
 #include <Pt/Net/HttpClient.h>
+#include <Pt/Net/HttpParser.h>
 
 namespace Pt {
 
 namespace Net {
 
-HttpReply::HttpReply()
-: _request(0)
+void HttpClient::ParseEvent::onKey(const std::string& key)
+{
+    _key = key;
+}
+
+void HttpClient::ParseEvent::onValue(const std::string& value)
+{
+    _reply.addHeader(_key, value);
+}
+
+void HttpClient::ParseEvent::onHttpVersion(unsigned major, unsigned minor)
+{
+    _reply.httpVersion(major, minor);
+}
+
+void HttpClient::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
+{
+    _reply.httpReturn(ret, text);
+}
+
+HttpClient::HttpClient(const std::string& server, unsigned short int port)
+: _parseEvent(_reply)
+, _parser(_parseEvent, true)
+, _request(0)
+, _server(server)
+, _port(port)
 , _readHeader(true)
 , _contentSize(0)
-, _requestReady(false)
 , _executed(false)
 {
     _stream.attachDevice(_socket);
-    connect(_socket.connected, *this, &HttpReply::onConnect);
-    connect(_stream.buffer().outputReady, *this, &HttpReply::onOutput);
-    connect(_stream.buffer().inputReady, *this, &HttpReply::onInput);
+    connect(_socket.connected, *this, &HttpClient::onConnect);
+    connect(_stream.buffer().outputReady, *this, &HttpClient::onOutput);
+    connect(_stream.buffer().inputReady, *this, &HttpClient::onInput);
 }
 
 
-void HttpReply::setSelector(System::SelectorBase& selector)
+void HttpClient::setSelector(System::SelectorBase& selector)
 {
     selector.add(_socket);
 }
 
 
-void HttpReply::beginExecute(HttpRequest& request)
+void HttpClient::beginExecute(HttpRequest& request)
 {
-    _requestReady = false;
-    _socket.beginConnect( request.server(), request.port() );
+    _socket.beginConnect(_server, _port);
     _request = &request;
 }
 
 
-void HttpReply::wait(std::size_t msecs)
+void HttpClient::wait(std::size_t msecs)
 {
     _socket.wait(msecs);
 }
 
 
-void HttpReply::onConnect(TcpSocket& socket)
+void HttpClient::onConnect(TcpSocket& socket)
 {
     _stream << _request->method() << ' '
-            << _request->url() << " HTTP/1.1\r\n";
+            << _request->url() << " HTTP/"
+            << _request->httpVersionMajor() << '.'
+            << _request->httpVersionMinor() << "\r\n";
 
-    for (HttpRequest::Headers::const_iterator it = _request->_headers.begin();
-        it != _request->_headers.end(); ++it)
+    for (HttpRequest::const_iterator it = _request->begin(); it != _request->end(); ++it)
     {
-        _stream << it->first << ": " << it->second;
+        _stream << it->first << ": " << it->second << "\r\n";
     }
 
     _stream << "\r\n\r\n";
@@ -83,7 +107,7 @@ void HttpReply::onConnect(TcpSocket& socket)
 }
 
 
-void HttpReply::onOutput(System::StreamBuffer& sb)
+void HttpClient::onOutput(System::StreamBuffer& sb)
 {
     if( sb.out_avail() > 0 )
     {
@@ -96,32 +120,38 @@ void HttpReply::onOutput(System::StreamBuffer& sb)
 }
 
 
-void HttpReply::onInput(System::StreamBuffer& sb)
+void HttpClient::onInput(System::StreamBuffer& sb)
 {
-    _readHeader = false; // TODO: parse header first
-
     if (_readHeader)
     {
-        // TODO parse reply
-        while( sb.in_avail() > 0 )
-            sb.sbumpc();
+        _parser.advance(sb);
 
-        bool ready = true;
+        if (_parser.fail())
+            throw std::runtime_error("http parser failed"); // TODO define exception class
+
+        bool ready = _parser.end();
         if( ready )
         {
-            _contentSize = 0;
-            headerReceived(*this);
+            _contentSize = _reply.contentSize();
+            headerReceived(_reply);
             _readHeader = false;
 
-            if( sb.in_avail() > 0 )
-                replyReceived(*this);
+            if (_contentSize > 0)
+            {
+                if( sb.in_avail() > 0 )
+                    bodyReceived(*this);
+            }
+            else
+            {
+                replyFinished(*this);
+            }
         }
     }
     else
     {
-        _contentSize -= replyReceived(*this);
+        _contentSize -= bodyReceived(*this);
         if( _contentSize <= 0 )
-            _requestReady = true;
+            replyFinished(*this);
     }
 }
 

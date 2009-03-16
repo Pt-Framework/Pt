@@ -32,7 +32,7 @@
 #include "Pt/Net/HttpParser.h"
 #include <string>
 
-class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestParser::Event
+class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderParser::Event
 {
     public:
         HttpParserTest()
@@ -48,7 +48,8 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void setUp()
         {
-          events.str(std::string());
+            events.str(std::string());
+            events.clear();
         }
 
         void tearDown()
@@ -56,7 +57,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void SimpleRequest()
         {
-            Pt::Net::HttpRequestParser parser(*this, false);
+            Pt::Net::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\n\r\n");
 
@@ -71,7 +72,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void RequestWithHeader()
         {
-            Pt::Net::HttpRequestParser parser(*this, false);
+            Pt::Net::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nUser-Agent: Pt-Unit\nContent-Size:47\r\n\r\n");
 
@@ -86,7 +87,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void RequestWithMultilineHeader()
         {
-            Pt::Net::HttpRequestParser parser(*this, false);
+            Pt::Net::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nContent-Size:47\nFoo:line1\r\n line2\n line3\nBar:bar\r\n\r\n");
 
@@ -101,7 +102,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void RequestWithWhitespace()
         {
-            Pt::Net::HttpRequestParser parser(*this, false);
+            Pt::Net::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("PUT   /foo   HTTP  /  1  .  0  \r\n  Content-Size  :  47  \r\n\r\n");
 
@@ -116,7 +117,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void RequestWithQueryParam()
         {
-            Pt::Net::HttpRequestParser parser(*this, false);
+            Pt::Net::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo+bar?a=4&b=Hello+World HTTP/1.1\r\n\r\n");
 
@@ -131,9 +132,9 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void Response()
         {
-            Pt::Net::HttpRequestParser parser(*this, true);
+            Pt::Net::HttpHeaderParser parser(*this, true);
 
-            std::istringstream msg("Connection:close\nContent-Type : text/xml\r\n\r\n");
+            std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type : text/xml\r\n\r\n");
 
             bool end = parser.advance(msg);
 
@@ -141,7 +142,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
-            PT_UNIT_ASSERT_EQUALS(events.str(), "K(Connection)H(close)K(Content-Type)H(text/xml)E()");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "V(1.1)R(200,OK)K(Connection)H(close)K(Content-Type)H(text/xml)E()");
         }
 
     private:
@@ -150,37 +151,42 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpRequestP
 
         void onMethod(const std::string& method)
         {
-          events << "M(" << method << ')';
+            events << "M(" << method << ')';
         }
 
         void onUrl(const std::string& url)
         {
-          events << "U(" << url << ')';
+            events << "U(" << url << ')';
         }
 
         void onUrlParam(const std::string& q)
         {
-          events << "Q(" << q << ')';
+            events << "Q(" << q << ')';
         }
 
         void onHttpVersion(unsigned major, unsigned minor)
         {
-          events << "V(" << major << '.' << minor << ')';
+            events << "V(" << major << '.' << minor << ')';
         }
 
         void onKey(const std::string& key)
         {
-          events << "K(" << key << ')';
+            events << "K(" << key << ')';
         }
 
         void onValue(const std::string& value)
         {
-          events << "H(" << value << ')';
+            events << "H(" << value << ')';
+        }
+
+        void onHttpReturn(unsigned ret, const std::string& text)
+        {
+            events << "R(" << ret << ',' << text << ')';
         }
 
         void onEnd()
         {
-          events << "E()";
+            events << "E()";
         }
 
 };

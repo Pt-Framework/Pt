@@ -32,6 +32,9 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
+#include <Pt/Net/HttpParser.h>
+#include <Pt/Net/HttpRequest.h>
+#include <Pt/Net/HttpReply.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
@@ -45,53 +48,34 @@ namespace Pt {
 
 namespace Net {
 
-class HttpRequest
+class HttpClient : public Pt::Connectable
 {
-        friend class HttpReply;
+        friend class ParseEvent;
+
+        class ParseEvent : public HttpHeaderParser::Event
+        {
+                HttpReply& _reply;
+                std::string _key;
+
+            public:
+                ParseEvent(HttpReply& reply)
+                    : _reply(reply)
+                    { }
+
+                void onHttpVersion(unsigned major, unsigned minor);
+                void onHttpReturn(unsigned ret, const std::string& text);
+                void onKey(const std::string& key);
+                void onValue(const std::string& value);
+        };
+
+        ParseEvent _parseEvent;
+        HttpHeaderParser _parser;
+
+        HttpRequest* _request;
+        HttpReply _reply;
 
         std::string _server;
-        unsigned short _port;
-        std::string _url;
-        std::ostringstream _body;
-        typedef std::map<std::string, std::string> Headers;
-        Headers _headers;
-
-    public:
-        HttpRequest(const std::string& server, unsigned short port, const std::string& url)
-        : _server(server)
-        , _port(port)
-        , _url(url)
-        {}
-
-        const std::string& server() const
-        { return _server; }
-
-        unsigned short port() const
-        { return _port; }
-
-        const std::string& url() const
-        { return _url; }
-
-        void setUrl(const std::string& url)
-        {}
-
-        std::string method() const
-        { return "GET"; }
-
-        void setHeader(const std::string& key, const std::string& value)
-        {}
-
-        std::string getHeader(const std::string& key) const
-        { return std::string(); }
-
-        std::ostream& body()
-        { return _body; }
-
-};
-
-class HttpReply : public Pt::Connectable
-{
-        HttpRequest* _request;
+        unsigned short int _port;
         TcpSocket _socket;
         System::IOStream _stream;
         bool _readHeader;
@@ -99,23 +83,17 @@ class HttpReply : public Pt::Connectable
         bool _requestReady;
         bool _executed;
 
-        typedef std::map<std::string, std::string> Headers;
-        Headers _headers;
-
     protected:
         void onConnect(TcpSocket& socket);
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);
 
     public:
-        HttpReply();
+        HttpClient(const std::string& server, unsigned short int port);
 
         void beginExecute(HttpRequest& request);
 
         void setSelector(System::SelectorBase& selector);
-
-        std::string getHeader(const std::string& key) const
-        { return std::string(); }
 
         void wait(std::size_t msecs);
 
@@ -124,11 +102,10 @@ class HttpReply : public Pt::Connectable
             return _stream;
         }
 
-        bool isReady() const   { return _requestReady; }
-
         Signal<HttpReply&> headerReceived;
 
-        Pt::Delegate<std::size_t, HttpReply&> replyReceived;
+        Pt::Delegate<std::size_t, HttpClient&> bodyReceived; // TODO better name?
+        Signal<HttpClient&> replyFinished;
 };
 
 } // namespace Net

@@ -41,7 +41,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
         HttpServerTest()
         : Pt::Unit::TestSuite("HttpServerTest")
         {
-            this->registerMethod( "serverInstance", *this, &HttpServerTest::serverInstance);
+            this->registerMethod( "NotFoundRequest", *this, &HttpServerTest::NotFoundRequest);
         }
 
         void setUp()
@@ -50,7 +50,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
         void tearDown()
         { }
 
-        void serverInstance()
+        void NotFoundRequest()
         {
             Pt::System::EventLoop loop;
             loop.setIdleTimeout(2000);
@@ -58,14 +58,15 @@ class HttpServerTest : public Pt::Unit::TestSuite
 
             Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
 
-            Pt::Net::HttpReply reply;
-            reply.setSelector(loop);
-            connect(reply.headerReceived, *this, &HttpServerTest::onReplyHeader);
-            connect(reply.replyReceived, *this, &HttpServerTest::onReply);
+            Pt::Net::HttpClient client("127.0.0.1", 8001);
+            client.setSelector(loop);
+            connect(client.headerReceived, *this, &HttpServerTest::onReplyHeader);
+            connect(client.bodyReceived, *this, &HttpServerTest::onReply);
+            connect(client.replyFinished, *this, &HttpServerTest::onReplyFinished);
 
-            Pt::Net::HttpRequest request("127.0.0.1", 8001, "/index.html");
+            Pt::Net::HttpRequest request("/index.html");
             request.setHeader("foo", "bar");
-            reply.beginExecute(request);
+            client.beginExecute(request);
 
             loop.run();
         }
@@ -73,24 +74,28 @@ class HttpServerTest : public Pt::Unit::TestSuite
     private:
         void onReplyHeader(Pt::Net::HttpReply& reply)
         {
-            std::cout << "Content-Size=" << reply.getHeader("Content-Size") << std::endl;
+            std::cout << "Server=" << reply.getHeader("server") << std::endl;
+            std::cout << "Connection=" << reply.getHeader("connection") << std::endl;
+            std::cout << "Content-Size=" << reply.contentSize() << std::endl;
         }
 
-        std::size_t onReply(Pt::Net::HttpReply& reply)
+        std::size_t onReply(Pt::Net::HttpClient& client)
         {
             std::size_t ret = 0;
-            while ( reply.in().rdbuf()->in_avail() )
+            while ( client.in().rdbuf()->in_avail() )
             {
                 char ch;
-                reply.in().get(ch);
+                client.in().get(ch);
                 ++ret;
                 std::cout << ch;
             }
 
-            if( reply.isReady() )
-                std::cout << "THE END" << std::endl;
-
             return ret;
+        }
+
+        void onReplyFinished(Pt::Net::HttpClient& client)
+        {
+            std::cout << "THE END" << std::endl;
         }
 };
 
