@@ -84,34 +84,30 @@ HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
 : Net::HttpResponder(service)
 , _state(OnBegin)
 , _ts(new Utf8Codec)
-, _reader(0)
-, _service(0)
+, _reader(_ts)
+, _service(&service)
 , _proc(0)
-, _current(0)
+, _args(0)
+//, _current(0)
 { }
 
 
 HttpXmlRpcResponder::~HttpXmlRpcResponder()
 {
-    delete _reader;
+
 }
 
 
 std::size_t HttpXmlRpcResponder::advance(std::istream& is)
 {
-    if( ! _reader )
-    {
-        _ts.attach(is);
-        _reader = new Xml::XmlReader(_ts);
-    }
-
+    _ts.attach( is );
     std::size_t n = _ts.buffer().import();
     if(n == 0)
         return n;
 
-    while( _reader->advance() )
+    while( _reader.advance() )
     {
-        const Pt::Xml::Node& node = _reader->get();
+        const Pt::Xml::Node& node = _reader.get();
         switch(_state)
         {
             case OnBegin:
@@ -142,6 +138,10 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
                     if( ! _proc )
                         throw std::runtime_error("no such procedure");
 
+                    _args = _proc->beginCall();
+                    if(*_args)
+                        _deserializer.begin(**_args);
+
                     _state = OnMethodName;
                 }
                 break;
@@ -164,21 +164,29 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
                 }
                 break;
             }
-/*
+
             case OnParams:
             {
-                if( ! _args )
-                    throw std::runtime_error("invalid XML-RPC request");
-
-                bool finished = _args->compose(node);
-                if(finished)
+                if(node.type() == Xml::Node::EndElement) // </params>
                 {
                     _state = OnParamsEnd;
+                    break;
+                }
+ 
+                if( ! *_args )
+                    throw std::runtime_error("invalid XML-RPC request");
+
+                bool finished = _deserializer.advance(node);
+                if(finished)
+                {
+                    ++_args;
+                    _deserializer.begin(**_args);
+                    _state = OnParams;
                 }
 
                 break;
             }
-*/
+
             case OnParamsEnd:
             { //std::cerr << "OnParamsEnd" << std::endl;
                 if(node.type() == Xml::Node::EndElement)
@@ -200,7 +208,7 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
 ///
 ///
 ///
-
+/*
             case OnParams:
             {
                 if(node.type() == Xml::Node::StartElement)
@@ -454,6 +462,7 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
             {
                 throw std::runtime_error("invalid XML-RPC request");
             }
+            */
         }
     }
 
@@ -463,15 +472,27 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
 
 void HttpXmlRpcResponder::finish(std::ostream& os)
 {
-    delete _reader;
     _state = OnBegin;
+    ITypeHandler* rh = _proc->endCall();
 
+    os << "<?xml version=\"1.0\"?>\n";
+    os << "<methodResponse>\n";
+    os << "<params>\n";
+
+    _serializer.begin( os );
+    rh->decompose(_serializer);
+    os << "</param>\n";
+
+    os << "</params>\n";
+    os << "</methodResponse>\n";
+/*
     SerializationInfo ret;
     _proc->run( ret, &_argv[0], _argv.size() );
 
     ResponseFormatter formatter(os);
     formatResult(ret, formatter);
     formatter.finish();
+*/
 }
 
 

@@ -63,17 +63,8 @@ void HttpNotFoundResponder::finish(std::ostream& out)
 {
     out << "HTTP/1.1 404 Not found\r\n"
            "Connection: close\r\n"
-           "Content-Size: 123\r\n"
+           "Content-Size: 0\r\n"
            "Server: Pt-Net Http server\r\n\r\n";
-
-    out << "<?xml version=\"1.0\"?>\n";
-    out << "<methodResponse>\n";
-    out << "<params>\n";
-    out << "<param>\n";
-    out << "<value><int>200</int></value>\n";
-    out << "</param>\n";
-    out << "</params>\n";
-    out << "</methodResponse>\n";
 }
 
 HttpResponder* HttpNotFoundService::createResponder()

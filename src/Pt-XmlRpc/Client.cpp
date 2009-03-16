@@ -29,6 +29,7 @@
 #include "Pt/XmlRpc/Client.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/Xml/EndElement.h"
 
 namespace Pt {
 

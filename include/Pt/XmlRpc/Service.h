@@ -32,6 +32,8 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
+#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/XmlRpc/Serializer.h>
 #include <Pt/XmlRpc/RequestHandler.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
@@ -58,7 +60,9 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
-        //virtual Args* createArgs() const = 0;
+        virtual ITypeHandler** beginCall() = 0;
+
+        virtual ITypeHandler* endCall() = 0;
 
         virtual void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc) = 0;
 
@@ -79,32 +83,42 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
         typedef typename TypeTraits<A2>::Value V2;
         typedef typename TypeTraits<R>::Value RV;
 
+        RV _rv;
+        V1 _v1;
+        V2 _v2;
+        ITypeHandler* _args[3];
+        TypeHandler<V1> _a1;
+        TypeHandler<V2> _a2;
+        TypeHandler<RV> _r;
+
     public:
         BasicServiceProcedure(C& object, MemFuncT ptr)
         : Method<R, C, A1, A2>(object, ptr)
         , ServiceProcedure()
-        {}
+        {
+            _args[0] = &_a1;
+            _args[1] = &_a2;
+            _args[2] = 0;
+        }
 
         Args* createArgs() const
         {
             return new BasicArgs<V1, V2>();
         }
 
-        ITypeHandler* beginCall()
+        ITypeHandler** beginCall()
         {
+            _a1.begin(_v1);
+            _a2.begin(_v2);
             // return null terminated array of type handler pointers
-            return 0;
+            return _args;
         }
 
         ITypeHandler* endCall()
         {
-            // array of arg handler is fileld
-            // R result = Method<R, C, A1, A2>::call(a1, a2);
-            // rhandler.begin
-            // return rhandler;
-
-            // return ptr to prepared return type handler
-            return 0;
+            _rv = Method<R, C, A1, A2>::call(_v1, _v2);
+            _r.begin(_rv);
+            return &_r;
         }
 
         void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc)
@@ -183,7 +197,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
         OnParams,
         OnParamsEnd,
         OnMethodCallEnd,
-
+/*
         OnParamBegin,
         OnValueBegin,
         OnValueEnd,
@@ -205,6 +219,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
         OnDataBegin,
         OnDataEnd,
         OnArrayEnd
+*/
     };
 
     public:
@@ -220,11 +235,15 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
     private:
        State _state;
        Pt::TextIStream _ts;
-       Pt::Xml::XmlReader* _reader;
+       Pt::Xml::XmlReader _reader;
+       Deserializer _deserializer;
+       Serializer _serializer;
        Service* _service;
        ServiceProcedure* _proc;
-       std::vector<SerializationInfo> _argv;
-       Pt::SerializationInfo* _current;
+       ITypeHandler** _args;
+       ITypeHandler* _result;
+       //std::vector<SerializationInfo> _argv;
+       //Pt::SerializationInfo* _current;
 };
 
 }
