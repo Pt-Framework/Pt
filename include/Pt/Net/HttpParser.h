@@ -30,40 +30,84 @@
 #define Pt_Net_HttpParser_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/TcpServer.h>
-#include <Pt/Net/TcpSocket.h>
-#include <Pt/System/IOStream.h>
-#include <Pt/System/Timer.h>
-#include <Pt/Connectable.h>
 #include <string>
-#include <cstddef>
-#include <map>
+#include <iosfwd>
 
 namespace Pt {
 
 namespace Net {
 
-class HttpServerRequest
-{
-};
-
-class HttpRequestParser
+class PT_NET_API HttpRequestParser
 {
     public:
-        class Event
+        class PT_NET_API Event
         {
             public:
-                virtual void onUrl(const std::string& url) = 0;
-                virtual void onUrlParam(const std::string& url) = 0;
-                virtual void onHttpVersion(unsigned major, unsigned minor) = 0;
-                virtual void onKey(const std::string& key) = 0;
-                virtual void onValue(const std::string& value) = 0;
-                virtual void onHeader(const std::string& key, const std::string& value) = 0;
-                virtual void onEnd() = 0;
+                virtual void onMethod(const std::string& method);
+                virtual void onUrl(const std::string& url);
+                virtual void onUrlParam(const std::string& q);
+                virtual void onHttpVersion(unsigned major, unsigned minor);
+                virtual void onKey(const std::string& key);
+                virtual void onValue(const std::string& value);
+                virtual void onEnd();
         };
 
+    private:
+        typedef void (HttpRequestParser::*state_type)(char);
+
+        void state_cmd0(char ch);
+        void state_cmd(char ch);
+        void state_url0(char ch);
+        void state_url(char ch);
+        void state_urlesc(char ch);
+        void state_qparam(char ch);
+        void state_protocol0(char ch);
+        void state_protocol(char ch);
+        void state_version0(char ch);
+        void state_version_major(char ch);
+        void state_version_major_e(char ch);
+        void state_version_minor(char ch);
+        void state_end0(char ch);
+        void state_h0(char ch);
+        void state_hcr(char ch);
+        void state_hfieldname(char ch);
+        void state_hfieldnamespace(char ch);
+        void state_hfieldbody0(char ch);
+        void state_hfieldbody(char ch);
+        void state_hfieldbody_cr(char ch);
+        void state_hfieldbody_crlf(char ch);
+        void state_hend_cr(char ch);
+        void state_end(char ch);
+        void state_error(char ch);
+
+        state_type state;
+        Event& ev;
+
+        std::string token;
+
+    public:
+        HttpRequestParser(Event& ev_, bool client)
+            : state(client ? &HttpRequestParser::state_h0 : &HttpRequestParser::state_cmd0),
+              ev(ev_)
+            { }
+
+        /// parse as many characters as available in buffer without blocking
         std::size_t advance(std::istream& is);
-        bool parse(char ch);
+
+        /// parses a single character and returns true, if message is finished
+        bool parse(char ch)
+        {
+            (this->*state)(ch);
+            return state == &HttpRequestParser::state_end || state == &HttpRequestParser::state_error;
+        }
+
+        bool end() const    { return state == &HttpRequestParser::state_end; }
+        bool fail() const   { return state == &HttpRequestParser::state_error; }
+
+        void reset(bool client)
+        {
+            state = (client ? &HttpRequestParser::state_h0 : &HttpRequestParser::state_cmd0);
+        }
 };
 
 } // namespace Net

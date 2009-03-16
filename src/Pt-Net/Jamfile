@@ -11,7 +11,8 @@ SharedLibrary Pt-Net : $(PT_NET_IMPL)
                        TcpServer.cpp
                        TcpSocket.cpp
                        HttpClient.cpp
-                       HttpServer.cpp ;
+                       HttpServer.cpp
+                       HttpParser.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
 LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
