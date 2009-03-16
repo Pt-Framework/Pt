@@ -140,9 +140,13 @@ class ResponseFormatter : public Formatter
 class RequestFormatter : public Formatter
 {
     public:
-        RequestFormatter(std::ostream& out, const std::string& method)
-        : _out(&out)
+        RequestFormatter()
+        : _out(0)
+        {}
+
+        void begin(std::ostream& out, const std::string& method)
         {
+            _out = &out;
             *_out << "<?xml version=\"1.0\"?>\n";
             *_out << "<methodCall>\n";
             *_out << "<methodName>" << method << "</methodName>\n";

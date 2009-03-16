@@ -31,6 +31,8 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/ResponseHandler.h>
+#include <Pt/Net/HttpClient.h>
+#include <string>
 #include <cstddef>
 
 namespace Pt {
@@ -53,25 +55,25 @@ class PT_XMLRPC_API RemoteMethod
 
         void begin(const A1& a1, const A2& a2)
         {
-            RequestFormatter formatter(*_os, _name);
-
-            formatter.beginParam();
+            _formatter.begin(*_os, _name);
+            _formatter.beginParam();
             _a1handler.begin(a1);
-            _a1handler.decompose(formatter);
-            formatter.finishParam();
+            _a1handler.decompose(_formatter);
+            _formatter.finishParam();
 
-            formatter.beginParam();
+            _formatter.beginParam();
             _a2handler.begin(a2);
-            _a2handler.decompose(formatter);
-            formatter.finishParam();
+            _a2handler.decompose(_formatter);
+            _formatter.finishParam();
 
-            formatter.finish();
+            _formatter.finish();
         }
 
         R result()
         { }
 
     private:
+        RequestFormatter _formatter;
         std::string _name;
         std::ostream* _os;
         TypeHandler<R> _rhandler;
@@ -88,6 +90,18 @@ class PT_XMLRPC_API Client
         virtual ~Client();
 };
 
+
+class PT_XMLRPC_API RemoteService
+{
+    public:
+        RemoteService(const std::string& addr, unsigned short port, const std::string& url);
+
+        virtual ~RemoteService();
+
+    private:
+        Net::HttpRequest _request;
+        Net::HttpReply _reply;
+};
 
 /*
 
