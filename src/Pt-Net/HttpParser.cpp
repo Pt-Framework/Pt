@@ -119,7 +119,7 @@ namespace Net {
     {
         if (istokenchar(ch))
         {
-            token.reserve(256);
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_cmd;
             return;
@@ -167,6 +167,7 @@ namespace Net {
         }
         else if (ch > ' ')
         {
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_url;
             return;
@@ -186,6 +187,7 @@ namespace Net {
             log_debug("url=" << token);
             ev.onUrl(token);
             token.clear();
+            token.reserve(32);
             state = &HttpRequestParser::state_qparam;
             return;
         }
@@ -194,6 +196,7 @@ namespace Net {
             log_debug("url=" << token);
             ev.onUrl(token);
             token.clear();
+            token.reserve(32);
             state = &HttpRequestParser::state_protocol0;
             return;
         }
@@ -254,6 +257,7 @@ namespace Net {
             log_debug("queryString=" << token);
             ev.onUrlParam(token);
             token.clear();
+            token.reserve(32);
             state = &HttpRequestParser::state_protocol0;
             return;
         }
@@ -272,6 +276,7 @@ namespace Net {
         }
         else if (std::isalpha(ch))
         {
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_protocol;
             return;
@@ -418,6 +423,7 @@ namespace Net {
         }
         else if (ch > 32 && ch < 127)
         {
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_hfieldname;
             return;
@@ -521,6 +527,7 @@ namespace Net {
         }
         else if (!std::isspace(ch))
         {
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_hfieldbody;
             return;
@@ -586,6 +593,7 @@ namespace Net {
         else if (ch > 32 && ch < 127)
         {
             ev.onValue(token);
+            token.reserve(32);
             token = ch;
             state = &HttpRequestParser::state_hfieldname;
             return;
