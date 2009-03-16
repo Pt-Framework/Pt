@@ -27,13 +27,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Client.h"
+#include "Pt/Utf8Codec.h"
 
 namespace Pt {
 
 namespace XmlRpc {
 
 RemoteService::RemoteService(const std::string& server, unsigned short port, const std::string& url)
-: _request(server, port,url)
+: _ts( new Utf8Codec )
+, _reader(_ts)
+, _request(server, port,url)
 {
 }
 
