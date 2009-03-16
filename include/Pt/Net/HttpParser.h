@@ -43,6 +43,7 @@ class PT_NET_API HttpHeaderParser
         class PT_NET_API Event
         {
             public:
+                virtual ~Event() {}
                 virtual void onMethod(const std::string& method);
                 virtual void onUrl(const std::string& url);
                 virtual void onUrlParam(const std::string& q);
