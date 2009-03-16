@@ -101,8 +101,7 @@ class PT_XMLRPC_API RemoteService
     private:
         TextIStream _ts;
         Xml::XmlReader _reader;
-        Net::HttpRequest _request;
-        Net::HttpReply _reply;
+        Net::HttpClient _client;
 };
 
 /*

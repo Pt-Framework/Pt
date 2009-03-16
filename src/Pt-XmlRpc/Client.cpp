@@ -36,7 +36,7 @@ namespace XmlRpc {
 RemoteService::RemoteService(const std::string& server, unsigned short port, const std::string& url)
 : _ts( new Utf8Codec )
 , _reader(_ts)
-, _request(server, port,url)
+, _client(server, port)
 {
 }
 
