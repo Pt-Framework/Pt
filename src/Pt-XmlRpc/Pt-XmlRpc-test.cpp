@@ -32,7 +32,6 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Client.h"
-#include "Pt/XmlRpc/ResponseHandler.h"
 #include "Pt/Net/HttpServer.h"
 #include "Pt/System/EventLoop.h"
 #include <sstream>

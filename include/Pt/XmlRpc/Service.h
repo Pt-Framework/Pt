@@ -30,20 +30,16 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Deserializer.h>
 #include <Pt/XmlRpc/Serializer.h>
-#include <Pt/XmlRpc/RequestHandler.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
 #include <Pt/TextStream.h>
-#include <Pt/SerializationInfo.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <string>
 #include <map>
-#include <vector>
 
 namespace Pt {
 
