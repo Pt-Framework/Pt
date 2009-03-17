@@ -2,8 +2,8 @@ SubDir TOP src Pt-XmlRpc ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 
-PT_XMLRPC_SOURCES = Client.cpp
-                    Deserializer.cpp
+PT_XMLRPC_SOURCES = Deserializer.cpp
+                    RemoteService.cpp
                     Service.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;

@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/RemoteService.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"

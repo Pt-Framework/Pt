@@ -25,73 +25,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Client_h
-#define Pt_XmlRpc_Client_h
+#ifndef Pt_XmlRpc_RemoteMethod_h
+#define Pt_XmlRpc_RemoteMethod_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Serializer.h>
-#include <Pt/XmlRpc/Deserializer.h>
-#include <Pt/Xml/XmlReader.h>
-#include <Pt/Net/HttpClient.h>
-#include <Pt/Connectable.h>
-#include <Pt/TextStream.h>
+#include <Pt/XmlRpc/RemoteService.h>
+#include <Pt/XmlRpc/TypeHandler.h>
 #include <string>
-#include <cstddef>
 
 namespace Pt {
 
-namespace System {
-
-class SelectorBase;
-
-}
-
 namespace XmlRpc {
-
-class PT_XMLRPC_API RemoteService : public Pt::Connectable
-{
-    enum State
-    {
-        OnBegin,
-        OnMethodResponseBegin,
-        OnParamsBegin,
-        OnParam,
-        OnParamEnd,
-        OnParamsEnd,
-        OnMethodResponseEnd,
-    };
-
-    public:
-        RemoteService(System::SelectorBase& selector, const std::string& addr,
-                      unsigned short port, const std::string& url);
-
-        virtual ~RemoteService();
-
-        void beginCall(ITypeHandler& r, const std::string& name,
-                       ITypeHandler& a1, ITypeHandler& a2);
-
-        void endCall();
-
-    protected:
-        std::size_t onReplyBody(Net::HttpClient& client);
-
-    private:
-        State _state;
-        std::string _url;
-        Net::HttpClient _client;
-        Net::HttpRequest _request;
-        TextIStream _ts;
-        Xml::XmlReader _reader;
-        Serializer _serializer;
-        Deserializer _deserializer;
-        ITypeHandler* _rhandler;
-};
-
 
 template <typename R,
           typename A1,
           typename A2 >
-class PT_XMLRPC_API RemoteMethod
+class RemoteMethod
 {
     public:
         RemoteMethod(RemoteService& service, const std::string& name)

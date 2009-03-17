@@ -31,7 +31,8 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
-#include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/RemoteService.h"
+#include "Pt/XmlRpc/RemoteMethod.h"
 #include "Pt/Net/HttpServer.h"
 #include "Pt/System/EventLoop.h"
 #include <sstream>
