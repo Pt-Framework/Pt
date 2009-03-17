@@ -56,6 +56,8 @@ RemoteService::~RemoteService()
 
 void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
 {
+    _state = OnBegin;
+
     _request.body() << "<?xml version=\"1.0\"?>\n";
     _request.body() << "<methodCall>\n";
     _request.body() << "<methodName>" << name << "</methodName>\n";
@@ -74,6 +76,15 @@ void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHan
 
     _client.beginExecute(_request);
     _deserializer.begin(r);
+}
+
+
+void RemoteService::endCall()
+{
+    while( _state != OnMethodResponseEnd )
+    { }
+
+    _state = OnBegin;
 }
 
 
@@ -117,7 +128,6 @@ std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
                 break;
             }
 
-
             case OnParam:
             { //std::cerr << "RemoteService:: OnParam" << std::endl;
                 bool finished = _deserializer.advance(node); // start with <value>
@@ -138,8 +148,6 @@ std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
                 }
                 break;
             }
-
-
 
             case OnParamsEnd:
             { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;

@@ -58,7 +58,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         OnParam,
         OnParamEnd,
         OnParamsEnd,
-        OnMethodResponseEnd
+        OnMethodResponseEnd,
     };
 
     public:
@@ -67,6 +67,8 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         virtual ~RemoteService();
 
         void beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
+
+        void endCall();
 
     protected:
         std::size_t onReplyBody(Net::HttpClient& client);
