@@ -38,7 +38,7 @@ Deserializer::~Deserializer()
 { }
 
 
-SerializationInfo& Deserializer::peek()
+/*SerializationInfo& Deserializer::peek()
 {
     if( ! _peeking )
     {
@@ -50,20 +50,35 @@ SerializationInfo& Deserializer::peek()
 
     _peeking = true;
     return _stack.back();
-}
+}*/
 
 
 void Deserializer::finish()
 {
+/*
     std::list<Pt::SerializationInfo>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
         this->fixup(*it);
     }
+*/
+
+    std::map<void*, std::string>::iterator it;
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        void* fixme = it->first;
+        std::string id = it->second;
+        void* obj = _objects[id];
+        //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
+
+        void** vp =(void**)(fixme);
+        *vp = obj;
+    }
 
     _peeking = false;
     _objects.clear();
     _stack.clear();
+    _pointers.clear();
 }
 
 
@@ -87,6 +102,17 @@ void Deserializer::markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup)
     {
         _objects[ si.id() ] = type;
         _fixups[ si.id() ] = fixup;
+    }
+
+    Pt::SerializationInfo::Iterator it;
+    for(it = si.begin(); it != si.end(); ++it)
+    {
+         if(it->category() == Pt::SerializationInfo::Reference)
+        {
+            //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
+
+            _pointers[ it->fixupAddr() ] = it->toValue<std::string>();
+        }
     }
 }
 

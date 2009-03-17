@@ -33,6 +33,84 @@
 
 namespace Pt {
 
+class IDeserializationHandler
+{
+    public:
+        IDeserializationHandler()
+        : _parent(0)
+        {}
+
+        virtual ~IDeserializationHandler()
+        {}
+
+        void setParent(IDeserializationHandler* parent)
+        { _parent = parent; }
+
+        IDeserializationHandler* parent()
+        { return _parent; }
+
+        virtual void setValue(const Pt::String& value) = 0;
+
+        virtual IDeserializationHandler* beginMember(const std::string& name) = 0;
+
+        virtual IDeserializationHandler* leaveMember() = 0;
+
+        virtual void finish() = 0;
+
+    private:
+        IDeserializationHandler* _parent;
+};
+
+
+template <typename T>
+class DeserializationHandler : public IDeserializationHandler
+{
+    public:
+        DeserializationHandler(T& type)
+        : _type(type)
+        , _current(&_si)
+        {}
+
+        virtual void setValue(const Pt::String& value)
+        {
+            _current->setValue(value);
+        }
+
+        virtual IDeserializationHandler* beginMember(const std::string& name)
+        {
+            SerializationInfo& child = _current->addMember(name);
+            _current = &child;
+            return this;
+        }
+
+        virtual IDeserializationHandler* leaveMember()
+        {
+            if( ! _current->parent() )
+            {
+                this->finish();
+
+                if( ! this->parent() )
+                    throw std::runtime_error("invalid member");
+
+                return this->parent();
+            }
+
+            _current = _current->parent();
+            return this;
+        }
+
+        virtual void finish()
+        { 
+            *_current >>= *_type;
+        }
+
+    private:
+        T* _type;
+        Pt::SerializationInfo _si;
+        Pt::SerializationInfo* _current;
+};
+
+
 class PT_API Deserializer
 {
     public:
@@ -53,7 +131,17 @@ class PT_API Deserializer
             this->markFixup(si, &type, &Deserializer::do_fixup<T>);
         }
 
-        SerializationInfo& peek();
+        template <typename T>
+        void deserialize2(T& type)
+        {
+            DeserializationHandler<T> handler(type);
+            this->onDeserialize(handler)
+        }
+
+        virtual void onDeserialize(IDeserializationHandler& dh)
+        {
+        }
+        //SerializationInfo& peek();
 
         void finish();
 
@@ -77,6 +165,8 @@ class PT_API Deserializer
         std::map<std::string, void*> _objects;
 
         std::map<std::string, Fixup> _fixups;
+
+        std::map<void*, std::string> _pointers;
 
         template <typename T>
         static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)

@@ -48,6 +48,7 @@ struct DateRef
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
+    //std::cerr << "NEED FIXUP: " << (void*)(&dr.date) << std::endl;
     si.getReference("date", dr.date );
 }
 
@@ -89,16 +90,18 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2(1, 1, 1);
             dr.date = 0;
 
-            //std::cerr << "\n##########\n" << std::endl;
-            //std::cerr << output.str() << std::endl;
-            //std::cerr << "##########" << std::endl;
+            //std::cerr << "\n--------------------" << std::endl;
+            //std::cerr << output.str();
+            //std::cerr << "---------------------\n" << std::endl;
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.finish();
-            //std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date2 << std::endl;
+            //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
+            //std::cerr << "RESULT: "<< dr.date->toIsoString() << std::endl;
+            //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
         }
