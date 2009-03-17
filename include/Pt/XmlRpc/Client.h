@@ -66,27 +66,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
 
         virtual ~RemoteService();
 
-        void beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
-        {
-            _request.body() << "<?xml version=\"1.0\"?>\n";
-            _request.body() << "<methodCall>\n";
-            _request.body() << "<methodName>" << name << "</methodName>\n";
-            _request.body() << "<params>\n";
-
-            _serializer.begin( _request.body() );
-            a1.decompose(_serializer);
-            _request.body() << "</param>\n";
-
-            _serializer.begin( _request.body() );
-            a2.decompose(_serializer);
-            _request.body() << "</param>\n";
-
-            _request.body() << "</params>\n";
-            _request.body() << "</methodCall>\n";
-
-            _client.beginExecute(_request);
-            _deserializer.begin(r);
-        }
+        void beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
 
     protected:
         std::size_t onReplyBody(Net::HttpClient& client);

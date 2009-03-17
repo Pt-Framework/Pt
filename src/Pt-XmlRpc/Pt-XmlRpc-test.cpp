@@ -70,9 +70,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer2);
-            this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
-            this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
-            this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
+            //this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
+            //this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
+            //this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
         }
 
         void Integer()
@@ -131,7 +131,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
            std::cerr << "RESULT: " << multiply.result() << std::endl;
         }
-
+/*
         void VectorOfInt()
         {
             Pt::XmlRpc::Service service;
@@ -297,6 +297,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::vector<int> vec = resp.result();
             std::cerr << "Result: " << vec.front() << " - " << vec.back() << std::endl;
         }
+*/
 
         int multiplyVector(int a, const std::vector<int>& v)
         {

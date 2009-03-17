@@ -63,10 +63,6 @@ class ServiceProcedure
         virtual ITypeHandler** beginCall() = 0;
 
         virtual ITypeHandler* endCall() = 0;
-
-        virtual void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc) = 0;
-
-        virtual void exec(std::ostream& ret, const Args& args) = 0;
 };
 
 
@@ -101,16 +97,10 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
             _args[2] = 0;
         }
 
-        Args* createArgs() const
-        {
-            return new BasicArgs<V1, V2>();
-        }
-
         ITypeHandler** beginCall()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
-            // return null terminated array of type handler pointers
             return _args;
         }
 
@@ -119,38 +109,6 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
             _rv = Method<R, C, A1, A2>::call(_v1, _v2);
             _r.begin(_rv);
             return &_r;
-        }
-
-        void run(SerializationInfo& result, SerializationInfo* argv, unsigned argc)
-        {
-            if(argc != 2)
-                throw std::invalid_argument("invalid number of arguments");
-
-            typedef typename TypeTraits<A1>::Value Arg1;
-            typedef typename TypeTraits<A2>::Value Arg2;
-            typedef typename TypeTraits<R>::Value RValue;
-
-            Arg1 a1 = Arg1();
-            argv[0] >>= a1;
-
-            Arg2 a2 = Arg2();
-            argv[1] >>= a2;
-
-            RValue r = Method<R, C, A1, A2>::call(a1, a2);
-            result <<= r;
-        }
-
-        void exec(std::ostream& ret, const Args& a)
-        {
-            const BasicArgs<V1, V2>& args = static_cast<const BasicArgs<V1, V2>& >(a);
-            R result = Pt::Method<R, C, A1, A2>::call( args.first(), args.second() );
-
-            TypeHandler<R> builder;
-            builder.begin(result);
-
-            ResponseFormatter resp(ret);
-            builder.decompose(resp);
-            resp.finish();
         }
 };
 

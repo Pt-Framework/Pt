@@ -4,7 +4,6 @@ SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 
 PT_XMLRPC_SOURCES = Client.cpp
                     Deserializer.cpp
-                    RequestHandler.cpp
                     Service.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
