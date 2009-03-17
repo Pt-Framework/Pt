@@ -27,7 +27,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Client.h"
-#include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"
 
