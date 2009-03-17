@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009 by Dr. Marc Boris Duerner
  * Copyright (C) 2009 by Tommi Meakitalo
- *
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,62 +26,62 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/XmlRpc/Service.h"
-#include "Pt/XmlRpc/Responder.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/EndElement.h"
-#include "Pt/Utf8Codec.h"
+#ifndef Pt_XmlRpc_Responder_h
+#define Pt_XmlRpc_Responder_h
+
+#include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/TypeHandler.h>
+#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/XmlRpc/Serializer.h>
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Net/HttpServer.h>
+#include <Pt/TextStream.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-Service::Service()
-{
-}
+class Service;
+class ServiceProcedure;
 
-
-Service::~Service()
+class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 {
-    ProcedureMap::iterator it;
-    for(it = _procedures.begin(); it != _procedures.end(); ++it)
+    enum State
     {
-        delete it->second;
-    }
-}
+        OnBegin,
+        OnMethodCallBegin,
+        OnMethodNameBegin,
+        OnMethodName,
+        OnMethodNameEnd,
+        OnParams,
+        OnParam,
+        OnParamsEnd,
+        OnMethodCallEnd,
+    };
 
+    public:
+        HttpXmlRpcResponder(Service& service);
 
-ServiceProcedure* Service::procedure(const std::string& name)
-{
-    ProcedureMap::iterator it = _procedures.find( name );
-    if( it == _procedures.end() )
-    {
-        return 0;
-    }
+        ~HttpXmlRpcResponder();
 
-    return it->second;
-}
+        std::size_t advance(std::istream& is);
 
+        void finish(std::ostream& os);
 
-void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
-{
-    std::pair<const std::string, ServiceProcedure*> p( name, proc );
-    _procedures.insert( p );
-}
-
-
-Net::HttpResponder* Service::createResponder()
-{
-    return new HttpXmlRpcResponder(*this);
-}
-
-
-void Service::releaseResponder(Net::HttpResponder* resp)
-{
-    delete resp;
-}
+    private:
+       State _state;
+       Pt::TextIStream _ts;
+       Pt::Xml::XmlReader _reader;
+       Deserializer _deserializer;
+       Serializer _serializer;
+       Service* _service;
+       ServiceProcedure* _proc;
+       ITypeHandler** _args;
+       ITypeHandler* _result;
+};
 
 }
 
 }
+
+#endif

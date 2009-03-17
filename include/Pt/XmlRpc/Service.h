@@ -31,11 +31,7 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/TypeHandler.h>
-#include <Pt/XmlRpc/Deserializer.h>
-#include <Pt/XmlRpc/Serializer.h>
-#include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
-#include <Pt/TextStream.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <string>
@@ -136,44 +132,6 @@ class PT_XMLRPC_API Service : public Net::HttpService
     private:
         typedef std::map<std::string, ServiceProcedure*> ProcedureMap;
         ProcedureMap _procedures;
-};
-
-
-class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
-{
-    enum State
-    {
-        OnBegin,
-        OnMethodCallBegin,
-        OnMethodNameBegin,
-        OnMethodName,
-        OnMethodNameEnd,
-        OnParams,
-        OnParam,
-        OnParamsEnd,
-        OnMethodCallEnd,
-    };
-
-    public:
-        HttpXmlRpcResponder(Service& service);
-
-        ~HttpXmlRpcResponder();
-
-        std::size_t advance(std::istream& is);
-
-        void finish(std::ostream& os);
-
-        static void formatResult(const Pt::SerializationInfo& si, Formatter& formatter);
-    private:
-       State _state;
-       Pt::TextIStream _ts;
-       Pt::Xml::XmlReader _reader;
-       Deserializer _deserializer;
-       Serializer _serializer;
-       Service* _service;
-       ServiceProcedure* _proc;
-       ITypeHandler** _args;
-       ITypeHandler* _result;
 };
 
 }
