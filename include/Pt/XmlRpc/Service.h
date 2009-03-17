@@ -195,31 +195,9 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
         OnMethodName,
         OnMethodNameEnd,
         OnParams,
+        OnParam,
         OnParamsEnd,
         OnMethodCallEnd,
-/*
-        OnParamBegin,
-        OnValueBegin,
-        OnValueEnd,
-        OnParamEnd,
-
-        OnScalarBegin,
-        OnScalar,
-        OnScalarEnd,
-
-        OnStructBegin,
-        OnMemberBegin,
-        OnNameBegin,
-        OnName,
-        OnNameEnd,
-        OnMemberEnd,
-        OnStructEnd,
-
-        OnArrayBegin,
-        OnDataBegin,
-        OnDataEnd,
-        OnArrayEnd
-*/
     };
 
     public:
@@ -242,8 +220,6 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
        ServiceProcedure* _proc;
        ITypeHandler** _args;
        ITypeHandler* _result;
-       //std::vector<SerializationInfo> _argv;
-       //Pt::SerializationInfo* _current;
 };
 
 }

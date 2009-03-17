@@ -79,82 +79,57 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
+            //server.addService("/", service);
+
+            Pt::Net::HttpResponder* resp = service.createResponder();
 
             std::stringstream in;
-            in << "<?xml version=\"1.0\"?>\n";
-            in << "<methodCall>\n";
-            in << "   <methodName>multiply</methodName>\n";
-            in << "   <params>\n";
-            in << "     <param>\n";
-            in << "         <value><i4>10</i4></value>\n";
-            in << "         </param>\n";
-            in << "     <param>\n";
-            in << "         <value><i4>20</i4></value>\n";
-            in << "         </param>\n";
-            in << "      </params>\n";
-            in << "   </methodCall>\n";
-
+            in << "<?xml version=\"1.0\"?>";
+            in << "<methodCall>";
+            in << "   <methodName>multiply</methodName>";
+            in << "   <params>";
+            in << "     <param>";
+            in << "         <value><i4>10</i4></value>";
+            in << "         </param>";
+            in << "     <param>";
+            in << "         <value><i4>20</i4></value>";
+            in << "         </param>";
+            in << "      </params>";
+            in << "   </methodCall>";
             in.seekg(std::ios::beg);
-            Pt::XmlRpc::RequestHandler req(service);
-
-            std::size_t n = 0;
+            in.clear();
             std::size_t contentLength = in.str().length();
+            //std::cerr << "Request Size: " <<  contentLength << std::endl;
+            std::size_t n = 0;
             while(n < contentLength)
             {
-                n += req.advance(in);
+                n += resp->advance(in);
             }
 
-            std::stringstream out;
-            req.finish(out);
-
-            out.seekg(std::ios::beg);
-            Pt::XmlRpc::ResponseHandler<int> resp(out);
-
-            n = 0;
-            contentLength = out.str().length();
-            while(n < contentLength)
-            {
-                n += resp.advance();
-            }
-
-            std::cerr << "Result: " << resp.result() << std::endl;
-            PT_UNIT_ASSERT(resp.result() == 200);
+            resp->finish(std::cout);
+            service.releaseResponder(resp);
         }
 
-/*
-    out << "HTTP/1.1 404 Not found\r\n"
-           "Connection: close\r\n"
-           "Content-Size: 123\r\n"
-           "Server: Pt-Net Http server\r\n\r\n";
-
-    out << "<?xml version=\"1.0\"?>\n";
-    out << "<methodResponse>\n";
-    out << "<params>\n";
-    out << "<param>\n";
-    out << "<value><int>200</int></value>\n";
-    out << "</param>\n";
-    out << "</params>\n";
-    out << "</methodResponse>\n";
-*/
         void Integer2()
         {
             Pt::System::EventLoop loop;
             loop.setIdleTimeout(2000);
             connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
 
-            std::cerr << "\nLISTEN: " << "127.0.0.1:8001" << std::endl;
+            std::cerr << "LISTEN: " << "127.0.0.1:8001" << std::endl;
             Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
 
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
+            server.addService("/calc", service);
 
-            Pt::XmlRpc::RemoteService rserv(loop, "127.0.0.1", 8001, "/Calc");
+            Pt::XmlRpc::RemoteService rserv(loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteMethod<int, int, int> multiply(rserv, "multiply");
             multiply.begin(2, 3);
 
            loop.run();
 
-           std::cerr << "\nRESULT: " << multiply.result() << std::endl;
+           std::cerr << "RESULT: " << multiply.result() << std::endl;
         }
 
         void VectorOfInt()

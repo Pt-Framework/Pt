@@ -40,50 +40,12 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
-        case OnParamsBegin:
-        { //std::cerr << "RemoteService:: OnParamsBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement)
-            {
-                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-
-                if(se.name() == L"param")
-                {
-                    _state = OnParamBegin;
-                }
-            }
-            else if(node.type() == Xml::Node::EndElement)
-            {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if(ee.name() == L"param")
-                {
-                    _state = OnParamEnd;
-                    return true;
-                }
-            }
-
-            break;
-        }
-
-        case OnParamBegin:
-        { //std::cerr << "OnParamBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement) // value
-            {
-                _state = OnValueBegin;
-            }
-            break;
-        }
-
-        case OnParamEnd:
-        { //std::cerr << "OnParamBegin" << std::endl;
-            throw std::runtime_error("Desrializer failed.");
-        }
-
         case OnValueBegin:
         { //std::cerr << "OnValueBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                //std::cerr << se.name().narrow() << std::endl;
+
                 if(se.name() == L"struct")
                 {
                     _state = OnStructBegin;
@@ -106,6 +68,7 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
                 if(ee.name() == L"member")
                 { //std::cerr << "OnValueEnd member" << std::endl;
                     _current = _current->leaveMember();
@@ -119,7 +82,7 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 else if(ee.name() == L"param")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
                     _current->finish();
-                    _state = OnParamEnd;
+                    _state = OnValueEnd;
                     return true;
                 }
             }
@@ -206,6 +169,7 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 _state = OnScalar;
+                //std::cerr << "-> found value " << chars.content().narrow() << std::endl;
                 _current->setValue( chars.content() );
             }
             break;

@@ -54,7 +54,9 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
     {
         OnBegin,
         OnMethodResponseBegin,
-        OnParams,
+        OnParamsBegin,
+        OnParam,
+        OnParamEnd,
         OnParamsEnd,
         OnMethodResponseEnd
     };

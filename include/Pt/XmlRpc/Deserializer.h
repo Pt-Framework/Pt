@@ -45,12 +45,10 @@ class PT_XMLRPC_API Deserializer
 {
     enum State
     {
-        OnParamsBegin,
-
-        OnParamBegin,
+        //OnParamBegin,
         OnValueBegin,
         OnValueEnd,
-        OnParamEnd,
+        //OnParamEnd,
 
         OnScalarBegin,
         OnScalar,
@@ -72,7 +70,7 @@ class PT_XMLRPC_API Deserializer
 
     public:
         Deserializer()
-        : _state(OnParamsBegin)
+        : _state(OnValueBegin)
         , _current(0)
         {}
 
@@ -81,7 +79,7 @@ class PT_XMLRPC_API Deserializer
 
         void begin(ITypeHandler& handler)
         {
-            _state = OnParamsBegin;
+            _state = OnValueBegin;
             _current = &handler;
         }
 
