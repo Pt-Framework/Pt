@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Client.h"
+#include "Pt/Xml/StartElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"
 
@@ -104,11 +105,17 @@ std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
         {
             case OnBegin:
             { //std::cerr << "RemoteService:: OnBegin" << std::endl;
-                if(node.type() == Xml::Node::StartElement) // <methodResponse>
+                if(node.type() == Xml::Node::StartElement)
                 {
-                    _state = OnMethodResponseBegin;
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                    if( se.name() == L"methodResponse" )
+                    {
+                        _state = OnMethodResponseBegin;
+                        break;
+                    }
                 }
-                break;
+
+                throw std::runtime_error("invalid XML-RPC methodCall");
             }
 
             case OnMethodResponseBegin:

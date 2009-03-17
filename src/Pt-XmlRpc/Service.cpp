@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Service.h"
-#include "Pt/XmlRpc/Formatter.h"
+#include "Pt/Xml/StartElement.h"
 #include "Pt/Utf8Codec.h"
 
 namespace Pt {
@@ -113,9 +113,14 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
             { //std::cerr << "OnBegin" << std::endl;
                 if(node.type() == Xml::Node::StartElement)
                 {
-                    _state = OnMethodCallBegin;
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                    if( se.name() == L"methodCall" )
+                    {
+                        _state = OnMethodCallBegin;
+                        break;
+                    }
                 }
-                break;
+                throw std::runtime_error("invalid XML-RPC methodCall");
             }
 
             case OnMethodCallBegin:
