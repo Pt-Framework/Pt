@@ -62,11 +62,13 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
     };
 
     public:
-        RemoteService(System::SelectorBase& selector, const std::string& addr, unsigned short port, const std::string& url);
+        RemoteService(System::SelectorBase& selector, const std::string& addr,
+                      unsigned short port, const std::string& url);
 
         virtual ~RemoteService();
 
-        void beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
+        void beginCall(ITypeHandler& r, const std::string& name,
+                       ITypeHandler& a1, ITypeHandler& a2);
 
         void endCall();
 
