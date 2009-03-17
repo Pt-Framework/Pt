@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_TypeHandler_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Formatter.h>
+#include <Pt/XmlRpc/Serializer.h>
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
 #include <string>
@@ -63,7 +63,7 @@ class ITypeHandler
 
         virtual void finish() = 0;
 
-        virtual void decompose(Formatter& f) = 0;
+        virtual void decompose(Serializer& s) = 0;
 
     private:
         ITypeHandler* _parent;
@@ -118,33 +118,33 @@ class TypeHandler : public ITypeHandler
             *_current >>= *_type;
         }
 
-        virtual void decompose(Formatter& formatter)
+        virtual void decompose(Serializer& s)
         {
             _si <<= *_type;
-            this->formatEach(_si, formatter);
+            this->formatEach(_si, s);
         }
 
-        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+        static void formatEach(const Pt::SerializationInfo& si, Serializer& s)
         {
             if(si.category() == SerializationInfo::Value)
             {
                 // TODO use formatter to adapt typenames to protocol specific typenames
 
-                formatter.addValue( si.typeName(), si.toString() );
+                s.addValue( si.typeName(), si.toString() );
             }
             else if(si.category() == SerializationInfo::Object)
             {
-                formatter.beginObject();
+                s.beginObject();
 
                 SerializationInfo::ConstIterator it;
                 for(it = si.begin(); it != si.end(); ++it)
                 {
-                    formatter.beginMember( it->name() );
-                    formatEach(*it, formatter);
-                    formatter.finishMember();
+                    s.beginMember( it->name() );
+                    formatEach(*it, s);
+                    s.finishMember();
                 }
 
-                formatter.finishObject();
+                s.finishObject();
             }
 
             //TODO arrays should use SerializationInfo Array
@@ -196,18 +196,18 @@ class TypeHandler< std::vector<T> > : public ITypeHandler
         virtual void finish()
         { }
 
-        void decompose(Formatter& formatter)
+        void decompose(Serializer& s)
         {
-            formatter.beginArray();
+            s.beginArray();
 
             typename std::vector<T>::iterator it;
             for(it = _type->begin(); it != _type->end(); ++it)
             {
                 _elemBuilder.begin(*it);
-                _elemBuilder.decompose(formatter);
+                _elemBuilder.decompose(s);
             }
 
-            formatter.finishArray();
+            s.finishArray();
         }
 
     private:
@@ -248,11 +248,11 @@ class TypeHandler<int> : public ITypeHandler
         virtual void finish()
         { }
 
-        void decompose(Formatter& formatter)
+        void decompose(Serializer& s)
         {
-            String s;
-            convert(s, *_type);
-            formatter.addValue("int", s);
+            String str;
+            convert(str, *_type);
+            s.addValue("int", str);
         }
 
     private:

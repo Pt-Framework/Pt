@@ -29,15 +29,15 @@
 #define Pt_XmlRpc_Serializer_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/TypeHandler.h>
-#include <Pt/XmlRpc/Formatter.h>
+#include <Pt/String.h>
 #include <iostream>
+#include <string>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Serializer : public Formatter
+class PT_XMLRPC_API Serializer
 {
     public:
         Serializer()
