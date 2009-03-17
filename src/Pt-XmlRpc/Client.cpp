@@ -81,7 +81,10 @@ void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHan
 void RemoteService::endCall()
 {
     while( _state != OnMethodResponseEnd )
-    { }
+    {
+        const Pt::Xml::Node& node = _reader.next();
+        // TODO feed node to state machine
+    }
 
     _state = OnBegin;
 }
