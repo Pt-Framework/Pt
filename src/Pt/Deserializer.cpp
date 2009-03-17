@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 by Marc Boris Duerner
+ * Copyright (C) 2008 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,112 +29,5 @@
 
 namespace Pt {
 
-Deserializer::Deserializer()
-: _peeking(false)
-{ }
-
-
-Deserializer::~Deserializer()
-{ }
-
-
-/*SerializationInfo& Deserializer::peek()
-{
-    if( ! _peeking )
-    {
-        _stack.push_back( SerializationInfo() );
-        Pt::SerializationInfo& si =_stack.back();
-        this->read( si );
-        _peeking = true;
-    }
-
-    _peeking = true;
-    return _stack.back();
-}*/
-
-
-void Deserializer::finish()
-{
-/*
-    std::list<Pt::SerializationInfo>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->fixup(*it);
-    }
-*/
-
-    std::map<void*, std::string>::iterator it;
-    for(it = _pointers.begin(); it != _pointers.end(); ++it)
-    {
-        void* fixme = it->first;
-        std::string id = it->second;
-        void* obj = _objects[id];
-        //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
-
-        void** vp =(void**)(fixme);
-        *vp = obj;
-    }
-
-    _peeking = false;
-    _objects.clear();
-    _stack.clear();
-    _pointers.clear();
-}
-
-
-Pt::SerializationInfo& Deserializer::get()
-{
-    if( ! _peeking )
-    {
-        _stack.push_back( SerializationInfo() );
-        Pt::SerializationInfo& si =_stack.back();
-        this->read( si );
-    }
-
-    _peeking = false;
-    return _stack.back();
-}
-
-
-void Deserializer::markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup)
-{
-    if( ! si.id().empty() )
-    {
-        _objects[ si.id() ] = type;
-        _fixups[ si.id() ] = fixup;
-    }
-
-    Pt::SerializationInfo::Iterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-         if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
-
-            _pointers[ it->fixupAddr() ] = it->toValue<std::string>();
-        }
-    }
-}
-
-
-void Deserializer::fixup(const Pt::SerializationInfo& si)
-{
-    Pt::SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            void* obj = _objects[ it->toValue<std::string>() ]; //TODO check that it exists
-            void* fixme = it->fixupAddr();
-            Fixup fixupHandler = _fixups[ it->toValue<std::string>() ];
-            fixupHandler( (void**)(&fixme), it->fixupInfo(), obj);
-        }
-
-        if(it->category() == Pt::SerializationInfo::Object)
-        {
-            this->fixup(*it);
-        }
-    }
-}
 
 } // namespace Pt

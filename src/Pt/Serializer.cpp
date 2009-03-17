@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 by Marc Boris Duerner
+ * Copyright (C) 2008 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,59 +29,6 @@
 
 namespace Pt {
 
-Serializer::Serializer()
-{ }
 
-
-Serializer::~Serializer()
-{ }
-
-
-SerializationInfo& Serializer::push(const void* obj)
-{
-    _stack.resize( _stack.size() + 1 );
-    SerializationInfo& si = _stack.back();
-
-    _objects[obj] = &si;
-    return si;
-}
-
-
-void Serializer::finish()
-{
-    std::list<Pt::SerializationInfo>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->fixdown(*it);
-    }
-
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->write( *it );
-    }
-
-    _objects.clear();
-    _stack.clear();
-}
-
-
-void Serializer::fixdown(Pt::SerializationInfo& si)
-{
-    if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        const void* p = si.toValue<void*>();
-        Pt::SerializationInfo* pointee = _objects[p];
-        pointee->setId( convert<std::string>(pointee) );
-        si.setReference( pointee );
-    }
-    else if(si.category() == Pt::SerializationInfo::Object)
-    {
-        Pt::SerializationInfo::Iterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            this->fixdown(*it);
-        }
-    }
-}
 
 } // namespace Pt

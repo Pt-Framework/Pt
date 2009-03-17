@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008 by Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,54 +30,96 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
-#include <map>
-#include <list>
 
 namespace Pt {
 
-class PT_API Serializer
+class Formatter
 {
     public:
-        virtual ~Serializer();
+        Formatter()
+        {}
 
-        /** @brief Serialize an object to XML
+        virtual ~Formatter()
+        {}
 
-            The serializer will serialize the object \a type as
-            XML to the assigned stream. The string \a name will be used
-            as the instance name of \a type and appear as the name of the
-            XML element. The type must be serializable.
-        */
-        template <typename T>
-        void serialize(const T& type, const std::string& name)
+        virtual void addValue(const std::string& type, const Pt::String& value) = 0;
+
+        virtual void beginArray() = 0;
+
+        virtual void finishArray() = 0;
+
+        virtual void beginObject() = 0;
+
+        virtual void beginMember(const std::string& name) = 0;
+
+        virtual void finishMember() = 0;
+
+        virtual void finishObject() = 0;
+
+        virtual void finish() = 0;
+};
+
+
+class ISerializer
+{
+    public:
+        ISerializer()
+        {}
+
+        virtual ~ISerializer()
+        {}
+
+        virtual void decompose(Formatter& formatter) = 0;
+};
+
+
+template <typename T>
+class Serializer : public ISerializer
+{
+    public:
+        Serializer(const T& type)
+        : _type(type)
+        , _current(&_si)
+        {}
+
+        virtual void decompose(Formatter& formatter)
         {
-            SerializationInfo& si = this->push(&type);
-            si.setName(name);
-            si <<= type;
+            _si <<= *_type;
+            this->formatEach(_si, formatter);
         }
 
-        /** @brief Serialize objects to XML
+        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+        {
+            if(si.category() == SerializationInfo::Value)
+            {
+                // TODO use formatter to adapt typenames to protocol specific typenames
 
-            Writes all serialized objects.
-        */
-        void finish();
+                formatter.addValue( si.typeName(), si.toString() );
+            }
+            else if(si.category() == SerializationInfo::Object)
+            {
+                formatter.beginObject();
 
-    protected:
-        Serializer();
+                SerializationInfo::ConstIterator it;
+                for(it = si.begin(); it != si.end(); ++it)
+                {
+                    formatter.beginMember( it->name() );
+                    formatEach(*it, formatter);
+                    formatter.finishMember();
+                }
 
-        virtual void write(const SerializationInfo& si) = 0;
+                formatter.finishObject();
+            }
+
+            //TODO arrays should use SerializationInfo Array
+        }
 
     private:
-        SerializationInfo& push(const void* obj);
-
-        //! @internal
-        void fixdown(Pt::SerializationInfo& si);
-
-        //! @internal
-        std::list<Pt::SerializationInfo> _stack;
-
-        //! @internal
-        std::map<const void*, Pt::SerializationInfo*> _objects;
+        T* _type;
+        Pt::SerializationInfo _si;
+        Pt::SerializationInfo* _current;
 };
+
 
 } // namespace Pt
 

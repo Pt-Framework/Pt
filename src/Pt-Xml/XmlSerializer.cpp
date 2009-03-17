@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008 by Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -136,6 +138,54 @@ void XmlSerializer::flush()
 {
     if (_writer)
         _writer->flush();
+}
+
+
+SerializationInfo& XmlSerializer::push(const void* obj)
+{
+    _stack.resize( _stack.size() + 1 );
+    SerializationInfo& si = _stack.back();
+
+    _objects[obj] = &si;
+    return si;
+}
+
+
+void XmlSerializer::finish()
+{
+    std::list<Pt::SerializationInfo>::iterator it;
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        this->fixdown(*it);
+    }
+
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        this->write( *it );
+    }
+
+    _objects.clear();
+    _stack.clear();
+}
+
+
+void XmlSerializer::fixdown(Pt::SerializationInfo& si)
+{
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        const void* p = si.toValue<void*>();
+        Pt::SerializationInfo* pointee = _objects[p];
+        pointee->setId( convert<std::string>(pointee) );
+        si.setReference( pointee );
+    }
+    else if(si.category() == Pt::SerializationInfo::Object)
+    {
+        Pt::SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            this->fixdown(*it);
+        }
+    }
 }
 
 } // namespace Xml

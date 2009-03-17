@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008 by Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,13 +30,15 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <Pt/Deserializer.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
+#include <list>
+#include <map>
 
 namespace Pt {
 
 namespace Xml {
+
     class XmlReader;
     class Node;
 
@@ -43,8 +47,11 @@ namespace Xml {
         Thic class performs XML deserialization of a single object or
         object data.
     */
-    class PT_XML_API XmlDeserializer : public Pt::Deserializer
+    class PT_XML_API XmlDeserializer
     {
+        public:
+            typedef void (*Fixup)(void**, const std::type_info&, void*);
+
         public:
             XmlDeserializer(XmlReader& reader);
 
@@ -55,6 +62,23 @@ namespace Xml {
 
             XmlReader& reader()
             { return *_reader; }
+
+            /** @brief Deserialize an object
+
+                This method will deserialize the object \a type from an
+                XML format. The type \a type must be serializable.
+            */
+            template <typename T>
+            void deserialize(T& type)
+            {
+                SerializationInfo& si = this->get();
+                si >>= type;
+                this->markFixup(si, &type, &XmlDeserializer::do_fixup<T>);
+            }
+
+            SerializationInfo& peek();
+
+            void finish();
 
         protected:
             /** @brief Deserialize object data from XML
@@ -83,6 +107,13 @@ namespace Xml {
             void onEndElement(const Node& node);
 
         private:
+            Pt::SerializationInfo& get();
+
+            void markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup);
+
+            void fixup(const Pt::SerializationInfo& si);
+
+        private:
             //! @internal
             XmlReader* _reader;
 
@@ -102,6 +133,25 @@ namespace Xml {
             String _nodeName;
 
             String _nodeId;
+
+            std::list<Pt::SerializationInfo> _stack;
+
+            bool _peeking;
+
+            std::map<std::string, void*> _objects;
+
+            std::map<std::string, Fixup> _fixups;
+
+            std::map<void*, std::string> _pointers;
+
+            template <typename T>
+            static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
+            {
+                if( fixmeInfo != typeid(T) )
+                    throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
+
+                *( (T**)(fixme) ) = (T*)(obj);
+            }
     };
 
 } // namespace Xml
