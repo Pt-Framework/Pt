@@ -30,8 +30,32 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
+#include <map>
+#include <typeinfo>
 
 namespace Pt {
+
+// pass this to finish to get pointers which need fixup
+class DeserializationContext
+{
+    public:
+        // used by Deserializer
+        void addObject(const std::string& id, void* obj)
+        {
+            _objects[id] = obj;
+        }
+
+        // IDeserializer calls this method on IDeserializer::finish()
+        void addReference(const std::string& id, void* obj)
+        {
+            _pointers[obj] = id;
+        }
+
+    private:
+        std::map<std::string, void*> _objects;
+        std::map<void*, std::string> _pointers;
+};
+
 
 class IDeserializer
 {
@@ -48,6 +72,8 @@ class IDeserializer
 
         IDeserializer* parent()
         { return _parent; }
+
+        virtual void setName(const std::string& name) = 0;
 
         virtual void setValue(const Pt::String& value) = 0;
 
@@ -75,14 +101,19 @@ class Deserializer : public IDeserializer
         , _current(&_si)
         {}
 
-        virtual void setValue(const Pt::String& value)
+        virtual void setName(const std::string& name)
         {
-            _current->setValue(value);
+            _current->setName(name);
         }
 
         virtual void setId(const std::string& id)
         {
             _current->setId(id);
+        }
+
+        virtual void setValue(const Pt::String& value)
+        {
+            _current->setValue(value);
         }
 
         virtual void setReference(const std::string& id)
@@ -104,8 +135,8 @@ class Deserializer : public IDeserializer
             {
                 this->finish();
 
-                if( ! this->parent() )
-                    throw std::runtime_error("invalid member");
+                //if( ! this->parent() )
+                //    throw std::runtime_error("invalid member");
 
                 return this->parent();
             }

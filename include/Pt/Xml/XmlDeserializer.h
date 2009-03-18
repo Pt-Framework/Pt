@@ -31,6 +31,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/Deserializer.h>
 #include <memory>
 #include <list>
 #include <map>
@@ -71,12 +72,15 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                SerializationInfo& si = this->get();
-                si >>= type;
-                this->markFixup(si, &type, &XmlDeserializer::do_fixup<T>);
+                Deserializer<T> deser(type);
+                this->get(&deser);
+                deser.finish();
+                //SerializationInfo& si = this->get();
+                //si >>= type;
+                //this->markFixup(si, &type, &XmlDeserializer::do_fixup<T>);
             }
 
-            SerializationInfo& peek();
+            //SerializationInfo& peek();
 
             void finish();
 
@@ -86,7 +90,7 @@ namespace Xml {
                 This method will append the object data generated
                 from an XML format to \a data.
             */
-            void read(SerializationInfo& si);
+            //void read(SerializationInfo& si);
 
             //! @internal
             void beginDocument(const Node& node);
@@ -107,7 +111,9 @@ namespace Xml {
             void onEndElement(const Node& node);
 
         private:
-            Pt::SerializationInfo& get();
+            //Pt::SerializationInfo& get();
+
+            void get(IDeserializer* deser);
 
             void markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup);
 
@@ -126,8 +132,11 @@ namespace Xml {
             //! @internal
             ProcessNode _processNode;
 
+            size_t _startDepth;
+
             //! @internal
-            SerializationInfo* _current;
+            //SerializationInfo* _current;
+            IDeserializer* _deser;
 
             //! @internal
             String _nodeName;

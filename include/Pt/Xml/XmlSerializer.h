@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <Pt/Serializer.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
 #include <list>
@@ -119,9 +120,8 @@ namespace Xml {
             template <typename T>
             void serialize(const T& type, const std::string& name)
             {
-                SerializationInfo& si = this->push(&type);
-                si.setName(name);
-                si <<= type;
+                Serializer<T>* serializer = new Serializer<T>(type);
+                this->push(&type, name, serializer);
             }
 
             /** @brief Serialize objects to XML
@@ -134,8 +134,7 @@ namespace Xml {
             void flush();
 
         protected:
-            //! @internal
-            void write(const SerializationInfo& si);
+            void push(const void* type, const std::string& name, ISerializer* serializer);
 
         private:
             //! @internal
@@ -144,16 +143,8 @@ namespace Xml {
             //! @internal
             std::auto_ptr<XmlWriter> _deleter;
 
-            SerializationInfo& push(const void* obj);
-
-            //! @internal
-            void fixdown(Pt::SerializationInfo& si);
-
-            //! @internal
-            std::list<Pt::SerializationInfo> _stack;
-
-            //! @internal
-            std::map<const void*, Pt::SerializationInfo*> _objects;
+            SerializationContext _omap;
+            std::list<ISerializer*> _stack;
     };
 
 } // namespace Xml

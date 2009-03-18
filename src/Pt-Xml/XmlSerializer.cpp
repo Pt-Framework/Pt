@@ -38,6 +38,79 @@ namespace Pt {
 
 namespace Xml {
 
+class XmlFormatter : public Formatter
+{
+    public:
+        XmlFormatter(XmlWriter& writer)
+        : _writer(&writer)
+        {}
+
+        ~XmlFormatter()
+        {}
+
+        void addValue(const std::string& name, const std::string& type, const Pt::String& value, const std::string& id)
+        {
+            if( ! id.empty() )
+            {
+                Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
+                _writer->writeElement( Pt::String::widen( name ), &attr, 1, value );
+            }
+            else
+                _writer->writeElement( Pt::String::widen( name ), value );
+        }
+
+        void addReference(const std::string& name, const Pt::String& value)
+        {
+            Attribute attr( Pt::String(L"ref"), value );
+            _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
+        }
+
+        void beginArray()
+        {
+
+        }
+
+        void finishArray()
+        {
+
+        }
+
+        void beginObject(const std::string& name, const std::string& id)
+        {
+            if( ! id.empty() )
+            {
+                Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
+                _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+            }
+            else
+                _writer->writeStartElement( Pt::String::widen( name ) );
+        }
+
+        void beginMember(const std::string& name)
+        {
+
+        }
+
+        void finishMember()
+        {
+
+        }
+
+        void finishObject()
+        {
+            _writer->writeEndElement();
+        }
+
+        void finish()
+        {
+
+        }
+
+    private:
+        XmlWriter* _writer;
+};
+
+
 XmlSerializer::XmlSerializer()
 : _writer(0)
 , _deleter(0)
@@ -97,43 +170,6 @@ void XmlSerializer::detach()
 }
 
 
-void XmlSerializer::write(const SerializationInfo& si)
-{
-    if (!_writer)
-        throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
-
-    if( si.category() == SerializationInfo::Value )
-    {
-        Attribute attr( Pt::String(L"id"), Pt::String::widen( si.id() ) ); /// NEW
-        _writer->writeElement( Pt::String::widen( si.name() ), &attr, 1, si.toString() ); /// NEW
-        ///OLD: _writer->writeElement( Pt::String::widen( si.name() ), si.toString() );
-    }
-    else if( si.category() == SerializationInfo::Object )
-    {
-        if( si.id().empty() == false )
-        {
-            Attribute attr( Pt::String(L"id"), Pt::String::widen( si.id() ) );
-            _writer->writeStartElement( Pt::String::widen( si.name() ), &attr, 1 );
-        }
-        else
-            _writer->writeStartElement( Pt::String::widen( si.name() ) );
-
-        SerializationInfo::ConstIterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            this->write( *it );
-        }
-
-        _writer->writeEndElement();
-    }
-    else if( si.category() == SerializationInfo::Reference )
-    {
-        Attribute attr( Pt::String(L"ref"), si.toString() );
-        _writer->writeElement( Pt::String::widen( si.name() ), &attr, 1, Pt::String() );
-    }
-}
-
-
 void XmlSerializer::flush()
 {
     if (_writer)
@@ -141,51 +177,35 @@ void XmlSerializer::flush()
 }
 
 
-SerializationInfo& XmlSerializer::push(const void* obj)
+void XmlSerializer::push(const void* type, const std::string& name, ISerializer* serializer)
 {
-    _stack.resize( _stack.size() + 1 );
-    SerializationInfo& si = _stack.back();
-
-    _objects[obj] = &si;
-    return si;
+    serializer->setName(name);
+    _omap[type] = serializer;
+    _stack.push_back(serializer);
 }
 
 
 void XmlSerializer::finish()
 {
-    std::list<Pt::SerializationInfo>::iterator it;
+    if( ! _writer )
+        throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
+
+    std::list<ISerializer*>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
-        this->fixdown(*it);
+        ISerializer* serializer = *it;
+        serializer->fixdown( _omap );
     }
 
+    _omap.clear();
+
+    XmlFormatter formatter(*_writer);
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
-        this->write( *it );
+        (*it)->decompose(formatter);
+        delete *it;
     }
-
-    _objects.clear();
     _stack.clear();
-}
-
-
-void XmlSerializer::fixdown(Pt::SerializationInfo& si)
-{
-    if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        const void* p = si.toValue<void*>();
-        Pt::SerializationInfo* pointee = _objects[p];
-        pointee->setId( convert<std::string>(pointee) );
-        si.setReference( pointee );
-    }
-    else if(si.category() == Pt::SerializationInfo::Object)
-    {
-        Pt::SerializationInfo::Iterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            this->fixdown(*it);
-        }
-    }
 }
 
 } // namespace Xml

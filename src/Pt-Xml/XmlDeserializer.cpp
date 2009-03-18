@@ -40,6 +40,7 @@ namespace Xml {
 
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
 : _reader(&reader)
+, _deser(0)
 , _peeking(false)
 {
 }
@@ -48,6 +49,8 @@ XmlDeserializer::XmlDeserializer(XmlReader& reader)
 XmlDeserializer::XmlDeserializer(std::istream& is)
 : _reader( 0 )
 , _deleter(new XmlReader(is))
+, _deser(0)
+, _peeking(false)
 {
     _reader = _deleter.get();
 }
@@ -58,7 +61,7 @@ XmlDeserializer::~XmlDeserializer()
     this->finish();
 }
 
-
+/*
 void XmlDeserializer::read(SerializationInfo& si)
 {
     if(_reader->get().type() != Node::StartElement)
@@ -78,8 +81,8 @@ void XmlDeserializer::read(SerializationInfo& si)
         }
     }
 }
-
-
+*/
+/*
 SerializationInfo& XmlDeserializer::peek()
 {
     if( ! _peeking )
@@ -93,7 +96,7 @@ SerializationInfo& XmlDeserializer::peek()
     _peeking = true;
     return _stack.back();
 }
-
+*/
 
 void XmlDeserializer::finish()
 {
@@ -104,6 +107,8 @@ void XmlDeserializer::finish()
         this->fixup(*it);
     }
 */
+
+    //TODO: use DeserializationContext
 
     std::map<void*, std::string>::iterator it;
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
@@ -124,7 +129,29 @@ void XmlDeserializer::finish()
 }
 
 
-Pt::SerializationInfo& XmlDeserializer::get()
+void XmlDeserializer::get(IDeserializer* deser)
+{
+    _deser = deser;
+
+    if(_reader->get().type() != Node::StartElement)
+        _reader->nextElement();
+
+    _processNode = &XmlDeserializer::beginDocument;
+
+    _startDepth = _reader->depth();
+    for(XmlReader::Iterator it = _reader->current(); it != _reader->end(); ++it)
+    {
+        (this->*_processNode)(*it);
+
+        if((it->type() == Node::EndElement) && (_reader->depth() < _startDepth))
+        {
+            break;
+        }
+    }
+}
+
+
+/*Pt::SerializationInfo& XmlDeserializer::get()
 {
     if( ! _peeking )
     {
@@ -135,7 +162,7 @@ Pt::SerializationInfo& XmlDeserializer::get()
 
     _peeking = false;
     return _stack.back();
-}
+}*/
 
 
 void XmlDeserializer::markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup)
@@ -187,12 +214,12 @@ void XmlDeserializer::beginDocument(const Node& node)
         case Node::StartElement:
         {
             _nodeName = static_cast<const StartElement&>(node).name();
-            _current->setName( _nodeName.narrow() );
+            _deser->setName( _nodeName.narrow() );
 
             _nodeId = static_cast<const StartElement&>(node).attribute(L"id");
             if( ! _nodeId.empty() )
             {
-                _current->setId( _nodeId.narrow() );
+                _deser->setId( _nodeId.narrow() );
             }
             _processNode = &XmlDeserializer::onRootElement;
             break;
@@ -214,7 +241,7 @@ void XmlDeserializer::onRootElement(const Node& node)
             if(Pt::String::npos != chars.content().find_first_not_of(L" \t\n\r") )
             {
                 /// OLD: throw std::logic_error("Invalid element" + PT_SOURCEINFO);
-                _current->setValue( chars.content() ); /// NEW
+                _deser->setValue( chars.content() ); /// NEW
                 _processNode = &XmlDeserializer::onContent;
             }
             else
@@ -246,16 +273,22 @@ void XmlDeserializer::onStartElement(const Node& node)
             const Characters& chars = static_cast<const Characters&>(node);
             if(Pt::String::npos != chars.content().find_first_not_of(L" \t\n\r") )
             {
-                _current->addValue( _nodeName.narrow(), chars.content() );
+                _deser = _deser->beginMember(_nodeName.narrow() );
+                _deser->setValue( chars.content() );
+                _deser = _deser->leaveMember();
+                //_current->addValue( _nodeName.narrow(), chars.content() );
+
                 _processNode = &XmlDeserializer::onContent;
             }
             else
             {
-                if(_current == 0)
+                if(_deser == 0)
                     throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
-                SerializationInfo& added = _current->addMember( _nodeName.narrow() );
-                _current = &added;
+                _deser = _deser->beginMember(_nodeName.narrow() );
+                //SerializationInfo& added = _current->addMember( _nodeName.narrow() );
+                //_current = &added;
+
                 _processNode = &XmlDeserializer::onWhitespace;
             }
 
@@ -263,11 +296,12 @@ void XmlDeserializer::onStartElement(const Node& node)
         }
         case Node::StartElement:
         {
-            if(_current == 0)
+            if(_deser == 0)
                 throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
-             SerializationInfo& added = _current->addMember( _nodeName.narrow() );
-            _current = &added;
+            _deser = _deser->beginMember(_nodeName.narrow() );
+            //SerializationInfo& added = _current->addMember( _nodeName.narrow() );
+            //_current = &added;
 
             _nodeName = static_cast<const StartElement&>(node).name();
             break;
@@ -277,7 +311,11 @@ void XmlDeserializer::onStartElement(const Node& node)
             if( _nodeName != static_cast<const EndElement&>(node).name() )
                 throw std::logic_error("Invalid element" + PT_SOURCEINFO);
 
-            _current->addValue( _nodeName.narrow(), Pt::String() );
+            _deser = _deser->beginMember(_nodeName.narrow() );
+            _deser->setValue( Pt::String() );
+            _deser = _deser->leaveMember();
+            //_current->addValue( _nodeName.narrow(), Pt::String() );
+
             _processNode = &XmlDeserializer::onEndElement;
             break;
         }
@@ -298,8 +336,12 @@ void XmlDeserializer::onWhitespace(const Node& node)
             String refId = static_cast<const StartElement&>(node).attribute(L"ref");
             if( ! refId.empty() )
             {
-                SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
-                ref.setCategory(SerializationInfo::Reference);
+                _deser = _deser->beginMember(_nodeName.narrow() );
+                _deser->setReference( refId.narrow() );
+                _deser = _deser->leaveMember();
+                //SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
+                //ref.setCategory(SerializationInfo::Reference);
+
                 //ref.setId( refId.narrow() );
 
                 _processNode = &XmlDeserializer::onContent;
@@ -310,11 +352,13 @@ void XmlDeserializer::onWhitespace(const Node& node)
         }
         case Node::EndElement:
         {
-            if(_current == 0)
+            if(_deser == 0)
                 throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
             _nodeName = static_cast<const EndElement&>(node).name();
-            _current = _current->parent();
+
+            if(_reader->depth() >= _startDepth)
+                _deser = _deser->leaveMember();
 
             _processNode = &XmlDeserializer::onEndElement;
             break;
@@ -357,11 +401,13 @@ void XmlDeserializer::onEndElement(const Node& node)
         }
         case Node::EndElement:
         {
-            if(_current == 0)
+            if(_deser == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
             _nodeName = static_cast<const EndElement&>(node).name();
-            _current = _current->parent();
+
+            if(_reader->depth() >= _startDepth)
+                _deser = _deser->leaveMember();
 
             break;
         }
