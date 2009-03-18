@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_RemoteMethod_h
-#define Pt_XmlRpc_RemoteMethod_h
+#ifndef Pt_XmlRpc_RemoteProcedure_h
+#define Pt_XmlRpc_RemoteProcedure_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/RemoteService.h>
@@ -41,15 +41,15 @@ namespace XmlRpc {
 template <typename R,
           typename A1,
           typename A2 >
-class RemoteMethod : public IRemoteMethod
+class RemoteProcedure : public IRemoteProcedure
 {
     public:
-        RemoteMethod(RemoteService& service, const std::string& name)
-        : IRemoteMethod(name)
+        RemoteProcedure(RemoteService& service, const std::string& name)
+        : IRemoteProcedure(name)
         , _service(&service)
         { }
 
-        ~RemoteMethod()
+        ~RemoteProcedure()
         {}
 
         void begin(const A1& a1, const A2& a2)

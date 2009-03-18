@@ -71,7 +71,7 @@ RemoteService::~RemoteService()
 }
 
 
-void RemoteService::beginCall(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a1, ITypeHandler& a2)
+void RemoteService::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
 {
     _method = &method;
     _state = OnBegin;
@@ -82,7 +82,7 @@ void RemoteService::beginCall(ITypeHandler& r, IRemoteMethod& method, ITypeHandl
 }
 
 
-void RemoteService::call(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a1, ITypeHandler& a2)
+void RemoteService::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
 {
     _method = &method;
     _state = OnBegin;

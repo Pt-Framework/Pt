@@ -62,20 +62,23 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class BasicServiceProcedure : public Method<R, C, A1, A2>
-                            , public ServiceProcedure
+class BasicServiceProcedure : public ServiceProcedure
 {
     public:
-        typedef R (C::*MemFuncT)(A1, A2);
-
-    public:
-        BasicServiceProcedure(C& object, MemFuncT ptr)
-        : Method<R, C, A1, A2>(object, ptr)
-        , ServiceProcedure()
+        BasicServiceProcedure( const Callable<R, A1, A2>& cb )
+        : ServiceProcedure()
+        , _cb(0)
         {
+            _cb = cb.clone();
+
             _args[0] = &_a1;
             _args[1] = &_a2;
             _args[2] = 0;
+        }
+
+        ~BasicServiceProcedure()
+        {
+            delete _cb;
         }
 
         ITypeHandler** beginCall()
@@ -87,7 +90,7 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
 
         ITypeHandler* endCall()
         {
-            _rv = Method<R, C, A1, A2>::call(_v1, _v2);
+            _rv = _cb->call(_v1, _v2);
             _r.begin(_rv);
             return &_r;
         }
@@ -97,6 +100,7 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
         typedef typename TypeTraits<A2>::Value V2;
         typedef typename TypeTraits<R>::Value RV;
 
+        Callable<R, A1, A2>* _cb;
         RV _rv;
         V1 _v1;
         V2 _v2;
@@ -120,7 +124,7 @@ class PT_XMLRPC_API Service : public Net::HttpService
         template <typename R, class C, typename A1, typename A2>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2) )
         {
-            ServiceProcedure* proc = new BasicServiceProcedure<R, C, A1, A2>(obj, method);
+            ServiceProcedure* proc = new BasicServiceProcedure<R, C, A1, A2>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 

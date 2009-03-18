@@ -32,7 +32,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/RemoteService.h"
-#include "Pt/XmlRpc/RemoteMethod.h"
+#include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Net/HttpServer.h"
 #include "Pt/System/EventLoop.h"
 #include <sstream>
@@ -88,7 +88,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             server.addService("/calc", service);
 
             Pt::XmlRpc::RemoteService rserv(loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteMethod<int, int, int> multiply(rserv, "multiply");
+            Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(rserv, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
 
             multiply.begin(2, 3);

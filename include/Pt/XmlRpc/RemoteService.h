@@ -48,16 +48,16 @@ class SelectorBase;
 
 namespace XmlRpc {
 
-class IRemoteMethod
+class IRemoteProcedure
 {
     friend class RemoteService;
 
     public:
-        IRemoteMethod(const std::string& name)
+        IRemoteProcedure(const std::string& name)
         :_name(name)
         { }
 
-        virtual ~IRemoteMethod()
+        virtual ~IRemoteProcedure()
         { }
 
         const std::string& name() const
@@ -93,10 +93,10 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
 
         virtual ~RemoteService();
 
-        void beginCall(ITypeHandler& r, IRemoteMethod& method,
+        void beginCall(ITypeHandler& r, IRemoteProcedure& method,
                        ITypeHandler& a1, ITypeHandler& a2);
 
-        void call(ITypeHandler& r, IRemoteMethod& method,
+        void call(ITypeHandler& r, IRemoteProcedure& method,
                   ITypeHandler& a1, ITypeHandler& a2);
 
     protected:
@@ -118,7 +118,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         Formatter _formatter;
         Deserializer _deserializer;
         ITypeHandler* _rhandler;
-        IRemoteMethod* _method;
+        IRemoteProcedure* _method;
 };
 
 }
