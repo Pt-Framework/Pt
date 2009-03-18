@@ -135,7 +135,7 @@ namespace Xml {
 
         protected:
             //! @internal
-            virtual void write(const SerializationInfo& si);
+            void write(const SerializationInfo& si);
 
         private:
             //! @internal
