@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_TypeHandler_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Serializer.h>
+#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
 #include <string>
@@ -63,7 +63,7 @@ class ITypeHandler
 
         virtual void finish() = 0;
 
-        virtual void decompose(Serializer& s) = 0;
+        virtual void decompose(Formatter& s) = 0;
 
     private:
         ITypeHandler* _parent;
@@ -118,13 +118,13 @@ class TypeHandler : public ITypeHandler
             *_current >>= *_type;
         }
 
-        virtual void decompose(Serializer& s)
+        virtual void decompose(Formatter& s)
         {
             _si <<= *_type;
             this->formatEach(_si, s);
         }
 
-        static void formatEach(const Pt::SerializationInfo& si, Serializer& s)
+        static void formatEach(const Pt::SerializationInfo& si, Formatter& s)
         {
             if(si.category() == SerializationInfo::Value)
             {
@@ -196,7 +196,7 @@ class TypeHandler< std::vector<T> > : public ITypeHandler
         virtual void finish()
         { }
 
-        void decompose(Serializer& s)
+        void decompose(Formatter& s)
         {
             s.beginArray();
 
@@ -248,7 +248,7 @@ class TypeHandler<int> : public ITypeHandler
         virtual void finish()
         { }
 
-        void decompose(Serializer& s)
+        void decompose(Formatter& s)
         {
             String str;
             convert(str, *_type);

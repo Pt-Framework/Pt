@@ -134,12 +134,12 @@ void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, IT
     _request.body() << "<methodName>" << name << "</methodName>\n";
     _request.body() << "<params>\n";
 
-    _serializer.begin( _request.body() );
-    a1.decompose(_serializer);
+    _formatter.begin( _request.body() );
+    a1.decompose(_formatter);
     _request.body() << "</param>\n";
 
-    _serializer.begin( _request.body() );
-    a2.decompose(_serializer);
+    _formatter.begin( _request.body() );
+    a2.decompose(_formatter);
     _request.body() << "</param>\n";
 
     _request.body() << "</params>\n";

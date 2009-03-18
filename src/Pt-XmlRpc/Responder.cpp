@@ -235,8 +235,8 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
     os << "<methodResponse>\n";
     os << "<params>\n";
 
-    _serializer.begin( os );
-    rh->decompose(_serializer);
+    _formatter.begin( os );
+    rh->decompose(_formatter);
     os << "</param>\n";
 
     os << "</params>\n";

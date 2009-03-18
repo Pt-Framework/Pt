@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Serializer_h
-#define Pt_XmlRpc_Serializer_h
+#ifndef Pt_XmlRpc_Formatter_h
+#define Pt_XmlRpc_Formatter_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/String.h>
@@ -37,13 +37,13 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Serializer
+class PT_XMLRPC_API Formatter
 {
     public:
-        Serializer()
+        Formatter()
         {}
 
-        ~Serializer()
+        ~Formatter()
         {}
 
         void begin(std::ostream& out)

@@ -29,7 +29,7 @@
 #define Pt_XmlRpc_RemoteService_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Serializer.h>
+#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/Deserializer.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpClient.h>
@@ -115,7 +115,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         Net::HttpRequest _request;
         TextIStream _ts;
         Xml::XmlReader _reader;
-        Serializer _serializer;
+        Formatter _formatter;
         Deserializer _deserializer;
         ITypeHandler* _rhandler;
         IRemoteMethod* _method;

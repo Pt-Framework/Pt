@@ -32,7 +32,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Deserializer.h>
-#include <Pt/XmlRpc/Serializer.h>
+#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
 #include <Pt/TextStream.h>
@@ -74,7 +74,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
        Pt::TextIStream _ts;
        Pt::Xml::XmlReader _reader;
        Deserializer _deserializer;
-       Serializer _serializer;
+       Formatter _formatter;
        Service* _service;
        ServiceProcedure* _proc;
        ITypeHandler** _args;
