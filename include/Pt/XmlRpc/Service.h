@@ -67,17 +67,6 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
 {
     public:
         typedef R (C::*MemFuncT)(A1, A2);
-        typedef typename TypeTraits<A1>::Value V1;
-        typedef typename TypeTraits<A2>::Value V2;
-        typedef typename TypeTraits<R>::Value RV;
-
-        RV _rv;
-        V1 _v1;
-        V2 _v2;
-        ITypeHandler* _args[3];
-        TypeHandler<V1> _a1;
-        TypeHandler<V2> _a2;
-        TypeHandler<RV> _r;
 
     public:
         BasicServiceProcedure(C& object, MemFuncT ptr)
@@ -102,6 +91,19 @@ class BasicServiceProcedure : public Method<R, C, A1, A2>
             _r.begin(_rv);
             return &_r;
         }
+
+    private:
+        typedef typename TypeTraits<A1>::Value V1;
+        typedef typename TypeTraits<A2>::Value V2;
+        typedef typename TypeTraits<R>::Value RV;
+
+        RV _rv;
+        V1 _v1;
+        V2 _v2;
+        ITypeHandler* _args[3];
+        TypeHandler<V1> _a1;
+        TypeHandler<V2> _a2;
+        TypeHandler<RV> _r;
 };
 
 
