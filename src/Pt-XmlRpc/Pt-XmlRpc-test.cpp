@@ -81,7 +81,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             loop.setIdleTimeout(1000);
             connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
 
-            std::cerr << "LISTEN: " << "127.0.0.1:8001" << std::endl;
             Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
 
             Pt::XmlRpc::Service service;

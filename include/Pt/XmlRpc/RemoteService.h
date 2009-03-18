@@ -46,12 +46,6 @@ class SelectorBase;
 
 }
 
-namespace Xml {
-
-class Node;
-
-}
-
 namespace XmlRpc {
 
 class IRemoteMethod

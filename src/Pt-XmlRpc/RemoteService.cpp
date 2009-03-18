@@ -104,6 +104,10 @@ std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
 
 void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
 {
+    _request.clear();
+    _request.url(_url);
+    _request.setHeader("Content-Type", "text/xml");
+
     _request.body() << "<?xml version=\"1.0\"?>\n";
     _request.body() << "<methodCall>\n";
     _request.body() << "<methodName>" << name << "</methodName>\n";
@@ -119,8 +123,6 @@ void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, IT
 
     _request.body() << "</params>\n";
     _request.body() << "</methodCall>\n";
-
-    _request.setHeader("Content-Type", "text/xml");
 }
 
 
