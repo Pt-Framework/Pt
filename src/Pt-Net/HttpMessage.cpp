@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Net/HttpMessage.h>
+#include <Pt/System/Mutex.h>
 
 namespace Pt {
 
@@ -43,6 +44,77 @@ std::size_t HttpMessage::contentSize() const
     ss >> size;
     return size;
 }
+
+bool HttpMessage::keepAlive() const
+{
+    std::string ch = getHeader("connection");
+    return ch == "keep-alive" ||
+           (ch.empty()
+                && httpVersionMajor() == 1
+                && httpVersionMinor() >= 1);
+}
+
+std::string HttpMessage::htdate(time_t t)
+{
+    struct ::tm tm;
+    gmtime_r(&t, &tm);
+    return htdate(&tm);
+}
+
+std::string HttpMessage::htdate(struct ::tm* tm)
+{
+    static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    char buffer[80];
+
+    sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
+        wday[tm->tm_wday], tm->tm_mday, monthn[tm->tm_mon], tm->tm_year + 1900,
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
+    return buffer;
+}
+
+std::string HttpMessage::htdateCurrent()
+{
+    static struct ::tm lastTm;
+    static time_t lastDay = 0;
+    static time_t lastTime = 0;
+    static std::string lastHtdate;
+    static Pt::System::Mutex mutex;
+
+    /*
+     * we cache the last split tm-struct here, because it is pretty expensive
+     * to calculate the date with gmtime_r.
+     */
+
+    time_t t;
+    time(&t);
+
+    Pt::System::MutexLock lock(mutex);
+
+    if (lastTime != t)
+    {
+        time_t day = t / (24*60*60);
+        if (day != lastDay)
+        {
+            // day differs, we calculate new date.
+            gmtime_r(&t, &lastTm);
+            lastDay = day;
+        }
+
+        lastTm.tm_sec = t % 60;
+        t /= 60;
+        lastTm.tm_min = t % 60;
+        t /= 60;
+        lastTm.tm_hour = t % 24;
+        lastHtdate = htdate(&lastTm);
+        lastTime = t;
+    }
+
+    return lastHtdate;
+}
+
+
 
 } // namespace Net
 

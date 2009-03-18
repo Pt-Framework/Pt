@@ -106,7 +106,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 n += resp->advance(in);
             }
 
-            resp->finish(std::cout);
+            Pt::Net::HttpRequest request;
+            Pt::Net::HttpReply reply;
+            resp->finish(std::cout, request, reply);
             service.releaseResponder(resp);
         }
 

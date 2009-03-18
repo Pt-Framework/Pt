@@ -34,6 +34,7 @@
 #include <sstream>
 #include <map>
 #include <cctype>
+#include <time.h>
 
 namespace Pt {
 
@@ -105,6 +106,9 @@ class HttpMessage
             return it == _headers.end() ? std::string() : it->second;
         }
 
+        bool hasHeader(const std::string& key) const
+        { return _headers.find(key) != _headers.end(); }
+
         std::string bodyStr() const
         { return _body.str(); }
 
@@ -130,6 +134,15 @@ class HttpMessage
 
         const_iterator end() const
         { return _headers.end(); }
+
+        bool keepAlive() const;
+
+        /// Returns a properly formatted date-string, as needed in http.
+        static std::string htdate(time_t t);
+        /// Returns a properly formatted date-string, as needed in http.
+        static std::string htdate(struct ::tm* tm);
+        /// Returns a properly formatted current time-string, as needed in http.
+        static std::string htdateCurrent();
 
 };
 

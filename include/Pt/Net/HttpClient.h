@@ -52,20 +52,17 @@ class HttpClient : public Pt::Connectable
 {
         friend class ParseEvent;
 
-        class ParseEvent : public HttpHeaderParser::Event
+        class ParseEvent : public HttpHeaderParser::HttpMessageEvent
         {
                 HttpReply& _reply;
-                std::string _key;
 
             public:
-                ParseEvent(HttpReply& reply)
-                    : _reply(reply)
+                explicit ParseEvent(HttpReply& reply)
+                    : HttpHeaderParser::HttpMessageEvent(reply),
+                      _reply(reply)
                     { }
 
-                void onHttpVersion(unsigned major, unsigned minor);
                 void onHttpReturn(unsigned ret, const std::string& text);
-                void onKey(const std::string& key);
-                void onValue(const std::string& value);
         };
 
         ParseEvent _parseEvent;

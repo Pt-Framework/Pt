@@ -66,7 +66,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
         std::size_t advance(std::istream& is);
 
-        void finish(std::ostream& os);
+        void finish(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
 
     private:
        State _state;

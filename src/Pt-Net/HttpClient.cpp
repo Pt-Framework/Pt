@@ -33,21 +33,6 @@ namespace Pt {
 
 namespace Net {
 
-void HttpClient::ParseEvent::onKey(const std::string& key)
-{
-    _key = key;
-}
-
-void HttpClient::ParseEvent::onValue(const std::string& value)
-{
-    _reply.addHeader(_key, value);
-}
-
-void HttpClient::ParseEvent::onHttpVersion(unsigned major, unsigned minor)
-{
-    _reply.httpVersion(major, minor);
-}
-
 void HttpClient::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
     _reply.httpReturn(ret, text);
@@ -91,6 +76,8 @@ void HttpClient::wait(std::size_t msecs)
 
 void HttpClient::onConnect(TcpSocket& socket)
 {
+    _request->amendHeaders(true);
+
     _stream << _request->method() << ' '
             << _request->url() << " HTTP/"
             << _request->httpVersionMajor() << '.'
@@ -101,7 +88,7 @@ void HttpClient::onConnect(TcpSocket& socket)
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-    _stream << "\r\n\r\n";
+    _stream << "\r\n" << _request->bodyStr();
 
     _stream.buffer().beginWrite();
 }
@@ -129,8 +116,7 @@ void HttpClient::onInput(System::StreamBuffer& sb)
         if (_parser.fail())
             throw std::runtime_error("http parser failed"); // TODO define exception class
 
-        bool ready = _parser.end();
-        if( ready )
+        if( _parser.end() )
         {
             _contentSize = _reply.contentSize();
             headerReceived(_reply);
@@ -139,7 +125,11 @@ void HttpClient::onInput(System::StreamBuffer& sb)
             if (_contentSize > 0)
             {
                 if( sb.in_avail() > 0 )
-                    bodyReceived(*this);
+                {
+                    _contentSize -= bodyReceived(*this);
+                    if( _contentSize <= 0 )
+                        replyFinished(*this);
+                }
             }
             else
             {

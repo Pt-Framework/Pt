@@ -33,38 +33,23 @@ namespace Pt {
 
 namespace Net {
 
-/*
-std::size_t HttpXmlRpcResponder::advance(std::istream& in)
-{
-    return _xmlRpcHandler.advance(in);
-}
-
-void HttpXmlRpcResponder::finish(std::ostream& out)
-{
-    std::ostringstream result;
-    _xmlRpcHandler.finish(result);
-    out << "HTTP/1.1 200 OK\r\n"
-           "Connection: close\r\n"
-           "Content-Size: " << result.str().size() <<
-           "Content-Type: text/xml\r\n"
-           "Server: Pt-Net Http server\r\n\r\n"
-        << result.str();
-}
-*/
-
 std::size_t HttpNotFoundResponder::advance(std::istream& in)
 {
-    std::size_t ret = in.rdbuf()->in_avail();
-    in.ignore(ret);
+    std::streambuf* sb = in.rdbuf();
+
+    std::size_t ret = 0;
+    while (sb->in_avail() > 0)
+    {
+        sb->sbumpc();
+        ++ret;
+    }
+
     return ret;
 }
 
-void HttpNotFoundResponder::finish(std::ostream& out)
+void HttpNotFoundResponder::finish(std::ostream& out, HttpRequest& request, HttpReply& reply)
 {
-    out << "HTTP/1.1 404 Not found\r\n"
-           "Connection: close\r\n"
-           "Content-Size: 0\r\n"
-           "Server: Pt-Net Http server\r\n\r\n";
+    reply.httpReturn(404, "Not found");
 }
 
 HttpResponder* HttpNotFoundService::createResponder()
@@ -75,9 +60,26 @@ HttpResponder* HttpNotFoundService::createResponder()
 void HttpNotFoundService::releaseResponder(HttpResponder*)
 { }
 
+void HttpSocket::ParseEvent::onMethod(const std::string& method)
+{
+    _request.method(method);
+}
+
+void HttpSocket::ParseEvent::onUrl(const std::string& url)
+{
+    _request.url(url);
+}
+
+void HttpSocket::ParseEvent::onUrlParam(const std::string& q)
+{
+    _request.qparams(q);
+}
+
 HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
     : TcpSocket(server),
       _server(server),
+      _parseEvent(_request),
+      _parser(_parseEvent, false),
       _readHeader(true)
 {
     _stream.attachDevice(*this);
@@ -96,29 +98,34 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
     _timer.start(_server.readTimeout());
     if ( _readHeader )
     {
-        // TODO http parser
-        while ( sb.in_avail() > 0 )
-        {
-            sb.sbumpc();
-        }
+        _parser.advance(sb);
 
-        std::string url = "/"; // TODO
-        bool ready = true; // TODO
-        if (ready)
+        if (_parser.fail())
+            throw std::runtime_error("http parser failed"); // TODO define exception class
+
+        if (_parser.end())
         {
-            _contentSize = 0; // TODO
-            HttpService* service = _server.getService(url);
+            _contentSize = _request.contentSize();
+            HttpService* service = _server.getService(_request.url());
             _responder = service->createResponder();
 
             if (_contentSize == 0)
             {
-                _responder->finish(_stream);
+                _responder->finish(_reply.body(), _request, _reply);
                 _responder->release();
+
+                _reply.amendHeaders(_request, true);
+                sendReply();
+
                 onOutput(sb);
                 return;
             }
 
             _readHeader = false;
+        }
+        else
+        {
+            sb.beginRead();
         }
     }
 
@@ -129,9 +136,17 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
 
         if (_contentSize <= 0)
         {
-            _responder->finish(_stream);
+            _responder->finish(_reply.body(), _request, _reply);
             _responder->release();
+
+            _reply.amendHeaders(_request, true);
+            sendReply();
+
             onOutput(sb);
+        }
+        else
+        {
+            sb.beginRead();
         }
     }
 }
@@ -162,6 +177,19 @@ void HttpSocket::onTimeout()
 {
      close();
      delete this;
+}
+
+void HttpSocket::sendReply()
+{
+    _stream << "HTTP/" << _reply.httpVersionMajor() << '.' << _reply.httpVersionMinor()
+        << ' ' << _reply.httpReturnCode() << ' ' << _reply.httpReturnText() << "\r\n";
+
+    for (HttpReply::const_iterator it = _reply.begin(); it != _reply.end(); ++it)
+    {
+        _stream << it->first << ": " << it->second << "\r\n";
+    }
+
+    _stream << "\r\n" << _reply.bodyStr();
 }
 
 HttpServer::HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port)

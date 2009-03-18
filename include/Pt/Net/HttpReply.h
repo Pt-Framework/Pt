@@ -36,13 +36,15 @@ namespace Pt {
 
 namespace Net {
 
+class HttpRequest;
+
 class HttpReply : public HttpMessage
 {
         unsigned _httpReturnCode;
         std::string _httpReturnText;
 
     public:
-        HttpReply() : _httpReturnCode(0)  { }
+        HttpReply() : _httpReturnCode(200)  { }
 
         unsigned httpReturnCode() const
         { return _httpReturnCode; }
@@ -56,6 +58,7 @@ class HttpReply : public HttpMessage
             _httpReturnText = t;
         }
 
+        void amendHeaders(HttpRequest& request, bool keepAlive);
 };
 
 } // namespace Net

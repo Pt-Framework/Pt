@@ -37,6 +37,7 @@ namespace Pt {
 
 namespace Net {
 
+class HttpMessage;
 class PT_NET_API HttpHeaderParser
 {
     public:
@@ -52,6 +53,21 @@ class PT_NET_API HttpHeaderParser
                 virtual void onValue(const std::string& value);
                 virtual void onHttpReturn(unsigned ret, const std::string& text);
                 virtual void onEnd();
+        };
+
+        class PT_NET_API HttpMessageEvent : public Event
+        {
+                HttpMessage& _message;
+                std::string _key;
+
+            public:
+                explicit HttpMessageEvent(HttpMessage& message)
+                    : _message(message)
+                    { }
+
+                virtual void onHttpVersion(unsigned major, unsigned minor);
+                virtual void onKey(const std::string& key);
+                virtual void onValue(const std::string& value);
         };
 
     private:

@@ -32,6 +32,9 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
+#include <Pt/Net/HttpParser.h>
+#include <Pt/Net/HttpRequest.h>
+#include <Pt/Net/HttpReply.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
@@ -65,10 +68,11 @@ class HttpResponder
         explicit HttpResponder(HttpService& service)
             : _service(service)
         { }
+
         virtual ~HttpResponder() { }
 
         virtual std::size_t advance(std::istream&) = 0;
-        virtual void finish(std::ostream&) = 0;
+        virtual void finish(std::ostream&, HttpRequest& request, HttpReply& reply) = 0;
         void release()     { _service.releaseResponder(this); }
 
     private:
@@ -83,7 +87,7 @@ class PT_NET_API HttpNotFoundResponder : public HttpResponder
             { }
 
         std::size_t advance(std::istream&);
-        void finish(std::ostream&);
+        void finish(std::ostream&, HttpRequest& request, HttpReply& reply);
 };
 
 class PT_NET_API HttpNotFoundService : public HttpService
@@ -99,23 +103,6 @@ class PT_NET_API HttpNotFoundService : public HttpService
     private:
         HttpNotFoundResponder _responder;
 };
-
-/*
-class PT_NET_API HttpXmlRpcResponder : public HttpResponder
-{
-    public:
-        HttpXmlRpcResponder(XmlRpc::Service& xmlRpcService, std::iostream& _stream)
-            : HttpResponder(_stream),
-              _xmlRpcHandler(xmlRpcService, _stream)
-        { }
-
-        virtual std::size_t advance(std::istream&);
-        virtual void finish(std::ostream&);
-
-    private:
-        XmlRpc::RequestHandler _xmlRpcHandler;
-};
-*/
 
 class PT_NET_API HttpServer : public TcpServer, public Connectable
 {
@@ -150,6 +137,21 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
 
 class PT_NET_API HttpSocket : public TcpSocket, public Connectable
 {
+        class ParseEvent : public HttpHeaderParser::HttpMessageEvent
+        {
+                HttpRequest& _request;
+
+            public:
+                explicit ParseEvent(HttpRequest& request)
+                    : HttpHeaderParser::HttpMessageEvent(request),
+                      _request(request)
+                    { }
+
+                virtual void onMethod(const std::string& method);
+                virtual void onUrl(const std::string& url);
+                virtual void onUrlParam(const std::string& q);
+        };
+
     public:
         HttpSocket(System::SelectorBase& s, HttpServer& server);
 
@@ -157,13 +159,21 @@ class PT_NET_API HttpSocket : public TcpSocket, public Connectable
         void onOutput(System::StreamBuffer& stream);
         void onTimeout();
 
+        void sendReply();
+
     private:
         HttpServer& _server;
+
+        ParseEvent _parseEvent;
+        HttpHeaderParser _parser;
+        HttpRequest _request;
+        HttpReply _reply;
+        bool _readHeader;
+
         System::Timer _timer;
         int _contentSize;
         HttpResponder* _responder;
         System::IOStream _stream;
-        bool _readHeader;
 };
 
 } // namespace Net

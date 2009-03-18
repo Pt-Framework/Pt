@@ -203,12 +203,14 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
 }
 
 
-void HttpXmlRpcResponder::finish(std::ostream& os)
+void HttpXmlRpcResponder::finish(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
 {
     _state = OnBegin;
 
     if( ! _proc )
         return;
+
+    reply.setHeader("Content-Type", "text/xml");
 
     ITypeHandler* rh = _proc->endCall();
 
