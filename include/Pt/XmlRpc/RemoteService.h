@@ -48,27 +48,7 @@ class SelectorBase;
 
 namespace XmlRpc {
 
-class IRemoteProcedure
-{
-    friend class RemoteService;
-
-    public:
-        IRemoteProcedure(const std::string& name)
-        :_name(name)
-        { }
-
-        virtual ~IRemoteProcedure()
-        { }
-
-        const std::string& name() const
-        { return _name; }
-
-    protected:
-        virtual void onFinished() = 0;
-
-    private:
-        std::string _name;
-};
+class IRemoteProcedure;
 
 
 class PT_XMLRPC_API RemoteService : public Pt::Connectable

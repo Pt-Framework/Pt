@@ -38,6 +38,29 @@ namespace Pt {
 
 namespace XmlRpc {
 
+class IRemoteProcedure
+{
+    friend class RemoteService;
+
+    public:
+        IRemoteProcedure(const std::string& name)
+        :_name(name)
+        { }
+
+        virtual ~IRemoteProcedure()
+        { }
+
+        const std::string& name() const
+        { return _name; }
+
+    protected:
+        virtual void onFinished() = 0;
+
+    private:
+        std::string _name;
+};
+
+
 template <typename R,
           typename A1,
           typename A2 >
