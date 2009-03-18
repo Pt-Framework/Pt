@@ -84,6 +84,7 @@ void RemoteService::beginCall(ITypeHandler& r, IRemoteMethod& method, ITypeHandl
 
 void RemoteService::call(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a1, ITypeHandler& a2)
 {
+    _method = &method;
     _state = OnBegin;
 
     this->prepareRequest(method.name(), a1, a2);
