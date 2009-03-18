@@ -122,7 +122,7 @@ class PT_XMLRPC_API Service : public Net::HttpService
             this->registerProcedure(name, proc);
         }
 
-        virtual Net::HttpResponder* createResponder();
+        virtual Net::HttpResponder* createResponder(const Net::HttpRequest&);
 
         virtual void releaseResponder(Net::HttpResponder* resp);
 

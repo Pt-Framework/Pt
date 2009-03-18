@@ -61,7 +61,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
             Pt::Net::HttpClient client("127.0.0.1", 8001);
             client.setSelector(loop);
             connect(client.headerReceived, *this, &HttpServerTest::onReplyHeader);
-            connect(client.bodyReceived, *this, &HttpServerTest::onReply);
+            connect(client.bodyAvailable, *this, &HttpServerTest::onReply);
             connect(client.replyFinished, *this, &HttpServerTest::onReplyFinished);
 
             Pt::Net::HttpRequest request("/index.html");

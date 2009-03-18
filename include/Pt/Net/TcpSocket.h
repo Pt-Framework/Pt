@@ -72,6 +72,8 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void endConnect();
 
+        bool isConnected() const;
+
         Signal<TcpSocket&> connected;
 
     protected:

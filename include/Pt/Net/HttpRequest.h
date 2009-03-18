@@ -48,6 +48,14 @@ class HttpRequest : public HttpMessage
           _method("GET")
         { }
 
+        void clear()
+        {
+            HttpMessage::clear();
+            _url.clear();
+            _method = "GET";
+            _qparams.clear();
+        }
+
         const std::string& url() const
         { return _url; }
 

@@ -82,6 +82,9 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void close();
 
+        bool isConnected() const
+        { return _isConnected; }
+
         void accept(TcpServer& server);
 
         void connect(const std::string& ipaddr, unsigned short int port);

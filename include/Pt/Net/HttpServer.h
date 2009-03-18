@@ -58,7 +58,7 @@ class HttpService
 {
     public:
         virtual ~HttpService() { }
-        virtual HttpResponder* createResponder() = 0;
+        virtual HttpResponder* createResponder(const HttpRequest&) = 0;
         virtual void releaseResponder(HttpResponder*) = 0;
 };
 
@@ -98,7 +98,7 @@ class PT_NET_API HttpNotFoundService : public HttpService
             : _responder(*this)
             { }
 
-        HttpResponder* createResponder();
+        HttpResponder* createResponder(const HttpRequest&);
         void releaseResponder(HttpResponder*);
 
     private:
@@ -110,9 +110,9 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
     public:
         HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
 
-        void addService(const std::string& url, HttpService& resp);
+        void addService(const std::string& url, HttpService& service);
 
-        HttpService* getService(const std::string& url);
+        HttpResponder* getResponder(const HttpRequest& request);
 
         void onConnect(TcpServer& server);
 
@@ -125,7 +125,7 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
         void keepAliveTimeout(std::size_t ms) { _keepAliveTimeout = ms; }
 
     private:
-        typedef std::map<std::string, HttpService*> ServicesType;
+        typedef std::multimap<std::string, HttpService*> ServicesType;
         ServicesType _service;
         System::SelectorBase& _selector;
         HttpNotFoundService _defaultService;

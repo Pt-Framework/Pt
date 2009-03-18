@@ -135,7 +135,8 @@ class PT_NET_API HttpHeaderParser
             return state == &HttpHeaderParser::state_end || state == &HttpHeaderParser::state_error;
         }
 
-        bool end() const    { return state == &HttpHeaderParser::state_end; }
+        bool end() const    { return state == &HttpHeaderParser::state_end
+                                || state == &HttpHeaderParser::state_error; }
         bool fail() const   { return state == &HttpHeaderParser::state_error; }
 
         void reset(bool client)

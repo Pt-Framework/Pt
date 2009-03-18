@@ -83,6 +83,14 @@ class HttpMessage
 
         virtual ~HttpMessage()  {}
 
+        void clear()
+        {
+          _headers.clear();
+          _body.str(std::string());
+          _httpVersionMajor = 1;
+          _httpVersionMinor = 1;
+        }
+
         void setHeader(const std::string& key, const std::string& value)
         {
             _headers[key] = value;

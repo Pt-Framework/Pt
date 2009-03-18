@@ -28,6 +28,7 @@
 
 #include <Pt/Net/HttpServer.h>
 #include <Pt/System/Selector.h>
+#include <cassert>
 
 namespace Pt {
 
@@ -56,7 +57,7 @@ void HttpNotFoundResponder::reply(std::ostream& out, HttpRequest& request, HttpR
     reply.httpReturn(404, "Not found");
 }
 
-HttpResponder* HttpNotFoundService::createResponder()
+HttpResponder* HttpNotFoundService::createResponder(const HttpRequest&)
 {
     return &_responder;
 }
@@ -109,12 +110,10 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
 
         if (_parser.end())
         {
-            _contentSize = _request.contentSize();
-            HttpService* service = _server.getService(_request.url());
-            _responder = service->createResponder();
-
+            _responder = _server.getResponder(_request);
             _responder->beginRequest(_stream, _request);
 
+            _contentSize = _request.contentSize();
             if (_contentSize == 0)
             {
                 _responder->reply(_reply.body(), _request, _reply);
@@ -138,7 +137,11 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
     if (!_readHeader)
     {
         if (sb.in_avail() > 0)
-            _contentSize -= _responder->readBody(_stream);
+        {
+            std::size_t s = _responder->readBody(_stream);
+            assert(s > 0);
+            _contentSize -= s;
+        }
 
         if (_contentSize <= 0)
         {
@@ -171,6 +174,8 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
     {
         _timer.start(_server.keepAliveTimeout());
         _readHeader = true;
+        _request.clear();
+        _reply.clear();
     }
     else
     {
@@ -209,15 +214,22 @@ HttpServer::HttpServer(System::SelectorBase& selector, const std::string& ip, un
     Pt::connect(connectionPending, *this, &HttpServer::onConnect);
 }
 
-void HttpServer::addService(const std::string& url, HttpService& resp)
+void HttpServer::addService(const std::string& url, HttpService& service)
 {
-    _service[url] = &resp;
+    _service.insert(ServicesType::value_type(url, &service));
 }
 
-HttpService* HttpServer::getService(const std::string& url)
+HttpResponder* HttpServer::getResponder(const HttpRequest& request)
 {
-    ServicesType::iterator it = _service.find(url);
-    return it == _service.end() ? &_defaultService : it->second;
+    for (ServicesType::const_iterator it = _service.lower_bound(request.url());
+        it != _service.end() && it->first == request.url(); ++it)
+    {
+        HttpResponder* resp = it->second->createResponder(request);
+        if (resp)
+            return resp;
+    }
+
+    return _defaultService.createResponder(request);
 }
 
 void HttpServer::onConnect(TcpServer& server)

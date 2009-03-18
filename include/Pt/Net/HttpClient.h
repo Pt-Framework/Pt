@@ -77,8 +77,8 @@ class HttpClient : public Pt::Connectable
         System::IOStream _stream;
         bool _readHeader;
         long _contentSize;
-        bool _requestReady;
-        bool _executed;
+
+        void sendRequest(HttpRequest& request);
 
     protected:
         void onConnect(TcpSocket& socket);
@@ -87,6 +87,22 @@ class HttpClient : public Pt::Connectable
 
     public:
         HttpClient(const std::string& server, unsigned short int port);
+
+        HttpClient(const std::string& server, unsigned short int port, System::SelectorBase& selector);
+
+        const HttpReply& execute(HttpRequest& request,
+            std::size_t timeout = System::Selectable::WaitInfinite);
+
+        void readBody(std::string& s);
+
+        std::string readBody()
+        {
+            std::string ret;
+            readBody(ret);
+            return ret;
+        }
+
+        std::string get(const std::string& url);
 
         void beginExecute(HttpRequest& request);
 
@@ -99,9 +115,9 @@ class HttpClient : public Pt::Connectable
             return _stream;
         }
 
+        Signal<HttpClient&> requestSent;
         Signal<HttpReply&> headerReceived;
-
-        Pt::Delegate<std::size_t, HttpClient&> bodyReceived; // TODO better name?
+        Pt::Delegate<std::size_t, HttpClient&> bodyAvailable;
         Signal<HttpClient&> replyFinished;
 };
 

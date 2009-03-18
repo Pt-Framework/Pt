@@ -128,6 +128,12 @@ void TcpSocket::endConnect()
 }
 
 
+bool TcpSocket::isConnected() const
+{
+    return _impl->isConnected();
+}
+
+
 void TcpSocket::accept(TcpServer& server)
 {
     this->close();

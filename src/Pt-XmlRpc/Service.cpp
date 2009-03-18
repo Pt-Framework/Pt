@@ -71,9 +71,12 @@ void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 }
 
 
-Net::HttpResponder* Service::createResponder()
+Net::HttpResponder* Service::createResponder(const Net::HttpRequest& req)
 {
-    return new HttpXmlRpcResponder(*this);
+    if (req.getHeader("Content-Type") == "text/xml")
+        return new HttpXmlRpcResponder(*this);
+
+    return 0;
 }
 
 

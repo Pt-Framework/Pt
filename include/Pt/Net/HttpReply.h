@@ -44,7 +44,17 @@ class HttpReply : public HttpMessage
         std::string _httpReturnText;
 
     public:
-        HttpReply() : _httpReturnCode(200)  { }
+        HttpReply()
+            : _httpReturnCode(200),
+              _httpReturnText("OK")
+            { }
+
+        void clear()
+        {
+            HttpMessage::clear();
+            _httpReturnCode = 200;
+            _httpReturnText = "OK";
+        }
 
         unsigned httpReturnCode() const
         { return _httpReturnCode; }

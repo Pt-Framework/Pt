@@ -46,7 +46,6 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port)
 , _port(port)
 , _readHeader(true)
 , _contentSize(0)
-, _executed(false)
 {
     _stream.attachDevice(_socket);
     connect(_socket.connected, *this, &HttpClient::onConnect);
@@ -55,9 +54,68 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port)
 }
 
 
+HttpClient::HttpClient(const std::string& server, unsigned short int port,
+    System::SelectorBase& selector)
+: _parseEvent(_reply)
+, _parser(_parseEvent, true)
+, _request(0)
+, _server(server)
+, _port(port)
+, _readHeader(true)
+, _contentSize(0)
+{
+    _stream.attachDevice(_socket);
+    connect(_socket.connected, *this, &HttpClient::onConnect);
+    connect(_stream.buffer().outputReady, *this, &HttpClient::onOutput);
+    connect(_stream.buffer().inputReady, *this, &HttpClient::onInput);
+    setSelector(selector);
+}
+
+
 void HttpClient::setSelector(System::SelectorBase& selector)
 {
     selector.add(_socket);
+}
+
+const HttpReply& HttpClient::execute(HttpRequest& request, std::size_t timeout)
+{
+    if (!_socket.isConnected())
+        _socket.connect(_server, _port);
+
+    sendRequest(request);
+    _stream.flush();
+
+    _parser.reset(true);
+
+    char ch;
+    while (!_parser.end() && _stream.get(ch))
+    {
+        _parser.parse(ch);
+    }
+
+    return _reply;
+}
+
+
+void HttpClient::readBody(std::string& s)
+{
+    char ch;
+
+    unsigned n = _reply.contentSize();
+
+    s.clear();
+    s.reserve(n);
+
+    while (n-- && _stream.get(ch))
+        s += ch;
+}
+
+
+std::string HttpClient::get(const std::string& url)
+{
+    HttpRequest request(url);
+    execute(request);
+    return readBody();
 }
 
 
@@ -74,21 +132,27 @@ void HttpClient::wait(std::size_t msecs)
 }
 
 
-void HttpClient::onConnect(TcpSocket& socket)
+void HttpClient::sendRequest(HttpRequest& request)
 {
-    _request->amendHeaders(true);
+    request.amendHeaders(true);
 
-    _stream << _request->method() << ' '
-            << _request->url() << " HTTP/"
-            << _request->httpVersionMajor() << '.'
-            << _request->httpVersionMinor() << "\r\n";
+    _stream << request.method() << ' '
+            << request.url() << " HTTP/"
+            << request.httpVersionMajor() << '.'
+            << request.httpVersionMinor() << "\r\n";
 
-    for (HttpRequest::const_iterator it = _request->begin(); it != _request->end(); ++it)
+    for (HttpRequest::const_iterator it = request.begin(); it != request.end(); ++it)
     {
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-    _stream << "\r\n" << _request->bodyStr();
+    _stream << "\r\n" << request.bodyStr();
+
+}
+
+void HttpClient::onConnect(TcpSocket& socket)
+{
+    sendRequest(*_request);
 
     _stream.buffer().beginWrite();
 }
@@ -103,6 +167,7 @@ void HttpClient::onOutput(System::StreamBuffer& sb)
     else
     {
         sb.beginRead();
+        requestSent(*this);
     }
 }
 
@@ -126,7 +191,7 @@ void HttpClient::onInput(System::StreamBuffer& sb)
             {
                 if( sb.in_avail() > 0 )
                 {
-                    _contentSize -= bodyReceived(*this);
+                    _contentSize -= bodyAvailable(*this);
                     if( _contentSize <= 0 )
                         replyFinished(*this);
                 }
@@ -139,7 +204,7 @@ void HttpClient::onInput(System::StreamBuffer& sb)
     }
     else
     {
-        _contentSize -= bodyReceived(*this);
+        _contentSize -= bodyAvailable(*this);
         if( _contentSize <= 0 )
             replyFinished(*this);
     }

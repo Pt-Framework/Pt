@@ -45,7 +45,7 @@ RemoteService::RemoteService(System::SelectorBase& selector, const std::string& 
 , _reader(_ts)
 {
     _client.setSelector(selector);
-    connect(_client.bodyReceived, *this, &RemoteService::onReplyBody);
+    connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
 }
 
 
@@ -74,6 +74,7 @@ void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHan
     _request.body() << "</params>\n";
     _request.body() << "</methodCall>\n";
 
+    _request.setHeader("Content-Type", "text/xml");
     _client.beginExecute(_request);
     _deserializer.begin(r);
 }
