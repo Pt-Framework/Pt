@@ -387,6 +387,7 @@ class basic_string< Pt::Char > {
     inline basic_string<Pt::Char> operator+(Pt::Char a, const basic_string<Pt::Char>& b)
     { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
+    // operator ==
     inline bool operator==(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) == 0; }
 
@@ -396,9 +397,21 @@ class basic_string< Pt::Char > {
     inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) == 0; }
 
-
     inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
     { return a.compare(b) == 0; }
+
+    // operator !=
+    inline bool operator!=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { return b.compare(a) != 0; }
+
+    inline bool operator!=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) != 0; }
 
 
     inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
