@@ -28,6 +28,7 @@
  */
 #include "Pt/XmlRpc/RemoteService.h"
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"
 
@@ -46,6 +47,21 @@ RemoteService::RemoteService(System::SelectorBase& selector, const std::string& 
 , _method(0)
 {
     _client.setSelector(selector);
+    connect(_client.headerReceived, *this, &RemoteService::onReplyHeader);
+    connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
+}
+
+
+RemoteService::RemoteService(const std::string& server, unsigned short port, const std::string& url)
+: _state(OnBegin)
+, _url(url)
+, _client(server, port)
+, _request(url)
+, _ts( new Utf8Codec )
+, _reader(_ts)
+, _method(0)
+{
+    connect(_client.headerReceived, *this, &RemoteService::onReplyHeader);
     connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
 }
 
@@ -84,9 +100,14 @@ void RemoteService::call(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a
 }
 
 
+void RemoteService::onReplyHeader(Net::HttpReply& reply)
+{
+    _ts.attach( _client.in() );
+}
+
+
 std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
 {
-    _ts.attach( client.in() );
     std::size_t n = _ts.buffer().import();
 
     while( _reader.advance() )
@@ -135,20 +156,23 @@ void RemoteService::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() == L"methodResponse" )
-                {
-                    _state = OnMethodResponseBegin;
-                    break;
-                }
+                if( se.name() != "methodResponse" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnMethodResponseBegin;
             }
 
-            throw std::runtime_error("invalid XML-RPC methodCall");
+            break;
         }
 
         case OnMethodResponseBegin:
         { //std::cerr << "RemoteService:: OnMethodResponseBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <params>
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() != "params" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
                 _state = OnParamsBegin;
             }
             break;
@@ -158,6 +182,10 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         { //std::cerr << "RemoteService:: OnParams" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <param>
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() != "param" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
                 _state = OnParam;
             }
 
@@ -180,6 +208,10 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </params>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "params" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
                 _state = OnParamsEnd;
             }
             break;
@@ -189,6 +221,10 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </methodResponse>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "methodResponse" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
                 _state = OnMethodResponseEnd;
             }
             break;

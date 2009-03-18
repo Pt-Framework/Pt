@@ -89,6 +89,8 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         RemoteService(System::SelectorBase& selector, const std::string& addr,
                       unsigned short port, const std::string& url);
 
+        RemoteService(const std::string& addr, unsigned short port, const std::string& url);
+
         virtual ~RemoteService();
 
         void beginCall(ITypeHandler& r, IRemoteMethod& method,
@@ -98,6 +100,8 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
                   ITypeHandler& a1, ITypeHandler& a2);
 
     protected:
+        void onReplyHeader(Net::HttpReply& reply);
+
         std::size_t onReplyBody(Net::HttpClient& client);
 
         void prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
