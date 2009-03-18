@@ -55,9 +55,14 @@ HttpXmlRpcResponder::~HttpXmlRpcResponder()
 }
 
 
-std::size_t HttpXmlRpcResponder::advance(std::istream& is)
+void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& request)
 {
     _ts.attach( is );
+}
+
+
+std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
+{
     std::size_t n = _ts.buffer().import();
     if(n == 0)
         return n;
@@ -203,7 +208,7 @@ std::size_t HttpXmlRpcResponder::advance(std::istream& is)
 }
 
 
-void HttpXmlRpcResponder::finish(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
+void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
 {
     _state = OnBegin;
 

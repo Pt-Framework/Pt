@@ -64,9 +64,10 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
         ~HttpXmlRpcResponder();
 
-        std::size_t advance(std::istream& is);
+        void beginRequest(std::istream& in, Pt::Net::HttpRequest& request);
+        std::size_t readBody(std::istream& is);
 
-        void finish(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
+        void reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
 
     private:
        State _state;

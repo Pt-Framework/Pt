@@ -62,7 +62,7 @@ class HttpService
         virtual void releaseResponder(HttpResponder*) = 0;
 };
 
-class HttpResponder
+class PT_NET_API HttpResponder
 {
     public:
         explicit HttpResponder(HttpService& service)
@@ -71,8 +71,10 @@ class HttpResponder
 
         virtual ~HttpResponder() { }
 
-        virtual std::size_t advance(std::istream&) = 0;
-        virtual void finish(std::ostream&, HttpRequest& request, HttpReply& reply) = 0;
+        virtual void beginRequest(std::istream& in, HttpRequest& request);
+        virtual std::size_t readBody(std::istream&);
+        virtual void reply(std::ostream&, HttpRequest& request, HttpReply& reply) = 0;
+
         void release()     { _service.releaseResponder(this); }
 
     private:
@@ -86,8 +88,7 @@ class PT_NET_API HttpNotFoundResponder : public HttpResponder
             : HttpResponder(service)
             { }
 
-        std::size_t advance(std::istream&);
-        void finish(std::ostream&, HttpRequest& request, HttpReply& reply);
+        void reply(std::ostream&, HttpRequest& request, HttpReply& reply);
 };
 
 class PT_NET_API HttpNotFoundService : public HttpService

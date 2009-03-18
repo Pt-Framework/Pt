@@ -69,50 +69,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer2);
+            this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             //this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
             //this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
             //this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
         }
 
         void Integer()
-        {
-            Pt::XmlRpc::Service service;
-            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
-            //server.addService("/", service);
-
-            Pt::Net::HttpResponder* resp = service.createResponder();
-
-            std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<methodCall>";
-            in << "   <methodName>multiply</methodName>";
-            in << "   <params>";
-            in << "     <param>";
-            in << "         <value><i4>10</i4></value>";
-            in << "         </param>";
-            in << "     <param>";
-            in << "         <value><i4>20</i4></value>";
-            in << "         </param>";
-            in << "      </params>";
-            in << "   </methodCall>";
-            in.seekg(std::ios::beg);
-            in.clear();
-            std::size_t contentLength = in.str().length();
-            //std::cerr << "Request Size: " <<  contentLength << std::endl;
-            std::size_t n = 0;
-            while(n < contentLength)
-            {
-                n += resp->advance(in);
-            }
-
-            Pt::Net::HttpRequest request;
-            Pt::Net::HttpReply reply;
-            resp->finish(std::cout, request, reply);
-            service.releaseResponder(resp);
-        }
-
-        void Integer2()
         {
             Pt::System::EventLoop loop;
             loop.setIdleTimeout(2000);

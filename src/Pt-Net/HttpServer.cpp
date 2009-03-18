@@ -33,7 +33,11 @@ namespace Pt {
 
 namespace Net {
 
-std::size_t HttpNotFoundResponder::advance(std::istream& in)
+void HttpResponder::beginRequest(std::istream& in, HttpRequest& request)
+{
+}
+
+std::size_t HttpResponder::readBody(std::istream& in)
 {
     std::streambuf* sb = in.rdbuf();
 
@@ -47,7 +51,7 @@ std::size_t HttpNotFoundResponder::advance(std::istream& in)
     return ret;
 }
 
-void HttpNotFoundResponder::finish(std::ostream& out, HttpRequest& request, HttpReply& reply)
+void HttpNotFoundResponder::reply(std::ostream& out, HttpRequest& request, HttpReply& reply)
 {
     reply.httpReturn(404, "Not found");
 }
@@ -109,9 +113,11 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
             HttpService* service = _server.getService(_request.url());
             _responder = service->createResponder();
 
+            _responder->beginRequest(_stream, _request);
+
             if (_contentSize == 0)
             {
-                _responder->finish(_reply.body(), _request, _reply);
+                _responder->reply(_reply.body(), _request, _reply);
                 _responder->release();
 
                 _reply.amendHeaders(_request, true);
@@ -132,11 +138,11 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
     if (!_readHeader)
     {
         if (sb.in_avail() > 0)
-            _contentSize -= _responder->advance(_stream);
+            _contentSize -= _responder->readBody(_stream);
 
         if (_contentSize <= 0)
         {
-            _responder->finish(_reply.body(), _request, _reply);
+            _responder->reply(_reply.body(), _request, _reply);
             _responder->release();
 
             _reply.amendHeaders(_request, true);
