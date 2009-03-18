@@ -66,7 +66,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)E()");
         }
 
@@ -81,7 +81,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(User-Agent)H(Pt-Unit)K(Content-Size)H(47)E()");
         }
 
@@ -96,7 +96,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(Content-Size)H(47)K(Foo)H(line1 line2 line3)K(Bar)H(bar)E()");
         }
 
@@ -111,7 +111,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(PUT)U(/foo)V(1.0)K(Content-Size)H(47  )E()");
         }
 
@@ -126,7 +126,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo bar)Q(a=4&b=Hello+World)V(1.1)E()");
         }
 
@@ -141,7 +141,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
-            PT_UNIT_ASSERT_EQUALS(msg.tellg(), msg.str().size());
+            PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "V(1.1)R(200,OK)K(Connection)H(close)K(Content-Type)H(text/xml)E()");
         }
 
