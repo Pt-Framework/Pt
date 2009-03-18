@@ -77,13 +77,13 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
                 if(node.type() == Xml::Node::StartElement)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() == L"methodCall" )
-                    {
-                        _state = OnMethodCallBegin;
-                        break;
-                    }
+                    if( se.name() != "methodCall" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+
+                    _state = OnMethodCallBegin;
                 }
-                throw std::runtime_error("invalid XML-RPC methodCall");
+
+                break;
             }
 
             case OnMethodCallBegin:
@@ -116,6 +116,10 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
             { //std::cerr << "OnMethodName" << std::endl;
                 if(node.type() == Xml::Node::EndElement)
                 {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if( ee.name() != "methodName" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+
                     _state = OnMethodNameEnd;
                 }
                 break;
@@ -125,6 +129,10 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
             { //std::cerr << "OnMethodNameEnd" << std::endl;
                 if(node.type() == Xml::Node::StartElement)
                 {
+                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                    if( se.name() != "params" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+ 
                     _state = OnParams;
                 }
                 break;
@@ -134,6 +142,10 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
             { //std::cerr << "OnParams" << std::endl;
                 if(node.type() == Xml::Node::EndElement) // </params>
                 {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if( ee.name() != "params" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+
                     _state = OnParamsEnd;
                     break;
                 }
@@ -141,32 +153,28 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
                 if(node.type() == Xml::Node::StartElement)
                 {
                     const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() == L"param" )
+                    if( se.name() != L"param" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+
+                    //std::cerr << "-> Found param" << std::endl;
+                    if( ! _args )
                     {
-                        //std::cerr << "-> Found param" << std::endl;
-                        if( ! _args )
-                        {
-                            //std::cerr << "-> begin call" << std::endl;
-                            _args = _proc->beginCall();
-                            if( ! *_args)
-                                std::runtime_error("too many arguments");
-                        }
-                        else
-                        {
-                            //std::cerr << "-> next arg" << std::endl;
-                            ++_args;
-                            if( ! *_args)
-                                std::runtime_error("too many arguments");
-                        }
-
-                        _deserializer.begin(**_args);
-                        _state = OnParam;
+                        //std::cerr << "-> begin call" << std::endl;
+                        _args = _proc->beginCall();
+                        if( ! *_args)
+                            std::runtime_error("too many arguments");
                     }
-                }
+                    else
+                    {
+                        //std::cerr << "-> next arg" << std::endl;
+                        ++_args;
+                        if( ! *_args)
+                            std::runtime_error("too many arguments");
+                    }
 
-                if(node.type() == Xml::Node::EndElement) // </params>
-                {
-                    _state = OnParamsEnd;
+                    _deserializer.begin(**_args);
+                    _state = OnParam;
+                    break;
                 }
 
                 break;
@@ -188,6 +196,10 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
             { //std::cerr << "OnParamsEnd" << std::endl;
                 if(node.type() == Xml::Node::EndElement) // </methodCall>
                 {
+                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                    if( ee.name() != "methodCall" )
+                        throw std::runtime_error("invalid XML-RPC methodCall");
+
                     _state = OnMethodCallEnd;
                 }
                 break;
