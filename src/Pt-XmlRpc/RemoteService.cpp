@@ -43,6 +43,7 @@ RemoteService::RemoteService(System::SelectorBase& selector, const std::string& 
 , _request(url)
 , _ts( new Utf8Codec )
 , _reader(_ts)
+, _method(0)
 {
     _client.setSelector(selector);
     connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
@@ -54,10 +55,55 @@ RemoteService::~RemoteService()
 }
 
 
-void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
+void RemoteService::beginCall(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a1, ITypeHandler& a2)
+{
+    _method = &method;
+    _state = OnBegin;
+
+    this->prepareRequest(method.name(), a1, a2);
+    _client.beginExecute(_request);
+    _deserializer.begin(r);
+}
+
+
+void RemoteService::call(ITypeHandler& r, IRemoteMethod& method, ITypeHandler& a1, ITypeHandler& a2)
 {
     _state = OnBegin;
 
+    this->prepareRequest(method.name(), a1, a2);
+    _client.execute(_request);
+
+    _ts.attach( _client.in() );
+    while( _state != OnMethodResponseEnd )
+    {
+        const Pt::Xml::Node& node = _reader.next();
+        this->advance(node);
+    }
+
+    _state = OnBegin;
+}
+
+
+std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
+{
+    _ts.attach( client.in() );
+    std::size_t n = _ts.buffer().import();
+
+    while( _reader.advance() )
+    {
+        const Pt::Xml::Node& node = _reader.get();
+        this->advance(node);
+
+        if(_state == OnMethodResponseEnd)
+            _method->onFinished();
+    }
+
+    return n;
+}
+
+
+void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
+{
     _request.body() << "<?xml version=\"1.0\"?>\n";
     _request.body() << "<methodCall>\n";
     _request.body() << "<methodName>" << name << "</methodName>\n";
@@ -75,111 +121,89 @@ void RemoteService::beginCall(ITypeHandler& r, const std::string& name, ITypeHan
     _request.body() << "</methodCall>\n";
 
     _request.setHeader("Content-Type", "text/xml");
-    _client.beginExecute(_request);
-    _deserializer.begin(r);
 }
 
 
-void RemoteService::endCall()
+void RemoteService::advance(const Pt::Xml::Node& node)
 {
-    while( _state != OnMethodResponseEnd )
+    switch(_state)
     {
-        const Pt::Xml::Node& node = _reader.next();
-        // TODO feed node to state machine
-    }
-
-    _state = OnBegin;
-}
-
-
-std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
-{
-    _ts.attach( client.in() );
-    std::size_t n = _ts.buffer().import();
-    if(n == 0)
-        return n;
-
-    while( _reader.advance() )
-    {
-        const Pt::Xml::Node& node = _reader.get();
-        switch(_state)
-        {
-            case OnBegin:
-            { //std::cerr << "RemoteService:: OnBegin" << std::endl;
-                if(node.type() == Xml::Node::StartElement)
+        case OnBegin:
+        { //std::cerr << "RemoteService:: OnBegin" << std::endl;
+            if(node.type() == Xml::Node::StartElement)
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() == L"methodResponse" )
                 {
-                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() == L"methodResponse" )
-                    {
-                        _state = OnMethodResponseBegin;
-                        break;
-                    }
+                    _state = OnMethodResponseBegin;
+                    break;
                 }
-
-                throw std::runtime_error("invalid XML-RPC methodCall");
             }
 
-            case OnMethodResponseBegin:
-            { //std::cerr << "RemoteService:: OnMethodResponseBegin" << std::endl;
-                if(node.type() == Xml::Node::StartElement) // <params>
-                {
-                    _state = OnParamsBegin;
-                }
-                break;
+            throw std::runtime_error("invalid XML-RPC methodCall");
+        }
+
+        case OnMethodResponseBegin:
+        { //std::cerr << "RemoteService:: OnMethodResponseBegin" << std::endl;
+            if(node.type() == Xml::Node::StartElement) // <params>
+            {
+                _state = OnParamsBegin;
+            }
+            break;
+        }
+
+        case OnParamsBegin:
+        { //std::cerr << "RemoteService:: OnParams" << std::endl;
+            if(node.type() == Xml::Node::StartElement) // <param>
+            {
+                _state = OnParam;
             }
 
-            case OnParamsBegin:
-            { //std::cerr << "RemoteService:: OnParams" << std::endl;
-                if(node.type() == Xml::Node::StartElement) // <param>
-                {
-                    _state = OnParam;
-                }
+            break;
+        }
 
-                break;
+        case OnParam:
+        { //std::cerr << "RemoteService:: OnParam" << std::endl;
+            bool finished = _deserializer.advance(node); // start with <value>
+            if(finished)
+            {
+                // </param>
+                _state = OnParamEnd;
             }
 
-            case OnParam:
-            { //std::cerr << "RemoteService:: OnParam" << std::endl;
-                bool finished = _deserializer.advance(node); // start with <value>
-                if(finished)
-                {
-                    // </param>
-                    _state = OnParamEnd;
-                }
+            break;
+        }
 
-                break;
+        case OnParamEnd:
+        { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
+            if(node.type() == Xml::Node::EndElement) // </params>
+            {
+                _state = OnParamsEnd;
             }
+            break;
+        }
 
-            case OnParamEnd:
-            { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
-                if(node.type() == Xml::Node::EndElement) // </params>
-                {
-                    _state = OnParamsEnd;
-                }
-                break;
+        case OnParamsEnd:
+        { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
+            if(node.type() == Xml::Node::EndElement) // </methodResponse>
+            {
+                _state = OnMethodResponseEnd;
             }
+            break;
+        }
 
-            case OnParamsEnd:
-            { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
-                if(node.type() == Xml::Node::EndElement) // </methodResponse>
-                {
-                    _state = OnMethodResponseEnd;
-                }
-                break;
-            }
+        case OnMethodResponseEnd:
+        { //std::cerr << "RemoteService:: OnMethodResponseEnd" << std::endl;
+            _state = OnEnd;
+            break;
+        }
 
-            case OnMethodResponseEnd:
-            { //std::cerr << "RemoteService:: OnMethodResponseEnd" << std::endl;
-                if(node.type() == Xml::Node::EndDocument)
-                {
-                    _state = OnMethodResponseEnd;
-                }
-                break;
-            }
+        case OnEnd:
+        { //std::cerr << "RemoteService:: OnMethodResponseEnd" << std::endl;
+            _state = OnEnd;
+            break;
         }
     }
-
-    return n;
 }
 
 }

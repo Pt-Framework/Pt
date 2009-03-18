@@ -31,6 +31,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/RemoteService.h>
 #include <Pt/XmlRpc/TypeHandler.h>
+#include <Pt/Signal.h>
 #include <string>
 
 namespace Pt {
@@ -40,11 +41,11 @@ namespace XmlRpc {
 template <typename R,
           typename A1,
           typename A2 >
-class RemoteMethod
+class RemoteMethod : public IRemoteMethod
 {
     public:
         RemoteMethod(RemoteService& service, const std::string& name)
-        : _name(name)
+        : IRemoteMethod(name)
         , _service(&service)
         { }
 
@@ -56,14 +57,30 @@ class RemoteMethod
             _a1handler.begin(a1);
             _a2handler.begin(a2);
             _rhandler.begin(_result);
-            _service->beginCall(_rhandler, _name, _a1handler, _a2handler);
+            _service->beginCall(_rhandler, *this, _a1handler, _a2handler);
+        }
+
+        const R& call(const A1& a1, const A2& a2)
+        {
+            _service->call(_rhandler, *this, _a1handler, _a2handler);
+            return _result;
+        }
+
+        const R& operator()(const A1& a1, const A2& a2)
+        {
+            return this->call(a1, a2);
         }
 
         const R& result()
         { return _result; }
 
+        Signal<const R&> finished;
+
+    protected:
+        void onFinished()
+        { finished.send(_result); }
+
     private:
-        std::string _name;
         RemoteService* _service;
         R _result;
         TypeHandler<R> _rhandler;

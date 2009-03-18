@@ -46,7 +46,36 @@ class SelectorBase;
 
 }
 
+namespace Xml {
+
+class Node;
+
+}
+
 namespace XmlRpc {
+
+class IRemoteMethod
+{
+    friend class RemoteService;
+
+    public:
+        IRemoteMethod(const std::string& name)
+        :_name(name)
+        { }
+
+        virtual ~IRemoteMethod()
+        { }
+
+        const std::string& name() const
+        { return _name; }
+
+    protected:
+        virtual void onFinished() = 0;
+
+    private:
+        std::string _name;
+};
+
 
 class PT_XMLRPC_API RemoteService : public Pt::Connectable
 {
@@ -59,6 +88,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         OnParamEnd,
         OnParamsEnd,
         OnMethodResponseEnd,
+        OnEnd,
     };
 
     public:
@@ -67,13 +97,18 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
 
         virtual ~RemoteService();
 
-        void beginCall(ITypeHandler& r, const std::string& name,
+        void beginCall(ITypeHandler& r, IRemoteMethod& method,
                        ITypeHandler& a1, ITypeHandler& a2);
 
-        void endCall();
+        void call(ITypeHandler& r, IRemoteMethod& method,
+                  ITypeHandler& a1, ITypeHandler& a2);
 
     protected:
         std::size_t onReplyBody(Net::HttpClient& client);
+
+        void prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
+
+        void advance(const Xml::Node& node);
 
     private:
         State _state;
@@ -85,6 +120,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
         Serializer _serializer;
         Deserializer _deserializer;
         ITypeHandler* _rhandler;
+        IRemoteMethod* _method;
 };
 
 }

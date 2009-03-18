@@ -78,7 +78,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void Integer()
         {
             Pt::System::EventLoop loop;
-            loop.setIdleTimeout(2000);
+            loop.setIdleTimeout(1000);
             connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
 
             std::cerr << "LISTEN: " << "127.0.0.1:8001" << std::endl;
@@ -90,11 +90,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             Pt::XmlRpc::RemoteService rserv(loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteMethod<int, int, int> multiply(rserv, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
+
             multiply.begin(2, 3);
 
-           loop.run();
+            loop.run();
+        }
 
-           std::cerr << "RESULT: " << multiply.result() << std::endl;
+        void onIntegerFinished(const int& r)
+        {
+            std::cerr << "RESULT: " << r << std::endl;
         }
 /*
         void VectorOfInt()
