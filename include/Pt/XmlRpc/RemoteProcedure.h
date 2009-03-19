@@ -172,6 +172,56 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
         TypeHandler<A1> _a1;
 };
 
+
+template <typename R>
+class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
+{
+    public:
+        RemoteProcedure(Client& service, const std::string& name)
+        : IRemoteProcedure(name)
+        , _service(&service)
+        { }
+
+        ~RemoteProcedure()
+        {}
+
+        void begin()
+        {
+            _r.begin(_result);
+
+            ITypeHandler* argv[1] = { 0 };
+            _service->beginCall(_r, *this, argv, 0);
+        }
+
+        const R& call()
+        {
+            _r.begin(_result);
+
+            ITypeHandler* argv[1] = { 0 };
+            _service->call(_r, *this, argv, 0);
+            return _result;
+        }
+
+        const R& operator()()
+        {
+            return this->call();
+        }
+
+        const R& result()
+        { return _result; }
+
+        Signal<const R&> finished;
+
+    protected:
+        void onFinished()
+        { finished.send(_result); }
+
+    private:
+        Client* _service;
+        R _result;
+        TypeHandler<R> _r;
+};
+
 }
 
 }

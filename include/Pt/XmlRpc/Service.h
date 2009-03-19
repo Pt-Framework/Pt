@@ -158,6 +158,47 @@ class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
 };
 
 
+template < typename R,
+           class C>
+class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
+{
+    public:
+        BasicServiceProcedure( const Callable<R>& cb )
+        : ServiceProcedure()
+        , _cb(0)
+        {
+            _cb = cb.clone();
+
+            _args[0] = 0;
+        }
+
+        ~BasicServiceProcedure()
+        {
+            delete _cb;
+        }
+
+        ITypeHandler** beginCall()
+        {
+            return _args;
+        }
+
+        ITypeHandler* endCall()
+        {
+            _rv = _cb->call();
+            _r.begin(_rv);
+            return &_r;
+        }
+
+    private:
+        typedef typename TypeTraits<R>::Value RV;
+
+        Callable<R>* _cb;
+        RV _rv;
+        ITypeHandler* _args[2];
+        TypeHandler<RV> _r;
+};
+
+
 class PT_XMLRPC_API Service : public Net::HttpService
 {
     public:
@@ -167,6 +208,13 @@ class PT_XMLRPC_API Service : public Net::HttpService
 
         // TODO cache service procedures and clone on demand
         ServiceProcedure* procedure(const std::string& name);
+
+        template <typename R, class C>
+        void registerMethod(const std::string& name, C& obj, R (C::*method)() )
+        {
+            ServiceProcedure* proc = new BasicServiceProcedure<R, C>( callable(obj, method) );
+            this->registerProcedure(name, proc);
+        }
 
         template <typename R, class C, typename A1>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1) )
