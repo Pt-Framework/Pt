@@ -71,8 +71,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
+            this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
+            this->registerMethod("String", *this, &PtXmlRpcTest::String);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
@@ -90,6 +92,28 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             delete _loop;
             delete _server;
+        }
+
+        void Boolean()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyBoolean);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onBooleanFinished );
+
+            multiply.begin(true, true);
+
+            _loop->run();
+        }
+
+        void onBooleanFinished(const bool& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r, true)
+
+            _loop->exit();
         }
 
         void Integer()
@@ -132,6 +156,28 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void onDoubleFinished(const double& r)
         {
             PT_UNIT_ASSERT_EQUALS(r, 6.0)
+
+            _loop->exit();
+        }
+
+        void String()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyString);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onStringFinished );
+
+            multiply.begin("2", "3");
+
+            _loop->run();
+        }
+
+        void onStringFinished(const std::string& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r, "6")
 
             _loop->exit();
         }
@@ -198,6 +244,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        bool multiplyBoolean(bool a, bool b)
+        {
+            PT_UNIT_ASSERT_EQUALS(a, true)
+            PT_UNIT_ASSERT_EQUALS(b, true)
+            return true;
+        }
+
         int multiplyInt(int a, int b)
         {
             return a*b;
@@ -206,6 +259,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         double multiplyDouble(double a, double b)
         {
             return a*b;
+        }
+
+        std::string multiplyString(std::string a, std::string b)
+        {
+            PT_UNIT_ASSERT_EQUALS(a, "2")
+            PT_UNIT_ASSERT_EQUALS(b, "3")
+            return "6";
         }
 
         std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)

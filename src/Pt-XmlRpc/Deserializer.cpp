@@ -59,7 +59,7 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-
+                //std::cerr << "-> found type" << se.name().narrow() << std::endl;
                 if(se.name() == L"struct")
                 {
                     _state = OnStructBegin;
