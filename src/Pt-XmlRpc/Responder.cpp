@@ -28,6 +28,7 @@
  */
 #include "Pt/XmlRpc/Responder.h"
 #include "Pt/XmlRpc/Service.h"
+#include "Pt/XmlRpc/Fault.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"

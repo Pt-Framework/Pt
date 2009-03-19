@@ -42,23 +42,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Fault : public std::runtime_error
-{
-    public:
-        Fault(const std::string& msg, int rc)
-        : std::runtime_error(msg)
-        , _rc(rc)
-        {
-        }
-
-        int rc() const
-        { return _rc; }
-
-    private:
-        int _rc;
-};
-
-
 class ServiceProcedure
 {
     public:
