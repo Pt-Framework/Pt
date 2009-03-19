@@ -71,6 +71,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
+            this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
             this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
@@ -92,6 +93,28 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             delete _loop;
             delete _server;
+        }
+
+        void Nothing()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyNothing);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onNothingFinished );
+
+            multiply.begin();
+
+            _loop->run();
+        }
+
+        void onNothingFinished(const bool& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r, false)
+
+            _loop->exit();
         }
 
         void Boolean()
@@ -242,6 +265,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(color.blue, 20)
 
             _loop->exit();
+        }
+
+        bool multiplyNothing()
+        {
+            return false;
         }
 
         bool multiplyBoolean(bool a, bool b)

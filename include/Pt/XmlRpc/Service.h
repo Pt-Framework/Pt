@@ -194,7 +194,7 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
 
         Callable<R>* _cb;
         RV _rv;
-        ITypeHandler* _args[2];
+        ITypeHandler* _args[1];
         TypeHandler<RV> _r;
 };
 

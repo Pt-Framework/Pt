@@ -59,6 +59,7 @@ void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& r
 {
     _state = OnBegin;
     _ts.attach( is );
+    _args = 0;
 }
 
 
@@ -92,9 +93,12 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
     if( ! _proc )
         throw std::runtime_error("invalid XML-RPC, no method found");
 
-    ++_args;
-    if( *_args )
-        throw std::runtime_error("invalid XML-RPC, missing arguments");
+    if( _args )
+    {
+        ++_args;
+        if( * _args )
+            throw std::runtime_error("invalid XML-RPC, missing arguments");
+    }
 
     reply.setHeader("Content-Type", "text/xml");
 
