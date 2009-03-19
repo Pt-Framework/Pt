@@ -72,11 +72,10 @@ class HttpServerTest : public Pt::Unit::TestSuite
         }
 
     private:
-        void onReplyHeader(Pt::Net::HttpReply& reply)
+        void onReplyHeader(Pt::Net::HttpClient& client)
         {
-            std::cout << "Server=" << reply.getHeader("server") << std::endl;
-            std::cout << "Connection=" << reply.getHeader("connection") << std::endl;
-            std::cout << "Content-Size=" << reply.contentSize() << std::endl;
+            std::cout << "Server=" << client.header().getHeader("server") << std::endl;
+            std::cout << "Connection=" << client.header().getHeader("connection") << std::endl;
         }
 
         std::size_t onReply(Pt::Net::HttpClient& client)

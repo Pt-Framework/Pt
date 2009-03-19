@@ -30,7 +30,8 @@
 #define Pt_Net_HttpReply_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessage.h>
+#include <Pt/Net/HttpReplyHeader.h>
+#include <sstream>
 
 namespace Pt {
 
@@ -38,37 +39,69 @@ namespace Net {
 
 class HttpRequest;
 
-class HttpReply : public HttpMessage
+class HttpReply
 {
-        unsigned _httpReturnCode;
-        std::string _httpReturnText;
+        HttpReplyHeader _header;
+        std::ostringstream _body;
 
     public:
         HttpReply()
-            : _httpReturnCode(200),
-              _httpReturnText("OK")
             { }
+
+        HttpReplyHeader& header()
+        { return _header; }
+
+        const HttpReplyHeader& header() const
+        { return _header; }
+
+        void setHeader(const std::string& key, const std::string& value)
+        {
+            _header.setHeader(key, value);
+        }
+
+        void addHeader(const std::string& key, const std::string& value)
+        {
+            _header.addHeader(key, value);
+        }
+
+        std::string getHeader(const std::string& key) const
+        {
+            return _header.getHeader(key);
+        }
+
+        bool hasHeader(const std::string& key) const
+        {
+            return _header.hasHeader(key);
+        }
 
         void clear()
         {
-            HttpMessage::clear();
-            _httpReturnCode = 200;
-            _httpReturnText = "OK";
+            _header.clear();
+            _body.clear();
+            _body.str(std::string());
         }
 
         unsigned httpReturnCode() const
-        { return _httpReturnCode; }
+        { return _header.httpReturnCode(); }
 
         const std::string& httpReturnText() const
-        { return _httpReturnText; }
+        { return _header.httpReturnText(); }
 
         void httpReturn(unsigned c, const std::string& t)
-        {
-            _httpReturnCode = c;
-            _httpReturnText = t;
-        }
+        { _header.httpReturn(c, t); }
 
-        void amendHeaders(HttpRequest& request, bool keepAlive);
+        std::string bodyStr() const
+        { return _body.str(); }
+
+        std::ostream& body()
+        { return _body; }
+
+        std::size_t bodySize() const
+        { return _body.str().size(); }
+
+        void sendBody(std::ostream& out) const
+        { out << _body.str(); }
+
 };
 
 } // namespace Net

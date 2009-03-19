@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Net/HttpParser.h>
-#include <Pt/Net/HttpMessage.h>
+#include <Pt/Net/HttpMessageHeader.h>
 #include <cctype>
 #include <algorithm>
 
@@ -103,19 +103,19 @@ namespace Net {
     {
     }
 
-    void HttpHeaderParser::HttpMessageEvent::onHttpVersion(unsigned major, unsigned minor)
+    void HttpHeaderParser::HttpMessageHeaderEvent::onHttpVersion(unsigned major, unsigned minor)
     {
-         _message.httpVersion(major, minor);
+         _header.httpVersion(major, minor);
     }
 
-    void HttpHeaderParser::HttpMessageEvent::onKey(const std::string& key)
+    void HttpHeaderParser::HttpMessageHeaderEvent::onKey(const std::string& key)
     {
         _key = key;
     }
 
-    void HttpHeaderParser::HttpMessageEvent::onValue(const std::string& value)
+    void HttpHeaderParser::HttpMessageHeaderEvent::onValue(const std::string& value)
     {
-        _message.addHeader(_key, value);
+        _header.addHeader(_key, value);
     }
 
     std::size_t HttpHeaderParser::advance(std::streambuf& sb)

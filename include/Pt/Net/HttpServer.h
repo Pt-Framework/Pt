@@ -138,13 +138,13 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
 
 class PT_NET_API HttpSocket : public TcpSocket, public Connectable
 {
-        class ParseEvent : public HttpHeaderParser::HttpMessageEvent
+        class ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
         {
                 HttpRequest& _request;
 
             public:
                 explicit ParseEvent(HttpRequest& request)
-                    : HttpHeaderParser::HttpMessageEvent(request),
+                    : HttpHeaderParser::HttpMessageHeaderEvent(request.header()),
                       _request(request)
                     { }
 

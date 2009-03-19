@@ -26,92 +26,102 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpMessage_h
-#define Pt_Net_HttpMessage_h
+#ifndef Pt_Net_HttpMessageHeader_h
+#define Pt_Net_HttpMessageHeader_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessageHead.h>
 #include <string>
-#include <sstream>
 #include <map>
-#include <cctype>
 #include <time.h>
 
 namespace Pt {
 
 namespace Net {
 
-class HttpMessage
+class HttpMessageHeader
 {
-        HttpMessageHead _head;
+        class StringLessIgnoreCase
+        {
+            public:
+                bool operator()(const std::string& s1, const std::string& s2) const;
+        };
 
-        std::stringstream _body;
+        typedef std::map<std::string, std::string, StringLessIgnoreCase> Headers;
+        Headers _headers;
+        unsigned _httpVersionMajor;
+        unsigned _httpVersionMinor;
 
     public:
-        HttpMessage()
+        typedef Headers::const_iterator const_iterator;
+
+        HttpMessageHeader()
+            : _httpVersionMajor(1)
+            , _httpVersionMinor(1)
             { }
 
-        virtual ~HttpMessage()  {}
+        virtual ~HttpMessageHeader()  {}
 
         void clear()
         {
-          _head.clear();
-          _body.str(std::string());
+          _headers.clear();
           _httpVersionMajor = 1;
           _httpVersionMinor = 1;
         }
 
         void setHeader(const std::string& key, const std::string& value)
         {
-            _head.setHeader(key, value);
+            _headers[key] = value;
         }
 
         void addHeader(const std::string& key, const std::string& value)
         {
-            _head.addHeader(key, value);
+            Headers::iterator it = _headers.find(key);
+            if (it == _headers.end())
+                _headers[key] = value;
+            else
+            {
+                it->second += ',';
+                it->second += value;
+            }
         }
 
         std::string getHeader(const std::string& key) const
         {
-            return _head.getHeader(key);
+            Headers::const_iterator it = _headers.find(key);
+            return it == _headers.end() ? std::string() : it->second;
         }
 
         bool hasHeader(const std::string& key) const
-        {
-            return _head.hasHeader(key);
-        }
-
-        std::string bodyStr() const
-        { return _body.str(); }
-
-        std::iostream& body()
-        { return _body; }
+        { return _headers.find(key) != _headers.end(); }
 
         unsigned httpVersionMajor() const
-        {
-            return _head.httpVersionMajor();
-        }
+        { return _httpVersionMajor; }
 
         unsigned httpVersionMinor() const
-        {
-            return _head.httpVersionMinor();
-        }
+        { return _httpVersionMinor; }
 
         void httpVersion(unsigned major, unsigned minor)
         {
-            _head.httpVersion(major, minor);
+            _httpVersionMajor = major;
+            _httpVersionMinor = minor;
         }
 
         std::size_t contentSize() const;
 
-        HttpMessageHead& header()
-        { return _head; }
+        const_iterator begin() const
+        { return _headers.begin(); }
 
-        const HttpMessageHead& header() const
-        { return _head; }
+        const_iterator end() const
+        { return _headers.end(); }
 
-        bool keepAlive() const
-        { return _head.keepAlive(); }
+        bool keepAlive() const;
+
+        /// Returns a properly formatted date-string, as needed in http.
+        static std::string htdate(time_t t);
+        /// Returns a properly formatted date-string, as needed in http.
+        static std::string htdate(struct ::tm* tm);
+        /// Returns a properly formatted current time-string, as needed in http.
+        static std::string htdateCurrent();
 
 };
 

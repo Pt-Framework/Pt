@@ -30,51 +30,85 @@
 #define Pt_Net_HttpRequest_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessage.h>
+#include <Pt/Net/HttpRequestHeader.h>
+#include <sstream>
 
 namespace Pt {
 
 namespace Net {
 
-class HttpRequest : public HttpMessage
+class HttpRequest
 {
-        std::string _url;
-        std::string _method;
-        std::string _qparams;
+        HttpRequestHeader _header;
+        std::ostringstream _body;
 
     public:
         explicit HttpRequest(const std::string& url = std::string())
-        : _url(url),
-          _method("GET")
+        : _header(url)
         { }
+
+        HttpRequestHeader& header()
+        { return _header; }
+
+        const HttpRequestHeader& header() const
+        { return _header; }
+
+        void setHeader(const std::string& key, const std::string& value)
+        {
+            _header.setHeader(key, value);
+        }
+
+        void addHeader(const std::string& key, const std::string& value)
+        {
+            _header.addHeader(key, value);
+        }
+
+        std::string getHeader(const std::string& key) const
+        {
+            return _header.getHeader(key);
+        }
+
+        bool hasHeader(const std::string& key) const
+        {
+            return _header.hasHeader(key);
+        }
 
         void clear()
         {
-            HttpMessage::clear();
-            _url.clear();
-            _method = "GET";
-            _qparams.clear();
+            _header.clear();
+            _body.clear();
+            _body.str(std::string());
         }
 
         const std::string& url() const
-        { return _url; }
+        { return _header.url(); }
 
         void url(const std::string& u)
-        { _url = u; }
+        { _header.url(u); }
 
         const std::string& method() const
-        { return _method; }
+        { return _header.method(); }
 
         void method(const std::string& m)
-        { _method = m; }
+        { _header.method(m); }
 
         const std::string& qparams() const
-        { return _qparams; }
+        { return _header.qparams(); }
 
         void qparams(const std::string& q)
-        { _qparams = q; }
+        { _header.qparams(q); }
 
-        void amendHeaders(bool keepAlive);
+        std::string bodyStr() const
+        { return _body.str(); }
+
+        std::ostream& body()
+        { return _body; }
+
+        std::size_t bodySize() const
+        { return _body.str().size(); }
+
+        void sendBody(std::ostream& out) const
+        { out << _body.str(); }
 
 };
 

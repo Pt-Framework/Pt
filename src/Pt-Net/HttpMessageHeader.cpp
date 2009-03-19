@@ -26,18 +26,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpMessage.h>
+#include <Pt/Net/HttpMessageHeader.h>
 #include <Pt/System/Mutex.h>
+#include <cctype>
+#include <sstream>
 
 namespace Pt {
 
 namespace Net {
 
-std::size_t HttpMessage::contentSize() const
+bool HttpMessageHeader::StringLessIgnoreCase::operator()
+    (const std::string& s1, const std::string& s2) const
+{
+    std::string::const_iterator it1 = s1.begin();
+    std::string::const_iterator it2 = s2.begin();
+    while (it1 != s1.end() && it2 != s2.end())
+    {
+        if (*it1 != *it2)
+        {
+            char c1 = std::toupper(*it1);
+            char c2 = std::toupper(*it2);
+            if (c1 < c2)
+                return true;
+            else if (c2 < c1)
+                return false;
+        }
+        ++it1;
+        ++it2;
+    }
+    return it1 == s1.end() ? (it2 != s2.end()) : (it2 == s2.end());
+}
+
+std::size_t HttpMessageHeader::contentSize() const
 {
     std::string s = getHeader("Content-Size");
     if (s.empty())
-        return _body.str().size();
+        return 0;
 
     std::istringstream ss(s);
     std::size_t size = 0;
@@ -45,7 +69,7 @@ std::size_t HttpMessage::contentSize() const
     return size;
 }
 
-bool HttpMessage::keepAlive() const
+bool HttpMessageHeader::keepAlive() const
 {
     std::string ch = getHeader("connection");
     return ch == "keep-alive" ||
@@ -54,14 +78,14 @@ bool HttpMessage::keepAlive() const
                 && httpVersionMinor() >= 1);
 }
 
-std::string HttpMessage::htdate(time_t t)
+std::string HttpMessageHeader::htdate(time_t t)
 {
     struct ::tm tm;
     gmtime_r(&t, &tm);
     return htdate(&tm);
 }
 
-std::string HttpMessage::htdate(struct ::tm* tm)
+std::string HttpMessageHeader::htdate(struct ::tm* tm)
 {
     static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -74,7 +98,7 @@ std::string HttpMessage::htdate(struct ::tm* tm)
     return buffer;
 }
 
-std::string HttpMessage::htdateCurrent()
+std::string HttpMessageHeader::htdateCurrent()
 {
     static struct ::tm lastTm;
     static time_t lastDay = 0;
@@ -113,7 +137,6 @@ std::string HttpMessage::htdateCurrent()
 
     return lastHtdate;
 }
-
 
 
 } // namespace Net

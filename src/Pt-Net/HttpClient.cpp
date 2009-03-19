@@ -35,11 +35,11 @@ namespace Net {
 
 void HttpClient::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
-    _reply.httpReturn(ret, text);
+    _replyHeader.httpReturn(ret, text);
 }
 
 HttpClient::HttpClient(const std::string& server, unsigned short int port)
-: _parseEvent(_reply)
+: _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
 , _server(server)
@@ -56,7 +56,7 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port)
 
 HttpClient::HttpClient(const std::string& server, unsigned short int port,
     System::SelectorBase& selector)
-: _parseEvent(_reply)
+: _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
 , _server(server)
@@ -77,7 +77,7 @@ void HttpClient::setSelector(System::SelectorBase& selector)
     selector.add(_socket);
 }
 
-const HttpReply& HttpClient::execute(HttpRequest& request, std::size_t timeout)
+const HttpReplyHeader& HttpClient::execute(const HttpRequest& request, std::size_t timeout)
 {
     if (!_socket.isConnected())
         _socket.connect(_server, _port);
@@ -93,7 +93,7 @@ const HttpReply& HttpClient::execute(HttpRequest& request, std::size_t timeout)
         _parser.parse(ch);
     }
 
-    return _reply;
+    return _replyHeader;
 }
 
 
@@ -101,7 +101,7 @@ void HttpClient::readBody(std::string& s)
 {
     char ch;
 
-    unsigned n = _reply.contentSize();
+    unsigned n = _replyHeader.contentSize();
 
     s.clear();
     s.reserve(n);
@@ -119,7 +119,7 @@ std::string HttpClient::get(const std::string& url)
 }
 
 
-void HttpClient::beginExecute(HttpRequest& request)
+void HttpClient::beginExecute(const HttpRequest& request)
 {
     _socket.beginConnect(_server, _port);
     _request = &request;
@@ -132,21 +132,47 @@ void HttpClient::wait(std::size_t msecs)
 }
 
 
-void HttpClient::sendRequest(HttpRequest& request)
+void HttpClient::sendRequest(const HttpRequest& request)
 {
-    request.amendHeaders(true);
+    const std::string contentSize = "Content-Size";
+    const std::string server = "Server";
+    const std::string connection = "Connection";
+    const std::string date = "Date";
 
     _stream << request.method() << ' '
             << request.url() << " HTTP/"
-            << request.httpVersionMajor() << '.'
-            << request.httpVersionMinor() << "\r\n";
+            << request.header().httpVersionMajor() << '.'
+            << request.header().httpVersionMinor() << "\r\n";
 
-    for (HttpRequest::const_iterator it = request.begin(); it != request.end(); ++it)
+    for (HttpRequestHeader::const_iterator it = request.header().begin();
+        it != request.header().end(); ++it)
     {
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-    _stream << "\r\n" << request.bodyStr();
+   if (!request.header().hasHeader(contentSize))
+    {
+        _stream << "Content-Size: " << request.bodySize() << "\r\n";
+    }
+
+    if (!request.header().hasHeader(server))
+    {
+        _stream << "Server: Pt-Net-HttpServer\r\n";
+    }
+
+    if (!request.header().hasHeader(connection))
+    {
+        _stream << "Connection: keep-alive\r\n";
+    }
+
+    if (!request.header().hasHeader(date))
+    {
+        _stream << "Date: " << HttpMessageHeader::htdateCurrent() << "\r\n";
+    }
+
+    _stream << "\r\n";
+
+    request.sendBody(_stream);
 
 }
 
@@ -183,8 +209,8 @@ void HttpClient::onInput(System::StreamBuffer& sb)
 
         if( _parser.end() )
         {
-            _contentSize = _reply.contentSize();
-            headerReceived(_reply);
+            _contentSize = _replyHeader.contentSize();
+            headerReceived(*this);
             _readHeader = false;
 
             if (_contentSize > 0)

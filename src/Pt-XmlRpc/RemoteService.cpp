@@ -102,9 +102,9 @@ void RemoteService::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler
 }
 
 
-void RemoteService::onReplyHeader(Net::HttpReply& reply)
+void RemoteService::onReplyHeader(Net::HttpClient& client)
 {
-    _ts.attach( _client.in() );
+    _ts.attach( client.in() );
 }
 
 

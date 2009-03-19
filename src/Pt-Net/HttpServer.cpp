@@ -113,13 +113,12 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
             _responder = _server.getResponder(_request);
             _responder->beginRequest(_stream, _request);
 
-            _contentSize = _request.contentSize();
+            _contentSize = _request.header().contentSize();
             if (_contentSize == 0)
             {
                 _responder->reply(_reply.body(), _request, _reply);
                 _responder->release();
 
-                _reply.amendHeaders(_request, true);
                 sendReply();
 
                 onOutput(sb);
@@ -148,7 +147,6 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
             _responder->reply(_reply.body(), _request, _reply);
             _responder->release();
 
-            _reply.amendHeaders(_request, true);
             sendReply();
 
             onOutput(sb);
@@ -192,15 +190,49 @@ void HttpSocket::onTimeout()
 
 void HttpSocket::sendReply()
 {
-    _stream << "HTTP/" << _reply.httpVersionMajor() << '.' << _reply.httpVersionMinor()
-        << ' ' << _reply.httpReturnCode() << ' ' << _reply.httpReturnText() << "\r\n";
+    const std::string contentSize = "Content-Size";
+    const std::string server = "Server";
+    const std::string connection = "Connection";
+    const std::string date = "Date";
 
-    for (HttpReply::const_iterator it = _reply.begin(); it != _reply.end(); ++it)
+    _stream << "HTTP/"
+        << _reply.header().httpVersionMajor() << '.'
+        << _reply.header().httpVersionMinor() << ' '
+        << _reply.header().httpReturnCode() << ' '
+        << _reply.header().httpReturnText() << "\r\n";
+
+    for (HttpReplyHeader::const_iterator it = _reply.header().begin();
+        it != _reply.header().end(); ++it)
     {
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-    _stream << "\r\n" << _reply.bodyStr();
+    if (!_reply.header().hasHeader(contentSize))
+    {
+        _stream << "Content-Size: " << _reply.bodySize() << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(server))
+    {
+        _stream << "Server: Pt-Net-HttpServer\r\n";
+    }
+
+    if (!_reply.header().hasHeader(connection))
+    {
+        _stream << "Connection: "
+                << (_request.header().keepAlive() ? "keep-alive" : "close")
+                << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(date))
+    {
+        _stream << "Date: " << HttpMessageHeader::htdateCurrent() << "\r\n";
+    }
+
+    _stream << "\r\n";
+
+    _reply.sendBody(_stream);
+
 }
 
 HttpServer::HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port)

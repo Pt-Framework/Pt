@@ -52,14 +52,14 @@ class HttpClient : public Pt::Connectable
 {
         friend class ParseEvent;
 
-        class ParseEvent : public HttpHeaderParser::HttpMessageEvent
+        class ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
         {
-                HttpReply& _reply;
+                HttpReplyHeader& _replyHeader;
 
             public:
-                explicit ParseEvent(HttpReply& reply)
-                    : HttpHeaderParser::HttpMessageEvent(reply),
-                      _reply(reply)
+                explicit ParseEvent(HttpReplyHeader& replyHeader)
+                    : HttpHeaderParser::HttpMessageHeaderEvent(replyHeader),
+                      _replyHeader(replyHeader)
                     { }
 
                 void onHttpReturn(unsigned ret, const std::string& text);
@@ -68,8 +68,8 @@ class HttpClient : public Pt::Connectable
         ParseEvent _parseEvent;
         HttpHeaderParser _parser;
 
-        HttpRequest* _request;
-        HttpReply _reply;
+        const HttpRequest* _request;
+        HttpReplyHeader _replyHeader;
 
         std::string _server;
         unsigned short int _port;
@@ -78,7 +78,7 @@ class HttpClient : public Pt::Connectable
         bool _readHeader;
         long _contentSize;
 
-        void sendRequest(HttpRequest& request);
+        void sendRequest(const HttpRequest& request);
 
     protected:
         void onConnect(TcpSocket& socket);
@@ -90,8 +90,11 @@ class HttpClient : public Pt::Connectable
 
         HttpClient(const std::string& server, unsigned short int port, System::SelectorBase& selector);
 
-        const HttpReply& execute(HttpRequest& request,
+        const HttpReplyHeader& execute(const HttpRequest& request,
             std::size_t timeout = System::Selectable::WaitInfinite);
+
+        const HttpReplyHeader& header()
+        { return _replyHeader; }
 
         void readBody(std::string& s);
 
@@ -104,7 +107,7 @@ class HttpClient : public Pt::Connectable
 
         std::string get(const std::string& url);
 
-        void beginExecute(HttpRequest& request);
+        void beginExecute(const HttpRequest& request);
 
         void setSelector(System::SelectorBase& selector);
 
@@ -116,7 +119,7 @@ class HttpClient : public Pt::Connectable
         }
 
         Signal<HttpClient&> requestSent;
-        Signal<HttpReply&> headerReceived;
+        Signal<HttpClient&> headerReceived;
         Pt::Delegate<std::size_t, HttpClient&> bodyAvailable;
         Signal<HttpClient&> replyFinished;
 };

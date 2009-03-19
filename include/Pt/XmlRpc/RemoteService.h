@@ -80,7 +80,7 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
                   ITypeHandler& a1, ITypeHandler& a2);
 
     protected:
-        void onReplyHeader(Net::HttpReply& reply);
+        void onReplyHeader(Net::HttpClient& client);
 
         std::size_t onReplyBody(Net::HttpClient& client);
 

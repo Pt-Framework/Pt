@@ -26,36 +26,52 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpRequest.h>
+#ifndef Pt_Net_HttpReplyHeader_h
+#define Pt_Net_HttpReplyHeader_h
+
+#include <Pt/Net/Api.h>
+#include <Pt/Net/HttpMessageHeader.h>
 
 namespace Pt {
 
 namespace Net {
 
-void HttpRequest::amendHeaders(bool keepAlive)
+class HttpRequestHeader;
+
+class HttpReplyHeader : public HttpMessageHeader
 {
-    const std::string contentSize = "Content-Size";
-    const std::string userAgent = "User-Agent";
-    const std::string connection = "Connection";
+        unsigned _httpReturnCode;
+        std::string _httpReturnText;
 
-    if (!hasHeader(contentSize))
-    {
-        std::ostringstream s;
-        s << bodyStr().size();
-        setHeader(contentSize, s.str());
-    }
+    public:
+        HttpReplyHeader()
+            : _httpReturnCode(200),
+              _httpReturnText("OK")
+            { }
 
-    if (!hasHeader(userAgent))
-    {
-        setHeader(userAgent, "Pt-Net-HttpClient");
-    }
+        void clear()
+        {
+            HttpMessageHeader::clear();
+            _httpReturnCode = 200;
+            _httpReturnText = "OK";
+        }
 
-    if (!hasHeader(connection))
-    {
-        setHeader(connection, keepAlive ? "keep-alive" : "close");
-    }
-}
+        unsigned httpReturnCode() const
+        { return _httpReturnCode; }
+
+        const std::string& httpReturnText() const
+        { return _httpReturnText; }
+
+        void httpReturn(unsigned c, const std::string& t)
+        {
+            _httpReturnCode = c;
+            _httpReturnText = t;
+        }
+
+};
 
 } // namespace Net
 
 } // namespace Pt
+
+#endif

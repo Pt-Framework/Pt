@@ -26,44 +26,59 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpReply.h>
-#include <Pt/Net/HttpRequest.h>
+#ifndef Pt_Net_HttpRequestHeader_h
+#define Pt_Net_HttpRequestHeader_h
+
+#include <Pt/Net/Api.h>
+#include <Pt/Net/HttpMessageHeader.h>
 
 namespace Pt {
 
 namespace Net {
 
-void HttpReply::amendHeaders(HttpRequest& request, bool keepAlive)
+class HttpRequestHeader : public HttpMessageHeader
 {
-    const std::string contentSize = "Content-Size";
-    const std::string server = "Server";
-    const std::string connection = "Connection";
-    const std::string date = "Date";
+        std::string _url;
+        std::string _method;
+        std::string _qparams;
 
-    if (!hasHeader(contentSize))
-    {
-        std::ostringstream s;
-        s << bodyStr().size();
-        setHeader(contentSize, s.str());
-    }
+    public:
+        explicit HttpRequestHeader(const std::string& url = std::string())
+        : _url(url),
+          _method("GET")
+        { }
 
-    if (!hasHeader(server))
-    {
-        setHeader(server, "Pt-Net-HttpServer");
-    }
+        virtual ~HttpRequestHeader()  {}
 
-    if (!hasHeader(connection))
-    {
-        setHeader(connection, keepAlive && request.keepAlive() ? "keep-alive" : "close");
-    }
+        void clear()
+        {
+            HttpMessageHeader::clear();
+            _method = "GET";
+            _qparams.clear();
+        }
 
-    if (!hasHeader(date))
-    {
-        setHeader(date, htdateCurrent());
-    }
+        const std::string& url() const
+        { return _url; }
 
-}
+        void url(const std::string& u)
+        { _url = u; }
+
+        const std::string& method() const
+        { return _method; }
+
+        void method(const std::string& m)
+        { _method = m; }
+
+        const std::string& qparams() const
+        { return _qparams; }
+
+        void qparams(const std::string& q)
+        { _qparams = q; }
+
+};
 
 } // namespace Net
 
 } // namespace Pt
+
+#endif
