@@ -34,6 +34,7 @@
 #include <Pt/Net/HttpServer.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
+#include <stdexcept>
 #include <string>
 #include <map>
 
@@ -41,7 +42,22 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Formatter;
+class Fault : public std::runtime_error
+{
+    public:
+        Fault(const std::string& msg, int rc)
+        : std::runtime_error(msg)
+        , _rc(rc)
+        {
+        }
+
+        int rc() const
+        { return _rc; }
+
+    private:
+        int _rc;
+};
+
 
 class ServiceProcedure
 {

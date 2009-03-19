@@ -102,18 +102,40 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
 
     reply.setHeader("Content-Type", "text/xml");
 
-    ITypeHandler* rh = _proc->endCall();
-
     os << "<?xml version=\"1.0\"?>\n";
     os << "<methodResponse>\n";
-    os << "<params>\n";
 
-    _formatter.begin( os );
-    rh->decompose(_formatter);
-    os << "</param>\n";
+    try
+    {
+        ITypeHandler* rh = _proc->endCall();
 
-    os << "</params>\n";
-    os << "</methodResponse>\n";
+        os << "<params>\n";
+
+        _formatter.begin( os );
+        rh->decompose(_formatter);
+        os << "</param>\n";
+
+        os << "</params>\n";
+        os << "</methodResponse>\n";
+    }
+    catch(const Fault& fault)
+    {
+        os << "<fault>\n";
+        os << "<value>\n";
+        os << "<struct>\n";
+        os << "<member>\n";
+        os << "<name>faultCode</name>\n";
+        os << "<value><int>" << fault.rc() << "</int></value>\n";
+        os << "</member>\n";
+        os << "<member>\n";
+        os << "<name>faultString</name>\n";
+        os << "<value><string>" << fault.what() << "</string></value>\n";
+        os << "</member>\n";
+        os << "</struct>\n";
+        os << "</value>\n";
+        os << "</fault>\n";
+        os << "</methodResponse>\n";
+    }
 }
 
 
