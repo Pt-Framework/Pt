@@ -60,8 +60,8 @@ class ServiceProcedure
 
 template < typename R,
            class C,
-           typename A1,
-           typename A2>
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void>
 class BasicServiceProcedure : public ServiceProcedure
 {
     public:
@@ -111,6 +111,53 @@ class BasicServiceProcedure : public ServiceProcedure
 };
 
 
+template < typename R,
+           class C,
+           typename A1>
+class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
+{
+    public:
+        BasicServiceProcedure( const Callable<R, A1>& cb )
+        : ServiceProcedure()
+        , _cb(0)
+        {
+            _cb = cb.clone();
+
+            _args[0] = &_a1;
+            _args[1] = 0;
+        }
+
+        ~BasicServiceProcedure()
+        {
+            delete _cb;
+        }
+
+        ITypeHandler** beginCall()
+        {
+            _a1.begin(_v1);
+            return _args;
+        }
+
+        ITypeHandler* endCall()
+        {
+            _rv = _cb->call(_v1);
+            _r.begin(_rv);
+            return &_r;
+        }
+
+    private:
+        typedef typename TypeTraits<A1>::Value V1;
+        typedef typename TypeTraits<R>::Value RV;
+
+        Callable<R, A1>* _cb;
+        RV _rv;
+        V1 _v1;
+        ITypeHandler* _args[2];
+        TypeHandler<V1> _a1;
+        TypeHandler<RV> _r;
+};
+
+
 class PT_XMLRPC_API Service : public Net::HttpService
 {
     public:
@@ -120,6 +167,13 @@ class PT_XMLRPC_API Service : public Net::HttpService
 
         // TODO cache service procedures and clone on demand
         ServiceProcedure* procedure(const std::string& name);
+
+        template <typename R, class C, typename A1>
+        void registerMethod(const std::string& name, C& obj, R (C::*method)(A1) )
+        {
+            ServiceProcedure* proc = new BasicServiceProcedure<R, C, A1>( callable(obj, method) );
+            this->registerProcedure(name, proc);
+        }
 
         template <typename R, class C, typename A1, typename A2>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2) )

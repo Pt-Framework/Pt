@@ -73,23 +73,23 @@ Client::~Client()
 }
 
 
-void Client::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
+void Client::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
-    this->prepareRequest(method.name(), a1, a2);
+    this->prepareRequest(method.name(), argv, argc);
     _client.beginExecute(_request);
     _deserializer.begin(r);
 }
 
 
-void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
+void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
-    this->prepareRequest(method.name(), a1, a2);
+    this->prepareRequest(method.name(), argv, argc);
     Net::HttpReplyHeader header = _client.execute(_request);
 
     std::string body = _client.readBody();
@@ -145,7 +145,7 @@ void Client::onReplyFinished(Net::HttpClient& client)
 }
 
 
-void Client::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
+void Client::prepareRequest(const std::string& name, ITypeHandler** argv, unsigned argc)
 {
     _request.clear();
     _request.url(_url);
@@ -156,13 +156,12 @@ void Client::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHand
     _request.body() << "<methodName>" << name << "</methodName>\n";
     _request.body() << "<params>\n";
 
-    _formatter.begin( _request.body() );
-    a1.decompose(_formatter);
-    _request.body() << "</param>\n";
-
-    _formatter.begin( _request.body() );
-    a2.decompose(_formatter);
-    _request.body() << "</param>\n";
+    for(unsigned n = 0; n < argc; ++n)
+    {
+        _formatter.begin( _request.body() );
+        argv[n]->decompose(_formatter);
+        _request.body() << "</param>\n";
+    }
 
     _request.body() << "</params>\n";
     _request.body() << "</methodCall>\n";

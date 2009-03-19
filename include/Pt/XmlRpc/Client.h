@@ -72,11 +72,9 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         virtual ~Client();
 
-        void beginCall(ITypeHandler& r, IRemoteProcedure& method,
-                       ITypeHandler& a1, ITypeHandler& a2);
+        void beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc);
 
-        void call(ITypeHandler& r, IRemoteProcedure& method,
-                  ITypeHandler& a1, ITypeHandler& a2);
+        void call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc);
 
     protected:
         void onReplyHeader(Net::HttpClient& client);
@@ -85,7 +83,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         void onReplyFinished(Net::HttpClient& client);
 
-        void prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
+        void prepareRequest(const std::string& name, ITypeHandler** argv, unsigned argc);
 
         void advance(const Xml::Node& node);
 

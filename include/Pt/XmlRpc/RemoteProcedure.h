@@ -62,8 +62,8 @@ class IRemoteProcedure
 
 
 template <typename R,
-          typename A1,
-          typename A2 >
+          typename A1 = Pt::Void,
+          typename A2 = Pt::Void>
 class RemoteProcedure : public IRemoteProcedure
 {
     public:
@@ -77,15 +77,22 @@ class RemoteProcedure : public IRemoteProcedure
 
         void begin(const A1& a1, const A2& a2)
         {
-            _a1handler.begin(a1);
-            _a2handler.begin(a2);
-            _rhandler.begin(_result);
-            _service->beginCall(_rhandler, *this, _a1handler, _a2handler);
+            _a1.begin(a1);
+            _a2.begin(a2);
+            _r.begin(_result);
+
+            ITypeHandler* argv[2] = { &_a1, &_a2 };
+            _service->beginCall(_r, *this, argv, 2);
         }
 
         const R& call(const A1& a1, const A2& a2)
         {
-            _service->call(_rhandler, *this, _a1handler, _a2handler);
+            _a1.begin(a1);
+            _a2.begin(a2);
+            _r.begin(_result);
+
+            ITypeHandler* argv[2] = { &_a1, &_a2 };
+            _service->call(_r, *this, argv, 2);
             return _result;
         }
 
@@ -106,9 +113,63 @@ class RemoteProcedure : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        TypeHandler<R> _rhandler;
-        TypeHandler<A1> _a1handler;
-        TypeHandler<A2> _a2handler;
+        TypeHandler<R> _r;
+        TypeHandler<A1> _a1;
+        TypeHandler<A2> _a2;
+};
+
+
+template <typename R,
+          typename A1>
+class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
+{
+    public:
+        RemoteProcedure(Client& service, const std::string& name)
+        : IRemoteProcedure(name)
+        , _service(&service)
+        { }
+
+        ~RemoteProcedure()
+        {}
+
+        void begin(const A1& a1)
+        {
+            _a1.begin(a1);
+            _r.begin(_result);
+
+            ITypeHandler* argv[1] = { &_a1 };
+            _service->beginCall(_r, *this, argv, 1);
+        }
+
+        const R& call(const A1& a1)
+        {
+            _a1.begin(a1);
+            _r.begin(_result);
+
+            ITypeHandler* argv[1] = { &_a1 };
+            _service->call(_r, *this, argv, 1);
+            return _result;
+        }
+
+        const R& operator()(const A1& a1)
+        {
+            return this->call(a1);
+        }
+
+        const R& result()
+        { return _result; }
+
+        Signal<const R&> finished;
+
+    protected:
+        void onFinished()
+        { finished.send(_result); }
+
+    private:
+        Client* _service;
+        R _result;
+        TypeHandler<R> _r;
+        TypeHandler<A1> _a1;
 };
 
 }
