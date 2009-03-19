@@ -28,6 +28,7 @@
 
 #include <Pt/Net/HttpClient.h>
 #include <Pt/Net/HttpParser.h>
+#include <Pt/System/IOError.h>
 
 namespace Pt {
 
@@ -79,11 +80,25 @@ void HttpClient::setSelector(System::SelectorBase& selector)
 
 const HttpReplyHeader& HttpClient::execute(const HttpRequest& request, std::size_t timeout)
 {
-    if (!_socket.isConnected())
+    bool connected = _socket.isConnected();
+    if (!connected)
         _socket.connect(_server, _port);
 
     sendRequest(request);
     _stream.flush();
+
+    if (!_stream && !connected)
+    {
+        // sending failed and we were not connected before, so try now
+        _socket.connect(_server, _port);
+
+        // the data is still in our stream buffer, so we just reset the flags and flush again
+        _stream.clear();
+        _stream.flush();
+    }
+
+    if (!_stream)
+        throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
     _parser.reset(true);
 
@@ -92,6 +107,9 @@ const HttpReplyHeader& HttpClient::execute(const HttpRequest& request, std::size
     {
         _parser.parse(ch);
     }
+
+    if (_parser.fail())
+        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
 
     return _replyHeader;
 }
@@ -108,6 +126,12 @@ void HttpClient::readBody(std::string& s)
 
     while (n-- && _stream.get(ch))
         s += ch;
+
+    if (_stream.fail())
+        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+    if (!_replyHeader.keepAlive())
+        _socket.close();
 }
 
 
@@ -121,8 +145,15 @@ std::string HttpClient::get(const std::string& url)
 
 void HttpClient::beginExecute(const HttpRequest& request)
 {
-    _socket.beginConnect(_server, _port);
     _request = &request;
+    if (_socket.isConnected())
+    {
+        // TODO what if write fails?
+        sendRequest(*_request);
+        _stream.buffer().beginWrite();
+    }
+    else
+        _socket.beginConnect(_server, _port);
 }
 
 
