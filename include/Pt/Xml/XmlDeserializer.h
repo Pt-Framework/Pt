@@ -72,29 +72,18 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                Deserializer<T> deser(type, _context);
+                Deserializer<T> deser(type);
                 this->get(&deser);
-                deser.finish();
-
-                //if( ! deser.id().empty() )
-                //    _context.addObject( deser.id(), &type );
-
-                //SerializationInfo& si = this->get();
-                //si >>= type;
-                //this->markFixup(si, &type, &XmlDeserializer::do_fixup<T>);
+                deser.finish(_context);
             }
 
-            //SerializationInfo& peek();
-
-            void finish();
+            void finish()
+            {
+                _context.fixup();
+            }
 
         protected:
-            /** @brief Deserialize object data from XML
-
-                This method will append the object data generated
-                from an XML format to \a data.
-            */
-            //void read(SerializationInfo& si);
+            void get(IDeserializer* deser);
 
             //! @internal
             void beginDocument(const Node& node);
@@ -115,15 +104,6 @@ namespace Xml {
             void onEndElement(const Node& node);
 
         private:
-            //Pt::SerializationInfo& get();
-
-            void get(IDeserializer* deser);
-
-            void markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup);
-
-            void fixup(const Pt::SerializationInfo& si);
-
-        private:
             //! @internal
             XmlReader* _reader;
 
@@ -141,32 +121,12 @@ namespace Xml {
             DeserializationContext _context;
 
             //! @internal
-            //SerializationInfo* _current;
             IDeserializer* _deser;
 
             //! @internal
             String _nodeName;
 
             String _nodeId;
-
-            std::list<Pt::SerializationInfo> _stack;
-
-            bool _peeking;
-
-            std::map<std::string, void*> _objects;
-
-            std::map<std::string, Fixup> _fixups;
-
-            std::map<void*, std::string> _pointers;
-
-            template <typename T>
-            static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
-            {
-                if( fixmeInfo != typeid(T) )
-                    throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
-
-                *( (T**)(fixme) ) = (T*)(obj);
-            }
     };
 
 } // namespace Xml

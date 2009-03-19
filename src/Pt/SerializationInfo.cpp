@@ -100,8 +100,6 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
 {
     _fixupAddr = &type;
     _fixupInfo = &ti;
-    //_id = convert<std::string>(&type);
-    //type = 0;
 }
 
 

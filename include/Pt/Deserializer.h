@@ -35,7 +35,6 @@
 
 namespace Pt {
 
-// pass this to finish to get pointers which need fixup
 class DeserializationContext
 {
     public:
@@ -46,7 +45,7 @@ class DeserializationContext
         }
 
         // IDeserializer calls this method on IDeserializer::finish()
-        void addReference(const std::string& id, void* obj)
+        void addFixup(const std::string& id, void* obj)
         {
             _pointers[obj] = id;
         }
@@ -74,18 +73,31 @@ class DeserializationContext
             clear();
         }
 
+
+        //TODO: we also have to allow the user to register allowed casts from
+        //     one type name to another. type id alone only does not take cars
+        //     of assigning derived classes to base pointers
+        template <typename T>
+        static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
+        {
+            if( fixmeInfo != typeid(T) )
+                throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
+
+            *( (T**)(fixme) ) = (T*)(obj);
+        }
+
     private:
         std::map<std::string, void*> _objects;
         std::map<void*, std::string> _pointers;
 };
 
 
+// TODO Unmarshaller
 class IDeserializer
 {
     public:
-        IDeserializer(DeserializationContext& ctx)
+        IDeserializer()
         : _parent(0)
-        , _context( &ctx )
         {}
 
         virtual ~IDeserializer()
@@ -96,9 +108,6 @@ class IDeserializer
 
         IDeserializer* parent()
         { return _parent; }
-
-        DeserializationContext* context()
-        { return _context; }
 
         virtual void setName(const std::string& name) = 0;
 
@@ -112,11 +121,11 @@ class IDeserializer
 
         virtual IDeserializer* leaveMember() = 0;
 
-        virtual void finish() = 0;
+        // TODO: maybe call release()
+        virtual void finish(DeserializationContext& ctx) = 0;
 
     private:
         IDeserializer* _parent;
-        DeserializationContext* _context;
 };
 
 
@@ -124,9 +133,8 @@ template <typename T>
 class Deserializer : public IDeserializer
 {
     public:
-        Deserializer(T& type, DeserializationContext& ctx)
-        : IDeserializer(ctx)
-        , _type(&type)
+        Deserializer(T& type)
+        : _type(&type)
         , _current(&_si)
         {}
 
@@ -162,7 +170,7 @@ class Deserializer : public IDeserializer
         {
             if( ! _current->parent() )
             {
-                this->finish();
+                *_current >>= *_type;
 
                 if( ! this->parent() )
                     throw std::runtime_error("invalid member");
@@ -174,7 +182,8 @@ class Deserializer : public IDeserializer
             return this;
         }
 
-        virtual void finish()
+        // TODO: maybe call release()
+        virtual void finish(DeserializationContext& ctx)
         {
             // SI's for unfixed pointers contain the fixup address now
             // other types may only point to _type,but not to its members
@@ -187,13 +196,13 @@ class Deserializer : public IDeserializer
                 {
                     //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
 
-                    this->context()->addReference( it->toValue<std::string>(), it->fixupAddr() );
+                    ctx.addFixup( it->toValue<std::string>(), it->fixupAddr() );
                 }
             }
 
             if( ! _current->id().empty() )
             {
-                this->context()->addObject(_current->id(), _type);
+                ctx.addObject(_current->id(), _type);
             }
         }
 

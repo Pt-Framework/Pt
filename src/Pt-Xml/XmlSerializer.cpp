@@ -38,86 +38,13 @@ namespace Pt {
 
 namespace Xml {
 
-class XmlFormatter : public Formatter
-{
-    public:
-        XmlFormatter(XmlWriter& writer)
-        : _writer(&writer)
-        {}
-
-        ~XmlFormatter()
-        {}
-
-        void addValue(const std::string& name, const std::string& type, const Pt::String& value, const std::string& id)
-        {
-            if( ! id.empty() )
-            {
-                Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
-                _writer->writeElement( Pt::String::widen( name ), &attr, 1, value );
-            }
-            else
-                _writer->writeElement( Pt::String::widen( name ), value );
-        }
-
-        void addReference(const std::string& name, const Pt::String& value)
-        {
-            Attribute attr( Pt::String(L"ref"), value );
-            _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
-        }
-
-        void beginArray()
-        {
-
-        }
-
-        void finishArray()
-        {
-
-        }
-
-        void beginObject(const std::string& name, const std::string& id)
-        {
-            if( ! id.empty() )
-            {
-                Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
-                _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
-            }
-            else
-                _writer->writeStartElement( Pt::String::widen( name ) );
-        }
-
-        void beginMember(const std::string& name)
-        {
-
-        }
-
-        void finishMember()
-        {
-
-        }
-
-        void finishObject()
-        {
-            _writer->writeEndElement();
-        }
-
-        void finish()
-        {
-
-        }
-
-    private:
-        XmlWriter* _writer;
-};
-
-
-XmlSerializer::XmlSerializer()
+XmlFormatter::XmlFormatter()
 : _writer(0)
 , _deleter(0)
 {
 }
 
-XmlSerializer::XmlSerializer(std::ostream& os)
+XmlFormatter::XmlFormatter(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
 {
@@ -125,21 +52,20 @@ XmlSerializer::XmlSerializer(std::ostream& os)
 }
 
 
-XmlSerializer::XmlSerializer(XmlWriter* writer)
+XmlFormatter::XmlFormatter(XmlWriter* writer)
 : _writer(writer)
 , _deleter(0)
 {
 }
 
 
-XmlSerializer::~XmlSerializer()
+XmlFormatter::~XmlFormatter()
 {
-    this->finish();
     this->detach();
 }
 
 
-void XmlSerializer::attach(std::ostream& os)
+void XmlFormatter::attach(std::ostream& os)
 {
     if (_writer)
         throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
@@ -149,7 +75,7 @@ void XmlSerializer::attach(std::ostream& os)
 }
 
 
-void XmlSerializer::attach(XmlWriter& writer)
+void XmlFormatter::attach(XmlWriter& writer)
 {
     if (_writer)
         throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
@@ -159,7 +85,7 @@ void XmlSerializer::attach(XmlWriter& writer)
 }
 
 
-void XmlSerializer::detach()
+void XmlFormatter::detach()
 {
     if (_writer)
     {
@@ -170,42 +96,131 @@ void XmlSerializer::detach()
 }
 
 
-void XmlSerializer::flush()
+void XmlFormatter::flush()
 {
     if (_writer)
         _writer->flush();
 }
 
 
-void XmlSerializer::push(const void* type, const std::string& name, ISerializer* serializer)
+void XmlFormatter::addValue(const std::string& name, const std::string& type,
+                             const Pt::String& value, const std::string& id)
 {
-    serializer->setName(name);
-    _omap[type] = serializer;
-    _stack.push_back(serializer);
+    if( ! id.empty() )
+    {
+        Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
+        _writer->writeElement( Pt::String::widen( name ), &attr, 1, value );
+    }
+    else
+        _writer->writeElement( Pt::String::widen( name ), value );
+}
+
+
+void XmlFormatter::addReference(const std::string& name, const Pt::String& value)
+{
+    Attribute attr( Pt::String(L"ref"), value );
+    _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
+}
+
+
+void XmlFormatter::beginArray()
+{
+}
+
+
+void XmlFormatter::finishArray()
+{
+}
+
+
+void XmlFormatter::beginObject(const std::string& name, const std::string& id)
+{
+    if( ! id.empty() )
+    {
+        Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
+        _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+    }
+    else
+        _writer->writeStartElement( Pt::String::widen( name ) );
+}
+
+
+void XmlFormatter::beginMember(const std::string& name)
+{
+}
+
+
+void XmlFormatter::finishMember()
+{
+}
+
+
+void XmlFormatter::finishObject()
+{
+    _writer->writeEndElement();
+}
+
+
+void XmlFormatter::finish()
+{
+
+}
+
+
+
+
+XmlSerializer::XmlSerializer()
+{
+}
+
+
+XmlSerializer::XmlSerializer(std::ostream& os)
+: _formatter(os)
+{
+}
+
+
+XmlSerializer::XmlSerializer(XmlWriter* writer)
+: _formatter(writer)
+{
+}
+
+
+XmlSerializer::~XmlSerializer()
+{
+    this->finish();
+}
+
+
+void XmlSerializer::attach(std::ostream& os)
+{
+    _formatter.attach(os);
+}
+
+
+void XmlSerializer::attach(XmlWriter& writer)
+{
+    _formatter.attach(writer);
+}
+
+
+void XmlSerializer::detach()
+{
+    _formatter.detach();
+}
+
+
+void XmlSerializer::flush()
+{
+    _formatter.flush();
 }
 
 
 void XmlSerializer::finish()
 {
-    if( ! _writer )
-        throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
-
-    std::list<ISerializer*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        ISerializer* serializer = *it;
-        serializer->fixdown( _omap );
-    }
-
-    _omap.clear();
-
-    XmlFormatter formatter(*_writer);
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        (*it)->decompose(formatter);
-        delete *it;
-    }
-    _stack.clear();
+    _context.fixdown();
+    _formatter.format(_context);
+    _context.clear();
 }
 
 } // namespace Xml

@@ -35,14 +35,150 @@
 
 namespace Pt {
 
+class Formatter;
+class SerializationContext;
+
+class ISerializer
+{
+    public:
+        virtual ~ISerializer()
+        {}
+
+        virtual void fixdown(SerializationContext& context) = 0;
+
+        virtual void setName(const std::string& name) = 0;
+
+        virtual void setId(const std::string& id) = 0;
+
+        virtual void format(Formatter& formatter) = 0;
+
+    protected:
+        ISerializer()
+        {}
+
+        static void fixdownEach(Pt::SerializationInfo& si, SerializationContext& context);
+
+        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
+};
+
+// TODO Marshaller
+template <typename T>
+class Serializer : public ISerializer
+{
+    public:
+        Serializer(const T& type)
+        : _type(&type)
+        , _current(&_si)
+        {
+            _si <<= *_type;
+        }
+
+        virtual void fixdown(SerializationContext& context)
+        {
+            this->fixdownEach( _si, context );
+        }
+
+        virtual void setId(const std::string& id)
+        {
+            _si.setId(id);
+        }
+
+        virtual void setName(const std::string& name)
+        {
+            _si.setName(name);
+        }
+
+        virtual void format(Formatter& formatter)
+        {
+            this->formatEach( _si, formatter );
+        }
+
+    private:
+        const T* _type;
+        Pt::SerializationInfo _si;
+        Pt::SerializationInfo* _current;
+};
+
+
+class SerializationContext
+{
+    public:
+        SerializationContext()
+        {}
+
+        virtual ~SerializationContext()
+        {
+            this->clear();
+        }
+
+        void clear()
+        {
+            _omap.clear();
+
+            std::vector<ISerializer*>::iterator it;
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                delete *it;
+            }
+            _stack.clear();
+        }
+
+        template <typename T>
+        ISerializer* push(const T& type)
+        {
+            Serializer<T>* serializer = new Serializer<T>(type);
+            _omap[&type] = serializer;
+            _stack.push_back(serializer);
+            return serializer;
+        }
+
+        ISerializer* find(const void* p) const
+        {
+            std::map<const void*, ISerializer*>::const_iterator it;
+            it = _omap.find(p);
+            if(it == _omap.end())
+                return 0;
+
+            return it->second;
+        }
+
+        void fixdown()
+        {
+            std::vector<ISerializer*>::iterator it;
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                ISerializer* serializer = *it;
+                serializer->fixdown(*this);
+            }
+
+            _omap.clear();
+        }
+
+        void format(Formatter& formatter)
+        {
+            std::vector<ISerializer*>::iterator it;
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                (*it)->format(formatter);
+            }
+        }
+
+    private:
+        std::map<const void*, ISerializer*> _omap;
+        std::vector<ISerializer*> _stack;
+};
+
+
 class Formatter
 {
     public:
-        Formatter()
-        {}
-
         virtual ~Formatter()
-        {}
+        { }
+
+        void format(SerializationContext& context)
+        {
+            context.format(*this);
+        }
 
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
@@ -62,114 +198,12 @@ class Formatter
         virtual void finishObject() = 0;
 
         virtual void finish() = 0;
-};
 
-class ISerializer;
-typedef std::map<const void*, ISerializer*> SerializationContext;
-
-
-class ISerializer
-{
-    public:
-        ISerializer()
+    protected:
+        Formatter()
         {}
-
-        virtual ~ISerializer()
-        {}
-
-        virtual void fixdown(SerializationContext& ctx) = 0;
-
-        virtual void setName(const std::string& name) = 0;
-
-        virtual void setId(const std::string& id) = 0;
-
-        virtual void decompose(Formatter& formatter) = 0;
 };
 
-
-template <typename T>
-class Serializer : public ISerializer
-{
-    public:
-        Serializer(const T& type)
-        : _type(&type)
-        , _current(&_si)
-        {
-            _si <<= *_type;
-        }
-
-        virtual void fixdown(SerializationContext& omap)
-        {
-            this->fixdownEach(_si, omap);
-        }
-
-        virtual void setId(const std::string& id)
-        {
-            _si.setId(id);
-        }
-
-        virtual void setName(const std::string& name)
-        {
-            _si.setName(name);
-        }
-
-        virtual void decompose(Formatter& formatter)
-        {
-            this->formatEach(_si, formatter);
-        }
-
-        static void fixdownEach(Pt::SerializationInfo& si, SerializationContext& omap)
-        {
-            if(si.category() == Pt::SerializationInfo::Reference)
-            {
-                const void* p = si.toValue<void*>();
-                ISerializer* pointee = omap[p];
-                pointee->setId( convert<std::string>(pointee) );
-                si.setReference( pointee );
-            }
-            else if(si.category() == Pt::SerializationInfo::Object)
-            {
-                Pt::SerializationInfo::Iterator it;
-                for(it = si.begin(); it != si.end(); ++it)
-                {
-                    fixdownEach(*it, omap);
-                }
-            }
-        }
-
-        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
-        {
-            if(si.category() == SerializationInfo::Value)
-            {
-                formatter.addValue( si.name(), si.typeName(), si.toString(), si.id() );
-            }
-            else if(si.category() == SerializationInfo::Object)
-            {
-                formatter.beginObject( si.name(), si.id() );
-
-                SerializationInfo::ConstIterator it;
-                for(it = si.begin(); it != si.end(); ++it)
-                {
-                    formatter.beginMember( it->name() );
-                    formatEach(*it, formatter);
-                    formatter.finishMember();
-                }
-
-                formatter.finishObject();
-            }
-            else if(si.category() == Pt::SerializationInfo::Reference)
-            {
-                formatter.addReference( si.name(), si.toString() );
-            }
-
-            //TODO arrays should use SerializationInfo Array
-        }
-
-    private:
-        const T* _type;
-        Pt::SerializationInfo _si;
-        Pt::SerializationInfo* _current;
-};
 
 } // namespace Pt
 

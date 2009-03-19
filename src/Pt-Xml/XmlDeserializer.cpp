@@ -41,7 +41,6 @@ namespace Xml {
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
 : _reader(&reader)
 , _deser(0)
-, _peeking(false)
 {
 }
 
@@ -50,7 +49,6 @@ XmlDeserializer::XmlDeserializer(std::istream& is)
 : _reader( 0 )
 , _deleter(new XmlReader(is))
 , _deser(0)
-, _peeking(false)
 {
     _reader = _deleter.get();
 }
@@ -59,74 +57,6 @@ XmlDeserializer::XmlDeserializer(std::istream& is)
 XmlDeserializer::~XmlDeserializer()
 {
     this->finish();
-}
-
-/*
-void XmlDeserializer::read(SerializationInfo& si)
-{
-    if(_reader->get().type() != Node::StartElement)
-        _reader->nextElement();
-
-    _current = &si;
-    _processNode = &XmlDeserializer::beginDocument;
-
-    size_t startDepth = _reader->depth();
-    for(XmlReader::Iterator it = _reader->current(); it != _reader->end(); ++it)
-    {
-        (this->*_processNode)(*it);
-
-        if((it->type() == Node::EndElement) && (_reader->depth() < startDepth))
-        {
-            break;
-        }
-    }
-}
-*/
-/*
-SerializationInfo& XmlDeserializer::peek()
-{
-    if( ! _peeking )
-    {
-        _stack.push_back( SerializationInfo() );
-        Pt::SerializationInfo& si =_stack.back();
-        this->read( si );
-        _peeking = true;
-    }
-
-    _peeking = true;
-    return _stack.back();
-}
-*/
-
-void XmlDeserializer::finish()
-{
-/*
-    std::list<Pt::SerializationInfo>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->fixup(*it);
-    }
-*/
-
-    //TODO: use DeserializationContext
-    _context.fixup();
-/*
-    std::map<void*, std::string>::iterator it;
-    for(it = _pointers.begin(); it != _pointers.end(); ++it)
-    {
-        void* fixme = it->first;
-        std::string id = it->second;
-        void* obj = _objects[id];
-        //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
-
-        void** vp =(void**)(fixme);
-        *vp = obj;
-    }
-*/
-    _peeking = false;
-    _objects.clear();
-    _stack.clear();
-    _pointers.clear();
 }
 
 
@@ -147,62 +77,6 @@ void XmlDeserializer::get(IDeserializer* deser)
         if((it->type() == Node::EndElement) && (_reader->depth() < _startDepth))
         {
             break;
-        }
-    }
-}
-
-
-/*Pt::SerializationInfo& XmlDeserializer::get()
-{
-    if( ! _peeking )
-    {
-        _stack.push_back( SerializationInfo() );
-        Pt::SerializationInfo& si =_stack.back();
-        this->read( si );
-    }
-
-    _peeking = false;
-    return _stack.back();
-}*/
-
-
-void XmlDeserializer::markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup)
-{
-    if( ! si.id().empty() )
-    {
-        _objects[ si.id() ] = type;
-        _fixups[ si.id() ] = fixup;
-    }
-
-    Pt::SerializationInfo::Iterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-         if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
-
-            _pointers[ it->fixupAddr() ] = it->toValue<std::string>();
-        }
-    }
-}
-
-
-void XmlDeserializer::fixup(const Pt::SerializationInfo& si)
-{
-    Pt::SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            void* obj = _objects[ it->toValue<std::string>() ]; //TODO check that it exists
-            void* fixme = it->fixupAddr();
-            Fixup fixupHandler = _fixups[ it->toValue<std::string>() ];
-            fixupHandler( (void**)(&fixme), it->fixupInfo(), obj);
-        }
-
-        if(it->category() == Pt::SerializationInfo::Object)
-        {
-            this->fixup(*it);
         }
     }
 }

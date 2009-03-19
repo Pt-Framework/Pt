@@ -33,119 +33,204 @@
 #include <Pt/Serializer.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
-#include <list>
-#include <map>
 
 namespace Pt {
 
 namespace Xml {
 
-    class XmlWriter;
+class XmlWriter;
 
-    /** @brief Serialize objects or object data to XML
+/** @brief Serialize objects or object data to XML
 
-        Thic class performs XML serialization of a single object or
-        object data.
-    */
-    class PT_XML_API XmlSerializer
-    {
-        public:
-            /** @brief Construct a serializer without initializing the
-                       serializer for writing.
+    Thic class performs XML serialization of a single object or
+    object data.
+*/
+class PT_XML_API XmlFormatter : public Formatter
+{
+    public:
+        /** @brief Construct a serializer without initializing the
+                    serializer for writing.
 
-                The serializer can be "opened" for writing by calling
-                method attach().
-            */
-            XmlSerializer();
+            The serializer can be "opened" for writing by calling
+            method attach().
+        */
+        XmlFormatter();
 
-            /** @brief Construct a serializer writing to a byte stream
+        /** @brief Construct a serializer writing to a byte stream
 
-                The serializer will write the objects as XML with
-                UTF-8 encoding to the output stream.
-            */
-            XmlSerializer(std::ostream& os);
+            The serializer will write the objects as XML with
+            UTF-8 encoding to the output stream.
+        */
+        XmlFormatter(std::ostream& os);
 
 
-            /** @brief Construct a serializer writing to the given XmlWriter object
+        /** @brief Construct a serializer writing to the given XmlWriter object
 
-                The serializer will write the objects to the given XmlWriter object.
-                This class will not free the given XmlWriter object. The caller is
-                responsible to free it if needed.
-            */
-            XmlSerializer(XmlWriter* writer);
+            The serializer will write the objects to the given XmlWriter object.
+            This class will not free the given XmlWriter object. The caller is
+            responsible to free it if needed.
+        */
+        XmlFormatter(XmlWriter* writer);
 
-            //! @brief Destructor
-            ~XmlSerializer();
+        //! @brief Destructor
+        ~XmlFormatter();
 
-            /** @brief Opens this serializer for writing into the given stream.
+        /** @brief Opens this serializer for writing into the given stream.
 
-                The serializer will write the objects as XML with
-                UTF-8 encoding to the output stream.
+            The serializer will write the objects as XML with
+            UTF-8 encoding to the output stream.
 
-                This method does not have to be called if this XmlSerializer object
-                was constructed using the constructor that takes an ostream or
-                XmlWriter object. If this method is called anyway or called twice an
-                std::logic_error is thrown.
-            */
-            void attach(std::ostream& os);
+            This method does not have to be called if this XmlSerializer object
+            was constructed using the constructor that takes an ostream or
+            XmlWriter object. If this method is called anyway or called twice an
+            std::logic_error is thrown.
+        */
+        void attach(std::ostream& os);
 
-            /** @brief Opens this serializer for writing into the given XmlWriter object.
+        /** @brief Opens this serializer for writing into the given XmlWriter object.
 
-                The serializer will write the objects to the given XmlWriter object.
+            The serializer will write the objects to the given XmlWriter object.
 
-                This method does not have to be called if this XmlSerializer object
-                was constructed using the constructor that takes an ostream or
-                XmlWriter object. If this method is called anyway or called twice an
-                std::logic_error is thrown.
+            This method does not have to be called if this XmlSerializer object
+            was constructed using the constructor that takes an ostream or
+            XmlWriter object. If this method is called anyway or called twice an
+            std::logic_error is thrown.
 
-                This class will not free the given XmlWriter object. The caller is
-                responsible to free it if needed.
-            */
-            void attach(XmlWriter& writer);
+            This class will not free the given XmlWriter object. The caller is
+            responsible to free it if needed.
+        */
+        void attach(XmlWriter& writer);
 
-            /** @brief Detaches the currently set writer from this object.
+        /** @brief Detaches the currently set writer from this object.
 
-                Before detaching the writer, the underlaying stream is flushed.
-                If there is no currently set writer, nothing happens.
-            */
-            void detach();
+            Before detaching the writer, the underlaying stream is flushed.
+            If there is no currently set writer, nothing happens.
+        */
+        void detach();
 
-            /** @brief Serialize an object to XML
+        //! @internal
+        void flush();
 
-                The serializer will serialize the object \a type as
-                XML to the assigned stream. The string \a name will be used
-                as the instance name of \a type and appear as the name of the
-                XML element. The type must be serializable.
-            */
-            template <typename T>
-            void serialize(const T& type, const std::string& name)
-            {
-                Serializer<T>* serializer = new Serializer<T>(type);
-                this->push(&type, name, serializer);
-            }
+        void addValue(const std::string& name, const std::string& type,
+                        const Pt::String& value, const std::string& id);
 
-            /** @brief Serialize objects to XML
+        void addReference(const std::string& name, const Pt::String& value);
 
-                Writes all serialized objects.
-            */
-            void finish();
+        void beginArray();
 
-            //! @internal
-            void flush();
+        void finishArray();
 
-        protected:
-            void push(const void* type, const std::string& name, ISerializer* serializer);
+        void beginObject(const std::string& name, const std::string& id);
 
-        private:
-            //! @internal
-            XmlWriter* _writer;
+        void beginMember(const std::string& name);
 
-            //! @internal
-            std::auto_ptr<XmlWriter> _deleter;
+        void finishMember();
 
-            SerializationContext _omap;
-            std::list<ISerializer*> _stack;
-    };
+        void finishObject();
+
+        void finish();
+
+    private:
+        //! @internal
+        XmlWriter* _writer;
+
+        //! @internal
+        std::auto_ptr<XmlWriter> _deleter;
+};
+
+
+/** @brief Serialize objects or object data to XML
+
+    Thic class performs XML serialization of a single object or
+    object data.
+*/
+class PT_XML_API XmlSerializer
+{
+    public:
+        /** @brief Construct a serializer without initializing the
+                    serializer for writing.
+
+            The serializer can be "opened" for writing by calling
+            method attach().
+        */
+        XmlSerializer();
+
+        /** @brief Construct a serializer writing to a byte stream
+
+            The serializer will write the objects as XML with
+            UTF-8 encoding to the output stream.
+        */
+        XmlSerializer(std::ostream& os);
+
+        /** @brief Construct a serializer writing to the given XmlWriter object
+
+            The serializer will write the objects to the given XmlWriter object.
+            This class will not free the given XmlWriter object. The caller is
+            responsible to free it if needed.
+        */
+        XmlSerializer(XmlWriter* writer);
+
+        //! @brief Destructor
+        ~XmlSerializer();
+
+        /** @brief Opens this serializer for writing into the given stream.
+
+            The serializer will write the objects as XML with
+            UTF-8 encoding to the output stream.
+
+            This method does not have to be called if this XmlSerializer object
+            was constructed using the constructor that takes an ostream or
+            XmlWriter object. If this method is called anyway or called twice an
+            std::logic_error is thrown.
+        */
+        void attach(std::ostream& os);
+
+        /** @brief Opens this serializer for writing into the given XmlWriter object.
+
+            The serializer will write the objects to the given XmlWriter object.
+
+            This method does not have to be called if this XmlSerializer object
+            was constructed using the constructor that takes an ostream or
+            XmlWriter object. If this method is called anyway or called twice an
+            std::logic_error is thrown.
+
+            This class will not free the given XmlWriter object. The caller is
+            responsible to free it if needed.
+        */
+        void attach(XmlWriter& writer);
+
+        /** @brief Detaches the currently set writer from this object.
+
+            Before detaching the writer, the underlaying stream is flushed.
+            If there is no currently set writer, nothing happens.
+        */
+        void detach();
+
+        /** @brief Serialize an object to XML
+
+            The serializer will serialize the object \a type as
+            XML to the assigned stream. The string \a name will be used
+            as the instance name of \a type and appear as the name of the
+            XML element. The type must be serializable.
+        */
+        template <typename T>
+        void serialize(const T& type, const std::string& name)
+        {
+            ISerializer* serializer = _context.push(type);
+            serializer->setName(name);
+        }
+
+        void finish();
+
+        //! @internal
+        void flush();
+
+    private:
+        XmlFormatter _formatter;
+
+        //! @internal
+        SerializationContext _context;
+};
 
 } // namespace Xml
 

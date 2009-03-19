@@ -29,6 +29,52 @@
 
 namespace Pt {
 
+void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& context)
+{
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        const void* p = si.toValue<void*>();
+        ISerializer* pointee = context.find(p);
+        pointee->setId( convert<std::string>(pointee) );
+        si.setReference( pointee );
+    }
+    else if(si.category() == Pt::SerializationInfo::Object)
+    {
+        Pt::SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            fixdownEach(*it, context);
+        }
+    }
+}
 
+
+void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
+{
+    if(si.category() == SerializationInfo::Value)
+    {
+        formatter.addValue( si.name(), si.typeName(), si.toString(), si.id() );
+    }
+    else if(si.category() == SerializationInfo::Object)
+    {
+        formatter.beginObject( si.name(), si.id() );
+
+        SerializationInfo::ConstIterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            formatter.beginMember( it->name() );
+            formatEach(*it, formatter);
+            formatter.finishMember();
+        }
+
+        formatter.finishObject();
+    }
+    else if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        formatter.addReference( si.name(), si.toString() );
+    }
+
+    //TODO arrays should use SerializationInfo Array
+}
 
 } // namespace Pt
