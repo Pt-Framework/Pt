@@ -64,159 +64,27 @@ void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& r
 
 std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 {
-    std::size_t n = _ts.buffer().import();
+    std::size_t n = 0;
 
-    while( _reader.advance() )
+    while(true)
     {
-        const Pt::Xml::Node& node = _reader.get();
-        switch(_state)
+        std::streamsize m = _ts.buffer().import();
+        if( ! m)
+            break;
+
+        n += m;
+
+        while( _reader.advance() )
         {
-            case OnBegin:
-            { //std::cerr << "OnBegin" << std::endl;
-                if(node.type() == Xml::Node::StartElement)
-                {
-                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() != "methodCall" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
-
-                    _state = OnMethodCallBegin;
-                }
-
-                break;
-            }
-
-            case OnMethodCallBegin:
-            { //std::cerr << "OnMethodCallBegin" << std::endl;
-                if(node.type() == Xml::Node::StartElement)
-                {
-                    _state = OnMethodNameBegin;
-                }
-                break;
-            }
-
-            case OnMethodNameBegin:
-            { //std::cerr << "OnMethodNameBegin" << std::endl;
-                if(node.type() == Xml::Node::Characters)
-                {
-                    const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-
-                    _proc = _service->procedure( chars.content().narrow() );
-                    if( ! _proc )
-                        throw std::runtime_error("no such procedure");
-
-                    //std::cerr << "-> Found Procedure: " << chars.content().narrow() << std::endl;
-
-                    _state = OnMethodName;
-                }
-                break;
-            }
-
-            case OnMethodName:
-            { //std::cerr << "OnMethodName" << std::endl;
-                if(node.type() == Xml::Node::EndElement)
-                {
-                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if( ee.name() != "methodName" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
-
-                    _state = OnMethodNameEnd;
-                }
-                break;
-            }
-
-            case OnMethodNameEnd:
-            { //std::cerr << "OnMethodNameEnd" << std::endl;
-                if(node.type() == Xml::Node::StartElement)
-                {
-                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() != "params" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
- 
-                    _state = OnParams;
-                }
-                break;
-            }
-
-            case OnParams:
-            { //std::cerr << "OnParams" << std::endl;
-                if(node.type() == Xml::Node::EndElement) // </params>
-                {
-                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if( ee.name() != "params" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
-
-                    _state = OnParamsEnd;
-                    break;
-                }
-
-                if(node.type() == Xml::Node::StartElement)
-                {
-                    const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                    if( se.name() != L"param" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
-
-                    //std::cerr << "-> Found param" << std::endl;
-                    if( ! _args )
-                    {
-                        //std::cerr << "-> begin call" << std::endl;
-                        _args = _proc->beginCall();
-                        if( ! *_args)
-                            std::runtime_error("too many arguments");
-                    }
-                    else
-                    {
-                        //std::cerr << "-> next arg" << std::endl;
-                        ++_args;
-                        if( ! *_args)
-                            std::runtime_error("too many arguments");
-                    }
-
-                    _deserializer.begin(**_args);
-                    _state = OnParam;
-                    break;
-                }
-
-                break;
-            }
-
-            case OnParam:
-            { //std::cerr << "S: OnParam" << std::endl;
-                bool finished = _deserializer.advance(node);
-                if(finished)
-                {
-                    //std::cerr << "-> param finished" << std::endl; // node is </param>
-                    _state = OnParams;
-                }
-
-                break;
-            }
-
-            case OnParamsEnd:
-            { //std::cerr << "OnParamsEnd" << std::endl;
-                if(node.type() == Xml::Node::EndElement) // </methodCall>
-                {
-                    const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                    if( ee.name() != "methodCall" )
-                        throw std::runtime_error("invalid XML-RPC methodCall");
-
-                    _state = OnMethodCallEnd;
-                }
-                break;
-            }
-
-            case OnMethodCallEnd:
-            { //std::cerr << "OnMethodCallEnd" << std::endl;
-                if(node.type() == Xml::Node::EndDocument)
-                {
-                    _state = OnMethodCallEnd;
-                }
-                break;
-            }
+            const Pt::Xml::Node& node = _reader.get();
+            this->advance(node);
         }
     }
 
     return n;
 }
+
+
 
 
 void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
@@ -240,6 +108,154 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
     os << "</methodResponse>\n";
 }
 
+
+void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
+{
+    switch(_state)
+    {
+        case OnBegin:
+        { //std::cerr << "OnBegin" << std::endl;
+            if(node.type() == Xml::Node::StartElement)
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() != "methodCall" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnMethodCallBegin;
+            }
+
+            break;
+        }
+
+        case OnMethodCallBegin:
+        { //std::cerr << "OnMethodCallBegin" << std::endl;
+            if(node.type() == Xml::Node::StartElement)
+            {
+                _state = OnMethodNameBegin;
+            }
+            break;
+        }
+
+        case OnMethodNameBegin:
+        { //std::cerr << "OnMethodNameBegin" << std::endl;
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+
+                _proc = _service->procedure( chars.content().narrow() );
+                if( ! _proc )
+                    throw std::runtime_error("no such procedure");
+
+                //std::cerr << "-> Found Procedure: " << chars.content().narrow() << std::endl;
+
+                _state = OnMethodName;
+            }
+            break;
+        }
+
+        case OnMethodName:
+        { //std::cerr << "OnMethodName" << std::endl;
+            if(node.type() == Xml::Node::EndElement)
+            {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "methodName" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnMethodNameEnd;
+            }
+            break;
+        }
+
+        case OnMethodNameEnd:
+        { //std::cerr << "OnMethodNameEnd" << std::endl;
+            if(node.type() == Xml::Node::StartElement)
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() != "params" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnParams;
+            }
+            break;
+        }
+
+        case OnParams:
+        { //std::cerr << "OnParams" << std::endl;
+            if(node.type() == Xml::Node::EndElement) // </params>
+            {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "params" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnParamsEnd;
+                break;
+            }
+
+            if(node.type() == Xml::Node::StartElement)
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if( se.name() != L"param" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                //std::cerr << "-> Found param" << std::endl;
+                if( ! _args )
+                {
+                    //std::cerr << "-> begin call" << std::endl;
+                    _args = _proc->beginCall();
+                    if( ! *_args)
+                        std::runtime_error("too many arguments");
+                }
+                else
+                {
+                    //std::cerr << "-> next argument" << std::endl;
+                    ++_args;
+                    if( ! *_args)
+                        std::runtime_error("too many arguments");
+                }
+
+                _deserializer.begin(**_args);
+                _state = OnParam;
+                break;
+            }
+
+            break;
+        }
+
+        case OnParam:
+        { //std::cerr << "S: OnParam" << std::endl;
+            bool finished = _deserializer.advance(node);
+            if(finished)
+            {
+                //std::cerr << "-> param finished" << std::endl; // node is </param>
+                _state = OnParams;
+            }
+
+            break;
+        }
+
+        case OnParamsEnd:
+        { //std::cerr << "OnParamsEnd" << std::endl;
+            if(node.type() == Xml::Node::EndElement) // </methodCall>
+            {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "methodCall" )
+                    throw std::runtime_error("invalid XML-RPC methodCall");
+
+                _state = OnMethodCallEnd;
+            }
+            break;
+        }
+
+        case OnMethodCallEnd:
+        { //std::cerr << "OnMethodCallEnd" << std::endl;
+            if(node.type() == Xml::Node::EndDocument)
+            {
+                _state = OnMethodCallEnd;
+            }
+            break;
+        }
+    }
+}
 }
 
 }

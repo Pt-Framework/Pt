@@ -35,9 +35,7 @@
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Net/HttpServer.h"
 #include "Pt/System/EventLoop.h"
-#include <sstream>
 
-#include "Pt/System/Clock.h"
 
 struct Color
 {
@@ -65,213 +63,124 @@ void operator <<=(Pt::SerializationInfo& si, const Color& color)
 
 class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
+    private:
+        Pt::System::EventLoop* _loop;
+        Pt::Net::HttpServer* _server;
+
     public:
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
-            //this->registerMethod("VectorOfInt", *this, &PtXmlRpcTest::VectorOfInt);
-            //this->registerMethod("ReturnStruct", *this, &PtXmlRpcTest::ReturnStruct);
-            //this->registerMethod("ReturnArray", *this, &PtXmlRpcTest::ReturnArray);
+            this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
+            this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
+        }
+
+        void setUp()
+        {
+            _loop = new Pt::System::EventLoop();
+            _loop->setIdleTimeout(1000);
+            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+
+            _server = new Pt::Net::HttpServer(*_loop, "127.0.0.1", 8001);
+        }
+
+        void tearDown()
+        {
+            delete _loop;
+            delete _server;
         }
 
         void Integer()
         {
-            Pt::System::EventLoop loop;
-            loop.setIdleTimeout(1000);
-            connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
-
-            Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
-
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
-            server.addService("/calc", service);
+            _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client rserv(loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(rserv, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
 
             multiply.begin(2, 3);
 
-            loop.run();
+            _loop->run();
         }
 
         void onIntegerFinished(const int& r)
         {
-            std::cerr << "RESULT: " << r << std::endl;
+            PT_UNIT_ASSERT_EQUALS(r, 6)
+
+            _loop->exit();
         }
-/*
-        void VectorOfInt()
+
+        void Array()
         {
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
+            _server->addService("/calc", service);
 
-            std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<methodCall>";
-            in << "    <methodName>multiply</methodName>";
-            in << "    <params>";
-            in << "         <param>";
-            in << "             <value><i4>2</i4></value>";
-            in << "         </param>";
-            in << "         <param>";
-            in << "             <value>";
-            in << "                 <array>";
-            in << "                     <data>";
-            in << "                         <value><int>3</int></value>";
-            in << "                         <value><int>4</int></value>";
-            in << "                         <value><int>3</int></value>";
-            in << "                         <value><int>4</int></value>";
-            in << "                         <value><int>3</int></value>";
-            in << "                         <value><int>4</int></value>";
-            in << "                         <value><int>3</int></value>";
-            in << "                         <value><int>4</int></value>";
-            in << "                         <value><int>3</int></value>";
-            in << "                         <value><int>4</int></value>";
-            in << "                    </data>";
-            in << "                </array>";
-            in << "            </value>";
-            in << "        </param>";
-            in << "    </params>";
-            in << "</methodCall>";
+            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(rserv, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onArrayFinished );
 
+            std::vector<int> vec;
+            vec.push_back(10);
+            vec.push_back(20);
 
-            //Pt::System::Clock clock;
-            //clock.start();
-            //for(int x = 0; x < 5000;++x)
-            {
-                in.clear();
-                in.seekg(std::ios::beg);
-                Pt::XmlRpc::RequestHandler req(service);
+            multiply.begin(vec, vec);
 
-                std::size_t contentLength = in.str().length();
-                //std::cerr << "Request Size: " <<  contentLength << std::endl;
-                std::size_t n = 0;
-                while(n < contentLength)
-                {
-                    n += req.advance(in);
-                }
-
-                std::stringstream out;
-                req.finish(out);
-
-                out.seekg(std::ios::beg);
-                Pt::XmlRpc::ResponseHandler<int> resp(out);
-
-                contentLength = out.str().length();
-                n = 0;
-                while(n < contentLength)
-                {
-                    n += resp.advance();
-                }
-
-                std::cerr << "Result: " << resp.result() << std::endl;
-            }
-            //std::cerr << "TIME: " << clock.stop().totalMSecs() << std::endl;
-            //std::exit(1);
+            _loop->run();
         }
 
-        void ReturnStruct()
+        void onArrayFinished(const std::vector<int>& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r.size(), 2)
+            PT_UNIT_ASSERT_EQUALS(r.at(0), 100)
+            PT_UNIT_ASSERT_EQUALS(r.at(1), 400)
+
+            _loop->exit();
+        }
+
+        void Struct()
         {
             Pt::XmlRpc::Service service;
-            service.registerMethod("getColor", *this, &PtXmlRpcTest::getColor);
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyColor);
+            _server->addService("/calc", service);
 
-            std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<methodCall>";
-            in << "   <methodName>getColor</methodName>";
-            in << "   <params>";
-            in << "     <param>";
-            in << "         <value><i4>10</i4></value>";
-            in << "         </param>";
-            in << "     <param>";
-            in << "         <value><i4>20</i4></value>";
-            in << "         </param>";
-            in << "      </params>";
-            in << "   </methodCall>";
- 
-            in.seekg(std::ios::beg);
-            Pt::XmlRpc::RequestHandler req(service);
+            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(rserv, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onStuctFinished );
 
-            std::size_t contentLength = in.str().length();
-            std::cerr << "Request Size: " <<  contentLength << std::endl;
-            std::size_t n = 0;
-            while(n < contentLength)
-            {
-                n += req.advance(in);
-            }
+            Color a;
+            a.red = 2;
+            a.green = 3;
+            a.blue = 4;
 
-            std::stringstream out;
-            req.finish(out);
+            Color b;
+            b.red = 3;
+            b.green = 4;
+            b.blue = 5;
 
-            out.seekg(std::ios::beg);
-            Pt::XmlRpc::ResponseHandler<Color> resp(out);
+            multiply.begin(a, b);
 
-            contentLength = out.str().length();
-            //std::cerr << "Response: " << out.str() << std::endl;
-            n = 0;
-            while(n < contentLength)
-            {
-                n += resp.advance();
-            }
-
-            Color color = resp.result();
-            std::cerr << "Result: " << color.red << ":" << color.green << ":" << color.blue << std::endl;
+            _loop->run();
         }
 
-        void ReturnArray()
+        void onStuctFinished(const Color& color)
         {
-            Pt::XmlRpc::Service service;
-            service.registerMethod("getVector", *this, &PtXmlRpcTest::getVector);
+            PT_UNIT_ASSERT_EQUALS(color.red, 6)
+            PT_UNIT_ASSERT_EQUALS(color.green, 12)
+            PT_UNIT_ASSERT_EQUALS(color.blue, 20)
 
-            std::stringstream in;
-            in << "<?xml version=\"1.0\"?>";
-            in << "<methodCall>";
-            in << "   <methodName>getVector</methodName>";
-            in << "   <params>";
-            in << "     <param>";
-            in << "         <value><i4>1</i4></value>";
-            in << "         </param>";
-            in << "     <param>";
-            in << "         <value><i4>2</i4></value>";
-            in << "         </param>";
-            in << "      </params>";
-            in << "   </methodCall>";
- 
-            in.seekg(std::ios::beg);
-            Pt::XmlRpc::RequestHandler req(service);
-
-            std::size_t contentLength = in.str().length();
-            std::cerr << "Request Size: " <<  contentLength << std::endl;
-            std::size_t n = 0;
-            while(n < contentLength)
-            {
-                n += req.advance(in);
-            }
-
-            std::stringstream out;
-            req.finish(out);
-
-            out.seekg(std::ios::beg);
-            Pt::XmlRpc::ResponseHandler< std::vector<int> > resp(out);
-
-            contentLength = out.str().length();
-            //std::cerr << "Response: " << out.str() << std::endl;
-            n = 0;
-            while(n < contentLength)
-            {
-                n += resp.advance();
-            }
-
-            std::vector<int> vec = resp.result();
-            std::cerr << "Result: " << vec.front() << " - " << vec.back() << std::endl;
+            _loop->exit();
         }
-*/
 
-        int multiplyVector(int a, const std::vector<int>& v)
+        std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
         {
-            //std::cerr << "multiplyVector(" << a << ", " << v.front() << ", " << v.back() << ")" << std::endl;
-            return a * v.front() * v.back();
+            std::vector<int> r;
+            r.push_back( a.at(0) * b.at(0) );
+            r.push_back( a.at(1) * b.at(1) );
+            return r;
         }
 
         int multiplyInt(int a, int b)
@@ -279,22 +188,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             return a*b;
         }
 
-        Color getColor(int a, int b)
+        Color multiplyColor(const Color& a, const Color& b)
         {
             Color color;
-            color.red = a;
-            color.green = b;
-            color.blue = a + b;
+            color.red = a.red * b.red;
+            color.green = a.green * b.green;
+            color.blue = a.blue * b.blue;
             return color;
-        }
-
-        std::vector<int> getVector(int a, int b)
-        {
-            std::vector<int> v;
-            v.push_back(a);
-            v.push_back(b);
-            v.push_back(a+b);
-            return v;
         }
 };
 

@@ -117,12 +117,21 @@ void Client::onReplyHeader(Net::HttpClient& client)
 
 std::size_t Client::onReplyBody(Net::HttpClient& client)
 {
-    std::size_t n = _ts.buffer().import();
+    std::size_t n = 0;
 
-    while( _reader.advance() )
+    while(true)
     {
-        const Pt::Xml::Node& node = _reader.get();
-        this->advance(node);
+        std::streamsize m = _ts.buffer().import();
+        if( ! m)
+            break;
+
+        n += m;
+
+        while( _reader.advance() )
+        {
+            const Pt::Xml::Node& node = _reader.get();
+            this->advance(node);
+        }
     }
 
     return n;

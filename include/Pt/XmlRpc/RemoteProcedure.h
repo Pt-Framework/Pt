@@ -108,7 +108,7 @@ class RemoteProcedure : public IRemoteProcedure
         R _result;
         TypeHandler<R> _rhandler;
         TypeHandler<A1> _a1handler;
-        TypeHandler<A1> _a2handler;
+        TypeHandler<A2> _a2handler;
 };
 
 }

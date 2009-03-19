@@ -40,6 +40,20 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
+        case OnParam:
+        { //std::cerr << "OnParam" << std::endl;
+            if(node.type() == Xml::Node::StartElement) // i4, struct, array...
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name() != "value")
+                    throw std::runtime_error("invalid XML-RPC data");
+
+                _state = OnValueBegin;
+            }
+            break;
+        }
+
         case OnValueBegin:
         { //std::cerr << "OnValueBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
