@@ -32,13 +32,13 @@
 #include <Pt/Net/Api.h>
 #include <string>
 #include <map>
-#include <time.h>
+//#include <time.h>
 
 namespace Pt {
 
 namespace Net {
 
-class HttpMessageHeader
+class PT_NET_API HttpMessageHeader
 {
         class StringLessIgnoreCase
         {
@@ -117,9 +117,9 @@ class HttpMessageHeader
         bool keepAlive() const;
 
         /// Returns a properly formatted date-string, as needed in http.
-        static std::string htdate(time_t t);
+        //static std::string htdate(time_t t);
         /// Returns a properly formatted date-string, as needed in http.
-        static std::string htdate(struct ::tm* tm);
+        //static std::string htdate(struct ::tm* tm);
         /// Returns a properly formatted current time-string, as needed in http.
         static std::string htdateCurrent();
 

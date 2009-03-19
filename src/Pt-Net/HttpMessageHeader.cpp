@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Net/HttpMessageHeader.h>
-#include <Pt/System/Mutex.h>
+//#include <Pt/System/Mutex.h>
 #include <cctype>
 #include <sstream>
 
@@ -77,7 +77,7 @@ bool HttpMessageHeader::keepAlive() const
                 && httpVersionMajor() == 1
                 && httpVersionMinor() >= 1);
 }
-
+/*
 std::string HttpMessageHeader::htdate(time_t t)
 {
     struct ::tm tm;
@@ -97,19 +97,22 @@ std::string HttpMessageHeader::htdate(struct ::tm* tm)
         tm->tm_hour, tm->tm_min, tm->tm_sec);
     return buffer;
 }
-
+*/
 std::string HttpMessageHeader::htdateCurrent()
 {
-    static struct ::tm lastTm;
+    return std::string();
+    //TODO: use System::Clock
+
+    /*static struct ::tm lastTm;
     static time_t lastDay = 0;
     static time_t lastTime = 0;
     static std::string lastHtdate;
     static Pt::System::Mutex mutex;
 
-    /*
-     * we cache the last split tm-struct here, because it is pretty expensive
-     * to calculate the date with gmtime_r.
-     */
+    //
+    // we cache the last split tm-struct here, because it is pretty expensive
+    // to calculate the date with gmtime_r.
+    //
 
     time_t t;
     time(&t);
@@ -135,7 +138,7 @@ std::string HttpMessageHeader::htdateCurrent()
         lastTime = t;
     }
 
-    return lastHtdate;
+    return lastHtdate;*/
 }
 
 
