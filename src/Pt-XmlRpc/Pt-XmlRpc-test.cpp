@@ -97,8 +97,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(rserv, "multiply");
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
 
             multiply.begin(2, 3);
@@ -119,8 +119,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(rserv, "multiply");
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onArrayFinished );
 
             std::vector<int> vec;
@@ -147,8 +147,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyColor);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client rserv(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(rserv, "multiply");
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onStuctFinished );
 
             Color a;
