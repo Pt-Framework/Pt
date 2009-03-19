@@ -29,6 +29,7 @@
 #include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"
@@ -106,6 +107,11 @@ void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv
 
     _ts.detach();
     _state = OnBegin;
+
+    if( _state == OnFaultResponseEnd )
+        throw _fault;
+
+    // _method contains a valid return value now
 }
 
 
@@ -142,6 +148,8 @@ void Client::onReplyFinished(Net::HttpClient& client)
 {
     if(_state == OnMethodResponseEnd)
         _method->onFinished();
+    else if(_state == OnFaultResponseEnd)
+        _method->fault(_fault);
 }
 
 
@@ -188,14 +196,56 @@ void Client::advance(const Pt::Xml::Node& node)
 
         case OnMethodResponseBegin:
         { //std::cerr << "Client:: OnMethodResponseBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement) // <params>
+            if(node.type() == Xml::Node::StartElement) // <params> or <fault>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != "params" )
+                if( se.name() == "params")
+                {
+                    _state = OnParamsBegin;
+                    break;
+                }
+
+                else if( se.name() == "fault")
+                {
+                    _fh.begin(_fault);
+                    _deserializer.begin(_fh);
+                    _state = OnFaultBegin;
+                    break;
+                }
+
+                throw std::runtime_error("invalid XML-RPC methodCall");
+            }
+            break;
+        }
+
+        case OnFaultBegin:
+        { //std::cerr << "Client:: OnFaultBegin" << std::endl;
+            bool finished = _deserializer.advance(node); // start with <value>
+            if(finished)
+            {
+                // </fault>
+                _state = OnFaultEnd;
+            }
+
+            break;
+        }
+
+        case OnFaultEnd:
+        { //std::cerr << "Client:: OnFaultEnd" << std::endl;
+            if(node.type() == Xml::Node::EndElement) // </methodResponse>
+            {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                if( ee.name() != "methodResponse" )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
-                _state = OnParamsBegin;
+                _state = OnFaultResponseEnd;
             }
+            break;
+        }
+
+        case OnFaultResponseEnd:
+        { //std::cerr << "Client:: OnFaultEnd" << std::endl;
+            _state = OnFaultResponseEnd;
             break;
         }
 

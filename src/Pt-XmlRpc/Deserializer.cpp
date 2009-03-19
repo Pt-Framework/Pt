@@ -47,7 +47,7 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != "value")
-                    throw std::runtime_error("invalid XML-RPC data");
+                    throw std::runtime_error("invalid XML-RPC data " + se.name().narrow());
 
                 _state = OnValueBegin;
             }
@@ -94,6 +94,12 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                     _state = OnDataEnd;
                 }
                 else if(ee.name() == L"param")
+                { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
+                    _current->finish();
+                    _state = OnValueEnd;
+                    return true;
+                }
+                else if(ee.name() == L"fault")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
                     _current->finish();
                     _state = OnValueEnd;

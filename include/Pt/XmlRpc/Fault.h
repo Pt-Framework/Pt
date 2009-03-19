@@ -30,6 +30,7 @@
 #define Pt_XmlRpc_Fault_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/SerializationInfo.h>
 #include <stdexcept>
 #include <string>
 
@@ -37,20 +38,54 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Fault : public std::runtime_error
+class Fault : public std::exception
 {
     public:
         Fault(const std::string& msg, int rc)
-        : std::runtime_error(msg)
+        : _msg(msg)
         , _rc(rc)
+        { }
+
+        Fault()
+        : _rc(0)
+        { }
+
+        ~Fault() throw()
         { }
 
         int rc() const
         { return _rc; }
 
+        void setRc(int rc)
+        { _rc = rc; }
+
+        void setText(const std::string& msg)
+        { _msg = msg; }
+
+        const std::string& text() const
+        { return _msg; }
+
+        const char* what() const throw()
+        { return _msg.c_str(); }
+
     private:
+        std::string _msg;
         int _rc;
 };
+
+
+inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
+{
+    fault.setRc( si.getValue<int>("faultCode") );
+    fault.setText( si.getValue<std::string>("faultString") );
+}
+
+
+inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
+{
+    si.addMember("faultCode") <<= fault.rc();
+    si.addMember("faultString") <<= fault.text();
+}
 
 }
 

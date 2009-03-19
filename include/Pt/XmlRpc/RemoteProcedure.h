@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
+class Fault;
+
 class IRemoteProcedure
 {
     friend class Client;
@@ -52,6 +54,8 @@ class IRemoteProcedure
 
         const std::string& name() const
         { return _name; }
+
+        Signal<const Fault&> fault;
 
     protected:
         virtual void onFinished() = 0;

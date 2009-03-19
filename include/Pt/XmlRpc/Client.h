@@ -29,6 +29,7 @@
 #define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/Deserializer.h>
 #include <Pt/Xml/XmlReader.h>
@@ -57,6 +58,9 @@ class PT_XMLRPC_API Client : public Pt::Connectable
     {
         OnBegin,
         OnMethodResponseBegin,
+        OnFaultBegin,
+        OnFaultEnd,
+        OnFaultResponseEnd,
         OnParamsBegin,
         OnParam,
         OnParamEnd,
@@ -97,6 +101,8 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Formatter _formatter;
         Deserializer _deserializer;
         IRemoteProcedure* _method;
+        Fault _fault;
+        TypeHandler<Fault> _fh;
 };
 
 }

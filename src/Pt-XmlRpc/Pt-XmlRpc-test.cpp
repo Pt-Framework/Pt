@@ -32,6 +32,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/Fault.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Net/HttpServer.h"
 #include "Pt/System/EventLoop.h"
@@ -71,6 +72,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
+            this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
             this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
@@ -93,6 +95,28 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             delete _loop;
             delete _server;
+        }
+
+        void Fault()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::throwFault);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            connect( multiply.fault, *this, &PtXmlRpcTest::onFault );
+
+            multiply.begin();
+
+            _loop->run();
+        }
+
+        void onFault(const Pt::XmlRpc::Fault& fault)
+        {
+            PT_UNIT_ASSERT_EQUALS(fault.rc(), 7)
+            PT_UNIT_ASSERT_EQUALS(fault.text(), "Fault")
+            _loop->exit();
         }
 
         void Nothing()
@@ -265,6 +289,12 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(color.blue, 20)
 
             _loop->exit();
+        }
+
+        bool throwFault()
+        {
+            throw Pt::XmlRpc::Fault("Fault", 7);
+            return false;
         }
 
         bool multiplyNothing()
