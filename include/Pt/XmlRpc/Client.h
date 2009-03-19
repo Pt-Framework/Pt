@@ -96,7 +96,6 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Xml::XmlReader _reader;
         Formatter _formatter;
         Deserializer _deserializer;
-        ITypeHandler* _rhandler;
         IRemoteProcedure* _method;
 };
 
