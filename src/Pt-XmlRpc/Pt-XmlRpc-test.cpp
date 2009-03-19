@@ -72,6 +72,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
+            this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
@@ -109,6 +110,28 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void onIntegerFinished(const int& r)
         {
             PT_UNIT_ASSERT_EQUALS(r, 6)
+
+            _loop->exit();
+        }
+
+        void Double()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyDouble);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<double, double, double> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onDoubleFinished );
+
+            multiply.begin(2.0, 3.0);
+
+            _loop->run();
+        }
+
+        void onDoubleFinished(const double& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r, 6.0)
 
             _loop->exit();
         }
@@ -175,17 +198,22 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        int multiplyInt(int a, int b)
+        {
+            return a*b;
+        }
+
+        double multiplyDouble(double a, double b)
+        {
+            return a*b;
+        }
+
         std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
         {
             std::vector<int> r;
             r.push_back( a.at(0) * b.at(0) );
             r.push_back( a.at(1) * b.at(1) );
             return r;
-        }
-
-        int multiplyInt(int a, int b)
-        {
-            return a*b;
         }
 
         Color multiplyColor(const Color& a, const Color& b)
