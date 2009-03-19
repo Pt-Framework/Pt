@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/XmlRpc/RemoteService.h"
+#include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-RemoteService::RemoteService(System::SelectorBase& selector, const std::string& server,
+Client::Client(System::SelectorBase& selector, const std::string& server,
                              unsigned short port, const std::string& url)
 : _state(OnBegin)
 , _url(url)
@@ -48,12 +48,12 @@ RemoteService::RemoteService(System::SelectorBase& selector, const std::string& 
 , _method(0)
 {
     _client.setSelector(selector);
-    connect(_client.headerReceived, *this, &RemoteService::onReplyHeader);
-    connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
+    connect(_client.headerReceived, *this, &Client::onReplyHeader);
+    connect(_client.bodyAvailable, *this, &Client::onReplyBody);
 }
 
 
-RemoteService::RemoteService(const std::string& server, unsigned short port, const std::string& url)
+Client::Client(const std::string& server, unsigned short port, const std::string& url)
 : _state(OnBegin)
 , _url(url)
 , _client(server, port)
@@ -62,17 +62,17 @@ RemoteService::RemoteService(const std::string& server, unsigned short port, con
 , _reader(_ts)
 , _method(0)
 {
-    connect(_client.headerReceived, *this, &RemoteService::onReplyHeader);
-    connect(_client.bodyAvailable, *this, &RemoteService::onReplyBody);
+    connect(_client.headerReceived, *this, &Client::onReplyHeader);
+    connect(_client.bodyAvailable, *this, &Client::onReplyBody);
 }
 
 
-RemoteService::~RemoteService()
+Client::~Client()
 {
 }
 
 
-void RemoteService::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
+void Client::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
 {
     _method = &method;
     _state = OnBegin;
@@ -83,7 +83,7 @@ void RemoteService::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHa
 }
 
 
-void RemoteService::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
+void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, ITypeHandler& a2)
 {
     _method = &method;
     _state = OnBegin;
@@ -102,13 +102,13 @@ void RemoteService::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler
 }
 
 
-void RemoteService::onReplyHeader(Net::HttpClient& client)
+void Client::onReplyHeader(Net::HttpClient& client)
 {
     _ts.attach( client.in() );
 }
 
 
-std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
+std::size_t Client::onReplyBody(Net::HttpClient& client)
 {
     std::size_t n = _ts.buffer().import();
 
@@ -125,7 +125,7 @@ std::size_t RemoteService::onReplyBody(Net::HttpClient& client)
 }
 
 
-void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
+void Client::prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2)
 {
     _request.clear();
     _request.url(_url);
@@ -149,12 +149,12 @@ void RemoteService::prepareRequest(const std::string& name, ITypeHandler& a1, IT
 }
 
 
-void RemoteService::advance(const Pt::Xml::Node& node)
+void Client::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
         case OnBegin:
-        { //std::cerr << "RemoteService:: OnBegin" << std::endl;
+        { //std::cerr << "Client:: OnBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -168,7 +168,7 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnMethodResponseBegin:
-        { //std::cerr << "RemoteService:: OnMethodResponseBegin" << std::endl;
+        { //std::cerr << "Client:: OnMethodResponseBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <params>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -181,7 +181,7 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnParamsBegin:
-        { //std::cerr << "RemoteService:: OnParams" << std::endl;
+        { //std::cerr << "Client:: OnParams" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <param>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -195,7 +195,7 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnParam:
-        { //std::cerr << "RemoteService:: OnParam" << std::endl;
+        { //std::cerr << "Client:: OnParam" << std::endl;
             bool finished = _deserializer.advance(node); // start with <value>
             if(finished)
             {
@@ -207,7 +207,7 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnParamEnd:
-        { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
+        { //std::cerr << "Client:: OnParamsEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </params>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -220,7 +220,7 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnParamsEnd:
-        { //std::cerr << "RemoteService:: OnParamsEnd" << std::endl;
+        { //std::cerr << "Client:: OnParamsEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </methodResponse>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -233,13 +233,13 @@ void RemoteService::advance(const Pt::Xml::Node& node)
         }
 
         case OnMethodResponseEnd:
-        { //std::cerr << "RemoteService:: OnMethodResponseEnd" << std::endl;
+        { //std::cerr << "Client:: OnMethodResponseEnd" << std::endl;
             _state = OnEnd;
             break;
         }
 
         case OnEnd:
-        { //std::cerr << "RemoteService:: OnMethodResponseEnd" << std::endl;
+        { //std::cerr << "Client:: OnMethodResponseEnd" << std::endl;
             _state = OnEnd;
             break;
         }

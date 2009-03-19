@@ -29,7 +29,7 @@
 #define Pt_XmlRpc_RemoteProcedure_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/RemoteService.h>
+#include <Pt/XmlRpc/Client.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/Signal.h>
 #include <string>
@@ -40,7 +40,7 @@ namespace XmlRpc {
 
 class IRemoteProcedure
 {
-    friend class RemoteService;
+    friend class Client;
 
     public:
         IRemoteProcedure(const std::string& name)
@@ -67,7 +67,7 @@ template <typename R,
 class RemoteProcedure : public IRemoteProcedure
 {
     public:
-        RemoteProcedure(RemoteService& service, const std::string& name)
+        RemoteProcedure(Client& service, const std::string& name)
         : IRemoteProcedure(name)
         , _service(&service)
         { }
@@ -104,7 +104,7 @@ class RemoteProcedure : public IRemoteProcedure
         { finished.send(_result); }
 
     private:
-        RemoteService* _service;
+        Client* _service;
         R _result;
         TypeHandler<R> _rhandler;
         TypeHandler<A1> _a1handler;

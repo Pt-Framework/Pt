@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_RemoteService_h
-#define Pt_XmlRpc_RemoteService_h
+#ifndef Pt_XmlRpc_Client_h
+#define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
@@ -51,7 +51,7 @@ namespace XmlRpc {
 class IRemoteProcedure;
 
 
-class PT_XMLRPC_API RemoteService : public Pt::Connectable
+class PT_XMLRPC_API Client : public Pt::Connectable
 {
     enum State
     {
@@ -66,12 +66,12 @@ class PT_XMLRPC_API RemoteService : public Pt::Connectable
     };
 
     public:
-        RemoteService(System::SelectorBase& selector, const std::string& addr,
+        Client(System::SelectorBase& selector, const std::string& addr,
                       unsigned short port, const std::string& url);
 
-        RemoteService(const std::string& addr, unsigned short port, const std::string& url);
+        Client(const std::string& addr, unsigned short port, const std::string& url);
 
-        virtual ~RemoteService();
+        virtual ~Client();
 
         void beginCall(ITypeHandler& r, IRemoteProcedure& method,
                        ITypeHandler& a1, ITypeHandler& a2);
