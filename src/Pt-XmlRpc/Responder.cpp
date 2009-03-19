@@ -57,6 +57,7 @@ HttpXmlRpcResponder::~HttpXmlRpcResponder()
 
 void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& request)
 {
+    _state = OnBegin;
     _ts.attach( is );
 }
 
@@ -64,8 +65,6 @@ void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& r
 std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 {
     std::size_t n = _ts.buffer().import();
-    if(n == 0)
-        return n;
 
     while( _reader.advance() )
     {
@@ -222,10 +221,8 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 
 void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
 {
-    _state = OnBegin;
-
     if( ! _proc )
-        return;
+        throw std::runtime_error("invalid XML-RPC methodCall");
 
     reply.setHeader("Content-Type", "text/xml");
 

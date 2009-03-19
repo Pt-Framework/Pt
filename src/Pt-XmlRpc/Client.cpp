@@ -50,6 +50,7 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
     _client.setSelector(selector);
     connect(_client.headerReceived, *this, &Client::onReplyHeader);
     connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+    connect(_client.replyFinished, *this, &Client::onReplyFinished);
 }
 
 
@@ -89,15 +90,21 @@ void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler& a1, I
     _state = OnBegin;
 
     this->prepareRequest(method.name(), a1, a2);
-    _client.execute(_request);
+    Net::HttpReplyHeader header = _client.execute(_request);
 
-    _ts.attach( _client.in() );
-    while( _state != OnMethodResponseEnd )
+    std::string body = _client.readBody();
+    std::istringstream is(body);
+    _ts.attach(is);
+    _deserializer.begin(r);
+
+    while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
     {
-        const Pt::Xml::Node& node = _reader.next();
+        const Pt::Xml::Node& node = _reader.get();
         this->advance(node);
+        _reader.next();
     }
 
+    _ts.detach();
     _state = OnBegin;
 }
 
@@ -116,12 +123,16 @@ std::size_t Client::onReplyBody(Net::HttpClient& client)
     {
         const Pt::Xml::Node& node = _reader.get();
         this->advance(node);
-
-        if(_state == OnMethodResponseEnd)
-            _method->onFinished();
     }
 
     return n;
+}
+
+
+void Client::onReplyFinished(Net::HttpClient& client)
+{
+    if(_state == OnMethodResponseEnd)
+        _method->onFinished();
 }
 
 
@@ -234,13 +245,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
         case OnMethodResponseEnd:
         { //std::cerr << "Client:: OnMethodResponseEnd" << std::endl;
-            _state = OnEnd;
-            break;
-        }
-
-        case OnEnd:
-        { //std::cerr << "Client:: OnMethodResponseEnd" << std::endl;
-            _state = OnEnd;
+            _state = OnMethodResponseEnd;
             break;
         }
     }

@@ -62,7 +62,6 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         OnParamEnd,
         OnParamsEnd,
         OnMethodResponseEnd,
-        OnEnd,
     };
 
     public:
@@ -83,6 +82,8 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         void onReplyHeader(Net::HttpClient& client);
 
         std::size_t onReplyBody(Net::HttpClient& client);
+
+        void onReplyFinished(Net::HttpClient& client);
 
         void prepareRequest(const std::string& name, ITypeHandler& a1, ITypeHandler& a2);
 
