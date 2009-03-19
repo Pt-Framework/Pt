@@ -51,6 +51,29 @@ class DeserializationContext
             _pointers[obj] = id;
         }
 
+        void clear()
+        {
+            _objects.clear();
+            _pointers.clear();
+        }
+
+        void fixup()
+        {
+            std::map<void*, std::string>::iterator it;
+            for(it = _pointers.begin(); it != _pointers.end(); ++it)
+            {
+                void* fixme = it->first;
+                std::string id = it->second;
+                void* obj = _objects[id];
+                //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
+
+                void** vp =(void**)(fixme);
+                *vp = obj;
+            }
+
+            clear();
+        }
+
     private:
         std::map<std::string, void*> _objects;
         std::map<void*, std::string> _pointers;
@@ -60,8 +83,9 @@ class DeserializationContext
 class IDeserializer
 {
     public:
-        IDeserializer()
+        IDeserializer(DeserializationContext& ctx)
         : _parent(0)
+        , _context( &ctx )
         {}
 
         virtual ~IDeserializer()
@@ -72,6 +96,9 @@ class IDeserializer
 
         IDeserializer* parent()
         { return _parent; }
+
+        DeserializationContext* context()
+        { return _context; }
 
         virtual void setName(const std::string& name) = 0;
 
@@ -89,6 +116,7 @@ class IDeserializer
 
     private:
         IDeserializer* _parent;
+        DeserializationContext* _context;
 };
 
 
@@ -96,8 +124,9 @@ template <typename T>
 class Deserializer : public IDeserializer
 {
     public:
-        Deserializer(T& type)
-        : _type(&type)
+        Deserializer(T& type, DeserializationContext& ctx)
+        : IDeserializer(ctx)
+        , _type(&type)
         , _current(&_si)
         {}
 
@@ -135,8 +164,8 @@ class Deserializer : public IDeserializer
             {
                 this->finish();
 
-                //if( ! this->parent() )
-                //    throw std::runtime_error("invalid member");
+                if( ! this->parent() )
+                    throw std::runtime_error("invalid member");
 
                 return this->parent();
             }
@@ -150,6 +179,22 @@ class Deserializer : public IDeserializer
             // SI's for unfixed pointers contain the fixup address now
             // other types may only point to _type,but not to its members
             *_current >>= *_type;
+
+            Pt::SerializationInfo::Iterator it;
+            for(it = _current->begin(); it != _current->end(); ++it)
+            {
+                if(it->category() == Pt::SerializationInfo::Reference)
+                {
+                    //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
+
+                    this->context()->addReference( it->toValue<std::string>(), it->fixupAddr() );
+                }
+            }
+
+            if( ! _current->id().empty() )
+            {
+                this->context()->addObject(_current->id(), _type);
+            }
         }
 
     private:

@@ -109,7 +109,8 @@ void XmlDeserializer::finish()
 */
 
     //TODO: use DeserializationContext
-
+    _context.fixup();
+/*
     std::map<void*, std::string>::iterator it;
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
@@ -121,7 +122,7 @@ void XmlDeserializer::finish()
         void** vp =(void**)(fixme);
         *vp = obj;
     }
-
+*/
     _peeking = false;
     _objects.clear();
     _stack.clear();

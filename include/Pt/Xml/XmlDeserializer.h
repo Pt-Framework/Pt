@@ -72,9 +72,13 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                Deserializer<T> deser(type);
+                Deserializer<T> deser(type, _context);
                 this->get(&deser);
                 deser.finish();
+
+                //if( ! deser.id().empty() )
+                //    _context.addObject( deser.id(), &type );
+
                 //SerializationInfo& si = this->get();
                 //si >>= type;
                 //this->markFixup(si, &type, &XmlDeserializer::do_fixup<T>);
@@ -133,6 +137,8 @@ namespace Xml {
             ProcessNode _processNode;
 
             size_t _startDepth;
+
+            DeserializationContext _context;
 
             //! @internal
             //SerializationInfo* _current;
