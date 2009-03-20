@@ -53,6 +53,12 @@ class Fault : public std::exception
         ~Fault() throw()
         { }
 
+        void clear()
+        {
+            _rc = 0;
+            _msg.clear();
+        }
+
         int rc() const
         { return _rc; }
 

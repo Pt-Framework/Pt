@@ -47,10 +47,15 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != "value")
-                    throw std::runtime_error("invalid XML-RPC data " + se.name().narrow());
+                    throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnValueBegin;
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -73,6 +78,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                     _state = OnScalarBegin;
                 }
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -105,6 +115,10 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                     _state = OnValueEnd;
                     return true;
                 }
+                else
+                {
+                    throw SerializationError("invalid XML-RPC parameter");
+                }
             }
             else if(node.type() == Xml::Node::StartElement)
             {
@@ -115,6 +129,10 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                     _current = _current->beginMember("");
                     _state = OnValueBegin;
                 }
+                else
+                {
+                    throw SerializationError("invalid XML-RPC parameter");
+                }
             }
 
             break;
@@ -124,6 +142,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnStructBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <member>
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name() != "member")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnMemberBegin;
             }
             else if(node.type() == Xml::Node::EndElement) // </struct>
@@ -137,8 +160,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnStructEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </value>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if(ee.name() != L"value")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnValueEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -146,8 +179,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnMemberBegin" << std::endl;
             if(node.type() == Xml::Node::StartElement) // name
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name() != "name")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnNameBegin;
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -162,6 +205,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
 
                 _state = OnName;
             }
+            else
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -169,8 +217,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnName" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </name>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if(ee.name() != L"name")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnNameEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -178,8 +236,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnNameEnd" << std::endl;
             if(node.type() == Xml::Node::StartElement) // <value>
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name() != "value")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnValueBegin;
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -192,6 +260,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 //std::cerr << "-> found value " << chars.content().narrow() << std::endl;
                 _current->setValue( chars.content() );
             }
+            else
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -201,6 +274,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
             {
                 _state = OnScalarEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -208,17 +286,37 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnScalarEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </value>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if(ee.name() != L"value")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnValueEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
         case OnArrayBegin:
         { //std::cerr << "OnArrayBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement) // data
+            if(node.type() == Xml::Node::StartElement) // <data>
             {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name() != "data")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnDataBegin;
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -230,6 +328,11 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 _current = _current->beginMember("");
                 _state = OnValueBegin;
             }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -237,8 +340,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnDataEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </array>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if(ee.name() != L"array")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnArrayEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
 
@@ -246,8 +359,18 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
         { //std::cerr << "OnArrayEnd" << std::endl;
             if(node.type() == Xml::Node::EndElement) // </value>
             {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if(ee.name() != L"value")
+                    throw SerializationError("invalid XML-RPC parameter");
+
                 _state = OnValueEnd;
             }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throw SerializationError("invalid XML-RPC parameter");
+            }
+
             break;
         }
     }

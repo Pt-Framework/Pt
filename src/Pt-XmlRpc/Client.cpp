@@ -28,6 +28,7 @@
  */
 #include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
+#include "Pt/Xml/ParseError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
@@ -108,6 +109,8 @@ void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv
     _ts.detach();
     _state = OnBegin;
 
+    // let Xml::ParseError SerializationError, ConversionError propagate
+
     if( _state == OnFaultResponseEnd )
         throw _fault;
 
@@ -117,6 +120,7 @@ void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv
 
 void Client::onReplyHeader(Net::HttpClient& client)
 {
+    _fault.clear();
     _ts.attach( client.in() );
 }
 
@@ -125,19 +129,40 @@ std::size_t Client::onReplyBody(Net::HttpClient& client)
 {
     std::size_t n = 0;
 
-    while(true)
+    try
     {
-        std::streamsize m = _ts.buffer().import();
-        if( ! m)
-            break;
-
-        n += m;
-
-        while( _reader.advance() )
+        while(true)
         {
-            const Pt::Xml::Node& node = _reader.get();
-            this->advance(node);
+            std::streamsize m = _ts.buffer().import();
+            if( ! m )
+                break;
+
+            n += m;
+
+            while( _reader.advance() ) // Xml::ParseError
+            {
+                const Pt::Xml::Node& node = _reader.get();
+                this->advance(node); // SerializationError, ConversionError
+            }
         }
+    }
+    catch(const Xml::ParseError& error)
+    {
+        _fault.setRc(1);
+        _fault.setText( error.what() );
+        throw;
+    }
+    catch(const SerializationError& error)
+    {
+        _fault.setRc(2);
+        _fault.setText( error.what() );
+        throw;
+    }
+    catch(const ConversionError& error)
+    {
+        _fault.setRc(3);
+        _fault.setText( error.what() );
+        throw;
     }
 
     return n;
@@ -147,9 +172,13 @@ std::size_t Client::onReplyBody(Net::HttpClient& client)
 void Client::onReplyFinished(Net::HttpClient& client)
 {
     if(_state == OnMethodResponseEnd)
+    {
         _method->onFinished();
-    else if(_state == OnFaultResponseEnd)
+    }
+    else if(_state == OnFaultResponseEnd || _fault.rc() != 0)
+    {
         _method->fault(_fault);
+    }
 }
 
 
@@ -186,7 +215,7 @@ void Client::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name() != "methodResponse" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodResponseBegin;
             }
@@ -213,7 +242,7 @@ void Client::advance(const Pt::Xml::Node& node)
                     break;
                 }
 
-                throw std::runtime_error("invalid XML-RPC methodCall");
+                throw SerializationError("invalid XML-RPC methodCall");
             }
             break;
         }
@@ -236,7 +265,7 @@ void Client::advance(const Pt::Xml::Node& node)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if( ee.name() != "methodResponse" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnFaultResponseEnd;
             }
@@ -255,7 +284,7 @@ void Client::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name() != "param" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParam;
             }
@@ -281,7 +310,7 @@ void Client::advance(const Pt::Xml::Node& node)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if( ee.name() != "params" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParamsEnd;
             }
@@ -294,7 +323,7 @@ void Client::advance(const Pt::Xml::Node& node)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if( ee.name() != "methodResponse" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodResponseEnd;
             }

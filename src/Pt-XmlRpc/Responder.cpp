@@ -29,6 +29,7 @@
 #include "Pt/XmlRpc/Responder.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Fault.h"
+#include "Pt/Xml/ParseError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
@@ -150,7 +151,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name() != "methodCall" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw Xml::ParseError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;
             }
