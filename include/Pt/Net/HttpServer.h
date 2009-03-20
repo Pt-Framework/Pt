@@ -74,6 +74,7 @@ class PT_NET_API HttpResponder
         virtual void beginRequest(std::istream& in, HttpRequest& request);
         virtual std::size_t readBody(std::istream&);
         virtual void reply(std::ostream&, HttpRequest& request, HttpReply& reply) = 0;
+        virtual void replyError(std::ostream&, HttpRequest& request, HttpReply& reply, const std::exception& ex);
 
         void release()     { _service.releaseResponder(this); }
 
@@ -114,6 +115,8 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
         void removeService(HttpService& service);
 
         HttpResponder* getResponder(const HttpRequest& request);
+        HttpResponder* getDefaultResponder(const HttpRequest& request)
+            { return _defaultService.createResponder(request); }
 
         void onConnect(TcpServer& server);
 
@@ -170,7 +173,6 @@ class PT_NET_API HttpSocket : public TcpSocket, public Connectable
         HttpHeaderParser _parser;
         HttpRequest _request;
         HttpReply _reply;
-        bool _readHeader;
 
         System::Timer _timer;
         int _contentSize;

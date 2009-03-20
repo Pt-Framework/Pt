@@ -52,6 +52,13 @@ std::size_t HttpResponder::readBody(std::istream& in)
     return ret;
 }
 
+void HttpResponder::replyError(std::ostream& out, HttpRequest& request, HttpReply& reply, const std::exception& ex)
+{
+    reply.httpReturn(500, "internal server error");
+    reply.setHeader("Content-Type", "text/plain");
+    out << ex.what();
+}
+
 void HttpNotFoundResponder::reply(std::ostream& out, HttpRequest& request, HttpReply& reply)
 {
     reply.httpReturn(404, "Not found");
@@ -84,8 +91,7 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
     : TcpSocket(server),
       _server(server),
       _parseEvent(_request),
-      _parser(_parseEvent, false),
-      _readHeader(true)
+      _parser(_parseEvent, false)
 {
     _stream.attachDevice(*this);
     _stream.buffer().beginRead();
@@ -101,23 +107,49 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
 void HttpSocket::onInput(System::StreamBuffer& sb)
 {
     _timer.start(_server.readTimeout());
-    if ( _readHeader )
+    if ( _responder == 0 )
     {
         _parser.advance(sb);
 
         if (_parser.fail())
-            throw std::runtime_error("http parser failed"); // TODO define exception class
+        {
+            _responder = _server.getDefaultResponder(_request);
+            _responder->replyError(_reply.body(), _request, _reply,
+                std::runtime_error("invalid http header"));
+            _responder->release();
+            _responder = 0;
+
+            sendReply();
+
+            onOutput(sb);
+            return;
+        }
 
         if (_parser.end())
         {
             _responder = _server.getResponder(_request);
-            _responder->beginRequest(_stream, _request);
+            try
+            {
+                _responder->beginRequest(_stream, _request);
+            }
+            catch (const std::exception& e)
+            {
+                _reply.setHeader("Connection", "close");
+                _responder->replyError(_reply.body(), _request, _reply, e);
+                _responder->release();
+                _responder = 0;
+                sendReply();
+
+                onOutput(sb);
+                return;
+            }
 
             _contentSize = _request.header().contentSize();
             if (_contentSize == 0)
             {
                 _responder->reply(_reply.body(), _request, _reply);
                 _responder->release();
+                _responder = 0;
 
                 sendReply();
 
@@ -125,7 +157,6 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
                 return;
             }
 
-            _readHeader = false;
         }
         else
         {
@@ -133,19 +164,34 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
         }
     }
 
-    if (!_readHeader)
+    if (_responder)
     {
         if (sb.in_avail() > 0)
         {
-            std::size_t s = _responder->readBody(_stream);
-            assert(s > 0);
-            _contentSize -= s;
+            try
+            {
+                std::size_t s = _responder->readBody(_stream);
+                assert(s > 0);
+                _contentSize -= s;
+            }
+            catch (const std::exception& e)
+            {
+                _reply.setHeader("Connection", "close");
+                _responder->replyError(_reply.body(), _request, _reply, e);
+                _responder->release();
+                _responder = 0;
+                sendReply();
+
+                onOutput(sb);
+                return;
+            }
         }
 
         if (_contentSize <= 0)
         {
             _responder->reply(_reply.body(), _request, _reply);
             _responder->release();
+            _responder = 0;
 
             sendReply();
 
@@ -160,25 +206,39 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
 
 void HttpSocket::onOutput(System::StreamBuffer& sb)
 {
-    bool keepAlive = false;  // TODO
-
     sb.beginWrite();
 
     if ( sb.out_avail() )
     {
         _timer.start(_server.writeTimeout());
     }
-    else if (keepAlive)
-    {
-        _timer.start(_server.keepAliveTimeout());
-        _readHeader = true;
-        _request.clear();
-        _reply.clear();
-    }
     else
     {
-        close();
-        delete this;
+        bool keepAlive = _request.header().keepAlive();
+
+        if (keepAlive)
+        {
+            std::string connection = _reply.getHeader("Connection");
+            if (connection != "keep-alive"
+                || (connection.empty()
+                    && _reply.header().httpVersionMajor() == 1
+                    && _reply.header().httpVersionMinor() >= 1))
+            {
+                keepAlive = false;
+            }
+        }
+
+        if (keepAlive)
+        {
+            _timer.start(_server.keepAliveTimeout());
+            _request.clear();
+            _reply.clear();
+        }
+        else
+        {
+            close();
+            delete this;
+        }
     }
 }
 

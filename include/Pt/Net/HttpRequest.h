@@ -63,6 +63,11 @@ class HttpRequest
             _header.addHeader(key, value);
         }
 
+        void removeHeader(const std::string& key)
+        {
+            _header.removeHeader(key);
+        }
+
         std::string getHeader(const std::string& key) const
         {
             return _header.getHeader(key);

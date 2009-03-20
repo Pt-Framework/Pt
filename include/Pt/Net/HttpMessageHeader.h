@@ -85,6 +85,11 @@ class PT_NET_API HttpMessageHeader
             }
         }
 
+        void removeHeader(const std::string& key)
+        {
+            _headers.erase(key);
+        }
+
         std::string getHeader(const std::string& key) const
         {
             Headers::const_iterator it = _headers.find(key);

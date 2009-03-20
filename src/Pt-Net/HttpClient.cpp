@@ -243,40 +243,53 @@ void HttpClient::onOutput(System::StreamBuffer& sb)
 
 void HttpClient::onInput(System::StreamBuffer& sb)
 {
-    if (_readHeader)
+    try
     {
-        _parser.advance(sb);
-
-        if (_parser.fail())
-            throw std::runtime_error("http parser failed"); // TODO define exception class
-
-        if( _parser.end() )
+        if (_readHeader)
         {
-            _contentSize = _replyHeader.contentSize();
-            headerReceived(*this);
-            _readHeader = false;
+            _parser.advance(sb);
 
-            if (_contentSize > 0)
+            if (_parser.fail())
+                throw std::runtime_error("http parser failed"); // TODO define exception class
+
+            if( _parser.end() )
             {
-                if( sb.in_avail() > 0 )
+                _contentSize = _replyHeader.contentSize();
+                headerReceived(*this);
+                _readHeader = false;
+
+                if (_contentSize > 0)
                 {
-                    _contentSize -= bodyAvailable(*this); // TODO: may throw exception
-                    if( _contentSize <= 0 )
-                        replyFinished(*this);
+                    if( sb.in_avail() > 0 )
+                    {
+                        processBodyAvailable();
+                    }
+                }
+                else
+                {
+                    replyFinished(*this);
                 }
             }
-            else
-            {
-                replyFinished(*this);
-            }
+        }
+        else
+        {
+            processBodyAvailable();
         }
     }
-    else
+    catch (const std::exception& e)
     {
-        _contentSize -= bodyAvailable(*this);
-        if( _contentSize <= 0 )
-            replyFinished(*this);
+        _socket.close();
+
+        // TODO propagate exception if signal errorOccured is not connected
+        errorOccured(*this, e);
     }
+}
+
+void HttpClient::processBodyAvailable()
+{
+    _contentSize -= bodyAvailable(*this); // TODO: may throw exception
+    if( _contentSize <= 0 )
+        replyFinished(*this);
 }
 
 } // namespace Net

@@ -79,6 +79,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
         long _contentSize;
 
         void sendRequest(const HttpRequest& request);
+        void processBodyAvailable();
 
     protected:
         void onConnect(TcpSocket& socket);
@@ -122,6 +123,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
         Signal<HttpClient&> headerReceived;
         Pt::Delegate<std::size_t, HttpClient&> bodyAvailable;
         Signal<HttpClient&> replyFinished;
+        Signal<HttpClient&, const std::exception&> errorOccured;
 };
 
 } // namespace Net
