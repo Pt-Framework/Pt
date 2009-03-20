@@ -38,7 +38,7 @@ namespace Pt {
 class Formatter;
 class SerializationContext;
 
-class ISerializer
+class PT_API ISerializer
 {
     public:
         virtual ~ISerializer()

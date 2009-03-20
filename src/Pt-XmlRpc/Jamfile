@@ -14,7 +14,7 @@ SharedLibrary_MakeLocate Pt-XmlRpc : $(OUTPUT_TARGET) ;
 PT_XMLRPC_TESTS = ;
 
 PtUnitTest Pt-XmlRpc-test : Pt-XmlRpc-test.cpp $(PT_XMLRPC_TESTS) ;
-Main_LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Xml Pt-System Pt-Unit Pt ;
+Main_LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Xml Pt-Net Pt-System Pt-Unit Pt ;
 PtUnitTest_MakeLocate Pt-XmlRpc-test : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
