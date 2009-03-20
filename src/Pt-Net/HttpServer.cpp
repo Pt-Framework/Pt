@@ -251,6 +251,22 @@ void HttpServer::addService(const std::string& url, HttpService& service)
     _service.insert(ServicesType::value_type(url, &service));
 }
 
+void HttpServer::removeService(HttpService& service)
+{
+    ServicesType::iterator it = _service.begin();
+    while (it != _service.end())
+    {
+        if (it->second == &service)
+        {
+            _service.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 HttpResponder* HttpServer::getResponder(const HttpRequest& request)
 {
     for (ServicesType::const_iterator it = _service.lower_bound(request.url());

@@ -111,6 +111,7 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
         HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
 
         void addService(const std::string& url, HttpService& service);
+        void removeService(HttpService& service);
 
         HttpResponder* getResponder(const HttpRequest& request);
 

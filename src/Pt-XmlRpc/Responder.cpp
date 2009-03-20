@@ -103,8 +103,8 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
 
     reply.setHeader("Content-Type", "text/xml");
 
-    os << "<?xml version=\"1.0\"?>\n";
-    os << "<methodResponse>\n";
+    os << "<?xml version=\"1.0\"?>\n"
+          "<methodResponse>\n";
 
     try
     {
@@ -114,28 +114,28 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
 
         _formatter.begin( os );
         rh->decompose(_formatter);
-        os << "</param>\n";
+        os << "</param>\n"
 
-        os << "</params>\n";
-        os << "</methodResponse>\n";
+              "</params>\n"
+              "</methodResponse>\n";
     }
     catch(const Fault& fault)
     {
-        os << "<fault>\n";
-        os << "<value>\n";
-        os << "<struct>\n";
-        os << "<member>\n";
-        os << "<name>faultCode</name>\n";
-        os << "<value><int>" << fault.rc() << "</int></value>\n";
-        os << "</member>\n";
-        os << "<member>\n";
-        os << "<name>faultString</name>\n";
-        os << "<value><string>" << fault.what() << "</string></value>\n";
-        os << "</member>\n";
-        os << "</struct>\n";
-        os << "</value>\n";
-        os << "</fault>\n";
-        os << "</methodResponse>\n";
+        os << "<fault>\n"
+              "<value>\n"
+              "<struct>\n"
+              "<member>\n"
+              "<name>faultCode</name>\n"
+              "<value><int>" << fault.rc() << "</int></value>\n"
+              "</member>\n"
+              "<member>\n"
+              "<name>faultString</name>\n"
+              "<value><string>" << fault.what() << "</string></value>\n"
+              "</member>\n"
+              "</struct>\n"
+              "</value>\n"
+              "</fault>\n"
+              "</methodResponse>\n";
     }
 }
 

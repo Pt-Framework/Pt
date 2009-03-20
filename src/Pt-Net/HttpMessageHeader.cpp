@@ -71,7 +71,11 @@ std::size_t HttpMessageHeader::contentSize() const
 
 bool HttpMessageHeader::keepAlive() const
 {
-    std::string ch = getHeader("connection");
+    std::string ch = getHeader("Connection");
+
+    for (std::string::iterator c = ch.begin(); c != ch.end(); ++c)
+        *c = std::tolower(*c);
+
     return ch == "keep-alive" ||
            (ch.empty()
                 && httpVersionMajor() == 1

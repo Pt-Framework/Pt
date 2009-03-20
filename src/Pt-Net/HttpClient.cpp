@@ -92,8 +92,9 @@ const HttpReplyHeader& HttpClient::execute(const HttpRequest& request, std::size
         // sending failed and we were not connected before, so try now
         _socket.connect(_server, _port);
 
-        // the data is still in our stream buffer, so we just reset the flags and flush again
         _stream.clear();
+        _stream.buffer().discard();
+        sendRequest(request);
         _stream.flush();
     }
 
@@ -146,11 +147,22 @@ std::string HttpClient::get(const std::string& url)
 void HttpClient::beginExecute(const HttpRequest& request)
 {
     _request = &request;
+    _replyHeader.clear();
     if (_socket.isConnected())
     {
-        // TODO what if write fails?
         sendRequest(*_request);
-        _stream.buffer().beginWrite();
+        try
+        {
+            _stream.buffer().beginWrite();
+        }
+        catch (const System::IOError&)
+        {
+            // first write failed, so connection is not active any more
+
+            _stream.clear();
+            _stream.buffer().discard();
+            _socket.beginConnect(_server, _port);
+        }
     }
     else
         _socket.beginConnect(_server, _port);

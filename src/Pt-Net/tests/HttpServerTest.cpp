@@ -45,21 +45,24 @@ class HttpServerTest : public Pt::Unit::TestSuite
         }
 
         void setUp()
-        { }
+        {
+            loop = new Pt::System::EventLoop();
+            loop->setIdleTimeout(2000);
+        }
 
         void tearDown()
-        { }
+        {
+            delete loop;
+        }
 
         void NotFoundRequest()
         {
-            Pt::System::EventLoop loop;
-            loop.setIdleTimeout(2000);
-            connect(loop.timeout, loop, &Pt::System::EventLoop::exit);
+            connect(loop->timeout, *loop, &Pt::System::EventLoop::exit);
 
-            Pt::Net::HttpServer server(loop, "127.0.0.1", 8001);
+            Pt::Net::HttpServer server(*loop, "127.0.0.1", 8001);
 
             Pt::Net::HttpClient client("127.0.0.1", 8001);
-            client.setSelector(loop);
+            client.setSelector(*loop);
             connect(client.headerReceived, *this, &HttpServerTest::onReplyHeader);
             connect(client.bodyAvailable, *this, &HttpServerTest::onReply);
             connect(client.replyFinished, *this, &HttpServerTest::onReplyFinished);
@@ -68,10 +71,12 @@ class HttpServerTest : public Pt::Unit::TestSuite
             request.setHeader("foo", "bar");
             client.beginExecute(request);
 
-            loop.run();
+            loop->run();
         }
 
     private:
+        Pt::System::EventLoop* loop;
+
         void onReplyHeader(Pt::Net::HttpClient& client)
         {
             std::cout << "Server=" << client.header().getHeader("server") << std::endl;
@@ -94,7 +99,9 @@ class HttpServerTest : public Pt::Unit::TestSuite
 
         void onReplyFinished(Pt::Net::HttpClient& client)
         {
+            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
             std::cout << "THE END" << std::endl;
+            loop->exit();
         }
 };
 

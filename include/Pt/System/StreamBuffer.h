@@ -72,10 +72,10 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
 {
     public:
         //! @brief Contructs an IOBuffer for an IODevice
-        StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
+        explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
 
         //! @brief Default constructor
-        StreamBuffer(size_t bufferSize = 8192, bool extend = false);
+        explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false);
 
         ~StreamBuffer();
 
@@ -86,6 +86,8 @@ class PT_SYSTEM_API StreamBuffer : public BasicStreamBuffer<char>
         void beginRead();
 
         void beginWrite();
+
+        void discard();
 
         Signal<StreamBuffer&> inputReady;
 

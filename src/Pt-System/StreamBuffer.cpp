@@ -222,6 +222,16 @@ void StreamBuffer::beginWrite()
 }
 
 
+void StreamBuffer::discard()
+{
+    if (_reading || _flushing)
+        throw IOPending( PT_ERROR_MSG("discard failed - streambuffer is in use") );
+
+    setg(0, 0, 0);
+    setp(0, 0);
+}
+
+
 void StreamBuffer::onWrite(IODevice& dev)
 {
     this->endWrite();

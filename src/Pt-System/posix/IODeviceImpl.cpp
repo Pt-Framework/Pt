@@ -183,7 +183,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
             continue;
 
         if(errno != EAGAIN)
-            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError("Could not write to file handle", PT_SOURCEINFO);
 
         fd_set wfds;
         FD_ZERO(&wfds);
