@@ -48,7 +48,7 @@ namespace Pt {
 
 namespace Net {
 
-class HttpClient : public Pt::Connectable
+class PT_NET_API HttpClient : public Pt::Connectable
 {
         friend class ParseEvent;
 
