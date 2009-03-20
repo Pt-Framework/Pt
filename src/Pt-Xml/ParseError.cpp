@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Xml {
 
-ParseError::ParseError(const char* what, std::size_t line)
+ParseError::ParseError(const char* what, unsigned line)
 : std::runtime_error(what)
 , _line(line)
 {
