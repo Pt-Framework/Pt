@@ -260,7 +260,7 @@ void HttpClient::onInput(System::StreamBuffer& sb)
             {
                 if( sb.in_avail() > 0 )
                 {
-                    _contentSize -= bodyAvailable(*this);
+                    _contentSize -= bodyAvailable(*this); // TODO: may throw exception
                     if( _contentSize <= 0 )
                         replyFinished(*this);
                 }

@@ -59,6 +59,7 @@ HttpXmlRpcResponder::~HttpXmlRpcResponder()
 
 void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& request)
 {
+    _fault.clear();
     _state = OnBegin;
     _ts.attach( is );
     _args = 0;
@@ -69,25 +70,68 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 {
     std::size_t n = 0;
 
-    while(true)
-    {
-        std::streamsize m = _ts.buffer().import();
-        if( ! m)
-            break;
-
-        n += m;
-
-        while( _reader.advance() )
+   try
+   {
+        while(true)
         {
-            const Pt::Xml::Node& node = _reader.get();
-            this->advance(node);
+            std::streamsize m = _ts.buffer().import();
+            if( ! m)
+                break;
+
+            n += m;
+
+            while( _reader.advance() )
+            {
+                const Pt::Xml::Node& node = _reader.get();
+                this->advance(node);
+            }
         }
+    }
+    catch(const Xml::ParseError& error)
+    {
+        _fault.setRc(1);
+        _fault.setText( error.what() );
+        throw;
+    }
+    catch(const SerializationError& error)
+    {
+        _fault.setRc(2);
+        _fault.setText( error.what() );
+        throw;
+    }
+    catch(const ConversionError& error)
+    {
+        _fault.setRc(3);
+        _fault.setText( error.what() );
+        throw;
     }
 
     return n;
 }
 
 
+void HttpXmlRpcResponder::replyError(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
+{
+    reply.setHeader("Content-Type", "text/xml");
+
+    os << "<?xml version=\"1.0\"?>\n"
+          "<methodResponse>\n"
+          "<fault>\n"
+          "<value>\n"
+          "<struct>\n"
+          "<member>\n"
+          "<name>faultCode</name>\n"
+          "<value><int>" << _fault.rc() << "</int></value>\n"
+          "</member>\n"
+          "<member>\n"
+          "<name>faultString</name>\n"
+          "<value><string>" << _fault.what() << "</string></value>\n"
+          "</member>\n"
+          "</struct>\n"
+          "</value>\n"
+          "</fault>\n"
+          "</methodResponse>\n";
+}
 
 
 void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)

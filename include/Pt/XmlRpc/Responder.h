@@ -30,6 +30,7 @@
 #define Pt_XmlRpc_Responder_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Deserializer.h>
 #include <Pt/XmlRpc/Formatter.h>
@@ -68,6 +69,8 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
         std::size_t readBody(std::istream& is);
 
+        void replyError(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
+
         void reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
 
     protected:
@@ -83,6 +86,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
        ServiceProcedure* _proc;
        ITypeHandler** _args;
        ITypeHandler* _result;
+       Fault _fault;
 };
 
 }
