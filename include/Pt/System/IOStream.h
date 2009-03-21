@@ -199,7 +199,7 @@ class BasicIOStream : public std::basic_iostream<CharT>
 };
 
 
-class PT_SYSTEM_API IStream : public BasicIStream<char>
+class IStream : public BasicIStream<char>
 {
     public:
         IStream(size_t bufferSize = 8192);
@@ -219,7 +219,7 @@ class PT_SYSTEM_API IStream : public BasicIStream<char>
 };
 
 
-class PT_SYSTEM_API OStream : public BasicIStream<char>
+class OStream : public BasicIStream<char>
 {
     public:
         OStream(size_t bufferSize = 8192);
@@ -239,7 +239,7 @@ class PT_SYSTEM_API OStream : public BasicIStream<char>
 };
 
 
-class PT_SYSTEM_API IOStream : public BasicIOStream<char>
+class IOStream : public BasicIOStream<char>
 {
     public:
         IOStream(size_t bufferSize = 8192);
@@ -257,6 +257,124 @@ class PT_SYSTEM_API IOStream : public BasicIOStream<char>
     private:
         StreamBuffer _buffer;
 };
+
+
+inline IStream::IStream(size_t bufferSize)
+: _buffer(bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline IStream::IStream(IODevice& device, size_t bufferSize)
+: _buffer(device, bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline IStream::~IStream()
+{
+}
+
+
+inline StreamBuffer& IStream::buffer()
+{
+return _buffer;
+}
+
+
+inline IODevice* IStream::attachDevice(IODevice& device)
+{
+    IODevice* ret = attachedDevice();
+    _buffer.attach(device);
+    return ret;
+}
+
+
+inline IODevice* IStream::attachedDevice()
+{
+return _buffer.device();
+}
+
+
+inline OStream::OStream(size_t bufferSize)
+: _buffer(bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline OStream::OStream(IODevice& device, size_t bufferSize)
+: _buffer(device, bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline OStream::~OStream()
+{
+}
+
+
+inline StreamBuffer& OStream::buffer()
+{
+    return _buffer;
+}
+
+
+inline IODevice* OStream::attachDevice(IODevice& device)
+{
+    IODevice* ret = attachedDevice();
+    _buffer.attach(device);
+    return ret;
+}
+
+
+inline IODevice* OStream::attachedDevice()
+{
+    return _buffer.device();
+}
+
+
+inline IOStream::IOStream(size_t bufferSize)
+: _buffer(bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline IOStream::~IOStream()
+{
+}
+
+
+inline IOStream::IOStream(IODevice& device, size_t bufferSize)
+: _buffer(device, bufferSize)
+{
+    attachBuffer(&_buffer);
+}
+
+
+inline StreamBuffer& IOStream::buffer()
+{
+    return _buffer;
+}
+
+
+inline IODevice* IOStream::attachDevice(IODevice& device)
+{
+    IODevice* ret = attachedDevice();
+    _buffer.attach(device);
+    return ret;
+}
+
+
+inline IODevice* IOStream::attachedDevice()
+{
+    return _buffer.device();
+}
+
 
 } // namespace System
 
