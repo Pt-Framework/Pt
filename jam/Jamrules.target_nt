@@ -10,6 +10,11 @@ if $(MSVCDir)
 else if $(VSINSTALLDIR)
 {
     TOOLSET ?= vc8 ;
+
+    if $(VS90COMNTOOLS)
+    {
+        TOOLSET = vc9 ;
+    }
 }
 else if $(MINGW)
 {
