@@ -45,7 +45,7 @@ using namespace std;
 
 void perfTest()
 {
-    stringstream input;
+/*    stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 input << "<a>";
     for(int i = 0; i < 50000; ++i)
@@ -63,6 +63,7 @@ input << "</a>";
     for(XmlReader::Iterator it = reader.current(); it != itEnd; ++it)
     {}
     cerr << clock() - begin << endl;
+*/
 }
 
 void test()

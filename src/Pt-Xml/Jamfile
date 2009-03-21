@@ -32,9 +32,8 @@ PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp $(PT_XML_TESTS) ;
 Main_LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-System Pt-Unit  Pt ;
 PtUnitTest_MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
 
-
 Main XmlReaderTest : XmlReaderTest.cpp ;
-Main_LinkSharedLibraries XmlReaderTest : Pt-Xml  Pt ;
+Main_LinkSharedLibraries XmlReaderTest : Pt-Xml Pt-System Pt ;
 Main_MakeLocate XmlReaderTest : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
