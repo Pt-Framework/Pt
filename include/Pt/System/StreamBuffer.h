@@ -68,10 +68,15 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
 };
 
 
+
+
+
 //! @brief A stream buffer for IODevices with linear buffer area
 class StreamBuffer : public BasicStreamBuffer<char>
                    , public Connectable
 {
+    friend void BeginRead(StreamBuffer& sb);
+
     public:
         //! @brief Contructs an IOBuffer for an IODevice
         explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
@@ -204,9 +209,12 @@ inline IODevice* StreamBuffer::device()
     return _ioDevice;
 }
 
+void BeginRead(StreamBuffer& sb);
 
 inline void StreamBuffer::beginRead()
 {
+    BeginRead(*this);
+/*
     if(_reading || _ioDevice == 0)
         return;
 
@@ -239,6 +247,44 @@ inline void StreamBuffer::beginRead()
     this->setg( _ibuffer + (_pbmax - putback), // start of get area
                 _ibuffer + used, // gptr position
                 _ibuffer + used ); // end of get area
+*/
+}
+
+
+inline void BeginRead(StreamBuffer& sb)
+{
+    if(sb._reading || sb._ioDevice == 0)
+        return;
+
+    if( ! sb._ibuffer )
+    {
+        sb._ibuffer = new char[sb._bufferSize];
+    }
+
+    size_t putback = sb._pbmax;
+    size_t leftover = 0;
+
+    // keep chars for putback
+    if( sb.gptr() )
+    {
+        putback = std::min<size_t>( sb.gptr() - sb.eback(), sb._pbmax);
+        char* to = sb._ibuffer + sb._pbmax - putback;
+        char* from = sb.gptr() - putback;
+
+        if(to == from)
+            throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
+
+        leftover = sb.egptr() - sb.gptr();
+        std::memmove( to, from, putback + leftover );
+    }
+
+    size_t used = sb._pbmax + leftover;
+    sb._ioDevice->beginRead( sb._ibuffer + used, sb._bufferSize - used );
+    sb._reading = true;
+
+    sb.setg( sb._ibuffer + (sb._pbmax - putback), // start of get area
+                sb._ibuffer + used, // gptr position
+                sb._ibuffer + used ); // end of get area
 }
 
 
