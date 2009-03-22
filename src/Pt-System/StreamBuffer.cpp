@@ -35,6 +35,62 @@ namespace Pt {
 
 namespace System {
 
+void StreamBuffer::Attach(StreamBuffer& sb, IODevice& ioDevice)
+{
+    if( ioDevice.busy() )
+        throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+    if(sb._ioDevice)
+    {
+        if( sb._ioDevice->busy() )
+            throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+        disconnect(ioDevice.inputReady, sb, &StreamBuffer::onRead);
+        disconnect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+    }
+
+    sb._ioDevice = &ioDevice;
+    connect(ioDevice.inputReady, sb, &StreamBuffer::onRead);
+    connect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+}
+
+
+void StreamBuffer::BeginRead(StreamBuffer& sb)
+{
+    if(sb._reading || sb._ioDevice == 0)
+        return;
+
+    if( ! sb._ibuffer )
+    {
+        sb._ibuffer = new char[sb._bufferSize];
+    }
+
+    size_t putback = sb._pbmax;
+    size_t leftover = 0;
+
+    // keep chars for putback
+    if( sb.gptr() )
+    {
+        putback = std::min<size_t>( sb.gptr() - sb.eback(), sb._pbmax);
+        char* to = sb._ibuffer + sb._pbmax - putback;
+        char* from = sb.gptr() - putback;
+
+        if(to == from)
+            throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
+
+        leftover = sb.egptr() - sb.gptr();
+        std::memmove( to, from, putback + leftover );
+    }
+
+    size_t used = sb._pbmax + leftover;
+    sb._ioDevice->beginRead( sb._ibuffer + used, sb._bufferSize - used );
+    sb._reading = true;
+
+    sb.setg( sb._ibuffer + (sb._pbmax - putback), // start of get area
+                sb._ibuffer + used, // gptr position
+                sb._ibuffer + used ); // end of get area
+}
+
 }
 
 }

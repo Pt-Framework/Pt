@@ -38,44 +38,12 @@ namespace Pt {
 
 namespace System {
 
-template <typename CharT>
-class BasicStreamBuffer : public std::basic_streambuf<CharT>
-{
-    public:
-        std::streamsize speekn(CharT* buffer, std::streamsize size)
-        { return this->xspeekn(buffer, size); }
-
-        std::streamsize out_avail()
-        {
-            if( this->pptr() )
-                return this->pptr() - this->pbase();
-
-             return this->showfull();
-        }
-
-     protected:
-        virtual std::streamsize xspeekn(CharT* buffer, std::streamsize size)
-        {
-            if(size == 0)
-                return 0;
-
-            buffer[0] = this->sgetc();
-            return 1;
-        }
-
-        virtual std::streamsize showfull()
-        { return 0; }
-};
-
-
-
-
-
 //! @brief A stream buffer for IODevices with linear buffer area
-class StreamBuffer : public BasicStreamBuffer<char>
+class StreamBuffer : public std::basic_streambuf<char>
                    , public Connectable
 {
-    friend void BeginRead(StreamBuffer& sb);
+    PT_SYSTEM_API static void Attach(StreamBuffer& sb, IODevice& ioDevice);
+    PT_SYSTEM_API static void BeginRead(StreamBuffer& sb);
 
     public:
         //! @brief Contructs an IOBuffer for an IODevice
@@ -86,17 +54,35 @@ class StreamBuffer : public BasicStreamBuffer<char>
 
         ~StreamBuffer();
 
-        void attach(IODevice& ioDevice);
+        void attach(IODevice& device)
+		{ Attach(*this, device); }
 
-        IODevice* device();
+        IODevice* device()
+		{
+		    return _ioDevice;
+		}
 
-        void beginRead();
+		void beginRead()
+		{ BeginRead(*this); }
 
         void beginWrite();
 
         void discard();
 
-        Signal<StreamBuffer&> inputReady;
+        std::streamsize speekn(char* buffer, std::streamsize size)
+        { 
+		    return this->xspeekn(buffer, size); 
+		}
+
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->pptr() - this->pbase();
+
+             return this->showfull();
+        }
+        
+		Signal<StreamBuffer&> inputReady;
 
         Signal<StreamBuffer&> outputReady;
 
@@ -184,7 +170,7 @@ inline StreamBuffer::~StreamBuffer()
 }
 
 
-inline void StreamBuffer::attach(IODevice& ioDevice)
+/*inline void StreamBuffer::attach(IODevice& ioDevice)
 {
     if( ioDevice.busy() )
         throw IOPending( PT_ERROR_MSG("IODevice in use") );
@@ -201,20 +187,11 @@ inline void StreamBuffer::attach(IODevice& ioDevice)
     _ioDevice = &ioDevice;
     connect(ioDevice.inputReady, *this, &StreamBuffer::onRead);
     connect(ioDevice.outputReady, *this, &StreamBuffer::onWrite);
-}
+}*/
 
 
-inline IODevice* StreamBuffer::device()
+/*inline void StreamBuffer::beginRead()
 {
-    return _ioDevice;
-}
-
-void BeginRead(StreamBuffer& sb);
-
-inline void StreamBuffer::beginRead()
-{
-    BeginRead(*this);
-/*
     if(_reading || _ioDevice == 0)
         return;
 
@@ -247,46 +224,8 @@ inline void StreamBuffer::beginRead()
     this->setg( _ibuffer + (_pbmax - putback), // start of get area
                 _ibuffer + used, // gptr position
                 _ibuffer + used ); // end of get area
+}
 */
-}
-
-
-inline void BeginRead(StreamBuffer& sb)
-{
-    if(sb._reading || sb._ioDevice == 0)
-        return;
-
-    if( ! sb._ibuffer )
-    {
-        sb._ibuffer = new char[sb._bufferSize];
-    }
-
-    size_t putback = sb._pbmax;
-    size_t leftover = 0;
-
-    // keep chars for putback
-    if( sb.gptr() )
-    {
-        putback = std::min<size_t>( sb.gptr() - sb.eback(), sb._pbmax);
-        char* to = sb._ibuffer + sb._pbmax - putback;
-        char* from = sb.gptr() - putback;
-
-        if(to == from)
-            throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
-
-        leftover = sb.egptr() - sb.gptr();
-        std::memmove( to, from, putback + leftover );
-    }
-
-    size_t used = sb._pbmax + leftover;
-    sb._ioDevice->beginRead( sb._ibuffer + used, sb._bufferSize - used );
-    sb._reading = true;
-
-    sb.setg( sb._ibuffer + (sb._pbmax - putback), // start of get area
-                sb._ibuffer + used, // gptr position
-                sb._ibuffer + used ); // end of get area
-}
-
 
 inline void StreamBuffer::onRead(IODevice& dev)
 {
