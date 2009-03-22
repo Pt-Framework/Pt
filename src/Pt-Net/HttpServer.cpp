@@ -87,12 +87,14 @@ void HttpSocket::ParseEvent::onUrlParam(const std::string& q)
     _request.qparams(q);
 }
 
+        
 HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
-    : TcpSocket(server),
-      _server(server),
-      _parseEvent(_request),
-      _parser(_parseEvent, false),
-      _responder(0)
+: TcpSocket(server)
+, _server(server)
+,  _parseEvent(_request)
+,  _parser(_parseEvent, false)
+,  _contentLength(0)
+,  _responder(0)
 {
     _stream.attachDevice(*this);
     _stream.buffer().beginRead();
