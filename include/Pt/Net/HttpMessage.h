@@ -33,9 +33,7 @@
 #include <Pt/Net/HttpMessageHead.h>
 #include <string>
 #include <sstream>
-#include <map>
 #include <cctype>
-#include <time.h>
 
 namespace Pt {
 

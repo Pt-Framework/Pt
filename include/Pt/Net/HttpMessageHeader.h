@@ -32,7 +32,6 @@
 #include <Pt/Net/Api.h>
 #include <string>
 #include <map>
-//#include <time.h>
 
 namespace Pt {
 
@@ -63,9 +62,9 @@ class PT_NET_API HttpMessageHeader
 
         void clear()
         {
-          _headers.clear();
-          _httpVersionMajor = 1;
-          _httpVersionMinor = 1;
+            _headers.clear();
+            _httpVersionMajor = 1;
+            _httpVersionMinor = 1;
         }
 
         void setHeader(const std::string& key, const std::string& value)
@@ -111,7 +110,7 @@ class PT_NET_API HttpMessageHeader
             _httpVersionMinor = minor;
         }
 
-        std::size_t contentSize() const;
+        std::size_t contentLength() const;
 
         const_iterator begin() const
         { return _headers.begin(); }

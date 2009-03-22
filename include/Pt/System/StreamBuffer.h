@@ -32,6 +32,7 @@
 #include <streambuf>
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <cstring>
 
 namespace Pt {
 
@@ -377,33 +378,29 @@ inline StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     {
         this->endWrite();
     }
-    else if( this->pptr() == this->epptr() ) // buffer is full
+    else if (traits_type::eq_int_type( ch, traits_type::eof() ) || !_oextend)
+    {
+        // normal blocking overflow case
+        size_t avail = this->pptr() - this->pbase();
+        size_t written = _ioDevice->write(_obuffer, avail);
+        size_t leftover = avail - written;
+
+        if(leftover > 0)
+        {
+            traits_type::move(_obuffer, _obuffer + written, leftover);
+        }
+        this->setp(_obuffer + leftover, _obuffer + _obufferSize);
+    }
+    else
     {
         // if the buffer area is extensible and overflow is not called by
         // sync/flush we copy the output buffer to a larger one
-        bool isFlush = traits_type::eq_int_type( ch, traits_type::eof() );
-        if( _oextend && ! isFlush )
-        {
-            size_t bufsize = _obufferSize + (_obufferSize/2);
-            char* buf = new char[ bufsize ];
-            traits_type::move(buf, _obuffer, _obufferSize);
-            std::swap(_obuffer, buf);
-            _obufferSize = bufsize;
-            delete [] buf;
-        }
-        else
-        {
-            // normal blocking overflow case
-            size_t avail = this->pptr() - this->pbase();
-            size_t written = _ioDevice->write(_obuffer, avail);
-            size_t leftover = avail - written;
-
-            if(leftover > 0)
-            {
-                traits_type::move(_obuffer, _obuffer + written, leftover);
-            }
-            this->setp(_obuffer + leftover, _obuffer + _obufferSize);
-        }
+        size_t bufsize = _obufferSize + (_obufferSize/2);
+        char* buf = new char[ bufsize ];
+        traits_type::move(buf, _obuffer, _obufferSize);
+        std::swap(_obuffer, buf);
+        _obufferSize = bufsize;
+        delete [] buf;
     }
 
     // if the overflow char is not EOF put it in buffer

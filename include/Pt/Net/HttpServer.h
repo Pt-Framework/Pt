@@ -175,7 +175,7 @@ class PT_NET_API HttpSocket : public TcpSocket, public Connectable
         HttpReply _reply;
 
         System::Timer _timer;
-        int _contentSize;
+        int _contentLength;
         HttpResponder* _responder;
         System::IOStream _stream;
 };

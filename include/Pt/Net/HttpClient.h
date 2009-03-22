@@ -76,7 +76,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
         TcpSocket _socket;
         System::IOStream _stream;
         bool _readHeader;
-        long _contentSize;
+        long _contentLength;
 
         void sendRequest(const HttpRequest& request);
         void processBodyAvailable();

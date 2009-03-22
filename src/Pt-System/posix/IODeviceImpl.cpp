@@ -248,15 +248,13 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
     }
 
     int ret = -1;
-    while( true )
+    do
     {
         ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
-        if( ret != -1 )
-            break;
+    } while (ret == -1 && errno == EINTR);
 
-        if( errno != EINTR )
-            throw IOError( PT_ERROR_MSG("select failed") );
-    }
+    if (ret == -1)
+        throw IOError( PT_ERROR_MSG("select failed") );
 
     return ret > 0;
 }

@@ -57,9 +57,9 @@ bool HttpMessageHeader::StringLessIgnoreCase::operator()
     return it1 == s1.end() ? (it2 != s2.end()) : (it2 == s2.end());
 }
 
-std::size_t HttpMessageHeader::contentSize() const
+std::size_t HttpMessageHeader::contentLength() const
 {
-    std::string s = getHeader("Content-Size");
+    std::string s = getHeader("Content-Length");
     if (s.empty())
         return 0;
 

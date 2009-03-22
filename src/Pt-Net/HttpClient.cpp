@@ -46,7 +46,7 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port)
 , _server(server)
 , _port(port)
 , _readHeader(true)
-, _contentSize(0)
+, _contentLength(0)
 {
     _stream.attachDevice(_socket);
     connect(_socket.connected, *this, &HttpClient::onConnect);
@@ -63,7 +63,7 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port,
 , _server(server)
 , _port(port)
 , _readHeader(true)
-, _contentSize(0)
+, _contentLength(0)
 {
     _stream.attachDevice(_socket);
     connect(_socket.connected, *this, &HttpClient::onConnect);
@@ -120,7 +120,7 @@ void HttpClient::readBody(std::string& s)
 {
     char ch;
 
-    unsigned n = _replyHeader.contentSize();
+    unsigned n = _replyHeader.contentLength();
 
     s.clear();
     s.reserve(n);
@@ -177,7 +177,7 @@ void HttpClient::wait(std::size_t msecs)
 
 void HttpClient::sendRequest(const HttpRequest& request)
 {
-    const std::string contentSize = "Content-Size";
+    const std::string contentLength = "Content-Length";
     const std::string server = "Server";
     const std::string connection = "Connection";
     const std::string date = "Date";
@@ -193,9 +193,9 @@ void HttpClient::sendRequest(const HttpRequest& request)
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-   if (!request.header().hasHeader(contentSize))
+   if (!request.header().hasHeader(contentLength))
     {
-        _stream << "Content-Size: " << request.bodySize() << "\r\n";
+        _stream << "Content-Length: " << request.bodySize() << "\r\n";
     }
 
     if (!request.header().hasHeader(server))
@@ -254,11 +254,11 @@ void HttpClient::onInput(System::StreamBuffer& sb)
 
             if( _parser.end() )
             {
-                _contentSize = _replyHeader.contentSize();
+                _contentLength = _replyHeader.contentLength();
                 headerReceived(*this);
                 _readHeader = false;
 
-                if (_contentSize > 0)
+                if (_contentLength > 0)
                 {
                     if( sb.in_avail() > 0 )
                     {
@@ -287,8 +287,8 @@ void HttpClient::onInput(System::StreamBuffer& sb)
 
 void HttpClient::processBodyAvailable()
 {
-    _contentSize -= bodyAvailable(*this); // TODO: may throw exception
-    if( _contentSize <= 0 )
+    _contentLength -= bodyAvailable(*this); // TODO: may throw exception
+    if( _contentLength <= 0 )
         replyFinished(*this);
 }
 

@@ -31,6 +31,7 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/HttpRequestHeader.h>
+#include <string>
 #include <sstream>
 
 namespace Pt {

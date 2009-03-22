@@ -91,7 +91,8 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
     : TcpSocket(server),
       _server(server),
       _parseEvent(_request),
-      _parser(_parseEvent, false)
+      _parser(_parseEvent, false),
+      _responder(0)
 {
     _stream.attachDevice(*this);
     _stream.buffer().beginRead();
@@ -144,8 +145,8 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
                 return;
             }
 
-            _contentSize = _request.header().contentSize();
-            if (_contentSize == 0)
+            _contentLength = _request.header().contentLength();
+            if (_contentLength == 0)
             {
                 _responder->reply(_reply.body(), _request, _reply);
                 _responder->release();
@@ -172,7 +173,7 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
             {
                 std::size_t s = _responder->readBody(_stream);
                 assert(s > 0);
-                _contentSize -= s;
+                _contentLength -= s;
             }
             catch (const std::exception& e)
             {
@@ -187,7 +188,7 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
             }
         }
 
-        if (_contentSize <= 0)
+        if (_contentLength <= 0)
         {
             _responder->reply(_reply.body(), _request, _reply);
             _responder->release();
@@ -250,7 +251,7 @@ void HttpSocket::onTimeout()
 
 void HttpSocket::sendReply()
 {
-    const std::string contentSize = "Content-Size";
+    const std::string contentLength = "Content-Length";
     const std::string server = "Server";
     const std::string connection = "Connection";
     const std::string date = "Date";
@@ -267,9 +268,9 @@ void HttpSocket::sendReply()
         _stream << it->first << ": " << it->second << "\r\n";
     }
 
-    if (!_reply.header().hasHeader(contentSize))
+    if (!_reply.header().hasHeader(contentLength))
     {
-        _stream << "Content-Size: " << _reply.bodySize() << "\r\n";
+        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
     }
 
     if (!_reply.header().hasHeader(server))
