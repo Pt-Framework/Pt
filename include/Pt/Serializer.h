@@ -99,8 +99,8 @@ class Serializer : public ISerializer
 
     private:
         const T* _type;
-        Pt::SerializationInfo _si;
-        Pt::SerializationInfo* _current;
+        SerializationInfo _si;
+        SerializationInfo* _current;
 };
 
 

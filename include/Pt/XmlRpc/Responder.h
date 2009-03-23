@@ -31,7 +31,7 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/XmlRpc/Scanner.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
@@ -77,9 +77,9 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
     private:
        State _state;
-       Pt::TextIStream _ts;
-       Pt::Xml::XmlReader _reader;
-       Deserializer _deserializer;
+       TextIStream _ts;
+       Xml::XmlReader _reader;
+       Scanner _scanner;
        Formatter _formatter;
        Service* _service;
        DeserializationContext _context;

@@ -289,7 +289,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
                         std::runtime_error("too many arguments");
                 }
 
-                _deserializer.begin(**_args, _context);
+                _scanner.begin(**_args, _context);
                 _state = OnParam;
                 break;
             }
@@ -299,7 +299,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
 
         case OnParam:
         { //std::cerr << "S: OnParam" << std::endl;
-            bool finished = _deserializer.advance(node);
+            bool finished = _scanner.advance(node);
             if(finished)
             {
                 //std::cerr << "-> param finished" << std::endl; // node is </param>

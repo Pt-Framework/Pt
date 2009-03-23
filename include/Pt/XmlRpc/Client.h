@@ -31,7 +31,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Formatter.h>
-#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpClient.h>
 #include <Pt/Connectable.h>
@@ -99,11 +99,11 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         TextIStream _ts;
         Xml::XmlReader _reader;
         Formatter _formatter;
-        Deserializer _deserializer;
+        Scanner _scanner;
         IRemoteProcedure* _method;
-        Fault _fault;
-        Pt::Deserializer<Fault> _fh;
         DeserializationContext _context;
+        Deserializer<Fault> _fh;
+        Fault _fault;
 };
 
 }

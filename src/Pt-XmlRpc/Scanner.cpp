@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Deserializer.h>
+#include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-bool Deserializer::advance(const Pt::Xml::Node& node)
+bool Scanner::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {

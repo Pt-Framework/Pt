@@ -25,11 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Deserializer_h
-#define Pt_XmlRpc_Deserializer_h
+#ifndef Pt_XmlRpc_Scanner_h
+#define Pt_XmlRpc_Scanner_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/Scanner.h>
+#include <Pt/Deserializer.h>
 
 namespace Pt {
 

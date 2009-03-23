@@ -82,7 +82,7 @@ void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer**
 
     this->prepareRequest(method.name(), argv, argc);
     _client.beginExecute(_request);
-    _deserializer.begin(r,_context);
+    _scanner.begin(r,_context);
 }
 
 
@@ -97,7 +97,7 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
     std::string body = _client.readBody();
     std::istringstream is(body);
     _ts.attach(is);
-    _deserializer.begin(r, _context);
+    _scanner.begin(r, _context);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
     {
@@ -237,7 +237,7 @@ void Client::advance(const Pt::Xml::Node& node)
                 else if( se.name() == "fault")
                 {
                     _fh.begin(_fault);
-                    _deserializer.begin(_fh, _context);
+                    _scanner.begin(_fh, _context);
                     _state = OnFaultBegin;
                     break;
                 }
@@ -249,7 +249,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
         case OnFaultBegin:
         { //std::cerr << "Client:: OnFaultBegin" << std::endl;
-            bool finished = _deserializer.advance(node); // start with <value>
+            bool finished = _scanner.advance(node); // start with <value>
             if(finished)
             {
                 // </fault>
@@ -294,7 +294,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
         case OnParam:
         { //std::cerr << "Client:: OnParam" << std::endl;
-            bool finished = _deserializer.advance(node); // start with <value>
+            bool finished = _scanner.advance(node); // start with <value>
             if(finished)
             {
                 // </param>

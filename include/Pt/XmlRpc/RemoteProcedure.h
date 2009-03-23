@@ -118,7 +118,7 @@ class RemoteProcedure : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        Pt::Deserializer<R> _r;
+        Deserializer<R> _r;
         Serializer<A1> _a1;
         Serializer<A2> _a2;
 };
@@ -173,7 +173,7 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        Pt::Deserializer<R> _r;
+        Deserializer<R> _r;
         Serializer<A1> _a1;
 };
 
@@ -224,7 +224,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        Pt::Deserializer<R> _r;
+        Deserializer<R> _r;
 };
 
 }

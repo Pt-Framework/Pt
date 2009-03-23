@@ -105,9 +105,9 @@ class BasicServiceProcedure : public ServiceProcedure
         V1 _v1;
         V2 _v2;
         IDeserializer* _args[3];
-        Pt::Deserializer<V1> _a1;
-        Pt::Deserializer<V2> _a2;
-        Pt::Serializer<RV> _r;
+        Deserializer<V1> _a1;
+        Deserializer<V2> _a2;
+        Serializer<RV> _r;
 };
 
 
@@ -153,8 +153,8 @@ class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
         RV _rv;
         V1 _v1;
         IDeserializer* _args[2];
-        Pt::Deserializer<V1> _a1;
-        Pt::Serializer<RV> _r;
+        Deserializer<V1> _a1;
+        Serializer<RV> _r;
 };
 
 
@@ -195,7 +195,7 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
         Callable<R>* _cb;
         RV _rv;
         IDeserializer* _args[1];
-        Pt::Serializer<RV> _r;
+        Serializer<RV> _r;
 };
 
 
