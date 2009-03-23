@@ -121,6 +121,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
+            deser.finish();
 
             PT_UNIT_ASSERT( date1 == date2);
         }

@@ -35,65 +35,10 @@
 
 namespace Pt {
 
-class DeserializationContext
-{
-    public:
-        // used by Deserializer
-        void addObject(const std::string& id, void* obj)
-        {
-            _objects[id] = obj;
-        }
-
-        // IDeserializer calls this method on IDeserializer::finish()
-        void addFixup(const std::string& id, void* obj)
-        {
-            _pointers[obj] = id;
-        }
-
-        void clear()
-        {
-            _objects.clear();
-            _pointers.clear();
-        }
-
-        void fixup()
-        {
-            std::map<void*, std::string>::iterator it;
-            for(it = _pointers.begin(); it != _pointers.end(); ++it)
-            {
-                void* fixme = it->first;
-                std::string id = it->second;
-                void* obj = _objects[id];
-                //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
-
-                void** vp =(void**)(fixme);
-                *vp = obj;
-            }
-
-            clear();
-        }
+class DeserializationContext;
 
 
-        //TODO: we also have to allow the user to register allowed casts from
-        //     one type name to another. type id alone only does not take cars
-        //     of assigning derived classes to base pointers
-        template <typename T>
-        static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
-        {
-            if( fixmeInfo != typeid(T) )
-                throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
-
-            *( (T**)(fixme) ) = (T*)(obj);
-        }
-
-    private:
-        std::map<std::string, void*> _objects;
-        std::map<void*, std::string> _pointers;
-};
-
-
-// TODO Unmarshaller
-class IDeserializer
+class PT_API IDeserializer
 {
     public:
         IDeserializer()
@@ -121,7 +66,10 @@ class IDeserializer
 
         virtual IDeserializer* leaveMember() = 0;
 
-        virtual void finish(DeserializationContext& ctx) = 0;
+        virtual void fixup(DeserializationContext& ctx) = 0;
+
+    protected:
+        void fixupEach(void* obj, Pt::SerializationInfo& si, DeserializationContext& ctx);
 
     private:
         IDeserializer* _parent;
@@ -187,34 +135,106 @@ class Deserializer : public IDeserializer
             return this;
         }
 
-        // TODO: maybe call release()
-        virtual void finish(DeserializationContext& ctx)
+        virtual void fixup(DeserializationContext& ctx)
         {
             // SI's for unfixed pointers contain the fixup address now
             // other types may only point to _type,but not to its members
             *_current >>= *_type;
 
-            Pt::SerializationInfo::Iterator it;
-            for(it = _current->begin(); it != _current->end(); ++it)
-            {
-                if(it->category() == Pt::SerializationInfo::Reference)
-                {
-                    //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
-
-                    ctx.addFixup( it->toValue<std::string>(), it->fixupAddr() );
-                }
-            }
-
-            if( ! _current->id().empty() )
-            {
-                ctx.addObject(_current->id(), _type);
-            }
+            fixupEach(_type, _si, ctx);
         }
 
     private:
         T* _type;
         Pt::SerializationInfo _si;
         Pt::SerializationInfo* _current;
+};
+
+
+class DeserializationContext
+{
+    public:
+        DeserializationContext()
+        {}
+
+        virtual ~DeserializationContext()
+        {
+            this->clear();
+        }
+
+        template <typename T>
+        IDeserializer* push(T& type)
+        {
+            Deserializer<T>* deser = new Deserializer<T>;
+            deser->begin(type);
+            _stack.push_back(deser);
+            return deser;
+        }
+
+        void addObject(const std::string& id, void* obj)
+        {
+            _objects[id] = obj;
+        }
+
+        void addFixup(const std::string& id, void* obj)
+        {
+            _pointers[obj] = id;
+        }
+
+        void clear()
+        {
+            _objects.clear();
+            _pointers.clear();
+
+            std::vector<IDeserializer*>::iterator it;
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                delete *it;
+            }
+            _stack.clear();
+        }
+
+        void fixup()
+        {
+            std::vector<IDeserializer*>::iterator iter;
+            for(iter = _stack.begin(); iter != _stack.end(); ++iter)
+            {
+                IDeserializer* deser = *iter;
+                deser->fixup(*this);
+            }
+
+            std::map<void*, std::string>::iterator it;
+            for(it = _pointers.begin(); it != _pointers.end(); ++it)
+            {
+                void* fixme = it->first;
+                std::string id = it->second;
+                void* obj = _objects[id];
+                //std::cerr << "FIXING: " << fixme << " to " << obj << std::endl;
+
+                void** vp =(void**)(fixme);
+                *vp = obj;
+            }
+
+            clear();
+        }
+
+
+        //TODO: we also have to allow the user to register allowed casts from
+        //     one type name to another. type id alone only does not take care
+        //     of assigning derived classes to base pointers
+        template <typename T>
+        static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
+        {
+            if( fixmeInfo != typeid(T) )
+                throw SerializationError( PT_ERROR_MSG("reference fixup failed, type mismatch") );
+
+            *( (T**)(fixme) ) = (T*)(obj);
+        }
+
+    private:
+        std::map<std::string, void*> _objects;
+        std::map<void*, std::string> _pointers;
+        std::vector<IDeserializer*> _stack;
 };
 
 } // namespace Pt

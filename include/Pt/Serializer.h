@@ -61,7 +61,7 @@ class PT_API ISerializer
         static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
 };
 
-// TODO Marshaller
+
 template <typename T>
 class Serializer : public ISerializer
 {

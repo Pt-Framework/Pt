@@ -69,15 +69,14 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                Deserializer<T> deser;
-                deser.begin(type);
-                this->get(&deser);
-                deser.finish(_context);
+                IDeserializer* deser = _context.push(type);
+                this->get(deser);
             }
 
             void finish()
             {
                 _context.fixup();
+                _context.clear();
             }
 
         protected:

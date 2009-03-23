@@ -29,5 +29,23 @@
 
 namespace Pt {
 
+void IDeserializer::fixupEach(void* obj, Pt::SerializationInfo& si, DeserializationContext& ctx)
+{
+    Pt::SerializationInfo::Iterator it;
+    for(it = si.begin(); it != si.end(); ++it)
+    {
+        if(it->category() == Pt::SerializationInfo::Reference)
+        {
+            //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
+
+            ctx.addFixup( it->toValue<std::string>(), it->fixupAddr() );
+        }
+    }
+
+    if( ! si.id().empty() )
+    {
+        ctx.addObject(si.id(), obj);
+    }
+}
 
 } // namespace Pt
