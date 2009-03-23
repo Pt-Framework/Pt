@@ -38,85 +38,65 @@ namespace Pt {
 
 namespace System {
 
-//! @brief A stream buffer for IODevices with linear buffer area
-class StreamBuffer : public std::basic_streambuf<char>
-                   , public Connectable
+class StreamBuffer;
+
+class PT_SYSTEM_API StreamBufferBase : public Connectable
 {
-    PT_SYSTEM_API static void Attach(StreamBuffer& sb, IODevice& ioDevice);
-    PT_SYSTEM_API static void BeginRead(StreamBuffer& sb);
+	public:
+	    typedef std::streambuf::int_type int_type;
+		typedef std::streambuf::pos_type pos_type;
+		typedef std::streambuf::off_type off_type;
+		typedef std::streambuf::traits_type traits_type;
 
     public:
-        //! @brief Contructs an IOBuffer for an IODevice
-        explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
+		StreamBufferBase(size_t bufferSize, bool extend);
 
-        //! @brief Default constructor
-        explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false);
+		virtual ~StreamBufferBase();
 
-        ~StreamBuffer();
-
-        void attach(IODevice& device)
-		{ Attach(*this, device); }
-
+		void init(StreamBuffer& sb);
+		
         IODevice* device()
-		{
-		    return _ioDevice;
-		}
+		{ return _ioDevice; }
+		
+		void attach(IODevice& ioDevice);
+		
+		void beginRead();
+		
+	    void onRead(IODevice& ioDevice);
+	    
+		void endRead();
 
-		void beginRead()
-		{ BeginRead(*this); }
+		void beginWrite();
 
-        void beginWrite();
+        void onWrite(IODevice& dev);
 
+        void endWrite();
+		
         void discard();
-
-        std::streamsize speekn(char* buffer, std::streamsize size)
-        { 
-		    return this->xspeekn(buffer, size); 
-		}
-
-        std::streamsize out_avail()
-        {
-            if( this->pptr() )
-                return this->pptr() - this->pbase();
-
-             return this->showfull();
-        }
-        
+		
 		Signal<StreamBuffer&> inputReady;
 
         Signal<StreamBuffer&> outputReady;
 
     protected:
-        virtual int sync();
+        int do_sync();
 
-        virtual std::streamsize showfull();
+        int_type do_underflow();
 
-        virtual std::streamsize xspeekn(char* buffer, std::streamsize size);
+        int_type do_overflow(int_type ch);
 
-        virtual int_type underflow();
+        std::streamsize do_xspeekn(char* buffer, std::streamsize size);
 
-        virtual int_type overflow(int_type ch);
+        pos_type do_seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
 
-        virtual int_type pbackfail(int_type c);
+        pos_type do_seekpos(pos_type p, std::ios::openmode mode );
 
-        /** @brief  Alters the stream positions
-        */
-        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
+	    std::streamsize do_showfull();
 
-        /** @brief  Alters the stream positions
-        */
-        virtual pos_type seekpos(pos_type p, std::ios::openmode mode );
+        int_type do_pbackfail(int_type c);
 
     private:
-        void onRead(IODevice& dev);
-
-        void endRead();
-
-        void onWrite(IODevice& dev);
-
-        void endWrite();
-
-    private:
+	    StreamBuffer* _sb;
         IODevice* _ioDevice;
         size_t _bufferSize;
         char* _ibuffer;
@@ -128,47 +108,77 @@ class StreamBuffer : public std::basic_streambuf<char>
         bool _flushing;
 };
 
-
-inline StreamBuffer::StreamBuffer(IODevice& ioDevice, size_t bufferSize, bool extend)
-: _ioDevice(&ioDevice),
-  _bufferSize(bufferSize+4),
-  _ibuffer(0),
-  _obufferSize(bufferSize),
-  _obuffer(0),
-  _oextend(extend),
-  _pbmax(4),
-  _reading(false),
-  _flushing(false)
+//! @brief A stream buffer for IODevices with linear buffer area
+class StreamBuffer : public std::streambuf
+                   , public StreamBufferBase
 {
-    this->setg(0, 0, 0);
-    this->setp(0, 0);
+    friend class StreamBufferBase;
 
-    this->attach(ioDevice);
-}
+	public:
+	    typedef std::streambuf::int_type int_type;
+		typedef std::streambuf::pos_type pos_type;
+		typedef std::streambuf::off_type off_type;
+		typedef std::streambuf::traits_type traits_type;
+	
+    public:
+        explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
+		: StreamBufferBase(bufferSize, extend)
+		{
+		    StreamBufferBase::init(*this);
+			StreamBufferBase::attach(ioDevice);
+		}
 
+        explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false)
+		: StreamBufferBase(bufferSize, extend)
+		{
+		    StreamBufferBase::init(*this);
+		}
+        
+		~StreamBuffer()
+		{}
 
-inline StreamBuffer::StreamBuffer(size_t bufferSize, bool extend)
-: _ioDevice(0),
-  _bufferSize(bufferSize+4),
-  _ibuffer(0),
-  _obufferSize(bufferSize),
-  _obuffer(0),
-  _oextend(extend),
-  _pbmax(4),
-  _reading(false),
-  _flushing(false)
-{
-    this->setg(0, 0, 0);
-    this->setp(0, 0);
-}
+        std::streamsize speekn(char* buffer, std::streamsize size)
+        { return this->xspeekn(buffer, size); }
 
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->pptr() - this->pbase();
 
-inline StreamBuffer::~StreamBuffer()
-{
-    delete[] _ibuffer;
-    delete[] _obuffer;
-}
+             return this->showfull();
+        }
 
+    protected:
+        virtual int sync()
+		{ return do_sync(); }
+
+        virtual int_type underflow()
+		{ return StreamBufferBase::do_underflow(); }
+
+        virtual int_type overflow(int_type ch)
+		{ return StreamBufferBase::do_overflow(ch); }
+		
+        virtual std::streamsize xspeekn(char* buffer, std::streamsize size)
+		{ return StreamBufferBase::do_xspeekn(buffer, size); }
+
+        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
+		{ return StreamBufferBase::do_seekoff(offset, sd, mode); }
+
+        virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
+		{ return StreamBufferBase::do_seekpos(p, mode); }
+        
+		virtual std::streamsize showfull()
+		{ return StreamBufferBase::do_showfull(); }
+
+        virtual int_type pbackfail(int_type c)
+		{ return StreamBufferBase::do_pbackfail(c); }
+};
+
+} // namespace System
+
+} // namespace Pt
+
+#endif
 
 /*inline void StreamBuffer::attach(IODevice& ioDevice)
 {
@@ -226,14 +236,14 @@ inline StreamBuffer::~StreamBuffer()
                 _ibuffer + used ); // end of get area
 }
 */
-
+/*
 inline void StreamBuffer::onRead(IODevice& dev)
 {
     this->endRead();
     inputReady.send(*this);
-}
+}*/
 
-
+/*
 inline void StreamBuffer::endRead()
 {
     size_t readSize = _ioDevice->endRead();
@@ -243,8 +253,8 @@ inline void StreamBuffer::endRead()
                 this->gptr(), // gptr position
                 this->egptr() + readSize ); // end of get area
 }
-
-
+*/
+/*
 inline StreamBuffer::int_type StreamBuffer::underflow()
 {
     if( ! _ioDevice )
@@ -285,14 +295,15 @@ inline StreamBuffer::int_type StreamBuffer::underflow()
 
     return traits_type::to_int_type( *(this->gptr()) );
 }
+*/
 
-
+/*
 inline std::streamsize StreamBuffer::showfull()
 {
     return 0;
 }
-
-
+*/
+/*
 inline void StreamBuffer::beginWrite()
 {
     if(_flushing || _ioDevice == 0 )
@@ -307,9 +318,9 @@ inline void StreamBuffer::beginWrite()
             _flushing = true;
         }
     }
-}
+}*/
 
-
+/*
 inline void StreamBuffer::discard()
 {
     if (_reading || _flushing)
@@ -317,9 +328,9 @@ inline void StreamBuffer::discard()
 
     setg(0, 0, 0);
     setp(0, 0);
-}
+}*/
 
-
+/*
 inline void StreamBuffer::onWrite(IODevice& dev)
 {
     this->endWrite();
@@ -347,7 +358,9 @@ inline void StreamBuffer::endWrite()
     this->setp(_obuffer + leftover, _obuffer + _obufferSize);
 }
 
+*/
 
+/*
 inline StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 {
     if( ! _ioDevice )
@@ -397,14 +410,14 @@ inline StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     return traits_type::not_eof(ch);
 }
-
-
+*/
+/*
 inline StreamBuffer::int_type StreamBuffer::pbackfail(StreamBuffer::int_type)
 {
     return traits_type::eof();
 }
-
-
+*/
+/*
 inline int StreamBuffer::sync()
 {
     if( ! _ioDevice )
@@ -426,8 +439,8 @@ inline int StreamBuffer::sync()
 
     return 0;
 }
-
-
+*/
+/*
 inline std::streamsize StreamBuffer::xspeekn(char* buffer, std::streamsize size)
 {
     if( traits_type::eof() == this->underflow() )
@@ -480,9 +493,4 @@ StreamBuffer::seekpos(pos_type p, std::ios::openmode mode)
 {
     return this->seekoff(p, std::ios::beg, mode);
 }
-
-} // namespace System
-
-} // namespace Pt
-
-#endif
+*/
