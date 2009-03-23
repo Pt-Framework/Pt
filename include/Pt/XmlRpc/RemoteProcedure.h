@@ -30,7 +30,8 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Client.h>
-#include <Pt/XmlRpc/TypeHandler.h>
+#include <Pt/Deserializer.h>
+#include <Pt/Serializer.h>
 #include <Pt/Signal.h>
 #include <string>
 
@@ -85,7 +86,7 @@ class RemoteProcedure : public IRemoteProcedure
             _a2.begin(a2);
             _r.begin(_result);
 
-            ITypeHandler* argv[2] = { &_a1, &_a2 };
+            ISerializer* argv[2] = { &_a1, &_a2 };
             _service->beginCall(_r, *this, argv, 2);
         }
 
@@ -95,7 +96,7 @@ class RemoteProcedure : public IRemoteProcedure
             _a2.begin(a2);
             _r.begin(_result);
 
-            ITypeHandler* argv[2] = { &_a1, &_a2 };
+            ISerializer* argv[2] = { &_a1, &_a2 };
             _service->call(_r, *this, argv, 2);
             return _result;
         }
@@ -117,9 +118,9 @@ class RemoteProcedure : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        TypeHandler<R> _r;
-        TypeHandler<A1> _a1;
-        TypeHandler<A2> _a2;
+        Pt::Deserializer<R> _r;
+        Serializer<A1> _a1;
+        Serializer<A2> _a2;
 };
 
 
@@ -141,7 +142,7 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
             _a1.begin(a1);
             _r.begin(_result);
 
-            ITypeHandler* argv[1] = { &_a1 };
+            ISerializer* argv[1] = { &_a1 };
             _service->beginCall(_r, *this, argv, 1);
         }
 
@@ -150,7 +151,7 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
             _a1.begin(a1);
             _r.begin(_result);
 
-            ITypeHandler* argv[1] = { &_a1 };
+            ISerializer* argv[1] = { &_a1 };
             _service->call(_r, *this, argv, 1);
             return _result;
         }
@@ -172,8 +173,8 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        TypeHandler<R> _r;
-        TypeHandler<A1> _a1;
+        Pt::Deserializer<R> _r;
+        Serializer<A1> _a1;
 };
 
 
@@ -193,7 +194,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
         {
             _r.begin(_result);
 
-            ITypeHandler* argv[1] = { 0 };
+            ISerializer* argv[1] = { 0 };
             _service->beginCall(_r, *this, argv, 0);
         }
 
@@ -201,7 +202,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
         {
             _r.begin(_result);
 
-            ITypeHandler* argv[1] = { 0 };
+            ISerializer* argv[1] = { 0 };
             _service->call(_r, *this, argv, 0);
             return _result;
         }
@@ -223,7 +224,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
     private:
         Client* _service;
         R _result;
-        TypeHandler<R> _r;
+        Pt::Deserializer<R> _r;
 };
 
 }

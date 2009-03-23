@@ -31,7 +31,6 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/XmlRpc/Deserializer.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
@@ -83,9 +82,10 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
        Deserializer _deserializer;
        Formatter _formatter;
        Service* _service;
+       DeserializationContext _context;
        ServiceProcedure* _proc;
-       ITypeHandler** _args;
-       ITypeHandler* _result;
+       IDeserializer** _args;
+       ISerializer* _result;
        Fault _fault;
 };
 

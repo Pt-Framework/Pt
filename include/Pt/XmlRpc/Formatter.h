@@ -30,6 +30,7 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/String.h>
+#include <Pt/Serializer.h>
 #include <iostream>
 #include <string>
 
@@ -37,7 +38,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Formatter
+class PT_XMLRPC_API Formatter : public Pt::Formatter
 {
     public:
         Formatter()
@@ -52,10 +53,16 @@ class PT_XMLRPC_API Formatter
             *_out << "<param>\n";
         }
 
-        void addValue(const std::string& type, const Pt::String& value)
+        void addValue(const std::string& name, const std::string& type,
+                      const Pt::String& value, const std::string& id)
         {
             *_out << "<value><" << type << ">" << value.narrow();
             *_out << "</" << type << "></value>\n";
+        }
+
+        void addReference(const std::string& name, const Pt::String& value)
+        {
+            throw SerializationError("references not supported");
         }
 
         void beginArray()
@@ -68,7 +75,7 @@ class PT_XMLRPC_API Formatter
             *_out << "</data></array></value>\n";
         }
 
-        void beginObject()
+        void beginObject(const std::string& name, const std::string& id)
         {
             *_out << "<value><struct>\n";
         }

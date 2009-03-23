@@ -30,8 +30,9 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/TypeHandler.h>
 #include <Pt/Net/HttpServer.h>
+#include <Pt/Deserializer.h>
+#include <Pt/Serializer.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <stdexcept>
@@ -51,9 +52,9 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
-        virtual ITypeHandler** beginCall() = 0;
+        virtual IDeserializer** beginCall() = 0;
 
-        virtual ITypeHandler* endCall() = 0;
+        virtual ISerializer* endCall() = 0;
 };
 
 
@@ -80,14 +81,14 @@ class BasicServiceProcedure : public ServiceProcedure
             delete _cb;
         }
 
-        ITypeHandler** beginCall()
+        IDeserializer** beginCall()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
             return _args;
         }
 
-        ITypeHandler* endCall()
+        ISerializer* endCall()
         {
             _rv = _cb->call(_v1, _v2);
             _r.begin(_rv);
@@ -103,10 +104,10 @@ class BasicServiceProcedure : public ServiceProcedure
         RV _rv;
         V1 _v1;
         V2 _v2;
-        ITypeHandler* _args[3];
-        TypeHandler<V1> _a1;
-        TypeHandler<V2> _a2;
-        TypeHandler<RV> _r;
+        IDeserializer* _args[3];
+        Pt::Deserializer<V1> _a1;
+        Pt::Deserializer<V2> _a2;
+        Pt::Serializer<RV> _r;
 };
 
 
@@ -131,13 +132,13 @@ class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
             delete _cb;
         }
 
-        ITypeHandler** beginCall()
+        IDeserializer** beginCall()
         {
             _a1.begin(_v1);
             return _args;
         }
 
-        ITypeHandler* endCall()
+        ISerializer* endCall()
         {
             _rv = _cb->call(_v1);
             _r.begin(_rv);
@@ -151,9 +152,9 @@ class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
         Callable<R, A1>* _cb;
         RV _rv;
         V1 _v1;
-        ITypeHandler* _args[2];
-        TypeHandler<V1> _a1;
-        TypeHandler<RV> _r;
+        IDeserializer* _args[2];
+        Pt::Deserializer<V1> _a1;
+        Pt::Serializer<RV> _r;
 };
 
 
@@ -176,12 +177,12 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
             delete _cb;
         }
 
-        ITypeHandler** beginCall()
+        IDeserializer** beginCall()
         {
             return _args;
         }
 
-        ITypeHandler* endCall()
+        ISerializer* endCall()
         {
             _rv = _cb->call();
             _r.begin(_rv);
@@ -193,8 +194,8 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
 
         Callable<R>* _cb;
         RV _rv;
-        ITypeHandler* _args[1];
-        TypeHandler<RV> _r;
+        IDeserializer* _args[1];
+        Pt::Serializer<RV> _r;
 };
 
 

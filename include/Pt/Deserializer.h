@@ -121,7 +121,6 @@ class IDeserializer
 
         virtual IDeserializer* leaveMember() = 0;
 
-        // TODO: maybe call release()
         virtual void finish(DeserializationContext& ctx) = 0;
 
     private:
@@ -133,10 +132,16 @@ template <typename T>
 class Deserializer : public IDeserializer
 {
     public:
-        Deserializer(T& type)
-        : _type(&type)
+        Deserializer()
+        : _type(0)
         , _current(&_si)
         {}
+
+        void begin(T& type)
+        {
+            _type = &type;
+            _current = &_si;
+        }
 
         virtual void setName(const std::string& name)
         {

@@ -105,13 +105,13 @@ bool Deserializer::advance(const Pt::Xml::Node& node)
                 }
                 else if(ee.name() == L"param")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->finish();
+                    _current->finish(*_context);
                     _state = OnValueEnd;
                     return true;
                 }
                 else if(ee.name() == L"fault")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->finish();
+                    _current->finish(*_context);
                     _state = OnValueEnd;
                     return true;
                 }

@@ -153,12 +153,12 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
 
     try
     {
-        ITypeHandler* rh = _proc->endCall();
+        ISerializer* rh = _proc->endCall();
 
         os << "<params>\n";
 
         _formatter.begin( os );
-        rh->decompose(_formatter);
+        rh->format(_formatter);
         os << "</param>\n"
 
               "</params>\n"
@@ -289,7 +289,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
                         std::runtime_error("too many arguments");
                 }
 
-                _deserializer.begin(**_args);
+                _deserializer.begin(**_args, _context);
                 _state = OnParam;
                 break;
             }

@@ -66,10 +66,14 @@ template <typename T>
 class Serializer : public ISerializer
 {
     public:
-        Serializer(const T& type)
-        : _type(&type)
+        Serializer()
+        : _type(0)
         , _current(&_si)
+        { }
+
+        void begin(const T& type)
         {
+            _type = &type;
             _si <<= *_type;
         }
 

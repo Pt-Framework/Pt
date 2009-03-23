@@ -76,9 +76,9 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         virtual ~Client();
 
-        void beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc);
+        void beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc);
 
-        void call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc);
+        void call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc);
 
     protected:
         void onReplyHeader(Net::HttpClient& client);
@@ -87,7 +87,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         void onReplyFinished(Net::HttpClient& client);
 
-        void prepareRequest(const std::string& name, ITypeHandler** argv, unsigned argc);
+        void prepareRequest(const std::string& name, ISerializer** argv, unsigned argc);
 
         void advance(const Xml::Node& node);
 
@@ -102,7 +102,8 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Deserializer _deserializer;
         IRemoteProcedure* _method;
         Fault _fault;
-        TypeHandler<Fault> _fh;
+        Pt::Deserializer<Fault> _fh;
+        DeserializationContext _context;
 };
 
 }

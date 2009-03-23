@@ -29,7 +29,7 @@
 #define Pt_XmlRpc_Deserializer_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/TypeHandler.h>
+#include <Pt/Scanner.h>
 
 namespace Pt {
 
@@ -41,7 +41,7 @@ class Node;
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Deserializer
+class PT_XMLRPC_API Scanner
 {
     enum State
     {
@@ -69,25 +69,27 @@ class PT_XMLRPC_API Deserializer
     };
 
     public:
-        Deserializer()
+        Scanner()
         : _state(OnParam)
         , _current(0)
         {}
 
-        ~Deserializer()
+        ~Scanner()
         {}
 
-        void begin(ITypeHandler& handler)
+        void begin(IDeserializer& handler, DeserializationContext& context)
         {
             _state = OnParam;
             _current = &handler;
+            _context = &context;
         }
 
         bool advance(const Xml::Node& node);
 
     private:
         State _state;
-        ITypeHandler* _current;
+        IDeserializer* _current;
+        DeserializationContext* _context;
 };
 
 }

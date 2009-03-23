@@ -75,18 +75,18 @@ Client::~Client()
 }
 
 
-void Client::beginCall(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc)
+void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
     this->prepareRequest(method.name(), argv, argc);
     _client.beginExecute(_request);
-    _deserializer.begin(r);
+    _deserializer.begin(r,_context);
 }
 
 
-void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv, unsigned argc)
+void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -97,7 +97,7 @@ void Client::call(ITypeHandler& r, IRemoteProcedure& method, ITypeHandler** argv
     std::string body = _client.readBody();
     std::istringstream is(body);
     _ts.attach(is);
-    _deserializer.begin(r);
+    _deserializer.begin(r, _context);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
     {
@@ -182,7 +182,7 @@ void Client::onReplyFinished(Net::HttpClient& client)
 }
 
 
-void Client::prepareRequest(const std::string& name, ITypeHandler** argv, unsigned argc)
+void Client::prepareRequest(const std::string& name, ISerializer** argv, unsigned argc)
 {
     _request.clear();
     _request.url(_url);
@@ -196,7 +196,7 @@ void Client::prepareRequest(const std::string& name, ITypeHandler** argv, unsign
     for(unsigned n = 0; n < argc; ++n)
     {
         _formatter.begin( _request.body() );
-        argv[n]->decompose(_formatter);
+        argv[n]->format(_formatter);
         _request.body() << "</param>\n";
     }
 
@@ -237,7 +237,7 @@ void Client::advance(const Pt::Xml::Node& node)
                 else if( se.name() == "fault")
                 {
                     _fh.begin(_fault);
-                    _deserializer.begin(_fh);
+                    _deserializer.begin(_fh, _context);
                     _state = OnFaultBegin;
                     break;
                 }
