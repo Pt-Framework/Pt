@@ -94,5 +94,3 @@ void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
 }
 
 } // namespace Pt
-
-#endif
