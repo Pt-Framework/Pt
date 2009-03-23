@@ -30,8 +30,8 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <Pt/Formatter.h>
 #include <Pt/Serializer.h>
-#include <Pt/SerializationInfo.h>
 #include <memory>
 
 namespace Pt {

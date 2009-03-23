@@ -34,6 +34,8 @@
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpClient.h>
+#include <Pt/Deserializer.h>
+#include <Pt/Serializer.h>
 #include <Pt/Connectable.h>
 #include <Pt/TextStream.h>
 #include <string>

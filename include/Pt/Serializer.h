@@ -169,38 +169,6 @@ class SerializationContext
         std::vector<ISerializer*> _stack;
 };
 
-
-class Formatter
-{
-    public:
-        virtual ~Formatter()
-        { }
-
-        virtual void addValue(const std::string& name, const std::string& type,
-                              const Pt::String& value, const std::string& id) = 0;
-
-        virtual void addReference(const std::string& name, const Pt::String& value) = 0;
-
-        virtual void beginArray() = 0;
-
-        virtual void finishArray() = 0;
-
-        virtual void beginObject(const std::string& name, const std::string& id) = 0;
-
-        virtual void beginMember(const std::string& name) = 0;
-
-        virtual void finishMember() = 0;
-
-        virtual void finishObject() = 0;
-
-        virtual void finish() = 0;
-
-    protected:
-        Formatter()
-        {}
-};
-
-
 } // namespace Pt
 
 #endif

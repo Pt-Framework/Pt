@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Serializer.h"
+#include "Pt/Formatter.h"
 
 namespace Pt {
 

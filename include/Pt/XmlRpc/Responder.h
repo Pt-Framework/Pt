@@ -35,6 +35,7 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Net/HttpServer.h>
+#include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
 
 namespace Pt {

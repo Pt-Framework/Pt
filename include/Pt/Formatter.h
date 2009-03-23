@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- *
+ * Copyright (C) 2008 by Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,53 +25,46 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Formatter_h
-#define Pt_XmlRpc_Formatter_h
+#ifndef Pt_Formatter_h
+#define Pt_Formatter_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/Formatter.h>
+#include <Pt/Api.h>
 #include <Pt/String.h>
-#include <iostream>
 #include <string>
 
 namespace Pt {
 
-namespace XmlRpc {
-
-class PT_XMLRPC_API Formatter : public Pt::Formatter
+class Formatter
 {
     public:
-        Formatter();
+        virtual ~Formatter()
+        { }
 
-        ~Formatter();
+        virtual void addValue(const std::string& name, const std::string& type,
+                              const Pt::String& value, const std::string& id) = 0;
 
-        void begin(std::ostream& out);
+        virtual void addReference(const std::string& name, const Pt::String& value) = 0;
 
-        void addValue(const std::string& name, const std::string& type,
-                      const Pt::String& value, const std::string& id);
+        virtual void beginArray() = 0;
 
-        void addReference(const std::string& name, const Pt::String& value);
+        virtual void finishArray() = 0;
 
-        void beginArray();
+        virtual void beginObject(const std::string& name, const std::string& id) = 0;
 
-        void finishArray();
+        virtual void beginMember(const std::string& name) = 0;
 
-        void beginObject(const std::string& name, const std::string& id);
+        virtual void finishMember() = 0;
 
-        void beginMember(const std::string& name);
+        virtual void finishObject() = 0;
 
-        void finishMember();
+        virtual void finish() = 0;
 
-        void finishObject();
-
-        void finish();
-
-    private:
-        std::ostream* _out;
+    protected:
+        Formatter()
+        {}
 };
 
-}
 
-}
+} // namespace Pt
 
 #endif

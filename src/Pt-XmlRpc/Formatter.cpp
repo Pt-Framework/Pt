@@ -28,6 +28,7 @@
  */
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/SerializationInfo.h>
 
 namespace Pt {
 
