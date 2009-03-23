@@ -94,7 +94,8 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
         {
             this->writeEntry( it->name(), it->toString(), it->typeName() );
         }
-        else if( it->category() == SerializationInfo::Object )
+        else if( it->category() == SerializationInfo::Object ||
+                 it->category() == SerializationInfo::Array)
         {
             if(it->name().empty() == false)
                 *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");

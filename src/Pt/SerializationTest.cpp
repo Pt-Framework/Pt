@@ -217,7 +217,7 @@ void SerializationTest::StdVectorTest()
 
     Pt::SerializationInfo si;
     si <<= iv;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Object);
+    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Array);
 
     Pt::SerializationInfo::Iterator it = si.begin();
     int counter = 0;

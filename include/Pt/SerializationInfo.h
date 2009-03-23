@@ -62,7 +62,7 @@ class PT_API SerializationInfo
 
     public:
         enum Category {
-            Void = 0, Value = 1, Object = 2, Reference = 4
+            Void = 0, Value = 1, Object = 2, Array = 6, Reference = 8
         };
 
         class Iterator;
@@ -606,6 +606,8 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
         si <<= *it;
+
+    si.setCategory(SerializationInfo::Array);
 }
 
 inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
@@ -626,6 +628,8 @@ inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
         SerializationInfo& newSi = si.addMember("int");
         newSi <<= *it;
     }
+
+    si.setCategory(SerializationInfo::Array);
 }
 
 } // namespace Pt

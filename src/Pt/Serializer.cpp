@@ -74,8 +74,18 @@ void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatt
     {
         formatter.addReference( si.name(), si.toString() );
     }
+    else if(si.category() == Pt::SerializationInfo::Array)
+    {
+        formatter.beginArray();
 
-    //TODO arrays should use SerializationInfo Array
+        SerializationInfo::ConstIterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            formatEach(*it, formatter);
+        }
+
+        formatter.finishArray();
+    }
 }
 
 } // namespace Pt
