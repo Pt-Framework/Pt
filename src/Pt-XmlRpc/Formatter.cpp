@@ -34,7 +34,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
-Formatter::Formatter()
+Formatter::Formatter(Xml::XmlWriter& writer)
+: _writer(&writer)
 {
 }
 
@@ -44,18 +45,18 @@ Formatter::~Formatter()
 }
 
 
-void Formatter::begin(std::ostream& out)
+void Formatter::attach(Xml::XmlWriter& writer)
 {
-    _out = &out;
-    *_out << "<param>\n";
+    _writer = &writer;
 }
 
 
 void Formatter::addValue(const std::string& name, const std::string& type,
                          const Pt::String& value, const std::string& id)
 {
-    *_out << "<value><" << type << ">" << value.narrow();
-    *_out << "</" << type << "></value>\n";
+    _writer->writeStartElement( Pt::String::widen("value") );
+    _writer->writeElement( Pt::String::widen(type), value );
+    _writer->writeEndElement();
 }
 
 
@@ -67,44 +68,50 @@ void Formatter::addReference(const std::string& name, const Pt::String& value)
 
 void Formatter::beginArray()
 {
-    *_out << "<value><array><data>\n";
+    _writer->writeStartElement( Pt::String::widen("value") );
+    _writer->writeStartElement( Pt::String::widen("array") );
+    _writer->writeStartElement( Pt::String::widen("data") );
 }
 
 
 void Formatter::finishArray()
 {
-    *_out << "</data></array></value>\n";
+    _writer->writeEndElement();
+    _writer->writeEndElement();
+    _writer->writeEndElement();
 }
 
 
 void Formatter::beginObject(const std::string& name, const std::string& id)
 {
-    *_out << "<value><struct>\n";
+    _writer->writeStartElement( Pt::String::widen("value") );
+    _writer->writeStartElement( Pt::String::widen("struct") );
 }
 
 
 void Formatter::beginMember(const std::string& name)
 {
-    *_out << "<member>\n";
-    *_out << "<name>" << name << "</name>\n";
+    _writer->writeStartElement( Pt::String::widen("member") );
+    _writer->writeElement( Pt::String::widen("name"), Pt::String::widen(name) );
 }
 
 
 void Formatter::finishMember()
 {
-    *_out << "</member>\n";
+    _writer->writeEndElement();
 }
 
 
 void Formatter::finishObject()
 {
-    *_out << "</struct></value>\n";
+    _writer->writeEndElement();
+    _writer->writeEndElement();
 }
 
 
 void Formatter::finish()
 {
-    *_out << "</param>\n";
+    _writer->writeEndElement();
 }
 
 }

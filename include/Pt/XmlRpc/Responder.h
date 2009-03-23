@@ -34,6 +34,7 @@
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/XmlWriter.h>
 #include <Pt/Net/HttpServer.h>
 #include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
@@ -80,6 +81,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
        State _state;
        TextIStream _ts;
        Xml::XmlReader _reader;
+       Xml::XmlWriter _writer;
        Scanner _scanner;
        Formatter _formatter;
        Service* _service;

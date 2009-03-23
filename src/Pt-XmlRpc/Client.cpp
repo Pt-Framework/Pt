@@ -47,6 +47,7 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
 , _request(url)
 , _ts( new Utf8Codec )
 , _reader(_ts)
+, _formatter(_writer)
 , _method(0)
 {
     _client.setSelector(selector);
@@ -63,6 +64,7 @@ Client::Client(const std::string& server, unsigned short port, const std::string
 , _request(url)
 , _ts( new Utf8Codec )
 , _reader(_ts)
+, _formatter(_writer)
 , _method(0)
 {
     connect(_client.headerReceived, *this, &Client::onReplyHeader);
@@ -188,20 +190,21 @@ void Client::prepareRequest(const std::string& name, ISerializer** argv, unsigne
     _request.url(_url);
     _request.setHeader("Content-Type", "text/xml");
 
-    _request.body() << "<?xml version=\"1.0\"?>\n";
-    _request.body() << "<methodCall>\n";
-    _request.body() << "<methodName>" << name << "</methodName>\n";
-    _request.body() << "<params>\n";
+    _writer.begin( _request.body() );
+    _writer.writeStartElement( L"methodCall" );
+    _writer.writeElement( L"methodName", Pt::String::widen(name) );
+    _writer.writeStartElement( L"params" );
 
     for(unsigned n = 0; n < argc; ++n)
     {
-        _formatter.begin( _request.body() );
+        _writer.writeStartElement( L"param" );
         argv[n]->format(_formatter);
-        _request.body() << "</param>\n";
+        _writer.writeEndElement();
     }
 
-    _request.body() << "</params>\n";
-    _request.body() << "</methodCall>\n";
+    _writer.writeEndElement();
+    _writer.writeEndElement();
+    _writer.flush();
 }
 
 

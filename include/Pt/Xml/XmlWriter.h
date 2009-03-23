@@ -40,9 +40,13 @@ namespace Xml {
     class PT_XML_API XmlWriter
     {
         public:
+            XmlWriter();
+
             XmlWriter(std::ostream& os);
 
             ~XmlWriter();
+
+            void begin(std::ostream& os);
 
             void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
 

@@ -33,6 +33,7 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/XmlWriter.h>
 #include <Pt/Net/HttpClient.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
@@ -100,6 +101,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Net::HttpRequest _request;
         TextIStream _ts;
         Xml::XmlReader _reader;
+        Xml::XmlWriter _writer;
         Formatter _formatter;
         Scanner _scanner;
         IRemoteProcedure* _method;

@@ -45,6 +45,7 @@ HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
 , _state(OnBegin)
 , _ts(new Utf8Codec)
 , _reader(_ts)
+, _formatter(_writer)
 , _service(&service)
 , _proc(0)
 , _args(0)
@@ -148,39 +149,46 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request,
 
     reply.setHeader("Content-Type", "text/xml");
 
-    os << "<?xml version=\"1.0\"?>\n"
-          "<methodResponse>\n";
+    _writer.begin(os);
+    _writer.writeStartElement( L"methodResponse" );
 
     try
     {
         ISerializer* rh = _proc->endCall();
 
-        os << "<params>\n";
-
-        _formatter.begin( os );
+        _writer.writeStartElement( L"params" );
+        _writer.writeStartElement( L"param" );
         rh->format(_formatter);
-        os << "</param>\n"
-
-              "</params>\n"
-              "</methodResponse>\n";
+        _writer.writeEndElement(); // param
+        _writer.writeEndElement(); // params
+        _writer.writeEndElement(); // methodResponse
+        _writer.flush();
     }
     catch(const Fault& fault)
     {
-        os << "<fault>\n"
-              "<value>\n"
-              "<struct>\n"
-              "<member>\n"
-              "<name>faultCode</name>\n"
-              "<value><int>" << fault.rc() << "</int></value>\n"
-              "</member>\n"
-              "<member>\n"
-              "<name>faultString</name>\n"
-              "<value><string>" << fault.what() << "</string></value>\n"
-              "</member>\n"
-              "</struct>\n"
-              "</value>\n"
-              "</fault>\n"
-              "</methodResponse>\n";
+        _writer.writeStartElement( L"fault" );
+        _writer.writeStartElement( L"value" );
+        _writer.writeStartElement( L"struct" );
+
+        _writer.writeStartElement( L"member" );
+        _writer.writeElement( L"name", L"faultCode" );
+        _writer.writeStartElement( L"value" );
+        _writer.writeElement( L"int", Pt::convert<Pt::String>(fault.rc()) );
+        _writer.writeEndElement(); // value
+        _writer.writeEndElement(); // member
+
+        _writer.writeStartElement( L"member" );
+        _writer.writeElement( L"name", L"faultString" );
+        _writer.writeStartElement( L"value" );
+        _writer.writeElement( L"string", Pt::String::widen(fault.what()) );
+        _writer.writeEndElement(); // value
+        _writer.writeEndElement(); // member
+
+        _writer.writeEndElement(); // struct
+        _writer.writeEndElement(); // value
+        _writer.writeEndElement(); // fault
+        _writer.writeEndElement(); // methodResponse
+        _writer.flush();
     }
 }
 

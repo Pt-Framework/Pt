@@ -33,6 +33,12 @@ namespace Pt {
 
 namespace Xml {
 
+XmlWriter::XmlWriter()
+: _tos(new Text::Utf8Codec)
+{
+}
+
+
 XmlWriter::XmlWriter(std::ostream& os)
 : _tos(os, new Text::Utf8Codec)
 {
@@ -42,6 +48,13 @@ XmlWriter::XmlWriter(std::ostream& os)
 
 XmlWriter::~XmlWriter()
 {
+}
+
+
+void XmlWriter::begin(std::ostream& os)
+{
+    _tos.attach(os);
+    _tos << Pt::String(L"<?xml version=\"1.0\" encoding=\"UTF-8\"?>") << std::endl;
 }
 
 
@@ -79,6 +92,9 @@ void XmlWriter::writeStartElement(const Pt::String& localName, const Attribute* 
 
 void XmlWriter::writeEndElement()
 {
+    if( _elements.empty() )
+        return;
+
     for(size_t n = 0; n < _elements.size()-1; ++n)
     {
         _tos << Pt::String(L"  ");
