@@ -3,8 +3,11 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 
 PT_XMLRPC_SOURCES = Client.cpp
-                    Scanner.cpp
+                    Fault.cpp
+                    Formatter.cpp
+                    RemoteProcedure.cpp
                     Responder.cpp
+                    Scanner.cpp
                     Service.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;

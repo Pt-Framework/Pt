@@ -26,77 +26,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Fault_h
-#define Pt_XmlRpc_Fault_h
-
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/SerializationInfo.h>
-#include <stdexcept>
-#include <string>
+#include <Pt/XmlRpc/RemoteProcedure.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Fault : public std::exception
+IRemoteProcedure::IRemoteProcedure(Client& client, const char* name)
+: _client(&client)
+, _name(name)
 {
-    public:
-        Fault(const std::string& msg, int rc)
-        : _msg(msg)
-        , _rc(rc)
-        { }
-
-        Fault(const char* msg, int rc);
-
-        Fault()
-        : _rc(0)
-        { }
-
-        ~Fault() throw()
-        { }
-
-        void clear()
-        {
-            _rc = 0;
-            _msg.clear();
-        }
-
-        int rc() const
-        { return _rc; }
-
-        void setRc(int rc)
-        { _rc = rc; }
-
-        void setText(const std::string& msg)
-        { _msg = msg; }
-
-        const std::string& text() const
-        { return _msg; }
-
-        const char* what() const throw()
-        { return _msg.c_str(); }
-
-    private:
-        std::string _msg;
-        int _rc;
-};
-
-
-inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
-{
-    fault.setRc( si.getValue<int>("faultCode") );
-    fault.setText( si.getValue<std::string>("faultString") );
-}
-
-
-inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
-{
-    si.addMember("faultCode") <<= fault.rc();
-    si.addMember("faultString") <<= fault.text();
 }
 
 }
 
 }
-
-#endif

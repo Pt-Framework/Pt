@@ -41,17 +41,23 @@ namespace XmlRpc {
 
 class Fault;
 
-class IRemoteProcedure
+class PT_XMLRPC_API IRemoteProcedure
 {
     friend class Client;
 
     public:
-        IRemoteProcedure(const std::string& name)
-        :_name(name)
+        IRemoteProcedure(Client& client, const std::string& name)
+        : _client(&client)
+        , _name(name)
         { }
+
+        IRemoteProcedure(Client& client, const char* name);
 
         virtual ~IRemoteProcedure()
         { }
+
+        Client* client()
+        { return _client; }
 
         const std::string& name() const
         { return _name; }
@@ -62,6 +68,7 @@ class IRemoteProcedure
         virtual void onFinished() = 0;
 
     private:
+        Client* _client;
         std::string _name;
 };
 
@@ -72,9 +79,8 @@ template <typename R,
 class RemoteProcedure : public IRemoteProcedure
 {
     public:
-        RemoteProcedure(Client& service, const std::string& name)
-        : IRemoteProcedure(name)
-        , _service(&service)
+        RemoteProcedure(Client& client, const std::string& name)
+        : IRemoteProcedure(client, name)
         { }
 
         ~RemoteProcedure()
@@ -87,7 +93,7 @@ class RemoteProcedure : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[2] = { &_a1, &_a2 };
-            _service->beginCall(_r, *this, argv, 2);
+            this->client()->beginCall(_r, *this, argv, 2);
         }
 
         const R& call(const A1& a1, const A2& a2)
@@ -97,7 +103,7 @@ class RemoteProcedure : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[2] = { &_a1, &_a2 };
-            _service->call(_r, *this, argv, 2);
+            this->client()->call(_r, *this, argv, 2);
             return _result;
         }
 
@@ -116,7 +122,6 @@ class RemoteProcedure : public IRemoteProcedure
         { finished.send(_result); }
 
     private:
-        Client* _service;
         R _result;
         Deserializer<R> _r;
         Serializer<A1> _a1;
@@ -129,9 +134,8 @@ template <typename R,
 class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
 {
     public:
-        RemoteProcedure(Client& service, const std::string& name)
-        : IRemoteProcedure(name)
-        , _service(&service)
+        RemoteProcedure(Client& client, const std::string& name)
+        : IRemoteProcedure(client, name)
         { }
 
         ~RemoteProcedure()
@@ -143,7 +147,7 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[1] = { &_a1 };
-            _service->beginCall(_r, *this, argv, 1);
+            this->client()->beginCall(_r, *this, argv, 1);
         }
 
         const R& call(const A1& a1)
@@ -152,7 +156,7 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[1] = { &_a1 };
-            _service->call(_r, *this, argv, 1);
+            this->client()->call(_r, *this, argv, 1);
             return _result;
         }
 
@@ -171,7 +175,6 @@ class RemoteProcedure<R, A1, Pt::Void> : public IRemoteProcedure
         { finished.send(_result); }
 
     private:
-        Client* _service;
         R _result;
         Deserializer<R> _r;
         Serializer<A1> _a1;
@@ -182,9 +185,8 @@ template <typename R>
 class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
 {
     public:
-        RemoteProcedure(Client& service, const std::string& name)
-        : IRemoteProcedure(name)
-        , _service(&service)
+        RemoteProcedure(Client& client, const std::string& name)
+        : IRemoteProcedure(client, name)
         { }
 
         ~RemoteProcedure()
@@ -195,7 +197,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[1] = { 0 };
-            _service->beginCall(_r, *this, argv, 0);
+            this->client()->beginCall(_r, *this, argv, 0);
         }
 
         const R& call()
@@ -203,7 +205,7 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
             _r.begin(_result);
 
             ISerializer* argv[1] = { 0 };
-            _service->call(_r, *this, argv, 0);
+            this->client()->call(_r, *this, argv, 0);
             return _result;
         }
 
@@ -222,7 +224,6 @@ class RemoteProcedure<R, Pt::Void, Pt::Void> : public IRemoteProcedure
         { finished.send(_result); }
 
     private:
-        Client* _service;
         R _result;
         Deserializer<R> _r;
 };

@@ -29,8 +29,8 @@
 #define Pt_XmlRpc_Formatter_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/String.h>
 #include <Pt/Serializer.h>
+#include <Pt/String.h>
 #include <iostream>
 #include <string>
 
@@ -41,65 +41,30 @@ namespace XmlRpc {
 class PT_XMLRPC_API Formatter : public Pt::Formatter
 {
     public:
-        Formatter()
-        {}
+        Formatter();
 
-        ~Formatter()
-        {}
+        ~Formatter();
 
-        void begin(std::ostream& out)
-        {
-            _out = &out;
-            *_out << "<param>\n";
-        }
+        void begin(std::ostream& out);
 
         void addValue(const std::string& name, const std::string& type,
-                      const Pt::String& value, const std::string& id)
-        {
-            *_out << "<value><" << type << ">" << value.narrow();
-            *_out << "</" << type << "></value>\n";
-        }
+                      const Pt::String& value, const std::string& id);
 
-        void addReference(const std::string& name, const Pt::String& value)
-        {
-            throw SerializationError("references not supported");
-        }
+        void addReference(const std::string& name, const Pt::String& value);
 
-        void beginArray()
-        {
-            *_out << "<value><array><data>\n";
-        }
+        void beginArray();
 
-        void finishArray()
-        {
-            *_out << "</data></array></value>\n";
-        }
+        void finishArray();
 
-        void beginObject(const std::string& name, const std::string& id)
-        {
-            *_out << "<value><struct>\n";
-        }
+        void beginObject(const std::string& name, const std::string& id);
 
-        void beginMember(const std::string& name)
-        {
-            *_out << "<member>\n";
-            *_out << "<name>" << name << "</name>\n";
-        }
+        void beginMember(const std::string& name);
 
-        void finishMember()
-        {
-            *_out << "</member>\n";
-        }
+        void finishMember();
 
-        void finishObject()
-        {
-            *_out << "</struct></value>\n";
-        }
+        void finishObject();
 
-        void finish()
-        {
-            *_out << "</param>\n";
-        }
+        void finish();
 
     private:
         std::ostream* _out;

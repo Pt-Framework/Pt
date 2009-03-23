@@ -26,77 +26,86 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Fault_h
-#define Pt_XmlRpc_Fault_h
-
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/SerializationInfo.h>
-#include <stdexcept>
-#include <string>
+#include <Pt/XmlRpc/Formatter.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Fault : public std::exception
+Formatter::Formatter()
 {
-    public:
-        Fault(const std::string& msg, int rc)
-        : _msg(msg)
-        , _rc(rc)
-        { }
-
-        Fault(const char* msg, int rc);
-
-        Fault()
-        : _rc(0)
-        { }
-
-        ~Fault() throw()
-        { }
-
-        void clear()
-        {
-            _rc = 0;
-            _msg.clear();
-        }
-
-        int rc() const
-        { return _rc; }
-
-        void setRc(int rc)
-        { _rc = rc; }
-
-        void setText(const std::string& msg)
-        { _msg = msg; }
-
-        const std::string& text() const
-        { return _msg; }
-
-        const char* what() const throw()
-        { return _msg.c_str(); }
-
-    private:
-        std::string _msg;
-        int _rc;
-};
+}
 
 
-inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
+Formatter::~Formatter()
 {
-    fault.setRc( si.getValue<int>("faultCode") );
-    fault.setText( si.getValue<std::string>("faultString") );
 }
 
 
-inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
+void Formatter::begin(std::ostream& out)
 {
-    si.addMember("faultCode") <<= fault.rc();
-    si.addMember("faultString") <<= fault.text();
+    _out = &out;
+    *_out << "<param>\n";
+}
+
+
+void Formatter::addValue(const std::string& name, const std::string& type,
+                         const Pt::String& value, const std::string& id)
+{
+    *_out << "<value><" << type << ">" << value.narrow();
+    *_out << "</" << type << "></value>\n";
+}
+
+
+void Formatter::addReference(const std::string& name, const Pt::String& value)
+{
+    throw SerializationError("references not supported");
+}
+
+
+void Formatter::beginArray()
+{
+    *_out << "<value><array><data>\n";
+}
+
+
+void Formatter::finishArray()
+{
+    *_out << "</data></array></value>\n";
+}
+
+
+void Formatter::beginObject(const std::string& name, const std::string& id)
+{
+    *_out << "<value><struct>\n";
+}
+
+
+void Formatter::beginMember(const std::string& name)
+{
+    *_out << "<member>\n";
+    *_out << "<name>" << name << "</name>\n";
+}
+
+
+void Formatter::finishMember()
+{
+    *_out << "</member>\n";
+}
+
+
+void Formatter::finishObject()
+{
+    *_out << "</struct></value>\n";
+}
+
+
+void Formatter::finish()
+{
+    *_out << "</param>\n";
 }
 
 }
 
 }
-
-#endif
