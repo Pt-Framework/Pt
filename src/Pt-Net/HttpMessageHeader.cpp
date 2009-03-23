@@ -30,7 +30,7 @@
 #include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>
-
+#include <iostream>
 namespace Pt {
 
 namespace Net {
@@ -93,18 +93,17 @@ std::string HttpMessageHeader::htdateCurrent()
     unsigned msec = 0;
 
     Pt::DateTime dt = Pt::System::Clock::getSystemTime();
-    dt.get(year, month, day,hour, min, sec, msec);
+    dt.get(year, month, day, hour, min, sec, msec);
+    unsigned dayOfWeek = dt.date().dayOfWeek();
 
     static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     char buffer[80];
     sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
-                    wday[day], day, monthn[month], year, hour, min, sec);
+                    wday[dayOfWeek], day, monthn[month], year, hour, min, sec);
 
     return std::string(buffer);
-
-    //TODO: use System::Clock
 }
 
 
