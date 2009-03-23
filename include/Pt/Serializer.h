@@ -130,7 +130,8 @@ class SerializationContext
         template <typename T>
         ISerializer* push(const T& type)
         {
-            Serializer<T>* serializer = new Serializer<T>(type);
+            Serializer<T>* serializer = new Serializer<T>;
+            serializer->begin(type);
             _omap[&type] = serializer;
             _stack.push_back(serializer);
             return serializer;
@@ -146,7 +147,7 @@ class SerializationContext
             return it->second;
         }
 
-        void fixdown()
+        void fixdown(Formatter& formatter)
         {
             std::vector<ISerializer*>::iterator it;
             for(it = _stack.begin(); it != _stack.end(); ++it)
@@ -156,11 +157,7 @@ class SerializationContext
             }
 
             _omap.clear();
-        }
 
-        void format(Formatter& formatter)
-        {
-            std::vector<ISerializer*>::iterator it;
             for(it = _stack.begin(); it != _stack.end(); ++it)
             {
                 (*it)->format(formatter);
@@ -178,11 +175,6 @@ class Formatter
     public:
         virtual ~Formatter()
         { }
-
-        void format(SerializationContext& context)
-        {
-            context.format(*this);
-        }
 
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;

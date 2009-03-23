@@ -215,14 +215,6 @@ void XmlSerializer::flush()
     _formatter.flush();
 }
 
-
-void XmlSerializer::finish()
-{
-    _context.fixdown();
-    _formatter.format(_context);
-    _context.clear();
-}
-
 } // namespace Xml
 
 } // namespace Pt

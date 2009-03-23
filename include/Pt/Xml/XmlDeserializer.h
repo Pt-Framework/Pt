@@ -72,7 +72,8 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                Deserializer<T> deser(type);
+                Deserializer<T> deser;
+                deser.begin(type);
                 this->get(&deser);
                 deser.finish(_context);
             }
