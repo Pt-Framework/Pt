@@ -120,7 +120,31 @@ void XmlWriter::writeElement(const Pt::String& localName, const Attribute* attr,
 
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    _tos << text;
+    static const Pt::Char lt[] = { '&', 'l', 't', ';', 0 };
+    static const Pt::Char gt[] = { '&', 'g', 't', ';', 0 };
+    static const Pt::Char amp[] = { '&', 'a', 'm', 'p', ';', 0 };
+
+    Pt::String::const_iterator it;
+    for(it = text.begin(); it != text.end(); ++it)
+    {
+        switch( it->value() )
+        {
+            case '<':
+                _tos << lt;
+                break;
+
+            case '>':
+                _tos << gt;
+                break;
+
+            case '&':
+                _tos << amp;
+                break;
+
+            default:
+                _tos << *it;
+        }
+    }
 }
 
 

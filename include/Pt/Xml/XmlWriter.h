@@ -27,6 +27,7 @@
 #define PTV_Xml_XmlWriter_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/EntityResolver.h>
 #include <Pt/String.h>
 #include <Pt/Text/TextStream.h>
 #include <stack>
@@ -63,6 +64,7 @@ namespace Xml {
             void endl();
 
         private:
+            EntityResolver _resolver;
             Text::TextOStream _tos;
             std::stack<Pt::String> _elements;
     };
