@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Net/HttpMessageHeader.h>
-//#include <Pt/System/Mutex.h>
+#include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>
 
@@ -81,68 +81,30 @@ bool HttpMessageHeader::keepAlive() const
                 && httpVersionMajor() == 1
                 && httpVersionMinor() >= 1);
 }
-/*
-std::string HttpMessageHeader::htdate(time_t t)
-{
-    struct ::tm tm;
-    gmtime_r(&t, &tm);
-    return htdate(&tm);
-}
 
-std::string HttpMessageHeader::htdate(struct ::tm* tm)
-{
-    static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    char buffer[80];
-
-    sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
-        wday[tm->tm_wday], tm->tm_mday, monthn[tm->tm_mon], tm->tm_year + 1900,
-        tm->tm_hour, tm->tm_min, tm->tm_sec);
-    return buffer;
-}
-*/
 std::string HttpMessageHeader::htdateCurrent()
 {
-    return std::string();
+    int year = 0;
+    unsigned month = 0;
+    unsigned day = 0;
+    unsigned hour = 0;
+    unsigned min = 0;
+    unsigned sec = 0;
+    unsigned msec = 0;
+
+    Pt::DateTime dt = Pt::System::Clock::getSystemTime();
+    dt.get(year, month, day,hour, min, sec, msec);
+
+    static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    char buffer[80];
+    sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
+                    wday[day], day, monthn[month], year, hour, min, sec);
+
+    return std::string(buffer);
+
     //TODO: use System::Clock
-
-    /*static struct ::tm lastTm;
-    static time_t lastDay = 0;
-    static time_t lastTime = 0;
-    static std::string lastHtdate;
-    static Pt::System::Mutex mutex;
-
-    //
-    // we cache the last split tm-struct here, because it is pretty expensive
-    // to calculate the date with gmtime_r.
-    //
-
-    time_t t;
-    time(&t);
-
-    Pt::System::MutexLock lock(mutex);
-
-    if (lastTime != t)
-    {
-        time_t day = t / (24*60*60);
-        if (day != lastDay)
-        {
-            // day differs, we calculate new date.
-            gmtime_r(&t, &lastTm);
-            lastDay = day;
-        }
-
-        lastTm.tm_sec = t % 60;
-        t /= 60;
-        lastTm.tm_min = t % 60;
-        t /= 60;
-        lastTm.tm_hour = t % 24;
-        lastHtdate = htdate(&lastTm);
-        lastTime = t;
-    }
-
-    return lastHtdate;*/
 }
 
 

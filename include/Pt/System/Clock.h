@@ -61,7 +61,7 @@ class PT_SYSTEM_API Clock
         */
         Timespan stop();
 
-        /** @brief Returns the current UTC time
+        /** @brief Returns the system time
         */
         static DateTime getSystemTime();
 
