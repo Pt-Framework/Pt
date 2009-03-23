@@ -50,6 +50,11 @@ Timespan Clock::stop()
     return _impl->stop();
 }
 
+DateTime Clock::getSystemTime()
+{
+    return ClockImpl::getSystemTime();
+}
+
 DateTime Clock::getLocalTime()
 {
     return ClockImpl::getLocalTime();

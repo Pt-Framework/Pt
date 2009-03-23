@@ -92,6 +92,21 @@ Timespan ClockImpl::stop()
 }
 
 
+Pt::DateTime ClockImpl::getSystemTime()
+{
+    SYSTEMTIME systemTime;
+    GetSystemTime(&systemTime);
+
+    return DateTime (    systemTime.wYear,
+                systemTime.wMonth,
+                systemTime.wDay,
+                systemTime.wHour,
+                systemTime.wMinute,
+                systemTime.wSecond,
+                systemTime.wMilliseconds    );
+}
+
+
 Pt::DateTime ClockImpl::getLocalTime()
 {
     SYSTEMTIME systemTime;
