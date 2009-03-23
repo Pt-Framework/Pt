@@ -82,10 +82,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
 
+        void failTest()
+        {
+            throw Pt::Unit::Assertion("test timed out", PT_SOURCEINFO);
+        }
+
         void setUp()
         {
             _loop = new Pt::System::EventLoop();
-            _loop->setIdleTimeout(1000);
+            _loop->setIdleTimeout(2000);
+            connect(_loop->timeout, *this, &PtXmlRpcTest::failTest);
             connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
 
             _server = new Pt::Net::HttpServer(*_loop, "127.0.0.1", 8001);

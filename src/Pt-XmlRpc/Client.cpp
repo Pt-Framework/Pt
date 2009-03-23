@@ -54,6 +54,8 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
     connect(_client.headerReceived, *this, &Client::onReplyHeader);
     connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     connect(_client.replyFinished, *this, &Client::onReplyFinished);
+
+    _formatter.addAlias("bool", "boolean");
 }
 
 
@@ -69,6 +71,8 @@ Client::Client(const std::string& server, unsigned short port, const std::string
 {
     connect(_client.headerReceived, *this, &Client::onReplyHeader);
     connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+
+    _formatter.addAlias("bool", "boolean");
 }
 
 

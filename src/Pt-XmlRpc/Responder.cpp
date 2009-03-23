@@ -50,6 +50,7 @@ HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
 , _proc(0)
 , _args(0)
 {
+    _formatter.addAlias("bool", "boolean");
 }
 
 

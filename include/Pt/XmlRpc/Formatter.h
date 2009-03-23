@@ -32,8 +32,8 @@
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Formatter.h>
 #include <Pt/String.h>
-#include <iostream>
 #include <string>
+#include <map>
 
 namespace Pt {
 
@@ -45,6 +45,8 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         Formatter(Xml::XmlWriter& writer);
 
         ~Formatter();
+
+        void addAlias(const std::string& type, const std::string& alias);
 
         void attach(Xml::XmlWriter& writer);
 
@@ -69,6 +71,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
     private:
         Xml::XmlWriter* _writer;
+        std::map<std::string, std::string> _typemap;
 };
 
 }

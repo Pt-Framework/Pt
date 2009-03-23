@@ -45,6 +45,12 @@ Formatter::~Formatter()
 }
 
 
+void Formatter::addAlias(const std::string& type, const std::string& alias)
+{
+    _typemap[type] = alias;
+}
+
+
 void Formatter::attach(Xml::XmlWriter& writer)
 {
     _writer = &writer;
@@ -55,7 +61,13 @@ void Formatter::addValue(const std::string& name, const std::string& type,
                          const Pt::String& value, const std::string& id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
-    _writer->writeElement( Pt::String::widen(type), value );
+
+    std::map<std::string, std::string>::iterator it = _typemap.find(type);
+    if( it != _typemap.end() )
+        _writer->writeElement( Pt::String::widen(it->second), value );
+    else
+        _writer->writeElement( Pt::String::widen(type), value );
+
     _writer->writeEndElement();
 }
 
