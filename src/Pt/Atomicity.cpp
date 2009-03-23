@@ -27,198 +27,40 @@
  */
 #include "Pt/Atomicity.h"
 
-#if defined (PT_ATOMICITY_WITH_PTHREAD)
+#if defined(PT_ATOMICITY_GCC_ARM)
+    #include "Atomicity.gcc.arm.cpp"
 
-#include <cassert>
-#include <pthread.h>
+#elif defined(PT_ATOMICITY_GCC_MIPS)
+    #include "Atomicity.gcc.mips.cpp"
 
-namespace Pt {
+#elif defined(PT_ATOMICITY_GCC_SPARC)
+    #include "Atomicity.gcc.sparc.cpp"
 
-static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+#elif defined(PT_ATOMICITY_GCC_X86_64)
+    #include "Atomicity.gcc.x86_64.cpp"
 
+#elif defined(PT_ATOMICITY_GCC_X86)
+    #include "Atomicity.gcc.x86.cpp"
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    atomic_t ret = 0;
+#elif defined(PT_ATOMICITY_GCC_AVR32)
+    #include "Atomicity.gcc.avr32.cpp"
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
+#elif defined(PT_ATOMICITY_GCC_PPC)
+    #include "Atomicity.gcc.ppc.cpp"
 
-    ret = val;
+#elif defined(PT_ATOMICITY_WINDOWS)
+    #include "Atomicity.windows.cpp"
 
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-    pthread_cleanup_pop (0);
+#elif defined(PT_ATOMICITY_SUN)
+    #include "Atomicity.sun.cpp"
 
-    return ret;
-}
+#elif defined(PT_ATOMICITY_SYMBIAN)
+    #include "Atomicity.cw.x86.cpp"
 
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    val = n;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-    pthread_cleanup_pop (0);
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& dest)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ++dest;
-    ret = dest;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& dest)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    --dest;
-    ret = dest;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
-{
-    atomic_t old = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int ret = pthread_mutex_lock(&mtx);
-    assert (ret == 0);
-
-    old = dest;
-    if(old == comp)
-    {
-        dest = exch;
-    }
-
-    ret = pthread_mutex_unlock(&mtx);
-    assert (ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return old;
-}
-
-
-void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
-{
-    void* old = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int ret = pthread_mutex_lock(&mtx);
-    assert(ret == 0);
-
-    old = dest;
-    if(old == comp)
-    {
-        dest = exch;
-    }
-
-    ret = pthread_mutex_unlock(&mtx);
-    assert(ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return old;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ret = dest;
-    dest = exch;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return ret;
-}
-
-
-
-void* atomicExchange(void* volatile& dest, void* exch)
-{
-    void* ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ret = dest;
-    dest = exch;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return ret;
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert (thr_ret == 0);
-
-    ret = dest;
-    dest += add;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert (thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-} // namespace Pt
-
+#elif defined(PT_ATOMICITY_PTHREAD)
+    #include "Atomicity.pthread.cpp"
 #else
-
+    #include "Atomicity.generic.cpp"
 #endif
 
 

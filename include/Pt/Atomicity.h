@@ -27,84 +27,99 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifndef PT_ATOMICITY_H
+#define PT_ATOMICITY_H
 
-// build systems can specify asm-style by defining PT_ASM_ATT or PT_ASM_INTEL
-// as well as the CPU type by defining PT_X86, PT_ARM, PT_PPC etc...
-// If these are not defined it is still possible to detect the asm-style
-// and CPU correctly for many common cases.
+#include <Pt/Api.h>
 
-// always use Interlocked-functions when compiling for win32
-#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
+#if defined(PT_ATOMICITY_GCC_ARM)
+    #include <Pt/Atomicity.gcc.arm.h>
 
-    #define PT_ATOMICITY_H <Pt/Atomicity.windows.h>
+#elif defined(PT_ATOMICITY_GCC_MIPS)
+    #include <Pt/Atomicity.gcc.mips.h>
 
-#elif defined(__sun)
+#elif defined(PT_ATOMICITY_GCC_SPARC)
+    #include <Pt/Atomicity.gcc.sparc.h>
 
-    #define PT_ATOMICITY_H <Pt/Api.h>
+#elif defined(PT_ATOMICITY_GCC_X86_64)
+    #include <Pt/Atomicity.gcc.x86_64.h>
+
+#elif defined(PT_ATOMICITY_GCC_X86)
+    #include <Pt/Atomicity.gcc.x86.h>
+
+#elif defined(PT_ATOMICITY_GCC_AVR32)
+    #include <Pt/Atomicity.gcc.avr32.h>
+
+#elif defined(PT_ATOMICITY_GCC_PPC)
+    #include <Pt/Atomicity.gcc.ppc.h>
+
+#elif defined(PT_ATOMICITY_WINDOWS)
+    #include <Pt/Atomicity.windows.h>
+
+#elif defined(PT_ATOMICITY_SUN)
     #include <Pt/Atomicity.sun.h>
 
-// use AT&T-style inline asm
-#elif defined(PT_ASM_ATT) || \
-      defined(__GNUC__) || defined(__xlC__) || \
+#elif defined(PT_ATOMICITY_PTHREAD)
+    #include <Pt/Atomicity.pthread.h>
+
+#elif defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
+    #define PT_ATOMICITY_WINDOWS
+    #include <Pt/Atomicity.windows.h>
+
+#elif defined(__sun)
+    #define CXXTOOLS_ATOMICITY_SUN
+    #include <Pt/Atomicity.sun.h>
+
+#elif defined(__GNUC__) || defined(__xlC__) || \
       defined(__SUNPRO_CC) || defined(__SUNPRO_C)
 
-    #if defined(PT_X86) || \
-        defined (i386) || defined(__i386) || defined (__i386__) || \
+    #if defined (i386) || defined(__i386) || defined (__i386__) || \
         defined(_X86_) || defined(sun386) || defined (_M_IX86)
+        #define PT_ATOMICITY_GCC_X86
+        #include <Pt/Atomicity.gcc.x86.h>
 
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.x86.h>
+    #elif defined(__x86_64__) || defined(__amd64__)
+        #define PT_ATOMICITY_GCC_X86_64
+        #include <Pt/Atomicity.gcc.x86_64.h>
 
-    #elif defined(PT_X86_64) || \
-        defined(__x86_64__) || defined(__amd64__)
+    #elif defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
+        #define PT_ATOMICITY_GCC_ARM
+        #include <Pt/Atomicity.gcc.arm.h>
 
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.x86_64.h>
+    #elif defined (AVR) || defined(__AVR__)
+        #define PT_ATOMICITY_GCC_AVR32
+        #include <Pt/Atomicity.avr32.h>
 
-    #elif defined(PT_ARM) || \
-          defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
-
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.arm.h>
-
-    #elif defined(PT_AVR32) || \
-          defined (AVR) || defined(__AVR__)
-
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.avr32.h>
-
-    #elif defined(PT_PPC) || \
-          defined( _M_PPC  ) || defined( PPC         ) || \
+    #elif defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
           defined( __ppc__ )
+        #define PT_ATOMICITY_GCC_PPC
+        #include <Pt/Atomicity.gcc.ppc.h>
 
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.ppc.h>
-
-    #elif defined(PT_MIPS) || \
-          defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
+    #elif defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
           defined(MIPSEL) || defined(_MIPSEL)
+        #define PT_ATOMICITY_GCC_MIPS
+        #include <Pt/Atomicity.gcc.mips.h>
 
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.mips.h>
-
-    #elif defined(PT_SPARC) || \
-          defined(__sparc__) || defined(sparc) || defined(__sparc) || \
+    #elif defined(__sparc__) || defined(sparc) || defined(__sparc) || \
           defined(__sparcv8) || defined(__sparcv9)
-
-        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.sparc.h>
+        #define PT_ATOMICITY_GCC_SPARC
+        #include <Pt/Atomicity.gcc.sparc.h>
 
     #else
-
-        #define PT_ATOMICITY_H <Pt/Atomicity.generic.h>
+        #define PT_ATOMICITY_PTHREAD
+        #include <Pt/Atomicity.pthread.h>
 
     #endif
 
 #elif defined(__SYMBIAN32__)
-	// x86 32bit inline assembly with Microsoft inline assembly syntax	
-	#define PT_ATOMICITY_H <Pt/Atomicity.cw.x86.h>
+    #define PT_ATOMICITY_SYMBIAN
+    #include <Pt/Atomicity.cw.x86.h>
 
 #else
-    #define PT_ATOMICITY_WITH_PTHREAD
-    #define PT_ATOMICITY_H <Pt/Atomicity.pthread.h>
+    #define PT_ATOMICITY_PTHREAD
+    #include <Pt/Atomicity.pthread.h>
 
 #endif
-
-#include PT_ATOMICITY_H
 
 namespace Pt {
 
@@ -112,57 +127,57 @@ namespace Pt {
 
     Returns the value after employing a memory fence.
 */
-atomic_t atomicGet(volatile atomic_t& val);
+PT_API atomic_t atomicGet(volatile atomic_t& val);
 
 /** @brief Atomically set a value
 
     Sets the value and employs a memory fence.
 */
-void atomicSet(volatile atomic_t& val, atomic_t n);
+PT_API void atomicSet(volatile atomic_t& val, atomic_t n);
 
 /** @brief Increases a value by one as an atomic operation
 
     Returns the resulting incremented value.
 */
-atomic_t atomicIncrement(volatile atomic_t& val);
+PT_API atomic_t atomicIncrement(volatile atomic_t& val);
 
 /** @brief Decreases a value by one as an atomic operation
 
     Returns the resulting decremented value.
 */
-atomic_t atomicDecrement(volatile atomic_t& val);
+PT_API atomic_t atomicDecrement(volatile atomic_t& val);
 
 /** @brief Performs atomic addition of two values
 
     Returns the initial value of the addend.
 */
-atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add);
+PT_API atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add);
 
 /** @brief Performs an atomic compare-and-exchange operation
 
     If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
     value of of \a val is returned.
 */
-atomic_t atomicCompareExchange(volatile atomic_t& val, atomic_t exch, atomic_t comp);
+PT_API atomic_t atomicCompareExchange(volatile atomic_t& val, atomic_t exch, atomic_t comp);
 
 /** @brief Performs an atomic compare-and-exchange operation
 
     If \a ptr is equal to \a comp, \a ptr is replaced by \a exch. The initial
     value of \a ptr is returned.
 */
-void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp);
+PT_API void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp);
 
 /** @brief Performs an atomic exchange operation
 
     Sets \a val to \a exch and returns the initial value of \a val.
 */
-atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch);
+PT_API atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch);
 
 /** @brief Performs an atomic exchange operation
 
     Sets \a dest to \a exch and returns the initial value of \a dest.
 */
-void* atomicExchange(void* volatile& dest, void* exch);
+PT_API void* atomicExchange(void* volatile& dest, void* exch);
 
 }
 

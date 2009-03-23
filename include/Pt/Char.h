@@ -85,29 +85,30 @@ namespace Pt {
             {}
 
             //! Constructs a character using the given wide-char as base for the character value.
-            Char(wchar_t ch)
-            : _value(ch)
-            {}
+            //Char(wchar_t ch)
+            //: _value(ch)
+            //{}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
             Char(short val)
-            : _value( (uint32_t)(val) )
+            : _value( (uint32_t)((unsigned short)val) )
             {}
 
-#ifndef PT_WCHAR_T_IS_USHORT            
+
+//#ifndef PT_WCHAR_T_IS_USHORT
             //! Constructs a character using the given 16-bit integer as base for the character value.
             Char(unsigned short val)
             : _value( (uint32_t)(val) )
             {}
-#endif
-            
+//#endif
+
             //! Constructs a character using the given 32-bit integer as base for the character value.
-            Char(const int32_t& val)
+            Char(const int& val)
             : _value( (uint32_t)(val) )
             {}
 
             //! Constructs a character using the given 32-bit integer as base for the character value.
-            Char(const uint32_t& val)
+            Char(const unsigned int& val)
             : _value(val)
             {}
 
@@ -254,16 +255,16 @@ namespace Pt {
             friend  bool operator<=(const Char& a, const Char& b)
             { return a.value() <= b.value(); }
 
-            friend  bool operator<=(const Char& a, const wchar_t b)
+            friend  bool operator<=(const Char& a, int b)
             { return a.value() <= static_cast<uint32_t>(b); }
-
-            friend  bool operator>=(const Char& a, const wchar_t b)
-            { return a.value() >= static_cast<uint32_t>(b); }
 
             //! @brief Returns $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
             //! @return $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
             friend  bool operator>=(const Char& a, const Char& b)
             { return a.value() >= b.value(); }
+
+            friend  bool operator>=(const Char& a, int b)
+            { return a.value() >= static_cast<uint32_t>(b); }
 
             //! @brief Sums the numeric value of a and the numeric value of b and returns the sum.
             //! @return The sum of the numeric values of a and b.
@@ -300,7 +301,7 @@ namespace Pt {
 
             friend Char operator&(const Char& a, int b)
             { return a.value() & b; }
-            
+
         private:
             Pt::uint32_t _value;
     };
@@ -478,6 +479,24 @@ namespace std {
 
 } // namespace std
 
+namespace Pt {
+
+    inline char Char::narrow(char def) const
+    {
+        if( _value == std::char_traits<Char>::eof() )
+        {
+            return std::char_traits<char>::eof();
+        }
+
+        if( _value <= 0xff )
+        {
+            return (char)_value;
+        }
+
+        return def;
+    }
+
+} // namespace Pt
 
 #include <Pt/Facets.h>
 
@@ -555,22 +574,6 @@ namespace Pt {
 
 
     PT_API Pt::Char toupper(const Pt::Char& ch);
-
-
-    inline char Char::narrow(char def) const
-    {
-        if( _value == std::char_traits<Char>::eof() )
-        {
-            return std::char_traits<char>::eof();
-        }
-
-        if( _value <= 0xff )
-        {
-            return (char)_value;
-        }
-
-        return def;
-    }
 
 } // namespace Pt
 

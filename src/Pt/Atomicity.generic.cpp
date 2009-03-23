@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 by Marc Boris Duerner
+ * Copyright (C) 2006-2007 by Marc Boris Duerner
  * Copyright (C) 2006 by Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
@@ -26,15 +26,79 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_ATOMICINT_GCC_MIPS_H
-#define PT_ATOMICINT_GCC_MIPS_H
-
+#include <Pt/Atomicity.generic.h>
 #include <csignal>
 
 namespace Pt {
 
-typedef std::sig_atomic_t atomic_t;
+atomic_t atomicGet(volatile atomic_t& val)
+{
+    return val;
+}
+
+
+void atomicSet(volatile atomic_t& val, atomic_t n)
+{
+    val = n;
+}
+
+
+atomic_t atomicIncrement(volatile atomic_t& dest)
+{
+    return dest++;
+}
+
+
+atomic_t atomicDecrement(volatile atomic_t& dest)
+{
+    return dest--;
+}
+
+
+atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
+{
+    atomic_t tmp = dest;
+
+    if(dest== comp)
+        dest = exch;
+
+    return tmp;
+}
+
+
+void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
+{
+    void* tmp = dest;
+
+    if(dest== comp)
+        dest = exch;
+
+    return tmp;
+}
+
+
+atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
+{
+    atomic_t tmp = dest;
+    dest = exch;
+    return tmp;
+}
+
+
+void* atomicExchange(void* volatile& dest, void* exch)
+{
+    void* tmp = dest;
+    dest = exch;
+    return tmp;
+}
+
+
+atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
+{
+    atomic_t tmp = dest;
+    dest += add;
+    return tmp;
+}
 
 } // namespace Pt
 
-#endif
