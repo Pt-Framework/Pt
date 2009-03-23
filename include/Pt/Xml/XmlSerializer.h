@@ -220,7 +220,11 @@ class PT_XML_API XmlSerializer
             serializer->setName(name);
         }
 
-        void finish();
+        void finish()
+        {
+            _context.fixdown(_formatter);
+            _context.clear();
+        }
 
         //! @internal
         void flush();
