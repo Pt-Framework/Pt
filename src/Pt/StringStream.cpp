@@ -29,34 +29,14 @@
 
 namespace Pt {
 
-BasicStringStreamBuffer::BasicStringStreamBuffer(std::ios::openmode mode)
+StringStreamBuffer::StringStreamBuffer(std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(mode)
 {
-// When building a DLL under Visual studio, we need to imbue here
-#ifndef PT_WITHOUT_STD_LOCALE
-    //if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
-    //{
-    //    std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-    //    std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-    //    std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-    //    std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-    //}
-#endif
 }
 
-BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios::openmode mode)
+StringStreamBuffer::StringStreamBuffer(const Pt::String& str, std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(str, mode)
 {
-// When building a DLL under Visual studio, we need to imbue here
-#ifndef PT_WITHOUT_STD_LOCALE
-//    if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
-//    {
-//        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-//        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-//        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-//        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-//    }
-#endif
 }
 
 } // namespace Pt
@@ -65,36 +45,39 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
 namespace std {
 
 basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
-{ }
+: basic_iostream<Pt::Char>(0)
+{
+    init(&_buffer);
+}
 
 
 basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(str, mode))
-{ }
+: basic_iostream<Pt::Char>(0)
+{
+    init(&_buffer);
+}
 
 
 basic_stringstream<Pt::Char>::~basic_stringstream()
 {
-    delete _buffer;
 }
 
 
 basic_stringbuf<Pt::Char>* basic_stringstream<Pt::Char>::rdbuf() const
 {
-    return (basic_stringbuf<Pt::Char>*)_buffer;
+    return (basic_stringbuf<Pt::Char>*)(&_buffer);
 }
 
 
 Pt::String basic_stringstream<Pt::Char>::str() const
 {
-    return (_buffer->str());
+    return _buffer.str();
 }
 
 
-void basic_stringstream<Pt::Char>::str(const Pt::String& newStr)
+void basic_stringstream<Pt::Char>::str(const Pt::String& str)
 {
-    _buffer->str(newStr);
+    _buffer.str(str);
 }
 
 } // namespace std

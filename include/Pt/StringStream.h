@@ -35,12 +35,12 @@
 
 namespace Pt {
 
-class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
+class PT_API StringStreamBuffer : public std::basic_stringbuf<Pt::Char>
 {
     public:
-        explicit BasicStringStreamBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
-        explicit BasicStringStreamBuffer(const Pt::String& str,
-                                         std::ios::openmode mode = std::ios::in | std::ios::out);
+        explicit StringStreamBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
+        explicit StringStreamBuffer(const Pt::String& str,
+                                    std::ios::openmode mode = std::ios::in | std::ios::out);
 };
 
 } // namespace Pt
@@ -55,11 +55,11 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
         typedef Pt::Char char_type;
         typedef std::char_traits<Pt::Char> traits_type;
         typedef std::allocator<Pt::Char> allocator_type;
-
         typedef traits_type::int_type int_type;
         typedef traits_type::pos_type pos_type;
         typedef traits_type::off_type off_type;
 
+    public:
         explicit basic_stringstream(ios_base::openmode mode = ios_base::in | ios_base::out);
 
         explicit basic_stringstream(const Pt::String& str,
@@ -71,10 +71,10 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 
         Pt::String str() const;
 
-        void str(const Pt::String& newStr);
+        void str(const Pt::String& str);
 
     private:
-        Pt::BasicStringStreamBuffer* _buffer;
+        Pt::StringStreamBuffer _buffer;
 };
 
 } // namespace std
