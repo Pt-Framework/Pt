@@ -76,7 +76,7 @@ void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatt
     }
     else if(si.category() == Pt::SerializationInfo::Array)
     {
-        formatter.beginArray();
+        formatter.beginArray( si.name(), si.id() );
 
         SerializationInfo::ConstIterator it;
         for(it = si.begin(); it != si.end(); ++it)

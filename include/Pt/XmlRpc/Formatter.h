@@ -55,7 +55,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void addReference(const std::string& name, const Pt::String& value);
 
-        void beginArray();
+        void beginArray(const std::string& name, const std::string& id);
 
         void finishArray();
 

@@ -45,7 +45,7 @@ class Formatter
 
         virtual void addReference(const std::string& name, const Pt::String& value) = 0;
 
-        virtual void beginArray() = 0;
+        virtual void beginArray(const std::string& name, const std::string& id) = 0;
 
         virtual void finishArray() = 0;
 

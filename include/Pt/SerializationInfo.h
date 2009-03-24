@@ -605,8 +605,13 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
     typename std::vector<T>::const_iterator it;
 
     for(it = vec.begin(); it != vec.end(); ++it)
-        si <<= *it;
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
 
+    si.setTypeName("array");
     si.setCategory(SerializationInfo::Array);
 }
 
@@ -629,6 +634,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
         newSi <<= *it;
     }
 
+    si.setTypeName("array");
     si.setCategory(SerializationInfo::Array);
 }
 

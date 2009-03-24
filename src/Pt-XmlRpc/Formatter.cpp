@@ -78,7 +78,7 @@ void Formatter::addReference(const std::string& name, const Pt::String& value)
 }
 
 
-void Formatter::beginArray()
+void Formatter::beginArray(const std::string&, const std::string&)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeStartElement( Pt::String::widen("array") );

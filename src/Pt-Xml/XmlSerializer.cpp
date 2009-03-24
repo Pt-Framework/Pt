@@ -123,13 +123,21 @@ void XmlFormatter::addReference(const std::string& name, const Pt::String& value
 }
 
 
-void XmlFormatter::beginArray()
+void XmlFormatter::beginArray(const std::string& name, const std::string& id)
 {
+    if( ! id.empty() )
+    {
+        Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
+        _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+    }
+    else
+        _writer->writeStartElement( Pt::String::widen( name ) );
 }
 
 
 void XmlFormatter::finishArray()
 {
+    _writer->writeEndElement();
 }
 
 
