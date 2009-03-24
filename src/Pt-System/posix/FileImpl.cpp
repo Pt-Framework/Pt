@@ -50,6 +50,9 @@ namespace System {
 // EROFS  pathname refers to a file on a read-only filesystem.
 void throwErrno(const std::string& path, const Pt::SourceInfo& si)
 {
+    if(errno == EEXIST)
+        throw AccessFailed(path, si);
+
     switch(errno)
     {
         case EIO:
@@ -76,9 +79,6 @@ void throwErrno(const std::string& path, const Pt::SourceInfo& si)
 
         case ENODEV:
             throw DeviceNotFound(path, si);
-
-        case EEXIST:
-            throw AccessFailed(path, si);
 
        case ENOMEM:
            throw std::bad_alloc();
