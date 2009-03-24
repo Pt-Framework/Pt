@@ -78,7 +78,8 @@ const String& NamespaceContext::prefix(const String& namespaceUri) const
 
 void NamespaceContext::addNamespace(const String& elementName, const Namespace& ns)
 {
-    _namespaceScopes.insert( make_pair(elementName, ns) );
+    ScopeMap::value_type elem(elementName, ns);
+    _namespaceScopes.insert(elem);
 }
 
 

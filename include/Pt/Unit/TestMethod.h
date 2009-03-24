@@ -51,7 +51,7 @@ namespace Unit {
             virtual void run()
             {}
 
-            virtual void run(const SerializationInfo* si, unsigned argCount) = 0;
+            virtual void exec(const SerializationInfo* si, unsigned argCount) = 0;
     };
 
 
@@ -77,7 +77,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 8)
                     throw std::invalid_argument("invalid number of arguments");
@@ -138,7 +138,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 5)
                     throw std::invalid_argument("invalid number of arguments");
@@ -189,7 +189,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 4)
                     throw std::invalid_argument("invalid number of arguments");
@@ -236,7 +236,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 3)
                     throw std::invalid_argument("invalid number of arguments");
@@ -279,7 +279,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 2)
                     throw std::invalid_argument("invalid number of arguments");
@@ -318,7 +318,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, unsigned argCount)
+            void exec(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 1)
                     throw std::invalid_argument("invalid number of arguments");
@@ -352,7 +352,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* si, unsigned argCount)
+            void exec(const SerializationInfo* si, unsigned argCount)
             {
                 Pt::Method<void, C>::call();
             }

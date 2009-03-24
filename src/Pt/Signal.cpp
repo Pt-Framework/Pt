@@ -332,7 +332,9 @@ void Signal<const Pt::Event&>::onConnectionClose(const Connection& c)
 
 void Signal<const Pt::Event&>::addRoute(const std::type_info* ti, IEventRoute* route)
 {
-	_routes.insert( std::make_pair(ti, route) );
+    RouteMap::value_type elem(ti, route);
+    _routes.insert( elem );
+	//_routes.insert( std::make_pair(ti, route) );
 }
 
 

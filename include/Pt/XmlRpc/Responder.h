@@ -58,7 +58,7 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
         OnParams,
         OnParam,
         OnParamsEnd,
-        OnMethodCallEnd,
+        OnMethodCallEnd
     };
 
     public:
@@ -70,9 +70,10 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
         std::size_t readBody(std::istream& is);
 
-        void replyError(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
+        void replyError(std::ostream& os, Net::HttpRequest& request,
+                        Net::HttpReply& reply, const std::exception& ex);
 
-        void reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply);
+        void reply(std::ostream& os, Net::HttpRequest& request, Net::HttpReply& reply);
 
     protected:
         void advance(const Pt::Xml::Node& node);

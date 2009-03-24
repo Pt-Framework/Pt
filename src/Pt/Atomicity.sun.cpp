@@ -28,7 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Atomicity.gcc.sun.h>
+#include <Pt/Atomicity.sun.h>
 #include <sys/types.h>
 #include <sys/atomic.h>
 

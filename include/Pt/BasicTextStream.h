@@ -205,7 +205,6 @@ namespace Pt {
             BasicTextBuffer<intern_type, extern_type> _buffer;
     };
 
-
     /** @brief Converts character sequences using a Codec.
 
         This generic stream, which only supports input and output, wraps another input-stream and converts the
@@ -229,7 +228,8 @@ namespace Pt {
         @see std::basic_istream
     */
     template <typename CharT, typename ByteT>
-    class BasicTextStream : public std::basic_iostream<CharT>
+    class BasicTextStream : private virtual InitLocale
+                          , public std::basic_iostream<CharT>
     {
         public:
             typedef ByteT extern_type;

@@ -82,6 +82,7 @@ class PT_XML_API EntityResolver {
 
     private:
         //! Entity map containing entities which are associated to their resolved entity value.
+        typedef std::map<String, String> EntityMap;
         std::map<String, String> _entityMap;
 };
 

@@ -112,7 +112,8 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 }
 
 
-void HttpXmlRpcResponder::replyError(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
+void HttpXmlRpcResponder::replyError(std::ostream& os, Net::HttpRequest& request,
+                                     Net::HttpReply& reply, const std::exception& ex)
 {
     reply.setHeader("Content-Type", "text/xml");
 
@@ -136,7 +137,7 @@ void HttpXmlRpcResponder::replyError(std::ostream& os, Pt::Net::HttpRequest& req
 }
 
 
-void HttpXmlRpcResponder::reply(std::ostream& os, Pt::Net::HttpRequest& request, Pt::Net::HttpReply& reply)
+void HttpXmlRpcResponder::reply(std::ostream& os, Net::HttpRequest& request, Net::HttpReply& reply)
 {
     if( ! _proc )
         throw std::runtime_error("invalid XML-RPC, no method found");

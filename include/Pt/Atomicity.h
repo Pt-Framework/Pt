@@ -66,7 +66,7 @@
     #include <Pt/Atomicity.windows.h>
 
 #elif defined(__sun)
-    #define CXXTOOLS_ATOMICITY_SUN
+    #define PT_ATOMICITY_SUN
     #include <Pt/Atomicity.sun.h>
 
 #elif defined(__GNUC__) || defined(__xlC__) || \

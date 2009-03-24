@@ -45,11 +45,21 @@ EntityResolver::~EntityResolver()
 void EntityResolver::clear()
 {
     _entityMap.clear();
-    _entityMap.insert( std::make_pair(L"lt", L"<")  );
-    _entityMap.insert( std::make_pair(L"gt", L">") );
-    _entityMap.insert( std::make_pair(L"amp", L"&") );
-    _entityMap.insert( std::make_pair(L"apos", L"\'") );
-    _entityMap.insert( std::make_pair(L"quot", L"\"") );
+
+    EntityMap::value_type lt(L"lt", L"<");
+    _entityMap.insert(lt);
+
+    EntityMap::value_type gt(L"gt", L">");
+    _entityMap.insert(gt);
+
+    EntityMap::value_type amp(L"amp", L"&");
+    _entityMap.insert(amp);
+
+    EntityMap::value_type apos(L"apos", L"\'");
+    _entityMap.insert(apos);
+
+    EntityMap::value_type qout(L"quot", L"\"");
+    _entityMap.insert(qout);
 }
 
 

@@ -27,9 +27,7 @@
  */
 #include "Pt/Char.h"
 #include "Pt/String.h"
-#ifdef PT_STLPORT
 #include <sstream>
-#endif
 
 namespace std {
 
@@ -172,7 +170,7 @@ ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfau
     return end;
 }
 
-#if PT_STLPORT
+#if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 //
 // num_put facet
 //
@@ -337,6 +335,8 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f,
 #endif
     return do_put(s, f, fill, val_);    
 }
+
+locale::id num_get<Pt::Char>::id;
 
 #endif
 

@@ -117,7 +117,6 @@ namespace Pt {
             ~TextOStream();
     };
 
-
     /** @brief Specialized class derived from BasicTextStream using Pt::Char and $char$
      * as internal and external type.
      *

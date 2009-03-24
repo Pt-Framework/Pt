@@ -48,7 +48,8 @@ class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
 namespace std {
 
 template<>
-class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
+class PT_API basic_stringstream<Pt::Char> : private virtual Pt::InitLocale
+                                          , public basic_iostream<Pt::Char>
 {
     public:
         typedef Pt::Char char_type;

@@ -97,6 +97,7 @@ namespace Xml {
 
         private:
             //! Multimap that stores the assocations between an element name and its namespace.
+            typedef std::multimap<String, Namespace> ScopeMap;
             std::multimap<String, Namespace> _namespaceScopes;
     };
 

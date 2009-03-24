@@ -68,7 +68,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         OnParam,
         OnParamEnd,
         OnParamsEnd,
-        OnMethodResponseEnd,
+        OnMethodResponseEnd
     };
 
     public:

@@ -331,8 +331,8 @@ namespace std {
                                                char dfault, char* dest) const;
     };
 
-#if PT_STLPORT
-    
+#if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
+
     // When STLport is used we provide a num_put<Pt::Char> facet
     // which will use num_put<wchar_t> internally.
     template <>
@@ -343,7 +343,7 @@ namespace std {
 
         typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
         locale loc;
-        const num_put<wchar_t,iter_type_w>& numput_wchar;
+        const num_put<wchar_t, iter_type_w>& numput_wchar;
 		
 		explicit num_put(size_t refs = 0);
 
@@ -351,7 +351,14 @@ namespace std {
 		iter_type put(iter_type s, ios_base& f, char_type fill, 
             bool val) const;
 #endif
-		
+        iter_type put(iter_type s, ios_base& f, char_type fill,
+            int val) const                   /// NOTE: rouguwave solaris
+        { return this->do_put( s, f, fill, long(val) ); }
+
+        iter_type put(iter_type s, ios_base& f, char_type fill,
+            unsigned val) const              /// NOTE: rouguwave solaris
+        { return this->do_put( s, f, fill, (unsigned long)(val) ); }
+
         iter_type put(iter_type s, ios_base& f, char_type fill, 
             long val) const;
 
@@ -373,12 +380,13 @@ namespace std {
         iter_type put(iter_type s, ios_base& f, char_type fill, 
             long double val) const;
 #endif
-        
+
         iter_type put(iter_type s, ios_base& f, char_type fill, 
             const void* val) const;
 
         static locale::id id;
-        virtual locale::id& __get_id (void) const { return id; }
+
+        virtual locale::id& __get_id (void) const { return id; } // XXX
 
 	protected:
         virtual ~num_put()
@@ -392,7 +400,7 @@ namespace std {
 		
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
 			long val) const;
-        
+
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
 			unsigned long val) const;
 		
@@ -417,7 +425,102 @@ namespace std {
 	};
 
 #endif
-    
+
+#if defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
+  template<> /// NOTE: XXX
+  class PT_API num_get<Pt::Char> : public locale::facet
+  {
+
+    public:
+      typedef Pt::Char char_type;
+      typedef istreambuf_iterator<Pt::Char> iter_type;
+
+      explicit num_get(size_t refs = 0)
+      {}
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, bool&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, long&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, unsigned short&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, unsigned int&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, unsigned long&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, float&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, double&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, long double&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type in, iter_type end, ios_base&,
+                    ios_base::iostate&, void*&) const
+      { return iter_type(); }
+
+      static locale::id id;
+
+      virtual locale::id& __get_id (void) const
+      { return id; } // XXX
+
+    protected:
+/*    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, bool&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, long&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&,
+                             unsigned short&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, 
+                             unsigned int&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, unsigned long&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, float&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, double&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, long double&) const
+    {}
+
+    virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                             ios_base::iostate&, void*&) const
+    {}
+*/
+  };
+#endif
+
 #if (defined _MSC_VER || defined __QNX__)
 
     template<>
@@ -616,21 +719,22 @@ _STLP_MOVE_TO_STD_NAMESPACE
 _STLP_END_NAMESPACE    
     
 #endif
-    
+
 namespace Pt {
 
-static struct PT_API InitLocale
+class InitLocale
 {
+    public:
     InitLocale()
-    {
-        #ifndef PT_WITHOUT_STD_LOCALE
-        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-        #endif
-    }
-} _initLocale;
+        {
+            #ifndef PT_WITHOUT_STD_LOCALE
+            std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+            #endif
+        }
+};
 
 }
 
