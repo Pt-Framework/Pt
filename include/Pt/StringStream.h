@@ -39,7 +39,8 @@ class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
 {
     public:
         explicit BasicStringStreamBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
-        explicit BasicStringStreamBuffer(const Pt::String& str, std::ios::openmode mode = std::ios::in | std::ios::out);
+        explicit BasicStringStreamBuffer(const Pt::String& str,
+                                         std::ios::openmode mode = std::ios::in | std::ios::out);
 };
 
 } // namespace Pt
@@ -48,8 +49,7 @@ class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
 namespace std {
 
 template<>
-class PT_API basic_stringstream<Pt::Char> : private virtual Pt::InitLocale
-                                          , public basic_iostream<Pt::Char>
+class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 {
     public:
         typedef Pt::Char char_type;
@@ -62,7 +62,8 @@ class PT_API basic_stringstream<Pt::Char> : private virtual Pt::InitLocale
 
         explicit basic_stringstream(ios_base::openmode mode = ios_base::in | ios_base::out);
 
-        explicit basic_stringstream(const Pt::String& str, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
+        explicit basic_stringstream(const Pt::String& str,
+                                    std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
 
         virtual ~basic_stringstream();
 
@@ -75,14 +76,6 @@ class PT_API basic_stringstream<Pt::Char> : private virtual Pt::InitLocale
     private:
         Pt::BasicStringStreamBuffer* _buffer;
 };
-
-inline basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
-{ }
-
-inline basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(str, mode))
-{ }
 
 } // namespace std
 

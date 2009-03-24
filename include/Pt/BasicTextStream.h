@@ -228,8 +228,7 @@ namespace Pt {
         @see std::basic_istream
     */
     template <typename CharT, typename ByteT>
-    class BasicTextStream : private virtual InitLocale
-                          , public std::basic_iostream<CharT>
+    class BasicTextStream : public std::basic_iostream<CharT>
     {
         public:
             typedef ByteT extern_type;

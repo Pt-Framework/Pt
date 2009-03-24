@@ -64,20 +64,33 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
 
 namespace std {
 
+basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
+{ }
+
+
+basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(str, mode))
+{ }
+
+
 basic_stringstream<Pt::Char>::~basic_stringstream()
 {
     delete _buffer;
 }
+
 
 basic_stringbuf<Pt::Char>* basic_stringstream<Pt::Char>::rdbuf() const
 {
     return (basic_stringbuf<Pt::Char>*)_buffer;
 }
 
+
 Pt::String basic_stringstream<Pt::Char>::str() const
 {
     return (_buffer->str());
 }
+
 
 void basic_stringstream<Pt::Char>::str(const Pt::String& newStr)
 {

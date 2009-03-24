@@ -25,6 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#ifndef PT_WITHOUT_STD_LOCALE
+
 #include "Pt/Char.h"
 #include "Pt/String.h"
 #include <sstream>
@@ -465,5 +468,7 @@ void  _Initialize_get_float( const ctype<Pt::Char>& ct,
 
 _STLP_MOVE_TO_STD_NAMESPACE
 _STLP_END_NAMESPACE  
+
+#endif
 
 #endif

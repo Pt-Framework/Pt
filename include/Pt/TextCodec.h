@@ -55,9 +55,13 @@ namespace Pt {
      * @see Utf16Codec
      * @see Utf32Codec
      */
+#ifndef PT_WITHOUT_STD_LOCALE
     template <typename I, typename E>
     class TextCodec : public std::codecvt<I, E, Pt::MBState>
-	{
+#else
+    class TextCodec :
+#endif
+    {
         public:
             typedef I InternT;
             typedef E ExternT;
@@ -79,10 +83,10 @@ namespace Pt {
             //! Empty desctructor
             virtual ~TextCodec()
             {}
-            
+
             size_t refs() const
             { return _refs; }
-        
+
         private:
             size_t _refs;
     };

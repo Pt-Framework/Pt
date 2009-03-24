@@ -498,7 +498,9 @@ namespace Pt {
 
 } // namespace Pt
 
+#ifndef PT_WITHOUT_STD_LOCALE
 #include <Pt/Facets.h>
+#endif
 
 namespace Pt {
 

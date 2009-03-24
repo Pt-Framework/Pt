@@ -29,155 +29,13 @@
 #define PT_FACETS_H
 
 #include <Pt/Api.h>
-#include <Pt/String.h>
+#include <locale>
+#include <iosfwd>
 #include <cctype>
 
-
-#ifndef PT_WITHOUT_STD_LOCALE
-
-    #include <locale>
-
-#else
-
-namespace std {
-
-    class locale
-    {
-        public:
-            class facet
-            {
-                public:
-                    facet(size_t refs)
-                        :_refs(refs)
-                    {}
-
-                private:
-                    size_t _refs;
-            };
-
-            class id
-            {
-            };
-
-        private:
-            int _dummy;
-    };
-
-
-    class ctype_base
-    {
-        public:
-            enum {
-                alpha  = 1 << 5,
-                cntrl  = 1 << 2,
-                digit  = 1 << 6,
-                lower  = 1 << 4,
-                print  = 1 << 1,
-                punct  = 1 << 7,
-                space  = 1 << 0,
-                upper  = 1 << 3,
-                xdigit = 1 << 8,
-                alnum  = alpha | digit,
-                graph  = alnum | punct
-            };
-
-            typedef unsigned short mask;
-
-            ctype_base(size_t _refs = 0)
-            { }
-    };
-
-
-    template <typename T>
-    class ctype
-    {
-        public:
-            ctype()
-            { }
-    };
-
-
-    class codecvt_base
-    {
-        public:
-            enum {
-                ok, partial, error, noconv
-            };
-
-            typedef int result;
-
-            codecvt_base(size_t _Refs = 0)
-            {
-            }
-
-            class id
-            {
-            };
-    };
-
-
-    template<class internT, class externT, class stateT>
-    class codecvt : public codecvt_base
-    {
-        public:
-            typedef internT intern_type;
-            typedef externT extern_type;
-            typedef stateT state_type;
-
-            explicit codecvt(size_t refs = 0)
-            : codecvt_base(refs)
-            {}
-
-            result in(stateT& state,
-                        const externT *from, const externT *from_end, const externT *& from_next,
-                        internT *to, internT *to_limit, internT *& to_next) const
-            { return 0; }
-
-            result out(stateT& state,
-                        const internT *from, const internT *from_end, const internT *& from_next,
-                        externT *to, externT *to_limit, externT *& to_next) const
-            { return 0; }
-
-            result unshift(stateT& state, externT to, externT to_end, externT*& to_next) const
-            { return 0; }
-
-            int encoding() const
-            { return 0; }
-
-            bool always_noconv() const
-            { return false; }
-
-            int length(stateT& state, const externT* from, const externT* end, size_t max) const
-            { return 0; }
-
-            int max_length() const
-            { return 0; }
-
-        protected:
-            virtual ~codecvt() = 0;
-
-            virtual result do_in(stateT& state,
-                                    const externT *from, const externT* from_end, const externT*& from_next,
-                                    internT* to, internT* to_limit, internT*& to_next) const = 0;
-
-            virtual result do_out(stateT&,
-                                    const internT* from, const internT* from_end, const internT*& from_next,
-                                    externT* to, externT* to_limit, externT*& to_next) const = 0;
-
-            virtual result do_unshift(stateT& state, externT* to, externT* to_limit, externT*& to_next) const = 0;
-
-            virtual int do_length(const stateT& state, const externT* from, const externT* end, size_t max) const = 0;
-
-            virtual int do_encoding() const = 0;
-
-            virtual bool do_always_noconv() const = 0;
-
-            virtual int do_max_length() const = 0;
-    };
-
-} // namespace std
-
-#endif
+namespace Pt {
+    typedef std::basic_string<Pt::Char> String;
+}
 
 namespace std {
 
@@ -188,18 +46,17 @@ namespace std {
     class PT_API numpunct<Pt::Char> : public locale::facet {
         public:
             typedef Pt::Char char_type;
-            typedef std::basic_string<Pt::Char> string_type;
+            typedef Pt::String string_type;
 
-			// gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-			#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
-			typedef __numpunct_cache<Pt::Char>  __cache_type;
-			#endif
+            // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
+            #if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
+            typedef __numpunct_cache<Pt::Char>  __cache_type;
+            #endif
 
             static locale::id id;
             virtual locale::id& __get_id (void) const { return id; }
 
         public:
-
             explicit numpunct(size_t refs = 0);
 
             virtual ~numpunct();
@@ -226,16 +83,7 @@ namespace std {
             virtual string_type do_falsename() const;
     };
 
-    class ios_base;
-
 #if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
-
-// According to the VC compiler warning, ctype_base is declared as class on WinCE
-#ifdef _WIN32_WCE
-    class PT_API ctype_base;
-#else
-    struct PT_API ctype_base;
-#endif
 
     /** @brief Ctype localization facet
         @ingroup Unicode
@@ -337,18 +185,18 @@ namespace std {
     // which will use num_put<wchar_t> internally.
     template <>
     class PT_API num_put<Pt::Char> : public locale::facet {
-	public:
-		typedef Pt::Char    char_type;
+        public:
+        typedef Pt::Char    char_type;
         typedef ostreambuf_iterator<Pt::Char>   iter_type;
 
         typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
         locale loc;
         const num_put<wchar_t, iter_type_w>& numput_wchar;
-		
-		explicit num_put(size_t refs = 0);
+
+        explicit num_put(size_t refs = 0);
 
 #if !defined (_STLP_NO_BOOL)
-		iter_type put(iter_type s, ios_base& f, char_type fill, 
+        iter_type put(iter_type s, ios_base& f, char_type fill,
             bool val) const;
 #endif
         iter_type put(iter_type s, ios_base& f, char_type fill,
@@ -366,63 +214,63 @@ namespace std {
             unsigned long val) const;
 
 #if defined (_STLP_LONG_LONG)
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
+        iter_type put(iter_type s, ios_base& f, char_type fill,
             long long val) const;
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
-        	unsigned long long val) const;
+        iter_type put(iter_type s, ios_base& f, char_type fill,
+            unsigned long long val) const;
 #endif
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
+        iter_type put(iter_type s, ios_base& f, char_type fill,
             double val) const;
-		
+
 #if !defined (_STLP_NO_LONG_DOUBLE)
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
+        iter_type put(iter_type s, ios_base& f, char_type fill,
             long double val) const;
 #endif
 
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
+        iter_type put(iter_type s, ios_base& f, char_type fill,
             const void* val) const;
 
         static locale::id id;
 
         virtual locale::id& __get_id (void) const { return id; } // XXX
 
-	protected:
+    protected:
         virtual ~num_put()
         {
         }
 
 #if !defined (_STLP_NO_BOOL)
-		virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-			bool val) const;
-#endif
-		
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-			long val) const;
+            bool val) const;
+#endif
 
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-			unsigned long val) const;
-		
+            long val) const;
+
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+            unsigned long val) const;
+
 #if defined (_STLP_LONG_LONG)
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, 
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
             long long val) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, 
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
             unsigned long long val) const;
 #endif
 
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-			double val) const;
-		
+            double val) const;
+
 #if !defined (_STLP_NO_LONG_DOUBLE)
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-			long double  val) const;
+            long double  val) const;
 #endif
-        
+
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
             const void*) const;
-	};
+    };
 
 #endif
 
@@ -701,7 +549,7 @@ namespace std {
 
             virtual int do_max_length() const throw() = 0;
     };
-    
+
 }
 
 // TODO: Move this into STLport?
@@ -716,27 +564,26 @@ void  _Initialize_get_float( const ctype<Pt::Char>& ct,
         Pt::Char* digits);
 
 _STLP_MOVE_TO_STD_NAMESPACE
-_STLP_END_NAMESPACE    
-    
+_STLP_END_NAMESPACE
+
 #endif
 
 namespace Pt {
 
-static std::ios_base::Init ptStreamInit;
+static std::ios_base::Init pt_stream_init;
 
-class InitLocale
+static struct InitLocale
 {
-    public:
     InitLocale()
-        {
-            #ifndef PT_WITHOUT_STD_LOCALE
-            std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-            #endif
-        }
-};
+    {
+        #ifndef PT_WITHOUT_STD_LOCALE
+        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+        #endif
+    }
+} pt_init_locale;
 
 }
 
