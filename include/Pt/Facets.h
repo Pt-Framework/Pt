@@ -722,6 +722,8 @@ _STLP_END_NAMESPACE
 
 namespace Pt {
 
+static std::ios_base::Init ptStreamInit;
+
 class InitLocale
 {
     public:
