@@ -321,7 +321,6 @@ namespace Pt {
 
 } // namespace Pt
 
-
 namespace std {
 
     /// @cond INTERNAL
@@ -363,24 +362,20 @@ namespace std {
         inline static int_type not_eof(const int_type& c);
     };
 
-
     inline void char_traits<Pt::Char>::assign(char_type& c1, const char_type& c2)
     {
         c1 = c2;
     }
-
 
     inline bool char_traits<Pt::Char>::eq(const char_type& c1, const char_type& c2)
     {
         return c1 == c2;
     }
 
-
     inline bool char_traits<Pt::Char>::lt(const char_type& c1, const char_type& c2)
     {
         return c1 < c2;
     }
-
 
     inline int char_traits<Pt::Char>::compare(const char_type* s1, const char_type* s2, size_t n)
     {
@@ -396,7 +391,6 @@ namespace std {
         return 0;
     }
 
-
     inline size_t char_traits<Pt::Char>::length(const char_type* s)
     {
         static const Pt::Char term(0);
@@ -406,7 +400,6 @@ namespace std {
 
         return n;
     }
-
 
     inline const char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::find(const char_type* s, size_t n, const char_type& a)
@@ -420,20 +413,17 @@ namespace std {
         return 0;
     }
 
-
     inline char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, int_type n)
     {
         return (Pt::Char*)std::memmove(s1, s2, n * sizeof(Pt::Char));
     }
 
-
     inline char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::copy(char_type* s1, const char_type* s2, size_t n)
     {
         return (Pt::Char*)std::memcpy(s1, s2, n * sizeof(Pt::Char));
     }
-
 
     inline char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::assign(char_type* s, size_t n, char_type a)
@@ -445,13 +435,11 @@ namespace std {
         return s;
     }
 
-
     inline char_traits<Pt::Char>::char_type
     char_traits<Pt::Char>::to_char_type(const int_type& c)
     {
         return char_type(c);
     }
-
 
     inline char_traits<Pt::Char>::int_type
     char_traits<Pt::Char>::to_int_type(const char_type& c)
@@ -459,18 +447,15 @@ namespace std {
         return c.value();
     }
 
-
     inline bool char_traits<Pt::Char>::eq_int_type(const int_type& c1, const int_type& c2)
     {
         return c1 == c2;
     }
 
-
     inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::eof()
     {
         return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
     }
-
 
     inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_type& c)
     {
@@ -499,6 +484,8 @@ namespace Pt {
 } // namespace Pt
 
 #ifdef PT_WITHOUT_STD_LOCALE
+
+#include <cctype>
 
 namespace std {
 
@@ -537,74 +524,62 @@ namespace Pt {
 
     PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
-
-    inline int isalpha(const Pt::Char& ch)
+    inline int isalpha(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::alpha;
     }
 
-
-    inline int isalnum(const Pt::Char& ch)
+    inline int isalnum(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::alnum;
     }
 
-
-    inline int ispunct(const Pt::Char& ch)
+    inline int ispunct(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::punct;
     }
 
-
-    inline int iscntrl(const Pt::Char& ch)
+    inline int iscntrl(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::cntrl;
     }
-
 
     inline int isdigit(const Pt::Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::digit;
     }
 
-
-    inline int isxdigit(const Pt::Char& ch)
+    inline int isxdigit(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::xdigit;
     }
 
-    inline int isgraph(const Pt::Char& ch)
+    inline int isgraph(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::graph;
     }
-
 
     inline int islower(const Pt::Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::lower;
     }
 
-
-    inline int isupper(const Pt::Char& ch)
+    inline int isupper(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::upper;
     }
 
-
-    inline int isprint(const Pt::Char& ch)
+    inline int isprint(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::print;
     }
 
-
-    inline int isspace(const Pt::Char& ch)
+    inline int isspace(const Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::space;
     }
 
-
     PT_API Pt::Char tolower(const Pt::Char& ch);
-
 
     PT_API Pt::Char toupper(const Pt::Char& ch);
 

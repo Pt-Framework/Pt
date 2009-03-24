@@ -31,6 +31,24 @@
 #include <Pt/Api.h>
 #include <Pt/Char.h>
 
+#ifdef PT_WITHOUT_STD_LOCALE
+
+namespace std {
+
+    class codecvt_base
+	{
+	    public:
+		    enum { ok, partial, error, noconv };
+			typedef int result;
+			
+			virtual ~codecvt_base()
+			{ }
+	};
+	
+}
+
+#endif
+
 namespace Pt {
 
     /**
@@ -55,16 +73,89 @@ namespace Pt {
      * @see Utf16Codec
      * @see Utf32Codec
      */
-#ifndef PT_WITHOUT_STD_LOCALE
+#ifdef PT_WITHOUT_STD_LOCALE
     template <typename I, typename E>
-    class TextCodec : public std::codecvt<I, E, Pt::MBState>
-#else
-    class TextCodec :
-#endif
+    class TextCodec : public std::codecvt_base
     {
         public:
             typedef I InternT;
             typedef E ExternT;
+	    
+		public:
+
+            codecvt_base::result out(Pt::MBState& state, 
+                                     const InternT* from,
+                                     const InternT* from_end, 
+                                     const InternT*& from_next,
+                                     ExternT* to, 
+                                     ExternT* to_end, 
+                                     ExternT*& to_next) const
+            { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
+
+            codecvt_base::result unshift(Pt::MBState& state, 
+                                         ExternT* to, 
+                                         ExternT* to_end,
+                                         ExternT*& to_next) const
+            { return this->do_unshift(state, to, to_end, to_next); }
+
+            codecvt_base::result in(Pt::MBState& state, 
+                                    const ExternT* from,
+                                    const ExternT* from_end, 
+                                    const ExternT*& from_next,
+                                    InternT* to, 
+                                    InternT* to_end, 
+                                    InternT*& to_next) const
+            { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
+
+            int encoding() const
+            { return this->do_encoding(); }
+
+            bool always_noconv() const
+            { return this->do_always_noconv(); }
+
+            int length(Pt::MBState& state, const ExternT* from,
+                       const ExternT* end, size_t max) const
+            { return this->do_length(state, from, end, max); }
+
+            int max_length() const
+            { return this->do_max_length(); }
+	    
+		protected:
+            virtual result do_in(MBState& s, const ExternT* fromBegin,
+                                 const ExternT* fromEnd, const ExternT*& fromNext,
+                                 InternT* toBegin, InternT* toEnd, InternT*& toNext) const = 0;
+
+            virtual result do_out(MBState& s, const InternT* fromBegin,
+                                  const InternT* fromEnd, const InternT*& fromNext,
+                                  ExternT* toBegin, ExternT* toEnd, ExternT*& toNext) const = 0;
+
+            // inheritdoc
+            virtual bool do_always_noconv() const = 0;
+
+            // inheritdoc
+            virtual int do_length(MBState& s, const ExternT* fromBegin, 
+			                      const ExternT* fromEnd, size_t max) const = 0;
+
+            // inheritdoc
+            virtual int do_max_length() const = 0;
+
+            // inheritdoc
+            virtual std::codecvt_base::result do_unshift(Pt::MBState&, 
+			                                             ExternT*, 
+														 ExternT*, 
+														 ExternT*&) const = 0;
+
+            // inheritdoc
+            virtual int do_encoding() const = 0;
+
+#else
+    template <typename I, typename E>
+    class TextCodec : public std::codecvt<I, E, Pt::MBState>
+    {
+        public:
+            typedef I InternT;
+            typedef E ExternT;
+#endif
 
         public:
             /**
@@ -76,8 +167,12 @@ namespace Pt {
              * of deleting the facet. If ref == 1 the locale does not destroy the facet.
              */
             TextCodec(size_t ref = 0)
+#ifdef PT_WITHOUT_STD_LOCALE
+			: _refs(ref)
+#else
             : std::codecvt<InternT, ExternT, MBState>(ref)
             , _refs(ref)
+#endif
             {}
 
             //! Empty desctructor
