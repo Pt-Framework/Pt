@@ -46,6 +46,7 @@ namespace std {
 
 basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
 : basic_iostream<Pt::Char>(0)
+, _buffer(mode)
 {
     init(&_buffer);
 }
@@ -53,6 +54,7 @@ basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
 
 basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
 : basic_iostream<Pt::Char>(0)
+, _buffer(str, mode)
 {
     init(&_buffer);
 }
