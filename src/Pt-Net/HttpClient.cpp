@@ -165,7 +165,9 @@ void HttpClient::beginExecute(const HttpRequest& request)
         }
     }
     else
+    {
         _socket.beginConnect(_server, _port);
+    }
 }
 
 
@@ -221,8 +223,8 @@ void HttpClient::sendRequest(const HttpRequest& request)
 
 void HttpClient::onConnect(TcpSocket& socket)
 {
+    socket.endConnect();
     sendRequest(*_request);
-
     _stream.buffer().beginWrite();
 }
 
