@@ -350,7 +350,7 @@ load_builtins()
       }
 
       {
-          //char * args[] = { "exec", ":", "*", 0 };
+          /* char * args[] = { "exec", ":", "*", 0 }; */
           bind_builtin( "EXEC",
               builtin_exec, 0, 0 );
       }
