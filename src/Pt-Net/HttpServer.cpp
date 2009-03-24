@@ -100,6 +100,7 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
     _stream.buffer().beginRead();
     Pt::connect(_stream.buffer().inputReady, *this, &HttpSocket::onInput);
     Pt::connect(_stream.buffer().outputReady, *this, &HttpSocket::onOutput);
+    Pt::connect(_timer.timeout, *this, &HttpSocket::onTimeout);
 
     selector.add(*this);
 
@@ -222,10 +223,11 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
         if (keepAlive)
         {
             std::string connection = _reply.getHeader("Connection");
-            if (connection != "keep-alive"
-                || (connection.empty()
-                    && _reply.header().httpVersionMajor() == 1
-                    && _reply.header().httpVersionMinor() >= 1))
+
+            if (connection == "close"
+              || (connection.empty()
+                    && (_reply.header().httpVersionMajor() < 1
+                     || _reply.header().httpVersionMinor() < 1)))
             {
                 keepAlive = false;
             }
@@ -236,6 +238,8 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
             _timer.start(_server.keepAliveTimeout());
             _request.clear();
             _reply.clear();
+            _parser.reset(false);
+            _stream.buffer().beginRead();
         }
         else
         {
