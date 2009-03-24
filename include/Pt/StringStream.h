@@ -76,6 +76,14 @@ class PT_API basic_stringstream<Pt::Char> : private virtual Pt::InitLocale
         Pt::BasicStringStreamBuffer* _buffer;
 };
 
+inline basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
+{ }
+
+inline basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(str, mode))
+{ }
+
 } // namespace std
 
 
