@@ -29,13 +29,10 @@
 #define PT_FACETS_H
 
 #include <Pt/Api.h>
+#include <Pt/String.h>
 #include <locale>
 #include <iosfwd>
 #include <cctype>
-
-namespace Pt {
-    typedef std::basic_string<Pt::Char> String;
-}
 
 namespace std {
 
@@ -46,7 +43,7 @@ namespace std {
     class PT_API numpunct<Pt::Char> : public locale::facet {
         public:
             typedef Pt::Char char_type;
-            typedef Pt::String string_type;
+            typedef basic_string<Pt::Char> string_type;
 
             // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
             #if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
