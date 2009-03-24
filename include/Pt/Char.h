@@ -498,8 +498,39 @@ namespace Pt {
 
 } // namespace Pt
 
-#ifndef PT_WITHOUT_STD_LOCALE
-#include <Pt/Facets.h>
+#ifdef PT_WITHOUT_STD_LOCALE
+
+namespace std {
+
+class ctype_base
+{
+    public:
+        enum {
+            alpha  = 1 << 5,
+            cntrl  = 1 << 2,
+            digit  = 1 << 6,
+            lower  = 1 << 4,
+            print  = 1 << 1,
+            punct  = 1 << 7,
+            space  = 1 << 0,
+            upper  = 1 << 3,
+            xdigit = 1 << 8,
+            alnum  = alpha | digit,
+            graph  = alnum | punct
+        };
+
+        typedef unsigned short mask;
+
+        ctype_base(size_t _refs = 0)
+        { }
+};
+
+}
+
+#elif
+
+    #include <Pt/Facets.h>
+
 #endif
 
 namespace Pt {
