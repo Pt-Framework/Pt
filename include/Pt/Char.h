@@ -514,7 +514,7 @@ class ctype_base
 
 }
 
-#elif
+#else
 
     #include <Pt/Facets.h>
 
