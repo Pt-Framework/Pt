@@ -111,6 +111,14 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
 void HttpSocket::onInput(System::StreamBuffer& sb)
 {
     _timer.start(_server.readTimeout());
+
+    if (sb.in_avail() == 0 || sb.device()->eof())
+    {
+        close();
+        delete this;
+        return;
+    }
+
     if ( _responder == 0 )
     {
         _parser.advance(sb);
