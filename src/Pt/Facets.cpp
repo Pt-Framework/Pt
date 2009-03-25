@@ -205,10 +205,17 @@ static num_put<Pt::Char>::iter_type put_val(const num_put<wchar_t,num_put<Pt::Ch
 
 locale::id num_put<Pt::Char>::id;
 
+#if defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 num_put<Pt::Char>::num_put(size_t refs) 
+: locale::facet(refs), numput_wchar( use_facet(loc, (num_put<wchar_t>*) 0) ) /// FIXME: baaaad !!!
+{
+}
+#else
+num_put<Pt::Char>::num_put(size_t refs)
 : locale::facet(refs), numput_wchar(use_facet<num_put<wchar_t,iter_type_w> >(loc))
 {
 }
+#endif
 
 #if !defined (_STLP_NO_BOOL)
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
