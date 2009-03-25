@@ -52,7 +52,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
 {
         friend class ParseEvent;
 
-        class ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
+        class PT_NET_API ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
         {
                 HttpReplyHeader& _replyHeader;
 
