@@ -13,7 +13,7 @@ else if $(VSINSTALLDIR)
 
     if $(VS90COMNTOOLS)
     {
-        TOOLSET = vc9 ;
+        TOOLSET ?= vc9 ;
     }
 }
 else if $(MINGW)
