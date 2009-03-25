@@ -565,6 +565,8 @@ _STLP_END_NAMESPACE
 
 #endif
 
+#ifndef PT_WITHOUT_STD_LOCALE
+
 namespace Pt {
 
 static std::ios_base::Init pt_stream_init;
@@ -573,15 +575,17 @@ static struct PT_API InitLocale
 {
     InitLocale()
     {
-        #ifndef PT_WITHOUT_STD_LOCALE
+        
         std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-        #endif
+        
     }
 } pt_init_locale;
 
 }
+
+#endif
 
 #endif
