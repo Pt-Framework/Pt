@@ -569,7 +569,7 @@ namespace Pt {
 
 static std::ios_base::Init pt_stream_init;
 
-static struct InitLocale
+static struct PT_API InitLocale
 {
     InitLocale()
     {
