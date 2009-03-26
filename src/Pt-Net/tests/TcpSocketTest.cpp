@@ -66,9 +66,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
 
             Pt::Net::TcpSocket client;
-            client.beginConnect("127.0.0.1", 8001);
             connect(client.connected, *this, &TcpSocketTest::onConnect);
             connect(client.outputReady, *this, &TcpSocketTest::onOutput);
+            client.beginConnect("127.0.0.1", 8001);
 
             server.wait(1000);
             client.wait(1000);
@@ -90,9 +90,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 selector.add(*_acceptor);
 
                 Pt::Net::TcpSocket client;
-                client.beginConnect("127.0.0.1", 8000);
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
+                client.beginConnect("127.0.0.1", 8000);
+
                 selector.add(client);
 
                 selector.wait(1000);
