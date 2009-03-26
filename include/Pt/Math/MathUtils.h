@@ -35,9 +35,8 @@
 #include <Pt/Math/Point.h>
 #include <cmath>
 #include <cassert>
-#ifdef __QNX__
 #include <math.h>
-#endif
+
 #ifdef PI
 #undef PI
 #endif

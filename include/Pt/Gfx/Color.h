@@ -29,11 +29,7 @@
 #ifndef Pt_Gfx_Color_h
 #define Pt_Gfx_Color_h
 
-#include <limits>
-#include <assert.h>
-
 #include <Pt/Gfx/GenericAlgo.h>
-
 
 namespace Pt {
 
