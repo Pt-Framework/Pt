@@ -136,11 +136,9 @@ namespace Pt {
              */
             char narrow(char def) const;
 
-            // deprecated
-            static const Char& null()
+            static Char null()
             {
-                static const Char c(0);
-                return c;
+                return Char(0);
             }
 
             /**

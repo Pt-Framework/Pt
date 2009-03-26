@@ -376,9 +376,6 @@ class basic_string< Pt::Char > {
             return *_data;
         }
 
-    public:
-        void invariant();
-
     private:
         Pt::StringData* _data;
     };
