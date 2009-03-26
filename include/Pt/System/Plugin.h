@@ -230,7 +230,8 @@ namespace System {
     template <class IfaceT, typename PluginT >
     void PluginManager<IfaceT, PluginT>::registerPlugin(PluginT& plugin)
     {
-        _plugins.insert( std::make_pair(plugin.feature(), &plugin) );
+        typename PluginMap::value_type p(plugin.feature(), &plugin);
+        _plugins.insert(p);
     }
 
 
@@ -258,7 +259,8 @@ namespace System {
         IfaceT* iface = plugin->create();
         if(iface) 
         {
-            _instances.insert( std::make_pair(iface, plugin) );
+            typename InstanceMap::value_type elem(iface, plugin);
+            _instances.insert( elem );
         }
 
         return iface;

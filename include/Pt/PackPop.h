@@ -35,6 +35,8 @@
     #pragma pack()
 #elif defined(__xlC__)
     #pragma pack(pop)
+#elif defined(__SUNPRO_C) || defined (__SUNPRO_CC)
+    #pragma pack()
 #else
     #error MACRO FOR PACKING HAS NOT BEEN DEFINED!!
 #endif
