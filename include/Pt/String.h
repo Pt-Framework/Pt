@@ -264,7 +264,7 @@ class basic_string< Pt::Char > {
 
         int compare(const Pt::Char* str) const;
 
-        int compare(const char* str) const;
+        int compare(const wchar_t* str) const;
 
         int compare(size_type pos, size_type n, const basic_string& str) const;
 
@@ -405,7 +405,7 @@ class basic_string< Pt::Char > {
     inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) == 0; }
 
-    inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
+    inline bool operator==(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) == 0; }
 
     // operator !=
@@ -418,10 +418,10 @@ class basic_string< Pt::Char > {
     inline bool operator!=(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) != 0; }
 
-    inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
+    inline bool operator!=(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) != 0; }
 
-
+    // operator <
     inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) < 0; }
 
@@ -431,6 +431,10 @@ class basic_string< Pt::Char > {
     inline bool operator<(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) < 0; }
 
+    inline bool operator<(const basic_string<Pt::Char>& a, const wchar_t* b)
+    { return a.compare(b) < 0; }
+
+    // operator >
     inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) > 0; }
 
@@ -438,6 +442,9 @@ class basic_string< Pt::Char > {
     { return b.compare(a) < 0; }
 
     inline bool operator>(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) > 0; }
+
+    inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) > 0; }
 
 } // namespace std

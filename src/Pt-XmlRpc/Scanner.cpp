@@ -46,7 +46,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if(se.name() != "value")
+                if(se.name() != L"value")
                     throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnValueBegin;
@@ -144,7 +144,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if(se.name() != "member")
+                if(se.name() != L"member")
                     throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnMemberBegin;
@@ -181,7 +181,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if(se.name() != "name")
+                if(se.name() != L"name")
                     throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnNameBegin;
@@ -238,7 +238,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if(se.name() != "value")
+                if(se.name() != L"value")
                     throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnValueBegin;
@@ -307,7 +307,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if(se.name() != "data")
+                if(se.name() != L"data")
                     throw SerializationError("invalid XML-RPC parameter");
 
                 _state = OnDataBegin;

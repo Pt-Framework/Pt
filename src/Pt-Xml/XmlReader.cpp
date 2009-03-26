@@ -291,7 +291,7 @@ struct XmlReaderImpl
             if(token.length() < 7)
                 return this;
 
-            if(token == "[CDATA[")
+            if(token == L"[CDATA[")
             {
                 token.clear();
                 return OnCData::instance();
@@ -990,7 +990,7 @@ struct XmlReaderImpl
             if(token.length() < 7)
                 return this;
 
-            if(token == "DOCTYPE")
+            if(token == L"DOCTYPE")
             {
                 return OnDocType::instance();
             }
@@ -1252,17 +1252,17 @@ struct XmlReaderImpl
     {
         virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
         {
-            if(reader._attr.name() == "version")
+            if(reader._attr.name() == L"version")
             {
                 reader._version = reader._attr.value();
             }
-            else if(reader._attr.name() == "encoding")
+            else if(reader._attr.name() == L"encoding")
             {
                 reader._encoding = reader._attr.value();
             }
-            else if(reader._attr.name() == "standalone")
+            else if(reader._attr.name() == L"standalone")
             {
-                if(reader._attr.value() == "true")
+                if(reader._attr.value() == L"true")
                     reader._standalone = true;
             }
 
@@ -1395,7 +1395,7 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            if( reader._procInstr.target() == "xml" )
+            if( reader._procInstr.target() == L"xml" )
                 return OnXmlDeclBeforeAttr::instance();
 
             return OnProcessingInstructionData::instance();

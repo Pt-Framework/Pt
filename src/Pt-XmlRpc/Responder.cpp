@@ -204,7 +204,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != "methodCall" )
+                if( se.name() != L"methodCall" )
                     throw Xml::ParseError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;
@@ -244,7 +244,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != "methodName" )
+                if( ee.name() != L"methodName" )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 _state = OnMethodNameEnd;
@@ -257,7 +257,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != "params" )
+                if( se.name() != L"params" )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 _state = OnParams;
@@ -270,7 +270,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // </params>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != "params" )
+                if( ee.name() != L"params" )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 _state = OnParamsEnd;
@@ -324,7 +324,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // </methodCall>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != "methodCall" )
+                if( ee.name() != L"methodCall" )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 _state = OnMethodCallEnd;
