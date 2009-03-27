@@ -95,7 +95,7 @@ namespace Pt {
             Variant()
             {}
 
-            ~Variant() throw()
+            ~Variant()
             {}
 
             /**
@@ -119,7 +119,7 @@ namespace Pt {
                 and assigns that to tgt.
             */
             template <typename T>
-            void get(T& tgt) const throw()
+            void get(T& tgt) const
             {
                 convert(tgt , _data);
             }
@@ -129,7 +129,7 @@ namespace Pt {
                 and sets this->str().
             */
             template <typename T>
-            void set(const T& value) throw()
+            void set(const T& value)
             {
                 convert(_data, value);
             }
@@ -158,7 +158,7 @@ namespace Pt {
                 value of val.
             */
             template <typename T>
-            inline Variant& operator=(const T& val) throw()
+            inline Variant& operator=(const T& val)
             {
                 this->set(val);
                 return *this;
@@ -167,7 +167,7 @@ namespace Pt {
             /**
                 Deeply copies rhs.
             */
-            inline Variant& operator=(const Variant & rhs) throw()
+            inline Variant& operator=(const Variant & rhs)
             {
                 if(&rhs != this)
                     this->_data = rhs._data;
@@ -264,15 +264,15 @@ namespace Pt {
         var.set(s);
         return is;
     }
-    
-    
+
+
     inline std::basic_ostream<Pt::Char>& operator<<(std::basic_ostream<Pt::Char>& os, const Variant& var)
     {
         os << var.str();
         return os;
     }
-    
-    
+
+
     inline std::basic_istream<Pt::Char>& operator>>(std::basic_istream<Pt::Char>& is, Variant& var)
     {
         Pt::String s;

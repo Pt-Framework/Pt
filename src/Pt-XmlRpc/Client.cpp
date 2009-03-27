@@ -28,7 +28,7 @@
  */
 #include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
-#include "Pt/Xml/ParseError.h"
+#include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
@@ -152,7 +152,7 @@ std::size_t Client::onReplyBody(Net::HttpClient& client)
             }
         }
     }
-    catch(const Xml::ParseError& error)
+    catch(const Xml::XmlError& error)
     {
         _fault.setRc(1);
         _fault.setText( error.what() );

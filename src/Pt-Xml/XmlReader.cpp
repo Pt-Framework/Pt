@@ -33,7 +33,7 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/Xml/Comment.h"
-#include "Pt/Xml/ParseError.h"
+#include "Pt/Xml/XmlError.h"
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/SourceInfo.h"
@@ -183,7 +183,7 @@ struct XmlReaderImpl
 
         void syntaxError(unsigned line)
         {
-            throw ParseError("syntax error", line);
+            throw XmlError("syntax error", line);
         }
     };
 

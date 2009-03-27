@@ -29,7 +29,7 @@
 #include "Pt/XmlRpc/Responder.h"
 #include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Fault.h"
-#include "Pt/Xml/ParseError.h"
+#include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
@@ -89,7 +89,7 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
             }
         }
     }
-    catch(const Xml::ParseError& error)
+    catch(const Xml::XmlError& error)
     {
         _fault.setRc(1);
         _fault.setText( error.what() );
@@ -205,7 +205,7 @@ void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name() != L"methodCall" )
-                    throw Xml::ParseError( "invalid XML-RPC methodCall", _reader.line() );
+                    throw Xml::XmlError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;
             }

@@ -23,37 +23,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_ParseError_h
-#define PTV_Xml_ParseError_h
-
-#include <Pt/Xml/Api.h>
-#include <stdexcept>
+#include "Pt/Xml/XmlError.h"
 
 namespace Pt {
 
 namespace Xml {
 
-//! Exception that is thrown when a parse error occured.
-class PT_XML_API ParseError : public std::runtime_error
+XmlError::XmlError(const char* what, unsigned line)
+: std::runtime_error(what)
+, _line(line)
 {
-    public:
-        /**
-            * @brief Creates a new ParseError object using the given reason and source info.
-            *
-            * @param what The reason of the parse error.
-            * @param info Source info containing information about where the exception occured.
-            */
-        ParseError(const char* what, unsigned line);
-
-        unsigned line() const
-        { return _line; }
-
-    private:
-        unsigned _line;
-};
-
 }
 
-}
+} // namespace Xml
 
-#endif
+} // namespace Pt
