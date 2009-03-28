@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Marc Boris Duerner
+ * Copyright (C) 2006-2008 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,5 +25,52 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "Pt/TextCodec.h"
  
+namespace std {
 
+//
+// codecvt facet for Char/char
+//
+std::locale::id codecvt<Pt::Char, char, Pt::MBState>::id;
+
+#if defined _MSC_VER || __QNX__
+
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+: codecvt_base(ref)
+{}
+
+#else
+
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+: locale::facet(ref)
+{}
+
+#endif
+
+codecvt<Pt::Char, char, Pt::MBState>::~codecvt()
+{}
+
+//
+// codecvt facet for char/char
+//
+std::locale::id codecvt<char, char, Pt::MBState>::id;
+
+#if defined _MSC_VER || __QNX__
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: codecvt_base(ref)
+{}
+
+#else
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: locale::facet(ref)
+{}
+
+#endif
+
+codecvt<char, char, Pt::MBState>::~codecvt()
+{}
+
+} // namespace std

@@ -32,53 +32,52 @@
 #include <Pt/String.h>
 #include <locale>
 #include <iosfwd>
-#include <cctype>
 
 namespace std {
 
-    /** @brief Numpunct localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API numpunct<Pt::Char> : public locale::facet {
-        public:
-            typedef Pt::Char char_type;
-            typedef basic_string<Pt::Char> string_type;
+/** @brief Numpunct localization facet
+    @ingroup Unicode
+*/
+template <>
+class PT_API numpunct<Pt::Char> : public locale::facet {
+    public:
+        typedef Pt::Char char_type;
+        typedef basic_string<Pt::Char> string_type;
 
-            // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-            #if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
-            typedef __numpunct_cache<Pt::Char>  __cache_type;
-            #endif
+        // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
+        #if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
+        typedef __numpunct_cache<Pt::Char>  __cache_type;
+        #endif
 
-            static locale::id id;
-            virtual locale::id& __get_id (void) const { return id; }
+        static locale::id id;
+        virtual locale::id& __get_id (void) const { return id; }
 
-        public:
-            explicit numpunct(size_t refs = 0);
+    public:
+        explicit numpunct(size_t refs = 0);
 
-            virtual ~numpunct();
+        virtual ~numpunct();
 
-            char_type decimal_point() const;
+        char_type decimal_point() const;
 
-            char_type thousands_sep() const;
+        char_type thousands_sep() const;
 
-            string grouping() const;
+        string grouping() const;
 
-            string_type truename() const;
+        string_type truename() const;
 
-            string_type falsename() const;
+        string_type falsename() const;
 
-        protected:
-            virtual char_type do_decimal_point() const;
+    protected:
+        virtual char_type do_decimal_point() const;
 
-            virtual char_type do_thousands_sep() const;
+        virtual char_type do_thousands_sep() const;
 
-            virtual string do_grouping() const;
+        virtual string do_grouping() const;
 
-            virtual string_type do_truename() const;
+        virtual string_type do_truename() const;
 
-            virtual string_type do_falsename() const;
-    };
+        virtual string_type do_falsename() const;
+};
 
 #if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
 
@@ -363,189 +362,9 @@ namespace std {
                              ios_base::iostate&, void*&) const
     {}
 */
-  };
-#endif
+};
 
-#if (defined _MSC_VER || defined __QNX__)
-
-    template<>
-    class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
-
-#else
-
-    template<>
-    class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
-#endif
-
-        public:
-            static locale::id id;
-            virtual locale::id& __get_id (void) const { return id; }
-
-        public:
-            explicit codecvt(size_t ref = 0);
-
-            virtual ~codecvt();
-
-            codecvt_base::result out(Pt::MBState& state, 
-                                     const Pt::Char* from,
-                                     const Pt::Char* from_end, 
-                                     const Pt::Char*& from_next,
-                                     char* to, 
-                                     char* to_end, 
-                                     char*& to_next) const
-            { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
-
-            codecvt_base::result unshift(Pt::MBState& state, 
-                                         char* to, 
-                                         char* to_end,
-                                         char*& to_next) const
-            { return this->do_unshift(state, to, to_end, to_next); }
-
-            codecvt_base::result in(Pt::MBState& state, 
-                                    const char* from,
-                                    const char* from_end, 
-                                    const char*& from_next,
-                                    Pt::Char* to, 
-                                    Pt::Char* to_end, 
-                                    Pt::Char*& to_next) const
-            { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
-
-            int encoding() const
-            { return this->do_encoding(); }
-
-            bool always_noconv() const
-            { return this->do_always_noconv(); }
-
-            int length(Pt::MBState& state, const char* from,
-                       const char* end, size_t max) const
-            { return this->do_length(state, from, end, max); }
-
-            int max_length() const
-            { return this->do_max_length(); }
-
-        protected:
-            virtual codecvt_base::result do_out(Pt::MBState& state, 
-                                                const Pt::Char* from,
-                                                const Pt::Char* from_end, 
-                                                const Pt::Char*& from_next,
-                                                char* to, 
-                                                char* to_end, 
-                                                char*& to_next) const = 0;
-
-            virtual codecvt_base::result do_unshift(Pt::MBState& state, 
-                                                    char* to,
-                                                    char* to_end, 
-                                                    char*& to_next) const = 0;
-
-            virtual codecvt_base::result do_in(Pt::MBState& state,
-                                               const char* from, 
-                                               const char* from_end,
-                                               const char*& from_next, 
-                                               Pt::Char* to, 
-                                               Pt::Char* to_end,
-                                               Pt::Char*& to_next) const = 0;
-
-            virtual int do_encoding() const throw() = 0;
-
-            virtual bool do_always_noconv() const throw() = 0;
-
-            virtual int do_length(Pt::MBState&, 
-                                  const char* from,
-                                  const char* end, 
-                                  size_t max) const = 0;
-
-            virtual int do_max_length() const throw() = 0;
-    };
-
-#if (defined _MSC_VER || defined __QNX__)
-
-    template<>
-    class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base {
-
-#else
-
-    template<>
-    class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public locale::facet {
-#endif
-
-        public:
-            static locale::id id;
-            virtual locale::id& __get_id (void) const { return id; }
-
-        public:
-            explicit codecvt(size_t ref = 0);
-
-            virtual ~codecvt();
-
-            codecvt_base::result out(Pt::MBState& state, 
-                                     const char* from,
-                                     const char* from_end, 
-                                     const char*& from_next,
-                                     char* to, 
-                                     char* to_end, 
-                                     char*& to_next) const
-            { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
-
-            codecvt_base::result unshift(Pt::MBState& state, 
-                                         char* to, 
-                                         char* to_end,
-                                         char*& to_next) const
-            { return this->do_unshift(state, to, to_end, to_next); }
-
-            codecvt_base::result in(Pt::MBState& state, 
-                                    const char* from,
-                                    const char* from_end, 
-                                    const char*& from_next,
-                                    char* to, char* to_end, 
-                                    char*& to_next) const
-            { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
-
-            int encoding() const
-            { return this->do_encoding(); }
-
-            bool always_noconv() const
-            { return this->do_always_noconv(); }
-
-            int length(Pt::MBState& state, const char* from,
-                       const char* end, size_t max) const
-            { return this->do_length(state, from, end, max); }
-
-            int max_length() const
-            { return this->do_max_length(); }
-
-        protected:
-            virtual codecvt_base::result do_out(Pt::MBState& state, 
-                                                const char* from,
-                                                const char* from_end, 
-                                                const char*& from_next,
-                                                char* to, 
-                                                char* to_end, 
-                                                char*& to_next) const = 0;
-
-            virtual codecvt_base::result do_unshift(Pt::MBState& state, 
-                                                    char* to,
-                                                    char* to_end, 
-                                                    char*& to_next) const = 0;
-
-            virtual codecvt_base::result do_in(Pt::MBState& state,
-                                               const char* from, 
-                                               const char* from_end,
-                                               const char*& from_next, 
-                                               char* to, 
-                                               char* to_end,
-                                               char*& to_next) const = 0;
-
-            virtual int do_encoding() const throw() = 0;
-
-            virtual bool do_always_noconv() const throw() = 0;
-
-            virtual int do_length(Pt::MBState&, 
-                                  const char* from,
-                                  const char* end, 
-                                  size_t max) const = 0;
-
-            virtual int do_max_length() const throw() = 0;
-    };
+#endif // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 }
 
@@ -565,8 +384,6 @@ _STLP_END_NAMESPACE
 
 #endif
 
-#ifndef PT_WITHOUT_STD_LOCALE
-
 namespace Pt {
 
 static std::ios_base::Init pt_stream_init;
@@ -585,7 +402,5 @@ static struct PT_API InitLocale
 } pt_init_locale;
 
 }
-
-#endif
 
 #endif

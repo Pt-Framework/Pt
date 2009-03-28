@@ -13,7 +13,6 @@ SharedLibrary Pt : Atomicity.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
-                   Facets.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
                    Settings.cpp
@@ -21,9 +20,9 @@ SharedLibrary Pt : Atomicity.cpp
                    SettingsWriter.cpp
                    Signal.cpp
                    StringStream.cpp
+                   TextCodec.cpp
                    TextStream.cpp
                    Time.cpp
-                   Unicode.cpp
                    Utf8Codec.cpp
                    ;
 

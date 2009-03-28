@@ -57,9 +57,10 @@
 
 #ifdef _WIN32_WCE
     // WinCE does not provide locale-classes
-    #define PT_WITHOUT_STD_LOCALE
+#else
+    #define PT_WITH_STD_LOCALE 1
 #endif
-
+ 
 #if defined(WIN32) || defined(_WIN32)
     // suppress min/max macros from win32 headers
     #ifndef NOMINMAX
