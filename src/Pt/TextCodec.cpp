@@ -26,7 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/TextCodec.h"
- 
+
+#ifdef PT_WITH_STD_LOCALE
+
 namespace std {
 
 //
@@ -74,3 +76,5 @@ codecvt<char, char, Pt::MBState>::~codecvt()
 {}
 
 } // namespace std
+
+#endif
