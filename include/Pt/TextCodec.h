@@ -240,6 +240,7 @@ class codecvt : public std::codecvt_base
     public:
         typedef I InternT;
         typedef E ExternT;
+        typedef S StateT; 
     
     public: 
         codecvt(size_t ref = 0)
@@ -248,7 +249,7 @@ class codecvt : public std::codecvt_base
         virtual ~codecvt()
         { }
         
-        codecvt_base::result out(Pt::MBState& state, 
+        codecvt_base::result out(StateT& state, 
                                  const InternT* from,
                                  const InternT* from_end, 
                                  const InternT*& from_next,
@@ -257,13 +258,13 @@ class codecvt : public std::codecvt_base
                                  ExternT*& to_next) const
         { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
 
-        codecvt_base::result unshift(Pt::MBState& state, 
+        codecvt_base::result unshift(StateT& state, 
                                      ExternT* to, 
                                      ExternT* to_end,
                                      ExternT*& to_next) const
         { return this->do_unshift(state, to, to_end, to_next); }
 
-        codecvt_base::result in(Pt::MBState& state, 
+        codecvt_base::result in(StateT& state, 
                                 const ExternT* from,
                                 const ExternT* from_end, 
                                 const ExternT*& from_next,
@@ -278,7 +279,7 @@ class codecvt : public std::codecvt_base
         bool always_noconv() const
         { return this->do_always_noconv(); }
 
-        int length(Pt::MBState& state, const ExternT* from,
+        int length(StateT& state, const ExternT* from,
                    const ExternT* end, size_t max) const
         { return this->do_length(state, from, end, max); }
 
@@ -286,22 +287,22 @@ class codecvt : public std::codecvt_base
         { return this->do_max_length(); }
     
     protected:
-        virtual result do_in(MBState& s, const ExternT* fromBegin,
+        virtual result do_in(StateT& s, const ExternT* fromBegin,
                              const ExternT* fromEnd, const ExternT*& fromNext,
                              InternT* toBegin, InternT* toEnd, InternT*& toNext) const = 0;
 
-        virtual result do_out(MBState& s, const InternT* fromBegin,
+        virtual result do_out(StateT& s, const InternT* fromBegin,
                               const InternT* fromEnd, const InternT*& fromNext,
                               ExternT* toBegin, ExternT* toEnd, ExternT*& toNext) const = 0;
 
         virtual bool do_always_noconv() const = 0;
 
-        virtual int do_length(MBState& s, const ExternT* fromBegin, 
+        virtual int do_length(StateT& s, const ExternT* fromBegin, 
                               const ExternT* fromEnd, size_t max) const = 0;
 
         virtual int do_max_length() const = 0;
 
-        virtual std::codecvt_base::result do_unshift(Pt::MBState&, 
+        virtual std::codecvt_base::result do_unshift(StateT&, 
                                                      ExternT*, 
                                                      ExternT*, 
                                                      ExternT*&) const = 0;
