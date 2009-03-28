@@ -245,7 +245,7 @@ class codecvt : public std::codecvt_base
         codecvt(size_t ref = 0)
         {}
         
-        virtual ~codecvt_base()
+        virtual ~codecvt()
         { }
         
         codecvt_base::result out(Pt::MBState& state, 
