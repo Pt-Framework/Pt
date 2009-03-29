@@ -52,11 +52,11 @@ string numpunct<Pt::Char>::grouping() const
 { return this->do_grouping(); }
 
 
-Pt::String  numpunct<Pt::Char>::truename() const
+Pt::String numpunct<Pt::Char>::truename() const
 { return this->do_truename(); }
 
 
-Pt::String  numpunct<Pt::Char>::falsename() const
+Pt::String numpunct<Pt::Char>::falsename() const
 { return this->do_falsename(); }
 
 
@@ -84,145 +84,6 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
     static const Pt::Char falsename[] = {'f', 'a', 'l', 's', 'e', '\0'};
     return falsename;
 }    
-    
-//
-// ctype facet
-//
-std::locale::id ctype<Pt::Char>::id;
-
-#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
-
-ctype<Pt::Char>::ctype(size_t refs)
-: ctype_base(refs)
-{ }
-
-#else
-
-ctype<Pt::Char>::ctype(size_t refs)
-: locale::facet(refs)
-{ }
-
-#endif
-
-
-ctype<Pt::Char>::~ctype()
-{
-}
-
-
-bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
-{
-    return m == ctypeMask(c);
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) const
-{
-    for( ; begin < end; ++begin)
-    {
-        *vec = ctypeMask(*begin);
-        ++vec;
-    }
-
-    return end;
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const
-{
-    while( begin != end && !is(m,*begin))
-    {
-        ++begin;
-    }
-
-    return begin;
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const
-{
-    while( begin != end && is(m,*begin))
-    {
-        ++begin;
-    }
-
-    return begin;
-}
-
-
-Pt::Char
-ctype<Pt::Char>::do_toupper(Pt::Char ch) const
-{
-    return toupper(ch);
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const
-{
-    for(; begin < end; ++begin)
-    {
-        *begin = do_toupper(*begin);
-    }
-
-    return end;
-}
-
-
-Pt::Char
-ctype<Pt::Char>::do_tolower(Pt::Char ch) const
-{
-    return tolower(ch);
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const
-{
-    for(; begin < end; ++begin) {
-        *begin = do_tolower(*begin);
-    }
-
-    return end;
-}
-
-
-Pt::Char ctype<Pt::Char>::do_widen(char ch) const
-{
-    return Pt::Char(ch);
-}
-
-
-const char* ctype<Pt::Char>::do_widen(const char* begin, const char* end, Pt::Char* dest) const
-{
-    for(const char* cur = begin; cur < end; ++cur) {
-        *dest = do_widen(*cur);
-        ++dest;
-    }
-
-    return end;
-}
-
-
-char ctype<Pt::Char>::do_narrow(Pt::Char ch, char dfault) const
-{
-    return ch.narrow(dfault);
-}
-
-
-const Pt::Char*
-ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const
-{
-    for(const Pt::Char* cur = begin; cur < end; ++cur) {
-        *dest = do_narrow(*cur, dfault);
-        ++dest;
-    }
-
-    return end;
-}
 
 #if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 //
@@ -372,22 +233,23 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f,
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
                                                        const void* val) const
 {
-    // Note:
-    // The STLport internal routine for serializing a pointer 
-    // performs hexadecimal conversion i.e. the result is a hexadecimal string.
-    // The routines for deserializing does NOT expect a hexadecimal string
-    // Is this a bug in STLport?
-    // 
-    // Here we force a numerical conversion because we don't provide a num_get
-    // facet where we could force hexadecimal deserialization.
-    
-    // force writing with hexadecimal value
-    //ios_base::fmtflags flags = f.flags();
-    //f.setf(ios_base::hex, ios_base::basefield);
-    //f.setf(ios_base::showbase);	
-    //iter_type result = put_val<size_t>(numput_wchar, s, f, fill, val_);
-    //f.flags(flags);
-    //return result;
+
+// Note:
+// The STLport internal routine for serializing a pointer 
+// performs hexadecimal conversion i.e. the result is a hexadecimal string.
+// The routines for deserializing does NOT expect a hexadecimal string
+// Is this a bug in STLport?
+// 
+// Here we force a numerical conversion because we don't provide a num_get
+// facet where we could force hexadecimal deserialization.
+
+// force writing with hexadecimal value
+//ios_base::fmtflags flags = f.flags();
+//f.setf(ios_base::hex, ios_base::basefield);
+//f.setf(ios_base::showbase);	
+//iter_type result = put_val<size_t>(numput_wchar, s, f, fill, val_);
+//f.flags(flags);
+//return result;
 
 #if defined (_STLP_LONG_LONG)
     long long val_ = reinterpret_cast<long long>(val);

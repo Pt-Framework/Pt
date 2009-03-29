@@ -30,7 +30,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <locale>
 #include <iosfwd>
 
 namespace std {
@@ -78,102 +77,6 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 
         virtual string_type do_falsename() const;
 };
-
-#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
-
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype< Pt::Char > : public ctype_base {
-
-#else
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
-
-#endif
-
-        public:
-            typedef ctype_base::mask mask;
-
-            static locale::id id;
-            virtual locale::id& __get_id (void) const { return id; }
-
-        public:
-            explicit ctype(size_t refs = 0);
-
-            virtual ~ctype();
-
-            bool is(mask m, Pt::Char c) const
-            { return this->do_is(m, c); }
-
-            const Pt::Char* is(const Pt::Char *lo, const Pt::Char *hi, mask *vec) const
-            { return this->do_is(lo, hi, vec); }
-
-            const Pt::Char* scan_is(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-            { return this->do_scan_is(m, lo, hi); }
-
-            const Pt::Char* scan_not(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-            { return this->do_scan_not(m, lo, hi); }
-
-            Pt::Char toupper(Pt::Char c) const
-            { return this->do_toupper(c); }
-
-            const Pt::Char* toupper(Pt::Char *lo, const Pt::Char* hi) const
-            { return this->do_toupper(lo, hi); }
-
-            Pt::Char tolower(Pt::Char c) const
-            { return this->do_tolower(c); }
-
-            const Pt::Char* tolower(Pt::Char* lo, const Pt::Char* hi) const
-            { return this->do_tolower(lo, hi); }
-
-            Pt::Char widen(char c) const
-            { return this->do_widen(c); }
-
-            const char* widen(const char* lo, const char* hi, Pt::Char* to) const
-            { return this->do_widen(lo, hi, to); }
-
-            char narrow(Pt::Char c, char dfault) const
-            { return this->do_narrow(c, dfault); }
-
-            const Pt::Char* narrow(const Pt::Char* lo, const Pt::Char* hi,
-                                   char dfault, char *to) const
-            { return this->do_narrow(lo, hi, dfault, to); }
-
-        protected:
-            virtual bool do_is(mask m, Pt::Char c) const;
-
-            virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
-                                           mask* vec) const;
-
-            virtual const Pt::Char* do_scan_is(mask m, const Pt::Char* lo,
-                                                const Pt::Char* hi) const;
-
-            virtual const Pt::Char* do_scan_not(mask m, const Pt::Char* lo,
-                                                 const Pt::Char* hi) const;
-
-            virtual Pt::Char do_toupper(Pt::Char) const;
-
-            virtual const Pt::Char* do_toupper(Pt::Char* lo, const Pt::Char* hi) const;
-
-            virtual Pt::Char do_tolower(Pt::Char) const;
-
-            virtual const Pt::Char* do_tolower(Pt::Char* lo, const Pt::Char* hi) const;
-
-            virtual Pt::Char do_widen(char) const;
-
-            virtual const char* do_widen(const char* lo, const char* hi,
-                                          Pt::Char* dest) const;
-
-            virtual char do_narrow(Pt::Char, char dfault) const;
-
-            virtual const Pt::Char* do_narrow(const Pt::Char* lo, const Pt::Char* hi,
-                                               char dfault, char* dest) const;
-    };
 
 #if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
