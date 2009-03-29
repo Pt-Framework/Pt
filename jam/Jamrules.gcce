@@ -7,6 +7,7 @@ if ! [ GLOB $(EPOCROOT)\\Epoc32\\include : e32base.h ]
 	Exit "Please specify EPOCROOT" ;
 }
 
+# set path=C:\Program Files\CSL Arm Toolchain\libexec\gcc\arm-none-symbianelf\3.4.3;%path%
 TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
 
 if ! [ GLOB $(TOOLSET_ROOT)\\bin : arm-none-symbianelf-gcc.exe ] 
