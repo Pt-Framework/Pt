@@ -29,16 +29,6 @@
 
 namespace Pt {
 
-SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
-: std::logic_error(msg + si)
-{ }
-
-
-SerializationError::SerializationError(const char* msg)
-: std::logic_error(msg)
-{ }
-
-
 SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)

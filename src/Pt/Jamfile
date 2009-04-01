@@ -13,6 +13,7 @@ SharedLibrary Pt : Atomicity.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
+                   SerializationError.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
                    Settings.cpp

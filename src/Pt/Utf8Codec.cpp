@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/Utf8Codec.h"
 
 #define halfShift uint32_t(10)
 #define halfBase Pt::Char(0x0010000)

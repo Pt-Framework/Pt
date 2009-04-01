@@ -28,33 +28,14 @@
 #ifndef Pt_SerializationInfo_h
 #define Pt_SerializationInfo_h
 
+#include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/Convert.h>
-#include <Pt/NonCopyable.h>
+#include <Pt/SerializationError.h>
 #include <vector>
 #include <typeinfo>
 
 namespace Pt {
-
-/** @brief Error during serialization of a type
-
-    This Exception indicates a error during serialization caused by
-    missing or invalid object attributes.
-*/
-class PT_API SerializationError : public std::logic_error
-{
-    public:
-        /** @brief Construct with message and source-info
-        */
-        SerializationError(const std::string& msg, const SourceInfo& si);
-
-        SerializationError(const char* msg);
-
-        //! @brief Destructor
-        ~SerializationError() throw()
-        {}
-};
-
 
 class PT_API SerializationInfo
 {
