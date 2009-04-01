@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-void IDeserializer::fixupEach(void* obj, Pt::SerializationInfo& si, DeserializationContext& ctx)
+void IDeserializer::fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, DeserializationContext& ctx)
 {
     Pt::SerializationInfo::Iterator it;
     for(it = si.begin(); it != si.end(); ++it)
@@ -37,15 +37,80 @@ void IDeserializer::fixupEach(void* obj, Pt::SerializationInfo& si, Deserializat
         if(it->category() == Pt::SerializationInfo::Reference)
         {
             //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->toValue<std::string>() << std::endl;
-
-            ctx.addFixup( it->toValue<std::string>(), it->fixupAddr() );
+            ctx.addFixup( it->toValue<std::string>(), it->fixupAddr(), it->fixupInfo() );
         }
     }
 
     if( ! si.id().empty() )
     {
-        ctx.addObject(si.id(), obj);
+        ctx.addObject( si.id(), deser->target(), deser->targetType() );
     }
 }
+
+
+DeserializationContext::DeserializationContext()
+{
+}
+
+
+DeserializationContext::~DeserializationContext()
+{
+}
+
+
+void DeserializationContext::addObject(const std::string& id, void* obj, const std::type_info& fixupInfo)
+{
+    FixupInfo fi;
+    fi.address = obj;
+    fi.type = &fixupInfo;
+    _targets[id] = fi;
+}
+
+
+void DeserializationContext::addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo)
+{
+    FixupInfo fi;
+    fi.address = obj;
+    fi.type = &fixupInfo;
+    _pointers[id] = fi;
+}
+
+
+void DeserializationContext::clear()
+{
+    _targets.clear();
+    _pointers.clear();
+}
+
+
+void DeserializationContext::fixup()
+{
+    std::map<std::string, FixupInfo>::iterator it;
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        void* fixme = it->second.address;
+        const std::type_info* fixupType = it->second.type;
+        std::string id = it->first;
+        void* target = _targets[id].address;
+        const std::type_info* targetType = _targets[id].type ;
+
+        //std::cerr << "FIXING: " << fixme << " to " << target << std::endl;
+        bool fixupAllowed = this->checkFixup(*fixupType, *targetType);
+        if( ! fixupAllowed )
+            throw SerializationError("reference fixup failed, type mismatch");
+
+        void** vp =(void**)(fixme);
+        *vp = target;
+    }
+
+    clear();
+}
+
+
+bool DeserializationContext::checkFixup(const std::type_info& from, const std::type_info& to)
+{
+    return from == to;
+}
+
 
 } // namespace Pt

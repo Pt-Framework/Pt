@@ -104,67 +104,34 @@ class Serializer : public ISerializer
 };
 
 
-class SerializationContext
+class PT_API SerializationContext
 {
     public:
-        SerializationContext()
-        {}
+        SerializationContext();
 
-        virtual ~SerializationContext()
-        {
-            this->clear();
-        }
+        virtual ~SerializationContext();
 
-        void clear()
-        {
-            _omap.clear();
-
-            std::vector<ISerializer*>::iterator it;
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                delete *it;
-            }
-            _stack.clear();
-        }
+        void clear();
 
         template <typename T>
-        ISerializer* push(const T& type)
+        ISerializer* begin(const T& type)
         {
             Serializer<T>* serializer = new Serializer<T>;
             serializer->begin(type);
-            _omap[&type] = serializer;
-            _stack.push_back(serializer);
+            this->do_begin(&type, serializer);
             return serializer;
         }
 
-        ISerializer* find(const void* p) const
-        {
-            std::map<const void*, ISerializer*>::const_iterator it;
-            it = _omap.find(p);
-            if(it == _omap.end())
-                return 0;
+        //TODO:
+        // void begin(ISerializer& serializer);
 
-            return it->second;
-        }
+        ISerializer* find(const void* p) const;
 
-        void fixdown(Formatter& formatter)
-        {
-            std::vector<ISerializer*>::iterator it;
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                ISerializer* serializer = *it;
-                serializer->fixdown(*this);
-            }
-
-            _omap.clear();
-
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                (*it)->format(formatter);
-            }
-        }
+        void fixdown(Formatter& formatter);
 
     private:
+        void do_begin(const void* target, ISerializer* serializer);
+
         std::map<const void*, ISerializer*> _omap;
         std::vector<ISerializer*> _stack;
 };

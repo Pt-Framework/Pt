@@ -216,7 +216,7 @@ class PT_XML_API XmlSerializer
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            ISerializer* serializer = _context.push(type);
+            ISerializer* serializer = _context.begin(type);
             serializer->setName(name);
         }
 

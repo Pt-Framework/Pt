@@ -69,8 +69,10 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                IDeserializer* deser = _context.push(type);
-                this->get(deser);
+                Deserializer<T> deser;
+                deser.begin(type);
+                this->get(&deser);
+                deser.fixup(_context);
             }
 
             void finish()
