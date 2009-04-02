@@ -26,10 +26,6 @@
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/String.h"
 
-#include <iostream>
-using namespace std;
-
-
 namespace Pt {
 
 namespace Xml {

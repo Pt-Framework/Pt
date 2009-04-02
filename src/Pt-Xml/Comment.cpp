@@ -25,10 +25,6 @@
  */
 #include "Pt/Xml/Comment.h"
 
-#include <iostream>
-using namespace std;
-
-
 namespace Pt {
 
 namespace Xml {
@@ -37,7 +33,6 @@ Comment::Comment(const String& text)
 : Node(Node::Comment)
 , _text(text)
 {
-
 }
 
 

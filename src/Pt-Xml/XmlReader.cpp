@@ -26,7 +26,6 @@
 #include "Pt/Xml/XmlReader.h"
 #include <Pt/Xml/EndDocument.h>
 #include "Pt/Xml/EntityResolver.h"
-#include <Pt/Xml/XmlDeclaration.h>
 #include <Pt/Xml/DocTypeDeclaration.h>
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"

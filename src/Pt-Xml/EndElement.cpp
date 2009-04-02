@@ -25,10 +25,6 @@
  */
 #include "Pt/Xml/EndElement.h"
 
-#include <iostream>
-using namespace std;
-
-
 namespace Pt {
 
 namespace Xml {

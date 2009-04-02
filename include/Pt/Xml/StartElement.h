@@ -23,18 +23,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Xml_StartElement_h
-#define Xml_StartElement_h
+#ifndef Pt_Xml_StartElement_h
+#define Pt_Xml_StartElement_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/String.h>
-
 #include <list>
-#include <iostream>
-
 
 namespace Pt {
 

@@ -23,12 +23,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_XmlWriter_h
-#define PTV_Xml_XmlWriter_h
+#ifndef PT_Xml_XmlWriter_h
+#define PT_Xml_XmlWriter_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <Pt/Text/TextStream.h>
+#include <Pt/TextStream.h>
 #include <stack>
 
 namespace Pt {
@@ -67,7 +67,7 @@ namespace Xml {
             void endl();
 
         private:
-            Text::TextOStream _tos;
+            TextOStream _tos;
             std::stack<Pt::String> _elements;
     };
 

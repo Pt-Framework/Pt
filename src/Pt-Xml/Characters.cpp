@@ -24,12 +24,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/Characters.h"
-using namespace Pt;
-using namespace Pt::Xml;
 
+namespace Pt {
+
+namespace Xml {
 
 Characters::Characters(const String& content)
-: Node(Node::Characters), _content(content) {
+: Node(Node::Characters), _content(content)
+{
 
 }
 
@@ -70,4 +72,6 @@ bool Characters::operator==(const Node& node) const
     return ( chars->content() == this->content() );
 }
 
+}
 
+}

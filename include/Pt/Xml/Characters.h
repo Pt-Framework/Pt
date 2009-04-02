@@ -23,13 +23,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_Characters_h
-#define PTV_Xml_Characters_h
+#ifndef Pt_Xml_Characters_h
+#define Pt_Xml_Characters_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/String.h>
 #include <Pt/Xml/Node.h>
-
+#include <Pt/String.h>
 
 namespace Pt {
 

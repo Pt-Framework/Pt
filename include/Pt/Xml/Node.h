@@ -23,11 +23,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_Node_h
-#define PTV_Xml_Node_h
+#ifndef PT_Xml_Node_h
+#define PT_Xml_Node_h
 
 #include <Pt/Xml/Api.h>
-
 
 namespace Pt {
 
@@ -68,8 +67,6 @@ namespace Pt {
                     EndElement = 5,
                     //! Parsed content of a tag's body (see Characters)
                     Characters = 6,
-                    //! Unparsed content of an XML document (see CData)
-                    CData,
                     //! Comment (see Comment)
                     Comment,
                     //! Processing instruction (see ProcessingInstruction)

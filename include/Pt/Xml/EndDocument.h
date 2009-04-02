@@ -43,7 +43,7 @@ namespace Pt {
          *
          * @see Node
          */
-        class PT_XML_API EndDocument : public Node {
+        class EndDocument : public Node {
             public:
                 //! Creates an EndDocument object.
                 EndDocument()

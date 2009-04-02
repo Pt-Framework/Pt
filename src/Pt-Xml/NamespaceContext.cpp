@@ -26,23 +26,17 @@
 #include "Pt/Xml/NamespaceContext.h"
 #include "Pt/String.h"
 
-#include <iostream>
-using namespace std;
-
-
 namespace Pt {
 
 namespace Xml {
 
 NamespaceContext::NamespaceContext()
 {
-
 }
 
 
 NamespaceContext::~NamespaceContext()
 {
-
 }
 
 

@@ -23,14 +23,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_Namespace_h
-#define PTV_Xml_Namespace_h
+#ifndef PT_Xml_Namespace_h
+#define PT_Xml_Namespace_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-
 #include <iosfwd>
-
 
 namespace Pt {
 

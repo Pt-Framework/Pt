@@ -23,14 +23,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_NamespaceContext_h
-#define PTV_Xml_NamespaceContext_h
+#ifndef PT_Xml_NamespaceContext_h
+#define PT_Xml_NamespaceContext_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/String.h>
 #include <map>
-
 
 namespace Pt {
 

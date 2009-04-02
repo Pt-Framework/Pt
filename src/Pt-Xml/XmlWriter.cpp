@@ -25,22 +25,21 @@
  */
 #include "Pt/Xml/XmlWriter.h"
 #include "Pt/Xml/StartElement.h"
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/Utf8Codec.h"
 #include <iostream>
-
 
 namespace Pt {
 
 namespace Xml {
 
 XmlWriter::XmlWriter()
-: _tos(new Text::Utf8Codec)
+: _tos(new Utf8Codec)
 {
 }
 
 
 XmlWriter::XmlWriter(std::ostream& os)
-: _tos(os, new Text::Utf8Codec)
+: _tos(os, new Utf8Codec)
 {
     _tos << Pt::String(L"<?xml version=\"1.0\" encoding=\"UTF-8\"?>") << std::endl;
 }
