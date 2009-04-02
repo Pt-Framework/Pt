@@ -37,6 +37,8 @@
 
 namespace Pt {
 
+/** @brief Represents arbitrary types during serialization.
+*/
 class PT_API SerializationInfo
 {
     typedef std::vector<SerializationInfo> Nodes;
@@ -109,22 +111,32 @@ class PT_API SerializationInfo
             return _id;
         }
 
+        /** @brief Serialization of weak pointers
+        */
         void setReference(void* ref);
 
+        /** @brief Deserialization of weak pointers
+        */
         SerializationInfo& addReference(const std::string& name, void* ref);
 
+        /** @brief Deserialization of weak pointers
+        */
         template <typename T>
         void toReference(T*& type) const
         {
             this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
+        /** @brief Deserialization of weak member pointers
+        */
         template <typename T>
         void getReference(const std::string& name, T*& type) const
         {
             this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
+        /** @brief Serialization of flat data-types
+        */
         template <typename T>
         void setValue(const T& value)
         {
@@ -132,20 +144,28 @@ class PT_API SerializationInfo
             _category = Value;
         }
 
+        /** @brief Deserialization of flat data-types
+        */
         template <typename T>
         T toValue() const
         {
             return convert<T>(_value);
         }
 
+        /** @brief Deserialization of flat data-types
+        */
         template <typename T>
         void toValue(T& value) const
         {
             convert(value, _value);
         }
 
+        /** @brief Deserialization of flat member data-types
+        */
         const Pt::String& toString() const;
 
+        /** @brief Serialization of flat member data-types
+        */
         template <typename T>
         SerializationInfo& addValue(const std::string& name, const T& value)
         {
@@ -154,15 +174,23 @@ class PT_API SerializationInfo
             return info;
         }
 
+        /** @brief Serialization of member data
+        */
         SerializationInfo& addMember(const std::string& name);
 
+        /** @brief Deserialization of member data
+        */
         const SerializationInfo& getMember(const std::string& name) const;
 
-        // This is needed for some compilers (GCC 3.x) to allow access to
-        // method 'T getValue(const std::string& name) const' below.
+        /** @brief Compiler workaround.
+            This is needed for some compilers (GCC 3.x) to allow access to
+            method 'T getValue(const std::string& name) const' below.
+         */
         template <typename T>
         friend T getValue(const std::string& name, SerializationInfo* si);
 
+        /** @brief Deserialization of flat child value types
+        */
         template <typename T>
         T getValue(const std::string& name) const
         {
@@ -172,6 +200,8 @@ class PT_API SerializationInfo
             return value;
         }
 
+        /** @brief Deserialization of flat child value types
+        */
         template <typename T>
         void getValue(const std::string& name, T& value) const
         {
@@ -179,14 +209,14 @@ class PT_API SerializationInfo
             return info.toValue(value);
         }
 
-        /** @brief Find object data by name
+        /** @brief Find member data by name
 
             This method returns the data for an object with the name \a name.
             or null if it is not present.
         */
         const SerializationInfo* findMember(const std::string& name) const;
 
-        /** @brief Find object data by name
+        /** @brief Find member data by name
 
             This method returns the data for an object with the name \a name.
             or null if it is not present.
@@ -595,6 +625,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
     si.setTypeName("array");
     si.setCategory(SerializationInfo::Array);
 }
+
 
 inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
 {
