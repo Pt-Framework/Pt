@@ -40,7 +40,6 @@
 #include <limits>
 #include <iostream>
 
-
 namespace Pt {
 
 template <typename T>
