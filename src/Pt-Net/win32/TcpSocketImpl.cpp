@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo, 
+ *                    Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +44,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
 , _isConnected(false)
+, _eventFlags(0)
 {
 	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
 	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
@@ -106,7 +108,8 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
         try
         {
 			this->create(it->ai_family, SOCK_STREAM, 0);
-			attachEvent(_currentEventHandle, FD_CONNECT);
+			_eventFlags = FD_CONNECT;
+			attachEvent(_currentEventHandle, _eventFlags);
         }
         catch (const System::SystemError&)
         {
@@ -141,6 +144,9 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 
 void TcpSocketImpl::endConnect()
 {
+	_eventFlags &= ~FD_CONNECT;
+	attachEvent(_currentEventHandle, _eventFlags);
+
 	if( _isConnected )
 		return;
 
@@ -172,23 +178,8 @@ void TcpSocketImpl::endConnect()
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
 {
-	if( _currentEventHandle != _waitEvent)
-		attachEvent(_currentEventHandle,0);
-
-	_currentEventHandle = _waitEvent;
-	attachEvent();
-}
-
-void TcpSocketImpl::attachEvent()
-{
-	if( _socket.rbuf() == 0 && _socket.wbuf() == 0)
-		attachEvent(_currentEventHandle, FD_CONNECT);
-	else if(_socket.rbuf() != 0 && _socket.wbuf() == 0)
-		attachEvent(_currentEventHandle, FD_READ);
-	else if(_socket.rbuf() == 0 && _socket.wbuf() != 0)
-		attachEvent(_currentEventHandle, FD_WRITE);	
-	else if( _socket.rbuf() != 0 && _socket.wbuf() != 0)
-		attachEvent(_currentEventHandle, FD_WRITE|FD_READ);	
+	bool avail;
+	setWaitHandle(_waitEvent,avail);
 }
 
 void TcpSocketImpl::attachEvent(HANDLE ev, long events)
@@ -202,10 +193,10 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 
 void TcpSocketImpl::accept(TcpServer& server)
 {
-	_fd =  WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
+	_fd = WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
 
-	if( _fd == INVALID_SOCKET)
-	      throw System::SystemError("accept");	
+	if(_fd == INVALID_SOCKET)
+		throw System::SystemError("accept");	
 }
 
 bool TcpSocketImpl::wait(std::size_t umsecs)
@@ -224,7 +215,6 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 
 	if(WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
 	{
-		WSAResetEvent(_currentEventHandle);
 		checkEvent();
 		return true;
 	}
@@ -234,30 +224,23 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 
 bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 {
-    log_debug("setWaitHandle");	
+	avail = false;
 	
-	if( _fd != INVALID_SOCKET)
-	{
-		_currentEventHandle = h;
+	if( _currentEventHandle == h)
+		return true;
 
-		attachEvent();
-	
-		_sendOverlapped.hEvent = _currentEventHandle;
-		_receiveOverlapped.hEvent = _currentEventHandle;
+	_currentEventHandle = h;
 
-		avail = checkEvent();
-	}
-	else
-	{
-		avail = false;
-	}
+	attachEvent(_currentEventHandle, _eventFlags);
+	_receiveOverlapped.hEvent = _currentEventHandle;
+	_sendOverlapped.hEvent = _currentEventHandle;
 
-    return true;
+	return true;
 }
 
 void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 {
-    log_debug("getWaitHandles");
+
 }
 
 std::string TcpSocketImpl::getSockAddr() const
@@ -281,10 +264,15 @@ std::string TcpSocketImpl::getPeerAddr() const
 
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-	if(_socket.wbuf() != 0)
-		attachEvent(_currentEventHandle, FD_READ|FD_WRITE);
-	else
-		attachEvent(_currentEventHandle, FD_READ);
+	_eventFlags |= FD_READ;
+
+	_receiveBuffer.buf = buffer;
+    _receiveBuffer.len = n;
+
+	if( _receiveBuffer.buf == 0)
+		 throw System::SystemError( PT_ERROR_MSG("beginRead failed") );
+
+	attachEvent(_currentEventHandle, _eventFlags);
 
 	return 0;
 }
@@ -296,116 +284,86 @@ size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
 size_t TcpSocketImpl::endRead(bool& eof)
 {
-	DWORD bytes = 0;
 	DWORD flags = 0;
+	DWORD numberOfBytesReceived;
 
+	_eventFlags &= ~FD_READ;
+	attachEvent(_currentEventHandle, _eventFlags);
 
-	_receiveBuffer.buf = _socket.rbuf();
-    _receiveBuffer.len = _socket.rbuflen();
+	int rc = WSARecv(_fd, &_receiveBuffer, 1, &numberOfBytesReceived, &flags, &_receiveOverlapped, NULL);		
 
-	if( _receiveBuffer.buf == 0)
-		 throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+	if (rc != SOCKET_ERROR)
+		return numberOfBytesReceived; 
 
-	if(WSARecv(_fd, &_receiveBuffer, 1, &bytes, &flags, &_receiveOverlapped, NULL) == SOCKET_ERROR)
-    {
-        if(GetLastError() != WSA_IO_PENDING)
-	        throw System::SystemError( PT_ERROR_MSG("endRead failed") );
-    }
-
-	bytes = checkReceiveResult(eof);
-
-	if(bytes > 0)
-	{
-		WSAResetEvent(_receiveOverlapped.hEvent);
-		return bytes;
-	}
-
-	if(!this->wait(_timeout))
+	if(WSAECONNRESET == WSAGetLastError()) 
 	{
 		eof = true;
 		return 0;
 	}
-	
-	bytes = checkReceiveResult(eof);
 
-	if(bytes == 0)
-		eof = true;
+	if (WSA_IO_PENDING != WSAGetLastError())
+		throw System::SystemError( PT_ERROR_MSG("WSARecv failed") );
 
-	WSAResetEvent(_receiveOverlapped.hEvent);
+	if(!wait(_timeout))
+		 throw System::IOTimeout();
 
-	return bytes;
-}
-
-size_t TcpSocketImpl::checkReceiveResult(bool& eof)
-{
-	DWORD bytes = 0;
-	DWORD flags = 0;
-
-	BOOL rc = WSAGetOverlappedResult(_fd, &_receiveOverlapped, &bytes, FALSE, &flags);
-
-	if (rc == FALSE) 
+    if( WSAGetOverlappedResult(_fd, &_receiveOverlapped, &numberOfBytesReceived, FALSE, &flags) == FALSE)
 	{
-		int err = WSAGetLastError();
-		
-		if( err == WSAECONNRESET)
+		if(WSAECONNRESET == WSAGetLastError()) 
+		{
 			eof = true;
-		else
-			throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+			return 0;
+		}
+
+		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 	}
 
-	return bytes;
+	return numberOfBytesReceived;
 }
 
 size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 {
+	DWORD numberOfBytesSent = n;
+
 	_sendBuffer.buf = const_cast<char*>(buffer);
-	_sendBuffer.len = n;
+    _sendBuffer.len = n;
+
+	_eventFlags |= FD_WRITE;
+	attachEvent(_currentEventHandle, _eventFlags);	
+
+	return 0;
+}
+
+size_t TcpSocketImpl::endWrite()
+{
+	DWORD flags = 0;
 	DWORD numberOfBytesSent = 0;
 	
-/*	if(_socket.rbuf() != 0 )
-		attachEvent(_currentEventHandle, FD_WRITE|FD_READ);	
-	else
-		attachEvent(_currentEventHandle, FD_WRITE);	
-*/
-	int rc = WSASend( _fd, &_sendBuffer, 1, &numberOfBytesSent, 0, &_sendOverlapped, NULL);
+	_eventFlags &= ~FD_WRITE;	
+	attachEvent(_currentEventHandle, _eventFlags);
 
-	if ((rc == SOCKET_ERROR) && (WSA_IO_PENDING != WSAGetLastError())) 
-	{
+	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, &_sendOverlapped, NULL);	
+
+	if (rc != SOCKET_ERROR)
+		return numberOfBytesSent; 
+
+	if (WSA_IO_PENDING != WSAGetLastError())
 		throw System::SystemError( PT_ERROR_MSG("WSASend failed") );
+
+	if(!wait(_timeout))
+		 throw System::IOTimeout();
+
+	if(WSAGetOverlappedResult(_fd, &_sendOverlapped, &numberOfBytesSent, FALSE, &flags) == FALSE)
+	{
+		if(WSAECONNRESET == WSAGetLastError()) 
+			return 0;
+
+		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
 	}
 
 	return numberOfBytesSent;
 }
 
-size_t TcpSocketImpl::endWrite()
-{
-	size_t bytes = checkSendResult();
-	if( bytes > 0)
-	{
-		WSAResetEvent(_sendOverlapped.hEvent);
-		return bytes;
-	}
-
-	this->wait(_timeout);
-	WSAResetEvent(_sendOverlapped.hEvent);
-
-	return checkSendResult();
-}
-
-size_t TcpSocketImpl::checkSendResult()
-{
-	DWORD sendBytes = 0;
-	DWORD flags = 0;
-    BOOL rc = WSAGetOverlappedResult(_fd, &_sendOverlapped, &sendBytes, FALSE, &flags);
-    
-	if (rc == FALSE) 
-	{
-		int error = WSAGetLastError();
-		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
-	}
-
-	return sendBytes;
-}
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {

@@ -28,10 +28,15 @@
 #ifndef Pt_Net_AddrInfo_H
 #define Pt_Net_AddrInfo_H
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+
 #include <Pt/Net/Api.h>
 #include <string>
-#include <sstream>
  
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 

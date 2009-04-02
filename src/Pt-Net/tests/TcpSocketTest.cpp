@@ -31,6 +31,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
+#include "Pt/System/Thread.h"
 #include <string>
 
 class TcpSocketTest : public Pt::Unit::TestSuite
@@ -60,7 +61,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             this->reportMessage("\nSTART");
 
-            Pt::Net::TcpServer server("127.0.0.1", 8001);
+            Pt::Net::TcpServer server("127.0.0.1", 8000);
             connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
 
             connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
@@ -68,11 +69,13 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             Pt::Net::TcpSocket client;
             connect(client.connected, *this, &TcpSocketTest::onConnect);
             connect(client.outputReady, *this, &TcpSocketTest::onOutput);
-            client.beginConnect("127.0.0.1", 8001);
+            client.beginConnect("127.0.0.1", 8000);
 
-            server.wait(1000);
-            client.wait(1000);
-            _acceptor->wait(1000);
+            server.wait(1000); //on accept 
+            client.wait(1000); //on connect
+			client.wait(1000); //on write
+            _acceptor->wait(1000);//on read
+
             this->reportMessage("FINISHED");
         }
 
@@ -93,8 +96,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
                 client.beginConnect("127.0.0.1", 8000);
-
-                selector.add(client);
+				selector.add(client);				
+                
 
                 selector.wait(1000);
                 selector.wait(1000);

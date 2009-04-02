@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ *                            Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -68,13 +69,14 @@ class TcpSocketImpl : public System::SelectableImpl
 		HANDLE		  _currentEventHandle;
 		WSABUF		  _receiveBuffer;
 		bool          _isConnected;
+		long		  _eventFlags;
 
 		void attachEvent(HANDLE ev, long events);
-		void attachEvent();
 		size_t checkReceiveResult(bool& eof);
 		size_t TcpSocketImpl::checkSendResult();
 
     public:
+
         TcpSocketImpl(TcpSocket& socket);
 		~TcpSocketImpl();
 

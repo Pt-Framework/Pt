@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo
+ *                    Laurentiu-Gheorghe Crisan
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -206,8 +207,7 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 
 	_selectorHandle = h;
     attachEvent(_selectorHandle, FD_ACCEPT);
-    avail = checkEvent();
-
+    avail = false;
     return true;
 }
 
