@@ -26,7 +26,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>

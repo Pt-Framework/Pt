@@ -160,13 +160,13 @@ void TcpSocketImpl::endConnect()
 		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
 		{
 			close();
-			throw System::SystemError("getsockopt");
+			throw System::IOError("getsockopt");
 		}
 
 		if(sockerr != 0)
 		{
 			close();
-			throw System::SystemError("connect");
+			throw System::IOError("connect");
 		}	
     }
     catch(...)

@@ -44,6 +44,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                                   &TcpSocketTest::NonBlockingWithSelector);
             this->registerMethod( "NonBlockingWithWait", *this,
                                   &TcpSocketTest::NonBlockingWithWait);
+            this->registerMethod( "ConnectFailed", *this,
+                                  &TcpSocketTest::ConnectFailed);
         }
 
         void setUp()
@@ -55,6 +57,23 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             _acceptor->close();
             delete _acceptor;
+        }
+
+        void ConnectFailed()
+        {
+            Pt::System::Selector selector;
+
+            Pt::Net::TcpSocket client;
+            connect(client.connected, *this, &TcpSocketTest::onConnectFailed);
+
+            client.beginConnect("127.0.0.2", 9000);
+            selector.add(client);
+            selector.wait(1000);
+        }
+
+        void onConnectFailed(Pt::Net::TcpSocket& socket)
+        {
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
 
         void NonBlockingWithWait()

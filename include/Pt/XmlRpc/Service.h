@@ -35,6 +35,7 @@
 #include <Pt/Serializer.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
+#include <Pt/TypeTraits.h>
 #include <stdexcept>
 #include <string>
 #include <map>

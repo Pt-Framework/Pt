@@ -31,6 +31,7 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
+#include "Pt/Net/HttpRequest.h"
 #include "Pt/Utf8Codec.h"
 
 namespace Pt {
