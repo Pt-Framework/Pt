@@ -40,9 +40,9 @@ namespace System {
 class IStream : public std::basic_istream<char>
 {
     public:
-        explicit IStream(size_t bufferSize = 8192);
+        explicit IStream(size_t bufferSize = 8192, bool extend = false);
         
-		explicit IStream(IODevice& device, size_t bufferSize = 8192);
+		explicit IStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
         
 		~IStream();
 
@@ -68,9 +68,9 @@ class IStream : public std::basic_istream<char>
 class OStream : public std::basic_ostream<char>
 {
     public:
-        explicit OStream(size_t bufferSize = 8192);
+        explicit OStream(size_t bufferSize = 8192, bool extend = false);
 
-        explicit OStream(IODevice& device, size_t bufferSize = 8192);
+        explicit OStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
 
         ~OStream();
 
@@ -90,9 +90,9 @@ class OStream : public std::basic_ostream<char>
 class IOStream : public std::basic_iostream<char>
 {
     public:
-        explicit IOStream(size_t bufferSize = 8192);
+        explicit IOStream(size_t bufferSize = 8192, bool extend = false);
 
-        explicit IOStream(IODevice& device, size_t bufferSize = 8192);
+        explicit IOStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
 
         ~IOStream();
 
@@ -117,17 +117,17 @@ class IOStream : public std::basic_iostream<char>
 };
 
 
-inline IStream::IStream(size_t bufferSize)
+inline IStream::IStream(size_t bufferSize, bool extend)
 : std::basic_istream<char>(0)
-, _buffer(bufferSize)
+, _buffer(bufferSize, extend)
 {
 	this->init(&_buffer);
 }
 
 
-inline IStream::IStream(IODevice& device, size_t bufferSize)
+inline IStream::IStream(IODevice& device, size_t bufferSize, bool extend)
 : std::basic_istream<char>(0)
-, _buffer(device, bufferSize)
+, _buffer(device, bufferSize, extend)
 {
     this->init(&_buffer);
 }
@@ -173,17 +173,17 @@ inline std::streamsize IStream::peeksome(char* buffer, std::streamsize n)
 }
 
 
-inline OStream::OStream(size_t bufferSize)
+inline OStream::OStream(size_t bufferSize, bool extend)
 : std::basic_ostream<char>(0)
-, _buffer(bufferSize)
+, _buffer(bufferSize, extend)
 {
     this->init(&_buffer);
 }
 
 
-inline OStream::OStream(IODevice& device, size_t bufferSize)
+inline OStream::OStream(IODevice& device, size_t bufferSize, bool extend)
 : std::basic_ostream<char>(0)
-, _buffer(device, bufferSize)
+, _buffer(device, bufferSize, extend)
 {
     this->init(&_buffer);
 }
@@ -230,17 +230,17 @@ inline std::streamsize OStream::writesome(char* buffer, std::streamsize n)
 }
 
 
-inline IOStream::IOStream(size_t bufferSize)
+inline IOStream::IOStream(size_t bufferSize, bool extend)
 : std::basic_iostream<char>(0)
-, _buffer(bufferSize)
+, _buffer(bufferSize, extend)
 {
     this->init(&_buffer);
 }
 
 
-inline IOStream::IOStream(IODevice& device, size_t bufferSize)
+inline IOStream::IOStream(IODevice& device, size_t bufferSize, bool extend)
 : std::basic_iostream<char>(0)
-, _buffer(device, bufferSize)
+, _buffer(device, bufferSize, extend)
 {
     this->init(&_buffer);
 }
