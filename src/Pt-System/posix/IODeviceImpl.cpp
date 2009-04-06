@@ -177,7 +177,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
             break;
 
         if(ret == 0 || errno == ECONNRESET || errno == EPIPE)
-            return 0;
+            throw IOError("lost connection to peer");
 
         if(errno == EINTR)
             continue;
