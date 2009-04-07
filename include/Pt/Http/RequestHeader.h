@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Duerner
+ * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,49 +25,61 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/TextStream.h"
+
+#ifndef Pt_Http_RequestHeader_h
+#define Pt_Http_RequestHeader_h
+
+#include <Pt/Http/Api.h>
+#include <Pt/Http/MessageHeader.h>
+#include <string>
 
 namespace Pt {
 
-TextIStream::TextIStream(std::istream& is, Codec* codec)
-: BasicTextIStream<Char, char>(is, codec)
-{ }
+namespace Http {
 
+class HttpRequestHeader : public HttpMessageHeader
+{
+        std::string _url;
+        std::string _method;
+        std::string _qparams;
 
-TextIStream::TextIStream(Codec* codec)
-: BasicTextIStream<Char, char>(codec)
-{ }
+    public:
+        explicit HttpRequestHeader(const std::string& url = std::string())
+        : _url(url),
+          _method("GET")
+        { }
 
+        virtual ~HttpRequestHeader()  {}
 
-TextIStream::~TextIStream()
-{ }
+        void clear()
+        {
+            HttpMessageHeader::clear();
+            _method = "GET";
+            _qparams.clear();
+        }
 
+        const std::string& url() const
+        { return _url; }
 
-TextOStream::TextOStream(std::ostream& os, Codec* codec)
-: BasicTextOStream<Char, char>(os, codec)
-{ }
+        void url(const std::string& u)
+        { _url = u; }
 
+        const std::string& method() const
+        { return _method; }
 
-TextOStream::TextOStream(Codec* codec)
-: BasicTextOStream<Char, char>(codec)
-{ }
+        void method(const std::string& m)
+        { _method = m; }
 
+        const std::string& qparams() const
+        { return _qparams; }
 
-TextOStream::~TextOStream()
-{ }
+        void qparams(const std::string& q)
+        { _qparams = q; }
 
+};
 
-TextStream::TextStream(std::iostream& ios, Codec* codec)
-: BasicTextStream<Char, char>(ios, codec)
-{ }
-
-
-TextStream::TextStream(Codec* codec)
-: BasicTextStream<Char, char>(codec)
-{ }
-
-
-TextStream::~TextStream()
-{ }
+} // namespace Http
 
 } // namespace Pt
+
+#endif

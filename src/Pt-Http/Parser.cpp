@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpParser.h>
-#include <Pt/Net/HttpMessageHeader.h>
+#include <Pt/Http/Parser.h>
+#include <Pt/Http/MessageHeader.h>
 #include <cctype>
 #include <algorithm>
 
@@ -36,7 +36,7 @@
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
     namespace
     {

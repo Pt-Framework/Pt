@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Dürner
+ * Copyright (C) 2004 Marc Boris Dï¿½rner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #ifndef Pt_Text_TextBuffer_h
 #define Pt_Text_TextBuffer_h
 
-#include <Pt/BasicTextBuffer.h>
+#include <Pt/TextBuffer.h>
 
 namespace Pt {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Dürner
+ * Copyright (C) 2004 Marc Boris Dï¿½rner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #ifndef PT_Text_BasicTextStream_h
 #define PT_Text_BasicTextStream_h
 
-#include <Pt/BasicTextStream.h>
+#include <Pt/TextStream.h>
 
 namespace Pt {
 

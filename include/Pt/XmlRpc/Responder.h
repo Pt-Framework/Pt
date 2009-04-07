@@ -35,7 +35,7 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/XmlWriter.h>
-#include <Pt/Net/HttpServer.h>
+#include <Pt/Http/Server.h>
 #include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
 
@@ -46,7 +46,7 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
-class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
+class PT_XMLRPC_API HttpXmlRpcResponder : public Http::HttpResponder
 {
     enum State
     {
@@ -66,14 +66,14 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Net::HttpResponder
 
         ~HttpXmlRpcResponder();
 
-        void beginRequest(std::istream& in, Pt::Net::HttpRequest& request);
+        void beginRequest(std::istream& in, Http::HttpRequest& request);
 
         std::size_t readBody(std::istream& is);
 
-        void replyError(std::ostream& os, Net::HttpRequest& request,
-                        Net::HttpReply& reply, const std::exception& ex);
+        void replyError(std::ostream& os, Http::HttpRequest& request,
+                        Http::HttpReply& reply, const std::exception& ex);
 
-        void reply(std::ostream& os, Net::HttpRequest& request, Net::HttpReply& reply);
+        void reply(std::ostream& os, Http::HttpRequest& request, Http::HttpReply& reply);
 
     protected:
         void advance(const Pt::Xml::Node& node);

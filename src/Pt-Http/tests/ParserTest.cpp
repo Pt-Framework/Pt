@@ -29,10 +29,10 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Net/HttpParser.h"
+#include "Pt/Http/Parser.h"
 #include <string>
 
-class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderParser::Event
+class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Http::HttpHeaderParser::Event
 {
     public:
         HttpParserTest()
@@ -57,7 +57,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void SimpleRequest()
         {
-            Pt::Net::HttpHeaderParser parser(*this, false);
+            Pt::Http::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\n\r\n");
 
@@ -72,7 +72,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void RequestWithHeader()
         {
-            Pt::Net::HttpHeaderParser parser(*this, false);
+            Pt::Http::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nUser-Agent: Pt-Unit\nContent-Size:47\r\n\r\n");
 
@@ -87,7 +87,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void RequestWithMultilineHeader()
         {
-            Pt::Net::HttpHeaderParser parser(*this, false);
+            Pt::Http::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nContent-Size:47\nFoo:line1\r\n line2\n line3\nBar:bar\r\n\r\n");
 
@@ -102,7 +102,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void RequestWithWhitespace()
         {
-            Pt::Net::HttpHeaderParser parser(*this, false);
+            Pt::Http::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("PUT   /foo   HTTP  /  1  .  0  \r\n  Content-Size  :  47  \r\n\r\n");
 
@@ -117,7 +117,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void RequestWithQueryParam()
         {
-            Pt::Net::HttpHeaderParser parser(*this, false);
+            Pt::Http::HttpHeaderParser parser(*this, false);
 
             std::istringstream msg("GET /foo+bar?a=4&b=Hello+World HTTP/1.1\r\n\r\n");
 
@@ -132,7 +132,7 @@ class HttpParserTest : public Pt::Unit::TestSuite, private Pt::Net::HttpHeaderPa
 
         void Response()
         {
-            Pt::Net::HttpHeaderParser parser(*this, true);
+            Pt::Http::HttpHeaderParser parser(*this, true);
 
             std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type : text/xml\r\n\r\n");
 

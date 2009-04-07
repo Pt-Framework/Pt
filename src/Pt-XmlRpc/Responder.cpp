@@ -33,7 +33,7 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
-#include "Pt/Net/HttpReply.h"
+#include "Pt/Http/Reply.h"
 #include "Pt/Utf8Codec.h"
 
 namespace Pt {
@@ -42,7 +42,7 @@ namespace XmlRpc {
 
 
 HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
-: Net::HttpResponder(service)
+: Http::HttpResponder(service)
 , _state(OnBegin)
 , _ts(new Utf8Codec)
 , _reader(_ts)
@@ -60,7 +60,7 @@ HttpXmlRpcResponder::~HttpXmlRpcResponder()
 }
 
 
-void HttpXmlRpcResponder::beginRequest(std::istream& is, Pt::Net::HttpRequest& request)
+void HttpXmlRpcResponder::beginRequest(std::istream& is, Http::HttpRequest& request)
 {
     _fault.clear();
     _state = OnBegin;
@@ -113,8 +113,8 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 }
 
 
-void HttpXmlRpcResponder::replyError(std::ostream& os, Net::HttpRequest& request,
-                                     Net::HttpReply& reply, const std::exception& ex)
+void HttpXmlRpcResponder::replyError(std::ostream& os, Http::HttpRequest& request,
+                                     Http::HttpReply& reply, const std::exception& ex)
 {
     reply.setHeader("Content-Type", "text/xml");
 
@@ -138,7 +138,7 @@ void HttpXmlRpcResponder::replyError(std::ostream& os, Net::HttpRequest& request
 }
 
 
-void HttpXmlRpcResponder::reply(std::ostream& os, Net::HttpRequest& request, Net::HttpReply& reply)
+void HttpXmlRpcResponder::reply(std::ostream& os, Http::HttpRequest& request, Http::HttpReply& reply)
 {
     if( ! _proc )
         throw std::runtime_error("invalid XML-RPC, no method found");

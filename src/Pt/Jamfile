@@ -21,6 +21,7 @@ SharedLibrary Pt : Atomicity.cpp
                    SettingsWriter.cpp
                    Signal.cpp
                    StringStream.cpp
+                   TextBuffer.cpp
                    TextCodec.cpp
                    TextStream.cpp
                    Time.cpp

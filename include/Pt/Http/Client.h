@@ -26,15 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpClient_h
-#define Pt_Net_HttpClient_h
+#ifndef Pt_Http_Client_h
+#define Pt_Http_Client_h
 
-#include <Pt/Net/Api.h>
+#include <Pt/Http/Api.h>
+#include <Pt/Http/Parser.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-#include <Pt/Net/HttpParser.h>
-#include <Pt/Net/HttpRequest.h>
-#include <Pt/Net/HttpReply.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
@@ -46,13 +46,13 @@
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
-class PT_NET_API HttpClient : public Pt::Connectable
+class PT_HTTP_API HttpClient : public Pt::Connectable
 {
         friend class ParseEvent;
 
-        class PT_NET_API ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
+        class PT_HTTP_API ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
         {
                 HttpReplyHeader& _replyHeader;
 
@@ -73,7 +73,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
 
         std::string _server;
         unsigned short int _port;
-        TcpSocket _socket;
+        Net::TcpSocket _socket;
         System::IOStream _stream;
         bool _readHeader;
         long _contentLength;
@@ -82,7 +82,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
         void processBodyAvailable();
 
     protected:
-        void onConnect(TcpSocket& socket);
+        void onConnect(Net::TcpSocket& socket);
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);
 
@@ -126,7 +126,7 @@ class PT_NET_API HttpClient : public Pt::Connectable
         Signal<HttpClient&, const std::exception&> errorOccured;
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

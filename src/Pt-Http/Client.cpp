@@ -26,13 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpClient.h>
-#include <Pt/Net/HttpParser.h>
+#include <Pt/Http/Client.h>
+#include <Pt/Http/Parser.h>
 #include <Pt/System/IOError.h>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 void HttpClient::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
@@ -232,7 +232,7 @@ void HttpClient::sendRequest(const HttpRequest& request)
 
 }
 
-void HttpClient::onConnect(TcpSocket& socket)
+void HttpClient::onConnect(Net::TcpSocket& socket)
 {
     socket.endConnect();
     sendRequest(*_request);
@@ -305,6 +305,6 @@ void HttpClient::processBodyAvailable()
         replyFinished(*this);
 }
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt

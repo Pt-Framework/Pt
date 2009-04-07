@@ -28,10 +28,10 @@
 #ifndef Pt_System_StreamBuffer_h
 #define Pt_System_StreamBuffer_h
 
-#include <ios>
-#include <streambuf>
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <streambuf>
+#include <ios>
 #include <cstring>
 
 namespace Pt {

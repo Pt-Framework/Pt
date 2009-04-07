@@ -26,13 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpServer.h>
+#include <Pt/Http/Server.h>
 #include <Pt/System/Selector.h>
 #include <cassert>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 void HttpResponder::beginRequest(std::istream& in, HttpRequest& request)
 {
@@ -360,6 +360,6 @@ void HttpServer::onConnect(TcpServer& server)
     new HttpSocket(_selector, *this);
 }
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt

@@ -34,7 +34,7 @@
 #include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/Fault.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
-#include "Pt/Net/HttpServer.h"
+#include "Pt/Http/Server.h"
 #include "Pt/System/EventLoop.h"
 
 
@@ -66,7 +66,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
     private:
         Pt::System::EventLoop* _loop;
-        Pt::Net::HttpServer* _server;
+        Pt::Http::HttpServer* _server;
 
     public:
         PtXmlRpcTest()
@@ -94,7 +94,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             connect(_loop->timeout, *this, &PtXmlRpcTest::failTest);
             connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
 
-            _server = new Pt::Net::HttpServer(*_loop, "127.0.0.1", 8001);
+            _server = new Pt::Http::HttpServer(*_loop, "127.0.0.1", 8001);
         }
 
         void tearDown()

@@ -29,8 +29,8 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Net/HttpServer.h"
-#include "Pt/Net/HttpClient.h"
+#include "Pt/Http/Server.h"
+#include "Pt/Http/Client.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/EventLoop.h"
 #include <string>
@@ -59,15 +59,15 @@ class HttpServerTest : public Pt::Unit::TestSuite
         {
             connect(loop->timeout, *loop, &Pt::System::EventLoop::exit);
 
-            Pt::Net::HttpServer server(*loop, "127.0.0.1", 8001);
+            Pt::Http::HttpServer server(*loop, "127.0.0.1", 8001);
 
-            Pt::Net::HttpClient client("127.0.0.1", 8001);
+            Pt::Http::HttpClient client("127.0.0.1", 8001);
             client.setSelector(*loop);
             connect(client.headerReceived, *this, &HttpServerTest::onReplyHeader);
             connect(client.bodyAvailable, *this, &HttpServerTest::onReply);
             connect(client.replyFinished, *this, &HttpServerTest::onReplyFinished);
 
-            Pt::Net::HttpRequest request("/index.html");
+            Pt::Http::HttpRequest request("/index.html");
             request.setHeader("foo", "bar");
             client.beginExecute(request);
 
@@ -77,13 +77,13 @@ class HttpServerTest : public Pt::Unit::TestSuite
     private:
         Pt::System::EventLoop* loop;
 
-        void onReplyHeader(Pt::Net::HttpClient& client)
+        void onReplyHeader(Pt::Http::HttpClient& client)
         {
             std::cout << "Server=" << client.header().getHeader("server") << std::endl;
             std::cout << "Connection=" << client.header().getHeader("connection") << std::endl;
         }
 
-        std::size_t onReply(Pt::Net::HttpClient& client)
+        std::size_t onReply(Pt::Http::HttpClient& client)
         {
             std::size_t ret = 0;
             while ( client.in().rdbuf()->in_avail() )
@@ -97,7 +97,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
             return ret;
         }
 
-        void onReplyFinished(Pt::Net::HttpClient& client)
+        void onReplyFinished(Pt::Http::HttpClient& client)
         {
             PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
             std::cout << "THE END" << std::endl;

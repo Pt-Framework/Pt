@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/Net/HttpServer.h>
+#include <Pt/Http/Server.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
 #include <Pt/Void.h>
@@ -200,7 +200,7 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
 };
 
 
-class PT_XMLRPC_API Service : public Net::HttpService
+class PT_XMLRPC_API Service : public Http::HttpService
 {
     public:
         Service();
@@ -231,9 +231,9 @@ class PT_XMLRPC_API Service : public Net::HttpService
             this->registerProcedure(name, proc);
         }
 
-        virtual Net::HttpResponder* createResponder(const Net::HttpRequest&);
+        virtual Http::HttpResponder* createResponder(const Http::HttpRequest&);
 
-        virtual void releaseResponder(Net::HttpResponder* resp);
+        virtual void releaseResponder(Http::HttpResponder* resp);
 
     protected:
         void registerProcedure(const std::string& name, ServiceProcedure* proc);

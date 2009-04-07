@@ -26,15 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpServer_h
-#define Pt_Net_HttpServer_h
+#ifndef Pt_Http_Server_h
+#define Pt_Http_Server_h
 
-#include <Pt/Net/Api.h>
+#include <Pt/Http/Api.h>
+#include <Pt/Http/Parser.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-#include <Pt/Net/HttpParser.h>
-#include <Pt/Net/HttpRequest.h>
-#include <Pt/Net/HttpReply.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
@@ -50,7 +50,7 @@ namespace System {
 
 }
 
-namespace Net {
+namespace Http {
 
 class HttpResponder;
 
@@ -62,7 +62,7 @@ class HttpService
         virtual void releaseResponder(HttpResponder*) = 0;
 };
 
-class PT_NET_API HttpResponder
+class PT_HTTP_API HttpResponder
 {
     public:
         explicit HttpResponder(HttpService& service)
@@ -82,7 +82,7 @@ class PT_NET_API HttpResponder
         HttpService& _service;
 };
 
-class PT_NET_API HttpNotFoundResponder : public HttpResponder
+class PT_HTTP_API HttpNotFoundResponder : public HttpResponder
 {
     public:
         explicit HttpNotFoundResponder(HttpService& service)
@@ -92,7 +92,7 @@ class PT_NET_API HttpNotFoundResponder : public HttpResponder
         void reply(std::ostream&, HttpRequest& request, HttpReply& reply);
 };
 
-class PT_NET_API HttpNotFoundService : public HttpService
+class PT_HTTP_API HttpNotFoundService : public HttpService
 {
     public:
         HttpNotFoundService()
@@ -106,7 +106,7 @@ class PT_NET_API HttpNotFoundService : public HttpService
         HttpNotFoundResponder _responder;
 };
 
-class PT_NET_API HttpServer : public TcpServer, public Connectable
+class PT_HTTP_API HttpServer : public Net::TcpServer, public Connectable
 {
     public:
         HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
@@ -140,7 +140,7 @@ class PT_NET_API HttpServer : public TcpServer, public Connectable
 };
 
 
-class PT_NET_API HttpSocket : public TcpSocket, public Connectable
+class PT_HTTP_API HttpSocket : public Net::TcpSocket, public Connectable
 {
         class ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
         {
@@ -180,7 +180,7 @@ class PT_NET_API HttpSocket : public TcpSocket, public Connectable
         System::IOStream _stream;
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

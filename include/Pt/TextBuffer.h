@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Duerner
+ * Copyright (C) 2004-2009 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,27 +29,29 @@
 #define Pt_TextBuffer_h
 
 #include <Pt/Api.h>
+#include <Pt/Char.h>
 #include <Pt/TextCodec.h>
 #include <Pt/ConversionError.h>
 #include <iostream>
 
 namespace Pt {
 
+
 /** @brief Converts character sequences with different encodings.
 
-	This class derives from std::basic_streambuf which is the super-class of all stream buffer
-	classes. Stream buffer classes are used to connect to an external device, transport characters
-	from and to this external device and buffer the characters in an internal buffer.
+    This class derives from std::basic_streambuf which is the super-class of all stream buffer
+    classes. Stream buffer classes are used to connect to an external device, transport characters
+    from and to this external device and buffer the characters in an internal buffer.
 
-	The internal character set can be specified using the template parameters 'char_type_', the
-	external character set using 'extern_type_'. The external type is the input type and output
-	type when reading from or writing to the external device. The internal type is the type
-	which is used to internally store the data from the external device after the external
-	format was converted using the Codec which is passed when constructing an object of this
-	class.
+    The internal character set can be specified using the template parameters 'char_type_', the
+    external character set using 'extern_type_'. The external type is the input type and output
+    type when reading from or writing to the external device. The internal type is the type
+    which is used to internally store the data from the external device after the external
+    format was converted using the Codec which is passed when constructing an object of this
+    class.
 
-	The Codec object which is passed as pointer to the constructor will afterwards be completely
-	managed by this class and also be deleted by this class when it's destructed!
+    The Codec object which is passed as pointer to the constructor will afterwards be completely
+    managed by this class and also be deleted by this class when it's destructed!
 
   @see std::basic_streambuf
 */
@@ -388,6 +390,27 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 ++s2;
             }
         }
+};
+
+
+/** @brief Buffers the conversion of 8-bit character sequences to unicode.
+
+    The internal type is Pt::Char. The external type is $char$.
+    See BasicTextBuffer for a more detailed description.
+*/
+class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
+{
+    public:
+        typedef TextCodec<Pt::Char, char> Codec;
+
+    public:
+        /** @brief Constructs a new TextBuffer
+             See BasicTextBuffer::BasicTextBuffer() for a more detailed description.
+
+             @param buffer The buffer (external device) which is wrapped by this object.
+             @param codec The codec which is used to convert data from and to the external device.
+        */
+        TextBuffer(std::ios* buffer, Codec* codec);
 };
 
 } // namespace Pt

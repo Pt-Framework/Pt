@@ -31,7 +31,7 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
-#include "Pt/Net/HttpRequest.h"
+#include "Pt/Http/Request.h"
 #include "Pt/Utf8Codec.h"
 
 namespace Pt {
@@ -72,7 +72,7 @@ void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 }
 
 
-Net::HttpResponder* Service::createResponder(const Net::HttpRequest& req)
+Http::HttpResponder* Service::createResponder(const Http::HttpRequest& req)
 {
     if (req.getHeader("Content-Type") == "text/xml")
         return new HttpXmlRpcResponder(*this);
@@ -81,7 +81,7 @@ Net::HttpResponder* Service::createResponder(const Net::HttpRequest& req)
 }
 
 
-void Service::releaseResponder(Net::HttpResponder* resp)
+void Service::releaseResponder(Http::HttpResponder* resp)
 {
     delete resp;
 }

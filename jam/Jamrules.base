@@ -765,7 +765,7 @@ rule LinkSharedLibraries
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        Echo Calling $(_type)_LinkSharedLibraries for $(1) ;
+        # Echo Calling $(_type)_LinkSharedLibraries for $(1) ;
         $(_type)_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
     }
     else
@@ -906,7 +906,7 @@ rule MakeLocate
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        Echo Calling $(_type)_MakeLocate for $(1) ;
+        # Echo Calling $(_type)_MakeLocate for $(1) ;
         $(_type)_MakeLocate $(<) : $(>) ;
     }
     else

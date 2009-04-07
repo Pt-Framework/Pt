@@ -26,18 +26,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpMessage_h
-#define Pt_Net_HttpMessage_h
+#ifndef Pt_Http_Message_h
+#define Pt_Http_Message_h
 
-#include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessageHead.h>
+#include <Pt/Http/Api.h>
+#include <Pt/Http/MessageHead.h>
 #include <string>
 #include <sstream>
 #include <cctype>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 class HttpMessage
 {
@@ -113,7 +113,7 @@ class HttpMessage
 
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

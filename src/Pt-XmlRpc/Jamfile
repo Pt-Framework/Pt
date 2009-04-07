@@ -14,14 +14,10 @@ SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-System Pt-Net Pt ;
 SharedLibrary_MakeLocate Pt-XmlRpc : $(OUTPUT_TARGET) ;
 
-PT_XMLRPC_TESTS = ;
-
 PtUnitTest Pt-XmlRpc-test : Pt-XmlRpc-test.cpp $(PT_XMLRPC_TESTS) ;
-Main_LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Xml Pt-Net Pt-System Pt-Unit Pt ;
-PtUnitTest_MakeLocate Pt-XmlRpc-test : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Http Pt-System Pt-Unit Pt ;
+MakeLocate Pt-XmlRpc-test : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
 NOTFILE Pt-XmlRpc-all ;
-DEPENDS Pt-XmlRpc-all : Pt-XmlRpc
-                        Pt-XmlRpc-test
-                        ;
+DEPENDS Pt-XmlRpc-all : Pt-XmlRpc Pt-XmlRpc-test ;

@@ -26,17 +26,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpRequest_h
-#define Pt_Net_HttpRequest_h
+#ifndef Pt_Http_Request_h
+#define Pt_Http_Request_h
 
-#include <Pt/Net/Api.h>
-#include <Pt/Net/HttpRequestHeader.h>
+#include <Pt/Http/Api.h>
+#include <Pt/Http/RequestHeader.h>
 #include <string>
 #include <sstream>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 class HttpRequest
 {
@@ -118,7 +118,7 @@ class HttpRequest
 
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

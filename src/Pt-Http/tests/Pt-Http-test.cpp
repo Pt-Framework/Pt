@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2005-2009 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,53 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
 
-#ifndef Pt_Net_HttpReplyHeader_h
-#define Pt_Net_HttpReplyHeader_h
-
-#include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessageHeader.h>
-
-namespace Pt {
-
-namespace Net {
-
-class HttpRequestHeader;
-
-class HttpReplyHeader : public HttpMessageHeader
+class PtHttpTest : public Pt::Unit::TestSuite
 {
-        unsigned _httpReturnCode;
-        std::string _httpReturnText;
-
     public:
-        HttpReplyHeader()
-            : _httpReturnCode(200),
-              _httpReturnText("OK")
-            { }
-
-        void clear()
+        PtHttpTest()
+        : Pt::Unit::TestSuite("Pt-Http-test")
         {
-            HttpMessageHeader::clear();
-            _httpReturnCode = 200;
-            _httpReturnText = "OK";
         }
-
-        unsigned httpReturnCode() const
-        { return _httpReturnCode; }
-
-        const std::string& httpReturnText() const
-        { return _httpReturnText; }
-
-        void httpReturn(unsigned c, const std::string& t)
-        {
-            _httpReturnCode = c;
-            _httpReturnText = t;
-        }
-
 };
-
-} // namespace Net
-
-} // namespace Pt
-
-#endif

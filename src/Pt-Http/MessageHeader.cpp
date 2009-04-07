@@ -26,14 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/HttpMessageHeader.h>
+#include <Pt/Http/MessageHeader.h>
 #include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>
 #include <iostream>
+
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 bool HttpMessageHeader::StringLessIgnoreCase::operator()
     (const std::string& s1, const std::string& s2) const
@@ -107,6 +108,6 @@ std::string HttpMessageHeader::htdateCurrent()
 }
 
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt

@@ -26,20 +26,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpMessageHeader_h
-#define Pt_Net_HttpMessageHeader_h
+#ifndef Pt_Http_MessageHeader_h
+#define Pt_Http_MessageHeader_h
 
-#include <Pt/Net/Api.h>
+#include <Pt/Http/Api.h>
 #include <string>
 #include <map>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
-class PT_NET_API HttpMessageHeader
+class PT_HTTP_API HttpMessageHeader
 {
-        class PT_NET_API StringLessIgnoreCase
+        class PT_HTTP_API StringLessIgnoreCase
         {
             public:
                 bool operator()(const std::string& s1, const std::string& s2) const;

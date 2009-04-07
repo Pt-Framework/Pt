@@ -98,7 +98,7 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
     _state = OnBegin;
 
     this->prepareRequest(method.name(), argv, argc);
-    Net::HttpReplyHeader header = _client.execute(_request);
+    Http::HttpReplyHeader header = _client.execute(_request);
 
     std::string body = _client.readBody();
     std::istringstream is(body);
@@ -124,14 +124,14 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
 }
 
 
-void Client::onReplyHeader(Net::HttpClient& client)
+void Client::onReplyHeader(Http::HttpClient& client)
 {
     _fault.clear();
     _ts.attach( client.in() );
 }
 
 
-std::size_t Client::onReplyBody(Net::HttpClient& client)
+std::size_t Client::onReplyBody(Http::HttpClient& client)
 {
     std::size_t n = 0;
 
@@ -175,7 +175,7 @@ std::size_t Client::onReplyBody(Net::HttpClient& client)
 }
 
 
-void Client::onReplyFinished(Net::HttpClient& client)
+void Client::onReplyFinished(Http::HttpClient& client)
 {
     if(_state == OnMethodResponseEnd)
     {

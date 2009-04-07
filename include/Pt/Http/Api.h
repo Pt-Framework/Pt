@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,61 +25,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef PT_HTTP_API_H
+#define PT_HTTP_API_H
 
-#ifndef Pt_Net_HttpRequestHeader_h
-#define Pt_Net_HttpRequestHeader_h
+#include <Pt/Api.h>
 
-#include <Pt/Net/Api.h>
-#include <Pt/Net/HttpMessageHeader.h>
-#include <string>
+#define PT_HTTP_VERSION_MAJOR 1
+#define PT_HTTP_VERSION_MINOR 0
+#define PT_HTTP_VERSION_REVISION 0
+ 
+#if defined(PT_HTTP_API_EXPORT)
+#    define PT_HTTP_API PT_EXPORT
+#  else
+#    define PT_HTTP_API PT_IMPORT
+#  endif
 
 namespace Pt {
 
-namespace Net {
-
-class HttpRequestHeader : public HttpMessageHeader
-{
-        std::string _url;
-        std::string _method;
-        std::string _qparams;
-
-    public:
-        explicit HttpRequestHeader(const std::string& url = std::string())
-        : _url(url),
-          _method("GET")
-        { }
-
-        virtual ~HttpRequestHeader()  {}
-
-        void clear()
-        {
-            HttpMessageHeader::clear();
-            _method = "GET";
-            _qparams.clear();
-        }
-
-        const std::string& url() const
-        { return _url; }
-
-        void url(const std::string& u)
-        { _url = u; }
-
-        const std::string& method() const
-        { return _method; }
-
-        void method(const std::string& m)
-        { _method = m; }
-
-        const std::string& qparams() const
-        { return _qparams; }
-
-        void qparams(const std::string& q)
-        { _qparams = q; }
-
-};
+/** @namespace Pt::Http
+    @brief HTTP server and client
+*/
+namespace Http {
 
 } // namespace Net
 
 } // namespace Pt
-
+ 
 #endif

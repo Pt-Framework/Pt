@@ -26,91 +26,51 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpReply_h
-#define Pt_Net_HttpReply_h
+#ifndef Pt_Http_ReplyHeader_h
+#define Pt_Http_ReplyHeader_h
 
-#include <Pt/Net/Api.h>
-#include <Pt/Net/HttpReplyHeader.h>
-#include <string>
-#include <sstream>
+#include <Pt/Http/Api.h>
+#include <Pt/Http/MessageHeader.h>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
-class HttpRequest;
+class HttpRequestHeader;
 
-class HttpReply
+class HttpReplyHeader : public HttpMessageHeader
 {
-        HttpReplyHeader _header;
-        std::ostringstream _body;
+        unsigned _httpReturnCode;
+        std::string _httpReturnText;
 
     public:
-        HttpReply()
+        HttpReplyHeader()
+            : _httpReturnCode(200),
+              _httpReturnText("OK")
             { }
-
-        HttpReplyHeader& header()
-        { return _header; }
-
-        const HttpReplyHeader& header() const
-        { return _header; }
-
-        void setHeader(const std::string& key, const std::string& value)
-        {
-            _header.setHeader(key, value);
-        }
-
-        void addHeader(const std::string& key, const std::string& value)
-        {
-            _header.addHeader(key, value);
-        }
-
-        void removeHeader(const std::string& key)
-        {
-            _header.removeHeader(key);
-        }
-
-        std::string getHeader(const std::string& key) const
-        {
-            return _header.getHeader(key);
-        }
-
-        bool hasHeader(const std::string& key) const
-        {
-            return _header.hasHeader(key);
-        }
 
         void clear()
         {
-            _header.clear();
-            _body.clear();
-            _body.str(std::string());
+            HttpMessageHeader::clear();
+            _httpReturnCode = 200;
+            _httpReturnText = "OK";
         }
 
         unsigned httpReturnCode() const
-        { return _header.httpReturnCode(); }
+        { return _httpReturnCode; }
 
         const std::string& httpReturnText() const
-        { return _header.httpReturnText(); }
+        { return _httpReturnText; }
 
         void httpReturn(unsigned c, const std::string& t)
-        { _header.httpReturn(c, t); }
-
-        std::string bodyStr() const
-        { return _body.str(); }
-
-        std::ostream& body()
-        { return _body; }
-
-        std::size_t bodySize() const
-        { return _body.str().size(); }
-
-        void sendBody(std::ostream& out) const
-        { out << _body.str(); }
+        {
+            _httpReturnCode = c;
+            _httpReturnText = t;
+        }
 
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

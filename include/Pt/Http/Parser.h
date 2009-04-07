@@ -26,23 +26,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Net_HttpParser_h
-#define Pt_Net_HttpParser_h
+#ifndef Pt_Http_Parser_h
+#define Pt_Http_Parser_h
 
-#include <Pt/Net/Api.h>
+#include <Pt/Http/Api.h>
 #include <string>
 #include <iostream>
 
 namespace Pt {
 
-namespace Net {
+namespace Http {
 
 class HttpMessageHeader;
 
-class PT_NET_API HttpHeaderParser
+class PT_HTTP_API HttpHeaderParser
 {
     public:
-        class PT_NET_API Event
+        class PT_HTTP_API Event
         {
             public:
                 virtual ~Event() {}
@@ -56,7 +56,7 @@ class PT_NET_API HttpHeaderParser
                 virtual void onEnd();
         };
 
-        class PT_NET_API HttpMessageHeaderEvent : public Event
+        class PT_HTTP_API HttpMessageHeaderEvent : public Event
         {
                 HttpMessageHeader& _header;
                 std::string _key;
@@ -146,7 +146,7 @@ class PT_NET_API HttpHeaderParser
         }
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 
