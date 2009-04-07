@@ -53,7 +53,7 @@ else
 }
 
 LINKFLAGS += -bh:5 ;
-C++FLAGS  += $(CCFLAGS) -qrtti -qeh -qstaticinline ;
+C++FLAGS  += $(CCFLAGS) -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
 WARN      ?= -qinfo=lan ;
 
 ##############################################################################
