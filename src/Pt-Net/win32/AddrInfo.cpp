@@ -28,6 +28,7 @@
 #include "AddrInfo.h"
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
+#include <sstream>
 #include <stdexcept>
 #include <string.h>
 

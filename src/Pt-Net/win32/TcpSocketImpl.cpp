@@ -356,7 +356,7 @@ size_t TcpSocketImpl::endWrite()
 	if(WSAGetOverlappedResult(_fd, &_sendOverlapped, &numberOfBytesSent, FALSE, &flags) == FALSE)
 	{
 		if( WSAECONNRESET == WSAGetLastError() )
-			throw IOError("lost connection to peer");
+			throw System::IOError("lost connection to peer");
 
 		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
 	}

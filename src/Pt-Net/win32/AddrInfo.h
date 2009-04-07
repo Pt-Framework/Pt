@@ -32,11 +32,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-
 #include <Pt/Net/Api.h>
 #include <string>
  
-
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
