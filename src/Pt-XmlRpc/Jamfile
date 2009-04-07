@@ -1,5 +1,6 @@
 SubDir TOP src Pt-XmlRpc ;
 SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 
 PT_XMLRPC_SOURCES = Client.cpp
                     Fault.cpp
@@ -10,7 +11,7 @@ PT_XMLRPC_SOURCES = Client.cpp
                     Service.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
-LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-System Pt-Net Pt ;
+LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate Pt-XmlRpc : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
