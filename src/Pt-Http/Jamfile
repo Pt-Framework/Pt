@@ -1,0 +1,17 @@
+SubDir TOP src Pt-Http ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
+SubDirHdrs $(TOP)/src/Pt-Http/$(SYS:L) ;
+
+SharedLibrary Pt-Http : Client.cpp
+                        MessageHeader.cpp
+                        Server.cpp
+                        Parser.cpp ;
+SharedLibrary_LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
+SharedLibrary_MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+NOTFILE Pt-Http-all ;
+DEPENDS Pt-Http-all : Pt-Http ;
+
+SubInclude TOP src Pt-Http tests ;
