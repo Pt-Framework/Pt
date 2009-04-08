@@ -34,11 +34,11 @@ namespace Pt {
 
 namespace Http {
 
-void HttpResponder::beginRequest(std::istream& in, HttpRequest& request)
+void Responder::beginRequest(std::istream& in, Request& request)
 {
 }
 
-std::size_t HttpResponder::readBody(std::istream& in)
+std::size_t Responder::readBody(std::istream& in)
 {
     std::streambuf* sb = in.rdbuf();
 
@@ -52,43 +52,43 @@ std::size_t HttpResponder::readBody(std::istream& in)
     return ret;
 }
 
-void HttpResponder::replyError(std::ostream& out, HttpRequest& request, HttpReply& reply, const std::exception& ex)
+void Responder::replyError(std::ostream& out, Request& request, Reply& reply, const std::exception& ex)
 {
     reply.httpReturn(500, "internal server error");
     reply.setHeader("Content-Type", "text/plain");
     out << ex.what();
 }
 
-void HttpNotFoundResponder::reply(std::ostream& out, HttpRequest& request, HttpReply& reply)
+void NotFoundResponder::reply(std::ostream& out, Request& request, Reply& reply)
 {
     reply.httpReturn(404, "Not found");
 }
 
-HttpResponder* HttpNotFoundService::createResponder(const HttpRequest&)
+Responder* NotFoundService::createResponder(const Request&)
 {
     return &_responder;
 }
 
-void HttpNotFoundService::releaseResponder(HttpResponder*)
+void NotFoundService::releaseResponder(Responder*)
 { }
 
-void HttpSocket::ParseEvent::onMethod(const std::string& method)
+void Socket::ParseEvent::onMethod(const std::string& method)
 {
     _request.method(method);
 }
 
-void HttpSocket::ParseEvent::onUrl(const std::string& url)
+void Socket::ParseEvent::onUrl(const std::string& url)
 {
     _request.url(url);
 }
 
-void HttpSocket::ParseEvent::onUrlParam(const std::string& q)
+void Socket::ParseEvent::onUrlParam(const std::string& q)
 {
     _request.qparams(q);
 }
 
         
-HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
+Socket::Socket(System::SelectorBase& selector, Server& server)
 : TcpSocket(server)
 , _server(server)
 ,  _parseEvent(_request)
@@ -98,9 +98,9 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
 {
     _stream.attachDevice(*this);
     _stream.buffer().beginRead();
-    Pt::connect(_stream.buffer().inputReady, *this, &HttpSocket::onInput);
-    Pt::connect(_stream.buffer().outputReady, *this, &HttpSocket::onOutput);
-    Pt::connect(_timer.timeout, *this, &HttpSocket::onTimeout);
+    Pt::connect(_stream.buffer().inputReady, *this, &Socket::onInput);
+    Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
+    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
 
     selector.add(*this);
 
@@ -108,7 +108,7 @@ HttpSocket::HttpSocket(System::SelectorBase& selector, HttpServer& server)
     selector.add(_timer);
 }
 
-void HttpSocket::onInput(System::StreamBuffer& sb)
+void Socket::onInput(System::StreamBuffer& sb)
 {
     _timer.start(_server.readTimeout());
 
@@ -216,7 +216,7 @@ void HttpSocket::onInput(System::StreamBuffer& sb)
     }
 }
 
-void HttpSocket::onOutput(System::StreamBuffer& sb)
+void Socket::onOutput(System::StreamBuffer& sb)
 {
     sb.beginWrite();
 
@@ -257,13 +257,13 @@ void HttpSocket::onOutput(System::StreamBuffer& sb)
     }
 }
 
-void HttpSocket::onTimeout()
+void Socket::onTimeout()
 {
      close();
      delete this;
 }
 
-void HttpSocket::sendReply()
+void Socket::sendReply()
 {
     const std::string contentLength = "Content-Length";
     const std::string server = "Server";
@@ -276,7 +276,7 @@ void HttpSocket::sendReply()
         << _reply.header().httpReturnCode() << ' '
         << _reply.header().httpReturnText() << "\r\n";
 
-    for (HttpReplyHeader::const_iterator it = _reply.header().begin();
+    for (ReplyHeader::const_iterator it = _reply.header().begin();
         it != _reply.header().end(); ++it)
     {
         _stream << it->first << ": " << it->second << "\r\n";
@@ -289,7 +289,7 @@ void HttpSocket::sendReply()
 
     if (!_reply.header().hasHeader(server))
     {
-        _stream << "Server: Pt-Net-HttpServer\r\n";
+        _stream << "Server: Pt-Net-Server\r\n";
     }
 
     if (!_reply.header().hasHeader(connection))
@@ -301,7 +301,7 @@ void HttpSocket::sendReply()
 
     if (!_reply.header().hasHeader(date))
     {
-        _stream << "Date: " << HttpMessageHeader::htdateCurrent() << "\r\n";
+        _stream << "Date: " << MessageHeader::htdateCurrent() << "\r\n";
     }
 
     _stream << "\r\n";
@@ -310,7 +310,7 @@ void HttpSocket::sendReply()
 
 }
 
-HttpServer::HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port)
+Server::Server(System::SelectorBase& selector, const std::string& ip, unsigned short int port)
 : TcpServer(ip, port),
   _selector(selector),
   _readTimeout(5000),
@@ -318,15 +318,15 @@ HttpServer::HttpServer(System::SelectorBase& selector, const std::string& ip, un
   _keepAliveTimeout(30000)
 {
     _selector.add(*this);
-    Pt::connect(connectionPending, *this, &HttpServer::onConnect);
+    Pt::connect(connectionPending, *this, &Server::onConnect);
 }
 
-void HttpServer::addService(const std::string& url, HttpService& service)
+void Server::addService(const std::string& url, Service& service)
 {
     _service.insert(ServicesType::value_type(url, &service));
 }
 
-void HttpServer::removeService(HttpService& service)
+void Server::removeService(Service& service)
 {
     ServicesType::iterator it = _service.begin();
     while (it != _service.end())
@@ -342,12 +342,12 @@ void HttpServer::removeService(HttpService& service)
     }
 }
 
-HttpResponder* HttpServer::getResponder(const HttpRequest& request)
+Responder* Server::getResponder(const Request& request)
 {
     for (ServicesType::const_iterator it = _service.lower_bound(request.url());
         it != _service.end() && it->first == request.url(); ++it)
     {
-        HttpResponder* resp = it->second->createResponder(request);
+        Responder* resp = it->second->createResponder(request);
         if (resp)
             return resp;
     }
@@ -355,9 +355,9 @@ HttpResponder* HttpServer::getResponder(const HttpRequest& request)
     return _defaultService.createResponder(request);
 }
 
-void HttpServer::onConnect(TcpServer& server)
+void Server::onConnect(TcpServer& server)
 {
-    new HttpSocket(_selector, *this);
+    new Socket(_selector, *this);
 }
 
 } // namespace Http

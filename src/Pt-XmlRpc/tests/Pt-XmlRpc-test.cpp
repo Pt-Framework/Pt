@@ -64,7 +64,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
     private:
         Pt::System::EventLoop* _loop;
-        Pt::Http::HttpServer* _server;
+        Pt::Http::Server* _server;
 
     public:
         PtXmlRpcTest()
@@ -92,7 +92,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             connect(_loop->timeout, *this, &PtXmlRpcTest::failTest);
             connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
 
-            _server = new Pt::Http::HttpServer(*_loop, "127.0.0.1", 8001);
+            _server = new Pt::Http::Server(*_loop, "127.0.0.1", 8001);
         }
 
         void tearDown()

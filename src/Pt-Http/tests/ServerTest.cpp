@@ -35,13 +35,13 @@
 #include "Pt/System/EventLoop.h"
 #include <string>
 
-class HttpServerTest : public Pt::Unit::TestSuite
+class ServerTest : public Pt::Unit::TestSuite
 {
     public:
-        HttpServerTest()
-        : Pt::Unit::TestSuite("HttpServerTest")
+        ServerTest()
+        : Pt::Unit::TestSuite("ServerTest")
         {
-            this->registerMethod( "NotFoundRequest", *this, &HttpServerTest::NotFoundRequest);
+            this->registerMethod( "NotFoundRequest", *this, &ServerTest::NotFoundRequest);
         }
 
         void setUp()
@@ -59,15 +59,15 @@ class HttpServerTest : public Pt::Unit::TestSuite
         {
             connect(loop->timeout, *loop, &Pt::System::EventLoop::exit);
 
-            Pt::Http::HttpServer server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
-            Pt::Http::HttpClient client("127.0.0.1", 8001);
+            Pt::Http::Client client("127.0.0.1", 8001);
             client.setSelector(*loop);
-            connect(client.headerReceived, *this, &HttpServerTest::onReplyHeader);
-            connect(client.bodyAvailable, *this, &HttpServerTest::onReply);
-            connect(client.replyFinished, *this, &HttpServerTest::onReplyFinished);
+            connect(client.headerReceived, *this, &ServerTest::onReplyHeader);
+            connect(client.bodyAvailable, *this, &ServerTest::onReply);
+            connect(client.replyFinished, *this, &ServerTest::onReplyFinished);
 
-            Pt::Http::HttpRequest request("/index.html");
+            Pt::Http::Request request("/index.html");
             request.setHeader("foo", "bar");
             client.beginExecute(request);
 
@@ -77,13 +77,13 @@ class HttpServerTest : public Pt::Unit::TestSuite
     private:
         Pt::System::EventLoop* loop;
 
-        void onReplyHeader(Pt::Http::HttpClient& client)
+        void onReplyHeader(Pt::Http::Client& client)
         {
             std::cout << "Server=" << client.header().getHeader("server") << std::endl;
             std::cout << "Connection=" << client.header().getHeader("connection") << std::endl;
         }
 
-        std::size_t onReply(Pt::Http::HttpClient& client)
+        std::size_t onReply(Pt::Http::Client& client)
         {
             std::size_t ret = 0;
             while ( client.in().rdbuf()->in_avail() )
@@ -97,7 +97,7 @@ class HttpServerTest : public Pt::Unit::TestSuite
             return ret;
         }
 
-        void onReplyFinished(Pt::Http::HttpClient& client)
+        void onReplyFinished(Pt::Http::Client& client)
         {
             PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
             std::cout << "THE END" << std::endl;
@@ -105,4 +105,4 @@ class HttpServerTest : public Pt::Unit::TestSuite
         }
 };
 
-Pt::Unit::RegisterTest<HttpServerTest> register_HttpServerTest;
+Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;

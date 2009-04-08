@@ -39,17 +39,17 @@ namespace Pt {
 
 namespace Http {
 
-class HttpMessage
+class Message
 {
-        HttpMessageHead _head;
+        MessageHead _head;
 
         std::stringstream _body;
 
     public:
-        HttpMessage()
+        Message()
             { }
 
-        virtual ~HttpMessage()  {}
+        virtual ~Message()  {}
 
         void clear()
         {
@@ -102,10 +102,10 @@ class HttpMessage
 
         std::size_t contentSize() const;
 
-        HttpMessageHead& header()
+        MessageHead& header()
         { return _head; }
 
-        const HttpMessageHead& header() const
+        const MessageHead& header() const
         { return _head; }
 
         bool keepAlive() const

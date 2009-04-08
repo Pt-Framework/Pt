@@ -38,7 +38,7 @@ namespace System {
 StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
 : _sb(0),
   _ioDevice(0),
-  _bufferSize(bufferSize+4),
+  _ibufferSize(bufferSize+4),
   _ibuffer(0),
   _obufferSize(bufferSize),
   _obuffer(0),
@@ -58,8 +58,12 @@ StreamBufferBase::~StreamBufferBase()
 void StreamBufferBase::init(StreamBuffer& sb)
 { 
     _sb = &sb; 
-	_sb->setg(0, 0, 0);
-    _sb->setp(0, 0);
+
+    if (_sb->gptr())
+        _sb->setg(_ibuffer, _ibuffer + _ibufferSize, _ibuffer + _ibufferSize);
+
+    if (_sb->pptr())
+        _sb->setp(_obuffer, _obuffer + _obufferSize);
 }
 
 
@@ -90,7 +94,7 @@ void StreamBufferBase::beginRead()
 
     if( ! _ibuffer )
     {
-        _ibuffer = new char[_bufferSize];
+        _ibuffer = new char[_ibufferSize];
     }
 
     size_t putback = _pbmax;
@@ -111,7 +115,7 @@ void StreamBufferBase::beginRead()
     }
 
     size_t used = _pbmax + leftover;
-    _ioDevice->beginRead( _ibuffer + used, _bufferSize - used );
+    _ioDevice->beginRead( _ibuffer + used, _ibufferSize - used );
     _reading = true;
 
     _sb->setg( _ibuffer + (_pbmax - putback), // start of get area
@@ -232,7 +236,7 @@ StreamBufferBase::int_type StreamBufferBase::do_underflow()
 
     if( ! _ibuffer )
     {
-        _ibuffer = new char[_bufferSize];
+        _ibuffer = new char[_ibufferSize];
     }
 
     size_t putback = _pbmax;
@@ -245,7 +249,7 @@ StreamBufferBase::int_type StreamBufferBase::do_underflow()
                       putback );
     }
 
-    size_t readSize = _ioDevice->read( _ibuffer + _pbmax, _bufferSize - _pbmax );
+    size_t readSize = _ioDevice->read( _ibuffer + _pbmax, _ibufferSize - _pbmax );
 
     _sb->setg( _ibuffer + _pbmax - putback,    // start of get area
                _ibuffer + _pbmax,              // gptr position
@@ -348,8 +352,7 @@ StreamBufferBase::do_seekoff(off_type off, std::ios::seekdir dir, std::ios::open
     ret = _ioDevice->seek(off, dir);
 
     // eliminate currently buffered sequence
-    _sb->setg(0, 0, 0);
-    _sb->setp(0, 0);
+    discard();
 
     return ret;
 }

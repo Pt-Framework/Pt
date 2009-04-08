@@ -46,7 +46,7 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
-class PT_XMLRPC_API HttpXmlRpcResponder : public Http::HttpResponder
+class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 {
     enum State
     {
@@ -62,18 +62,18 @@ class PT_XMLRPC_API HttpXmlRpcResponder : public Http::HttpResponder
     };
 
     public:
-        HttpXmlRpcResponder(Service& service);
+        XmlRpcResponder(Service& service);
 
-        ~HttpXmlRpcResponder();
+        ~XmlRpcResponder();
 
-        void beginRequest(std::istream& in, Http::HttpRequest& request);
+        void beginRequest(std::istream& in, Http::Request& request);
 
         std::size_t readBody(std::istream& is);
 
-        void replyError(std::ostream& os, Http::HttpRequest& request,
-                        Http::HttpReply& reply, const std::exception& ex);
+        void replyError(std::ostream& os, Http::Request& request,
+                        Http::Reply& reply, const std::exception& ex);
 
-        void reply(std::ostream& os, Http::HttpRequest& request, Http::HttpReply& reply);
+        void reply(std::ostream& os, Http::Request& request, Http::Reply& reply);
 
     protected:
         void advance(const Pt::Xml::Node& node);

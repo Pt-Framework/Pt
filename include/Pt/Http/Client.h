@@ -48,17 +48,17 @@ namespace Pt {
 
 namespace Http {
 
-class PT_HTTP_API HttpClient : public Pt::Connectable
+class PT_HTTP_API Client : public Pt::Connectable
 {
         friend class ParseEvent;
 
-        class PT_HTTP_API ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
+        class PT_HTTP_API ParseEvent : public HeaderParser::MessageHeaderEvent
         {
-                HttpReplyHeader& _replyHeader;
+                ReplyHeader& _replyHeader;
 
             public:
-                explicit ParseEvent(HttpReplyHeader& replyHeader)
-                    : HttpHeaderParser::HttpMessageHeaderEvent(replyHeader),
+                explicit ParseEvent(ReplyHeader& replyHeader)
+                    : HeaderParser::MessageHeaderEvent(replyHeader),
                       _replyHeader(replyHeader)
                     { }
 
@@ -66,10 +66,10 @@ class PT_HTTP_API HttpClient : public Pt::Connectable
         };
 
         ParseEvent _parseEvent;
-        HttpHeaderParser _parser;
+        HeaderParser _parser;
 
-        const HttpRequest* _request;
-        HttpReplyHeader _replyHeader;
+        const Request* _request;
+        ReplyHeader _replyHeader;
 
         std::string _server;
         unsigned short int _port;
@@ -78,8 +78,11 @@ class PT_HTTP_API HttpClient : public Pt::Connectable
         bool _readHeader;
         long _contentLength;
 
-        void sendRequest(const HttpRequest& request);
+        void sendRequest(const Request& request);
         void processBodyAvailable();
+
+        void reexecute(const Request& request);
+        void doparse();
 
     protected:
         void onConnect(Net::TcpSocket& socket);
@@ -87,14 +90,14 @@ class PT_HTTP_API HttpClient : public Pt::Connectable
         void onInput(System::StreamBuffer& sb);
 
     public:
-        HttpClient(const std::string& server, unsigned short int port);
+        Client(const std::string& server, unsigned short int port);
 
-        HttpClient(const std::string& server, unsigned short int port, System::SelectorBase& selector);
+        Client(const std::string& server, unsigned short int port, System::SelectorBase& selector);
 
-        const HttpReplyHeader& execute(const HttpRequest& request,
+        const ReplyHeader& execute(const Request& request,
             std::size_t timeout = System::Selectable::WaitInfinite);
 
-        const HttpReplyHeader& header()
+        const ReplyHeader& header()
         { return _replyHeader; }
 
         void readBody(std::string& s);
@@ -108,7 +111,7 @@ class PT_HTTP_API HttpClient : public Pt::Connectable
 
         std::string get(const std::string& url);
 
-        void beginExecute(const HttpRequest& request);
+        void beginExecute(const Request& request);
 
         void setSelector(System::SelectorBase& selector);
 
@@ -119,11 +122,11 @@ class PT_HTTP_API HttpClient : public Pt::Connectable
             return _stream;
         }
 
-        Signal<HttpClient&> requestSent;
-        Signal<HttpClient&> headerReceived;
-        Pt::Delegate<std::size_t, HttpClient&> bodyAvailable;
-        Signal<HttpClient&> replyFinished;
-        Signal<HttpClient&, const std::exception&> errorOccured;
+        Signal<Client&> requestSent;
+        Signal<Client&> headerReceived;
+        Pt::Delegate<std::size_t, Client&> bodyAvailable;
+        Signal<Client&> replyFinished;
+        Signal<Client&, const std::exception&> errorOccured;
 };
 
 } // namespace Http

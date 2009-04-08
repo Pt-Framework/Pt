@@ -200,7 +200,7 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
 };
 
 
-class PT_XMLRPC_API Service : public Http::HttpService
+class PT_XMLRPC_API Service : public Http::Service
 {
     public:
         Service();
@@ -231,9 +231,9 @@ class PT_XMLRPC_API Service : public Http::HttpService
             this->registerProcedure(name, proc);
         }
 
-        virtual Http::HttpResponder* createResponder(const Http::HttpRequest&);
+        virtual Http::Responder* createResponder(const Http::Request&);
 
-        virtual void releaseResponder(Http::HttpResponder* resp);
+        virtual void releaseResponder(Http::Responder* resp);
 
     protected:
         void registerProcedure(const std::string& name, ServiceProcedure* proc);

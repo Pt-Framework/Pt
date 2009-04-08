@@ -84,11 +84,11 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         void call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc);
 
     protected:
-        void onReplyHeader(Http::HttpClient& client);
+        void onReplyHeader(Http::Client& client);
 
-        std::size_t onReplyBody(Http::HttpClient& client);
+        std::size_t onReplyBody(Http::Client& client);
 
-        void onReplyFinished(Http::HttpClient& client);
+        void onReplyFinished(Http::Client& client);
 
         void prepareRequest(const std::string& name, ISerializer** argv, unsigned argc);
 
@@ -97,8 +97,8 @@ class PT_XMLRPC_API Client : public Pt::Connectable
     private:
         State _state;
         std::string _url;
-        Http::HttpClient _client;
-        Http::HttpRequest _request;
+        Http::Client _client;
+        Http::Request _request;
         TextIStream _ts;
         Xml::XmlReader _reader;
         Xml::XmlWriter _writer;

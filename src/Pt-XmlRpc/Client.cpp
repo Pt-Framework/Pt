@@ -98,11 +98,13 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
     _state = OnBegin;
 
     this->prepareRequest(method.name(), argv, argc);
-    Http::HttpReplyHeader header = _client.execute(_request);
+    Http::ReplyHeader header = _client.execute(_request);
 
-    std::string body = _client.readBody();
+    std::string body;
+    _client.readBody(body);
     std::istringstream is(body);
     _ts.attach(is);
+    _reader.reset(_ts);
     _scanner.begin(r, _context);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
@@ -124,14 +126,14 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
 }
 
 
-void Client::onReplyHeader(Http::HttpClient& client)
+void Client::onReplyHeader(Http::Client& client)
 {
     _fault.clear();
     _ts.attach( client.in() );
 }
 
 
-std::size_t Client::onReplyBody(Http::HttpClient& client)
+std::size_t Client::onReplyBody(Http::Client& client)
 {
     std::size_t n = 0;
 
@@ -175,7 +177,7 @@ std::size_t Client::onReplyBody(Http::HttpClient& client)
 }
 
 
-void Client::onReplyFinished(Http::HttpClient& client)
+void Client::onReplyFinished(Http::Client& client)
 {
     if(_state == OnMethodResponseEnd)
     {

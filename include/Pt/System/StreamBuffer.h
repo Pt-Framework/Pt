@@ -98,7 +98,7 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
     private:
 	    StreamBuffer* _sb;
         IODevice* _ioDevice;
-        size_t _bufferSize;
+        size_t _ibufferSize;
         char* _ibuffer;
         std::size_t _obufferSize;
         char* _obuffer;

@@ -38,21 +38,21 @@ namespace Pt {
 
 namespace Http {
 
-class HttpRequest;
+class Request;
 
-class HttpReply
+class Reply
 {
-        HttpReplyHeader _header;
+        ReplyHeader _header;
         std::ostringstream _body;
 
     public:
-        HttpReply()
+        Reply()
             { }
 
-        HttpReplyHeader& header()
+        ReplyHeader& header()
         { return _header; }
 
-        const HttpReplyHeader& header() const
+        const ReplyHeader& header() const
         { return _header; }
 
         void setHeader(const std::string& key, const std::string& value)

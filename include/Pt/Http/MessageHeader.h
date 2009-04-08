@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Http {
 
-class PT_HTTP_API HttpMessageHeader
+class PT_HTTP_API MessageHeader
 {
         class PT_HTTP_API StringLessIgnoreCase
         {
@@ -53,12 +53,12 @@ class PT_HTTP_API HttpMessageHeader
     public:
         typedef Headers::const_iterator const_iterator;
 
-        HttpMessageHeader()
+        MessageHeader()
             : _httpVersionMajor(1)
             , _httpVersionMinor(1)
             { }
 
-        virtual ~HttpMessageHeader()  {}
+        virtual ~MessageHeader()  {}
 
         void clear()
         {
@@ -125,7 +125,7 @@ class PT_HTTP_API HttpMessageHeader
 
 };
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

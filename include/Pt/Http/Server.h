@@ -52,70 +52,70 @@ namespace System {
 
 namespace Http {
 
-class HttpResponder;
+class Responder;
 
-class HttpService
+class Service
 {
     public:
-        virtual ~HttpService() { }
-        virtual HttpResponder* createResponder(const HttpRequest&) = 0;
-        virtual void releaseResponder(HttpResponder*) = 0;
+        virtual ~Service() { }
+        virtual Responder* createResponder(const Request&) = 0;
+        virtual void releaseResponder(Responder*) = 0;
 };
 
-class PT_HTTP_API HttpResponder
+class PT_HTTP_API Responder
 {
     public:
-        explicit HttpResponder(HttpService& service)
+        explicit Responder(Service& service)
             : _service(service)
         { }
 
-        virtual ~HttpResponder() { }
+        virtual ~Responder() { }
 
-        virtual void beginRequest(std::istream& in, HttpRequest& request);
+        virtual void beginRequest(std::istream& in, Request& request);
         virtual std::size_t readBody(std::istream&);
-        virtual void reply(std::ostream&, HttpRequest& request, HttpReply& reply) = 0;
-        virtual void replyError(std::ostream&, HttpRequest& request, HttpReply& reply, const std::exception& ex);
+        virtual void reply(std::ostream&, Request& request, Reply& reply) = 0;
+        virtual void replyError(std::ostream&, Request& request, Reply& reply, const std::exception& ex);
 
         void release()     { _service.releaseResponder(this); }
 
     private:
-        HttpService& _service;
+        Service& _service;
 };
 
-class PT_HTTP_API HttpNotFoundResponder : public HttpResponder
+class PT_HTTP_API NotFoundResponder : public Responder
 {
     public:
-        explicit HttpNotFoundResponder(HttpService& service)
-            : HttpResponder(service)
+        explicit NotFoundResponder(Service& service)
+            : Responder(service)
             { }
 
-        void reply(std::ostream&, HttpRequest& request, HttpReply& reply);
+        void reply(std::ostream&, Request& request, Reply& reply);
 };
 
-class PT_HTTP_API HttpNotFoundService : public HttpService
+class PT_HTTP_API NotFoundService : public Service
 {
     public:
-        HttpNotFoundService()
+        NotFoundService()
             : _responder(*this)
             { }
 
-        HttpResponder* createResponder(const HttpRequest&);
-        void releaseResponder(HttpResponder*);
+        Responder* createResponder(const Request&);
+        void releaseResponder(Responder*);
 
     private:
-        HttpNotFoundResponder _responder;
+        NotFoundResponder _responder;
 };
 
-class PT_HTTP_API HttpServer : public Net::TcpServer, public Connectable
+class PT_HTTP_API Server : public Net::TcpServer, public Connectable
 {
     public:
-        HttpServer(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
+        Server(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
 
-        void addService(const std::string& url, HttpService& service);
-        void removeService(HttpService& service);
+        void addService(const std::string& url, Service& service);
+        void removeService(Service& service);
 
-        HttpResponder* getResponder(const HttpRequest& request);
-        HttpResponder* getDefaultResponder(const HttpRequest& request)
+        Responder* getResponder(const Request& request);
+        Responder* getDefaultResponder(const Request& request)
             { return _defaultService.createResponder(request); }
 
         void onConnect(TcpServer& server);
@@ -129,10 +129,10 @@ class PT_HTTP_API HttpServer : public Net::TcpServer, public Connectable
         void keepAliveTimeout(std::size_t ms) { _keepAliveTimeout = ms; }
 
     private:
-        typedef std::multimap<std::string, HttpService*> ServicesType;
+        typedef std::multimap<std::string, Service*> ServicesType;
         ServicesType _service;
         System::SelectorBase& _selector;
-        HttpNotFoundService _defaultService;
+        NotFoundService _defaultService;
 
         std::size_t _readTimeout;
         std::size_t _writeTimeout;
@@ -140,15 +140,15 @@ class PT_HTTP_API HttpServer : public Net::TcpServer, public Connectable
 };
 
 
-class PT_HTTP_API HttpSocket : public Net::TcpSocket, public Connectable
+class PT_HTTP_API Socket : public Net::TcpSocket, public Connectable
 {
-        class ParseEvent : public HttpHeaderParser::HttpMessageHeaderEvent
+        class ParseEvent : public HeaderParser::MessageHeaderEvent
         {
-                HttpRequest& _request;
+                Request& _request;
 
             public:
-                explicit ParseEvent(HttpRequest& request)
-                    : HttpHeaderParser::HttpMessageHeaderEvent(request.header()),
+                explicit ParseEvent(Request& request)
+                    : HeaderParser::MessageHeaderEvent(request.header()),
                       _request(request)
                     { }
 
@@ -158,7 +158,7 @@ class PT_HTTP_API HttpSocket : public Net::TcpSocket, public Connectable
         };
 
     public:
-        HttpSocket(System::SelectorBase& s, HttpServer& server);
+        Socket(System::SelectorBase& s, Server& server);
 
         void onInput(System::StreamBuffer& stream);
         void onOutput(System::StreamBuffer& stream);
@@ -167,16 +167,16 @@ class PT_HTTP_API HttpSocket : public Net::TcpSocket, public Connectable
         void sendReply();
 
     private:
-        HttpServer& _server;
+        Server& _server;
 
         ParseEvent _parseEvent;
-        HttpHeaderParser _parser;
-        HttpRequest _request;
-        HttpReply _reply;
+        HeaderParser _parser;
+        Request _request;
+        Reply _reply;
 
         System::Timer _timer;
         int _contentLength;
-        HttpResponder* _responder;
+        Responder* _responder;
         System::IOStream _stream;
 };
 

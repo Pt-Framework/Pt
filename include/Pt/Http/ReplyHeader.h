@@ -36,22 +36,22 @@ namespace Pt {
 
 namespace Http {
 
-class HttpRequestHeader;
+class RequestHeader;
 
-class HttpReplyHeader : public HttpMessageHeader
+class ReplyHeader : public MessageHeader
 {
         unsigned _httpReturnCode;
         std::string _httpReturnText;
 
     public:
-        HttpReplyHeader()
+        ReplyHeader()
             : _httpReturnCode(200),
               _httpReturnText("OK")
             { }
 
         void clear()
         {
-            HttpMessageHeader::clear();
+            MessageHeader::clear();
             _httpReturnCode = 200;
             _httpReturnText = "OK";
         }

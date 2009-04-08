@@ -37,23 +37,23 @@ namespace Pt {
 
 namespace Http {
 
-class HttpRequestHeader : public HttpMessageHeader
+class RequestHeader : public MessageHeader
 {
         std::string _url;
         std::string _method;
         std::string _qparams;
 
     public:
-        explicit HttpRequestHeader(const std::string& url = std::string())
+        explicit RequestHeader(const std::string& url = std::string())
         : _url(url),
           _method("GET")
         { }
 
-        virtual ~HttpRequestHeader()  {}
+        virtual ~RequestHeader()  {}
 
         void clear()
         {
-            HttpMessageHeader::clear();
+            MessageHeader::clear();
             _method = "GET";
             _qparams.clear();
         }

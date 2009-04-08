@@ -34,12 +34,12 @@ namespace Pt {
 
 namespace Http {
 
-void HttpClient::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
+void Client::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
     _replyHeader.httpReturn(ret, text);
 }
 
-HttpClient::HttpClient(const std::string& server, unsigned short int port)
+Client::Client(const std::string& server, unsigned short int port)
 : _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
@@ -50,13 +50,13 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port)
 , _contentLength(0)
 {
     _stream.attachDevice(_socket);
-    connect(_socket.connected, *this, &HttpClient::onConnect);
-    connect(_stream.buffer().outputReady, *this, &HttpClient::onOutput);
-    connect(_stream.buffer().inputReady, *this, &HttpClient::onInput);
+    connect(_socket.connected, *this, &Client::onConnect);
+    connect(_stream.buffer().outputReady, *this, &Client::onOutput);
+    connect(_stream.buffer().inputReady, *this, &Client::onInput);
 }
 
 
-HttpClient::HttpClient(const std::string& server, unsigned short int port,
+Client::Client(const std::string& server, unsigned short int port,
     System::SelectorBase& selector)
 : _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
@@ -68,57 +68,84 @@ HttpClient::HttpClient(const std::string& server, unsigned short int port,
 , _contentLength(0)
 {
     _stream.attachDevice(_socket);
-    connect(_socket.connected, *this, &HttpClient::onConnect);
-    connect(_stream.buffer().outputReady, *this, &HttpClient::onOutput);
-    connect(_stream.buffer().inputReady, *this, &HttpClient::onInput);
+    connect(_socket.connected, *this, &Client::onConnect);
+    connect(_stream.buffer().outputReady, *this, &Client::onOutput);
+    connect(_stream.buffer().inputReady, *this, &Client::onInput);
     setSelector(selector);
 }
 
 
-void HttpClient::setSelector(System::SelectorBase& selector)
+void Client::setSelector(System::SelectorBase& selector)
 {
     selector.add(_socket);
 }
 
-const HttpReplyHeader& HttpClient::execute(const HttpRequest& request, std::size_t timeout)
+void Client::reexecute(const Request& request)
 {
-    bool connected = _socket.isConnected();
-    if (!connected)
+    _socket.connect(_server, _port);
+
+    _stream.clear();
+    _stream.buffer().discard();
+    sendRequest(request);
+    _stream.flush();
+}
+
+void Client::doparse()
+{
+    char ch;
+    while (!_parser.end() && _stream.get(ch))
+        _parser.parse(ch);
+
+}
+
+const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
+{
+    _replyHeader.clear();
+
+    _socket.setTimeout(timeout);
+
+    bool shouldReconnect = _socket.isConnected();
+    if (!shouldReconnect)
         _socket.connect(_server, _port);
 
     sendRequest(request);
     _stream.flush();
 
-    if (!_stream && !connected)
+    if (!_stream && shouldReconnect)
     {
-        // sending failed and we were not connected before, so try now
-        _socket.connect(_server, _port);
-
-        _stream.clear();
-        _stream.buffer().discard();
-        sendRequest(request);
-        _stream.flush();
+        // sending failed and we were not connected before, so try again
+        reexecute(request);
+        shouldReconnect = false;
     }
 
     if (!_stream)
         throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
     _parser.reset(true);
+    doparse();
 
-    char ch;
-    while (!_parser.end() && _stream.get(ch))
+    if (_parser.begin() && shouldReconnect)
     {
-        _parser.parse(ch);
+        // reading failed and we were not connected before, so try again
+        reexecute(request);
+
+        if (!_stream)
+            throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
+
+        doparse();
     }
 
     if (_parser.fail())
         throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
 
+    if (!_parser.end())
+        throw System::IOError( PT_ERROR_MSG("incomplete HTTP reply header") );
+
     return _replyHeader;
 }
 
 
-void HttpClient::readBody(std::string& s)
+void Client::readBody(std::string& s)
 {
     char ch;
 
@@ -138,15 +165,15 @@ void HttpClient::readBody(std::string& s)
 }
 
 
-std::string HttpClient::get(const std::string& url)
+std::string Client::get(const std::string& url)
 {
-    HttpRequest request(url);
+    Request request(url);
     execute(request);
     return readBody();
 }
 
 
-void HttpClient::beginExecute(const HttpRequest& request)
+void Client::beginExecute(const Request& request)
 {
     _request = &request;
     _replyHeader.clear();
@@ -173,13 +200,13 @@ void HttpClient::beginExecute(const HttpRequest& request)
 }
 
 
-void HttpClient::wait(std::size_t msecs)
+void Client::wait(std::size_t msecs)
 {
     _socket.wait(msecs);
 }
 
 
-void HttpClient::sendRequest(const HttpRequest& request)
+void Client::sendRequest(const Request& request)
 {
     const std::string contentLength = "Content-Length";
     const std::string server = "Server";
@@ -192,7 +219,7 @@ void HttpClient::sendRequest(const HttpRequest& request)
             << request.header().httpVersionMajor() << '.'
             << request.header().httpVersionMinor() << "\r\n";
 
-    for (HttpRequestHeader::const_iterator it = request.header().begin();
+    for (RequestHeader::const_iterator it = request.header().begin();
         it != request.header().end(); ++it)
     {
         _stream << it->first << ": " << it->second << "\r\n";
@@ -205,7 +232,7 @@ void HttpClient::sendRequest(const HttpRequest& request)
 
     if (!request.header().hasHeader(server))
     {
-        _stream << "Server: Pt-Net-HttpServer\r\n";
+        _stream << "Server: Pt-Net-Server\r\n";
     }
 
     if (!request.header().hasHeader(connection))
@@ -215,7 +242,7 @@ void HttpClient::sendRequest(const HttpRequest& request)
 
     if (!request.header().hasHeader(date))
     {
-        _stream << "Date: " << HttpMessageHeader::htdateCurrent() << "\r\n";
+        _stream << "Date: " << MessageHeader::htdateCurrent() << "\r\n";
     }
 
     if (!request.header().hasHeader(host))
@@ -232,7 +259,7 @@ void HttpClient::sendRequest(const HttpRequest& request)
 
 }
 
-void HttpClient::onConnect(Net::TcpSocket& socket)
+void Client::onConnect(Net::TcpSocket& socket)
 {
     socket.endConnect();
     sendRequest(*_request);
@@ -240,7 +267,7 @@ void HttpClient::onConnect(Net::TcpSocket& socket)
 }
 
 
-void HttpClient::onOutput(System::StreamBuffer& sb)
+void Client::onOutput(System::StreamBuffer& sb)
 {
     if( sb.out_avail() > 0 )
     {
@@ -254,7 +281,7 @@ void HttpClient::onOutput(System::StreamBuffer& sb)
 }
 
 
-void HttpClient::onInput(System::StreamBuffer& sb)
+void Client::onInput(System::StreamBuffer& sb)
 {
     try
     {
@@ -298,7 +325,7 @@ void HttpClient::onInput(System::StreamBuffer& sb)
     }
 }
 
-void HttpClient::processBodyAvailable()
+void Client::processBodyAvailable()
 {
     _contentLength -= bodyAvailable(*this); // TODO: may throw exception
     if( _contentLength <= 0 )

@@ -38,20 +38,20 @@ namespace Pt {
 
 namespace Http {
 
-class HttpRequest
+class Request
 {
-        HttpRequestHeader _header;
+        RequestHeader _header;
         std::ostringstream _body;
 
     public:
-        explicit HttpRequest(const std::string& url = std::string())
+        explicit Request(const std::string& url = std::string())
         : _header(url)
         { }
 
-        HttpRequestHeader& header()
+        RequestHeader& header()
         { return _header; }
 
-        const HttpRequestHeader& header() const
+        const RequestHeader& header() const
         { return _header; }
 
         void setHeader(const std::string& key, const std::string& value)

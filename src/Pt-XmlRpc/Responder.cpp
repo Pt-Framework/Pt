@@ -41,8 +41,8 @@ namespace Pt {
 namespace XmlRpc {
 
 
-HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
-: Http::HttpResponder(service)
+XmlRpcResponder::XmlRpcResponder(Service& service)
+: Http::Responder(service)
 , _state(OnBegin)
 , _ts(new Utf8Codec)
 , _reader(_ts)
@@ -55,12 +55,12 @@ HttpXmlRpcResponder::HttpXmlRpcResponder(Service& service)
 }
 
 
-HttpXmlRpcResponder::~HttpXmlRpcResponder()
+XmlRpcResponder::~XmlRpcResponder()
 {
 }
 
 
-void HttpXmlRpcResponder::beginRequest(std::istream& is, Http::HttpRequest& request)
+void XmlRpcResponder::beginRequest(std::istream& is, Http::Request& request)
 {
     _fault.clear();
     _state = OnBegin;
@@ -69,7 +69,7 @@ void HttpXmlRpcResponder::beginRequest(std::istream& is, Http::HttpRequest& requ
 }
 
 
-std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
+std::size_t XmlRpcResponder::readBody(std::istream& is)
 {
     std::size_t n = 0;
 
@@ -113,8 +113,8 @@ std::size_t HttpXmlRpcResponder::readBody(std::istream& is)
 }
 
 
-void HttpXmlRpcResponder::replyError(std::ostream& os, Http::HttpRequest& request,
-                                     Http::HttpReply& reply, const std::exception& ex)
+void XmlRpcResponder::replyError(std::ostream& os, Http::Request& request,
+                                     Http::Reply& reply, const std::exception& ex)
 {
     reply.setHeader("Content-Type", "text/xml");
 
@@ -138,7 +138,7 @@ void HttpXmlRpcResponder::replyError(std::ostream& os, Http::HttpRequest& reques
 }
 
 
-void HttpXmlRpcResponder::reply(std::ostream& os, Http::HttpRequest& request, Http::HttpReply& reply)
+void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Reply& reply)
 {
     if( ! _proc )
         throw std::runtime_error("invalid XML-RPC, no method found");
@@ -196,7 +196,7 @@ void HttpXmlRpcResponder::reply(std::ostream& os, Http::HttpRequest& request, Ht
 }
 
 
-void HttpXmlRpcResponder::advance(const Pt::Xml::Node& node)
+void XmlRpcResponder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {

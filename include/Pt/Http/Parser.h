@@ -37,9 +37,9 @@ namespace Pt {
 
 namespace Http {
 
-class HttpMessageHeader;
+class MessageHeader;
 
-class PT_HTTP_API HttpHeaderParser
+class PT_HTTP_API HeaderParser
 {
     public:
         class PT_HTTP_API Event
@@ -56,13 +56,13 @@ class PT_HTTP_API HttpHeaderParser
                 virtual void onEnd();
         };
 
-        class PT_HTTP_API HttpMessageHeaderEvent : public Event
+        class PT_HTTP_API MessageHeaderEvent : public Event
         {
-                HttpMessageHeader& _header;
+                MessageHeader& _header;
                 std::string _key;
 
             public:
-                explicit HttpMessageHeaderEvent(HttpMessageHeader& header)
+                explicit MessageHeaderEvent(MessageHeader& header)
                     : _header(header)
                     { }
 
@@ -72,7 +72,7 @@ class PT_HTTP_API HttpHeaderParser
         };
 
     private:
-        typedef void (HttpHeaderParser::*state_type)(char);
+        typedef void (HeaderParser::*state_type)(char);
 
         void state_cmd0(char ch);
         void state_cmd(char ch);
@@ -118,8 +118,8 @@ class PT_HTTP_API HttpHeaderParser
         unsigned value;
 
     public:
-        HttpHeaderParser(Event& ev_, bool client)
-            : state(client ? &HttpHeaderParser::state_cl_protocol0 : &HttpHeaderParser::state_cmd0),
+        HeaderParser(Event& ev_, bool client)
+            : state(client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0),
               ev(ev_)
             { }
 
@@ -133,16 +133,19 @@ class PT_HTTP_API HttpHeaderParser
         bool parse(char ch)
         {
             (this->*state)(ch);
-            return state == &HttpHeaderParser::state_end || state == &HttpHeaderParser::state_error;
+            return state == &HeaderParser::state_end || state == &HeaderParser::state_error;
         }
 
-        bool end() const    { return state == &HttpHeaderParser::state_end
-                                || state == &HttpHeaderParser::state_error; }
-        bool fail() const   { return state == &HttpHeaderParser::state_error; }
+        bool begin() const  { return state == &HeaderParser::state_cl_protocol0
+                                  || state == &HeaderParser::state_cmd0; }
+
+        bool end() const    { return state == &HeaderParser::state_end
+                                || state == &HeaderParser::state_error; }
+        bool fail() const   { return state == &HeaderParser::state_error; }
 
         void reset(bool client)
         {
-            state = (client ? &HttpHeaderParser::state_cl_protocol0 : &HttpHeaderParser::state_cmd0);
+            state = (client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0);
         }
 };
 
