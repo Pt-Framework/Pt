@@ -71,6 +71,7 @@ void PipeIODevice::open(HANDLE h, bool isAsync)
 
     this->setEnabled(true);
     this->setAsync(isAsync);
+    this->setEof(false);
 }
 
 
