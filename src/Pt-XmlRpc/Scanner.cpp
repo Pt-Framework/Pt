@@ -259,6 +259,12 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 //std::cerr << "-> found value " << chars.content().narrow() << std::endl;
                 _current->setValue( chars.content() );
             }
+            else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
+            {
+                //std::cerr << "-> found empty value " << std::endl;
+                _current->setValue( Pt::String() );
+                _state = OnScalarEnd;
+            }
             else
             {
                 throw SerializationError("invalid XML-RPC parameter");

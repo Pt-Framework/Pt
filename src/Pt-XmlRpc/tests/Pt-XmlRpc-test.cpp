@@ -76,6 +76,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
+            this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
@@ -233,6 +234,27 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        void EmptyValues()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyEmpty);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onEmptyFinished );
+
+            multiply.begin("", "");
+
+            _loop->run();
+        }
+
+        void onEmptyFinished(const std::string& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r, "4")
+            _loop->exit();
+        }
+
         void Array()
         {
             Pt::XmlRpc::Service service;
@@ -328,6 +350,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(a, "2")
             PT_UNIT_ASSERT_EQUALS(b, "3")
             return "6";
+        }
+
+        std::string multiplyEmpty(std::string a, std::string b)
+        {
+            PT_UNIT_ASSERT_EQUALS(a, "")
+            PT_UNIT_ASSERT_EQUALS(b, "")
+            return "4";
         }
 
         std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
