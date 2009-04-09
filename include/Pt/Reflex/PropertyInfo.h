@@ -84,6 +84,16 @@ class PropertyInfo  : public MemberInfo
         virtual void deserialize(const Pt::SerializationInfo& si) = 0;
 };
 
+inline void operator<<=(Pt::SerializationInfo& si, const PropertyInfo& pi)
+{
+    pi.serialize(si);
+}
+
+inline void operator>>=(const Pt::SerializationInfo& si, PropertyInfo& pi)
+{
+    pi.deserialize(si);
+}
+
 
 template <typename T>
 class ReadPropertyInfo : virtual public PropertyInfo
@@ -241,7 +251,9 @@ class ReadProperty : public PropertyInfo
         }
 
         void deserialize(const Pt::SerializationInfo& si)
-        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
+        {
+            throw PropertyNotWritable(this->name(), PT_SOURCEINFO);
+        }
 
     private:
         std::string _name;

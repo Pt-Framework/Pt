@@ -403,20 +403,6 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
-template <typename T>
-void operator >>=(const Pt::SerializationInfo& si, T& x)
-{
-    x.deserialize(si);
-}
-
-
-template <typename T>
-void operator <<=(Pt::SerializationInfo& si, const T& x)
-{
-    x.serialize(si);
-}
-
-
 inline void operator >>=(const SerializationInfo& si, bool& n)
 {
     si.toValue(n);
