@@ -204,7 +204,7 @@ int StreamBufferBase::do_sync()
 
     if( _sb->pptr() )
     {
-        while( _sb->pptr() > _sb->pbase() )
+        while( _sb->pptr() > _obuffer )
         {
             const int_type ch = _sb->overflow( traits_type::eof() );
             if( ch == traits_type::eof() )
@@ -279,7 +279,7 @@ StreamBufferBase::int_type StreamBufferBase::do_overflow(int_type ch)
     else if (traits_type::eq_int_type( ch, traits_type::eof() ) || !_oextend)
     {
         // normal blocking overflow case
-        size_t avail = _sb->pptr() - _sb->pbase();
+        size_t avail = _sb->pptr() - _obuffer;
         size_t written = _ioDevice->write(_obuffer, avail);
         size_t leftover = avail - written;
 

@@ -122,6 +122,7 @@ const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
         throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
     _parser.reset(true);
+    _readHeader = true;
     doparse();
 
     if (_parser.begin() && shouldReconnect)
@@ -277,6 +278,8 @@ void Client::onOutput(System::StreamBuffer& sb)
     {
         sb.beginRead();
         requestSent(*this);
+        _parser.reset(true);
+        _readHeader = true;
     }
 }
 
