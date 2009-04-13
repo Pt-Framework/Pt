@@ -53,7 +53,7 @@ Service::~Service()
 }
 
 
-ServiceProcedure* Service::procedure(const std::string& name)
+ServiceProcedure* Service::getProcedure(const std::string& name)
 {
     ProcedureMap::iterator it = _procedures.find( name );
     if( it == _procedures.end() )
@@ -62,6 +62,12 @@ ServiceProcedure* Service::procedure(const std::string& name)
     }
 
     return it->second;
+}
+
+
+void Service::releaseProcedure(ServiceProcedure* proc)
+{
+    delete proc;
 }
 
 

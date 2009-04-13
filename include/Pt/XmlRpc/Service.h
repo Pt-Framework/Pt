@@ -208,7 +208,9 @@ class PT_XMLRPC_API Service : public Http::Service
         virtual ~Service();
 
         // TODO cache service procedures and clone on demand
-        ServiceProcedure* procedure(const std::string& name);
+        ServiceProcedure* getProcedure(const std::string& name);
+
+        void releaseProcedure(ServiceProcedure* proc);
 
         template <typename R, class C>
         void registerMethod(const std::string& name, C& obj, R (C::*method)() )
