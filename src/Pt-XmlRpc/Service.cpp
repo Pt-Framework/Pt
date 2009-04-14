@@ -61,7 +61,7 @@ ServiceProcedure* Service::getProcedure(const std::string& name)
         return 0;
     }
 
-    return it->second;
+    return it->second->clone();
 }
 
 

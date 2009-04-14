@@ -53,6 +53,8 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
+        virtual ServiceProcedure* clone() const = 0;
+
         virtual IDeserializer** beginCall() = 0;
 
         virtual ISerializer* endCall() = 0;
@@ -80,6 +82,11 @@ class BasicServiceProcedure : public ServiceProcedure
         ~BasicServiceProcedure()
         {
             delete _cb;
+        }
+
+        ServiceProcedure* clone() const
+        {
+            return new BasicServiceProcedure(*_cb);
         }
 
         IDeserializer** beginCall()
@@ -133,6 +140,11 @@ class BasicServiceProcedure<R, C, A1, Pt::Void> : public ServiceProcedure
             delete _cb;
         }
 
+        ServiceProcedure* clone() const
+        {
+            return new BasicServiceProcedure(*_cb);
+        }
+
         IDeserializer** beginCall()
         {
             _a1.begin(_v1);
@@ -176,6 +188,11 @@ class BasicServiceProcedure<R, C, Pt::Void, Pt::Void> : public ServiceProcedure
         ~BasicServiceProcedure()
         {
             delete _cb;
+        }
+
+        ServiceProcedure* clone() const
+        {
+            return new BasicServiceProcedure(*_cb);
         }
 
         IDeserializer** beginCall()

@@ -57,6 +57,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 
 XmlRpcResponder::~XmlRpcResponder()
 {
+    if(_proc)
+        _service->releaseProcedure(_proc);
 }
 
 
