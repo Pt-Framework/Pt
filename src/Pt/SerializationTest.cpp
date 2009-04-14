@@ -41,6 +41,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "Pt/System/Clock.h"
 
 class SerializationTest : public Pt::Unit::TestSuite
 {
@@ -48,14 +49,17 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
-            //std::cerr << "\n# sizeof Pt::SerializationInfo: " << sizeof(Pt::SerializationInfo) << std::endl;
-
+            //Pt::Unit::TestSuite::registerMethod( "Benchmark1", *this, &SerializationTest::Benchmark1 );
+            //Pt::Unit::TestSuite::registerMethod( "Benchmark2", *this, &SerializationTest::Benchmark2 );
             Pt::Unit::TestSuite::registerMethod( "BuiltInTypesTest", *this, &SerializationTest::BuiltInTypesTest );
             Pt::Unit::TestSuite::registerMethod( "StdVectorTest", *this, &SerializationTest::StdVectorTest );
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
         }
+    
     protected:
+        void Benchmark1();
+        void Benchmark2();
         void BuiltInTypesTest();
         void StdVectorTest();
         void DateTest();
@@ -64,6 +68,71 @@ class SerializationTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<SerializationTest> register_SerializationTest;
+
+
+void SerializationTest::Benchmark1()
+{
+    std::string name;
+    
+    Pt::System::Clock clock;
+    clock.start();
+    for(unsigned n = 0; n < 50000; ++n)
+    {
+        std::vector<int> vec;
+        
+        Pt::SerializationInfo si;
+
+        Pt::String num(L"111");
+        si.addValue(name, num);
+
+        num = L"222";
+        si.addValue(name, num);
+
+        num = L"333";
+        si.addValue(name, num);
+
+        num = L"444";
+        si.addValue(name, num);
+
+        num = L"555";
+        si.addValue(name, num);
+        num.clear();
+
+        si >>= vec;
+    }
+    Pt::Timespan ts = clock.stop();
+    std::cerr << "Time: " << ts.toUSecs() << std::endl;
+}
+
+
+void SerializationTest::Benchmark2()
+{
+    std::string name;
+    
+    Pt::System::Clock clock;
+    clock.start();
+    for(unsigned n = 0; n < 50000; ++n)
+    {
+        std::vector<int> vec;
+        Pt::String num(L"111");
+        vec.push_back( Pt::convert<int>(num) );
+
+        num = L"22";
+        vec.push_back( Pt::convert<int>(num) );
+
+        num = L"333";
+        vec.push_back( Pt::convert<int>(num) );
+
+        num = L"444";
+        vec.push_back( Pt::convert<int>(num) );
+
+        num = L"555";
+        vec.push_back( Pt::convert<int>(num) );
+        num.clear();
+    }
+    Pt::Timespan ts = clock.stop();
+    std::cerr << "Time: " << ts.toUSecs() << std::endl;
+}
 
 
 void SerializationTest::BuiltInTypesTest()
