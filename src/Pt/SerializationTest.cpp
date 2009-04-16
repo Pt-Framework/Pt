@@ -154,7 +154,6 @@ void SerializationTest::Benchmark2()
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time: " << ts.toUSecs() << std::endl;
-	std::exit(1);
 }
 
 
