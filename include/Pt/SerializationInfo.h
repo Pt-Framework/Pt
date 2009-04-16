@@ -59,6 +59,8 @@ class PT_API SerializationInfo
         ~SerializationInfo()
         {}
 
+		void clear();
+		
         void reserve(size_t n);
 
         Category category() const
