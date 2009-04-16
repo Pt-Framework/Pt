@@ -65,6 +65,20 @@ SerializationInfo& SerializationInfo::operator=(const SerializationInfo& si)
 }
 
 
+void SerializationInfo::clear()
+{
+	_category = Void;
+	_parent = 0;
+	_name.clear();
+	_type.clear();
+	_id.clear();
+	_fixupAddr = 0;
+	_fixupInfo = 0;
+	_value.clear();
+	_nodes.clear();
+}
+
+
 void SerializationInfo::reserve(size_t n)
 {
     _nodes.reserve(n);
