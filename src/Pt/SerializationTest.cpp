@@ -51,6 +51,7 @@ inline void convert(int& n, const Pt::String& str)
 	ssc.clear();
 	ssc.str(str);
 	ssc >> n;
+	
 	//n = 111;
 }
 
@@ -87,6 +88,11 @@ void SerializationTest::Benchmark1()
 {
     std::string name;
     Pt::String num(L"111");
+    Pt::String num1(L"111");
+    Pt::String num2(L"222");
+    Pt::String num3(L"333");
+    Pt::String num4(L"444");
+    Pt::String num5(L"555");
 	Pt::SerializationInfo si;
 	std::vector<int> vec;
     
@@ -94,30 +100,35 @@ void SerializationTest::Benchmark1()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
+    	num1 = L"111";
+    	num2 = L"222";
+    	num3 = L"333";
+    	num4 = L"444";
+    	num5 = L"555";
         si.clear();
 
-        num = L"111";
-        si.addValue(name, num);
+        //num = L"111";
+        si.addValue(name, num1);
 
-        num = L"222";
-        si.addValue(name, num);
+        //num = L"222";
+        si.addValue(name, num2);
 
-        num = L"333";
-        si.addValue(name, num);
+        //num = L"333";
+        si.addValue(name, num3);
 
-        num = L"444";
-        si.addValue(name, num);
+        //num = L"444";
+        si.addValue(name, num4);
 
-        num = L"555";
-        si.addValue(name, num);
+        //num = L"555";
+        si.addValue(name, num5);
 
         si >>= vec;
 
 		vec.clear();
-		num.clear();
+		//num.clear();
     }
     Pt::Timespan ts = clock.stop();
-    std::cerr << "Time: " << ts.toUSecs() << std::endl;
+    std::cerr << "Time1: " << ts.toUSecs() << std::endl;
 }
 
 
@@ -125,9 +136,13 @@ void SerializationTest::Benchmark2()
 {
     std::string name;
     Pt::String num(L"111");
+    Pt::String num1(L"111");
+    Pt::String num2(L"222");
+    Pt::String num3(L"333");
+    Pt::String num4(L"444");
+    Pt::String num5(L"555");
 	Pt::StringStream ss;
-	int x = 0;
-    
+    int x = 0;
 	std::vector<int> vec;
 
 	Pt::System::Clock clock;
@@ -135,25 +150,31 @@ void SerializationTest::Benchmark2()
     for(unsigned n = 0; n < 50000; ++n)
     {
 		num = L"111";
-        vec.push_back( Pt::convert<int>(num) );
+		convert(x, num);
+        vec.push_back( x );
 
 		num = L"222";
-		vec.push_back( Pt::convert<int>(num) );
+		convert(x, num);
+        vec.push_back( x );
 		
 		num = L"333";
-		vec.push_back( Pt::convert<int>(num) );
+		convert(x, num);
+        vec.push_back( x );
 		
 		num = L"444";
-		vec.push_back( Pt::convert<int>(num) );
+		convert(x, num);
+        vec.push_back( x );
 		
 		num = L"555";
-		vec.push_back( Pt::convert<int>(num) );
+		convert(x, num);
+        vec.push_back( x );
 
-        num.clear();
+        //num.clear();
 		vec.clear();
     }
     Pt::Timespan ts = clock.stop();
-    std::cerr << "Time: " << ts.toUSecs() << std::endl;
+    std::cerr << "Time2: " << ts.toUSecs() << std::endl;
+    //std::exit(1);
 }
 
 
