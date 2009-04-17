@@ -87,7 +87,7 @@ struct XmlReaderImpl
 
                     case '"':
                     case '\'':
-                        return this->onQoute(c, reader);
+                        return this->onQuote(c, reader);
 
                     case '!':
                         return this->onExclam(c, reader);
@@ -145,7 +145,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             this->syntaxError(reader.line());
@@ -242,7 +242,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             reader._chars.content() += c;
@@ -354,6 +354,36 @@ struct XmlReaderImpl
         {
             PT_XML_LOG
             return OnTag::instance();
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._chars.content() += c;
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._chars.content() += c;
+            return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
@@ -491,7 +521,7 @@ struct XmlReaderImpl
 
     struct OnAttributeValue : public State
     {
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             reader._startElem.addAttribute(reader._attr);
@@ -521,7 +551,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             return OnAttributeValue::instance();
@@ -707,7 +737,7 @@ struct XmlReaderImpl
             return OnComment::instance();
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             return OnComment::instance();
@@ -781,7 +811,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             return this;
@@ -856,32 +886,13 @@ struct XmlReaderImpl
     };
 
 
-    struct AfterTag : public State
+    struct AfterTag : public OnCharacters
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             if(reader.depth() == 0)
                 return OnProlog::instance();
-
-            reader._chars.content() += c;
-            return OnCharacters::instance();
-        }
-
-        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
-            return OnTag::instance();
-        }
-
-        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
-        {
-            PT_XML_LOG
-
-            if(c == '&')
-            {
-                reader._token.clear();
-                return OnEntityReference::instance();
-            }
 
             reader._chars.content() += c;
             return OnCharacters::instance();
@@ -949,7 +960,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             reader._docType.content() += c;
@@ -1195,7 +1206,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             PT_XML_LOG
             reader._procInstr.data() += c;
@@ -1249,7 +1260,7 @@ struct XmlReaderImpl
 
     struct OnXmlDeclValue : public State
     {
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             if(reader._attr.name() == L"version")
             {
@@ -1289,7 +1300,7 @@ struct XmlReaderImpl
             return this;
         }
 
-        virtual State* onQoute(Pt::Char c, XmlReaderImpl& reader)
+        virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
             return OnXmlDeclValue::instance();
         }
