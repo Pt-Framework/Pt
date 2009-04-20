@@ -337,7 +337,7 @@ void XmlTest::ElementWithContent()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    input << "<a>b</a>";
+    input << "<a>?!:=b</a>";
 
     Pt::Xml::XmlReader reader( input );
 
@@ -354,7 +354,7 @@ void XmlTest::ElementWithContent()
     const Pt::Xml::Node& charactersNode = *it;
 
     PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content().narrow() == "b");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content().narrow() == "?!:=b");
     PT_UNIT_ASSERT( reader.depth() == 1)
 
     // </a>
