@@ -189,6 +189,16 @@ void StringTest::testCompare()
 
 void StringTest::testAssign()
 {
+
+{
+    Pt::String s1;
+    Pt::String s2(L"abc");
+    Pt::String s3 = s1;
+
+    Pt::Char& ref = s2[0]; // make it unsharable
+    s1 = s2;
+}
+
     const wchar_t* z = L"abcde";
     vector<wchar_t> v(z, z + 5);
     String s;
