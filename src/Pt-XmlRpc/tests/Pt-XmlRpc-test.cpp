@@ -70,15 +70,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
+            /*this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
             this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
-            this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
-            this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
-            this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
+            this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);*/
+            this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
+            /*this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
+            this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);*/
         }
 
         void failTest()
@@ -283,6 +284,30 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        void EmptyArray()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
+            _server->addService("/calc", service);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> >
+                multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onEmptyArrayFinished );
+
+            std::vector<int> vec;
+            multiply.begin(vec, vec);
+
+            _loop->run();
+        }
+
+        void onEmptyArrayFinished(const std::vector<int>& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r.size(), 0)
+
+            _loop->exit();
+        }
+
         void Struct()
         {
             Pt::XmlRpc::Service service;
@@ -362,8 +387,12 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
         {
             std::vector<int> r;
-            r.push_back( a.at(0) * b.at(0) );
-            r.push_back( a.at(1) * b.at(1) );
+            if( a.size() )
+            {
+                r.push_back( a.at(0) * b.at(0) );
+                r.push_back( a.at(1) * b.at(1) );
+            }
+
             return r;
         }
 
