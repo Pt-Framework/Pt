@@ -1,0 +1,283 @@
+/** \defgroup xmlrpc XML-RPC Client and Server
+    @brief Remote method calls using XML and HTTP
+
+
+@section xmlrpc_Overwiew Overview
+
+XML-RPC is a Remote Procedure Calling protocol that works over the network.
+
+An XML-RPC message is an HTTP-POST request. The body of the request is in XML. A procedure executes on the server and the value it returns is also formatted in XML.
+
+Procedure parameters can be scalars, numbers, strings, dates, etc.; and can also be complex record and list structures.
+
+<b>Firewalls:</b> The goal of this protocol is to lay a compatible foundation across different environments, no new power is provided beyond the capabilities of the CGI interface. Firewall software can watch for POSTs whose Content-Type is text/xml.
+
+<b>Discoverability:</b> We wanted a clean, extensible format that's very simple. It should be possible for an HTML coder to be able to look at a file containing an XML-RPC procedure call, understand what it's doing, and be able to modify it and have it work on the first or second try.
+
+<b>Easy to implement:</b> We also wanted it to be an easy to implement protocol that could quickly be adapted to run in other environments or on other operating systems.
+
+
+@subsection xmlrpc_Request_Example Request Example
+
+Here's an example of an XML-RPC request:
+
+@verbatim
+POST /Calc HTTP/1.0
+User-Agent: Frontier/5.1.2 (WinNT)
+Host: betty.userland.com
+Content-Type: text/xml
+Content-length: 181
+
+<?xml version="1.0"?>
+<methodCall>
+  <methodName>multiply</methodName>
+  <params>
+    <param> <value><int>6</int></value> </param>
+    <param> <value><int>7</int></value> </param>
+  </params>
+</methodCall>
+@endverbatim
+
+The format of the URI in the first line of the header is not specified. For example, it could be empty, a single slash, if the server is only handling XML-RPC calls. However, if the server is handling a mix of incoming HTTP requests, we allow the URI to help route the request to the code that handles XML-RPC requests. In the example, the URI is /Calc, telling the server to route the request to the "Calc" service.
+
+The payload is in XML, a single <methodCall> structure.
+
+The \<methodCall\> must contain a \<methodName\> sub-item, a string, containing the name of the method to be called. The string may only contain identifier characters, upper and lower-case A-Z, the numeric characters, 0-9, underscore, dot, colon and slash. It's entirely up to the server to decide how to interpret the characters in a methodName.
+
+For example, the methodName could be the name of a file containing a script that executes on an incoming request. It could be the name of a cell in a database table. Or it could be a path to a file contained within a hierarchy of folders and files.
+
+If the procedure call has parameters, the \<methodCall\> must contain a <params\> sub-item. The \<params\> sub-item can contain any number of \<param\>s, each of which has a \<value\>.
+
+
+@subsection xmlrpc_Response_Example Response Example
+
+Here's an example of an XML-RPC response:
+
+@verbatim
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 158
+Content-Type: text/xml
+Date: Fri, 17 Jul 2008 19:55:08 GMT
+Server: UserLand Frontier/5.1.2-WinNT
+
+<?xml version="1.0"?>
+<methodResponse>
+  <params>
+    <param>
+      <value><int>42</int></value>
+    </param>
+  </params>
+</methodResponse> 
+@endverbatim
+
+Unless there's a lower-level error, always return 200 OK.
+
+The Content-Type is text/xml. Content-Length must be present and correct.
+
+The body of the response is a single XML structure, a \<methodResponse\>, which can contain a single \<params\> which contains a single <param> which contains a single \<value\>.
+
+@subsection xmlrpc_Fault_Example Fault Example
+
+Here's an example of an XML-RPC fault response:
+
+@verbatim
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 426
+Content-Type: text/xml
+Date: Fri, 17 Jul 1998 19:55:02 GMT
+Server: UserLand Frontier/5.1.2-WinNT
+
+<?xml version="1.0"?>
+<methodResponse>
+  <fault>
+    <value>
+      <struct>
+        <member>
+          <name>faultCode</name>
+          <value><int>4</int></value>
+        </member>
+        <member>
+          <name>faultString</name>
+          <value><string>Too many parameters.</string></value>
+        </member>
+      </struct>
+    </value>
+  </fault>
+</methodResponse> 
+@endverbatim
+
+The \<methodResponse\> could also contain a \<fault\> which contains a \<value\> which is a \<struct\> containing two elements, one named \<faultCode\>, an <int> and one named \<faultString\>, a \<string\>.
+
+A <methodResponse> can not contain both a <fault> and a <params>.
+
+
+@section xmlrpc_Service Implemention of XML-RPC services
+
+@subsection xmlrpc_Service_1 Adding service methods to a XML-RPC service
+
+@code
+class CalculatorService : public cxxtools::xmlrpc::Service
+{
+  public:
+    CalculatorService()
+    {
+      registerMethod("add", *this, &CalculatorService::add);
+      registerMethod("sub", *this, &CalculatorService::sub);
+      registerMethod("multiply", *this, &CalculatorService::multiply);
+      registerMethod("div", *this, &CalculatorService::div);
+    }
+
+    int add(int a, int b)
+    { return a+b; }
+
+    int sub(int a, int b)
+    { return a-b; }
+
+    int multiply(int a, int b)
+    { return a*b; }
+
+    int div(int a, int b)
+    { return a/b; }
+};
+@endcode
+
+
+@subsection xmlrpc_Service_2 Service methods with user defined types
+
+@code
+struct Address
+{
+  std::string country;
+  std::string city;
+  std::string street;
+  int code;
+};
+
+void operator>>=(const cxxtools::SerializationInfo& si, Address& address);
+void operator<<=(cxxtools::SerializationInfo& si, const Address& address);
+
+class MyService : public cxxtools::xmlrpc::Service
+{
+  public:
+    MyService()
+    {
+      registerMethod("getPosition", *this, &MyService::getPosition);
+    }
+
+     Address getPosition();
+};
+@endcode
+
+@code
+void operator>>=(const cxxtools::SerializationInfo& si, Address& address)
+{
+  address.country = si.getValue<std::string>("country");
+  address.city = si.getValue<std::string>("city");
+  address.street = si.getValue<std::string>("street");
+  address.code = si.getValue<int>("code");
+}
+
+void operator<<=(cxxtools::SerializationInfo& si, const Address& address)
+{
+  si.addMember("country") <<= address.country;
+  si.addMember("city")    <<= address.city;
+  si.addMember("street")  <<= address.street;
+  si.addMember("code")    <<= address.code;
+}
+@endcode
+
+@subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
+
+@code
+int main(int argc, char** argv)
+{
+  // constructor takes address and port for listen
+  cxxtools::http::HttpServer server("127.0.0.1", 7002);
+
+  // add the service to the server
+  CalculatorService service;
+  server.addService("/Calc", service);
+
+  // begin accepting connections
+  server.run();
+  return 0;
+};
+@endcode
+
+
+@section xmlrpc_Client Implementation of a XML-RPC clients
+
+@subsection xmlrpc_Client_1 Blocking calls to a XML-RPC service
+
+@code
+int main(int argc, char** argv)
+{
+  try
+  {
+    cxxtools::xmlrpc::Client client("127.0.0.1", 7002, "/Calc");
+
+    cxxtools::xmlrpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+
+    int r = multiply(6, 7);
+
+    std::cout << "Result: " << r << std::endl;
+    return 0;
+  }
+  catch(std::exception& ex)  // may be cxxtools::xmlrpc::Fault
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+  }
+
+  return 1
+};
+@endcode
+
+
+@subsection xmlrpc_Client_2 Non-Blocking calls to a XML-RPC service
+
+@code
+
+void onFault(const cxxtools::xmlrpc::Fault& fault)
+{
+  std::cerr << "Error: " << fault.what() << std::endl;
+}
+
+void onResult(int r)
+{
+  std::cout << "Result: " << r << std::endl;
+}
+
+int main(int argc, char** argv)
+{
+  cxxtools::Application app;
+  cxxtools::xmlrpc::Client client(app.loop(), "127.0.0.1", 7002, "/Calc");
+
+  cxxtools::xmlrpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+  connect( multiply.fault, &onFault );
+  connect( multiply.finished, &onResult );
+
+  multiply.begin(6, 7);
+
+  app.run();
+  return 0;
+};
+
+
+@endcode
+
+
+@section xmlrpc_Copyright Copyright and Disclaimer
+
+This document contains parts of the original XML-RPC specification (http://www.xmlrpc.com), which is published under the following license:
+
+Copyright 1998-2003 UserLand Software. All Rights Reserved.
+
+This document and translations of it may be copied and furnished to others, and derivative works that comment on or otherwise explain it or assist in its implementation may be prepared, copied, published and distributed, in whole or in part, without restriction of any kind, provided that the above copyright notice and these paragraphs are included on all such copies and derivative works.
+
+This document may not be modified in any way, such as by removing the copyright notice or references to UserLand or other organizations. Further, while these copyright restrictions apply to the written XML-RPC specification, no claim of ownership is made by UserLand to the protocol it describes. Any party may, for commercial or non-commercial purposes, implement this protocol without royalty or license fee to UserLand. The limited permissions granted herein are perpetual and will not be revoked by UserLand or its successors or assigns.
+
+This document and the information contained herein is provided on an "AS IS" basis and USERLAND DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+*/
