@@ -184,33 +184,6 @@ inline void basic_string<Pt::Char>::reserve(size_t n)
 }
 
 
-inline void basic_string<Pt::Char>::detach(size_type reserveSize)
-{
-    // shared, not busy - make copy
-    if( _data->shared() ) 
-    {
-        Pt::StringData* newBuffer = new Pt::StringData();
-        newBuffer->reserve( reserveSize );
-        newBuffer->assign( _data->str(), _data->length() );
-
-        if( _data->unref() < 1)
-        {
-            // just in case two threads are trying this at once
-            delete newBuffer;
-        }
-        else
-        {
-            _data = newBuffer;
-        }
-    }
-    // just resizing
-    else
-    {
-        _data->reserve( reserveSize );
-    }
-}
-
-
 inline void basic_string<Pt::Char>::clear()
 {
     this->detach(0);
@@ -296,47 +269,73 @@ inline const Pt::Char* basic_string<Pt::Char>::c_str() const
 }
 
 
-inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
+inline void basic_string<Pt::Char>::detach(size_type reserveSize)
 {
+    // shared, not busy - make copy
+    if( _data->shared() ) 
+    {
+        Pt::StringData* newBuffer = new Pt::StringData( reserveSize );
+        newBuffer->assign( _data->str(), _data->length() );
+
+        if( _data->unref() < 1)
+        {
+            // just in case two threads are trying this at once
+            delete newBuffer;
+        }
+        else
+        {
+            _data = newBuffer;
+        }
+    }
+    // just resizing
+    else
+    {
+        _data->reserve( reserveSize );
+    }
+}
+
+
+inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
+{ 
     // self-assignment check
     if(this == &str)
     {
         return *this;
     }
-
-    if( _data->shared() ) //shared
+    
+    if( _data->shared() ) 
     {
-        Pt::StringData* newBuffer = str._data;
-        if( str._data->busy() )
-        {
-            newBuffer = new Pt::StringData( str._data->str(), str._data->length() );
+    	Pt::StringData* newBuffer = str._data;
+    	if( str._data->busy() )
+    	{
+        	newBuffer = new Pt::StringData( str._data->str(), str._data->length() );
         }
         else
         {
-            newBuffer->ref();
+        	newBuffer->ref();
         }
 
         if( _data->unref() < 1)
         {
-            // just in case two threads are trying this at once
-            delete _data;
-        }
+      	    // just in case two threads are trying this at once
+      	    delete _data;
+       	}
 
-        _data = newBuffer;
+		_data = newBuffer;
     }
     else // unshared
     {
-        if( _data->capacity() >= str.size() || str._data->busy() )
-        {
-            _data->assign( str._data->str(), str._data->length() );
-            _data->setInitial();
-        }
-        else
-        {
-            delete _data;
-            _data = str._data;
-            _data->ref();
-        }
+    	if( _data->capacity() >= str.size() || str._data->busy() )
+    	{
+    	    _data->assign( str._data->str(), str._data->length() );
+    	    _data->setInitial();
+    	}
+    	else
+    	{
+        	delete _data;
+    		_data = str._data;
+    		_data->ref();
+    	}
     }
 
     return *this;
@@ -367,7 +366,8 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* st
 {
     // this is a modifying action and if multiple instances reference this
     // data instance we need to copy on write first.
-    if( _data->shared() ) {
+    if( _data->shared() ) 
+    {
         Pt::StringData* newBuffer = new Pt::StringData( str, length );
         _data->unref();
         _data = newBuffer;

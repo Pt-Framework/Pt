@@ -34,6 +34,8 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include <memory>
+#include <new>
 
 namespace std {
 
@@ -71,11 +73,15 @@ namespace std {
 
             pointer allocate(size_type n, const void* = 0)
             {
-                return static_cast<value_type*>(::operator new(n * sizeof(value_type)));
+                //return static_cast<value_type*>(::operator new(n * sizeof(value_type)));
+                return static_cast<pointer>( ::malloc(n * sizeof(value_type)) );
             }
 
             void deallocate(pointer p, size_type)
-            { ::operator delete(p); }
+            { 
+            	//::operator delete(p); 
+            	::free(p);
+            }
 
             size_type max_size() const throw()
             { return size_t(-1) / sizeof(value_type); }
@@ -106,6 +112,8 @@ class StringData {
         StringData(const allocator_type& a = allocator_type());
 
         StringData(const Pt::Char* s, size_type length, const allocator_type& a = allocator_type());
+        
+        StringData(size_type capacity, const allocator_type& a = allocator_type());
 
         StringData(const wchar_t* wstr, size_type length, const allocator_type& a);
 

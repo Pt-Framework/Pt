@@ -44,10 +44,24 @@ inline StringData::StringData(const Pt::Char* s, size_type length, const allocat
 {
     _str = _allocator.allocate(length + 1, _str);
     _capacity = length;
-
+    _length = length;
+    
     traits_type::copy(_str, s, length);
     _str[length] = Pt::Char::null();
-    _length = length;
+
+    this->updateInternalStringData();
+}
+
+
+inline StringData::StringData( size_type n, const allocator_type& a)
+: _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
+{
+	if(n < 16)
+		n = 16;
+
+    _str = _allocator.allocate(n + 1, _str);
+    _capacity = n;
+    _str[0] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
@@ -312,6 +326,20 @@ inline void StringData::reserve(size_type n)
 }
 
 
+inline void StringData::allocate(size_type n)
+{
+    if(n <= _capacity)
+        return;
+
+    if(_str) {
+        _allocator.deallocate(_str, _capacity + 1 );
+    }
+
+    _str = _allocator.allocate(n + 1, _str);
+    _capacity = n;
+}
+
+
 inline void StringData::updateInternalStringData()
 {
 #ifndef NDEBUG
@@ -331,20 +359,6 @@ inline void StringData::updateInternalStringData()
     wchar_t* end = std::copy(_str, _str + size, _wStr);
     *end = 0;
 #endif
-}
-
-
-inline void StringData::allocate(size_type n)
-{
-    if(n <= _capacity)
-        return;
-
-    if(_str) {
-        _allocator.deallocate(_str, _capacity + 1 );
-    }
-
-    _str = _allocator.allocate(n + 1, _str);
-    _capacity = n;
 }
 
 } // namespace Pt
