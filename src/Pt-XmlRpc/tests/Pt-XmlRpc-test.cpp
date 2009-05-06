@@ -70,16 +70,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            /*this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
+            this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
             this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
-            this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);*/
+            this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
             this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
-            /*this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
-            this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);*/
+            this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
+            this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
 
         void failTest()
