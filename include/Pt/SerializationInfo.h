@@ -37,40 +37,209 @@
 
 namespace Pt {
 
+class SerializationCache;
+
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
 {
-    typedef std::vector<SerializationInfo> Nodes;
-
     public:
+		typedef std::vector<SerializationInfo> Nodes;
+     
         enum Category {
-            Void = 0, Value = 1, Object = 2, Array = 6, Reference = 8
+            Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
+        };
+
+        class Node // TODO: SerializationEntry
+        {
+            public:
+                virtual ~Node()
+                {}
+
+                Category category() const
+                { return _category; }
+
+                void setCategory(Category cat)
+                {
+                    _category = cat;
+                }
+
+                void clear()
+                {
+                    this->onClear();
+                }
+
+            protected:
+                Node(Category cat)
+                : _category(cat)
+                {}
+                
+                virtual void onClear() = 0;
+
+            private:
+                Category _category;
+        };
+
+        class ValueNode : public Node
+        {
+            public:
+                ValueNode()
+                : Node(Value)
+                {}
+
+                const Pt::String& value() const
+                { return _value; }
+
+                Pt::String& value()
+                { return _value; }
+
+                void setValue(const Pt::String& value)
+                { _value = value; }
+
+            protected:
+                virtual void onClear();
+
+            private:
+                Pt::String _value;
+        };
+
+        class ReferenceNode : public Node
+        {
+            public:
+                ReferenceNode()
+                : Node(Reference)
+                {}
+
+                const std::string& refId() const
+                { return _refid; }
+
+                void setRefId(const std::string& addr)
+                { _refid = addr; }
+
+                const void* refAddr() const
+                { return _refAddr; }
+
+                void setAddr(void* addr)
+                { _refAddr = addr; }
+
+                void* fixupAddr() const
+                { return _fixupAddr; }
+
+                void setFixupAddr(void* p)
+                { _fixupAddr = p; }
+
+                const std::type_info* fixupInfo() const
+                { return _fixupInfo; }
+
+                void setFixupInfo(const std::type_info& ti)
+                { _fixupInfo = &ti; }
+
+            protected:
+                virtual void onClear()
+                { _refid.clear(); }
+
+            private:
+            	mutable void* _refAddr;
+                mutable void* _fixupAddr;
+                mutable const std::type_info* _fixupInfo;
+                std::string _refid;
+        };
+
+        class ObjectNode : public Node
+        {
+            public:
+                typedef SerializationInfo** Iterator;
+                typedef const SerializationInfo* const* ConstIterator;
+
+                ObjectNode()
+                : Node(Object)
+                , _nodes(0)
+                , _capacity(0)
+                , _size(0)
+                {}
+
+                ~ObjectNode();
+
+                void push_back(SerializationInfo* si);
+
+                Iterator begin()
+                { return &_nodes[0]; }
+
+                Iterator end()
+                { return &_nodes[_size]; }
+
+                ConstIterator begin() const
+                { return &_nodes[0]; }
+
+                ConstIterator end() const
+                { return &_nodes[_size]; }
+
+                unsigned size() const
+                { return _size; }
+
+                SerializationInfo& back()
+                { return *( _nodes[_size - 1] ); }
+
+                const SerializationInfo& back() const
+                { return *( _nodes[_size - 1] ); }
+
+                void release(SerializationCache& cache);
+
+            protected:
+				virtual void onClear();
+
+                ObjectNode& operator=(const ObjectNode&);
+                ObjectNode(const ObjectNode&);
+
+            private:
+                SerializationInfo** _nodes;
+                unsigned _capacity;
+                unsigned _size;
         };
 
         class Iterator;
         class ConstIterator;
 
     public:
-        SerializationInfo();
+        SerializationInfo()
+		: _node(0)
+		, _cache(0)
+		, _parent(0)
+		{ }
+        
+        explicit SerializationInfo(SerializationCache* cache)
+		: _node( 0 )
+		, _cache(cache)
+		, _parent(0)
+		{ }
+        
+        ~SerializationInfo();
 
-        SerializationInfo(const SerializationInfo& si);
+	private:
+		SerializationInfo(const SerializationInfo& si)
+		{}
 
-        ~SerializationInfo()
-        {}
-
-		void clear();
+		SerializationInfo& operator=(const SerializationInfo& si)
+		{ return *this; }
 		
-        void reserve(size_t n);
+	public:
+		void clear();
 
         Category category() const
         {
-            return _category;
+            return _node ? _node->category() : Void;
         }
 
-        void setCategory(Category cat)
+        void setCategory(Category category);
+
+        SerializationCache* cache()
         {
-            _category = cat;
+            return _cache;
+        }
+
+        const SerializationCache* cache() const
+        {
+            return _cache;
         }
 
         SerializationInfo* parent()
@@ -113,9 +282,29 @@ class PT_API SerializationInfo
             return _id;
         }
 
+        const void* refAddr() const
+        {
+            if( this->category() != Reference)
+                throw SerializationError("not a reference");
+
+            const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
+            return rnode->refAddr();
+        }
+
+        const std::string& refId() const
+        {
+            if( this->category() != Reference)
+                throw SerializationError("not a reference");
+
+            const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
+            return rnode->refId();
+        }
+
         /** @brief Serialization of weak pointers
         */
         void setReference(void* ref);
+
+        void setReferenceId(const std::string& ref);
 
         /** @brief Serialization of weak pointers
         */
@@ -141,21 +330,16 @@ class PT_API SerializationInfo
 
         const std::type_info& fixupInfo() const;
 
-        /** @brief Serialization of flat data-types
-        */
-        template <typename T>
-        void setValue(const T& value)
-        {
-            convert(_value, value);
-            _category = Value;
-        }
-
         /** @brief Deserialization of flat data-types
         */
         template <typename T>
         T toValue() const
         {
-            return convert<T>(_value);
+            if(_node == 0 || _node->category() != Value)
+                throw SerializationError("not a value");
+
+            const ValueNode* svalue = static_cast<const ValueNode*>(_node);
+            return convert<T>( svalue->value() );
         }
 
         /** @brief Deserialization of flat data-types
@@ -163,12 +347,25 @@ class PT_API SerializationInfo
         template <typename T>
         void toValue(T& value) const
         {
-            convert(value, _value);
+            if( this->category() != Value)
+                throw SerializationError("not a value");
+
+            ValueNode* svalue = (ValueNode*) _node;
+            return convert( value, svalue->value() );
         }
 
         /** @brief Deserialization of flat member data-types
         */
         const Pt::String& toString() const;
+
+        /** @brief Serialization of flat data-types
+        */
+        template <typename T>
+        void setValue(const T& value)
+        {
+        	ValueNode* svalue = initValue();
+            convert(svalue->value(), value);
+        }
 
         /** @brief Serialization of flat member data-types
         */
@@ -231,7 +428,12 @@ class PT_API SerializationInfo
 
         size_t memberCount() const
         {
-            return _nodes.size();
+            if(_node->category() == Object || _node->category() == Array)
+            {
+                return static_cast<const ObjectNode*>(_node)->size();
+            }
+
+            return 0;
         }
 
         Iterator begin();
@@ -240,26 +442,54 @@ class PT_API SerializationInfo
 
         ConstIterator begin() const;
 
-        ConstIterator end() const;
-
-        SerializationInfo& operator =(const SerializationInfo& si);
+        ConstIterator end() const;        
 
     protected:
         void getReference(void*& type, const std::type_info& ti) const;
 
-        void setParent(SerializationInfo& si)
-        { _parent = &si; }
+        void setParent(SerializationInfo* si)
+        {
+            _parent = si;
+        }
+
+        ValueNode* initValue() const;
+
+        ReferenceNode* initReference() const;
+
+        ObjectNode* initObject(Category category) const;
 
     private:
+        mutable Node* _node;
+        SerializationCache* _cache;
         SerializationInfo* _parent;
-        Category _category;
         std::string _name;
         std::string _type;
         std::string _id;
-        mutable void* _fixupAddr; // only refs
-        mutable const std::type_info* _fixupInfo; // only refs
-        Pt::String _value;        // values/refs
-        Nodes _nodes;             // objects/arrays
+};
+
+
+class PT_API SerializationCache
+{
+    public:
+        SerializationCache();
+
+        ~SerializationCache();
+
+        SerializationInfo* get();
+
+		void push(SerializationInfo::Node* node);
+
+        void push(SerializationInfo* si);
+
+        SerializationInfo::ValueNode* getScalarData();
+
+        SerializationInfo::Node* getObject();
+
+    private:
+        std::vector<SerializationInfo*> _infos;
+        std::vector<SerializationInfo::ValueNode*> _scalars;
+        std::vector<SerializationInfo::ObjectNode*> _objects;
+        std::vector<SerializationInfo::ReferenceNode*> _refs;
 };
 
 
@@ -270,7 +500,7 @@ class SerializationInfo::Iterator
 
         Iterator(const Iterator& other);
 
-        Iterator(SerializationInfo* info);
+        Iterator(SerializationInfo** info);
 
         Iterator& operator=(const Iterator& other);
 
@@ -283,7 +513,7 @@ class SerializationInfo::Iterator
         bool operator!=(const Iterator& other) const;
 
     private:
-        SerializationInfo* _info;
+        SerializationInfo** _info;
 };
 
 
@@ -294,7 +524,7 @@ class SerializationInfo::ConstIterator
 
         ConstIterator(const ConstIterator& other);
 
-        ConstIterator(const SerializationInfo* info);
+        ConstIterator(const SerializationInfo* const* info);
 
         ConstIterator& operator=(const ConstIterator& other);
 
@@ -307,7 +537,7 @@ class SerializationInfo::ConstIterator
         bool operator!=(const ConstIterator& other) const;
 
     private:
-        const SerializationInfo* _info;
+        const SerializationInfo* const* _info;
 };
 
 
@@ -321,7 +551,7 @@ inline SerializationInfo::Iterator::Iterator(const Iterator& other)
 {}
 
 
-inline SerializationInfo::Iterator::Iterator(SerializationInfo* info)
+inline SerializationInfo::Iterator::Iterator(SerializationInfo** info)
 : _info(info)
 {}
 
@@ -342,13 +572,13 @@ inline SerializationInfo::Iterator& SerializationInfo::Iterator::operator++()
 
 inline SerializationInfo& SerializationInfo::Iterator::operator*()
 {
-    return *_info;
+    return **_info;
 }
 
 
 inline SerializationInfo* SerializationInfo::Iterator::operator->()
 {
-    return _info;
+    return *_info;
 }
 
 
@@ -368,7 +598,7 @@ inline SerializationInfo::ConstIterator::ConstIterator(const ConstIterator& othe
 {}
 
 
-inline SerializationInfo::ConstIterator::ConstIterator(const SerializationInfo* info)
+inline SerializationInfo::ConstIterator::ConstIterator(const SerializationInfo* const* info)
 : _info(info)
 {}
 
@@ -389,13 +619,13 @@ inline SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::opera
 
 inline const SerializationInfo& SerializationInfo::ConstIterator::operator*() const
 {
-    return *_info;
+    return **_info;
 }
 
 
 inline const SerializationInfo* SerializationInfo::ConstIterator::operator->() const
 {
-    return _info;
+    return *_info;
 }
 
 
@@ -590,10 +820,14 @@ inline void operator <<=(SerializationInfo& si, const Pt::String& n)
 template <typename T>
 inline void operator >>=(const SerializationInfo& si, std::vector<T>& vec)
 {
+	T elem = T();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
-        vec.resize( vec.size() + 1 );
-        *it >>=  vec.back();
+        //vec.resize( vec.size() + 1 );
+        //*it >>=  vec.back();
+        
+        *it >>= elem;
+        vec.push_back( elem );
     }
 }
 
@@ -617,10 +851,12 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 
 inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
 {
-    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+	int n = 0;
+	SerializationInfo::ConstIterator end = si.end();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
-        vec.resize( vec.size() + 1 );
-        *it >>=  vec.back();
+    	*it >>= n;
+        vec.push_back( n );
     }
 }
 

@@ -34,10 +34,11 @@ void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& c
 {
     if(si.category() == Pt::SerializationInfo::Reference)
     {
-        const void* p = si.toValue<void*>();
+        const void* p = si.refAddr();
         ISerializer* pointee = context.find(p);
         pointee->setId( convert<std::string>(pointee) );
         si.setReference( pointee );
+        //std::cerr << "fixdown " << p << " to " << pointee << std::endl;
     }
     else if(si.category() == Pt::SerializationInfo::Object)
     {
@@ -72,7 +73,8 @@ void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatt
     }
     else if(si.category() == Pt::SerializationInfo::Reference)
     {
-        formatter.addReference( si.name(), si.toString() );
+    	Pt::String addr = convert<Pt::String>( si.refAddr() );
+        formatter.addReference( si.name(), addr);
     }
     else if(si.category() == Pt::SerializationInfo::Array)
     {

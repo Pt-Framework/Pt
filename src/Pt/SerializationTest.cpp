@@ -28,7 +28,7 @@
  */
 #undef PT_API_EXPORT
 
-#include "Pt/SerializationInfo.h"
+
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
@@ -42,6 +42,8 @@
 #include <iterator>
 
 #include "Pt/System/Clock.h"
+#include "Pt/StringStream.h"
+#include <fstream>
 
 namespace Pt {
 
@@ -51,11 +53,142 @@ inline void convert(int& n, const Pt::String& str)
 	ssc.clear();
 	ssc.str(str);
 	ssc >> n;
+
+	//int value = 1234;
+	//memcpy(&n, &value, sizeof(int));
 	
-	//n = 111;
+	//n = atoi("111");
 }
 
 }
+
+
+#include "Pt/SerializationInfo.h"
+#include "Pt/Deserializer.h"
+
+
+class IntDeserializer : public Pt::IDeserializer
+{
+	public:
+	    typedef int value_type;
+
+    public:
+        IntDeserializer()
+        : _type(0)
+        {}
+
+        void begin(value_type& type)
+        {
+            _type = &type;
+        }
+
+        virtual void* target()
+        {
+            return _type;
+        }
+
+        virtual const std::type_info& targetType()
+        {
+            return typeid(value_type);
+        }
+
+        virtual void setName(const std::string& name)
+        {
+        }
+
+        virtual void setId(const std::string& id)
+        {
+        }
+
+        virtual void setValue(const Pt::String& value)
+        {
+        	convert(*_type, value);
+        }
+
+        virtual void setReference(const std::string& id)
+        {
+        }
+
+        virtual Pt::IDeserializer* beginMember(const std::string& name)
+        { 
+        	return 0;
+        }
+
+        virtual Pt::IDeserializer* leaveMember()
+        {
+        	return parent();
+        }
+
+        virtual void fixup(Pt::DeserializationContext& ctx)
+        { }
+
+    private:
+        value_type* _type;
+};
+
+class VectorDeserializer : public Pt::IDeserializer
+{
+	public:
+	    typedef int value_type;
+
+    public:
+        VectorDeserializer()
+        : _type(0)
+        {
+        	_deser.setParent(this);
+        }
+
+        void begin(std::vector<value_type>& type)
+        {
+            _type = &type;
+        }
+
+        virtual void* target()
+        {
+            return _type;
+        }
+
+        virtual const std::type_info& targetType()
+        {
+            return typeid(std::vector<value_type>);
+        }
+        
+        virtual void setName(const std::string& name)
+        {
+        }
+
+        virtual void setId(const std::string& id)
+        {
+        }
+
+        virtual void setValue(const Pt::String& value)
+        {
+        }
+
+        virtual void setReference(const std::string& id)
+        {
+        }
+
+        virtual Pt::IDeserializer* beginMember(const std::string& name)
+        {
+        	_type->push_back( value_type() );
+        	_deser.begin( _type->back() );
+        	return &_deser;
+        }
+
+        virtual Pt::IDeserializer* leaveMember()
+        {
+        	return this;
+        }
+
+        virtual void fixup(Pt::DeserializationContext& ctx)
+        { }
+
+    private:
+        std::vector<value_type>* _type;
+        IntDeserializer _deser;
+};
+
 
 class SerializationTest : public Pt::Unit::TestSuite
 {
@@ -83,97 +216,115 @@ class SerializationTest : public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<SerializationTest> register_SerializationTest;
 
+// Apple
+// without 900676
+// with SI 905312
+// with DS 906900
 
 void SerializationTest::Benchmark1()
-{
+{ 
     std::string name;
     Pt::String num(L"111");
-    Pt::String num1(L"111");
-    Pt::String num2(L"222");
-    Pt::String num3(L"333");
-    Pt::String num4(L"444");
-    Pt::String num5(L"555");
-	Pt::SerializationInfo si;
-	std::vector<int> vec;
-    
+	Pt::StringStream input(L"111 222 333 444 555");
+    std::vector<int> vec;
+    int u = 0;
+
+	Pt::SerializationCache cache;
+	Pt::SerializationInfo si(&cache);
+	
 	Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-    	num1 = L"111";
-    	num2 = L"222";
-    	num3 = L"333";
-    	num4 = L"444";
-    	num5 = L"555";
-        si.clear();
+		input.clear(); // 105 000
+		input.seekg(std::ios::beg);
+        
+        //std::cerr << "getline" << std::endl;
+        std::getline(input, num, Pt::Char(' '));
+        si.addValue(name, num);
 
-        //num = L"111";
-        si.addValue(name, num1);
+	    //std::cerr << "getline" << std::endl;
+        std::getline(input, num, Pt::Char(' '));
+        si.addValue(name, num);
 
-        //num = L"222";
-        si.addValue(name, num2);
+		//std::cerr << "getline" << std::endl;
+        std::getline(input, num, Pt::Char(' '));
+        si.addValue(name, num);
 
-        //num = L"333";
-        si.addValue(name, num3);
+		//std::cerr << "getline 4" << std::endl;
+        std::getline(input, num, Pt::Char(' '));
+        si.addValue(name, num);
 
-        //num = L"444";
-        si.addValue(name, num4);
+		//std::cerr << "getline 5" << std::endl;
+        std::getline(input, num, Pt::Char(' '));
+        si.addValue(name, num);
 
-        //num = L"555";
-        si.addValue(name, num5);
+        //vec.reserve(5);
+        si >>= vec; //55 000
+        
+        si.clear(); // 130 000
 
-        si >>= vec;
-
+        u += vec.size();
+		//std::cerr << "RESULT: " << vec.size() << " " << vec[4] << std::endl;
 		vec.clear();
-		//num.clear();
     }
     Pt::Timespan ts = clock.stop();
-    std::cerr << "Time1: " << ts.toUSecs() << std::endl;
+    std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;
+    //std::exit(1);
 }
 
 
 void SerializationTest::Benchmark2()
 {
-    std::string name;
+	std::string name;
     Pt::String num(L"111");
-    Pt::String num1(L"111");
-    Pt::String num2(L"222");
-    Pt::String num3(L"333");
-    Pt::String num4(L"444");
-    Pt::String num5(L"555");
-	Pt::StringStream ss;
-    int x = 0;
-	std::vector<int> vec;
-
+	
+	VectorDeserializer vecdes;
+	Pt::IDeserializer* deser = &vecdes;
+    Pt::StringStream input(L"111 222 333 444 555");
+    std::vector<int> vec;
+    int u = 0;
 	Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-		num = L"111";
-		convert(x, num);
-        vec.push_back( x );
+        vecdes.begin(vec);
+		
+		input.clear();
+		input.seekg(std::ios::beg);
 
-		num = L"222";
-		convert(x, num);
-        vec.push_back( x );
-		
-		num = L"333";
-		convert(x, num);
-        vec.push_back( x );
-		
-		num = L"444";
-		convert(x, num);
-        vec.push_back( x );
-		
-		num = L"555";
-		convert(x, num);
-        vec.push_back( x );
+		std::getline(input, num, Pt::Char(' '));
+		deser = deser->beginMember(name);
+		deser->setValue(num);
+        deser = deser->leaveMember();
 
-        //num.clear();
+		std::getline(input, num, Pt::Char(' '));
+		deser = deser->beginMember(name);
+		deser->setValue(num);
+        deser = deser->leaveMember();
+		
+		std::getline(input, num, Pt::Char(' '));
+		deser = deser->beginMember(name);
+		deser->setValue(num);
+        deser = deser->leaveMember();
+		
+		std::getline(input, num, Pt::Char(' '));
+		deser = deser->beginMember(name);
+		deser->setValue(num);
+        deser = deser->leaveMember();
+		
+		std::getline(input, num, Pt::Char(' '));
+		deser = deser->beginMember(name);
+		deser->setValue(num);
+        deser = deser->leaveMember();
+		
+		u += vec.size();
 		vec.clear();
     }
     Pt::Timespan ts = clock.stop();
-    std::cerr << "Time2: " << ts.toUSecs() << std::endl;
+    
+    std::cerr << "Time2: " << ts.toUSecs() << " " << u << std::endl;
+
     //std::exit(1);
 }
 

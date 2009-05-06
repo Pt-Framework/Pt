@@ -122,8 +122,7 @@ class Deserializer : public IDeserializer
 
         virtual void setReference(const std::string& id)
         {
-           _current->setValue(id);
-           _current->setCategory(SerializationInfo::Reference);
+           _current->setReferenceId(id);
         }
 
         virtual IDeserializer* beginMember(const std::string& name)

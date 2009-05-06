@@ -29,66 +29,293 @@
 
 namespace Pt {
 
-SerializationInfo::SerializationInfo()
-: _parent(0)
-, _category(Value)
-, _fixupAddr(0)
-, _fixupInfo(0)
-{ }
-
-
-SerializationInfo::SerializationInfo(const SerializationInfo& si)
-: _parent(si._parent)
-, _category(si._category)
-, _name(si._name)
-, _type(si._type)
-, _id(si._id)
-, _fixupAddr(si._fixupAddr)
-, _fixupInfo(si._fixupInfo)
-, _value(si._value)
-, _nodes(si._nodes)
-{ }
-
-
-SerializationInfo& SerializationInfo::operator=(const SerializationInfo& si)
+SerializationCache::SerializationCache()
 {
-    _parent = si._parent;
-    _category = si._category;
-    _name = si._name;
-    _id = si._id;
-    _type = si._type;
-    _value = si._value;
-    _nodes = si._nodes;
-    _fixupAddr = si._fixupAddr;
-    _fixupInfo = si._fixupInfo;
-    return *this;
 }
 
 
+SerializationCache::~SerializationCache()
+{
+	std::vector<SerializationInfo::ValueNode*>::iterator it = _scalars.begin();
+	for(; it != _scalars.end(); ++it)
+	{
+        //std::cerr << "destroy value" << std::endl;
+		delete *it;
+	}
+	
+	std::vector<SerializationInfo*>::iterator iter = _infos.begin();
+	for(; iter != _infos.end(); ++iter)
+	{
+        //std::cerr << "destroy si" << std::endl;
+		delete *iter;
+	}
+	
+	//std::cerr << "cache destroyed" << std::endl;
+}
+
+
+SerializationInfo* SerializationCache::get()
+{
+    SerializationInfo* si = 0;
+
+	if( _infos.empty() )
+	{
+        //std::cerr << "create si" << std::endl;
+	    si = new SerializationInfo(this);
+		_infos.push_back(si);
+	}
+	else
+	{
+	    si = _infos.back();
+	}
+
+	//std::cerr << "get si" << std::endl;
+	_infos.pop_back();
+	return si;
+}
+
+
+void SerializationCache::push(SerializationInfo* si)
+{
+	//std::cerr << "push si" << std::endl;
+	_infos.push_back(si);
+}
+
+
+SerializationInfo::ValueNode* SerializationCache::getScalarData()
+{
+    SerializationInfo::ValueNode* node = 0;
+
+	if( _scalars.empty() )
+	{
+        //std::cerr << "create value" << std::endl;
+	    node = new SerializationInfo::ValueNode();
+		_scalars.push_back(node);
+	}
+	else
+	{
+	    node = _scalars.back();
+	}
+
+    //std::cerr << "get value" << std::endl;
+	_scalars.pop_back();
+	return node;
+}
+
+
+SerializationInfo::Node* SerializationCache::getObject()
+{
+    //std::cerr << "get object" << std::endl;
+	return new SerializationInfo::ObjectNode();
+}
+
+
+void SerializationCache::push(SerializationInfo::Node* node)
+{
+	if( node->category() == SerializationInfo::Value )
+	{
+		SerializationInfo::ValueNode* scalar = static_cast<SerializationInfo::ValueNode*>(node);
+		_scalars.push_back(scalar);
+	}
+	else if( node->category() == SerializationInfo::Object || 
+	         node->category() == SerializationInfo::Array )
+	{
+		static_cast<const SerializationInfo::ObjectNode*>(node)->release(*this);
+		delete node;
+	}
+	else
+	{
+		delete node;
+	}
+}
+
+
+/*void SerializationInfo::ValueNode::onClear(SerializationCache& cache)
+{ 
+	_value.clear(); 
+}*/
+
+
+void SerializationInfo::ValueNode::onClear()
+{ 
+	_value.clear(); 
+}
+
+
+SerializationInfo::ObjectNode::~ObjectNode()
+{
+	this->onClear();
+	::operator delete(_nodes);
+}
+
+
+void SerializationInfo::ObjectNode::push_back(SerializationInfo* si)
+{
+	if(_capacity == _size)
+	{
+		void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
+		SerializationInfo** nodes = (SerializationInfo**) mem;
+		_capacity += 5;
+		std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
+
+		::operator delete(_nodes);
+		_nodes = nodes;
+	}
+
+	_nodes[_size] = si;
+	++_size;
+}
+
+
+void SerializationInfo::ObjectNode::release(SerializationCache& cache)
+{
+    Iterator endIt = end();
+
+	for(Iterator it = begin(); it != endIt; ++it)
+	{
+		Node* node = (*it)->_node;
+		cache.push(node);
+		(*it)->_node = 0;
+		cache.push(*it);
+	}
+
+    _size = 0;
+}
+
+
+void SerializationInfo::ObjectNode::onClear()
+{
+    Iterator endIt = end();
+
+    for(Iterator it = begin(); it != endIt; ++it)
+    {
+        delete *it;
+    }
+    _size = 0;
+}
+
+
+SerializationInfo::~SerializationInfo()
+{
+    if(_node)
+    {
+    	if(_cache)
+        	_cache->push(_node);
+        else
+        	delete _node;
+    }
+}
+
+	
 void SerializationInfo::clear()
 {
-	_category = Void;
-	_parent = 0;
-	_name.clear();
-	_type.clear();
-	_id.clear();
-	_fixupAddr = 0;
-	_fixupInfo = 0;
-	_value.clear();
-	_nodes.clear();
+    if(_node)
+    {
+    	if(_cache && (_node->category() == Object || _node->category() == Array) )
+    	{
+        	static_cast<const SerializationInfo::ObjectNode*>(_node)->release(*_cache);
+        }
+        else
+        	_node->clear();
+    }
+
+    _name = std::string();
+    _type = _name;
+    _id = _name;
 }
 
 
-void SerializationInfo::reserve(size_t n)
+void SerializationInfo::setCategory(Category category)
 {
-    _nodes.reserve(n);
+	switch(category)
+	{
+		case Value:
+			initValue();
+			break;
+			
+		case Reference:
+			initReference();
+			break;
+			
+		case Array:
+		case Object:
+			initObject(category);
+			break;
+			
+		default:
+		    break;
+	}
+}
+
+
+SerializationInfo::ValueNode* SerializationInfo::initValue() const
+{
+	if( this->category() != Value)
+	{
+		if( _cache )
+		{
+			SerializationInfo::Node* node = _cache->getScalarData();
+			delete _node;
+			_node = node;
+		}
+		else
+		{
+			ValueNode* node = new ValueNode();
+			delete _node;
+			_node = node;
+		}
+	}
+	
+	return static_cast<ValueNode*>(_node);
+}
+
+
+SerializationInfo::ReferenceNode* SerializationInfo::initReference() const
+{
+	if( this->category() != Reference)
+	{	
+		//if( ! _node->cache() )
+		{
+			ReferenceNode* node = new ReferenceNode();
+			delete _node;
+			_node = node;
+		}
+	}
+	
+	return static_cast<ReferenceNode*>(_node);
+}
+
+
+SerializationInfo::ObjectNode* SerializationInfo::initObject(Category category) const
+{
+	if( this->category() != Object && this->category() != Array)
+	{
+		//if( ! _node->cache() )
+		{
+			ObjectNode* node = new ObjectNode();
+			node->setCategory(category);
+			delete _node;
+			_node = node;
+		}
+	}
+	
+	return static_cast<ObjectNode*>(_node);
 }
 
 
 void SerializationInfo::setReference(void* ref)
 {
-    _value = convert<Pt::String>(ref);
-    _category = Reference;
+	ReferenceNode* node = initReference();
+	//std::cerr << "setReference " << ref << std::endl;
+	node->setAddr(ref);
+}
+
+
+void SerializationInfo::setReferenceId(const std::string& ref)
+{
+	ReferenceNode* node = initReference();
+	//std::cerr << "setReference " << ref << std::endl;
+	node->setRefId(ref);
 }
 
 
@@ -102,91 +329,135 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 
 void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
 {
-    _fixupAddr = &type;
-    _fixupInfo = &ti;
+	ReferenceNode* node = initReference();
+	node->setFixupAddr(&type);
+	node->setFixupInfo(ti);
 }
 
 
 void* SerializationInfo::fixupAddr() const
 {
-    return _fixupAddr;
+	ReferenceNode* node = initReference();
+    return node->fixupAddr();
 }
 
 
 const std::type_info& SerializationInfo::fixupInfo() const
 {
-    return *_fixupInfo;
+	ReferenceNode* node = initReference();
+    return *( node->fixupInfo() );
 }
 
 
 const Pt::String& SerializationInfo::toString() const
 {
-    return _value;
+    if( this->category() != Value)
+        throw SerializationError("not a value");
+
+    ValueNode* svalue = (ValueNode*) _node;
+    return svalue->value();
 }
 
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    ///SerializationInfo* info = new SerializationInfo();
-    ///info->setParent(*this);
-    ///info->setName(name);
-    ///_nodes.push_back( info );
-    SerializationInfo info;
-    _nodes.push_back( info );
-    _nodes.back().setParent(*this);
-    _nodes.back().setName(name);
+    ObjectNode* onode = initObject(Object);
 
-    _category = Object;
+    //std::cerr << "added member " <<  _node->cache() << std::endl;
 
-    ///return *info;
-    return _nodes.back();
+	SerializationInfo* si = 0;
+	if( _cache )
+	{
+		si = _cache->get();
+	}
+	else
+	{
+		si = new SerializationInfo();
+	}
+
+    si->setParent(this);
+    si->setName(name);
+    onode->push_back(si);
+    return onode->back();
 }
 
 
 SerializationInfo::Iterator SerializationInfo::begin()
 {
-    if(_nodes.size() == 0)
-        return 0;
+	if(! _node || (_node->category() != Object && _node->category() != Array) )
+	{
+		return 0;
+	}
+	
+	ObjectNode* snode = (ObjectNode*) _node;
+    
+    //if(snode->nodes().size() == 0)
+    //    return 0;
 
-    return &( _nodes[0] );
+    return snode->begin();
 }
 
 
 SerializationInfo::Iterator SerializationInfo::end()
 {
-    if(_nodes.size() == 0)
-        return 0;
+	if(! _node || (_node->category() != Object && _node->category() != Array) )
+	{
+		return 0;
+	}
+	
+	ObjectNode* snode = (ObjectNode*) _node;
 
-    return &_nodes[0] + _nodes.size();
+    //if(snode->nodes().size() == 0)
+    //    return 0;
+
+    return snode->end();
 }
 
 
 SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
-    if(_nodes.size() == 0)
-        return 0;
+	if(! _node || (_node->category() != Object && _node->category() != Array) )
+	{
+		return 0;
+	}
+	
+	ObjectNode* snode = (ObjectNode*) _node;
+    
+    //if(snode->nodes().size() == 0)
+    //    return 0;
 
-    return &( _nodes[0] );
+    return snode->begin();
 }
 
 
 SerializationInfo::ConstIterator SerializationInfo::end() const
 {
-    if(_nodes.size() == 0)
-        return 0;
+	if(! _node || (_node->category() != Object && _node->category() != Array) )
+	{
+		return 0;
+	}
+	
+	ObjectNode* snode = (ObjectNode*) _node;
 
-    return &_nodes[0] + _nodes.size();
+    //if(snode->nodes().size() == 0)
+    //    return 0;
+
+    return snode->end();
 }
 
 
 const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
-    Nodes::const_iterator it = _nodes.begin();
-    for(; it != _nodes.end(); ++it)
-    {
-        if( it->name() == name )
-            return *it;
-    }
+	if(_node && (_node->category() == Object || _node->category() == Array) )
+	{
+	    ObjectNode* snode = (ObjectNode*) _node;
+		Iterator it = snode->begin();
+		for(; it != snode->end(); ++it)
+		{
+			if( it->name() == name )
+				return *it;
+		}
+	}
 
     throw SerializationError("Missing info for '" + name + "'", PT_SOURCEINFO);
 }
@@ -194,12 +465,16 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
 
 const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
-    Nodes::const_iterator it = _nodes.begin();
-    for(; it != _nodes.end(); ++it)
-    {
-        if( it->name() == name )
-            return &(*it);
-    }
+	if(_node && (_node->category() == Object || _node->category() == Array) )
+	{
+	    ObjectNode* snode = (ObjectNode*) _node;
+		ObjectNode::ConstIterator it = snode->begin();
+		for(; it != snode->end(); ++it)
+		{
+			if( (*it)->name() == name )
+				return *it;
+		}
+	}
 
     return 0;
 }
@@ -207,12 +482,16 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 
 SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
-    Nodes::iterator it = _nodes.begin();
-    for(; it != _nodes.end(); ++it)
-    {
-        if( it->name() == name )
-            return &(*it);
-    }
+	if(_node && (_node->category() == Object || _node->category() == Array) )
+	{
+	    ObjectNode* snode = (ObjectNode*) _node;
+		ObjectNode::Iterator it = snode->begin();
+		for(; it != snode->end(); ++it)
+		{
+			if( (*it)->name() == name )
+				return *it;
+		}
+	}
 
     return 0;
 }
