@@ -293,12 +293,12 @@ SerializationInfo::ObjectNode* SerializationInfo::initObject(Category category) 
 		//if( ! _node->cache() )
 		{
 			ObjectNode* node = new ObjectNode();
-			node->setCategory(category);
 			delete _node;
 			_node = node;
 		}
 	}
 	
+	_node->setCategory(category);
 	return static_cast<ObjectNode*>(_node);
 }
 
@@ -377,6 +377,28 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
     si->setParent(this);
     si->setName(name);
+    onode->push_back(si);
+    return onode->back();
+}
+
+
+SerializationInfo& SerializationInfo::addMember()
+{
+    ObjectNode* onode = initObject(Array);
+
+    //std::cerr << "added member " <<  _node->cache() << std::endl;
+
+	SerializationInfo* si = 0;
+	if( _cache )
+	{
+		si = _cache->get();
+	}
+	else
+	{
+		si = new SerializationInfo();
+	}
+
+    si->setParent(this);
     onode->push_back(si);
     return onode->back();
 }

@@ -57,7 +57,7 @@ inline void convert(int& n, const Pt::String& str)
 	//int value = 1234;
 	//memcpy(&n, &value, sizeof(int));
 	
-	//n = atoi("111");
+	//n = atoi( "111");
 }
 
 }

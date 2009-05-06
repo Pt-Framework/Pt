@@ -381,6 +381,10 @@ class PT_API SerializationInfo
         */
         SerializationInfo& addMember(const std::string& name);
 
+        /** @brief Serialization of member data
+        */
+        SerializationInfo& addMember();
+
         /** @brief Deserialization of member data
         */
         const SerializationInfo& getMember(const std::string& name) const;
@@ -839,7 +843,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        SerializationInfo& newSi = si.addMember("item");
+        SerializationInfo& newSi = si.addMember();
         newSi <<= *it;
         newSi.setName( newSi.typeName() );
     }
@@ -866,7 +870,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        SerializationInfo& newSi = si.addMember("int");
+        SerializationInfo& newSi = si.addMember();
         newSi <<= *it;
     }
 
