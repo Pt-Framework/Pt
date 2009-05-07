@@ -111,6 +111,17 @@
     #define PT_API PT_IMPORT
 #endif
 
+#if !defined(__NOLOCK_ON_INPUT)
+    // disable locking of iostreams on xlC
+    #define __NOLOCK_ON_INPUT
+#endif
+
+#if !defined(__NOLOCK_ON_OUTPUT)
+    // disable locking of iostreams on xlC
+    #define __NOLOCK_ON_OUTPUT
+#endif
+
+
 /** @defgroup DateTime
     @brief Dates and Times
 
