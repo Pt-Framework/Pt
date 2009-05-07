@@ -120,7 +120,7 @@ void SerializationCache::push(SerializationInfo::Node* node)
 	else if( node->category() == SerializationInfo::Object || 
 	         node->category() == SerializationInfo::Array )
 	{
-		static_cast<const SerializationInfo::ObjectNode*>(node)->release(*this);
+		static_cast<SerializationInfo::ObjectNode*>(node)->release(*this);
 		delete node;
 	}
 	else
@@ -213,7 +213,7 @@ void SerializationInfo::clear()
     {
     	if(_cache && (_node->category() == Object || _node->category() == Array) )
     	{
-        	static_cast<const SerializationInfo::ObjectNode*>(_node)->release(*_cache);
+        	static_cast<SerializationInfo::ObjectNode*>(_node)->release(*_cache);
         }
         else
         	_node->clear();
