@@ -127,13 +127,11 @@ void ProcessImpl::start()
 
 void ProcessImpl::kill()
 {
-    if( 0 > ::kill(m_pid,SIGINT) )
+    int iStatus;
+    if( 0 > ::kill(m_pid,SIGINT)
+        || 0 > ::waitpid(m_pid,&iStatus,WNOHANG|WUNTRACED) )
     {
         throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-    }
-    if( m_pid != ::wait(NULL) )
-    {
-        throw SystemError( PT_ERROR_MSG("kill failed") );
     }
 }
 
