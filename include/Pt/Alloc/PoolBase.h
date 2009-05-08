@@ -25,8 +25,7 @@
 
 namespace Pt{
 
-template< typename Mutex                 = Mutex,
-          std::size_t chunkSize          = PT_DEFAULT_CHUNK_SIZE,
+template< std::size_t chunkSize          = PT_DEFAULT_CHUNK_SIZE,
           std::size_t maxSmallObjectSize = PT_DEFAULT_MAX_SMALL_OBJECT_SIZE,
           std::size_t objectAlignSize    = PT_DEFAULT_OBJECT_ALIGNMENT >
 class PT_ALLOC_API PoolBase

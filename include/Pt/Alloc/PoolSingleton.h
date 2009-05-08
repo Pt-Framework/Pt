@@ -71,43 +71,41 @@ public:
 
     void* allocate (std::size_t size, bool doThrow)
     { 
-        _mutex->lock();
+        Pt::System::MutexLock mutexLock(*_mutex);        
         return _poolAlloc->allocate(size, doThrow);
     }
 
     void deallocate (void* p, std::size_t size)
     {
-        _mutex->lock();
+        Pt::System::MutexLock mutexLock(*_mutex);
         _poolAlloc->deallocate (p, size);
     }
 
     void deallocate (void* p)
     {
-        _mutex->lock();
+        Pt::System::MutexLock mutexLock(*_mutex);
         _poolAlloc->deallocate(p);
     }
 
     std::size_t getMaxObjectSize() const
     {
-        _mutex->lock();
         return _poolAlloc->getMaxObjectSize();
     }
 
     std::size_t getAlignment() const 
     {
-        _mutex->lock();
         return _poolAlloc->getAlignment(); 
     }
 
     bool trimExcessMemory()
     {
-        _mutex->lock();
+        Pt::System::MutexLock mutexLock(*_mutex);
         return _poolAlloc->trimExcessMemory();
     }
 
     bool isCorrupt() const
     {
-        _mutex->lock();
+        Pt::System::MutexLock mutexLock(*_mutex);
         return _poolAlloc->isCorrupt();
     }
 

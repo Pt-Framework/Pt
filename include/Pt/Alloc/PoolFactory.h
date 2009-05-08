@@ -140,8 +140,7 @@ private:
     PoolFactory& operator=(const PoolFactory&);
 
     /// Type of container used to hold Chunks.
-    typedef std::vector<Chunk, Allocator<Chunk, default_user_allocator_new_delete<Chunk> > > Chunks;
-    //typedef std::vector<Chunk> Chunks;
+    typedef std::vector<Chunk> Chunks;
 
     /// Iterator through container of Chunks.
     typedef Chunks::iterator ChunkIter;

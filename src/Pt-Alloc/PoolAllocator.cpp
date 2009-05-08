@@ -102,11 +102,10 @@ void* PoolAllocator::allocate(std::size_t size, bool doThrow)
     assert(NULL != _pool);
     if (0 == size)
     {
-        size = 1;
+        return 0;
     }
     const std::size_t index = getOffset(size, getAlignment()) - 1;
     const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
-    (void) allocCount;
     assert(index < allocCount);
 
     PoolFactory& allocator = _pool[ index ];
@@ -114,20 +113,9 @@ void* PoolAllocator::allocate(std::size_t size, bool doThrow)
     assert(allocator.blockSize() < size + getAlignment());
     void* place = allocator.allocate();
 
-    if ((NULL == place) && trimExcessMemory() )
-    {
-        place = allocator.allocate();
-    }
-
     if ((NULL == place) && doThrow)
     {
-    #ifdef _MSC_VER
-        throw std::bad_alloc( "could not allocate small object" );
-    #else
-        // GCC did not like a literal string passed to std::bad_alloc.
-        // so just throw the default-constructed exception.
         throw std::bad_alloc();
-    #endif
     }
     return place;
 }

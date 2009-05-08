@@ -71,9 +71,9 @@ void* PoolFactory::allocate()
         }
         else
         {
-            for (ChunkIter iter =_chunks.begin(); iter != _chunks.end(); ++iter)
+            for (ChunkIter iter =_chunks.begin(); ; ++iter)
             {
-                if (_chunks.back() == (*iter))
+                if (iter == _chunks.end())
                 {
                     if(!createChunk())
                     {
@@ -87,14 +87,6 @@ void* PoolFactory::allocate()
                     break;
                 }
             }
-            if (_chunks.size() == 0)
-            {
-                if(!createChunk())
-                {
-                    return NULL;
-                }
-            }
-
         }
     }
     else if(_allocChunk == _emptyChunk)
