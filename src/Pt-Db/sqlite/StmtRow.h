@@ -25,7 +25,7 @@
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IRow.h>
 
-#include "Statement.h"
+#include "SQLStatement.h"
 
 
 namespace Pt {

@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EventSink.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\File.cpp"
 				>
 			</File>
@@ -618,6 +622,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\EventLoop.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\EventSink.h"
 				>
 			</File>
 			<File

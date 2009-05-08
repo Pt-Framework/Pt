@@ -33,7 +33,7 @@
 #include "Error.h"
 
 #include <Pt/Db/Row.h>
-
+#include <Pt/System/Thread.h>
 
 namespace Pt {
  
@@ -53,8 +53,25 @@ namespace sqlite {
 
     Row Cursor::fetch()
     {
-        //log_debug("sqlite3_step(" << stmt << ')');
-        int ret = ::sqlite3_step(_stmt);
+        int ret = 0;
+        int n = 0;
+
+        //when sqlite3_step() returns SQLITE_LOCKED be aware
+        //that sqlite3_reset() will most likely also return
+        //SQLITE_LOCKED and thus it is necessary to repeat calling
+        //it until it returns SQLITE_OK.
+        do
+        {
+            ret = sqlite3_step(_stmt);
+
+            if( (ret == SQLITE_BUSY) || (ret == SQLITE_LOCKED) )
+            {
+                Pt::System::Thread::sleep(200);
+                n++;
+            }
+        }
+        while((n < 50) && ((ret == SQLITE_BUSY) || (ret == SQLITE_LOCKED)));
+
         if (ret == SQLITE_DONE)
         {
             return Row();

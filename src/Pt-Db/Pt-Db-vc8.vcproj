@@ -2,16 +2,14 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="Pt-Db"
-	ProjectGUID="{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}"
+	Name="Pt-Db-vc8"
+	ProjectGUID="{8D756A24-2F88-472A-B2A1-650164026B24}"
+	RootNamespace="Pt-Db-vc8"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
 		<Platform
 			Name="Win32"
-		/>
-		<Platform
-			Name="Pocket PC 2003 (ARMV4)"
 		/>
 	</Platforms>
 	<ToolFiles>
@@ -19,75 +17,36 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt-Dbd.dll"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) Pt-Db-all -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) Pt-Db-all -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				Output=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
 				AssemblySearchPath=""
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|Pocket PC 2003 (ARMV4)"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\tmp\wince\arm\le\vc8\$(ConfigurationName)"
-			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
-			ExcludeBuckets="7"
-			>
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
-				Output="$(OutDir)\Pt-Dbd.dll"
-				PreprocessorDefinitions="WIN32;_DEBUG"
-				IncludeSearchPath=""
-				ForcedIncludes=""
-				AssemblySearchPath=""
-				ForcedUsingAssemblies=""
-				CompileAsManaged=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt-Db.dll"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) Pt-Db-all -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) Pt-Db-all -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -97,19 +56,17 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Pocket PC 2003 (ARMV4)"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
+			Name="Debug-arm|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
-			ExcludeBuckets="7"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName) -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
-				Output="$(OutDir)\Pt-Db.dll"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug ptv-db-all"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug -a ptv-db-all"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug clean"
+				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -117,20 +74,25 @@
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
 			/>
+		</Configuration>
+		<Configuration
+			Name="Release-arm|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=release ptv-db-all"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=release -a ptv-db-all"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=release clean"
+				Output=""
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
 			/>
 		</Configuration>
 	</Configurations>
@@ -155,6 +117,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ResultImpl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ResultImplTest.cpp"
 				>
 			</File>
@@ -167,7 +133,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RowImpl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RowImplTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SqliteTest.cpp"
 				>
 			</File>
 			<File
@@ -179,9 +153,113 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ValueImpl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ValueImplTest.cpp"
 				>
 			</File>
+			<Filter
+				Name="sqlite"
+				>
+				<File
+					RelativePath=".\sqlite\BlobCompress.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Connection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Connection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Connector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Connector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Cursor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Cursor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Error.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Error.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Jamfile"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\SQLConnection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\SQLConnection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\sqlite3.c"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\sqlite3.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\sqlite3ext.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\SqliteTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\SQLStatement.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\SQLStatement.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Statement.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\Statement.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\StmtRow.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\StmtRow.h"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\StmtValue.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\sqlite\StmtValue.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -193,11 +271,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Db\Blob.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Db\Connection.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\Db\Db.h"
+				RelativePath="..\..\include\Pt\Db\DataBaseTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Db\db.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Db\Exception.h"
 				>
 			</File>
 			<File
@@ -233,15 +323,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ResultImpl.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\Pt\Db\Row.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RowImpl.h"
 				>
 			</File>
 			<File
@@ -254,306 +336,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\Db\Value.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ValueImpl.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="sqlite"
-			>
-			<File
-				RelativePath=".\sqlite\alter.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\analyze.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\attach.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\auth.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\btree.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\btree.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\build.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\callback.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\complete.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Connection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Connection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Connector.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Connector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Cursor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Cursor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\date.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\delete.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Error.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\expr.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\func.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\hash.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\hash.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\insert.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\keywordhash.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\legacy.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\loadext.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\main.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\opcodes.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\opcodes.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os_common.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os_os2.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os_posix.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\os_win32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\pager.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\pager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\parse.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\parse.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\pragma.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\prepare.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\printf.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\random.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\select.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\shell.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\sqlite3.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\sqlite3ext.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\sqliteInt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\SqliteTest.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Statement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\Statement.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\StmtRow.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\StmtRow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\StmtValue.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\StmtValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\structs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\table.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\tclsqlite.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\tokenize.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\trigger.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\update.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\utf.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\util.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vacuum.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbe.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbe.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbeapi.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbeaux.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbefifo.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbeInt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vdbemem.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\vtab.c"
-				>
-			</File>
-			<File
-				RelativePath=".\sqlite\where.c"
 				>
 			</File>
 		</Filter>

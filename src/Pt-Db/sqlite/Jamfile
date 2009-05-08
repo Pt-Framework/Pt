@@ -20,11 +20,11 @@ else
 PT_SQLITE_SOURCES = sqlite3.c
                     ;
 
-PT_SQLITE_SOURCES += Connection.cpp 
+PT_SQLITE_SOURCES += SQLConnection.cpp 
                      Connector.cpp
                      Cursor.cpp
                      Error.cpp
-                     Statement.cpp
+                     SQLStatement.cpp
                      StmtRow.cpp
                      StmtValue.cpp
                    ;

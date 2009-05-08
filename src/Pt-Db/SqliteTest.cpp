@@ -35,10 +35,185 @@
 #include <Pt/Db/Transaction.h>
 #include <Pt/Db/Result.h>
 #include <Pt/System/File.h>
+#include <Pt/System/Thread.h>
 
 #include <fstream>
 #include <cassert>
 #include <cstddef>
+
+/**
+ * @brief Helper class using for the write or read access test to the database. 
+ *
+ * Implements a Runnable which runs in a loop until a stop() API is called. Before use this class, a database must be
+ * already created and also contains table name, age and salary.
+ */
+class AccessDbRunnable
+{
+public:
+
+    /**
+     * @brief Constructor.
+     *
+     * @param accessWrite Indicate whether the helper class is used for the database write access or read access test.
+     * @param db The connection instance to the target database.
+     * @param accessFreq Number of write or read access to the target database.
+     * @param startValue The first value added to "40000" for the field "salary". This value will be incremented depends 
+     *        on the accessFreq within the read and write methods.
+     */
+    AccessDbRunnable(const bool accessWrite, const Pt::Db::Connection& db, const Pt::uint32_t accessFreq, const Pt::uint32_t& startValue = 0)
+    : _exit(false)
+    , _accessWrite(accessWrite)
+    , _db(db)
+    , _accessFreq(accessFreq)
+    , _startValue(startValue)
+    , _success(false)
+    {
+    }
+
+    /**
+     * @brief Alters a member variable to break the loop in the run() method.
+     */
+    void stop()
+    {
+        _exit = true; 
+    }
+
+    /**
+     * @return \c True when the access write or read to the db is successfully done.
+     */
+    const bool isTestSuccessfully()
+    {
+        return _success;
+    }
+
+    /**
+     * @brief Implementation of the Runnable interface.
+     *
+     * Implements a loop which is abortable by calling the stop() method.
+     */
+    void run()
+    {
+        while(false == _exit)
+        {
+            if (_accessWrite)
+            {
+                writeDb();
+            }
+            else
+            {
+                readDb();
+            }
+        }
+        _db.close();
+    }
+
+private:
+
+    /**
+     * @brief Specifies if the run() method should be broken and thus returned.
+     */
+    bool _exit;
+
+    /**
+     * @brief Specifies whether the read or write access has to be done.
+     */
+    bool _accessWrite;
+
+    /**
+     * @brief Specifies the data base to access.
+     */
+    Pt::Db::Connection _db;
+
+    /**
+     * @brief Specifies the frequently access to the database.
+     */
+    Pt::uint32_t _accessFreq;
+
+    /**
+     * @brief The first value added to "40000" for the field "salary". This value will be incremented depending 
+     *        on the accessFreq within the read and write methods.
+     */
+    Pt::uint32_t _startValue;
+
+    /**
+     * @brief Indicates whether the read or write access is successfully done.
+     */
+    bool _success;
+
+
+private:
+
+    /**
+     * @brief Write access methods to the database.
+     *
+     * By each write access the salary value will be incremented and added to value "40000".
+     */
+    void writeDb()
+    {
+        try
+        {
+            _success = false;
+            _db.beginImmediateTransaction();
+
+            for (Pt::uint32_t i=0; i < _accessFreq; ++i)
+            {
+                std::stringstream strStream;
+                strStream << "INSERT INTO TestTable (name,age,salary) VALUES ('Thomas0',20, " << 40000 + i + _startValue << ")";
+                _db.execute(strStream.str());
+            }
+
+           _db.commitTransaction();
+           _exit = true;
+           _success = true;
+       }
+       catch (const std::logic_error& error)
+       {
+           std::cout << "std::logic_error caught while loading UpdateHandler on WriteDb : "  << error.what() << std::endl;
+       }
+       catch (const std::runtime_error& error)
+       {
+           std::cout << "std::runtime_error caught while loading UpdateHandler on WriteDb: " << error.what() << std::endl;
+       }
+       catch (...)
+       {
+           std::cout << "... caught while loading UpdateHandler on WriteDb" << std::endl;
+       }
+    }
+
+    /**
+     * @brief Read access methods to the database.
+     *
+     * By each select statement the salary value will be incremented and added to value "40000".
+     */
+    void readDb()
+    {
+        try
+        {            
+            _success = false;
+            for (Pt::uint32_t i=0; i < _accessFreq; ++i)
+            {
+                std::stringstream strStream;
+                strStream << "SELECT * FROM TestTable WHERE name = 'Thomas0' AND salary = " << 40000 + i + _startValue << "";
+                Pt::Db::Result result = _db.select(strStream.str());
+            }
+            _success = true;
+            _exit = true;
+        }
+        catch (const std::logic_error& error)
+        {
+            std::cout << "std::logic_error caught while loading UpdateHandler on ReadDb : "  << error.what() << std::endl;
+        }
+        catch (const std::runtime_error& error)
+        {
+            std::cout << "std::runtime_error caught while loading UpdateHandler on ReadDb: " << error.what() << std::endl;
+        }
+        catch (...)
+        {
+            std::cout << "... caught while loading UpdateHandler on ReadDb" << std::endl;
+        }        
+    }
+};
+
 
 class SqliteTest : public Pt::Unit::TestSuite
 {
@@ -52,6 +227,7 @@ class SqliteTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "testSelect", *this, &SqliteTest::Select );
             Pt::Unit::TestSuite::registerMethod( "testDelete", *this, &SqliteTest::Delete );
             Pt::Unit::TestSuite::registerMethod( "testPragma", *this, &SqliteTest::Pragma );
+            Pt::Unit::TestSuite::registerMethod( "Concurrency", *this, &SqliteTest::testConcurrency );
         }
 
     public:
@@ -65,6 +241,7 @@ class SqliteTest : public Pt::Unit::TestSuite
         void Select();
         void Delete();
         void Pragma();
+        void testConcurrency();
 
     private:
         void fillTable(Pt::Db::Connection& con);
@@ -75,7 +252,6 @@ Pt::Unit::RegisterTest<SqliteTest> register_SqliteTest;
 
 void SqliteTest::setUp()
 {
-
 }
 
 void SqliteTest::tearDown()
@@ -201,12 +377,11 @@ void SqliteTest::Delete()
 void SqliteTest::Pragma()
 {
     Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTestPragma.db");
-    Pt::Db::Transaction tact(con);
     Pt::Db::Value result;
 
     // NOTE: setting the page_size only works if its the first statement
-    con.execute("PRAGMA page_size = 4096"); // size of one page in bytes
-    result = con.selectValue("PRAGMA page_size");
+    con.execute("PRAGMA page_size=4096;"); // size of one page in bytes
+    result = con.selectValue("PRAGMA page_size;");
     PT_UNIT_ASSERT( result.getInt() == 4096 );
 
     con.execute("PRAGMA auto_vacuum = 1"); // 0 | 1 - reclaim unused space or not
@@ -220,6 +395,80 @@ void SqliteTest::Pragma()
     con.execute("PRAGMA count_changes = 1"); // 0 | 1 - if set INSERT, UPDATE, DELETE return No. of changes
     result = con.selectValue("PRAGMA count_changes");
     PT_UNIT_ASSERT( result.getInt() == 1 );
-
-    tact.commit();
 }
+
+void SqliteTest::testConcurrency()
+{
+    bool success = false;
+    try
+    {
+        Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        Pt::Db::Connection con1 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        Pt::Db::Connection con2 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        
+        con.beginImmediateTransaction();
+        con.execute("CREATE TABLE TestTable (name,age,salary);");
+        con.commitTransaction();
+
+        AccessDbRunnable *runAccessWrite = new AccessDbRunnable(true, con, 20000);
+        AccessDbRunnable *runAccessRead = new AccessDbRunnable(false, con1, 5000, 0);
+        AccessDbRunnable *runAccessWrite1 = new AccessDbRunnable(true, con2, 10000, 20001);
+
+        //Create the Threads.
+        Pt::System::AttachedThread th1(Pt::callable(*runAccessWrite, &AccessDbRunnable::run));
+        Pt::System::AttachedThread th2(Pt::callable(*runAccessRead, &AccessDbRunnable::run));
+        Pt::System::AttachedThread th3(Pt::callable(*runAccessWrite1, &AccessDbRunnable::run));
+
+        //Start the Threads.
+        th1.start();
+        th2.start();
+        th3.start();
+
+        //Give the Threads so time to work a bit.
+        Pt::System::Thread::sleep(3000);
+
+        //Stop the AccessDbRunnable and join the corresponding Threads.
+        runAccessWrite->stop();
+        runAccessRead->stop();
+        runAccessWrite1->stop();
+ 
+        th3.join();
+        th2.join();
+        th1.join();
+
+        Pt::Db::Connection con3 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        Pt::Db::Value result = con3.selectValue("SELECT COUNT(name) FROM TestTable where name = 'Thomas0'");
+        PT_UNIT_ASSERT(result.getInt() == 30000);
+
+        PT_UNIT_ASSERT(runAccessWrite->isTestSuccessfully());
+        PT_UNIT_ASSERT(runAccessRead->isTestSuccessfully());
+        PT_UNIT_ASSERT(runAccessWrite1->isTestSuccessfully());
+
+        Pt::Db::Connection conDelete = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        conDelete.execute("DROP TABLE TestTable");
+
+        conDelete.close();
+        con3.close();
+        con2.close();
+        con1.close();
+        con.close();
+
+        success = true;
+    }
+    catch (const std::logic_error& error)
+    {
+        std::cout << "std::logic_error caught while loading UpdateHandler: "  << error.what() << std::endl;
+    }
+    catch (const std::runtime_error& error)
+    {
+        std::cout << "std::runtime_error caught while loading UpdateHandler: " << error.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cout << "... caught while loading UpdateHandler" << std::endl;
+    }
+    
+    PT_UNIT_ASSERT(success);
+    Pt::System::File("SqliteConcurrencyTest.db").remove();
+}
+

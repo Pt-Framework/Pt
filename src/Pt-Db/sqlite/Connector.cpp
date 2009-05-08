@@ -29,7 +29,7 @@
  */
 
 #include "Connector.h"
-#include "Connection.h"
+#include "SQLConnection.h"
 
 #include <Pt/Db/Connection.h>
 

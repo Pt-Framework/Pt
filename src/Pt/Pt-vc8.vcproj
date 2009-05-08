@@ -156,7 +156,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AsciiCodec.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Atomicity.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\AtomicTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Base64Codec.cpp"
 				>
 			</File>
 			<File
@@ -188,6 +200,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConversionTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Convert.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ctype.cpp"
 				>
 			</File>
@@ -216,11 +236,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Deserializer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Exception.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ExceptionTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Facets.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NonCopyableTest.cpp"
 				>
 			</File>
 			<File
@@ -244,6 +276,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Pt-test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Reflectable.cpp"
 				>
 			</File>
@@ -256,11 +292,39 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SerializationInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SerializationTest.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\Serializer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Settings.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingsReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingsReader.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SettingsTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingsWriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingsWriter.h"
 				>
 			</File>
 			<File
@@ -296,11 +360,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TextStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextStreamTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Time.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Timespan.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TimespanTest.cpp"
 				>
 			</File>
 			<File
@@ -328,6 +404,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Unicode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UnicodeTable.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utf16Codec.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utf32Codec.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utf8Codec.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\VariantTest.cpp"
 				>
 			</File>
@@ -337,6 +437,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\include\Pt\Allocator.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\include\Pt\Any.h"
 				>
@@ -374,6 +478,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\AsciiCodec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Atomicity.cw.x86.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Atomicity.gcc.arm.h"
 				>
 			</File>
@@ -386,7 +498,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Atomicity.gcc.sparc.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Atomicity.gcc.x86.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Atomicity.gcc.x86_64.h"
 				>
 			</File>
 			<File
@@ -398,7 +518,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Atomicity.pthread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Atomicity.sun.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Atomicity.windows.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Base64Codec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\BasicTextBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\BasicTextStream.h"
 				>
 			</File>
 			<File
@@ -450,6 +590,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Date.h"
 				>
 			</File>
@@ -462,11 +606,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Deserializer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Event.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\Exception.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Facets.h"
 				>
 			</File>
 			<File
@@ -514,6 +666,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Pack1.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\PackPop.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Pool.h"
 				>
 			</File>
@@ -547,6 +707,14 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\SerializationData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\SerializationInfo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Serializer.h"
 				>
 			</File>
 			<File
@@ -590,6 +758,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\TextCodec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\TextStream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Time.h"
 				>
 			</File>
@@ -618,11 +794,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Utf16Codec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Utf32Codec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Utf8Codec.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Variant.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\VariantTraits.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Vector2d.h"
 				>
 			</File>
 			<File

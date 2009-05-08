@@ -32,6 +32,7 @@
 #include <Pt/Db/Transaction.h>
 #include <Pt/Db/Result.h>
 #include <Pt/System/File.h>
+#include <Pt/Db/Value.h>
 
 #include <fstream>
 #include <cassert>
@@ -46,6 +47,7 @@ class SqliteTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("SqliteTest")
         {
             this->registerMethod( "Connection", *this, &SqliteTest::testConnection );
+            this->registerMethod( "MaxPageCount", *this, &SqliteTest::testMaxPageCount );
             this->registerMethod( "CreateTable", *this, &SqliteTest::testCreateTable );
             this->registerMethod( "Insert", *this, &SqliteTest::testInsert );
             this->registerMethod( "Select", *this, &SqliteTest:: testSelect );
@@ -59,6 +61,7 @@ class SqliteTest : public Pt::Unit::TestSuite
 
     protected:
         void testConnection();
+        void testMaxPageCount();
         void testCreateTable();
         void testInsert();
         void testSelect();
@@ -118,7 +121,45 @@ void SqliteTest::testConnection()
     Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
 }
 
+void SqliteTest::testMaxPageCount()
+{
+    char testData[512];
+    for (int i = 0; i < 512; i++)
+    {
+        testData[i] = 'a';
+    }
 
+    Pt::Db::Connection dbConnection = Pt::Db::connect("sqlite:SqliteTest.db");
+
+    // Create test table and set page_size and max_page_count.
+    std::string statement("pragma page_size=512;"
+        "pragma max_page_count=4;"
+        "CREATE TABLE SizeTest ("
+        "  data varchar(512)"
+        ");");
+
+    (void)dbConnection.execute(statement);
+
+    // Current page_count is now 2.
+    try
+    {
+        // The following 2 inserts increase the page_count to 4, which is still fine.
+        (void)dbConnection.execute(std::string("insert into SizeTest values('") + std::string(testData) + std::string("');"));
+        (void)dbConnection.execute(std::string("insert into SizeTest values('") + std::string(testData) + std::string("');"));
+    }
+    catch (std::runtime_error& e)
+    {
+        PT_UNIT_ASSERT_MSG(false, "An error occurred while inserting test data. This should not happen: " + std::string(e.what()));
+    }
+    
+    // Current page_count is now 4. Adding one more should throw an exception.
+    PT_UNIT_ASSERT_THROW(
+        (void)dbConnection.execute(std::string("insert into SizeTest values('") + std::string(testData) + std::string("');")),
+        std::runtime_error
+    );
+
+    dbConnection.close();
+}
 void SqliteTest::testCreateTable()
 {
     Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");

@@ -2,29 +2,79 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "src\Pt\Pt-vc8.vcproj", "{D6FC5308-A4A0-419B-929A-362C863FC786}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Db", "src\Pt-Db\Pt-Db-vc8.vcproj", "{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Db-vc8", "src\Pt-Db\Pt-Db-vc8.vcproj", "{8D756A24-2F88-472A-B2A1-650164026B24}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Gfx", "src\Pt-Gfx\Pt-Gfx-vc8.vcproj", "{E72BFC53-9B16-4B21-883F-C6C1649B7B88}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Gui", "src\Pt-Gui\Pt-Gui-vc8.vcproj", "{81C9E3DA-9B2A-41B0-A92C-4D7F6E3E3212}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Math", "src\Pt-Math\Pt-Math-vc8.vcproj", "{A4954B16-5C20-40F8-AFC0-B7695AB4C850}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Net", "src\Pt-Net\Pt-Net-vc8.vcproj", "{741C349B-F0B9-40A4-BDAE-50575EA41E80}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-System", "src\Pt-System\Pt-System-vc8.vcproj", "{D79858C0-34A5-42DB-B136-456DFC6FB50E}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Text", "src\Pt-Text\Pt-Text-vc8.vcproj", "{1CC82693-DB84-4C33-8858-95215DF38754}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Xml", "src\Pt-Xml\Pt-Xml-vc8.vcproj", "{7B07CB50-60AE-4DB6-BD36-B1392A4B3AD7}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Test", "src\Pt-Test\Pt-Test.vcproj", "{AED4459E-0B3E-4C2A-9C10-A519FA97C3FE}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Log", "src\Pt-Log\Pt-Log.vcproj", "{11954EFF-97AA-48FA-B458-4734FB45B184}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Alloc", "src\Pt-Alloc\Pt-Alloc.vcproj", "{19AFA54A-2703-4E79-9388-E0375ACB4EA0}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,12 +94,12 @@ Global
 		{D6FC5308-A4A0-419B-929A-362C863FC786}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
 		{D6FC5308-A4A0-419B-929A-362C863FC786}.Release|Win32.ActiveCfg = Release|Win32
 		{D6FC5308-A4A0-419B-929A-362C863FC786}.Release|Win32.Build.0 = Release|Win32
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Debug|Win32.Build.0 = Debug|Win32
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Release|Win32.ActiveCfg = Release|Win32
-		{FAB5594D-13D5-4D81-9DA2-2A4B8CFD6E48}.Release|Win32.Build.0 = Release|Win32
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Debug|Win32.Build.0 = Debug|Win32
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Release|Win32.ActiveCfg = Release|Win32
+		{8D756A24-2F88-472A-B2A1-650164026B24}.Release|Win32.Build.0 = Release|Win32
 		{E72BFC53-9B16-4B21-883F-C6C1649B7B88}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
 		{E72BFC53-9B16-4B21-883F-C6C1649B7B88}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
 		{E72BFC53-9B16-4B21-883F-C6C1649B7B88}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
@@ -140,6 +190,12 @@ Global
 		{11954EFF-97AA-48FA-B458-4734FB45B184}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
 		{11954EFF-97AA-48FA-B458-4734FB45B184}.Release|Win32.ActiveCfg = Release|Win32
 		{11954EFF-97AA-48FA-B458-4734FB45B184}.Release|Win32.Build.0 = Release|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Debug|Win32.Build.0 = Debug|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Release|Win32.ActiveCfg = Release|Win32
+		{19AFA54A-2703-4E79-9388-E0375ACB4EA0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

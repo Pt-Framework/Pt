@@ -61,6 +61,70 @@ namespace Db {
             ~AccessError() throw();
     };
 
+    /** @brief Basic exception type for database interaction.
+        @ingroup Pt
+        
+        This exception is used to inform about database errors. Commonly databases
+        return some kind of error values. To be able to use the benefits of exceptions
+        this class encapsulates such error values.
+        
+     */
+    class PT_DB_API DatabaseException : public std::logic_error
+    {
+        public:
+            
+            /**
+             * @brief The possible error values of a DatabaseException.
+             *
+             * 
+             */
+            enum DatabaseError
+            {
+                UNSPECIFIED=0,            //!< No error was specified (default value).
+                //ACCESS_ERROR,           //!< The database cannot be accessed (e.g. locked table...).
+                PERMISSION_DENIED,      //!< The current user has not the permission to access the database.
+                BAD_ALLOC,              //!< Required memory cannot be allocated.
+                VALUE_OUT_OF_RANGE,     //!< A parameter provided was out of range.
+                TABLE_RECORD_NOT_FOUND, //!< The table or record specified was not found.
+                TYPE_MISMATCH,          //!< A parameter provided was of wrong type.
+                AUTHORIZATION_FAILED    //!< The authorization failed.
+            };
+            
+            /** @brief Constructs a DataBaseException with no specific error value. 
+                
+                @param what The message text of the DatabaseException.
+                @param statement The statement that failed.
+                @param si The SourceInfo where the error occurred.
+             */
+            DatabaseException( const std::string& what, const std::string& statement, const SourceInfo& si ) throw();
+                
+            /** @brief Constructs a DataBaseException with a specific error value. 
+                
+                The error value allows the catcher to implement specific code for specific error values.
+                
+                @param what The message text of the DatabaseException.
+                @param statement The statement that failed.
+                @param error An error value which concretizes the DataBaseException.
+                @param si The SourceInfo where the error occurred.
+             */
+            DatabaseException( const std::string& what, const std::string& statement, const DatabaseError& error, const SourceInfo& si ) throw();
+            
+            //! @brief Destructor.
+            ~DatabaseException() throw();
+            
+            /** @brief Returns the error value of this DataBaseException.
+            
+                @return The error value of this DataBaseException.
+             */
+            const DatabaseException::DatabaseError& databaseError() const;
+                
+            const std::string& statement() const;
+                
+        private:
+            DatabaseError m_dbError;
+            std::string m_statement;
+    };
+
 } // namespace Db
 
 } // namespace Pt

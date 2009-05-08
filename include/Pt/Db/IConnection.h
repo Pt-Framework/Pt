@@ -57,6 +57,7 @@ namespace Db {
             typedef std::size_t size_type;
 
             virtual void beginTransaction() = 0;
+            virtual void beginImmediateTransaction() = 0;
             virtual void commitTransaction() = 0;
             virtual void rollbackTransaction() = 0;
 
