@@ -41,6 +41,37 @@ AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 AccessError::~AccessError() throw()
 { }
 
+
+DatabaseException::DatabaseException( const std::string& what, const std::string& statement, const SourceInfo& si ) throw()
+: std::logic_error( what + si )
+, m_dbError(DatabaseException::UNSPECIFIED)
+, m_statement(statement)
+{
+    
+}
+                
+DatabaseException::DatabaseException( const std::string& what, const std::string& statement, const DatabaseError& error, const SourceInfo& si ) throw()
+: std::logic_error( what + si )
+, m_dbError(error)
+, m_statement(statement)
+{
+}
+            
+DatabaseException::~DatabaseException() throw()
+{
+}
+            
+const DatabaseException::DatabaseError& DatabaseException::databaseError() const
+{
+    return m_dbError;
+}
+
+const std::string& DatabaseException::statement() const
+{
+    return m_statement;
+}
+
+
 } // namespace Db
 
 } // namespace Ptv

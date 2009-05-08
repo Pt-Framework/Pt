@@ -44,6 +44,10 @@ namespace Db {
     {
         _connection->beginTransaction();
     }
+    void Connection::beginImmediateTransaction()
+    {
+        _connection->beginImmediateTransaction();
+    }
 
     void Connection::commitTransaction()
     {
