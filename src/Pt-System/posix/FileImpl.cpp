@@ -148,11 +148,11 @@ void FileImpl::move(const std::string& path, const std::string& to)
 
 void FileImpl::create(const std::string& path)
 {
-    FILE* f = fopen(path.c_str(), "w");
-    if( ! f )
+    int fd = open(path.c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
+    if( fd < 0 )
         throwFileErrno(path, PT_SOURCEINFO);
 
-    fclose(f);
+    ::close(fd);
 }
 
 }
