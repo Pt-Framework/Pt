@@ -174,13 +174,20 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 #endif
 
 #if defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
-  template<> /// NOTE: XXX
-  class PT_API num_get<Pt::Char> : public locale::facet
+
+    /* LNG */
+   // _USE_FACET (_NumGet, __strm.getloc ())
+   // .get (_Iter (__strm), _Iter (), __strm, __err, __val);
+
+  template<> /// NOTE: TODO
+  class PT_API num_get< Pt::Char, 
+                        istreambuf_iterator< Pt::Char, 
+                                             char_traits<Pt::Char> > > : public locale::facet
   {
 
     public:
       typedef Pt::Char char_type;
-      typedef istreambuf_iterator<Pt::Char> iter_type;
+      typedef istreambuf_iterator<Pt::Char, char_traits<Pt::Char> > iter_type;
 
       explicit num_get(size_t refs = 0)
       {}
