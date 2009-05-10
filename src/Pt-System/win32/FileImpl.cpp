@@ -71,8 +71,6 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
         case ERROR_SHARING_VIOLATION:
         case ERROR_LOCK_VIOLATION:
         case ERROR_NOT_OWNER:
-        case ERROR_ALREADY_EXISTS:
-        case ERROR_FILE_EXISTS:
         case ERROR_CURRENT_DIRECTORY:
             throw PermissionDenied(path, si);
 
@@ -87,6 +85,8 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
         case ERROR_BAD_DEVICE:  
             throw DeviceNotFound(path, si);
 
+        case ERROR_ALREADY_EXISTS:
+        case ERROR_FILE_EXISTS:
         case ERROR_BAD_PATHNAME:
         case ERROR_PATH_NOT_FOUND:
         case ERROR_FILE_CORRUPT:
@@ -200,7 +200,7 @@ void FileImpl::create(const std::string& path)
                            GENERIC_WRITE, // open for writing
                            0, // do not share
                            NULL,
-                           CREATE_ALWAYS,
+                           CREATE_NEW,
                            FILE_ATTRIBUTE_NORMAL,                  
                            NULL);
 
