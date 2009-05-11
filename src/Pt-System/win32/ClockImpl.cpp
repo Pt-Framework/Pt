@@ -110,7 +110,7 @@ Pt::DateTime ClockImpl::getSystemTime()
 Pt::DateTime ClockImpl::getLocalTime()
 {
     SYSTEMTIME systemTime;
-    GetSystemTime(&systemTime);
+    GetLocalTime(&systemTime);
 
     return DateTime (    systemTime.wYear,
                 systemTime.wMonth,
