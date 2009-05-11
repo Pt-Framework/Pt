@@ -116,22 +116,16 @@ class PT_API SerializationInfo
                 void setRefId(const std::string& addr)
                 { _refid = addr; }
 
-                const void* refAddr() const
-                { return _refAddr; }
+                void* address() const
+                { return _address; }
 
-                void setAddr(void* addr)
-                { _refAddr = addr; }
+                void setAddress(void* addr)
+                { _address = addr; }
 
-                void* fixupAddr() const
-                { return _fixupAddr; }
-
-                void setFixupAddr(void* p)
-                { _fixupAddr = p; }
-
-                const std::type_info* fixupInfo() const
+                const std::type_info* typeInfo() const
                 { return _fixupInfo; }
 
-                void setFixupInfo(const std::type_info& ti)
+                void setTypeInfo(const std::type_info& ti)
                 { _fixupInfo = &ti; }
 
             protected:
@@ -139,9 +133,8 @@ class PT_API SerializationInfo
                 { _refid.clear(); }
 
             private:
-            	mutable void* _refAddr;
-                mutable void* _fixupAddr;
-                mutable const std::type_info* _fixupInfo;
+            	void* _address;
+                const std::type_info* _fixupInfo;
                 std::string _refid;
         };
 
@@ -282,29 +275,9 @@ class PT_API SerializationInfo
             return _id;
         }
 
-        const void* refAddr() const
-        {
-            if( this->category() != Reference)
-                throw SerializationError("not a reference");
-
-            const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
-            return rnode->refAddr();
-        }
-
-        const std::string& refId() const
-        {
-            if( this->category() != Reference)
-                throw SerializationError("not a reference");
-
-            const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
-            return rnode->refId();
-        }
-
         /** @brief Serialization of weak pointers
         */
         void setReference(void* ref);
-
-        void setReferenceId(const std::string& ref);
 
         /** @brief Serialization of weak pointers
         */
@@ -326,9 +299,13 @@ class PT_API SerializationInfo
             this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
-        void* fixupAddr() const;
+        void* refAddr() const;
 
-        const std::type_info& fixupInfo() const;
+        const std::string& refId() const;
+
+        void setRefId(const std::string& ref);
+
+        const std::type_info& refType() const;
 
         /** @brief Deserialization of flat data-types
         */

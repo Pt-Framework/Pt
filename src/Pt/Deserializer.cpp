@@ -37,7 +37,7 @@ void IDeserializer::fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, D
         if(it->category() == Pt::SerializationInfo::Reference)
         {
             //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->refId() << std::endl;
-            ctx.addFixup( it->refId(), it->fixupAddr(), it->fixupInfo() );
+            ctx.addFixup( it->refId(), it->refAddr(), it->refType() );
         }
     }
 

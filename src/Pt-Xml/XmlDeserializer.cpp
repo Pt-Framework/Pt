@@ -212,7 +212,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
             if( ! refId.empty() )
             {
                 _deser = _deser->beginMember(_nodeName.narrow() );
-                _deser->setReference( refId.narrow() );
+                _deser->setReferenceId( refId.narrow() );
                 _deser = _deser->leaveMember();
                 //SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
                 //ref.setCategory(SerializationInfo::Reference);

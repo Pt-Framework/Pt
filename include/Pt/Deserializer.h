@@ -64,7 +64,7 @@ class PT_API IDeserializer
 
         virtual void setId(const std::string& id) = 0;
 
-        virtual void setReference(const std::string& id) = 0;
+        virtual void setReferenceId(const std::string& id) = 0;
 
         virtual IDeserializer* beginMember(const std::string& name) = 0;
 
@@ -120,9 +120,9 @@ class Deserializer : public IDeserializer
             _current->setValue(value);
         }
 
-        virtual void setReference(const std::string& id)
+        virtual void setReferenceId(const std::string& id)
         {
-           _current->setReferenceId(id);
+           _current->setRefId(id);
         }
 
         virtual IDeserializer* beginMember(const std::string& name)
@@ -151,7 +151,7 @@ class Deserializer : public IDeserializer
         virtual void fixup(DeserializationContext& ctx)
         {
             // SI's for unfixed pointers contain the fixup address now
-            // other types may only point to _type,but not to its members
+            // other pointers may only point to _type, but not to its members
             *_current >>= *_type;
 
             fixupEach(this, _si, ctx);

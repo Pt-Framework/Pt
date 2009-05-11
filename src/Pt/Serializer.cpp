@@ -37,7 +37,7 @@ void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& c
         const void* p = si.refAddr();
         ISerializer* pointee = context.find(p);
         pointee->setId( convert<std::string>(pointee) );
-        si.setReference( pointee );
+        si.setReference( pointee ); // TODO setRefId()
         //std::cerr << "fixdown " << p << " to " << pointee << std::endl;
     }
     else if(si.category() == Pt::SerializationInfo::Object)

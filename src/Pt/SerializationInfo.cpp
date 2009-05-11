@@ -307,15 +307,7 @@ void SerializationInfo::setReference(void* ref)
 {
 	ReferenceNode* node = initReference();
 	//std::cerr << "setReference " << ref << std::endl;
-	node->setAddr(ref);
-}
-
-
-void SerializationInfo::setReferenceId(const std::string& ref)
-{
-	ReferenceNode* node = initReference();
-	//std::cerr << "setReference " << ref << std::endl;
-	node->setRefId(ref);
+	node->setAddress(ref);
 }
 
 
@@ -330,22 +322,43 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
 {
 	ReferenceNode* node = initReference();
-	node->setFixupAddr(&type);
-	node->setFixupInfo(ti);
+	node->setAddress(&type);
+	node->setTypeInfo(ti);
 }
 
 
-void* SerializationInfo::fixupAddr() const
+void* SerializationInfo::refAddr() const
 {
-	ReferenceNode* node = initReference();
-    return node->fixupAddr();
+    if( this->category() != Reference)
+        return 0;
+
+    const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
+    return rnode->address();
 }
 
 
-const std::type_info& SerializationInfo::fixupInfo() const
+const std::string& SerializationInfo::refId() const
+{
+    if( this->category() != Reference)
+        throw SerializationError("not a reference");
+
+    const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
+    return rnode->refId();
+}
+
+
+void SerializationInfo::setRefId(const std::string& ref)
+{
+    ReferenceNode* node = initReference();
+    //std::cerr << "setReference " << ref << std::endl;
+    node->setRefId(ref);
+}
+
+
+const std::type_info& SerializationInfo::refType() const
 {
 	ReferenceNode* node = initReference();
-    return *( node->fixupInfo() );
+    return *( node->typeInfo() );
 }
 
 
