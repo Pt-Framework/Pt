@@ -40,8 +40,6 @@ namespace Pt {
 
 namespace System {
 
-namespace {
-
 void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
 {
 //INVALID_DATA,		EINVAL
@@ -102,6 +100,8 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
 }
 
 
+namespace {
+
 void throwFileError(const std::string& path, const Pt::SourceInfo& si)
 {
     DWORD error = GetLastError();
@@ -116,7 +116,6 @@ void throwFileError(const std::string& path, const Pt::SourceInfo& si)
             throwError(error, path, si);
     }
 }
-
 
 }
 

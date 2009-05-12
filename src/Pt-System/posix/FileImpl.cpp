@@ -34,8 +34,6 @@ namespace Pt {
 
 namespace System {
 
-namespace {
-
 // EACCES Permission denied.
 // EMFILE Too many file descriptors in use by process.
 // ENOENT Directory does not exist, or name is an empty string.
@@ -91,6 +89,8 @@ void throwErrno(const std::string& path, const Pt::SourceInfo& si)
 }
 
 
+namespace {
+
 void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
 {
     switch(errno)
@@ -106,9 +106,7 @@ void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
     }
 }
 
-
 }
-
 
 std::size_t FileImpl::size(const std::string& path)
 {
