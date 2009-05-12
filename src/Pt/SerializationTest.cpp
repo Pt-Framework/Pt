@@ -105,7 +105,7 @@ class IntDeserializer : public Pt::IDeserializer
         	convert(*_type, value);
         }
 
-        virtual void setReference(const std::string& id)
+        virtual void setReferenceId(const std::string& id)
         {
         }
 
@@ -165,7 +165,7 @@ class VectorDeserializer : public Pt::IDeserializer
         {
         }
 
-        virtual void setReference(const std::string& id)
+        virtual void setReferenceId(const std::string& id)
         {
         }
 

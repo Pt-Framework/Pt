@@ -106,6 +106,12 @@ class Serializer : public ISerializer
 
 class PT_API SerializationContext
 {
+    struct FixupInfo
+    {
+        void* address;
+        const std::type_info* type;
+    };
+
     public:
         SerializationContext();
 
@@ -134,6 +140,21 @@ class PT_API SerializationContext
 
         std::map<const void*, ISerializer*> _omap;
         std::vector<ISerializer*> _stack;
+
+    public:
+        // addFixupTarget
+        void addObject(const std::string& id, void* obj, const std::type_info& fixupInfo);
+
+        void addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo);
+
+        void fixup();
+
+    protected:
+        virtual bool checkFixup(const std::type_info& from, const std::type_info& to);
+
+    private:
+        std::map<std::string, FixupInfo> _targets;
+        std::map<std::string, FixupInfo> _pointers;
 };
 
 } // namespace Pt
