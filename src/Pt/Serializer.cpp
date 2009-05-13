@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Serializer.h"
+#include "Pt/SerializationContext.h"
 #include "Pt/Formatter.h"
 
 namespace Pt {
@@ -88,128 +89,6 @@ void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatt
 
         formatter.finishArray();
     }
-}
-
-
-SerializationContext::SerializationContext()
-{
-}
-
-
-SerializationContext::~SerializationContext()
-{
-    this->clear();
-}
-
-
-void SerializationContext::clear()
-{
-    //
-    // Serialisation
-    //
-    _omap.clear();
-
-    std::vector<ISerializer*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        delete *it;
-    }
-    _stack.clear();
-
-    //
-    // Deserialisation
-    //
-    _targets.clear();
-    _pointers.clear();
-}
-
-
-//
-// Serialization specific
-//
-ISerializer* SerializationContext::find(const void* p) const
-{
-    std::map<const void*, ISerializer*>::const_iterator it;
-    it = _omap.find(p);
-    if(it == _omap.end())
-        return 0;
-
-    return it->second;
-}
-
-
-void SerializationContext::fixdown(Formatter& formatter)
-{
-    std::vector<ISerializer*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        ISerializer* serializer = *it;
-        serializer->fixdown(*this);
-    }
-
-    _omap.clear();
-
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        (*it)->format(formatter);
-    }
-}
-
-
-void SerializationContext::do_begin(const void* target, ISerializer* serializer)
-{
-    _omap[target] = serializer;
-    _stack.push_back(serializer);
-}
-
-//
-// Deserialization specific
-//
-void SerializationContext::addObject(const std::string& id, void* obj, const std::type_info& fixupInfo)
-{
-    FixupInfo fi;
-    fi.address = obj;
-    fi.type = &fixupInfo;
-    _targets[id] = fi;
-}
-
-
-void SerializationContext::addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo)
-{
-    FixupInfo fi;
-    fi.address = obj;
-    fi.type = &fixupInfo;
-    _pointers[id] = fi;
-}
-
-
-void SerializationContext::fixup()
-{
-    std::map<std::string, FixupInfo>::iterator it;
-    for(it = _pointers.begin(); it != _pointers.end(); ++it)
-    {
-        void* fixme = it->second.address;
-        const std::type_info* fixupType = it->second.type;
-        std::string id = it->first;
-        void* target = _targets[id].address;
-        const std::type_info* targetType = _targets[id].type ;
-
-        //std::cerr << "FIXING: " << fixme << " to " << target << std::endl;
-        bool fixupAllowed = this->checkFixup(*fixupType, *targetType);
-        if( ! fixupAllowed )
-            throw SerializationError("reference fixup failed, type mismatch");
-
-        void** vp =(void**)(fixme);
-        *vp = target;
-    }
-
-    clear();
-}
-
-
-bool SerializationContext::checkFixup(const std::type_info& from, const std::type_info& to)
-{
-    return from == to;
 }
 
 } // namespace Pt

@@ -16,6 +16,7 @@ SharedLibrary Pt : Atomicity.cpp
                    SerializationError.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
+                   SerializationContext.cpp
                    Settings.cpp
                    SettingsReader.cpp
                    SettingsWriter.cpp

@@ -25,80 +25,68 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Serializer_h
-#define Pt_Serializer_h
+#ifndef Pt_SerializationContext_h
+#define Pt_SerializationContext_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationInfo.h>
+#include <Pt/Serializer.h>
+#include <map>
+#include <vector>
+#include <typeinfo>
 
 namespace Pt {
 
-class Formatter;
-class SerializationContext;
-
-class PT_API ISerializer
+class PT_API SerializationContext
 {
+    struct FixupInfo
+    {
+        void* address;
+        const std::type_info* type;
+    };
+
     public:
-        virtual ~ISerializer()
-        {}
+        SerializationContext();
 
-        virtual void fixdown(SerializationContext& context) = 0;
+        virtual ~SerializationContext();
 
-        virtual void setName(const std::string& name) = 0;
+        void clear();
 
-        virtual void setId(const std::string& id) = 0;
-
-        virtual void format(Formatter& formatter) = 0;
-
-    protected:
-        ISerializer()
-        {}
-
-        static void fixdownEach(Pt::SerializationInfo& si, SerializationContext& context);
-
-        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
-};
-
-
-template <typename T>
-class Serializer : public ISerializer
-{
-    public:
-        Serializer()
-        : _type(0)
-        , _current(&_si)
-        { }
-
-        void begin(const T& type)
+        template <typename T>
+        ISerializer* begin(const T& type)
         {
-            _type = &type;
-            _si <<= *_type;
+            Serializer<T>* serializer = new Serializer<T>;
+            serializer->begin(type);
+            this->do_begin(&type, serializer);
+            return serializer;
         }
 
-        virtual void fixdown(SerializationContext& context)
-        {
-            this->fixdownEach( _si, context );
-        }
+        //TODO:
+        // void begin(ISerializer& serializer);
 
-        virtual void setId(const std::string& id)
-        {
-            _si.setId(id);
-        }
+        ISerializer* find(const void* p) const;
 
-        virtual void setName(const std::string& name)
-        {
-            _si.setName(name);
-        }
-
-        virtual void format(Formatter& formatter)
-        {
-            this->formatEach( _si, formatter );
-        }
+        void fixdown(Formatter& formatter);
 
     private:
-        const T* _type;
-        SerializationInfo _si;
-        SerializationInfo* _current;
+        void do_begin(const void* target, ISerializer* serializer);
+
+        std::map<const void*, ISerializer*> _omap;
+        std::vector<ISerializer*> _stack;
+
+    public:
+        // addFixupTarget
+        void addObject(const std::string& id, void* obj, const std::type_info& fixupInfo);
+
+        void addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo);
+
+        void fixup();
+
+    protected:
+        virtual bool checkFixup(const std::type_info& from, const std::type_info& to);
+
+    private:
+        std::map<std::string, FixupInfo> _targets;
+        std::map<std::string, FixupInfo> _pointers;
 };
 
 } // namespace Pt
