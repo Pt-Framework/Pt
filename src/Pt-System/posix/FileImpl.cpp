@@ -27,8 +27,14 @@
  */
 #include "FileImpl.h"
 #include "Pt/System/IOError.h"
-#include <new>
-#include <cstring>
+#include "Pt/System/SystemError.h"
+#include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 namespace Pt {
 

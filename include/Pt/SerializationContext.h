@@ -44,6 +44,18 @@ class PT_API SerializationContext
         const std::type_info* type;
     };
 
+    template <typename T>
+    struct FixdownInfo
+    {
+        static void fixdown(const void* type, const SerializationContext& context, Formatter& formatter)
+        {
+            const T* serializable = static_cast<const T*>(type);
+            Serializer<T> serializer;
+            serializer.begin(*serializable);
+            serializer.format(formatter);
+        }
+    };
+
     public:
         SerializationContext();
 
