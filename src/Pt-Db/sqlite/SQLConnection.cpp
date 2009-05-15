@@ -142,11 +142,23 @@ namespace sqlite {
 
     void Connection::commitTransaction()
     {
+        // Statement handles are invalidated at transaction end, therefore we
+        // release all cached statements here.
+        // The problem still remains since the application might preserve a
+        // statement handle, which can't be released here.
+        this->clearStatementCache();
+
         this->execute("COMMIT TRANSACTION");
     }
 
     void Connection::rollbackTransaction()
     {
+        // Statement handles are invalidated at transaction end, therefore we
+        // release all cached statements here.
+        // The problem still remains since the application might preserve a
+        // statement handle, which can't be released here.
+        this->clearStatementCache();
+
         this->execute("ROLLBACK TRANSACTION");
     }
 
