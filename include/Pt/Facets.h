@@ -213,6 +213,10 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
       { return iter_type(); }
 
       iter_type get(iter_type, iter_type, ios_base&,
+                    ios_base::iostate&, int&) const
+      { return iter_type(); }
+
+      iter_type get(iter_type, iter_type, ios_base&,
                     ios_base::iostate&, unsigned int&) const
       { return iter_type(); }
 
