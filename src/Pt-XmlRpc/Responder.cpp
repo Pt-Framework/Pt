@@ -51,6 +51,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _proc(0)
 , _args(0)
 {
+    _writer.setFormat(0);
+
     _formatter.addAlias("bool", "boolean");
 }
 
@@ -87,7 +89,7 @@ std::size_t XmlRpcResponder::readBody(std::istream& is)
 
             while( _reader.advance() )
             {
-                const Pt::Xml::Node& node = _reader.get();
+                const Xml::Node& node = _reader.get();
                 this->advance(node);
             }
         }
@@ -96,19 +98,19 @@ std::size_t XmlRpcResponder::readBody(std::istream& is)
     {
         _fault.setRc(1);
         _fault.setText( error.what() );
-        throw;
+        throw _fault;
     }
     catch(const SerializationError& error)
     {
         _fault.setRc(2);
         _fault.setText( error.what() );
-        throw;
+        throw _fault;
     }
     catch(const ConversionError& error)
     {
         _fault.setRc(3);
         _fault.setText( error.what() );
-        throw;
+        throw _fault;
     }
 
     return n;
@@ -120,47 +122,65 @@ void XmlRpcResponder::replyError(std::ostream& os, Http::Request& request,
 {
     reply.setHeader("Content-Type", "text/xml");
 
-    os << "<?xml version=\"1.0\"?>\n"
-          "<methodResponse>\n"
-          "<fault>\n"
-          "<value>\n"
-          "<struct>\n"
-          "<member>\n"
-          "<name>faultCode</name>\n"
-          "<value><int>" << _fault.rc() << "</int></value>\n"
-          "</member>\n"
-          "<member>\n"
-          "<name>faultString</name>\n"
-          "<value><string>" << _fault.what() << "</string></value>\n"
-          "</member>\n"
-          "</struct>\n"
-          "</value>\n"
-          "</fault>\n"
-          "</methodResponse>\n";
+    _writer.begin(os);
+    _writer.writeStartElement( L"methodResponse" );
+    _writer.writeStartElement( L"fault" );
+    _writer.writeStartElement( L"value" );
+    _writer.writeStartElement( L"struct" );
+
+    _writer.writeStartElement( L"member" );
+    _writer.writeElement( L"name", L"faultCode" );
+    _writer.writeStartElement( L"value" );
+    _writer.writeElement( L"int", Pt::convert<Pt::String>(_fault.rc()) );
+    _writer.writeEndElement(); // value
+    _writer.writeEndElement(); // member
+
+    _writer.writeStartElement( L"member" );
+    _writer.writeElement( L"name", L"faultString" );
+    _writer.writeStartElement( L"value" );
+
+    const char* msg = (_fault.rc() ? _fault.what() : ex.what());
+    _writer.writeElement( L"string", Pt::String::widen(msg));
+
+    _writer.writeEndElement(); // value
+    _writer.writeEndElement(); // member
+
+    _writer.writeEndElement(); // struct
+    _writer.writeEndElement(); // value
+    _writer.writeEndElement(); // fault
+    _writer.writeEndElement(); // methodResponse
+    _writer.flush();
 }
 
 
 void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Reply& reply)
 {
-    if( ! _proc )
-        throw std::runtime_error("invalid XML-RPC, no method found");
-
-    if( _args )
-    {
-        ++_args;
-        if( * _args )
-            throw std::runtime_error("invalid XML-RPC, missing arguments");
-    }
-
-    reply.setHeader("Content-Type", "text/xml");
-
-    _writer.begin(os);
-    _writer.writeStartElement( L"methodResponse" );
-
     try
     {
+        if( ! _proc )
+        {
+            _fault.setRc(4);
+            _fault.setText("invalid XML-RPC");
+            throw _fault;
+        }
+
+        if( _args )
+        {
+            ++_args;
+            if( * _args )
+            {
+                _fault.setRc(5);
+                _fault.setText("invalid XML-RPC, missing arguments");
+                throw _fault;
+            }
+        }
+
         ISerializer* rh = _proc->endCall();
 
+        reply.setHeader("Content-Type", "text/Xml");
+
+        _writer.begin(os);
+        _writer.writeStartElement( L"methodResponse" );
         _writer.writeStartElement( L"params" );
         _writer.writeStartElement( L"param" );
         rh->format(_formatter);
@@ -169,31 +189,15 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
         _writer.writeEndElement(); // methodResponse
         _writer.flush();
     }
-    catch(const Fault& fault)
+    catch (const Fault& fault)
     {
-        _writer.writeStartElement( L"fault" );
-        _writer.writeStartElement( L"value" );
-        _writer.writeStartElement( L"struct" );
-
-        _writer.writeStartElement( L"member" );
-        _writer.writeElement( L"name", L"faultCode" );
-        _writer.writeStartElement( L"value" );
-        _writer.writeElement( L"int", Pt::convert<Pt::String>(fault.rc()) );
-        _writer.writeEndElement(); // value
-        _writer.writeEndElement(); // member
-
-        _writer.writeStartElement( L"member" );
-        _writer.writeElement( L"name", L"faultString" );
-        _writer.writeStartElement( L"value" );
-        _writer.writeElement( L"string", Pt::String::widen(fault.what()) );
-        _writer.writeEndElement(); // value
-        _writer.writeEndElement(); // member
-
-        _writer.writeEndElement(); // struct
-        _writer.writeEndElement(); // value
-        _writer.writeEndElement(); // fault
-        _writer.writeEndElement(); // methodResponse
+        _fault = fault;
+        replyError(reply.body(), request, reply, fault);
+    }
+    catch (...)
+    {
         _writer.flush();
+        throw;
     }
 }
 

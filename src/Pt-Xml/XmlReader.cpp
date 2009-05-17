@@ -36,11 +36,11 @@
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/SourceInfo.h"
+#include "Pt/Log/Logger.h"
 #include <stdexcept>
 #include <iostream>
 
-#define PT_XML_LOG
-// std::cout << PT_SOURCEINFO.func()  << c.narrow('_') << std::endl;
+log_define("pt.xml.reader")
 
 namespace Pt {
 
@@ -99,89 +99,91 @@ struct XmlReaderImpl
                         return this->onAlpha(c, reader);
             }
 
+            log_warn("unexpected char '" << c << "' in line " << reader.line());
             this->syntaxError(reader.line());
             return 0;
         }
 
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected space in line " << reader.line());
             this->syntaxError( reader.line() );
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected open bracket in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected close bracket in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected colon in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected slash in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected equal in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected quote in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected exclamation mark in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected questionmark in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected alpha '" << c << "' in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
+            log_warn("unexpected eof in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
 
         void syntaxError(unsigned line)
         {
+            log_warn("syntax error in line " << line);
             throw XmlError("syntax error", line);
         }
     };
@@ -191,21 +193,18 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
 
             const String& content = reader._chars.content();
             unsigned len = content.length();
@@ -223,49 +222,42 @@ struct XmlReaderImpl
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
@@ -282,8 +274,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             String& token = reader._token;
             token += c;
 
@@ -312,8 +302,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == ';')
             {
                 reader.resolveEntity(reader._token);
@@ -338,21 +326,18 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.content() += c;
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnTag::instance();
         }
 
@@ -388,8 +373,6 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == '&')
             {
                 reader._token.clear();
@@ -412,13 +395,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.clear();
             reader._current = &(reader._endElem);
             reader._depth--;
@@ -441,20 +422,17 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return AfterEndElementName::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._endElem.name() += c;
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.clear();
             reader._current = &(reader._endElem);
             reader._depth--;
@@ -477,7 +455,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._endElem.name() += c;
             return OnEndElementName::instance();
         }
@@ -494,13 +471,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._endElem.name() = reader._startElem.name();
             reader._current = &(reader._endElem);
             reader._depth--;
@@ -523,14 +498,12 @@ struct XmlReaderImpl
     {
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._startElem.addAttribute(reader._attr);
             return BeforeAttribute::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._attr.value() += c;;
             return this;
         }
@@ -547,13 +520,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnAttributeValue::instance();
         }
 
@@ -569,13 +540,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return BeforeAttributeValue::instance();
         }
 
@@ -591,19 +560,16 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return AfterAttributeName::instance();
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return BeforeAttributeValue::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._attr.name() += c;
             return this;
         }
@@ -620,13 +586,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._current = &(reader._startElem);
             reader._depth++;
             return OnEmptyElement::instance();
@@ -634,7 +598,6 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._attr.clear();
             reader._attr.name() += c;
             return OnAttributeName::instance();
@@ -642,7 +605,6 @@ struct XmlReaderImpl
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._current = &(reader._startElem);
             reader._depth++;
             return AfterTag::instance();
@@ -660,13 +622,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return BeforeAttribute::instance();
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.clear();
             reader._current = &(reader._startElem);
             reader._depth++;
@@ -675,14 +635,12 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._startElem.name() += c;
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._chars.clear();
             reader._current = &(reader._startElem);
             reader._depth++;
@@ -701,8 +659,6 @@ struct XmlReaderImpl
     {
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(reader.depth() == 0)
                 return OnProlog::instance();
 
@@ -721,62 +677,51 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnComment::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == '-')
                 return OnCommentEnd::instance();
 
@@ -795,62 +740,51 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == '-')
                 return AfterComment::instance();
 
@@ -869,8 +803,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == '-')
                 return OnComment::instance();
 
@@ -890,7 +822,6 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             if(reader.depth() == 0)
                 return OnProlog::instance();
 
@@ -900,7 +831,6 @@ struct XmlReaderImpl
 
         virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             if(reader.depth() > 0)
                 this->syntaxError( reader.line() );
 
@@ -920,63 +850,54 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
 
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._current = &(reader._docType);
             return OnProlog::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._docType.content() += c;
             return this;
         }
@@ -993,7 +914,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             String& token = reader._docType.content();
             token += c;
 
@@ -1022,8 +942,6 @@ struct XmlReaderImpl
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
-
             if(c == '-')
                 return BeforeComment::instance();
 
@@ -1057,20 +975,17 @@ struct XmlReaderImpl
     {
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.clear();
             return OnProcessingInstruction::instance();
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnTagExclam::instance();
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             if( reader._chars.content().length() )
             {
                 reader._current = &(reader._chars);
@@ -1082,7 +997,6 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             if( reader._chars.content().length() )
             {
                 reader._current = &(reader._chars);
@@ -1104,17 +1018,17 @@ struct XmlReaderImpl
     struct OnEpilog : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             return OnTag::instance();
         }
 
         virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             reader._current = &( reader._endDoc );
             return this;
         }
@@ -1130,17 +1044,17 @@ struct XmlReaderImpl
     struct OnProlog : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             return OnTag::instance();
         }
 
         virtual State* onEof(Pt::Char c, XmlReaderImpl& reader)
-        {   PT_XML_LOG
+        {
             reader._current = &( reader._endDoc );
             return this;
         }
@@ -1157,7 +1071,6 @@ struct XmlReaderImpl
     {
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._current = &(reader._procInstr);
             return AfterTag::instance();
         }
@@ -1174,55 +1087,47 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnProcessingInstructionEnd::instance();
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.data() += c;
             return this;
         }
@@ -1239,13 +1144,11 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             return OnProcessingInstructionData::instance();
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._procInstr.target() += c;
             return this;
         }
@@ -1462,7 +1365,6 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            PT_XML_LOG
             reader._startElem.clear();
             reader._startElem.name() += c;
             return OnStartElement::instance();

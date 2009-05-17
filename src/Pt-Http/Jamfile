@@ -4,9 +4,13 @@ SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
 SubDirHdrs $(TOP)/src/Pt-Http/$(SYS:L) ;
 
 SharedLibrary Pt-Http : Client.cpp
+                        NotFoundResponder.cpp
+                        NotFoundService.cpp
                         MessageHeader.cpp
+                        Parser.cpp
+                        Responder.cpp
                         Server.cpp
-                        Parser.cpp ;
+                        Socket.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 SharedLibrary_MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
 

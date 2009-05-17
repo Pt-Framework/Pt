@@ -79,7 +79,8 @@ class PT_HTTP_API Client : public Pt::Connectable
         long _contentLength;
 
         void sendRequest(const Request& request);
-        void processBodyAvailable();
+        void processHeaderAvailable(System::StreamBuffer& sb);
+        void processBodyAvailable(System::StreamBuffer& sb);
 
         void reexecute(const Request& request);
         void doparse();
@@ -92,7 +93,7 @@ class PT_HTTP_API Client : public Pt::Connectable
     public:
         Client(const std::string& server, unsigned short int port);
 
-        Client(const std::string& server, unsigned short int port, System::SelectorBase& selector);
+        Client(System::SelectorBase& selector, const std::string& server, unsigned short int port);
 
         const ReplyHeader& execute(const Request& request,
             std::size_t timeout = System::Selectable::WaitInfinite);
@@ -109,7 +110,8 @@ class PT_HTTP_API Client : public Pt::Connectable
             return ret;
         }
 
-        std::string get(const std::string& url);
+        std::string get(const std::string& url,
+            std::size_t timeout = System::Selectable::WaitInfinite);
 
         void beginExecute(const Request& request);
 

@@ -30,86 +30,36 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Parser.h>
-#include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/NotFoundService.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Net/TcpSocket.h>
-#include <Pt/System/IOStream.h>
-#include <Pt/System/Timer.h>
+#include <Pt/System/Selector.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Condition.h>
 #include <Pt/Connectable.h>
 #include <string>
-#include <cstddef>
-#include <map>
+#include <set>
 
 namespace Pt {
 
 namespace System {
 
-    class SelectorBase;
+    class AttachedThread;
 
 }
 
 namespace Http {
 
 class Responder;
-
-class Service
-{
-    public:
-        virtual ~Service() { }
-        virtual Responder* createResponder(const Request&) = 0;
-        virtual void releaseResponder(Responder*) = 0;
-};
-
-class PT_HTTP_API Responder
-{
-    public:
-        explicit Responder(Service& service)
-            : _service(service)
-        { }
-
-        virtual ~Responder() { }
-
-        virtual void beginRequest(std::istream& in, Request& request);
-        virtual std::size_t readBody(std::istream&);
-        virtual void reply(std::ostream&, Request& request, Reply& reply) = 0;
-        virtual void replyError(std::ostream&, Request& request, Reply& reply, const std::exception& ex);
-
-        void release()     { _service.releaseResponder(this); }
-
-    private:
-        Service& _service;
-};
-
-class PT_HTTP_API NotFoundResponder : public Responder
-{
-    public:
-        explicit NotFoundResponder(Service& service)
-            : Responder(service)
-            { }
-
-        void reply(std::ostream&, Request& request, Reply& reply);
-};
-
-class PT_HTTP_API NotFoundService : public Service
-{
-    public:
-        NotFoundService()
-            : _responder(*this)
-            { }
-
-        Responder* createResponder(const Request&);
-        void releaseResponder(Responder*);
-
-    private:
-        NotFoundResponder _responder;
-};
+class Request;
+class Socket;
+class Service;
 
 class PT_HTTP_API Server : public Net::TcpServer, public Connectable
 {
     public:
-        Server(System::SelectorBase& selector, const std::string& ip, unsigned short int port);
+        Server(const std::string& ip, unsigned short int port);
+        ~Server()  { terminate(); }
 
         void addService(const std::string& url, Service& service);
         void removeService(Service& service);
@@ -128,56 +78,52 @@ class PT_HTTP_API Server : public Net::TcpServer, public Connectable
         void writeTimeout(std::size_t ms)     { _writeTimeout = ms; }
         void keepAliveTimeout(std::size_t ms) { _keepAliveTimeout = ms; }
 
+        void terminate();
+
+        void run();
+
     private:
+        std::string _ip;
+        unsigned short int _port;
+
         typedef std::multimap<std::string, Service*> ServicesType;
         ServicesType _service;
-        System::SelectorBase& _selector;
+        System::Selector _selector;
         NotFoundService _defaultService;
 
         std::size_t _readTimeout;
         std::size_t _writeTimeout;
         std::size_t _keepAliveTimeout;
-};
 
+        void serverThread();
 
-class PT_HTTP_API Socket : public Net::TcpSocket, public Connectable
-{
-        class ParseEvent : public HeaderParser::MessageHeaderEvent
-        {
-                Request& _request;
+        System::Mutex _threadMutex;
+        System::Mutex _createThreadMutex;
+        System::Mutex _selectorMutex;
+        System::Condition _threadRunning;
+        System::AttachedThread* _startingThread;
+        unsigned _minThreads;
+        unsigned _maxThreads;
+        atomic_t _waitingThreads;
+        bool _terminating;
+        System::Condition _terminated;
+        System::Condition _threadTerminated;
 
-            public:
-                explicit ParseEvent(Request& request)
-                    : HeaderParser::MessageHeaderEvent(request.header()),
-                      _request(request)
-                    { }
+        typedef std::set<System::AttachedThread*> Threads;
+        Threads _threads;
+        Threads _terminatedThreads;
 
-                virtual void onMethod(const std::string& method);
-                virtual void onUrl(const std::string& url);
-                virtual void onUrlParam(const std::string& q);
-        };
+        typedef std::list<Socket*> ServerSockets;
+        ServerSockets _readySockets;
+        System::Mutex _idleSocketsMutex;
+        ServerSockets _idleSockets;
 
-    public:
-        Socket(System::SelectorBase& s, Server& server);
+        bool hasReplyToDo() const  { return !_readySockets.empty(); }
+        friend class Socket;
+        void addReadySockets(Socket* s)
+            { _readySockets.push_back(s); }
 
-        void onInput(System::StreamBuffer& stream);
-        void onOutput(System::StreamBuffer& stream);
-        void onTimeout();
-
-        void sendReply();
-
-    private:
-        Server& _server;
-
-        ParseEvent _parseEvent;
-        HeaderParser _parser;
-        Request _request;
-        Reply _reply;
-
-        System::Timer _timer;
-        int _contentLength;
-        Responder* _responder;
-        System::IOStream _stream;
+        void createThread();
 };
 
 } // namespace Http

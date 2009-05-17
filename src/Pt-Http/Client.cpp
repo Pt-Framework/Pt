@@ -29,6 +29,9 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Parser.h>
 #include <Pt/System/IOError.h>
+#include <Pt/Log/Logger.h>
+
+log_define("Pt.http.client")
 
 namespace Pt {
 
@@ -56,8 +59,7 @@ Client::Client(const std::string& server, unsigned short int port)
 }
 
 
-Client::Client(const std::string& server, unsigned short int port,
-    System::SelectorBase& selector)
+Client::Client(System::SelectorBase& selector, const std::string& server, unsigned short int port)
 : _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
@@ -82,6 +84,7 @@ void Client::setSelector(System::SelectorBase& selector)
 
 void Client::reexecute(const Request& request)
 {
+    log_debug("reconnect");
     _socket.connect(_server, _port);
 
     _stream.clear();
@@ -106,7 +109,10 @@ const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
 
     bool shouldReconnect = _socket.isConnected();
     if (!shouldReconnect)
+    {
+        log_debug("connect");
         _socket.connect(_server, _port);
+    }
 
     sendRequest(request);
     _stream.flush();
@@ -120,6 +126,8 @@ const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
 
     if (!_stream)
         throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
+
+    log_debug("read reply");
 
     _parser.reset(true);
     _readHeader = true;
@@ -136,6 +144,11 @@ const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
         doparse();
     }
 
+    log_debug("reply ready");
+
+    if (_stream.fail())
+        throw System::IOError( PT_ERROR_MSG("failed to read HTTP reply") );
+
     if (_parser.fail())
         throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
 
@@ -148,13 +161,14 @@ const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
 
 void Client::readBody(std::string& s)
 {
-    char ch;
-
     unsigned n = _replyHeader.contentLength();
+
+    log_debug("read body; content-size: " << n);
 
     s.clear();
     s.reserve(n);
 
+    char ch;
     while (n-- && _stream.get(ch))
         s += ch;
 
@@ -162,14 +176,21 @@ void Client::readBody(std::string& s)
         throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
     if (!_replyHeader.keepAlive())
+    {
+        log_debug("close socket - no keep alive");
         _socket.close();
+    }
+    else
+    {
+        log_debug("do not close socket - keep alive");
+    }
 }
 
 
-std::string Client::get(const std::string& url)
+std::string Client::get(const std::string& url, std::size_t timeout)
 {
     Request request(url);
-    execute(request);
+    execute(request, timeout);
     return readBody();
 }
 
@@ -187,7 +208,7 @@ void Client::beginExecute(const Request& request)
         }
         catch (const System::IOError&)
         {
-            // first write failed, so connection is not active any more
+            log_debug("first write failed, so connection is not active any more");
 
             _stream.clear();
             _stream.buffer().discard();
@@ -209,6 +230,8 @@ void Client::wait(std::size_t msecs)
 
 void Client::sendRequest(const Request& request)
 {
+    log_debug("send request " << request.url());
+
     const std::string contentLength = "Content-Length";
     const std::string server = "Server";
     const std::string connection = "Connection";
@@ -256,8 +279,9 @@ void Client::sendRequest(const Request& request)
 
     _stream << "\r\n";
 
-    request.sendBody(_stream);
+    log_debug("send body");
 
+    request.sendBody(_stream);
 }
 
 void Client::onConnect(Net::TcpSocket& socket)
@@ -288,39 +312,21 @@ void Client::onInput(System::StreamBuffer& sb)
 {
     try
     {
+        log_trace("Client::onInput; readHeader=" << _readHeader);
+
         if (_readHeader)
         {
-            _parser.advance(sb);
-
-            if (_parser.fail())
-                throw std::runtime_error("http parser failed"); // TODO define exception class
-
-            if( _parser.end() )
-            {
-                _contentLength = _replyHeader.contentLength();
-                headerReceived(*this);
-                _readHeader = false;
-
-                if (_contentLength > 0)
-                {
-                    if( sb.in_avail() > 0 )
-                    {
-                        processBodyAvailable();
-                    }
-                }
-                else
-                {
-                    replyFinished(*this);
-                }
-            }
+            processHeaderAvailable(sb);
         }
         else
         {
-            processBodyAvailable();
+            processBodyAvailable(sb);
         }
     }
     catch (const std::exception& e)
     {
+        log_warn("error of type " << typeid(e).name() << " occured: " << e.what());
+
         _socket.close();
 
         // TODO propagate exception if signal errorOccured is not connected
@@ -328,11 +334,62 @@ void Client::onInput(System::StreamBuffer& sb)
     }
 }
 
-void Client::processBodyAvailable()
+void Client::processHeaderAvailable(System::StreamBuffer& sb)
 {
+    _parser.advance(sb);
+
+    if (_parser.fail())
+        throw std::runtime_error("http parser failed"); // TODO define exception class
+
+    if( _parser.end() )
+    {
+        _contentLength = _replyHeader.contentLength();
+        log_debug("header received - content-length=" << _contentLength);
+
+        headerReceived(*this);
+        _readHeader = false;
+
+        if (_contentLength > 0)
+        {
+            if( sb.in_avail() > 0 )
+            {
+                processBodyAvailable(sb);
+            }
+            else
+            {
+                sb.beginRead();
+            }
+        }
+        else
+        {
+            replyFinished(*this);
+        }
+    }
+    else
+    {
+        sb.beginRead();
+    }
+}
+
+void Client::processBodyAvailable(System::StreamBuffer& sb)
+{
+    log_trace("processBodyAvailable");
+
+    log_debug("content-length(pre)=" << _contentLength);
+
     _contentLength -= bodyAvailable(*this); // TODO: may throw exception
+
+    log_debug("content-length(post)=" << _contentLength);
+
     if( _contentLength <= 0 )
+    {
+        log_debug("reply finished");
         replyFinished(*this);
+    }
+    else
+    {
+        sb.beginRead();
+    }
 }
 
 } // namespace Http

@@ -29,6 +29,7 @@
 #include "Pt/System/SystemError.h"
 #include <errno.h>
 #include <signal.h>
+#include <iostream>
 
 extern "C"
 {
@@ -36,10 +37,23 @@ extern "C"
     {
         Pt::System::ThreadImpl* impl = (Pt::System::ThreadImpl*)arg;
         if( impl->cb() )
-            impl->cb()->call();
+        {
+            try
+            {
+                impl->cb()->call();
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "exception occured: " << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cerr << "exception occured" << std::endl;
+            }
+        }
 
-        return 0;
-    }
+          return 0;
+      }
 }
 
 namespace Pt {

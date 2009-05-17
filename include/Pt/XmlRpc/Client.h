@@ -83,12 +83,18 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         void call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc);
 
+        std::size_t timeout() const  { return _timeout; }
+
+        void timeout(std::size_t t)  { _timeout = t; }
+
     protected:
         void onReplyHeader(Http::Client& client);
 
         std::size_t onReplyBody(Http::Client& client);
 
         void onReplyFinished(Http::Client& client);
+
+        void onErrorOccured(Http::Client& client, const std::exception& e);
 
         void prepareRequest(const std::string& name, ISerializer** argv, unsigned argc);
 
@@ -108,6 +114,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         DeserializationContext _context;
         Deserializer<Fault> _fh;
         Fault _fault;
+        std::size_t _timeout;
 };
 
 }

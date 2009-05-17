@@ -32,6 +32,7 @@
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
 #include <Pt/Serializer.h>
+#include <Pt/SerializationContext.h>
 #include <memory>
 
 namespace Pt {

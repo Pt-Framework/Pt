@@ -194,7 +194,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             If the target does not exist yet within the loggin framework it 
             will be created and configured.
         */
-        Logger(const std::string& name);
+        explicit Logger(const std::string& name);
 
         /** @brief Constructs a new logger for a target and log-level
 
@@ -202,7 +202,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             If the target does not exist yet within the loggin framework it 
             will be created and configured.
         */
-        Logger(const char* name);
+        explicit Logger(const char* name);
 
         /** @brief Destructor
         */
@@ -422,14 +422,20 @@ struct LogDefine
     }
 
     #define log_define(category) \
-    static Pt:.Log::LogDefine pt_logdef(category);
+    static Pt::Log::Logger* pt_logdef() \
+    { \
+        static Pt::Log::Logger* logger = 0; \
+        if (logger == 0) \
+            logger = new Pt::Log::Logger(category); \
+        return logger; \
+    }
 
     #define log_xxxx(level, expr)   \
     do { \
-        Pt::Log::Logger* _pt_logger = LogDefine::getLogger(); \
-        if( _pt_logger->isEnabled(Pt::Log:: ## level) ) \
+        Pt::Log::Logger* _pt_logger = pt_logdef(); \
+        if( _pt_logger && _pt_logger->enabled(Pt::Log::level) ) \
         { \
-            _pt_logger->beginLog(level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
+            _pt_logger->beginLog(Pt::Log::level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
         } \
     } while (false)
 #endif

@@ -66,9 +66,23 @@ namespace Xml {
 
             void endl();
 
+            enum FormatFlags {
+              UseIndent = 1,
+              UseEndl = 2
+            };
+
+            void setFormat(int f)  { _flags = f; }
+
+            int format() const             { return _flags; }
+
+            bool useIndent() const         { return _flags | UseIndent; }
+
+            bool useEndl() const           { return _flags | UseEndl; }
+
         private:
             TextOStream _tos;
             std::stack<Pt::String> _elements;
+            int _flags;
     };
 
 }
