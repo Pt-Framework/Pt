@@ -194,7 +194,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             If the target does not exist yet within the loggin framework it 
             will be created and configured.
         */
-        explicit Logger(const std::string& name);
+        Logger(const std::string& name);
 
         /** @brief Constructs a new logger for a target and log-level
 
@@ -202,7 +202,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             If the target does not exist yet within the loggin framework it 
             will be created and configured.
         */
-        explicit Logger(const char* name);
+        Logger(const char* name);
 
         /** @brief Destructor
         */
@@ -391,20 +391,6 @@ class LoggedScope
         LogLevel _level;
 };
 
-struct LogDefine
-{
-    LogDefine(const char* category)
-    {
-        getLogger(category);
-    }
-
-    static Pt::Log::Logger* getLogger(const char* category)
-    {
-        static Pt::Log::Logger s_logger(category);
-        return &s_logger;
-    }
-};
-
 }
 
 }
@@ -422,20 +408,13 @@ struct LogDefine
     }
 
     #define log_define(category) \
-    static Pt::Log::Logger* pt_logdef() \
-    { \
-        static Pt::Log::Logger* logger = 0; \
-        if (logger == 0) \
-            logger = new Pt::Log::Logger(category); \
-        return logger; \
-    }
+    static Pt::Log::Logger pt_logger(category);
 
     #define log_xxxx(level, expr)   \
     do { \
-        Pt::Log::Logger* _pt_logger = pt_logdef(); \
-        if( _pt_logger && _pt_logger->enabled(Pt::Log::level) ) \
+        if( pt_logger.enabled(Pt::Log::level) ) \
         { \
-            _pt_logger->beginLog(Pt::Log::level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
+            pt_logger.beginLog(Pt::Log::level, PT_SOURCEINFO) << expr << Pt::Log::endlog; \
         } \
     } while (false)
 #endif
