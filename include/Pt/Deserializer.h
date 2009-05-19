@@ -91,6 +91,7 @@ class Deserializer : public IDeserializer
 
         void begin(T& type)
         {
+            _si.clear();
             _type = &type;
             _current = &_si;
         }
