@@ -207,11 +207,6 @@ class StringData {
         size_type _capacity;
         allocator_type _allocator;
         volatile mutable atomic_type _n;
-
-#ifndef NDEBUG
-        static const Pt::size_t _wstrSize = 100;
-        wchar_t _wStr[_wstrSize];
-#endif
 };
 
 //! @internal

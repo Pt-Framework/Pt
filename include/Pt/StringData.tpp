@@ -35,7 +35,6 @@ inline StringData::StringData( const allocator_type& a )
 {
     _str = _allocator.allocate(1, _str);
     _str[0] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -48,8 +47,6 @@ inline StringData::StringData(const Pt::Char* s, size_type length, const allocat
     
     traits_type::copy(_str, s, length);
     _str[length] = Pt::Char::null();
-
-    this->updateInternalStringData();
 }
 
 
@@ -62,7 +59,6 @@ inline StringData::StringData( size_type n, const allocator_type& a)
     _str = _allocator.allocate(n + 1, _str);
     _capacity = n;
     _str[0] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -81,7 +77,6 @@ inline StringData::StringData(const wchar_t* wstr, size_type length, const alloc
         ++wstr;
         ++str;
     }
-    this->updateInternalStringData();
 }
 
 
@@ -94,7 +89,6 @@ inline StringData::StringData(size_type length, Pt::Char ch)
     traits_type::assign(_str, length, ch);
     _str[length] = Pt::Char::null();
     _length = length;
-    this->updateInternalStringData();
 }
 
 
@@ -150,7 +144,6 @@ inline void StringData::clear()
 {
     _str[0] = Pt::Char::null();
     _length = 0;
-    this->updateInternalStringData();
 }
 
 
@@ -162,7 +155,6 @@ inline void StringData::assign(const Pt::Char* s, size_type length)
 
     _str[length] = Pt::Char::null();
     _length = length;
-    this->updateInternalStringData();
 }
 
 
@@ -174,7 +166,6 @@ inline void StringData::assign(size_type length, Pt::Char ch)
 
     _str[length] = Pt::Char::null();
     _length = length;
-    this->updateInternalStringData();
 }
 
 
@@ -186,7 +177,6 @@ inline void StringData::append(size_type n, Pt::Char ch)
 
     _length += n;
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -198,7 +188,6 @@ inline void StringData::append(const Pt::Char* str, size_type n)
 
     _length += n;
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -214,7 +203,6 @@ inline void StringData::insert(size_type pos, const Pt::Char* str, size_type n)
 
     _length += n;
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -230,7 +218,6 @@ inline void StringData::insert(size_type pos, size_type n, Pt::Char ch)
 
     _length += n;
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -246,7 +233,6 @@ inline StringData::value_type* StringData::erase(value_type* pos, size_type n)
     _length -= n;
     _str[_length] = Pt::Char::null();
 
-    this->updateInternalStringData();
     return _str + rpos;
 }
 
@@ -272,7 +258,6 @@ inline void StringData::replace(size_type pos, size_type n, const Pt::Char* str,
 
     _length += (n2 - n);
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -297,7 +282,6 @@ inline void StringData::replace(size_type pos, size_type n, size_type n2, Pt::Ch
 
     _length += (n2 - n);
     _str[_length] = Pt::Char::null();
-    this->updateInternalStringData();
 }
 
 
@@ -322,7 +306,6 @@ inline void StringData::reserve(size_type n)
 
     _str = newStr;
     _capacity = n;
-    this->updateInternalStringData();
 }
 
 
@@ -337,28 +320,6 @@ inline void StringData::allocate(size_type n)
 
     _str = _allocator.allocate(n + 1, _str);
     _capacity = n;
-}
-
-
-inline void StringData::updateInternalStringData()
-{
-#ifndef NDEBUG
-/*
-    Pt::Char* str = _str;
-
-    for (Pt::size_t charCount = 0; ((charCount < _capacity) && (charCount < 100)); ++charCount)
-    {
-        this->_wStr[charCount] = (wchar_t)(*str);
-        ++str;
-    }
-
-    _wStr[99] = '0';
-*/
-
-    Pt::size_t size = std::min<size_t>( _wstrSize - 1, _length );
-    wchar_t* end = std::copy(_str, _str + size, _wStr);
-    *end = 0;
-#endif
 }
 
 } // namespace Pt
