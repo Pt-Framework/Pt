@@ -217,13 +217,12 @@ class PT_XML_API XmlSerializer
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            ISerializer* serializer = _context.begin(type);
-            serializer->setName(name);
+            _context.serialize(type, name);
         }
 
         void finish()
         {
-            _context.fixdown(_formatter);
+            _context.format(_formatter);
             _context.clear();
         }
 

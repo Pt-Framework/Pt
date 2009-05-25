@@ -45,13 +45,13 @@ void SerializationContext::clear()
     //
     // Serialisation
     //
-    _omap.clear();
 
     std::vector<ISerializer*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
+    for(it = _heap.begin(); it != _heap.end(); ++it)
     {
         delete *it;
     }
+    _heap.clear();
     _stack.clear();
 
     //
@@ -65,17 +65,8 @@ void SerializationContext::clear()
 //
 // Serialization specific
 //
-ISerializer* SerializationContext::find(const void* p) const
-{
-    std::map<const void*, ISerializer*>::const_iterator it;
-    it = _omap.find(p);
-    if(it == _omap.end())
-        return 0;
 
-    return it->second;
-}
-
-
+/*
 void SerializationContext::fixdown(Formatter& formatter)
 {
     std::vector<ISerializer*>::iterator it;
@@ -92,13 +83,14 @@ void SerializationContext::fixdown(Formatter& formatter)
         (*it)->format(formatter);
     }
 }
-
-
+*/
+/*
 void SerializationContext::do_begin(const void* target, ISerializer* serializer)
 {
     _omap[target] = serializer;
     _stack.push_back(serializer);
 }
+*/
 
 //
 // Deserialization specific

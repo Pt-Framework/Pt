@@ -29,7 +29,7 @@ PT_XML_TESTS = XmlTest.cpp
                ;
 
 PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp $(PT_XML_TESTS) ;
-Main_LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-System Pt-Unit  Pt ;
+Main_LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-System Pt-Unit Pt-Log Pt ;
 PtUnitTest_MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
 
 Main XmlReaderTest : XmlReaderTest.cpp ;

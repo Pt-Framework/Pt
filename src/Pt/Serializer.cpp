@@ -36,10 +36,7 @@ void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& c
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        ISerializer* pointee = context.find(p);
-        pointee->setId( convert<std::string>(pointee) );
-        si.setReference( pointee ); // TODO setRefId()
-        //std::cerr << "fixdown " << p << " to " << pointee << std::endl;
+        context.makeId(p);
     }
     else if(si.category() == Pt::SerializationInfo::Object)
     {
@@ -48,6 +45,57 @@ void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& c
         {
             fixdownEach(*it, context);
         }
+    }
+}
+
+
+void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
+                              SerializationContext& context, Formatter& formatter)
+{
+    unsigned* id = context.getId(type);
+    if(id)
+    {
+        si.setId( convert<std::string>(*id) );
+    }
+
+    if(si.category() == SerializationInfo::Value)
+    {
+        formatter.addValue( si.name(), si.typeName(), si.toString(), si.id() );
+    }
+    else if(si.category() == SerializationInfo::Object)
+    {
+        formatter.beginObject( si.name(), si.id() );
+
+        SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            formatter.beginMember( it->name() );
+            formatEach2(*it, 0, context, formatter);
+            formatter.finishMember();
+        }
+
+        formatter.finishObject();
+    }
+    else if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        unsigned* id = context.getId( si.refAddr() );
+        if( ! id )
+            throw std::runtime_error("no such id for reference");
+
+        Pt::String addr = convert<Pt::String>( *id );
+        formatter.addReference( si.name(), addr);
+    }
+    else if(si.category() == Pt::SerializationInfo::Array)
+    {
+        formatter.beginArray( si.name(), si.id() );
+
+        SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            formatEach2(*it, 0, context, formatter);
+        }
+
+        formatter.finishArray();
     }
 }
 

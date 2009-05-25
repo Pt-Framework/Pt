@@ -44,18 +44,6 @@ class PT_API SerializationContext
         const std::type_info* type;
     };
 
-    template <typename T>
-    struct FixdownInfo
-    {
-        static void fixdown(const void* type, const SerializationContext& context, Formatter& formatter)
-        {
-            const T* serializable = static_cast<const T*>(type);
-            Serializer<T> serializer;
-            serializer.begin(*serializable);
-            serializer.format(formatter);
-        }
-    };
-
     public:
         SerializationContext();
 
@@ -63,27 +51,57 @@ class PT_API SerializationContext
 
         void clear();
 
+        /// TODO: move this to XmlSerializer
         template <typename T>
-        ISerializer* begin(const T& type)
+        void serialize(const T& type, const std::string& name)
         {
             Serializer<T>* serializer = new Serializer<T>;
+            _heap.push_back(serializer);
             serializer->begin(type);
-            this->do_begin(&type, serializer);
-            return serializer;
+            serializer->setName(name);
+
+            this->push(*serializer);
         }
 
-        //TODO:
-        // void begin(ISerializer& serializer);
+        void push(ISerializer& serializer)
+        {
+            _stack.push_back(&serializer);
+            serializer.fixdown(*this);
+        }
 
-        ISerializer* find(const void* p) const;
+        void makeId(const void* p)
+        {
+            if( _idmap.find(p) == _idmap.end() )
+            {
+                unsigned id = _idmap.size();
+                _idmap[p] = id;
+            }
+        }
 
-        void fixdown(Formatter& formatter);
+        unsigned* getId(const void* p)
+        {
+            if( _idmap.find(p) != _idmap.end() )
+            {
+                return &( _idmap[p] );
+            }
+
+            return 0;
+        }
+
+        void format(Formatter& formatter)
+        {
+            std::vector<ISerializer*>::iterator it;
+
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                (*it)->format2(*this, formatter);
+            }
+        }
 
     private:
-        void do_begin(const void* target, ISerializer* serializer);
-
-        std::map<const void*, ISerializer*> _omap;
+        std::map<const void*, unsigned> _idmap;
         std::vector<ISerializer*> _stack;
+        std::vector<ISerializer*> _heap;
 
     public:
         // addFixupTarget
