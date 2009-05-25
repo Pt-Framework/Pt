@@ -802,6 +802,7 @@ template <typename T>
 inline void operator >>=(const SerializationInfo& si, std::vector<T>& vec)
 {
 	T elem = T();
+    vec.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         //vec.resize( vec.size() + 1 );
@@ -833,6 +834,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
 {
 	int n = 0;
+    vec.clear();
 	SerializationInfo::ConstIterator end = si.end();
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
