@@ -91,9 +91,16 @@ class PT_HTTP_API Client : public Pt::Connectable
         void onInput(System::StreamBuffer& sb);
 
     public:
+        Client();
         Client(const std::string& server, unsigned short int port);
 
         Client(System::SelectorBase& selector, const std::string& server, unsigned short int port);
+
+        void connect(const std::string& server, unsigned short int port)
+        {
+            _server = server;
+            _port = port;
+        }
 
         const ReplyHeader& execute(const Request& request,
             std::size_t timeout = System::Selectable::WaitInfinite);

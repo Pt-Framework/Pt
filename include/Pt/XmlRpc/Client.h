@@ -72,12 +72,21 @@ class PT_XMLRPC_API Client : public Pt::Connectable
     };
 
     public:
+        Client();
+
         Client(System::SelectorBase& selector, const std::string& addr,
                       unsigned short port, const std::string& url);
 
         Client(const std::string& addr, unsigned short port, const std::string& url);
 
         virtual ~Client();
+
+        void connect(const std::string& addr, unsigned short port,
+                     const std::string& url)
+        {
+            _client.connect(addr, port);
+            _request.url(url);
+        }
 
         void beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc);
 

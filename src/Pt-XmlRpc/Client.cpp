@@ -39,6 +39,26 @@ namespace Pt {
 
 namespace XmlRpc {
 
+Client::Client()
+: _state(OnBegin)
+, _ts( new Utf8Codec )
+, _reader(_ts)
+, _formatter(_writer)
+, _method(0)
+, _timeout(System::Selectable::WaitInfinite)
+{
+    _writer.useIndent(false);
+    _writer.useEndl(false);
+
+    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
+    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
+    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
+
+    _formatter.addAlias("bool", "boolean");
+}
+
+
 Client::Client(System::SelectorBase& selector, const std::string& server,
                              unsigned short port, const std::string& url)
 : _state(OnBegin)
@@ -53,10 +73,10 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
 {
     _writer.setFormat(0);
 
-    connect(_client.headerReceived, *this, &Client::onReplyHeader);
-    connect(_client.bodyAvailable, *this, &Client::onReplyBody);
-    connect(_client.replyFinished, *this, &Client::onReplyFinished);
-    connect(_client.errorOccured, *this, &Client::onErrorOccured);
+    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
+    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
+    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
 
     _formatter.addAlias("bool", "boolean");
 }
@@ -75,9 +95,9 @@ Client::Client(const std::string& server, unsigned short port, const std::string
 {
     _writer.setFormat(0);
 
-    connect(_client.headerReceived, *this, &Client::onReplyHeader);
-    connect(_client.bodyAvailable, *this, &Client::onReplyBody);
-    connect(_client.errorOccured, *this, &Client::onErrorOccured);
+    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
+    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
 
     _formatter.addAlias("bool", "boolean");
 }

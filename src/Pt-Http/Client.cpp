@@ -42,6 +42,23 @@ void Client::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
     _replyHeader.httpReturn(ret, text);
 }
 
+Client::Client()
+: _parseEvent(_replyHeader)
+, _parser(_parseEvent, true)
+, _request(0)
+, _server(std::string())
+, _port(0)
+, _stream(8192, true)
+, _readHeader(true)
+, _contentLength(0)
+{
+    _stream.attachDevice(_socket);
+    Pt::connect(_socket.connected, *this, &Client::onConnect);
+    Pt::connect(_stream.buffer().outputReady, *this, &Client::onOutput);
+    Pt::connect(_stream.buffer().inputReady, *this, &Client::onInput);
+}
+
+
 Client::Client(const std::string& server, unsigned short int port)
 : _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
@@ -53,9 +70,9 @@ Client::Client(const std::string& server, unsigned short int port)
 , _contentLength(0)
 {
     _stream.attachDevice(_socket);
-    connect(_socket.connected, *this, &Client::onConnect);
-    connect(_stream.buffer().outputReady, *this, &Client::onOutput);
-    connect(_stream.buffer().inputReady, *this, &Client::onInput);
+    Pt::connect(_socket.connected, *this, &Client::onConnect);
+    Pt::connect(_stream.buffer().outputReady, *this, &Client::onOutput);
+    Pt::connect(_stream.buffer().inputReady, *this, &Client::onInput);
 }
 
 
@@ -70,9 +87,9 @@ Client::Client(System::SelectorBase& selector, const std::string& server, unsign
 , _contentLength(0)
 {
     _stream.attachDevice(_socket);
-    connect(_socket.connected, *this, &Client::onConnect);
-    connect(_stream.buffer().outputReady, *this, &Client::onOutput);
-    connect(_stream.buffer().inputReady, *this, &Client::onInput);
+    Pt::connect(_socket.connected, *this, &Client::onConnect);
+    Pt::connect(_stream.buffer().outputReady, *this, &Client::onOutput);
+    Pt::connect(_stream.buffer().inputReady, *this, &Client::onInput);
     setSelector(selector);
 }
 
