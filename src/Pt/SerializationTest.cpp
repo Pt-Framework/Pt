@@ -222,51 +222,51 @@ Pt::Unit::RegisterTest<SerializationTest> register_SerializationTest;
 // with DS 906900
 
 void SerializationTest::Benchmark1()
-{ 
+{
     std::string name;
     Pt::String num(L"111");
-	Pt::StringStream input(L"111 222 333 444 555");
+    Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
     int u = 0;
 
-	Pt::SerializationCache cache;
-	Pt::SerializationInfo si(&cache);
-	
-	Pt::System::Clock clock;
+    Pt::SerializationContext context;
+    Pt::SerializationInfo si(&context);
+
+    Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-		input.clear(); // 105 000
-		input.seekg(std::ios::beg);
-        
+        input.clear(); // 105 000
+        input.seekg(std::ios::beg);
+
         //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         si.addValue(name, num);
 
-	    //std::cerr << "getline" << std::endl;
+        //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         si.addValue(name, num);
 
-		//std::cerr << "getline" << std::endl;
+        //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         si.addValue(name, num);
 
-		//std::cerr << "getline 4" << std::endl;
+        //std::cerr << "getline 4" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         si.addValue(name, num);
 
-		//std::cerr << "getline 5" << std::endl;
+        //std::cerr << "getline 5" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         si.addValue(name, num);
 
         //vec.reserve(5);
         si >>= vec; //55 000
-        
+
         si.clear(); // 130 000
 
         u += vec.size();
-		//std::cerr << "RESULT: " << vec.size() << " " << vec[4] << std::endl;
-		vec.clear();
+        //std::cerr << "RESULT: " << vec.size() << " " << vec[4] << std::endl;
+        vec.clear();
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;
@@ -276,53 +276,53 @@ void SerializationTest::Benchmark1()
 
 void SerializationTest::Benchmark2()
 {
-	std::string name;
+    std::string name;
     Pt::String num(L"111");
-	
-	VectorDeserializer vecdes;
-	Pt::IDeserializer* deser = &vecdes;
+
+    VectorDeserializer vecdes;
+    Pt::IDeserializer* deser = &vecdes;
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
     int u = 0;
-	Pt::System::Clock clock;
+    Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
         vecdes.begin(vec);
-		
-		input.clear();
-		input.seekg(std::ios::beg);
 
-		std::getline(input, num, Pt::Char(' '));
-		deser = deser->beginMember(name);
-		deser->setValue(num);
+        input.clear();
+        input.seekg(std::ios::beg);
+
+        std::getline(input, num, Pt::Char(' '));
+        deser = deser->beginMember(name);
+        deser->setValue(num);
         deser = deser->leaveMember();
 
-		std::getline(input, num, Pt::Char(' '));
-		deser = deser->beginMember(name);
-		deser->setValue(num);
+        std::getline(input, num, Pt::Char(' '));
+        deser = deser->beginMember(name);
+        deser->setValue(num);
         deser = deser->leaveMember();
-		
-		std::getline(input, num, Pt::Char(' '));
-		deser = deser->beginMember(name);
-		deser->setValue(num);
+
+        std::getline(input, num, Pt::Char(' '));
+        deser = deser->beginMember(name);
+        deser->setValue(num);
         deser = deser->leaveMember();
-		
-		std::getline(input, num, Pt::Char(' '));
-		deser = deser->beginMember(name);
-		deser->setValue(num);
+
+        std::getline(input, num, Pt::Char(' '));
+        deser = deser->beginMember(name);
+        deser->setValue(num);
         deser = deser->leaveMember();
-		
-		std::getline(input, num, Pt::Char(' '));
-		deser = deser->beginMember(name);
-		deser->setValue(num);
+
+        std::getline(input, num, Pt::Char(' '));
+        deser = deser->beginMember(name);
+        deser->setValue(num);
         deser = deser->leaveMember();
-		
-		u += vec.size();
-		vec.clear();
+
+        u += vec.size();
+        vec.clear();
     }
     Pt::Timespan ts = clock.stop();
-    
+
     std::cerr << "Time2: " << ts.toUSecs() << " " << u << std::endl;
 
     //std::exit(1);

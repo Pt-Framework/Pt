@@ -56,8 +56,6 @@ class PT_API ISerializer
 
         static void formatEach2(Pt::SerializationInfo& si, const void* type,
                                 SerializationContext& context, Formatter& formatter);
-
-        //static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
 };
 
 

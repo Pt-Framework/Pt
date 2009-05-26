@@ -26,109 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/SerializationInfo.h>
+#include <Pt/SerializationContext.h>
 
 namespace Pt {
-
-SerializationCache::SerializationCache()
-{
-}
-
-
-SerializationCache::~SerializationCache()
-{
-	std::vector<SerializationInfo::ValueNode*>::iterator it = _scalars.begin();
-	for(; it != _scalars.end(); ++it)
-	{
-        //std::cerr << "destroy value" << std::endl;
-		delete *it;
-	}
-	
-	std::vector<SerializationInfo*>::iterator iter = _infos.begin();
-	for(; iter != _infos.end(); ++iter)
-	{
-        //std::cerr << "destroy si" << std::endl;
-		delete *iter;
-	}
-	
-	//std::cerr << "cache destroyed" << std::endl;
-}
-
-
-SerializationInfo* SerializationCache::get()
-{
-    SerializationInfo* si = 0;
-
-	if( _infos.empty() )
-	{
-        //std::cerr << "create si" << std::endl;
-	    si = new SerializationInfo(this);
-		_infos.push_back(si);
-	}
-	else
-	{
-	    si = _infos.back();
-	}
-
-	//std::cerr << "get si" << std::endl;
-	_infos.pop_back();
-	return si;
-}
-
-
-void SerializationCache::push(SerializationInfo* si)
-{
-	//std::cerr << "push si" << std::endl;
-	_infos.push_back(si);
-}
-
-
-SerializationInfo::ValueNode* SerializationCache::getScalarData()
-{
-    SerializationInfo::ValueNode* node = 0;
-
-	if( _scalars.empty() )
-	{
-        //std::cerr << "create value" << std::endl;
-	    node = new SerializationInfo::ValueNode();
-		_scalars.push_back(node);
-	}
-	else
-	{
-	    node = _scalars.back();
-	}
-
-    //std::cerr << "get value" << std::endl;
-	_scalars.pop_back();
-	return node;
-}
-
-
-SerializationInfo::Node* SerializationCache::getObject()
-{
-    //std::cerr << "get object" << std::endl;
-	return new SerializationInfo::ObjectNode();
-}
-
-
-void SerializationCache::push(SerializationInfo::Node* node)
-{
-	if( node->category() == SerializationInfo::Value )
-	{
-		SerializationInfo::ValueNode* scalar = static_cast<SerializationInfo::ValueNode*>(node);
-		_scalars.push_back(scalar);
-	}
-	else if( node->category() == SerializationInfo::Object || 
-	         node->category() == SerializationInfo::Array )
-	{
-		static_cast<SerializationInfo::ObjectNode*>(node)->release(*this);
-		delete node;
-	}
-	else
-	{
-		delete node;
-	}
-}
-
 
 /*void SerializationInfo::ValueNode::onClear(SerializationCache& cache)
 { 
@@ -167,16 +67,16 @@ void SerializationInfo::ObjectNode::push_back(SerializationInfo* si)
 }
 
 
-void SerializationInfo::ObjectNode::release(SerializationCache& cache)
+void SerializationInfo::ObjectNode::release(SerializationContext& context)
 {
     Iterator endIt = end();
 
 	for(Iterator it = begin(); it != endIt; ++it)
 	{
 		Node* node = (*it)->_node;
-		cache.push(node);
+		context.push(node);
 		(*it)->_node = 0;
-		cache.push(*it);
+		context.push(*it);
 	}
 
     _size = 0;
@@ -199,8 +99,8 @@ SerializationInfo::~SerializationInfo()
 {
     if(_node)
     {
-    	if(_cache)
-        	_cache->push(_node);
+    	if(_context)
+        	_context->push(_node);
         else
         	delete _node;
     }
@@ -211,9 +111,9 @@ void SerializationInfo::clear()
 {
     if(_node)
     {
-    	if(_cache && (_node->category() == Object || _node->category() == Array) )
+    	if(_context && (_node->category() == Object || _node->category() == Array) )
     	{
-        	static_cast<SerializationInfo::ObjectNode*>(_node)->release(*_cache);
+        	static_cast<SerializationInfo::ObjectNode*>(_node)->release(*_context);
         }
         else
         	_node->clear();
@@ -252,9 +152,9 @@ SerializationInfo::ValueNode* SerializationInfo::initValue() const
 {
 	if( this->category() != Value)
 	{
-		if( _cache )
+		if( _context )
 		{
-			SerializationInfo::Node* node = _cache->getScalarData();
+			SerializationInfo::Node* node = _context->getScalarData();
 			delete _node;
 			_node = node;
 		}
@@ -379,9 +279,9 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
     //std::cerr << "added member " <<  _node->cache() << std::endl;
 
 	SerializationInfo* si = 0;
-	if( _cache )
+	if( _context )
 	{
-		si = _cache->get();
+		si = _context->get();
 	}
 	else
 	{
@@ -402,9 +302,9 @@ SerializationInfo& SerializationInfo::addMember()
     //std::cerr << "added member " <<  _node->cache() << std::endl;
 
 	SerializationInfo* si = 0;
-	if( _cache )
+	if( _context )
 	{
-		si = _cache->get();
+		si = _context->get();
 	}
 	else
 	{

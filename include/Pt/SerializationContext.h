@@ -29,10 +29,11 @@
 #define Pt_SerializationContext_h
 
 #include <Pt/Api.h>
-#include <Pt/Serializer.h>
-#include <map>
-#include <vector>
+#include <Pt/SerializationInfo.h>
 #include <typeinfo>
+#include <string>
+#include <vector>
+#include <map>
 
 namespace Pt {
 
@@ -51,24 +52,9 @@ class PT_API SerializationContext
 
         void clear();
 
-        void makeId(const void* p)
-        {
-            if( _idmap.find(p) == _idmap.end() )
-            {
-                unsigned id = _idmap.size();
-                _idmap[p] = id;
-            }
-        }
+        void makeId(const void* p);
 
-        unsigned* getId(const void* p)
-        {
-            if( _idmap.find(p) != _idmap.end() )
-            {
-                return &( _idmap[p] );
-            }
-
-            return 0;
-        }
+        unsigned* getId(const void* p);
 
     private:
         std::map<const void*, unsigned> _idmap;
@@ -86,6 +72,24 @@ class PT_API SerializationContext
     private:
         std::map<std::string, FixupInfo> _targets;
         std::map<std::string, FixupInfo> _pointers;
+
+    public:
+        SerializationInfo* get();
+
+        void push(SerializationInfo::Node* node);
+
+        void push(SerializationInfo* si);
+
+        SerializationInfo::ValueNode* getScalarData();
+
+        SerializationInfo::Node* getObject();
+
+    private:
+        std::vector<SerializationInfo*> _infos;
+        std::vector<SerializationInfo::ValueNode*> _scalars;
+        std::vector<SerializationInfo::ObjectNode*> _objects;
+        std::vector<SerializationInfo::ReferenceNode*> _refs;
+
 };
 
 } // namespace Pt

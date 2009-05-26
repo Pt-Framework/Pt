@@ -99,44 +99,4 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
     }
 }
 
-/*
-void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
-{
-    if(si.category() == SerializationInfo::Value)
-    {
-        formatter.addValue( si.name(), si.typeName(), si.toString(), si.id() );
-    }
-    else if(si.category() == SerializationInfo::Object)
-    {
-        formatter.beginObject( si.name(), si.id() );
-
-        SerializationInfo::ConstIterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            formatter.beginMember( it->name() );
-            formatEach(*it, formatter);
-            formatter.finishMember();
-        }
-
-        formatter.finishObject();
-    }
-    else if(si.category() == Pt::SerializationInfo::Reference)
-    {
-    	Pt::String addr = convert<Pt::String>( si.refAddr() );
-        formatter.addReference( si.name(), addr);
-    }
-    else if(si.category() == Pt::SerializationInfo::Array)
-    {
-        formatter.beginArray( si.name(), si.id() );
-
-        SerializationInfo::ConstIterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            formatEach(*it, formatter);
-        }
-
-        formatter.finishArray();
-    }
-}
-*/
 } // namespace Pt

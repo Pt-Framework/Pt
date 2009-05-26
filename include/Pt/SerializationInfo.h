@@ -37,15 +37,15 @@
 
 namespace Pt {
 
-class SerializationCache;
+class SerializationContext;
 
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
 {
     public:
-		typedef std::vector<SerializationInfo> Nodes;
-     
+        typedef std::vector<SerializationInfo> Nodes;
+
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
         };
@@ -73,7 +73,7 @@ class PT_API SerializationInfo
                 Node(Category cat)
                 : _category(cat)
                 {}
-                
+
                 virtual void onClear() = 0;
 
             private:
@@ -176,10 +176,10 @@ class PT_API SerializationInfo
                 const SerializationInfo& back() const
                 { return *( _nodes[_size - 1] ); }
 
-                void release(SerializationCache& cache);
+                void release(SerializationContext& context);
 
             protected:
-				virtual void onClear();
+               virtual void onClear();
 
                 ObjectNode& operator=(const ObjectNode&);
                 ObjectNode(const ObjectNode&);
@@ -195,28 +195,28 @@ class PT_API SerializationInfo
 
     public:
         SerializationInfo()
-		: _node(0)
-		, _cache(0)
-		, _parent(0)
-		{ }
-        
-        explicit SerializationInfo(SerializationCache* cache)
-		: _node( 0 )
-		, _cache(cache)
-		, _parent(0)
-		{ }
-        
+        : _node(0)
+        , _context(0)
+        , _parent(0)
+        { }
+
+        explicit SerializationInfo(SerializationContext* context)
+        : _node( 0 )
+        , _context(context)
+        , _parent(0)
+        { }
+
         ~SerializationInfo();
 
-	private:
-		SerializationInfo(const SerializationInfo& si)
-		{}
+    private:
+        SerializationInfo(const SerializationInfo& si)
+        {}
 
-		SerializationInfo& operator=(const SerializationInfo& si)
-		{ return *this; }
-		
-	public:
-		void clear();
+        SerializationInfo& operator=(const SerializationInfo& si)
+        { return *this; }
+
+    public:
+        void clear();
 
         Category category() const
         {
@@ -225,14 +225,14 @@ class PT_API SerializationInfo
 
         void setCategory(Category category);
 
-        SerializationCache* cache()
+        SerializationContext* context()
         {
-            return _cache;
+            return _context;
         }
 
-        const SerializationCache* cache() const
+        const SerializationContext* context() const
         {
-            return _cache;
+            return _context;
         }
 
         SerializationInfo* parent()
@@ -423,7 +423,7 @@ class PT_API SerializationInfo
 
         ConstIterator begin() const;
 
-        ConstIterator end() const;        
+        ConstIterator end() const;
 
     protected:
         void getReference(void*& type, const std::type_info& ti) const;
@@ -441,36 +441,11 @@ class PT_API SerializationInfo
 
     private:
         mutable Node* _node;
-        SerializationCache* _cache;
+        SerializationContext* _context;
         SerializationInfo* _parent;
         std::string _name;
         std::string _type;
         std::string _id;
-};
-
-
-class PT_API SerializationCache
-{
-    public:
-        SerializationCache();
-
-        ~SerializationCache();
-
-        SerializationInfo* get();
-
-		void push(SerializationInfo::Node* node);
-
-        void push(SerializationInfo* si);
-
-        SerializationInfo::ValueNode* getScalarData();
-
-        SerializationInfo::Node* getObject();
-
-    private:
-        std::vector<SerializationInfo*> _infos;
-        std::vector<SerializationInfo::ValueNode*> _scalars;
-        std::vector<SerializationInfo::ObjectNode*> _objects;
-        std::vector<SerializationInfo::ReferenceNode*> _refs;
 };
 
 

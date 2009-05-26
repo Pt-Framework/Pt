@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/SerializationContext.h"
+#include "Pt/SerializationError.h"
 
 namespace Pt {
 
@@ -37,11 +38,104 @@ SerializationContext::SerializationContext()
 SerializationContext::~SerializationContext()
 {
     this->clear();
+
+    std::vector<SerializationInfo::ValueNode*>::iterator it = _scalars.begin();
+    for(; it != _scalars.end(); ++it)
+    {
+        //std::cerr << "destroy value" << std::endl;
+        delete *it;
+    }
+    
+    std::vector<SerializationInfo*>::iterator iter = _infos.begin();
+    for(; iter != _infos.end(); ++iter)
+    {
+        //std::cerr << "destroy si" << std::endl;
+        delete *iter;
+    }
+    
+    //std::cerr << "cache destroyed" << std::endl;
+}
+
+
+SerializationInfo* SerializationContext::get()
+{
+    SerializationInfo* si = 0;
+
+    if( _infos.empty() )
+    {
+        //std::cerr << "create si" << std::endl;
+        si = new SerializationInfo(this);
+        _infos.push_back(si);
+    }
+    else
+    {
+        si = _infos.back();
+    }
+
+    //std::cerr << "get si" << std::endl;
+    _infos.pop_back();
+    return si;
+}
+
+
+void SerializationContext::push(SerializationInfo* si)
+{
+    //std::cerr << "push si" << std::endl;
+    _infos.push_back(si);
+}
+
+
+SerializationInfo::ValueNode* SerializationContext::getScalarData()
+{
+    SerializationInfo::ValueNode* node = 0;
+
+    if( _scalars.empty() )
+    {
+        //std::cerr << "create value" << std::endl;
+        node = new SerializationInfo::ValueNode();
+        _scalars.push_back(node);
+    }
+    else
+    {
+        node = _scalars.back();
+    }
+
+    //std::cerr << "get value" << std::endl;
+    _scalars.pop_back();
+    return node;
+}
+
+
+SerializationInfo::Node* SerializationContext::getObject()
+{
+    //std::cerr << "get object" << std::endl;
+    return new SerializationInfo::ObjectNode();
+}
+
+
+void SerializationContext::push(SerializationInfo::Node* node)
+{
+    if( node->category() == SerializationInfo::Value )
+    {
+        SerializationInfo::ValueNode* scalar = static_cast<SerializationInfo::ValueNode*>(node);
+        _scalars.push_back(scalar);
+    }
+    else if( node->category() == SerializationInfo::Object || 
+             node->category() == SerializationInfo::Array )
+    {
+        static_cast<SerializationInfo::ObjectNode*>(node)->release(*this);
+        delete node;
+    }
+    else
+    {
+        delete node;
+    }
 }
 
 
 void SerializationContext::clear()
 {
+    _idmap.clear();
     //
     // Deserialisation
     //
@@ -49,6 +143,26 @@ void SerializationContext::clear()
     _pointers.clear();
 }
 
+
+void SerializationContext::makeId(const void* p)
+{
+    if( _idmap.find(p) == _idmap.end() )
+    {
+        unsigned id = _idmap.size();
+        _idmap[p] = id;
+    }
+}
+
+
+unsigned* SerializationContext::getId(const void* p)
+{
+    if( _idmap.find(p) != _idmap.end() )
+    {
+        return &( _idmap[p] );
+    }
+
+    return 0;
+}
 
 //
 // Deserialization specific
