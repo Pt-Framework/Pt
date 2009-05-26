@@ -31,28 +31,28 @@
 
 namespace Pt {
 
-void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& context)
+void ISerializer::fixdownEach(Pt::SerializationInfo& si, Formatter& formatter)
 {
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        context.makeId(p);
+        formatter.makeId(p);
     }
     else if(si.category() == Pt::SerializationInfo::Object)
     {
         Pt::SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            fixdownEach(*it, context);
+            fixdownEach(*it, formatter);
         }
     }
 }
 
 
 void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
-                              SerializationContext& context, Formatter& formatter)
+                              Formatter& formatter)
 {
-    unsigned* id = context.getId(type);
+    unsigned* id = formatter.getId(type);
     if(id)
     {
         si.setId( convert<std::string>(*id) );
@@ -70,7 +70,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         for(it = si.begin(); it != si.end(); ++it)
         {
             formatter.beginMember( it->name() );
-            formatEach2(*it, 0, context, formatter);
+            formatEach2(*it, 0, formatter);
             formatter.finishMember();
         }
 
@@ -78,7 +78,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
     }
     else if(si.category() == Pt::SerializationInfo::Reference)
     {
-        unsigned* id = context.getId( si.refAddr() );
+        unsigned* id = formatter.getId( si.refAddr() );
         if( ! id )
             throw std::runtime_error("no such id for reference");
 
@@ -92,7 +92,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            formatEach2(*it, 0, context, formatter);
+            formatEach2(*it, 0, formatter);
         }
 
         formatter.finishArray();

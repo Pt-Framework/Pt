@@ -217,13 +217,31 @@ class PT_XML_API XmlSerializer
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            _context.serialize(type, name);
+            Serializer<T>* serializer = new Serializer<T>;
+            _heap.push_back(serializer);
+            _stack.push_back(serializer);
+
+            serializer->begin(type);
+            serializer->setName(name);
+            serializer->fixdown(_formatter);
         }
 
         void finish()
         {
-            _context.format(_formatter);
-            _context.clear();
+            std::vector<ISerializer*>::iterator it;
+
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                (*it)->format(_formatter);
+            }
+
+            for(it = _heap.begin(); it != _heap.end(); ++it)
+            {
+                delete *it;
+            }
+
+            _heap.clear();
+            _stack.clear();
         }
 
         //! @internal
@@ -231,6 +249,9 @@ class PT_XML_API XmlSerializer
 
     private:
         XmlFormatter _formatter;
+
+        std::vector<ISerializer*> _stack;
+        std::vector<ISerializer*> _heap;
 
         //! @internal
         SerializationContext _context;

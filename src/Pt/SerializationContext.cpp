@@ -43,54 +43,12 @@ SerializationContext::~SerializationContext()
 void SerializationContext::clear()
 {
     //
-    // Serialisation
-    //
-
-    std::vector<ISerializer*>::iterator it;
-    for(it = _heap.begin(); it != _heap.end(); ++it)
-    {
-        delete *it;
-    }
-    _heap.clear();
-    _stack.clear();
-
-    //
     // Deserialisation
     //
     _targets.clear();
     _pointers.clear();
 }
 
-
-//
-// Serialization specific
-//
-
-/*
-void SerializationContext::fixdown(Formatter& formatter)
-{
-    std::vector<ISerializer*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        ISerializer* serializer = *it;
-        serializer->fixdown(*this);
-    }
-
-    _omap.clear();
-
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        (*it)->format(formatter);
-    }
-}
-*/
-/*
-void SerializationContext::do_begin(const void* target, ISerializer* serializer)
-{
-    _omap[target] = serializer;
-    _stack.push_back(serializer);
-}
-*/
 
 //
 // Deserialization specific

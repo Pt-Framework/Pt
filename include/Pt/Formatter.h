@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <string>
+#include <map>
 
 namespace Pt {
 
@@ -59,9 +60,31 @@ class Formatter
 
         virtual void finish() = 0;
 
+        void makeId(const void* p)
+        {
+            if( _idmap.find(p) == _idmap.end() )
+            {
+                unsigned id = _idmap.size();
+                _idmap[p] = id;
+            }
+        }
+
+        unsigned* getId(const void* p)
+        {
+            if( _idmap.find(p) != _idmap.end() )
+            {
+                return &( _idmap[p] );
+            }
+
+            return 0;
+        }
+
     protected:
         Formatter()
         {}
+
+    private:
+        std::map<const void*, unsigned> _idmap;
 };
 
 

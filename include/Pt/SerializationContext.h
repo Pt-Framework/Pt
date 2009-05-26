@@ -51,58 +51,6 @@ class PT_API SerializationContext
 
         void clear();
 
-        /// TODO: move this to XmlSerializer
-        template <typename T>
-        void serialize(const T& type, const std::string& name)
-        {
-            Serializer<T>* serializer = new Serializer<T>;
-            _heap.push_back(serializer);
-            serializer->begin(type);
-            serializer->setName(name);
-
-            this->push(*serializer);
-        }
-
-        void push(ISerializer& serializer)
-        {
-            _stack.push_back(&serializer);
-            serializer.fixdown(*this);
-        }
-
-        void makeId(const void* p)
-        {
-            if( _idmap.find(p) == _idmap.end() )
-            {
-                unsigned id = _idmap.size();
-                _idmap[p] = id;
-            }
-        }
-
-        unsigned* getId(const void* p)
-        {
-            if( _idmap.find(p) != _idmap.end() )
-            {
-                return &( _idmap[p] );
-            }
-
-            return 0;
-        }
-
-        void format(Formatter& formatter)
-        {
-            std::vector<ISerializer*>::iterator it;
-
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                (*it)->format2(*this, formatter);
-            }
-        }
-
-    private:
-        std::map<const void*, unsigned> _idmap;
-        std::vector<ISerializer*> _stack;
-        std::vector<ISerializer*> _heap;
-
     public:
         // addFixupTarget
         void addObject(const std::string& id, void* obj, const std::type_info& fixupInfo);
