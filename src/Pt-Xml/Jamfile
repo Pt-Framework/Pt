@@ -14,6 +14,7 @@ PT_XML_SOURCES = Characters.cpp
                  StartElement.cpp
                  XmlDeserializer.cpp
                  XmlError.cpp
+                 XmlFormatter.cpp
                  XmlReader.cpp
                  XmlSerializer.cpp
                  XmlWriter.cpp

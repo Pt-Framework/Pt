@@ -25,25 +25,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_XmlSerializer_h
-#define Pt_Xml_XmlSerializer_h
+#ifndef Pt_Xml_XmlFormatter_h
+#define Pt_Xml_XmlFormatter_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/XmlFormatter.h>
-#include <Pt/Serializer.h>
-#include <Pt/SerializationContext.h>
-#include <vector>
+#include <Pt/String.h>
+#include <Pt/Formatter.h>
+#include <memory>
 
 namespace Pt {
 
 namespace Xml {
+
+class XmlWriter;
 
 /** @brief Serialize objects or object data to XML
 
     Thic class performs XML serialization of a single object or
     object data.
 */
-class PT_XML_API XmlSerializer
+class PT_XML_API XmlFormatter : public Formatter
 {
     public:
         /** @brief Construct a serializer without initializing the
@@ -52,14 +53,15 @@ class PT_XML_API XmlSerializer
             The serializer can be "opened" for writing by calling
             method attach().
         */
-        XmlSerializer();
+        XmlFormatter();
 
         /** @brief Construct a serializer writing to a byte stream
 
             The serializer will write the objects as XML with
             UTF-8 encoding to the output stream.
         */
-        XmlSerializer(std::ostream& os);
+        XmlFormatter(std::ostream& os);
+
 
         /** @brief Construct a serializer writing to the given XmlWriter object
 
@@ -67,10 +69,10 @@ class PT_XML_API XmlSerializer
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        XmlSerializer(XmlWriter* writer);
+        XmlFormatter(XmlWriter* writer);
 
         //! @brief Destructor
-        ~XmlSerializer();
+        ~XmlFormatter();
 
         /** @brief Opens this serializer for writing into the given stream.
 
@@ -105,54 +107,34 @@ class PT_XML_API XmlSerializer
         */
         void detach();
 
-        /** @brief Serialize an object to XML
-
-            The serializer will serialize the object \a type as
-            XML to the assigned stream. The string \a name will be used
-            as the instance name of \a type and appear as the name of the
-            XML element. The type must be serializable.
-        */
-        template <typename T>
-        void serialize(const T& type, const std::string& name)
-        {
-            Serializer<T>* serializer = new Serializer<T>;
-            _heap.push_back(serializer);
-            _stack.push_back(serializer);
-
-            serializer->begin(type);
-            serializer->setName(name);
-            serializer->fixdown(_formatter);
-        }
-
-        void finish()
-        {
-            std::vector<ISerializer*>::iterator it;
-
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                (*it)->format(_formatter);
-            }
-
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _heap.clear();
-            _stack.clear();
-        }
-
         //! @internal
         void flush();
 
-    private:
-        XmlFormatter _formatter;
+        void addValue(const std::string& name, const std::string& type,
+                        const Pt::String& value, const std::string& id);
 
-        std::vector<ISerializer*> _stack;
-        std::vector<ISerializer*> _heap;
+        void addReference(const std::string& name, const Pt::String& value);
+
+        void beginArray(const std::string& name, const std::string& id);
+
+        void finishArray();
+
+        void beginObject(const std::string& name, const std::string& id);
+
+        void beginMember(const std::string& name);
+
+        void finishMember();
+
+        void finishObject();
+
+        void finish();
+
+    private:
+        //! @internal
+        XmlWriter* _writer;
 
         //! @internal
-        SerializationContext _context;
+        std::auto_ptr<XmlWriter> _deleter;
 };
 
 } // namespace Xml
