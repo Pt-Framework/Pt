@@ -86,7 +86,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        Scanner _scanner;
        Formatter _formatter;
        Service* _service;
-       DeserializationContext _context;
+       SerializationContext _context;
        ServiceProcedure* _proc;
        IDeserializer** _args;
        ISerializer* _result;

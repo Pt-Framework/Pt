@@ -120,7 +120,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Formatter _formatter;
         Scanner _scanner;
         IRemoteProcedure* _method;
-        DeserializationContext _context;
+        SerializationContext _context;
         Deserializer<Fault> _fh;
         Fault _fault;
         std::size_t _timeout;

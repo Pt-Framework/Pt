@@ -44,7 +44,7 @@ class Formatter
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 
-        virtual void addReference(const std::string& name, const Pt::String& value) = 0;
+        virtual void addReference(const std::string& name, const Pt::String& refId) = 0;
 
         virtual void beginArray(const std::string& name, const std::string& id) = 0;
 
@@ -60,31 +60,9 @@ class Formatter
 
         virtual void finish() = 0;
 
-        void makeId(const void* p)
-        {
-            if( _idmap.find(p) == _idmap.end() )
-            {
-                unsigned id = _idmap.size();
-                _idmap[p] = id;
-            }
-        }
-
-        unsigned* getId(const void* p)
-        {
-            if( _idmap.find(p) != _idmap.end() )
-            {
-                return &( _idmap[p] );
-            }
-
-            return 0;
-        }
-
     protected:
         Formatter()
         {}
-
-    private:
-        std::map<const void*, unsigned> _idmap;
 };
 
 

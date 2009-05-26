@@ -241,7 +241,7 @@ void Client::prepareRequest(const std::string& name, ISerializer** argv, unsigne
     for(unsigned n = 0; n < argc; ++n)
     {
         _writer.writeStartElement( L"param" );
-        argv[n]->format(_formatter);
+        argv[n]->format(_context, _formatter);
         _writer.writeEndElement();
     }
 

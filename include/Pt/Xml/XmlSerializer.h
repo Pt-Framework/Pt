@@ -121,7 +121,7 @@ class PT_XML_API XmlSerializer
 
             serializer->begin(type);
             serializer->setName(name);
-            serializer->fixdown(_formatter);
+            serializer->fixdown(_context);
         }
 
         void finish()
@@ -130,7 +130,7 @@ class PT_XML_API XmlSerializer
 
             for(it = _stack.begin(); it != _stack.end(); ++it)
             {
-                (*it)->format(_formatter);
+                (*it)->format(_context, _formatter);
             }
 
             for(it = _heap.begin(); it != _heap.end(); ++it)
@@ -146,6 +146,7 @@ class PT_XML_API XmlSerializer
         void flush();
 
     private:
+        // TODO:derive from formatter
         XmlFormatter _formatter;
 
         std::vector<ISerializer*> _stack;

@@ -119,7 +119,7 @@ class IntDeserializer : public Pt::IDeserializer
         	return parent();
         }
 
-        virtual void fixup(Pt::DeserializationContext& ctx)
+        virtual void fixup(Pt::SerializationContext& ctx)
         { }
 
     private:
@@ -181,7 +181,7 @@ class VectorDeserializer : public Pt::IDeserializer
         	return this;
         }
 
-        virtual void fixup(Pt::DeserializationContext& ctx)
+        virtual void fixup(Pt::SerializationContext& ctx)
         { }
 
     private:

@@ -30,13 +30,11 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/SerializationContext.h>
 #include <map>
 #include <typeinfo>
 
 namespace Pt {
-
-class DeserializationContext;
-
 
 class PT_API IDeserializer
 {
@@ -70,10 +68,10 @@ class PT_API IDeserializer
 
         virtual IDeserializer* leaveMember() = 0;
 
-        virtual void fixup(DeserializationContext& ctx) = 0;
+        virtual void fixup(SerializationContext& ctx) = 0;
 
     protected:
-        void fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, DeserializationContext& ctx);
+        void fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, SerializationContext& ctx);
 
     private:
         IDeserializer* _parent;
@@ -149,7 +147,7 @@ class Deserializer : public IDeserializer
             return this;
         }
 
-        virtual void fixup(DeserializationContext& ctx)
+        virtual void fixup(SerializationContext& ctx)
         {
             // SI's for unfixed pointers contain the fixup address now
             // other pointers may only point to _type, but not to its members
@@ -162,36 +160,6 @@ class Deserializer : public IDeserializer
         T* _type;
         Pt::SerializationInfo _si;
         Pt::SerializationInfo* _current;
-};
-
-
-class PT_API DeserializationContext
-{
-    struct FixupInfo
-    {
-        void* address;
-        const std::type_info* type;
-    };
-
-    public:
-        DeserializationContext();
-
-        virtual ~DeserializationContext();
-
-        void addObject(const std::string& id, void* obj, const std::type_info& fixupInfo);
-
-        void addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo);
-
-        void clear();
-
-        void fixup();
-
-    protected:
-        virtual bool checkFixup(const std::type_info& from, const std::type_info& to);
-
-    private:
-        std::map<std::string, FixupInfo> _targets;
-        std::map<std::string, FixupInfo> _pointers;
 };
 
 } // namespace Pt

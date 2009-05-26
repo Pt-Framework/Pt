@@ -31,28 +31,28 @@
 
 namespace Pt {
 
-void ISerializer::fixdownEach(Pt::SerializationInfo& si, Formatter& formatter)
+void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& context)
 {
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        formatter.makeId(p);
+        context.makeId(p);
     }
     else if(si.category() == Pt::SerializationInfo::Object)
     {
         Pt::SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            fixdownEach(*it, formatter);
+            fixdownEach(*it, context);
         }
     }
 }
 
 
 void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
-                              Formatter& formatter)
+                              SerializationContext& context, Formatter& formatter)
 {
-    unsigned* id = formatter.getId(type);
+    unsigned* id = context.getId(type);
     if(id)
     {
         si.setId( convert<std::string>(*id) );
@@ -70,7 +70,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         for(it = si.begin(); it != si.end(); ++it)
         {
             formatter.beginMember( it->name() );
-            formatEach2(*it, 0, formatter);
+            formatEach2(*it, 0, context, formatter);
             formatter.finishMember();
         }
 
@@ -78,7 +78,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
     }
     else if(si.category() == Pt::SerializationInfo::Reference)
     {
-        unsigned* id = formatter.getId( si.refAddr() );
+        unsigned* id = context.getId( si.refAddr() );
         if( ! id )
             throw std::runtime_error("no such id for reference");
 
@@ -92,14 +92,14 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            formatEach2(*it, 0, formatter);
+            formatEach2(*it, 0, context, formatter);
         }
 
         formatter.finishArray();
     }
 }
 
-
+/*
 void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatter)
 {
     if(si.category() == SerializationInfo::Value)
@@ -138,5 +138,5 @@ void ISerializer::formatEach(const Pt::SerializationInfo& si, Formatter& formatt
         formatter.finishArray();
     }
 }
-
+*/
 } // namespace Pt

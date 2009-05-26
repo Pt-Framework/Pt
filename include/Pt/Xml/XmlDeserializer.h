@@ -117,7 +117,7 @@ namespace Xml {
 
             size_t _startDepth;
 
-            DeserializationContext _context;
+            SerializationContext _context;
 
             //! @internal
             IDeserializer* _deser;

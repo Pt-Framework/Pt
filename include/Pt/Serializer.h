@@ -42,21 +42,22 @@ class PT_API ISerializer
         virtual ~ISerializer()
         {}
 
-        virtual void fixdown(Formatter& formatter) = 0;
-
         virtual void setName(const std::string& name) = 0;
 
-        virtual void format(Formatter& formatter) = 0;
+        virtual void fixdown(SerializationContext& context) = 0;
+
+        virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
     protected:
         ISerializer()
         {}
 
-        static void fixdownEach(Pt::SerializationInfo& si, Formatter& formatter);
+        static void fixdownEach(Pt::SerializationInfo& si, SerializationContext& context);
 
-        static void formatEach2(Pt::SerializationInfo& si, const void* type, Formatter& formatter);
+        static void formatEach2(Pt::SerializationInfo& si, const void* type,
+                                SerializationContext& context, Formatter& formatter);
 
-        static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
+        //static void formatEach(const Pt::SerializationInfo& si, Formatter& formatter);
 };
 
 
@@ -76,19 +77,19 @@ class Serializer : public ISerializer
             _si <<= *_type;
         }
 
-        virtual void fixdown(Formatter& formatter)
-        {
-            this->fixdownEach( _si, formatter );
-        }
-
         virtual void setName(const std::string& name)
         {
             _si.setName(name);
         }
 
-        virtual void format(Formatter& formatter)
+        virtual void fixdown(SerializationContext& context)
         {
-            this->formatEach2( _si, _type, formatter );
+            this->fixdownEach( _si, context );
+        }
+
+        virtual void format(SerializationContext& context, Formatter& formatter)
+        {
+            this->formatEach2( _si, _type, context, formatter );
         }
 
     private:

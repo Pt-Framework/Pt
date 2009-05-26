@@ -53,7 +53,7 @@ void SerializationContext::clear()
 //
 // Deserialization specific
 //
-void SerializationContext::addObject(const std::string& id, void* obj, const std::type_info& fixupInfo)
+void SerializationContext::addFixupTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
 {
     FixupInfo fi;
     fi.address = obj;

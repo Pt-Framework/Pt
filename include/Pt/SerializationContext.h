@@ -51,9 +51,30 @@ class PT_API SerializationContext
 
         void clear();
 
+        void makeId(const void* p)
+        {
+            if( _idmap.find(p) == _idmap.end() )
+            {
+                unsigned id = _idmap.size();
+                _idmap[p] = id;
+            }
+        }
+
+        unsigned* getId(const void* p)
+        {
+            if( _idmap.find(p) != _idmap.end() )
+            {
+                return &( _idmap[p] );
+            }
+
+            return 0;
+        }
+
+    private:
+        std::map<const void*, unsigned> _idmap;
+
     public:
-        // addFixupTarget
-        void addObject(const std::string& id, void* obj, const std::type_info& fixupInfo);
+        void addFixupTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
         void addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
