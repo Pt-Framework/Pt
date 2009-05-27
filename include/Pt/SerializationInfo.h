@@ -32,8 +32,10 @@
 #include <Pt/String.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
-#include <vector>
 #include <typeinfo>
+#include <vector>
+#include <list>
+#include <set>
 
 namespace Pt {
 
@@ -773,8 +775,8 @@ inline void operator <<=(SerializationInfo& si, const Pt::String& n)
 }
 
 
-template <typename T>
-inline void operator >>=(const SerializationInfo& si, std::vector<T>& vec)
+template <typename T, typename A>
+inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 {
 	T elem = T();
     vec.clear();
@@ -782,15 +784,15 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T>& vec)
     {
         //vec.resize( vec.size() + 1 );
         //*it >>=  vec.back();
-        
+
         *it >>= elem;
         vec.push_back( elem );
     }
 }
 
 
-template <typename T>
-inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
+template <typename T, typename A>
+inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 {
     typename std::vector<T>::const_iterator it;
 
@@ -818,6 +820,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
     }
 }
 
+
 inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
 {
     std::vector<int>::const_iterator it;
@@ -829,6 +832,65 @@ inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
     }
 
     si.setTypeName("array");
+    si.setCategory(SerializationInfo::Array);
+}
+
+
+template <typename T, typename A>
+inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
+{
+    list.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        list.resize( list.size() + 1 );
+        *it >>=  list.back();
+    }
+}
+
+
+template <typename T, typename A>
+inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
+{
+    typename std::list<T, A>::const_iterator it;
+
+    for(it = list.begin(); it != list.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("list");
+    si.setCategory(SerializationInfo::Array);
+}
+
+
+template <typename T, typename C, typename A>
+inline void operator >>=(const SerializationInfo& si, std::set<T, C, A>& set)
+{
+    set.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        T t();
+        *it >>= t;
+        set.insert(t);
+    }
+}
+
+
+template <typename T, typename C, typename A>
+inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
+{
+    typename std::set<T, C, A>::const_iterator it;
+
+    for(it = set.begin(); it != set.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("set");
     si.setCategory(SerializationInfo::Array);
 }
 
