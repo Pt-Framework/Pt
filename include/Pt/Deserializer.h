@@ -87,6 +87,12 @@ class Deserializer : public IDeserializer
         , _current(&_si)
         {}
 
+        Deserializer(SerializationContext& ctx)
+        : _type(0)
+        , _si(&ctx)
+        , _current(&_si)
+        { }
+
         void begin(T& type)
         {
             _si.clear();
