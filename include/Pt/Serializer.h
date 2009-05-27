@@ -68,9 +68,18 @@ class Serializer : public ISerializer
         , _current(&_si)
         { }
 
+        // TODO: remove this method
         void begin(const T& type)
         {
             _si.clear();
+            _type = &type;
+            _si <<= *_type;
+        }
+
+        void begin(const T& type, SerializationContext& context)
+        {
+            _si.clear();
+            _si.setContext(context);
             _type = &type;
             _si <<= *_type;
         }

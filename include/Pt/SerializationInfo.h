@@ -237,6 +237,11 @@ class PT_API SerializationInfo
             return _context;
         }
 
+        void setContext(SerializationContext& context)
+        {
+            _context = &context;
+        }
+
         SerializationInfo* parent()
         {
             return _parent;

@@ -341,7 +341,7 @@ void SerializationTest::Benchmark3()
     Pt::String num(L"111");
 
     Pt::SerializationContext context;
-    Pt::Deserializer< std::vector<int> > vecdes(context);
+    Pt::Deserializer< std::vector<int> > vecdes;
     Pt::IDeserializer* deser = &vecdes;
 
     Pt::StringStream input(L"111 222 333 444 555");
@@ -351,7 +351,7 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        vecdes.begin(vec);
+        vecdes.begin(vec, context);
 
         input.clear();
         input.seekg(std::ios::beg);

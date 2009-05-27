@@ -70,7 +70,7 @@ namespace Xml {
             void deserialize(T& type)
             {
                 Deserializer<T> deser;
-                deser.begin(type);
+                deser.begin(type, _context);
                 this->get(&deser);
                 deser.fixup(_context);
             }
