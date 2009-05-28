@@ -389,7 +389,7 @@ void SerializationTest::Benchmark3()
 
     std::cerr << "Time3: " << ts.toUSecs() << " " << u << std::endl;
 
-    std::exit(1);
+    //std::exit(1);
 }
 
 
