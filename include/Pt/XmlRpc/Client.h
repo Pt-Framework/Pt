@@ -75,7 +75,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Client();
 
         Client(System::SelectorBase& selector, const std::string& addr,
-                      unsigned short port, const std::string& url);
+               unsigned short port, const std::string& url);
 
         Client(const std::string& addr, unsigned short port, const std::string& url);
 
@@ -111,7 +111,6 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
     private:
         State _state;
-        std::string _url;
         Http::Client _client;
         Http::Request _request;
         TextIStream _ts;
@@ -122,7 +121,6 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         IRemoteProcedure* _method;
         SerializationContext _context;
         Deserializer<Fault> _fh;
-        Fault _fault;
         std::size_t _timeout;
 };
 

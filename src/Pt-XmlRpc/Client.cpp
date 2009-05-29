@@ -60,9 +60,8 @@ Client::Client()
 
 
 Client::Client(System::SelectorBase& selector, const std::string& server,
-                             unsigned short port, const std::string& url)
+               unsigned short port, const std::string& url)
 : _state(OnBegin)
-, _url(url)
 , _client(selector, server, port)
 , _request(url)
 , _ts( new Utf8Codec )
@@ -71,7 +70,8 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
 , _method(0)
 , _timeout(System::Selectable::WaitInfinite)
 {
-    _writer.setFormat(0);
+    _writer.useIndent(false);
+    _writer.useEndl(false);
 
     Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
@@ -84,7 +84,6 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
 
 Client::Client(const std::string& server, unsigned short port, const std::string& url)
 : _state(OnBegin)
-, _url(url)
 , _client(server, port)
 , _request(url)
 , _ts( new Utf8Codec )
@@ -93,10 +92,12 @@ Client::Client(const std::string& server, unsigned short port, const std::string
 , _method(0)
 , _timeout(System::Selectable::WaitInfinite)
 {
-    _writer.setFormat(0);
+    _writer.useIndent(false);
+    _writer.useEndl(false);
 
     Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
+    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
     Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
 
     _formatter.addAlias("bool", "boolean");
@@ -148,7 +149,7 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
     if( _state == OnFaultResponseEnd )
     {
         _state = OnBegin;
-        throw _fault;
+        throw method.fault();
     }
 
     _state = OnBegin;
@@ -159,7 +160,6 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
 
 void Client::onReplyHeader(Http::Client& client)
 {
-    _fault.clear();
     _ts.attach( client.in() );
 }
 
@@ -187,20 +187,17 @@ std::size_t Client::onReplyBody(Http::Client& client)
     }
     catch(const Xml::XmlError& error)
     {
-        _fault.setRc(1);
-        _fault.setText( error.what() );
+        _method->setFault(Fault::invalidXmlRpc, error.what());
         throw;
     }
     catch(const SerializationError& error)
     {
-        _fault.setRc(2);
-        _fault.setText( error.what() );
+        _method->setFault(Fault::invalidMethodParameters, error.what());
         throw;
     }
     catch(const ConversionError& error)
     {
-        _fault.setRc(3);
-        _fault.setText( error.what() );
+        _method->setFault(Fault::invalidMethodParameters, error.what());
         throw;
     }
 
@@ -210,27 +207,22 @@ std::size_t Client::onReplyBody(Http::Client& client)
 
 void Client::onErrorOccured(Http::Client& client, const std::exception& e)
 {
-    _method->errorOccured(*this, e);
+    if (!_method->fault())
+        _method->setFault(Fault::systemError, e.what());
+
+    _method->onFinished();
 }
 
 
 void Client::onReplyFinished(Http::Client& client)
 {
-    if(_state == OnMethodResponseEnd)
-    {
-        _method->onFinished();
-    }
-    else if(_state == OnFaultResponseEnd || _fault.rc() != 0)
-    {
-        _method->fault(_fault);
-    }
+    _method->onFinished();
 }
 
 
 void Client::prepareRequest(const std::string& name, ISerializer** argv, unsigned argc)
 {
     _request.clear();
-    _request.url(_url);
     _request.setHeader("Content-Type", "text/xml");
 
     _writer.begin( _request.body() );
@@ -282,7 +274,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
                 else if( se.name() == L"fault")
                 {
-                    _fh.begin(_fault);
+                    _fh.begin(_method->fault());
                     _scanner.begin(_fh, _context);
                     _state = OnFaultBegin;
                     break;

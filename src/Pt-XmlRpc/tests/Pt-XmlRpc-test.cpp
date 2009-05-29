@@ -111,17 +111,26 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
-            connect( multiply.fault, *this, &PtXmlRpcTest::onFault );
+            connect( multiply.finished, *this, &PtXmlRpcTest::onFault );
 
             multiply.begin();
 
             _loop->run();
         }
 
-        void onFault(const Pt::XmlRpc::Fault& fault)
+        void onFault(const Pt::XmlRpc::Result<bool>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(fault.rc(), 7)
-            PT_UNIT_ASSERT_EQUALS(fault.text(), "Fault")
+            try
+            {
+                r.get();
+                PT_UNIT_ASSERT(false);
+            }
+            catch (const Pt::XmlRpc::Fault& e)
+            {
+                PT_UNIT_ASSERT_EQUALS(e.rc(), 7)
+                PT_UNIT_ASSERT_EQUALS(e.text(), "Fault")
+            }
+
             _loop->exit();
         }
 
@@ -140,9 +149,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onNothingFinished(const bool& r)
+        void onNothingFinished(const Pt::XmlRpc::Result<bool>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, false)
+            PT_UNIT_ASSERT_EQUALS(r.get(), false)
 
             _loop->exit();
         }
@@ -162,9 +171,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onBooleanFinished(const bool& r)
+        void onBooleanFinished(const Pt::XmlRpc::Result<bool>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, true)
+            PT_UNIT_ASSERT_EQUALS(r.get(), true)
 
             _loop->exit();
         }
@@ -184,9 +193,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onIntegerFinished(const int& r)
+        void onIntegerFinished(const Pt::XmlRpc::Result<int>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, 6)
+            PT_UNIT_ASSERT_EQUALS(r.get(), 6)
 
             _loop->exit();
         }
@@ -206,9 +215,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onDoubleFinished(const double& r)
+        void onDoubleFinished(const Pt::XmlRpc::Result<double>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, 6.0)
+            PT_UNIT_ASSERT_EQUALS(r.get(), 6.0)
 
             _loop->exit();
         }
@@ -228,9 +237,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onStringFinished(const std::string& r)
+        void onStringFinished(const Pt::XmlRpc::Result<std::string>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, "6")
+            PT_UNIT_ASSERT_EQUALS(r.get(), "6")
 
             _loop->exit();
         }
@@ -250,9 +259,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onEmptyFinished(const std::string& r)
+        void onEmptyFinished(const Pt::XmlRpc::Result<std::string>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r, "4")
+            PT_UNIT_ASSERT_EQUALS(r.get(), "4")
             _loop->exit();
         }
 
@@ -275,11 +284,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onArrayFinished(const std::vector<int>& r)
+        void onArrayFinished(const Pt::XmlRpc::Result< std::vector<int> >& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r.size(), 2)
-            PT_UNIT_ASSERT_EQUALS(r.at(0), 100)
-            PT_UNIT_ASSERT_EQUALS(r.at(1), 400)
+            PT_UNIT_ASSERT_EQUALS(r.get().size(), 2)
+            PT_UNIT_ASSERT_EQUALS(r.get().at(0), 100)
+            PT_UNIT_ASSERT_EQUALS(r.get().at(1), 400)
 
             _loop->exit();
         }
@@ -301,9 +310,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onEmptyArrayFinished(const std::vector<int>& r)
+        void onEmptyArrayFinished(const Pt::XmlRpc::Result< std::vector<int> >& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r.size(), 0)
+            PT_UNIT_ASSERT_EQUALS(r.get().size(), 0)
 
             _loop->exit();
         }
@@ -333,11 +342,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onStuctFinished(const Color& color)
+        void onStuctFinished(const Pt::XmlRpc::Result<Color>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(color.red, 6)
-            PT_UNIT_ASSERT_EQUALS(color.green, 12)
-            PT_UNIT_ASSERT_EQUALS(color.blue, 20)
+            PT_UNIT_ASSERT_EQUALS(r.get().red, 6)
+            PT_UNIT_ASSERT_EQUALS(r.get().green, 12)
+            PT_UNIT_ASSERT_EQUALS(r.get().blue, 20)
 
             _loop->exit();
         }
