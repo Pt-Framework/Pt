@@ -116,7 +116,7 @@ void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer**
 
     this->prepareRequest(method.name(), argv, argc);
     _client.beginExecute(_request);
-    _scanner.begin(r,_context);
+    _scanner.begin(r);
 }
 
 
@@ -133,7 +133,7 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
     std::istringstream is(body);
     _ts.attach(is);
     _reader.reset(_ts);
-    _scanner.begin(r, _context);
+    _scanner.begin(r);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
     {
@@ -274,8 +274,8 @@ void Client::advance(const Pt::Xml::Node& node)
 
                 else if( se.name() == L"fault")
                 {
-                    _fh.begin(_method->fault());
-                    _scanner.begin(_fh, _context);
+                    _fh.begin(_method->fault(), _context);
+                    _scanner.begin(_fh);
                     _state = OnFaultBegin;
                     break;
                 }

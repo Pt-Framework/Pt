@@ -111,9 +111,9 @@ class PT_XML_API XmlFormatter : public Formatter
         void flush();
 
         void addValue(const std::string& name, const std::string& type,
-                        const Pt::String& value, const std::string& id);
+                      const Pt::String& value, const std::string& id);
 
-        void addReference(const std::string& name, const Pt::String& value);
+        void addReference(const std::string& name, const std::string& value);
 
         void beginArray(const std::string& name, const std::string& id);
 

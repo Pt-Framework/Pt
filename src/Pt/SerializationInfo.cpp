@@ -37,33 +37,33 @@ namespace Pt {
 
 
 void SerializationInfo::ValueNode::onClear()
-{ 
-	_value.clear(); 
+{
+    _value.clear();
 }
 
 
 SerializationInfo::ObjectNode::~ObjectNode()
 {
-	this->onClear();
-	::operator delete(_nodes);
+    this->onClear();
+    ::operator delete(_nodes);
 }
 
 
 void SerializationInfo::ObjectNode::push_back(SerializationInfo* si)
 {
-	if(_capacity == _size)
-	{
-		void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
-		SerializationInfo** nodes = (SerializationInfo**) mem;
-		_capacity += 5;
-		std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
+    if(_capacity == _size)
+    {
+        void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
+        SerializationInfo** nodes = (SerializationInfo**) mem;
+        _capacity += 5;
+        std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
 
-		::operator delete(_nodes);
-		_nodes = nodes;
-	}
+        ::operator delete(_nodes);
+        _nodes = nodes;
+    }
 
-	_nodes[_size] = si;
-	++_size;
+    _nodes[_size] = si;
+    ++_size;
 }
 
 
@@ -71,13 +71,16 @@ void SerializationInfo::ObjectNode::release(SerializationContext& context)
 {
     Iterator endIt = end();
 
-	for(Iterator it = begin(); it != endIt; ++it)
-	{
-		Node* node = (*it)->_node;
-		context.push(node);
-		(*it)->_node = 0;
-		context.push(*it);
-	}
+    for(Iterator it = begin(); it != endIt; ++it)
+    {
+        Node* node = (*it)->_node;
+
+        if(node)
+            context.push(node);
+
+        (*it)->_node = 0;
+        context.push(*it);
+    }
 
     _size = 0;
 }
@@ -99,24 +102,28 @@ SerializationInfo::~SerializationInfo()
 {
     if(_node)
     {
-    	if(_context)
-        	_context->push(_node);
+        if(_context)
+        {
+            _context->push(_node);
+        }
         else
-        	delete _node;
+        {
+            delete _node;
+        }
     }
 }
 
-	
+
 void SerializationInfo::clear()
 {
     if(_node)
     {
-    	if(_context && (_node->category() == Object || _node->category() == Array) )
-    	{
-        	static_cast<SerializationInfo::ObjectNode*>(_node)->release(*_context);
+        if(_context && (_node->category() == Object || _node->category() == Array) )
+        {
+            static_cast<SerializationInfo::ObjectNode*>(_node)->release(*_context);
         }
         else
-        	_node->clear();
+            _node->clear();
     }
 
     _name = std::string();
@@ -127,87 +134,87 @@ void SerializationInfo::clear()
 
 void SerializationInfo::setCategory(Category category)
 {
-	switch(category)
-	{
-		case Value:
-			initValue();
-			break;
-			
-		case Reference:
-			initReference();
-			break;
-			
-		case Array:
-		case Object:
-			initObject(category);
-			break;
-			
-		default:
-		    break;
-	}
+    switch(category)
+    {
+        case Value:
+            initValue();
+            break;
+
+        case Reference:
+            initReference();
+            break;
+
+        case Array:
+        case Object:
+            initObject(category);
+            break;
+
+        default:
+            break;
+    }
 }
 
 
 SerializationInfo::ValueNode* SerializationInfo::initValue() const
 {
-	if( this->category() != Value)
-	{
-		if( _context )
-		{
-			SerializationInfo::Node* node = _context->getScalarData();
-			delete _node;
-			_node = node;
-		}
-		else
-		{
-			ValueNode* node = new ValueNode();
-			delete _node;
-			_node = node;
-		}
-	}
-	
-	return static_cast<ValueNode*>(_node);
+    if( this->category() != Value)
+    {
+        if( _context )
+        {
+            SerializationInfo::Node* node = _context->getScalarData();
+            delete _node;
+            _node = node;
+        }
+        else
+        {
+            ValueNode* node = new ValueNode();
+            delete _node;
+            _node = node;
+        }
+    }
+
+    return static_cast<ValueNode*>(_node);
 }
 
 
 SerializationInfo::ReferenceNode* SerializationInfo::initReference() const
 {
-	if( this->category() != Reference)
-	{	
-		//if( ! _node->cache() )
-		{
-			ReferenceNode* node = new ReferenceNode();
-			delete _node;
-			_node = node;
-		}
-	}
-	
-	return static_cast<ReferenceNode*>(_node);
+    if( this->category() != Reference)
+    {
+        //if( ! _node->cache() )
+        {
+            ReferenceNode* node = new ReferenceNode();
+            delete _node;
+            _node = node;
+        }
+    }
+
+    return static_cast<ReferenceNode*>(_node);
 }
 
 
 SerializationInfo::ObjectNode* SerializationInfo::initObject(Category category) const
 {
-	if( this->category() != Object && this->category() != Array)
-	{
-		//if( ! _node->cache() )
-		{
-			ObjectNode* node = new ObjectNode();
-			delete _node;
-			_node = node;
-		}
-	}
-	
-	_node->setCategory(category);
-	return static_cast<ObjectNode*>(_node);
+    if( this->category() != Object && this->category() != Array)
+    {
+        //if( ! _node->cache() )
+        {
+            ObjectNode* node = new ObjectNode();
+            delete _node;
+            _node = node;
+        }
+    }
+
+    _node->setCategory(category);
+    return static_cast<ObjectNode*>(_node);
 }
 
 
 void SerializationInfo::setReference(void* ref)
 {
-	ReferenceNode* node = initReference();
-	//std::cerr << "setReference " << ref << std::endl;
-	node->setAddress(ref);
+    ReferenceNode* node = initReference();
+    //std::cerr << "setReference " << ref << std::endl;
+    node->setAddress(ref);
 }
 
 
@@ -221,9 +228,9 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 
 void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
 {
-	ReferenceNode* node = initReference();
-	node->setAddress(&type);
-	node->setTypeInfo(ti);
+    ReferenceNode* node = initReference();
+    node->setAddress(&type);
+    node->setTypeInfo(ti);
 }
 
 
@@ -276,7 +283,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
     ObjectNode* onode = initObject(Object);
 
-    //std::cerr << "added member " <<  _node->cache() << std::endl;
+    //std::cerr << "added member " << name << " "<< _context << std::endl;
 
 	SerializationInfo* si = 0;
 	if( _context )

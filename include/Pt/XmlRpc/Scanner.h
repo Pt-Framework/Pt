@@ -77,11 +77,10 @@ class PT_XMLRPC_API Scanner
         ~Scanner()
         {}
 
-        void begin(IDeserializer& handler, SerializationContext& context)
+        void begin(IDeserializer& handler)
         {
             _state = OnParam;
             _current = &handler;
-            _context = &context;
         }
 
         bool advance(const Xml::Node& node);
@@ -89,7 +88,6 @@ class PT_XMLRPC_API Scanner
     private:
         State _state;
         IDeserializer* _current;
-        SerializationContext* _context;
 };
 
 }

@@ -57,8 +57,8 @@ class PT_XMLRPC_API IRemoteProcedure
         virtual ~IRemoteProcedure()
         { }
 
-        Client* client()
-        { return _client; }
+        Client& client()
+        { return *_client; }
 
         const std::string& name() const
         { return _name; }
@@ -127,31 +127,31 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            _a4.begin(a4);
-            _a5.begin(a5);
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            _a4.begin( a4, this->client().context() );
+            _a5.begin( a5, this->client().context() );
 
-            this->_r.begin(this->_result.value());
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5};
-            this->client()->beginCall(this->_r, *this, argv, 5);
+            this->client().beginCall(this->_r, *this, argv, 5);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            _a4.begin(a4);
-            _a5.begin(a5);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            _a4.begin( a4, this->client().context() );
+            _a5.begin( a5, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5};
-            this->client()->call(this->_r, *this, argv, 5);
+            this->client().call(this->_r, *this, argv, 5);
             return this->_result.get();
         }
 
@@ -186,29 +186,29 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            _a4.begin(a4);
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            _a4.begin( a4, this->client().context() );
 
-            this->_r.begin(this->_result.value());
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[4] = { &_a1, &_a2, &_a3, &_a4};
-            this->client()->beginCall(this->_r, *this, argv, 4);
+            this->client().beginCall(this->_r, *this, argv, 4);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            _a4.begin(a4);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            _a4.begin( a4, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[4] = { &_a1, &_a2, &_a3, &_a4};
-            this->client()->call(this->_r, *this, argv, 4);
+            this->client().call(this->_r, *this, argv, 4);
             return this->_result.get();
         }
 
@@ -242,26 +242,26 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
-            this->client()->beginCall(this->_r, *this, argv, 3);
+            this->client().beginCall(this->_r, *this, argv, 3);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3)
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            _a3.begin(a3);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            _a3.begin( a3, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
-            this->client()->call(this->_r, *this, argv, 3);
+            this->client().call(this->_r, *this, argv, 3);
             return this->_result.get();
         }
 
@@ -294,24 +294,24 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
-            this->client()->beginCall(this->_r, *this, argv, 2);
+            this->client().beginCall(this->_r, *this, argv, 2);
         }
 
         const R& call(const A1& a1, const A2& a2)
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            _a2.begin( a2, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
-            this->client()->call(this->_r, *this, argv, 2);
+            this->client().call(this->_r, *this, argv, 2);
             return this->_result.get();
         }
 
@@ -343,22 +343,22 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { &_a1 };
-            this->client()->beginCall(this->_r, *this, argv, 1);
+            this->client().beginCall(this->_r, *this, argv, 1);
         }
 
         const R& call(const A1& a1)
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            this->_r.begin(this->_result.value());
+            _a1.begin( a1, this->client().context() );
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { &_a1 };
-            this->client()->call(this->_r, *this, argv, 1);
+            this->client().call(this->_r, *this, argv, 1);
             return this->_result.get();
         }
 
@@ -389,20 +389,20 @@ class RemoteProcedure<R,
         {
             this->_result.clearFault();
 
-            this->_r.begin(this->_result.value());
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { 0 };
-            this->client()->beginCall(this->_r, *this, argv, 0);
+            this->client().beginCall(this->_r, *this, argv, 0);
         }
 
         const R& call()
         {
             this->_result.clearFault();
 
-            this->_r.begin(this->_result.value());
+            this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { 0 };
-            this->client()->call(this->_r, *this, argv, 0);
+            this->client().call(this->_r, *this, argv, 0);
             return this->_result.get();
         }
 

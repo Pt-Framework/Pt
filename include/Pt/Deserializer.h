@@ -31,12 +31,11 @@
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
-#include <map>
 #include <typeinfo>
 
 namespace Pt {
 
-class PT_API IDeserializer
+class IDeserializer
 {
     public:
         IDeserializer()
@@ -58,24 +57,28 @@ class PT_API IDeserializer
 
         virtual void setName(const std::string& name) = 0;
 
-        virtual void setValue(const Pt::String& value) = 0;
-
         virtual void setId(const std::string& id) = 0;
 
-        virtual void setReferenceId(const std::string& id) = 0;
+        virtual void setValue(const Pt::String& value) = 0;
+
+        virtual void setReference(const std::string& id) = 0;
 
         virtual IDeserializer* beginMember(const std::string& name) = 0;
 
+        virtual IDeserializer* beginMember() = 0;
+
         virtual IDeserializer* leaveMember() = 0;
 
-        virtual void fixup(SerializationContext& ctx) = 0;
+        virtual void leave() = 0;
 
-    protected:
-        void fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, SerializationContext& ctx);
+        virtual void link() = 0;
 
     private:
         IDeserializer* _parent;
 };
+
+
+PT_API void linkEach(IDeserializer& deser, Pt::SerializationInfo& si);
 
 
 template <typename T>
@@ -86,14 +89,6 @@ class Deserializer : public IDeserializer
         : _type(0)
         , _current(&_si)
         {}
-
-        // TODO: remove this method
-        void begin(T& type)
-        {
-            _si.clear();
-            _type = &type;
-            _current = &_si;
-        }
 
         void begin(T& type, SerializationContext& ctx)
         {
@@ -128,7 +123,7 @@ class Deserializer : public IDeserializer
             _current->setValue(value);
         }
 
-        virtual void setReferenceId(const std::string& id)
+        virtual void setReference(const std::string& id)
         {
            _current->setRefId(id);
         }
@@ -136,6 +131,13 @@ class Deserializer : public IDeserializer
         virtual IDeserializer* beginMember(const std::string& name)
         {
             SerializationInfo& child = _current->addMember(name);
+            _current = &child;
+            return this;
+        }
+
+        virtual IDeserializer* beginMember()
+        {
+            SerializationInfo& child = _current->addMember();
             _current = &child;
             return this;
         }
@@ -156,13 +158,16 @@ class Deserializer : public IDeserializer
             return this;
         }
 
-        virtual void fixup(SerializationContext& ctx)
+        virtual void leave()
         {
             // SI's for unfixed pointers contain the fixup address now
             // other pointers may only point to _type, but not to its members
             *_current >>= *_type;
+        }
 
-            fixupEach(this, _si, ctx);
+        virtual void link()
+        {
+            linkEach(*this, _si);
         }
 
     private:

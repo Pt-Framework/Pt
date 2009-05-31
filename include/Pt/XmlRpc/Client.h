@@ -96,6 +96,9 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         void timeout(std::size_t t)  { _timeout = t; }
 
+        SerializationContext& context()
+        { return _context; }
+
     protected:
         void onReplyHeader(Http::Client& client);
 

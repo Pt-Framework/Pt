@@ -104,13 +104,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 }
                 else if(ee.name() == L"param")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->fixup(*_context);
+                    _current->leave();
                     _state = OnValueEnd;
                     return true;
                 }
                 else if(ee.name() == L"fault")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->fixup(*_context);
+                    _current->leave();
                     _state = OnValueEnd;
                     return true;
                 }

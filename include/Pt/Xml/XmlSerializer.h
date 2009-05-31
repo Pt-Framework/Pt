@@ -43,7 +43,7 @@ namespace Xml {
     Thic class performs XML serialization of a single object or
     object data.
 */
-class PT_XML_API XmlSerializer
+class PT_XML_API XmlSerializer : public SerializationContext
 {
     public:
         /** @brief Construct a serializer without initializing the
@@ -119,31 +119,29 @@ class PT_XML_API XmlSerializer
             _heap.push_back(serializer);
             _stack.push_back(serializer);
 
-            serializer->begin(type);
+            serializer->begin(type, *this);
             serializer->setName(name);
-            serializer->fixdown(_context);
+            serializer->unlink(*this);
         }
 
-        void finish()
-        {
-            std::vector<ISerializer*>::iterator it;
-
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                (*it)->format(_context, _formatter);
-            }
-
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _heap.clear();
-            _stack.clear();
-        }
+        void finish();
 
         //! @internal
         void flush();
+
+    public:
+        virtual void beginUnlinkTarget(const std::string& name, const void* p);
+
+        virtual void finishUnlinkTarget();
+
+        virtual void unlinkTarget(const void* p);
+
+        virtual bool isUnlinked(const void* p);
+
+        virtual std::string getUnlinkId(const void* p);
+
+    private:
+        std::map<const void*, unsigned> _idmap;
 
     private:
         // TODO:derive from formatter
@@ -151,9 +149,6 @@ class PT_XML_API XmlSerializer
 
         std::vector<ISerializer*> _stack;
         std::vector<ISerializer*> _heap;
-
-        //! @internal
-        SerializationContext _context;
 };
 
 } // namespace Xml

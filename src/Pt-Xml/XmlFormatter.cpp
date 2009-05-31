@@ -116,9 +116,9 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::addReference(const std::string& name, const Pt::String& value)
+void XmlFormatter::addReference(const std::string& name, const std::string& id)
 {
-    Attribute attr( Pt::String(L"ref"), value );
+    Attribute attr( Pt::String(L"ref"), Pt::String::widen( id ) );
     _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
 }
 

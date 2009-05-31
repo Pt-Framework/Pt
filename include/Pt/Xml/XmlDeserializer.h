@@ -37,96 +37,108 @@ namespace Pt {
 
 namespace Xml {
 
-    class XmlReader;
-    class Node;
+class XmlReader;
+class Node;
 
-    /** @brief Deserialize objects or object data to XML
+/** @brief Deserialize objects or object data to XML
 
-        Thic class performs XML deserialization of a single object or
-        object data.
-    */
-    class PT_XML_API XmlDeserializer
-    {
-        public:
-            typedef void (*Fixup)(void**, const std::type_info&, void*);
+    Thic class performs XML deserialization of a single object or
+    object data.
+*/
+class PT_XML_API XmlDeserializer : public SerializationContext
+{
+    public:
+        XmlDeserializer(XmlReader& reader);
 
-        public:
-            XmlDeserializer(XmlReader& reader);
+        XmlDeserializer(std::istream& is);
 
-            XmlDeserializer(std::istream& is);
+        //! @brief Destructor
+        ~XmlDeserializer();
 
-            //! @brief Destructor
-            ~XmlDeserializer();
+        XmlReader& reader()
+        { return *_reader; }
 
-            XmlReader& reader()
-            { return *_reader; }
+        /** @brief Deserialize an object
 
-            /** @brief Deserialize an object
+            This method will deserialize the object \a type from an
+            XML format. The type \a type must be serializable.
+        */
+        template <typename T>
+        void deserialize(T& type)
+        {
+            Deserializer<T> deser;
+            deser.begin(type, *this);
+            this->get(&deser);
+            deser.leave();
+            deser.link();
+        }
 
-                This method will deserialize the object \a type from an
-                XML format. The type \a type must be serializable.
-            */
-            template <typename T>
-            void deserialize(T& type)
-            {
-                Deserializer<T> deser;
-                deser.begin(type, _context);
-                this->get(&deser);
-                deser.fixup(_context);
-            }
+    public:
+        virtual void beginLinkTarget(const std::string& name, const std::string& id,
+                                     void* obj, const std::type_info& fixupInfo);
 
-            void finish()
-            {
-                _context.fixup();
-                _context.clear();
-            }
+        virtual void finishLinkTarget();
 
-        protected:
-            void get(IDeserializer* deser);
+        virtual void linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
-            //! @internal
-            void beginDocument(const Node& node);
+        virtual void link();
 
-            //! @internal
-            void onRootElement(const Node& node);
+        virtual bool checkLink(const std::type_info& from, const std::type_info& to);
 
-            //! @internal
-            void onStartElement(const Node& node);
+    private:
+        struct FixupInfo
+        {
+            void* address;
+            const std::type_info* type;
+        };
 
-            //! @internal
-            void onWhitespace(const Node& node);
+        std::map<std::string, FixupInfo> _targets;
+        std::map<std::string, FixupInfo> _pointers;
 
-            //! @internal
-            void onContent(const Node& node);
+    protected:
+        void get(IDeserializer* deser);
 
-            //! @internal
-            void onEndElement(const Node& node);
+        //! @internal
+        void beginDocument(const Node& node);
 
-        private:
-            //! @internal
-            XmlReader* _reader;
+        //! @internal
+        void onRootElement(const Node& node);
 
-            //! @internal
-            std::auto_ptr<XmlReader> _deleter;
+        //! @internal
+        void onStartElement(const Node& node);
 
-            //! @internal
-            typedef void (XmlDeserializer::*ProcessNode)(const Node&);
+        //! @internal
+        void onWhitespace(const Node& node);
 
-            //! @internal
-            ProcessNode _processNode;
+        //! @internal
+        void onContent(const Node& node);
 
-            size_t _startDepth;
+        //! @internal
+        void onEndElement(const Node& node);
 
-            SerializationContext _context;
+    private:
+        //! @internal
+        XmlReader* _reader;
 
-            //! @internal
-            IDeserializer* _deser;
+        //! @internal
+        std::auto_ptr<XmlReader> _deleter;
 
-            //! @internal
-            String _nodeName;
+        //! @internal
+        typedef void (XmlDeserializer::*ProcessNode)(const Node&);
 
-            String _nodeId;
-    };
+        //! @internal
+        ProcessNode _processNode;
+
+        size_t _startDepth;
+
+        //! @internal
+        IDeserializer* _deser;
+
+        //! @internal
+        String _nodeName;
+
+        String _nodeId;
+};
 
 } // namespace Xml
 

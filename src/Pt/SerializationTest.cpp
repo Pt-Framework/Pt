@@ -69,8 +69,8 @@ inline void convert(int& n, const Pt::String& str)
 
 class IntDeserializer : public Pt::IDeserializer
 {
-	public:
-	    typedef int value_type;
+    public:
+        typedef int value_type;
 
     public:
         IntDeserializer()
@@ -102,24 +102,32 @@ class IntDeserializer : public Pt::IDeserializer
 
         virtual void setValue(const Pt::String& value)
         {
-        	convert(*_type, value);
+            convert(*_type, value);
         }
 
-        virtual void setReferenceId(const std::string& id)
+        virtual void setReference(const std::string& id)
         {
         }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
-        { 
-        	return 0;
+        {
+            return 0;
+        }
+
+        virtual Pt::IDeserializer* beginMember()
+        {
+            return 0;
         }
 
         virtual Pt::IDeserializer* leaveMember()
         {
-        	return parent();
+            return parent();
         }
 
-        virtual void fixup(Pt::SerializationContext& ctx)
+        virtual void leave()
+        { }
+
+        virtual void link()
         { }
 
     private:
@@ -128,14 +136,14 @@ class IntDeserializer : public Pt::IDeserializer
 
 class VectorDeserializer : public Pt::IDeserializer
 {
-	public:
-	    typedef int value_type;
+    public:
+        typedef int value_type;
 
     public:
         VectorDeserializer()
         : _type(0)
         {
-        	_deser.setParent(this);
+            _deser.setParent(this);
         }
 
         void begin(std::vector<value_type>& type)
@@ -153,7 +161,7 @@ class VectorDeserializer : public Pt::IDeserializer
         {
             return typeid(std::vector<value_type>);
         }
-        
+
         virtual void setName(const std::string& name)
         {
         }
@@ -166,23 +174,33 @@ class VectorDeserializer : public Pt::IDeserializer
         {
         }
 
-        virtual void setReferenceId(const std::string& id)
+        virtual void setReference(const std::string& id)
         {
         }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
         {
-        	_type->push_back( value_type() );
-        	_deser.begin( _type->back() );
-        	return &_deser;
+            _type->push_back( value_type() );
+            _deser.begin( _type->back() );
+            return &_deser;
+        }
+
+        virtual Pt::IDeserializer* beginMember()
+        {
+            _type->push_back( value_type() );
+            _deser.begin( _type->back() );
+            return &_deser;
         }
 
         virtual Pt::IDeserializer* leaveMember()
         {
-        	return this;
+            return this;
         }
 
-        virtual void fixup(Pt::SerializationContext& ctx)
+        virtual void leave()
+        { }
+
+        virtual void link()
         { }
 
     private:
@@ -323,7 +341,7 @@ void SerializationTest::Benchmark2()
         deser->setValue(num);
         deser = deser->leaveMember();
 
-        deser->fixup(context);
+        deser->leave();
 
         u += vec.size();
     }
@@ -381,7 +399,7 @@ void SerializationTest::Benchmark3()
         deser->setValue(num);
         deser = deser->leaveMember();
 
-        deser->fixup(context);
+        deser->leave();
 
         u += vec.size();
     }

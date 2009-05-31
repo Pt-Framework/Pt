@@ -72,7 +72,7 @@ void Formatter::addValue(const std::string& name, const std::string& type,
 }
 
 
-void Formatter::addReference(const std::string& name, const Pt::String& value)
+void Formatter::addReference(const std::string& name, const std::string& value)
 {
     throw SerializationError("references not supported");
 }

@@ -56,7 +56,6 @@ XmlDeserializer::XmlDeserializer(std::istream& is)
 
 XmlDeserializer::~XmlDeserializer()
 {
-    this->finish();
 }
 
 
@@ -100,7 +99,6 @@ void XmlDeserializer::beginDocument(const Node& node)
             break;
         }
         default:
-            std::cerr << "NODE: " << node.type() << std::endl;
             throw std::logic_error("Expected start element" + PT_SOURCEINFO);
     };
 }
@@ -212,7 +210,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
             if( ! refId.empty() )
             {
                 _deser = _deser->beginMember(_nodeName.narrow() );
-                _deser->setReferenceId( refId.narrow() );
+                _deser->setReference( refId.narrow() );
                 _deser = _deser->leaveMember();
                 //SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
                 //ref.setCategory(SerializationInfo::Reference);
@@ -295,6 +293,62 @@ void XmlDeserializer::onEndElement(const Node& node)
             throw std::logic_error("Expected start element" + PT_SOURCEINFO);
         }
     };
+}
+
+
+void XmlDeserializer::beginLinkTarget(const std::string& name, const std::string& id,
+                                      void* obj, const std::type_info& fixupInfo)
+{
+    FixupInfo fi;
+    fi.address = obj;
+    fi.type = &fixupInfo;
+    _targets[id] = fi;
+}
+
+
+void XmlDeserializer::finishLinkTarget()
+{
+}
+
+
+void XmlDeserializer::linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
+{
+    FixupInfo fi;
+    fi.address = obj;
+    fi.type = &fixupInfo;
+    _pointers[id] = fi;
+}
+
+
+void XmlDeserializer::link()
+{
+    std::map<std::string, FixupInfo>::iterator it;
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        void* fixme = it->second.address;
+        const std::type_info* fixupType = it->second.type;
+
+        std::string id = it->first;
+        void* target = _targets[id].address;
+        const std::type_info* targetType = _targets[id].type ;
+
+        //std::cerr << "FIXING: " << fixme << " to " << target << std::endl;
+        bool allowed = this->checkLink(*fixupType, *targetType);
+        if( ! allowed )
+            throw SerializationError("type mismatch during reference fixup");
+
+        void** vp =(void**)(fixme);
+        *vp = target;
+    }
+
+    _targets.clear();
+    _pointers.clear();
+}
+
+
+bool XmlDeserializer::checkLink(const std::type_info& from, const std::type_info& to)
+{
+    return from == to;
 }
 
 } // namespace Xml

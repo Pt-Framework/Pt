@@ -37,8 +37,6 @@ SerializationContext::SerializationContext()
 
 SerializationContext::~SerializationContext()
 {
-    this->clear();
-
     std::vector<SerializationInfo::ValueNode*>::iterator it = _scalars.begin();
     for(; it != _scalars.end(); ++it)
     {
@@ -133,83 +131,59 @@ void SerializationContext::push(SerializationInfo::Node* node)
 }
 
 
-void SerializationContext::clear()
+void SerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
 {
-    _idmap.clear();
-    //
-    // Deserialisation
-    //
-    _targets.clear();
-    _pointers.clear();
 }
 
 
-void SerializationContext::makeId(const void* p)
+void SerializationContext::finishUnlinkTarget()
 {
-    if( _idmap.find(p) == _idmap.end() )
-    {
-        unsigned id = _idmap.size();
-        _idmap[p] = id;
-    }
 }
 
 
-unsigned* SerializationContext::getId(const void* p)
+void SerializationContext::unlinkTarget(const void* p)
 {
-    if( _idmap.find(p) != _idmap.end() )
-    {
-        return &( _idmap[p] );
-    }
+    throw SerializationError("missing unlink information");
+}
 
-    return 0;
+
+bool SerializationContext::isUnlinked(const void* p)
+{
+    return false;
+}
+
+
+std::string SerializationContext::getUnlinkId(const void* p)
+{
+    throw SerializationError("missing unlink information");
+    return std::string();
 }
 
 //
 // Deserialization specific
 //
-void SerializationContext::addFixupTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
+void SerializationContext::beginLinkTarget(const std::string& name, const std::string& id,
+                                           void* obj, const std::type_info& fixupInfo)
 {
-    FixupInfo fi;
-    fi.address = obj;
-    fi.type = &fixupInfo;
-    _targets[id] = fi;
 }
 
 
-void SerializationContext::addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo)
+void SerializationContext::finishLinkTarget()
 {
-    FixupInfo fi;
-    fi.address = obj;
-    fi.type = &fixupInfo;
-    _pointers[id] = fi;
 }
 
 
-void SerializationContext::fixup()
+void SerializationContext::linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
 {
-    std::map<std::string, FixupInfo>::iterator it;
-    for(it = _pointers.begin(); it != _pointers.end(); ++it)
-    {
-        void* fixme = it->second.address;
-        const std::type_info* fixupType = it->second.type;
-        std::string id = it->first;
-        void* target = _targets[id].address;
-        const std::type_info* targetType = _targets[id].type ;
-
-        //std::cerr << "FIXING: " << fixme << " to " << target << std::endl;
-        bool fixupAllowed = this->checkFixup(*fixupType, *targetType);
-        if( ! fixupAllowed )
-            throw SerializationError("reference fixup failed, type mismatch");
-
-        void** vp =(void**)(fixme);
-        *vp = target;
-    }
-
-    clear();
 }
 
 
-bool SerializationContext::checkFixup(const std::type_info& from, const std::type_info& to)
+void SerializationContext::link()
+{
+}
+
+
+bool SerializationContext::checkLink(const std::type_info& from, const std::type_info& to)
 {
     return from == to;
 }

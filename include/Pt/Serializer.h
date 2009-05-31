@@ -36,7 +36,7 @@ namespace Pt {
 class Formatter;
 class SerializationContext;
 
-class PT_API ISerializer
+class ISerializer
 {
     public:
         virtual ~ISerializer()
@@ -44,19 +44,22 @@ class PT_API ISerializer
 
         virtual void setName(const std::string& name) = 0;
 
-        virtual void fixdown(SerializationContext& context) = 0;
+        virtual void unlink(SerializationContext& context) = 0;
 
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
     protected:
         ISerializer()
         {}
-
-        static void fixdownEach(Pt::SerializationInfo& si, SerializationContext& context);
-
-        static void formatEach2(Pt::SerializationInfo& si, const void* type,
-                                SerializationContext& context, Formatter& formatter);
 };
+
+
+PT_API void unlinkEach(Pt::SerializationInfo& si, const void* target,
+                       SerializationContext& context);
+
+
+PT_API void formatEach(Pt::SerializationInfo& si, const void* target,
+                       SerializationContext& context, Formatter& formatter);
 
 
 template <typename T>
@@ -67,14 +70,6 @@ class Serializer : public ISerializer
         : _type(0)
         , _current(&_si)
         { }
-
-        // TODO: remove this method
-        void begin(const T& type)
-        {
-            _si.clear();
-            _type = &type;
-            _si <<= *_type;
-        }
 
         void begin(const T& type, SerializationContext& context)
         {
@@ -89,14 +84,14 @@ class Serializer : public ISerializer
             _si.setName(name);
         }
 
-        virtual void fixdown(SerializationContext& context)
+        virtual void unlink(SerializationContext& context)
         {
-            this->fixdownEach( _si, context );
+            unlinkEach(_si, _type, context);
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)
         {
-            this->formatEach2( _si, _type, context, formatter );
+            formatEach( _si, _type, context, formatter );
         }
 
     private:

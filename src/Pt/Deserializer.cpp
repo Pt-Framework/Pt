@@ -26,25 +26,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Deserializer.h"
+#include <cassert>
 
 namespace Pt {
 
-void IDeserializer::fixupEach(IDeserializer* deser, Pt::SerializationInfo& si, SerializationContext& ctx)
+void linkEach(IDeserializer& deser, Pt::SerializationInfo& si)
 {
+    SerializationContext* context = si.context();
+    assert(context);
+
     Pt::SerializationInfo::Iterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {
         if(it->category() == Pt::SerializationInfo::Reference)
         {
-            //std::cerr << "UNFIXED: " << it->fixupAddr() << " needs " << it->refId() << std::endl;
-            ctx.addFixup( it->refId(), it->refAddr(), it->refType() );
+            context->linkTarget( it->refId(), it->refAddr(), it->refType() );
         }
     }
 
-    if( ! si.id().empty() )
-    {
-        ctx.addFixupTarget( si.id(), deser->target(), deser->targetType() );
-    }
+    context->beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
+    context->finishLinkTarget();
 }
 
 } // namespace Pt

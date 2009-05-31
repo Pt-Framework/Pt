@@ -34,44 +34,38 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 namespace Pt {
 
 class PT_API SerializationContext
 {
-    struct FixupInfo
-    {
-        void* address;
-        const std::type_info* type;
-    };
-
     public:
         SerializationContext();
 
         virtual ~SerializationContext();
 
-        void clear();
+        virtual void beginUnlinkTarget(const std::string& name, const void* p);
 
-        void makeId(const void* p);
+        virtual void finishUnlinkTarget();
 
-        unsigned* getId(const void* p);
+        virtual void unlinkTarget(const void* p);
 
-    private:
-        std::map<const void*, unsigned> _idmap;
+        virtual bool isUnlinked(const void* p);
+
+        virtual std::string getUnlinkId(const void* p);
 
     public:
-        void addFixupTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
+        virtual void beginLinkTarget(const std::string& name, const std::string& id,
+                                     void* obj, const std::type_info& fixupInfo);
 
-        void addFixup(const std::string& id, void* obj, const std::type_info& fixupInfo);
+        virtual void finishLinkTarget();
 
-        void fixup();
+        virtual void linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
-    protected:
-        virtual bool checkFixup(const std::type_info& from, const std::type_info& to);
+        virtual void link();
 
-    private:
-        std::map<std::string, FixupInfo> _targets;
-        std::map<std::string, FixupInfo> _pointers;
+        virtual bool checkLink(const std::type_info& from, const std::type_info& to);
 
     public:
         SerializationInfo* get();

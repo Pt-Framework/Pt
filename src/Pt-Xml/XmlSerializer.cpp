@@ -72,9 +72,63 @@ void XmlSerializer::detach()
 }
 
 
+void XmlSerializer::finish()
+{
+    std::vector<ISerializer*>::iterator it;
+
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        (*it)->format(*this, _formatter);
+    }
+
+    for(it = _heap.begin(); it != _heap.end(); ++it)
+    {
+        delete *it;
+    }
+
+    _heap.clear();
+    _stack.clear();
+}
+
+
 void XmlSerializer::flush()
 {
     _formatter.flush();
+}
+
+
+void XmlSerializer::beginUnlinkTarget(const std::string& name, const void* p)
+{
+}
+
+
+void XmlSerializer::finishUnlinkTarget()
+{
+}
+
+
+void XmlSerializer::unlinkTarget(const void* p)
+{
+    if( _idmap.find(p) == _idmap.end() )
+    {
+        unsigned id = _idmap.size();
+        _idmap[p] = id;
+    }
+}
+
+
+bool XmlSerializer::isUnlinked(const void* p)
+{
+    return _idmap.find(p) != _idmap.end();
+}
+
+
+std::string XmlSerializer::getUnlinkId(const void* p)
+{
+    if( _idmap.find(p) == _idmap.end() )
+        throw SerializationError("missing unlink information");
+
+    return convert<std::string>( _idmap[p] );
 }
 
 } // namespace Xml

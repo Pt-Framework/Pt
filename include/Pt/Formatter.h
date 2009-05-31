@@ -44,11 +44,13 @@ class Formatter
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 
-        virtual void addReference(const std::string& name, const Pt::String& refId) = 0;
+        virtual void addReference(const std::string& name, const std::string& refId) = 0;
 
         virtual void beginArray(const std::string& name, const std::string& id) = 0;
 
         virtual void finishArray() = 0;
+
+        //TODO: beginElement() and finishElement()
 
         virtual void beginObject(const std::string& name, const std::string& id) = 0;
 

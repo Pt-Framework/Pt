@@ -31,36 +31,66 @@
 
 namespace Pt {
 
-void ISerializer::fixdownEach(Pt::SerializationInfo& si, SerializationContext& context)
+void unlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
 {
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        context.makeId(p);
+        context.unlinkTarget(p);
     }
-    else if(si.category() == Pt::SerializationInfo::Object)
+    else if(si.category() == Pt::SerializationInfo::Object ||
+            si.category() == Pt::SerializationInfo::Array)
     {
         Pt::SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            fixdownEach(*it, context);
+            unlinkMember(*it, context);
         }
     }
 }
 
 
-void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
-                              SerializationContext& context, Formatter& formatter)
+void unlinkEach(Pt::SerializationInfo& si, const void* target, SerializationContext& context)
 {
-    unsigned* id = context.getId(type);
-    if(id)
+    context.beginUnlinkTarget(si.name(), target);
+    context.finishUnlinkTarget();
+
+    if(si.category() == Pt::SerializationInfo::Reference)
     {
-        si.setId( convert<std::string>(*id) );
+        const void* p = si.refAddr();
+        context.unlinkTarget(p);
     }
+    else if(si.category() == Pt::SerializationInfo::Object ||
+            si.category() == Pt::SerializationInfo::Array)
+    {
+        Pt::SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            unlinkMember(*it, context);
+        }
+    }
+}
+
+
+void formatEach(Pt::SerializationInfo& si, const void* type,
+                SerializationContext& context, Formatter& formatter)
+{
+    if( context.isUnlinked(type) )
+    {
+        std::string id = context.getUnlinkId(type);
+        si.setId(id);
+    }
+
+    // TODO: it might not be necessary to store the id in the si object
 
     if(si.category() == SerializationInfo::Value)
     {
         formatter.addValue( si.name(), si.typeName(), si.toString(), si.id() );
+    }
+    else if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        std::string id = context.getUnlinkId( si.refAddr() );
+        formatter.addReference( si.name(), id);
     }
     else if(si.category() == SerializationInfo::Object)
     {
@@ -70,20 +100,11 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         for(it = si.begin(); it != si.end(); ++it)
         {
             formatter.beginMember( it->name() );
-            formatEach2(*it, 0, context, formatter);
+            formatEach(*it, 0, context, formatter);
             formatter.finishMember();
         }
 
         formatter.finishObject();
-    }
-    else if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        unsigned* id = context.getId( si.refAddr() );
-        if( ! id )
-            throw std::runtime_error("no such id for reference");
-
-        Pt::String addr = convert<Pt::String>( *id );
-        formatter.addReference( si.name(), addr);
     }
     else if(si.category() == Pt::SerializationInfo::Array)
     {
@@ -92,7 +113,7 @@ void ISerializer::formatEach2(Pt::SerializationInfo& si, const void* type,
         SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            formatEach2(*it, 0, context, formatter);
+            formatEach(*it, 0, context, formatter);
         }
 
         formatter.finishArray();

@@ -97,10 +97,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
-
-            //std::cerr << "========================\n" << std::endl;
             deser.deserialize(dr);
-            deser.finish();
+
+            deser.link();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
             std::cerr << "RESULT: "<< dr.date->toIsoString() << std::endl;
             //std::cerr << "========================\n" << std::endl;
@@ -121,7 +120,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
-            deser.finish();
+            deser.link();
 
             PT_UNIT_ASSERT( date1 == date2);
         }
