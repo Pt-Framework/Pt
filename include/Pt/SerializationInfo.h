@@ -177,12 +177,6 @@ class PT_API SerializationInfo
 
         const std::type_info& refType() const;
 
-        /** @internal DEPRECATED
-        */
-        template <typename T>
-        T toValue() const
-        { return convert<T>( this->toString() ); }
-
         /** @brief Deserialization of flat data-types
         */
         template <typename T>
@@ -199,6 +193,19 @@ class PT_API SerializationInfo
         void setValue(const T& value)
         { convert( initString(), value ); }
 
+        /** @brief Serialization of flat member data-types
+        */
+        template <typename T>
+        void addValue(const std::string& name, const T& value)
+        { this->addMember(name) <<= value; }
+
+        /** @brief Deserialization of flat child value types
+        */
+        template <typename T>
+        void getValue(const std::string& name, T& value) const
+        { SerializationInfo& info = this->getMember(name) >>= value; }
+
+        // TODO: move to operator >>= <<=
         void toValue(short& s) const;
 
         void setValue(short s);
@@ -231,16 +238,6 @@ class PT_API SerializationInfo
 
         void setValue(double f);
 
-        /** @brief Serialization of flat member data-types
-        */
-        template <typename T>
-        SerializationInfo& addValue(const std::string& name, const T& value)
-        {
-            SerializationInfo& info = this->addMember(name);
-            info.setValue(value);
-            return info;
-        }
-
         /** @brief Serialization of member data
         */
         SerializationInfo& addMember(const std::string& name);
@@ -252,33 +249,6 @@ class PT_API SerializationInfo
         /** @brief Deserialization of member data
         */
         const SerializationInfo& getMember(const std::string& name) const;
-
-        /** @brief Compiler workaround.
-            This is needed for some compilers (GCC 3.x) to allow access to
-            method 'T getValue(const std::string& name) const' below.
-         */
-        template <typename T>
-        friend T getValue(const std::string& name, SerializationInfo* si);
-
-        /** @brief Deserialization of flat child value types
-        */
-        template <typename T>
-        T getValue(const std::string& name) const
-        {
-            T value;
-            const SerializationInfo& info = this->getMember(name);
-            info.toValue(value);
-            return value;
-        }
-
-        /** @brief Deserialization of flat child value types
-        */
-        template <typename T>
-        void getValue(const std::string& name, T& value) const
-        {
-            const SerializationInfo& info = this->getMember(name);
-            return info.toValue(value);
-        }
 
         /** @brief Find member data by name
 
@@ -309,6 +279,31 @@ class PT_API SerializationInfo
 
         void setNode(Node* node)
         { _node = node; }
+
+    public:
+        /** @internal DEPRECATED
+        */
+        template <typename T>
+        T toValue() const
+        { return convert<T>( this->toString() ); }
+
+        /** @internal DEPRECATED Compiler workaround.
+            This is needed for some compilers (GCC 3.x) to allow access to
+            method 'T getValue(const std::string& name) const' below.
+         */
+        template <typename T>
+        friend T getValue(const std::string& name, SerializationInfo* si);
+
+        /** @internal DEPRECATED
+        */
+        template <typename T>
+        T getValue(const std::string& name) const
+        {
+            T value;
+            const SerializationInfo& info = this->getMember(name);
+            info.toValue(value);
+            return value;
+        }
 
     protected:
         void getReference(void*& type, const std::type_info& ti) const;
