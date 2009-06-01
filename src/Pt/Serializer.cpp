@@ -31,12 +31,12 @@
 
 namespace Pt {
 
-void unlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
+void prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
 {
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        context.unlinkTarget(p);
+        context.prepareUnlink(p);
     }
     else if(si.category() == Pt::SerializationInfo::Object ||
             si.category() == Pt::SerializationInfo::Array)
@@ -44,13 +44,13 @@ void unlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
         Pt::SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            unlinkMember(*it, context);
+            prepareUnlinkMember(*it, context);
         }
     }
 }
 
 
-void unlinkEach(Pt::SerializationInfo& si, const void* target, SerializationContext& context)
+void prepareUnlinkEach(Pt::SerializationInfo& si, const void* target, SerializationContext& context)
 {
     context.beginUnlinkTarget(si.name(), target);
     context.finishUnlinkTarget();
@@ -58,7 +58,7 @@ void unlinkEach(Pt::SerializationInfo& si, const void* target, SerializationCont
     if(si.category() == Pt::SerializationInfo::Reference)
     {
         const void* p = si.refAddr();
-        context.unlinkTarget(p);
+        context.prepareUnlink(p);
     }
     else if(si.category() == Pt::SerializationInfo::Object ||
             si.category() == Pt::SerializationInfo::Array)
@@ -66,7 +66,7 @@ void unlinkEach(Pt::SerializationInfo& si, const void* target, SerializationCont
         Pt::SerializationInfo::Iterator it;
         for(it = si.begin(); it != si.end(); ++it)
         {
-            unlinkMember(*it, context);
+            prepareUnlinkMember(*it, context);
         }
     }
 }

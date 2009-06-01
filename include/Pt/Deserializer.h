@@ -71,14 +71,15 @@ class IDeserializer
 
         virtual void leave() = 0;
 
-        virtual void link() = 0;
+        virtual void prepareLink(SerializationContext& context) = 0;
 
     private:
         IDeserializer* _parent;
 };
 
 
-PT_API void linkEach(IDeserializer& deser, Pt::SerializationInfo& si);
+PT_API void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
+                           SerializationContext& context);
 
 
 template <typename T>
@@ -90,10 +91,10 @@ class Deserializer : public IDeserializer
         , _current(&_si)
         {}
 
-        void begin(T& type, SerializationContext& ctx)
+        void begin(T& type, SerializationContext& context)
         {
             _si.clear();
-            _si.setContext(ctx);
+            _si.setContext(context);
             _type = &type;
             _current = &_si;
         }
@@ -160,14 +161,12 @@ class Deserializer : public IDeserializer
 
         virtual void leave()
         {
-            // SI's for unfixed pointers contain the fixup address now
-            // other pointers may only point to _type, but not to its members
             *_current >>= *_type;
         }
 
-        virtual void link()
+        virtual void prepareLink(SerializationContext& context)
         {
-            linkEach(*this, _si);
+            prepareLinkEach(*this, _si, context);
         }
 
     private:

@@ -49,7 +49,7 @@ class PT_API SerializationContext
 
         virtual void finishUnlinkTarget();
 
-        virtual void unlinkTarget(const void* p);
+        virtual void prepareUnlink(const void* p);
 
         virtual bool isUnlinked(const void* p);
 
@@ -61,11 +61,11 @@ class PT_API SerializationContext
 
         virtual void finishLinkTarget();
 
-        virtual void linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
-
-        virtual void link();
+        virtual void prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
         virtual bool checkLink(const std::type_info& from, const std::type_info& to);
+
+        virtual void link();
 
     public:
         SerializationInfo* get();

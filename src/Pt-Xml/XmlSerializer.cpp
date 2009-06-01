@@ -107,7 +107,7 @@ void XmlSerializer::finishUnlinkTarget()
 }
 
 
-void XmlSerializer::unlinkTarget(const void* p)
+void XmlSerializer::prepareUnlink(const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
     {

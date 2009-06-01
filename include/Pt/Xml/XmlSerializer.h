@@ -121,7 +121,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
 
             serializer->begin(type, *this);
             serializer->setName(name);
-            serializer->unlink(*this);
+            serializer->prepareUnlink(*this);
         }
 
         void finish();
@@ -134,7 +134,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
 
         virtual void finishUnlinkTarget();
 
-        virtual void unlinkTarget(const void* p);
+        virtual void prepareUnlink(const void* p);
 
         virtual bool isUnlinked(const void* p);
 

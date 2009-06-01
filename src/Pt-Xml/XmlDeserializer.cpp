@@ -311,7 +311,7 @@ void XmlDeserializer::finishLinkTarget()
 }
 
 
-void XmlDeserializer::linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
+void XmlDeserializer::prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo)
 {
     FixupInfo fi;
     fi.address = obj;

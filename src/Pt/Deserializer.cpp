@@ -30,22 +30,20 @@
 
 namespace Pt {
 
-void linkEach(IDeserializer& deser, Pt::SerializationInfo& si)
+void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
+                     SerializationContext& context)
 {
-    SerializationContext* context = si.context();
-    assert(context);
-
     Pt::SerializationInfo::Iterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {
         if(it->category() == Pt::SerializationInfo::Reference)
         {
-            context->linkTarget( it->refId(), it->refAddr(), it->refType() );
+            context.prepareLink( it->refId(), it->refAddr(), it->refType() );
         }
     }
 
-    context->beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
-    context->finishLinkTarget();
+    context.beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
+    context.finishLinkTarget();
 }
 
 } // namespace Pt

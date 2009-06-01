@@ -44,7 +44,7 @@ class ISerializer
 
         virtual void setName(const std::string& name) = 0;
 
-        virtual void unlink(SerializationContext& context) = 0;
+        virtual void prepareUnlink(SerializationContext& context) = 0;
 
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
@@ -54,8 +54,8 @@ class ISerializer
 };
 
 
-PT_API void unlinkEach(Pt::SerializationInfo& si, const void* target,
-                       SerializationContext& context);
+PT_API void prepareUnlinkEach(Pt::SerializationInfo& si, const void* target,
+                              SerializationContext& context);
 
 
 PT_API void formatEach(Pt::SerializationInfo& si, const void* target,
@@ -84,9 +84,9 @@ class Serializer : public ISerializer
             _si.setName(name);
         }
 
-        virtual void unlink(SerializationContext& context)
+        virtual void prepareUnlink(SerializationContext& context)
         {
-            unlinkEach(_si, _type, context);
+            prepareUnlinkEach(_si, _type, context);
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)

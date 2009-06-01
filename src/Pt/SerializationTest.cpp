@@ -127,7 +127,7 @@ class IntDeserializer : public Pt::IDeserializer
         virtual void leave()
         { }
 
-        virtual void link()
+        virtual void prepareLink(Pt::SerializationContext& context)
         { }
 
     private:
@@ -200,7 +200,7 @@ class VectorDeserializer : public Pt::IDeserializer
         virtual void leave()
         { }
 
-        virtual void link()
+        virtual void prepareLink(Pt::SerializationContext& context)
         { }
 
     private:

@@ -70,7 +70,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
             deser.begin(type, *this);
             this->get(&deser);
             deser.leave();
-            deser.link();
+            deser.prepareLink(*this);
         }
 
     public:
@@ -79,7 +79,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
 
         virtual void finishLinkTarget();
 
-        virtual void linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo);
+        virtual void prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo);
 
         virtual void link();
 

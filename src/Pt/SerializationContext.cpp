@@ -141,7 +141,7 @@ void SerializationContext::finishUnlinkTarget()
 }
 
 
-void SerializationContext::unlinkTarget(const void* p)
+void SerializationContext::prepareUnlink(const void* p)
 {
     throw SerializationError("missing unlink information");
 }
@@ -159,9 +159,7 @@ std::string SerializationContext::getUnlinkId(const void* p)
     return std::string();
 }
 
-//
-// Deserialization specific
-//
+
 void SerializationContext::beginLinkTarget(const std::string& name, const std::string& id,
                                            void* obj, const std::type_info& fixupInfo)
 {
@@ -173,7 +171,7 @@ void SerializationContext::finishLinkTarget()
 }
 
 
-void SerializationContext::linkTarget(const std::string& id, void* obj, const std::type_info& fixupInfo)
+void SerializationContext::prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo)
 {
 }
 
