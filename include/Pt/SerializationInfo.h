@@ -462,16 +462,9 @@ class PT_API SerializationInfo
         void setValue(short s)
         { initValue()->setInt(s); }
 
-        void toValue(int& i) const
-        {
-            long l = 0;
-            this->toValue(l);
-            // TODO: consider SerializationError on overflow
-            i = static_cast<int>(l);
-        }
+        void toValue(int& i) const;
 
-        void setValue(int i)
-        { initValue()->setInt(i); }
+        void setValue(int i);
 
         void toValue(long& l) const
         {
@@ -495,16 +488,9 @@ class PT_API SerializationInfo
         void setValue(unsigned short us)
         { initValue()->setUInt(us); }
 
-        void toValue(unsigned int& ui) const
-        {
-            unsigned long ul = 0;
-            this->toValue(ul);
-            // TODO: consider SerializationError on overflow
-            ui = static_cast<int>(ul);
-        }
+        void toValue(unsigned int& ui) const;
 
-        void setValue(unsigned int ui)
-        { initValue()->setUInt(ui); }
+        void setValue(unsigned int ui);
 
         void toValue(unsigned long& ul) const
         {

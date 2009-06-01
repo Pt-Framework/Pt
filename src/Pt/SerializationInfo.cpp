@@ -279,6 +279,36 @@ const Pt::String& SerializationInfo::toString() const
 }
 
 
+void SerializationInfo::toValue(int& i) const
+{
+    long l = 0;
+    this->toValue(l);
+    // TODO: consider SerializationError on overflow
+    i = static_cast<int>(l);
+}
+
+
+void SerializationInfo::setValue(int i)
+{
+    initValue()->setInt(i);
+}
+
+
+void SerializationInfo::toValue(unsigned int& ui) const
+{
+    unsigned long ul = 0;
+    this->toValue(ul);
+    // TODO: consider SerializationError on overflow
+    ui = static_cast<int>(ul);
+}
+
+
+void SerializationInfo::setValue(unsigned int ui)
+{
+    initValue()->setUInt(ui);
+}
+
+
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
     ObjectNode* onode = initObject(Object);
