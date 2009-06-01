@@ -82,46 +82,124 @@ class PT_API SerializationInfo
         {
             enum Type
             {
-                Streamable,
-                Signed,
+                Void,
+                String,
+                Int,
+                UInt,
+                Float
             };
             public:
                 ValueNode()
                 : Node(Value)
-                , _type(Streamable)
+                , _type(String)
                 {}
 
-                const Pt::String& value() const
-                { return _value; }
-
-                Pt::String& value()
+                const Pt::String& getString() const
                 {
-                    _type = Streamable;
+                    switch(_type)
+                    {
+                        case Int:
+                            convert(_value, _variant.l);
+                            break;
+
+                        case UInt:
+                            convert(_value, _variant.ul);
+                            break;
+
+                        case Float:
+                            convert(_value, _variant.f);
+                            break;
+
+                        default:
+                            break;
+                    }
+
                     return _value;
                 }
 
-                void getValue(int& i)
+                template <typename T>
+                void setValue(const T& value)
                 {
-                    //printf("ValueNode::getValue(int) called\n");
-                    if(_type != Signed)
+                    convert(_value, value);
+                    _type = String;
+                }
+
+                long getInt()
+                {
+                    switch(_type)
                     {
-                        convert(_ival, _value);
+                        case UInt:
+                            return static_cast<long>(_variant.ul);
+
+                        case Float:
+                            return static_cast<long>(_variant.f);
+
+                        case String:
+                            convert(_variant.l, _value); // fall trough
+
+                        default:
+                            break;
                     }
 
-                    i = _ival;
+                    return _variant.l;
                 }
 
-                void setValue(const Pt::String& value)
+                void setInt(long l)
                 {
-                    //printf("ValueNode::setValue(String) called\n");
-                    _value = value;
-                    _type = Streamable;
+                    _variant.l = l;
+                    _type = Int;
                 }
 
-                void setValue(int val)
-                {   //printf("ValueNode::setValue(int) called\n");
-                    _ival = val;
-                    _type = Signed;
+                unsigned long getUInt()
+                {
+                    switch(_type)
+                    {
+                        case Int:
+                            return static_cast<unsigned long>(_variant.l);
+
+                        case Float:
+                            return static_cast<unsigned long>(_variant.f);
+
+                        case String:
+                            convert(_variant.ul, _value); // fall trough
+
+                        default:
+                            break;
+                    }
+
+                    return _variant.ul;
+                }
+
+                void setUInt(unsigned long ul)
+                {
+                    _variant.ul = ul;
+                    _type = UInt;
+                }
+
+                void setFloat(double f)
+                {
+                    _variant.f = f;
+                    _type = Float;
+                }
+
+                double getFloat()
+                {
+                    switch(_type)
+                    {
+                        case Int:
+                            return static_cast<double>(_variant.l);
+
+                        case UInt:
+                            return static_cast<double>(_variant.ul);
+
+                        case String:
+                            convert(_variant.f, _value); // fall trough
+
+                        default:
+                            break;
+                    }
+
+                    return _variant.f;
                 }
 
             protected:
@@ -129,8 +207,13 @@ class PT_API SerializationInfo
 
             private:
                 Type _type;
-                Pt::String _value;
-                long _ival;
+                mutable Pt::String _value;
+                union Variant
+                {
+                    long l;
+                    unsigned long ul;
+                    double f;
+                } _variant;
         };
 
         class ReferenceNode : public Node
@@ -342,37 +425,18 @@ class PT_API SerializationInfo
 
         const std::type_info& refType() const;
 
-        /** @brief Deserialization of flat data-types
+        /** @internal DEPRECATED
         */
         template <typename T>
         T toValue() const
-        {
-            if(_node == 0 || _node->category() != Value)
-                throw SerializationError("not a value");
-
-            const ValueNode* svalue = static_cast<const ValueNode*>(_node);
-            return convert<T>( svalue->value() );
-        }
+        { return convert<T>( this->toString() ); }
 
         /** @brief Deserialization of flat data-types
         */
         template <typename T>
         void toValue(T& value) const
         {
-            if( this->category() != Value)
-                throw SerializationError("not a value");
-
-            ValueNode* svalue = (ValueNode*) _node;
-            convert( value, svalue->value() );
-        }
-
-        void toValue(int& lv) const
-        {   //printf("SerializationInfo::toValue(int) called\n");
-            if( this->category() != Value)
-                throw SerializationError("not a value");
-
-            ValueNode* svalue = (ValueNode*) _node;
-            svalue->getValue(lv);
+            convert( value, this->toString() );
         }
 
         /** @brief Deserialization of flat member data-types
@@ -383,16 +447,97 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void setValue(const T& value)
-        {   //printf("SerializationInfo::setValue(T) called\n");
-            ValueNode* svalue = initValue();
-            convert(svalue->value(), value);
+        {
+            initValue()->setValue(value);
         }
 
-        void setValue(int n)
-        {   //printf("SerializationInfo::setValue(inz) called\n");
-            ValueNode* svalue = initValue();
-            svalue->setValue(n);
+        void toValue(short& s) const
+        {
+            long l = 0;
+            this->toValue(l);
+            // TODO: consider SerializationError on overflow
+            s = static_cast<short>(l);
         }
+
+        void setValue(short s)
+        { initValue()->setInt(s); }
+
+        void toValue(int& i) const
+        {
+            long l = 0;
+            this->toValue(l);
+            // TODO: consider SerializationError on overflow
+            i = static_cast<int>(l);
+        }
+
+        void setValue(int i)
+        { initValue()->setInt(i); }
+
+        void toValue(long& l) const
+        {
+            if( this->category() != Value)
+                throw SerializationError("expected integer value");
+
+            l = static_cast<const ValueNode*>(_node)->getInt();
+        }
+
+        void setValue(long l)
+        { initValue()->setInt(l); }
+
+        void toValue(unsigned short& us) const
+        {
+            unsigned long ul = 0;
+            this->toValue(ul);
+            // TODO: consider SerializationError on overflow
+            us = static_cast<int>(ul);
+        }
+
+        void setValue(unsigned short us)
+        { initValue()->setUInt(us); }
+
+        void toValue(unsigned int& ui) const
+        {
+            unsigned long ul = 0;
+            this->toValue(ul);
+            // TODO: consider SerializationError on overflow
+            ui = static_cast<int>(ul);
+        }
+
+        void setValue(unsigned int ui)
+        { initValue()->setUInt(ui); }
+
+        void toValue(unsigned long& ul) const
+        {
+            if( this->category() != Value)
+                throw SerializationError("expected integer value");
+
+            ul = static_cast<const ValueNode*>(_node)->getUInt();
+        }
+
+        void setValue(unsigned long ul)
+        { initValue()->setUInt(ul); }
+
+        void toValue(float& f) const
+        {
+            double d = 0.0;
+            this->toValue(d);
+            // TODO: consider SerializationError on overflow
+            f = static_cast<double>(d);
+        }
+
+        void setValue(float f)
+        { initValue()->setFloat(f); }
+
+        void toValue(double& f) const
+        {
+            if( this->category() != Value)
+                throw SerializationError("expected float value");
+
+            f = static_cast<const ValueNode*>(_node)->getFloat();
+        }
+
+        void setValue(double f)
+        { initValue()->setFloat(f); }
 
         /** @brief Serialization of flat member data-types
         */

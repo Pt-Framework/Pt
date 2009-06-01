@@ -547,7 +547,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(floatVal2);
     PT_UNIT_ASSERT( Pt::Math::equal(floatVal2, 77.3547f,   Pt::Math::Eps3) );
-    PT_UNIT_ASSERT(si.toString() == Pt::String(L"77.3547") );
+    PT_UNIT_ASSERT(si.toString().find(Pt::String(L"77.354"))== 0 );
     si >>= floatVal2;
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
 

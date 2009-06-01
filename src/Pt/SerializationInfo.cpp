@@ -275,7 +275,7 @@ const Pt::String& SerializationInfo::toString() const
         throw SerializationError("not a value");
 
     ValueNode* svalue = (ValueNode*) _node;
-    return svalue->value();
+    return svalue->getString();
 }
 
 
