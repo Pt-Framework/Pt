@@ -61,6 +61,8 @@ class IDeserializer
 
         virtual void setValue(const Pt::String& value) = 0;
 
+        virtual void setValue(int value) = 0;
+
         virtual void setReference(const std::string& id) = 0;
 
         virtual IDeserializer* beginMember(const std::string& name) = 0;
@@ -120,6 +122,11 @@ class Deserializer : public IDeserializer
         }
 
         virtual void setValue(const Pt::String& value)
+        {
+            _current->setValue(value);
+        }
+
+        virtual void setValue(int value)
         {
             _current->setValue(value);
         }

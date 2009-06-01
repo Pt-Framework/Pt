@@ -52,7 +52,7 @@ class PT_API SerializationInfo
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
         };
 
-        class Node // TODO: SerializationEntry
+        class Node
         {
             public:
                 virtual ~Node()
@@ -62,14 +62,10 @@ class PT_API SerializationInfo
                 { return _category; }
 
                 void setCategory(Category cat)
-                {
-                    _category = cat;
-                }
+                { _category = cat; }
 
                 void clear()
-                {
-                    this->onClear();
-                }
+                { this->onClear(); }
 
             protected:
                 Node(Category cat)
@@ -84,25 +80,57 @@ class PT_API SerializationInfo
 
         class ValueNode : public Node
         {
+            enum Type
+            {
+                Streamable,
+                Signed,
+            };
             public:
                 ValueNode()
                 : Node(Value)
+                , _type(Streamable)
                 {}
 
                 const Pt::String& value() const
                 { return _value; }
 
                 Pt::String& value()
-                { return _value; }
+                {
+                    _type = Streamable;
+                    return _value;
+                }
+
+                void getValue(int& i)
+                {
+                    //printf("ValueNode::getValue(int) called\n");
+                    if(_type != Signed)
+                    {
+                        convert(_ival, _value);
+                    }
+
+                    i = _ival;
+                }
 
                 void setValue(const Pt::String& value)
-                { _value = value; }
+                {
+                    //printf("ValueNode::setValue(String) called\n");
+                    _value = value;
+                    _type = Streamable;
+                }
+
+                void setValue(int val)
+                {   //printf("ValueNode::setValue(int) called\n");
+                    _ival = val;
+                    _type = Signed;
+                }
 
             protected:
                 virtual void onClear();
 
             private:
+                Type _type;
                 Pt::String _value;
+                long _ival;
         };
 
         class ReferenceNode : public Node
@@ -335,7 +363,16 @@ class PT_API SerializationInfo
                 throw SerializationError("not a value");
 
             ValueNode* svalue = (ValueNode*) _node;
-            return convert( value, svalue->value() );
+            convert( value, svalue->value() );
+        }
+
+        void toValue(int& lv) const
+        {   //printf("SerializationInfo::toValue(int) called\n");
+            if( this->category() != Value)
+                throw SerializationError("not a value");
+
+            ValueNode* svalue = (ValueNode*) _node;
+            svalue->getValue(lv);
         }
 
         /** @brief Deserialization of flat member data-types
@@ -346,9 +383,15 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void setValue(const T& value)
-        {
-        	ValueNode* svalue = initValue();
+        {   //printf("SerializationInfo::setValue(T) called\n");
+            ValueNode* svalue = initValue();
             convert(svalue->value(), value);
+        }
+
+        void setValue(int n)
+        {   //printf("SerializationInfo::setValue(inz) called\n");
+            ValueNode* svalue = initValue();
+            svalue->setValue(n);
         }
 
         /** @brief Serialization of flat member data-types

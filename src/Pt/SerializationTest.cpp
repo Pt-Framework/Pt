@@ -93,21 +93,23 @@ class IntDeserializer : public Pt::IDeserializer
         }
 
         virtual void setName(const std::string& name)
-        {
-        }
+        { }
 
         virtual void setId(const std::string& id)
-        {
-        }
+        { }
 
         virtual void setValue(const Pt::String& value)
         {
             convert(*_type, value);
         }
 
-        virtual void setReference(const std::string& id)
+        virtual void setValue(int i)
         {
+            *_type = i;
         }
+
+        virtual void setReference(const std::string& id)
+        { }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
         {
@@ -137,7 +139,8 @@ class IntDeserializer : public Pt::IDeserializer
 class VectorDeserializer : public Pt::IDeserializer
 {
     public:
-        typedef int value_type;
+        typedef std::vector<int> value_type;
+        typedef int elem_type;
 
     public:
         VectorDeserializer()
@@ -146,7 +149,7 @@ class VectorDeserializer : public Pt::IDeserializer
             _deser.setParent(this);
         }
 
-        void begin(std::vector<value_type>& type)
+        void begin(value_type& type)
         {
             type.clear();
             _type = &type;
@@ -159,35 +162,34 @@ class VectorDeserializer : public Pt::IDeserializer
 
         virtual const std::type_info& targetType()
         {
-            return typeid(std::vector<value_type>);
+            return typeid(value_type);
         }
 
         virtual void setName(const std::string& name)
-        {
-        }
+        { }
 
         virtual void setId(const std::string& id)
-        {
-        }
+        { }
 
         virtual void setValue(const Pt::String& value)
-        {
-        }
+        { }
+
+        virtual void setValue(int i)
+        { }
 
         virtual void setReference(const std::string& id)
-        {
-        }
+        { }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
         {
-            _type->push_back( value_type() );
+            _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
         virtual Pt::IDeserializer* beginMember()
         {
-            _type->push_back( value_type() );
+            _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
@@ -204,7 +206,7 @@ class VectorDeserializer : public Pt::IDeserializer
         { }
 
     private:
-        std::vector<value_type>* _type;
+        value_type* _type;
         IntDeserializer _deser;
 };
 
@@ -249,6 +251,7 @@ void SerializationTest::Benchmark1()
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
     int u = 0;
+    int v = 0;
 
     Pt::SerializationContext context;
     Pt::SerializationInfo si(&context);
@@ -262,23 +265,28 @@ void SerializationTest::Benchmark1()
 
         //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
-        si.addValue(name, num);
+        convert(v, num);
+        si.addValue(name, v);
 
         //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
-        si.addValue(name, num);
+        convert(v, num);
+        si.addValue(name, v);
 
         //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
-        si.addValue(name, num);
+        convert(v, num);
+        si.addValue(name, v);
 
         //std::cerr << "getline 4" << std::endl;
         std::getline(input, num, Pt::Char(' '));
-        si.addValue(name, num);
+        convert(v, num);
+        si.addValue(name, v);
 
         //std::cerr << "getline 5" << std::endl;
         std::getline(input, num, Pt::Char(' '));
-        si.addValue(name, num);
+        convert(v, num);
+        si.addValue(name, v);
 
         //vec.reserve(5);
         si >>= vec; //55 000
@@ -307,6 +315,8 @@ void SerializationTest::Benchmark2()
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
     int u = 0;
+    int v = 0;
+
     Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
@@ -317,28 +327,33 @@ void SerializationTest::Benchmark2()
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setValue(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setValue(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setValue(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setValue(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setValue(v);
         deser = deser->leaveMember();
 
         deser->leave();
