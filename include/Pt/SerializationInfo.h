@@ -40,14 +40,15 @@
 namespace Pt {
 
 class SerializationContext;
+class ValueNode;
+class ReferenceNode;
+class ObjectNode;
 
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
 {
     public:
-        typedef std::vector<SerializationInfo> Nodes;
-
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
         };
@@ -76,231 +77,6 @@ class PT_API SerializationInfo
 
             private:
                 Category _category;
-        };
-
-        class ValueNode : public Node
-        {
-            enum Type
-            {
-                Void,
-                String,
-                Int,
-                UInt,
-                Float
-            };
-            public:
-                ValueNode()
-                : Node(Value)
-                , _type(String)
-                {}
-
-                const Pt::String& getString() const
-                {
-                    switch(_type)
-                    {
-                        case Int:
-                            convert(_value, _variant.l);
-                            break;
-
-                        case UInt:
-                            convert(_value, _variant.ul);
-                            break;
-
-                        case Float:
-                            convert(_value, _variant.f);
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    return _value;
-                }
-
-                template <typename T>
-                void setValue(const T& value)
-                {
-                    convert(_value, value);
-                    _type = String;
-                }
-
-                long getInt()
-                {
-                    switch(_type)
-                    {
-                        case UInt:
-                            return static_cast<long>(_variant.ul);
-
-                        case Float:
-                            return static_cast<long>(_variant.f);
-
-                        case String:
-                            convert(_variant.l, _value); // fall trough
-
-                        default:
-                            break;
-                    }
-
-                    return _variant.l;
-                }
-
-                void setInt(long l)
-                {
-                    _variant.l = l;
-                    _type = Int;
-                }
-
-                unsigned long getUInt()
-                {
-                    switch(_type)
-                    {
-                        case Int:
-                            return static_cast<unsigned long>(_variant.l);
-
-                        case Float:
-                            return static_cast<unsigned long>(_variant.f);
-
-                        case String:
-                            convert(_variant.ul, _value); // fall trough
-
-                        default:
-                            break;
-                    }
-
-                    return _variant.ul;
-                }
-
-                void setUInt(unsigned long ul)
-                {
-                    _variant.ul = ul;
-                    _type = UInt;
-                }
-
-                void setFloat(double f)
-                {
-                    _variant.f = f;
-                    _type = Float;
-                }
-
-                double getFloat()
-                {
-                    switch(_type)
-                    {
-                        case Int:
-                            return static_cast<double>(_variant.l);
-
-                        case UInt:
-                            return static_cast<double>(_variant.ul);
-
-                        case String:
-                            convert(_variant.f, _value); // fall trough
-
-                        default:
-                            break;
-                    }
-
-                    return _variant.f;
-                }
-
-            protected:
-                virtual void onClear();
-
-            private:
-                Type _type;
-                mutable Pt::String _value;
-                union Variant
-                {
-                    long l;
-                    unsigned long ul;
-                    double f;
-                } _variant;
-        };
-
-        class ReferenceNode : public Node
-        {
-            public:
-                ReferenceNode()
-                : Node(Reference)
-                {}
-
-                const std::string& refId() const
-                { return _refid; }
-
-                void setRefId(const std::string& addr)
-                { _refid = addr; }
-
-                void* address() const
-                { return _address; }
-
-                void setAddress(void* addr)
-                { _address = addr; }
-
-                const std::type_info* typeInfo() const
-                { return _fixupInfo; }
-
-                void setTypeInfo(const std::type_info& ti)
-                { _fixupInfo = &ti; }
-
-            protected:
-                virtual void onClear()
-                { _refid.clear(); }
-
-            private:
-            	void* _address;
-                const std::type_info* _fixupInfo;
-                std::string _refid;
-        };
-
-        class ObjectNode : public Node
-        {
-            public:
-                typedef SerializationInfo** Iterator;
-                typedef const SerializationInfo* const* ConstIterator;
-
-                ObjectNode()
-                : Node(Object)
-                , _nodes(0)
-                , _capacity(0)
-                , _size(0)
-                {}
-
-                ~ObjectNode();
-
-                void push_back(SerializationInfo* si);
-
-                Iterator begin()
-                { return &_nodes[0]; }
-
-                Iterator end()
-                { return &_nodes[_size]; }
-
-                ConstIterator begin() const
-                { return &_nodes[0]; }
-
-                ConstIterator end() const
-                { return &_nodes[_size]; }
-
-                unsigned size() const
-                { return _size; }
-
-                SerializationInfo& back()
-                { return *( _nodes[_size - 1] ); }
-
-                const SerializationInfo& back() const
-                { return *( _nodes[_size - 1] ); }
-
-                void release(SerializationContext& context);
-
-            protected:
-               virtual void onClear();
-
-                ObjectNode& operator=(const ObjectNode&);
-                ObjectNode(const ObjectNode&);
-
-            private:
-                SerializationInfo** _nodes;
-                unsigned _capacity;
-                unsigned _size;
         };
 
         class Iterator;
@@ -332,66 +108,42 @@ class PT_API SerializationInfo
         void clear();
 
         Category category() const
-        {
-            return _node ? _node->category() : Void;
-        }
+        { return _node ? _node->category() : Void; }
 
         void setCategory(Category category);
 
         SerializationContext* context()
-        {
-            return _context;
-        }
+        { return _context; }
 
         const SerializationContext* context() const
-        {
-            return _context;
-        }
+        { return _context; }
 
         void setContext(SerializationContext& context)
-        {
-            _context = &context;
-        }
+        { _context = &context; }
 
         SerializationInfo* parent()
-        {
-            return _parent;
-        }
+        { return _parent; }
 
         const SerializationInfo* parent() const
-        {
-            return _parent;
-        }
+        { return _parent; }
 
         const std::string& typeName() const
-        {
-            return _type;
-        }
+        { return _type; }
 
         void setTypeName(const std::string& type)
-        {
-            _type = type;
-        }
+        { _type = type; }
 
         const std::string& name() const
-        {
-            return _name;
-        }
+        { return _name; }
 
         void setName(const std::string& name)
-        {
-            _name = name;
-        }
+        { _name = name; }
 
         void setId(const std::string& id)
-        {
-            _id = id;
-        }
+        { _id = id; }
 
         const std::string& id() const
-        {
-            return _id;
-        }
+        { return _id; }
 
         /** @brief Serialization of weak pointers
         */
@@ -435,9 +187,7 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void toValue(T& value) const
-        {
-            convert( value, this->toString() );
-        }
+        { convert( value, this->toString() ); }
 
         /** @brief Deserialization of flat member data-types
         */
@@ -447,83 +197,39 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void setValue(const T& value)
-        {
-            initValue()->setValue(value);
-        }
+        { convert( initString(), value ); }
 
-        void toValue(short& s) const
-        {
-            long l = 0;
-            this->toValue(l);
-            // TODO: consider SerializationError on overflow
-            s = static_cast<short>(l);
-        }
+        void toValue(short& s) const;
 
-        void setValue(short s)
-        { initValue()->setInt(s); }
+        void setValue(short s);
 
         void toValue(int& i) const;
 
         void setValue(int i);
 
-        void toValue(long& l) const
-        {
-            if( this->category() != Value)
-                throw SerializationError("expected integer value");
+        void toValue(long& l) const;
 
-            l = static_cast<const ValueNode*>(_node)->getInt();
-        }
+        void setValue(long l);
 
-        void setValue(long l)
-        { initValue()->setInt(l); }
+        void toValue(unsigned short& us) const;
 
-        void toValue(unsigned short& us) const
-        {
-            unsigned long ul = 0;
-            this->toValue(ul);
-            // TODO: consider SerializationError on overflow
-            us = static_cast<int>(ul);
-        }
-
-        void setValue(unsigned short us)
-        { initValue()->setUInt(us); }
+        void setValue(unsigned short us);
 
         void toValue(unsigned int& ui) const;
 
         void setValue(unsigned int ui);
 
-        void toValue(unsigned long& ul) const
-        {
-            if( this->category() != Value)
-                throw SerializationError("expected integer value");
+        void toValue(unsigned long& ul) const;
 
-            ul = static_cast<const ValueNode*>(_node)->getUInt();
-        }
+        void setValue(unsigned long ul);
 
-        void setValue(unsigned long ul)
-        { initValue()->setUInt(ul); }
+        void toValue(float& f) const;
 
-        void toValue(float& f) const
-        {
-            double d = 0.0;
-            this->toValue(d);
-            // TODO: consider SerializationError on overflow
-            f = static_cast<double>(d);
-        }
+        void setValue(float f);
 
-        void setValue(float f)
-        { initValue()->setFloat(f); }
+        void toValue(double& f) const;
 
-        void toValue(double& f) const
-        {
-            if( this->category() != Value)
-                throw SerializationError("expected float value");
-
-            f = static_cast<const ValueNode*>(_node)->getFloat();
-        }
-
-        void setValue(double f)
-        { initValue()->setFloat(f); }
+        void setValue(double f);
 
         /** @brief Serialization of flat member data-types
         */
@@ -588,15 +294,7 @@ class PT_API SerializationInfo
         */
         SerializationInfo* findMember(const std::string& name);
 
-        size_t memberCount() const
-        {
-            if(_node->category() == Object || _node->category() == Array)
-            {
-                return static_cast<const ObjectNode*>(_node)->size();
-            }
-
-            return 0;
-        }
+        size_t memberCount() const;
 
         Iterator begin();
 
@@ -606,15 +304,21 @@ class PT_API SerializationInfo
 
         ConstIterator end() const;
 
+        Node* node()
+        { return _node; }
+
+        void setNode(Node* node)
+        { _node = node; }
+
     protected:
         void getReference(void*& type, const std::type_info& ti) const;
 
         void setParent(SerializationInfo* si)
-        {
-            _parent = si;
-        }
+        { _parent = si; }
 
         ValueNode* initValue() const;
+
+        Pt::String& initString() const;
 
         ReferenceNode* initReference() const;
 

@@ -38,6 +38,10 @@
 
 namespace Pt {
 
+class ValueNode;
+class ObjectNode;
+class ValueNode;
+
 class PT_API SerializationContext
 {
     public:
@@ -74,15 +78,15 @@ class PT_API SerializationContext
 
         void push(SerializationInfo* si);
 
-        SerializationInfo::ValueNode* getScalarData();
+        ValueNode* getScalarData();
 
-        SerializationInfo::Node* getObject();
+        SerializationInfo::Node* getObjectData();
 
     private:
         std::vector<SerializationInfo*> _infos;
-        std::vector<SerializationInfo::ValueNode*> _scalars;
-        std::vector<SerializationInfo::ObjectNode*> _objects;
-        std::vector<SerializationInfo::ReferenceNode*> _refs;
+        std::vector<ValueNode*> _scalars;
+        std::vector<ObjectNode*> _objects;
+        std::vector<ReferenceNode*> _refs;
 
 };
 

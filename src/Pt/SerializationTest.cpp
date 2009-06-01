@@ -103,9 +103,9 @@ class IntDeserializer : public Pt::IDeserializer
             convert(*_type, value);
         }
 
-        virtual void setValue(int i)
+        virtual void setInt(long l)
         {
-            *_type = i;
+            *_type = static_cast<int>(l);
         }
 
         virtual void setReference(const std::string& id)
@@ -174,7 +174,7 @@ class VectorDeserializer : public Pt::IDeserializer
         virtual void setValue(const Pt::String& value)
         { }
 
-        virtual void setValue(int i)
+        virtual void setInt(long)
         { }
 
         virtual void setReference(const std::string& id)
@@ -329,31 +329,31 @@ void SerializationTest::Benchmark2()
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(v);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(v);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(v);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(v);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(v);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
         deser->leave();

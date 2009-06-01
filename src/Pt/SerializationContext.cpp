@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "SerializationData.h"
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationError.h"
 
@@ -37,7 +38,7 @@ SerializationContext::SerializationContext()
 
 SerializationContext::~SerializationContext()
 {
-    std::vector<SerializationInfo::ValueNode*>::iterator it = _scalars.begin();
+    std::vector<ValueNode*>::iterator it = _scalars.begin();
     for(; it != _scalars.end(); ++it)
     {
         //std::cerr << "destroy value" << std::endl;
@@ -83,14 +84,14 @@ void SerializationContext::push(SerializationInfo* si)
 }
 
 
-SerializationInfo::ValueNode* SerializationContext::getScalarData()
+ValueNode* SerializationContext::getScalarData()
 {
-    SerializationInfo::ValueNode* node = 0;
+    ValueNode* node = 0;
 
     if( _scalars.empty() )
     {
         //std::cerr << "create value" << std::endl;
-        node = new SerializationInfo::ValueNode();
+        node = new ValueNode();
         _scalars.push_back(node);
     }
     else
@@ -104,10 +105,10 @@ SerializationInfo::ValueNode* SerializationContext::getScalarData()
 }
 
 
-SerializationInfo::Node* SerializationContext::getObject()
+SerializationInfo::Node* SerializationContext::getObjectData()
 {
     //std::cerr << "get object" << std::endl;
-    return new SerializationInfo::ObjectNode();
+    return new ObjectNode();
 }
 
 
@@ -115,13 +116,13 @@ void SerializationContext::push(SerializationInfo::Node* node)
 {
     if( node->category() == SerializationInfo::Value )
     {
-        SerializationInfo::ValueNode* scalar = static_cast<SerializationInfo::ValueNode*>(node);
+        ValueNode* scalar = static_cast<ValueNode*>(node);
         _scalars.push_back(scalar);
     }
     else if( node->category() == SerializationInfo::Object || 
              node->category() == SerializationInfo::Array )
     {
-        static_cast<SerializationInfo::ObjectNode*>(node)->release(*this);
+        static_cast<ObjectNode*>(node)->release(*this);
         delete node;
     }
     else
