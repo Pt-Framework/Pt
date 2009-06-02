@@ -34,6 +34,7 @@
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Http/Server.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/Thread.h"
 
 
 struct Color
@@ -65,20 +66,25 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
     private:
         Pt::System::EventLoop* _loop;
         Pt::Http::Server* _server;
+        Pt::System::AttachedThread* _serverThread;
+        unsigned _count;
 
     public:
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
             this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
+            this->registerMethod("CallbackException", *this, &PtXmlRpcTest::CallbackException);
+            this->registerMethod("ConnectError", *this, &PtXmlRpcTest::ConnectError);
             this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
             this->registerMethod("Boolean", *this, &PtXmlRpcTest::Boolean);
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
+            this->registerMethod("EchoString", *this, &PtXmlRpcTest::EchoString);
             this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
-            this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
+            this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
         }
 
@@ -94,13 +100,15 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             connect(_loop->timeout, *this, &PtXmlRpcTest::failTest);
             connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
 
-            _server = new Pt::Http::Server(*_loop, "127.0.0.1", 8001);
+            _server = new Pt::Http::Server("127.0.0.1", 8001);
+            _serverThread = new Pt::System::AttachedThread( Pt::callable(*_server, &Pt::Http::Server::run) );
         }
 
         void tearDown()
         {
             delete _loop;
             delete _server;
+            delete _serverThread;
         }
 
         void Fault()
@@ -109,21 +117,23 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::throwFault);
             _server->addService("/calc", service);
 
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onFault );
-
             multiply.begin();
 
             _loop->run();
         }
 
-        void onFault(const Pt::XmlRpc::Result<bool>& r)
+        void onFault(const Pt::XmlRpc::Result<bool>& result)
         {
             try
             {
-                r.get();
-                PT_UNIT_ASSERT(false);
+                result.get();
+                PT_UNIT_ASSERT_MSG(false, "Pt::XmlRpc::Fault exception expected");
             }
             catch (const Pt::XmlRpc::Fault& e)
             {
@@ -139,6 +149,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyNothing);
             _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -156,11 +169,65 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        void CallbackException()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyNothing);
+            _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onExceptionCallback );
+
+            multiply.begin();
+
+            _count = 0;
+            PT_UNIT_ASSERT_THROW(_loop->run(), std::runtime_error);
+            PT_UNIT_ASSERT_EQUALS(_count, 1);
+        }
+
+        void onExceptionCallback(const Pt::XmlRpc::Result<bool>& r)
+        {
+            ++_count;
+            _loop->exit();
+            throw std::runtime_error("my error");
+        }
+
+        void ConnectError()
+        {
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onConnectErrorCallback );
+
+            multiply.begin();
+
+            try
+            {
+                _loop->run();
+            }
+            catch (const std::exception& e)
+            {
+                PT_UNIT_ASSERT_MSG(false, std::string("unexpected exception ") + typeid(e).name() + ": " + e.what());
+            }
+        }
+
+        void onConnectErrorCallback(const Pt::XmlRpc::Result<bool>& r)
+        {
+            _loop->exit();
+            PT_UNIT_ASSERT_THROW(r.get(), std::exception);
+        }
+
         void Boolean()
         {
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyBoolean);
             _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
@@ -184,6 +251,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
             _server->addService("/calc", service);
 
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
@@ -205,6 +275,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyDouble);
             _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<double, double, double> multiply(client, "multiply");
@@ -228,6 +301,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyString);
             _server->addService("/calc", service);
 
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onStringFinished );
@@ -244,11 +320,39 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        void EchoString()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("echoString", *this, &PtXmlRpcTest::echoString);
+            _server->addService("/foo", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/foo");
+            Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
+            connect( echo.finished, *this, &PtXmlRpcTest::onStringEchoFinished );
+
+            echo.begin("foo?");
+
+            _loop->run();
+        }
+
+        void onStringEchoFinished(const Pt::XmlRpc::Result<std::string>& r)
+        {
+            PT_UNIT_ASSERT_EQUALS(r.get(), "foo?")
+
+            _loop->exit();
+        }
+
         void EmptyValues()
         {
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyEmpty);
             _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
@@ -271,6 +375,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
             _server->addService("/calc", service);
 
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onArrayFinished );
@@ -284,7 +391,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onArrayFinished(const Pt::XmlRpc::Result< std::vector<int> >& r)
+        void onArrayFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get().size(), 2)
             PT_UNIT_ASSERT_EQUALS(r.get().at(0), 100)
@@ -299,9 +406,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
             _server->addService("/calc", service);
 
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> >
-                multiply(client, "multiply");
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onEmptyArrayFinished );
 
             std::vector<int> vec;
@@ -310,7 +419,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onEmptyArrayFinished(const Pt::XmlRpc::Result< std::vector<int> >& r)
+        void onEmptyArrayFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get().size(), 0)
 
@@ -322,6 +431,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyColor);
             _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
 
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
@@ -342,11 +454,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onStuctFinished(const Pt::XmlRpc::Result<Color>& r)
+        void onStuctFinished(const Pt::XmlRpc::Result<Color>& color)
         {
-            PT_UNIT_ASSERT_EQUALS(r.get().red, 6)
-            PT_UNIT_ASSERT_EQUALS(r.get().green, 12)
-            PT_UNIT_ASSERT_EQUALS(r.get().blue, 20)
+            PT_UNIT_ASSERT_EQUALS(color.get().red, 6)
+            PT_UNIT_ASSERT_EQUALS(color.get().green, 12)
+            PT_UNIT_ASSERT_EQUALS(color.get().blue, 20)
 
             _loop->exit();
         }
@@ -384,6 +496,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(a, "2")
             PT_UNIT_ASSERT_EQUALS(b, "3")
             return "6";
+        }
+
+        std::string echoString(std::string a)
+        {
+            return a;
         }
 
         std::string multiplyEmpty(std::string a, std::string b)

@@ -56,7 +56,7 @@ namespace Unit {
             }
         @endcode
     */
-    class PT_UNIT_API Assertion : public std::logic_error
+    class PT_UNIT_API Assertion
     {
         public:
             /** @brief Construct from a message and source info.
@@ -73,8 +73,11 @@ namespace Unit {
 
             const Pt::SourceInfo& sourceInfo() const;
 
+            const char* what() const  { return _what.c_str(); }
+
         private:
             Pt::SourceInfo _sourceInfo;
+            std::string _what;
     };
 
     #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
