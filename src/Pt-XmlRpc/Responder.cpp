@@ -51,7 +51,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _proc(0)
 , _args(0)
 {
-    _writer.setFormat(0);
+    _writer.useIndent(false);
+    _writer.useEndl(false);
 
     _formatter.addAlias("bool", "boolean");
 }
@@ -177,7 +178,7 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
 
         ISerializer* rh = _proc->endCall(_context);
 
-        reply.setHeader("Content-Type", "text/Xml");
+        reply.setHeader("Content-Type", "text/xml");
 
         _writer.begin(os);
         _writer.writeStartElement( L"methodResponse" );
