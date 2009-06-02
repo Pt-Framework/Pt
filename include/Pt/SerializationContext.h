@@ -112,28 +112,6 @@ class SerializationBinder
         virtual void bind() = 0;
 };
 
-
-class SerializationUnbinder
-{
-    public:
-        SerializationUnbinder()
-        {}
-
-        virtual ~SerializationUnbinder()
-        {}
-
-        virtual void beginUnbindTarget(const std::string& name, const void* p) = 0;
-
-        virtual void finishUnbindTarget() = 0;
-
-        virtual void prepareUnbind(const void* p) = 0;
-
-        virtual bool isUnbound(const void* p) = 0;
-
-        virtual std::string unbind(const void* p) = 0;
-};
-
-
 } // namespace Pt
 
 #endif
