@@ -130,62 +130,33 @@ class PT_API SerializationInfo
         const std::string& typeName() const
         { return _type; }
 
+        // TODO: performance optimization: overload const char*
         void setTypeName(const std::string& type)
         { _type = type; }
 
         const std::string& name() const
         { return _name; }
 
+        // TODO: performance optimization: overload const char*
         void setName(const std::string& name)
         { _name = name; }
-
-        void setId(const std::string& id)
-        { _id = id; }
 
         const std::string& id() const
         { return _id; }
 
-        /** @brief Serialization of weak pointers
-        */
-        void setReference(void* ref);
+        // TODO: performance optimization: overload const char*
+        void setId(const std::string& id)
+        { _id = id; }
 
-        /** @brief Serialization of weak pointers
-        */
-        SerializationInfo& addReference(const std::string& name, void* ref);
-
-        /** @brief Deserialization of weak pointers
-        */
-        template <typename T>
-        void toReference(T*& type) const
-        {
-            this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
-        }
-
-        /** @brief Deserialization of weak member pointers
-        */
-        template <typename T>
-        void getReference(const std::string& name, T*& type) const
-        {
-            this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
-        }
-
-        void* refAddr() const;
-
-        const std::string& refId() const;
-
-        void setRefId(const std::string& ref);
-
-        const std::type_info& refType() const;
-
-        /** @brief Deserialization of flat data-types
-        */
-        template <typename T>
-        void toValue(T& value) const
-        { convert( value, this->toString() ); }
-
-        /** @brief Deserialization of flat member data-types
+        /** @brief Returns the content as string.
         */
         const Pt::String& toString() const;
+
+        /** @brief Deserialization of flat child value types
+        */
+        template <typename T>
+        void getValue(T& value) const
+        { convert( value, this->toString() ); }
 
         /** @brief Serialization of flat data-types
         */
@@ -193,50 +164,49 @@ class PT_API SerializationInfo
         void setValue(const T& value)
         { convert( initString(), value ); }
 
-        /** @brief Serialization of flat member data-types
+        void getValue(short& s) const;
+
+        void setValue(short s);
+
+        void getValue(int& i) const;
+
+        void setValue(int i);
+
+        void getValue(long& l) const;
+
+        void setValue(long l);
+
+        void getValue(unsigned short& us) const;
+
+        void setValue(unsigned short us);
+
+        void getValue(unsigned int& ui) const;
+
+        void setValue(unsigned int ui);
+
+        void getValue(unsigned long& ul) const;
+
+        void setValue(unsigned long ul);
+
+        void getValue(float& f) const;
+
+        void setValue(float f);
+
+        void getValue(double& f) const;
+
+        void setValue(double f);
+
+        /** @brief Serialization of member scalars
         */
         template <typename T>
         void addValue(const std::string& name, const T& value)
         { this->addMember(name) <<= value; }
 
-        /** @brief Deserialization of flat child value types
+        /** @brief Serialization of member scalars
         */
         template <typename T>
         void getValue(const std::string& name, T& value) const
         { SerializationInfo& info = this->getMember(name) >>= value; }
-
-        // TODO: move to operator >>= <<=
-        void toValue(short& s) const;
-
-        void setValue(short s);
-
-        void toValue(int& i) const;
-
-        void setValue(int i);
-
-        void toValue(long& l) const;
-
-        void setValue(long l);
-
-        void toValue(unsigned short& us) const;
-
-        void setValue(unsigned short us);
-
-        void toValue(unsigned int& ui) const;
-
-        void setValue(unsigned int ui);
-
-        void toValue(unsigned long& ul) const;
-
-        void setValue(unsigned long ul);
-
-        void toValue(float& f) const;
-
-        void setValue(float f);
-
-        void toValue(double& f) const;
-
-        void setValue(double f);
 
         /** @brief Serialization of member data
         */
@@ -274,6 +244,38 @@ class PT_API SerializationInfo
 
         ConstIterator end() const;
 
+        /** @brief Serialization of weak pointers
+        */
+        void setReference(void* ref);
+
+        /** @brief Serialization of weak pointers
+        */
+        SerializationInfo& addReference(const std::string& name, void* ref);
+
+        /** @brief Deserialization of weak pointers
+        */
+        template <typename T>
+        void toReference(T*& type) const
+        {
+            this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
+        }
+
+        /** @brief Deserialization of weak member pointers
+        */
+        template <typename T>
+        void getReference(const std::string& name, T*& type) const
+        {
+            this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
+        }
+
+        void* refAddr() const;
+
+        const std::string& refId() const;
+
+        void setRefId(const std::string& ref);
+
+        const std::type_info& refType() const;
+
         Node* node()
         { return _node; }
 
@@ -284,12 +286,18 @@ class PT_API SerializationInfo
         /** @internal DEPRECATED
         */
         template <typename T>
+        void toValue(T& value) const
+        { this->getValue(value); }
+
+        /** @internal DEPRECATED
+        */
+        template <typename T>
         T toValue() const
         { return convert<T>( this->toString() ); }
 
-        /** @internal DEPRECATED Compiler workaround.
-            This is needed for some compilers (GCC 3.x) to allow access to
-            method 'T getValue(const std::string& name) const' below.
+        /** @internal DEPRECATED
+            This is needed as a workaround for some compilers (GCC 3.x) to
+            allow access to 'T getValue(const std::string& name) const'.
          */
         template <typename T>
         friend T getValue(const std::string& name, SerializationInfo* si);
@@ -473,7 +481,7 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 
 inline void operator >>=(const SerializationInfo& si, bool& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -486,7 +494,7 @@ inline void operator <<=(SerializationInfo& si, bool n)
 
 inline void operator >>=(const SerializationInfo& si, signed char& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -499,7 +507,7 @@ inline void operator <<=(SerializationInfo& si, signed char n)
 
 inline void operator >>=(const SerializationInfo& si, unsigned char& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -512,7 +520,7 @@ inline void operator <<=(SerializationInfo& si, unsigned char n)
 
 inline void operator >>=(const SerializationInfo& si, char& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -525,7 +533,7 @@ inline void operator <<=(SerializationInfo& si, char n)
 
 inline void operator >>=(const SerializationInfo& si, short& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -538,7 +546,7 @@ inline void operator <<=(SerializationInfo& si, short n)
 
 inline void operator >>=(const SerializationInfo& si, unsigned short& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -551,7 +559,7 @@ inline void operator <<=(SerializationInfo& si, unsigned short n)
 
 inline void operator >>=(const SerializationInfo& si, int& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -564,7 +572,7 @@ inline void operator <<=(SerializationInfo& si, int n)
 
 inline void operator >>=(const SerializationInfo& si, unsigned int& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -577,7 +585,7 @@ inline void operator <<=(SerializationInfo& si, unsigned int n)
 
 inline void operator >>=(const SerializationInfo& si, long& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -590,7 +598,7 @@ inline void operator <<=(SerializationInfo& si, long n)
 
 inline void operator >>=(const SerializationInfo& si, unsigned long& n)
 {
-    si.toValue(n);
+    si.getValue(n);
 }
 
 
@@ -603,7 +611,7 @@ inline void operator <<=(SerializationInfo& si, unsigned long n)
 
 inline void operator >>=(const SerializationInfo& si, float& n)
 {
-    si.toValue<float>(n);
+    si.getValue(n);
 }
 
 
@@ -616,7 +624,7 @@ inline void operator <<=(SerializationInfo& si, float n)
 
 inline void operator >>=(const SerializationInfo& si, double& n)
 {
-    si.toValue<double>(n);
+    si.getValue(n);
 }
 
 
@@ -629,7 +637,7 @@ inline void operator <<=(SerializationInfo& si, double n)
 
 inline void operator >>=(const SerializationInfo& si, std::string& n)
 {
-    si.toValue<std::string>(n);
+    si.getValue(n);
 }
 
 
@@ -642,7 +650,7 @@ inline void operator <<=(SerializationInfo& si, const std::string& n)
 
 inline void operator >>=(const SerializationInfo& si, Pt::String& n)
 {
-    si.toValue<Pt::String>(n);
+    si.getValue(n);
 }
 
 

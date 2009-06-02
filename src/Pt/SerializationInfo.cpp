@@ -59,9 +59,9 @@ void SerializationInfo::clear()
             _node->clear();
     }
 
-    _name = std::string();
-    _type = _name;
-    _id = _name;
+    _name.clear();
+    _type.clear();
+    _id.clear();
 }
 
 
@@ -218,10 +218,10 @@ const Pt::String& SerializationInfo::toString() const
 }
 
 
-void SerializationInfo::toValue(short& s) const
+void SerializationInfo::getValue(short& s) const
 {
     long l = 0;
-    this->toValue(l);
+    this->getValue(l);
     // TODO: consider SerializationError on overflow
     s = static_cast<short>(l);
 }
@@ -233,10 +233,10 @@ void SerializationInfo::setValue(short s)
 }
 
 
-void SerializationInfo::toValue(int& i) const
+void SerializationInfo::getValue(int& i) const
 {
     long l = 0;
-    this->toValue(l);
+    this->getValue(l);
     // TODO: consider SerializationError on overflow
     i = static_cast<int>(l);
 }
@@ -248,7 +248,7 @@ void SerializationInfo::setValue(int i)
 }
 
 
-void SerializationInfo::toValue(long& l) const
+void SerializationInfo::getValue(long& l) const
 {
     if( this->category() != Value)
         throw SerializationError("expected integer value");
@@ -262,10 +262,10 @@ void SerializationInfo::setValue(long l)
 }
 
 
-void SerializationInfo::toValue(unsigned short& us) const
+void SerializationInfo::getValue(unsigned short& us) const
 {
     unsigned long ul = 0;
-    this->toValue(ul);
+    this->getValue(ul);
     // TODO: consider SerializationError on overflow
     us = static_cast<int>(ul);
 }
@@ -277,10 +277,10 @@ void SerializationInfo::setValue(unsigned short us)
 }
 
 
-void SerializationInfo::toValue(unsigned int& ui) const
+void SerializationInfo::getValue(unsigned int& ui) const
 {
     unsigned long ul = 0;
-    this->toValue(ul);
+    this->getValue(ul);
     // TODO: consider SerializationError on overflow
     ui = static_cast<int>(ul);
 }
@@ -292,7 +292,7 @@ void SerializationInfo::setValue(unsigned int ui)
 }
 
 
-void SerializationInfo::toValue(unsigned long& ul) const
+void SerializationInfo::getValue(unsigned long& ul) const
 {
     if( this->category() != Value)
         throw SerializationError("expected integer value");
@@ -307,10 +307,10 @@ void SerializationInfo::setValue(unsigned long ul)
 }
 
 
-void SerializationInfo::toValue(float& f) const
+void SerializationInfo::getValue(float& f) const
 {
     double d = 0.0;
-    this->toValue(d);
+    this->getValue(d);
     // TODO: consider SerializationError on overflow
     f = static_cast<double>(d);
 }
@@ -322,7 +322,7 @@ void SerializationInfo::setValue(float f)
 }
 
 
-void SerializationInfo::toValue(double& f) const
+void SerializationInfo::getValue(double& f) const
 {
     if( this->category() != Value)
         throw SerializationError("expected float value");
