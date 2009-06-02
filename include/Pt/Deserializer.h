@@ -133,7 +133,7 @@ class Deserializer : public IDeserializer
 
         virtual void setReference(const std::string& id)
         {
-           _current->setRefId(id);
+           _current->setReference(id);
         }
 
         virtual IDeserializer* beginMember(const std::string& name)

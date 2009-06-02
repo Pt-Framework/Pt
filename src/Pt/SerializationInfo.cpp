@@ -26,10 +26,106 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "SerializationData.h"
+#include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
 
 namespace Pt {
+
+void SerializationInfo::prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
+{
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        void* refAddr = static_cast<const ReferenceNode*>(si._node)->address();
+        context.prepareUnlink(refAddr);
+    }
+    else if(si.category() == Pt::SerializationInfo::Object ||
+            si.category() == Pt::SerializationInfo::Array)
+    {
+        Pt::SerializationInfo::Iterator it;
+        for(it = si.begin(); it != si.end(); ++it)
+        {
+            prepareUnlinkMember(*it, context);
+        }
+    }
+}
+
+
+void SerializationInfo::prepareLink(SerializationContext& context)
+{
+    Pt::SerializationInfo::Iterator it;
+    for(it = this->begin(); it != this->end(); ++it)
+    {
+        if(it->category() == Pt::SerializationInfo::Reference)
+        {
+            void* refAddr = static_cast<const ReferenceNode*>(it->_node)->address();
+            const std::string& refId = static_cast<const ReferenceNode*>(it->_node)->refId();
+            const std::type_info* refType = static_cast<const ReferenceNode*>(it->_node)->typeInfo();
+            context.prepareLink( refId, refAddr, *refType );
+        }
+    }
+}
+
+
+void SerializationInfo::prepareUnlink(SerializationContext& context)
+{
+    if(this->category() == Pt::SerializationInfo::Reference)
+    {
+        void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
+        context.prepareUnlink(refAddr);
+    }
+    else if(this->category() == Pt::SerializationInfo::Object ||
+            this->category() == Pt::SerializationInfo::Array)
+    {
+        Pt::SerializationInfo::Iterator it;
+        for(it = this->begin(); it != this->end(); ++it)
+        {
+            prepareUnlinkMember(*it, context);
+        }
+    }
+}
+
+
+void SerializationInfo::format(Formatter& formatter, SerializationContext& context)
+{
+    if(this->category() == SerializationInfo::Value)
+    {
+        formatter.addValue( this->name(), this->typeName(), this->toString(), this->id() );
+    }
+    else if(this->category() == Pt::SerializationInfo::Reference)
+    {
+        const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
+        std::string id = context.getUnlinkId( refAddr );
+        formatter.addReference( this->name(), id);
+    }
+    else if(this->category() == SerializationInfo::Object)
+    {
+        formatter.beginObject( this->name(), this->id() );
+
+        SerializationInfo::Iterator it;
+        for(it = this->begin(); it != this->end(); ++it)
+        {
+            formatter.beginMember( it->name() );
+            it->format(formatter, context);
+            formatter.finishMember();
+        }
+
+        formatter.finishObject();
+    }
+    else if(this->category() == Pt::SerializationInfo::Array)
+    {
+        formatter.beginArray( this->name(), this->id() );
+
+        SerializationInfo::Iterator it;
+        for(it = this->begin(); it != this->end(); ++it)
+        {
+            it->format(formatter, context);
+        }
+
+        formatter.finishArray();
+    }
+}
+
 
 SerializationInfo::~SerializationInfo()
 {
@@ -62,6 +158,15 @@ void SerializationInfo::clear()
     _name.clear();
     _type.clear();
     _id.clear();
+}
+
+
+void SerializationInfo::release(SerializationContext& context)
+{
+    if(_node)
+        context.push(_node);
+
+    _node = 0;
 }
 
 
@@ -152,8 +257,14 @@ ObjectNode* SerializationInfo::initObject(Category category) const
 void SerializationInfo::setReference(void* ref)
 {
     ReferenceNode* node = initReference();
-    //std::cerr << "setReference " << ref << std::endl;
     node->setAddress(ref);
+}
+
+
+void SerializationInfo::setReference(const std::string& id)
+{
+    ReferenceNode* node = initReference();
+    node->setRefId(id);
 }
 
 
@@ -170,41 +281,6 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
     ReferenceNode* node = initReference();
     node->setAddress(&type);
     node->setTypeInfo(ti);
-}
-
-
-void* SerializationInfo::refAddr() const
-{
-    if( this->category() != Reference)
-        return 0;
-
-    const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
-    return rnode->address();
-}
-
-
-const std::string& SerializationInfo::refId() const
-{
-    if( this->category() != Reference)
-        throw SerializationError("not a reference");
-
-    const ReferenceNode* rnode = static_cast<const ReferenceNode*>(_node);
-    return rnode->refId();
-}
-
-
-void SerializationInfo::setRefId(const std::string& ref)
-{
-    ReferenceNode* node = initReference();
-    //std::cerr << "setReference " << ref << std::endl;
-    node->setRefId(ref);
-}
-
-
-const std::type_info& SerializationInfo::refType() const
-{
-	ReferenceNode* node = initReference();
-    return *( node->typeInfo() );
 }
 
 
@@ -353,7 +429,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
         si = new SerializationInfo();
     }
 
-    si->setParent(this);
+    si->_parent = this;
     si->setName(name);
     onode->push_back(si);
     return onode->back();
@@ -376,7 +452,7 @@ SerializationInfo& SerializationInfo::addMember()
         si = new SerializationInfo();
     }
 
-    si->setParent(this);
+    si->_parent = this;
     onode->push_back(si);
     return onode->back();
 }

@@ -90,6 +90,50 @@ class PT_API SerializationContext
 
 };
 
+
+class SerializationBinder
+{
+    public:
+        SerializationBinder()
+        {}
+
+        virtual ~SerializationBinder()
+        {}
+
+        virtual void beginBindTarget(const std::string& name, const std::string& id,
+                                     void* obj, const std::type_info& fixupInfo) = 0;
+
+        virtual void finishBindTarget() = 0;
+
+        virtual void prepareBind(const std::string& id, void* obj, const std::type_info& fixupInfo) = 0;
+
+        virtual bool checkBinding(const std::type_info& from, const std::type_info& to) = 0;
+
+        virtual void bind() = 0;
+};
+
+
+class SerializationUnbinder
+{
+    public:
+        SerializationUnbinder()
+        {}
+
+        virtual ~SerializationUnbinder()
+        {}
+
+        virtual void beginUnbindTarget(const std::string& name, const void* p) = 0;
+
+        virtual void finishUnbindTarget() = 0;
+
+        virtual void prepareUnbind(const void* p) = 0;
+
+        virtual bool isUnbound(const void* p) = 0;
+
+        virtual std::string unbind(const void* p) = 0;
+};
+
+
 } // namespace Pt
 
 #endif

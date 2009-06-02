@@ -40,6 +40,7 @@
 namespace Pt {
 
 class SerializationContext;
+class Formatter;
 class ValueNode;
 class ReferenceNode;
 class ObjectNode;
@@ -250,12 +251,12 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of weak pointers
         */
-        SerializationInfo& addReference(const std::string& name, void* ref);
+        void setReference(const std::string& id);
 
         /** @brief Deserialization of weak pointers
         */
         template <typename T>
-        void toReference(T*& type) const
+        void getReference(T*& type) const
         {
             this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
@@ -268,19 +269,17 @@ class PT_API SerializationInfo
             this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
-        void* refAddr() const;
+        /** @brief Serialization of weak pointers
+        */
+        SerializationInfo& addReference(const std::string& name, void* ref);
 
-        const std::string& refId() const;
+        void prepareLink(SerializationContext& context);
 
-        void setRefId(const std::string& ref);
+        void prepareUnlink(SerializationContext& context);
 
-        const std::type_info& refType() const;
+        void format(Formatter& formatter, SerializationContext& context);
 
-        Node* node()
-        { return _node; }
-
-        void setNode(Node* node)
-        { _node = node; }
+        void release(SerializationContext& context);
 
     public:
         /** @internal DEPRECATED
@@ -313,11 +312,10 @@ class PT_API SerializationInfo
             return value;
         }
 
-    protected:
-        void getReference(void*& type, const std::type_info& ti) const;
+    private:
+        void prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context);
 
-        void setParent(SerializationInfo* si)
-        { _parent = si; }
+        void getReference(void*& type, const std::type_info& ti) const;
 
         ValueNode* initValue() const;
 
@@ -664,15 +662,13 @@ inline void operator <<=(SerializationInfo& si, const Pt::String& n)
 template <typename T, typename A>
 inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 {
-	T elem = T();
+    T elem = T();
     vec.clear();
-    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    SerializationInfo::ConstIterator end = si.end();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
-        //vec.resize( vec.size() + 1 );
-        //*it >>=  vec.back();
-
-        *it >>= elem;
         vec.push_back( elem );
+        *it >>= vec.back();
     }
 }
 
@@ -684,37 +680,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        SerializationInfo& newSi = si.addMember();
-        newSi <<= *it;
-        newSi.setName( newSi.typeName() );
-    }
-
-    si.setTypeName("array");
-    si.setCategory(SerializationInfo::Array);
-}
-
-
-inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
-{
-	int n = 0;
-    vec.clear();
-	SerializationInfo::ConstIterator end = si.end();
-    for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
-    {
-    	*it >>= n;
-        vec.push_back( n );
-    }
-}
-
-
-inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
-{
-    std::vector<int>::const_iterator it;
-
-    for(it = vec.begin(); it != vec.end(); ++it)
-    {
-        SerializationInfo& newSi = si.addMember();
-        newSi <<= *it;
+        si.addMember() <<= *it;
     }
 
     si.setTypeName("array");
@@ -741,9 +707,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
 
     for(it = list.begin(); it != list.end(); ++it)
     {
-        SerializationInfo& newSi = si.addMember("item");
-        newSi <<= *it;
-        newSi.setName( newSi.typeName() );
+        si.addMember() <<= *it;
     }
 
     si.setTypeName("list");
@@ -771,9 +735,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 
     for(it = set.begin(); it != set.end(); ++it)
     {
-        SerializationInfo& newSi = si.addMember("item");
-        newSi <<= *it;
-        newSi.setName( newSi.typeName() );
+        si.addMember() <<= *it;
     }
 
     si.setTypeName("set");

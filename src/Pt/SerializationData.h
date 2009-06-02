@@ -296,12 +296,7 @@ inline void ObjectNode::release(SerializationContext& context)
 
     for(Iterator it = begin(); it != endIt; ++it)
     {
-        SerializationInfo::Node* node = (*it)->node();
-
-        if(node)
-            context.push(node);
-
-        (*it)->setNode(0);
+        (*it)->release(context);
         context.push(*it);
     }
 

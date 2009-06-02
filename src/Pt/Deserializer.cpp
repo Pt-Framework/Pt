@@ -33,14 +33,7 @@ namespace Pt {
 void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
                      SerializationContext& context)
 {
-    Pt::SerializationInfo::Iterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            context.prepareLink( it->refId(), it->refAddr(), it->refType() );
-        }
-    }
+    si.prepareLink(context);
 
     context.beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
     context.finishLinkTarget();
