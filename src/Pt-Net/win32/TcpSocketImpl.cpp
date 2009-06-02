@@ -128,7 +128,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
 			else
 			{
 				close();
-				throw System::SystemError("connect failed");
+				throw System::IOError("connect failed");
 			}
 		}
 
@@ -160,10 +160,9 @@ void TcpSocketImpl::endConnect()
 		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
 		{
 			close();
-			throw System::IOError("getsockopt");
+			throw System::SystemError("getsockopt");
 		}
-
-		if(sockerr != 0)
+		else if(sockerr != 0)
 		{
 			close();
 			throw System::IOError("connect");

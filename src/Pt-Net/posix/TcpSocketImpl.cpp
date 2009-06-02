@@ -155,7 +155,7 @@ bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int p
         if(errno != EINPROGRESS)
         {
             close();
-            throw System::SystemError("connect failed");
+            throw System::IOError("connect failed");
         }
 
         log_debug("connect in progress");
@@ -191,6 +191,7 @@ void TcpSocketImpl::endConnect()
             bool ret = this->wait(_timeout, 0, &wfds, 0);
             if(false == ret)
             {
+                close();
                 throw System::IOTimeout();
             }
 
@@ -198,12 +199,15 @@ void TcpSocketImpl::endConnect()
             socklen_t optlen = sizeof(sockerr);
             if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
             {
-                throw System::IOError("getsockopt");
+                int e = errno;
+                close();
+                throw System::SystemError(strerror(e));
             }
 
             if(sockerr != 0)
             {
-                throw System::IOError("connect"); //TODO dedicated exception type?
+                close();
+                throw System::IOError(strerror(sockerr)); //TODO dedicated exception type?
             }
 
             _isConnected = true;
