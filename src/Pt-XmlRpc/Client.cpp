@@ -207,16 +207,29 @@ std::size_t Client::onReplyBody(Http::Client& client)
 
 void Client::onErrorOccured(Http::Client& client, const std::exception& e)
 {
-    if (!_method->fault())
-        _method->setFault(Fault::systemError, e.what());
+    if (_method)
+    {
+        // TODO do not map local exceptions to cxxtools::xmlrpc::Fault
 
-    _method->onFinished();
+        if (!_method->fault())
+            _method->setFault(Fault::systemError, e.what());
+
+        IRemoteProcedure* method = _method;
+        _method = 0;
+        method->onFinished();
+    }
+    else
+    {
+        throw;
+    }
 }
 
 
 void Client::onReplyFinished(Http::Client& client)
 {
-    _method->onFinished();
+    IRemoteProcedure* method = _method;
+    _method = 0;
+    method->onFinished();
 }
 
 
