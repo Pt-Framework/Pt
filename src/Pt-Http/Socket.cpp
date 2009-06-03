@@ -28,8 +28,14 @@
 
 #include <Pt/Http/Socket.h>
 #include <Pt/Http/Server.h>
-#include <Pt/Log/Logger.h>
 #include <cassert>
+
+#define log_define(a)
+#define log_trace(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
 
 log_define("pt.http.socket")
 

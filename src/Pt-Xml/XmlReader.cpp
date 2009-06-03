@@ -36,9 +36,14 @@
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/SourceInfo.h"
-#include "Pt/Log/Logger.h"
 #include <stdexcept>
 #include <iostream>
+
+#define log_define(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
 
 log_define("pt.xml.reader")
 

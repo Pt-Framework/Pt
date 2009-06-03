@@ -30,22 +30,123 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Socket.h>
 
+#define log_define(a)
+#define log_trace(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
+
 namespace Pt {
 
 namespace Http {
 
 Server::Server(const std::string& ip, unsigned short int port)
-: TcpServer(ip, port),
+: _ip(ip),
+  _port(port),
   _readTimeout(5000),
   _writeTimeout(5000),
-  _keepAliveTimeout(30000)
+  _keepAliveTimeout(30000),
+  _minThreads(4),
+  _maxThreads(10),
+  _waitingThreads(0),
+  _terminating(true)
 {
+    log_trace("initialize Server class");
+
     _selector.add(*this);
     Pt::connect(connectionPending, *this, &Server::onConnect);
 }
 
+void Server::createThread()
+{
+    log_trace("Server::createThread");
+
+    System::MutexLock clock(_createThreadMutex);
+    System::MutexLock lock(_threadMutex);
+
+    if (_threads.size() < _maxThreads)
+    {
+        log_debug("create thread object");
+        _startingThread = new System::AttachedThread(callable(*this, &Server::serverThread));
+
+        log_debug("run thread " << _startingThread);
+        _startingThread->start();
+
+        log_debug("wait for thread running");
+        _threadRunning.wait(lock);
+
+        log_debug("thread " << _startingThread << " is running");
+        _startingThread = 0;
+    }
+}
+
+void Server::terminate()
+{
+    System::MutexLock lock(_threadMutex);
+
+    if (_terminating)
+        return;
+
+    _terminating = true;
+    _selector.wake();
+    _terminated.wait(lock);
+}
+
+void Server::run()
+{
+    log_trace("run server");
+
+    _terminating = false;
+
+    {
+        System::MutexLock selectorLock(_selectorMutex);
+
+        log_debug("start " << _minThreads << " threads");
+        for (unsigned n = 0; n < _minThreads; ++n)
+        {
+            log_debug("start thread " << n);
+            createThread();
+        }
+
+        listen(_ip, _port);
+    }
+
+    System::MutexLock lock(_threadMutex);
+
+    while (!_terminating || !_threads.empty())
+    {
+        log_info("wait for finished threads");
+
+        _threadTerminated.wait(lock);
+        log_debug(_terminatedThreads.size() << " threads finished");
+
+        for (Threads::iterator it = _terminatedThreads.begin(); it != _terminatedThreads.end(); ++it)
+        {
+            log_info("join thread " << (*it));
+            (*it)->join();
+            log_debug("delete thread " << (*it));
+            delete *it;
+        }
+
+        log_info("delete " << _terminatedThreads.size() << " thread objects");
+        _terminatedThreads.clear();
+    }
+
+    for (Threads::iterator it = _terminatedThreads.begin(); it != _terminatedThreads.end(); ++it)
+    {
+        log_info("join thread " << (*it));
+        (*it)->join();
+        log_debug("delete thread " << (*it));
+        delete *it;
+    }
+
+    _terminated.signal();
+}
+
 void Server::addService(const std::string& url, Service& service)
 {
+    log_debug("add service for url <" << url << '>');
     _service.insert(ServicesType::value_type(url, &service));
 }
 
@@ -67,22 +168,154 @@ void Server::removeService(Service& service)
 
 Responder* Server::getResponder(const Request& request)
 {
+    log_debug("get responder for url <" << request.url() << '>');
+
     for (ServicesType::const_iterator it = _service.lower_bound(request.url());
         it != _service.end() && it->first == request.url(); ++it)
     {
         Responder* resp = it->second->createResponder(request);
         if (resp)
+        {
+            log_debug("responder created");
             return resp;
+        }
     }
 
+    log_debug("use default responder");
     return _defaultService.createResponder(request);
 }
 
 void Server::onConnect(TcpServer& server)
 {
+    log_trace("onConnect");
     new Socket(_selector, *this);
 }
 
-} // namespace Http
+void Server::serverThread()
+{
+    log_trace("serverThread");
+    class Dec
+    {
+            atomic_t& _counter;
+
+        public:
+            explicit Dec(atomic_t& counter)
+                : _counter(counter)
+                { }
+            ~Dec()
+                { atomicDecrement(_counter); }
+    };
+
+    class ThreadTerminator
+    {
+            System::AttachedThread* _thread;
+            Threads& _threads;
+            Threads& _terminatedThreads;
+            System::Condition& _threadTerminated;
+            System::Mutex& _threadMutex;
+
+        public:
+            ThreadTerminator(System::AttachedThread* thread, Threads& threads, Threads& terminatedThreads, System::Condition& threadTerminated, System::Mutex& threadMutex)
+                : _thread(thread),
+                  _threads(threads),
+                  _terminatedThreads(terminatedThreads),
+                  _threadTerminated(threadTerminated),
+                  _threadMutex(threadMutex)
+                { }
+            ~ThreadTerminator()
+            {
+                System::MutexLock threadLock(_threadMutex);
+                _threads.erase(_thread);
+                _terminatedThreads.insert(_thread);
+                _threadTerminated.signal();
+            }
+
+            const System::AttachedThread* thread() const  { return _thread; }
+    };
+
+    System::MutexLock threadLock(_threadMutex);
+
+    ThreadTerminator terminator(_startingThread, _threads, _terminatedThreads, _threadTerminated, _threadMutex);
+
+    _threads.insert(_startingThread);
+
+    log_info("thread running (" << _startingThread << ')');
+    _threadRunning.signal();
+
+    threadLock.unlock();
+
+    System::MutexLock selectorLock(_selectorMutex, false);
+
+    do
+    {
+        {
+            atomicIncrement(_waitingThreads);
+            Dec m(_waitingThreads);
+            log_debug("wait for selector lock; now " << _waitingThreads << " threads waiting");
+            selectorLock.lock();
+        }
+
+        log_debug("selectorLock obtained; " << _waitingThreads << " threads left");
+
+        if (_terminating)
+        {
+            log_debug("server terminating");
+            break;
+        }
+
+        if (atomicGet(_waitingThreads) == 0)
+            createThread();
+
+        while (!hasReplyToDo())
+        {
+            log_debug("wait selector");
+            _selector.wait();
+
+            if (_terminating)
+                return;
+
+            log_debug("check for idle sockets to add to selector");
+            System::MutexLock lock(_idleSocketsMutex);
+            while (!_idleSockets.empty())
+            {
+                log_debug("add idle socket " << _idleSockets.front() << " to selector");
+                _idleSockets.front()->addSelector(_selector);
+                _idleSockets.pop_front();
+            }
+        }
+
+        Socket* s = _readySockets.front();
+        log_debug("socket " << s << " ready");
+        _readySockets.pop_front();
+        s->removeSelector();
+
+        log_debug("release selector lock");
+        selectorLock.unlock();
+
+        try
+        {
+            log_info("execute reply for url " << s->request().url());
+            if (s->doReply())
+            {
+                log_debug("add socket to idle sockets and wake up selector");
+                System::MutexLock lock(_idleSocketsMutex);
+                _idleSockets.push_back(s);
+                _selector.wake();
+            }
+            else
+                log_debug("socket destroyed");
+        }
+        catch (const std::exception& e)
+        {
+            delete s;
+            log_error(e.what());
+        }
+
+    } while (atomicGet(_waitingThreads) < _minThreads);
+
+    log_info("end thread " << terminator.thread());
+}
+
+} // namespace http
 
 } // namespace Pt

@@ -28,7 +28,13 @@
 
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Reply.h>
-#include <Pt/Log/Logger.h>
+
+#define log_define(a)
+#define log_trace(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
 
 log_define("Pt.Http.responder")
 

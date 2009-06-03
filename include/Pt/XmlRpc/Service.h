@@ -386,8 +386,8 @@ class BasicServiceProcedure<R, C, A1,
 
         ISerializer* endCall(SerializationContext& context)
         {
-            _rv = _cb->call(_v1, context);
-            _r.begin(_rv);
+            _rv = _cb->call(_v1);
+            _r.begin(_rv, context);
             return &_r;
         }
 

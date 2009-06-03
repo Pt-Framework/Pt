@@ -29,7 +29,13 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Parser.h>
 #include <Pt/System/IOError.h>
-#include <Pt/Log/Logger.h>
+
+#define log_define(a)
+#define log_trace(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
 
 log_define("Pt.http.client")
 
@@ -303,11 +309,17 @@ void Client::sendRequest(const Request& request)
 
 void Client::onConnect(Net::TcpSocket& socket)
 {
-    socket.endConnect();
-    sendRequest(*_request);
-    _stream.buffer().beginWrite();
+    try
+    {
+        socket.endConnect();
+        sendRequest(*_request);
+        _stream.buffer().beginWrite();
+    }
+    catch (const std::exception& e)
+    {
+        errorOccured(*this, e);
+    }
 }
-
 
 void Client::onOutput(System::StreamBuffer& sb)
 {
