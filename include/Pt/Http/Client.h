@@ -35,6 +35,7 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
+#include <Pt/System/Selectable.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
@@ -130,6 +131,12 @@ class PT_HTTP_API Client : public Pt::Connectable
         {
             return _stream;
         }
+
+        const std::string& server() const
+        { return _server; }
+
+        unsigned short int port() const
+        { return _port; }
 
         Signal<Client&> requestSent;
         Signal<Client&> headerReceived;

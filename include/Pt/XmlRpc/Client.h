@@ -40,6 +40,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/TextStream.h>
 #include <string>
+#include <sstream>
 #include <cstddef>
 
 namespace Pt {
@@ -98,6 +99,18 @@ class PT_XMLRPC_API Client : public Pt::Connectable
 
         SerializationContext& context()
         { return _context; }
+
+        std::string url() const
+        {
+            std::ostringstream s;
+            s << "http://"
+              << _client.server()
+              << ':'
+              << _client.port()
+              << _request.url();
+
+            return s.str();
+        }
 
     protected:
         void onReplyHeader(Http::Client& client);
