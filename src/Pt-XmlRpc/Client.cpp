@@ -146,10 +146,10 @@ void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv
 
     // let Xml::ParseError SerializationError, ConversionError propagate
 
-    if( _state == OnFaultResponseEnd )
+    if (_method->failed() )
     {
         _state = OnBegin;
-        throw method.fault();
+        throw _fault;
     }
 
     _state = OnBegin;
@@ -211,7 +211,7 @@ void Client::onErrorOccured(Http::Client& client, const std::exception& e)
     {
         // TODO do not map local exceptions to Pt::xmlrpc::Fault
 
-        if (!_method->fault())
+        if (!_method->failed())
             _method->setFault(Fault::systemError, e.what());
 
         IRemoteProcedure* method = _method;
@@ -287,7 +287,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
                 else if( se.name() == L"fault")
                 {
-                    _fh.begin(_method->fault(), _context);
+                    _fh.begin(_fault, _context);
                     _scanner.begin(_fh);
                     _state = OnFaultBegin;
                     break;
@@ -317,6 +317,8 @@ void Client::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if( ee.name() != L"methodResponse" )
                     throw SerializationError("invalid XML-RPC methodCall");
+
+                _method->setFault(_fault.rc(), _fault.text());
 
                 _state = OnFaultResponseEnd;
             }

@@ -74,6 +74,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
             this->registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
+            this->registerMethod("Exception", *this, &PtXmlRpcTest::Exception);
             this->registerMethod("CallbackException", *this, &PtXmlRpcTest::CallbackException);
             this->registerMethod("ConnectError", *this, &PtXmlRpcTest::ConnectError);
             this->registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
@@ -139,6 +140,39 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             {
                 PT_UNIT_ASSERT_EQUALS(e.rc(), 7)
                 PT_UNIT_ASSERT_EQUALS(e.text(), "Fault")
+            }
+
+            _loop->exit();
+        }
+
+        void Exception()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiply", *this, &PtXmlRpcTest::throwException);
+            _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onException );
+            multiply.begin();
+
+            _loop->run();
+        }
+
+        void onException(const Pt::XmlRpc::Result<bool>& result)
+        {
+            try
+            {
+                bool v = result.get();
+                PT_UNIT_ASSERT(false);
+            }
+            catch (const Pt::XmlRpc::Fault& e)
+            {
+                PT_UNIT_ASSERT_EQUALS(e.rc(), 0)
+                PT_UNIT_ASSERT_EQUALS(e.text(), "Exception")
             }
 
             _loop->exit();
@@ -466,6 +500,12 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         bool throwFault()
         {
             throw Pt::XmlRpc::Fault("Fault", 7);
+            return false;
+        }
+
+        bool throwException()
+        {
+            throw std::runtime_error("Exception");
             return false;
         }
 

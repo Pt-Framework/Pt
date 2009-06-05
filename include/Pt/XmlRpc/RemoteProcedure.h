@@ -30,6 +30,7 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Client.h>
+#include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Result.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
@@ -65,7 +66,7 @@ class PT_XMLRPC_API IRemoteProcedure
 
         virtual void setFault(int rc, const std::string& msg) = 0;
 
-        virtual Fault& fault() = 0;
+        virtual bool failed() const = 0;
 
     protected:
         virtual void onFinished() = 0;
@@ -94,9 +95,9 @@ class RemoteProcedureBase : public IRemoteProcedure
             return _result.get();
         }
 
-        virtual Fault& fault()
+        virtual bool failed() const
         {
-            return _result.fault();
+            return _result.failed();
         }
 
         Signal< const Result<R> & > finished;

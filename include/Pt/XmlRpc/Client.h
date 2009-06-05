@@ -136,6 +136,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         Scanner _scanner;
         IRemoteProcedure* _method;
         SerializationContext _context;
+        Fault _fault;
         Deserializer<Fault> _fh;
         std::size_t _timeout;
 };
