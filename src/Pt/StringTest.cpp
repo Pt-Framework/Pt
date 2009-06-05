@@ -196,6 +196,7 @@ void StringTest::testAssign()
     Pt::String s3 = s1;
 
     Pt::Char& ref = s2[0]; // make it unsharable
+    ref = L'x';
     s1 = s2;
 }
 
