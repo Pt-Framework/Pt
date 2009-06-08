@@ -183,7 +183,8 @@ void StreamBufferBase::endWrite()
         }
     }
 
-    _sb->setp(_obuffer + leftover, _obuffer + _obufferSize);
+    _sb->setp(_obuffer, _obuffer + _obufferSize);
+    _sb->pbump( leftover );
 }
 
 
@@ -204,7 +205,7 @@ int StreamBufferBase::do_sync()
 
     if( _sb->pptr() )
     {
-        while( _sb->pptr() > _obuffer )
+        while( _sb->pptr() > _sb->pbase() )
         {
             const int_type ch = _sb->overflow( traits_type::eof() );
             if( ch == traits_type::eof() )
@@ -287,7 +288,8 @@ StreamBufferBase::int_type StreamBufferBase::do_overflow(int_type ch)
         {
             traits_type::move(_obuffer, _obuffer + written, leftover);
         }
-        _sb->setp(_obuffer + leftover, _obuffer + _obufferSize);
+        _sb->setp(_obuffer, _obuffer + _obufferSize);
+        _sb->pbump( leftover );
     }
     else
     {
