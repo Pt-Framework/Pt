@@ -207,7 +207,7 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void getValue(const std::string& name, T& value) const
-        { SerializationInfo& info = this->getMember(name) >>= value; }
+        { this->getMember(name) >>= value; }
 
         /** @brief Serialization of member data
         */
@@ -561,7 +561,7 @@ inline void operator >>=(const SerializationInfo& si, int& n)
 }
 
 
-inline void operator <<=(SerializationInfo& si, int n)
+inline void operator <<=(SerializationInfo& si, const int& n)
 {
     si.setValue(n);
     si.setTypeName("int");

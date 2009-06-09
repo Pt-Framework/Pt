@@ -97,8 +97,15 @@ void XmlSerializer::flush()
 }
 
 
-void XmlSerializer::beginUnlinkTarget(const std::string& name, const void* p)
+std::string XmlSerializer::beginUnlinkTarget(const std::string& name, const void* p)
 {
+    if( _idmap.find(p) == _idmap.end() )
+    {
+        unsigned id = _idmap.size();
+        _idmap[p] = id;
+    }
+
+    return convert<std::string>( _idmap[p] );
 }
 
 
@@ -114,12 +121,16 @@ void XmlSerializer::prepareUnlink(const void* p)
         unsigned id = _idmap.size();
         _idmap[p] = id;
     }
+
+    unsigned lid = _idmap[p];
+    _linkmap[lid] = p;
 }
 
 
-bool XmlSerializer::isUnlinked(const void* p)
+bool XmlSerializer::isUnlinked(const std::string& id)
 {
-    return _idmap.find(p) != _idmap.end();
+    unsigned n = convert<unsigned>( id );
+    return _linkmap.find(n) != _linkmap.end();
 }
 
 

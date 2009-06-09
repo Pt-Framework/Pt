@@ -142,7 +142,7 @@ void operator<<=(SerializationInfo& si, const Date& date)
     std::string s;
     convert(s, date);
     si.setValue(s);
-    si.setTypeName("Date");
+    si.setTypeName("Pt::Date");
 
     //si.addValue("year",  date.year() );
     //si.addValue("month", date.month() );

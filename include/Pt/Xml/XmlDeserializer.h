@@ -69,7 +69,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
             Deserializer<T> deser;
             deser.begin(type, *this);
             this->get(&deser);
-            deser.leave();
+            //deser.leave();
             deser.prepareLink(*this);
         }
 

@@ -132,8 +132,9 @@ void SerializationContext::push(SerializationInfo::Node* node)
 }
 
 
-void SerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
+std::string SerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
 {
+    return std::string();
 }
 
 
@@ -148,7 +149,7 @@ void SerializationContext::prepareUnlink(const void* p)
 }
 
 
-bool SerializationContext::isUnlinked(const void* p)
+bool SerializationContext::isUnlinked(const std::string& id)
 {
     return false;
 }

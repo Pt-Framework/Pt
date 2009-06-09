@@ -119,9 +119,9 @@ class PT_XML_API XmlSerializer : public SerializationContext
             _heap.push_back(serializer);
             _stack.push_back(serializer);
 
-            serializer->begin(type, *this);
-            serializer->setName(name);
-            serializer->prepareUnlink(*this);
+            serializer->begin(type, name, *this);
+            //serializer->setName(name);
+            //serializer->prepareUnlink(*this);
         }
 
         void finish();
@@ -130,18 +130,19 @@ class PT_XML_API XmlSerializer : public SerializationContext
         void flush();
 
     public:
-        virtual void beginUnlinkTarget(const std::string& name, const void* p);
+        virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
 
         virtual void finishUnlinkTarget();
 
         virtual void prepareUnlink(const void* p);
 
-        virtual bool isUnlinked(const void* p);
+        virtual bool isUnlinked(const std::string& id);
 
         virtual std::string getUnlinkId(const void* p);
 
     private:
         std::map<const void*, unsigned> _idmap;
+        std::map<unsigned, const void*> _linkmap;
 
     private:
         // TODO:derive from formatter

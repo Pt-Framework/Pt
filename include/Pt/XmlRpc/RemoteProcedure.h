@@ -128,11 +128,11 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
-            _a4.begin( a4, this->client().context() );
-            _a5.begin( a5, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
+            _a4.begin( a4, "", this->client().context() );
+            _a5.begin( a5, "", this->client().context() );
 
             this->_r.begin( this->_result.value(), this->client().context() );
 
@@ -144,11 +144,11 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
-            _a4.begin( a4, this->client().context() );
-            _a5.begin( a5, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
+            _a4.begin( a4, "", this->client().context() );
+            _a5.begin( a5, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5};
@@ -187,10 +187,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
-            _a4.begin( a4, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
+            _a4.begin( a4, "", this->client().context() );
 
             this->_r.begin( this->_result.value(), this->client().context() );
 
@@ -202,10 +202,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
-            _a4.begin( a4, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
+            _a4.begin( a4, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[4] = { &_a1, &_a2, &_a3, &_a4};
@@ -243,9 +243,9 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
@@ -256,9 +256,9 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
-            _a3.begin( a3, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
+            _a3.begin( a3, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
@@ -295,8 +295,8 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
@@ -307,8 +307,8 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
-            _a2.begin( a2, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
+            _a2.begin( a2, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
@@ -344,7 +344,7 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { &_a1 };
@@ -355,7 +355,7 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, this->client().context() );
+            _a1.begin( a1, "", this->client().context() );
             this->_r.begin( this->_result.value(), this->client().context() );
 
             ISerializer* argv[1] = { &_a1 };

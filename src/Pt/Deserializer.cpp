@@ -29,7 +29,7 @@
 #include <cassert>
 
 namespace Pt {
-
+/*
 void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
                      SerializationContext& context)
 {
@@ -38,5 +38,5 @@ void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
     context.beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
     context.finishLinkTarget();
 }
-
+*/
 } // namespace Pt

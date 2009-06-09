@@ -88,6 +88,11 @@ void SerializationInfo::prepareUnlink(SerializationContext& context)
 
 void SerializationInfo::format(Formatter& formatter, SerializationContext& context)
 {
+    if( this->id().size() && ! context.isUnlinked( this->id() ) )
+    {
+        this->setId("");
+    }
+
     if(this->category() == SerializationInfo::Value)
     {
         formatter.addValue( this->name(), this->typeName(), this->toString(), this->id() );
@@ -281,6 +286,12 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
     ReferenceNode* node = initReference();
     node->setAddress(&type);
     node->setTypeInfo(ti);
+
+    void* refAddr = node->address();
+    const std::string& refId = node->refId();
+    const std::type_info* refType = node->typeInfo();
+    if(_context)
+        _context->prepareLink( refId, refAddr, *refType );
 }
 
 

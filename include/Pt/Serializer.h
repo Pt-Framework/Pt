@@ -30,6 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/SerializationContext.h>
 
 namespace Pt {
 
@@ -42,10 +43,6 @@ class ISerializer
         virtual ~ISerializer()
         {}
 
-        virtual void setName(const std::string& name) = 0;
-
-        virtual void prepareUnlink(SerializationContext& context) = 0;
-
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
     protected:
@@ -54,12 +51,13 @@ class ISerializer
 };
 
 
-PT_API void prepareUnlinkEach(Pt::SerializationInfo& si, const void* target,
-                              SerializationContext& context);
+//PT_API void prepareUnlinkEach(Pt::SerializationInfo& si,
+//                              SerializationContext& context);
 
 
-PT_API void formatEach(Pt::SerializationInfo& si, const void* target,
-                       SerializationContext& context, Formatter& formatter);
+//PT_API void formatEach(Pt::SerializationInfo& si,
+//                       SerializationContext& context,
+//                       Formatter& formatter);
 
 
 template <typename T>
@@ -71,27 +69,23 @@ class Serializer : public ISerializer
         , _current(&_si)
         { }
 
-        void begin(const T& type, SerializationContext& context)
+        void begin(const T& type, const std::string& name, SerializationContext& context)
         {
             _si.clear();
-            _si.setContext(context);
             _type = &type;
-            _si <<= *_type;
-        }
 
-        virtual void setName(const std::string& name)
-        {
             _si.setName(name);
-        }
+            _si.setContext(context);
 
-        virtual void prepareUnlink(SerializationContext& context)
-        {
-            prepareUnlinkEach(_si, _type, context);
+            std::string id = context.beginUnlinkTarget(_si.name(), _type);
+            _si.setId(id);
+            _si <<= *_type; // calls prepareUnlink for each reference
+            context.finishUnlinkTarget();
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)
         {
-            formatEach( _si, _type, context, formatter );
+            _si.format(formatter, context);
         }
 
     private:

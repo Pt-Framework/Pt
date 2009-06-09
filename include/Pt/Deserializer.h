@@ -51,9 +51,9 @@ class IDeserializer
         IDeserializer* parent()
         { return _parent; }
 
-        virtual void* target() = 0;
+        //virtual void* target() = 0;
 
-        virtual const std::type_info& targetType() = 0;
+        //virtual const std::type_info& targetType() = 0;
 
         virtual void setName(const std::string& name) = 0;
 
@@ -80,8 +80,8 @@ class IDeserializer
 };
 
 
-PT_API void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
-                           SerializationContext& context);
+//PT_API void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
+//                           SerializationContext& context);
 
 
 template <typename T>
@@ -101,15 +101,15 @@ class Deserializer : public IDeserializer
             _current = &_si;
         }
 
-        virtual void* target()
-        {
-            return _type;
-        }
+        //virtual void* target()
+        //{
+        //    return _type;
+        //}
 
-        virtual const std::type_info& targetType()
-        {
-            return typeid(T);
-        }
+        //virtual const std::type_info& targetType()
+        //{
+        //    return typeid(T);
+        //}
 
         virtual void setName(const std::string& name)
         {
@@ -173,7 +173,13 @@ class Deserializer : public IDeserializer
 
         virtual void prepareLink(SerializationContext& context)
         {
-            prepareLinkEach(*this, _si, context);
+            context.beginLinkTarget( _si.name(), _si.id(), _type, typeid(T) );
+            *_current >>= *_type;
+            context.finishLinkTarget();
+
+            //_si.prepareLink(context);
+
+            //prepareLinkEach(*this, _si, context);
         }
 
     private:

@@ -31,27 +31,28 @@
 
 namespace Pt {
 
-void prepareUnlinkEach(Pt::SerializationInfo& si, const void* target, SerializationContext& context)
+/*void prepareUnlinkEach(Pt::SerializationInfo& si, const void* target, SerializationContext& context)
 {
     context.beginUnlinkTarget(si.name(), target);
     context.finishUnlinkTarget();
 
     si.prepareUnlink(context);
-}
+}*/
 
 
-void formatEach(Pt::SerializationInfo& si, const void* type,
+/*void formatEach(Pt::SerializationInfo& si,
                 SerializationContext& context, Formatter& formatter)
 {
     // TODO: it might not be necessary to store the id in the si object
 
-    if( context.isUnlinked(type) )
+    const void* target = si.resolvable();
+    if( target && context.isUnlinked(target) )
     {
-        std::string id = context.getUnlinkId(type);
+        std::string id = context.getUnlinkId(target);
         si.setId(id);
     }
 
     si.format(formatter, context);
-}
+}*/
 
 } // namespace Pt
