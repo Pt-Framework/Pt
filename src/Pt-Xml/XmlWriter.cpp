@@ -35,7 +35,7 @@ namespace Xml {
 
 XmlWriter::XmlWriter()
 : _tos(new Utf8Codec)
-, _flags(UseIndent | UseEndl)
+, _flags(UseXmlDeclaration | UseIndent | UseEndl)
 {
 }
 
