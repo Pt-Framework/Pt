@@ -1017,6 +1017,8 @@ inline std::string basic_string<Pt::Char>::narrow() const
     size_type len = this->length();
     const Pt::Char* s = _data->str();
 
+    ret.reserve(len);
+
     for(size_t n = 0; n < len; ++n){
         ret.append( 1, s->narrow('_') );
         ++s;
@@ -1029,6 +1031,8 @@ inline std::string basic_string<Pt::Char>::narrow() const
 inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
 {
     std::basic_string<Pt::Char> ret;
+
+    ret.reserve(str.size());
 
     for(size_t n = 0; n < str.size(); ++n)
         ret += Pt::Char( str[n] );
