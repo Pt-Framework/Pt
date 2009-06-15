@@ -273,11 +273,11 @@ class PT_API SerializationInfo
         */
         SerializationInfo& addReference(const std::string& name, void* ref);
 
-        void prepareLink(SerializationContext& context);
-
         void prepareUnlink(SerializationContext& context);
 
         void format(Formatter& formatter, SerializationContext& context);
+
+        void prepareLink(SerializationContext& context);
 
         void release(SerializationContext& context);
 

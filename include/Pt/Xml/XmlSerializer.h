@@ -121,7 +121,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
 
             serializer->begin(type, name, *this);
             //serializer->setName(name);
-            //serializer->prepareUnlink(*this);
+            serializer->prepareUnlink(*this);
         }
 
         void finish();

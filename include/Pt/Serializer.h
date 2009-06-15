@@ -45,6 +45,8 @@ class ISerializer
 
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
+        virtual void prepareUnlink( SerializationContext& context ) = 0;
+
     protected:
         ISerializer()
         {}
@@ -77,9 +79,17 @@ class Serializer : public ISerializer
             _si.setName(name);
             _si.setContext(context);
 
+            //std::string id = context.beginUnlinkTarget(_si.name(), _type);
+            //_si.setId(id);
+            _si <<= *_type;
+            //context.finishUnlinkTarget();
+        }
+
+        virtual void prepareUnlink( SerializationContext& context ) 
+        {
             std::string id = context.beginUnlinkTarget(_si.name(), _type);
             _si.setId(id);
-            _si <<= *_type; // calls prepareUnlink for each reference
+            _si.prepareUnlink(context);
             context.finishUnlinkTarget();
         }
 

@@ -51,22 +51,6 @@ void SerializationInfo::prepareUnlinkMember(Pt::SerializationInfo& si, Serializa
 }
 
 
-void SerializationInfo::prepareLink(SerializationContext& context)
-{
-    Pt::SerializationInfo::Iterator it;
-    for(it = this->begin(); it != this->end(); ++it)
-    {
-        if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            void* refAddr = static_cast<const ReferenceNode*>(it->_node)->address();
-            const std::string& refId = static_cast<const ReferenceNode*>(it->_node)->refId();
-            const std::type_info* refType = static_cast<const ReferenceNode*>(it->_node)->typeInfo();
-            context.prepareLink( refId, refAddr, *refType );
-        }
-    }
-}
-
-
 void SerializationInfo::prepareUnlink(SerializationContext& context)
 {
     if(this->category() == Pt::SerializationInfo::Reference)
@@ -128,6 +112,22 @@ void SerializationInfo::format(Formatter& formatter, SerializationContext& conte
         }
 
         formatter.finishArray();
+    }
+}
+
+
+void SerializationInfo::prepareLink(SerializationContext& context)
+{
+    Pt::SerializationInfo::Iterator it;
+    for(it = this->begin(); it != this->end(); ++it)
+    {
+        if(it->category() == Pt::SerializationInfo::Reference)
+        {
+            void* refAddr = static_cast<const ReferenceNode*>(it->_node)->address();
+            const std::string& refId = static_cast<const ReferenceNode*>(it->_node)->refId();
+            const std::type_info* refType = static_cast<const ReferenceNode*>(it->_node)->typeInfo();
+            context.prepareLink( refId, refAddr, *refType );
+        }
     }
 }
 
