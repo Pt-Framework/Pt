@@ -173,8 +173,9 @@ class Deserializer : public IDeserializer
 
         virtual void prepareLink(SerializationContext& context)
         {
+        	// TODO: move this into SerializationInfo
             context.beginLinkTarget( _si.name(), _si.id(), _type, typeid(T) );
-            _si.prepareLink(context);
+            //_si.prepareLink(context);
             context.finishLinkTarget();
         }
 

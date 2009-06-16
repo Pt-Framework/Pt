@@ -263,6 +263,11 @@ void SerializationInfo::setReference(void* ref)
 {
     ReferenceNode* node = initReference();
     node->setAddress(ref);
+    
+    if(_context )
+    {
+        _context->prepareUnlink( ref );
+    }
 }
 
 
@@ -277,6 +282,7 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 {
     SerializationInfo& info = this->addMember(name);
     info.setReference(ref);
+    
     return info;
 }
 
@@ -290,8 +296,11 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
     void* refAddr = node->address();
     const std::string& refId = node->refId();
     const std::type_info* refType = node->typeInfo();
+    
     if(_context)
+    {
         _context->prepareLink( refId, refAddr, *refType );
+    }
 }
 
 

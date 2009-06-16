@@ -79,18 +79,19 @@ class Serializer : public ISerializer
             _si.setName(name);
             _si.setContext(context);
 
-            //std::string id = context.beginUnlinkTarget(_si.name(), _type);
-            //_si.setId(id);
+            // TODO: move this into SerializationInfo
+            // only get an id if a Context (or Binder later) is available
+            std::string id = context.beginUnlinkTarget(_si.name(), _type);
+            _si.setId(id);
+
             _si <<= *_type;
-            //context.finishUnlinkTarget();
+            
+            context.finishUnlinkTarget();
         }
 
         virtual void prepareUnlink( SerializationContext& context ) 
         {
-            std::string id = context.beginUnlinkTarget(_si.name(), _type);
-            _si.setId(id);
-            _si.prepareUnlink(context);
-            context.finishUnlinkTarget();
+            //_si.prepareUnlink(context);
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)
