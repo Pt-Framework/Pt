@@ -132,6 +132,11 @@ void SerializationContext::push(SerializationInfo::Node* node)
 }
 
 
+void SerializationContext::beginUnlink()
+{
+}
+
+
 std::string SerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
 {
     return std::string();
