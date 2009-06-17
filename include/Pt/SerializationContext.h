@@ -49,6 +49,8 @@ class PT_API SerializationContext
 
         virtual ~SerializationContext();
 
+		virtual void beginUnlink();
+
         virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
 
         virtual void finishUnlinkTarget();

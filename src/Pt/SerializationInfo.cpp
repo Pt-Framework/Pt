@@ -32,6 +32,7 @@
 
 namespace Pt {
 
+/*
 void SerializationInfo::prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
 {
     if(si.category() == Pt::SerializationInfo::Reference)
@@ -49,8 +50,8 @@ void SerializationInfo::prepareUnlinkMember(Pt::SerializationInfo& si, Serializa
         }
     }
 }
-
-
+*/
+/*
 void SerializationInfo::prepareUnlink(SerializationContext& context)
 {
     if(this->category() == Pt::SerializationInfo::Reference)
@@ -68,7 +69,7 @@ void SerializationInfo::prepareUnlink(SerializationContext& context)
         }
     }
 }
-
+*/
 
 void SerializationInfo::format(Formatter& formatter, SerializationContext& context)
 {
@@ -128,6 +129,25 @@ void SerializationInfo::prepareLink(SerializationContext& context)
             const std::type_info* refType = static_cast<const ReferenceNode*>(it->_node)->typeInfo();
             context.prepareLink( refId, refAddr, *refType );
         }
+    }
+}
+
+
+void SerializationInfo::beginUnlink(const void* p)
+{ 	
+	if(_context)
+    {
+        std::string id = _context->beginUnlinkTarget(_name, p); 
+        this->setId(id);
+    }
+}
+
+
+void SerializationInfo::finishUnlink()
+{ 	
+	if(_context)
+    {
+        _context->finishUnlinkTarget(); 
     }
 }
 

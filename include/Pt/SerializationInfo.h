@@ -153,6 +153,18 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
+        void beginUnlink(const void* p);
+
+		void finishUnlink();
+
+		template <typename T>
+		void setUnlinkable(const T& type)
+		{
+            this->beginUnlink( &type);
+            (*this) <<= type;
+            this->finishUnlink();
+        }
+
         /** @brief Deserialization of flat child value types
         */
         template <typename T>
@@ -273,7 +285,11 @@ class PT_API SerializationInfo
         */
         SerializationInfo& addReference(const std::string& name, void* ref);
 
-        void prepareUnlink(SerializationContext& context);
+        //void prepareUnlink(SerializationContext& context);
+
+        //void beginPublic(const void* p);
+        
+        //void finishPublic();
 
         void format(Formatter& formatter, SerializationContext& context);
 
@@ -313,7 +329,7 @@ class PT_API SerializationInfo
         }
 
     private:
-        void prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context);
+        //void prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context);
 
         void getReference(void*& type, const std::type_info& ti) const;
 
@@ -679,8 +695,9 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
     typename std::vector<T>::const_iterator it;
 
     for(it = vec.begin(); it != vec.end(); ++it)
-    {
-        si.addMember() <<= *it;
+    {        
+        SerializationInfo& elem = si.addMember();
+        elem.setUnlinkable(*it);
     }
 
     si.setTypeName("array");
