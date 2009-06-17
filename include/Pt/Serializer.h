@@ -80,8 +80,7 @@ class Serializer : public ISerializer
             _si.setName(name);
             
             //TODO:
-            // _si <<= unlink <<= *_type;
-            _si.setUnlinkable(*_type);
+            _si <<= Pt::unlink(*_type);
         }
 
         virtual void prepareUnlink( SerializationContext& context ) 

@@ -493,6 +493,29 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
+template <typename T>
+struct Unlink
+{
+	const T* type;
+};
+
+
+template <typename T>
+Unlink<T> unlink(const T& type)
+{
+	Unlink<T> ul;
+	ul.type = &type;
+	return ul;
+};
+
+
+template <typename T>
+inline void operator <<=(SerializationInfo& si, const Unlink<T>& ul)
+{
+	si.setUnlinkable( *(ul.type) );
+}
+
+
 inline void operator >>=(const SerializationInfo& si, bool& n)
 {
     si.getValue(n);
