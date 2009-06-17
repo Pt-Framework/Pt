@@ -57,11 +57,6 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
     si.setTypeName("DateRef");
     si.addReference("date", dr.date);
-
-    /*if( si.context() )
-    {
-        si.context()->prepareUnlink( dr.date );
-    }*/
 }
 
 
