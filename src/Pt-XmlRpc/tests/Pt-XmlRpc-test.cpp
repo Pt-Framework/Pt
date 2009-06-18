@@ -82,7 +82,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("Integer", *this, &PtXmlRpcTest::Integer);
             this->registerMethod("Double", *this, &PtXmlRpcTest::Double);
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
-            this->registerMethod("EchoString", *this, &PtXmlRpcTest::EchoString);
             this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
             this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
@@ -332,31 +331,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void String()
         {
             Pt::XmlRpc::Service service;
-            service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyString);
-            _server->addService("/calc", service);
-
-            _serverThread->start();
-            Pt::System::Thread::sleep(500);
-
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
-            connect( multiply.finished, *this, &PtXmlRpcTest::onStringFinished );
-
-            multiply.begin("2", "3");
-
-            _loop->run();
-        }
-
-        void onStringFinished(const Pt::XmlRpc::Result<std::string>& r)
-        {
-            PT_UNIT_ASSERT_EQUALS(r.get(), "6")
-
-            _loop->exit();
-        }
-
-        void EchoString()
-        {
-            Pt::XmlRpc::Service service;
             service.registerMethod("echoString", *this, &PtXmlRpcTest::echoString);
             _server->addService("/foo", service);
 
@@ -367,14 +341,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
             connect( echo.finished, *this, &PtXmlRpcTest::onStringEchoFinished );
 
-            echo.begin("foo?");
+            echo.begin("\xc3\xaf\xc2\xbb\xc2\xbf'\"&<> foo?");
 
             _loop->run();
         }
 
         void onStringEchoFinished(const Pt::XmlRpc::Result<std::string>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r.get(), "foo?")
+            PT_UNIT_ASSERT_EQUALS(r.get(), "\xc3\xaf\xc2\xbb\xc2\xbf'\"&<> foo?")
 
             _loop->exit();
         }
@@ -529,13 +503,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         double multiplyDouble(double a, double b)
         {
             return a*b;
-        }
-
-        std::string multiplyString(std::string a, std::string b)
-        {
-            PT_UNIT_ASSERT_EQUALS(a, "2")
-            PT_UNIT_ASSERT_EQUALS(b, "3")
-            return "6";
         }
 
         std::string echoString(std::string a)

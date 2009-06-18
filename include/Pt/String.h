@@ -97,7 +97,7 @@ class basic_string< Pt::Char > {
 
         basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a);
 
-        basic_string(Pt::Char* begin, Pt::Char* end);
+        basic_string(const Pt::Char* begin, const Pt::Char* end);
 
         ~basic_string();
 

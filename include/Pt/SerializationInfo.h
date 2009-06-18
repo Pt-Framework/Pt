@@ -603,7 +603,7 @@ inline void operator >>=(const SerializationInfo& si, int& n)
 inline void operator <<=(SerializationInfo& si, const int& n)
 {
     si.setValue(n);
-    //si.setTypeName("int");
+    si.setTypeName("int");
 }
 
 

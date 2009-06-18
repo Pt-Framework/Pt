@@ -74,9 +74,9 @@ inline basic_string<Pt::Char>::basic_string(size_type n, Pt::Char c)
 inline basic_string<Pt::Char>::basic_string(const basic_string& str)
 : _data(0)
 {
-	// if the other string is not being modified with iterators we can
-	// share the same data. Otherwise the other string is marked as
-	// busy and we need to copy on write
+    // if the other string is not being modified with iterators we can
+    // share the same data. Otherwise the other string is marked as
+    // busy and we need to copy on write
     if( str._data->busy() == false ) {
         _data = str._data;
         _data->ref();
@@ -104,7 +104,7 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type p
 {
 }
 
-inline basic_string<Pt::Char>::basic_string(Pt::Char* begin, Pt::Char* end)
+inline basic_string<Pt::Char>::basic_string(const Pt::Char* begin, const Pt::Char* end)
 : _data( new Pt::StringData( begin, end - begin ) )
 {
 }
@@ -112,9 +112,9 @@ inline basic_string<Pt::Char>::basic_string(Pt::Char* begin, Pt::Char* end)
 
 inline basic_string<Pt::Char>::~basic_string()
 {
-	// Noone else references this data if the reference counter
-	// is at one or this string is marked as busy because someone
-	// has a mutating iterator on it.
+    // Noone else references this data if the reference counter
+    // is at one or this string is marked as busy because someone
+    // has a mutating iterator on it.
     if( _data->busy() || _data->unref() < 1 ) {
         delete _data;
         _data = 0;
@@ -169,7 +169,7 @@ inline void basic_string<Pt::Char>::resize(size_t n, Pt::Char ch)
 
 inline void basic_string<Pt::Char>::reserve(size_t n)
 {
-    if( n == this->capacity() && _data->busy() )
+    if( (n == this->capacity() && _data->busy()) || n == 0 )
         return;
 
     const size_type size = this->size();
@@ -181,6 +181,32 @@ inline void basic_string<Pt::Char>::reserve(size_t n)
 
     // mutation ends busy mode
     _data->setInitial();
+}
+
+
+inline void basic_string<Pt::Char>::detach(size_type reserveSize)
+{
+    // shared, not busy - make copy
+    if( _data->shared() ) 
+    {
+        Pt::StringData* newBuffer = new Pt::StringData( reserveSize );
+        newBuffer->assign( _data->str(), _data->length() );
+
+        if( _data->unref() < 1)
+        {
+            // just in case two threads are trying this at once
+            delete newBuffer;
+        }
+        else
+        {
+            _data = newBuffer;
+        }
+    }
+    // just resizing
+    else
+    {
+        _data->reserve( reserveSize );
+    }
 }
 
 
@@ -269,73 +295,47 @@ inline const Pt::Char* basic_string<Pt::Char>::c_str() const
 }
 
 
-inline void basic_string<Pt::Char>::detach(size_type reserveSize)
-{
-    // shared, not busy - make copy
-    if( _data->shared() ) 
-    {
-        Pt::StringData* newBuffer = new Pt::StringData( reserveSize );
-        newBuffer->assign( _data->str(), _data->length() );
-
-        if( _data->unref() < 1)
-        {
-            // just in case two threads are trying this at once
-            delete newBuffer;
-        }
-        else
-        {
-            _data = newBuffer;
-        }
-    }
-    // just resizing
-    else
-    {
-        _data->reserve( reserveSize );
-    }
-}
-
-
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
-{ 
+{
     // self-assignment check
     if(this == &str)
     {
         return *this;
     }
-    
-    if( _data->shared() ) 
+
+    if( _data->shared() )
     {
-    	Pt::StringData* newBuffer = str._data;
-    	if( str._data->busy() )
-    	{
-        	newBuffer = new Pt::StringData( str._data->str(), str._data->length() );
+        Pt::StringData* newBuffer = str._data;
+        if( str._data->busy() )
+        {
+            newBuffer = new Pt::StringData( str._data->str(), str._data->length() );
         }
         else
         {
-        	newBuffer->ref();
+            newBuffer->ref();
         }
 
         if( _data->unref() < 1)
         {
-      	    // just in case two threads are trying this at once
-      	    delete _data;
-       	}
+            // just in case two threads are trying this at once
+            delete _data;
+        }
 
-		_data = newBuffer;
+        _data = newBuffer;
     }
     else // unshared
     {
-    	if( _data->capacity() >= str.size() || str._data->busy() )
-    	{
-    	    _data->assign( str._data->str(), str._data->length() );
-    	    _data->setInitial();
-    	}
-    	else
-    	{
-        	delete _data;
-    		_data = str._data;
-    		_data->ref();
-    	}
+        if( _data->capacity() >= str.size() || str._data->busy() )
+        {
+            _data->assign( str._data->str(), str._data->length() );
+            _data->setInitial();
+        }
+        else
+        {
+            delete _data;
+            _data = str._data;
+            _data->ref();
+        }
     }
 
     return *this;
@@ -366,7 +366,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* st
 {
     // this is a modifying action and if multiple instances reference this
     // data instance we need to copy on write first.
-    if( _data->shared() ) 
+    if( _data->shared() )
     {
         Pt::StringData* newBuffer = new Pt::StringData( str, length );
         _data->unref();
@@ -1075,39 +1075,39 @@ inline OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to) const
 template <typename InIterT>
 inline basic_string<Pt::Char> basic_string<Pt::Char>::fromUtf16(InIterT from, InIterT fromEnd)
 {
-	std::basic_string<Pt::Char> ret;
+    std::basic_string<Pt::Char> ret;
 
-	for( ; from != fromEnd; ++from)
-	{
-		unsigned ch = *from;
+    for( ; from != fromEnd; ++from)
+    {
+        unsigned ch = *from;
 
-		// high surrogate
-		if (ch >= 0xD800 && ch <= 0xDBFF) 
-		{
-			// invalid or missing low surrogate
-			if(++from == fromEnd || *from < 0xDC00 || *from > 0xDFFF) 
-			{
-				ret += Pt::Char(0xFFFD);
-				break;
-			}
+        // high surrogate
+        if (ch >= 0xD800 && ch <= 0xDBFF) 
+        {
+            // invalid or missing low surrogate
+            if(++from == fromEnd || *from < 0xDC00 || *from > 0xDFFF) 
+            {
+                ret += Pt::Char(0xFFFD);
+                break;
+            }
 
-			const unsigned lo = *from;
-			ch = ((ch - 0xD800) << 10) + (lo - 0xDC00) + 0x0010000U;
-			ret += Pt::Char(ch);
-		}
-		// not a surrogate
-		else if(ch < 0xDC00 || ch > 0xDFFF)
-		{
-			ret += Pt::Char(ch);
-		}
-		// not a valid unicode point
-		else
-		{
-		    ret += Pt::Char(0xFFFD);
-		}
-	}
+            const unsigned lo = *from;
+            ch = ((ch - 0xD800) << 10) + (lo - 0xDC00) + 0x0010000U;
+            ret += Pt::Char(ch);
+        }
+        // not a surrogate
+        else if(ch < 0xDC00 || ch > 0xDFFF)
+        {
+            ret += Pt::Char(ch);
+        }
+        // not a valid unicode point
+        else
+        {
+            ret += Pt::Char(0xFFFD);
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
 }

@@ -44,7 +44,7 @@ inline StringData::StringData(const Pt::Char* s, size_type length, const allocat
     _str = _allocator.allocate(length + 1, _str);
     _capacity = length;
     _length = length;
-    
+
     traits_type::copy(_str, s, length);
     _str[length] = Pt::Char::null();
 }

@@ -198,13 +198,13 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
@@ -221,49 +221,49 @@ struct XmlReaderImpl
                 return AfterTag::instance();
             }
 
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
@@ -331,13 +331,13 @@ struct XmlReaderImpl
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
@@ -348,31 +348,31 @@ struct XmlReaderImpl
 
         virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
         virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
@@ -384,7 +384,7 @@ struct XmlReaderImpl
                 return OnEntityReference::instance();
             }
 
-            reader._chars.content() += c;
+            reader.appendContent(c);
             return this;
         }
 
@@ -1544,6 +1544,19 @@ struct XmlReaderImpl
     void resolveEntity(String& str)
     {
         str = _resolver.resolveEntity( str );
+    }
+
+    void appendContent(Pt::Char c)
+    {
+        String& content = _chars.content();
+        if (content.capacity() <= content.size() + 20)
+        {
+            if (content.capacity() < 16)
+                content.reserve(16);
+            else
+                content.reserve(content.capacity() + content.capacity() / 2);
+        }
+        content += c;
     }
 
     std::basic_streambuf<Char>* _textBuffer;
