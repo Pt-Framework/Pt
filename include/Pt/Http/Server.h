@@ -105,7 +105,12 @@ class PT_HTTP_API Server : public Net::TcpServer, public Connectable
         unsigned _minThreads;
         unsigned _maxThreads;
         atomic_t _waitingThreads;
-        bool _terminating;
+        enum {
+          Stopped,
+          Starting,
+          Running,
+          Terminating
+        } _runmode;
         System::Condition _terminated;
         System::Condition _threadTerminated;
 
