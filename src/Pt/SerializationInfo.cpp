@@ -116,7 +116,7 @@ void SerializationInfo::format(Formatter& formatter, SerializationContext& conte
     }
 }
 
-
+/*
 void SerializationInfo::prepareLink(SerializationContext& context)
 {
     Pt::SerializationInfo::Iterator it;
@@ -131,7 +131,7 @@ void SerializationInfo::prepareLink(SerializationContext& context)
         }
     }
 }
-
+*/
 
 void SerializationInfo::beginUnlink(const void* p)
 { 	
@@ -148,6 +148,24 @@ void SerializationInfo::finishUnlink()
 	if(_context)
     {
         _context->finishUnlinkTarget(); 
+    }
+}
+
+
+void SerializationInfo::beginLink(void* p, const std::type_info& ti) const
+{
+	if(_context)
+    {
+        _context->beginLinkTarget( _name, _id, p, ti);
+    }
+}
+
+
+void SerializationInfo::finishLink() const
+{
+	if(_context)
+    {
+        _context->finishLinkTarget();
     }
 }
 

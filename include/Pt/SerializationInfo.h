@@ -157,13 +157,9 @@ class PT_API SerializationInfo
 
 		void finishUnlink();
 
-		template <typename T>
-		void setUnlinkable(const T& type)
-		{
-            this->beginUnlink( &type);
-            (*this) <<= type;
-            this->finishUnlink();
-        }
+        void beginLink(void* p, const std::type_info& ti) const;
+
+		void finishLink() const;
 
         /** @brief Deserialization of flat child value types
         */
@@ -293,7 +289,7 @@ class PT_API SerializationInfo
 
         void format(Formatter& formatter, SerializationContext& context);
 
-        void prepareLink(SerializationContext& context);
+        //void prepareLink(SerializationContext& context);
 
         void release(SerializationContext& context);
 
@@ -493,6 +489,7 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
+// TODO rename Break or BreakDown
 template <typename T>
 struct Unlink
 {
@@ -512,7 +509,34 @@ Unlink<T> unlink(const T& type)
 template <typename T>
 inline void operator <<=(SerializationInfo& si, const Unlink<T>& ul)
 {
-	si.setUnlinkable( *(ul.type) );
+    si.beginUnlink( ul.type );
+    si <<= *(ul.type);
+    si.finishUnlink();
+}
+
+
+template <typename T>
+struct Link
+{
+	T* type;
+};
+
+// TODO: rename Fixup
+template <typename T>
+Link<T> link(T& type)
+{
+	Link<T> l;
+	l.type = &type;
+	return l;
+};
+
+
+template <typename T>
+inline void operator >>=(const SerializationInfo& si, const Link<T>& l)
+{
+    si.beginLink( l.type, typeid(T) );
+    si >>= *(l.type);
+    si.finishLink();
 }
 
 
@@ -703,11 +727,13 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 {
     T elem = T();
     vec.clear();
+    vec.reserve( si.memberCount() );
+    
     SerializationInfo::ConstIterator end = si.end();
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back( elem );
-        *it >>= vec.back();
+        *it >>= Pt::link( vec.back() );
     }
 }
 
@@ -719,8 +745,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {        
-        SerializationInfo& elem = si.addMember();
-        elem.setUnlinkable(*it);
+        si.addMember() <<= Pt::unlink(*it);
     }
 
     si.setTypeName("array");

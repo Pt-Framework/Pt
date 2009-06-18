@@ -53,15 +53,6 @@ class ISerializer
 };
 
 
-//PT_API void prepareUnlinkEach(Pt::SerializationInfo& si,
-//                              SerializationContext& context);
-
-
-//PT_API void formatEach(Pt::SerializationInfo& si,
-//                       SerializationContext& context,
-//                       Formatter& formatter);
-
-
 template <typename T>
 class Serializer : public ISerializer
 {

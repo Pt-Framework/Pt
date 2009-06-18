@@ -29,14 +29,5 @@
 #include <cassert>
 
 namespace Pt {
-/*
-void prepareLinkEach(IDeserializer& deser, Pt::SerializationInfo& si,
-                     SerializationContext& context)
-{
-    si.prepareLink(context);
 
-    context.beginLinkTarget( si.name(), si.id(), deser.target(), deser.targetType() );
-    context.finishLinkTarget();
-}
-*/
 } // namespace Pt
