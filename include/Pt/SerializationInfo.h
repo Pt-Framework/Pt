@@ -34,8 +34,11 @@
 #include <Pt/SerializationError.h>
 #include <typeinfo>
 #include <vector>
-#include <list>
 #include <set>
+#include <map>
+#include <list>
+#include <deque>
+#include <typeinfo>
 
 namespace Pt {
 
@@ -741,10 +744,10 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 template <typename T, typename A>
 inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 {
-    typename std::vector<T>::const_iterator it;
+    typename std::vector<T, A>::const_iterator it;
 
     for(it = vec.begin(); it != vec.end(); ++it)
-    {        
+    {
         si.addMember() <<= Pt::unlink(*it);
     }
 
@@ -760,7 +763,7 @@ inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         list.resize( list.size() + 1 );
-        *it >>=  list.back();
+        *it >>= list.back();
     }
 }
 
@@ -772,10 +775,41 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
 
     for(it = list.begin(); it != list.end(); ++it)
     {
-        si.addMember() <<= *it;
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
     }
 
     si.setTypeName("list");
+    si.setCategory(SerializationInfo::Array);
+}
+
+
+template <typename T, typename A>
+inline void operator >>=(const SerializationInfo& si, std::deque<T, A>& deque)
+{
+    deque.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        deque.resize( deque.size() + 1 );
+        *it >>= deque.back();
+    }
+}
+
+
+template <typename T, typename A>
+inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
+{
+    typename std::deque<T, A>::const_iterator it;
+
+    for(it = deque.begin(); it != deque.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("deque");
     si.setCategory(SerializationInfo::Array);
 }
 
@@ -786,7 +820,7 @@ inline void operator >>=(const SerializationInfo& si, std::set<T, C, A>& set)
     set.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
-        T t();
+        T t;
         *it >>= t;
         set.insert(t);
     }
@@ -800,12 +834,121 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 
     for(it = set.begin(); it != set.end(); ++it)
     {
-        si.addMember() <<= *it;
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
     }
 
     si.setTypeName("set");
     si.setCategory(SerializationInfo::Array);
 }
+
+
+template <typename T, typename C, typename A>
+inline void operator >>=(const SerializationInfo& si, std::multiset<T, C, A>& multiset)
+{
+    multiset.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        T t;
+        *it >>= t;
+        multiset.insert(t);
+    }
+}
+
+
+template <typename T, typename C, typename A>
+inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& multiset)
+{
+    typename std::multiset<T, C, A>::const_iterator it;
+
+    for(it = multiset.begin(); it != multiset.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("multiset");
+    si.setCategory(SerializationInfo::Array);
+}
+
+
+template <typename A, typename B>
+inline void operator >>=(const SerializationInfo& si, std::pair<A, B>& p)
+{
+    si.getMember("first") >>= p.first;
+    si.getMember("second") >>= p.second;
+}
+
+
+template <typename A, typename B>
+inline void operator <<=(SerializationInfo& si, const std::pair<A, B>& p)
+{
+    si.addMember("first") <<= p.first;
+    si.addMember("second") <<= p.second;
+}
+
+
+template <typename K, typename V, typename P, typename A>
+inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
+{
+    map.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        typename std::pair<K, V> v;
+        *it >>= v;
+        map.insert(v);
+    }
+}
+
+
+template <typename K, typename V, typename P, typename A>
+inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
+{
+    typename std::map<K, V, P, A>::const_iterator it;
+
+    for(it = map.begin(); it != map.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("map");
+    si.setCategory(SerializationInfo::Array);
+}
+
+
+template <typename K, typename V, typename P, typename A>
+inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>& multimap)
+{
+    multimap.clear();
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        typename std::pair<K, V> v;
+        *it >>= v;
+        multimap.insert(v);
+    }
+}
+
+
+template <typename T, typename C, typename P, typename A>
+inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>& multimap)
+{
+    typename std::multimap<T, C, P, A>::const_iterator it;
+
+    for(it = multimap.begin(); it != multimap.end(); ++it)
+    {
+        SerializationInfo& newSi = si.addMember("item");
+        newSi <<= *it;
+        newSi.setName( newSi.typeName() );
+    }
+
+    si.setTypeName("multimap");
+    si.setCategory(SerializationInfo::Array);
+}
+
 
 } // namespace Pt
 

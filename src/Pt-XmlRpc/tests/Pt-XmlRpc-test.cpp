@@ -45,6 +45,12 @@ struct Color
 };
 
 
+typedef std::set<int> IntSet;
+typedef std::multiset<int> IntMultiset;
+typedef std::map<int, int> IntMap;
+typedef std::multimap<int, int> IntMultimap;
+
+
 void operator >>=(const Pt::SerializationInfo& si, Color& color)
 {
     color.red = si.getValue<int>("red");
@@ -86,6 +92,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
             this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
+            this->registerMethod("Set", *this, &PtXmlRpcTest::Set);
+            this->registerMethod("Multiset", *this, &PtXmlRpcTest::Multiset);
+            this->registerMethod("Map", *this, &PtXmlRpcTest::Map);
+            this->registerMethod("Multimap", *this, &PtXmlRpcTest::Multimap);
         }
 
         void failTest()
@@ -111,6 +121,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             delete _serverThread;
         }
 
+        ////////////////////////////////////////////////////////////
+        // Fault
+        //
         void Fault()
         {
             Pt::XmlRpc::Service service;
@@ -144,6 +157,15 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        bool throwFault()
+        {
+            throw Pt::XmlRpc::Fault("Fault", 7);
+            return false;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Exception
+        //
         void Exception()
         {
             Pt::XmlRpc::Service service;
@@ -177,6 +199,15 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        bool throwException()
+        {
+            throw std::runtime_error("Exception");
+            return false;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Nothing
+        //
         void Nothing()
         {
             Pt::XmlRpc::Service service;
@@ -202,6 +233,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        bool multiplyNothing()
+        {
+            return false;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // CallbackException
+        //
         void CallbackException()
         {
             Pt::XmlRpc::Service service;
@@ -229,6 +268,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             throw std::runtime_error("my error");
         }
 
+        ////////////////////////////////////////////////////////////
+        // ConnectError
+        //
         void ConnectError()
         {
             Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
@@ -253,6 +295,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(r.get(), std::exception);
         }
 
+        ////////////////////////////////////////////////////////////
+        // Boolean
+        //
         void Boolean()
         {
             Pt::XmlRpc::Service service;
@@ -278,6 +323,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        bool multiplyBoolean(bool a, bool b)
+        {
+            PT_UNIT_ASSERT_EQUALS(a, true)
+            PT_UNIT_ASSERT_EQUALS(b, true)
+            return true;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Integer
+        //
         void Integer()
         {
             Pt::XmlRpc::Service service;
@@ -303,6 +358,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        int multiplyInt(int a, int b)
+        {
+            return a*b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Double
+        //
         void Double()
         {
             Pt::XmlRpc::Service service;
@@ -328,6 +391,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        double multiplyDouble(double a, double b)
+        {
+            return a*b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // String
+        //
         void String()
         {
             Pt::XmlRpc::Service service;
@@ -353,6 +424,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        std::string echoString(std::string a)
+        {
+            return a;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // EmptyValues
+        //
         void EmptyValues()
         {
             Pt::XmlRpc::Service service;
@@ -377,6 +456,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        std::string multiplyEmpty(std::string a, std::string b)
+        {
+            PT_UNIT_ASSERT_EQUALS(a, "")
+            PT_UNIT_ASSERT_EQUALS(b, "")
+            return "4";
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Array
+        //
         void Array()
         {
             Pt::XmlRpc::Service service;
@@ -399,6 +488,18 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
+        std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
+        {
+            std::vector<int> r;
+            if( a.size() )
+            {
+                r.push_back( a.at(0) * b.at(0) );
+                r.push_back( a.at(1) * b.at(1) );
+            }
+
+            return r;
+        }
+
         void onArrayFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get().size(), 2)
@@ -408,6 +509,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        ////////////////////////////////////////////////////////////
+        // EmptyArray
+        //
         void EmptyArray()
         {
             Pt::XmlRpc::Service service;
@@ -434,6 +538,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+        ////////////////////////////////////////////////////////////
+        // Struct
+        //
         void Struct()
         {
             Pt::XmlRpc::Service service;
@@ -471,64 +578,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
-        bool throwFault()
-        {
-            throw Pt::XmlRpc::Fault("Fault", 7);
-            return false;
-        }
-
-        bool throwException()
-        {
-            throw std::runtime_error("Exception");
-            return false;
-        }
-
-        bool multiplyNothing()
-        {
-            return false;
-        }
-
-        bool multiplyBoolean(bool a, bool b)
-        {
-            PT_UNIT_ASSERT_EQUALS(a, true)
-            PT_UNIT_ASSERT_EQUALS(b, true)
-            return true;
-        }
-
-        int multiplyInt(int a, int b)
-        {
-            return a*b;
-        }
-
-        double multiplyDouble(double a, double b)
-        {
-            return a*b;
-        }
-
-        std::string echoString(std::string a)
-        {
-            return a;
-        }
-
-        std::string multiplyEmpty(std::string a, std::string b)
-        {
-            PT_UNIT_ASSERT_EQUALS(a, "")
-            PT_UNIT_ASSERT_EQUALS(b, "")
-            return "4";
-        }
-
-        std::vector<int> multiplyVector(const std::vector<int>& a, const std::vector<int>& b)
-        {
-            std::vector<int> r;
-            if( a.size() )
-            {
-                r.push_back( a.at(0) * b.at(0) );
-                r.push_back( a.at(1) * b.at(1) );
-            }
-
-            return r;
-        }
-
         Color multiplyColor(const Color& a, const Color& b)
         {
             Color color;
@@ -537,6 +586,205 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             color.blue = a.blue * b.blue;
             return color;
         }
+
+        ////////////////////////////////////////////////////////////
+        // Set
+        //
+        void Set()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiplyset", *this, &PtXmlRpcTest::multiplySet);
+            _server->addService("/test", service);
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::RemoteProcedure<IntSet, IntSet, int> multiply(client, "multiplyset");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onSetFinished );
+
+            IntSet myset;
+            myset.insert(4);
+            myset.insert(5);
+            myset.insert(11);
+            myset.insert(5);
+
+            multiply.begin(myset, 2);
+
+            _loop->run();
+        }
+
+        void onSetFinished(const Pt::XmlRpc::Result<IntSet>& result)
+        {
+            const IntSet& v = result.get();
+            PT_UNIT_ASSERT_EQUALS(v.size(), 3);
+            PT_UNIT_ASSERT(v.find(8) != v.end());
+            PT_UNIT_ASSERT(v.find(10) != v.end());
+            PT_UNIT_ASSERT(v.find(22) != v.end());
+
+            _loop->exit();
+        }
+
+        IntSet multiplySet(const IntSet& s, int f)
+        {
+            IntSet ret;
+            for (IntSet::const_iterator it = s.begin(); it != s.end(); ++it)
+                ret.insert(*it * f);
+            return ret;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Multiset
+        //
+        void Multiset()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiplyset", *this, &PtXmlRpcTest::multiplyMultiset);
+            _server->addService("/test", service);
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::RemoteProcedure<IntMultiset, IntMultiset, int> multiply(client, "multiplyset");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onMultisetFinished );
+
+            IntMultiset myset;
+            myset.insert(4);
+            myset.insert(5);
+            myset.insert(11);
+            myset.insert(5);
+
+            multiply.begin(myset, 2);
+
+            _loop->run();
+        }
+
+        void onMultisetFinished(const Pt::XmlRpc::Result<IntMultiset>& result)
+        {
+            const IntMultiset& v = result.get();
+            PT_UNIT_ASSERT_EQUALS(v.size(), 4);
+            PT_UNIT_ASSERT_EQUALS(v.count(8), 1);
+            PT_UNIT_ASSERT_EQUALS(v.count(10), 2);
+            PT_UNIT_ASSERT_EQUALS(v.count(22), 1);
+
+            _loop->exit();
+        }
+
+        IntMultiset multiplyMultiset(const IntMultiset& s, int f)
+        {
+            IntMultiset ret;
+            for (IntMultiset::const_iterator it = s.begin(); it != s.end(); ++it)
+                ret.insert(*it * f);
+            return ret;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Map
+        //
+        void Map()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiplymap", *this, &PtXmlRpcTest::multiplyMap);
+
+            _server->addService("/test", service);
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::RemoteProcedure<IntMap, IntMap, int> multiply(client, "multiplymap");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onMultiplyMapFinished );
+
+            IntMap mymap;
+            mymap[2] = 4;
+            mymap[7] = 7;
+            mymap[1] = -1;
+
+            multiply.begin(mymap, 2);
+
+            _loop->run();
+        }
+
+        void onMultiplyMapFinished(const Pt::XmlRpc::Result<IntMap>& result)
+        {
+            const IntMap& v = result.get();
+            PT_UNIT_ASSERT_EQUALS(v.size(), 3);
+            PT_UNIT_ASSERT(v.find(2) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.find(2)->second, 8);
+            PT_UNIT_ASSERT(v.find(7) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.find(7)->second, 14);
+            PT_UNIT_ASSERT(v.find(1) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.find(1)->second, -2);
+
+            _loop->exit();
+        }
+
+        IntMap multiplyMap(const IntMap& m, int f)
+        {
+            IntMap ret;
+            for (IntMap::const_iterator it = m.begin(); it != m.end(); ++it)
+            {
+                ret[it->first] = it->second * f;
+            }
+
+            return ret;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // Multimap
+        //
+        void Multimap()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("multiplymultimap", *this, &PtXmlRpcTest::multiplyMultimap);
+
+            _server->addService("/test", service);
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::RemoteProcedure<IntMultimap, IntMultimap, int> multiply(client, "multiplymultimap");
+            connect( multiply.finished, *this, &PtXmlRpcTest::onMultiplyMultimapFinished );
+
+            IntMultimap mymap;
+            mymap.insert(IntMultimap::value_type(2, 4));
+            mymap.insert(IntMultimap::value_type(7, 7));
+            mymap.insert(IntMultimap::value_type(7, 8));
+            mymap.insert(IntMultimap::value_type(1, -1));
+
+            multiply.begin(mymap, 2);
+
+            _loop->run();
+        }
+
+        void onMultiplyMultimapFinished(const Pt::XmlRpc::Result<IntMultimap>& result)
+        {
+            const IntMultimap& v = result.get();
+            PT_UNIT_ASSERT_EQUALS(v.size(), 4);
+            PT_UNIT_ASSERT(v.lower_bound(2) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.lower_bound(2)->second, 8);
+            PT_UNIT_ASSERT(v.lower_bound(7) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.lower_bound(7)->second, 14);
+            IntMultimap::const_iterator it = v.lower_bound(7);
+            ++it;
+            PT_UNIT_ASSERT(it != v.end());
+            PT_UNIT_ASSERT_EQUALS(it->first, 7);
+            PT_UNIT_ASSERT_EQUALS(it->second, 16);
+            PT_UNIT_ASSERT(v.lower_bound(1) != v.end());
+            PT_UNIT_ASSERT_EQUALS(v.lower_bound(1)->second, -2);
+
+            _loop->exit();
+        }
+
+        IntMultimap multiplyMultimap(const IntMultimap& m, int f)
+        {
+            IntMultimap ret;
+            for (IntMultimap::const_iterator it = m.begin(); it != m.end(); ++it)
+            {
+                ret.insert(IntMultimap::value_type(it->first, it->second * f));
+            }
+
+            return ret;
+        }
+
 };
 
 Pt::Unit::RegisterTest<PtXmlRpcTest> register_PtXmlRpcTest;
