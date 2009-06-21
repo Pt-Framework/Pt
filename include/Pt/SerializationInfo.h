@@ -138,6 +138,9 @@ class PT_API SerializationInfo
         void setTypeName(const std::string& type)
         { _type = type; }
 
+        void setTypeName(const char* type)
+        { _type = type; }
+
         const std::string& name() const
         { return _name; }
 
