@@ -31,6 +31,74 @@
 
 namespace Pt {
 
+
+SerializationBinder::SerializationBinder()
+{
+}
+
+
+SerializationBinder::~SerializationBinder()
+{
+}
+
+
+std::string SerializationBinder::beginUnlinkTarget(const std::string& name, const void* p)
+{
+    return std::string();
+}
+
+
+void SerializationBinder::finishUnlinkTarget()
+{
+}
+
+
+void SerializationBinder::prepareUnlink(const void* p)
+{
+    throw SerializationError("missing unlink information");
+}
+
+
+bool SerializationBinder::isUnlinked(const std::string& id)
+{
+    return false;
+}
+
+
+std::string SerializationBinder::getUnlinkId(const void* p)
+{
+    throw SerializationError("missing unlink information");
+    return std::string();
+}
+
+
+void SerializationBinder::beginLinkTarget(const std::string& name, const std::string& id,
+                                           void* obj, const std::type_info& fixupInfo)
+{
+}
+
+
+void SerializationBinder::finishLinkTarget()
+{
+}
+
+
+void SerializationBinder::prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo)
+{
+}
+
+
+void SerializationBinder::link()
+{
+}
+
+
+bool SerializationBinder::checkLink(const std::type_info& from, const std::type_info& to)
+{
+    return from == to;
+}
+
+
 SerializationContext::SerializationContext()
 {
 }
@@ -129,63 +197,6 @@ void SerializationContext::push(SerializationInfo::Node* node)
     {
         delete node;
     }
-}
-
-
-std::string SerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
-{
-    return std::string();
-}
-
-
-void SerializationContext::finishUnlinkTarget()
-{
-}
-
-
-void SerializationContext::prepareUnlink(const void* p)
-{
-    throw SerializationError("missing unlink information");
-}
-
-
-bool SerializationContext::isUnlinked(const std::string& id)
-{
-    return false;
-}
-
-
-std::string SerializationContext::getUnlinkId(const void* p)
-{
-    throw SerializationError("missing unlink information");
-    return std::string();
-}
-
-
-void SerializationContext::beginLinkTarget(const std::string& name, const std::string& id,
-                                           void* obj, const std::type_info& fixupInfo)
-{
-}
-
-
-void SerializationContext::finishLinkTarget()
-{
-}
-
-
-void SerializationContext::prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo)
-{
-}
-
-
-void SerializationContext::link()
-{
-}
-
-
-bool SerializationContext::checkLink(const std::type_info& from, const std::type_info& to)
-{
-    return from == to;
 }
 
 } // namespace Pt

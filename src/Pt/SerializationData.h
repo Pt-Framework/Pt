@@ -181,28 +181,28 @@ class ReferenceNode : public SerializationInfo::Node
         const std::string& refId() const
         { return _refid; }
 
-        void setRefId(const std::string& addr)
-        { _refid = addr; }
+        void setRefId(const std::string& id)
+        { _refid = id; }
 
         void* address() const
         { return _address; }
 
         void setAddress(void* addr)
         { _address = addr; }
-
+/*
         const std::type_info* typeInfo() const
         { return _fixupInfo; }
 
         void setTypeInfo(const std::type_info& ti)
         { _fixupInfo = &ti; }
-
+*/
     protected:
         virtual void onClear()
         { _refid.clear(); }
 
     private:
         void* _address;
-        const std::type_info* _fixupInfo;
+        //const std::type_info* _fixupInfo;
         std::string _refid;
 };
 

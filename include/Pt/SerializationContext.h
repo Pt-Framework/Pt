@@ -42,12 +42,12 @@ class ValueNode;
 class ObjectNode;
 class ValueNode;
 
-class PT_API SerializationContext
+class PT_API SerializationBinder
 {
     public:
-        SerializationContext();
+        SerializationBinder();
 
-        virtual ~SerializationContext();
+        virtual ~SerializationBinder();
 
         virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
 
@@ -70,6 +70,15 @@ class PT_API SerializationContext
         virtual bool checkLink(const std::type_info& from, const std::type_info& to);
 
         virtual void link();
+};
+
+
+class PT_API SerializationContext : public SerializationBinder
+{
+    public:
+        SerializationContext();
+
+        virtual ~SerializationContext();
 
     public:
         SerializationInfo* get();
@@ -87,29 +96,6 @@ class PT_API SerializationContext
         std::vector<ValueNode*> _scalars;
         std::vector<ObjectNode*> _objects;
         std::vector<ReferenceNode*> _refs;
-
-};
-
-
-class SerializationBinder
-{
-    public:
-        SerializationBinder()
-        {}
-
-        virtual ~SerializationBinder()
-        {}
-
-        virtual void beginBindTarget(const std::string& name, const std::string& id,
-                                     void* obj, const std::type_info& fixupInfo) = 0;
-
-        virtual void finishBindTarget() = 0;
-
-        virtual void prepareBind(const std::string& id, void* obj, const std::type_info& fixupInfo) = 0;
-
-        virtual bool checkBinding(const std::type_info& from, const std::type_info& to) = 0;
-
-        virtual void bind() = 0;
 };
 
 } // namespace Pt

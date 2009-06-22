@@ -297,6 +297,7 @@ ObjectNode* SerializationInfo::initObject(Category category) const
 }
 
 
+// called during serialization, when a reference needs to be unlinked
 void SerializationInfo::setReference(void* ref)
 {
     ReferenceNode* node = initReference();
@@ -309,13 +310,7 @@ void SerializationInfo::setReference(void* ref)
 }
 
 
-void SerializationInfo::setReference(const std::string& id)
-{
-    ReferenceNode* node = initReference();
-    node->setRefId(id);
-}
-
-
+// called during serialization, when a reference needs to be unlinked
 SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
 {
     SerializationInfo& info = this->addMember(name);
@@ -325,19 +320,29 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 }
 
 
+// called during deserialization, when a reference id was parsed
+void SerializationInfo::setReference(const std::string& id)
+{
+    ReferenceNode* node = initReference();
+    node->setRefId(id);
+}
+
+
+// called during deserialization, when a reference needs to be relinked
+// by a previously parsed reference id
 void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
 {
     ReferenceNode* node = initReference();
-    node->setAddress(&type);
-    node->setTypeInfo(ti);
+    //node->setAddress(&type);
+    //node->setTypeInfo(ti);
 
-    void* refAddr = node->address();
+    //void* refAddr = node->address();
     const std::string& refId = node->refId();
-    const std::type_info* refType = node->typeInfo();
+    //const std::type_info* refType = node->typeInfo();
     
     if(_context)
     {
-        _context->prepareLink( refId, refAddr, *refType );
+        _context->prepareLink( refId, &type, ti );
     }
 }
 
