@@ -31,73 +31,17 @@ namespace Pt {
 
 namespace Xml {
 
-XmlSerializer::XmlSerializer()
+XmlSerializationContext::XmlSerializationContext()
 {
 }
 
 
-XmlSerializer::XmlSerializer(std::ostream& os)
-: _formatter(os)
+XmlSerializationContext::~XmlSerializationContext()
 {
 }
 
 
-XmlSerializer::XmlSerializer(XmlWriter* writer)
-: _formatter(writer)
-{
-}
-
-
-XmlSerializer::~XmlSerializer()
-{
-    this->finish();
-}
-
-
-void XmlSerializer::attach(std::ostream& os)
-{
-    _formatter.attach(os);
-}
-
-
-void XmlSerializer::attach(XmlWriter& writer)
-{
-    _formatter.attach(writer);
-}
-
-
-void XmlSerializer::detach()
-{
-    _formatter.detach();
-}
-
-
-void XmlSerializer::finish()
-{
-    std::vector<ISerializer*>::iterator it;
-
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        (*it)->format(*this, _formatter);
-    }
-
-    for(it = _heap.begin(); it != _heap.end(); ++it)
-    {
-        delete *it;
-    }
-
-    _heap.clear();
-    _stack.clear();
-}
-
-
-void XmlSerializer::flush()
-{
-    _formatter.flush();
-}
-
-
-std::string XmlSerializer::beginUnlinkTarget(const std::string& name, const void* p)
+std::string XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -109,12 +53,12 @@ std::string XmlSerializer::beginUnlinkTarget(const std::string& name, const void
 }
 
 
-void XmlSerializer::finishUnlinkTarget()
+void XmlSerializationContext::finishUnlinkTarget()
 {
 }
 
 
-void XmlSerializer::prepareUnlink(const void* p)
+void XmlSerializationContext::prepareUnlink(const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -127,20 +71,94 @@ void XmlSerializer::prepareUnlink(const void* p)
 }
 
 
-bool XmlSerializer::isUnlinked(const std::string& id)
+bool XmlSerializationContext::isUnlinked(const std::string& id)
 {
     unsigned n = convert<unsigned>( id );
     return _linkmap.find(n) != _linkmap.end();
 }
 
 
-std::string XmlSerializer::getUnlinkId(const void* p)
+std::string XmlSerializationContext::getUnlinkId(const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
         throw SerializationError("missing unlink information");
 
     return convert<std::string>( _idmap[p] );
 }
+
+
+XmlSerializer::XmlSerializer()
+: _context(0)
+{
+	_context = &_xmlcontext;
+}
+
+
+XmlSerializer::XmlSerializer(std::ostream& os)
+: XmlFormatter(os)
+, _context(0)
+{
+	_context = &_xmlcontext;
+}
+
+
+XmlSerializer::XmlSerializer(XmlWriter* writer)
+: XmlFormatter(writer)
+, _context(0)
+{
+	_context = &_xmlcontext;
+}
+
+
+XmlSerializer::~XmlSerializer()
+{
+    this->finish();
+}
+
+
+/*
+void XmlSerializer::attach(std::ostream& os)
+{
+    _formatter.attach(os);
+}
+*/
+/*
+void XmlSerializer::attach(XmlWriter& writer)
+{
+    _formatter.attach(writer);
+}
+*/
+/*
+void XmlSerializer::detach()
+{
+    _formatter.detach();
+}
+*/
+
+void XmlSerializer::finish()
+{
+    std::vector<ISerializer*>::iterator it;
+
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        (*it)->format(*_context, *this); // context, formatter
+    }
+
+    for(it = _heap.begin(); it != _heap.end(); ++it)
+    {
+        delete *it;
+    }
+
+    _heap.clear();
+    _stack.clear();
+}
+
+/*
+void XmlSerializer::flush()
+{
+    _formatter.flush();
+}
+*/
 
 } // namespace Xml
 

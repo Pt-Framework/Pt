@@ -38,13 +38,35 @@ namespace Pt {
 
 namespace Xml {
 
+class PT_XML_API XmlSerializationContext : public SerializationContext
+{
+    public:
+        XmlSerializationContext();
+        
+        //! @brief Destructor
+        ~XmlSerializationContext();
+        
+        virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
+
+        virtual void finishUnlinkTarget();
+
+        virtual void prepareUnlink(const void* p);
+
+        virtual bool isUnlinked(const std::string& id);
+
+        virtual std::string getUnlinkId(const void* p);
+
+    private:
+        std::map<const void*, unsigned> _idmap;
+        std::map<unsigned, const void*> _linkmap;
+};
+
 /** @brief Serialize objects or object data to XML
 
     Thic class performs XML serialization of a single object or
     object data.
 */
-class PT_XML_API XmlSerializer : public SerializationContext
-                               , public XmlFormatter
+class PT_XML_API XmlSerializer : public XmlFormatter
 {
     public:
         /** @brief Construct a serializer without initializing the
@@ -72,6 +94,15 @@ class PT_XML_API XmlSerializer : public SerializationContext
 
         //! @brief Destructor
         ~XmlSerializer();
+
+        SerializationContext& context()
+        { return *_context; }
+
+        const SerializationContext& context() const
+        { return *_context; }
+
+        void setContext(SerializationContext& context)
+        { _context = &context; }
 
         /** @brief Opens this serializer for writing into the given stream.
 
@@ -120,9 +151,9 @@ class PT_XML_API XmlSerializer : public SerializationContext
             _heap.push_back(serializer);
             _stack.push_back(serializer);
 
-            serializer->begin(type, name, *this);
+            serializer->begin(type, name, *_context);
             //serializer->setName(name);
-            serializer->prepareUnlink(*this);
+            serializer->prepareUnlink(*_context);
         }
 
         void finish();
@@ -130,24 +161,9 @@ class PT_XML_API XmlSerializer : public SerializationContext
         //! @internal
         //void flush();
 
-    public:
-        virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
-
-        virtual void finishUnlinkTarget();
-
-        virtual void prepareUnlink(const void* p);
-
-        virtual bool isUnlinked(const std::string& id);
-
-        virtual std::string getUnlinkId(const void* p);
-
     private:
-        std::map<const void*, unsigned> _idmap;
-        std::map<unsigned, const void*> _linkmap;
-
-    private:
-        // TODO:derive from formatter
-        //XmlFormatter _formatter;
+        XmlSerializationContext _xmlcontext;
+        SerializationContext* _context;
 
         std::vector<ISerializer*> _stack;
         std::vector<ISerializer*> _heap;
