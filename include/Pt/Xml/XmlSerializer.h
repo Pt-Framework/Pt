@@ -44,6 +44,7 @@ namespace Xml {
     object data.
 */
 class PT_XML_API XmlSerializer : public SerializationContext
+                               , public XmlFormatter
 {
     public:
         /** @brief Construct a serializer without initializing the
@@ -82,7 +83,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
             XmlWriter object. If this method is called anyway or called twice an
             std::logic_error is thrown.
         */
-        void attach(std::ostream& os);
+        //void attach(std::ostream& os);
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 
@@ -96,14 +97,14 @@ class PT_XML_API XmlSerializer : public SerializationContext
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        void attach(XmlWriter& writer);
+        //void attach(XmlWriter& writer);
 
         /** @brief Detaches the currently set writer from this object.
 
             Before detaching the writer, the underlaying stream is flushed.
             If there is no currently set writer, nothing happens.
         */
-        void detach();
+        //void detach();
 
         /** @brief Serialize an object to XML
 
@@ -127,7 +128,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
         void finish();
 
         //! @internal
-        void flush();
+        //void flush();
 
     public:
         virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
@@ -146,7 +147,7 @@ class PT_XML_API XmlSerializer : public SerializationContext
 
     private:
         // TODO:derive from formatter
-        XmlFormatter _formatter;
+        //XmlFormatter _formatter;
 
         std::vector<ISerializer*> _stack;
         std::vector<ISerializer*> _heap;
