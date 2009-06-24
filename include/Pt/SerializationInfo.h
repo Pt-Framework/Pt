@@ -520,6 +520,54 @@ inline void operator <<=(SerializationInfo& si, const Unlink<T>& ul)
     si.finishUnlink();
 }
 
+struct unbind
+{};
+
+/////////////////////
+template <typename T>
+struct Unbinder
+{
+    const T* type;
+};
+
+template <typename T>
+inline Unbinder<T> operator<<= (const unbind&, const T& t)
+{
+    Unbinder<T> ub;
+    ub.type = &t;
+    return ub;
+}
+
+template <typename T>
+void operator<<= (SerializationInfo& si, Unbinder<T> ub)
+{
+    si.beginUnlink( ub.type );
+    si <<= *(ub.type);
+    si.finishUnlink();
+}
+
+////////////////
+struct Unbind
+{
+    SerializationInfo* si;
+};
+
+inline Unbind operator<< (SerializationInfo& si, Unbind ub)
+{
+    ub.si = &si;
+    return ub;
+}
+
+template <typename T>
+SerializationInfo& operator<<= (const Unbind& out, const T& t)
+{
+    out.si->beginUnlink( &t );
+    *(out.si) <<= t;
+    out.si->finishUnlink();
+    return *(out.si);
+}
+
+
 
 template <typename T>
 struct Link

@@ -69,9 +69,8 @@ class Serializer : public ISerializer
             _si.setContext(context);
 
             _si.setName(name);
-            
-            //TODO:
-            _si <<= Pt::unlink(*_type);
+
+             _si <<= Pt::unbind() <<= *_type;
         }
 
         virtual void prepareUnlink( SerializationContext& context ) 
