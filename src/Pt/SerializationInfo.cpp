@@ -71,9 +71,9 @@ void SerializationInfo::prepareUnlink(SerializationContext& context)
 }
 */
 
-void SerializationInfo::format(Formatter& formatter, SerializationContext& context)
+void SerializationInfo::format(Formatter& formatter)
 {
-    if( this->id().size() && ! context.isUnlinked( this->id() ) )
+    if( _context && ! _context->isUnlinked( this->id() ) )
     {
         this->setId("");
     }
@@ -84,8 +84,11 @@ void SerializationInfo::format(Formatter& formatter, SerializationContext& conte
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
+    	if( ! _context )
+    		throw SerializationError("context not available");
+        
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
-        std::string id = context.getUnlinkId( refAddr );
+        std::string id = _context->getUnlinkId( refAddr );
         formatter.addReference( this->name(), id);
     }
     else if(this->category() == SerializationInfo::Object)
@@ -96,7 +99,7 @@ void SerializationInfo::format(Formatter& formatter, SerializationContext& conte
         for(it = this->begin(); it != this->end(); ++it)
         {
             formatter.beginMember( it->name() );
-            it->format(formatter, context);
+            it->format(formatter);
             formatter.finishMember();
         }
 
@@ -109,7 +112,7 @@ void SerializationInfo::format(Formatter& formatter, SerializationContext& conte
         SerializationInfo::Iterator it;
         for(it = this->begin(); it != this->end(); ++it)
         {
-            it->format(formatter, context);
+            it->format(formatter);
         }
 
         formatter.finishArray();

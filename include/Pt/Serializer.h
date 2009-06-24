@@ -43,9 +43,9 @@ class ISerializer
         virtual ~ISerializer()
         {}
 
+		virtual void setContext( SerializationContext& context ) = 0;
+        
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
-
-        virtual void prepareUnlink( SerializationContext& context ) = 0;
 
     protected:
         ISerializer()
@@ -58,35 +58,28 @@ class Serializer : public ISerializer
 {
     public:
         Serializer()
-        : _type(0)
-        , _current(&_si)
         { }
 
-        void begin(const T& type, const std::string& name, SerializationContext& context)
+        void begin(const T& type, const std::string& name)
         {
             _si.clear();
-            _type = &type;
-            _si.setContext(context);
-
             _si.setName(name);
 
-             _si <<= Pt::unbind() <<= *_type;
+            _si <<= Pt::unlink() <<= type;
         }
 
-        virtual void prepareUnlink( SerializationContext& context ) 
+        virtual void setContext(SerializationContext& context) 
         {
-
+			_si.setContext(context);
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)
         {
-            _si.format(formatter, context);
+            _si.format(formatter);
         }
 
     private:
-        const T* _type;
         SerializationInfo _si;
-        SerializationInfo* _current;
 };
 
 } // namespace Pt

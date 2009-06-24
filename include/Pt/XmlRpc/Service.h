@@ -99,18 +99,18 @@ class BasicServiceProcedure : public ServiceProcedure
 
         IDeserializer** beginCall(SerializationContext& context)
         {
-            _a1.begin(_v1, context);
-            _a2.begin(_v2, context);
-            _a3.begin(_v3, context);
-            _a4.begin(_v4, context);
-            _a5.begin(_v5, context);
+            _a1.begin(_v1);
+            _a2.begin(_v2);
+            _a3.begin(_v3);
+            _a4.begin(_v4);
+            _a5.begin(_v5);
             return _args;
         }
 
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5);
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -177,10 +177,10 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
 
         IDeserializer** beginCall(SerializationContext& context)
         {
-            _a1.begin(_v1, context);
-            _a2.begin(_v2, context);
-            _a3.begin(_v3, context);
-            _a4.begin(_v4, context);
+            _a1.begin(_v1);
+            _a2.begin(_v2);
+            _a3.begin(_v3);
+            _a4.begin(_v4);
 
             return _args;
         }
@@ -188,7 +188,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4);
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -252,9 +252,9 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
 
         IDeserializer** beginCall(SerializationContext& context)
         {
-            _a1.begin(_v1, context);
-            _a2.begin(_v2, context);
-            _a3.begin(_v3, context);
+            _a1.begin(_v1);
+            _a2.begin(_v2);
+            _a3.begin(_v3);
 
             return _args;
         }
@@ -262,7 +262,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call(_v1, _v2, _v3);
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -320,15 +320,15 @@ class BasicServiceProcedure<R, C, A1, A2,
 
         IDeserializer** beginCall(SerializationContext& context)
         {
-            _a1.begin(_v1, context);
-            _a2.begin(_v2, context);
+            _a1.begin(_v1);
+            _a2.begin(_v2);
             return _args;
         }
 
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call(_v1, _v2);
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -380,14 +380,14 @@ class BasicServiceProcedure<R, C, A1,
 
         IDeserializer** beginCall(SerializationContext& context)
         {
-            _a1.begin(_v1, context);
+            _a1.begin(_v1);
             return _args;
         }
 
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call(_v1);
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -440,7 +440,7 @@ class BasicServiceProcedure<R, C, Pt::Void,
         ISerializer* endCall(SerializationContext& context)
         {
             _rv = _cb->call();
-            _r.begin(_rv, "", context);
+            _r.begin(_rv, "");
             return &_r;
         }
 

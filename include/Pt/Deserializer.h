@@ -51,6 +51,8 @@ class IDeserializer
         IDeserializer* parent()
         { return _parent; }
 
+		virtual void setContext( SerializationContext& context ) = 0;
+
         virtual void setName(const std::string& name) = 0;
 
         virtual void setId(const std::string& id) = 0;
@@ -69,8 +71,6 @@ class IDeserializer
 
         virtual void leave() = 0;
 
-        virtual void prepareLink(SerializationContext& context) = 0;
-
     private:
         IDeserializer* _parent;
 };
@@ -85,12 +85,16 @@ class Deserializer : public IDeserializer
         , _current(&_si)
         {}
 
-        void begin(T& type, SerializationContext& context)
+        void begin(T& type)
         {
             _si.clear();
-            _si.setContext(context);
             _type = &type;
             _current = &_si;
+        }
+
+        virtual void setContext(SerializationContext& context) 
+        {
+			_si.setContext(context);
         }
 
         virtual void setName(const std::string& name)
@@ -125,6 +129,7 @@ class Deserializer : public IDeserializer
             return this;
         }
 
+		// TODO: beginElement
         virtual IDeserializer* beginMember()
         {
             SerializationInfo& child = _current->addMember();
@@ -151,14 +156,6 @@ class Deserializer : public IDeserializer
         virtual void leave()
         {
             *_current >>= Pt::link(*_type);
-        }
-
-        virtual void prepareLink(SerializationContext& context)
-        {
-        	// TODO: move this into SerializationInfo
-            //context.beginLinkTarget( _si.name(), _si.id(), _type, typeid(T) );
-            //_si.prepareLink(context);
-            //context.finishLinkTarget();
         }
 
     private:

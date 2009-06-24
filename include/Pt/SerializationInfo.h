@@ -293,7 +293,7 @@ class PT_API SerializationInfo
         
         //void finishPublic();
 
-        void format(Formatter& formatter, SerializationContext& context);
+        void format(Formatter& formatter);
 
         //void prepareLink(SerializationContext& context);
 
@@ -495,78 +495,32 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
+struct unlink
+{};
+
+
 // TODO rename Break or BreakDown
 template <typename T>
 struct Unlink
-{
-	const T* type;
-};
-
-
-template <typename T>
-Unlink<T> unlink(const T& type)
-{
-	Unlink<T> ul;
-	ul.type = &type;
-	return ul;
-};
-
-
-template <typename T>
-inline void operator <<=(SerializationInfo& si, const Unlink<T>& ul)
-{
-    si.beginUnlink( ul.type );
-    si <<= *(ul.type);
-    si.finishUnlink();
-}
-
-struct unbind
-{};
-
-/////////////////////
-template <typename T>
-struct Unbinder
 {
     const T* type;
 };
 
 template <typename T>
-inline Unbinder<T> operator<<= (const unbind&, const T& t)
+inline Unlink<T> operator<<= (unlink, const T& t)
 {
-    Unbinder<T> ub;
-    ub.type = &t;
-    return ub;
+    Unlink<T> u;
+    u.type = &t;
+    return u;
 }
 
 template <typename T>
-void operator<<= (SerializationInfo& si, Unbinder<T> ub)
+void operator<<= (SerializationInfo& si, Unlink<T> u)
 {
-    si.beginUnlink( ub.type );
-    si <<= *(ub.type);
+    si.beginUnlink( u.type );
+    si <<= *(u.type);
     si.finishUnlink();
 }
-
-////////////////
-struct Unbind
-{
-    SerializationInfo* si;
-};
-
-inline Unbind operator<< (SerializationInfo& si, Unbind ub)
-{
-    ub.si = &si;
-    return ub;
-}
-
-template <typename T>
-SerializationInfo& operator<<= (const Unbind& out, const T& t)
-{
-    out.si->beginUnlink( &t );
-    *(out.si) <<= t;
-    out.si->finishUnlink();
-    return *(out.si);
-}
-
 
 
 template <typename T>
@@ -799,7 +753,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        si.addMember() <<= Pt::unlink(*it);
+        si.addMember() <<= Pt::unlink() <<= *it;
     }
 
     si.setTypeName("array");

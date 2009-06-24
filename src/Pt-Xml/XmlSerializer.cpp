@@ -73,6 +73,9 @@ void XmlSerializationContext::prepareUnlink(const void* p)
 
 bool XmlSerializationContext::isUnlinked(const std::string& id)
 {
+	if( id.empty() )
+		return false;
+
     unsigned n = convert<unsigned>( id );
     return _linkmap.find(n) != _linkmap.end();
 }

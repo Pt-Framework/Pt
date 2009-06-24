@@ -287,7 +287,7 @@ void Client::advance(const Pt::Xml::Node& node)
 
                 else if( se.name() == L"fault")
                 {
-                    _fh.begin(_fault, _context);
+                    _fh.begin(_fault);
                     _scanner.begin(_fh);
                     _state = OnFaultBegin;
                     break;
