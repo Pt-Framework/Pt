@@ -82,15 +82,8 @@ class IntDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void* target()
-        {
-            return _type;
-        }
-
-        virtual const std::type_info& targetType()
-        {
-            return typeid(value_type);
-        }
+        virtual void setContext(Pt::SerializationContext& cx)
+        { }
 
         virtual void setName(const std::string& name)
         { }
@@ -155,15 +148,8 @@ class VectorDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void* target()
-        {
-            return _type;
-        }
-
-        virtual const std::type_info& targetType()
-        {
-            return typeid(value_type);
-        }
+        virtual void setContext(Pt::SerializationContext& cx)
+        { }
 
         virtual void setName(const std::string& name)
         { }
@@ -384,7 +370,7 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        vecdes.begin(vec, context);
+        vecdes.begin(vec);
 
         input.clear();
         input.seekg(std::ios::beg);
