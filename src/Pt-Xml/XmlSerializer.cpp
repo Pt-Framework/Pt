@@ -144,7 +144,7 @@ void XmlSerializer::finish()
 
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
-        (*it)->format(*_context, *this); // context, formatter
+        (*it)->format(*this);
     }
 
     for(it = _heap.begin(); it != _heap.end(); ++it)

@@ -46,6 +46,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         ~Formatter();
 
+		// TODO: addAlias is unneccessary once addBool() is available
         void addAlias(const std::string& type, const std::string& alias);
 
         void attach(Xml::XmlWriter& writer);
@@ -53,12 +54,22 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
+		void addInt(const std::string& name, const std::string& type,
+                    long value, const std::string& id);
+
+		void addUInt(const std::string& name, const std::string& type,
+                     unsigned long value, const std::string& id);
+
+		void addFloat(const std::string& name, const std::string& type,
+                      double value, const std::string& id);
+
         void addReference(const std::string& name, const std::string& id);
 
         void beginArray(const std::string& name, const std::string& id);
 
         void finishArray();
 
+		// TODO: format typename
         void beginObject(const std::string& name, const std::string& id);
 
         void beginMember(const std::string& name);
@@ -72,6 +83,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
     private:
         Xml::XmlWriter* _writer;
         std::map<std::string, std::string> _typemap;
+        Pt::String _value;
 };
 
 }

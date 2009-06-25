@@ -80,7 +80,10 @@ void SerializationInfo::format(Formatter& formatter)
 
     if(this->category() == SerializationInfo::Value)
     {
-        formatter.addValue( this->name(), this->typeName(), this->toString(), this->id() );
+    	static_cast<const ValueNode*>(_node)->format( formatter, 
+    	                                              this->name(), 
+    	                                              this->typeName(), 
+    	                                              this->id() );
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
     {

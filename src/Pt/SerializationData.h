@@ -30,6 +30,7 @@
 #define Pt_SerializationData_h
 
 #include <Pt/SerializationContext.h>
+#include <Pt/Formatter.h>
 
 namespace Pt {
 
@@ -155,6 +156,29 @@ class ValueNode : public SerializationInfo::Node
             }
 
             return _variant.f;
+        }
+
+        void format(Formatter& formatter, const std::string& name,
+                     const std::string& type, const std::string& id)
+        {
+            switch(_type)
+            {
+                case Int:
+                    formatter.addInt( name, type, _variant.l, id );
+                    break;
+
+                case UInt:
+                    formatter.addUInt( name, type, _variant.ul, id );
+                    break;
+
+                case Float:
+                    formatter.addFloat( name, type, _variant.f, id );
+                    break;
+                
+                default:
+                    formatter.addValue( name, type, _value, id );
+                    break;
+            }
         }
 
     protected:

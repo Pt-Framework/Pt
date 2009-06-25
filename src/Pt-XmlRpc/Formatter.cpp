@@ -29,6 +29,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/Convert.h>
 
 namespace Pt {
 
@@ -69,6 +70,30 @@ void Formatter::addValue(const std::string& name, const std::string& type,
         _writer->writeElement( Pt::String::widen(type), value );
 
     _writer->writeEndElement();
+}
+
+
+void Formatter::addInt(const std::string& name, const std::string& type,
+                            long value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
+}
+
+
+void Formatter::addUInt(const std::string& name, const std::string& type,
+                           unsigned long value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
+}
+
+
+void Formatter::addFloat(const std::string& name, const std::string& type,
+                            double value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
 }
 
 

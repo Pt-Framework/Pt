@@ -181,6 +181,8 @@ class PT_API SerializationInfo
         void setValue(const T& value)
         { convert( initString(), value ); }
 
+        // TODO: getBool, setBool
+
         void getValue(short& s) const;
 
         void setValue(short s);
@@ -289,15 +291,7 @@ class PT_API SerializationInfo
         */
         SerializationInfo& addReference(const std::string& name, void* ref);
 
-        //void prepareUnlink(SerializationContext& context);
-
-        //void beginPublic(const void* p);
-        
-        //void finishPublic();
-
         void format(Formatter& formatter);
-
-        //void prepareLink(SerializationContext& context);
 
         void release(SerializationContext& context);
 
@@ -333,8 +327,6 @@ class PT_API SerializationInfo
         }
 
     private:
-        //void prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context);
-
         void getReference(void*& type, const std::type_info& ti) const;
 
         ValueNode* initValue() const;

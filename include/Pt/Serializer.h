@@ -30,7 +30,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
-#include <Pt/SerializationContext.h>
 
 namespace Pt {
 
@@ -45,11 +44,11 @@ class ISerializer
 
         virtual void setContext( SerializationContext& context ) = 0;
 
-        virtual void setName(const std::string& name) {} // TODO
+        virtual void setName(const std::string& name) = 0;
 
-        virtual void prepare( SerializationContext& context ) {} // TODO
+        virtual void prepare() = 0;
 
-        virtual void format(SerializationContext& context, Formatter& formatter) = 0;
+        virtual void format(Formatter& formatter) = 0;
 
     protected:
         ISerializer()
@@ -62,14 +61,13 @@ class Serializer : public ISerializer
 {
     public:
         Serializer()
+        : _type(0)
         { }
 
-        void begin(const T& type, const std::string& name)
+        void begin(const T& type)
         {
             _si.clear();
-            _si.setName(name);
-
-            _si <<= Pt::unlink() <<= type;
+            _type = &type;
         }
 
         virtual void setContext(SerializationContext& context) 
@@ -77,13 +75,24 @@ class Serializer : public ISerializer
             _si.setContext(context);
         }
 
-        virtual void format(SerializationContext& context, Formatter& formatter)
+        virtual void setName(const std::string& name) 
+        {
+            _si.setName(name);
+        }
+
+        virtual void prepare() 
+        {
+            _si <<= Pt::unlink() <<= *_type;
+        }
+
+        virtual void format(Formatter& formatter)
         {
             _si.format(formatter);
         }
 
     private:
         SerializationInfo _si;
+        const T* _type;
 };
 
 } // namespace Pt

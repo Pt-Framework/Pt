@@ -30,6 +30,7 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
+#include "Pt/Convert.h"
 #include "Pt/String.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
@@ -113,6 +114,30 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
     }
     else
         _writer->writeElement( Pt::String::widen( name ), value );
+}
+
+
+void XmlFormatter::addInt(const std::string& name, const std::string& type,
+                            long value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
+}
+
+
+void XmlFormatter::addUInt(const std::string& name, const std::string& type,
+                           unsigned long value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
+}
+
+
+void XmlFormatter::addFloat(const std::string& name, const std::string& type,
+                            double value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
 }
 
 

@@ -35,35 +35,25 @@
 
 namespace Pt {
 
-class SerializationUnbinder
-{
-    public:
-        SerializationUnbinder()
-        {}
-
-        virtual ~SerializationUnbinder()
-        {}
-
-        virtual void beginUnbindTarget(const std::string& name, const void* p) = 0;
-
-        virtual void finishUnbindTarget() = 0;
-
-        virtual void prepareUnbind(const void* p) = 0;
-
-        virtual bool isUnbound(const void* p) = 0;
-
-        virtual std::string unbind(const void* p) = 0;
-};
-
-
 class Formatter
 {
     public:
         virtual ~Formatter()
         { }
 
+        //TODO: addBool()
+
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
+
+		virtual void addInt(const std::string& name, const std::string& type,
+                            long value, const std::string& id) = 0;
+
+		virtual void addUInt(const std::string& name, const std::string& type,
+                             unsigned long value, const std::string& id) = 0;
+
+		virtual void addFloat(const std::string& name, const std::string& type,
+                              double value, const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;
 

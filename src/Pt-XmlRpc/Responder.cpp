@@ -184,7 +184,7 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
         _writer.writeStartElement( L"methodResponse" );
         _writer.writeStartElement( L"params" );
         _writer.writeStartElement( L"param" );
-        rh->format(_context, _formatter);
+        rh->format(_formatter);
         _writer.writeEndElement(); // param
         _writer.writeEndElement(); // params
         _writer.writeEndElement(); // methodResponse

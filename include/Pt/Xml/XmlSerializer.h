@@ -152,8 +152,9 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             _stack.push_back(serializer);
 
             serializer->setContext(*_context);
-            serializer->begin(type, name);
-            //serializer->setName(name);
+            serializer->begin(type);
+            serializer->setName(name);
+            serializer->prepare();
         }
 
         void finish();

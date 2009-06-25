@@ -128,11 +128,16 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
-            _a4.begin( a4, "" );
-            _a5.begin( a5, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
+            _a4.begin(a4);
+            _a4.prepare();
+            _a5.begin(a5);
+            _a5.prepare();
 
             this->_r.begin( this->_result.value() );
 
@@ -144,11 +149,17 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
-            _a4.begin( a4, "" );
-            _a5.begin( a5, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
+            _a4.begin(a4);
+            _a4.prepare();
+            _a5.begin(a5);
+            _a5.prepare();
+            
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5};
@@ -187,10 +198,14 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
-            _a4.begin( a4, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
+            _a4.begin(a4);
+            _a4.prepare();
 
             this->_r.begin( this->_result.value() );
 
@@ -202,10 +217,15 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
-            _a4.begin( a4, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
+            _a4.begin(a4);
+            _a4.prepare();
+            
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[4] = { &_a1, &_a2, &_a3, &_a4};
@@ -243,9 +263,12 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
@@ -256,9 +279,12 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
-            _a3.begin( a3, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
+            _a3.begin(a3);
+            _a3.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[3] = { &_a1, &_a2, &_a3};
@@ -295,8 +321,10 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
@@ -307,8 +335,10 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
-            _a2.begin( a2, "" );
+            _a1.begin(a1);
+            _a1.prepare();
+            _a2.begin(a2);
+            _a2.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[2] = { &_a1, &_a2 };
@@ -344,7 +374,8 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
+            _a1.begin(a1);
+            _a1.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[1] = { &_a1 };
@@ -355,7 +386,8 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin( a1, "" );
+            _a1.begin(a1);
+            _a1.prepare();
             this->_r.begin( this->_result.value() );
 
             ISerializer* argv[1] = { &_a1 };
