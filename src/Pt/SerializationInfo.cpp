@@ -137,27 +137,33 @@ void SerializationInfo::prepareLink(SerializationContext& context)
 */
 
 void SerializationInfo::beginUnlink(const void* p)
-{ 	
-	if(_context)
+{
+    if(_parent == 0 || _parent->_binder)
+        _binder = _context;
+
+    if( _context )
     {
-        std::string id = _context->beginUnlinkTarget(_name, p); 
+        std::string id = _context->beginUnlinkTarget(_name, p);
         this->setId(id);
     }
 }
 
 
 void SerializationInfo::finishUnlink()
-{ 	
-	if(_context)
+{
+    if(_binder)
     {
-        _context->finishUnlinkTarget(); 
+        _binder->finishUnlinkTarget();
     }
 }
 
 
 void SerializationInfo::beginLink(void* p, const std::type_info& ti) const
 {
-	if(_context)
+    if(_parent == 0 || _parent->_binder)
+        _binder = _context;
+
+    if(_context)
     {
         _context->beginLinkTarget( _name, _id, p, ti);
     }
@@ -166,7 +172,7 @@ void SerializationInfo::beginLink(void* p, const std::type_info& ti) const
 
 void SerializationInfo::finishLink() const
 {
-	if(_context)
+    if(_context)
     {
         _context->finishLinkTarget();
     }

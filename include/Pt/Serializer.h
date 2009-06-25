@@ -43,8 +43,12 @@ class ISerializer
         virtual ~ISerializer()
         {}
 
-		virtual void setContext( SerializationContext& context ) = 0;
-        
+        virtual void setContext( SerializationContext& context ) = 0;
+
+        virtual void setName(const std::string& name) {} // TODO
+
+        virtual void prepare( SerializationContext& context ) {} // TODO
+
         virtual void format(SerializationContext& context, Formatter& formatter) = 0;
 
     protected:
@@ -70,7 +74,7 @@ class Serializer : public ISerializer
 
         virtual void setContext(SerializationContext& context) 
         {
-			_si.setContext(context);
+            _si.setContext(context);
         }
 
         virtual void format(SerializationContext& context, Formatter& formatter)
