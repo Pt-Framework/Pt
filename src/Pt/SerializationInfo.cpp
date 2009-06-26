@@ -377,12 +377,12 @@ void SerializationInfo::getValue(short& s) const
     s = static_cast<short>(l);
 }
 
-
+/*
 void SerializationInfo::setValue(short s)
 {
     initValue()->setInt(s);
 }
-
+*/
 
 void SerializationInfo::getValue(int& i) const
 {
@@ -392,12 +392,12 @@ void SerializationInfo::getValue(int& i) const
     i = static_cast<int>(l);
 }
 
-
+/*
 void SerializationInfo::setValue(int i)
 {
     initValue()->setInt(i);
 }
-
+*/
 
 void SerializationInfo::getValue(long& l) const
 {
@@ -421,12 +421,12 @@ void SerializationInfo::getValue(unsigned short& us) const
     us = static_cast<int>(ul);
 }
 
-
+/*
 void SerializationInfo::setValue(unsigned short us)
 {
     initValue()->setUInt(us);
 }
-
+*/
 
 void SerializationInfo::getValue(unsigned int& ui) const
 {
@@ -436,12 +436,12 @@ void SerializationInfo::getValue(unsigned int& ui) const
     ui = static_cast<int>(ul);
 }
 
-
+/*
 void SerializationInfo::setValue(unsigned int ui)
 {
     initValue()->setUInt(ui);
 }
-
+*/
 
 void SerializationInfo::getValue(unsigned long& ul) const
 {
@@ -466,12 +466,12 @@ void SerializationInfo::getValue(float& f) const
     f = static_cast<double>(d);
 }
 
-
+/*
 void SerializationInfo::setValue(float f)
 {
     initValue()->setFloat(f);
 }
-
+*/
 
 void SerializationInfo::getValue(double& f) const
 {

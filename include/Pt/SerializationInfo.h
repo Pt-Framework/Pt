@@ -185,11 +185,11 @@ class PT_API SerializationInfo
 
         void getValue(short& s) const;
 
-        void setValue(short s);
+        //void setValue(short s);
 
         void getValue(int& i) const;
 
-        void setValue(int i);
+        //void setValue(int i);
 
         void getValue(long& l) const;
 
@@ -197,11 +197,11 @@ class PT_API SerializationInfo
 
         void getValue(unsigned short& us) const;
 
-        void setValue(unsigned short us);
+        //void setValue(unsigned short us);
 
         void getValue(unsigned int& ui) const;
 
-        void setValue(unsigned int ui);
+        //void setValue(unsigned int ui);
 
         void getValue(unsigned long& ul) const;
 
@@ -209,7 +209,7 @@ class PT_API SerializationInfo
 
         void getValue(float& f) const;
 
-        void setValue(float f);
+        //void setValue(float f);
 
         void getValue(double& f) const;
 
