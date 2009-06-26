@@ -136,7 +136,6 @@ class PT_API SerializationInfo
         const std::string& typeName() const
         { return _type; }
 
-        // TODO: performance optimization: overload const char*
         void setTypeName(const std::string& type)
         { _type = type; }
 
@@ -163,11 +162,11 @@ class PT_API SerializationInfo
 
         void beginUnlink(const void* p);
 
-		void finishUnlink();
+        void finishUnlink();
 
         void beginLink(void* p, const std::type_info& ti) const;
 
-		void finishLink() const;
+        void finishLink() const;
 
         /** @brief Deserialization of flat child value types
         */
@@ -214,18 +213,6 @@ class PT_API SerializationInfo
         void getValue(double& f) const;
 
         void setValue(double f);
-
-        /** @brief Serialization of member scalars
-        */
-        template <typename T>
-        void addValue(const std::string& name, const T& value)
-        { this->addMember(name) <<= value; }
-
-        /** @brief Serialization of member scalars
-        */
-        template <typename T>
-        void getValue(const std::string& name, T& value) const
-        { this->getMember(name) >>= value; }
 
         /** @brief Serialization of member data
         */
@@ -325,6 +312,18 @@ class PT_API SerializationInfo
             info.toValue(value);
             return value;
         }
+
+        /** @internal DEPRECATED
+        */
+        template <typename T>
+        void addValue(const std::string& name, const T& value)
+        { this->addMember(name) <<= value; }
+
+        /** @internal DEPRECATED
+        */
+        template <typename T>
+        void getValue(const std::string& name, T& value) const
+        { this->getMember(name) >>= value; }
 
     private:
         void getReference(void*& type, const std::type_info& ti) const;
