@@ -58,16 +58,19 @@ void XmlSerializationContext::finishUnlinkTarget()
 }
 
 
-void XmlSerializationContext::prepareUnlink(const void* p)
+bool XmlSerializationContext::prepareUnlink(const void* p)
 {
+	bool first = false;
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
         _idmap[p] = id;
+        first = true;
     }
 
     unsigned lid = _idmap[p];
     _linkmap[lid] = p;
+    return first;
 }
 
 

@@ -53,9 +53,10 @@ void SerializationBinder::finishUnlinkTarget()
 }
 
 
-void SerializationBinder::prepareUnlink(const void* p)
+bool SerializationBinder::prepareUnlink(const void* p)
 {
     throw SerializationError("missing unlink information");
+    return false;
 }
 
 

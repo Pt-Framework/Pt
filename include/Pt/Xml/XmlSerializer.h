@@ -50,7 +50,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void finishUnlinkTarget();
 
-        virtual void prepareUnlink(const void* p);
+        virtual bool prepareUnlink(const void* p);
 
         virtual bool isUnlinked(const std::string& id);
 
