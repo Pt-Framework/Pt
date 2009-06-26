@@ -95,6 +95,13 @@ void XmlDeserializer::beginDocument(const Node& node)
             {
                 _deser->setId( _nodeId.narrow() );
             }
+
+            String refId = static_cast<const StartElement&>(node).attribute(L"ref");
+            if( ! refId.empty() )
+            {
+                _deser->setReference( refId.narrow() );
+            }
+
             _processNode = &XmlDeserializer::onRootElement;
             break;
         }
@@ -106,6 +113,7 @@ void XmlDeserializer::beginDocument(const Node& node)
 
 void XmlDeserializer::onRootElement(const Node& node)
 {
+    //std::cerr << "XmlDeserializer::onRootElement(const Node& node)"<< std::endl;
     switch( node.type() )
     {
         case Node::Characters:
@@ -116,18 +124,26 @@ void XmlDeserializer::onRootElement(const Node& node)
                 /// OLD: throw std::logic_error("Invalid element" + PT_SOURCEINFO);
                 _deser->setValue( chars.content() ); /// NEW
                 _processNode = &XmlDeserializer::onContent;
+                //std::cerr << "-> onContent"<< std::endl;
             }
             else
             {
                 _processNode = &XmlDeserializer::onWhitespace;
+                //std::cerr << "-> onWhitespace"<< std::endl;
             }
 
             break;
         }
         case Node::StartElement:
         {
+            //std::cerr << "-> StartElement"<< std::endl;
             _nodeName = static_cast<const StartElement&>(node).name();
             _processNode = &XmlDeserializer::onStartElement;
+            break;
+        }
+        case Node::EndElement:
+        {
+            _processNode = &XmlDeserializer::onEndElement;
             break;
         }
 
@@ -139,6 +155,8 @@ void XmlDeserializer::onRootElement(const Node& node)
 
 void XmlDeserializer::onStartElement(const Node& node)
 {
+    //std::cerr << "XmlDeserializer::onStartElement(const Node& node)"<< std::endl;
+
     switch( node.type() )
     {
         case Node::Characters:
@@ -152,6 +170,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 //_current->addValue( _nodeName.narrow(), chars.content() );
 
                 _processNode = &XmlDeserializer::onContent;
+                //std::cerr << "-> onContent"<< std::endl;
             }
             else
             {
@@ -163,6 +182,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 //_current = &added;
 
                 _processNode = &XmlDeserializer::onWhitespace;
+                //std::cerr << "-> onWhitespace"<< std::endl;
             }
 
             break;
@@ -177,6 +197,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             //_current = &added;
 
             _nodeName = static_cast<const StartElement&>(node).name();
+            //std::cerr << "-> onStartElement"<< std::endl;
             break;
         }
         case Node::EndElement:
@@ -190,6 +211,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             //_current->addValue( _nodeName.narrow(), Pt::String() );
 
             _processNode = &XmlDeserializer::onEndElement;
+            //std::cerr << "-> onEndElement"<< std::endl;
             break;
         }
         default:
@@ -200,6 +222,8 @@ void XmlDeserializer::onStartElement(const Node& node)
 
 void XmlDeserializer::onWhitespace(const Node& node)
 {
+    //std::cerr << "XmlDeserializer::onWhitespace(const Node& node)"<< std::endl;
+
     switch( node.type() )
     {
         case Node::StartElement:
@@ -218,9 +242,11 @@ void XmlDeserializer::onWhitespace(const Node& node)
                 //ref.setId( refId.narrow() );
 
                 _processNode = &XmlDeserializer::onContent;
+                //std::cerr << "-> onContent"<< std::endl;
             }
 
             _processNode = &XmlDeserializer::onStartElement;
+            //std::cerr << "-> onStartElement"<< std::endl;
             break;
         }
         case Node::EndElement:
@@ -234,6 +260,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
                 _deser = _deser->leaveMember();
 
             _processNode = &XmlDeserializer::onEndElement;
+            //std::cerr << "-> onEndElement"<< std::endl;
             break;
         }
         default:
@@ -299,6 +326,10 @@ void XmlDeserializer::onEndElement(const Node& node)
 void XmlDeserializer::beginLinkTarget(const std::string& name, const std::string& id,
                                       void* obj, const std::type_info& fixupInfo)
 {
+    if( id.empty() )
+        return;
+
+    //std::cerr << "beginLinkTarget: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
     FixupInfo fi;
     fi.address = obj;
     fi.type = &fixupInfo;
@@ -313,26 +344,31 @@ void XmlDeserializer::finishLinkTarget()
 
 void XmlDeserializer::prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo)
 {
+    //std::cerr << "prepareLink: " << obj << " " << fixupInfo.name() << " id " << id << std::endl;
     FixupInfo fi;
     fi.address = obj;
     fi.type = &fixupInfo;
-    _pointers[id] = fi;
+    _pointers.insert( std::pair<std::string, FixupInfo>(id, fi) );
 }
 
 
 void XmlDeserializer::link()
 {
-    std::map<std::string, FixupInfo>::iterator it;
+    std::multimap<std::string, FixupInfo>::iterator it;
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
         void* fixme = it->second.address;
         const std::type_info* fixupType = it->second.type;
 
         std::string id = it->first;
+
+        if( _targets.find(id) == _targets.end() )
+            throw SerializationError("reference target not found");
+
         void* target = _targets[id].address;
         const std::type_info* targetType = _targets[id].type ;
 
-        //std::cerr << "FIXING: " << fixme << " to " << target << std::endl;
+        //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
         bool allowed = this->checkLink(*fixupType, *targetType);
         if( ! allowed )
             throw SerializationError("type mismatch during reference fixup");
@@ -348,6 +384,7 @@ void XmlDeserializer::link()
 
 bool XmlDeserializer::checkLink(const std::type_info& from, const std::type_info& to)
 {
+    //std::cerr << "checkLink: " << from.name() << " -> " << to.name() << std::endl;
     return from == to;
 }
 

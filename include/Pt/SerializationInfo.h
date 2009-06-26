@@ -526,6 +526,21 @@ Link<T> link(T& type)
 
 
 template <typename T>
+inline void operator <<=(SerializationInfo& si, const T* ptr)
+{
+    si.setReference( (T*) ptr );
+    si.setTypeName("reference");
+}
+
+
+template <typename T>
+inline void operator >>=(const SerializationInfo& si, T*& ptr)
+{
+    si.getReference(ptr);
+}
+
+
+template <typename T>
 inline void operator >>=(const SerializationInfo& si, const Link<T>& l)
 {
     si.beginLink( l.type, typeid(T) );

@@ -93,7 +93,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
         };
 
         std::map<std::string, FixupInfo> _targets;
-        std::map<std::string, FixupInfo> _pointers;
+        std::multimap<std::string, FixupInfo> _pointers;
 
     protected:
         void get(IDeserializer* deser);

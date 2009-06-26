@@ -76,6 +76,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         void Reference()
         {
             Pt::Date date1(1889, 4, 20);
+            const Pt::Date* dateptr = &date1;
 
             DateRef dr;
             dr.date = &date1;
@@ -85,12 +86,14 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dref");
+            ser.serialize(dateptr, "dateptr");
 
             ser.finish();
             ser.flush();
 
             Pt::Date date2(1, 1, 1);
             dr.date = 0;
+            Pt::Date* dateptr2 = 0;
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
@@ -100,10 +103,12 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
             deser.deserialize(dr);
+            deser.deserialize(dateptr2);
 
             deser.link();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
             std::cerr << "RESULT: "<< dr.date->toIsoString() << std::endl;
+            std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
