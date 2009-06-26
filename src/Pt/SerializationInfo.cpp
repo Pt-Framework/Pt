@@ -323,13 +323,13 @@ void SerializationInfo::setReference(void* ref)
 
 
 // called during serialization, when a reference needs to be unlinked
-SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
+/*SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
 {
     SerializationInfo& info = this->addMember(name);
     info.setReference(ref);
     
     return info;
-}
+}*/
 
 
 // called during deserialization, when a reference id was parsed

@@ -254,11 +254,11 @@ class PT_API SerializationInfo
         */
         void setReference(void* ref);
 
-        /** @brief Serialization of weak pointers
+        /** @brief Deserialization of weak pointers (parse phase)
         */
         void setReference(const std::string& id);
 
-        /** @brief Deserialization of weak pointers
+        /** @brief Deserialization of weak pointers (contruction phase)
         */
         template <typename T>
         void getReference(T*& type) const
@@ -266,17 +266,9 @@ class PT_API SerializationInfo
             this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
-        /** @brief Deserialization of weak member pointers
-        */
-        template <typename T>
-        void getReference(const std::string& name, T*& type) const
-        {
-            this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
-        }
-
         /** @brief Serialization of weak pointers
         */
-        SerializationInfo& addReference(const std::string& name, void* ref);
+        //SerializationInfo& addReference(const std::string& name, void* ref);
 
         void format(Formatter& formatter);
 

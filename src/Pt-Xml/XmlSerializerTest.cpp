@@ -49,14 +49,16 @@ struct DateRef
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     //std::cerr << "NEED FIXUP: " << (void*)(&dr.date) << std::endl;
-    si.getReference("date", dr.date );
+    si.getMember("date").getReference(dr.date);
+    //si.getReference("date", dr.date );
 }
 
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
+    si.addMember("date").setReference(dr.date);
     si.setTypeName("DateRef");
-    si.addReference("date", dr.date);
+    //si.addReference("date", dr.date);
 }
 
 
