@@ -67,32 +67,43 @@ namespace Pt
 
 void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
 {
-    if( si.context() )
-    {
-        bool first = si.context()->prepareUnlink( sp.getPointer() );
-        if(first)
-        {
-	        si <<= Pt::unlink() <<= *sp;
-        }
-        else
-        {
-            si.setReference( (Pt::Date*)sp.getPointer() );
-            si.setTypeName("reference");
-        }
-    }
+    if( ! si.context() )
+        throw Pt::SerializationError("no context for smart pointer");
+
 	
-	//throw Pt::SerializationError("no context for smart pointer");
+    // TODO unlink the smart ptr or its context?
+    bool first = si.context()->prepareUnlink( sp.getPointer() );
+    if(first)
+    {
+	    si <<= Pt::unlink() <<= *sp;
+    }
+    else
+    {
+        si.setReference( (Pt::Date*)sp.getPointer() );
+        si.setTypeName("reference");
+    }
 }
+
+
+void fixup(void* ptr, void* target, const std::type_info& ti)
+{
+    Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(ptr);
+    Pt::SmartPtr<Pt::Date>* to = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
+    *from = *to;
+}
+
 
 void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
 {
 	if(si.category() == Pt::SerializationInfo::Reference)
 	{
+	    //sp = <other smart pointer>
+	    // si.addFixup(sp, fixup);
 	}
 	else
 	{
 		sp = new Pt::Date;
-		si >>= *sp;
+		si >>= Pt::link(*sp);
 	}
 }
 
