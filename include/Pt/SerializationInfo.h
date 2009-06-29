@@ -162,7 +162,7 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        void beginUnlink(const void* p);
+        bool beginUnlink(const void* p);
 
         void finishUnlink();
 
@@ -260,6 +260,8 @@ class PT_API SerializationInfo
         */
         void setReference(const std::string& id);
 
+        void getReference(void* type, const std::type_info& ti, FixupHandler fh) const;
+
         /** @brief Deserialization of weak pointers (contruction phase)
         */
         /*template <typename T>
@@ -318,8 +320,6 @@ class PT_API SerializationInfo
         template <typename T>
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
-
-        void getReference(void* type, const std::type_info& ti, FixupHandler fh) const;
 
     private:
         ValueNode* initValue() const;
@@ -494,6 +494,7 @@ struct Unlink
     const T* type;
 };
 
+
 template <typename T>
 inline Unlink<T> operator<<= (unlink, const T& t)
 {
@@ -502,12 +503,21 @@ inline Unlink<T> operator<<= (unlink, const T& t)
     return u;
 }
 
+
 template <typename T>
 void operator<<= (SerializationInfo& si, Unlink<T> u)
 {
-    si.beginUnlink( u.type );
-    si <<= *(u.type);
-    si.finishUnlink();
+    bool unlinked = si.beginUnlink( u.type );
+
+    if(unlinked)
+    {
+        si <<= *(u.type);
+        si.finishUnlink();
+    }
+    else
+    {
+        si <<= u.type;
+    }
 }
 
 
@@ -518,10 +528,15 @@ inline void FixupPointer(void* fixme, void* target)
 }
 
 
+struct linkable
+{};
+
+
 template <typename T>
 struct Link
 {
 	T* type;
+	const std::type_info* info;
 };
 
 // TODO: rename Fixup
@@ -531,8 +546,29 @@ Link<T> link(T& type)
 	Link<T> l;
 	T* t = &type;
 	l.type = t;
+	l.info = &( typeid(T) );
 	return l;
 };
+
+
+template <typename T>
+inline Link<T> operator>>= (linkable, const T& type)
+{
+	Link<T> l;
+	T* t = &type;
+	l.type = t;
+	l.info = &( typeid(T) );
+	return l;
+}
+
+
+template <typename T>
+inline void operator >>=(const SerializationInfo& si, const Link<T>& l)
+{
+    si.beginLink( l.type, *(l.info) );
+    si >>= *(l.type);
+    si.finishLink();
+}
 
 
 template <typename T>
@@ -548,15 +584,6 @@ inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
     void* fixme = (void*)(&ptr);
     si.getReference(fixme, typeid(T), FixupPointer);
-}
-
-
-template <typename T>
-inline void operator >>=(const SerializationInfo& si, const Link<T>& l)
-{
-    si.beginLink( l.type, typeid(T) );
-    si >>= *(l.type);
-    si.finishLink();
 }
 
 

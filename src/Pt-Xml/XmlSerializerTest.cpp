@@ -77,8 +77,7 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
-    si.setReference( dr.date() );
-    si.setTypeName("DateRef");
+    si <<= dr.date();
 }
 
 
@@ -86,19 +85,7 @@ namespace Pt {
 
 void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
 {
-    if( ! si.context() )
-        throw Pt::SerializationError("no context for smart pointer");
-
-    bool first = si.context()->prepareUnlink( sp.getPointer() );
-    if(first)
-    {
-        si <<= Pt::unlink() <<= *sp;
-    }
-    else
-    {
-        si.setReference( sp.getPointer() );
-        si.setTypeName("reference");
-    }
+    si <<= Pt::unlink() <<= *sp;
 }
 
 
@@ -125,7 +112,7 @@ void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
         si.beginLink( sptr, typeid(Pt::SmartPtr<Pt::Date>) );
         si >>= *sp;
         si.finishLink();
-	}
+    }
 }
 
 }

@@ -46,7 +46,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         //! @brief Destructor
         ~XmlSerializationContext();
         
-        virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
+        virtual std::string beginUnlinkTarget(const std::string& name, const void* p, bool& first);
 
         virtual void finishUnlinkTarget();
 

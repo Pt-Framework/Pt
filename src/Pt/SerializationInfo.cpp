@@ -139,16 +139,20 @@ void SerializationInfo::prepareLink(SerializationContext& context)
 }
 */
 
-void SerializationInfo::beginUnlink(const void* p)
+bool SerializationInfo::beginUnlink(const void* p)
 {
+    bool unlinked = true;
+
     if(_parent == 0 || _parent->_binder)
         _binder = _context;
 
     if( _context )
     {
-        std::string id = _context->beginUnlinkTarget(_name, p);
+        std::string id = _context->beginUnlinkTarget(_name, p, unlinked);
         this->setId(id);
     }
+
+    return unlinked;
 }
 
 
@@ -312,15 +316,33 @@ ObjectNode* SerializationInfo::initObject(Category category) const
 // called during serialization, when a reference needs to be unlinked
 void SerializationInfo::setReference(const void* ref)
 {
-    ReferenceNode* node = initReference();
-    node->setAddress( const_cast<void*>(ref) );
-
     if(_context )
     {
         _context->prepareUnlink( ref );
     }
+
+    ReferenceNode* node = initReference();
+    node->setAddress( const_cast<void*>(ref) );
 }
 
+/*
+bool SerializationInfo::setReferenceOnce(const void* ref)
+{
+    bool first = false;
+
+
+    if(_context )
+    {
+        first = _context->prepareUnlink( ref );
+
+    }
+
+    ReferenceNode* node = initReference();
+    node->setAddress( const_cast<void*>(ref) );
+
+    return first;
+}
+*/
 
 // called during serialization, when a reference needs to be unlinked
 /*SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)

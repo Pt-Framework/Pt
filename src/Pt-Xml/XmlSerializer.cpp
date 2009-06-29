@@ -41,12 +41,15 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-std::string XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
+std::string XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p, bool& first)
 {
+    first = false;
+
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
         _idmap[p] = id;
+        first = true;
     }
 
     return convert<std::string>( _idmap[p] );

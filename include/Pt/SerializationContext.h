@@ -76,7 +76,7 @@ class PT_API SerializationBinder
 
         virtual ~SerializationBinder();
 
-        virtual std::string beginUnlinkTarget(const std::string& name, const void* p);
+        virtual std::string beginUnlinkTarget(const std::string& name, const void* p, bool& first);
 
         virtual void finishUnlinkTarget();
 
