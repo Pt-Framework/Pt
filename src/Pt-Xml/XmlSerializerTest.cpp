@@ -41,69 +41,90 @@
 #include <sstream>
 
 
-struct DateRef
+class DateRef
 {
-    Pt::Date* date;
+    public:
+        DateRef(Pt::Date* date = 0)
+        : _date(date)
+        { }
+
+        void setDate(Pt::Date* date)
+        { _date = date; }
+
+        Pt::Date* date() const
+        { return _date; }
+
+    private:
+        Pt::Date* _date;
 };
+
+
+void FixupDateRef(void* fixme, void* target)
+{
+    DateRef* from = static_cast< DateRef* >(fixme);
+    Pt::Date* to   = static_cast< Pt::Date* >(target);
+    from->setDate(to);
+}
 
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     //std::cerr << "NEED FIXUP: " << (void*)(&dr.date) << std::endl;
-    si.getMember("date").getReference(dr.date);
-    //si.getReference("date", dr.date );
+    si.getReference(&dr, typeid(Pt::Date), FixupDateRef);
+
 }
 
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
-    si.addMember("date").setReference(dr.date);
+    si.setReference( dr.date() );
     si.setTypeName("DateRef");
-    //si.addReference("date", dr.date);
 }
 
-namespace Pt
-{
+
+namespace Pt {
 
 void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
 {
     if( ! si.context() )
         throw Pt::SerializationError("no context for smart pointer");
 
-	
-    // TODO unlink the smart ptr or its context?
     bool first = si.context()->prepareUnlink( sp.getPointer() );
     if(first)
     {
-	    si <<= Pt::unlink() <<= *sp;
+        si <<= Pt::unlink() <<= *sp;
     }
     else
     {
-        si.setReference( (Pt::Date*)sp.getPointer() );
+        si.setReference( sp.getPointer() );
         si.setTypeName("reference");
     }
 }
 
 
-void fixup(void* ptr, void* target, const std::type_info& ti)
+void FixupDuplicate(void* fixme, void* target)
 {
-    Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(ptr);
-    Pt::SmartPtr<Pt::Date>* to = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
+    Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(fixme);
+    Pt::SmartPtr<Pt::Date>* to   = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
     *from = *to;
 }
 
 
 void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
 {
-	if(si.category() == Pt::SerializationInfo::Reference)
-	{
-	    //sp = <other smart pointer>
-	    // si.addFixup(sp, fixup);
-	}
-	else
-	{
-		sp = new Pt::Date;
-		si >>= Pt::link(*sp);
+    Pt::SmartPtr<Pt::Date>* sptr = &sp;
+
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        si.getReference(sptr, typeid(Pt::SmartPtr<Pt::Date>), FixupDuplicate);
+    }
+    else
+    {
+        sp = new Pt::Date;
+
+        si.beginLink( sptr, typeid(Pt::SmartPtr<Pt::Date>) );
+        si >>= *sp;
+        si.finishLink();
 	}
 }
 
@@ -123,13 +144,12 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         void Reference()
         {
             Pt::Date date1(1889, 4, 20);
+
             const Pt::Date* dateptr = &date1;
             Pt::SmartPtr<Pt::Date> datesp( new Pt::Date(2000, 6, 25) );
             Pt::SmartPtr<Pt::Date> datesp2 = datesp;
 
-            DateRef dr;
-            dr.date = &date1;
-            //std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date1 << std::endl;
+            DateRef dr( &date1 );
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
@@ -138,13 +158,13 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dateptr, "dateptr");
             ser.serialize(datesp, "datesp");
             ser.serialize(datesp2, "datesp2");
-            
+
             ser.finish();
             ser.flush();
 
             Pt::Date date2(1, 1, 1);
-            dr.date = 0;
-            Pt::Date* dateptr2 = 0;
+            dr.setDate(0);
+            Pt::Date* dateptr2 = 0; // const ?
             Pt::SmartPtr<Pt::Date> datesp3;
             Pt::SmartPtr<Pt::Date> datesp4;
 
@@ -162,9 +182,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             deser.link();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
-            std::cerr << "RESULT: "<< dr.date->toIsoString() << std::endl;
+            std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< datesp3->toIsoString() << std::endl;
+            std::cerr << "RESULT: "<< datesp4->toIsoString() << std::endl;
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);

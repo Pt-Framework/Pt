@@ -79,7 +79,8 @@ class PT_XML_API XmlDeserializer : public SerializationContext
 
         virtual void finishLinkTarget();
 
-        virtual void prepareLink(const std::string& id, void* obj, const std::type_info& fixupInfo);
+        virtual void prepareLink(const std::string& id, void* obj,
+                                 const std::type_info& fixupInfo, FixupHandler);
 
         virtual void link();
 
@@ -89,6 +90,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
         struct FixupInfo
         {
             void* address;
+            void (*fixup)(void* fixme, void* target);
             const std::type_info* type;
         };
 

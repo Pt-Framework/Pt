@@ -53,6 +53,8 @@ class ObjectNode;
 class PT_API SerializationInfo
 {
     public:
+        typedef void (*FixupHandler)(void* fixme, void* target);
+
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
         };
@@ -252,7 +254,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of weak pointers
         */
-        void setReference(void* ref);
+        void setReference(const void* ref);
 
         /** @brief Deserialization of weak pointers (parse phase)
         */
@@ -260,11 +262,11 @@ class PT_API SerializationInfo
 
         /** @brief Deserialization of weak pointers (contruction phase)
         */
-        template <typename T>
-        void getReference(T*& type) const
+        /*template <typename T>
+        void getReference(T* type, FixupHandler fh) const
         {
-            this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
-        }
+            this->getReference( reinterpret_cast<void*>(type), typeid(T), fh );
+        }*/
 
         /** @brief Serialization of weak pointers
         */
@@ -317,9 +319,9 @@ class PT_API SerializationInfo
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
 
-    private:
-        void getReference(void*& type, const std::type_info& ti) const;
+        void getReference(void* type, const std::type_info& ti, FixupHandler fh) const;
 
+    private:
         ValueNode* initValue() const;
 
         Pt::String& initString() const;
@@ -509,6 +511,13 @@ void operator<<= (SerializationInfo& si, Unlink<T> u)
 }
 
 
+inline void FixupPointer(void* fixme, void* target)
+{
+    void** ptr =(void**)(fixme);
+    *ptr = target;
+}
+
+
 template <typename T>
 struct Link
 {
@@ -520,7 +529,8 @@ template <typename T>
 Link<T> link(T& type)
 {
 	Link<T> l;
-	l.type = &type;
+	T* t = &type;
+	l.type = t;
 	return l;
 };
 
@@ -536,7 +546,8 @@ inline void operator <<=(SerializationInfo& si, const T* ptr)
 template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
-    si.getReference(ptr);
+    void* fixme = (void*)(&ptr);
+    si.getReference(fixme, typeid(T), FixupPointer);
 }
 
 

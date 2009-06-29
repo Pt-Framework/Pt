@@ -310,11 +310,11 @@ ObjectNode* SerializationInfo::initObject(Category category) const
 
 
 // called during serialization, when a reference needs to be unlinked
-void SerializationInfo::setReference(void* ref)
+void SerializationInfo::setReference(const void* ref)
 {
     ReferenceNode* node = initReference();
-    node->setAddress(ref);
-    
+    node->setAddress( const_cast<void*>(ref) );
+
     if(_context )
     {
         _context->prepareUnlink( ref );
@@ -342,7 +342,7 @@ void SerializationInfo::setReference(const std::string& id)
 
 // called during deserialization, when a reference needs to be relinked
 // by a previously parsed reference id
-void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
+void SerializationInfo::getReference(void* type, const std::type_info& ti, FixupHandler fh) const
 {
     ReferenceNode* node = initReference();
     //node->setAddress(&type);
@@ -354,7 +354,7 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
     
     if(_context)
     {
-        _context->prepareLink( refId, &type, ti );
+        _context->prepareLink( refId, type, ti, fh );
     }
 }
 
