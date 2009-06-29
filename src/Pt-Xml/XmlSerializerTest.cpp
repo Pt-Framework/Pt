@@ -109,8 +109,10 @@ void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
     {
         sp = new Pt::Date;
 
+        // TODO: si >>= Pt::link(sp) >>= *sp;
+
         si.beginLink( sptr, typeid(Pt::SmartPtr<Pt::Date>) );
-        si >>= *sp;
+        si >>= *sp ;
         si.finishLink();
     }
 }
