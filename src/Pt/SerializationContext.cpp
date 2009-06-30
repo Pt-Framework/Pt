@@ -96,12 +96,6 @@ void SerializationBinder::link()
 }
 
 
-bool SerializationBinder::checkLink(const std::type_info& from, const std::type_info& to)
-{
-    return from == to;
-}
-
-
 SerializationContext::SerializationContext()
 {
 }

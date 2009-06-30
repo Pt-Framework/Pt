@@ -372,22 +372,13 @@ void XmlDeserializer::link()
         const std::type_info* targetType = _targets[id].type ;
 
         //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
-        bool allowed = this->checkLink(*fixupType, *targetType);
-        if( ! allowed )
-            throw SerializationError("type mismatch during reference fixup");
 
-        it->second.fixup(fixme, target);
+        it->second.fixup(fixme, *fixupType,
+                         target, *targetType);
     }
 
     _targets.clear();
     _pointers.clear();
-}
-
-
-bool XmlDeserializer::checkLink(const std::type_info& from, const std::type_info& to)
-{
-    //std::cerr << "checkLink: " << from.name() << " -> " << to.name() << std::endl;
-    return from == to;
 }
 
 } // namespace Xml

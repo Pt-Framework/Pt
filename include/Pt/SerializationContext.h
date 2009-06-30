@@ -70,7 +70,8 @@ DESERIALIZATION:
 class PT_API SerializationBinder
 {
     public:
-        typedef void (*FixupHandler)(void* fixme, void* target);
+        typedef void (*FixupHandler)(void* fixme, const std::type_info& fixmeType,
+                                     void* target, const std::type_info& targetType);
 
         SerializationBinder();
 
@@ -94,8 +95,6 @@ class PT_API SerializationBinder
 
         virtual void prepareLink(const std::string& id, void* obj,
                                  const std::type_info& fixupInfo, FixupHandler);
-
-        virtual bool checkLink(const std::type_info& from, const std::type_info& to);
 
         virtual void link();
 };

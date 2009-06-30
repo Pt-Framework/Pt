@@ -49,8 +49,12 @@ class ReferenceNode;
 class ObjectNode;
 
 
-inline void FixupPointer(void* fixme, void* target)
+inline void FixupPointer(void* fixme, const std::type_info& fixmeType,
+                         void* target, const std::type_info& targetType)
 {
+    if(fixmeType != targetType)
+        throw SerializationError("type mismatch during reference fixup");
+
     void** ptr =(void**)(fixme);
     *ptr = target;
 }
@@ -61,7 +65,8 @@ inline void FixupPointer(void* fixme, void* target)
 class PT_API SerializationInfo
 {
     public:
-        typedef void (*FixupHandler)(void* fixme, void* target);
+        typedef void (*FixupHandler)(void* fixme, const std::type_info& fixmeType,
+                                     void* target, const std::type_info& targetType);
 
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4

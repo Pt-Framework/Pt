@@ -84,13 +84,12 @@ class PT_XML_API XmlDeserializer : public SerializationContext
 
         virtual void link();
 
-        virtual bool checkLink(const std::type_info& from, const std::type_info& to);
-
     private:
         struct FixupInfo
         {
             void* address;
-            void (*fixup)(void* fixme, void* target);
+            void (*fixup)(void* fixme, const std::type_info& fixmeType,
+                          void* target, const std::type_info& targetType);
             const std::type_info* type;
         };
 

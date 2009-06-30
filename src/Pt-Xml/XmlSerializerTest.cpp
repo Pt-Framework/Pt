@@ -59,7 +59,8 @@ class DateRef
 };
 
 
-void FixupDateRef(void* fixme, void* target)
+void FixupDateRef(void* fixme, const std::type_info& fixmeType,
+                  void* target, const std::type_info& targetType)
 {
     DateRef* from = static_cast< DateRef* >(fixme);
     Pt::Date* to   = static_cast< Pt::Date* >(target);
@@ -82,7 +83,8 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 
 namespace Pt {
 
-void FixupDuplicate(void* fixme, void* target)
+void FixupSmartPtr(void* fixme, const std::type_info& fixmeType,
+                   void* target, const std::type_info& targetType)
 {
     Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(fixme);
     Pt::SmartPtr<Pt::Date>* to   = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
@@ -102,7 +104,7 @@ void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
 
     if(si.category() == Pt::SerializationInfo::Reference)
     {
-        si.getReference(sptr, typeid(Pt::SmartPtr<Pt::Date>), FixupDuplicate);
+        si.getReference(sptr, typeid(Pt::SmartPtr<Pt::Date>), FixupSmartPtr);
     }
     else
     {
