@@ -529,14 +529,6 @@ void operator<<= (SerializationInfo& si, Unlink<T> u)
 
 
 template <typename T>
-struct Link
-{
-	T* type;
-	const std::type_info* info;
-};
-
-
-template <typename T>
 struct Symbol
 {
     Symbol(T& t)
@@ -564,7 +556,7 @@ Symbol<T> symbol(T& t)
 
 
 template <typename S, typename T>
-struct SLink
+struct Link
 {
     T* value;
     Symbol<S> sym;
@@ -572,9 +564,9 @@ struct SLink
 
 
 template <typename S, typename T>
-inline SLink<S, T> operator>>= (const Symbol<S>& sym, T& value)
+inline Link<S, T> operator>>= (const Symbol<S>& sym, T& value)
 {
-	SLink<S, T> sl;
+	Link<S, T> sl;
 	sl.sym = sym;
 	sl.value = &value;
 	return sl;
@@ -582,7 +574,7 @@ inline SLink<S, T> operator>>= (const Symbol<S>& sym, T& value)
 
 
 template <typename S, typename T>
-inline void operator >>=(const SerializationInfo& si, const SLink<S, T>& l)
+inline void operator >>=(const SerializationInfo& si, const Link<S, T>& l)
 {
     si.beginLink( l.sym.type, *(l.sym.info) );
     si >>= *(l.value);
@@ -595,21 +587,13 @@ struct link
 
 
 template <typename T>
-inline Link<T> operator>>= (link, T& type)
+inline Link<T, T> operator>>= (link, T& type)
 {
-	Link<T> l;
-	l.type = &type;
-	l.info = &( typeid(T) );
+	Link<T, T> l;
+	l.value = &type;
+	l.sym.type = &type;
+	l.sym.info = &( typeid(T) );
 	return l;
-}
-
-
-template <typename T>
-inline void operator >>=(const SerializationInfo& si, const Link<T>& l)
-{
-    si.beginLink( l.type, *(l.info) );
-    si >>= *(l.type);
-    si.finishLink();
 }
 
 

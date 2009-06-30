@@ -83,17 +83,17 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 
 namespace Pt {
 
-void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
-{
-    si <<= Pt::unlink() <<= *sp;
-}
-
-
 void FixupDuplicate(void* fixme, void* target)
 {
     Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(fixme);
     Pt::SmartPtr<Pt::Date>* to   = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
     *from = *to;
+}
+
+
+void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
+{
+    si <<= Pt::unlink() <<= *sp;
 }
 
 
