@@ -82,7 +82,7 @@ class Serializer : public ISerializer
 
         virtual void prepare() 
         {
-            _si <<= Pt::unlink() <<= *_type;
+            _si <<= Pt::id() <<= *_type;
         }
 
         virtual void format(Formatter& formatter)

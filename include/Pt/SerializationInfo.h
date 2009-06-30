@@ -200,11 +200,13 @@ class PT_API SerializationInfo
 
         void getValue(short& s) const;
 
-        //void setValue(short s);
+        void setValue(short s)
+        { this->setValue( long(s) ); }
 
         void getValue(int& i) const;
 
-        //void setValue(int i);
+        void setValue(int i)
+        { this->setValue( long(i) ); }
 
         void getValue(long& l) const;
 
@@ -212,11 +214,13 @@ class PT_API SerializationInfo
 
         void getValue(unsigned short& us) const;
 
-        //void setValue(unsigned short us);
+        void setValue(unsigned short us)
+        { this->setValue( static_cast<unsigned long>(us) ); }
 
         void getValue(unsigned int& ui) const;
 
-        //void setValue(unsigned int ui);
+        void setValue(unsigned int ui)
+        { this->setValue( static_cast<unsigned long>(ui) ); }
 
         void getValue(unsigned long& ul) const;
 
@@ -224,7 +228,8 @@ class PT_API SerializationInfo
 
         void getValue(float& f) const;
 
-        //void setValue(float f);
+        void setValue(float f)
+        { this->setValue( double(f) ); }
 
         void getValue(double& f) const;
 
@@ -274,7 +279,7 @@ class PT_API SerializationInfo
         */
         void setReference(const std::string& id);
 
-        void getReference(void* type, const std::type_info& ti, FixupHandler fh) const;
+        void getReference(void* fixme, const std::type_info& ti, FixupHandler fh) const;
 
         /** @brief Deserialization of weak pointers (contruction phase)
         */
@@ -497,43 +502,6 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
-struct unlink
-{};
-
-
-template <typename T>
-struct Unlink
-{
-    const T* type;
-};
-
-
-template <typename T>
-inline Unlink<T> operator<<= (unlink, const T& t)
-{
-    Unlink<T> u;
-    u.type = &t;
-    return u;
-}
-
-
-template <typename T>
-void operator<<= (SerializationInfo& si, Unlink<T> u)
-{
-    bool unlinked = si.beginUnlink( u.type );
-
-    if(unlinked)
-    {
-        si <<= *(u.type);
-        si.finishUnlink();
-    }
-    else
-    {
-        si <<= u.type;
-    }
-}
-
-
 template <typename T>
 struct Symbol
 {
@@ -564,30 +532,6 @@ struct ConstSymbol
 };
 
 
-template <typename S, typename T>
-struct Link
-{
-    T* value;
-    Symbol<S> sym;
-};
-
-
-template <typename S, typename T>
-struct ConstUnbind
-{
-    const T* value;
-    ConstSymbol<S> sym;
-};
-
-
-template <typename S, typename T>
-struct Unbind
-{
-    const T* value;
-    Symbol<S> sym;
-};
-
-
 template <typename T>
 Symbol<T> id(T& t)
 {
@@ -606,6 +550,22 @@ inline Symbol<Pt::Void> id()
 {
     return Symbol<Pt::Void>();
 }
+
+
+template <typename S, typename T>
+struct ConstUnbind
+{
+    const T* value;
+    ConstSymbol<S> sym;
+};
+
+
+template <typename S, typename T>
+struct Unbind
+{
+    const T* value;
+    Symbol<S> sym;
+};
 
 
 template <typename S, typename T>
@@ -673,17 +633,15 @@ void operator<<= (SerializationInfo& si, ConstUnbind<S, T> u)
 
 
 template <typename S, typename T>
-inline Link<S, T> operator>>= (const Symbol<S>& sym, T& value)
+struct Link
 {
-	Link<S, T> sl;
-	sl.sym = sym;
-	sl.value = &value;
-	return sl;
-}
+    T* value;
+    Symbol<S> sym;
+};
 
 
 template <typename S, typename T>
-inline Link<S, T> operator>> (const Symbol<S>& sym, T& value)
+inline Link<S, T> operator>>= (const Symbol<S>& sym, T& value)
 {
 	Link<S, T> sl;
 	sl.sym = sym;
@@ -945,7 +903,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        si.addMember() <<= Pt::unlink() <<= *it;
+        si.addMember() <<= Pt::id() <<= *it;
     }
 
     si.setTypeName("array");
