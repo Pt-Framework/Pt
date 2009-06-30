@@ -71,7 +71,6 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     //std::cerr << "NEED FIXUP: " << (void*)(&dr.date) << std::endl;
     si.getReference(&dr, typeid(Pt::Date), FixupDateRef);
-
 }
 
 
