@@ -48,6 +48,14 @@ class ValueNode;
 class ReferenceNode;
 class ObjectNode;
 
+
+inline void FixupPointer(void* fixme, void* target)
+{
+    void** ptr =(void**)(fixme);
+    *ptr = target;
+}
+
+
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
@@ -487,7 +495,6 @@ struct unlink
 {};
 
 
-// TODO rename Break or BreakDown
 template <typename T>
 struct Unlink
 {
@@ -521,17 +528,6 @@ void operator<<= (SerializationInfo& si, Unlink<T> u)
 }
 
 
-inline void FixupPointer(void* fixme, void* target)
-{
-    void** ptr =(void**)(fixme);
-    *ptr = target;
-}
-
-
-struct linkable
-{};
-
-
 template <typename T>
 struct Link
 {
@@ -539,24 +535,70 @@ struct Link
 	const std::type_info* info;
 };
 
-// TODO: rename Fixup
+
 template <typename T>
-Link<T> link(T& type)
+struct Symbol
 {
-	Link<T> l;
-	T* t = &type;
-	l.type = t;
-	l.info = &( typeid(T) );
-	return l;
+    Symbol(T& t)
+    : type(&t)
+    , info(0)
+    {
+        info = &( typeid(T) );
+    }
+
+    Symbol()
+    : type(0)
+    , info(0)
+    {}
+
+    T* type;
+    const std::type_info* info;
 };
 
 
 template <typename T>
-inline Link<T> operator>>= (linkable, const T& type)
+Symbol<T> symbol(T& t)
+{
+    return Symbol<T>(t);
+}
+
+
+template <typename S, typename T>
+struct SLink
+{
+    T* value;
+    Symbol<S> sym;
+};
+
+
+template <typename S, typename T>
+inline SLink<S, T> operator>>= (const Symbol<S>& sym, T& value)
+{
+	SLink<S, T> sl;
+	sl.sym = sym;
+	sl.value = &value;
+	return sl;
+}
+
+
+template <typename S, typename T>
+inline void operator >>=(const SerializationInfo& si, const SLink<S, T>& l)
+{
+    si.beginLink( l.sym.type, *(l.sym.info) );
+    si >>= *(l.value);
+    si.finishLink();
+}
+
+
+struct link
+{ };
+
+
+template <typename T>
+inline Link<T> operator>>= (link, T& type)
 {
 	Link<T> l;
-	T* t = &type;
-	l.type = t;
+	l.type = &type;
 	l.info = &( typeid(T) );
 	return l;
 }
@@ -780,7 +822,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back( elem );
-        *it >>= Pt::link( vec.back() );
+        *it >>= Pt::link() >>= vec.back();
     }
 }
 

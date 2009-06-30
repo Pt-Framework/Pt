@@ -108,16 +108,12 @@ void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
     else
     {
         sp = new Pt::Date;
-
-        // TODO: si >>= Pt::link(sp) >>= *sp;
-
-        si.beginLink( sptr, typeid(Pt::SmartPtr<Pt::Date>) );
-        si >>= *sp ;
-        si.finishLink();
+        si >>= Pt::symbol(sp) >>= *sp;
     }
 }
 
 }
+
 
 class XmlSerializerTest: public Pt::Unit::TestSuite
 {
