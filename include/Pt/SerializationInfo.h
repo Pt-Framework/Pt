@@ -32,6 +32,7 @@
 #include <Pt/String.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
+#include <Pt/Void.h>
 #include <typeinfo>
 #include <vector>
 #include <set>
@@ -538,26 +539,29 @@ struct Symbol
 {
     Symbol(T& t)
     : type(&t)
-    , info(0)
-    {
-        info = &( typeid(T) );
-    }
+    { }
 
     Symbol()
     : type(0)
-    , info(0)
-    {}
+    { }
 
     T* type;
-    const std::type_info* info;
 };
 
 
 template <typename T>
-Symbol<T> symbol(T& t)
+struct ConstSymbol
 {
-    return Symbol<T>(t);
-}
+    ConstSymbol(const T& t)
+    : type(&t)
+    { }
+
+    ConstSymbol()
+    : type(0)
+    { }
+
+    const T* type;
+};
 
 
 template <typename S, typename T>
@@ -566,6 +570,106 @@ struct Link
     T* value;
     Symbol<S> sym;
 };
+
+
+template <typename S, typename T>
+struct ConstUnbind
+{
+    const T* value;
+    ConstSymbol<S> sym;
+};
+
+
+template <typename S, typename T>
+struct Unbind
+{
+    const T* value;
+    Symbol<S> sym;
+};
+
+
+template <typename T>
+Symbol<T> id(T& t)
+{
+    return Symbol<T>(t);
+}
+
+
+template <typename T>
+ConstSymbol<T> id(const T& t)
+{
+    return ConstSymbol<T>(t);
+}
+
+
+inline Symbol<Pt::Void> id()
+{
+    return Symbol<Pt::Void>();
+}
+
+
+template <typename S, typename T>
+inline Unbind<S, T> operator<<= (const Symbol<S>& sym, const T& value)
+{
+	Unbind<S, T> sl;
+	sl.sym = sym;
+	sl.value = &value;
+	return sl;
+}
+
+
+template <typename T>
+inline ConstUnbind<T, T> operator<<= (const Symbol<Pt::Void>& sym, const T& value)
+{
+	ConstUnbind<T, T> sl;
+	sl.sym.type = &value;
+	sl.value = &value;
+	return sl;
+}
+
+
+template <typename S, typename T>
+inline ConstUnbind<S, T> operator<<= (const ConstSymbol<S>& sym, const T& value)
+{
+	ConstUnbind<S, T> sl;
+	sl.sym = sym;
+	sl.value = &value;
+	return sl;
+}
+
+
+template <typename S, typename T>
+void operator<<= (SerializationInfo& si, Unbind<S, T> u)
+{
+    bool unlinked = si.beginUnlink( u.sym.type );
+
+    if(unlinked)
+    {
+        si <<= *(u.value);
+        si.finishUnlink();
+    }
+    else
+    {
+        si <<= u.sym.type;
+    }
+}
+
+
+template <typename S, typename T>
+void operator<<= (SerializationInfo& si, ConstUnbind<S, T> u)
+{
+    bool unlinked = si.beginUnlink( u.sym.type );
+
+    if(unlinked)
+    {
+        si <<= *(u.value);
+        si.finishUnlink();
+    }
+    else
+    {
+        si <<= u.sym.type;
+    }
+}
 
 
 template <typename S, typename T>
@@ -579,26 +683,44 @@ inline Link<S, T> operator>>= (const Symbol<S>& sym, T& value)
 
 
 template <typename S, typename T>
+inline Link<S, T> operator>> (const Symbol<S>& sym, T& value)
+{
+	Link<S, T> sl;
+	sl.sym = sym;
+	sl.value = &value;
+	return sl;
+}
+
+
+template <typename T>
+inline Link<T, T> operator>>= (const Symbol<Pt::Void>& sym, T& type)
+{
+	Link<T, T> l;
+	l.value = &type;
+	l.sym.type = &type;
+	return l;
+}
+
+
+template <typename S, typename T>
 inline void operator >>=(const SerializationInfo& si, const Link<S, T>& l)
 {
-    si.beginLink( l.sym.type, *(l.sym.info) );
+    si.beginLink( l.sym.type, typeid(S) );
     si >>= *(l.value);
     si.finishLink();
 }
 
 
-struct link
-{ };
-
-
-template <typename T>
-inline Link<T, T> operator>>= (link, T& type)
+inline const SerializationInfo& nothing(const SerializationInfo& si)
 {
-	Link<T, T> l;
-	l.value = &type;
-	l.sym.type = &type;
-	l.sym.info = &( typeid(T) );
-	return l;
+    return si;
+}
+
+
+template <typename O>
+inline O operator >>(const SerializationInfo& si, O (*modify)(const SerializationInfo&) )
+{
+    return modify(si);
 }
 
 
@@ -811,7 +933,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back( elem );
-        *it >>= Pt::link() >>= vec.back();
+        *it >>= Pt::id() >>= vec.back();
     }
 }
 

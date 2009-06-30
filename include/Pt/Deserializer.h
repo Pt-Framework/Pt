@@ -155,7 +155,7 @@ class Deserializer : public IDeserializer
 
         virtual void leave()
         {
-            *_current >>= Pt::link() >>= *_type;
+            *_current >>= Pt::id() >>= *_type;
         }
 
     private:

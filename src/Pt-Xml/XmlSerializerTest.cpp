@@ -94,7 +94,7 @@ void FixupSmartPtr(void* fixme, const std::type_info& fixmeType,
 
 void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
 {
-    si <<= Pt::unlink() <<= *sp;
+    si <<= Pt::id() <<= *sp;
 }
 
 
@@ -109,7 +109,7 @@ void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Date>& sp)
     else
     {
         sp = new Pt::Date;
-        si >>= Pt::symbol(sp) >>= *sp;
+        si >>= Pt::id(sp) >> *sp;
     }
 }
 
