@@ -84,26 +84,39 @@ typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
 
 namespace Pt {
 
+DateSmartPtr* theOne = 0;
+
 void FixupSmartPtr(void* fixme, const std::type_info& fixmeType,
                    void* target, const std::type_info& targetType)
 {
-    std::cerr << "FixupSmartPtr: " << fixmeType.name() << " ==> " << targetType.name() << std::endl;
+    //std::cerr << "FixupSmartPtr: " << fixmeType.name() << " ==> " << targetType.name() << std::endl;
     DateSmartPtr* from = static_cast< DateSmartPtr* >(fixme);
     //DateSmartPtr* to   = static_cast< DateSmartPtr* >(target);
 
     Pt::Date* to   = static_cast< Pt::Date* >(target);
-    //*from = *to;
+    *from = *theOne;
 }
 
 
 void operator <<= (Pt::SerializationInfo& six, const DateSmartPtr& sp)
 {
-    six <<= Pt::id() <<= *sp; // only create id if not present
+    //static bool x = true;
+    //if(x)
+    {
+        six.addMember("data") <<= Pt::id() <<= *sp; // only create id if not present
+        //std::cerr << &(*sp) << std::endl;
+        //x = false;
+    }
+    //else
+    //{
+    //    six <<= &(*sp);
+    //}
 }
 
 
-void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
+void operator >>=(const Pt::SerializationInfo& six, DateSmartPtr& sp)
 {
+    const Pt::SerializationInfo& si = six.getMember("data");
     DateSmartPtr* sptr = &sp;
 
     if(si.category() == Pt::SerializationInfo::Reference)
@@ -113,7 +126,9 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
     else
     {
         sp = new Pt::Date;
-        si  >>= Pt::id() >>= *sp;
+        si >>= Pt::id() >>= *sp;
+        // insert FixupHint<DateSmartPtr> for *sp to find parent smart pointer
+        theOne = &sp;
     }
 }
 
@@ -175,7 +190,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< datesp3->toIsoString() << std::endl;
-            //std::cerr << "RESULT: "<< datesp4->toIsoString() << std::endl;
+            std::cerr << "RESULT: "<< datesp4->toIsoString() << std::endl;
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
