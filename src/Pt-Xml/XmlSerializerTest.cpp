@@ -80,41 +80,40 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
     si <<= dr.date();
 }
 
+typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
 
 namespace Pt {
 
 void FixupSmartPtr(void* fixme, const std::type_info& fixmeType,
                    void* target, const std::type_info& targetType)
 {
-    Pt::SmartPtr<Pt::Date>* from = static_cast< Pt::SmartPtr<Pt::Date>* >(fixme);
-    Pt::SmartPtr<Pt::Date>* to   = static_cast< Pt::SmartPtr<Pt::Date>* >(target);
-    *from = *to;
+    std::cerr << "FixupSmartPtr: " << fixmeType.name() << " ==> " << targetType.name() << std::endl;
+    DateSmartPtr* from = static_cast< DateSmartPtr* >(fixme);
+    //DateSmartPtr* to   = static_cast< DateSmartPtr* >(target);
+
+    Pt::Date* to   = static_cast< Pt::Date* >(target);
+    //*from = *to;
 }
 
 
-void operator <<= (Pt::SerializationInfo& si, const Pt::SmartPtr<Pt::Date>& sp)
+void operator <<= (Pt::SerializationInfo& six, const DateSmartPtr& sp)
 {
-    si.addMember("data") <<= Pt::id() <<= *sp;
+    six <<= Pt::id() <<= *sp; // only create id if not present
 }
 
 
-void operator >>=(const Pt::SerializationInfo& six, Pt::SmartPtr<Pt::Date>& sp)
+void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
-    const SerializationInfo& si = six.getMember("data");
-
-    Pt::SmartPtr<Pt::Date>* sptr = &sp;
+    DateSmartPtr* sptr = &sp;
 
     if(si.category() == Pt::SerializationInfo::Reference)
     {
-        si.getReference(sptr, typeid(Pt::SmartPtr<Pt::Date>), FixupSmartPtr);
+        si.getReference(sptr, typeid(DateSmartPtr), FixupSmartPtr);
     }
     else
     {
         sp = new Pt::Date;
-        std::cerr << "++++++++" << std::endl;
-        std::cerr << "<" << si.toString().narrow() << ">" << std::endl;
-        si  >>= *sp;
-        std::cerr << "-------" << std::endl;
+        si  >>= Pt::id() >>= *sp;
     }
 }
 
@@ -137,8 +136,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date1(1889, 4, 20);
 
             const Pt::Date* dateptr = &date1;
-            Pt::SmartPtr<Pt::Date> datesp( new Pt::Date(2000, 6, 25) );
-            Pt::SmartPtr<Pt::Date> datesp2 = datesp;
+            DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
+            DateSmartPtr datesp2 = datesp;
 
             DateRef dr( &date1 );
 
@@ -156,8 +155,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2(1, 1, 1);
             dr.setDate(0);
             Pt::Date* dateptr2 = 0; // const ?
-            Pt::SmartPtr<Pt::Date> datesp3;
-            Pt::SmartPtr<Pt::Date> datesp4;
+            DateSmartPtr datesp3;
+            DateSmartPtr datesp4;
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
@@ -168,14 +167,14 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.deserialize(dateptr2);
-            //deser.deserialize(datesp3);
-            //deser.deserialize(datesp4);
+            deser.deserialize(datesp3);
+            deser.deserialize(datesp4);
 
             deser.link();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
             std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
-            //std::cerr << "RESULT: "<< datesp3->toIsoString() << std::endl;
+            std::cerr << "RESULT: "<< datesp3->toIsoString() << std::endl;
             //std::cerr << "RESULT: "<< datesp4->toIsoString() << std::endl;
             //std::cerr << "========================\n" << std::endl;
 
