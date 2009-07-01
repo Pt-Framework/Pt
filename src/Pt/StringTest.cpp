@@ -69,6 +69,7 @@ class StringTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "testPushBack", *this, &StringTest::testPushBack );
             Pt::Unit::TestSuite::registerMethod( "testCopy", *this, &StringTest::testCopy );
             Pt::Unit::TestSuite::registerMethod( "testReserve", *this, &StringTest::testReserve );
+            Pt::Unit::TestSuite::registerMethod( "testReserveEmpty", *this, &StringTest::testReserveEmpty );
             Pt::Unit::TestSuite::registerMethod( "testLengthAndSize", *this, &StringTest::testLengthAndSize );
         }
 
@@ -95,6 +96,7 @@ class StringTest : public Pt::Unit::TestSuite
         void testPushBack();
         void testCopy();
         void testReserve();
+        void testReserveEmpty();
         void testLengthAndSize();
 };
 
@@ -632,6 +634,15 @@ void StringTest::testReserve()
     PT_UNIT_ASSERT( s.capacity() == 4 );
     PT_UNIT_ASSERT( s.size() == 4 );
     PT_UNIT_ASSERT( char_traits<Char>::compare(s.c_str(), c1, 4) == 0 );
+}
+
+
+void StringTest::testReserveEmpty()
+{
+    String s;
+    s.reserve(0);
+    PT_UNIT_ASSERT( s.capacity() >= 0 );
+    PT_UNIT_ASSERT( s.size() == 0 );
 }
 
 
