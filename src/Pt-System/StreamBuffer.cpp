@@ -107,14 +107,15 @@ void StreamBufferBase::beginRead()
         char* to = _ibuffer + _pbmax - putback;
         char* from = _sb->gptr() - putback;
 
-        if(to == from)
-            throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
-
         leftover = _sb->egptr() - _sb->gptr();
         std::memmove( to, from, putback + leftover );
     }
 
     size_t used = _pbmax + leftover;
+
+    if( _ibufferSize == used )
+        throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
+
     _ioDevice->beginRead( _ibuffer + used, _ibufferSize - used );
     _reading = true;
 
