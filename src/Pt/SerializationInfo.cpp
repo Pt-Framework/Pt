@@ -32,45 +32,6 @@
 
 namespace Pt {
 
-/*
-void SerializationInfo::prepareUnlinkMember(Pt::SerializationInfo& si, SerializationContext& context)
-{
-    if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        void* refAddr = static_cast<const ReferenceNode*>(si._node)->address();
-        context.prepareUnlink(refAddr);
-    }
-    else if(si.category() == Pt::SerializationInfo::Object ||
-            si.category() == Pt::SerializationInfo::Array)
-    {
-        Pt::SerializationInfo::Iterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            prepareUnlinkMember(*it, context);
-        }
-    }
-}
-*/
-/*
-void SerializationInfo::prepareUnlink(SerializationContext& context)
-{
-    if(this->category() == Pt::SerializationInfo::Reference)
-    {
-        void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
-        context.prepareUnlink(refAddr);
-    }
-    else if(this->category() == Pt::SerializationInfo::Object ||
-            this->category() == Pt::SerializationInfo::Array)
-    {
-        Pt::SerializationInfo::Iterator it;
-        for(it = this->begin(); it != this->end(); ++it)
-        {
-            prepareUnlinkMember(*it, context);
-        }
-    }
-}
-*/
-
 void SerializationInfo::format(Formatter& formatter)
 {
     if( _context && ! _context->isUnlinked( this->id() ) )
@@ -80,16 +41,16 @@ void SerializationInfo::format(Formatter& formatter)
 
     if(this->category() == SerializationInfo::Value)
     {
-    	static_cast<const ValueNode*>(_node)->format( formatter, 
-    	                                              this->name(), 
-    	                                              this->typeName(), 
-    	                                              this->id() );
+        static_cast<const ValueNode*>(_node)->format( formatter,
+                                                      this->name(),
+                                                      this->typeName(),
+                                                      this->id() );
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
-    	if( ! _context )
-    		throw SerializationError("context not available");
-        
+        if( ! _context )
+            throw SerializationError("context not available");
+
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
         std::string id = _context->getUnlinkId( refAddr );
         formatter.addReference( this->name(), id);
@@ -122,22 +83,6 @@ void SerializationInfo::format(Formatter& formatter)
     }
 }
 
-/*
-void SerializationInfo::prepareLink(SerializationContext& context)
-{
-    Pt::SerializationInfo::Iterator it;
-    for(it = this->begin(); it != this->end(); ++it)
-    {
-        if(it->category() == Pt::SerializationInfo::Reference)
-        {
-            void* refAddr = static_cast<const ReferenceNode*>(it->_node)->address();
-            const std::string& refId = static_cast<const ReferenceNode*>(it->_node)->refId();
-            const std::type_info* refType = static_cast<const ReferenceNode*>(it->_node)->typeInfo();
-            context.prepareLink( refId, refAddr, *refType );
-        }
-    }
-}
-*/
 
 bool SerializationInfo::beginUnlink(const void* p)
 {
@@ -325,24 +270,6 @@ void SerializationInfo::setReference(const void* ref)
     node->setAddress( const_cast<void*>(ref) );
 }
 
-/*
-bool SerializationInfo::setReferenceOnce(const void* ref)
-{
-    bool first = false;
-
-
-    if(_context )
-    {
-        first = _context->prepareUnlink( ref );
-
-    }
-
-    ReferenceNode* node = initReference();
-    node->setAddress( const_cast<void*>(ref) );
-
-    return first;
-}
-*/
 
 // called during serialization, when a reference needs to be unlinked
 /*SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
@@ -364,19 +291,16 @@ void SerializationInfo::setReference(const std::string& id)
 
 // called during deserialization, when a reference needs to be relinked
 // by a previously parsed reference id
-void SerializationInfo::getReference(void* type, const std::type_info& ti, FixupHandler fh) const
+void SerializationInfo::getReference(void* type, FixupHandler fh) const
 {
-    ReferenceNode* node = initReference();
-    //node->setAddress(&type);
-    //node->setTypeInfo(ti);
+    if( this->category() != Reference)
+        throw SerializationError("not a reference");
 
-    //void* refAddr = node->address();
-    const std::string& refId = node->refId();
-    //const std::type_info* refType = node->typeInfo();
-    
+    const std::string& refId = static_cast<const ReferenceNode*>(_node)->refId();
+
     if(_context)
     {
-        _context->prepareLink( refId, type, ti, fh );
+        _context->prepareLink( refId, type, fh );
     }
 }
 

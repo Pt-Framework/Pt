@@ -50,10 +50,12 @@ class ReferenceNode;
 class ObjectNode;
 
 
-inline void FixupPointer(void* fixme, const std::type_info& fixmeType,
-                         void* target, const std::type_info& targetType)
+template <typename T>
+inline void FixupPointer(void* fixme,
+                         void* target, const std::type_info& targetType,
+                         void* hint)
 {
-    if(fixmeType != targetType)
+    if( typeid(T) != targetType )
         throw SerializationError("type mismatch during reference fixup");
 
     void** ptr =(void**)(fixme);
@@ -66,8 +68,9 @@ inline void FixupPointer(void* fixme, const std::type_info& fixmeType,
 class PT_API SerializationInfo
 {
     public:
-        typedef void (*FixupHandler)(void* fixme, const std::type_info& fixmeType,
-                                     void* target, const std::type_info& targetType);
+        typedef void (*FixupHandler)(void* fixme,
+                                     void* target, const std::type_info& targetType,
+                                     void* hint);
 
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
@@ -134,10 +137,7 @@ class PT_API SerializationInfo
 
         void setCategory(Category category);
 
-        SerializationContext* context()
-        { return _context; }
-
-        const SerializationContext* context() const
+        SerializationContext* context() const
         { return _context; }
 
         void setContext(SerializationContext& context)
@@ -279,7 +279,7 @@ class PT_API SerializationInfo
         */
         void setReference(const std::string& id);
 
-        void getReference(void* fixme, const std::type_info& ti, FixupHandler fh) const;
+        void getReference(void* fixme, FixupHandler fh) const;
 
         /** @brief Deserialization of weak pointers (contruction phase)
         */
@@ -694,7 +694,7 @@ template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
     void* fixme = (void*)(&ptr);
-    si.getReference(fixme, typeid(T), FixupPointer);
+    si.getReference(fixme, FixupPointer<T>);
 }
 
 

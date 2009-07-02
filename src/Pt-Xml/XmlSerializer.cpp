@@ -96,6 +96,13 @@ std::string XmlSerializationContext::getUnlinkId(const void* p)
 }
 
 
+void XmlSerializationContext::reset()
+{
+    _linkmap.clear();
+    _idmap.clear();
+}
+
+
 XmlSerializer::XmlSerializer()
 : _context(0)
 {

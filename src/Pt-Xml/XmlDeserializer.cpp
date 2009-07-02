@@ -355,13 +355,11 @@ void XmlDeserializer::finishLinkTarget()
 }
 
 
-void XmlDeserializer::prepareLink(const std::string& id, void* obj,
-                                  const std::type_info& fixupInfo, FixupHandler fh)
+void XmlDeserializer::prepareLink(const std::string& id, void* obj, FixupHandler fh)
 {
     //std::cerr << "prepareLink: " << obj << " " << fixupInfo.name() << " id " << id << std::endl;
     FixupInfo fi;
     fi.address = obj;
-    fi.type = &fixupInfo;
     fi.fixup = fh;
     _pointers.insert( std::pair<std::string, FixupInfo>(id, fi) );
 }
@@ -373,7 +371,6 @@ void XmlDeserializer::link()
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
         void* fixme = it->second.address;
-        const std::type_info* fixupType = it->second.type;
 
         std::string id = it->first;
 
@@ -385,10 +382,18 @@ void XmlDeserializer::link()
 
         //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
 
-        it->second.fixup(fixme, *fixupType,
-                         target, *targetType);
+        void* hint = this->getHint(target);
+
+        it->second.fixup(fixme, target, *targetType, hint);
     }
 
+    _targets.clear();
+    _pointers.clear();
+}
+
+
+void XmlDeserializer::reset()
+{
     _targets.clear();
     _pointers.clear();
 }

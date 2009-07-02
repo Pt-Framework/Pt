@@ -56,6 +56,8 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual std::string getUnlinkId(const void* p);
 
+        virtual void reset();
+
     private:
         std::map<const void*, unsigned> _idmap;
         std::map<unsigned, const void*> _linkmap;

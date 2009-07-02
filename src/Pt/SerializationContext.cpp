@@ -85,8 +85,7 @@ void SerializationBinder::finishLinkTarget()
 }
 
 
-void SerializationBinder::prepareLink(const std::string& id, void* obj,
-                                      const std::type_info& fixupInfo, FixupHandler)
+void SerializationBinder::prepareLink(const std::string& id, void* obj, FixupHandler)
 {
 }
 

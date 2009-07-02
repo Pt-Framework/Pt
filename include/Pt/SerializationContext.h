@@ -34,7 +34,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <set>
 
 namespace Pt {
 
@@ -70,8 +69,9 @@ DESERIALIZATION:
 class PT_API SerializationBinder
 {
     public:
-        typedef void (*FixupHandler)(void* fixme, const std::type_info& fixmeType,
-                                     void* target, const std::type_info& targetType);
+        typedef void (*FixupHandler)(void* fixme,
+                                     void* target, const std::type_info& targetType,
+                                     void* hint);
 
         SerializationBinder();
 
@@ -93,10 +93,13 @@ class PT_API SerializationBinder
 
         virtual void finishLinkTarget();
 
-        virtual void prepareLink(const std::string& id, void* obj,
-                                 const std::type_info& fixupInfo, FixupHandler);
+        virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
 
         virtual void link();
+
+    public:
+        virtual void reset()
+        {}
 };
 
 
@@ -106,6 +109,28 @@ class PT_API SerializationContext : public SerializationBinder
         SerializationContext();
 
         virtual ~SerializationContext();
+
+        void addHint(const void* ptr, void* hint)
+        {
+            _hints[ptr] = hint;
+        }
+
+        void* getHint(const void* ptr) const
+        {
+            std::map<const void*, void*>::const_iterator it = _hints.find(ptr);
+            if( it == _hints.end() )
+            {
+                return 0;
+            }
+
+            return it->second;
+        }
+
+        void clear()
+        {
+            _hints.clear();
+            this->reset();
+        }
 
     public:
         SerializationInfo* get();
@@ -119,6 +144,7 @@ class PT_API SerializationContext : public SerializationBinder
         SerializationInfo::Node* getObjectData();
 
     private:
+        std::map<const void*, void*> _hints;
         std::vector<SerializationInfo*> _infos;
         std::vector<ValueNode*> _scalars;
         std::vector<ObjectNode*> _objects;
