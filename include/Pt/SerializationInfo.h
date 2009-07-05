@@ -51,16 +51,26 @@ class ObjectNode;
 
 
 template <typename T>
-inline void FixupPointer(void* fixme,
-                         void* target, const std::type_info& targetType,
-                         void* hint)
+struct Fixup
 {
-    if( typeid(T) != targetType )
-        throw SerializationError("type mismatch during reference fixup");
-
-    void** ptr =(void**)(fixme);
-    *ptr = target;
-}
+    static void do_fixup_ptr(void* fixme,
+                             void* target, 
+                             const std::type_info& targetType,
+                             void* hint)
+    {
+        T** from = static_cast<T**>(fixme);
+        fixup(*from, target, targetType, hint);
+    }
+    
+    static void do_fixup_ref(void* fixme,
+                             void* target, 
+                             const std::type_info& targetType,
+                             void* hint)
+    {
+        T* from = static_cast<T*>(fixme);
+        fixup(*from, target, targetType, hint);
+    }
+};
 
 
 /** @brief Represents arbitrary types during serialization.
@@ -279,15 +289,21 @@ class PT_API SerializationInfo
         */
         void setReference(const std::string& id);
 
-        void getReference(void* fixme, FixupHandler fh) const;
-
         /** @brief Deserialization of weak pointers (contruction phase)
         */
-        /*template <typename T>
-        void getReference(T* type, FixupHandler fh) const
+        void getReference(void* fixme, FixupHandler fh) const;
+
+        template <typename T>
+        void getReference(T& fixme) const
         {
-            this->getReference( reinterpret_cast<void*>(type), typeid(T), fh );
-        }*/
+            this->getReference(&fixme, Fixup<T>::do_fixup_ref);
+        }
+
+        template <typename T>
+        void getReference(T*& fixme) const
+        {
+            this->getReference(&fixme, Fixup<T>::do_fixup_ptr);
+        }
 
         /** @brief Serialization of weak pointers
         */
@@ -683,18 +699,31 @@ inline O operator >>(const SerializationInfo& si, O (*modify)(const Serializatio
 
 
 template <typename T>
-inline void operator <<=(SerializationInfo& si, const T* ptr)
+inline void fixup(T*& fixme,
+                  void* target, const std::type_info& targetType,
+                  void* hint)
 {
-    si.setReference( (T*) ptr );
-    si.setTypeName("reference");
+    if( typeid(T) != targetType )
+    {
+        throw SerializationError("type mismatch during reference fixup");
+    }
+
+    fixme = static_cast<T*>(target);
 }
 
 
 template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
-    void* fixme = (void*)(&ptr);
-    si.getReference(fixme, FixupPointer<T>);
+    si.getReference(ptr);
+}
+
+
+template <typename T>
+inline void operator <<=(SerializationInfo& si, const T* ptr)
+{
+    si.setReference( (T*) ptr );
+    si.setTypeName("reference");
 }
 
 

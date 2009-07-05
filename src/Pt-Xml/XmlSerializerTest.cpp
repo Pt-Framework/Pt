@@ -40,7 +40,6 @@
 #include <string>
 #include <sstream>
 
-
 class DateRef
 {
     public:
@@ -59,54 +58,51 @@ class DateRef
 };
 
 
-void FixupDateRef(void* fixme,
-                  void* target, const std::type_info& targetType,
-                  void* hint)
+void fixup(DateRef& fixme,
+           void* target, const std::type_info& targetType,
+           void* hint)
 {
-    DateRef* from = static_cast< DateRef* >(fixme);
     Pt::Date* to   = static_cast< Pt::Date* >(target);
-    from->setDate(to);
+    fixme.setDate(to);
 }
 
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     //std::cerr << "NEED FIXUP: " << (void*)(&dr.date) << std::endl;
-    si.getReference(&dr, FixupDateRef);
+    si.getMember("date").getReference(dr);
 }
 
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
-    si <<= dr.date();
+    si.addMember("date") <<= dr.date();
 }
+
 
 typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
 
 namespace Pt {
 
-void FixupSmartPtr(void* fixme,
-                   void* target, const std::type_info& targetType,
-                   void* hint)
+void fixup(DateSmartPtr& fixme, 
+           void* target, 
+           const std::type_info& targetType,
+           void* hint)
 {
-    //std::cerr << "FixupSmartPtr: " << fixme << " ==> " << targetType.name() << std::endl;
-    DateSmartPtr* from = static_cast< DateSmartPtr* >(fixme);
-
     //std::cerr << "GOT HINT: " << target << ", "  << hint << std::endl;
     DateSmartPtr* to = static_cast< DateSmartPtr* >(hint);
-
-    *from = *to;
+    fixme = *to;
 }
 
 
-void operator >>=(const Pt::SerializationInfo& six, DateSmartPtr& sp)
+void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
-    const Pt::SerializationInfo& si = six.getMember("data");
+    //const Pt::SerializationInfo& si = six.getMember("data");
     DateSmartPtr* sptr = &sp;
 
     if(si.category() == Pt::SerializationInfo::Reference)
     {
-        si.getReference(sptr, FixupSmartPtr);
+        si.getReference(sp);
     }
     else
     {
@@ -121,15 +117,18 @@ void operator >>=(const Pt::SerializationInfo& six, DateSmartPtr& sp)
 void operator <<= (Pt::SerializationInfo& six, const DateSmartPtr& sp)
 {
     void* hint = six.context()->getHint( sp.getPointer() );
+    const DateSmartPtr* sptr = &sp;
 
     if( ! hint )
     {
-        six.addMember("data") <<= Pt::id() <<= *sp;
+        //six.addMember("data") <<= Pt::id() <<= *sp;
+        six <<= Pt::id() <<= *sp;
         six.context()->addHint(sp.getPointer(), &hint);
     }
     else
     {
-        six.addMember("data") <<= &(*sp);
+        //six.addMember("data") <<= &(*sp);
+        six <<= &(*sp);
     }
 }
 
