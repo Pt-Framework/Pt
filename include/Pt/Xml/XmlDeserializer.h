@@ -90,8 +90,7 @@ class PT_XML_API XmlDeserializer : public SerializationContext
         {
             void* address;
             void (*fixup)(void* fixme,
-                          void* target, const std::type_info& targetType,
-                          void* hint);
+                          void* target, const std::type_info& targetType);
             const std::type_info* type;
         };
 

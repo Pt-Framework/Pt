@@ -55,20 +55,18 @@ struct Fixup
 {
     static void do_fixup_ptr(void* fixme,
                              void* target, 
-                             const std::type_info& targetType,
-                             void* hint)
+                             const std::type_info& targetType)
     {
         T** from = static_cast<T**>(fixme);
-        fixup(*from, target, targetType, hint);
+        fixup(*from, target, targetType);
     }
     
     static void do_fixup_ref(void* fixme,
                              void* target, 
-                             const std::type_info& targetType,
-                             void* hint)
+                             const std::type_info& targetType)
     {
         T* from = static_cast<T*>(fixme);
-        fixup(*from, target, targetType, hint);
+        fixup(*from, target, targetType);
     }
 };
 
@@ -79,8 +77,7 @@ class PT_API SerializationInfo
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
-                                     void* target, const std::type_info& targetType,
-                                     void* hint);
+                                     void* target, const std::type_info& targetType);
 
         enum Category {
             Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
@@ -700,8 +697,7 @@ inline O operator >>(const SerializationInfo& si, O (*modify)(const Serializatio
 
 template <typename T>
 inline void fixup(T*& fixme,
-                  void* target, const std::type_info& targetType,
-                  void* hint)
+                  void* target, const std::type_info& targetType)
 {
     if( typeid(T) != targetType )
     {

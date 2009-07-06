@@ -381,10 +381,7 @@ void XmlDeserializer::link()
         const std::type_info* targetType = _targets[id].type ;
 
         //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
-
-        void* hint = this->getHint(target);
-
-        it->second.fixup(fixme, target, *targetType, hint);
+        it->second.fixup(fixme, target, *targetType);
     }
 
     _targets.clear();

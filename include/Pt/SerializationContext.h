@@ -70,8 +70,7 @@ class PT_API SerializationBinder
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
-                                     void* target, const std::type_info& targetType,
-                                     void* hint);
+                                     void* target, const std::type_info& targetType);
 
         SerializationBinder();
 
@@ -110,25 +109,8 @@ class PT_API SerializationContext : public SerializationBinder
 
         virtual ~SerializationContext();
 
-        void addHint(const void* ptr, void* hint)
-        {
-            _hints[ptr] = hint;
-        }
-
-        void* getHint(const void* ptr) const
-        {
-            std::map<const void*, void*>::const_iterator it = _hints.find(ptr);
-            if( it == _hints.end() )
-            {
-                return 0;
-            }
-
-            return it->second;
-        }
-
         void clear()
         {
-            _hints.clear();
             this->reset();
         }
 
@@ -144,7 +126,6 @@ class PT_API SerializationContext : public SerializationBinder
         SerializationInfo::Node* getObjectData();
 
     private:
-        std::map<const void*, void*> _hints;
         std::vector<SerializationInfo*> _infos;
         std::vector<ValueNode*> _scalars;
         std::vector<ObjectNode*> _objects;
