@@ -106,15 +106,59 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
     }
     else
     {
-        sp = new Pt::Date;
-        si >>= Pt::id() >>= *sp;
+        //sp = new Pt::Date;
+        si >>= *sp;
         si.context()->addHint(sp.getPointer(), sptr);
         //std::cerr << "HINT: " << sp.getPointer() << ", "  << sptr << std::endl;
     }
 }
 
+// TODO:: import
+inline void operator >>=(const SerializationInfo& si, const Link<DateSmartPtr, DateSmartPtr>& l)
+{
+    DateSmartPtr& sp = *(l.value);
 
-void operator <<= (Pt::SerializationInfo& six, const DateSmartPtr& sp)
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        si >>= sp;
+    }
+    else
+    {
+        sp = new Pt::Date;
+        si.beginLink( &(*sp), typeid(Pt::Date) );
+        si >>= sp;
+        si.finishLink();
+    }
+}
+
+/*
+ConstUnbind<Pt::Date, DateSmartPtr> operator<<= (const Symbol<Pt::Void>& sym, const DateSmartPtr& value)
+{
+    ConstUnbind<Pt::Date, DateSmartPtr> sl;
+    sl.sym.type = value.getPointer();
+    sl.value = &value;
+    return sl;
+}
+*/
+
+// TODO:: export
+void operator<<= (SerializationInfo& si, ConstUnbind<DateSmartPtr, DateSmartPtr> u)
+{
+    bool unlinked = si.beginUnlink( u.value->getPointer() );
+
+    if(unlinked)
+    {
+        si <<= **u.value;
+        si.finishUnlink();
+    }
+    else
+    {
+        si <<= u.value->getPointer();
+    }
+}
+
+
+void operator <<=(Pt::SerializationInfo& six, const DateSmartPtr& sp)
 {
     void* hint = six.context()->getHint( sp.getPointer() );
     const DateSmartPtr* sptr = &sp;
@@ -122,7 +166,7 @@ void operator <<= (Pt::SerializationInfo& six, const DateSmartPtr& sp)
     if( ! hint )
     {
         //six.addMember("data") <<= Pt::id() <<= *sp;
-        six <<= Pt::id() <<= *sp;
+        six <<= *sp;
         six.context()->addHint(sp.getPointer(), &hint);
     }
     else
