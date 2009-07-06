@@ -65,12 +65,13 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void addReference(const std::string& name, const std::string& id);
 
-        void beginArray(const std::string& name, const std::string& id);
+        void beginArray(const std::string& name, const std::string& type,
+                        const std::string& id);
 
         void finishArray();
 
-		// TODO: format typename
-        void beginObject(const std::string& name, const std::string& id);
+        void beginObject(const std::string& name, const std::string& type,
+                         const std::string& id);
 
         void beginMember(const std::string& name);
 

@@ -124,11 +124,13 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void addReference(const std::string& name, const std::string& value);
 
-        void beginArray(const std::string& name, const std::string& id);
+        void beginArray(const std::string& name, const std::string& type,
+                        const std::string& id);
 
         void finishArray();
 
-        void beginObject(const std::string& name, const std::string& id);
+        void beginObject(const std::string& name, const std::string& type,
+                         const std::string& id);
 
         void beginMember(const std::string& name);
 

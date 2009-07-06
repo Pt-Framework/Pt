@@ -109,11 +109,20 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 {
     if( ! id.empty() )
     {
-        Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
-        _writer->writeElement( Pt::String::widen( name ), &attr, 1, value );
+        Xml::Attribute attr( String(L"id"), String::widen( id ) );
+
+        if( ! name.empty() )
+            _writer->writeElement( String::widen( name ), &attr, 1, value );
+        else
+            _writer->writeElement( String::widen( type ), &attr, 1, value );
     }
     else
-        _writer->writeElement( Pt::String::widen( name ), value );
+    {
+        if( ! name.empty() )
+            _writer->writeElement( String::widen( name ), value );
+        else
+            _writer->writeElement( String::widen( type ), value );
+    }
 }
 
 
@@ -148,15 +157,25 @@ void XmlFormatter::addReference(const std::string& name, const std::string& id)
 }
 
 
-void XmlFormatter::beginArray(const std::string& name, const std::string& id)
+void XmlFormatter::beginArray(const std::string& name, const std::string& type,
+                              const std::string& id)
 {
     if( ! id.empty() )
     {
         Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
-        _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+
+        if( ! name.empty() )
+            _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+        else
+            _writer->writeStartElement( String::widen( type ), &attr, 1 );
     }
     else
-        _writer->writeStartElement( Pt::String::widen( name ) );
+    {
+        if( ! name.empty() )
+            _writer->writeStartElement( Pt::String::widen( name ) );
+        else
+            _writer->writeStartElement( String::widen( type ) );
+    }
 }
 
 
@@ -166,15 +185,25 @@ void XmlFormatter::finishArray()
 }
 
 
-void XmlFormatter::beginObject(const std::string& name, const std::string& id)
+void XmlFormatter::beginObject(const std::string& name, const std::string& type,
+                               const std::string& id)
 {
     if( ! id.empty() )
     {
-        Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
-        _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
+        Xml::Attribute attr( String(L"id"), String::widen( id ) );
+
+        if( ! name.empty() )
+            _writer->writeStartElement( String::widen( name ), &attr, 1 );
+        else
+            _writer->writeStartElement( String::widen( type ), &attr, 1 );
     }
     else
-        _writer->writeStartElement( Pt::String::widen( name ) );
+    {
+        if( ! name.empty() )
+            _writer->writeStartElement( String::widen( name ) );
+        else
+            _writer->writeStartElement( String::widen( type ) );
+    }
 }
 
 

@@ -46,24 +46,26 @@ class Formatter
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 
-		virtual void addInt(const std::string& name, const std::string& type,
+        virtual void addInt(const std::string& name, const std::string& type,
                             long value, const std::string& id) = 0;
 
-		virtual void addUInt(const std::string& name, const std::string& type,
+        virtual void addUInt(const std::string& name, const std::string& type,
                              unsigned long value, const std::string& id) = 0;
 
-		virtual void addFloat(const std::string& name, const std::string& type,
+        virtual void addFloat(const std::string& name, const std::string& type,
                               double value, const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;
 
-        virtual void beginArray(const std::string& name, const std::string& id) = 0;
+        virtual void beginArray(const std::string& name, const std::string& type,
+                                const std::string& id) = 0;
 
         virtual void finishArray() = 0;
 
         //TODO: beginElement() and finishElement()
 
-        virtual void beginObject(const std::string& name, const std::string& id) = 0;
+        virtual void beginObject(const std::string& name, const std::string& type,
+                                 const std::string& id) = 0;
 
         virtual void beginMember(const std::string& name) = 0;
 

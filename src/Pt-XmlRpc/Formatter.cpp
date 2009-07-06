@@ -103,7 +103,8 @@ void Formatter::addReference(const std::string& name, const std::string& value)
 }
 
 
-void Formatter::beginArray(const std::string&, const std::string&)
+void Formatter::beginArray(const std::string&, const std::string& type,
+                           const std::string&)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeStartElement( Pt::String::widen("array") );
@@ -119,7 +120,8 @@ void Formatter::finishArray()
 }
 
 
-void Formatter::beginObject(const std::string& name, const std::string& id)
+void Formatter::beginObject(const std::string& name, const std::string& type,
+                            const std::string& id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeStartElement( Pt::String::widen("struct") );

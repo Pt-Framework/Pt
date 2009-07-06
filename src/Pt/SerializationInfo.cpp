@@ -57,7 +57,7 @@ void SerializationInfo::format(Formatter& formatter)
     }
     else if(this->category() == SerializationInfo::Object)
     {
-        formatter.beginObject( this->name(), this->id() );
+        formatter.beginObject( this->name(), this->typeName(), this->id() );
 
         SerializationInfo::Iterator it;
         for(it = this->begin(); it != this->end(); ++it)
@@ -71,7 +71,7 @@ void SerializationInfo::format(Formatter& formatter)
     }
     else if(this->category() == Pt::SerializationInfo::Array)
     {
-        formatter.beginArray( this->name(), this->id() );
+        formatter.beginArray( this->name(), this->typeName(), this->id() );
 
         SerializationInfo::Iterator it;
         for(it = this->begin(); it != this->end(); ++it)
