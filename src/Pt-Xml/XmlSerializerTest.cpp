@@ -58,17 +58,21 @@ class DateRef
 };
 
 
-void fixup(DateRef& fixme,
-           void* target, const std::type_info& targetType)
+void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 {
-    Pt::Date* to   = static_cast< Pt::Date* >(target);
+    if( typeid(Pt::Date) != targetType )
+    {
+        throw Pt::SerializationError("type mismatch during pointer fixup");
+    }
+    
+    Pt::Date* to = static_cast< Pt::Date* >(target);
     fixme.setDate(to);
 }
 
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
-    si.getMember("date").getReference(dr);
+    si.getMember("date").fixupReference(dr);
 }
 
 
@@ -82,38 +86,10 @@ typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
 
 namespace Pt {
 
-void fixup(DateSmartPtr& fixme, 
-           void* target, 
-           const std::type_info& targetType)
-{    
-    DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
-    fixme = *to;
-}
-
-
 void operator >>=(const SerializationInfo& si, DateSmartPtr& sp)
 {
     sp = new Date();
     si >>= *sp;
-}
-
-// TODO:: import
-inline void operator >>=(const SerializationInfo& si, 
-                         const Link<DateSmartPtr, DateSmartPtr>& l)
-{
-    DateSmartPtr& sp = *(l.value);
-    DateSmartPtr* sptr = &sp;
-
-    if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        si.getReference(sp);
-    }
-    else
-    {
-        si.beginLink( sptr, typeid(DateSmartPtr) );
-        si >>= sp;
-        si.finishLink();
-    }
 }
 
 
@@ -122,21 +98,19 @@ void operator <<=(SerializationInfo& si, const DateSmartPtr& sp)
     si <<= *sp;
 }
 
-// TODO:: export
-void operator <<=(SerializationInfo& si, 
-                  ConstUnbind<DateSmartPtr, DateSmartPtr> u)
+
+void save(SerializationInfo& si, const DateSmartPtr& value)
 {
-    bool unlinked = si.beginUnlink( u.value->getPointer() );
+    bool unlinked = si.beginSave( value.getPointer() );
 
     if(unlinked)
     {
-        const DateSmartPtr& sp = *u.value;
-        si <<= sp;
-        si.finishUnlink();
+        si <<= value;
+        si.finishSave();
     }
     else
     {
-        si <<= u.value->getPointer();
+        si <<= value.getPointer();
     }
 }
 
@@ -202,6 +176,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
+            PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
         }
 
         void Object()

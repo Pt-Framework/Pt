@@ -84,7 +84,7 @@ void SerializationInfo::format(Formatter& formatter)
 }
 
 
-bool SerializationInfo::beginUnlink(const void* p)
+bool SerializationInfo::beginSave(const void* p)
 {
     bool unlinked = true;
 
@@ -101,7 +101,7 @@ bool SerializationInfo::beginUnlink(const void* p)
 }
 
 
-void SerializationInfo::finishUnlink()
+void SerializationInfo::finishSave()
 {
     if(_binder)
     {
@@ -110,7 +110,7 @@ void SerializationInfo::finishUnlink()
 }
 
 
-void SerializationInfo::beginLink(void* p, const std::type_info& ti) const
+void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 {
     if(_parent == 0 || _parent->_binder)
         _binder = _context;
@@ -122,7 +122,7 @@ void SerializationInfo::beginLink(void* p, const std::type_info& ti) const
 }
 
 
-void SerializationInfo::finishLink() const
+void SerializationInfo::finishLoad() const
 {
     if(_context)
     {
@@ -271,16 +271,6 @@ void SerializationInfo::setReference(const void* ref)
 }
 
 
-// called during serialization, when a reference needs to be unlinked
-/*SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
-{
-    SerializationInfo& info = this->addMember(name);
-    info.setReference(ref);
-    
-    return info;
-}*/
-
-
 // called during deserialization, when a reference id was parsed
 void SerializationInfo::setReference(const std::string& id)
 {
@@ -291,7 +281,7 @@ void SerializationInfo::setReference(const std::string& id)
 
 // called during deserialization, when a reference needs to be relinked
 // by a previously parsed reference id
-void SerializationInfo::getReference(void* type, FixupHandler fh) const
+void SerializationInfo::fixup(void* type, FixupHandler fh) const
 {
     if( this->category() != Reference)
         throw SerializationError("not a reference");

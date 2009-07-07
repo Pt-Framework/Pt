@@ -80,6 +80,7 @@ class Serializer : public ISerializer
             _si.setName(name);
         }
 
+        // rename save
         virtual void prepare() 
         {
             _si <<= Pt::id() <<= *_type;

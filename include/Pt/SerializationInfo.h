@@ -71,6 +71,31 @@ struct Fixup
 };
 
 
+template <typename T>
+inline void fixup(T*& fixme, void* target, const std::type_info& targetType)
+{
+    if( typeid(T) != targetType )
+    {
+        throw SerializationError("type mismatch during pointer fixup");
+    }
+
+    fixme = static_cast<T*>(target);
+}
+
+
+template <typename T>
+void fixup(T& fixme, void* target, const std::type_info& targetType)
+{
+    if( typeid(T) != targetType )
+    {
+        throw SerializationError("type mismatch during reference fixup");
+    }
+
+    T* to = static_cast< T* >(target);
+    fixme = *to;
+}
+
+
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
@@ -183,13 +208,17 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        bool beginUnlink(const void* p);
+        // TODO: remove this method and use Context directly
+        bool beginSave(const void* p);
 
-        void finishUnlink();
+        // TODO: remove this method and use Context directly
+        void finishSave();
 
-        void beginLink(void* p, const std::type_info& ti) const;
+        // TODO: remove this method and use Context directly
+        void beginLoad(void* p, const std::type_info& ti) const;
 
-        void finishLink() const;
+        // TODO: remove this method and use Context directly
+        void finishLoad() const;
 
         /** @brief Deserialization of flat child value types
         */
@@ -286,25 +315,23 @@ class PT_API SerializationInfo
         */
         void setReference(const std::string& id);
 
-        /** @brief Deserialization of weak pointers (contruction phase)
+        /** @brief Deserialization of references
         */
-        void getReference(void* fixme, FixupHandler fh) const;
-
         template <typename T>
-        void getReference(T& fixme) const
+        void fixupReference(T& fixme) const
         {
-            this->getReference(&fixme, Fixup<T>::do_fixup_ref);
+            this->fixup(&fixme, Fixup<T>::do_fixup_ref);
         }
 
+        /** @brief Deserialization of weak pointers
+        */
         template <typename T>
-        void getReference(T*& fixme) const
+        void fixupPointer(T*& fixme) const
         {
-            this->getReference(&fixme, Fixup<T>::do_fixup_ptr);
+            this->fixup(&fixme, Fixup<T>::do_fixup_ptr);
         }
 
-        /** @brief Serialization of weak pointers
-        */
-        //SerializationInfo& addReference(const std::string& name, void* ref);
+        void fixup(void* fixme, FixupHandler fh) const;
 
         void format(Formatter& formatter);
 
@@ -515,170 +542,88 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 }
 
 
-template <typename T>
-struct Symbol
-{
-    Symbol(T& t)
-    : type(&t)
-    { }
-
-    Symbol()
-    : type(0)
-    { }
-
-    T* type;
-};
+struct id
+{};
 
 
 template <typename T>
-struct ConstSymbol
-{
-    ConstSymbol(const T& t)
-    : type(&t)
-    { }
-
-    ConstSymbol()
-    : type(0)
-    { }
-
-    const T* type;
-};
-
-
-template <typename T>
-Symbol<T> id(T& t)
-{
-    return Symbol<T>(t);
-}
-
-
-template <typename T>
-ConstSymbol<T> id(const T& t)
-{
-    return ConstSymbol<T>(t);
-}
-
-
-inline Symbol<Pt::Void> id()
-{
-    return Symbol<Pt::Void>();
-}
-
-
-template <typename S, typename T>
-struct ConstUnbind
+struct Save
 {
     const T* value;
-    ConstSymbol<S> sym;
 };
 
 
-template <typename S, typename T>
-struct Unbind
+template <typename T>
+inline Save<T> operator<<= (const id& sym, const T& value)
 {
-    const T* value;
-    Symbol<S> sym;
-};
-
-
-template <typename S, typename T>
-inline Unbind<S, T> operator<<= (const Symbol<S>& sym, const T& value)
-{
-	Unbind<S, T> sl;
-	sl.sym = sym;
+	Save<T> sl;
 	sl.value = &value;
 	return sl;
 }
 
 
 template <typename T>
-inline ConstUnbind<T, T> operator<<= (const Symbol<Pt::Void>& sym, const T& value)
+void save(SerializationInfo& si, const T& value)
 {
-	ConstUnbind<T, T> sl;
-	sl.sym.type = &value;
-	sl.value = &value;
-	return sl;
-}
-
-
-template <typename S, typename T>
-inline ConstUnbind<S, T> operator<<= (const ConstSymbol<S>& sym, const T& value)
-{
-	ConstUnbind<S, T> sl;
-	sl.sym = sym;
-	sl.value = &value;
-	return sl;
-}
-
-
-template <typename S, typename T>
-void operator<<= (SerializationInfo& si, Unbind<S, T> u)
-{
-    bool unlinked = si.beginUnlink( u.sym.type );
+    bool unlinked = si.beginSave( &value );
 
     if(unlinked)
     {
-        si <<= *(u.value);
-        si.finishUnlink();
+        si <<= value;
+        si.finishSave();
     }
     else
     {
-        si <<= u.sym.type;
+        si <<= &value;
     }
 }
 
 
-template <typename S, typename T>
-void operator<<= (SerializationInfo& si, ConstUnbind<S, T> u)
+template <typename T>
+void operator<<= (SerializationInfo& si, Save<T> u)
 {
-    bool unlinked = si.beginUnlink( u.sym.type );
-
-    if(unlinked)
-    {
-        si <<= *(u.value);
-        si.finishUnlink();
-    }
-    else
-    {
-        si <<= u.sym.type;
-    }
+    save( si, *(u.value) );
 }
 
 
-template <typename S, typename T>
-struct Link
+template <typename T>
+struct Load
 {
     T* value;
-    Symbol<S> sym;
 };
 
 
-template <typename S, typename T>
-inline Link<S, T> operator>>= (const Symbol<S>& sym, T& value)
-{
-	Link<S, T> sl;
-	sl.sym = sym;
-	sl.value = &value;
-	return sl;
-}
-
-
 template <typename T>
-inline Link<T, T> operator>>= (const Symbol<Pt::Void>& sym, T& type)
+inline Load<T> operator>>= (const id& sym, T& type)
 {
-	Link<T, T> l;
+	Load<T> l;
 	l.value = &type;
-	l.sym.type = &type;
 	return l;
 }
 
 
-template <typename S, typename T>
-inline void operator >>=(const SerializationInfo& si, const Link<S, T>& l)
+template <typename T>
+inline void load(const SerializationInfo& si, T& type)
 {
-    si.beginLink( l.sym.type, typeid(S) );
-    si >>= *(l.value);
-    si.finishLink();
+    T* tp = &type;
+
+    if(si.category() == Pt::SerializationInfo::Reference)
+    {
+        si.fixupReference(type);
+    }
+    else
+    {
+        si.beginLoad( tp, typeid(T) );
+        si >>= type;
+        si.finishLoad();
+    }
+}
+
+
+template <typename T>
+inline void operator >>=(const SerializationInfo& si, const Load<T>& l)
+{
+    load(si, *(l.value) );
 }
 
 
@@ -696,22 +641,9 @@ inline O operator >>(const SerializationInfo& si, O (*modify)(const Serializatio
 
 
 template <typename T>
-inline void fixup(T*& fixme,
-                  void* target, const std::type_info& targetType)
-{
-    if( typeid(T) != targetType )
-    {
-        throw SerializationError("type mismatch during reference fixup");
-    }
-
-    fixme = static_cast<T*>(target);
-}
-
-
-template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
-    si.getReference(ptr);
+    si.fixupPointer(ptr);
 }
 
 
