@@ -545,117 +545,100 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 struct id
 {};
 
+struct load : public id
+{};
 
-template <typename T>
-struct Save
+struct save : public id
+{};
+
+
+// TODO SaveInfo
+class Symbol
 {
-    Save(const T& type)
-    : value(&type)
-    {}
-
-    const T& get() const
-    { return *value; }
-
-    const T* value;
+    public:
+        explicit Symbol(SerializationInfo& info)
+        : si(&info)
+        {}
+    
+        bool beginSave(const void* sym)
+        { return si->beginSave( sym ); }
+    
+        SerializationInfo& info() const
+        { return *si; }
+    
+        void finishSave()
+        { si->finishSave(); }
+    
+    private:
+        SerializationInfo* si;
 };
 
 
-template <typename T>
-inline Save<T> operator<<= (const id& sym, const T& value)
+inline Symbol operator<< (SerializationInfo& si, const id&)
 {
-    return Save<T>(value);
+    return Symbol(si);
 }
 
 
 template <typename T>
-void operator<<= (SerializationInfo& si, Save<T> save)
-{
-    bool unlinked = si.beginSave( save.value );
-
-    if(unlinked)
+void operator<<= (Symbol symbol, const T& type)
+{    
+    bool first = symbol.beginSave( &type );
+    if(first)
     {
-        si <<= save.get();
-        si.finishSave();
+        symbol.info() <<= type;
+        symbol.finishSave();
     }
     else
     {
-        si <<= save.value;
+        symbol.info() <<= &type;
     }
 }
 
 
-template <typename T>
-struct Load
+// TODO: LoadInfo
+class ConstSymbol
 {
-    T* value;
+    public:
+        explicit ConstSymbol(const SerializationInfo& info)
+        : si(&info)
+        {}
+    
+        void beginLoad(void* sym, const std::type_info& ti) const
+        { si->beginLoad( sym, ti ); }
+    
+        const SerializationInfo& info() const
+        { return *si; }
+    
+        void finishLoad() const
+        { si->finishLoad(); }
+    
+    private:
+        const SerializationInfo* si;
 };
 
 
-template <typename T>
-inline Load<T> operator>>= (const id& sym, T& type)
+inline ConstSymbol operator>> (const SerializationInfo& si, const id& )
 {
-	Load<T> l;
-	l.value = &type;
-	return l;
+	return ConstSymbol(si);
 }
 
 
 template <typename T>
-inline void operator >>=(const SerializationInfo& si, const Load<T>& l)
+inline void operator >>=(const ConstSymbol& symbol, T& type)
 {
-    T& type = *(l.value);
-    T* tp   = l.value;
+    T* tp   = &type;
 
-    if(si.category() == Pt::SerializationInfo::Reference)
+    if(symbol.info().category() == Pt::SerializationInfo::Reference)
     {
-        si.fixupReference(type);
+        symbol.info().fixupReference(type);
     }
     else
     {
-        si.beginLoad( tp, typeid(T) );
-        si >>= type;
-        si.finishLoad();
+        symbol.beginLoad( tp, typeid(T) );
+        symbol.info() >>= type;
+        symbol.finishLoad();
     }
-}
-
-
-struct Visible
-{
-    //operator const SerializationInfo&() const
-    //{ return *si; }
-
-    SerializationInfo* si;
-};
-
-
-struct ConstVisible
-{
-    //operator const SerializationInfo&() const
-    //{ return *si; }
-
-    const SerializationInfo* si;
-};
-
-
-inline ConstVisible visible(const SerializationInfo& si)
-{
-    ConstVisible v;
-    v.si = &si;
-    return v;
-}
-
-
-template <typename T>
-inline void operator >>=(ConstVisible v, T& type)
-{
-    load( *(v.si), type );
-}
-
-
-template <typename O>
-inline O operator >>(const SerializationInfo& si, O (*modify)(const SerializationInfo&) )
-{
-    return modify(si);
 }
 
 
@@ -867,7 +850,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back( elem );
-        *it >>= Pt::id() >>= vec.back();
+        *it >> Pt::load() >>= vec.back();
     }
 }
 
@@ -879,7 +862,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        si.addMember() <<= Pt::id() <<= *it;
+        si.addMember() << Pt::save() <<= *it;
     }
 
     si.setTypeName("array");

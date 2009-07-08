@@ -93,6 +93,8 @@ bool SerializationInfo::beginSave(const void* p)
 
     if( _context )
     {
+        // TODO: optimize: keep void* to bound type in SerializationInfotype
+        //       to show public access and get id later only if required
         std::string id = _context->beginUnlinkTarget(_name, p, unlinked);
         this->setId(id);
     }

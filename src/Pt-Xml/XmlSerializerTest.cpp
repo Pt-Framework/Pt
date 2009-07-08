@@ -45,6 +45,7 @@ class DateRef
     public:
         DateRef(Pt::Date* date = 0)
         : _date(date)
+        , _n(5)
         { }
 
         void setDate(Pt::Date* date)
@@ -53,8 +54,15 @@ class DateRef
         Pt::Date* date() const
         { return _date; }
 
+        int n() const
+        { return _n; }
+
+        void setN(int n)
+        { _n = n; }
+
     private:
         Pt::Date* _date;
+        int _n;
 };
 
 
@@ -73,18 +81,24 @@ void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     si.getMember("date").fixupReference(dr);
+    
+    int n = 0;
+    si.getMember("n") >>= n;
+    dr.setN(n);
 }
 
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
     si.addMember("date") <<= dr.date();
+    si.addMember("n") <<= dr.n();
 }
 
 
-typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
-
 namespace Pt {
+
+typedef SmartPtr<Date> DateSmartPtr;
+
 
 void operator >>=(const SerializationInfo& si, DateSmartPtr& sp)
 {
@@ -99,35 +113,17 @@ void operator <<=(SerializationInfo& si, const DateSmartPtr& sp)
 }
 
 
-void operator <<=(Visible member, const DateSmartPtr& sp)
+void operator <<=(Symbol symbol, const DateSmartPtr& sp)
 {
-    Pt::SerializationInfo& si = *(member.si);
-    bool first = si.beginSave( sp.getPointer() );
+    bool first = symbol.beginSave( sp.getPointer() );
     if(first)
     {
-        si <<= sp;
-        si.finishSave();
+        symbol.info() <<= sp;
+        symbol.finishSave();
     }
     else
     {
-        si <<= sp.getPointer();
-    }
-}
-
-
-void operator <<=(Pt::SerializationInfo& si, Pt::Save<DateSmartPtr> save)
-{
-    const DateSmartPtr& sp = save.get();
-
-    bool first = si.beginSave( sp.getPointer() );
-    if(first)
-    {
-        si <<= sp;
-        si.finishSave();
-    }
-    else
-    {
-        si <<= sp.getPointer();
+        symbol.info() <<= sp.getPointer();
     }
 }
 
@@ -150,8 +146,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date1(1889, 4, 20);
 
             const Pt::Date* dateptr = &date1;
-            DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
-            DateSmartPtr datesp2 = datesp;
+            Pt::DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
+            Pt::DateSmartPtr datesp2 = datesp;
 
             DateRef dr( &date1 );
 
@@ -169,8 +165,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2(1, 1, 1);
             dr.setDate(0);
             Pt::Date* dateptr2 = 0; // const ?
-            DateSmartPtr datesp3;
-            DateSmartPtr datesp4;
+            Pt::DateSmartPtr datesp3;
+            Pt::DateSmartPtr datesp4;
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
