@@ -99,18 +99,35 @@ void operator <<=(SerializationInfo& si, const DateSmartPtr& sp)
 }
 
 
-void save(SerializationInfo& si, const DateSmartPtr& value)
+void operator <<=(Visible member, const DateSmartPtr& sp)
 {
-    bool unlinked = si.beginSave( value.getPointer() );
-
-    if(unlinked)
+    Pt::SerializationInfo& si = *(member.si);
+    bool first = si.beginSave( sp.getPointer() );
+    if(first)
     {
-        si <<= value;
+        si <<= sp;
         si.finishSave();
     }
     else
     {
-        si <<= value.getPointer();
+        si <<= sp.getPointer();
+    }
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, Pt::Save<DateSmartPtr> save)
+{
+    const DateSmartPtr& sp = save.get();
+
+    bool first = si.beginSave( sp.getPointer() );
+    if(first)
+    {
+        si <<= sp;
+        si.finishSave();
+    }
+    else
+    {
+        si <<= sp.getPointer();
     }
 }
 

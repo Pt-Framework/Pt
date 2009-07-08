@@ -549,6 +549,13 @@ struct id
 template <typename T>
 struct Save
 {
+    Save(const T& type)
+    : value(&type)
+    {}
+
+    const T& get() const
+    { return *value; }
+
     const T* value;
 };
 
@@ -556,33 +563,24 @@ struct Save
 template <typename T>
 inline Save<T> operator<<= (const id& sym, const T& value)
 {
-	Save<T> sl;
-	sl.value = &value;
-	return sl;
+    return Save<T>(value);
 }
 
 
 template <typename T>
-void save(SerializationInfo& si, const T& value)
+void operator<<= (SerializationInfo& si, Save<T> save)
 {
-    bool unlinked = si.beginSave( &value );
+    bool unlinked = si.beginSave( save.value );
 
     if(unlinked)
     {
-        si <<= value;
+        si <<= save.get();
         si.finishSave();
     }
     else
     {
-        si <<= &value;
+        si <<= save.value;
     }
-}
-
-
-template <typename T>
-void operator<<= (SerializationInfo& si, Save<T> u)
-{
-    save( si, *(u.value) );
 }
 
 
@@ -603,9 +601,10 @@ inline Load<T> operator>>= (const id& sym, T& type)
 
 
 template <typename T>
-inline void load(const SerializationInfo& si, T& type)
+inline void operator >>=(const SerializationInfo& si, const Load<T>& l)
 {
-    T* tp = &type;
+    T& type = *(l.value);
+    T* tp   = l.value;
 
     if(si.category() == Pt::SerializationInfo::Reference)
     {
@@ -620,16 +619,36 @@ inline void load(const SerializationInfo& si, T& type)
 }
 
 
-template <typename T>
-inline void operator >>=(const SerializationInfo& si, const Load<T>& l)
+struct Visible
 {
-    load(si, *(l.value) );
+    //operator const SerializationInfo&() const
+    //{ return *si; }
+
+    SerializationInfo* si;
+};
+
+
+struct ConstVisible
+{
+    //operator const SerializationInfo&() const
+    //{ return *si; }
+
+    const SerializationInfo* si;
+};
+
+
+inline ConstVisible visible(const SerializationInfo& si)
+{
+    ConstVisible v;
+    v.si = &si;
+    return v;
 }
 
 
-inline const SerializationInfo& nothing(const SerializationInfo& si)
+template <typename T>
+inline void operator >>=(ConstVisible v, T& type)
 {
-    return si;
+    load( *(v.si), type );
 }
 
 
