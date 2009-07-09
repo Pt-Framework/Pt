@@ -141,14 +141,14 @@ class PT_API SerializationInfo
         SerializationInfo()
         : _node(0)
         , _context(0)
-        , _binder(0)
+        , _bound(0)
         , _parent(0)
         { }
 
         explicit SerializationInfo(SerializationContext* context)
         : _node( 0 )
         , _context(context)
-        , _binder(0)
+        , _bound(0)
         , _parent(0)
         { }
 
@@ -392,7 +392,7 @@ class PT_API SerializationInfo
     private:
         mutable Node* _node;
         SerializationContext* _context;
-        mutable SerializationContext* _binder;
+        mutable const void* _bound;
         SerializationInfo* _parent;
         std::string _name;
         std::string _type;
@@ -551,19 +551,30 @@ class SaveInfo
     public:
         explicit SaveInfo(SerializationInfo& info)
         : si(&info)
+        , _saved(false)
         {}
 
-        bool beginSave(const void* sym)
-        { return si->beginSave( sym ); }
+        ~SaveInfo()
+        { if(_saved) si->finishSave();  }
 
         SerializationInfo& info()
         { return *si; }
 
-        void finishSave()
-        { si->finishSave(); }
+        template <typename T>
+        bool save(const T& type)
+        { 
+            _saved = si->beginSave( &type );
+            if(_saved)
+                this->info() <<= type;
+            else
+                this->info() <<= &type;
+            
+            return _saved;
+        }
 
     private:
         SerializationInfo* si;
+        bool _saved;
 };
 
 
@@ -596,17 +607,9 @@ inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
 template <typename T>
 inline void operator<<= (SaveInfo& si, const T& type)
 {
-    bool first = si.beginSave( &type );
-    if(first)
-    {
-        si.info() <<= type;
-        si.finishSave();
-    }
-    else
-    {
-        si.info() <<= &type;
-    }
+    si.save( type );
 }
+
 
 struct load
 {};

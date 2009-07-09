@@ -42,10 +42,9 @@ SerializationBinder::~SerializationBinder()
 }
 
 
-std::string SerializationBinder::beginUnlinkTarget(const std::string& name, const void* p, bool& first)
+bool SerializationBinder::beginUnlinkTarget(const std::string& name, const void* p)
 {
-    first = true;
-    return std::string();
+    return false;
 }
 
 
@@ -54,14 +53,13 @@ void SerializationBinder::finishUnlinkTarget()
 }
 
 
-bool SerializationBinder::prepareUnlink(const void* p)
+void SerializationBinder::prepareUnlink(const void* p)
 {
     throw SerializationError("missing unlink information");
-    return false;
 }
 
 
-bool SerializationBinder::isUnlinked(const std::string& id)
+bool SerializationBinder::isUnlinkTarget(const void* p)
 {
     return false;
 }

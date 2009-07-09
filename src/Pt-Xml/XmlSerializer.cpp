@@ -41,18 +41,16 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-std::string XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p, bool& first)
+bool XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
 {
-    first = false;
-
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
         _idmap[p] = id;
-        first = true;
+        return true;
     }
 
-    return convert<std::string>( _idmap[p] );
+    return false;
 }
 
 
@@ -61,29 +59,30 @@ void XmlSerializationContext::finishUnlinkTarget()
 }
 
 
-bool XmlSerializationContext::prepareUnlink(const void* p)
+void XmlSerializationContext::prepareUnlink(const void* p)
 {
-	bool first = false;
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
         _idmap[p] = id;
-        first = true;
     }
 
     unsigned lid = _idmap[p];
     _linkmap[lid] = p;
-    return first;
 }
 
 
-bool XmlSerializationContext::isUnlinked(const std::string& id)
+bool XmlSerializationContext::isUnlinkTarget(const void* p)
 {
-	if( id.empty() )
-		return false;
-
-    unsigned n = convert<unsigned>( id );
-    return _linkmap.find(n) != _linkmap.end();
+    std::map<unsigned, const void*>::const_iterator it;
+    
+    for(it = _linkmap.begin(); it != _linkmap.end(); ++it)
+    {
+        if(it->second == p)
+            return true;
+    }
+    
+    return false;
 }
 
 

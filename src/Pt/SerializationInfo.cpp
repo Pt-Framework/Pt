@@ -34,9 +34,9 @@ namespace Pt {
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    if( _context && ! _context->isUnlinked( this->id() ) )
+    if( _context && _bound &&  _context->isUnlinkTarget(_bound) )
     {
-        this->setId("");
+        this->setId( _context->getUnlinkId(_bound) );
     }
 
     if(this->category() == SerializationInfo::Value)
@@ -86,38 +86,37 @@ void SerializationInfo::format(Formatter& formatter)
 
 bool SerializationInfo::beginSave(const void* p)
 {
-    bool unlinked = true;
+    bool first = false;
 
-    if(_parent == 0 || _parent->_binder)
-        _binder = _context;
-
-    if( _context )
+    if(_parent == 0 || _parent->_bound)
     {
-        // TODO: optimize: keep void* to bound type in SerializationInfotype
-        //       to show public access and get id later only if required
-        std::string id = _context->beginUnlinkTarget(_name, p, unlinked);
-        this->setId(id);
+        if(_context)
+        {
+            first = _context->beginUnlinkTarget(_name, p);
+            if(first)
+                _bound = p;
+        }
     }
 
-    return unlinked;
+    return first;
 }
 
 
 void SerializationInfo::finishSave()
 {
-    if(_binder)
+    if(_context && _bound)
     {
-        _binder->finishUnlinkTarget();
+        _context->finishUnlinkTarget();
     }
 }
 
 
 void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 {
-    if(_parent == 0 || _parent->_binder)
-        _binder = _context;
+    if(_parent == 0 || _parent->_bound)
+        _bound = p;
 
-    if(_context)
+    if(_context && _bound)
     {
         _context->beginLinkTarget( _name, _id, p, ti);
     }
@@ -126,7 +125,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 
 void SerializationInfo::finishLoad() const
 {
-    if(_context)
+    if(_context && _bound)
     {
         _context->finishLinkTarget();
     }
@@ -164,6 +163,7 @@ void SerializationInfo::clear()
     _name.clear();
     _type.clear();
     _id.clear();
+    _bound = 0;
 }
 
 

@@ -115,16 +115,7 @@ void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
 
 void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
-    bool first = si.beginSave( sp.getPointer() );
-    if(first)
-    {
-        si.info() <<= sp;
-        si.finishSave();
-    }
-    else
-    {
-        si.info() <<= sp.getPointer();
-    }
+    si.save( *sp );
 }
 
 }
