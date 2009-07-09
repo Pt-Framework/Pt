@@ -141,7 +141,7 @@ class Deserializer : public IDeserializer
         {
             if( ! _current->parent() )
             {
-                *_current >> Pt::id() >>= *_type;
+                *_current >>= Pt::load() >>= *_type;
 
                 if( ! this->parent() )
                     throw std::runtime_error("invalid member");
@@ -155,7 +155,7 @@ class Deserializer : public IDeserializer
 
         virtual void leave()
         {
-            *_current >> Pt::id() >>= *_type;
+            *_current >>= Pt::load() >>= *_type;
         }
 
     private:

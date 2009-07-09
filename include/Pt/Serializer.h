@@ -83,7 +83,7 @@ class Serializer : public ISerializer
         // rename save
         virtual void prepare() 
         {
-            _si << Pt::id() <<= *_type;
+            _si <<= Pt::save() <<= *_type;
         }
 
         virtual void format(Formatter& formatter)

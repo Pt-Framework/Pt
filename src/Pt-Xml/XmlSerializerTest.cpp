@@ -100,30 +100,30 @@ namespace Pt {
 typedef SmartPtr<Date> DateSmartPtr;
 
 
-void operator >>=(const SerializationInfo& si, DateSmartPtr& sp)
+void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
     sp = new Date();
     si >>= *sp;
 }
 
 
-void operator <<=(SerializationInfo& si, const DateSmartPtr& sp)
+void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
 {
     si <<= *sp;
 }
 
 
-void operator <<=(Symbol symbol, const DateSmartPtr& sp)
+void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
-    bool first = symbol.beginSave( sp.getPointer() );
+    bool first = si.beginSave( sp.getPointer() );
     if(first)
     {
-        symbol.info() <<= sp;
-        symbol.finishSave();
+        si.info() <<= sp;
+        si.finishSave();
     }
     else
     {
-        symbol.info() <<= sp.getPointer();
+        si.info() <<= sp.getPointer();
     }
 }
 
