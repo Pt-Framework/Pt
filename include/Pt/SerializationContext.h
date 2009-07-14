@@ -76,24 +76,33 @@ class PT_API SerializationBinder
 
         virtual ~SerializationBinder();
 
+        // beginSave
         virtual bool beginUnlinkTarget(const std::string& name, const void* p);
 
+        // finishSave
         virtual void finishUnlinkTarget();
 
+        // breakup
         virtual void prepareUnlink(const void* p);
 
+        // isSaved
         virtual bool isUnlinkTarget(const void* p);
 
+        // createId
         virtual std::string getUnlinkId(const void* p);
 
     public:
+        // beginLoad
         virtual void beginLinkTarget(const std::string& name, const std::string& id,
                                      void* obj, const std::type_info& fixupInfo);
 
+        // finishLoad
         virtual void finishLinkTarget();
 
+        // prepareSave
         virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
 
+        // fixup
         virtual void link();
 
     public:
