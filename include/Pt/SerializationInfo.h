@@ -147,15 +147,15 @@ class PT_API SerializationInfo
         SerializationInfo()
         : _node(0)
         , _context(0)
-        , _bound(0)
         , _parent(0)
+        , _bound(0)
         { }
 
         explicit SerializationInfo(SerializationContext* context)
         : _node( 0 )
         , _context(context)
-        , _bound(0)
         , _parent(0)
+        , _bound(0)
         { }
 
         ~SerializationInfo();
