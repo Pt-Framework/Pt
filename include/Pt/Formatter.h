@@ -73,8 +73,6 @@ class Formatter
 
         virtual void finishObject() = 0;
 
-        virtual void finish() = 0;
-
     protected:
         Formatter()
         {}

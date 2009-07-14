@@ -138,8 +138,6 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void finishObject();
 
-        void finish();
-
     private:
         //! @internal
         XmlWriter* _writer;

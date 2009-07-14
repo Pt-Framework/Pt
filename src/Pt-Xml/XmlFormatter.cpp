@@ -222,12 +222,6 @@ void XmlFormatter::finishObject()
     _writer->writeEndElement();
 }
 
-
-void XmlFormatter::finish()
-{
-
-}
-
 } // namespace Xml
 
 } // namespace Pt
