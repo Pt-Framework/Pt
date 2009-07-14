@@ -101,7 +101,7 @@ typedef SmartPtr<Date> DateSmartPtr;
 
 void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
 {
-    if( typeid(DateSmartPtr) == targetType && target)
+    if( target && targetType == typeid(DateSmartPtr) )
     {
         DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
         fixme = *to;
@@ -112,7 +112,7 @@ void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
     }
     else
     {
-        throw SerializationError("type mismatch during reference fixup");
+        throw SerializationError("smart pointer fixup failed");
     }
 }
 

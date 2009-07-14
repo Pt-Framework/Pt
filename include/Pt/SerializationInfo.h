@@ -314,6 +314,8 @@ class PT_API SerializationInfo
         ConstIterator end() const;
 
         /** @brief Serialization of weak pointers
+
+            TODO: saveReference
         */
         void setReference(const void* ref);
 
@@ -322,6 +324,7 @@ class PT_API SerializationInfo
         void setReference(const std::string& id);
 
         /** @brief Deserialization of references
+            TODO loadReference
         */
         template <typename T>
         void fixupReference(T& fixme) const
@@ -330,6 +333,7 @@ class PT_API SerializationInfo
         }
 
         /** @brief Deserialization of weak pointers
+            TODO loadReference
         */
         template <typename T>
         void fixupPointer(T*& fixme) const
@@ -337,6 +341,7 @@ class PT_API SerializationInfo
             this->fixup(&fixme, Fixup<T>::do_fixup_ptr);
         }
 
+        // TODO rename load()
         void fixup(void* fixme, FixupHandler fh) const;
 
         void format(Formatter& formatter);
@@ -563,7 +568,7 @@ class SaveInfo
         ~SaveInfo()
         { if(_saved) si->finishSave();  }
 
-        SerializationInfo& info()
+        SerializationInfo& out()
         { return *si; }
 
         template <typename T>
@@ -574,9 +579,9 @@ class SaveInfo
 
             _saved = si->beginSave( &type );
             if(_saved)
-                this->info() <<= type;
+                *si <<= type;
             else
-                this->info() <<= &type;
+                *si <<= &type;
 
             return _saved;
         }
@@ -584,8 +589,8 @@ class SaveInfo
         void saveNull()
         {
             void* p = 0;
-            this->info().setReference( p );
-            this->info().setTypeName("reference");
+            si->setReference( p );
+            si->setTypeName("reference");
             _saved = false;
         }
 
@@ -637,19 +642,35 @@ class LoadInfo
     public:
         explicit LoadInfo(const SerializationInfo& info)
         : si(&info)
+        , _loaded(false)
         {}
 
-        void beginLoad(void* sym, const std::type_info& ti) const
-        { si->beginLoad( sym, ti ); }
+        ~LoadInfo()
+        { if(_loaded) si->finishLoad(); }
 
-        const SerializationInfo& info() const
+        const SerializationInfo& in() const
         { return *si; }
 
-        void finishLoad() const
-        { si->finishLoad(); }
+        template <typename T>
+        void load(T& type) const
+        {
+            T* tp = &type;
+
+            if(si->category() == Pt::SerializationInfo::Reference)
+            {
+                si->fixupReference(type);
+            }
+            else
+            {
+                si->beginLoad( tp, typeid(T) );
+                _loaded = true;
+                *si >>= type;
+            }
+        }
 
     private:
         const SerializationInfo* si;
+        mutable bool _loaded;
 };
 
 
@@ -680,20 +701,9 @@ inline void operator >>=(const SerializationInfo& si, const Load<T>& ld)
 
 
 template <typename T>
-inline void operator >>=(const LoadInfo& symbol, T& type)
+inline void operator >>=(const LoadInfo& li, T& type)
 {
-    T* tp   = &type;
-
-    if(symbol.info().category() == Pt::SerializationInfo::Reference)
-    {
-        symbol.info().fixupReference(type);
-    }
-    else
-    {
-        symbol.beginLoad( tp, typeid(T) );
-        symbol.info() >>= type;
-        symbol.finishLoad();
-    }
+    li.load(type);
 }
 
 
