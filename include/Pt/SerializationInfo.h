@@ -400,11 +400,11 @@ class PT_API SerializationInfo
     private:
         mutable Node* _node;
         SerializationContext* _context;
-        mutable const void* _bound;
         SerializationInfo* _parent;
         std::string _name;
         std::string _type;
         std::string _id;
+        mutable const void* _bound;
 };
 
 
