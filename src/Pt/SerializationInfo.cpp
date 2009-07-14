@@ -41,7 +41,7 @@ void SerializationInfo::format(Formatter& formatter)
 
     if(this->category() == SerializationInfo::Value)
     {
-        static_cast<const ValueNode*>(_node)->format( formatter,
+        static_cast<ValueNode*>(_node)->format( formatter,
                                                       this->name(),
                                                       this->typeName(),
                                                       this->id() );
@@ -330,7 +330,7 @@ void SerializationInfo::getValue(long& l) const
     if( this->category() != Value)
         throw SerializationError("expected integer value");
 
-    l = static_cast<const ValueNode*>(_node)->getInt();
+    l = static_cast<ValueNode*>(_node)->getInt();
 }
 
 void SerializationInfo::setValue(long l)
@@ -362,7 +362,7 @@ void SerializationInfo::getValue(unsigned long& ul) const
     if( this->category() != Value)
         throw SerializationError("expected integer value");
 
-    ul = static_cast<const ValueNode*>(_node)->getUInt();
+    ul = static_cast<ValueNode*>(_node)->getUInt();
 }
 
 
@@ -377,7 +377,7 @@ void SerializationInfo::getValue(float& f) const
     double d = 0.0;
     this->getValue(d);
     // TODO: consider SerializationError on overflow
-    f = static_cast<double>(d);
+    f = static_cast<float>(d);
 }
 
 
@@ -386,7 +386,7 @@ void SerializationInfo::getValue(double& f) const
     if( this->category() != Value)
         throw SerializationError("expected float value");
 
-    f = static_cast<const ValueNode*>(_node)->getFloat();
+    f = static_cast<ValueNode*>(_node)->getFloat();
 }
 
 
