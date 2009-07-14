@@ -49,8 +49,9 @@ void SerializationInfo::format(Formatter& formatter)
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
         if( ! _context )
-            throw SerializationError("context not available");
-
+        {
+            throw SerializationError("context not available ");
+        }
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
         std::string id = _context->getUnlinkId( refAddr );
         formatter.addReference( this->name(), id);
@@ -86,7 +87,7 @@ void SerializationInfo::format(Formatter& formatter)
 
 bool SerializationInfo::beginSave(const void* p)
 {
-    bool first = false;
+    bool first = true;
 
     if(_parent == 0 || _parent->_bound)
     {
