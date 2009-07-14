@@ -568,14 +568,25 @@ class SaveInfo
 
         template <typename T>
         bool save(const T& type)
-        { 
+        {
+            if(_saved)
+                si->finishSave();
+
             _saved = si->beginSave( &type );
             if(_saved)
                 this->info() <<= type;
             else
                 this->info() <<= &type;
-            
+
             return _saved;
+        }
+
+        void saveNull()
+        {
+            void* p = 0;
+            this->info().setReference( p );
+            this->info().setTypeName("reference");
+            _saved = false;
         }
 
     private:
@@ -603,17 +614,17 @@ inline Save<T> operator<<= (const save&, const T& type)
 
 
 template <typename T>
-inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
+inline void operator<<= (SaveInfo& si, const T& type)
 {
-    SaveInfo info(si);
-    info <<= *(sv.type);
+    si.save( type );
 }
 
 
 template <typename T>
-inline void operator<<= (SaveInfo& si, const T& type)
+inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
 {
-    si.save( type );
+    SaveInfo info(si);
+    info <<= *(sv.type);
 }
 
 

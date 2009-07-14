@@ -101,20 +101,21 @@ typedef SmartPtr<Date> DateSmartPtr;
 
 void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
 {
-    if(target == 0)
+    if( typeid(DateSmartPtr) == targetType && target)
+    {
+        DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
+        fixme = *to;
+    }
+    else if(target == 0)
     {
         fixme = DateSmartPtr();
-        return;
     }
-
-    if( typeid(DateSmartPtr) != targetType )
+    else
     {
         throw SerializationError("type mismatch during reference fixup");
     }
-
-    DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
-    fixme = *to;
 }
+
 
 void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
@@ -137,7 +138,7 @@ void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
     }
     else
     {
-        si <<= sp.getPointer();
+        si.saveNull();
     }
 }
 
