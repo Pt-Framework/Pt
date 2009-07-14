@@ -80,7 +80,7 @@ void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
-    si.getMember("date").fixupReference(dr);
+    si.getMember("date").loadReference(dr);
     
     int n = 0;
     si.getMember("n") >>= n;

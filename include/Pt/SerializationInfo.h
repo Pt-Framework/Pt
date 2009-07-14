@@ -317,32 +317,27 @@ class PT_API SerializationInfo
 
             TODO: saveReference
         */
-        void setReference(const void* ref);
+        void saveReference(const void* ref);
 
         /** @brief Deserialization of weak pointers (parse phase)
         */
         void setReference(const std::string& id);
 
         /** @brief Deserialization of references
-            TODO loadReference
         */
         template <typename T>
-        void fixupReference(T& fixme) const
+        void loadReference(T& fixme) const
         {
-            this->fixup(&fixme, Fixup<T>::do_fixup_ref);
+            this->load(&fixme, Fixup<T>::do_fixup_ref);
         }
 
         /** @brief Deserialization of weak pointers
-            TODO loadReference
         */
         template <typename T>
-        void fixupPointer(T*& fixme) const
+        void loadPointer(T*& fixme) const
         {
-            this->fixup(&fixme, Fixup<T>::do_fixup_ptr);
+            this->load(&fixme, Fixup<T>::do_fixup_ptr);
         }
-
-        // TODO rename load()
-        void fixup(void* fixme, FixupHandler fh) const;
 
         void format(Formatter& formatter);
 
@@ -392,6 +387,8 @@ class PT_API SerializationInfo
         { this->getMember(name) >>= value; }
 
     private:
+        void load(void* fixme, FixupHandler fh) const;
+        
         ValueNode* initValue() const;
 
         Pt::String& initString() const;
@@ -589,7 +586,7 @@ class SaveInfo
         void saveNull()
         {
             void* p = 0;
-            si->setReference( p );
+            si->saveReference( p );
             si->setTypeName("reference");
             _saved = false;
         }
@@ -658,7 +655,7 @@ class LoadInfo
 
             if(si->category() == Pt::SerializationInfo::Reference)
             {
-                si->fixupReference(type);
+                si->loadReference(type);
             }
             else
             {
@@ -712,14 +709,14 @@ inline void operator >>=(const LoadInfo& li, T& type)
 template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
-    si.fixupPointer(ptr);
+    si.loadPointer(ptr);
 }
 
 
 template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
-    si.setReference( (T*) ptr );
+    si.saveReference( (T*) ptr );
     si.setTypeName("reference");
 }
 

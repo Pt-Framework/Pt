@@ -42,9 +42,9 @@ void SerializationInfo::format(Formatter& formatter)
     if(this->category() == SerializationInfo::Value)
     {
         static_cast<ValueNode*>(_node)->format( formatter,
-                                                      this->name(),
-                                                      this->typeName(),
-                                                      this->id() );
+                                                this->name(),
+                                                this->typeName(),
+                                                this->id() );
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
@@ -262,7 +262,7 @@ ObjectNode* SerializationInfo::initObject(Category category) const
 
 
 // called during serialization, when a reference needs to be unlinked
-void SerializationInfo::setReference(const void* ref)
+void SerializationInfo::saveReference(const void* ref)
 {
     if(_context )
     {
@@ -284,7 +284,7 @@ void SerializationInfo::setReference(const std::string& id)
 
 // called during deserialization, when a reference needs to be relinked
 // by a previously parsed reference id
-void SerializationInfo::fixup(void* type, FixupHandler fh) const
+void SerializationInfo::load(void* type, FixupHandler fh) const
 {
     if( this->category() != Reference)
         throw SerializationError("not a reference");
