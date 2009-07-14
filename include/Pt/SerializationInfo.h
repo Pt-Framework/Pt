@@ -1121,7 +1121,6 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
     si.setCategory(SerializationInfo::Array);
 }
 
-
 } // namespace Pt
 
 

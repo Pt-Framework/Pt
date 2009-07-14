@@ -40,6 +40,8 @@
 #include <string>
 #include <sstream>
 
+namespace test {
+
 class DateRef
 {
     public:
@@ -93,6 +95,8 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
     si.addMember("date") <<= dr.date();
     si.addMember("n") <<= dr.n();
 }
+
+} // namespace test
 
 
 namespace Pt {
@@ -159,7 +163,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         void Reference()
         {
             Pt::Date date1(1889, 4, 20);
-            DateRef dr( &date1 );
+            test::DateRef dr( &date1 );
             const Pt::Date* dateptr = &date1;
             Pt::DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
             Pt::DateSmartPtr datesp2 = datesp;
