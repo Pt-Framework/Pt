@@ -61,6 +61,11 @@ void XmlSerializationContext::finishUnlinkTarget()
 
 void XmlSerializationContext::prepareUnlink(const void* p)
 {
+    if(p == 0)
+    {
+        return;
+    }
+
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
@@ -75,21 +80,28 @@ void XmlSerializationContext::prepareUnlink(const void* p)
 bool XmlSerializationContext::isUnlinkTarget(const void* p)
 {
     std::map<unsigned, const void*>::const_iterator it;
-    
+
     for(it = _linkmap.begin(); it != _linkmap.end(); ++it)
     {
         if(it->second == p)
             return true;
     }
-    
+
     return false;
 }
 
 
 std::string XmlSerializationContext::getUnlinkId(const void* p)
 {
+    if(p == 0)
+    {
+        return "null";
+    }
+
     if( _idmap.find(p) == _idmap.end() )
+    {
         throw SerializationError("missing unlink information");
+    }
 
     return convert<std::string>( _idmap[p] );
 }

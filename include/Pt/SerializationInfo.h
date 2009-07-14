@@ -60,7 +60,7 @@ struct Fixup
         T** from = static_cast<T**>(fixme);
         fixup(*from, target, targetType);
     }
-    
+
     static void do_fixup_ref(void* fixme,
                              void* target, 
                              const std::type_info& targetType)
@@ -74,6 +74,12 @@ struct Fixup
 template <typename T>
 inline void fixup(T*& fixme, void* target, const std::type_info& targetType)
 {
+    if(target == 0)
+    {
+        fixme = 0;
+        return;
+    }
+
     if( typeid(T) != targetType )
     {
         throw SerializationError("type mismatch during pointer fixup");

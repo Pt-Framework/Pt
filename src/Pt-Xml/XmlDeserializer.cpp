@@ -357,7 +357,7 @@ void XmlDeserializer::finishLinkTarget()
 
 void XmlDeserializer::prepareLink(const std::string& id, void* obj, FixupHandler fh)
 {
-    //std::cerr << "prepareLink: " << obj << " " << fixupInfo.name() << " id " << id << std::endl;
+    //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
     FixupInfo fi;
     fi.address = obj;
     fi.fixup = fh;
@@ -371,17 +371,25 @@ void XmlDeserializer::link()
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
         void* fixme = it->second.address;
-
         std::string id = it->first;
 
-        if( _targets.find(id) == _targets.end() )
+        if( id == "null" )
+        {
+            const std::type_info* targetType = &( typeid(void*) );
+            it->second.fixup(fixme, 0, *targetType);
+        }
+        else if( _targets.find(id) != _targets.end() )
+        {
+            void* target = _targets[id].address;
+            const std::type_info* targetType = _targets[id].type ;
+
+            //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
+            it->second.fixup(fixme, target, *targetType);
+        }
+        else
+        {
             throw SerializationError("reference target not found");
-
-        void* target = _targets[id].address;
-        const std::type_info* targetType = _targets[id].type ;
-
-        //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
-        it->second.fixup(fixme, target, *targetType);
+        }
     }
 
     _targets.clear();

@@ -99,6 +99,22 @@ namespace Pt {
 
 typedef SmartPtr<Date> DateSmartPtr;
 
+void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
+{
+    if(target == 0)
+    {
+        fixme = DateSmartPtr();
+        return;
+    }
+
+    if( typeid(DateSmartPtr) != targetType )
+    {
+        throw SerializationError("type mismatch during reference fixup");
+    }
+
+    DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
+    fixme = *to;
+}
 
 void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
@@ -115,7 +131,14 @@ void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
 
 void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
-    si.save( *sp );
+    if( sp.getPointer() )
+    {
+        si.save( *sp );
+    }
+    else
+    {
+        si <<= sp.getPointer();
+    }
 }
 
 }
@@ -135,12 +158,11 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         void Reference()
         {
             Pt::Date date1(1889, 4, 20);
-
+            DateRef dr( &date1 );
             const Pt::Date* dateptr = &date1;
             Pt::DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
             Pt::DateSmartPtr datesp2 = datesp;
-
-            DateRef dr( &date1 );
+            Pt::DateSmartPtr dateNull;
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
@@ -149,6 +171,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dateptr, "dateptr");
             ser.serialize(datesp, "datesp");
             ser.serialize(datesp2, "datesp2");
+            ser.serialize(dateNull, "dateNull");
 
             ser.finish();
             ser.flush();
@@ -158,6 +181,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date* dateptr2 = 0; // const ?
             Pt::DateSmartPtr datesp3;
             Pt::DateSmartPtr datesp4;
+            Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
@@ -170,6 +194,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.deserialize(dateptr2);
             deser.deserialize(datesp3);
             deser.deserialize(datesp4);
+            deser.deserialize(nullDate);
 
             deser.link();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
@@ -181,6 +206,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( date1 == date2);
             PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
+            PT_UNIT_ASSERT( nullDate.getPointer() == 0);
         }
 
         void Object()
