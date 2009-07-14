@@ -652,7 +652,7 @@ class LoadInfo
         { return *si; }
 
         template <typename T>
-        void load(T& type) const
+        bool load(T& type) const
         {
             T* tp = &type;
 
@@ -666,6 +666,8 @@ class LoadInfo
                 _loaded = true;
                 *si >>= type;
             }
+
+            return _loaded;
         }
 
     private:
