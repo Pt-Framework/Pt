@@ -240,6 +240,10 @@ class PT_API SerializationInfo
 
         // TODO: getBool, setBool
 
+        void getValue(bool& b) const;
+
+        void setValue(bool b);
+
         void getValue(short& s) const;
 
         void setValue(short s)

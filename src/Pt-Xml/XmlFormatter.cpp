@@ -126,6 +126,14 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 }
 
 
+void XmlFormatter::addBool(const std::string& name, const std::string& type,
+                           bool value, const std::string& id)
+{
+	convert(_value, value);
+	this->addValue(name, type, _value, id);
+}
+
+
 void XmlFormatter::addInt(const std::string& name, const std::string& type,
                             long value, const std::string& id)
 {

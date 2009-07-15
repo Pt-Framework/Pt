@@ -41,10 +41,11 @@ class Formatter
         virtual ~Formatter()
         { }
 
-        //TODO: addBool()
-
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
+
+        virtual void addBool(const std::string& name, const std::string& type,
+                             bool value, const std::string& id) = 0;
 
         virtual void addInt(const std::string& name, const std::string& type,
                             long value, const std::string& id) = 0;

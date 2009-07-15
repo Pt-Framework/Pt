@@ -39,6 +39,7 @@ class ValueNode : public SerializationInfo::Node
     enum Type
     {
         Void,
+        Bool,
         String,
         Int,
         UInt,
@@ -57,6 +58,10 @@ class ValueNode : public SerializationInfo::Node
             {
                 case Int:
                     convert(_value, _variant.l);
+                    break;
+
+                case Bool:
+                    convert(_value, _variant.b);
                     break;
 
                 case UInt:
@@ -80,10 +85,42 @@ class ValueNode : public SerializationInfo::Node
             return _value;
         }
 
+        long getBool()
+        {
+            switch(_type)
+            {
+                case Int:
+                    return static_cast<bool>(_variant.l);
+                
+                case UInt:
+                    return static_cast<bool>(_variant.ul);
+
+                case Float:
+                    return static_cast<bool>(_variant.f);
+
+                case String:
+                    convert(_variant.b, _value); // fall trough
+
+                default:
+                    break;
+            }
+
+            return _variant.b;
+        }
+
+        void setBool(bool b)
+        {
+            _variant.b = b;
+            _type = Bool;
+        }
+
         long getInt()
         {
             switch(_type)
             {
+                case Bool:
+                    return static_cast<long>(_variant.b);
+                
                 case UInt:
                     return static_cast<long>(_variant.ul);
 
@@ -110,6 +147,9 @@ class ValueNode : public SerializationInfo::Node
         {
             switch(_type)
             {
+                case Bool:
+                    return static_cast<unsigned long>(_variant.b);
+                
                 case Int:
                     return static_cast<unsigned long>(_variant.l);
 
@@ -142,6 +182,9 @@ class ValueNode : public SerializationInfo::Node
         {
             switch(_type)
             {
+                case Bool:
+                    return static_cast<double>(_variant.b);
+                
                 case Int:
                     return static_cast<double>(_variant.l);
 
@@ -163,6 +206,10 @@ class ValueNode : public SerializationInfo::Node
         {
             switch(_type)
             {
+                case Bool:
+                    formatter.addBool( name, type, _variant.b, id );
+                    break;
+                
                 case Int:
                     formatter.addInt( name, type, _variant.l, id );
                     break;
@@ -189,6 +236,7 @@ class ValueNode : public SerializationInfo::Node
         mutable Pt::String _value;
         union Variant
         {
+            bool b;
             long l;
             unsigned long ul;
             double f;

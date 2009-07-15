@@ -308,6 +308,21 @@ const Pt::String& SerializationInfo::toString() const
 }
 
 
+void SerializationInfo::getValue(bool& b) const
+{
+    if( this->category() != Value)
+        throw SerializationError("expected boolean value");
+
+    b = static_cast<ValueNode*>(_node)->getBool();
+}
+
+
+void SerializationInfo::setValue(bool b)
+{
+    initValue()->setBool(b);
+}
+
+
 void SerializationInfo::getValue(short& s) const
 {
     long l = 0;
