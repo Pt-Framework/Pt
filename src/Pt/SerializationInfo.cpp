@@ -559,7 +559,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 
 size_t SerializationInfo::memberCount() const
 {
-    if(_node->category() == Object || _node->category() == Array)
+    if(_node && (_node->category() == Object || _node->category() == Array) )
     {
         return static_cast<const ObjectNode*>(_node)->size();
     }
