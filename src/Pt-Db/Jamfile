@@ -8,8 +8,9 @@ if $(TARGET_OS:L) = symbian
     SubDirCcFlags [ FDefines __REMOVE_PLATSEC_DIAGNOSTIC_STRINGS__ ] ;
 }
 
-PT_DB_SOURCES = [ FDirName sqlite sqlite3.c ]
-                [ FDirName sqlite SQLConnection.cpp ]
+# BUG: if a C source file comes first, jam links a C library
+PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
+                [ FDirName sqlite sqlite3.c ]
                 [ FDirName sqlite Connector.cpp ]
                 [ FDirName sqlite Cursor.cpp ]
                 [ FDirName sqlite Error.cpp ]
