@@ -111,7 +111,74 @@ void XmlSerializationContext::reset()
 {
     _linkmap.clear();
     _idmap.clear();
+    
+    _targets.clear();
+    _pointers.clear();
 }
+
+
+void XmlSerializationContext::beginLinkTarget(const std::string& name, const std::string& id,
+                                              void* obj, const std::type_info& fixupInfo)
+{
+    if( id.empty() )
+        return;
+
+    //std::cerr << "beginLinkTarget: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
+    FixupInfo fi;
+    fi.address = obj;
+    fi.type = &fixupInfo;
+    fi.fixup = 0;
+    _targets[id] = fi;
+}
+
+
+void XmlSerializationContext::finishLinkTarget()
+{
+}
+
+
+void XmlSerializationContext::prepareLink(const std::string& id, void* obj, FixupHandler fh)
+{
+    //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
+    FixupInfo fi;
+    fi.address = obj;
+    fi.fixup = fh;
+    _pointers.insert( std::pair<std::string, FixupInfo>(id, fi) );
+}
+
+
+void XmlSerializationContext::link()
+{
+    std::multimap<std::string, FixupInfo>::iterator it;
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        void* fixme = it->second.address;
+        std::string id = it->first;
+
+        if( id == "null" )
+        {
+            const std::type_info* targetType = &( typeid(void*) );
+            it->second.fixup(fixme, 0, *targetType);
+        }
+        else if( _targets.find(id) != _targets.end() )
+        {
+            void* target = _targets[id].address;
+            const std::type_info* targetType = _targets[id].type ;
+
+            //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
+            it->second.fixup(fixme, target, *targetType);
+        }
+        else
+        {
+            throw SerializationError("reference target not found");
+        }
+    }
+
+    _targets.clear();
+    _pointers.clear();
+}
+
+
 
 
 XmlSerializer::XmlSerializer()

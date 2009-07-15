@@ -29,6 +29,7 @@
 #define Pt_Xml_XmlDeserializer_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/XmlSerializer.h>
 #include <Pt/String.h>
 #include <Pt/Deserializer.h>
 #include <memory>
@@ -45,7 +46,7 @@ class Node;
     Thic class performs XML deserialization of a single object or
     object data.
 */
-class PT_XML_API XmlDeserializer : public SerializationContext
+class PT_XML_API XmlDeserializer
 {
     public:
         XmlDeserializer(XmlReader& reader);
@@ -54,6 +55,15 @@ class PT_XML_API XmlDeserializer : public SerializationContext
 
         //! @brief Destructor
         ~XmlDeserializer();
+
+        SerializationContext& context()
+        { return *_context; }
+
+        const SerializationContext& context() const
+        { return *_context; }
+
+        void setContext(SerializationContext& context)
+        { _context = &context; }
 
         XmlReader& reader()
         { return *_reader; }
@@ -68,34 +78,13 @@ class PT_XML_API XmlDeserializer : public SerializationContext
         {
             Deserializer<T> deser;
             deser.begin(type);
-            deser.setContext(*this);
+            deser.setContext(*_context);
             this->get(&deser);
             deser.leave();
         }
-
-    public:
-        virtual void beginLinkTarget(const std::string& name, const std::string& id,
-                                     void* obj, const std::type_info& fixupInfo);
-
-        virtual void finishLinkTarget();
-
-        virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
-
-        virtual void link();
-
-        virtual void reset();
-
-    private:
-        struct FixupInfo
-        {
-            void* address;
-            void (*fixup)(void* fixme,
-                          void* target, const std::type_info& targetType);
-            const std::type_info* type;
-        };
-
-        std::map<std::string, FixupInfo> _targets;
-        std::multimap<std::string, FixupInfo> _pointers;
+        
+        void finish()
+        { _xmlcontext.link(); }
 
     protected:
         void get(IDeserializer* deser);
@@ -119,6 +108,10 @@ class PT_XML_API XmlDeserializer : public SerializationContext
         void onEndElement(const Node& node);
 
     private:
+        XmlSerializationContext _xmlcontext;
+        
+        SerializationContext* _context;
+        
         //! @internal
         XmlReader* _reader;
 

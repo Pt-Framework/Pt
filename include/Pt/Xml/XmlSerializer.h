@@ -61,6 +61,28 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
     private:
         std::map<const void*, unsigned> _idmap;
         std::map<unsigned, const void*> _linkmap;
+
+    public:
+        virtual void beginLinkTarget(const std::string& name, const std::string& id,
+                                     void* obj, const std::type_info& fixupInfo);
+
+        virtual void finishLinkTarget();
+
+        virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
+
+        virtual void link();
+
+    private:
+        struct FixupInfo
+        {
+            void* address;
+            void (*fixup)(void* fixme,
+                          void* target, const std::type_info& targetType);
+            const std::type_info* type;
+        };
+
+        std::map<std::string, FixupInfo> _targets;
+        std::multimap<std::string, FixupInfo> _pointers;
 };
 
 /** @brief Serialize objects or object data to XML
