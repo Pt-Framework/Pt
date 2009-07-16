@@ -138,11 +138,14 @@ void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
     if( sp.getPointer() )
     {
-        si.save( *sp );
+        if( si.beginSave( *sp ) )
+            si.out() <<= *sp;
+        else
+            si.out() <<= sp.getPointer();
     }
     else
     {
-        si.saveNull();
+        si.out() <<= sp.getPointer();
     }
 }
 

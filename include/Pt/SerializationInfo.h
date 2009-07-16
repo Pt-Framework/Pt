@@ -573,26 +573,10 @@ class SaveInfo
         { return *si; }
 
         template <typename T>
-        bool save(const T& type)
+        bool beginSave(const T& type)
         {
-            if(_saved)
-                si->finishSave();
-
             _saved = si->beginSave( &type );
-            if(_saved)
-                *si <<= type;
-            else
-                *si <<= &type;
-
             return _saved;
-        }
-
-        void saveNull()
-        {
-            void* p = 0;
-            si->saveReference( p );
-            si->setTypeName("reference");
-            _saved = false;
         }
 
     private:
@@ -622,7 +606,10 @@ inline Save<T> operator<<= (const save&, const T& type)
 template <typename T>
 inline void operator<<= (SaveInfo& si, const T& type)
 {
-    si.save( type );
+    if( si.beginSave( type ) )
+        si.out() <<= type;
+     else
+        si.out() <<= &type;
 }
 
 
@@ -653,21 +640,11 @@ class LoadInfo
         { return *si; }
 
         template <typename T>
-        bool load(T& type) const
+        bool beginLoad(T& type) const
         {
             T* tp = &type;
-
-            if(si->category() == Pt::SerializationInfo::Reference)
-            {
-                si->loadReference(type);
-            }
-            else
-            {
-                si->beginLoad( tp, typeid(T) );
-                _loaded = true;
-                *si >>= type;
-            }
-
+            si->beginLoad( tp, typeid(T) );
+            _loaded = true;
             return _loaded;
         }
 
@@ -706,7 +683,15 @@ inline void operator >>=(const SerializationInfo& si, const Load<T>& ld)
 template <typename T>
 inline void operator >>=(const LoadInfo& li, T& type)
 {
-    li.load(type);
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(type);
+    }
+    else
+    {
+        li.beginLoad( type );
+        li.in() >>= type;
+    }
 }
 
 
