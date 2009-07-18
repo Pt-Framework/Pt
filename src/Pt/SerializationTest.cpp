@@ -101,6 +101,15 @@ class IntDeserializer : public Pt::IDeserializer
             *_type = static_cast<int>(l);
         }
 
+        virtual void setBool(bool value)
+        { }
+
+        virtual void setUInt(unsigned long value)
+        { }
+
+        virtual void setFloat(double value)
+        { }
+
         virtual void setReference(const std::string& id)
         { }
 
@@ -161,6 +170,15 @@ class VectorDeserializer : public Pt::IDeserializer
         { }
 
         virtual void setInt(long)
+        { }
+
+        virtual void setBool(bool value)
+        { }
+
+        virtual void setUInt(unsigned long value)
+        { }
+
+        virtual void setFloat(double value)
         { }
 
         virtual void setReference(const std::string& id)

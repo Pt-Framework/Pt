@@ -59,7 +59,13 @@ class IDeserializer
 
         virtual void setValue(const Pt::String& value) = 0;
 
+        virtual void setBool(bool value) = 0;
+
         virtual void setInt(long value) = 0;
+
+        virtual void setUInt(unsigned long value) = 0;
+
+        virtual void setFloat(double value) = 0;
 
         virtual void setReference(const std::string& id) = 0;
 
@@ -112,7 +118,22 @@ class Deserializer : public IDeserializer
             _current->setValue(value);
         }
 
+        virtual void setBool(bool value)
+        {
+            _current->setValue(value);
+        }
+
         virtual void setInt(long value)
+        {
+            _current->setValue(value);
+        }
+
+        virtual void setUInt(unsigned long value)
+        {
+            _current->setValue(value);
+        }
+
+        virtual void setFloat(double value)
         {
             _current->setValue(value);
         }
