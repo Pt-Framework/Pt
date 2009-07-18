@@ -182,7 +182,7 @@ void SerializationContext::push(SerializationInfo::Node* node)
         _scalars.push_back(scalar);
     }
     else if( node->category() == SerializationInfo::Object || 
-             node->category() == SerializationInfo::Array )
+             node->category() == SerializationInfo::Sequence )
     {
         static_cast<ObjectNode*>(node)->release(*this);
         delete node;

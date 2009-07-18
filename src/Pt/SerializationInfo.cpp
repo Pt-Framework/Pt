@@ -70,7 +70,7 @@ void SerializationInfo::format(Formatter& formatter)
 
         formatter.finishObject();
     }
-    else if(this->category() == Pt::SerializationInfo::Array)
+    else if(this->category() == Pt::SerializationInfo::Sequence)
     {
         formatter.beginArray( this->name(), this->typeName(), this->id() );
 
@@ -153,7 +153,7 @@ void SerializationInfo::clear()
 {
     if(_node)
     {
-        if(_context && (_node->category() == Object || _node->category() == Array) )
+        if(_context && (_node->category() == Object || _node->category() == Sequence) )
         {
             static_cast<ObjectNode*>(_node)->release(*_context);
         }
@@ -189,7 +189,7 @@ void SerializationInfo::setCategory(Category category)
             initReference();
             break;
 
-        case Array:
+        case Sequence:
         case Object:
             initObject(category);
             break;
@@ -246,7 +246,7 @@ ReferenceNode* SerializationInfo::initReference() const
 
 ObjectNode* SerializationInfo::initObject(Category category) const
 {
-    if( this->category() != Object && this->category() != Array)
+    if( this->category() != Object && this->category() != Sequence)
     {
         //if( ! _node->cache() )
         {
@@ -437,7 +437,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 SerializationInfo& SerializationInfo::addMember()
 {
-    ObjectNode* onode = initObject(Array);
+    ObjectNode* onode = initObject(Sequence);
 
     //std::cerr << "added member " <<  _node->cache() << std::endl;
 
@@ -459,7 +459,7 @@ SerializationInfo& SerializationInfo::addMember()
 
 SerializationInfo::Iterator SerializationInfo::begin()
 {
-    if(! _node || (_node->category() != Object && _node->category() != Array) )
+    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -475,7 +475,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
 
 SerializationInfo::Iterator SerializationInfo::end()
 {
-    if(! _node || (_node->category() != Object && _node->category() != Array) )
+    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -491,7 +491,7 @@ SerializationInfo::Iterator SerializationInfo::end()
 
 SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
-    if(! _node || (_node->category() != Object && _node->category() != Array) )
+    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -507,7 +507,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 
 SerializationInfo::ConstIterator SerializationInfo::end() const
 {
-    if(! _node || (_node->category() != Object && _node->category() != Array) )
+    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -523,7 +523,7 @@ SerializationInfo::ConstIterator SerializationInfo::end() const
 
 const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Object || _node->category() == Array) )
+    if(_node && (_node->category() == Object || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         Iterator it = snode->begin();
@@ -540,7 +540,7 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
 
 const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Object || _node->category() == Array) )
+    if(_node && (_node->category() == Object || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         ObjectNode::ConstIterator it = snode->begin();
@@ -557,7 +557,7 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 
 SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
-    if(_node && (_node->category() == Object || _node->category() == Array) )
+    if(_node && (_node->category() == Object || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         ObjectNode::Iterator it = snode->begin();
@@ -574,7 +574,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 
 size_t SerializationInfo::memberCount() const
 {
-    if(_node && (_node->category() == Object || _node->category() == Array) )
+    if(_node && (_node->category() == Object || _node->category() == Sequence) )
     {
         return static_cast<const ObjectNode*>(_node)->size();
     }

@@ -110,8 +110,8 @@ class PT_API SerializationInfo
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
-        enum Category { // Sequence
-            Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
+        enum Category {
+            Void = 0, Value = 1, Object = 2, Sequence = 3, Reference = 4
         };
 
         class Node
@@ -919,7 +919,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
     }
 
     si.setTypeName("array");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -947,7 +947,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
     }
 
     si.setTypeName("list");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -975,7 +975,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
     }
 
     si.setTypeName("deque");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -1004,7 +1004,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
     }
 
     si.setTypeName("set");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -1033,7 +1033,7 @@ inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& mu
     }
 
     si.setTypeName("multiset");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -1078,7 +1078,7 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
     }
 
     si.setTypeName("map");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 
@@ -1107,7 +1107,7 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
     }
 
     si.setTypeName("multimap");
-    si.setCategory(SerializationInfo::Array);
+    si.setCategory(SerializationInfo::Sequence);
 }
 
 } // namespace Pt
