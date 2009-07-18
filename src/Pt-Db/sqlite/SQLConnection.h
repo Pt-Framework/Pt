@@ -57,15 +57,6 @@ namespace sqlite {
             */
             void beginTransaction();
 
-            /** \brief Starts a database immediate transaction.
-
-                If the transaction is immediate, then RESERVED locks are acquired on all databases as soon as the 
-                BEGIN command is executed, without waiting for the database to be used. After a BEGIN IMMEDIATE, 
-                you are guaranteed that no other thread or process will be able to write to the database or do a 
-                BEGIN IMMEDIATE or BEGIN EXCLUSIVE. Other processes can continue to read from the database.
-            */
-            void beginImmediateTransaction();
-
             void commitTransaction();
 
             void rollbackTransaction();

@@ -135,11 +135,6 @@ namespace sqlite {
         this->execute("BEGIN TRANSACTION");
     }
 
-    void Connection::beginImmediateTransaction()
-    {
-        this->execute("BEGIN IMMEDIATE TRANSACTION");
-    }
-
     void Connection::commitTransaction()
     {
         // Statement handles are invalidated at transaction end, therefore we

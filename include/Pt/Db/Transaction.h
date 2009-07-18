@@ -96,17 +96,10 @@ namespace Db {
             */
             const Connection& getConnection() const  { return _DbConnection; }
 
-            /** \brief Begin a deferred transaction.
+            /** \brief Begin transaction.
 
                 Starts a new deferred transaction. If there is an active transaction it will be rolled back 
                 before beginning this transaction.
-                The default transaction behavior is deferred. Deferred means that no locks are acquired on the database 
-                until the database is first accessed. Thus with a deferred transaction, the BEGIN statement 
-                itself does nothing. Locks are not acquired until the first read or write operation. 
-                The first read operation against a database creates a SHARED lock and the first write operation 
-                creates a RESERVED lock. Because the acquisition of locks is deferred until they are needed, 
-                it is possible that another thread or process could create a separate transaction and write to the database 
-                after the BEGIN on the current thread has executed.
             */
             void begin()
             {
@@ -118,25 +111,6 @@ namespace Db {
                 _active = true;
             }
 
-           /** \brief Begin an immediate transaction.
-
-                Starts a new immediate transaction. If there is an active transaction it will be rolled back 
-                before beginning this transaction. 
-                If the transaction is immediate, then RESERVED locks are acquired on all databases as soon as the 
-                BEGIN command is executed, without waiting for the database to be used. 
-                After a BEGIN IMMEDIATE, it is guaranteed that no other thread or process will be able to write to 
-                the database or do a BEGIN IMMEDIATE or BEGIN EXCLUSIVE. 
-                Other processes can continue to read from the database.
-            */
-            void beginImmediate()
-            {
-                if (_active)
-                {
-                    rollback();
-                }
-                _DbConnection.beginImmediateTransaction();
-                _active = true;
-            }
             /** \brief Commit a transaction
 
                 Commits the current transaction. If there is no active transaction

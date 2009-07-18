@@ -89,26 +89,9 @@ namespace Db {
                 _connection = 0;
             }
             
-            /** \brief Starts a database deferred transaction.
-            
-                The default transaction behavior is deferred. Deferred means that no locks are acquired on the database 
-                until the database is first accessed. Thus with a deferred transaction, the BEGIN statement itself 
-                does nothing. Locks are not acquired until the first read or write operation. The first read operation 
-                against a database creates a SHARED lock and the first write operation creates a RESERVED lock. Because 
-                the acquisition of locks is deferred until they are needed, it is possible that another thread or 
-                process could create a separate transaction and write to the database after the BEGIN on the current 
-                thread has executed. 
+            /** \brief Starts a database transaction.            
             */
             void beginTransaction();
-
-            /** \brief Starts a database immediate transaction.
-
-                If the transaction is immediate, then RESERVED locks are acquired on all databases as soon as the 
-                BEGIN command is executed, without waiting for the database to be used. After a BEGIN IMMEDIATE, 
-                you are guaranteed that no other thread or process will be able to write to the database or do a 
-                BEGIN IMMEDIATE or BEGIN EXCLUSIVE. Other processes can continue to read from the database.
-            */
-            void beginImmediateTransaction();
 
             /** \brief Commits a transaction.
 

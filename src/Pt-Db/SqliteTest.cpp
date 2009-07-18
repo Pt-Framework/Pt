@@ -153,7 +153,7 @@ private:
         try
         {
             _success = false;
-            _db.beginImmediateTransaction();
+            Pt::Db::SqliteTransaction sqliteConn(_db,true,true);
 
             for (Pt::uint32_t i=0; i < _accessFreq; ++i)
             {
@@ -406,7 +406,7 @@ void SqliteTest::testConcurrency()
         Pt::Db::Connection con1 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
         Pt::Db::Connection con2 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
         
-        con.beginImmediateTransaction();
+        Pt::Db::SqliteTransaction sqliteConn(con,true,true);
         con.execute("CREATE TABLE TestTable (name,age,salary);");
         con.commitTransaction();
 
