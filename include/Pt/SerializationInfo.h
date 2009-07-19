@@ -705,7 +705,7 @@ inline void operator >>=(const SerializationInfo& si, T*& ptr)
 template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
-    si.saveReference( (T*) ptr );
+    si.saveReference( ptr );
     si.setTypeName("reference");
 }
 
