@@ -110,7 +110,7 @@ class PT_API SerializationInfo
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
-        enum Category {
+        enum Category { // Scalar, Struct
             Void = 0, Value = 1, Object = 2, Sequence = 3, Reference = 4
         };
 
