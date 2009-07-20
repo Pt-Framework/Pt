@@ -28,6 +28,7 @@
 #include "SerializationData.h"
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationError.h"
+#include <Pt/SerializationInfo.h>
 
 namespace Pt {
 
@@ -167,14 +168,14 @@ ValueNode* SerializationContext::getScalarData()
 }
 
 
-SerializationInfo::Node* SerializationContext::getObjectData()
+SerializationNode* SerializationContext::getObjectData()
 {
     //std::cerr << "get object" << std::endl;
     return new ObjectNode();
 }
 
 
-void SerializationContext::push(SerializationInfo::Node* node)
+void SerializationContext::push(SerializationNode* node)
 {
     if( node->category() == SerializationInfo::Value )
     {
@@ -184,7 +185,7 @@ void SerializationContext::push(SerializationInfo::Node* node)
     else if( node->category() == SerializationInfo::Object || 
              node->category() == SerializationInfo::Sequence )
     {
-        static_cast<ObjectNode*>(node)->release(*this);
+        static_cast<ObjectNode*>(node)->clear(*this);
         delete node;
     }
     else

@@ -29,12 +29,39 @@
 #ifndef Pt_SerializationData_h
 #define Pt_SerializationData_h
 
+#include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/Formatter.h>
 
 namespace Pt {
 
-class ValueNode : public SerializationInfo::Node
+class SerializationNode
+{
+	public:
+		virtual ~SerializationNode()
+		{}
+
+		SerializationInfo::Category category() const
+		{ return _category; }
+
+		void setCategory(SerializationInfo::Category cat)
+		{ _category = cat; }
+
+		virtual void clear() = 0;
+
+        virtual void clear(SerializationContext& ) = 0;
+
+	protected:
+		SerializationNode(SerializationInfo::Category cat)
+		: _category(cat)
+		{}
+
+	private:
+		SerializationInfo::Category _category;
+};
+
+
+class ValueNode : public SerializationNode
 {
     enum Type
     {
@@ -48,7 +75,7 @@ class ValueNode : public SerializationInfo::Node
 
     public:
         ValueNode()
-        : SerializationInfo::Node(SerializationInfo::Value)
+        : SerializationNode(SerializationInfo::Value)
         , _type(String)
         {}
 
@@ -228,8 +255,9 @@ class ValueNode : public SerializationInfo::Node
             }
         }
 
-    protected:
-        virtual void onClear();
+        virtual void clear();
+
+        virtual void clear(SerializationContext& context);
 
     private:
         Type _type;
@@ -243,11 +271,11 @@ class ValueNode : public SerializationInfo::Node
         } _variant;
 };
 
-class ReferenceNode : public SerializationInfo::Node
+class ReferenceNode : public SerializationNode
 {
     public:
         ReferenceNode()
-        : SerializationInfo::Node(SerializationInfo::Reference)
+        : SerializationNode(SerializationInfo::Reference)
         {}
 
         const std::string& refId() const
@@ -261,31 +289,26 @@ class ReferenceNode : public SerializationInfo::Node
 
         void setAddress(void* addr)
         { _address = addr; }
-/*
-        const std::type_info* typeInfo() const
-        { return _fixupInfo; }
 
-        void setTypeInfo(const std::type_info& ti)
-        { _fixupInfo = &ti; }
-*/
-    protected:
-        virtual void onClear()
+        virtual void clear()
         { _refid.clear(); }
 
+        virtual void clear(SerializationContext& context)
+        { _refid.clear(); }
+    
     private:
         void* _address;
-        //const std::type_info* _fixupInfo;
         std::string _refid;
 };
 
-class ObjectNode : public SerializationInfo::Node
+class ObjectNode : public SerializationNode
 {
     public:
         typedef SerializationInfo** Iterator;
         typedef const SerializationInfo* const* ConstIterator;
 
         ObjectNode()
-        : SerializationInfo::Node(SerializationInfo::Object)
+        : SerializationNode(SerializationInfo::Object)
         , _nodes(0)
         , _capacity(0)
         , _size(0)
@@ -316,11 +339,11 @@ class ObjectNode : public SerializationInfo::Node
         const SerializationInfo& back() const
         { return *( _nodes[_size - 1] ); }
 
-        void release(SerializationContext& context);
+        virtual void clear();
 
+        virtual void clear(SerializationContext& context);
+    
     protected:
-        virtual void onClear();
-
         ObjectNode& operator=(const ObjectNode&);
         ObjectNode(const ObjectNode&);
 
@@ -331,7 +354,13 @@ class ObjectNode : public SerializationInfo::Node
 };
 
 
-inline void ValueNode::onClear()
+inline void ValueNode::clear()
+{
+    _value.clear();
+}
+
+
+inline void ValueNode::clear(SerializationContext& context)
 {
     _value.clear();
 }
@@ -339,7 +368,7 @@ inline void ValueNode::onClear()
 
 inline ObjectNode::~ObjectNode()
 {
-    this->onClear();
+    this->clear();
     ::operator delete(_nodes);
 }
 
@@ -362,7 +391,19 @@ inline void ObjectNode::push_back(SerializationInfo* si)
 }
 
 
-inline void ObjectNode::release(SerializationContext& context)
+inline void ObjectNode::clear()
+{
+    Iterator endIt = end();
+
+    for(Iterator it = begin(); it != endIt; ++it)
+    {
+        delete *it;
+    }
+    _size = 0;
+}
+
+
+inline void ObjectNode::clear(SerializationContext& context)
 {
     Iterator endIt = end();
 
@@ -372,18 +413,6 @@ inline void ObjectNode::release(SerializationContext& context)
         context.push(*it);
     }
 
-    _size = 0;
-}
-
-
-inline void ObjectNode::onClear()
-{
-    Iterator endIt = end();
-
-    for(Iterator it = begin(); it != endIt; ++it)
-    {
-        delete *it;
-    }
     _size = 0;
 }
 

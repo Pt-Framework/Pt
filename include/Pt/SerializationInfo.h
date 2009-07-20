@@ -32,7 +32,6 @@
 #include <Pt/String.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
-#include <Pt/Void.h>
 #include <typeinfo>
 #include <vector>
 #include <set>
@@ -48,7 +47,7 @@ class Formatter;
 class ValueNode;
 class ReferenceNode;
 class ObjectNode;
-
+class SerializationNode;
 
 template <typename T>
 struct Fixup
@@ -114,32 +113,6 @@ class PT_API SerializationInfo
             Void = 0, Value = 1, Object = 2, Sequence = 3, Reference = 4
         };
 
-        class Node
-        {
-            public:
-                virtual ~Node()
-                {}
-
-                Category category() const
-                { return _category; }
-
-                void setCategory(Category cat)
-                { _category = cat; }
-
-                void clear()
-                { this->onClear(); }
-
-            protected:
-                Node(Category cat)
-                : _category(cat)
-                {}
-
-                virtual void onClear() = 0;
-
-            private:
-                Category _category;
-        };
-
         class Iterator;
         class ConstIterator;
 
@@ -170,8 +143,9 @@ class PT_API SerializationInfo
     public:
         void clear();
 
-        Category category() const
-        { return _node ? _node->category() : Void; }
+        void release(SerializationContext& context);
+
+        Category category() const;
 
         void setCategory(Category category);
 
@@ -345,8 +319,6 @@ class PT_API SerializationInfo
 
         void format(Formatter& formatter);
 
-        void release(SerializationContext& context);
-
     public:
         /** @internal DEPRECATED
         */
@@ -402,7 +374,7 @@ class PT_API SerializationInfo
         ObjectNode* initObject(Category category) const;
 
     private:
-        mutable Node* _node;
+        mutable SerializationNode* _node;
         SerializationContext* _context;
         SerializationInfo* _parent;
         std::string _name;

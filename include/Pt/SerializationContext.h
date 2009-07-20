@@ -29,43 +29,18 @@
 #define Pt_SerializationContext_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationInfo.h>
 #include <typeinfo>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Pt {
 
 class ValueNode;
 class ObjectNode;
-class ValueNode;
+class ReferenceNode;
+class SerializationInfo;
+class SerializationNode;
 
-// TODO: smart pointer binding
-/*
-SERIALIZATION:
- 
-  - When a smart pointer is serialized, the pointee address is looked up in
-    a pointee/SmartPtr map in the context.
- 
-  - if the pointee address is not found in the context, the pointee type is 
-    serialized and the pointee and containing smart pointer address 
-    added to the map<pointee, SmartPtr> in the context.
-   
-  - if the pointee address is found in the context a reference to the pointee
-    containing smart pointer is serialized.
-
-DESERIALIZATION:
-
-  - When a smart pointer is deserialized it can either be deserialized from
-    a type of from a reference.
-    
-  - If it is deserialized from a value, the type is created.
-  
-  - If it is deserialied from a reference it is fixed up.
-
-
-*/
 class PT_API SerializationBinder
 {
     public:
@@ -126,13 +101,13 @@ class PT_API SerializationContext : public SerializationBinder
     public:
         SerializationInfo* get();
 
-        void push(SerializationInfo::Node* node);
+        void push(SerializationNode* node);
 
         void push(SerializationInfo* si);
 
         ValueNode* getScalarData();
 
-        SerializationInfo::Node* getObjectData();
+        SerializationNode* getObjectData();
 
     private:
         std::vector<SerializationInfo*> _infos;

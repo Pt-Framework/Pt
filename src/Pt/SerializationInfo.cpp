@@ -26,9 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "SerializationData.h"
+
 #include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
+
 
 namespace Pt {
 
@@ -82,6 +84,12 @@ void SerializationInfo::format(Formatter& formatter)
 
         formatter.finishArray();
     }
+}
+
+
+SerializationInfo::Category SerializationInfo::category() const
+{ 
+    return _node ? _node->category() : Void; 
 }
 
 
@@ -153,10 +161,8 @@ void SerializationInfo::clear()
 {
     if(_node)
     {
-        if(_context && (_node->category() == Object || _node->category() == Sequence) )
-        {
-            static_cast<ObjectNode*>(_node)->release(*_context);
-        }
+        if( _context )
+            _node->clear(*_context);
         else
             _node->clear();
     }
@@ -173,6 +179,10 @@ void SerializationInfo::release(SerializationContext& context)
     if(_node)
         context.push(_node);
 
+    _name.clear();
+    _type.clear();
+    _id.clear();
+    _bound = 0;
     _node = 0;
 }
 
@@ -206,7 +216,7 @@ ValueNode* SerializationInfo::initValue() const
     {
         if( _context )
         {
-            SerializationInfo::Node* node = _context->getScalarData();
+            SerializationNode* node = _context->getScalarData();
             delete _node;
             _node = node;
         }
