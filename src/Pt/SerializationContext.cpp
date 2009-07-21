@@ -140,13 +140,6 @@ SerializationInfo* SerializationContext::get()
 }
 
 
-void SerializationContext::push(SerializationInfo* si)
-{
-    //std::cerr << "push si" << std::endl;
-    _infos.push_back(si);
-}
-
-
 ValueNode* SerializationContext::getScalarData()
 {
     ValueNode* node = 0;
@@ -175,21 +168,38 @@ SerializationNode* SerializationContext::getObjectData()
 }
 
 
+void SerializationContext::push(SerializationInfo* si)
+{
+    //std::cerr << "push si" << std::endl;
+
+    si->clear();
+    
+    SerializationNode* node = si->releaseNode();
+    
+    if(node)
+        this->push(node);
+    
+    _infos.push_back(si);
+}
+
+
 void SerializationContext::push(SerializationNode* node)
 {
     if( node->category() == SerializationInfo::Value )
     {
+        //std::cerr << "SerializationContext::push Value" << std::endl;
         ValueNode* scalar = static_cast<ValueNode*>(node);
         _scalars.push_back(scalar);
     }
     else if( node->category() == SerializationInfo::Object || 
              node->category() == SerializationInfo::Sequence )
     {
-        static_cast<ObjectNode*>(node)->clear(*this);
+        //std::cerr << "SerializationContext::push Struct" << std::endl;
         delete node;
     }
     else
     {
+         //std::cerr << "SerializationContext::push unknown" << std::endl;
         delete node;
     }
 }

@@ -143,10 +143,12 @@ void SerializationInfo::finishLoad() const
 
 SerializationInfo::~SerializationInfo()
 {
+    //std::cerr << "SerializationInfo::~SerializationInfo() BEGIN" << std::endl;
     if(_node)
     {
         if(_context)
         {
+            //std::cerr << "SerializationInfo::~SerializationInfo() PUSH" << std::endl;
             _context->push(_node);
         }
         else
@@ -154,6 +156,8 @@ SerializationInfo::~SerializationInfo()
             delete _node;
         }
     }
+    
+    //std::cerr << "SerializationInfo::~SerializationInfo() END" << std::endl;
 }
 
 
@@ -167,23 +171,24 @@ void SerializationInfo::clear()
             _node->clear();
     }
 
-    _name.clear();
-    _type.clear();
-    _id.clear();
+    if( _name.size() )
+        _name.clear();
+    
+    if( _type.size() )
+        _type.clear();
+    
+    if( _id.size() )
+        _id.clear();
+    
     _bound = 0;
 }
 
 
-void SerializationInfo::release(SerializationContext& context)
+SerializationNode* SerializationInfo::releaseNode()
 {
-    if(_node)
-        context.push(_node);
-
-    _name.clear();
-    _type.clear();
-    _id.clear();
-    _bound = 0;
+    SerializationNode* node = _node;
     _node = 0;
+    return node;
 }
 
 

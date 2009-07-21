@@ -143,7 +143,7 @@ class PT_API SerializationInfo
     public:
         void clear();
 
-        void release(SerializationContext& context);
+        SerializationNode* releaseNode();
 
         Category category() const;
 

@@ -356,13 +356,19 @@ class ObjectNode : public SerializationNode
 
 inline void ValueNode::clear()
 {
-    _value.clear();
+    _type = ValueNode::String;
+    
+    if( _value.size() )
+        _value.clear();
 }
 
 
 inline void ValueNode::clear(SerializationContext& context)
 {
-    _value.clear();
+    _type = ValueNode::String;
+    
+    if( _value.size() )
+        _value.clear();
 }
 
 
@@ -409,7 +415,6 @@ inline void ObjectNode::clear(SerializationContext& context)
 
     for(Iterator it = begin(); it != endIt; ++it)
     {
-        (*it)->release(context);
         context.push(*it);
     }
 
