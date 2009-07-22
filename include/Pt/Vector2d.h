@@ -42,8 +42,11 @@ namespace Pt {
 /**
  * @brief A dynamic two dimensional array.
  *
+ * @tparam T The type of the elements.
+ * @tparam Container The type of the underlying (random access) container.
+ *                   This can be a vector or a deque.
  */
-template <typename T, typename Allocator = std::allocator<T> >
+template <typename T, typename Container = std::vector<T> >
 class Vector2d
 {
 
@@ -53,29 +56,13 @@ public:
     Vector2d();
 
     /**
-     * @brief Constructs a two dimensional array with given width and height.
+     * @brief Constructs a two dimensional vector with given width and height.
      *
-     * @param width The width of the Array2d object to be constructed.
-     * @param height The height of the Array2d object to be constructed.
+     * @param width The width of the Vector2d object to be constructed.
+     * @param height The height of the Vector2d object to be constructed.
+     * @param default The default value the elements are initialized with.
      */
-    Vector2d(Pt::size_t width, Pt::size_t height);
-
-    /**
-     * @brief Copies an Array2d object.
-     *
-     * @param rhs The Array2d object to be copied.
-     */
-    Vector2d(const Vector2d<T, Allocator>& rhs);
-
-    /** @brief Destructor. */
-    ~Vector2d();
-
-    /**
-     * @brief Assignment operator.
-     *
-     * @param rhs The Array2d object to be copied.
-     */
-    Vector2d<T, Allocator>& operator=(const Vector2d<T, Allocator>& rhs);
+    Vector2d(Pt::size_t width, Pt::size_t height, const T& default = T());
 
     /**
      * @brief Returns a constant reference to an element
@@ -135,8 +122,9 @@ public:
      *
      * @param width The horizontal size of the array.
      * @param height The vertical size of the array.
+     * @param default The default value the elements are initialized with.
      */
-    void resize(Pt::size_t width, Pt::size_t height);
+    void resize(Pt::size_t width, Pt::size_t height, const T& default = T());
 
     /**
      * @brief Exchanges contents of the current array
@@ -146,7 +134,7 @@ public:
      *
      * @param other Reference to the Array2d object to exchange contents with.
      */
-    void swap(Vector2d<T, Allocator>& other);
+    void swap(Vector2d<T, Container>& other);
 
     /**
      * @brief Returns the height of this two dimensional array.
@@ -181,7 +169,7 @@ private:
     Pt::size_t m_height;
 
     /** @brief The two dimensional array stored as vector. */
-    std::vector<T, Allocator> m_array;
+    Container m_array;
 
 
 };

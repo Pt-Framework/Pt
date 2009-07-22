@@ -1,59 +1,38 @@
 
-template <typename T, typename Allocator>
-Vector2d<T, Allocator>::Vector2d()
+template <typename T, typename Container>
+Vector2d<T, Container>::Vector2d()
 : m_height(0)
 , m_array()
 {
 }
 
 
-template <typename T, typename Allocator>
-Vector2d<T, Allocator>::Vector2d(const Pt::size_t width, const Pt::size_t height)
+template <typename T, typename Container>
+Vector2d<T, Container>::Vector2d(const Pt::size_t width,
+								 const Pt::size_t height,
+								 const T& default)
 : m_height(height)
-, m_array(width * height)
+, m_array(width * height, default)
 {
 }
 
 
-template <typename T, typename Allocator>
-Vector2d<T, Allocator>::Vector2d(const Vector2d<T, Allocator>& rhs)
-: m_height(rhs.height)
-, m_array(rhs.m_array)
-{
-}
-
-
-template <typename T, typename Allocator>
-Vector2d<T, Allocator>::~Vector2d()
-{
-}
-
-
-template <typename T, typename Allocator>
-Vector2d<T, Allocator>& Vector2d<T, Allocator>::operator=(const Vector2d<T, Allocator>& rhs)
-{
-    m_array = rhs.m_array;
-    m_height = rhs.m_height;
-    return *this;
-}
-
-
-template <typename T, typename Allocator>
-const T& Vector2d<T, Allocator>::operator()(const Pt::size_t x, const Pt::size_t y) const
+template <typename T, typename Container>
+const T& Vector2d<T, Container>::operator()(const Pt::size_t x, const Pt::size_t y) const
 {
     return m_array[index(x, y)];
 }
 
 
-template <typename T, typename Allocator>
-T& Vector2d<T, Allocator>::operator()(const Pt::size_t x, const Pt::size_t y)
+template <typename T, typename Container>
+T& Vector2d<T, Container>::operator()(const Pt::size_t x, const Pt::size_t y)
 {
     return m_array[index(x, y)];
 }
 
 
-template <typename T, typename Allocator>
-const T& Vector2d<T, Allocator>::at(const Pt::size_t x, const Pt::size_t y) const
+template <typename T, typename Container>
+const T& Vector2d<T, Container>::at(const Pt::size_t x, const Pt::size_t y) const
 {
     if (x >= width())
     {
@@ -67,8 +46,8 @@ const T& Vector2d<T, Allocator>::at(const Pt::size_t x, const Pt::size_t y) cons
 }
 
 
-template <typename T, typename Allocator>
-T& Vector2d<T, Allocator>::at(const Pt::size_t x, const Pt::size_t y)
+template <typename T, typename Container>
+T& Vector2d<T, Container>::at(const Pt::size_t x, const Pt::size_t y)
 {
     if (x >= width())
     {
@@ -82,46 +61,48 @@ T& Vector2d<T, Allocator>::at(const Pt::size_t x, const Pt::size_t y)
 }
 
 
-template <typename T, typename Allocator>
-bool Vector2d<T, Allocator>::empty() const
+template <typename T, typename Container>
+bool Vector2d<T, Container>::empty() const
 {
     return m_array.empty();
 }
 
 
-template <typename T, typename Allocator>
-void Vector2d<T, Allocator>::clear()
+template <typename T, typename Container>
+void Vector2d<T, Container>::clear()
 {
     m_height = 0;
     m_array.clear();
 }
 
 
-template <typename T, typename Allocator>
-void Vector2d<T, Allocator>::resize(const Pt::size_t width, const Pt::size_t height)
+template <typename T, typename Container>
+void Vector2d<T, Container>::resize(const Pt::size_t width,
+								    const Pt::size_t height,
+								    const T& default)
 {
-    m_array.resize(width * height);
+    m_array.resize(width * height, default);
     m_height = height;
 }
 
 
-template <typename T, typename Allocator>
-void Vector2d<T, Allocator>::swap(Vector2d<T, Allocator>& other)
+template <typename T, typename Container>
+void Vector2d<T, Container>::swap(Vector2d<T, Container>& other)
 {
     m_array.swap(other.m_array);
     swap(m_height, other.m_height);
 }
 
 
-template <typename T, typename Allocator>
-inline Pt::size_t Vector2d<T, Allocator>::height() const
+template <typename T, typename Container>
+inline Pt::size_t Vector2d<T, Container>::height() const
 {
     return m_height;
 }
 
 
-template <typename T, typename Allocator>
-inline Pt::size_t Vector2d<T, Allocator>::width() const
+template <typename T, typename Container>
+inline Pt::size_t Vector2d<T, Container>::width() const
 {
     if (m_height == 0)
     {
@@ -131,8 +112,8 @@ inline Pt::size_t Vector2d<T, Allocator>::width() const
 }
 
 
-template <typename T, typename Allocator>
-inline Pt::size_t Vector2d<T, Allocator>::index(const Pt::size_t x, const Pt::size_t y) const
+template <typename T, typename Container>
+inline Pt::size_t Vector2d<T, Container>::index(const Pt::size_t x, const Pt::size_t y) const
 {
     return x * m_height + y;
 }
