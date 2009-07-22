@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_ARRAY2D_H
-#define PT_ARRAY2D_H
+#ifndef PT_VECTOR2D_H
+#define PT_VECTOR2D_H
 
 
 #include "Pt/Types.h"
@@ -44,7 +44,7 @@ namespace Pt {
  *
  * @tparam T The type of the elements.
  * @tparam Container The type of the underlying (random access) container.
- *                   This can be a vector or a deque.
+ *                   E.g., this can be a vector or a deque.
  */
 template <typename T, typename Container = std::vector<T> >
 class Vector2d
@@ -178,4 +178,4 @@ private:
 
 } // namespace Pt
 
-#endif // PT_ARRAY2D_H
+#endif // PT_VECTOR2D_H
