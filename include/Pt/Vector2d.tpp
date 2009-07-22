@@ -42,7 +42,7 @@ const T& Vector2d<T, Container>::at(const Pt::size_t x, const Pt::size_t y) cons
     {
         throw std::out_of_range();
     }
-    return m_array.at(index(x, y));
+    return m_array[index(x, y)];
 }
 
 
@@ -57,7 +57,7 @@ T& Vector2d<T, Container>::at(const Pt::size_t x, const Pt::size_t y)
     {
         throw std::out_of_range();
     }
-    return m_array.at(index(x, y));
+    return m_array[index(x, y)];
 }
 
 
