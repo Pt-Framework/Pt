@@ -34,12 +34,12 @@ void SettingsWriter::write(const SerializationInfo& si)
     SerializationInfo::ConstIterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {
-        if( it->category() == SerializationInfo::Value )
+        if( it->category() == SerializationInfo::Scalar )
         {
             this->writeEntry( it->name(), it->toString(), it->typeName() );
             *_os << std::endl;
         }
-        else if( it->category() == SerializationInfo::Object)
+        else if( it->category() == SerializationInfo::Struct)
         {
             // Array types may have no instance-names
             if( it->findMember("") )
@@ -63,13 +63,13 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
     SerializationInfo::ConstIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
-        if( it->category() == SerializationInfo::Value )
+        if( it->category() == SerializationInfo::Scalar )
         {
             *_os << Pt::String::widen( prefix ) << '.';
             this->writeEntry( it->name(), it->toString(), it->typeName() );
             *_os << std::endl;
         }
-        else if( it->category() == SerializationInfo::Object )
+        else if( it->category() == SerializationInfo::Struct )
         {
             *_os << Pt::String::widen( prefix ) << '.' << Pt::String::widen( it->name() ) << Pt::String(L" = ");
             *_os<< Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");
@@ -90,11 +90,11 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
         if(separate)
             *_os << Pt::String(L", ");
 
-        if( it->category() == SerializationInfo::Value )
+        if( it->category() == SerializationInfo::Scalar )
         {
             this->writeEntry( it->name(), it->toString(), it->typeName() );
         }
-        else if( it->category() == SerializationInfo::Object ||
+        else if( it->category() == SerializationInfo::Struct ||
                  it->category() == SerializationInfo::Sequence)
         {
             if(it->name().empty() == false && sd.category() != SerializationInfo::Sequence)

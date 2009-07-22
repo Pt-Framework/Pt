@@ -140,31 +140,39 @@ SerializationInfo* SerializationContext::get()
 }
 
 
-ValueNode* SerializationContext::getScalarData()
+SerializationNode* SerializationContext::get(SerializationInfo::Category category)
 {
-    ValueNode* node = 0;
+    SerializationNode* node = 0;
 
-    if( _scalars.empty() )
+    switch(category)
     {
-        //std::cerr << "create value" << std::endl;
-        node = new ValueNode();
-        _scalars.push_back(node);
-    }
-    else
-    {
-        node = _scalars.back();
-    }
+        case SerializationInfo::Scalar:
+        {
+			if( _scalars.empty() )
+			{
+				node = new ValueNode();
+				break;
+		    }
+				
+            node = _scalars.back();
+			_scalars.pop_back();
+			break;
+	    }
 
-    //std::cerr << "get value" << std::endl;
-    _scalars.pop_back();
+        case SerializationInfo::Reference:
+            node = new ReferenceNode();
+            break;
+
+        case SerializationInfo::Sequence:
+        case SerializationInfo::Struct:
+            node = new ObjectNode(category);
+            break;
+            
+        default:
+            node = 0;
+    }
+    
     return node;
-}
-
-
-SerializationNode* SerializationContext::getObjectData()
-{
-    //std::cerr << "get object" << std::endl;
-    return new ObjectNode();
 }
 
 
@@ -185,13 +193,13 @@ void SerializationContext::push(SerializationInfo* si)
 
 void SerializationContext::push(SerializationNode* node)
 {
-    if( node->category() == SerializationInfo::Value )
+    if( node->category() == SerializationInfo::Scalar )
     {
         //std::cerr << "SerializationContext::push Value" << std::endl;
         ValueNode* scalar = static_cast<ValueNode*>(node);
         _scalars.push_back(scalar);
     }
-    else if( node->category() == SerializationInfo::Object || 
+    else if( node->category() == SerializationInfo::Struct || 
              node->category() == SerializationInfo::Sequence )
     {
         //std::cerr << "SerializationContext::push Struct" << std::endl;

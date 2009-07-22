@@ -41,7 +41,7 @@ void SerializationInfo::format(Formatter& formatter)
         this->setId( _context->getUnlinkId(_bound) );
     }
 
-    if(this->category() == SerializationInfo::Value)
+    if(this->category() == SerializationInfo::Scalar)
     {
         static_cast<ValueNode*>(_node)->format( formatter,
                                                 this->name(),
@@ -58,7 +58,7 @@ void SerializationInfo::format(Formatter& formatter)
         std::string id = _context->getUnlinkId( refAddr );
         formatter.addReference( this->name(), id);
     }
-    else if(this->category() == SerializationInfo::Object)
+    else if(this->category() == SerializationInfo::Struct)
     {
         formatter.beginObject( this->name(), this->typeName(), this->id() );
 
@@ -194,85 +194,46 @@ SerializationNode* SerializationInfo::releaseNode()
 
 void SerializationInfo::setCategory(Category category)
 {
-    switch(category)
+    if( this->category() != category)
     {
-        case Value:
-            initValue();
-            break;
+        SerializationNode* node = 0;
 
-        case Reference:
-            initReference();
-            break;
-
-        case Sequence:
-        case Object:
-            initObject(category);
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-ValueNode* SerializationInfo::initValue() const
-{
-    if( this->category() != Value)
-    {
         if( _context )
         {
-            SerializationNode* node = _context->getScalarData();
-            delete _node;
-            _node = node;
+            node = _context->get(category);
         }
         else
         {
-            ValueNode* node = new ValueNode();
-            delete _node;
-            _node = node;
+			switch(category)
+			{
+				case Scalar:
+					node = new ValueNode();
+					break;
+		
+				case Reference:
+					node = new ReferenceNode();
+					break;
+		
+				case Sequence:
+				case Struct:
+					node = new ObjectNode(category);
+					break;
+		
+				default:
+					break;
+			}
         }
+        
+        delete _node;
+        _node = node;
     }
-
-    return static_cast<ValueNode*>(_node);
 }
 
 
-Pt::String& SerializationInfo::initString() const
+Pt::String& SerializationInfo::initString()
 {
-    return initValue()->setString();
-}
-
-
-ReferenceNode* SerializationInfo::initReference() const
-{
-    if( this->category() != Reference)
-    {
-        //if( ! _node->cache() )
-        {
-            ReferenceNode* node = new ReferenceNode();
-            delete _node;
-            _node = node;
-        }
-    }
-
-    return static_cast<ReferenceNode*>(_node);
-}
-
-
-ObjectNode* SerializationInfo::initObject(Category category) const
-{
-    if( this->category() != Object && this->category() != Sequence)
-    {
-        //if( ! _node->cache() )
-        {
-            ObjectNode* node = new ObjectNode();
-            delete _node;
-            _node = node;
-        }
-    }
-
-    _node->setCategory(category);
-    return static_cast<ObjectNode*>(_node);
+    this->setCategory(Scalar);
+    return static_cast<ValueNode*>(_node)->setString();
 }
 
 
@@ -284,16 +245,16 @@ void SerializationInfo::saveReference(const void* ref)
         _context->prepareUnlink( ref );
     }
 
-    ReferenceNode* node = initReference();
-    node->setAddress( const_cast<void*>(ref) );
+    this->setCategory(Reference);
+    static_cast<ReferenceNode*>(_node)->setAddress( const_cast<void*>(ref) );
 }
 
 
 // called during deserialization, when a reference id was parsed
 void SerializationInfo::setReference(const std::string& id)
 {
-    ReferenceNode* node = initReference();
-    node->setRefId(id);
+    this->setCategory(Reference);
+    static_cast<ReferenceNode*>(_node)->setRefId(id);
 }
 
 
@@ -315,7 +276,7 @@ void SerializationInfo::load(void* type, FixupHandler fh) const
 
 const Pt::String& SerializationInfo::toString() const
 {
-    if( this->category() != Value)
+    if( this->category() != Scalar)
         throw SerializationError("not a value");
 
     ValueNode* svalue = (ValueNode*) _node;
@@ -325,7 +286,7 @@ const Pt::String& SerializationInfo::toString() const
 
 void SerializationInfo::getValue(bool& b) const
 {
-    if( this->category() != Value)
+    if( this->category() != Scalar)
         throw SerializationError("expected boolean value");
 
     b = static_cast<ValueNode*>(_node)->getBool();
@@ -334,7 +295,9 @@ void SerializationInfo::getValue(bool& b) const
 
 void SerializationInfo::setValue(bool b)
 {
-    initValue()->setBool(b);
+    this->setCategory(Scalar);
+    static_cast<ValueNode*>(_node)->setBool(b);
+    //initValue()->setBool(b);
 }
 
 
@@ -358,7 +321,7 @@ void SerializationInfo::getValue(int& i) const
 
 void SerializationInfo::getValue(long& l) const
 {
-    if( this->category() != Value)
+    if( this->category() != Scalar)
         throw SerializationError("expected integer value");
 
     l = static_cast<ValueNode*>(_node)->getInt();
@@ -366,7 +329,8 @@ void SerializationInfo::getValue(long& l) const
 
 void SerializationInfo::setValue(long l)
 {
-    initValue()->setInt(l);
+    this->setCategory(Scalar);
+    static_cast<ValueNode*>(_node)->setInt(l);
 }
 
 
@@ -390,7 +354,7 @@ void SerializationInfo::getValue(unsigned int& ui) const
 
 void SerializationInfo::getValue(unsigned long& ul) const
 {
-    if( this->category() != Value)
+    if( this->category() != Scalar)
         throw SerializationError("expected integer value");
 
     ul = static_cast<ValueNode*>(_node)->getUInt();
@@ -399,7 +363,8 @@ void SerializationInfo::getValue(unsigned long& ul) const
 
 void SerializationInfo::setValue(unsigned long ul)
 {
-    initValue()->setUInt(ul);
+    this->setCategory(Scalar);
+    static_cast<ValueNode*>(_node)->setUInt(ul);
 }
 
 
@@ -414,7 +379,7 @@ void SerializationInfo::getValue(float& f) const
 
 void SerializationInfo::getValue(double& f) const
 {
-    if( this->category() != Value)
+    if( this->category() != Scalar)
         throw SerializationError("expected float value");
 
     f = static_cast<ValueNode*>(_node)->getFloat();
@@ -423,13 +388,17 @@ void SerializationInfo::getValue(double& f) const
 
 void SerializationInfo::setValue(double f)
 {
-    initValue()->setFloat(f);
+    this->setCategory(Scalar);
+    static_cast<ValueNode*>(_node)->setFloat(f);
 }
 
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    ObjectNode* onode = initObject(Object);
+    if( this->category() != Struct)
+    	this->setCategory(Struct);
+    
+    ObjectNode* onode = static_cast<ObjectNode*>(_node);
 
     //std::cerr << "added member " << name << " "<< _context << std::endl;
 
@@ -452,7 +421,10 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 SerializationInfo& SerializationInfo::addMember()
 {
-    ObjectNode* onode = initObject(Sequence);
+    if( this->category() != Sequence)
+    	this->setCategory(Sequence);
+    
+    ObjectNode* onode = static_cast<ObjectNode*>(_node);
 
     //std::cerr << "added member " <<  _node->cache() << std::endl;
 
@@ -474,7 +446,7 @@ SerializationInfo& SerializationInfo::addMember()
 
 SerializationInfo::Iterator SerializationInfo::begin()
 {
-    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
+    if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -490,7 +462,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
 
 SerializationInfo::Iterator SerializationInfo::end()
 {
-    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
+    if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -506,7 +478,7 @@ SerializationInfo::Iterator SerializationInfo::end()
 
 SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
-    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
+    if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -522,7 +494,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 
 SerializationInfo::ConstIterator SerializationInfo::end() const
 {
-    if(! _node || (_node->category() != Object && _node->category() != Sequence) )
+    if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
         return 0;
     }
@@ -538,7 +510,7 @@ SerializationInfo::ConstIterator SerializationInfo::end() const
 
 const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Object || _node->category() == Sequence) )
+    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         Iterator it = snode->begin();
@@ -555,7 +527,7 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
 
 const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Object || _node->category() == Sequence) )
+    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         ObjectNode::ConstIterator it = snode->begin();
@@ -572,7 +544,7 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 
 SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
-    if(_node && (_node->category() == Object || _node->category() == Sequence) )
+    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
         ObjectNode::Iterator it = snode->begin();
@@ -589,7 +561,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 
 size_t SerializationInfo::memberCount() const
 {
-    if(_node && (_node->category() == Object || _node->category() == Sequence) )
+    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         return static_cast<const ObjectNode*>(_node)->size();
     }

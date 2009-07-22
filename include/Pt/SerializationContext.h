@@ -29,6 +29,7 @@
 #define Pt_SerializationContext_h
 
 #include <Pt/Api.h>
+#include <Pt/SerializationInfo.h>
 #include <typeinfo>
 #include <string>
 #include <vector>
@@ -105,9 +106,7 @@ class PT_API SerializationContext : public SerializationBinder
 
         void push(SerializationInfo* si);
 
-        ValueNode* getScalarData();
-
-        SerializationNode* getObjectData();
+        SerializationNode* get(SerializationInfo::Category category);
 
     private:
         std::vector<SerializationInfo*> _infos;

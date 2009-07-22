@@ -75,7 +75,7 @@ class ValueNode : public SerializationNode
 
     public:
         ValueNode()
-        : SerializationNode(SerializationInfo::Value)
+        : SerializationNode(SerializationInfo::Scalar)
         , _type(String)
         {}
 
@@ -307,8 +307,8 @@ class ObjectNode : public SerializationNode
         typedef SerializationInfo** Iterator;
         typedef const SerializationInfo* const* ConstIterator;
 
-        ObjectNode()
-        : SerializationNode(SerializationInfo::Object)
+        ObjectNode(SerializationInfo::Category category)
+        : SerializationNode(category)
         , _nodes(0)
         , _capacity(0)
         , _size(0)

@@ -109,8 +109,8 @@ class PT_API SerializationInfo
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
-        enum Category { // Scalar, Struct
-            Void = 0, Value = 1, Object = 2, Sequence = 3, Reference = 4
+        enum Category {
+            Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4
         };
 
         class Iterator;
@@ -173,31 +173,31 @@ class PT_API SerializationInfo
         const std::string& name() const
         { return _name; }
 
-        // TODO: performance optimization: overload const char*
         void setName(const std::string& name)
+        { _name = name; }
+
+        void setName(const char* name)
         { _name = name; }
 
         const std::string& id() const
         { return _id; }
 
-        // TODO: performance optimization: overload const char*
         void setId(const std::string& id)
+        { _id = id; }
+
+        void setId(const char* id)
         { _id = id; }
 
         /** @brief Returns the content as string.
         */
         const Pt::String& toString() const;
 
-        // TODO: remove this method and use Context directly
         bool beginSave(const void* p);
 
-        // TODO: remove this method and use Context directly
         void finishSave();
 
-        // TODO: remove this method and use Context directly
         void beginLoad(void* p, const std::type_info& ti) const;
 
-        // TODO: remove this method and use Context directly
         void finishLoad() const;
 
         /** @brief Deserialization of flat child value types
@@ -211,8 +211,6 @@ class PT_API SerializationInfo
         template <typename T>
         void setValue(const T& value)
         { convert( initString(), value ); }
-
-        // TODO: getBool, setBool
 
         void getValue(bool& b) const;
 
@@ -292,8 +290,6 @@ class PT_API SerializationInfo
         ConstIterator end() const;
 
         /** @brief Serialization of weak pointers
-
-            TODO: saveReference
         */
         void saveReference(const void* ref);
 
@@ -362,16 +358,10 @@ class PT_API SerializationInfo
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
 
-    private:
+    protected:
         void load(void* fixme, FixupHandler fh) const;
-        
-        ValueNode* initValue() const;
 
-        Pt::String& initString() const;
-
-        ReferenceNode* initReference() const;
-
-        ObjectNode* initObject(Category category) const;
+        Pt::String& initString();
 
     private:
         mutable SerializationNode* _node;
