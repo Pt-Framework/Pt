@@ -125,17 +125,14 @@ SerializationInfo* SerializationContext::get()
 
     if( _infos.empty() )
     {
-        //std::cerr << "create si" << std::endl;
         si = new SerializationInfo(this);
-        _infos.push_back(si);
     }
     else
     {
         si = _infos.back();
+        _infos.pop_back();
     }
 
-    //std::cerr << "get si" << std::endl;
-    _infos.pop_back();
     return si;
 }
 
