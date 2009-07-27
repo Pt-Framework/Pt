@@ -45,7 +45,7 @@ SerializationBinder::~SerializationBinder()
 
 bool SerializationBinder::beginUnlinkTarget(const std::string& name, const void* p)
 {
-    return false;
+    return true;
 }
 
 
