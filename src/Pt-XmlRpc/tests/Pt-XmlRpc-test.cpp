@@ -35,7 +35,7 @@
 #include "Pt/Http/Server.h"
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/Thread.h"
-
+#include "Pt/System/Clock.h"
 
 struct Color
 {
@@ -90,6 +90,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             this->registerMethod("String", *this, &PtXmlRpcTest::String);
             this->registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
             this->registerMethod("Array", *this, &PtXmlRpcTest::Array);
+            this->registerMethod("ArrayBenchmark", *this, &PtXmlRpcTest::ArrayBenchmark);
             this->registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
             this->registerMethod("Struct", *this, &PtXmlRpcTest::Struct);
             this->registerMethod("Set", *this, &PtXmlRpcTest::Set);
@@ -507,6 +508,66 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(r.get().at(1), 400)
 
             _loop->exit();
+        }
+
+        ////////////////////////////////////////////////////////////
+        // ArrayBenchmark
+        //
+        Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> >* benchmarkProc;
+        std::vector<int> benchmarkVec;
+        std::vector<int> benchmarkResult;
+
+        void ArrayBenchmark()
+        {
+            Pt::XmlRpc::Service service;
+            service.registerMethod("mergeVector", *this, &PtXmlRpcTest::mergeVector);
+            _server->addService("/calc", service);
+
+            _serverThread->start();
+            Pt::System::Thread::sleep(500);
+
+            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
+            connect( proc.finished, *this, &PtXmlRpcTest::onArrayBenchmarkFinished );
+
+            benchmarkProc = &proc;
+
+            benchmarkVec.push_back(1);
+            benchmarkVec.push_back(2);
+            benchmarkVec.push_back(3);
+            benchmarkVec.push_back(4);
+
+            proc.begin(benchmarkVec, benchmarkVec);
+
+            Pt::System::Clock clock;
+            clock.start();
+            _loop->run();
+            Pt::Timespan ts = clock.stop();
+            std::cerr << "Time: " << ts.toUSecs() <<  std::endl;
+        }
+
+        void onArrayBenchmarkFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
+        {
+            //PT_UNIT_ASSERT_EQUALS(r.get().size(), 8)
+
+            static unsigned benchmarkCounter = 0;
+
+            if(++benchmarkCounter >= 5000)
+                _loop->exit();
+
+            benchmarkProc->begin(benchmarkVec, benchmarkVec);
+        }
+
+        std::vector<int> mergeVector(const std::vector<int>& a, const std::vector<int>& b)
+        {
+            benchmarkResult = a;
+            std::vector<int>::const_iterator it;
+            for(it = b.begin(); it != b.end(); ++it)
+            {
+                benchmarkResult.push_back(*it);
+            }
+
+            return benchmarkResult;
         }
 
         ////////////////////////////////////////////////////////////
