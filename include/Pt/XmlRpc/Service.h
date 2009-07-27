@@ -309,6 +309,10 @@ class BasicServiceProcedure<R, C, A1, A2,
             _args[0] = &_a1;
             _args[1] = &_a2;
             _args[2] = 0;
+            
+            //_a1.setContext(_context);
+            //_a2.setContext(_context);
+            //_r.setContext(_context);
         }
 
         ~BasicServiceProcedure()
@@ -346,12 +350,21 @@ class BasicServiceProcedure<R, C, A1, A2,
         V1 _v1;
         V2 _v2;
         IDeserializer* _args[3];
+        //static SerializationContext _context;
         Deserializer<V1> _a1;
         Deserializer<V2> _a2;
         Serializer<RV> _r;
 };
-
-
+/*
+template < typename R,
+           class C,
+           typename A1,
+           typename A2>
+SerializationContext BasicServiceProcedure<R, C, A1, A2,
+                            Pt::Void,
+                            Pt::Void,
+                            Pt::Void> ::_context;
+*/
 template < typename R,
            class C,
            typename A1>

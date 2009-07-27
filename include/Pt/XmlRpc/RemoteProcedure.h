@@ -32,6 +32,7 @@
 #include <Pt/XmlRpc/Client.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Result.h>
+#include <Pt/SerializationContext.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
 #include <Pt/Signal.h>
@@ -106,6 +107,7 @@ class RemoteProcedureBase : public IRemoteProcedure
         void onFinished()
         { finished.send(_result); }
 
+        //SerializationContext _context;
         Result<R> _result;
         Deserializer<R> _r;
 };
@@ -315,7 +317,18 @@ class RemoteProcedure<R, A1, A2,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
-        { }
+        { 
+            //_a1.setContext(this->_context);
+            //_a2.setContext(this->_context);
+            //this->_r.setContext(this->_context);
+        }
+        
+        ~RemoteProcedure()
+        {
+            //_a1.clear();
+            //_a2.clear();
+            //_r.clear();
+        }
 
         void begin(const A1& a1, const A2& a2)
         {

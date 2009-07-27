@@ -543,7 +543,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             clock.start();
             _loop->run();
             Pt::Timespan ts = clock.stop();
-            std::cerr << "Time: " << ts.toUSecs() <<  std::endl;
+            std::cerr << "Time   : " << ts.toUSecs() <<  std::endl;
+            std::cerr << "Req/Sec: " << ((10000.0/ts.toUSecs())*1000000) <<  std::endl;
         }
 
         void onArrayBenchmarkFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
@@ -552,7 +553,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             static unsigned benchmarkCounter = 0;
 
-            if(++benchmarkCounter >= 5000)
+            if(++benchmarkCounter >= 10000)
                 _loop->exit();
 
             benchmarkProc->begin(benchmarkVec, benchmarkVec);
