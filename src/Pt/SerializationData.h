@@ -47,6 +47,8 @@ class SerializationNode
 		void setCategory(SerializationInfo::Category cat)
 		{ _category = cat; }
 
+        virtual void setContext(SerializationContext* context) = 0;
+
 		virtual void clear() = 0;
 
         virtual void clear(SerializationContext& ) = 0;
@@ -255,9 +257,24 @@ class ValueNode : public SerializationNode
             }
         }
 
-        virtual void clear();
+        virtual void setContext(SerializationContext* context)
+        { }
 
-        virtual void clear(SerializationContext& context);
+        virtual void clear()
+		{
+			_type = ValueNode::String;
+			
+			if( _value.size() )
+				_value.clear();
+		}
+        
+        virtual void clear(SerializationContext& context)
+		{
+			_type = ValueNode::String;
+			
+			if( _value.size() )
+				_value.clear();
+		}
 
     private:
         Type _type;
@@ -290,6 +307,9 @@ class ReferenceNode : public SerializationNode
         void setAddress(void* addr)
         { _address = addr; }
 
+        virtual void setContext(SerializationContext* context)
+        { }
+
         virtual void clear()
         { _refid.clear(); }
 
@@ -314,10 +334,29 @@ class ObjectNode : public SerializationNode
         , _size(0)
         {}
 
-        ~ObjectNode();
-
-        void push_back(SerializationInfo* si);
-
+        ~ObjectNode()
+		{
+			this->clear();
+			::operator delete(_nodes);
+		}
+        
+        void push_back(SerializationInfo* si)
+		{
+			if(_capacity == _size)
+			{
+				void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
+				SerializationInfo** nodes = (SerializationInfo**) mem;
+				_capacity += 5;
+				std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
+		
+				::operator delete(_nodes);
+				_nodes = nodes;
+			}
+		
+			_nodes[_size] = si;
+			++_size;
+		}
+        
         Iterator begin()
         { return &_nodes[0]; }
 
@@ -339,9 +378,38 @@ class ObjectNode : public SerializationNode
         const SerializationInfo& back() const
         { return *( _nodes[_size - 1] ); }
 
-        virtual void clear();
+        virtual void setContext(SerializationContext* context)
+        { 
+			Iterator endIt = end();
+		
+			for(Iterator it = begin(); it != endIt; ++it)
+			{
+				(*it)->setContext(context);
+			}
+        }
 
-        virtual void clear(SerializationContext& context);
+		virtual void clear()
+		{
+			Iterator endIt = end();
+		
+			for(Iterator it = begin(); it != endIt; ++it)
+			{
+				delete *it;
+			}
+			_size = 0;
+		}
+
+		virtual void clear(SerializationContext& context)
+		{
+			Iterator endIt = end();
+		
+			for(Iterator it = begin(); it != endIt; ++it)
+			{
+				context.push(*it);
+			}
+		
+			_size = 0;
+		}
     
     protected:
         ObjectNode& operator=(const ObjectNode&);
@@ -352,74 +420,6 @@ class ObjectNode : public SerializationNode
         unsigned _capacity;
         unsigned _size;
 };
-
-
-inline void ValueNode::clear()
-{
-    _type = ValueNode::String;
-    
-    if( _value.size() )
-        _value.clear();
-}
-
-
-inline void ValueNode::clear(SerializationContext& context)
-{
-    _type = ValueNode::String;
-    
-    if( _value.size() )
-        _value.clear();
-}
-
-
-inline ObjectNode::~ObjectNode()
-{
-    this->clear();
-    ::operator delete(_nodes);
-}
-
-
-inline void ObjectNode::push_back(SerializationInfo* si)
-{
-    if(_capacity == _size)
-    {
-        void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
-        SerializationInfo** nodes = (SerializationInfo**) mem;
-        _capacity += 5;
-        std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
-
-        ::operator delete(_nodes);
-        _nodes = nodes;
-    }
-
-    _nodes[_size] = si;
-    ++_size;
-}
-
-
-inline void ObjectNode::clear()
-{
-    Iterator endIt = end();
-
-    for(Iterator it = begin(); it != endIt; ++it)
-    {
-        delete *it;
-    }
-    _size = 0;
-}
-
-
-inline void ObjectNode::clear(SerializationContext& context)
-{
-    Iterator endIt = end();
-
-    for(Iterator it = begin(); it != endIt; ++it)
-    {
-        context.push(*it);
-    }
-
-    _size = 0;
-}
 
 } // namespace Pt
 

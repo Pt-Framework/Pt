@@ -41,7 +41,7 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-bool XmlSerializationContext::beginUnlinkTarget(const std::string& name, const void* p)
+bool XmlSerializationContext::beginSave(const std::string& name, const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -54,12 +54,12 @@ bool XmlSerializationContext::beginUnlinkTarget(const std::string& name, const v
 }
 
 
-void XmlSerializationContext::finishUnlinkTarget()
+void XmlSerializationContext::finishSave()
 {
 }
 
 
-void XmlSerializationContext::prepareUnlink(const void* p)
+void XmlSerializationContext::prepareId(const void* p)
 {
     if(p == 0)
     {
@@ -77,7 +77,7 @@ void XmlSerializationContext::prepareUnlink(const void* p)
 }
 
 
-bool XmlSerializationContext::isUnlinkTarget(const void* p)
+bool XmlSerializationContext::hasId(const void* p)
 {
     std::map<unsigned, const void*>::const_iterator it;
 
@@ -91,7 +91,7 @@ bool XmlSerializationContext::isUnlinkTarget(const void* p)
 }
 
 
-std::string XmlSerializationContext::getUnlinkId(const void* p)
+std::string XmlSerializationContext::getId(const void* p)
 {
     if(p == 0)
     {
@@ -117,8 +117,8 @@ void XmlSerializationContext::reset()
 }
 
 
-void XmlSerializationContext::beginLinkTarget(const std::string& name, const std::string& id,
-                                              void* obj, const std::type_info& fixupInfo)
+void XmlSerializationContext::beginLoad(const std::string& name, const std::string& id,
+                                        void* obj, const std::type_info& fixupInfo)
 {
     if( id.empty() )
         return;
@@ -132,12 +132,12 @@ void XmlSerializationContext::beginLinkTarget(const std::string& name, const std
 }
 
 
-void XmlSerializationContext::finishLinkTarget()
+void XmlSerializationContext::finishLoad()
 {
 }
 
 
-void XmlSerializationContext::prepareLink(const std::string& id, void* obj, FixupHandler fh)
+void XmlSerializationContext::prepareFixup(const std::string& id, void* obj, FixupHandler fh)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
     FixupInfo fi;
@@ -147,7 +147,7 @@ void XmlSerializationContext::prepareLink(const std::string& id, void* obj, Fixu
 }
 
 
-void XmlSerializationContext::link()
+void XmlSerializationContext::fixup()
 {
     std::multimap<std::string, FixupInfo>::iterator it;
     for(it = _pointers.begin(); it != _pointers.end(); ++it)

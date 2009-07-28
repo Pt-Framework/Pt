@@ -31,14 +31,13 @@
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
 
-
 namespace Pt {
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    if( _context && _bound &&  _context->isUnlinkTarget(_bound) )
+    if( _context && _bound &&  _context->hasId(_bound) )
     {
-        this->setId( _context->getUnlinkId(_bound) );
+        this->setId( _context->getId(_bound) );
     }
 
     if(this->category() == SerializationInfo::Scalar)
@@ -55,7 +54,7 @@ void SerializationInfo::format(Formatter& formatter)
             throw SerializationError("context not available ");
         }
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
-        std::string id = _context->getUnlinkId( refAddr );
+        std::string id = _context->getId( refAddr );
         formatter.addReference( this->name(), id);
     }
     else if(this->category() == SerializationInfo::Struct)
@@ -101,7 +100,7 @@ bool SerializationInfo::beginSave(const void* p)
     {
         if(_context)
         {
-            first = _context->beginUnlinkTarget(_name, p);
+            first = _context->beginSave(_name, p);
             if(first)
                 _bound = p;
         }
@@ -115,7 +114,7 @@ void SerializationInfo::finishSave()
 {
     if(_context && _bound)
     {
-        _context->finishUnlinkTarget();
+        _context->finishSave();
     }
 }
 
@@ -127,7 +126,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 
     if(_context && _bound)
     {
-        _context->beginLinkTarget( _name, _id, p, ti);
+        _context->beginLoad( _name, _id, p, ti);
     }
 }
 
@@ -136,7 +135,7 @@ void SerializationInfo::finishLoad() const
 {
     if(_context && _bound)
     {
-        _context->finishLinkTarget();
+        _context->finishLoad();
     }
 }
 
@@ -230,6 +229,17 @@ void SerializationInfo::setCategory(Category category)
 }
 
 
+void SerializationInfo::setContext(SerializationContext* context)
+{ 
+    _context = context; 
+    
+    if(_node)
+    {
+        _node->setContext(context);
+    }
+}
+
+
 Pt::String& SerializationInfo::initString()
 {
     this->setCategory(Scalar);
@@ -242,7 +252,7 @@ void SerializationInfo::saveReference(const void* ref)
 {
     if(_context )
     {
-        _context->prepareUnlink( ref );
+        _context->prepareId( ref );
     }
 
     this->setCategory(Reference);
@@ -269,7 +279,7 @@ void SerializationInfo::load(void* type, FixupHandler fh) const
 
     if(_context)
     {
-        _context->prepareLink( refId, type, fh );
+        _context->prepareFixup( refId, type, fh );
     }
 }
 

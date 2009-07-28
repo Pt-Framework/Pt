@@ -42,7 +42,7 @@ class ISerializer
         virtual ~ISerializer()
         {}
 
-        virtual void setContext( SerializationContext& context ) = 0;
+        virtual void setContext( SerializationContext* context ) = 0;
 
         virtual void setName(const std::string& name) = 0;
 
@@ -70,7 +70,7 @@ class Serializer : public ISerializer
             _type = &type;
         }
 
-        virtual void setContext(SerializationContext& context) 
+        virtual void setContext(SerializationContext* context) 
         {
             _si.setContext(context);
         }

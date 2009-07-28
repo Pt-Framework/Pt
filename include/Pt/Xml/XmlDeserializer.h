@@ -78,13 +78,13 @@ class PT_XML_API XmlDeserializer
         {
             Deserializer<T> deser;
             deser.begin(type);
-            deser.setContext(*_context);
+            deser.setContext(_context);
             this->get(&deser);
             deser.leave();
         }
         
         void finish()
-        { _xmlcontext.link(); }
+        { _xmlcontext.fixup(); }
 
     protected:
         void get(IDeserializer* deser);

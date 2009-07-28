@@ -44,9 +44,6 @@ namespace Pt {
 
 class SerializationContext;
 class Formatter;
-class ValueNode;
-class ReferenceNode;
-class ObjectNode;
 class SerializationNode;
 
 template <typename T>
@@ -152,8 +149,7 @@ class PT_API SerializationInfo
         SerializationContext* context() const
         { return _context; }
 
-        void setContext(SerializationContext& context)
-        { _context = &context; }
+        void setContext(SerializationContext* context);
 
         SerializationInfo* parent()
         { return _parent; }

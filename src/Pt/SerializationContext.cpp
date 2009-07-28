@@ -32,90 +32,101 @@
 
 namespace Pt {
 
-
-SerializationBinder::SerializationBinder()
+class SerializationCache
 {
-}
+    public:
+        std::vector<SerializationInfo*> _infos;
+        std::vector<SerializationNode*> _scalars;
+        std::vector<SerializationNode*> _objects;
+        std::vector<SerializationNode*> _refs;
+};
 
 
-SerializationBinder::~SerializationBinder()
-{
-}
-
-
-bool SerializationBinder::beginUnlinkTarget(const std::string& name, const void* p)
+bool SerializationContext::beginSave(const std::string& name, const void* p)
 {
     return true;
 }
 
 
-void SerializationBinder::finishUnlinkTarget()
+void SerializationContext::finishSave()
 {
 }
 
 
-void SerializationBinder::prepareUnlink(const void* p)
+void SerializationContext::prepareId(const void* p)
 {
     throw SerializationError("missing unlink information");
 }
 
 
-bool SerializationBinder::isUnlinkTarget(const void* p)
+bool SerializationContext::hasId(const void* p)
 {
     return false;
 }
 
 
-std::string SerializationBinder::getUnlinkId(const void* p)
+std::string SerializationContext::getId(const void* p)
 {
     throw SerializationError("missing unlink information");
     return std::string();
 }
 
 
-void SerializationBinder::beginLinkTarget(const std::string& name, const std::string& id,
-                                           void* obj, const std::type_info& fixupInfo)
+void SerializationContext::beginLoad(const std::string& name, const std::string& id,
+                                    void* obj, const std::type_info& fixupInfo)
 {
 }
 
 
-void SerializationBinder::finishLinkTarget()
+void SerializationContext::finishLoad()
 {
 }
 
 
-void SerializationBinder::prepareLink(const std::string& id, void* obj, FixupHandler)
+void SerializationContext::prepareFixup(const std::string& id, void* obj, FixupHandler)
 {
 }
 
 
-void SerializationBinder::link()
+void SerializationContext::fixup()
 {
 }
 
 
 SerializationContext::SerializationContext()
+: _cache(0)
 {
+    _cache = new SerializationCache;
 }
 
 
 SerializationContext::~SerializationContext()
 {
-    std::vector<ValueNode*>::iterator it = _scalars.begin();
-    for(; it != _scalars.end(); ++it)
+    std::vector<SerializationNode*>::iterator it = _cache->_scalars.begin();
+    for(; it != _cache->_scalars.end(); ++it)
     {
-        //std::cerr << "destroy value" << std::endl;
         delete *it;
     }
     
-    std::vector<SerializationInfo*>::iterator iter = _infos.begin();
-    for(; iter != _infos.end(); ++iter)
+    it = _cache->_objects.begin();
+    for(; it != _cache->_objects.end(); ++it)
     {
-        //std::cerr << "destroy si" << std::endl;
+        delete *it;
+    }
+    
+    it = _cache->_refs.begin();
+    for(; it != _cache->_refs.end(); ++it)
+    {
+        delete *it;
+    }
+    
+    std::vector<SerializationInfo*>::iterator iter;
+    for(iter = _cache->_infos.begin(); iter != _cache->_infos.end(); ++iter)
+    {
         delete *iter;
     }
     
-    //std::cerr << "cache destroyed" << std::endl;
+    delete _cache;
 }
 
 
@@ -123,20 +134,30 @@ SerializationInfo* SerializationContext::get()
 {
     SerializationInfo* si = 0;
 
-    if( _infos.empty() )
+    if( _cache->_infos.empty() )
     {
         si = new SerializationInfo(this);
     }
     else
     {
-        si = _infos.back();
-        _infos.pop_back();
+        si = _cache->_infos.back();
+        _cache->_infos.pop_back();
     }
 
-    _out.push_back(si);
-    //std::cerr << "get si "  << (void*)si << std::endl;
-
     return si;
+}
+
+
+void SerializationContext::push(SerializationInfo* si)
+{
+    si->clear();
+
+    SerializationNode* node = si->releaseNode();
+
+    if(node)
+        this->push(node);
+
+    _cache->_infos.push_back(si);
 }
 
 
@@ -148,24 +169,39 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
     {
         case SerializationInfo::Scalar:
         {
-			if( _scalars.empty() )
+			if( _cache->_scalars.empty() )
 			{
 				node = new ValueNode();
 				break;
 		    }
 				
-            node = _scalars.back();
-			_scalars.pop_back();
+            node = _cache->_scalars.back();
+			_cache->_scalars.pop_back();
 			break;
 	    }
 
         case SerializationInfo::Reference:
-            node = new ReferenceNode();
+			if( _cache->_refs.empty() )
+			{
+				node = new ReferenceNode();
+				break;
+		    }
+				
+            node = _cache->_refs.back();
+			_cache->_refs.pop_back();
             break;
 
         case SerializationInfo::Sequence:
         case SerializationInfo::Struct:
-            node = new ObjectNode(category);
+			if( _cache->_objects.empty() )
+			{
+				node = new ObjectNode(category);
+				break;
+		    }
+
+            node = _cache->_objects.back();
+			_cache->_objects.pop_back();
+			node->setCategory(category);
             break;
             
         default:
@@ -176,50 +212,25 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 }
 
 
-void SerializationContext::push(SerializationInfo* si)
-{
-    //std::cerr << "push si "  << (void*)si << std::endl;
-
-    si->clear();
-
-    SerializationNode* node = si->releaseNode();
-
-    if(node)
-        this->push(node);
-
-    std::vector<SerializationInfo*>::iterator it;
-    for(it = _out.begin(); it != _out.end(); ++it)
-    {
-        if(*it == si)
-        {
-            _out.erase(it);
-            break;
-        }
-        //std::cerr << "- miss -" << std::endl;
-    }
-
-    _infos.push_back(si);
-}
-
-
 void SerializationContext::push(SerializationNode* node)
 {
-    if( node->category() == SerializationInfo::Scalar )
+    switch( node->category() )
     {
-        //std::cerr << "SerializationContext::push Value" << std::endl;
-        ValueNode* scalar = static_cast<ValueNode*>(node);
-        _scalars.push_back(scalar);
-    }
-    else if( node->category() == SerializationInfo::Struct || 
-             node->category() == SerializationInfo::Sequence )
-    {
-        //std::cerr << "SerializationContext::push Struct" << std::endl;
-        delete node;
-    }
-    else
-    {
-         //std::cerr << "SerializationContext::push unknown" << std::endl;
-        delete node;
+        case SerializationInfo::Scalar:
+            _cache->_scalars.push_back(node);
+            break;
+
+    	case SerializationInfo::Struct: 
+    	case SerializationInfo::Sequence:
+            _cache->_objects.push_back(node);
+            break;
+
+    	case SerializationInfo::Reference:
+            _cache->_refs.push_back(node);
+            break;
+
+        default:
+            delete node;
     }
 }
 

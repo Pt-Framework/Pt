@@ -46,16 +46,17 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         //! @brief Destructor
         ~XmlSerializationContext();
         
-        virtual bool beginUnlinkTarget(const std::string& name, const void* p);
+        virtual bool beginSave(const std::string& name, const void* p);
 
-        virtual void finishUnlinkTarget();
+        virtual void finishSave();
 
-        virtual void prepareUnlink(const void* p);
+        virtual void prepareId(const void* p);
         
-        virtual bool isUnlinkTarget(const void* p);
+        virtual bool hasId(const void* p);
 
-        virtual std::string getUnlinkId(const void* p);
+        virtual std::string getId(const void* p);
 
+    protected:
         virtual void reset();
 
     private:
@@ -63,14 +64,14 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         std::map<unsigned, const void*> _linkmap;
 
     public:
-        virtual void beginLinkTarget(const std::string& name, const std::string& id,
-                                     void* obj, const std::type_info& fixupInfo);
+        virtual void beginLoad(const std::string& name, const std::string& id,
+                               void* obj, const std::type_info& fixupInfo);
 
-        virtual void finishLinkTarget();
+        virtual void finishLoad();
 
-        virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
+        virtual void prepareFixup(const std::string& id, void* obj, FixupHandler);
 
-        virtual void link();
+        virtual void fixup();
 
     private:
         struct FixupInfo
@@ -175,7 +176,7 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             _heap.push_back(serializer);
             _stack.push_back(serializer);
 
-            serializer->setContext(*_context);
+            serializer->setContext(_context);
             serializer->begin(type);
             serializer->setName(name);
             serializer->prepare();

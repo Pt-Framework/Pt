@@ -37,59 +37,16 @@
 
 namespace Pt {
 
-class ValueNode;
-class ObjectNode;
-class ReferenceNode;
 class SerializationInfo;
 class SerializationNode;
+class SerializationCache;
 
-class PT_API SerializationBinder
+class PT_API SerializationContext
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
-
-        SerializationBinder();
-
-        virtual ~SerializationBinder();
-
-        // beginSave
-        virtual bool beginUnlinkTarget(const std::string& name, const void* p);
-
-        // finishSave
-        virtual void finishUnlinkTarget();
-
-        // breakup
-        virtual void prepareUnlink(const void* p);
-
-        // isSaved
-        virtual bool isUnlinkTarget(const void* p);
-
-        // createId
-        virtual std::string getUnlinkId(const void* p);
-
-    public:
-        // beginLoad
-        virtual void beginLinkTarget(const std::string& name, const std::string& id,
-                                     void* obj, const std::type_info& fixupInfo);
-
-        // finishLoad
-        virtual void finishLinkTarget();
-
-        // prepareSave
-        virtual void prepareLink(const std::string& id, void* obj, FixupHandler);
-
-        // fixup
-        virtual void link();
-
-    public:
-        virtual void reset()
-        {}
-};
-
-
-class PT_API SerializationContext : public SerializationBinder
-{
+    
     public:
         SerializationContext();
 
@@ -100,21 +57,42 @@ class PT_API SerializationContext : public SerializationBinder
             this->reset();
         }
 
+        virtual bool beginSave(const std::string& name, const void* p);
+
+        virtual void finishSave();
+
+        virtual void prepareId(const void* p);
+
+        // TODO: getId returns char* and NULL if no id required
+        virtual bool hasId(const void* p);
+
+        virtual std::string getId(const void* p);
+
+    public:
+        virtual void beginLoad(const std::string& name, const std::string& id,
+                               void* obj, const std::type_info& fixupInfo);
+
+        virtual void finishLoad();
+
+        virtual void prepareFixup(const std::string& id, void* obj, FixupHandler);
+
+        virtual void fixup();
+
     public:
         SerializationInfo* get();
 
-        void push(SerializationNode* node);
-
         void push(SerializationInfo* si);
+
+        void push(SerializationNode* node);
 
         SerializationNode* get(SerializationInfo::Category category);
 
+    protected:
+        virtual void reset()
+        {}
+
     private:
-        std::vector<SerializationInfo*> _infos;
-        std::vector<SerializationInfo*> _out;
-        std::vector<ValueNode*> _scalars;
-        std::vector<ObjectNode*> _objects;
-        std::vector<ReferenceNode*> _refs;
+        SerializationCache* _cache;
 };
 
 } // namespace Pt

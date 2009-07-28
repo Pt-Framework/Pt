@@ -51,7 +51,7 @@ class IDeserializer
         IDeserializer* parent()
         { return _parent; }
 
-		virtual void setContext( SerializationContext& context ) = 0;
+		virtual void setContext( SerializationContext* context ) = 0;
 
         virtual void setName(const std::string& name) = 0;
 
@@ -98,7 +98,7 @@ class Deserializer : public IDeserializer
             _current = &_si;
         }
 
-        virtual void setContext(SerializationContext& context) 
+        virtual void setContext(SerializationContext* context) 
         {
 			_si.setContext(context);
         }
