@@ -33,6 +33,7 @@
 #include <typeinfo>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace Pt {
 
@@ -110,6 +111,7 @@ class PT_API SerializationContext : public SerializationBinder
 
     private:
         std::vector<SerializationInfo*> _infos;
+        std::vector<SerializationInfo*> _out;
         std::vector<ValueNode*> _scalars;
         std::vector<ObjectNode*> _objects;
         std::vector<ReferenceNode*> _refs;

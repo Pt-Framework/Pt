@@ -133,6 +133,9 @@ SerializationInfo* SerializationContext::get()
         _infos.pop_back();
     }
 
+    _out.push_back(si);
+    //std::cerr << "get si "  << (void*)si << std::endl;
+
     return si;
 }
 
@@ -175,15 +178,26 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 
 void SerializationContext::push(SerializationInfo* si)
 {
-    //std::cerr << "push si" << std::endl;
+    //std::cerr << "push si "  << (void*)si << std::endl;
 
     si->clear();
-    
+
     SerializationNode* node = si->releaseNode();
-    
+
     if(node)
         this->push(node);
-    
+
+    std::vector<SerializationInfo*>::iterator it;
+    for(it = _out.begin(); it != _out.end(); ++it)
+    {
+        if(*it == si)
+        {
+            _out.erase(it);
+            break;
+        }
+        //std::cerr << "- miss -" << std::endl;
+    }
+
     _infos.push_back(si);
 }
 
