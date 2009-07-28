@@ -58,11 +58,11 @@ namespace Pt {
                };
         @endcode
      */
-    template <typename T, typename A = std::allocator<T> >
+    template <typename T/*, typename A = std::allocator<T>*/ >
     class Singleton : public NonCopyable
     {
         public:
-            typedef A Allocator;
+            //typedef A Allocator;
 
         public:
             /** @brief Returns the instance of the singleton type
@@ -70,14 +70,15 @@ namespace Pt {
                     When called for the first time, the singleton instance will be
                     created with the specified alloctaor. All subsequent calls wikk
                     return a reference to the previously created instance.
-            
+
                 @return The singleton instance
              */
             static T& instance()
             {
-                if(!_instance)
+                if( !_instance )
                 {
-                    try
+                    _instance = create();
+                    /*try
                     {
                         _instance = (T*)_allocator.allocate(1);
                         new (_instance) T();
@@ -92,7 +93,7 @@ namespace Pt {
                         _allocator.deallocate(_instance, 1);
                         _instance = 0;
                         throw;
-                    }
+                    }*/
                 }
 
                 return *_instance;
@@ -109,6 +110,12 @@ namespace Pt {
             ~Singleton()
             { }
 
+            static T* create()
+            {
+                static T inst;
+                return &inst;
+            }
+
         private:
             /** @brief Exit handler
 
@@ -116,25 +123,25 @@ namespace Pt {
                 the singleton instance at the end of the program using the
                 specified allocator.
              */
-            static void atExit()
+            /*static void atExit()
             {
                 _instance->~T();
                 _allocator.deallocate(_instance, 1);
                 _instance = 0;
-            }
+            }*/
 
         private:
-            static A  _allocator;
+            //static A  _allocator;
             static T* _instance;
     };
 
 
-    template <typename T, typename A>
-    A Singleton<T, A>::_allocator;
+    //template <typename T, typename A>
+    //A Singleton<T, A>::_allocator;
 
 
-    template <typename T, typename A>
-    T* Singleton<T, A>::_instance = 0;
+    template <typename T/*, typename A*/>
+    T* Singleton<T/*, A*/>::_instance = 0;
 
 } // namespace Pt
 

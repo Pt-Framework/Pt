@@ -44,9 +44,30 @@ class TestSingleton : public Pt::Singleton<TestSingleton>
         {}
 
         ~TestSingleton()
-        {}
+        { /*std::cerr << "~TestSingleton" << std::endl;*/ }
 };
 
+/*
+static struct first
+{
+   ~first()
+   { std::cerr << "~first" << std::endl; }
+} fst;
+
+
+static struct singleton_init
+{
+   singleton_init()
+   { TestSingleton::instance(); }
+} singletonInit;
+
+
+static struct second
+{
+   ~second()
+   { std::cerr << "~second" << std::endl; }
+} sec;
+*/
 
 class SingletonTest : public Pt::Unit::TestSuite
 {
