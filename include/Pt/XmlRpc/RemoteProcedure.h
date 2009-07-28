@@ -107,6 +107,7 @@ class RemoteProcedureBase : public IRemoteProcedure
         void onFinished()
         { finished.send(_result); }
 
+        /// TODO
         //SerializationContext _context;
         Result<R> _result;
         Deserializer<R> _r;
@@ -317,17 +318,11 @@ class RemoteProcedure<R, A1, A2,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
-        { 
+        {
+            /// TODO
             //_a1.setContext(this->_context);
             //_a2.setContext(this->_context);
             //this->_r.setContext(this->_context);
-        }
-        
-        ~RemoteProcedure()
-        {
-            //_a1.clear();
-            //_a2.clear();
-            //_r.clear();
         }
 
         void begin(const A1& a1, const A2& a2)
