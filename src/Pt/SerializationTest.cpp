@@ -82,7 +82,7 @@ class IntDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void setContext(Pt::SerializationContext& cx)
+        virtual void setContext(Pt::SerializationContext*)
         { }
 
         virtual void setName(const std::string& name)
@@ -157,7 +157,7 @@ class VectorDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void setContext(Pt::SerializationContext& cx)
+        virtual void setContext(Pt::SerializationContext*)
         { }
 
         virtual void setName(const std::string& name)
