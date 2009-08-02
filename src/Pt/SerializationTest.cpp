@@ -49,7 +49,7 @@ namespace Pt {
 
 inline void convert(int& n, const Pt::String& str)
 {
-	static Pt::StringStream ssc;
+	Pt::StringStream ssc;
 	ssc.clear();
 	ssc.str(str);
 	ssc >> n;
@@ -57,7 +57,7 @@ inline void convert(int& n, const Pt::String& str)
 	//int value = 1234;
 	//memcpy(&n, &value, sizeof(int));
 	
-	//n = atoi( "111");
+	//n = atoi("111");
 }
 
 }
@@ -243,10 +243,6 @@ class SerializationTest : public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<SerializationTest> register_SerializationTest;
 
-// Apple
-// without 900676
-// with SI 905312
-// with DS 906900
 
 void SerializationTest::Benchmark1()
 {
@@ -267,30 +263,25 @@ void SerializationTest::Benchmark1()
         input.clear(); // 105 000
         input.seekg(std::ios::beg);
 
-        //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addValue(name, v);
+        si.addMember().setValue(v);
 
-        //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addValue(name, v);
+        si.addMember().setValue(v);
 
-        //std::cerr << "getline" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addValue(name, v);
+        si.addMember().setValue(v);
 
-        //std::cerr << "getline 4" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addValue(name, v);
+        si.addMember().setValue(v);
 
-        //std::cerr << "getline 5" << std::endl;
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addValue(name, v);
+        si.addMember().setValue(v);
 
         //vec.reserve(5);
         si >>= vec; //55 000
@@ -298,7 +289,6 @@ void SerializationTest::Benchmark1()
         si.clear(); // 130 000
 
         u += vec.size();
-        //std::cerr << "RESULT: " << vec.size() << " " << vec[4] << std::endl;
         vec.clear();
     }
     Pt::Timespan ts = clock.stop();
@@ -380,10 +370,12 @@ void SerializationTest::Benchmark3()
     Pt::SerializationContext context;
     Pt::Deserializer< std::vector<int> > vecdes;
     Pt::IDeserializer* deser = &vecdes;
+    deser->setContext(&context);
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
     int u = 0;
+    int v = 0;
     Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
@@ -394,30 +386,40 @@ void SerializationTest::Benchmark3()
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
         deser = deser->beginMember(name);
-        deser->setValue(num);
+        deser->setInt(v);
         deser = deser->leaveMember();
 
+        std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
+        deser = deser->beginMember(name);
+        deser->setInt(v);
+        deser = deser->leaveMember();
+
+        std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
+        deser = deser->beginMember(name);
+        deser->setInt(v);
+        deser = deser->leaveMember();
+
+        std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
+        deser = deser->beginMember(name);
+        deser->setInt(v);
+        deser = deser->leaveMember();
+        
+        std::getline(input, num, Pt::Char(' '));
+        convert(v, num);
+        deser = deser->beginMember(name);
+        deser->setInt(v);
+        deser = deser->leaveMember();
+/*
         std::getline(input, num, Pt::Char(' '));
         deser = deser->beginMember(name);
         deser->setValue(num);
         deser = deser->leaveMember();
-
-        std::getline(input, num, Pt::Char(' '));
-        deser = deser->beginMember(name);
-        deser->setValue(num);
-        deser = deser->leaveMember();
-
-        std::getline(input, num, Pt::Char(' '));
-        deser = deser->beginMember(name);
-        deser->setValue(num);
-        deser = deser->leaveMember();
-
-        std::getline(input, num, Pt::Char(' '));
-        deser = deser->beginMember(name);
-        deser->setValue(num);
-        deser = deser->leaveMember();
-
+*/
         deser->leave();
 
         u += vec.size();
