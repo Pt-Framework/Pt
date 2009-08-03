@@ -54,8 +54,6 @@ Client::Client()
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
     Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
-
-    _formatter.addAlias("bool", "boolean");
 }
 
 
@@ -77,8 +75,6 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
     Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
-
-    _formatter.addAlias("bool", "boolean");
 }
 
 
@@ -99,8 +95,6 @@ Client::Client(const std::string& server, unsigned short port, const std::string
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
     Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
-
-    _formatter.addAlias("bool", "boolean");
 }
 
 

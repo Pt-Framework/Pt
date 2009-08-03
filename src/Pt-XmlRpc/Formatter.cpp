@@ -46,12 +46,6 @@ Formatter::~Formatter()
 }
 
 
-void Formatter::addAlias(const std::string& type, const std::string& alias)
-{
-    _typemap[type] = alias;
-}
-
-
 void Formatter::attach(Xml::XmlWriter& writer)
 {
     _writer = &writer;
@@ -62,46 +56,40 @@ void Formatter::addValue(const std::string& name, const std::string& type,
                          const Pt::String& value, const std::string& id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
-
-    std::map<std::string, std::string>::iterator it = _typemap.find(type);
-    if( it != _typemap.end() )
-        _writer->writeElement( Pt::String::widen(it->second), value );
-    else
-        _writer->writeElement( Pt::String::widen(type), value );
-
+    _writer->writeElement( Pt::String::widen(type), value );
     _writer->writeEndElement();
 }
 
 
-void Formatter::addBool(const std::string& name, const std::string& type,
-                        bool value, const std::string& id)
+void Formatter::addBool(const std::string& name, bool value, 
+                        const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "boolean", _value, id);
 }
 
 
-void Formatter::addInt(const std::string& name, const std::string& type,
-                            long value, const std::string& id)
+void Formatter::addInt(const std::string& name, long value, 
+                       const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "int", _value, id);
 }
 
 
-void Formatter::addUInt(const std::string& name, const std::string& type,
-                           unsigned long value, const std::string& id)
+void Formatter::addUInt(const std::string& name, unsigned long value, 
+                        const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "int", _value, id);
 }
 
 
-void Formatter::addFloat(const std::string& name, const std::string& type,
-                            double value, const std::string& id)
+void Formatter::addFloat(const std::string& name, double value, 
+                         const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "double", _value, id);
 }
 
 

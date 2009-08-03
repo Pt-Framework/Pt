@@ -126,35 +126,35 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::addBool(const std::string& name, const std::string& type,
-                           bool value, const std::string& id)
+void XmlFormatter::addBool(const std::string& name, bool value, 
+                           const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "bool", _value, id);
 }
 
 
-void XmlFormatter::addInt(const std::string& name, const std::string& type,
-                            long value, const std::string& id)
+void XmlFormatter::addInt(const std::string& name, long value, 
+                          const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "int", _value, id);
 }
 
 
-void XmlFormatter::addUInt(const std::string& name, const std::string& type,
-                           unsigned long value, const std::string& id)
+void XmlFormatter::addUInt(const std::string& name, unsigned long value, 
+                           const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "unsigned", _value, id);
 }
 
 
-void XmlFormatter::addFloat(const std::string& name, const std::string& type,
-                            double value, const std::string& id)
+void XmlFormatter::addFloat(const std::string& name, double value, 
+                            const std::string& id)
 {
 	convert(_value, value);
-	this->addValue(name, type, _value, id);
+	this->addValue(name, "double", _value, id);
 }
 
 

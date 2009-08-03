@@ -53,8 +53,6 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 {
     _writer.useIndent(false);
     _writer.useEndl(false);
-
-    _formatter.addAlias("bool", "boolean");
 }
 
 

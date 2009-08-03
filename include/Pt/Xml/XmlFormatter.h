@@ -113,17 +113,17 @@ class PT_XML_API XmlFormatter : public Formatter
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
-		void addBool(const std::string& name, const std::string& type,
-                    bool value, const std::string& id);
+		void addBool(const std::string& name, bool value, 
+		             const std::string& id);
 
-		void addInt(const std::string& name, const std::string& type,
-                    long value, const std::string& id);
+		void addInt(const std::string& name, long value, 
+		            const std::string& id);
 
-		void addUInt(const std::string& name, const std::string& type,
-                     unsigned long value, const std::string& id);
+		void addUInt(const std::string& name, unsigned long value, 
+		             const std::string& id);
 
-		void addFloat(const std::string& name, const std::string& type,
-                      double value, const std::string& id);
+		void addFloat(const std::string& name, double value, 
+		              const std::string& id);
 
         void addReference(const std::string& name, const std::string& value);
 

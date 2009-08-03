@@ -236,19 +236,19 @@ class ValueNode : public SerializationNode
             switch(_type)
             {
                 case Bool:
-                    formatter.addBool( name, type, _variant.b, id );
+                    formatter.addBool( name, _variant.b, id );
                     break;
                 
                 case Int:
-                    formatter.addInt( name, type, _variant.l, id );
+                    formatter.addInt( name, _variant.l, id );
                     break;
 
                 case UInt:
-                    formatter.addUInt( name, type, _variant.ul, id );
+                    formatter.addUInt( name, _variant.ul, id );
                     break;
 
                 case Float:
-                    formatter.addFloat( name, type, _variant.f, id );
+                    formatter.addFloat( name, _variant.f, id );
                     break;
                 
                 default:
