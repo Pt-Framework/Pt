@@ -120,6 +120,16 @@ void Formatter::beginArray(const std::string&, const std::string& type,
 }
 
 
+void Formatter::beginElement(const std::string& type, const std::string& id)
+{
+}
+
+
+void Formatter::finishElement()
+{
+}
+
+
 void Formatter::finishArray()
 {
     _writer->writeEndElement();
@@ -136,7 +146,8 @@ void Formatter::beginObject(const std::string& name, const std::string& type,
 }
 
 
-void Formatter::beginMember(const std::string& name)
+void Formatter::beginMember(const std::string& name, const std::string& type, 
+                            const std::string& id)
 {
     _writer->writeStartElement( Pt::String::widen("member") );
     _writer->writeElement( Pt::String::widen("name"), Pt::String::widen(name) );

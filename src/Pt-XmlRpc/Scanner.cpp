@@ -94,23 +94,33 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                 if(ee.name() == L"member")
                 { //std::cerr << "OnValueEnd member" << std::endl;
-                    _current = _current->leaveMember();
+                    _current = _current->finish();
+                    if( ! _current )
+                        throw SerializationError("invalid XML-RPC struct");
+                    
                     _state = OnStructBegin;
                 }
                 else if(ee.name() == L"data")
                 { //std::cerr << "OnValueEnd data" << std::endl;
-                    _current = _current->leaveMember();
+                    _current = _current->finish();
+                    if( ! _current )
+                        throw SerializationError("invalid XML-RPC array");
+                    
                     _state = OnDataEnd;
                 }
                 else if(ee.name() == L"param")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->leave();
+                    if( 0 != _current->finish() )
+                        throw SerializationError("invalid XML-RPC parameter");
+                    
                     _state = OnValueEnd;
                     return true;
                 }
                 else if(ee.name() == L"fault")
                 { //std::cerr << "OnValueEnd data other " << ee.name().narrow() << std::endl;
-                    _current->leave();
+                    if( 0 != _current->finish() )
+                        throw SerializationError("invalid XML-RPC fault");
+                    
                     _state = OnValueEnd;
                     return true;
                 }
@@ -124,8 +134,12 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if(se.name() == L"value")
                 { //std::cerr << "OnValueEnd data value" << std::endl;
-                    _current = _current->leaveMember();
-                    _current = _current->beginMember("");
+                    _current = _current->finish();
+                    
+                    if( ! _current )
+                        throw SerializationError("invalid XML-RPC element");
+                    
+                    _current = _current->beginElement();
                     _state = OnValueBegin;
                 }
                 else
@@ -330,7 +344,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // value
             {
                 //std::cerr << _current << std::endl;
-                _current = _current->beginMember("");
+                _current = _current->beginElement();
                 _state = OnValueBegin;
             }
             else if(node.type() == Xml::Node::EndElement) // empty array

@@ -64,7 +64,7 @@ void SerializationInfo::format(Formatter& formatter)
         SerializationInfo::Iterator it;
         for(it = this->begin(); it != this->end(); ++it)
         {
-            formatter.beginMember( it->name() );
+            formatter.beginMember( it->name(), it->typeName(), it->id() );
             it->format(formatter);
             formatter.finishMember();
         }
@@ -78,7 +78,9 @@ void SerializationInfo::format(Formatter& formatter)
         SerializationInfo::Iterator it;
         for(it = this->begin(); it != this->end(); ++it)
         {
+            formatter.beginElement( it->typeName(), it->id()  );
             it->format(formatter);
+            formatter.finishElement();
         }
 
         formatter.finishArray();
@@ -429,7 +431,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 }
 
 
-SerializationInfo& SerializationInfo::addMember()
+SerializationInfo& SerializationInfo::addElement()
 {
     if( this->category() != Sequence)
     	this->setCategory(Sequence);

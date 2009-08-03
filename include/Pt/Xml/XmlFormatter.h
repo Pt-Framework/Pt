@@ -130,12 +130,17 @@ class PT_XML_API XmlFormatter : public Formatter
         void beginArray(const std::string& name, const std::string& type,
                         const std::string& id);
 
+        void beginElement(const std::string& type, const std::string& id);
+
+        void finishElement();
+
         void finishArray();
 
         void beginObject(const std::string& name, const std::string& type,
                          const std::string& id);
 
-        void beginMember(const std::string& name);
+        void beginMember(const std::string& name, const std::string& type,
+                         const std::string& id);
 
         void finishMember();
 

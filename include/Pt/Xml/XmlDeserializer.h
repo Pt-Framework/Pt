@@ -80,7 +80,7 @@ class PT_XML_API XmlDeserializer
             deser.begin(type);
             deser.setContext(_context);
             this->get(&deser);
-            deser.leave();
+            deser.finish();
         }
         
         void finish()

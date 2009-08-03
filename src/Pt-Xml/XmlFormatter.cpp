@@ -187,6 +187,16 @@ void XmlFormatter::beginArray(const std::string& name, const std::string& type,
 }
 
 
+void XmlFormatter::beginElement(const std::string& type, const std::string& id)
+{
+}
+
+
+void XmlFormatter::finishElement()
+{
+}
+
+
 void XmlFormatter::finishArray()
 {
     _writer->writeEndElement();
@@ -215,7 +225,8 @@ void XmlFormatter::beginObject(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::beginMember(const std::string& name)
+void XmlFormatter::beginMember(const std::string& name, const std::string& type,
+                               const std::string& id)
 {
 }
 

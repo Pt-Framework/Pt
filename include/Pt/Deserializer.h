@@ -30,26 +30,17 @@
 
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
-#include <Pt/SerializationContext.h>
 #include <typeinfo>
 
 namespace Pt {
 
+class SerializationContext;
+
 class IDeserializer
 {
     public:
-        IDeserializer()
-        : _parent(0)
-        {}
-
         virtual ~IDeserializer()
         {}
-
-        void setParent(IDeserializer* parent)
-        { _parent = parent; }
-
-        IDeserializer* parent()
-        { return _parent; }
 
 		virtual void setContext( SerializationContext* context ) = 0;
 
@@ -71,14 +62,13 @@ class IDeserializer
 
         virtual IDeserializer* beginMember(const std::string& name) = 0;
 
-        virtual IDeserializer* beginMember() = 0;
+        virtual IDeserializer* beginElement() = 0;
 
-        virtual IDeserializer* leaveMember() = 0;
-
-        virtual void leave() = 0;
-
-    private:
-        IDeserializer* _parent;
+        virtual IDeserializer* finish() = 0;
+        
+    protected:
+        IDeserializer()
+        {}
 };
 
 
@@ -150,33 +140,23 @@ class Deserializer : public IDeserializer
             return this;
         }
 
-		// TODO: beginElement
-        virtual IDeserializer* beginMember()
+        virtual IDeserializer* beginElement()
         {
-            SerializationInfo& child = _current->addMember();
+            SerializationInfo& child = _current->addElement();
             _current = &child;
             return this;
         }
 
-        virtual IDeserializer* leaveMember()
+        virtual IDeserializer* finish()
         {
             if( ! _current->parent() )
             {
                 *_current >>= Pt::load() >>= *_type;
-
-                if( ! this->parent() )
-                    throw std::runtime_error("invalid member");
-
-                return this->parent();
+                return 0;
             }
 
             _current = _current->parent();
             return this;
-        }
-
-        virtual void leave()
-        {
-            *_current >>= Pt::load() >>= *_type;
         }
 
     private:
