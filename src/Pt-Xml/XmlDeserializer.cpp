@@ -93,12 +93,12 @@ void XmlDeserializer::beginDocument(const Node& node)
         {
             _nodeName = static_cast<const StartElement&>(node).name();
             //std::cerr << "-> StartElement " << _nodeName.narrow() << std::endl;
-            _deser->setName( _nodeName.narrow() );
+            _deser->onName( _nodeName.narrow() );
 
             _nodeId = static_cast<const StartElement&>(node).attribute(L"id");
             if( ! _nodeId.empty() )
             {
-                _deser->setId( _nodeId.narrow() );
+                _deser->onId( _nodeId.narrow() );
             }
 
             String refId = static_cast<const StartElement&>(node).attribute(L"ref");
@@ -174,7 +174,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             {
                 _deser = _deser->beginMember(_nodeName.narrow() );
                 _deser->setValue( chars.content() );
-                _deser->setId( _nodeId.narrow() );
+                _deser->onId( _nodeId.narrow() );
                 _nodeId.clear();
                 _deser = _deser->finish();
                 //_current->addValue( _nodeName.narrow(), chars.content() );

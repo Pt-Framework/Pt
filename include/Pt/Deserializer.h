@@ -44,25 +44,34 @@ class IDeserializer
 
 		virtual void setContext( SerializationContext* context ) = 0;
 
-        virtual void setName(const std::string& name) = 0;
+        // TODO could be merged with setValue et al.
+        virtual void onName(const std::string& name) = 0;
 
-        virtual void setId(const std::string& id) = 0;
+        virtual void onId(const std::string& id) = 0;
 
-        virtual void setValue(const Pt::String& value) = 0;
+        virtual void setValue(const Pt::String& value) 
+        { throw SerializationError("unexpected value"); }
 
-        virtual void setBool(bool value) = 0;
+        virtual void setBool(bool value)
+        { throw SerializationError("unexpected bool value"); }
 
-        virtual void setInt(long value) = 0;
+        virtual void setInt(long value)
+        { throw SerializationError("unexpected integer value"); }
 
-        virtual void setUInt(unsigned long value) = 0;
+        virtual void setUInt(unsigned long value)
+        { throw SerializationError("unexpected unsigned value"); }
 
-        virtual void setFloat(double value) = 0;
+        virtual void setFloat(double value)
+        { throw SerializationError("unexpected float value"); }
 
-        virtual void setReference(const std::string& id) = 0;
+        virtual void setReference(const std::string& id) 
+        { throw SerializationError("unexpected reference"); }
 
-        virtual IDeserializer* beginMember(const std::string& name) = 0;
+        virtual IDeserializer* beginMember(const std::string& name)
+        { throw SerializationError("unexpected struct"); }
 
-        virtual IDeserializer* beginElement() = 0;
+        virtual IDeserializer* beginElement()
+        { throw SerializationError("unexpected sequence"); }
 
         virtual IDeserializer* finish() = 0;
         
@@ -93,12 +102,12 @@ class Deserializer : public IDeserializer
 			_si.setContext(context);
         }
 
-        virtual void setName(const std::string& name)
+        virtual void onName(const std::string& name)
         {
             _current->setName(name);
         }
 
-        virtual void setId(const std::string& id)
+        virtual void onId(const std::string& id)
         {
             _current->setId(id);
         }

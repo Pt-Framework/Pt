@@ -76,6 +76,7 @@ class IntDeserializer : public Pt::IDeserializer
     public:
         IntDeserializer()
         : _type(0)
+        , _parent(0)
         {}
 
         void setParent(IDeserializer* parent)
@@ -89,10 +90,10 @@ class IntDeserializer : public Pt::IDeserializer
         virtual void setContext(Pt::SerializationContext*)
         { }
 
-        virtual void setName(const std::string& name)
+        virtual void onName(const std::string& name)
         { }
 
-        virtual void setId(const std::string& id)
+        virtual void onId(const std::string& id)
         { }
 
         virtual void setValue(const Pt::String& value)
@@ -103,28 +104,6 @@ class IntDeserializer : public Pt::IDeserializer
         virtual void setInt(long l)
         {
             *_type = static_cast<int>(l);
-        }
-
-        virtual void setBool(bool value)
-        { }
-
-        virtual void setUInt(unsigned long value)
-        { }
-
-        virtual void setFloat(double value)
-        { }
-
-        virtual void setReference(const std::string& id)
-        { }
-
-        virtual Pt::IDeserializer* beginMember(const std::string& name)
-        {
-            return 0;
-        }
-
-        virtual Pt::IDeserializer* beginElement()
-        {
-            return 0;
         }
 
         virtual Pt::IDeserializer* finish()
@@ -159,28 +138,10 @@ class VectorDeserializer : public Pt::IDeserializer
         virtual void setContext(Pt::SerializationContext*)
         { }
 
-        virtual void setName(const std::string& name)
+        virtual void onName(const std::string& name)
         { }
 
-        virtual void setId(const std::string& id)
-        { }
-
-        virtual void setValue(const Pt::String& value)
-        { }
-
-        virtual void setInt(long)
-        { }
-
-        virtual void setBool(bool value)
-        { }
-
-        virtual void setUInt(unsigned long value)
-        { }
-
-        virtual void setFloat(double value)
-        { }
-
-        virtual void setReference(const std::string& id)
+        virtual void onId(const std::string& id)
         { }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
