@@ -50,15 +50,15 @@ namespace Pt {
 
 inline void convert(int& n, const Pt::String& str)
 {
-	/*Pt::StringStream ssc;
+	Pt::StringStream ssc;
 	ssc.clear();
 	ssc.str(str);
-	ssc >> n;*/
+	ssc >> n;
 
 	//int value = 1234;
 	//memcpy(&n, &value, sizeof(int));
 	
-	n = atoi("111");
+	//n = atoi("111");
 }
 
 }
