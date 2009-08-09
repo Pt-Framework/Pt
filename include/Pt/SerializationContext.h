@@ -78,14 +78,18 @@ class PT_API SerializationContext
 
         virtual void fixup();
 
-    public:
+    public:        
+        void setLimit(size_t n);
+        
+        size_t limit() const;
+
         SerializationInfo* get();
 
         void push(SerializationInfo* si);
 
-        void push(SerializationNode* node);
-
         SerializationNode* get(SerializationInfo::Category category);
+
+        void push(SerializationNode* node);
 
     protected:
         virtual void reset()

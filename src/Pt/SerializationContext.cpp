@@ -35,10 +35,15 @@ namespace Pt {
 class SerializationCache
 {
     public:
+        SerializationCache()
+        : _limit(64)
+        {}
+        
         std::vector<SerializationInfo*> _infos;
         std::vector<SerializationNode*> _scalars;
         std::vector<SerializationNode*> _objects;
         std::vector<SerializationNode*> _refs;
+        size_t _limit;
 };
 
 
@@ -130,6 +135,18 @@ SerializationContext::~SerializationContext()
 }
 
 
+size_t SerializationContext::limit() const
+{
+    return _cache->_limit;
+}
+
+
+void SerializationContext::setLimit(size_t n)
+{
+	_cache->_limit = n;
+}
+
+
 SerializationInfo* SerializationContext::get()
 {
     SerializationInfo* si = 0;
@@ -157,7 +174,14 @@ void SerializationContext::push(SerializationInfo* si)
     if(node)
         this->push(node);
 
-    _cache->_infos.push_back(si);
+    if(_cache->_infos.size() < _cache->_limit)
+    {
+        _cache->_infos.push_back(si);
+    }
+    else
+    {
+        delete si;
+    }
 }
 
 
@@ -217,16 +241,25 @@ void SerializationContext::push(SerializationNode* node)
     switch( node->category() )
     {
         case SerializationInfo::Scalar:
-            _cache->_scalars.push_back(node);
+            if(_cache->_scalars.size() < _cache->_limit)
+                _cache->_scalars.push_back(node);
+            else
+                delete node;
             break;
 
     	case SerializationInfo::Struct: 
     	case SerializationInfo::Sequence:
-            _cache->_objects.push_back(node);
+    	    if(_cache->_objects.size() < _cache->_limit)
+                _cache->_objects.push_back(node);
+            else
+                delete node;
             break;
 
     	case SerializationInfo::Reference:
-            _cache->_refs.push_back(node);
+    	    if(_cache->_refs.size() < _cache->_limit)
+                _cache->_refs.push_back(node);
+            else
+                delete node;
             break;
 
         default:
