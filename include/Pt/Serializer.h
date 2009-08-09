@@ -51,7 +51,8 @@ class ISerializer
         {}
 };
 
-
+// DeserializationHandler
+// SerializationHandler
 template <typename T>
 class Serializer : public ISerializer
 {
