@@ -45,7 +45,6 @@
 #include "Pt/System/Clock.h"
 #include "Pt/StringStream.h"
 
-
 namespace Pt {
 
 inline void convert(int& n, const Pt::String& str)
@@ -63,10 +62,8 @@ inline void convert(int& n, const Pt::String& str)
 
 }
 
-
 #include "Pt/SerializationInfo.h"
 #include "Pt/Deserializer.h"
-
 
 class IntDeserializer : public Pt::IDeserializer
 {
@@ -87,13 +84,10 @@ class IntDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void setContext(Pt::SerializationContext*)
+        virtual void setName(const std::string& name)
         { }
 
-        virtual void onName(const std::string& name)
-        { }
-
-        virtual void onId(const std::string& id)
+        virtual void setId(const std::string& id)
         { }
 
         virtual void setValue(const Pt::String& value)
@@ -135,13 +129,10 @@ class VectorDeserializer : public Pt::IDeserializer
             _type = &type;
         }
 
-        virtual void setContext(Pt::SerializationContext*)
+        virtual void setName(const std::string& name)
         { }
 
-        virtual void onName(const std::string& name)
-        { }
-
-        virtual void onId(const std::string& id)
+        virtual void setId(const std::string& id)
         { }
 
         virtual Pt::IDeserializer* beginMember(const std::string& name)
@@ -324,7 +315,7 @@ void SerializationTest::Benchmark3()
     Pt::SerializationContext context;
     Pt::Deserializer< std::vector<int> > vecdes;
     Pt::IDeserializer* deser = &vecdes;
-    deser->setContext(&context);
+    //deser->setContext(&context);
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
@@ -334,7 +325,7 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        vecdes.begin(vec);
+        vecdes.begin(vec, &context);
 
         input.clear();
         input.seekg(std::ios::beg);

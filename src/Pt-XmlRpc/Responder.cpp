@@ -174,7 +174,7 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
             }
         }
 
-        ISerializer* rh = _proc->endCall(_context);
+        ISerializer* rh = _proc->endCall();
 
         reply.setHeader("Content-Type", "text/xml");
 
@@ -293,7 +293,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
                 if( ! _args )
                 {
                     //std::cerr << "-> begin call" << std::endl;
-                    _args = _proc->beginCall(_context);
+                    _args = _proc->beginCall();
                     if( ! *_args)
                         std::runtime_error("too many arguments");
                 }

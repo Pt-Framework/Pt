@@ -42,12 +42,9 @@ class IDeserializer
         virtual ~IDeserializer()
         {}
 
-		virtual void setContext( SerializationContext* context ) = 0;
+        virtual void setName(const std::string& name) = 0;
 
-        // TODO could be merged with setValue et al.
-        virtual void onName(const std::string& name) = 0;
-
-        virtual void onId(const std::string& id) = 0;
+        virtual void setId(const std::string& id) = 0;
 
         virtual void setValue(const Pt::String& value) 
         { throw SerializationError("unexpected value"); }
@@ -90,24 +87,20 @@ class Deserializer : public IDeserializer
         , _current(&_si)
         {}
 
-        void begin(T& type)
+        void begin(T& type, SerializationContext* context = 0)
         {
             _si.clear();
+            _si.setContext(context);
             _type = &type;
             _current = &_si;
         }
 
-        virtual void setContext(SerializationContext* context) 
-        {
-			_si.setContext(context);
-        }
-
-        virtual void onName(const std::string& name)
+        virtual void setName(const std::string& name)
         {
             _current->setName(name);
         }
 
-        virtual void onId(const std::string& id)
+        virtual void setId(const std::string& id)
         {
             _current->setId(id);
         }

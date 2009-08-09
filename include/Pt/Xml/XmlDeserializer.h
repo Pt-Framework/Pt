@@ -77,8 +77,8 @@ class PT_XML_API XmlDeserializer
         void deserialize(T& type)
         {
             Deserializer<T> deser;
-            deser.begin(type);
-            deser.setContext(_context);
+            deser.begin(type, _context);
+
             this->get(&deser);
             deser.finish();
         }

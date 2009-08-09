@@ -42,11 +42,7 @@ class ISerializer
         virtual ~ISerializer()
         {}
 
-        virtual void setContext( SerializationContext* context ) = 0;
-
         virtual void setName(const std::string& name) = 0;
-
-        virtual void prepare() = 0;
 
         virtual void format(Formatter& formatter) = 0;
 
@@ -61,29 +57,18 @@ class Serializer : public ISerializer
 {
     public:
         Serializer()
-        : _type(0)
         { }
 
-        void begin(const T& type)
+        void begin(const T& type, SerializationContext* context = 0)
         {
             _si.clear();
-            _type = &type;
-        }
-
-        virtual void setContext(SerializationContext* context) 
-        {
             _si.setContext(context);
+            _si <<= Pt::save() <<= type;
         }
 
         virtual void setName(const std::string& name) 
         {
             _si.setName(name);
-        }
-
-        // rename save
-        virtual void prepare() 
-        {
-            _si <<= Pt::save() <<= *_type;
         }
 
         virtual void format(Formatter& formatter)
@@ -93,7 +78,6 @@ class Serializer : public ISerializer
 
     private:
         SerializationInfo _si;
-        const T* _type;
 };
 
 } // namespace Pt
