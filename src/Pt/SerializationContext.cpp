@@ -92,6 +92,11 @@ void SerializationContext::fixup()
 }
 
 
+void SerializationContext::reset()
+{
+}
+
+
 SerializationContext::SerializationContext()
 : _cache(0)
 {

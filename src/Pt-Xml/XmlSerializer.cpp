@@ -31,6 +31,15 @@ namespace Pt {
 
 namespace Xml {
 
+struct XmlSerializationContext::FixupInfo
+{
+	void* address;
+	void (*fixup)(void* fixme,
+				  void* target, const std::type_info& targetType);
+	const std::type_info* type;
+};
+
+
 XmlSerializationContext::XmlSerializationContext()
 {
 }
@@ -62,7 +71,7 @@ void XmlSerializationContext::finishSave()
 void XmlSerializationContext::prepareId(const void* p)
 {
     if(p)
-        _linkmap[p] = std::string();
+        _refmap[p] = std::string();
 }
 
 
@@ -73,7 +82,7 @@ const char* XmlSerializationContext::getId(const void* p)
         return "null";
     }
 
-    if( _linkmap.find(p) == _linkmap.end() )
+    if( _refmap.find(p) == _refmap.end() )
         return 0;
         
     if( _idmap.find(p) == _idmap.end() )
@@ -81,14 +90,14 @@ const char* XmlSerializationContext::getId(const void* p)
         throw SerializationError("missing unlink information");
     }
 
-    _linkmap[p] = convert<std::string>( _idmap[p] );
-    return _linkmap[p].c_str();
+    _refmap[p] = convert<std::string>( _idmap[p] );
+    return _refmap[p].c_str();
 }
 
 
 void XmlSerializationContext::reset()
 {
-    _linkmap.clear();
+    _refmap.clear();
     _idmap.clear();
     
     _targets.clear();
@@ -122,6 +131,7 @@ void XmlSerializationContext::prepareFixup(const std::string& id, void* obj, Fix
     FixupInfo fi;
     fi.address = obj;
     fi.fixup = fh;
+    fi.type = 0;
     _pointers.insert( std::pair<std::string, FixupInfo>(id, fi) );
 }
 

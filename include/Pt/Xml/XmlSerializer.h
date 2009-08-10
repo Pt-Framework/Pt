@@ -33,6 +33,7 @@
 #include <Pt/Serializer.h>
 #include <Pt/SerializationContext.h>
 #include <vector>
+#include <map>
 
 namespace Pt {
 
@@ -45,7 +46,10 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         
         //! @brief Destructor
         ~XmlSerializationContext();
-        
+
+        virtual void reset();
+
+    public:
         virtual bool beginSave(const std::string& name, const void* p);
 
         virtual void finishSave();
@@ -54,12 +58,9 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual const char* getId(const void* p);
 
-    protected:
-        virtual void reset();
-
     private:
         std::map<const void*, unsigned> _idmap;
-        std::map<const void*, std::string> _linkmap;
+        std::map<const void*, std::string> _refmap;
 
     public:
         virtual void beginLoad(const std::string& name, const std::string& id,
@@ -72,14 +73,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         virtual void fixup();
 
     private:
-        struct FixupInfo
-        {
-            void* address;
-            void (*fixup)(void* fixme,
-                          void* target, const std::type_info& targetType);
-            const std::type_info* type;
-        };
-
+        struct FixupInfo;
         std::map<std::string, FixupInfo> _targets;
         std::multimap<std::string, FixupInfo> _pointers;
 };

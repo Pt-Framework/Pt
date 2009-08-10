@@ -52,10 +52,7 @@ class PT_API SerializationContext
 
         virtual ~SerializationContext();
 
-        void clear()
-        {
-            this->reset();
-        }
+        virtual void reset();
 
         virtual bool beginSave(const std::string& name, const void* p);
 
@@ -87,10 +84,6 @@ class PT_API SerializationContext
         SerializationNode* get(SerializationInfo::Category category);
 
         void push(SerializationNode* node);
-
-    protected:
-        virtual void reset()
-        {}
 
     private:
         SerializationCache* _cache;
