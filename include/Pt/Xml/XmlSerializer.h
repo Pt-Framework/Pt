@@ -51,17 +51,15 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         virtual void finishSave();
 
         virtual void prepareId(const void* p);
-        
-        virtual bool hasId(const void* p);
 
-        virtual std::string getId(const void* p);
+        virtual const char* getId(const void* p);
 
     protected:
         virtual void reset();
 
     private:
         std::map<const void*, unsigned> _idmap;
-        std::map<unsigned, const void*> _linkmap;
+        std::map<const void*, std::string> _linkmap;
 
     public:
         virtual void beginLoad(const std::string& name, const std::string& id,

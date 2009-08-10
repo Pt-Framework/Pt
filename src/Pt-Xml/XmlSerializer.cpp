@@ -41,7 +41,7 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-bool XmlSerializationContext::beginSave(const std::string& name, const void* p)
+bool XmlSerializationContext::beginSave(const std::string&, const void* p)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -61,49 +61,28 @@ void XmlSerializationContext::finishSave()
 
 void XmlSerializationContext::prepareId(const void* p)
 {
-    if(p == 0)
-    {
-        return;
-    }
-
-    if( _idmap.find(p) == _idmap.end() )
-    {
-        unsigned id = _idmap.size();
-        _idmap[p] = id;
-    }
-
-    unsigned lid = _idmap[p];
-    _linkmap[lid] = p;
+    if(p)
+        _linkmap[p] = std::string();
 }
 
 
-bool XmlSerializationContext::hasId(const void* p)
-{
-    std::map<unsigned, const void*>::const_iterator it;
-
-    for(it = _linkmap.begin(); it != _linkmap.end(); ++it)
-    {
-        if(it->second == p)
-            return true;
-    }
-
-    return false;
-}
-
-
-std::string XmlSerializationContext::getId(const void* p)
+const char* XmlSerializationContext::getId(const void* p)
 {
     if(p == 0)
     {
         return "null";
     }
 
+    if( _linkmap.find(p) == _linkmap.end() )
+        return 0;
+        
     if( _idmap.find(p) == _idmap.end() )
     {
         throw SerializationError("missing unlink information");
     }
 
-    return convert<std::string>( _idmap[p] );
+    _linkmap[p] = convert<std::string>( _idmap[p] );
+    return _linkmap[p].c_str();
 }
 
 

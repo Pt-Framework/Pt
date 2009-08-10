@@ -64,16 +64,10 @@ void SerializationContext::prepareId(const void* p)
 }
 
 
-bool SerializationContext::hasId(const void* p)
-{
-    return false;
-}
-
-
-std::string SerializationContext::getId(const void* p)
+const char* SerializationContext::getId(const void* p)
 {
     throw SerializationError("missing unlink information");
-    return std::string();
+    return 0;
 }
 
 

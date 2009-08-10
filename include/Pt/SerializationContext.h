@@ -63,10 +63,7 @@ class PT_API SerializationContext
 
         virtual void prepareId(const void* p);
 
-        // TODO: getId returns char* and NULL if no id required
-        virtual bool hasId(const void* p);
-
-        virtual std::string getId(const void* p);
+        virtual const char* getId(const void* p);
 
     public:
         virtual void beginLoad(const std::string& name, const std::string& id,

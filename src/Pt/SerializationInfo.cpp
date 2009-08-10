@@ -35,9 +35,11 @@ namespace Pt {
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    if( _context && _bound &&  _context->hasId(_bound) )
+    if( _context && _bound )
     {
-        this->setId( _context->getId(_bound) );
+        const char* id = _context->getId(_bound);
+        if(id)
+            this->setId( id );
     }
 
     if(this->category() == SerializationInfo::Scalar)
@@ -50,11 +52,13 @@ void SerializationInfo::format(Formatter& formatter)
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
         if( ! _context )
-        {
-            throw SerializationError("context not available ");
-        }
+            throw SerializationError("context not available");
+
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
-        std::string id = _context->getId( refAddr );
+        const char* id = _context->getId( refAddr );
+        if( ! id )
+            throw SerializationError("stray reference");
+        
         formatter.addReference( this->name(), id);
     }
     else if(this->category() == SerializationInfo::Struct)

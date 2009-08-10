@@ -46,6 +46,8 @@ class ISerializer
 
         virtual void format(Formatter& formatter) = 0;
 
+        // bool advance(Formatter& formatter) = 0;
+
     protected:
         ISerializer()
         {}
