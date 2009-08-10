@@ -50,7 +50,7 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-bool XmlSerializationContext::beginSave(const std::string&, const void* p)
+bool XmlSerializationContext::beginSave(const void* p, const std::string&)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -105,8 +105,8 @@ void XmlSerializationContext::reset()
 }
 
 
-void XmlSerializationContext::beginLoad(const std::string& name, const std::string& id,
-                                        void* obj, const std::type_info& fixupInfo)
+void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
+                                        const std::string& name, const std::string& id)
 {
     if( id.empty() )
         return;
@@ -125,7 +125,7 @@ void XmlSerializationContext::finishLoad()
 }
 
 
-void XmlSerializationContext::prepareFixup(const std::string& id, void* obj, FixupHandler fh)
+void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
     FixupInfo fi;

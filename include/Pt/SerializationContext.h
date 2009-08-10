@@ -54,7 +54,7 @@ class PT_API SerializationContext
 
         virtual void reset();
 
-        virtual bool beginSave(const std::string& name, const void* p);
+        virtual bool beginSave(const void* p, const std::string& name);
 
         virtual void finishSave();
 
@@ -63,12 +63,12 @@ class PT_API SerializationContext
         virtual const char* getId(const void* p);
 
     public:
-        virtual void beginLoad(const std::string& name, const std::string& id,
-                               void* obj, const std::type_info& fixupInfo);
+        virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
+                               const std::string& name, const std::string& id);
 
         virtual void finishLoad();
 
-        virtual void prepareFixup(const std::string& id, void* obj, FixupHandler);
+        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
 
         virtual void fixup();
 

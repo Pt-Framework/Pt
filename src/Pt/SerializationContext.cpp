@@ -47,7 +47,7 @@ class SerializationCache
 };
 
 
-bool SerializationContext::beginSave(const std::string& name, const void* p)
+bool SerializationContext::beginSave(const void* p, const std::string& name)
 {
     return true;
 }
@@ -71,8 +71,8 @@ const char* SerializationContext::getId(const void* p)
 }
 
 
-void SerializationContext::beginLoad(const std::string& name, const std::string& id,
-                                    void* obj, const std::type_info& fixupInfo)
+void SerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
+                                     const std::string& name, const std::string& id)
 {
 }
 
@@ -82,7 +82,7 @@ void SerializationContext::finishLoad()
 }
 
 
-void SerializationContext::prepareFixup(const std::string& id, void* obj, FixupHandler)
+void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupHandler)
 {
 }
 

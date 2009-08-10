@@ -50,7 +50,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         virtual void reset();
 
     public:
-        virtual bool beginSave(const std::string& name, const void* p);
+        virtual bool beginSave(const void* p, const std::string& name);
 
         virtual void finishSave();
 
@@ -63,12 +63,12 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         std::map<const void*, std::string> _refmap;
 
     public:
-        virtual void beginLoad(const std::string& name, const std::string& id,
-                               void* obj, const std::type_info& fixupInfo);
+        virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
+                               const std::string& name, const std::string& id);
 
         virtual void finishLoad();
 
-        virtual void prepareFixup(const std::string& id, void* obj, FixupHandler);
+        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
 
         virtual void fixup();
 

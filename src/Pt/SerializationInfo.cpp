@@ -106,7 +106,7 @@ bool SerializationInfo::beginSave(const void* p)
     {
         if(_context)
         {
-            first = _context->beginSave(_name, p);
+            first = _context->beginSave(p, _name);
             if(first)
                 _bound = p;
         }
@@ -132,7 +132,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 
     if(_context && _bound)
     {
-        _context->beginLoad( _name, _id, p, ti);
+        _context->beginLoad(p, ti, _name, _id);
     }
 }
 
@@ -285,7 +285,7 @@ void SerializationInfo::load(void* type, FixupHandler fh) const
 
     if(_context)
     {
-        _context->prepareFixup( refId, type, fh );
+        _context->prepareFixup(type, refId, fh);
     }
 }
 
