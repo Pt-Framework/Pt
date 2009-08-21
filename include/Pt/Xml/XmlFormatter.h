@@ -31,13 +31,12 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
+#include <Pt/Xml/XmlWriter.h>
 #include <memory>
 
 namespace Pt {
 
 namespace Xml {
-
-class XmlWriter;
 
 /** @brief Serialize objects or object data to XML
 
