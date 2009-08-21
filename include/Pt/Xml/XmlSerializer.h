@@ -147,7 +147,14 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         virtual void fixup();
 
     private:
-        struct FixupInfo;
+        struct FixupInfo
+        {
+            void* address;
+            void (*fixup)(void* fixme,
+                          void* target, const std::type_info& targetType);
+            const std::type_info* type;
+        };
+
         std::map<std::string, FixupInfo> _targets;
         std::multimap<std::string, FixupInfo> _pointers;
 };

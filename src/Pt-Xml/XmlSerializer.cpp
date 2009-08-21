@@ -31,15 +31,6 @@ namespace Pt {
 
 namespace Xml {
 
-struct XmlSerializationContext::FixupInfo
-{
-	void* address;
-	void (*fixup)(void* fixme,
-				  void* target, const std::type_info& targetType);
-	const std::type_info* type;
-};
-
-
 XmlSerializationContext::XmlSerializationContext()
 {
 }
