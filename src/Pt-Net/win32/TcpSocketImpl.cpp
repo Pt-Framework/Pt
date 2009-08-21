@@ -46,12 +46,12 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _isConnected(false)
 , _eventFlags(0)
 {
-	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
-	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
+//	memset(&_receiveOverlapped, 0, sizeof(WSAOVERLAPPED));
+//	memset(&_sendOverlapped, 0, sizeof(WSAOVERLAPPED));
 
 	_currentEventHandle		  = _waitEvent;
-	_sendOverlapped.hEvent	  = _currentEventHandle;
-	_receiveOverlapped.hEvent = _currentEventHandle;
+//	_sendOverlapped.hEvent	  = _currentEventHandle;
+//	_receiveOverlapped.hEvent = _currentEventHandle;
 }
 
 TcpSocketImpl::~TcpSocketImpl()
@@ -79,8 +79,8 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
         throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
     }
 
-	_sendOverlapped.hEvent    = _currentEventHandle;
-	_receiveOverlapped.hEvent = _currentEventHandle;
+//	_sendOverlapped.hEvent    = _currentEventHandle;
+//	_receiveOverlapped.hEvent = _currentEventHandle;
 }
 
 void TcpSocketImpl::close()
@@ -147,32 +147,41 @@ void TcpSocketImpl::endConnect()
 	_eventFlags &= ~FD_CONNECT;
 	attachEvent(_currentEventHandle, _eventFlags);
 
-	if( _isConnected )
-		return;
-
-	if(!this->wait(_timeout))
-		 throw System::IOTimeout();
-
 	try
     {
 		int sockerr;
 		socklen_t optlen = sizeof(sockerr);
 		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
 		{
-			close();
-			throw System::SystemError("getsockopt");
+			DWORD error = WSAGetLastError();
+			
+			if( error != WSAEINPROGRESS)
+				throw System::SystemError("getsockopt");
 		}
 		else if(sockerr != 0)
 		{
-			close();
 			throw System::IOError("connect");
 		}	
+
     }
     catch(...)
     {
         close();
         throw;
 	}
+
+
+	if( _isConnected )
+		return;
+
+	if(!this->wait(_timeout))
+	{	
+		close();
+		throw System::IOTimeout();
+	}
+
+	_isConnected = true;
+
 }
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
@@ -231,8 +240,8 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 	_currentEventHandle = h;
 
 	attachEvent(_currentEventHandle, _eventFlags);
-	_receiveOverlapped.hEvent = _currentEventHandle;
-	_sendOverlapped.hEvent = _currentEventHandle;
+//	_receiveOverlapped.hEvent = _currentEventHandle;
+//	_sendOverlapped.hEvent = _currentEventHandle;
 
 	return true;
 }
@@ -289,7 +298,7 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	_eventFlags &= ~FD_READ;
 	attachEvent(_currentEventHandle, _eventFlags);
 
-	int rc = WSARecv(_fd, &_receiveBuffer, 1, &numberOfBytesReceived, &flags, &_receiveOverlapped, NULL);		
+	int rc = WSARecv(_fd, &_receiveBuffer, 1, &numberOfBytesReceived, &flags, NULL, NULL);		
 
 	if (rc != SOCKET_ERROR)
 		return numberOfBytesReceived; 
@@ -299,23 +308,28 @@ size_t TcpSocketImpl::endRead(bool& eof)
 		eof = true;
 		return 0;
 	}
-
-	if (WSA_IO_PENDING != WSAGetLastError())
-		throw System::SystemError( PT_ERROR_MSG("WSARecv failed") );
-
-	if(!wait(_timeout))
-		 throw System::IOTimeout();
-
-    if( WSAGetOverlappedResult(_fd, &_receiveOverlapped, &numberOfBytesReceived, FALSE, &flags) == FALSE)
+	else
 	{
-		if(WSAECONNRESET == WSAGetLastError()) 
-		{
-			eof = true;
-			return 0;
-		}
-
 		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
 	}
+
+
+	//if (WSA_IO_PENDING != WSAGetLastError())
+	//	throw System::SystemError( PT_ERROR_MSG("WSARecv failed") );
+
+	//if(!wait(_timeout))
+	//	 throw System::IOTimeout();
+
+ //   if( WSAGetOverlappedResult(_fd, &_receiveOverlapped, &numberOfBytesReceived, FALSE, &flags) == FALSE)
+	//{
+	//	if(WSAECONNRESET == WSAGetLastError()) 
+	//	{
+	//		eof = true;
+	//		return 0;
+	//	}
+
+	//	throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+	//}
 
 	return numberOfBytesReceived;
 }
@@ -341,24 +355,28 @@ size_t TcpSocketImpl::endWrite()
 	_eventFlags &= ~FD_WRITE;	
 	attachEvent(_currentEventHandle, _eventFlags);
 
-	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, &_sendOverlapped, NULL);	
+	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);	
 
 	if (rc != SOCKET_ERROR)
 		return numberOfBytesSent; 
 
-	if (WSA_IO_PENDING != WSAGetLastError())
-		throw System::SystemError( PT_ERROR_MSG("WSASend failed") );
+	throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
 
-	if(!wait(_timeout))
-		 throw System::IOTimeout();
+	//if (WSA_IO_PENDING != WSAGetLastError())
+	//	throw System::SystemError( PT_ERROR_MSG("WSASend failed") );
+	//else
 
-	if(WSAGetOverlappedResult(_fd, &_sendOverlapped, &numberOfBytesSent, FALSE, &flags) == FALSE)
-	{
-		if( WSAECONNRESET == WSAGetLastError() )
-			throw System::IOError("lost connection to peer");
 
-		throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
-	}
+	//if(!wait(_timeout))
+	//	 throw System::IOTimeout();
+
+	//if(WSAGetOverlappedResult(_fd, &_sendOverlapped, &numberOfBytesSent, FALSE, &flags) == FALSE)
+	//{
+	//	if( WSAECONNRESET == WSAGetLastError() )
+	//		throw System::IOError("lost connection to peer");
+
+	//	throw System::SystemError( PT_ERROR_MSG("endWrite failed") );
+	//}
 
 	return numberOfBytesSent;
 }
@@ -382,7 +400,7 @@ bool TcpSocketImpl::checkEvent()
 
     if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT)        
 	{
-		ev = true;
+		ev = true;		
 		_isConnected = true;
 		_socket.connected.send(_socket);
 	}

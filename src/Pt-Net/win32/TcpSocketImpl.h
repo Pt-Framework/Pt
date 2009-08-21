@@ -62,9 +62,9 @@ class TcpSocketImpl : public System::SelectableImpl
 		TcpSocket&    _socket;
 		WSAEVENT      _waitEvent;
 		std::size_t	  _timeout;
-		WSAOVERLAPPED _connectOverlapped;
+//		WSAOVERLAPPED _connectOverlapped;
 		WSAOVERLAPPED _sendOverlapped;
-		WSAOVERLAPPED _receiveOverlapped;
+//		WSAOVERLAPPED _receiveOverlapped;
 		WSABUF        _sendBuffer;
 		HANDLE		  _currentEventHandle;
 		WSABUF		  _receiveBuffer;
@@ -124,7 +124,8 @@ class TcpSocketImpl : public System::SelectableImpl
         bool wait(std::size_t msecs);
 
         void attach(System::SelectorBase& sb)
-        { }
+		{}
+        
 
         void detach(System::SelectorBase& sb);
 
