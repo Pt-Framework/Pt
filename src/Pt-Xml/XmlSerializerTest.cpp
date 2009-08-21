@@ -34,6 +34,8 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/TextStream.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/DateTime.h"
 #include "Pt/SmartPtr.h"
 
@@ -226,13 +228,27 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
+            std::cerr << "\n--------------------" << std::endl;
+            std::cerr << output.str();
+            std::cerr << "---------------------\n" << std::endl;
+            
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
             std::stringstream input( output.str() );
-            Pt::Xml::XmlDeserializer deser(input);
-            deser.deserialize(date2);
-            deser.finish();
+            Pt::TextIStream tis(input, new Pt::Utf8Codec);
+            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlDeserializer deser(reader);
+            //deser.deserialize(date2);
+            //deser.finish();
 
-            PT_UNIT_ASSERT( date1 == date2);
+            std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
+            std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
+            Pt::Deserializer<Pt::DateTime> des;
+            des.begin(date2);
+            Pt::IDeserializer* d = deser.advance(&des);
+            std::cerr << "D (null): " << d << std::endl;
+            std::cerr << "DATE: " << date2.toIsoString() << std::endl;
+            
+            //PT_UNIT_ASSERT( date1 == date2);
         }
 };
 
