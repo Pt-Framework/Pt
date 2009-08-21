@@ -103,7 +103,7 @@ Client::~Client()
 }
 
 
-void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc)
+void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -114,7 +114,7 @@ void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, ISerializer**
 }
 
 
-void Client::call(IDeserializer& r, IRemoteProcedure& method, ISerializer** argv, unsigned argc)
+void Client::call(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -227,7 +227,7 @@ void Client::onReplyFinished(Http::Client& client)
 }
 
 
-void Client::prepareRequest(const std::string& name, ISerializer** argv, unsigned argc)
+void Client::prepareRequest(const std::string& name, IDecomposer** argv, unsigned argc)
 {
     _request.clear();
     _request.setHeader("Content-Type", "text/xml");

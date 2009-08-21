@@ -220,7 +220,7 @@ void XmlSerializer::detach()
 
 void XmlSerializer::finish()
 {
-    std::vector<ISerializer*>::iterator it;
+    std::vector<IDecomposer*>::iterator it;
 
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {

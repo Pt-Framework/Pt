@@ -36,10 +36,10 @@ namespace Pt {
 class Formatter;
 class SerializationContext;
 
-class ISerializer
+class IDecomposer
 {
     public:
-        virtual ~ISerializer()
+        virtual ~IDecomposer()
         {}
 
         virtual void setName(const std::string& name) = 0;
@@ -49,17 +49,17 @@ class ISerializer
         // bool advance(Formatter& formatter) = 0;
 
     protected:
-        ISerializer()
+        IDecomposer()
         {}
 };
 
 // DeserializationHandler
 // SerializationHandler
 template <typename T>
-class Serializer : public ISerializer
+class Decomposer : public IDecomposer
 {
     public:
-        Serializer()
+        Decomposer()
         { }
 
         void begin(const T& type, SerializationContext* context = 0)

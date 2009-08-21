@@ -174,7 +174,7 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
             }
         }
 
-        ISerializer* rh = _proc->endCall();
+        IDecomposer* rh = _proc->endCall();
 
         reply.setHeader("Content-Type", "text/xml");
 

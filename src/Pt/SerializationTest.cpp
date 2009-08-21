@@ -49,15 +49,15 @@ namespace Pt {
 
 inline void convert(int& n, const Pt::String& str)
 {
-	Pt::StringStream ssc;
-	ssc.clear();
-	ssc.str(str);
-	ssc >> n;
+    /*Pt::StringStream ssc;
+    ssc.clear();
+    ssc.str(str);
+    ssc >> n;*/
 
-	//int value = 1234;
-	//memcpy(&n, &value, sizeof(int));
+    //int value = 1234;
+    //memcpy(&n, &value, sizeof(int));
 	
-	//n = atoi("111");
+    n = atoi("111");
 }
 
 }
@@ -313,8 +313,6 @@ void SerializationTest::Benchmark3()
     Pt::String num(L"111");
 
     Pt::SerializationContext context;
-    Pt::Deserializer< std::vector<int> > vecdes;
-    Pt::IDeserializer* deser = &vecdes;
     //deser->setContext(&context);
 
     Pt::StringStream input(L"111 222 333 444 555");
@@ -325,7 +323,9 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        vecdes.begin(vec, &context);
+        Pt::Deserializer< std::vector<int> >* des = new Pt::Deserializer< std::vector<int> >();
+        des->begin(vec, &context);
+        Pt::IDeserializer* deser = des;
 
         input.clear();
         input.seekg(std::ios::beg);
@@ -366,6 +366,8 @@ void SerializationTest::Benchmark3()
         deser = deser->leaveMember();
 */
         deser->finish();
+        des->begin(vec, &context);
+        delete des;
 
         u += vec.size();
     }
@@ -373,7 +375,7 @@ void SerializationTest::Benchmark3()
 
     std::cerr << "Time3: " << ts.toUSecs() << " " << u << std::endl;
 
-    //std::exit(1);
+    std::exit(1);
 }
 
 

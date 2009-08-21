@@ -153,6 +153,7 @@ class Deserializer : public IDeserializer
         {
             if( ! _current->parent() )
             {
+                //std::cerr << "# loaded " << typeid(T).name() << std::endl;
                 *_current >>= Pt::load() >>= *_type;
                 return 0;
             }

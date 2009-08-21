@@ -90,7 +90,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        SerializationContext _context;
        ServiceProcedure* _proc;
        IDeserializer** _args;
-       ISerializer* _result;
+       IDecomposer* _result;
        Fault _fault;
 };
 

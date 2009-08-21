@@ -39,6 +39,80 @@ namespace Pt {
 
 namespace Xml {
 
+class SerializerBase
+{
+    public:
+        SerializerBase()
+        {}
+
+        virtual ~SerializerBase()
+        {}
+
+        SerializationContext& context()
+        { return *_context; }
+
+        const SerializationContext& context() const
+        { return *_context; }
+
+        void setContext(SerializationContext& context)
+        { _context = &context; }
+
+        Formatter& formatter()
+        { return *_formatter; }
+
+        const Formatter& formatter() const
+        { return *_formatter; }
+
+        void setFormatter(Formatter& formatter)
+        { _formatter = &formatter; }
+
+        /** @brief Serialize an object
+
+            The serializer will serialize the object \a type. The string
+            \a name will be used as the instance name of \a type. The
+            type must be serializable.
+        */
+        template <typename T>
+        void serialize(const T& type, const std::string& name)
+        {
+            Decomposer<T>* dec = new Decomposer<T>;
+            _heap.push_back(dec);
+            _stack.push_back(dec);
+            
+            dec->begin(type, _context);
+            dec->setName(name);
+            this->begin(dec);
+        }
+
+        void finish()
+        {
+            std::vector<IDecomposer*>::iterator it;
+
+            for(it = _stack.begin(); it != _stack.end(); ++it)
+            {
+                (*it)->format(*_formatter);
+            }
+
+            for(it = _heap.begin(); it != _heap.end(); ++it)
+            {
+                delete *it;
+            }
+
+            _heap.clear();
+            _stack.clear();
+        }
+
+    protected:
+        virtual void begin(IDecomposer& dec) = 0;
+
+    private:
+        SerializationContext* _context;
+        Formatter* _formatter;
+        std::vector<IDecomposer*> _stack;
+        std::vector<IDecomposer*> _heap;
+};
+
+
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
@@ -164,7 +238,7 @@ class PT_XML_API XmlSerializer : public XmlFormatter
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            Serializer<T>* serializer = new Serializer<T>;
+            Decomposer<T>* serializer = new Decomposer<T>;
             _heap.push_back(serializer);
             _stack.push_back(serializer);
 
@@ -181,8 +255,8 @@ class PT_XML_API XmlSerializer : public XmlFormatter
         XmlSerializationContext _xmlcontext;
         SerializationContext* _context;
 
-        std::vector<ISerializer*> _stack;
-        std::vector<ISerializer*> _heap;
+        std::vector<IDecomposer*> _stack;
+        std::vector<IDecomposer*> _heap;
 };
 
 } // namespace Xml

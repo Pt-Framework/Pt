@@ -57,7 +57,7 @@ class ServiceProcedure
 
         virtual IDeserializer** beginCall() = 0;
 
-        virtual ISerializer* endCall() = 0;
+        virtual IDecomposer* endCall() = 0;
 };
 
 
@@ -107,7 +107,7 @@ class BasicServiceProcedure : public ServiceProcedure
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5);
             _r.begin(_rv);
@@ -136,7 +136,7 @@ class BasicServiceProcedure : public ServiceProcedure
         Deserializer<V3> _a3;
         Deserializer<V4> _a4;
         Deserializer<V5> _a5;
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 
@@ -185,7 +185,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4);
             _r.begin(_rv);
@@ -212,7 +212,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
         Deserializer<V2> _a2;
         Deserializer<V3> _a3;
         Deserializer<V4> _a4;
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 
@@ -259,7 +259,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2, _v3);
             _r.begin(_rv);
@@ -283,7 +283,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
         Deserializer<V1> _a1;
         Deserializer<V2> _a2;
         Deserializer<V3> _a3;
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 
@@ -330,7 +330,7 @@ class BasicServiceProcedure<R, C, A1, A2,
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2);
             _r.begin(_rv);
@@ -351,7 +351,7 @@ class BasicServiceProcedure<R, C, A1, A2,
         //static SerializationContext _context;
         Deserializer<V1> _a1;
         Deserializer<V2> _a2;
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 /// TODO
@@ -401,7 +401,7 @@ class BasicServiceProcedure<R, C, A1,
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call(_v1);
             _r.begin(_rv);
@@ -417,7 +417,7 @@ class BasicServiceProcedure<R, C, A1,
         V1 _v1;
         IDeserializer* _args[2];
         Deserializer<V1> _a1;
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 
@@ -454,7 +454,7 @@ class BasicServiceProcedure<R, C, Pt::Void,
             return _args;
         }
 
-        ISerializer* endCall()
+        IDecomposer* endCall()
         {
             _rv = _cb->call();
             _r.begin(_rv);
@@ -467,7 +467,7 @@ class BasicServiceProcedure<R, C, Pt::Void,
         Callable<R>* _cb;
         RV _rv;
         IDeserializer* _args[1];
-        Serializer<RV> _r;
+        Decomposer<RV> _r;
 };
 
 

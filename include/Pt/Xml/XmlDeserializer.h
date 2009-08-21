@@ -41,6 +41,78 @@ namespace Xml {
 class XmlReader;
 class Node;
 
+class DeserializerBase
+{
+    public:
+        DeserializerBase()
+        : _current(0)
+        {}
+
+        virtual ~DeserializerBase()
+        {}
+
+        SerializationContext& context()
+        { return *_context; }
+
+        const SerializationContext& context() const
+        { return *_context; }
+
+        void setContext(SerializationContext& context)
+        { _context = &context; }
+
+        /** @brief Deserialize an object
+
+            This method will deserialize the object \a type.
+            The type \a type must be serializable.
+        */
+        template <typename T>
+        void deserialize(T& type)
+        {
+            Deserializer<T> deser;
+            deser.begin(type, _context);
+
+            this->get(&deser);
+            //deser.finish();
+        }
+
+        void deserialize(IDeserializer& deser)
+        {
+            this->get(&deser);
+            deser.finish();
+        }
+
+        template <typename T>
+        void begin(T& type)
+        {
+            Deserializer<T>* deser = new Deserializer<T>;
+            deser->begin(type, _context);
+            _current = deser;
+        }
+
+        bool advance()
+        {
+            if( ! _current )
+                return false;
+
+            _current = this->advance(_current);
+
+            if( ! _current )
+                return false;
+        }
+        
+        virtual IDeserializer* advance(IDeserializer* deser) = 0;
+
+        void finish()
+        { _context->fixup(); }
+        
+    protected:
+        virtual void get(IDeserializer* deser) = 0;
+        
+    private:
+        SerializationContext* _context;
+        IDeserializer*        _current;
+};
+
 /** @brief Deserialize objects or object data to XML
 
     Thic class performs XML deserialization of a single object or
@@ -80,12 +152,14 @@ class PT_XML_API XmlDeserializer
             deser.begin(type, _context);
 
             this->get(&deser);
-            deser.finish();
+            //deser.finish();
         }
         
         void finish()
         { _xmlcontext.fixup(); }
 
+        IDeserializer* advance(IDeserializer* deser);
+        
     protected:
         void get(IDeserializer* deser);
 

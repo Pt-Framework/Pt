@@ -65,6 +65,7 @@ XmlDeserializer::~XmlDeserializer()
 
 void XmlDeserializer::get(IDeserializer* deser)
 {
+    //std::cerr << "-> BEGIN"<< std::endl;
     _deser = deser;
 
     if(_reader->get().type() != Node::StartElement)
@@ -82,6 +83,23 @@ void XmlDeserializer::get(IDeserializer* deser)
             break;
         }
     }
+
+    //std::cerr << "-> DONE"<< std::endl;
+}
+
+
+IDeserializer* XmlDeserializer::advance(IDeserializer* deser)
+{
+    _deser = deser;
+    _processNode = &XmlDeserializer::beginDocument;
+
+    while( _reader->advance() )
+    {
+        const Pt::Xml::Node& node = _reader->get();
+        (this->*_processNode)(node);
+    }
+
+    return _deser;
 }
 
 
@@ -92,7 +110,7 @@ void XmlDeserializer::beginDocument(const Node& node)
         case Node::StartElement:
         {
             _nodeName = static_cast<const StartElement&>(node).name();
-            //std::cerr << "-> StartElement " << _nodeName.narrow() << std::endl;
+            //std::cerr << "-> beginDocument::StartElement " << _nodeName.narrow() << std::endl;
             _deser->setName( _nodeName.narrow() );
 
             _nodeId = static_cast<const StartElement&>(node).attribute(L"id");
@@ -129,12 +147,12 @@ void XmlDeserializer::onRootElement(const Node& node)
                 /// OLD: throw std::logic_error("Invalid element" + PT_SOURCEINFO);
                 _deser->setValue( chars.content() ); /// NEW
                 _processNode = &XmlDeserializer::onContent;
-                //std::cerr << "-> onContent root " << chars.content().narrow() << std::endl;
+                //std::cerr << "-> onRootElement::onContent" << chars.content().narrow() << std::endl;
             }
             else
             {
                 _processNode = &XmlDeserializer::onWhitespace;
-                //std::cerr << "-> onWhitespace"<< std::endl;
+                //std::cerr << "-> onRootElement::onWhitespace"<< std::endl;
             }
 
             break;
@@ -143,7 +161,7 @@ void XmlDeserializer::onRootElement(const Node& node)
         {
             //std::cerr << "-> StartElement" << std::endl;
             _nodeName = static_cast<const StartElement&>(node).name();
-            //std::cerr << "-> StartElement " << _nodeName.narrow() << std::endl;
+            //std::cerr << "-> onRootElement::StartElement " << _nodeName.narrow() << std::endl;
 
             _processNode = &XmlDeserializer::onStartElement;
             break;
@@ -151,7 +169,8 @@ void XmlDeserializer::onRootElement(const Node& node)
         case Node::EndElement:
         {
             _processNode = &XmlDeserializer::onEndElement;
-            //std::cerr << "-> EndElement " << std::endl;
+            //std::cerr << "-> onRootElement::EndElement " << std::endl;
+            _deser = _deser->finish();
             break;
         }
 
@@ -180,7 +199,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 //_current->addValue( _nodeName.narrow(), chars.content() );
 
                 _processNode = &XmlDeserializer::onContent;
-                //std::cerr << "-> onContent 1 " << chars.content().narrow() << std::endl;
+                //std::cerr << "-> onStartElement::onContent 1 " << chars.content().narrow() << std::endl;
             }
             else
             {
@@ -192,7 +211,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 //_current = &added;
 
                 _processNode = &XmlDeserializer::onWhitespace;
-                //std::cerr << "-> onWhitespace" << std::endl;
+                //std::cerr << "-> onStartElement::onWhitespace" << std::endl;
             }
 
             break;
@@ -207,7 +226,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             //_current = &added;
 
             _nodeName = static_cast<const StartElement&>(node).name();
-            //std::cerr << "-> StartElement " << _nodeName.narrow() << std::endl;
+            //std::cerr << "-> onStartElement::StartElement " << _nodeName.narrow() << std::endl;
             //std::cerr << "-> onStartElement"<< std::endl;
             break;
         }
@@ -224,7 +243,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             //_current->addValue( _nodeName.narrow(), Pt::String() );
 
             _processNode = &XmlDeserializer::onEndElement;
-            //std::cerr << "-> onEndElement"<< std::endl;
+            //std::cerr << "-> onStartElement::onEndElement"<< std::endl;
             break;
         }
         default:
@@ -255,7 +274,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
                 //ref.setId( refId.narrow() );
 
                 _processNode = &XmlDeserializer::onContent;
-                //std::cerr << "-> onContent"<< std::endl;
+                //std::cerr << "-> onWhitespace::onContent"<< std::endl;
             }
 
             _nodeId = static_cast<const StartElement&>(node).attribute(L"id");
@@ -267,12 +286,19 @@ void XmlDeserializer::onWhitespace(const Node& node)
         case Node::EndElement:
         {
             if(_deser == 0)
-                throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
+            {
+                 //throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
+                _processNode = &XmlDeserializer::onEndElement;
+                break;
+            }
 
             _nodeName = static_cast<const EndElement&>(node).name();
 
             if(_reader->depth() >= _startDepth)
+            {
+                //std::cerr << "onWhitespace::finish" << std::endl;
                 _deser = _deser->finish();
+            }
 
             _processNode = &XmlDeserializer::onEndElement;
             //std::cerr << "-> onEndElement"<< std::endl;
@@ -291,7 +317,8 @@ void XmlDeserializer::onContent(const Node& node)
         case Node::EndElement:
         {
             _processNode = &XmlDeserializer::onEndElement;
-            //std::cerr << "-> onEndElement"<< std::endl;
+            //std::cerr << "-> onContent::onEndElement"<< std::endl;
+            _deser = _deser->finish();
             break;
         }
         default:
@@ -306,29 +333,36 @@ void XmlDeserializer::onEndElement(const Node& node)
     {
         case Node::Characters:
         {
+            //std::cerr << "-> onEndElement::Characters"<< std::endl;
             _processNode = &XmlDeserializer::onWhitespace;
             break;
         }
         case Node::StartElement:
         {
+            //std::cerr << "-> onEndElement::StartElement"<< std::endl;
             _nodeName = static_cast<const StartElement&>(node).name();
             _processNode = &XmlDeserializer::onStartElement;
             break;
         }
         case Node::EndElement:
         {
+            //std::cerr << "-> onEndElement::EndElement"<< std::endl;
             if(_deser == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
             _nodeName = static_cast<const EndElement&>(node).name();
 
             if(_reader->depth() >= _startDepth)
+            {
+                //std::cerr << "onEndElement::finish" << std::endl;
                 _deser = _deser->finish();
+            }
 
             break;
         }
         case Node::EndDocument:
         {
+            //std::cerr << "-> onEndElement::EndDocument"<< std::endl;
             break;
         }
         default:
