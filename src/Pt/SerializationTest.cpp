@@ -65,18 +65,18 @@ inline void convert(int& n, const Pt::String& str)
 #include "Pt/SerializationInfo.h"
 #include "Pt/Deserializer.h"
 
-class IntDeserializer : public Pt::IDeserializer
+class IntComposer : public Pt::IComposer
 {
     public:
         typedef int value_type;
 
     public:
-        IntDeserializer()
+        IntComposer()
         : _type(0)
         , _parent(0)
         {}
 
-        void setParent(IDeserializer* parent)
+        void setParent(IComposer* parent)
         { _parent = parent; }
 
         void begin(value_type& type)
@@ -100,24 +100,24 @@ class IntDeserializer : public Pt::IDeserializer
             *_type = static_cast<int>(l);
         }
 
-        virtual Pt::IDeserializer* finish()
+        virtual Pt::IComposer* finish()
         {
             return _parent;
         }
 
     private:
         value_type* _type;
-        IDeserializer* _parent;
+        IComposer* _parent;
 };
 
-class VectorDeserializer : public Pt::IDeserializer
+class VectorComposer : public Pt::IComposer
 {
     public:
         typedef std::vector<int> value_type;
         typedef int elem_type;
 
     public:
-        VectorDeserializer()
+        VectorComposer()
         : _type(0)
         {
             _deser.setParent(this);
@@ -135,28 +135,28 @@ class VectorDeserializer : public Pt::IDeserializer
         virtual void setId(const std::string& id)
         { }
 
-        virtual Pt::IDeserializer* beginMember(const std::string& name)
+        virtual Pt::IComposer* beginMember(const std::string& name)
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::IDeserializer* beginElement()
+        virtual Pt::IComposer* beginElement()
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::IDeserializer* finish()
+        virtual Pt::IComposer* finish()
         {
             return 0;
         }
 
     private:
         value_type* _type;
-        IntDeserializer _deser;
+        IntComposer _deser;
 };
 
 
@@ -248,8 +248,8 @@ void SerializationTest::Benchmark2()
     Pt::String num(L"111");
 
     Pt::SerializationContext context;
-    VectorDeserializer vecdes;
-    Pt::IDeserializer* deser = &vecdes;
+    VectorComposer vecdes;
+    Pt::IComposer* deser = &vecdes;
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
@@ -323,9 +323,9 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        Pt::Deserializer< std::vector<int> >* des = new Pt::Deserializer< std::vector<int> >();
+        Pt::Composer< std::vector<int> >* des = new Pt::Composer< std::vector<int> >();
         des->begin(vec, &context);
-        Pt::IDeserializer* deser = des;
+        Pt::IComposer* deser = des;
 
         input.clear();
         input.seekg(std::ios::beg);

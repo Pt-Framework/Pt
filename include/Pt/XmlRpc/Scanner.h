@@ -77,7 +77,7 @@ class PT_XMLRPC_API Scanner
         ~Scanner()
         {}
 
-        void begin(IDeserializer& handler)
+        void begin(IComposer& handler)
         {
             _state = OnParam;
             _current = &handler;
@@ -87,7 +87,7 @@ class PT_XMLRPC_API Scanner
 
     private:
         State _state;
-        IDeserializer* _current;
+        IComposer* _current;
 };
 
 }

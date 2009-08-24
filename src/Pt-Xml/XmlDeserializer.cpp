@@ -63,7 +63,7 @@ XmlDeserializer::~XmlDeserializer()
 }
 
 
-void XmlDeserializer::get(IDeserializer* deser)
+void XmlDeserializer::get(IComposer* deser)
 {
     //std::cerr << "-> BEGIN"<< std::endl;
     _deser = deser;
@@ -88,7 +88,7 @@ void XmlDeserializer::get(IDeserializer* deser)
 }
 
 
-IDeserializer* XmlDeserializer::advance(IDeserializer* deser)
+IComposer* XmlDeserializer::advance(IComposer* deser)
 {
     _deser = deser;
     _processNode = &XmlDeserializer::beginDocument;

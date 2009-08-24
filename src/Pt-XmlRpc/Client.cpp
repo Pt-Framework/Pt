@@ -103,7 +103,7 @@ Client::~Client()
 }
 
 
-void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -114,7 +114,7 @@ void Client::beginCall(IDeserializer& r, IRemoteProcedure& method, IDecomposer**
 }
 
 
-void Client::call(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void Client::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;

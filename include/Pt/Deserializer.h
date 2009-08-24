@@ -36,10 +36,10 @@ namespace Pt {
 
 class SerializationContext;
 
-class IDeserializer
+class IComposer
 {
     public:
-        virtual ~IDeserializer()
+        virtual ~IComposer()
         {}
 
         virtual void setName(const std::string& name) = 0;
@@ -64,25 +64,25 @@ class IDeserializer
         virtual void setReference(const std::string& id) 
         { throw SerializationError("unexpected reference"); }
 
-        virtual IDeserializer* beginMember(const std::string& name)
+        virtual IComposer* beginMember(const std::string& name)
         { throw SerializationError("unexpected struct"); }
 
-        virtual IDeserializer* beginElement()
+        virtual IComposer* beginElement()
         { throw SerializationError("unexpected sequence"); }
 
-        virtual IDeserializer* finish() = 0;
+        virtual IComposer* finish() = 0;
         
     protected:
-        IDeserializer()
+        IComposer()
         {}
 };
 
 
 template <typename T>
-class Deserializer : public IDeserializer
+class Composer : public IComposer
 {
     public:
-        Deserializer()
+        Composer()
         : _type(0)
         , _current(&_si)
         {}
@@ -135,21 +135,21 @@ class Deserializer : public IDeserializer
            _current->setReference(id);
         }
 
-        virtual IDeserializer* beginMember(const std::string& name)
+        virtual IComposer* beginMember(const std::string& name)
         {
             SerializationInfo& child = _current->addMember(name);
             _current = &child;
             return this;
         }
 
-        virtual IDeserializer* beginElement()
+        virtual IComposer* beginElement()
         {
             SerializationInfo& child = _current->addElement();
             _current = &child;
             return this;
         }
 
-        virtual IDeserializer* finish()
+        virtual IComposer* finish()
         {
             if( ! _current->parent() )
             {

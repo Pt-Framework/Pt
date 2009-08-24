@@ -242,9 +242,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
             std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
-            Pt::Deserializer<Pt::DateTime> des;
+            Pt::Composer<Pt::DateTime> des;
             des.begin(date2);
-            Pt::IDeserializer* d = deser.advance(&des);
+            Pt::IComposer* d = deser.advance(&des);
             std::cerr << "D (null): " << d << std::endl;
             std::cerr << "DATE: " << date2.toIsoString() << std::endl;
             

@@ -68,14 +68,14 @@ class DeserializerBase
         template <typename T>
         void deserialize(T& type)
         {
-            Deserializer<T> deser;
+            Composer<T> deser;
             deser.begin(type, _context);
 
             this->get(&deser);
             //deser.finish();
         }
 
-        void deserialize(IDeserializer& deser)
+        void deserialize(IComposer& deser)
         {
             this->get(&deser);
             deser.finish();
@@ -84,7 +84,7 @@ class DeserializerBase
         template <typename T>
         void begin(T& type)
         {
-            Deserializer<T>* deser = new Deserializer<T>;
+            Composer<T>* deser = new Composer<T>;
             deser->begin(type, _context);
             _current = deser;
         }
@@ -100,17 +100,17 @@ class DeserializerBase
                 return false;
         }
         
-        virtual IDeserializer* advance(IDeserializer* deser) = 0;
+        virtual IComposer* advance(IComposer* deser) = 0;
 
         void finish()
         { _context->fixup(); }
         
     protected:
-        virtual void get(IDeserializer* deser) = 0;
+        virtual void get(IComposer* deser) = 0;
         
     private:
         SerializationContext* _context;
-        IDeserializer*        _current;
+        IComposer*        _current;
 };
 
 /** @brief Deserialize objects or object data to XML
@@ -148,7 +148,7 @@ class PT_XML_API XmlDeserializer
         template <typename T>
         void deserialize(T& type)
         {
-            Deserializer<T> deser;
+            Composer<T> deser;
             deser.begin(type, _context);
 
             this->get(&deser);
@@ -158,10 +158,10 @@ class PT_XML_API XmlDeserializer
         void finish()
         { _xmlcontext.fixup(); }
 
-        IDeserializer* advance(IDeserializer* deser);
+        IComposer* advance(IComposer* deser);
         
     protected:
-        void get(IDeserializer* deser);
+        void get(IComposer* deser);
 
         //! @internal
         void beginDocument(const Node& node);
@@ -201,7 +201,7 @@ class PT_XML_API XmlDeserializer
         size_t _startDepth;
 
         //! @internal
-        IDeserializer* _deser;
+        IComposer* _deser;
 
         //! @internal
         String _nodeName;

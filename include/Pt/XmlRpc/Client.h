@@ -90,9 +90,9 @@ class PT_XMLRPC_API Client : public Pt::Connectable
             _request.url(url);
         }
 
-        void beginCall(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
-        void call(IDeserializer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         std::size_t timeout() const  { return _timeout; }
 
@@ -138,7 +138,7 @@ class PT_XMLRPC_API Client : public Pt::Connectable
         IRemoteProcedure* _method;
         SerializationContext _context;
         Fault _fault;
-        Deserializer<Fault> _fh;
+        Composer<Fault> _fh;
         std::size_t _timeout;
 };
 

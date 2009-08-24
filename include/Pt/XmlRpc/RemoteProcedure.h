@@ -110,7 +110,7 @@ class RemoteProcedureBase : public IRemoteProcedure
         /// TODO
         //SerializationContext _context;
         Result<R> _result;
-        Deserializer<R> _r;
+        Composer<R> _r;
 };
 
 
