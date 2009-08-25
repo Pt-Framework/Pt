@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2007 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -76,7 +76,7 @@ void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
     {
         throw Pt::SerializationError("type mismatch during pointer fixup");
     }
-    
+
     Pt::Date* to = static_cast< Pt::Date* >(target);
     fixme.setDate(to);
 }
@@ -85,7 +85,7 @@ void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     si.getMember("date").loadReference(dr);
-    
+
     int n = 0;
     si.getMember("n") >>= n;
     dr.setN(n);
@@ -231,7 +231,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
             std::cerr << "---------------------\n" << std::endl;
-            
+
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
             std::stringstream input( output.str() );
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
@@ -247,7 +247,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::IComposer* d = deser.advance(&des);
             std::cerr << "D (null): " << d << std::endl;
             std::cerr << "DATE: " << date2.toIsoString() << std::endl;
-            
+
             //PT_UNIT_ASSERT( date1 == date2);
         }
 };

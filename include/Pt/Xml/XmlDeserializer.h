@@ -99,15 +99,15 @@ class DeserializerBase
             if( ! _current )
                 return false;
         }
-        
+
         virtual IComposer* advance(IComposer* deser) = 0;
 
         void finish()
         { _context->fixup(); }
-        
+
     protected:
         virtual void get(IComposer* deser) = 0;
-        
+
     private:
         SerializationContext* _context;
         IComposer*        _current;
@@ -154,12 +154,12 @@ class PT_XML_API XmlDeserializer
             this->get(&deser);
             //deser.finish();
         }
-        
+
         void finish()
         { _xmlcontext.fixup(); }
 
         IComposer* advance(IComposer* deser);
-        
+
     protected:
         void get(IComposer* deser);
 
@@ -183,9 +183,9 @@ class PT_XML_API XmlDeserializer
 
     private:
         XmlSerializationContext _xmlcontext;
-        
+
         SerializationContext* _context;
-        
+
         //! @internal
         XmlReader* _reader;
 
