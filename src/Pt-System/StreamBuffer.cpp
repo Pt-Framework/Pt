@@ -43,9 +43,7 @@ StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
   _obufferSize(bufferSize),
   _obuffer(0),
   _oextend(extend),
-  _pbmax(4),
-  _reading(false),
-  _flushing(false)
+  _pbmax(4)
 {
 }
 
@@ -89,7 +87,7 @@ void StreamBufferBase::attach(IODevice& ioDevice)
 
 void StreamBufferBase::beginRead()
 {
-    if(_reading || _ioDevice == 0)
+    if(_ioDevice == 0 || _ioDevice->reading())
         return;
 
     if( ! _ibuffer )
@@ -117,7 +115,6 @@ void StreamBufferBase::beginRead()
         throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
 
     _ioDevice->beginRead( _ibuffer + used, _ibufferSize - used );
-    _reading = true;
 
     _sb->setg( _ibuffer + (_pbmax - putback), // start of get area
                _ibuffer + used, // gptr position
@@ -135,7 +132,6 @@ void StreamBufferBase::onRead(IODevice& dev)
 void StreamBufferBase::endRead()
 {
     size_t readSize = _ioDevice->endRead();
-    _reading = false;
 
     _sb->setg( _sb->eback(), // start of get area
                _sb->gptr(), // gptr position
@@ -145,7 +141,7 @@ void StreamBufferBase::endRead()
 
 void StreamBufferBase::beginWrite()
 {
-    if(_flushing || _ioDevice == 0 )
+    if(_ioDevice == 0 || _ioDevice->writing())
         return;
 
     if( _sb->pptr() )
@@ -154,7 +150,6 @@ void StreamBufferBase::beginWrite()
         if(avail > 0)
         {
             _ioDevice->beginWrite(_obuffer, avail);
-            _flushing = true;
         }
     }
 }
@@ -169,7 +164,6 @@ void StreamBufferBase::onWrite(IODevice& dev)
 
 void StreamBufferBase::endWrite()
 {
-    _flushing = false;
     size_t leftover = 0;
 
     if( _sb->pptr() )
@@ -191,7 +185,7 @@ void StreamBufferBase::endWrite()
 
 void StreamBufferBase::discard()
 {
-    if (_reading || _flushing)
+    if (_ioDevice && (_ioDevice->reading() || _ioDevice->writing()))
         throw IOPending( PT_ERROR_MSG("discard failed - streambuffer is in use") );
 
     _sb->setg(0, 0, 0);
@@ -227,7 +221,7 @@ StreamBufferBase::int_type StreamBufferBase::do_underflow()
     if( ! _ioDevice )
         return traits_type::eof();
 
-    if(_reading)
+    if(_ioDevice->reading())
         this->endRead();
 
     if( _sb->gptr() < _sb->egptr() )
@@ -274,7 +268,7 @@ StreamBufferBase::int_type StreamBufferBase::do_overflow(int_type ch)
         _obuffer = new char[_obufferSize];
         _sb->setp(_obuffer, _obuffer + _obufferSize);
     }
-    else if(_flushing) // beginWrite is unfinished
+    else if(_ioDevice->writing()) // beginWrite is unfinished
     {
         this->endWrite();
     }
@@ -344,12 +338,12 @@ StreamBufferBase::do_seekoff(off_type off, std::ios::seekdir dir, std::ios::open
         return ret;
     }
 
-    if(_flushing)
+    if(_ioDevice->writing())
     {
         this->endWrite();
     }
 
-    if(_reading)
+    if(_ioDevice->reading())
     {
         this->endRead();
     }

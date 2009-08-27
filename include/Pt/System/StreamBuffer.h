@@ -104,8 +104,6 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
         char* _obuffer;
         bool _oextend;
         const size_t _pbmax;
-        bool _reading;
-        bool _flushing;
 };
 
 //! @brief A stream buffer for IODevices with linear buffer area

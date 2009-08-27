@@ -237,6 +237,12 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         virtual IODeviceImpl& ioimpl() = 0;
 
+        bool reading() const
+        { return _rbuf != 0; }
+
+        bool writing() const
+        { return _wbuf != 0; }
+
         char* rbuf() const
         { return _rbuf; }
 
