@@ -32,11 +32,20 @@
 #include <sstream>
 #include <iostream>
 
+#define log_define(a)
+#define log_trace(a)
+#define log_debug(a)
+#define log_info(a)
+#define log_warn(a)
+#define log_error(a)
+
+log_define("Pt.Http.messageheader")
+
 namespace Pt {
 
 namespace Http {
 
-bool MessageHeader::StringLessIgnoreCase::operator()
+int MessageHeader::StringLessIgnoreCase::compare
     (const std::string& s1, const std::string& s2) const
 {
     std::string::const_iterator it1 = s1.begin();
@@ -48,14 +57,23 @@ bool MessageHeader::StringLessIgnoreCase::operator()
             char c1 = std::toupper(*it1);
             char c2 = std::toupper(*it2);
             if (c1 < c2)
-                return true;
+                return -1;
             else if (c2 < c1)
-                return false;
+                return 1;
         }
         ++it1;
         ++it2;
     }
-    return it1 == s1.end() ? (it2 != s2.end()) : (it2 == s2.end());
+
+    return it1 == s1.end() ? (it2 != s2.end()) ? -1 : 0
+                           : (it2 == s2.end()) ? 1 : 0;
+}
+
+bool MessageHeader::chunkedTransferEncoding() const
+{
+    std::string s = getHeader("Transfer-Encoding");
+    log_debug("Transfer-Encoding=" << s << " chunked=" << (StringLessIgnoreCase().compare(s, "chunked") == 0));
+    return StringLessIgnoreCase().compare(s, "chunked") == 0;
 }
 
 std::size_t MessageHeader::contentLength() const
@@ -77,7 +95,7 @@ bool MessageHeader::keepAlive() const
     for (std::string::iterator c = ch.begin(); c != ch.end(); ++c)
         *c = std::tolower(*c);
 
-    return ch == "keep-alive" ||
+    return StringLessIgnoreCase().compare(ch, "keep-alive") == 0 ||
            (ch.empty()
                 && httpVersionMajor() == 1
                 && httpVersionMinor() >= 1);
@@ -106,7 +124,6 @@ std::string MessageHeader::htdateCurrent()
 
     return std::string(buffer);
 }
-
 
 } // namespace Http
 

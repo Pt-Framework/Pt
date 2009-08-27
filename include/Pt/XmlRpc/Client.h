@@ -35,6 +35,7 @@
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Http/Client.h>
+#include <Pt/Http/Request.h>
 #include <Pt/Deserializer.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/Serializer.h>

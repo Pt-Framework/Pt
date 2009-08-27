@@ -34,6 +34,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selector.h"
 #include "Pt/Utf8Codec.h"
+#include "Pt/Http/ReplyHeader.h"
 
 namespace Pt {
 

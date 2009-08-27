@@ -30,66 +30,27 @@
 #define Pt_Http_Client_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Parser.h>
-#include <Pt/Http/Request.h>
-#include <Pt/Http/Reply.h>
-#include <Pt/Net/TcpServer.h>
-#include <Pt/Net/TcpSocket.h>
 #include <Pt/System/Selectable.h>
-#include <Pt/System/IOStream.h>
-#include <Pt/System/Timer.h>
-#include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 #include <Pt/Delegate.h>
+#include <Pt/NonCopyable.h>
 #include <string>
-#include <sstream>
-#include <map>
-#include <cstddef>
 
 namespace Pt {
 
+namespace System {
+    class SelectorBase;
+}
+
 namespace Http {
 
-class PT_HTTP_API Client : public Pt::Connectable
+class ClientImpl;
+class ReplyHeader;
+class Request;
+
+class PT_HTTP_API Client : private NonCopyable
 {
-        friend class ParseEvent;
-
-        class PT_HTTP_API ParseEvent : public HeaderParser::MessageHeaderEvent
-        {
-                ReplyHeader& _replyHeader;
-
-            public:
-                explicit ParseEvent(ReplyHeader& replyHeader)
-                    : HeaderParser::MessageHeaderEvent(replyHeader),
-                      _replyHeader(replyHeader)
-                    { }
-
-                void onHttpReturn(unsigned ret, const std::string& text);
-        };
-
-        ParseEvent _parseEvent;
-        HeaderParser _parser;
-
-        const Request* _request;
-        ReplyHeader _replyHeader;
-
-        std::string _server;
-        unsigned short int _port;
-        Net::TcpSocket _socket;
-        System::IOStream _stream;
-        bool _readHeader;
-        long _contentLength;
-
-        void sendRequest(const Request& request);
-        void processHeaderAvailable(System::StreamBuffer& sb);
-        void processBodyAvailable(System::StreamBuffer& sb);
-
-        void reexecute(const Request& request);
-        void doparse();
-
-    protected:
-        void onConnect(Net::TcpSocket& socket);
-        void onOutput(System::StreamBuffer& sb);
-        void onInput(System::StreamBuffer& sb);
+        ClientImpl* _impl;
 
     public:
         Client();
@@ -97,20 +58,25 @@ class PT_HTTP_API Client : public Pt::Connectable
 
         Client(System::SelectorBase& selector, const std::string& server, unsigned short int port);
 
-        void connect(const std::string& server, unsigned short int port)
-        {
-            _server = server;
-            _port = port;
-        }
+        ~Client();
 
+        // Sets the server and port. No actual network connect is done.
+        void connect(const std::string& server, unsigned short int port);
+
+        // Sends the passed request to the server and parses the headers.
+        // The body must be read with readBody.
+        // This method blocks or times out until the body is parsed.
         const ReplyHeader& execute(const Request& request,
             std::size_t timeout = System::Selectable::WaitInfinite);
 
-        const ReplyHeader& header()
-        { return _replyHeader; }
+        const ReplyHeader& header();
 
+        // Reads the http body after header read with execute.
+        // This method blocks until the body is received.
         void readBody(std::string& s);
 
+        // Reads the http body after header read with execute.
+        // This method blocks until the body is received.
         std::string readBody()
         {
             std::string ret;
@@ -118,30 +84,51 @@ class PT_HTTP_API Client : public Pt::Connectable
             return ret;
         }
 
+        // Combines the execute and readBody methods in one call.
+        // This method blocks until the reply is recieved.
         std::string get(const std::string& url,
             std::size_t timeout = System::Selectable::WaitInfinite);
 
+        // Starts a new request.
+        // This method does not block. To actually process the request, the
+        // event loop must be executed. The state of the request is signaled
+        // with the corresponding signals and delegates.
+        // The delegate "bodyAvailable" must be connected, if a body is
+        // received.
         void beginExecute(const Request& request);
 
         void setSelector(System::SelectorBase& selector);
 
+        // Executes the underlying selector until a event occures or the
+        // specified timeout is reached.
         void wait(std::size_t msecs);
 
-        std::istream& in()   // reply body is received here
-        {
-            return _stream;
-        }
+        // Returns the underlying stream, where the reply may be read from.
+        std::istream& in();
 
-        const std::string& server() const
-        { return _server; }
+        const std::string& server() const;
 
-        unsigned short int port() const
-        { return _port; }
+        unsigned short int port() const;
 
+        // Sets the username and password for all subsequent requests.
+        void auth(const std::string& username, const std::string& password);
+
+        void clearAuth();
+
+        // Signals that the request is sent to the server.
         Signal<Client&> requestSent;
+
+        // Signals that the header is received.
         Signal<Client&> headerReceived;
+
+        // This delegate is called, when data is arrived while reading the
+        // body. The connected functor must return the number of bytes read.
         Pt::Delegate<std::size_t, Client&> bodyAvailable;
+
+        // Signals that the reply is completely processed.
         Signal<Client&> replyFinished;
+
+        // Signals that a exception is catched while processing the request.
         Signal<Client&, const std::exception&> errorOccured;
 };
 
