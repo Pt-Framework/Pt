@@ -77,11 +77,11 @@ class PT_API SerializationContext
 
         size_t limit() const;
 
-        template <typename T>
-        bool decompose(SerializationInfo& si, const T& type)
-        {
-            return false;
-        }
+        // template <typename T>
+        // bool decompose(SerializationInfo& si, const T& type)
+        // {
+        //     return false;
+        // }
 
         SerializationInfo* get();
 

@@ -44,16 +44,16 @@ class Formatter
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 
-        virtual void addBool(const std::string& name, bool value, 
+        virtual void addBool(const std::string& name, bool value,
                              const std::string& id) = 0;
 
-        virtual void addInt(const std::string& name, long value, 
+        virtual void addInt(const std::string& name, long value,
                             const std::string& id) = 0;
 
-        virtual void addUInt(const std::string& name, unsigned long value, 
+        virtual void addUInt(const std::string& name, unsigned long value,
                              const std::string& id) = 0;
 
-        virtual void addFloat(const std::string& name, double value, 
+        virtual void addFloat(const std::string& name, double value,
                               const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;

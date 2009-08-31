@@ -78,7 +78,7 @@ class SerializerBase
             Decomposer<T>* dec = new Decomposer<T>;
             _heap.push_back(dec);
             _stack.push_back(dec);
-            
+
             dec->begin(type, _context);
             dec->setName(name);
             this->begin(dec);
@@ -117,7 +117,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
         XmlSerializationContext();
-        
+
         //! @brief Destructor
         ~XmlSerializationContext();
 
