@@ -140,6 +140,12 @@ void operator>>=(const SerializationInfo& si, Date& date)
 
 void operator<<=(SerializationInfo& si, const Date& date)
 {
+    si.addValue("year",  date.year() );
+    si.addValue("month", date.month() );
+    si.addValue("day",   date.day() );
+    si.setTypeName( "Pt::Date");
+    return;
+
     //if( ! si.context() )
     {
         std::string s;

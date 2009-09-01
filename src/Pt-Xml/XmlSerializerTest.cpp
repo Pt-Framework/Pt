@@ -160,7 +160,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
+            //Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
         }
 
@@ -222,16 +222,18 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
+            Pt::Date date_2(2000, 4,18);
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
+            ser.serialize(date_2, "date2");
             ser.finish();
             ser.flush();
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
             std::cerr << "---------------------\n" << std::endl;
-
+/*
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
             std::stringstream input( output.str() );
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
@@ -247,7 +249,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::IComposer* d = deser.advance(&des);
             std::cerr << "D (null): " << d << std::endl;
             std::cerr << "DATE: " << date2.toIsoString() << std::endl;
-
+*/
             //PT_UNIT_ASSERT( date1 == date2);
         }
 };

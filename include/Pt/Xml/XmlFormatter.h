@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2008 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -112,16 +112,16 @@ class PT_XML_API XmlFormatter : public Formatter
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
-		void addBool(const std::string& name, bool value, 
-		             const std::string& id);
+		void addBool(const std::string& name, bool value,
+                     const std::string& id);
 
-		void addInt(const std::string& name, long value, 
+		void addInt(const std::string& name, long value,
 		            const std::string& id);
 
-		void addUInt(const std::string& name, unsigned long value, 
+		void addUInt(const std::string& name, unsigned long value,
 		             const std::string& id);
 
-		void addFloat(const std::string& name, double value, 
+		void addFloat(const std::string& name, double value,
 		              const std::string& id);
 
         void addReference(const std::string& name, const std::string& value);
@@ -145,14 +145,27 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void finishObject();
 
+        struct Surrogate
+        {
+            virtual ~Surrogate() {}
+            virtual void write(Formatter& f) const = 0;
+        };
+
+        void addSurrogate(const Surrogate& s)
+        {
+            s.write(*this);
+        }
+
     private:
         //! @internal
         XmlWriter* _writer;
 
         //! @internal
         std::auto_ptr<XmlWriter> _deleter;
-        
+
         Pt::String _value;
+
+        std::map<std::string, Surrogate*> _rules;
 };
 
 } // namespace Xml
