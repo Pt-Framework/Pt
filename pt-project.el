@@ -3,7 +3,7 @@
 ;;
 (define-key-after global-map [menu-bar build-menu]
   (cons "Jam" (make-sparse-keymap "Jam"))
-  'tools )
+  'project-menu )
 
 (define-key-after (lookup-key global-map [menu-bar build-menu]) [build1-label]
   '(menu-item "Build Runtime (debug)"

@@ -228,6 +228,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(date1, "date1");
             ser.serialize(date_2, "date2");
             ser.finish();
+
             ser.flush();
 
             std::cerr << "\n--------------------" << std::endl;
