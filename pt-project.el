@@ -2,8 +2,7 @@
 ;; Jam Menu
 ;;
 (define-key-after global-map [menu-bar build-menu]
-  (cons "Jam" (make-sparse-keymap "Jam"))
-  'project-menu )
+  (cons "Jam" (make-sparse-keymap "Jam")) 'project-menu )
 
 (define-key-after (lookup-key global-map [menu-bar build-menu]) [build1-label]
   '(menu-item "Build Runtime (debug)"
@@ -67,4 +66,8 @@
      (lambda () (interactive) (cd project-directory) (compile "./jam.sh -q Pt-XmlRpc-test.unit") )
      nil))
 
+(add-hook 'project-close-hook
+  (lambda ()
+    (define-key global-map [menu-bar build-menu] 'undefined)
+    (message "Closed project.")))
 
