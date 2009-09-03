@@ -288,6 +288,42 @@ class ValueNode : public SerializationNode
         } _variant;
 };
 
+// class SpecialNode : public SerializationNode
+// {
+//     public:
+//         typedef void (*Format)(const Pt::Any&, Formatter& formatter, const std::string& name,
+//                                const std::string& type, const std::string& id);
+
+//         SpecialNode()
+//         : SerializationNode(SerializationInfo::Void)
+//         {}
+
+//         const Any& get() const
+//         { return _value; }
+
+//         void set(const Any& v, Format)
+//         { _value = v; }
+
+//         virtual void setContext(SerializationContext* context)
+//         { }
+
+//         virtual void clear()
+//         { _value.clear(); }
+
+//         virtual void clear(SerializationContext& context)
+//         { _value.clear(); }
+
+//         void format(Formatter& formatter, const std::string& name,
+//                      const std::string& type, const std::string& id)
+//         {
+//             _format(_value, formatter, name, type, id);
+//         }
+
+//     private:
+//         Any _value;
+//         Format _format;
+// };
+
 class ReferenceNode : public SerializationNode
 {
     public:

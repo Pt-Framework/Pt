@@ -42,6 +42,11 @@ void SerializationInfo::format(Formatter& formatter)
             this->setId( id );
     }
 
+    if(_context)
+    {
+        _context->preformat(*this);
+    }
+
     if(this->category() == SerializationInfo::Scalar)
     {
         static_cast<ValueNode*>(_node)->format( formatter,
@@ -58,7 +63,7 @@ void SerializationInfo::format(Formatter& formatter)
         const char* id = _context->getId( refAddr );
         if( ! id )
             throw SerializationError("stray reference");
-        
+
         formatter.addReference( this->name(), id);
     }
     else if(this->category() == SerializationInfo::Struct)

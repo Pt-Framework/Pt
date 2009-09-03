@@ -229,7 +229,7 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
                                const std::string& id)
 {
-    if(type == "Pt::Date")
+    if(type == "Pt::DateXXX")
     {
         _currentSurrogate = &_dateSurrogate;
         _currentSurrogate->begin(name);

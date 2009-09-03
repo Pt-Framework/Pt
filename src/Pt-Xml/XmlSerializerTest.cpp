@@ -219,12 +219,18 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( nullDate.getPointer() == 0);
         }
 
+        static void dateToIso(Pt::SerializationInfo& si)
+        {
+            si.setValue("1999-8-7");
+        }
+
         void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
             Pt::Date date_2(2000, 4,18);
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
+            ser.context().setSurrogate("Pt::Date", &XmlSerializerTest::dateToIso);
             ser.serialize(date1, "date1");
             ser.serialize(date_2, "date2");
             ser.finish();
