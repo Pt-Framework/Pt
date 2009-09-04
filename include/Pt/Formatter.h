@@ -78,6 +78,10 @@ class Formatter
 
         virtual void finishObject() = 0;
 
+        //virtual void setSurrogate(const std::string& typeName, Serialize s);
+
+        virtual void transform(SerializationInfo& si) const {}
+
         // virtual void addAny(const std::string& name, const std::string& type,
         //                     const Any& value, const std::string& id)
         // {
