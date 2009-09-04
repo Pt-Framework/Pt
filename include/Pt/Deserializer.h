@@ -83,9 +83,13 @@ class Composer : public IComposer
 {
     public:
         Composer()
-        : _type(0)
+        : _parent(0)
+        , _type(0)
         , _current(&_si)
         {}
+
+        void setParent(IComposer* parent)
+        { _parent = parent; }
 
         void begin(T& type, SerializationContext* context = 0)
         {
@@ -155,7 +159,7 @@ class Composer : public IComposer
             {
                 //std::cerr << "# loaded " << typeid(T).name() << std::endl;
                 *_current >>= Pt::load() >>= *_type;
-                return 0;
+                return _parent;
             }
 
             _current = _current->parent();
@@ -163,6 +167,7 @@ class Composer : public IComposer
         }
 
     private:
+        IComposer* _parent;
         T* _type;
         Pt::SerializationInfo _si;
         Pt::SerializationInfo* _current;

@@ -49,15 +49,15 @@ namespace Pt {
 
 inline void convert(int& n, const Pt::String& str)
 {
-    Pt::StringStream ssc;
-    ssc.clear();
-    ssc.str(str);
-    ssc >> n;
+    // Pt::StringStream ssc;
+    // ssc.clear();
+    // ssc.str(str);
+    // ssc >> n;
 
     //int value = 1234;
     //memcpy(&n, &value, sizeof(int));
-	
-    //n = atoi("111");
+
+    n = atoi("111");
 }
 
 }
@@ -97,14 +97,17 @@ class IntComposer : public Pt::IComposer
 
         virtual void setInt(long l)
         {
-            *_type = static_cast<int>(l);
+            _si.setValue(l);
+            //*_type = static_cast<int>(l);
         }
 
         virtual Pt::IComposer* finish()
         {
+            _si >>= *_type;
             return _parent;
         }
 
+        Pt::SerializationInfo _si;
     private:
         value_type* _type;
         IComposer* _parent;
@@ -157,6 +160,7 @@ class VectorComposer : public Pt::IComposer
     private:
         value_type* _type;
         IntComposer _deser;
+        //Pt::Composer<int> _deser;
 };
 
 
@@ -375,7 +379,7 @@ void SerializationTest::Benchmark3()
 
     std::cerr << "Time3: " << ts.toUSecs() << " " << u << std::endl;
 
-    //std::exit(1);
+    std::exit(1);
 }
 
 
