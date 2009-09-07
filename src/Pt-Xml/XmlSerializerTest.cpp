@@ -219,9 +219,19 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( nullDate.getPointer() == 0);
         }
 
-        static void dateToIso(Pt::SerializationInfo& si)
+        static void dateToIso(Pt::SerializationInfo& si, Pt::Formatter& formatter)
         {
-            si.setValue("1999-8-7");
+            int year = 0;
+            unsigned month = 0;
+            unsigned day = 0;
+
+            si.getMember("year") >>= year;
+            si.getMember("month") >>= month;
+            si.getMember("day") >>= day;
+
+            Pt::Date date(year, month, day);
+            std::string s = date.toIsoString();
+            formatter.addValue( si.name(), si.typeName(), Pt::String::widen(s), si.id() );
         }
 
         void Object()
@@ -230,17 +240,16 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date_2(2000, 4,18);
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context().setSurrogate("Pt::Date", &XmlSerializerTest::dateToIso);
+            ser.setFormatRule("Pt::Date", &XmlSerializerTest::dateToIso);
             ser.serialize(date1, "date1");
-            ser.serialize(date_2, "date2");
+            //ser.serialize(date_2, "date2");
             ser.finish();
-
             ser.flush();
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
             std::cerr << "---------------------\n" << std::endl;
-/*
+
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
             std::stringstream input( output.str() );
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
@@ -256,7 +265,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::IComposer* d = deser.advance(&des);
             std::cerr << "D (null): " << d << std::endl;
             std::cerr << "DATE: " << date2.toIsoString() << std::endl;
-*/
+            deser.finish();
+
             //PT_UNIT_ASSERT( date1 == date2);
         }
 };

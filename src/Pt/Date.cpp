@@ -143,34 +143,14 @@ void operator<<=(SerializationInfo& si, const Date& date)
     si.addMember("year") <<=  date.year();
     si.addMember("month") <<= date.month();
     si.addMember("day") <<=  date.day();
-    si.setTypeName( "Pt::Date");
+    si.setTypeName("Pt::Date");
     return;
 
-    //if( ! si.context() )
-    {
-        std::string s;
-        convert(s, date);
-        si.setValue(s);
-        si.setTypeName("Pt::Date");
-        return;
-    }
-
-    // TODO: decide whether the type should be flattened or memberwise
-    //       decomposed. possibly reset the typename
-    //       if a handler is set memberwise if not flat
-    //       if customized give memberwise decomposed type
-    //       to Formatter and let it decide what exactly to do
-
-    //const DateHandler* handler = getHandler<PutDate>( si->context() );
-    //if( handler->flatten(date) )
-
-    // if( si.context()->decompose(si, date) )
-    //     return;
-
-    //si.addValue("year",  date.year() );
-    //si.addValue("month", date.month() );
-    //si.addValue("day",   date.day() );
-    //si.setTypeName( "Date");
+    // std::string s;
+    // convert(s, date);
+    // si.setValue(s);
+    // si.setTypeName("Pt::Date");
+    // return;
 }
 
 // Return current local date

@@ -30,7 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/Date.h>
+#include <Pt/SerializationInfo.h>
 #include <string>
 #include <map>
 
@@ -39,6 +39,8 @@ namespace Pt {
 class Formatter
 {
     public:
+        typedef void (*FormatRule)(SerializationInfo& si, Formatter& formatter);
+
         virtual ~Formatter()
         { }
 
@@ -56,6 +58,9 @@ class Formatter
 
         virtual void addFloat(const std::string& name, double value,
                               const std::string& id) = 0;
+
+        virtual void addBytes(const std::string& name, const std::string& type,
+                              const char* value, const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;
 
@@ -78,100 +83,31 @@ class Formatter
 
         virtual void finishObject() = 0;
 
-        //virtual void setSurrogate(const std::string& typeName, Serialize s);
+        void setFormatRule(const std::string& typeName, FormatRule f)
+        {
+            _formatRules[typeName] = f;
+        }
 
-        virtual void transform(SerializationInfo& si) const {}
-
-        // virtual void addAny(const std::string& name, const std::string& type,
-        //                     const Any& value, const std::string& id)
-        // {
-        //     if(type == "Pt::Date")
-        //     {
-        //         const Pt::Date& date = any_cast<const Pt::Date&>(value);
-        //     }
-        // }
+        void addType(SerializationInfo& si)
+        {
+            std::map<std::string, FormatRule>::const_iterator it;
+            it = _formatRules.find( si.typeName() );
+            if( it != _formatRules.end() )
+            {
+                it->second(si, *this);
+            }
+            else
+            {
+                si.format(*this);
+            }
+        }
 
     protected:
         Formatter()
         {}
-};
-
-class FormatterSurrogate
-{
-    public:
-        virtual ~FormatterSurrogate() {}
-
-        void begin(const std::string& name)
-        { _name = name; }
-
-        const std::string& name() const
-        { return _name; }
-
-        virtual void onBool(const std::string& name, bool value) = 0;
-
-        virtual void onInt(const std::string& name, long value) = 0;
-
-        virtual void onUInt(const std::string& name, unsigned long value) = 0;
-
-        virtual void onFloat(const std::string& name, double value) = 0;
-
-        virtual void onValue(const std::string& name, const Pt::String& value) = 0;
-
-        virtual void format(Formatter& f) const = 0;
 
     private:
-        std::string _name;
-};
-
-class DateAsIsoString : public FormatterSurrogate
-{
-    public:
-        virtual void onInt(const std::string& name, long value)
-        {
-            if(name == "year")
-                y = value;
-            else if(name == "month")
-                m = value;
-            else
-                d = value;
-        }
-
-        virtual void onUInt(const std::string& name, unsigned long value)
-        {
-            if(name == "year")
-                y = value;
-            else if(name == "month")
-                m = value;
-            else
-                d = value;
-        }
-
-        virtual void format(Formatter& f) const
-        {
-            char ret[10];
-            unsigned short n = y;
-
-            ret[3] = '0' + n % 10;
-            n /= 10;
-            ret[2] = '0' + n % 10;
-            n /= 10;
-            ret[1] = '0' + n % 10;
-            n /= 10;
-            ret[0] = '0' + n % 10;
-            ret[4] = '-';
-            ret[5] = '0' + m / 10;
-            ret[6] = '0' + m % 10;
-            ret[7] = '-';
-            ret[8] = '0' + d / 10;
-            ret[9] = '0' + d % 10;
-            //Pt::String value = Pt::String::widen( Pt::Date(y, m, d).toIsoString() );
-            //f.addValue(this->name(), "date", value, "");
-        }
-
-    private:
-        long y;
-        long m;
-        long d;
+        std::map<std::string, FormatRule> _formatRules;
 };
 
 } // namespace Pt

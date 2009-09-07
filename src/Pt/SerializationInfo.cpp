@@ -39,12 +39,7 @@ void SerializationInfo::format(Formatter& formatter)
     {
         const char* id = _context->getId(_bound);
         if(id)
-            this->setId( id );
-    }
-
-    if(_context)
-    {
-        _context->preformat(*this);
+            this->setId( id ); // prevents this method being const
     }
 
     if(this->category() == SerializationInfo::Scalar)

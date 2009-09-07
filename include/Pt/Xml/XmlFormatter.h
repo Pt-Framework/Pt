@@ -30,7 +30,6 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <Pt/Date.h>
 #include <Pt/Formatter.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <memory>
@@ -113,9 +112,6 @@ class PT_XML_API XmlFormatter : public Formatter
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
-        void addRaw(const std::string& name, const std::string& type,
-                    const char* value, const std::string& id);
-
         void addBool(const std::string& name, bool value,
                      const std::string& id);
 
@@ -127,6 +123,9 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void addFloat(const std::string& name, double value,
                       const std::string& id);
+
+        void addBytes(const std::string& name, const std::string& type,
+                      const char* value, const std::string& id);
 
         void addReference(const std::string& name, const std::string& value);
 
@@ -149,67 +148,6 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void finishObject();
 
-        struct Surrogate
-        {
-            virtual ~Surrogate() {}
-
-            void begin(const std::string& name)
-            { _name = name; }
-
-            const std::string& name() const
-            { return _name; }
-
-            virtual void onInt(const std::string& name, long value) = 0;
-
-            virtual void onUInt(const std::string& name, unsigned long value) = 0;
-
-            virtual void format(Formatter& f) const = 0;
-
-            std::string _name;
-        };
-
-        struct DateAsIsoString : public Surrogate
-        {
-            virtual void onInt(const std::string& name, long value)
-            {
-                if(name == "year")
-                    y = value;
-                else if(name == "month")
-                    m = value;
-                else
-                    d = value;
-            }
-
-            virtual void onUInt(const std::string& name, unsigned long value)
-            {
-                if(name == "year")
-                    y = value;
-                else if(name == "month")
-                    m = value;
-                else
-                    d = value;
-            }
-
-            virtual void format(Formatter& f) const
-            {
-                Pt::String value = Pt::String::widen( Pt::Date(y, m, d).toIsoString() );
-                f.addValue(this->name(), "date", value, "");
-            }
-
-            long y;
-            long m;
-            long d;
-        };
-
-        void addSurrogate(const Surrogate& s)
-        {
-        }
-
-        Surrogate* getSurrogate(const std::string& typeName)
-        {
-            return 0;
-        }
-
     private:
         //! @internal
         XmlWriter* _writer;
@@ -218,11 +156,6 @@ class PT_XML_API XmlFormatter : public Formatter
         std::auto_ptr<XmlWriter> _deleter;
 
         Pt::String _value;
-
-        DateAsIsoString _dateSurrogate;
-        Surrogate* _currentSurrogate;
-
-        std::map<std::string, Surrogate*> _rules;
 };
 
 } // namespace Xml

@@ -32,9 +32,6 @@
 #include <Pt/SerializationInfo.h>
 #include <typeinfo>
 #include <string>
-#include <vector>
-#include <set>
-#include <map>
 
 namespace Pt {
 
@@ -80,27 +77,6 @@ class PT_API SerializationContext
 
         size_t limit() const;
 
-        void setSurrogate(const std::string& typeName, Serialize s)
-        {
-            _surrogates[typeName] = s;
-        }
-
-        void preformat(SerializationInfo& si) const
-        {
-            std::map<std::string, Serialize>::const_iterator it;
-            it = _surrogates.find( si.typeName() );
-            if( it != _surrogates.end() )
-            {
-                it->second(si);
-            }
-        }
-
-        // template <typename T>
-        // bool decompose(SerializationInfo& si, const T& type)
-        // {
-        //     return false;
-        // }
-
         SerializationInfo* get();
 
         void push(SerializationInfo* si);
@@ -111,7 +87,6 @@ class PT_API SerializationContext
 
     private:
         SerializationCache* _cache;
-        std::map<std::string, Serialize> _surrogates;
 };
 
 } // namespace Pt

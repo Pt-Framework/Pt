@@ -93,6 +93,15 @@ void Formatter::addFloat(const std::string& name, double value,
 }
 
 
+void Formatter::addBytes(const std::string& name, const std::string& type,
+                         const char* value, const std::string& id)
+{
+    _writer->writeStartElement( Pt::String::widen("value") );
+    _writer->writeElement( Pt::String::widen(type), Pt::String::widen(value) );
+    _writer->writeEndElement();
+}
+
+
 void Formatter::addReference(const std::string& name, const std::string& value)
 {
     throw SerializationError("references not supported");

@@ -42,14 +42,12 @@ namespace Xml {
 XmlFormatter::XmlFormatter()
 : _writer(0)
 , _deleter(0)
-, _currentSurrogate(0)
 {
 }
 
 XmlFormatter::XmlFormatter(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
-, _currentSurrogate(0)
 {
     _writer = _deleter.get();
 }
@@ -58,7 +56,6 @@ XmlFormatter::XmlFormatter(std::ostream& os)
 XmlFormatter::XmlFormatter(XmlWriter* writer)
 : _writer(writer)
 , _deleter(0)
-, _currentSurrogate(0)
 {
 }
 
@@ -129,8 +126,8 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::addRaw(const std::string& name, const std::string& type,
-                          const char* value, const std::string& id)
+void XmlFormatter::addBytes(const std::string& name, const std::string& type,
+                            const char* value, const std::string& id)
 {
     convert(_value, std::string(value));
     this->addValue(name, type, _value, id);
@@ -148,12 +145,6 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 void XmlFormatter::addInt(const std::string& name, long value,
                           const std::string& id)
 {
-    if(_currentSurrogate)
-    {
-        _currentSurrogate->onInt(name, value);
-        return;
-    }
-
     convert(_value, value);
 	this->addValue(name, "int", _value, id);
 }
@@ -162,12 +153,6 @@ void XmlFormatter::addInt(const std::string& name, long value,
 void XmlFormatter::addUInt(const std::string& name, unsigned long value,
                            const std::string& id)
 {
-    if(_currentSurrogate)
-    {
-        _currentSurrogate->onUInt(name, value);
-        return;
-    }
-
     convert(_value, value);
 	this->addValue(name, "unsigned", _value, id);
 }
@@ -229,13 +214,6 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
                                const std::string& id)
 {
-    if(type == "Pt::DateXXX")
-    {
-        _currentSurrogate = &_dateSurrogate;
-        _currentSurrogate->begin(name);
-        return;
-    }
-
     if( ! id.empty() )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
@@ -268,12 +246,6 @@ void XmlFormatter::finishMember()
 
 void XmlFormatter::finishObject()
 {
-    if(_currentSurrogate)
-    {
-        _currentSurrogate->format(*this);
-        _currentSurrogate = 0;
-    }
-
     _writer->writeEndElement();
 }
 

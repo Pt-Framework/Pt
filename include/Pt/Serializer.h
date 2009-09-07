@@ -29,11 +29,11 @@
 #define Pt_Serializer_h
 
 #include <Pt/Api.h>
+#include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
 
 namespace Pt {
 
-class Formatter;
 class SerializationContext;
 
 class IDecomposer
@@ -76,7 +76,8 @@ class Decomposer : public IDecomposer
 
         virtual void format(Formatter& formatter)
         {
-            _si.format(formatter);
+            formatter.addType(_si);
+            //_si.format(formatter);
         }
 
     private:

@@ -63,6 +63,9 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 		void addFloat(const std::string& name, double value, 
 		              const std::string& id);
 
+        void addBytes(const std::string& name, const std::string& type,
+                      const char* value, const std::string& id);
+
         void addReference(const std::string& name, const std::string& id);
 
         void beginArray(const std::string& name, const std::string& type,
