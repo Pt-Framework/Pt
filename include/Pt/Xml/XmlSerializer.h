@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Xml {
 
-class SerializerBase
+class SerializerBase : public Formatter
 {
     public:
         SerializerBase()
@@ -56,15 +56,6 @@ class SerializerBase
 
         void setContext(SerializationContext& context)
         { _context = &context; }
-
-        Formatter& formatter()
-        { return *_formatter; }
-
-        const Formatter& formatter() const
-        { return *_formatter; }
-
-        void setFormatter(Formatter& formatter)
-        { _formatter = &formatter; }
 
         /** @brief Serialize an object
 
@@ -90,7 +81,7 @@ class SerializerBase
 
             for(it = _stack.begin(); it != _stack.end(); ++it)
             {
-                (*it)->format(*_formatter);
+                (*it)->format(*this);
             }
 
             for(it = _heap.begin(); it != _heap.end(); ++it)
@@ -107,7 +98,6 @@ class SerializerBase
 
     private:
         SerializationContext* _context;
-        Formatter* _formatter;
         std::vector<IDecomposer*> _stack;
         std::vector<IDecomposer*> _heap;
 };

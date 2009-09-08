@@ -41,14 +41,14 @@ namespace Xml {
 class XmlReader;
 class Node;
 
-class DeserializerBase
+class Deserializer
 {
     public:
-        DeserializerBase()
+        Deserializer()
         : _current(0)
         {}
 
-        virtual ~DeserializerBase()
+        virtual ~Deserializer()
         {}
 
         SerializationContext& context()

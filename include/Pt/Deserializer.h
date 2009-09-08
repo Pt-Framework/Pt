@@ -155,6 +155,19 @@ class Composer : public IComposer
 
         virtual IComposer* finish()
         {
+            // TODO: pass Deserializer to finish() so a format rule
+            //       can be applied to the _current SerializationInfo
+            //       to expand for example a date iso string to date
+            //       member attributes.
+            //
+            //       deser.setFormatRule("Pt::Date", DateFromIsoString);
+            //       composer.finish(deser);
+            //
+            // Composer::finish(Deserializer& deser)
+            // {
+            //     deser.load(*_current);
+            //     ...
+
             if( ! _current->parent() )
             {
                 //std::cerr << "# loaded " << typeid(T).name() << std::endl;
