@@ -72,7 +72,7 @@ namespace Pt
     {
     }
 
-    int ChunkedReader::showmanyc()
+    std::streamsize ChunkedReader::showmanyc()
     {
       log_trace("showmanyc");
 
