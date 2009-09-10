@@ -234,6 +234,16 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             formatter.addValue( si.name(), si.typeName(), Pt::String::widen(s), si.id() );
         }
 
+        static void isoToDate(Pt::SerializationInfo& si, Pt::Deserializer& deser)
+        {
+            std::string isoString;
+            si >>= isoString;
+            Pt::Date date = Pt::Date::fromIsoString(isoString);
+            si.addMember("year") <<= date.year();
+            si.addMember("month") <<= date.month();
+            si.addMember("day") <<= date.day();
+        }
+
         void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
@@ -242,7 +252,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(output);
             ser.setFormatRule("Pt::Date", &XmlSerializerTest::dateToIso);
             ser.serialize(date1, "date1");
-            //ser.serialize(date_2, "date2");
+            ser.serialize(date_2, "date2");
             ser.finish();
             ser.flush();
 
@@ -251,21 +261,24 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::cerr << "---------------------\n" << std::endl;
 
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
+            Pt::Date date3(1800, 7, 6);
             std::stringstream input( output.str() );
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
-            //deser.deserialize(date2);
-            //deser.finish();
-
-            std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
-            std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
-            Pt::Composer<Pt::DateTime> des;
-            des.begin(date2);
-            Pt::IComposer* d = deser.advance(&des);
-            std::cerr << "D (null): " << d << std::endl;
-            std::cerr << "DATE: " << date2.toIsoString() << std::endl;
+            deser.setLoadRule("Pt::Date", &XmlSerializerTest::isoToDate);
+            deser.deserialize(date2);
+            deser.deserialize(date3);
             deser.finish();
+            std::cerr << "Date3: " << date3.toIsoString() << std::endl;
+            // std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
+            // std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
+            // Pt::Composer<Pt::DateTime> des;
+            // des.begin(date2);
+            // Pt::IComposer* d = deser.advance(&des);
+            // std::cerr << "D (null): " << d << std::endl;
+            // std::cerr << "DATE: " << date2.toIsoString() << std::endl;
+            // deser.finish();
 
             //PT_UNIT_ASSERT( date1 == date2);
         }

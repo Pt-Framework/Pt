@@ -41,84 +41,12 @@ namespace Xml {
 class XmlReader;
 class Node;
 
-class Deserializer
-{
-    public:
-        Deserializer()
-        : _current(0)
-        {}
-
-        virtual ~Deserializer()
-        {}
-
-        SerializationContext& context()
-        { return *_context; }
-
-        const SerializationContext& context() const
-        { return *_context; }
-
-        void setContext(SerializationContext& context)
-        { _context = &context; }
-
-        /** @brief Deserialize an object
-
-            This method will deserialize the object \a type.
-            The type \a type must be serializable.
-        */
-        template <typename T>
-        void deserialize(T& type)
-        {
-            Composer<T> deser;
-            deser.begin(type, _context);
-
-            this->get(&deser);
-            //deser.finish();
-        }
-
-        void deserialize(IComposer& deser)
-        {
-            this->get(&deser);
-            deser.finish();
-        }
-
-        template <typename T>
-        void begin(T& type)
-        {
-            Composer<T>* deser = new Composer<T>;
-            deser->begin(type, _context);
-            _current = deser;
-        }
-
-        bool advance()
-        {
-            if( ! _current )
-                return false;
-
-            _current = this->advance(_current);
-
-            if( ! _current )
-                return false;
-        }
-
-        virtual IComposer* advance(IComposer* deser) = 0;
-
-        void finish()
-        { _context->fixup(); }
-
-    protected:
-        virtual void get(IComposer* deser) = 0;
-
-    private:
-        SerializationContext* _context;
-        IComposer*        _current;
-};
-
 /** @brief Deserialize objects or object data to XML
 
     Thic class performs XML deserialization of a single object or
     object data.
 */
-class PT_XML_API XmlDeserializer
+class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
         XmlDeserializer(XmlReader& reader);
@@ -128,14 +56,14 @@ class PT_XML_API XmlDeserializer
         //! @brief Destructor
         ~XmlDeserializer();
 
-        SerializationContext& context()
-        { return *_context; }
+        // SerializationContext& context()
+        // { return *_context; }
 
-        const SerializationContext& context() const
-        { return *_context; }
+        // const SerializationContext& context() const
+        // { return *_context; }
 
-        void setContext(SerializationContext& context)
-        { _context = &context; }
+        // void setContext(SerializationContext& context)
+        // { _context = &context; }
 
         XmlReader& reader()
         { return *_reader; }
@@ -145,18 +73,17 @@ class PT_XML_API XmlDeserializer
             This method will deserialize the object \a type from an
             XML format. The type \a type must be serializable.
         */
-        template <typename T>
-        void deserialize(T& type)
-        {
-            Composer<T> deser;
-            deser.begin(type, _context);
+        // template <typename T>
+        // void deserialize(T& type)
+        // {
+        //     Composer<T> deser;
+        //     deser.begin(type, _context);
 
-            this->get(&deser);
-            //deser.finish();
-        }
+        //     this->get(&deser);
+        // }
 
-        void finish()
-        { _xmlcontext.fixup(); }
+        // void finish()
+        // { _xmlcontext.fixup(); }
 
         IComposer* advance(IComposer* deser);
 
@@ -183,8 +110,6 @@ class PT_XML_API XmlDeserializer
 
     private:
         XmlSerializationContext _xmlcontext;
-
-        SerializationContext* _context;
 
         //! @internal
         XmlReader* _reader;

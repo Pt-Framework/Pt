@@ -39,20 +39,18 @@ namespace Pt {
 namespace Xml {
 
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
-: _context(0)
-, _reader(&reader)
+: _reader(&reader)
 , _deser(0)
 {
-	_context = &_xmlcontext;
+	this->setContext( &_xmlcontext );
 }
 
 XmlDeserializer::XmlDeserializer(std::istream& is)
-: _context(0)
-, _reader( 0 )
+: _reader( 0 )
 , _deleter(new XmlReader(is))
 , _deser(0)
 {
-    _context = &_xmlcontext;
+	this->setContext( &_xmlcontext );
     _reader = _deleter.get();
 }
 
@@ -170,7 +168,7 @@ void XmlDeserializer::onRootElement(const Node& node)
         {
             _processNode = &XmlDeserializer::onEndElement;
             //std::cerr << "-> onRootElement::EndElement " << std::endl;
-            _deser = _deser->finish();
+            _deser = _deser->finish(*this);
             break;
         }
 
@@ -195,7 +193,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 _deser->setValue( chars.content() );
                 _deser->setId( _nodeId.narrow() );
                 _nodeId.clear();
-                _deser = _deser->finish();
+                _deser = _deser->finish(*this);
                 //_current->addValue( _nodeName.narrow(), chars.content() );
 
                 _processNode = &XmlDeserializer::onContent;
@@ -239,7 +237,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             //std::cerr << "added member id " <<  _nodeId.narrow() << std::endl;
             _deser = _deser->beginMember(_nodeName.narrow() );
             _deser->setValue( Pt::String() );
-            _deser = _deser->finish();
+            _deser = _deser->finish(*this);
             //_current->addValue( _nodeName.narrow(), Pt::String() );
 
             _processNode = &XmlDeserializer::onEndElement;
@@ -267,7 +265,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
             {
                 _deser = _deser->beginMember(_nodeName.narrow() );
                 _deser->setReference( refId.narrow() );
-                _deser = _deser->finish();
+                _deser = _deser->finish(*this);
                 //SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
                 //ref.setCategory(SerializationInfo::Reference);
 
@@ -297,7 +295,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
             if(_reader->depth() >= _startDepth)
             {
                 //std::cerr << "onWhitespace::finish" << std::endl;
-                _deser = _deser->finish();
+                _deser = _deser->finish(*this);
             }
 
             _processNode = &XmlDeserializer::onEndElement;
@@ -318,7 +316,7 @@ void XmlDeserializer::onContent(const Node& node)
         {
             _processNode = &XmlDeserializer::onEndElement;
             //std::cerr << "-> onContent::onEndElement"<< std::endl;
-            _deser = _deser->finish();
+            _deser = _deser->finish(*this);
             break;
         }
         default:
@@ -355,7 +353,7 @@ void XmlDeserializer::onEndElement(const Node& node)
             if(_reader->depth() >= _startDepth)
             {
                 //std::cerr << "onEndElement::finish" << std::endl;
-                _deser = _deser->finish();
+                _deser = _deser->finish(*this);
             }
 
             break;
