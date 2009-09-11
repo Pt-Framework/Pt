@@ -58,12 +58,9 @@ namespace Pt {
                };
         @endcode
      */
-    template <typename T/*, typename A = std::allocator<T>*/ >
+    template <typename T>
     class Singleton : public NonCopyable
     {
-        public:
-            //typedef A Allocator;
-
         public:
             /** @brief Returns the instance of the singleton type
 
@@ -78,22 +75,6 @@ namespace Pt {
                 if( !_instance )
                 {
                     _instance = create();
-                    /*try
-                    {
-                        _instance = (T*)_allocator.allocate(1);
-                        new (_instance) T();
-                        std::atexit(&atExit);
-                    }
-                    catch( const std::bad_alloc& e )
-                    {
-                        throw e;
-                    }
-                    catch(...)
-                    {
-                        _allocator.deallocate(_instance, 1);
-                        _instance = 0;
-                        throw;
-                    }*/
                 }
 
                 return *_instance;
@@ -117,32 +98,13 @@ namespace Pt {
             }
 
         private:
-            /** @brief Exit handler
-
-                This function is set as the program exit handler and will destroy
-                the singleton instance at the end of the program using the
-                specified allocator.
-             */
-            /*static void atExit()
-            {
-                _instance->~T();
-                _allocator.deallocate(_instance, 1);
-                _instance = 0;
-            }*/
-
-        private:
-            //static A  _allocator;
             static T* _instance;
     };
 
-
-    //template <typename T, typename A>
-    //A Singleton<T, A>::_allocator;
-
-
-    template <typename T/*, typename A*/>
-    T* Singleton<T/*, A*/>::_instance = 0;
+    template <typename T>
+    T* Singleton<T>::_instance = 0;
 
 } // namespace Pt
 
 #endif
+
