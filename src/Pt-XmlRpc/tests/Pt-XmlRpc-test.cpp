@@ -188,7 +188,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             try
             {
-                bool v = result.get();
+                //bool v =
+                    result.get();
                 PT_UNIT_ASSERT(false);
             }
             catch (const Pt::XmlRpc::Fault& e)
