@@ -128,8 +128,39 @@ void convert(Date& date, const std::string& s)
 
 void operator>>=(const SerializationInfo& si, Date& date)
 {
+    int year = 0;
+    unsigned month = 0, day = 0;
+
+    if(si.category() != SerializationInfo::Scalar)
+    {
+        si.getMember("year") >>=  year;
+        si.getMember("month") >>= month;
+        si.getMember("day") >>=  day;
+        date.set(year, month, day);
+        return;
+    }
+
+    SerializationContext* context = si.context();
+    if( context )
+    {
+        const SerializationSurrogate* surrogate = context->surrogate("date");
+        if( surrogate )
+        {
+            SerializationInfo si2(context);
+            surrogate->deserialize(si2, si);
+            si2.getMember("year") >>=  year;
+            si2.getMember("month") >>= month;
+            si2.getMember("day") >>=  day;
+            date.set(year, month, day);
+            return;
+        }
+    }
+
     std::string s = si.toValue<std::string>();
     convert(date, s);
+
+    // std::string s = si.toValue<std::string>();
+    // convert(date, s);
 
     //int year = si.getValue<int>("year");
     //unsigned month = si.getValue<unsigned>("month");

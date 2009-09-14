@@ -39,13 +39,27 @@ class SerializationInfo;
 class SerializationNode;
 class SerializationCache;
 
+class SerializationSurrogate
+{
+    public:
+        SerializationSurrogate()
+        {}
+
+        virtual void serialize(SerializationInfo& to, const SerializationInfo& from) const;
+
+        virtual void deserialize(SerializationInfo& to, const SerializationInfo& from) const;
+
+    protected:
+        virtual ~SerializationSurrogate()
+        {}
+};
+
+
 class PT_API SerializationContext
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
-
-        typedef void (*Serialize)(SerializationInfo& si);
 
     public:
         SerializationContext();
@@ -84,6 +98,9 @@ class PT_API SerializationContext
         SerializationNode* get(SerializationInfo::Category category);
 
         void push(SerializationNode* node);
+
+        const SerializationSurrogate* surrogate(const char* name) const
+        { return 0; }
 
     private:
         SerializationCache* _cache;
