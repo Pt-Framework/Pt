@@ -175,7 +175,16 @@ void operator<<=(SerializationInfo& si, const Date& date)
     si.addMember("month") <<= date.month();
     si.addMember("day") <<=  date.day();
     si.setTypeName("Pt::Date");
-    return;
+
+    SerializationContext* context = si.context();
+    if( context )
+    {
+        const SerializationSurrogate* surrogate = context->surrogate("date");
+        if( surrogate )
+        {
+            surrogate->serialize(si);
+        }
+    }
 
     // std::string s;
     // convert(s, date);

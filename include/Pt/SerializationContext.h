@@ -42,15 +42,15 @@ class SerializationCache;
 class SerializationSurrogate
 {
     public:
-        SerializationSurrogate()
+        virtual ~SerializationSurrogate()
         {}
 
-        virtual void serialize(SerializationInfo& to, const SerializationInfo& from) const;
+        virtual void serialize(SerializationInfo& it) const = 0;
 
-        virtual void deserialize(SerializationInfo& to, const SerializationInfo& from) const;
+        virtual void deserialize(SerializationInfo& to, const SerializationInfo& from) const = 0;
 
     protected:
-        virtual ~SerializationSurrogate()
+        SerializationSurrogate()
         {}
 };
 
@@ -99,8 +99,9 @@ class PT_API SerializationContext
 
         void push(SerializationNode* node);
 
-        const SerializationSurrogate* surrogate(const char* name) const
-        { return 0; }
+        void addSurrogate(const char* name, SerializationSurrogate* surrogate);
+
+        const SerializationSurrogate* surrogate(const char* name) const;
 
     private:
         SerializationCache* _cache;

@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2008 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,6 +29,7 @@
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationError.h"
 #include <Pt/SerializationInfo.h>
+#include <map>
 
 namespace Pt {
 
@@ -38,7 +39,8 @@ class SerializationCache
         SerializationCache()
         : _limit(64)
         {}
-        
+
+        std::map<std::string, SerializationSurrogate*> _surrogates;
         std::vector<SerializationInfo*> _infos;
         std::vector<SerializationNode*> _scalars;
         std::vector<SerializationNode*> _objects;
@@ -111,25 +113,31 @@ SerializationContext::~SerializationContext()
     {
         delete *it;
     }
-    
+
     it = _cache->_objects.begin();
     for(; it != _cache->_objects.end(); ++it)
     {
         delete *it;
     }
-    
+
     it = _cache->_refs.begin();
     for(; it != _cache->_refs.end(); ++it)
     {
         delete *it;
     }
-    
+
     std::vector<SerializationInfo*>::iterator iter;
     for(iter = _cache->_infos.begin(); iter != _cache->_infos.end(); ++iter)
     {
         delete *iter;
     }
-    
+
+    std::map<std::string, SerializationSurrogate*>::iterator sit;
+    for(sit = _cache->_surrogates.begin(); sit != _cache->_surrogates.end(); ++sit)
+    {
+        delete sit->second;
+    }
+
     delete _cache;
 }
 
@@ -197,7 +205,7 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 				node = new ValueNode();
 				break;
 		    }
-				
+
             node = _cache->_scalars.back();
 			_cache->_scalars.pop_back();
 			break;
@@ -209,7 +217,7 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 				node = new ReferenceNode();
 				break;
 		    }
-				
+
             node = _cache->_refs.back();
 			_cache->_refs.pop_back();
             break;
@@ -226,11 +234,11 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 			_cache->_objects.pop_back();
 			node->setCategory(category);
             break;
-            
+
         default:
             node = 0;
     }
-    
+
     return node;
 }
 
@@ -246,7 +254,7 @@ void SerializationContext::push(SerializationNode* node)
                 delete node;
             break;
 
-    	case SerializationInfo::Struct: 
+    	case SerializationInfo::Struct:
     	case SerializationInfo::Sequence:
     	    if(_cache->_objects.size() < _cache->_limit)
                 _cache->_objects.push_back(node);
@@ -264,6 +272,23 @@ void SerializationContext::push(SerializationNode* node)
         default:
             delete node;
     }
+}
+
+
+void SerializationContext::addSurrogate(const char* name, SerializationSurrogate* surrogate)
+{
+    _cache->_surrogates.insert( std::make_pair(name, surrogate) );
+}
+
+
+const SerializationSurrogate* SerializationContext::surrogate(const char* name) const
+{
+    std::map<std::string, SerializationSurrogate*>::const_iterator it;
+    it = _cache->_surrogates.find(name);
+    if( it == _cache->_surrogates.end() )
+        return 0;
+
+    return it->second;
 }
 
 } // namespace Pt

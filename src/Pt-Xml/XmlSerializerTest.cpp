@@ -244,13 +244,45 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             si.addMember("day") <<= date.day();
         }
 
+        class IsoDateSurrogate : public Pt::SerializationSurrogate
+        {
+            public:
+                // NOTE rename method to pack
+                virtual void serialize(Pt::SerializationInfo& si) const
+                {
+                    int year = 0;
+                    unsigned month = 0, day = 0;
+
+                    si.getMember("year") >>= year;
+                    si.getMember("month") >>= month;
+                    si.getMember("day") >>= day;
+
+                    Pt::Date date(year, month, day);
+                    std::string s = date.toIsoString();
+                    si.setValue(s);
+                    si.setTypeName("date");
+                }
+
+                // NOTE rename method to unpack
+                virtual void deserialize(Pt::SerializationInfo& to, const Pt::SerializationInfo& from) const
+                {
+                    std::string isoString;
+                    from >>= isoString;
+                    Pt::Date date = Pt::Date::fromIsoString(isoString);
+                    to.addMember("year") <<= date.year();
+                    to.addMember("month") <<= date.month();
+                    to.addMember("day") <<= date.day();
+                }
+        };
+
         void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
             Pt::Date date_2(2000, 4,18);
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.setFormatRule("Pt::Date", &XmlSerializerTest::dateToIso);
+            //ser.setFormatRule("Pt::Date", &XmlSerializerTest::dateToIso);
+            ser.context().addSurrogate("date", new IsoDateSurrogate);
             ser.serialize(date1, "date1");
             ser.serialize(date_2, "date2");
             ser.finish();
@@ -266,7 +298,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
-            deser.setLoadRule("Pt::Date", &XmlSerializerTest::isoToDate);
+            //deser.setLoadRule("Pt::Date", &XmlSerializerTest::isoToDate);
+            deser.context().addSurrogate("date", new IsoDateSurrogate);
             deser.deserialize(date2);
             deser.deserialize(date3);
             deser.finish();
