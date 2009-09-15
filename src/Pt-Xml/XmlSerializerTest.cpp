@@ -247,8 +247,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         class IsoDateSurrogate : public Pt::SerializationSurrogate
         {
             public:
-                // NOTE rename method to pack
-                virtual void serialize(Pt::SerializationInfo& si) const
+                virtual void pack(Pt::SerializationInfo& si) const
                 {
                     int year = 0;
                     unsigned month = 0, day = 0;
@@ -263,8 +262,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
                     si.setTypeName("date");
                 }
 
-                // NOTE rename method to unpack
-                virtual void deserialize(Pt::SerializationInfo& to, const Pt::SerializationInfo& from) const
+                virtual void unpack(Pt::SerializationInfo& to, const Pt::SerializationInfo& from) const
                 {
                     std::string isoString;
                     from >>= isoString;

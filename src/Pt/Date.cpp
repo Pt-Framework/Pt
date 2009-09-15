@@ -131,41 +131,29 @@ void operator>>=(const SerializationInfo& si, Date& date)
     int year = 0;
     unsigned month = 0, day = 0;
 
-    if(si.category() != SerializationInfo::Scalar)
+    const SerializationSurrogate* surrogate = si.surrogate("date");
+    if( surrogate )
     {
-        si.getMember("year") >>=  year;
-        si.getMember("month") >>= month;
-        si.getMember("day") >>=  day;
+        SerializationInfo si2( si.context() );
+        surrogate->unpack(si2, si);
+        si2.getMember("year") >>=  year;
+        si2.getMember("month") >>= month;
+        si2.getMember("day") >>=  day;
         date.set(year, month, day);
         return;
     }
 
-    SerializationContext* context = si.context();
-    if( context )
+    if(si.category() == SerializationInfo::Scalar)
     {
-        const SerializationSurrogate* surrogate = context->surrogate("date");
-        if( surrogate )
-        {
-            SerializationInfo si2(context);
-            surrogate->deserialize(si2, si);
-            si2.getMember("year") >>=  year;
-            si2.getMember("month") >>= month;
-            si2.getMember("day") >>=  day;
-            date.set(year, month, day);
-            return;
-        }
+        std::string s = si.toValue<std::string>();
+        convert(date, s);
+        return;
     }
 
-    std::string s = si.toValue<std::string>();
-    convert(date, s);
-
-    // std::string s = si.toValue<std::string>();
-    // convert(date, s);
-
-    //int year = si.getValue<int>("year");
-    //unsigned month = si.getValue<unsigned>("month");
-    //unsigned day = si.getValue<unsigned>("day");
-    //date.set(year, month, day);
+    si.getMember("year") >>=  year;
+    si.getMember("month") >>= month;
+    si.getMember("day") >>=  day;
+    date.set(year, month, day);
 }
 
 
@@ -176,75 +164,12 @@ void operator<<=(SerializationInfo& si, const Date& date)
     si.addMember("day") <<=  date.day();
     si.setTypeName("Pt::Date");
 
-    SerializationContext* context = si.context();
-    if( context )
+    const SerializationSurrogate* surrogate = si.surrogate("date");
+    if( surrogate )
     {
-        const SerializationSurrogate* surrogate = context->surrogate("date");
-        if( surrogate )
-        {
-            surrogate->serialize(si);
-        }
+        surrogate->pack(si);
     }
-
-    // std::string s;
-    // convert(s, date);
-    // si.setValue(s);
-    // si.setTypeName("Pt::Date");
-    // return;
 }
-
-// Return current local date
-/*
-Date Date::localDate(){
-  Date date;
-#ifndef WIN32
-#if defined(FOX_THREAD_SAFE) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
-  struct tm result,*t;
-  time_t ltime;
-  time(&ltime);
-  t=localtime_r(&ltime,&result);
-#else
-  struct tm *t;
-  time_t ltime;
-  time(&ltime);
-  t=localtime(&ltime);
-#endif
-  greg2jul(date._julian,t->tm_year+1900,t->tm_mon+1,t->tm_mday);
-#else
-  SYSTEMTIME t;
-  GetLocalTime(&t);
-  greg2jul(date._julian,t.wYear,t.wMonth,t.wDay);
-#endif
-  return date;
-  }
-*/
-
-
-// Return current universal (UTC) date
-/*
-Date Date::universalDate(){
-  Date date;
-#ifndef WIN32
-#if defined(FOX_THREAD_SAFE) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
-  struct tm result,*t;
-  time_t ltime;
-  time(&ltime);
-  t=gmtime_r(&ltime,&result);
-#else
-  struct tm *t;
-  time_t ltime;
-  time(&ltime);
-  t=gmtime(&ltime);
-#endif
-  greg2jul(date._julian,t->tm_year+1900,t->tm_mon+1,t->tm_mday);
-#else
-  SYSTEMTIME t;
-  GetSystemTime(&t);
-  greg2jul(date._julian,t.wYear,t.wMonth,t.wDay);
-#endif
-  return date;
-  }
-*/
 
 }
 

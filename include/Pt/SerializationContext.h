@@ -45,9 +45,9 @@ class SerializationSurrogate
         virtual ~SerializationSurrogate()
         {}
 
-        virtual void serialize(SerializationInfo& it) const = 0;
+        virtual void pack(SerializationInfo& it) const = 0;
 
-        virtual void deserialize(SerializationInfo& to, const SerializationInfo& from) const = 0;
+        virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
 
     protected:
         SerializationSurrogate()
@@ -101,7 +101,7 @@ class PT_API SerializationContext
 
         void addSurrogate(const char* name, SerializationSurrogate* surrogate);
 
-        const SerializationSurrogate* surrogate(const char* name) const;
+        SerializationSurrogate* surrogate(const char* name) const;
 
     private:
         SerializationCache* _cache;

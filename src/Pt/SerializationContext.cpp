@@ -281,7 +281,7 @@ void SerializationContext::addSurrogate(const char* name, SerializationSurrogate
 }
 
 
-const SerializationSurrogate* SerializationContext::surrogate(const char* name) const
+SerializationSurrogate* SerializationContext::surrogate(const char* name) const
 {
     std::map<std::string, SerializationSurrogate*>::const_iterator it;
     it = _cache->_surrogates.find(name);

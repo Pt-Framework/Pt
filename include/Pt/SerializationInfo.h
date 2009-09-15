@@ -42,6 +42,7 @@
 
 namespace Pt {
 
+class SerializationSurrogate;
 class SerializationContext;
 class Formatter;
 class SerializationNode;
@@ -150,6 +151,8 @@ class PT_API SerializationInfo
         { return _context; }
 
         void setContext(SerializationContext* context);
+
+        SerializationSurrogate* surrogate(const char* name) const;
 
         SerializationInfo* parent()
         { return _parent; }

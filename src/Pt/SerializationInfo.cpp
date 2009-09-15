@@ -93,8 +93,17 @@ void SerializationInfo::format(Formatter& formatter)
 
 
 SerializationInfo::Category SerializationInfo::category() const
-{ 
-    return _node ? _node->category() : Void; 
+{
+    return _node ? _node->category() : Void;
+}
+
+
+SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
+{
+    if(_context)
+        return _context->surrogate(name);
+
+    return 0;
 }
 
 
