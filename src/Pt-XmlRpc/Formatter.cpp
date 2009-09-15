@@ -94,9 +94,10 @@ void Formatter::addFloat(const std::string& name, double value,
 
 
 void Formatter::addBytes(const std::string& name, const std::string& type,
-                         const char* value, const std::string& id)
+                         const char* data, size_t length, const std::string& id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
+    std::string value(data, length);
     _writer->writeElement( Pt::String::widen(type), Pt::String::widen(value) );
     _writer->writeEndElement();
 }

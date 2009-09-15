@@ -64,7 +64,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 		              const std::string& id);
 
         void addBytes(const std::string& name, const std::string& type,
-                      const char* value, const std::string& id);
+                      const char* value, size_t length, const std::string& id);
 
         void addReference(const std::string& name, const std::string& id);
 

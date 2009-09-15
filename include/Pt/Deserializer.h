@@ -73,107 +73,9 @@ class IComposer
 
         virtual IComposer* finish() = 0;
 
-        virtual IComposer* finish(Deserializer& deser) = 0;
-
     protected:
         IComposer()
         {}
-};
-
-
-template <typename T>
-class Composer;
-
-
-class Deserializer
-{
-    public:
-        typedef void (*LoadRule)(SerializationInfo& si, Deserializer& deser);
-
-    public:
-        Deserializer()
-        : _context(0)
-        , _current(0)
-        {}
-
-        virtual ~Deserializer()
-        {}
-
-        SerializationContext& context()
-        { return *_context; }
-
-        const SerializationContext& context() const
-        { return *_context; }
-
-        void setContext(SerializationContext* context)
-        { _context = context; }
-
-        /** @brief Deserialize an object
-
-            This method will deserialize the object \a type.
-            The type \a type must be serializable.
-        */
-        template <typename T>
-        void deserialize(T& type)
-        {
-            Composer<T> deser;
-            deser.begin(type, _context);
-
-            this->get(&deser);
-        }
-
-        void deserialize(IComposer& deser)
-        {
-            this->get(&deser);
-            deser.finish(*this);
-        }
-
-        template <typename T>
-        void begin(T& type)
-        {
-            Composer<T>* deser = new Composer<T>;
-            deser->begin(type, _context);
-            _current = deser;
-        }
-
-        bool advance()
-        {
-            if( ! _current )
-                return false;
-
-            _current = this->advance(_current);
-
-            if( ! _current )
-                return false;
-        }
-
-        virtual IComposer* advance(IComposer* deser) = 0;
-
-        void finish()
-        { _context->fixup(); }
-
-        void setLoadRule(const std::string& typeName, LoadRule rule)
-        {
-            _loadRules[typeName] = rule;
-        }
-
-        void load(SerializationInfo& si)
-        {
-            std::map<std::string, LoadRule>::const_iterator it;
-            it = _loadRules.find( si.typeName() );
-            if( it != _loadRules.end() )
-            {
-                it->second(si, *this);
-            }
-        }
-
-    protected:
-        virtual void get(IComposer* deser) = 0;
-
-    private:
-        std::map<std::string, LoadRule> _loadRules;
-        SerializationContext* _context;
-        IComposer* _current;
 };
 
 
@@ -264,33 +166,84 @@ class Composer : public IComposer
             return this;
         }
 
-        virtual IComposer* finish(Deserializer& deser)
-        {
-            // TODO: pass Deserializer to finish() so a format rule
-            //       can be applied to the _current SerializationInfo
-            //       to expand for example a date iso string to date
-            //       member attributes.
-            //
-            //       deser.setLoadRule("Pt::Date", DateFromIsoString);
-            //       composer.finish(deser);
-
-            deser.load(*_current);
-
-            if( ! _current->parent() )
-            {
-                *_current >>= Pt::load() >>= *_type;
-                return _parent;
-            }
-
-            _current = _current->parent();
-            return this;
-        }
-
     private:
         IComposer* _parent;
         T* _type;
         Pt::SerializationInfo _si;
         Pt::SerializationInfo* _current;
+};
+
+
+class Deserializer
+{
+    public:
+        Deserializer()
+        : _context(0)
+        , _current(0)
+        {}
+
+        virtual ~Deserializer()
+        {}
+
+        SerializationContext& context()
+        { return *_context; }
+
+        const SerializationContext& context() const
+        { return *_context; }
+
+        void setContext(SerializationContext* context)
+        { _context = context; }
+
+        /** @brief Deserialize an object
+
+            This method will deserialize the object \a type.
+            The type \a type must be serializable.
+        */
+        template <typename T>
+        void deserialize(T& type)
+        {
+            Composer<T> deser;
+            deser.begin(type, _context);
+
+            this->get(&deser);
+        }
+
+        void deserialize(IComposer& deser)
+        {
+            this->get(&deser);
+            deser.finish();
+        }
+
+        template <typename T>
+        void begin(T& type)
+        {
+            Composer<T>* deser = new Composer<T>;
+            deser->begin(type, _context);
+            _current = deser;
+        }
+
+        bool advance()
+        {
+            if( ! _current )
+                return false;
+
+            _current = this->advance(_current);
+
+            if( ! _current )
+                return false;
+        }
+
+        virtual IComposer* advance(IComposer* deser) = 0;
+
+        void finish()
+        { _context->fixup(); }
+
+    protected:
+        virtual void get(IComposer* deser) = 0;
+
+    private:
+        SerializationContext* _context;
+        IComposer* _current;
 };
 
 } // namespace Pt

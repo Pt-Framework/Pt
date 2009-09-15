@@ -30,17 +30,13 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/SerializationInfo.h>
 #include <string>
-#include <map>
 
 namespace Pt {
 
 class Formatter
 {
     public:
-        typedef void (*FormatRule)(SerializationInfo& si, Formatter& formatter);
-
         virtual ~Formatter()
         { }
 
@@ -60,7 +56,7 @@ class Formatter
                               const std::string& id) = 0;
 
         virtual void addBytes(const std::string& name, const std::string& type,
-                              const char* value, const std::string& id) = 0;
+                              const char* value, size_t length, const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;
 
@@ -83,31 +79,9 @@ class Formatter
 
         virtual void finishObject() = 0;
 
-        void setFormatRule(const std::string& typeName, FormatRule f)
-        {
-            _formatRules[typeName] = f;
-        }
-
-        void addType(SerializationInfo& si)
-        {
-            std::map<std::string, FormatRule>::const_iterator it;
-            it = _formatRules.find( si.typeName() );
-            if( it != _formatRules.end() )
-            {
-                it->second(si, *this);
-            }
-            else
-            {
-                si.format(*this);
-            }
-        }
-
     protected:
         Formatter()
         {}
-
-    private:
-        std::map<std::string, FormatRule> _formatRules;
 };
 
 } // namespace Pt

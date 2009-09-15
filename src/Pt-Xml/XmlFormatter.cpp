@@ -127,9 +127,9 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 
 
 void XmlFormatter::addBytes(const std::string& name, const std::string& type,
-                            const char* value, const std::string& id)
+                            const char* value, size_t length, const std::string& id)
 {
-    convert(_value, std::string(value));
+    convert(_value, std::string(value, length));
     this->addValue(name, type, _value, id);
 }
 

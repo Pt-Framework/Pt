@@ -76,8 +76,7 @@ class Decomposer : public IDecomposer
 
         virtual void format(Formatter& formatter)
         {
-            formatter.addType(_si);
-            //_si.format(formatter);
+            _si.format(formatter);
         }
 
     private:
