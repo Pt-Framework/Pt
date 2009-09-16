@@ -88,6 +88,7 @@ class PT_XMLRPC_API Scanner
     private:
         State _state;
         IComposer* _current;
+        String _value;
 };
 
 }

@@ -30,6 +30,8 @@
 #define Pt_Http_Service_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/System/Mutex.h>
+#include <vector>
 
 namespace Pt {
 
@@ -44,6 +46,43 @@ class Service
         virtual ~Service() { }
         virtual Responder* createResponder(const Request&) = 0;
         virtual void releaseResponder(Responder*) = 0;
+};
+
+template <typename ResponderType>
+class CachedService : public Service
+{
+        System::Mutex mutex;
+        typedef std::vector<Responder*> Responders;
+        Responders responders;
+
+    public:
+        ~CachedService()
+        {
+            for (typename Responders::iterator it = responders.begin(); it != responders.end(); ++it)
+                delete *it;
+        }
+
+        Responder* createResponder(const Request& request)
+        {
+            System::MutexLock lock(mutex);
+            if (responders.empty())
+            {
+                return new ResponderType(*this);
+            }
+            else
+            {
+                Responder* ret = responders.back();
+                responders.pop_back();
+                return ret;
+            }
+        }
+
+        void releaseResponder(Responder* resp)
+        {
+            System::MutexLock lock(mutex);
+            responders.push_back(resp);
+        }
+
 };
 
 } // namespace Http
