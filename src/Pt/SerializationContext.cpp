@@ -277,6 +277,15 @@ void SerializationContext::push(SerializationNode* node)
 
 void SerializationContext::addSurrogate(const char* name, SerializationSurrogate* surrogate)
 {
+    std::map<std::string, SerializationSurrogate*>::iterator it;
+    it = _cache->_surrogates.find(name);
+    if( it != _cache->_surrogates.end() )
+    {
+        delete it->second;
+        it->second = surrogate;
+        return;
+    }
+
     _cache->_surrogates.insert( std::make_pair(name, surrogate) );
 }
 
