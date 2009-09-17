@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2009 by Dr. Marc Boris Duerner
  * Copyright (C) 2009 by Tommi Meakitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,7 +43,7 @@ namespace
 {
     void throwInvalidXmlRpcParameter()
     {
-        throwInvalidXmlRpcParameter();
+        throwInvalidXmlRpcParameter(); // TODO: missing space or intended endless loop?
     }
 }
 
@@ -77,7 +77,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-               
+
                 log_debug("-> found type " << se.name().narrow());
                 if(se.name() == L"struct")
                 {
@@ -135,7 +135,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     _current = _current->finish();
                     if( ! _current )
                         throw SerializationError("invalid XML-RPC struct");
-                    
+
                     _state = OnStructBegin;
                 }
                 else if(ee.name() == L"data")
@@ -144,7 +144,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     _current = _current->finish();
                     if( ! _current )
                         throw SerializationError("invalid XML-RPC array");
-                    
+
                     _state = OnDataEnd;
                 }
                 else if(ee.name() == L"param")
@@ -152,7 +152,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
                         throwInvalidXmlRpcParameter();
-                    
+
                     _state = OnValueEnd;
                     return true;
                 }
@@ -161,7 +161,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
                         throw SerializationError("invalid XML-RPC fault");
-                    
+
                     _state = OnValueEnd;
                     return true;
                 }
@@ -177,10 +177,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 {
                     log_debug("OnValueEnd data value");
                     _current = _current->finish();
-                    
+
                     if( ! _current )
                         throw SerializationError("invalid XML-RPC element");
-                    
+
                     _current = _current->beginElement();
                     _state = OnValueBegin;
                 }
