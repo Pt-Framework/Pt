@@ -30,6 +30,8 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Parser.h>
 #include <Pt/System/IOError.h>
+#include <Pt/TextStream.h>
+#include <Pt/Base64Codec.h>
 #include <sstream>
 
 #define log_define(a)
@@ -299,6 +301,7 @@ void ClientImpl::sendRequest(const Request& request)
     const std::string connection = "Connection";
     const std::string date = "Date";
     const std::string host = "Host";
+    const std::string authorization = "Authorization";
 
     _stream << request.method() << ' '
             << request.url() << " HTTP/"
@@ -334,9 +337,21 @@ void ClientImpl::sendRequest(const Request& request)
         _stream << "\r\n";
     }
 
+    if (!_username.empty() && !request.header().hasHeader(authorization))
+    {
+        std::ostringstream d;
+        BasicTextOStream<char, char> b(d, new Base64Codec());
+        b << _username
+          << ':'
+          << _password;
+        b.terminate();
+        log_debug("set Authorization to " << d.str());
+        _stream << "Authorization: Basic " << d.str() << "\r\n";
+    }
+
     _stream << "\r\n";
 
-    log_debug("send body");
+    log_debug("send body; " << request.bodySize() << " bytes");
 
     request.sendBody(_stream);
 }
@@ -508,9 +523,11 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
     {
         log_debug("content-length(pre)=" << _contentLength);
 
-        _contentLength -= _client->bodyAvailable(*_client); // TODO: may throw exception
-
-        log_debug("content-length(post)=" << _contentLength);
+        while (_contentLength > 0 && sb.in_avail() > 0)
+        {
+            _contentLength -= _client->bodyAvailable(*_client); // TODO: may throw exception
+            log_debug("content-length(post)=" << _contentLength);
+        }
 
         if( _contentLength <= 0 )
         {

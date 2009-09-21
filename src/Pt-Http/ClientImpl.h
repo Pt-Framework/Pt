@@ -84,6 +84,9 @@ class ClientImpl : public Connectable
         bool _chunkedEncoding;
         ChunkedIStream _chunkedIStream;
 
+        std::string _username;
+        std::string _password;
+
         void sendRequest(const Request& request);
         void processHeaderAvailable(System::StreamBuffer& sb);
         void processBodyAvailable(System::StreamBuffer& sb);
@@ -162,6 +165,13 @@ class ClientImpl : public Connectable
 
         unsigned short int port() const
         { return _port; }
+
+        // Sets the username and password for all subsequent requests.
+        void auth(const std::string& username, const std::string& password)
+        { _username = username; _password = password; }
+
+        void clearAuth()
+        { _username.clear(); _password.clear(); }
 
 };
 

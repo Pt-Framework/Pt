@@ -110,6 +110,17 @@ unsigned short int Client::port() const
     return _impl->port();
 }
 
-} // namespace http
+// Sets the username and password for all subsequent requests.
+void Client::auth(const std::string& username, const std::string& password)
+{
+    _impl->auth(username, password);
+}
+
+void Client::clearAuth()
+{
+    _impl->clearAuth();
+}
+
+} // namespace Http
 
 } // namespace Pt
