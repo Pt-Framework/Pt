@@ -51,6 +51,7 @@ Client::Client()
     _writer.useIndent(false);
     _writer.useEndl(false);
 
+    _request.method("POST");
     Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
@@ -72,6 +73,7 @@ Client::Client(System::SelectorBase& selector, const std::string& server,
     _writer.useIndent(false);
     _writer.useEndl(false);
 
+    _request.method("POST");
     Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
@@ -92,6 +94,7 @@ Client::Client(const std::string& server, unsigned short port, const std::string
     _writer.useIndent(false);
     _writer.useEndl(false);
 
+    _request.method("POST");
     Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
     Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
     Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
@@ -232,6 +235,7 @@ void Client::prepareRequest(const std::string& name, IDecomposer** argv, unsigne
 {
     _request.clear();
     _request.setHeader("Content-Type", "text/xml");
+    _request.method("POST");
 
     _writer.begin( _request.body() );
     _writer.writeStartElement( L"methodCall" );
