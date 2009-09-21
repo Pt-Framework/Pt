@@ -33,6 +33,64 @@
 
 namespace Pt {
 
+bool SerializationInfo::beginFormat(Formatter& formatter)
+{
+    if( _context && _bound )
+    {
+        const char* id = _context->getId(_bound);
+        if(id)
+            this->setId( id ); // prevents this method being const
+    }
+
+    if(this->category() == SerializationInfo::Scalar)
+    {
+        static_cast<ValueNode*>(_node)->format( formatter,
+                                                this->name(),
+                                                this->typeName(),
+                                                this->id() );
+        return false;
+    }
+    else if(this->category() == Pt::SerializationInfo::Reference)
+    {
+        if( ! _context )
+            throw SerializationError("context not available");
+
+        const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
+        const char* id = _context->getId( refAddr );
+        if( ! id )
+            throw SerializationError("stray reference");
+
+        formatter.addReference( this->name(), id);
+        return false;
+    }
+    else if(this->category() == SerializationInfo::Struct)
+    {
+        formatter.beginObject( this->name(), this->typeName(), this->id() );
+        return true;
+    }
+    else if(this->category() == Pt::SerializationInfo::Sequence)
+    {
+        formatter.beginArray( this->name(), this->typeName(), this->id() );
+        return true;
+    }
+
+    return false;
+}
+
+
+void SerializationInfo::endFormat(Formatter& formatter)
+{
+    if(this->category() == SerializationInfo::Struct)
+    {
+        formatter.finishObject();
+    }
+    else if(this->category() == Pt::SerializationInfo::Sequence)
+    {
+        formatter.finishArray();
+    }
+}
+
+
 void SerializationInfo::format(Formatter& formatter)
 {
     if( _context && _bound )

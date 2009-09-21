@@ -312,6 +312,10 @@ class PT_API SerializationInfo
             this->load(&fixme, Fixup<T>::do_fixup_ptr);
         }
 
+        bool beginFormat(Formatter& formatter);
+
+        void endFormat(Formatter& formatter);
+
         void format(Formatter& formatter);
 
     public:
