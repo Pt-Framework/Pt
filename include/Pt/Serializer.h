@@ -46,7 +46,8 @@ class IDecomposer
 
         virtual void format(Formatter& formatter) = 0;
 
-        // bool advance(Formatter& formatter) = 0;
+        virtual void beginFormat(Formatter& formatter) {}
+        virtual bool advance(Formatter& formatter) { return false; }
 
     protected:
         IDecomposer()
@@ -80,67 +81,37 @@ class Decomposer : public IDecomposer
             _si.format(formatter);
         }
 
-        bool beginFormat(Formatter& formatter)
+        void beginFormat(Formatter& formatter)
         {
             _current = &_si;
-
-            if( _current->beginFormat(formatter) )
-            {
-                _it = _current->begin();
-                if( ! (_it != _current->end()) )
-                    return false;
-            }
-
-            return false;
-        }
-
-        void endFormat(Formatter& formatter)
-        {
+            _current->beginFormat(formatter);
+            _it = _current->begin();
         }
 
         bool advance(Formatter& formatter)
         {
-            if( ! _current )
+            if( ! (_it != _current->end()) )
             {
-                _current = &_si;
-                if( _current->beginFormat(formatter) )
-                {
-                    _it = _current->begin();
-                    if( _it != _current->end() )
-                    {
-                        _current = &(*_it);
-                        return true;
-                    }
-                }
-
-                _current->endFormat(formatter);
-                return false;
-            }
-
-            if( _it != _current->end() )
-            {
-                if( _it->beginFormat(formatter) )
-                {
-                    _it = _current->begin();
-                    if( _it != _current->end() )
-                    {
-                        _current = &(*_it);
-                        return true;
-                    }
-                }
-
-                _current->endFormat(formatter);
-                return true;
-            }
-
-            //if( _it == _current.end() )
-            //{
                 _current->endFormat(formatter);
                 _current = _current->parent();
                 if(_current)
                     _it = _current->end();
                 return _current != 0;
-            //}
+            }
+
+            if( _it->beginFormat(formatter) )
+            {
+                // _it = _current->begin();
+                // if( _it != _current->end() )
+                // {
+                //     _current = &(*_it);
+                //     return true;
+                // }
+            }
+
+            _it->endFormat(formatter);
+            ++_it;
+            return true;
         }
 
     private:

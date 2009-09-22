@@ -162,6 +162,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         {
             //Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
+            Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
 
     protected:
@@ -312,6 +313,30 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             // deser.finish();
 
             //PT_UNIT_ASSERT( date1 == date2);
+        }
+
+        void AdvanceObject()
+        {
+            Pt::Date date_2(2000, 4,18);
+            std::stringstream output;
+            Pt::Xml::XmlSerializer ser(output);
+
+            ser.serialize(date_2, "dateA");
+
+            std::cerr << "\n--------------------" << std::endl;
+            ser.beginFormat();
+            while( ser.advance() )
+            {
+                ser.flush();
+                std::cerr << output.str() << "- ADVANCE -" << std::endl;
+                output.str( std::string() );
+            }
+
+            ser.finish();
+            ser.flush();
+
+            std::cerr << output.str();
+            std::cerr << "---------------------\n" << std::endl;
         }
 };
 

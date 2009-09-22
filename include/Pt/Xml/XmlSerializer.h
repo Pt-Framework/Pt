@@ -179,6 +179,35 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             serializer->setName(name);
         }
 
+        void beginFormat()
+        {
+            _current = 0;
+            if( _stack.empty() )
+                return;
+
+            _current = _stack.front();
+            _current->beginFormat(*this);
+        }
+
+        bool advance()
+        {
+            if( ! _current )
+                return false;
+
+            if( _current->advance(*this) )
+                return true;
+
+            _current = 0;
+            _stack.erase( _stack.begin() );
+
+            if( _stack.empty() )
+                return false;
+
+            _current = _stack.front();
+            _current->beginFormat(*this);
+            return true;
+        }
+
         void finish();
 
         //! @internal
@@ -190,6 +219,7 @@ class PT_XML_API XmlSerializer : public XmlFormatter
 
         std::vector<IDecomposer*> _stack;
         std::vector<IDecomposer*> _heap;
+        IDecomposer* _current;
 };
 
 } // namespace Xml
