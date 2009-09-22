@@ -6,9 +6,34 @@
 
 (defvar jam-config-debug t)
 
-(define-key-after (lookup-key global-map [menu-bar build-menu]) [debug-toggle]
-  (menu-bar-make-toggle toggle-jam-debug jam-config-debug
-	    "Debug" "Debug builds toggled" "Builds debug versions"))
+;; (define-key-after (lookup-key global-map [menu-bar build-menu]) [debug-toggle]
+;;   (menu-bar-make-toggle toggle-jam-debug jam-config-debug
+;; 	    "Debug" "Debug builds toggled" "Builds debug versions"))
+
+(defvar menu-bar-config-menu (make-sparse-keymap "Build Config"))
+
+(define-key menu-bar-config-menu [menu-bar-config-debug]
+  '(menu-item "Debug"
+	      (lambda ()
+		(interactive)
+        (setq jam-config-debug t)
+		(message "Using debug configuration"))
+	      :help "Build debug version"
+	      :button (:radio . (eq jam-config-debug t))
+	      :visible (menu-bar-menu-frame-live-and-visible-p)))
+
+(define-key menu-bar-config-menu [menu-bar-config-release]
+  '(menu-item "Release"
+	      (lambda ()
+		(interactive)
+		(setq jam-config-debug nil)
+		(message "Using release configuration"))
+	      :help "Build release version"
+	      :button (:radio . (not jam-config-debug))
+	      :visible (menu-bar-menu-frame-live-and-visible-p)))
+
+(define-key-after (lookup-key global-map [menu-bar build-menu]) [config-menu]
+  (list 'menu-item "Configuration" menu-bar-config-menu))
 
 (define-key-after (lookup-key global-map [menu-bar build-menu])
   [build-menu-separator0] '("--" . build-menu-separator0) t)
