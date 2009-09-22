@@ -87,7 +87,7 @@ class Decomposer : public IDecomposer
             if( _current->beginFormat(formatter) )
             {
                 _it = _current->begin();
-                if( _it == _current->end() )
+                if( ! (_it != _current->end()) )
                     return false;
             }
 
@@ -113,7 +113,7 @@ class Decomposer : public IDecomposer
                     }
                 }
 
-                _current->endFormat();
+                _current->endFormat(formatter);
                 return false;
             }
 
@@ -129,7 +129,7 @@ class Decomposer : public IDecomposer
                     }
                 }
 
-                _current->endFormat();
+                _current->endFormat(formatter);
                 return true;
             }
 
