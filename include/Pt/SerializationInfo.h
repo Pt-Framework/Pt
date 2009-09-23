@@ -119,6 +119,7 @@ class PT_API SerializationInfo
         : _node(0)
         , _context(0)
         , _parent(0)
+        , _next(0)
         , _bound(0)
         { }
 
@@ -126,6 +127,7 @@ class PT_API SerializationInfo
         : _node( 0 )
         , _context(context)
         , _parent(0)
+        , _next(0)
         , _bound(0)
         { }
 
@@ -361,8 +363,11 @@ class PT_API SerializationInfo
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
 
-        SerializationInfo* sibling()
-        { return 0; }
+        SerializationInfo* sibling() const
+        { return _next; }
+
+        void setSibling(SerializationInfo* si)
+        { _next = si; }
 
     protected:
         void load(void* fixme, FixupHandler fh) const;
@@ -373,34 +378,35 @@ class PT_API SerializationInfo
         mutable SerializationNode* _node;
         SerializationContext* _context;
         SerializationInfo* _parent;
+        SerializationInfo* _next;
         std::string _name;
         std::string _type;
         std::string _id;
         mutable const void* _bound;
 };
 
-class SIterator
+class SerializationInfo::Iterator
 {
     public:
-        SIterator()
+        Iterator()
         : _si(0)
         {}
 
-        SIterator(const SIterator& other)
+        Iterator(const Iterator& other)
         : _si(other._si)
         {}
 
-        SIterator(SerializationInfo* si)
+        explicit Iterator(SerializationInfo* si)
         : _si(si)
         {}
 
-        SIterator& operator=(const SIterator& other)
+        Iterator& operator=(const Iterator& other)
         {
             _si = other._si;
             return *this;
         }
 
-        SIterator& operator++()
+        Iterator& operator++()
         {
             _si = _si->sibling();
             return *this;
@@ -416,13 +422,57 @@ class SIterator
             return _si;
         }
 
-        bool operator!=(const SIterator& other) const
+        bool operator!=(const Iterator& other) const
         { return _si != other._si; }
 
     private:
         SerializationInfo* _si;
 };
 
+class SerializationInfo::ConstIterator
+{
+    public:
+        ConstIterator()
+        : _si(0)
+        {}
+
+        ConstIterator(const ConstIterator& other)
+        : _si(other._si)
+        {}
+
+        explicit ConstIterator(const SerializationInfo* si)
+        : _si(si)
+        {}
+
+        ConstIterator& operator=(const ConstIterator& other)
+        {
+            _si = other._si;
+            return *this;
+        }
+
+        ConstIterator& operator++()
+        {
+            _si = _si->sibling();
+            return *this;
+        }
+
+        const SerializationInfo& operator*()
+        {
+            return *_si;
+        }
+
+        const SerializationInfo* operator->()
+        {
+            return _si;
+        }
+
+        bool operator!=(const ConstIterator& other) const
+        { return _si != other._si; }
+
+    private:
+        const SerializationInfo* _si;
+};
+/*
 class SerializationInfo::Iterator
 {
     public:
@@ -563,7 +613,7 @@ inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& ot
 {
     return _info != other._info;
 }
-
+*/
 
 struct save
 {};

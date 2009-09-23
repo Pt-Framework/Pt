@@ -360,9 +360,6 @@ class ReferenceNode : public SerializationNode
 class ObjectNode : public SerializationNode
 {
     public:
-        typedef SerializationInfo** Iterator;
-        typedef const SerializationInfo* const* ConstIterator;
-
         ObjectNode(SerializationInfo::Category category)
         : SerializationNode(category)
         , _nodes(0)
@@ -375,7 +372,7 @@ class ObjectNode : public SerializationNode
 			this->clear();
 			::operator delete(_nodes);
 		}
-        
+
         void push_back(SerializationInfo* si)
 		{
 			if(_capacity == _size)
@@ -384,15 +381,30 @@ class ObjectNode : public SerializationNode
 				SerializationInfo** nodes = (SerializationInfo**) mem;
 				_capacity += 5;
 				std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
-		
+
 				::operator delete(_nodes);
 				_nodes = nodes;
 			}
-		
+
 			_nodes[_size] = si;
+            if( _size )
+            {
+                _nodes[_size-1]->setSibling(si);
+            }
 			++_size;
 		}
-        
+        SerializationInfo* begin()
+        { return _nodes[0]; }
+
+        SerializationInfo* end()
+        { return 0; }
+
+        const SerializationInfo* begin() const
+        { return _nodes[0]; }
+
+        const SerializationInfo* end() const
+        { return 0; }
+/*
         Iterator begin()
         { return &_nodes[0]; }
 
@@ -404,49 +416,41 @@ class ObjectNode : public SerializationNode
 
         ConstIterator end() const
         { return &_nodes[_size]; }
-
+*/
         unsigned size() const
         { return _size; }
 
-        SerializationInfo& back()
-        { return *( _nodes[_size - 1] ); }
-
-        const SerializationInfo& back() const
-        { return *( _nodes[_size - 1] ); }
-
         virtual void setContext(SerializationContext* context)
-        { 
-			Iterator endIt = end();
-		
-			for(Iterator it = begin(); it != endIt; ++it)
+        {
+			for(SerializationInfo* it = begin(); it != 0; it = it->sibling())
 			{
-				(*it)->setContext(context);
+				it->setContext(context);
 			}
         }
 
 		virtual void clear()
 		{
-			Iterator endIt = end();
-		
-			for(Iterator it = begin(); it != endIt; ++it)
+			for(SerializationInfo* it = begin(); it != 0; )
 			{
-				delete *it;
+                SerializationInfo* tmp = it;
+                it = it->sibling();
+				delete tmp;
 			}
 			_size = 0;
 		}
 
 		virtual void clear(SerializationContext& context)
 		{
-			Iterator endIt = end();
-		
-			for(Iterator it = begin(); it != endIt; ++it)
+			for(SerializationInfo* it = begin(); it != 0; )
 			{
-				context.push(*it);
+                SerializationInfo* tmp = it;
+                it = it->sibling();
+				tmp->setSibling(0);
+                context.push(tmp);
 			}
-		
-			_size = 0;
+            _size = 0;
 		}
-    
+
     protected:
         ObjectNode& operator=(const ObjectNode&);
         ObjectNode(const ObjectNode&);

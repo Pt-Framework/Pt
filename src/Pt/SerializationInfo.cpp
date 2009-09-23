@@ -245,13 +245,13 @@ void SerializationInfo::clear()
 
     if( _name.size() )
         _name.clear();
-    
+
     if( _type.size() )
         _type.clear();
-    
+
     if( _id.size() )
         _id.clear();
-    
+
     _bound = 0;
 }
 
@@ -281,21 +281,21 @@ void SerializationInfo::setCategory(Category category)
 				case Scalar:
 					node = new ValueNode();
 					break;
-		
+
 				case Reference:
 					node = new ReferenceNode();
 					break;
-		
+
 				case Sequence:
 				case Struct:
 					node = new ObjectNode(category);
 					break;
-		
+
 				default:
 					break;
 			}
         }
-        
+
         delete _node;
         _node = node;
     }
@@ -303,9 +303,9 @@ void SerializationInfo::setCategory(Category category)
 
 
 void SerializationInfo::setContext(SerializationContext* context)
-{ 
-    _context = context; 
-    
+{
+    _context = context;
+
     if(_node)
     {
         _node->setContext(context);
@@ -480,9 +480,8 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
     if( this->category() != Struct)
     	this->setCategory(Struct);
-    
-    ObjectNode* onode = static_cast<ObjectNode*>(_node);
 
+    ObjectNode* onode = static_cast<ObjectNode*>(_node);
     //std::cerr << "added member " << name << " "<< _context << std::endl;
 
     SerializationInfo* si = 0;
@@ -497,8 +496,9 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
     si->_parent = this;
     si->setName(name);
+
     onode->push_back(si);
-    return onode->back();
+    return *si;
 }
 
 
@@ -506,7 +506,7 @@ SerializationInfo& SerializationInfo::addElement()
 {
     if( this->category() != Sequence)
     	this->setCategory(Sequence);
-    
+
     ObjectNode* onode = static_cast<ObjectNode*>(_node);
 
     //std::cerr << "added member " <<  _node->cache() << std::endl;
@@ -523,7 +523,7 @@ SerializationInfo& SerializationInfo::addElement()
 
     si->_parent = this;
     onode->push_back(si);
-    return onode->back();
+    return *si;
 }
 
 
@@ -531,7 +531,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
 {
     if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
-        return 0;
+        return SerializationInfo::Iterator(0);
     }
 
     ObjectNode* snode = (ObjectNode*) _node;
@@ -539,7 +539,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
     //if(snode->nodes().size() == 0)
     //    return 0;
 
-    return snode->begin();
+    return SerializationInfo::Iterator( snode->begin() );
 }
 
 
@@ -547,7 +547,7 @@ SerializationInfo::Iterator SerializationInfo::end()
 {
     if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
-        return 0;
+        return SerializationInfo::Iterator(0);
     }
 
     ObjectNode* snode = (ObjectNode*) _node;
@@ -555,7 +555,7 @@ SerializationInfo::Iterator SerializationInfo::end()
     //if(snode->nodes().size() == 0)
     //    return 0;
 
-    return snode->end();
+    return SerializationInfo::Iterator( snode->end() );
 }
 
 
@@ -563,7 +563,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
     if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
-        return 0;
+        return SerializationInfo::ConstIterator(0);
     }
 
     ObjectNode* snode = (ObjectNode*) _node;
@@ -571,7 +571,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
     //if(snode->nodes().size() == 0)
     //    return 0;
 
-    return snode->begin();
+    return SerializationInfo::ConstIterator( snode->begin() );
 }
 
 
@@ -579,7 +579,7 @@ SerializationInfo::ConstIterator SerializationInfo::end() const
 {
     if(! _node || (_node->category() != Struct && _node->category() != Sequence) )
     {
-        return 0;
+        return SerializationInfo::ConstIterator(0);
     }
 
     ObjectNode* snode = (ObjectNode*) _node;
@@ -587,7 +587,7 @@ SerializationInfo::ConstIterator SerializationInfo::end() const
     //if(snode->nodes().size() == 0)
     //    return 0;
 
-    return snode->end();
+    return SerializationInfo::ConstIterator( snode->end() );
 }
 
 
@@ -596,8 +596,8 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
     if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
-        Iterator it = snode->begin();
-        for(; it != snode->end(); ++it)
+        ConstIterator it( snode->begin() );
+        for(; it != ConstIterator( snode->end() ); ++it)
         {
             if( it->name() == name )
                 return *it;
@@ -613,11 +613,11 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
     if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
-        ObjectNode::ConstIterator it = snode->begin();
-        for(; it != snode->end(); ++it)
+        ConstIterator it( snode->begin() );
+        for(; it != ConstIterator( snode->end() ); ++it)
         {
-            if( (*it)->name() == name )
-                return *it;
+            if( it->name() == name )
+                return &(*it);
         }
     }
 
@@ -630,11 +630,11 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
     if(_node && (_node->category() == Struct || _node->category() == Sequence) )
     {
         ObjectNode* snode = (ObjectNode*) _node;
-        ObjectNode::Iterator it = snode->begin();
-        for(; it != snode->end(); ++it)
+        Iterator it ( snode->begin() );
+        for(; it != Iterator( snode->end()); ++it)
         {
-            if( (*it)->name() == name )
-                return *it;
+            if( it->name() == name )
+                return &(*it);
         }
     }
 
