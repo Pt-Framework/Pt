@@ -361,6 +361,9 @@ class PT_API SerializationInfo
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
 
+        SerializationInfo* sibling()
+        { return 0; }
+
     protected:
         void load(void* fixme, FixupHandler fh) const;
 
@@ -376,6 +379,49 @@ class PT_API SerializationInfo
         mutable const void* _bound;
 };
 
+class SIterator
+{
+    public:
+        SIterator()
+        : _si(0)
+        {}
+
+        SIterator(const SIterator& other)
+        : _si(other._si)
+        {}
+
+        SIterator(SerializationInfo* si)
+        : _si(si)
+        {}
+
+        SIterator& operator=(const SIterator& other)
+        {
+            _si = other._si;
+            return *this;
+        }
+
+        SIterator& operator++()
+        {
+            _si = _si->sibling();
+            return *this;
+        }
+
+        SerializationInfo& operator*()
+        {
+            return *_si;
+        }
+
+        SerializationInfo* operator->()
+        {
+            return _si;
+        }
+
+        bool operator!=(const SIterator& other) const
+        { return _si != other._si; }
+
+    private:
+        SerializationInfo* _si;
+};
 
 class SerializationInfo::Iterator
 {
