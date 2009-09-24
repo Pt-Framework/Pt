@@ -171,12 +171,12 @@ class PT_XML_API XmlSerializer : public XmlFormatter
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            Decomposer<T>* serializer = new Decomposer<T>;
-            _heap.push_back(serializer);
-            _stack.push_back(serializer);
+            Decomposer<T>* dec = new Decomposer<T>;
+            _heap.push_back(dec);
+            _stack.push_back(dec);
 
-            serializer->begin(type, _context);
-            serializer->setName(name);
+            dec->begin(type, _context);
+            dec->setName(name);
         }
 
         void beginFormat()

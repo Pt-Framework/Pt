@@ -413,17 +413,16 @@ class SerializationInfo::Iterator
         }
 
         SerializationInfo& operator*()
-        {
-            return *_si;
-        }
+        { return *_si; }
 
         SerializationInfo* operator->()
-        {
-            return _si;
-        }
+        { return _si; }
 
         bool operator!=(const Iterator& other) const
         { return _si != other._si; }
+
+        bool operator==(const Iterator& other) const
+        { return _si == other._si; }
 
     private:
         SerializationInfo* _si;
@@ -457,163 +456,33 @@ class SerializationInfo::ConstIterator
         }
 
         const SerializationInfo& operator*()
-        {
-            return *_si;
-        }
+        { return *_si; }
 
         const SerializationInfo* operator->()
-        {
-            return _si;
-        }
+        { return _si; }
 
         bool operator!=(const ConstIterator& other) const
         { return _si != other._si; }
 
+        bool operator==(const ConstIterator& other) const
+        { return _si == other._si; }
+
     private:
         const SerializationInfo* _si;
 };
-/*
-class SerializationInfo::Iterator
+
+
+inline SerializationInfo::Iterator SerializationInfo::end()
 {
-    public:
-        Iterator();
-
-        Iterator(const Iterator& other);
-
-        Iterator(SerializationInfo** info);
-
-        Iterator& operator=(const Iterator& other);
-
-        Iterator& operator++();
-
-        SerializationInfo& operator*();
-
-        SerializationInfo* operator->();
-
-        bool operator!=(const Iterator& other) const;
-
-    private:
-        SerializationInfo** _info;
-};
-
-
-class SerializationInfo::ConstIterator
-{
-    public:
-        ConstIterator();
-
-        ConstIterator(const ConstIterator& other);
-
-        ConstIterator(const SerializationInfo* const* info);
-
-        ConstIterator& operator=(const ConstIterator& other);
-
-        ConstIterator& operator++();
-
-        const SerializationInfo& operator*() const;
-
-        const SerializationInfo* operator->() const;
-
-        bool operator!=(const ConstIterator& other) const;
-
-    private:
-        const SerializationInfo* const* _info;
-};
-
-
-inline SerializationInfo::Iterator::Iterator()
-: _info(0)
-{}
-
-
-inline SerializationInfo::Iterator::Iterator(const Iterator& other)
-: _info(other._info)
-{}
-
-
-inline SerializationInfo::Iterator::Iterator(SerializationInfo** info)
-: _info(info)
-{}
-
-
-inline SerializationInfo::Iterator& SerializationInfo::Iterator::operator=(const Iterator& other)
-{
-    _info = other._info;
-    return *this;
+    return SerializationInfo::Iterator();
 }
 
 
-inline SerializationInfo::Iterator& SerializationInfo::Iterator::operator++()
+inline SerializationInfo::ConstIterator SerializationInfo::end() const
 {
-    ++_info;
-    return *this;
+    return SerializationInfo::ConstIterator();
 }
 
-
-inline SerializationInfo& SerializationInfo::Iterator::operator*()
-{
-    return **_info;
-}
-
-
-inline SerializationInfo* SerializationInfo::Iterator::operator->()
-{
-    return *_info;
-}
-
-
-inline bool SerializationInfo::Iterator::operator!=(const Iterator& other) const
-{
-    return _info != other._info;
-}
-
-
-inline SerializationInfo::ConstIterator::ConstIterator()
-: _info(0)
-{}
-
-
-inline SerializationInfo::ConstIterator::ConstIterator(const ConstIterator& other)
-: _info(other._info)
-{}
-
-
-inline SerializationInfo::ConstIterator::ConstIterator(const SerializationInfo* const* info)
-: _info(info)
-{}
-
-
-inline SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator=(const ConstIterator& other)
-{
-    _info = other._info;
-    return *this;
-}
-
-
-inline SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator++()
-{
-    ++_info;
-    return *this;
-}
-
-
-inline const SerializationInfo& SerializationInfo::ConstIterator::operator*() const
-{
-    return **_info;
-}
-
-
-inline const SerializationInfo* SerializationInfo::ConstIterator::operator->() const
-{
-    return *_info;
-}
-
-
-inline bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& other) const
-{
-    return _info != other._info;
-}
-*/
 
 struct save
 {};

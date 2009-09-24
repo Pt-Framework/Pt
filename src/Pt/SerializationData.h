@@ -362,67 +362,48 @@ class ObjectNode : public SerializationNode
     public:
         ObjectNode(SerializationInfo::Category category)
         : SerializationNode(category)
-        , _nodes(0)
-        , _capacity(0)
+        , _first(0)
+        , _last(0)
         , _size(0)
         {}
 
         ~ObjectNode()
 		{
 			this->clear();
-			::operator delete(_nodes);
 		}
 
         void push_back(SerializationInfo* si)
 		{
-			if(_capacity == _size)
-			{
-				void* mem = ::operator new( (_capacity+5) * sizeof(SerializationInfo*) );
-				SerializationInfo** nodes = (SerializationInfo**) mem;
-				_capacity += 5;
-				std::memcpy( nodes, _nodes, _size * sizeof(SerializationInfo*) );
-
-				::operator delete(_nodes);
-				_nodes = nodes;
-			}
-
-			_nodes[_size] = si;
-            if( _size )
+            ++_size;
+            if(_first)
             {
-                _nodes[_size-1]->setSibling(si);
+                _last->setSibling(si);
+                _last = si;
+                return;
             }
-			++_size;
+
+            _first = si;
+            _last = si;
 		}
+
         SerializationInfo* begin()
-        { return _nodes[0]; }
+        { return _first; }
 
         SerializationInfo* end()
         { return 0; }
 
         const SerializationInfo* begin() const
-        { return _nodes[0]; }
+        { return _first; }
 
         const SerializationInfo* end() const
         { return 0; }
-/*
-        Iterator begin()
-        { return &_nodes[0]; }
 
-        Iterator end()
-        { return &_nodes[_size]; }
-
-        ConstIterator begin() const
-        { return &_nodes[0]; }
-
-        ConstIterator end() const
-        { return &_nodes[_size]; }
-*/
         unsigned size() const
         { return _size; }
 
         virtual void setContext(SerializationContext* context)
         {
-			for(SerializationInfo* it = begin(); it != 0; it = it->sibling())
+			for(SerializationInfo* it = begin(); it != end(); it = it->sibling())
 			{
 				it->setContext(context);
 			}
@@ -430,27 +411,31 @@ class ObjectNode : public SerializationNode
 
 		virtual void clear()
 		{
-            if(_size == 0) return;
-			for(SerializationInfo* it = begin(); it != 0; )
+			for(SerializationInfo* it = begin(); it != end(); )
 			{
                 SerializationInfo* tmp = it;
                 it = it->sibling();
 				delete tmp;
 			}
-			_size = 0;
+
+            _size = 0;
+            _first = 0;
+            _last = 0;
 		}
 
 		virtual void clear(SerializationContext& context)
 		{
-            if(_size == 0) return;
-			for(SerializationInfo* it = begin(); it != 0; )
+			for(SerializationInfo* it = begin(); it != end(); )
 			{
                 SerializationInfo* tmp = it;
                 it = it->sibling();
 				tmp->setSibling(0);
                 context.push(tmp);
 			}
+
             _size = 0;
+            _first = 0;
+            _last = 0;
 		}
 
     protected:
@@ -458,8 +443,8 @@ class ObjectNode : public SerializationNode
         ObjectNode(const ObjectNode&);
 
     private:
-        SerializationInfo** _nodes;
-        unsigned _capacity;
+        SerializationInfo* _first;
+        SerializationInfo* _last;
         unsigned _size;
 };
 
