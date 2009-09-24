@@ -73,6 +73,7 @@ class Decomposer : public IDecomposer
 
         virtual void setName(const std::string& name)
         {
+            // TODO should happen before saving otherwise instance name is not available
             _si.setName(name);
         }
 
