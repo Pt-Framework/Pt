@@ -47,7 +47,8 @@ class IDecomposer
         virtual void format(Formatter& formatter) = 0;
 
         virtual void beginFormat(Formatter& formatter) {}
-        virtual bool advance(Formatter& formatter) { return false; }
+
+        virtual IDecomposer* advance(Formatter& formatter) { return 0; }
 
     protected:
         IDecomposer()
@@ -89,7 +90,7 @@ class Decomposer : public IDecomposer
             _it = _current->begin();
         }
 
-        bool advance(Formatter& formatter)
+        IDecomposer* advance(Formatter& formatter)
         {
             if( ! (_it != _current->end()) )
             {
@@ -97,7 +98,8 @@ class Decomposer : public IDecomposer
                 _current = _current->parent();
                 if(_current)
                     _it = _current->end();
-                return _current != 0;
+
+                return _current != 0 ? this : 0;
             }
 
             if( _it->beginFormat(formatter) )
@@ -112,7 +114,7 @@ class Decomposer : public IDecomposer
 
             _it->endFormat(formatter);
             ++_it;
-            return true;
+            return this;
         }
 
     private:

@@ -194,10 +194,10 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             if( ! _current )
                 return false;
 
-            if( _current->advance(*this) )
+            _current = _current->advance(*this);
+            if( _current )
                 return true;
 
-            _current = 0;
             _stack.erase( _stack.begin() );
 
             if( _stack.empty() )
