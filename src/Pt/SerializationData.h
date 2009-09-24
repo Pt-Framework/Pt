@@ -430,6 +430,7 @@ class ObjectNode : public SerializationNode
 
 		virtual void clear()
 		{
+            if(_size == 0) return;
 			for(SerializationInfo* it = begin(); it != 0; )
 			{
                 SerializationInfo* tmp = it;
@@ -441,6 +442,7 @@ class ObjectNode : public SerializationNode
 
 		virtual void clear(SerializationContext& context)
 		{
+            if(_size == 0) return;
 			for(SerializationInfo* it = begin(); it != 0; )
 			{
                 SerializationInfo* tmp = it;
