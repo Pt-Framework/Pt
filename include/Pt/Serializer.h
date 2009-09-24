@@ -92,7 +92,7 @@ class Decomposer : public IDecomposer
 
         IDecomposer* advance(Formatter& formatter)
         {
-            if( ! (_it != _current->end()) )
+            if( _it == _current->end() )
             {
                 _current->endFormat(formatter);
                 _current = _current->parent();
