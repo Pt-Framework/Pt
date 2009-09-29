@@ -84,6 +84,9 @@ class PT_API SerializationContext
 
         virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
 
+        virtual void* getFixup(void* ref, const char* name) const
+        { return 0; }
+
         virtual void fixup();
 
     public:

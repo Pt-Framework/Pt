@@ -82,6 +82,14 @@ void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 }
 
 
+void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
+{
+    void* target = ctx.getFixup(&fixme, "date");
+    Pt::Date* to = static_cast< Pt::Date* >(target);
+    fixme.setDate(to);
+}
+
+
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
     si.getMember("date").loadReference(dr);
