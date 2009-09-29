@@ -173,8 +173,8 @@ bool SerializationInfo::beginSave(const void* p)
     {
         if(_context)
         {
-            first = _context->beginSave(p, _name);
-            if(first)
+            /// XXX first = _context->beginSave(p, _name);
+            /// if(first)
                 _bound = p;
         }
     }
@@ -187,7 +187,7 @@ void SerializationInfo::finishSave()
 {
     if(_context && _bound)
     {
-        _context->finishSave();
+        /// XXX _context->finishSave();
     }
 }
 
@@ -323,10 +323,10 @@ Pt::String& SerializationInfo::initString()
 // called during serialization, when a reference needs to be unlinked
 void SerializationInfo::saveReference(const void* ref)
 {
-    if(_context )
+    /* XXX if(_context )
     {
         _context->prepareId( ref );
-    }
+    }*/
 
     this->setCategory(Reference);
     static_cast<ReferenceNode*>(_node)->setAddress( const_cast<void*>(ref) );

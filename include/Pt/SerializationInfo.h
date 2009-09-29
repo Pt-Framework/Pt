@@ -626,6 +626,14 @@ inline void operator >>=(const LoadInfo& li, T& type)
 
 
 template <typename T>
+void operator <<=(Pt::SerializationContext& ctx, const T& dr)
+{
+    // export symbols, if any are reachable
+    // prepare id's if any
+}
+
+
+template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
     si.loadPointer(ptr);

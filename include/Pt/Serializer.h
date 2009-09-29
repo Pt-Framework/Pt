@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/SerializationContext.h>
 
 namespace Pt {
 
@@ -64,6 +65,13 @@ class Decomposer : public IDecomposer
 
         void begin(const T& type, SerializationContext* context = 0)
         {
+            if(context)
+            {
+                context->beginSave(&type, "name");
+                (*context) <<= type;
+                context->finishSave();
+            }
+
             _si.clear();
             _si.setContext(context);
             _si <<= Pt::save() <<= type;
