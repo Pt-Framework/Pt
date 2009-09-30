@@ -173,6 +173,9 @@ bool SerializationInfo::beginSave(const void* p)
     {
         if(_context)
         {
+            // all referenced objects are known by context
+            // if this object is known make an id and set _id
+            // so later when formatting it can be written
             /// XXX first = _context->beginSave(p, _name);
             /// if(first)
                 _bound = p;
