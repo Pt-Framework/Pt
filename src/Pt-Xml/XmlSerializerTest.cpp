@@ -94,6 +94,7 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 
 void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
 {
+    std::cerr << "fixup" << &fixme << std::endl;
     void* target = ctx.getFixup(&fixme, "date");
     Pt::Date* to = static_cast< Pt::Date* >(target);
     fixme.setDate(to);
@@ -142,6 +143,19 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
     sp = new Date();
     si >>= *sp;
+}
+
+
+void operator <<=(Pt::SerializationContext& ctx, const DateSmartPtr& sp)
+{
+    if( sp.getPointer() )
+    {
+        //bool first = ctx.beginSave(sp.getPointer(), _name);
+    }
+    else
+    {
+        //si.out() <<= sp.getPointer();
+    }
 }
 
 
@@ -214,19 +228,19 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         {
             Pt::Date date1(1889, 4, 20);
             test::DateRef dr( &date1 );
-            /*const Pt::Date* dateptr = &date1;
+            const Pt::Date* dateptr = &date1;
             Pt::DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
             Pt::DateSmartPtr datesp2 = datesp;
-            Pt::DateSmartPtr dateNull;*/
+            Pt::DateSmartPtr dateNull;
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.context().addSurrogate("date", new IsoDateSurrogate);
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dref");
-            //ser.context() <<= dr;
-            /*ser.serialize(dateptr, "dateptr");
-            ser.serialize(datesp, "datesp");
+
+            ser.serialize(dateptr, "dateptr");
+            /*ser.serialize(datesp, "datesp");
             ser.serialize(datesp2, "datesp2");
             ser.serialize(dateNull, "dateNull");*/
 

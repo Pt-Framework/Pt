@@ -35,12 +35,12 @@ namespace Pt {
 
 bool SerializationInfo::beginFormat(Formatter& formatter)
 {
-    if( _context && _bound )
-    {
-        const char* id = _context->getId(_bound);
-        if(id)
-            this->setId( id ); // prevents this method being const
-    }
+    // if( _context && _bound )
+    // {
+    //     const char* id = _context->getId(_bound);
+    //     if(id)
+    //         this->setId( id ); // prevents this method being const
+    // }
 
     if(this->category() == SerializationInfo::Scalar)
     {
@@ -93,12 +93,12 @@ void SerializationInfo::endFormat(Formatter& formatter)
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    if( _context && _bound )
-    {
-        const char* id = _context->getId(_bound);
-        if(id)
-            this->setId( id ); // prevents this method being const
-    }
+    // if( _context && _bound )
+    // {
+    //     const char* id = _context->getId(_bound);
+    //     if(id)
+    //         this->setId( id ); // prevents this method being const
+    // }
 
     if(this->category() == SerializationInfo::Scalar)
     {
@@ -173,10 +173,18 @@ bool SerializationInfo::beginSave(const void* p)
     {
         if(_context)
         {
-            // all referenced objects are known by context
+            // all referenced objects are known by the context
             // if this object is known make an id and set _id
-            // so later when formatting it can be written
-            /// XXX first = _context->beginSave(p, _name);
+            // _id can be written when this type is formatted
+            std::cerr << "beginSave " << p << std::endl;
+            const char* id = _context->getId(p);
+            if(id)
+            {
+                std::cerr << "  id " << id << std::endl;
+                _id = id;
+            }
+
+            /// XXX 
             /// if(first)
                 _bound = p;
         }

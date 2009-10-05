@@ -43,6 +43,7 @@ XmlSerializationContext::~XmlSerializationContext()
 
 bool XmlSerializationContext::beginSave(const void* p, const std::string&)
 {
+    std::cerr << "ctx beginSave " << p << std::endl;
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();

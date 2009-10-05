@@ -61,10 +61,14 @@ class Decomposer : public IDecomposer
 {
     public:
         Decomposer()
+        : _type(0)
         { }
 
         void begin(const T& type, SerializationContext* context = 0)
         {
+            std::cerr << "begin " << &type << std::endl;
+            _type = &type;
+
             if(context)
             {
                 context->beginSave(&type, "name");
@@ -74,7 +78,6 @@ class Decomposer : public IDecomposer
 
             _si.clear();
             _si.setContext(context);
-            _si <<= Pt::save() <<= type;
             _current = 0;
 
             //_it = SerializationInfo::Iterator(&_current);
@@ -88,6 +91,8 @@ class Decomposer : public IDecomposer
 
         virtual void format(Formatter& formatter)
         {
+            std::cerr << "format " << _type << std::endl;
+            _si <<= Pt::save() <<= *_type;
             _si.format(formatter);
         }
 
@@ -126,6 +131,7 @@ class Decomposer : public IDecomposer
         }
 
     private:
+        const T* _type;
         SerializationInfo _si;
         SerializationInfo* _current;
         SerializationInfo::Iterator _it; // TODO iterator stack !!!
