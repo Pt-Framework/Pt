@@ -167,6 +167,25 @@ void operator <<=(Pt::SerializationContext& ctx, const DateSmartPtr& sp)
     }
 }
 
+// struct SymbolInfo {};
+// void operator <<=(SymbolInfo& sym, const DateSmartPtr& sp)
+// {
+//     if( sp.getPointer() )
+//     {
+//         bool first = sym.begin( sp.getPointer() ); // SymblInfo knows instance name
+//         if(first)
+//         {
+//             sym.context() <<= *sp;
+//             sym.finish();
+//         }
+//         else
+//         {
+//             sym.context().prepareId( sp.getPointer() );
+//             // operator <<=(Context; SmartPtr) only relevant for private instances???
+//         }
+//     }
+// }
+
 
 void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
 {
