@@ -150,7 +150,16 @@ void operator <<=(Pt::SerializationContext& ctx, const DateSmartPtr& sp)
 {
     if( sp.getPointer() )
     {
-        //bool first = ctx.beginSave(sp.getPointer(), _name);
+        bool first = ctx.beginSave(sp.getPointer(), "name");
+        if(first)
+        {
+            ctx <<= *sp;
+            ctx.finishSave();
+        }
+        else
+        {
+            ctx.prepareId( sp.getPointer() );
+        }
     }
     else
     {
@@ -170,7 +179,10 @@ void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
     if( sp.getPointer() )
     {
         if( si.beginSave( *sp ) )
+        {
+            std::cerr << "saving SP" << std::endl;
             si.out() <<= *sp;
+        }
         else
             si.out() <<= sp.getPointer();
     }
@@ -240,9 +252,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dr, "dref");
 
             ser.serialize(dateptr, "dateptr");
-            /*ser.serialize(datesp, "datesp");
+            ser.serialize(datesp, "datesp");
             ser.serialize(datesp2, "datesp2");
-            ser.serialize(dateNull, "dateNull");*/
+            /*ser.serialize(dateNull, "dateNull");*/
 
             ser.finish();
             ser.flush();

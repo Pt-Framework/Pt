@@ -58,6 +58,8 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual const char* getId(const void* p);
 
+        virtual const char* makeId(const void* p);
+
     private:
         std::map<const void*, unsigned> _idmap;
         std::map<const void*, std::string> _refmap;

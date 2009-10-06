@@ -69,6 +69,7 @@ void XmlSerializationContext::prepareId(const void* p)
 
 const char* XmlSerializationContext::getId(const void* p)
 {
+    std::cerr << "GET ID" << std::endl;
     if(p == 0)
     {
         return "null";
@@ -76,7 +77,9 @@ const char* XmlSerializationContext::getId(const void* p)
 
     if( _refmap.find(p) == _refmap.end() )
         return 0;
-        
+    else
+        return _refmap[p].c_str();
+
     if( _idmap.find(p) == _idmap.end() )
     {
         throw SerializationError("missing unlink information");
@@ -87,11 +90,25 @@ const char* XmlSerializationContext::getId(const void* p)
 }
 
 
+const char* XmlSerializationContext::makeId(const void* p)
+{
+    std::cerr << "MAKE ID" << std::endl;
+    if( _idmap.find(p) == _idmap.end() )
+    {
+        return 0;
+    }
+
+    _refmap[p] = convert<std::string>( _idmap[p] );
+    _idmap.erase(p);
+    return _refmap[p].c_str();
+}
+
+
 void XmlSerializationContext::reset()
 {
     _refmap.clear();
     _idmap.clear();
-    
+
     _targets.clear();
     _pointers.clear();
 }

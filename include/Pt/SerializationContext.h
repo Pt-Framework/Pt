@@ -76,6 +76,9 @@ class PT_API SerializationContext
 
         virtual const char* getId(const void* p);
 
+        virtual const char* makeId(const void* p)
+        { return 0; }
+
     public:
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
                                const std::string& name, const std::string& id);

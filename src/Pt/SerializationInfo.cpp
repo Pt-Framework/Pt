@@ -177,11 +177,15 @@ bool SerializationInfo::beginSave(const void* p)
             // if this object is known make an id and set _id
             // _id can be written when this type is formatted
             std::cerr << "beginSave " << p << std::endl;
-            const char* id = _context->getId(p);
+            const char* id = _context->makeId(p);
             if(id)
             {
                 std::cerr << "  id " << id << std::endl;
                 _id = id;
+            }
+            else
+            {
+                first = false;
             }
 
             /// XXX 
