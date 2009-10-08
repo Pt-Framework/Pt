@@ -42,6 +42,7 @@
 
 //#include <iostream>
 #define log_debug(x) //std::cout << x << std::endl;
+#define log_trace(x) //std::cout << x << std::endl;
 
 namespace {
 
@@ -121,60 +122,119 @@ void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 }
 
 
+int TcpSocketImpl::checkConnect()
+{
+    log_trace("checkConnect");
+
+    int sockerr;
+    socklen_t optlen = sizeof(sockerr);
+
+    // check for socket error
+    if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+    {
+        // getsockopt failed
+        close();
+        throw System::SystemError("getsockopt");
+    }
+
+    if (sockerr == 0)
+    {
+        log_debug("connected successfully");
+        _isConnected = true;
+    }
+
+    return sockerr;
+}
+
+void TcpSocketImpl::checkPendingError()
+{
+    if (_connectResult)
+    {
+        throw System::IOError(_connectResult);
+    }
+}
+
+
+const char* TcpSocketImpl::tryConnect()
+{
+    log_trace("tryConnect");
+
+    if (_addrInfoPtr == _addrInfo.end())
+    {
+        log_debug("no more address informations");
+        return "invalid address information";
+    }
+
+    while (true)
+    {
+        int fd;
+        while (true)
+        {
+            log_debug("create socket");
+            fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
+            if (fd >= 0)
+                break;
+
+            if (++_addrInfoPtr == _addrInfo.end())
+                return "socket";
+        }
+
+        IODeviceImpl::open(fd, true);
+
+        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+
+        log_debug("created socket " << _fd << " max: " << FD_SETSIZE);
+
+        if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
+        {
+            _isConnected = true;
+            log_debug("connected successfully");
+            break;
+        }
+
+        if (errno == EINPROGRESS)
+        {
+            log_debug("connect in progress");
+            memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+            break;
+        }
+
+        close();
+        if (++_addrInfoPtr == _addrInfo.end())
+            return "socket";
+    }
+
+    return 0;
+}
+
+
 bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
 {
-    log_debug("begin connect to " << ipaddr << " port " << port);
+    log_trace("begin connect to " << ipaddr << " port " << port);
 
     if( this->fd() > FD_SETSIZE )
     {
         throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
     }
 
-    AddrInfo ai(ipaddr, port);
-
-    log_debug("checking address information");
-    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    if (_isConnected)
     {
-        int fd = ::socket(it->ai_family, SOCK_STREAM, 0);
-        if (fd < 0)
-            continue;
-
-        IODeviceImpl::open(fd, true);
-
-        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-
-        log_debug("created socket " << _fd << " max: " << FD_SETSIZE);
-
-        if( ::connect(this->fd(), it->ai_addr, it->ai_addrlen) == 0 )
-        {
-            _isConnected = true;
-            log_debug("connected successfuly");
-            return true;
-        }
-
-        if(errno != EINPROGRESS)
-        {
-            close();
-            throw System::IOError("connect failed");
-        }
-
-        log_debug("connect in progress");
-        if(_wfds)
-        {
-            FD_SET( this->fd(), _wfds );
-        }
-
-        memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-        return false;
+        // TODO throw exception instead?
+        close();
+        _isConnected = false;
     }
 
-    throw System::SystemError("invalid address information");
+    _addrInfo.init(ipaddr, port);
+    _addrInfoPtr = _addrInfo.begin();
+    _connectResult = tryConnect();
+    checkPendingError();
+    return _isConnected;
 }
 
 
 void TcpSocketImpl::endConnect()
 {
-    log_debug("ending connect");
+    log_trace("ending connect");
 
     if(_wfds && ! _socket.wbuf() )
     {
@@ -185,32 +245,40 @@ void TcpSocketImpl::endConnect()
     {
         try
         {
-            fd_set wfds;
-            FD_ZERO(&wfds);
-            FD_SET(this->fd(), &wfds);
-            bool ret = this->wait(_timeout, 0, &wfds, 0);
-            if(false == ret)
-            {
-                close();
-                throw System::IOTimeout();
-            }
+            checkPendingError();
 
-            int sockerr;
-            socklen_t optlen = sizeof(sockerr);
-            if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+            while (true)
             {
-                int e = errno;
-                close();
-                throw System::SystemError(strerror(e));
-            }
+                int sockerr = checkConnect();
+                if (_isConnected)
+                    return;
 
-            if(sockerr != 0)
-            {
-                close();
-                throw System::IOError(strerror(sockerr)); //TODO dedicated exception type?
-            }
+                if (sockerr != EINPROGRESS)
+                {
+                    // something went wrong - look for next addrInfo
+                    log_debug("sockerr is " << sockerr << " try next");
+                    if (++_addrInfoPtr == _addrInfo.end())
+                    {
+                        // no more addrInfo - propagate error
+                        throw System::IOError("connect");
+                    }
 
-            _isConnected = true;
+                    _connectResult = tryConnect();
+                    if (_isConnected)
+                        return;
+                    checkPendingError();
+                }
+
+                fd_set wfds;
+                FD_ZERO(&wfds);
+                FD_SET(this->fd(), &wfds);
+                bool ret = this->wait(timeout(), 0, &wfds, 0);
+                if(false == ret)
+                {
+                    // nothing has happened in time
+                    throw System::IOTimeout();
+                }
+            }
         }
         catch(...)
         {
@@ -221,7 +289,7 @@ void TcpSocketImpl::endConnect()
 }
 
 
-void TcpSocketImpl::accept(TcpServer& server)
+void TcpSocketImpl::accept(const TcpServer& server)
 {
     socklen_t peeraddr_len = sizeof(_peeraddr);
 
@@ -229,6 +297,7 @@ void TcpSocketImpl::accept(TcpServer& server)
     _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
     if( _fd < 0 )
       throw System::SystemError("accept");
+
 
     System::IODeviceImpl::open(_fd, true);
     //TODO ECONNABORTED EINTR EPERM
@@ -247,6 +316,7 @@ void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
         if( ! _isConnected )
         {
             FD_SET(this->fd(), &wfds);
+            FD_SET(this->fd(), &efds);
         }
     }
 
@@ -261,7 +331,10 @@ int TcpSocketImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
     if( this->fd() > 0 )
     {
         if( ! _isConnected )
+        {
             FD_SET(this->fd(), &wfds);
+            FD_SET(this->fd(), &efds);
+        }
     }
 
     return System::IODeviceImpl::initSelect(rfds, wfds, efds);
@@ -277,10 +350,41 @@ int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     if( this->fd() < 0)
         return 0;
 
-    if( ! _isConnected && FD_ISSET(this->fd(), &wfds) )
+    if( ! _isConnected )
     {
-        _socket.connected.send(_socket);
-        ++avail;
+        if (FD_ISSET(this->fd(), &efds) )
+        {
+            AddrInfo::const_iterator ptr = _addrInfoPtr;
+            if (++ptr == _addrInfo.end())
+            {
+                // not really connected but error
+                // end of addrinfo list means that no working addrinfo was found
+                _socket.connected.send(_socket);
+                return true;
+            }
+            else
+            {
+                _addrInfoPtr = ptr;
+
+                close();
+                _connectResult = tryConnect();
+
+                if (_isConnected || _connectResult)
+                    // immediate success or error
+                    _socket.connected.send(_socket);
+                else
+                    // by closing the previous file handle _pfd is set to 0.
+                    // creating a new socket in tryConnect may also change the value of fd.
+                    initSelect(rfds, wfds, efds);
+
+                return _isConnected;
+            }
+        }
+        else if (FD_ISSET(this->fd(), &wfds) )
+        {
+            _socket.connected.send(_socket);
+            ++avail;
+        }
     }
 
     avail += System::IODeviceImpl::checkEvent(rfds, wfds, efds);

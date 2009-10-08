@@ -35,8 +35,7 @@ namespace Pt {
 
 namespace Net {
 
-AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
-: ai(0)
+void AddrInfo::init(const std::string& ipaddr, unsigned short port)
 {
     struct addrinfo hints;
 
@@ -47,30 +46,31 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
     init(ipaddr, port, hints);
 }
 
+void AddrInfo::init(const std::string& ipaddr, unsigned short port,
+  const addrinfo& hints)
+{
+    if (ai)
+    {
+        freeaddrinfo(ai);
+        ai = 0;
+    }
+
+    std::ostringstream p;
+    p << port;
+
+    // TODO: exception type
+    if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
+        throw System::SystemError(("invalid ipaddress " + ipaddr).c_str());
+
+    // TODO: exception type
+    if (ai == 0)
+        throw System::SystemError("getaddrinfo");
+}
 
 AddrInfo::~AddrInfo()
 {
     if (ai)
-        ::freeaddrinfo(ai);
-}
-
-
-void AddrInfo::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
-{
-    std::ostringstream p;
-    p << port;
-
-    if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-    {
-        // TODO: exception type
-        throw System::SystemError( PT_ERROR_MSG("invalid netork address") );
-    }
-
-    if (ai == 0)
-    {
-        // TODO: exception type
-        throw System::SystemError( PT_ERROR_MSG("getaddrinfo failed") );
-    }
+        freeaddrinfo(ai);
 }
 
 }

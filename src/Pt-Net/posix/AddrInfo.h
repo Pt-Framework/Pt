@@ -29,6 +29,7 @@
 #define Pt_Net_AddrInfo_H
 
 #include <Pt/Net/Api.h>
+#include <Pt/NonCopyable.h>
 #include <string>
 #include <sstream>
 #include <sys/types.h>
@@ -39,75 +40,59 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfo
+class AddrInfo : private Pt::NonCopyable
 {
-    private:
-        ::addrinfo* ai;
-
-    protected:
-        void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
-
-    public:  
-        class const_iterator
-        {
-            private:
-                ::addrinfo* current;
-
-            public:
-                typedef ::addrinfo value_type;
-                typedef std::ptrdiff_t difference_type;
-                typedef std::forward_iterator_tag iterator_category;
-                typedef const ::addrinfo* pointer;
-                typedef const ::addrinfo& reference;
-
-            public:
-                explicit const_iterator(struct addrinfo* ai = 0)
-                : current(ai)
-                { }
-
-                bool operator== (const const_iterator& it) const
-                { return current == it.current; }
-
-                bool operator!= (const const_iterator& it) const
-                { return current != it.current; }
-
-                const_iterator& operator++ ()
-                { current = current->ai_next; return *this; }
-
-                const_iterator operator++ (int)
-                {
-                  const_iterator ret(current);
-                  current = current->ai_next;
-                  return ret;
-                }
-
-                reference operator* () const
-                { return *current; }
-
-                pointer operator-> () const
-                { return current; }
-        };
+        struct addrinfo* ai;
 
     public:
-        AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
-        : ai(0)
-        {
-            init(ipaddr, port, hints);
-        }
+        void init(const std::string& ipaddr, unsigned short port);
+        void init(const std::string& ipaddr, unsigned short port,
+                  const addrinfo& hints);
 
-        AddrInfo(const std::string& ipaddr, unsigned short port);
-
+        AddrInfo()
+          : ai(0)
+          { }
+        AddrInfo(const std::string& ipaddr, unsigned short port)
+          : ai(0)
+          { init(ipaddr, port); }
+        AddrInfo(const std::string& ipaddr, unsigned short port,
+                 const addrinfo& hints)
+          : ai(0)
+          { init(ipaddr, port, hints); }
         ~AddrInfo();
 
-        const_iterator begin() const
-        { return const_iterator(ai); }
+        class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+        {
+            struct addrinfo* current;
 
-        const_iterator end() const
-        { return const_iterator(); }
+          public:
+            explicit const_iterator(struct addrinfo* ai = 0)
+              : current(ai)
+              { }
+            bool operator== (const const_iterator& it) const
+              { return current == it.current; }
+            bool operator!= (const const_iterator& it) const
+              { return current != it.current; }
+            const_iterator& operator++ ()
+              { current = current->ai_next; return *this; }
+            const_iterator operator++ (int)
+              {
+                const_iterator ret(current);
+                current = current->ai_next;
+                return ret;
+              }
+            reference operator* () const
+              { return *current; }
+            pointer operator-> () const
+              { return current; }
+        };
+
+        const_iterator begin() const  { return const_iterator(ai); }
+        const_iterator end() const    { return const_iterator(); }
 };
 
 } // namespace Net
 
-} // nameace Pt
+} // namespace Pt
 
 #endif

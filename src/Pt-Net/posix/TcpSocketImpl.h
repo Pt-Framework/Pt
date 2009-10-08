@@ -32,6 +32,7 @@
 #include "Pt/Net/Api.h"
 #include "Pt/Signal.h"
 #include "IODeviceImpl.h"
+#include "AddrInfo.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -56,17 +57,24 @@ class TcpSocketImpl : public System::IODeviceImpl
         TcpSocket& _socket;
         bool _isConnected;
         struct sockaddr_storage _peeraddr;
+        AddrInfo _addrInfo;
+        AddrInfo::const_iterator _addrInfoPtr;
+
+        int checkConnect();
+        void checkPendingError();
+        const char* tryConnect();
+        const char* _connectResult;
 
     public:
         TcpSocketImpl(TcpSocket& socket);
 
         ~TcpSocketImpl();
 
+        void close();
+
         std::string getSockAddr() const;
 
         std::string getPeerAddr() const;
-
-        void close();
 
         bool isConnected() const
         { return _isConnected; }
@@ -77,7 +85,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void endConnect();
 
-        void accept(TcpServer& server);
+        void accept(const TcpServer& server);
 
         void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
