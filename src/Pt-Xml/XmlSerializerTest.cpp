@@ -146,45 +146,22 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 }
 
 
-void operator <<=(Pt::SerializationContext& ctx, const DateSmartPtr& sp)
+// void operator <<=(Pt::SerializationContext& ctx, const DateSmartPtr& sp)
+// {
+
+// }
+
+
+void operator <<=(Pt::SymbolInfo& sym, const DateSmartPtr& sp)
 {
     if( sp.getPointer() )
     {
-        bool first = ctx.beginSave(sp.getPointer(), "name");
-        if(first)
-        {
-            ctx <<= *sp;
-            ctx.finishSave();
-        }
-        else
-        {
-            ctx.prepareId( sp.getPointer() );
-        }
-    }
-    else
-    {
-        //si.out() <<= sp.getPointer();
+       std::cerr << "sym SP" << std::endl;
+        bool first = sym.save(*sp);
+        if( ! first )
+            sym.context->prepareId( sp.getPointer() );
     }
 }
-
-// struct SymbolInfo {};
-// void operator <<=(SymbolInfo& sym, const DateSmartPtr& sp)
-// {
-//     if( sp.getPointer() )
-//     {
-//         bool first = sym.begin( sp.getPointer() ); // SymblInfo knows instance name
-//         if(first)
-//         {
-//             sym.context() <<= *sp;
-//             sym.finish();
-//         }
-//         else
-//         {
-//             sym.context().prepareId( sp.getPointer() );
-//             // operator <<=(Context; SmartPtr) only relevant for private instances???
-//         }
-//     }
-// }
 
 
 void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
@@ -197,13 +174,13 @@ void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
     if( sp.getPointer() )
     {
-        if( si.beginSave( *sp ) )
+        if( ! si.save( *sp ) )
         {
-            std::cerr << "saving SP" << std::endl;
-            si.out() <<= *sp;
+             si.out() <<= sp.getPointer();
+             std::cerr << "loaded SP" << std::endl;
         }
         else
-            si.out() <<= sp.getPointer();
+           std::cerr << "saved SP" << std::endl;
     }
     else
     {
