@@ -63,13 +63,16 @@ void XmlSerializationContext::finishSave()
 void XmlSerializationContext::prepareId(const void* p)
 {
     if(p)
+    {
+        std::cerr << "PREP ID " << p  << std::endl;
         _refmap[p] = std::string();
+    }
 }
 
 
 const char* XmlSerializationContext::getId(const void* p)
 {
-    std::cerr << "GET ID" << std::endl;
+    std::cerr << "GET ID " << p << std::endl;
     if(p == 0)
     {
         return "null";
@@ -92,8 +95,8 @@ const char* XmlSerializationContext::getId(const void* p)
 
 const char* XmlSerializationContext::makeId(const void* p)
 {
-    std::cerr << "MAKE ID" << std::endl;
-    if( _idmap.find(p) == _idmap.end() )
+    std::cerr << "MAKE ID " << p << std::endl;
+    if( _refmap.find(p) == _refmap.end() )
     {
         return 0;
     }

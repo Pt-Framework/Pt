@@ -188,7 +188,9 @@ bool SerializationInfo::beginSave(const void* p)
                 first = false;
             }
 
-            /// XXX 
+            // TODO: return true only if type is saved for the first time
+
+            /// XXX
             /// if(first)
                 _bound = p;
         }

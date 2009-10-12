@@ -493,11 +493,7 @@ class SaveInfo
     public:
         explicit SaveInfo(SerializationInfo& info)
         : si(&info)
-        //, _saved(false)
         {}
-
-        // ~SaveInfo()
-        // { if(_saved) si->finishSave();  }
 
         SerializationInfo& out()
         { return *si; }
@@ -515,16 +511,8 @@ class SaveInfo
             return first;
         }
 
-        // template <typename T>
-        // bool beginSave(const T& type)
-        // {
-        //     _saved = si->beginSave( &type );
-        //     return _saved;
-        // }
-
     private:
         SerializationInfo* si;
-        //bool _saved;
 };
 
 
@@ -549,8 +537,7 @@ inline Save<T> operator<<= (const save&, const T& type)
 template <typename T>
 inline void operator<<= (SaveInfo& si, const T& type)
 {
-    if( ! si.save( type ) )
-        si.out() <<= &type;
+    si.save( type );
 }
 
 
@@ -633,14 +620,6 @@ inline void operator >>=(const LoadInfo& li, T& type)
         li.beginLoad( type );
         li.in() >>= type;
     }
-}
-
-
-template <typename T>
-void operator <<=(Pt::SerializationContext& ctx, const T& type)
-{
-    // export symbols, if any are reachable
-    // prepare id's if any
 }
 
 
