@@ -43,10 +43,10 @@ XmlSerializationContext::~XmlSerializationContext()
 
 bool XmlSerializationContext::beginSave(const void* p, const std::string&)
 {
-    std::cerr << "ctx beginSave " << p << std::endl;
     if( _idmap.find(p) == _idmap.end() )
     {
         unsigned id = _idmap.size();
+        std::cerr << "ctx beginSave " << p << " " << id << std::endl;
         _idmap[p] = id;
         return true;
     }
@@ -96,11 +96,19 @@ const char* XmlSerializationContext::getId(const void* p)
 const char* XmlSerializationContext::makeId(const void* p)
 {
     std::cerr << "MAKE ID " << p << std::endl;
+
+    // already saved
+    if( _idmap.find(p) == _idmap.end() )
+        return 0;
+
+    // not referenced, return empty id
     if( _refmap.find(p) == _refmap.end() )
     {
-        return 0;
+        _idmap.erase(p);
+        return "";
     }
 
+    // referenced, return id
     _refmap[p] = convert<std::string>( _idmap[p] );
     _idmap.erase(p);
     return _refmap[p].c_str();
