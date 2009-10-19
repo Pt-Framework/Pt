@@ -253,7 +253,10 @@ bool Socket::onOutput(System::StreamBuffer& sb)
             _request.clear();
             _reply.clear();
             _parser.reset(false);
-            _stream.buffer().beginRead();
+            if (sb.in_avail())
+                onInput(sb);
+            else
+                _stream.buffer().beginRead();
         }
         else
         {
