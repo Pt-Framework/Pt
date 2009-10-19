@@ -30,8 +30,9 @@
 #define Pt_Net_TcpSocket_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Signal.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/Net/AddrInfo.h>
+#include <Pt/Signal.h>
 #include <string>
 
 namespace Pt {
@@ -39,17 +40,20 @@ namespace Pt {
 namespace Net {
 
 class TcpServer;
+class AddrInfo;
 
 class PT_NET_API TcpSocket : public System::IODevice
 {
-    class TcpSocketImpl* _impl;
+        class TcpSocketImpl* _impl;
 
     public:
         TcpSocket();
 
-        TcpSocket(TcpServer& server);
+        TcpSocket(const TcpServer& server);
 
         TcpSocket(const std::string& ipaddr, unsigned short int port);
+
+        explicit TcpSocket(const AddrInfo& addrinfo);
 
         ~TcpSocket();
 
@@ -64,17 +68,23 @@ class PT_NET_API TcpSocket : public System::IODevice
         std::size_t getTimeout() const
         { return timeout(); }
 
-        void accept(TcpServer& server);
+        void accept(const TcpServer& server);
 
-        void connect(const std::string& ipaddr, unsigned short int port);
+        void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port);
+        void connect(const std::string& ipaddr, unsigned short int port)
+        { connect(AddrInfo(ipaddr, port)); }
+
+        bool beginConnect(const AddrInfo& addrinfo);
+
+        bool beginConnect(const std::string& ipaddr, unsigned short int port)
+        { return beginConnect(AddrInfo(ipaddr, port)); }
 
         void endConnect();
 
-        bool isConnected() const;
-
         Signal<TcpSocket&> connected;
+
+        bool isConnected() const;
 
     protected:
         // inherit doc

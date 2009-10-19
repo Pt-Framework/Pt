@@ -42,7 +42,7 @@ TcpSocket::TcpSocket()
 }
 
 
-TcpSocket::TcpSocket(TcpServer& server)
+TcpSocket::TcpSocket(const TcpServer& server)
 : _impl(0)
 {
     _impl = new TcpSocketImpl(*this);
@@ -61,6 +61,18 @@ TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
     this->connect(ipaddr, port);
+
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(const AddrInfo& addrinfo)
+: _impl(0)
+{
+    _impl = new TcpSocketImpl(*this);
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    this->connect(addrinfo);
 
     impl.release();
 }
@@ -103,20 +115,20 @@ std::size_t TcpSocket::timeout() const
 }
 
 
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
+void TcpSocket::connect(const AddrInfo& addrinfo)
 {
     this->close();
-    _impl->connect(ipaddr, port);
+    _impl->connect(addrinfo);
     this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 }
 
 
-bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
     this->close();
-    bool ret = _impl->beginConnect(ipaddr, port);
+    bool ret = _impl->beginConnect(addrinfo);
     this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
@@ -139,7 +151,7 @@ bool TcpSocket::isConnected() const
 }
 
 
-void TcpSocket::accept(TcpServer& server)
+void TcpSocket::accept(const TcpServer& server)
 {
     this->close();
     _impl->accept(server);

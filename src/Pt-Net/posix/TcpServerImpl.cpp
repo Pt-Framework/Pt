@@ -26,8 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "AddrInfo.h"
+#include <Pt/Net/AddrInfo.h>
 #include "TcpServerImpl.h"
+#include "AddrInfoImpl.h"
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/Selector.h>
@@ -76,11 +77,11 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
 
     AddrInfo ai(ipaddr, port);
 
-    int reuseAddr = 1;
+    static const int reuseAddr = 1;
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one
-    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
     {
         try
         {

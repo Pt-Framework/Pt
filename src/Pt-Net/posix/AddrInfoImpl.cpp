@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2003,2009 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,76 +26,67 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_TcpSocketImpl_H
-#define PT_NET_TcpSocketImpl_H
-
-#include "Pt/Signal.h"
-#include "IODeviceImpl.h"
-#include "Pt/Net/AddrInfo.h"
 #include "AddrInfoImpl.h"
+#include <Pt/System/SystemError.h>
 #include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include <sstream>
+#include <string.h>
 
 namespace Pt {
 
-namespace System {
-    class SelectorBase;
-}
-
 namespace Net {
 
-class TcpServer;
-class TcpSocket;
+    void AddrInfoImpl::init(const std::string& host, unsigned short port)
+    {
+        struct addrinfo hints;
 
-class TcpSocketImpl : public System::IODeviceImpl
-{
-    private:
-        TcpSocket& _socket;
-        bool _isConnected;
-        struct sockaddr_storage _peeraddr;
-        AddrInfo _addrInfo;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
+        // give some useful default values to use for getaddrinfo()
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_socktype = SOCK_STREAM;
 
-        int checkConnect();
-        void checkPendingError();
-        const char* tryConnect();
-        const char* _connectResult;
+        init(host, port, hints);
+    }
 
-    public:
-        TcpSocketImpl(TcpSocket& socket);
+    void AddrInfoImpl::init(const std::string& host, unsigned short port,
+        const addrinfo& hints)
+    {
+        if (_ai)
+        {
+            freeaddrinfo(_ai);
+            _ai = 0;
+        }
 
-        ~TcpSocketImpl();
+        _host = host;
+        _port = port;
 
-        void close();
+        std::ostringstream p;
+        p << port;
 
-        std::string getSockAddr() const;
+        // TODO: exception type
+        if (0 != ::getaddrinfo(host.c_str(), p.str().c_str(), &hints, &_ai))
+            throw System::SystemError(("invalid ipaddress " + host).c_str());
 
-        std::string getPeerAddr() const;
+        // TODO: exception type
+        if (_ai == 0)
+            throw System::SystemError("getaddrinfo");
+    }
 
-        bool isConnected() const
-        { return _isConnected; }
+    AddrInfoImpl::~AddrInfoImpl()
+    {
+        if (_ai)
+            freeaddrinfo(_ai);
+    }
 
-        void connect(const AddrInfo& addrinfo);
+    const std::string& AddrInfoImpl::host() const
+    {
+        return _host;
+    }
 
-        bool beginConnect(const AddrInfo& addrinfo);
-
-        void endConnect();
-
-        void accept(const TcpServer& server);
-
-        void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-        int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-        int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
-};
+    unsigned short AddrInfoImpl::port() const
+    {
+        return _port;
+    }
 
 } // namespace Net
 
 } // namespace Pt
-
-#endif

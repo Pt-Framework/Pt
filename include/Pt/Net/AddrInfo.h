@@ -26,8 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/AddrInfo.h>
-#include "AddrInfoImpl.h"
+#ifndef PT_NET_ADDRINFO_H
+#define PT_NET_ADDRINFO_H
+
+#include <Pt/Net/Api.h>
+#include <string>
 
 namespace Pt
 {
@@ -35,59 +38,33 @@ namespace Pt
 namespace Net
 {
 
-AddrInfo::AddrInfo(AddrInfoImpl* impl)
-  : _impl(impl)
-{
-    if (_impl)
-        _impl->addRef();
-}
+    class AddrInfoImpl;
 
-
-AddrInfo::AddrInfo(const std::string& host, unsigned short port)
-    : _impl(new AddrInfoImpl(host, port))
-{
-    _impl->addRef();
-}
-
-AddrInfo::AddrInfo(const AddrInfo& src)
-    : _impl(src._impl)
-{
-    _impl->addRef();
-}
-
-AddrInfo::~AddrInfo()
-{
-    if (_impl)
-        _impl->release();
-}
-
-AddrInfo& AddrInfo::operator= (const AddrInfo& src)
-{
-    if (src._impl != _impl)
+    class PT_NET_API AddrInfo
     {
-        if (_impl)
-            _impl->release();
+        public:
+            AddrInfo()
+                : _impl(0)
+                { }
+            explicit AddrInfo(AddrInfoImpl* impl);
+            AddrInfo(const std::string& host, unsigned short port);
+            AddrInfo(const AddrInfo& src);
+            ~AddrInfo();
 
-        _impl = src._impl;
+            AddrInfo& operator= (const AddrInfo& src);
 
-        if (_impl)
-            _impl->addRef();
-    }
+            const std::string& host() const;
+            unsigned short port() const;
 
-    return *this;
-}
+            AddrInfoImpl* impl()               { return _impl; }
+            const AddrInfoImpl* impl() const   { return _impl; }
 
-const std::string& AddrInfo::host() const
-{
-    return _impl->host();
-}
+        private:
+            AddrInfoImpl* _impl;
+    };
 
-unsigned short AddrInfo::port() const
-{
-    return _impl->port();
-}
+} // namespace Net
 
+} // namespace Pt
 
-}
-
-}
+#endif // PT_NET_ADDRINFO_H
