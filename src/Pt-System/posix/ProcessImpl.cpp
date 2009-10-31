@@ -27,6 +27,7 @@
 #include "IODeviceImpl.h"
 
 #include <cstdlib>
+#include <stdio.h>
 #include <vector>
 #include <signal.h>
 #include <errno.h>

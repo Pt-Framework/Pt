@@ -30,7 +30,7 @@
 #include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>
-#include <iostream>
+#include <stdio.h>
 
 #define log_define(a)
 #define log_trace(a)
