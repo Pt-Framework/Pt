@@ -35,6 +35,7 @@
 #include <cerrno>
 #include <cassert>
 #include <cstring>
+#include <unistd.h>
 
 #define log_debug(x)
 
