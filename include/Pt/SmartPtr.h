@@ -459,6 +459,16 @@ namespace Pt {
             { return object; }
     };
 
+template<typename T, typename B, typename C>
+void operator >>=(const SerializationInfo& si, SmartPtr<T,B,C>& date)
+{
+}
+
+template<typename T, typename B, typename C>
+void operator <<=(SerializationInfo& si, const SmartPtr<T,B,C>& date)
+{
+}
+
 } // namespace Pt
 
 #endif // PT_SMARTPTR_H
