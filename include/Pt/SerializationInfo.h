@@ -488,15 +488,17 @@ struct save
 {};
 
 
-class SaveInfo
+template <typename T>
+class SaveInfo;
+
+
+template <>
+class SaveInfo<save>
 {
     public:
         explicit SaveInfo(SerializationInfo& info)
         : si(&info)
         {}
-
-        SerializationInfo& out()
-        { return *si; }
 
         template <typename T>
         bool save(const T& type)
@@ -511,7 +513,12 @@ class SaveInfo
             return first;
         }
 
-    private:
+        template <typename T>
+        void put(const T& type)
+        {
+            *si <<= type;
+        }
+
         SerializationInfo* si;
 };
 
@@ -535,17 +542,17 @@ inline Save<T> operator<<= (const save&, const T& type)
 
 
 template <typename T>
-inline void operator<<= (SaveInfo& si, const T& type)
+inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
 {
-    si.save( type );
+    SaveInfo<save> info(si);
+    info <<= *(sv.type);
 }
 
 
-template <typename T>
-inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
+template <typename S, typename T>
+inline void operator<<= (SaveInfo<S>& si, const T& type)
 {
-    SaveInfo info(si);
-    info <<= *(sv.type);
+    si.save( type );
 }
 
 
@@ -634,6 +641,7 @@ template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
     si.saveReference( ptr );
+    //std::cerr << "saveReference " << ptr << std::endl;
     si.setTypeName("reference");
 }
 

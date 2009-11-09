@@ -67,7 +67,7 @@ class Decomposer : public IDecomposer
 
         void begin(const T& type, SerializationContext* context = 0)
         {
-            std::cerr << "begin " << &type << std::endl;
+            //std::cerr << "begin " << &type << std::endl;
             _type = &type;
 
             if(context)
@@ -88,7 +88,7 @@ class Decomposer : public IDecomposer
 
         virtual void format(Formatter& formatter)
         {
-            std::cerr << "format " << _type << std::endl;
+            //std::cerr << "format " << _type << std::endl;
             _si <<= Pt::save() <<= *_type;
             _si.format(formatter);
         }

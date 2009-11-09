@@ -94,7 +94,7 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 
 void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
 {
-    std::cerr << "fixup" << &fixme << std::endl;
+    //std::cerr << "fixup" << &fixme << std::endl;
     void* target = ctx.getFixup(&fixme, "date");
     Pt::Date* to = static_cast< Pt::Date* >(target);
     fixme.setDate(to);
@@ -104,9 +104,10 @@ void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
 void operator <<=(Pt::SerializationContext& ctx, const DateRef& dr)
 {
     // export symbols, if any are reachable
-    ctx.prepareId( dr.date() );
+    ctx <<= dr.date();
 }
 
+// possibly unify both <<= above and below
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
@@ -120,6 +121,16 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 namespace Pt {
 
 typedef SmartPtr<Date> DateSmartPtr;
+
+template <typename S>
+void operator <<=(Pt::SaveInfo<S>& si, const DateSmartPtr& sp)
+{
+    if( ! sp.getPointer() || ! si.save( *sp ) )
+    {
+        si.put( sp.getPointer() );
+    }
+}
+
 
 void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
 {
@@ -145,34 +156,6 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
     si >>= *sp;
 }
 
-
-void operator <<=(Pt::SymbolInfo& sym, const DateSmartPtr& sp)
-{
-    if( sp.getPointer() )
-    {
-        if( ! sym.save(*sp) )
-            sym.context->prepareId( sp.getPointer() );
-    }
-    else
-    {
-        sym.context->prepareId( sp.getPointer() );
-    }
-}
-
-
-void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
-{
-    if( sp.getPointer() )
-    {
-        if( ! si.save( *sp ) )
-             si.out() <<= sp.getPointer();
-    }
-    else
-    {
-        si.out() <<= sp.getPointer();
-    }
-}
-
 }
 
 
@@ -183,7 +166,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
             Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
-            //yPt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
+            Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
             //Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
 
@@ -230,6 +213,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(output);
             ser.context().addSurrogate("date", new IsoDateSurrogate);
             ser.serialize(date1, "date1");
+            //ser.serialize(date1, "date_1b");
             ser.serialize(dr, "dref");
 
             ser.serialize(dateptr, "dateptr");
@@ -242,10 +226,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             Pt::Date date2(1, 1, 1);
             dr.setDate(0);
-            /*Pt::Date* dateptr2 = 0; // const ?
+            Pt::Date* dateptr2 = 0; // const ?
             Pt::DateSmartPtr datesp3;
             Pt::DateSmartPtr datesp4;
-            Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );*/
+            Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
@@ -256,10 +240,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.context().addSurrogate("date", new IsoDateSurrogate);
             deser.deserialize(date2);
             deser.deserialize(dr);
-            /*deser.deserialize(dateptr2);
+            deser.deserialize(dateptr2);
             deser.deserialize(datesp3);
             deser.deserialize(datesp4);
-            deser.deserialize(nullDate);*/
+            deser.deserialize(nullDate);
 
             deser.finish();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
@@ -270,8 +254,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
-            //PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
-            //PT_UNIT_ASSERT( nullDate.getPointer() == 0);
+            PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
+            PT_UNIT_ASSERT( nullDate.getPointer() == 0);
         }
 
         static void dateToIso(Pt::SerializationInfo& si, Pt::Formatter& formatter)

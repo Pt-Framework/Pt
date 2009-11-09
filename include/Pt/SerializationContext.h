@@ -35,7 +35,6 @@
 
 namespace Pt {
 
-class SerializationInfo;
 class SerializationNode;
 class SerializationCache;
 
@@ -122,9 +121,27 @@ void operator <<=(Pt::SerializationContext& ctx, const T& type)
 }
 
 
-struct SymbolInfo
+template <typename T>
+void operator <<=(Pt::SerializationContext& ctx, const T* type)
 {
-    SymbolInfo(SerializationContext& ctx, const char* n)
+    ctx.prepareId(type);
+}
+
+
+struct sym
+{
+    sym(const char* n)
+    : name(n)
+    {}
+
+    const char* name;
+};
+
+
+template <>
+struct SaveInfo<sym>
+{
+    SaveInfo(SerializationContext& ctx, const char* n)
     : context(&ctx)
     , name(n)
     {}
@@ -140,6 +157,12 @@ struct SymbolInfo
         }
 
         return false;
+    }
+
+    template <typename T>
+    void put(const T& t)
+    {
+        *context <<= t;
     }
 
     SerializationContext* context;
@@ -160,16 +183,6 @@ struct Symbol
 };
 
 
-struct sym
-{
-    sym(const char* n)
-    : name(n)
-    {}
-
-    const char* name;
-};
-
-
 template <typename T>
 Symbol<T> operator <<=(const sym& s, const T& t)
 {
@@ -178,16 +191,9 @@ Symbol<T> operator <<=(const sym& s, const T& t)
 
 
 template <typename T>
-void operator <<=(SymbolInfo& s, const T& t)
-{
-    s.save(t);
-}
-
-
-template <typename T>
 inline void operator <<=(SerializationContext& context, const Symbol<T>& s)
 {
-    SymbolInfo si(context, s.name);
+    SaveInfo<sym> si(context, s.name);
     si <<= *(s.type);
 }
 
