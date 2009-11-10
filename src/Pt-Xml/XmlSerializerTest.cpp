@@ -108,6 +108,7 @@ void operator <<=(Pt::SerializationContext& ctx, const DateRef& dr)
 }
 
 // possibly unify both <<= above and below
+// do fixup from Composer with ctx >>= T
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
@@ -128,6 +129,19 @@ void operator <<=(Pt::SaveInfo<S>& si, const DateSmartPtr& sp)
     if( ! sp.getPointer() || ! si.save( *sp ) )
     {
         si.put( sp.getPointer() );
+    }
+}
+
+
+inline void operator >>=(const LoadInfo& li, DateSmartPtr& sp)
+{
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(sp);
+    }
+    else
+    {
+        li.load(sp);
     }
 }
 

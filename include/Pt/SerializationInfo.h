@@ -565,27 +565,39 @@ class LoadInfo
     public:
         explicit LoadInfo(const SerializationInfo& info)
         : si(&info)
-        , _loaded(false)
+        //, _loaded(false)
         {}
 
         ~LoadInfo()
-        { if(_loaded) si->finishLoad(); }
+        { /*if(_loaded) si->finishLoad();*/ }
 
         const SerializationInfo& in() const
         { return *si; }
 
+        // template <typename T>
+        // bool beginLoad(T& type) const
+        // {
+        //     T* tp = &type;
+        //     si->beginLoad( tp, typeid(T) );
+        //     _loaded = true;
+        //     return _loaded;
+        // }
+
         template <typename T>
-        bool beginLoad(T& type) const
+        void load(T& type) const
         {
             T* tp = &type;
+            //if( si->beginLoad( tp, typeid(T) ) )
             si->beginLoad( tp, typeid(T) );
-            _loaded = true;
-            return _loaded;
+            //{
+                *si >>= type;
+                si->finishLoad();
+           // }
         }
 
     private:
         const SerializationInfo* si;
-        mutable bool _loaded;
+        //mutable bool _loaded;
 };
 
 
@@ -618,15 +630,16 @@ inline void operator >>=(const SerializationInfo& si, const Load<T>& ld)
 template <typename T>
 inline void operator >>=(const LoadInfo& li, T& type)
 {
-    if(li.in().category() == Pt::SerializationInfo::Reference)
-    {
-        li.in().loadReference(type);
-    }
-    else
-    {
-        li.beginLoad( type );
-        li.in() >>= type;
-    }
+    // if(li.in().category() == Pt::SerializationInfo::Reference)
+    // {
+    //     li.in().loadReference(type);
+    // }
+    // else
+    // {
+        li.load(type);
+        //li.beginLoad( type );
+        //li.in() >>= type;
+    //}
 }
 
 
