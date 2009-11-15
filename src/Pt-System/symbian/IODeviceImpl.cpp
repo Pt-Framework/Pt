@@ -89,7 +89,7 @@ void IODeviceImpl::open(int fd, bool isAsync)
     {
         int flags = fcntl(_fd, F_GETFL);
         flags |= O_NONBLOCK ;
-        fcntl(_fd, F_SETFL, O_NONBLOCK);
+        fcntl(_fd, F_SETFL, flags);
     }
 }
 
