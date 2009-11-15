@@ -2,6 +2,7 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2009 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -68,6 +69,9 @@ namespace System {
     }
     @endcode
 */
+
+    class PipeImpl;
+
 class PT_SYSTEM_API Pipe : public NonCopyable
 {
     private:
@@ -84,7 +88,7 @@ class PT_SYSTEM_API Pipe : public NonCopyable
             The default constructor will create the pipe and the appropriate
             IODevices to read and write to the pipe.
         */
-        Pipe(OpenMode mode = Sync);
+        explicit Pipe(OpenMode mode = Sync);
 
         /** @brief Destructor
 
@@ -98,11 +102,60 @@ class PT_SYSTEM_API Pipe : public NonCopyable
         */
         IODevice& out();
 
+        const IODevice& out() const;
+
         /** @brief Endpoint of the pipe to write to
 
             @return An IODevice used to write to the pipe
         */
         IODevice& in();
+
+        const IODevice& in() const;
+
+        int getReadFd() const;
+
+        int getWriteFd() const;
+
+        void closeReadFd()
+        { out().close(); }
+
+        void closeWriteFd()
+        { in().close(); }
+
+        /// Redirect write-end to stdout.
+        /// When the close argument is set, closes the original filedescriptor
+        void redirectStdout(bool close = true);
+
+        /// Redirect read-end to stdin.
+        /// When the close argument is set, closes the original filedescriptor
+        void redirectStdin(bool close = true);
+
+        /// Redirect write-end to stdout.
+        /// When the close argument is set, closes the original filedescriptor
+        void redirectStderr(bool close = true);
+
+        size_t write(const char* buf, size_t count)
+        {
+          return in().write(buf, count);
+        }
+
+        void write(char ch)
+        {
+          in().write(&ch, 1);
+        }
+
+        size_t read(char* buf, size_t count)
+        {
+          return out().read(buf, count);
+        }
+
+        char read()
+        {
+          char ch;
+          out().read(&ch, 1);
+          return ch;
+        }
+
 };
 
 } // namespace System

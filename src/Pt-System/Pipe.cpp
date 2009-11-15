@@ -2,6 +2,7 @@
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2009 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,9 +53,48 @@ IODevice& Pipe::out()
     return _impl->out();
 }
 
+const IODevice& Pipe::out() const
+{
+    return _impl->out();
+}
+
 IODevice& Pipe::in()
 {
     return _impl->in();
+}
+
+const IODevice& Pipe::in() const
+{
+    return _impl->in();
+}
+
+int Pipe::getReadFd() const
+{
+    return _impl->out().fd();
+}
+
+int Pipe::getWriteFd() const
+{
+    return _impl->in().fd();
+}
+
+/// Redirect read-end to stdin.
+/// When the close argument is set, closes the original filedescriptor
+void Pipe::redirectStdin(bool close)
+{
+    _impl->out().redirect(0, close);
+}
+
+void Pipe::redirectStdout(bool close)
+{
+    _impl->in().redirect(1, close);
+}
+
+/// Redirect write-end to stdout.
+/// When the close argument is set, closes the original filedescriptor
+void Pipe::redirectStderr(bool close)
+{
+    _impl->in().redirect(2, close);
 }
 
 } // namespace System

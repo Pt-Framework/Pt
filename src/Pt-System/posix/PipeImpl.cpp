@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2009 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,13 +54,25 @@ PipeIODevice::~PipeIODevice()
     {}
 }
 
+void PipeIODevice::redirect(int newFd, bool close)
+{
+    int ret = ::dup2(fd(), newFd);
+    if (ret < 0)
+        throw SystemError("dup2");
+
+    if (close)
+    {
+        IODevice::close();
+        _impl.open(newFd, async());
+    }
+}
 
 void PipeIODevice::open(int fd, bool isAsync)
 {
     _impl.open(fd, isAsync);
     this->setEnabled(true);
-    this->setEof(false);
     this->setAsync(isAsync);
+    this->setEof(false);
 }
 
 
@@ -117,22 +130,22 @@ PipeImpl::PipeImpl(bool isAsync)
     if(-1 == ::pipe(fds) )
         throw SystemError( PT_ERROR_MSG("pipe failed") );
 
-    _out.open( fds[0] ,isAsync );
+    _out.open( fds[0], isAsync );
     _in.open( fds[1], isAsync );
 }
 
 
-PipeImpl::~PipeImpl()
-{
-}
-
-
-IODevice& PipeImpl::out()
+PipeIODevice& PipeImpl::out()
 {
     return _out;
 }
 
-IODevice& PipeImpl::in()
+const PipeIODevice& PipeImpl::out() const
+{
+    return _out;
+}
+
+PipeIODevice& PipeImpl::in()
 {
     return _in;
 }
