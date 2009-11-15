@@ -459,6 +459,8 @@ namespace Pt {
             { return object; }
     };
 
+class SerializationInfo;
+
 template<typename T, typename B, typename C>
 void operator >>=(const SerializationInfo& si, SmartPtr<T,B,C>& date)
 {
