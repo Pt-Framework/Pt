@@ -113,6 +113,57 @@ class PT_API SerializationContext
 };
 
 
+struct BreakDown
+{
+    BreakDown(SerializationContext& ctx)
+    : _ctx(ctx)
+    {}
+
+    template <typename T>
+    bool save(const T& t, const char* name)
+    {
+        if( _ctx.beginSave(&t, name) )
+        {
+            breakdown(*this, t);
+            _ctx.finishSave();
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename T>
+    void prepareId(const T* t)
+    {
+        _ctx.prepareId(t);
+    }
+
+    SerializationContext& _ctx;
+};
+
+
+template <typename T>
+void breakdown(Pt::BreakDown& b, const T& type)
+{
+    // export symbols, if any are reachable
+    // prepare id's if any
+}
+
+
+template <typename T>
+void breakdown(Pt::BreakDown& b, const T* t)
+{
+    b.prepareId(t);
+}
+
+
+template <typename T>
+void symbolize(Pt::BreakDown& b, const T& type, const char* name)
+{
+    b.save(type, name);
+}
+
+/*
 template <typename T>
 void operator <<=(Pt::SerializationContext& ctx, const T& type)
 {
@@ -196,7 +247,7 @@ inline void operator <<=(SerializationContext& context, const Symbol<T>& s)
     SaveInfo<sym> si(context, s.name);
     si <<= *(s.type);
 }
-
+*/
 } // namespace Pt
 
 #endif

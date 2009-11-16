@@ -71,7 +71,12 @@ class Decomposer : public IDecomposer
             _type = &type;
 
             if(context)
-                *context <<= Pt::sym("name") <<= type;
+            {
+                //*context <<= Pt::sym("name") <<= type;
+
+                Pt::BreakDown b(*context);
+                symbolize(b, type, "name");
+            }
 
             _si.clear();
             _si.setContext(context);

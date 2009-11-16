@@ -55,7 +55,7 @@ class DateRef
         void setDate(Pt::Date* date)
         { _date = date; }
 
-        Pt::Date* date() const
+        const Pt::Date* date() const
         { return _date; }
 
         int n() const
@@ -101,11 +101,19 @@ void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
 }
 
 
+void breakdown(Pt::BreakDown& b, const DateRef& dr)
+{
+    //std::cerr << "breakdown DateRef" << dr.date() << std::endl;
+    breakdown(b, dr.date());
+}
+
+/*
 void operator <<=(Pt::SerializationContext& ctx, const DateRef& dr)
 {
     // export symbols, if any are reachable
     ctx <<= dr.date();
 }
+*/
 
 // possibly unify both <<= above and below
 // do fixup from Composer with ctx >>= T
@@ -122,6 +130,23 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 namespace Pt {
 
 typedef SmartPtr<Date> DateSmartPtr;
+
+void symbolize(Pt::BreakDown& b, const DateSmartPtr& sp, const char* name)
+{
+    if( ! sp.getPointer() || ! b.save( *sp, name ) )
+    {
+        b.prepareId( sp.getPointer() );
+    }
+}
+
+
+void breakdown(Pt::BreakDown& b, const DateSmartPtr& sp)
+{
+    /*if( ! sp.getPointer() || ! b.save( *sp ) )
+    {
+        b.prepareId( sp.getPointer() );
+    }*/
+}
 
 template <typename S>
 void operator <<=(Pt::SaveInfo<S>& si, const DateSmartPtr& sp)
