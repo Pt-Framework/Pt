@@ -103,8 +103,18 @@ void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
 
 void breakdown(Pt::BreakDown& b, const DateRef& dr)
 {
-    //std::cerr << "breakdown DateRef" << dr.date() << std::endl;
+    std::cerr << "### breakdown DateRef" << dr.date() << std::endl;
     breakdown(b, dr.date());
+}
+
+void symbolize(Pt::BreakDown& b, const DateRef& dr, const char* name)
+{
+    std::cerr << "### symbolize DateRef " << dr.date() << std::endl;
+    //b.save(dr, name);
+
+    b._ctx.beginSave(&dr, name);
+    b.prepareId( dr.date() );
+    b._ctx.finishSave();
 }
 
 /*
@@ -148,8 +158,8 @@ void breakdown(Pt::BreakDown& b, const DateSmartPtr& sp)
     }*/
 }
 
-template <typename S>
-void operator <<=(Pt::SaveInfo<S>& si, const DateSmartPtr& sp)
+
+void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
     {

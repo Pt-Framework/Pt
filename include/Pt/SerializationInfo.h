@@ -488,12 +488,7 @@ struct save
 {};
 
 
-template <typename T>
-class SaveInfo;
-
-
-template <>
-class SaveInfo<save>
+class SaveInfo
 {
     public:
         explicit SaveInfo(SerializationInfo& info)
@@ -544,13 +539,13 @@ inline Save<T> operator<<= (const save&, const T& type)
 template <typename T>
 inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
 {
-    SaveInfo<save> info(si);
+    SaveInfo info(si);
     info <<= *(sv.type);
 }
 
 
-template <typename S, typename T>
-inline void operator<<= (SaveInfo<S>& si, const T& type)
+template <typename T>
+inline void operator<<= (SaveInfo& si, const T& type)
 {
     si.save( type );
 }
