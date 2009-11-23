@@ -201,7 +201,7 @@ class PT_API SerializationContext : public ISerializationInfo
         SerializationCache* _cache;
 };
 
-
+/*
 struct BreakDown
 {
     BreakDown(SerializationContext& ctx)
@@ -251,7 +251,7 @@ void symbolize(Pt::BreakDown& b, const T& type, const char* name)
 {
     b.save(type, name);
 }
-
+*/
 /*
 template <typename T>
 void operator <<=(Pt::SerializationContext& ctx, const T& type)

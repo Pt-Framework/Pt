@@ -69,6 +69,8 @@ class DateRef
         int _n;
 };
 
+// do fixup from Composer with ctx >>= T
+// Derive BreakDownInfo from SerializationInfoy
 
 void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 {
@@ -92,7 +94,21 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 }
 
 
-void breakdown(Pt::BreakDown& b, const DateRef& dr)
+void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
+{
+    si.addMember("date") <<= dr.date();
+    si.addMember("n") <<= dr.n();
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
+{
+    si.addMember("date") <<= dr.date();
+    si.addMember("n") <<= dr.n();
+}
+
+
+/*void breakdown(Pt::BreakDown& b, const DateRef& dr)
 {
     std::cerr << "### breakdown DateRef" << dr.date() << std::endl;
     breakdown(b, dr.date());
@@ -111,24 +127,7 @@ void symbolize(Pt::BreakDown& b, const DateRef& dr, const char* name)
 
     //b._ctx.finishSave();
     //std::cerr << "### DONE symbolize DateRef " << dr.date() << std::endl;
-}
-
-
-void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
-{
-    si.addMember("date") <<= dr.date();
-    si.addMember("n") <<= dr.n();
-}
-
-
-// possibly unify both <<= above and below
-// do fixup from Composer with ctx >>= T
-
-void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
-{
-    si.addMember("date") <<= dr.date();
-    si.addMember("n") <<= dr.n();
-}
+}*/
 
 } // namespace test
 
@@ -136,7 +135,7 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 namespace Pt {
 
 typedef SmartPtr<Date> DateSmartPtr;
-
+/*
 void symbolize(Pt::BreakDown& b, const DateSmartPtr& sp, const char* name)
 {
     if( ! sp.getPointer() || ! b.save( *sp, name ) )
@@ -148,10 +147,19 @@ void symbolize(Pt::BreakDown& b, const DateSmartPtr& sp, const char* name)
 
 void breakdown(Pt::BreakDown& b, const DateSmartPtr& sp)
 {
-    /*if( ! sp.getPointer() || ! b.save( *sp ) )
+    // if( ! sp.getPointer() || ! b.save( *sp ) )
+    // {
+    //     b.prepareId( sp.getPointer() );
+    // }
+}
+*/
+
+void operator <<=(Pt::ISaveInfo& si, const DateSmartPtr& sp)
+{
+    if( ! sp.getPointer() || ! si.save( *sp ) )
     {
-        b.prepareId( sp.getPointer() );
-    }*/
+        si.put( sp.getPointer() );
+    }
 }
 
 
