@@ -131,7 +131,7 @@ class PT_API SerializationInfo
         , _bound(0)
         { }
 
-        ~SerializationInfo();
+        virtual ~SerializationInfo();
 
     private:
         SerializationInfo(const SerializationInfo& si)
@@ -154,7 +154,7 @@ class PT_API SerializationInfo
 
         void setContext(SerializationContext* context);
 
-        SerializationSurrogate* surrogate(const char* name) const;
+        virtual SerializationSurrogate* surrogate(const char* name) const;
 
         SerializationInfo* parent()
         { return _parent; }
@@ -193,9 +193,9 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        bool beginSave(const void* p);
+        virtual bool beginSave(const void* p);
 
-        void finishSave();
+        virtual void finishSave();
 
         void beginLoad(void* p, const std::type_info& ti) const;
 
@@ -256,7 +256,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of member data
         */
-        SerializationInfo& addMember(const std::string& name);
+        virtual SerializationInfo& addMember(const std::string& name);
 
         /** @brief Serialization of member data
         */
@@ -292,7 +292,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of weak pointers
         */
-        void saveReference(const void* ref);
+        virtual void saveReference(const void* ref);
 
         /** @brief Deserialization of weak pointers (parse phase)
         */

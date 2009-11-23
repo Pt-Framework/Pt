@@ -76,7 +76,10 @@ class Decomposer : public IDecomposer
 
                 //Pt::BreakDown b(*context);
                 //symbolize(b, type, "name");
-                *context <<= Pt::save() <<= type;
+                //*context <<= Pt::save() <<= type;
+
+                Pt::BreakDownInfo bi(*context);
+                bi  <<= Pt::save() <<= type;
             }
 
             _si.clear();

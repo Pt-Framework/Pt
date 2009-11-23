@@ -167,6 +167,7 @@ SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
 
 bool SerializationInfo::beginSave(const void* p)
 {
+    //std::cerr << "SerializationInfo::beginSave" << std::endl;
     bool first = true;
 
     if(_parent == 0 || _parent->_bound)

@@ -201,6 +201,33 @@ class PT_API SerializationContext : public ISerializationInfo
         SerializationCache* _cache;
 };
 
+
+class BreakDownInfo : public SerializationInfo
+{
+    public:
+        explicit BreakDownInfo(SerializationContext& context)
+        : SerializationInfo(&context)
+        { }
+
+        virtual ~BreakDownInfo()
+        { }
+
+        virtual bool beginSave(const void* p)
+        { return this->context()->beginSave(p, "name"); }
+
+        virtual void finishSave()
+        { this->context()->finishSave(); }
+
+        virtual SerializationInfo& addMember(const std::string& name)
+        { return *this; }
+
+        virtual void saveReference(const void* ref)
+        { this->context()->prepareId(ref); }
+
+        virtual SerializationSurrogate* surrogate(const char* name) const
+        { return 0; }
+};
+
 /*
 struct BreakDown
 {

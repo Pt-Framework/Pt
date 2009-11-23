@@ -70,7 +70,7 @@ class DateRef
 };
 
 // do fixup from Composer with ctx >>= T
-// Derive BreakDownInfo from SerializationInfoy
+// Derive BreakDownInfo from SerializationInfo and make addMember etc virtual
 
 void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 {
@@ -103,6 +103,7 @@ void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
 
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
+   //std::cerr << "### <<= DateRef" << dr.date() << std::endl;
     si.addMember("date") <<= dr.date();
     si.addMember("n") <<= dr.n();
 }
