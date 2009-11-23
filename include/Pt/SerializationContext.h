@@ -54,7 +54,87 @@ class SerializationSurrogate
 };
 
 
-class PT_API SerializationContext
+class ISerializationInfo
+{
+    public:
+        virtual ~ISerializationInfo()
+        {}
+
+        virtual void saveReference(const void* p) = 0;
+
+        virtual ISerializationInfo& addMember(const std::string& name) = 0;
+
+        virtual void setTypeName(const std::string& type) = 0;
+
+        virtual bool beginSave(const void* p, const std::string& name = "") = 0;
+
+        virtual void finishSave() = 0;
+};
+
+
+template <typename T>
+void operator <<=(Pt::ISerializationInfo& si, const T& type)
+{
+    // export symbols, if any are reachable
+    // prepare id's if any
+}
+
+
+template <typename T>
+inline void operator <<=(ISerializationInfo& si, const T* ptr)
+{
+    si.saveReference( ptr );
+    //std::cerr << "saveReference " << ptr << std::endl;
+    si.setTypeName("reference");
+}
+
+
+class ISaveInfo
+{
+    public:
+        explicit ISaveInfo(ISerializationInfo& info)
+        : si(&info)
+        {}
+
+        template <typename T>
+        bool save(const T& type)
+        {
+            bool first = si->beginSave( &type );
+            if(first)
+            {
+                *si <<= type;
+                 si->finishSave();
+            }
+
+            return first;
+        }
+
+        template <typename T>
+        void put(const T& type)
+        {
+            *si <<= type;
+        }
+
+        ISerializationInfo* si;
+};
+
+
+template <typename T>
+inline void operator<<= (ISerializationInfo& si, const Save<T>& sv)
+{
+    ISaveInfo info(si);
+    info <<= *(sv.type);
+}
+
+
+template <typename T>
+inline void operator<<= (ISaveInfo& si, const T& type)
+{
+    si.save( type );
+}
+
+
+class PT_API SerializationContext : public ISerializationInfo
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
@@ -77,6 +157,15 @@ class PT_API SerializationContext
 
         virtual const char* makeId(const void* p)
         { return 0; }
+
+        void saveReference(const void* p)
+        { this->prepareId(p); }
+
+        ISerializationInfo& addMember(const std::string& name)
+        { return *this; }
+
+        void setTypeName(const std::string&)
+        {}
 
     public:
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,

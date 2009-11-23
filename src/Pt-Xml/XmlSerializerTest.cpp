@@ -92,38 +92,34 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 }
 
 
-void operator >>=(const Pt::SerializationContext& ctx, DateRef& fixme)
-{
-    //std::cerr << "fixup" << &fixme << std::endl;
-    void* target = ctx.getFixup(&fixme, "date");
-    Pt::Date* to = static_cast< Pt::Date* >(target);
-    fixme.setDate(to);
-}
-
-
 void breakdown(Pt::BreakDown& b, const DateRef& dr)
 {
     std::cerr << "### breakdown DateRef" << dr.date() << std::endl;
     breakdown(b, dr.date());
 }
 
+
 void symbolize(Pt::BreakDown& b, const DateRef& dr, const char* name)
 {
     std::cerr << "### symbolize DateRef " << dr.date() << std::endl;
     //b.save(dr, name);
 
-    b._ctx.beginSave(&dr, name);
-    b.prepareId( dr.date() );
-    b._ctx.finishSave();
+    //b._ctx.beginSave(&dr, name);
+    //b.prepareId( dr.date() );
+
+    b._ctx <<= Pt::save() <<= dr;
+
+    //b._ctx.finishSave();
+    //std::cerr << "### DONE symbolize DateRef " << dr.date() << std::endl;
 }
 
-/*
-void operator <<=(Pt::SerializationContext& ctx, const DateRef& dr)
+
+void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
 {
-    // export symbols, if any are reachable
-    ctx <<= dr.date();
+    si.addMember("date") <<= dr.date();
+    si.addMember("n") <<= dr.n();
 }
-*/
+
 
 // possibly unify both <<= above and below
 // do fixup from Composer with ctx >>= T
