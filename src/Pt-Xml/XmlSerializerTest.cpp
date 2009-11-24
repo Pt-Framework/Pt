@@ -69,10 +69,11 @@ class DateRef
         int _n;
 };
 
-// do fixup from Composer with ctx >>= T
 
 void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
 {
+    // NOTE: maybe fixup from Composer with ctx >>= T
+    // NOTE: hide this check in FixupInfo
     if( typeid(Pt::Date) != targetType )
     {
         throw Pt::SerializationError("type mismatch during pointer fixup");
@@ -93,19 +94,18 @@ void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 }
 
 
-void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
-{
-    si.addMember("date") <<= dr.date();
-    si.addMember("n") <<= dr.n();
-}
-
-
 void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 {
-   //std::cerr << "### <<= DateRef" << dr.date() << std::endl;
     si.addMember("date") <<= dr.date();
     si.addMember("n") <<= dr.n();
 }
+
+
+/*void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
+{
+    si.addMember("date") <<= dr.date();
+    si.addMember("n") <<= dr.n();
+}*/
 
 
 /*void breakdown(Pt::BreakDown& b, const DateRef& dr)
@@ -154,35 +154,13 @@ void breakdown(Pt::BreakDown& b, const DateSmartPtr& sp)
 }
 */
 
-void operator <<=(Pt::ISaveInfo& si, const DateSmartPtr& sp)
+/*void operator <<=(Pt::ISaveInfo& si, const DateSmartPtr& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
     {
         si.put( sp.getPointer() );
     }
-}
-
-
-void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
-{
-    if( ! sp.getPointer() || ! si.save( *sp ) )
-    {
-        si.put( sp.getPointer() );
-    }
-}
-
-
-inline void operator >>=(const LoadInfo& li, DateSmartPtr& sp)
-{
-    if(li.in().category() == Pt::SerializationInfo::Reference)
-    {
-        li.in().loadReference(sp);
-    }
-    else
-    {
-        li.load(sp);
-    }
-}
+}*/
 
 
 void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
@@ -203,10 +181,45 @@ void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
 }
 
 
+void operator >>=(const LoadInfo& li, DateSmartPtr& sp)
+{
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(sp);
+    }
+    else
+    {
+        li.load(sp);
+    }
+}
+
+
 void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
 {
     sp = new Date();
     si >>= *sp;
+}
+
+
+void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
+{
+    if( ! sp.getPointer() || ! si.save( *sp ) )
+    {
+        si.put( sp.getPointer() );
+    }
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
+{
+    if( sp.getPointer() )
+    {
+        si <<= *sp;
+    }
+    else
+    {
+        si <<= Pt::Date();
+    }
 }
 
 }
