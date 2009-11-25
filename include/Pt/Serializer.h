@@ -65,10 +65,13 @@ class Decomposer : public IDecomposer
         : _type(0)
         { }
 
-        void begin(const T& type, SerializationContext* context = 0)
+        void begin(const T& type, const std::string& name, SerializationContext* context = 0)
         {
             //std::cerr << "begin " << &type << std::endl;
             _type = &type;
+            _si.clear();
+            _si.setName(name);
+            _si.setContext(context);
 
             if(context)
             {
@@ -79,11 +82,10 @@ class Decomposer : public IDecomposer
                 //*context <<= Pt::save() <<= type;
 
                 Pt::BreakDownInfo bi(*context);
+                bi.setName(name);
                 bi  <<= Pt::save() <<= type;
             }
 
-            _si.clear();
-            _si.setContext(context);
             _current = 0;
 
             //_it = SerializationInfo::Iterator(&_current);
@@ -174,7 +176,7 @@ class SerializerBase : public Formatter
             _heap.push_back(dec);
             _stack.push_back(dec);
 
-            dec->begin(type, _context);
+            dec->begin(type, name, _context);
             dec->setName(name);
             this->begin(dec);
         }

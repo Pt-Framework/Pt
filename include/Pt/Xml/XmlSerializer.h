@@ -177,8 +177,8 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             _heap.push_back(dec);
             _stack.push_back(dec);
 
-            dec->begin(type, _context);
-            dec->setName(name);
+            dec->begin(type, name,_context);
+            //dec->setName(name);
         }
 
         void beginFormat()
