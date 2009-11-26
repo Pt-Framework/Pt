@@ -131,7 +131,7 @@ class PT_API SerializationInfo
         , _bound(0)
         { }
 
-        virtual ~SerializationInfo();
+        ~SerializationInfo();
 
     private:
         SerializationInfo(const SerializationInfo& si)
@@ -142,6 +142,12 @@ class PT_API SerializationInfo
 
     public:
         void clear();
+
+        void prepareSerialize()
+        { _parent = this; }
+
+        bool isPreparing() const
+        { return _parent == this; }
 
         SerializationNode* releaseNode();
 
@@ -154,7 +160,7 @@ class PT_API SerializationInfo
 
         void setContext(SerializationContext* context);
 
-        virtual SerializationSurrogate* surrogate(const char* name) const;
+        SerializationSurrogate* surrogate(const char* name) const;
 
         SerializationInfo* parent()
         { return _parent; }
@@ -193,9 +199,9 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        virtual bool beginSave(const void* p);
+        bool beginSave(const void* p);
 
-        virtual void finishSave();
+        void finishSave();
 
         void beginLoad(void* p, const std::type_info& ti) const;
 
@@ -205,13 +211,23 @@ class PT_API SerializationInfo
         */
         template <typename T>
         void getValue(T& value) const
-        { convert( value, this->toString() ); }
+        {
+            if( this->isPreparing() )
+                return;
+
+            convert( value, this->toString() );
+        }
 
         /** @brief Serialization of flat data-types
         */
         template <typename T>
         void setValue(const T& value)
-        { convert( initString(), value ); }
+        {
+            if( this->isPreparing() )
+                return;
+
+            convert( initString(), value );
+        }
 
         void getValue(bool& b) const;
 
@@ -256,7 +272,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of member data
         */
-        virtual SerializationInfo& addMember(const std::string& name);
+        SerializationInfo& addMember(const std::string& name);
 
         /** @brief Serialization of member data
         */
@@ -292,7 +308,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of weak pointers
         */
-        virtual void saveReference(const void* ref);
+        void saveReference(const void* ref);
 
         /** @brief Deserialization of weak pointers (parse phase)
         */

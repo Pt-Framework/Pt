@@ -201,7 +201,7 @@ class PT_API SerializationContext : public ISerializationInfo
         SerializationCache* _cache;
 };
 
-
+/*
 class BreakDownInfo : public SerializationInfo
 {
     public:
@@ -227,6 +227,7 @@ class BreakDownInfo : public SerializationInfo
         virtual SerializationSurrogate* surrogate(const char* name) const
         { return 0; }
 };
+*/
 
 /*
 struct BreakDown

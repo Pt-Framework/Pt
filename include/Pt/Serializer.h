@@ -81,9 +81,11 @@ class Decomposer : public IDecomposer
                 //symbolize(b, type, "name");
                 //*context <<= Pt::save() <<= type;
 
-                Pt::BreakDownInfo bi(*context);
-                bi.setName(name);
-                bi  <<= Pt::save() <<= type;
+                //Pt::BreakDownInfo bi(*context);
+                _si.prepareSerialize();
+                _si <<= Pt::save() <<= type;
+                _si.clear();
+                _si.setName(name);
             }
 
             _current = 0;

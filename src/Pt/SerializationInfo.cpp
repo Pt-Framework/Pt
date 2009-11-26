@@ -158,6 +158,11 @@ SerializationInfo::Category SerializationInfo::category() const
 
 SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
 {
+    if( this->isPreparing() )
+    {
+        return 0;
+    }
+
     if(_context)
         return _context->surrogate(name);
 
@@ -167,6 +172,11 @@ SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
 
 bool SerializationInfo::beginSave(const void* p)
 {
+    if( this->isPreparing() )
+    {
+        return this->context()->beginSave(p, _name);
+    }
+
     //std::cerr << "SerializationInfo::beginSave" << std::endl;
     bool first = true;
 
@@ -204,6 +214,12 @@ bool SerializationInfo::beginSave(const void* p)
 
 void SerializationInfo::finishSave()
 {
+    if( this->isPreparing() )
+    {
+        this->context()->finishSave();
+        return;
+    }
+
     if(_context && _bound)
     {
         /// XXX _context->finishSave();
@@ -271,6 +287,7 @@ void SerializationInfo::clear()
     if( _id.size() )
         _id.clear();
 
+    _parent = 0;
     _bound = 0;
 }
 
@@ -285,6 +302,9 @@ SerializationNode* SerializationInfo::releaseNode()
 
 void SerializationInfo::setCategory(Category category)
 {
+    if( this->isPreparing() )
+        return;
+
     if( this->category() != category)
     {
         SerializationNode* node = 0;
@@ -342,6 +362,11 @@ Pt::String& SerializationInfo::initString()
 // called during serialization, when a reference needs to be unlinked
 void SerializationInfo::saveReference(const void* ref)
 {
+    if( this->isPreparing() )
+    {
+        this->context()->prepareId(ref);
+        return;
+    }
     /* XXX if(_context )
     {
         _context->prepareId( ref );
@@ -397,6 +422,9 @@ void SerializationInfo::getValue(bool& b) const
 
 void SerializationInfo::setValue(bool b)
 {
+    if( this->isPreparing() )
+        return;
+
     this->setCategory(Scalar);
     static_cast<ValueNode*>(_node)->setBool(b);
     //initValue()->setBool(b);
@@ -431,6 +459,9 @@ void SerializationInfo::getValue(long& l) const
 
 void SerializationInfo::setValue(long l)
 {
+    if( this->isPreparing() )
+        return;
+
     this->setCategory(Scalar);
     static_cast<ValueNode*>(_node)->setInt(l);
 }
@@ -465,6 +496,9 @@ void SerializationInfo::getValue(unsigned long& ul) const
 
 void SerializationInfo::setValue(unsigned long ul)
 {
+    if( this->isPreparing() )
+        return;
+
     this->setCategory(Scalar);
     static_cast<ValueNode*>(_node)->setUInt(ul);
 }
@@ -490,6 +524,9 @@ void SerializationInfo::getValue(double& f) const
 
 void SerializationInfo::setValue(double f)
 {
+    if( this->isPreparing() )
+        return;
+
     this->setCategory(Scalar);
     static_cast<ValueNode*>(_node)->setFloat(f);
 }
@@ -497,6 +534,11 @@ void SerializationInfo::setValue(double f)
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
+    if( this->isPreparing() )
+    {
+        return *this;
+    }
+
     if( this->category() != Struct)
     	this->setCategory(Struct);
 
@@ -522,6 +564,11 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 SerializationInfo& SerializationInfo::addElement()
 {
+    if( this->isPreparing() )
+    {
+        return *this;
+    }
+
     if( this->category() != Sequence)
     	this->setCategory(Sequence);
 
