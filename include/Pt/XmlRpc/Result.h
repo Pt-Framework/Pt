@@ -29,6 +29,7 @@
 #define Pt_XmlRpc_Result_h
 
 #include <string>
+#include <Pt/XmlRpc/Fault.h>
 
 namespace Pt {
 
