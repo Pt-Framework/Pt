@@ -112,10 +112,6 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
         const IODevice& in() const;
 
-        int getReadFd() const;
-
-        int getWriteFd() const;
-
         void closeReadFd()
         { out().close(); }
 

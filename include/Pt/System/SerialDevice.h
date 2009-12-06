@@ -122,6 +122,18 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             TwoStopBits
         };
 
+        enum SerialLine
+        {
+            CLR_BREAK,
+            CLR_DTR,
+            CLR_RTS,
+            SET_BREAK,
+            SET_DTR,
+            SET_RTS,
+            SET_XOFF,
+            SET_XON,
+        };
+
         //! Default constructor.
         SerialDevice();
 
@@ -137,10 +149,10 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         void open( const std::string& file, OpenMode mode);
 
         //! @brief Sets the baud rate
-        void setBaudRate( BaudRate rate );
+		void setBaudRate( unsigned rate );
 
         //! @brief Gets the baud rate
-        BaudRate baudRate() const;
+        unsigned baudRate() const;
 
         //! @brief Sets the char size
         void setCharSize( int size );
@@ -170,6 +182,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         void setTimeout( size_t msec );
 
         size_t timeout() const;
+
+        bool setSignal(SerialDevice::SerialLine signal);
 
         //! @brief Transmit the current buffered characters.
         void flush();
