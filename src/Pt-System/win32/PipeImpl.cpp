@@ -379,8 +379,9 @@ void PipeIODevice::onSync() const
         throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
 }
 
-
-
+void PipeIODevice::redirect(int newFd, bool close)
+{
+}
 
 PipeImpl::PipeImpl(bool isAsync)
 {
@@ -420,20 +421,19 @@ PipeImpl::PipeImpl(bool isAsync)
     InterlockedIncrement(&_nameId);
 }
 
-
 PipeImpl::~PipeImpl()
 {
     _nameId--;
 }
 
 
-IODevice& PipeImpl::out()
+PipeIODevice& PipeImpl::out()
 {
     return _out;
 }
 
 
-IODevice& PipeImpl::in()
+PipeIODevice& PipeImpl::in()
 {
     return _in;
 }

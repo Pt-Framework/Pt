@@ -399,20 +399,20 @@ void SerialDeviceImpl::readCommState( DCB& commState ) const
 }
 
 
-void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
+void SerialDeviceImpl::setBaudRate( unsigned rate )
 {
     DCB commState;
     readCommState( commState );
-    commState.BaudRate = static_cast<DWORD>( rate );
+    commState.BaudRate =  rate ;
     writeCommState( commState );
 }
 
 
-SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
+unsigned SerialDeviceImpl::baudRate() const
 {
     DCB commState;
     readCommState( commState );
-    return static_cast<SerialDevice::BaudRate>( commState.BaudRate );
+    return commState.BaudRate ;
 }
 
 
@@ -532,6 +532,38 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     return SerialDevice::ParityEven;
 }
 
+bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+{
+    switch(signal)
+    {
+        case SerialDevice::CLR_BREAK:
+            return EscapeCommFunction(handle(), CLRBREAK) > 0;
+        break;
+        case SerialDevice::CLR_DTR:
+            return EscapeCommFunction(handle(), CLRDTR) > 0;
+        break;
+        case SerialDevice::CLR_RTS:
+            return EscapeCommFunction(handle(), CLRRTS) > 0;
+        break;
+        case SerialDevice::SET_BREAK:
+            return EscapeCommFunction(handle(), SETBREAK) > 0;
+        break;
+        case SerialDevice::SET_DTR:
+            return EscapeCommFunction(handle(), SETDTR) > 0;
+        break;
+        case SerialDevice::SET_RTS:
+            return EscapeCommFunction(handle(), SETRTS) > 0;
+        break;
+        case SerialDevice::SET_XOFF:
+            return EscapeCommFunction(handle(), SETXOFF) > 0;
+        break;
+        case SerialDevice::SET_XON:
+            return EscapeCommFunction(handle(), SETXON) > 0;
+        break;
+    }
+
+    return false;
+}
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
@@ -551,6 +583,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     {
         case SerialDevice::FlowControlSoft:
             commState.fInX = commState.fOutX = 1;
+            commState.fRtsControl = RTS_CONTROL_DISABLE;
         break;
 
         case SerialDevice::FlowControlBoth:

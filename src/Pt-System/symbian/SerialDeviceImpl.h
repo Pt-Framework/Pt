@@ -105,10 +105,10 @@ class SerialDeviceImpl : public IODeviceImpl
         void sync() const;        
         
         // Currently unsupported
-        void setBaudRate( SerialDevice::BaudRate rate );
+        void setBaudRate( unsigned rate );
 
         // Currently unsupported
-        SerialDevice::BaudRate baudRate() const;
+        unsigned baudRate() const;
 
         // Currently unsupported
         void setCharSize( int size );
@@ -142,6 +142,8 @@ class SerialDeviceImpl : public IODeviceImpl
 
         // Currently unsupported
         void flush();
+
+        bool setSignal(SerialDevice::SerialLine signal);
 
     private:
         TBTDevAddr doBluetoothDeviceQuery();

@@ -43,9 +43,9 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void close();
 
-        void setBaudRate( SerialDevice::BaudRate rate );
+        void setBaudRate( unsigned rate );
 
-        SerialDevice::BaudRate baudRate() const;
+        unsigned baudRate() const;
 
         void setCharSize( int size );
 
@@ -62,6 +62,8 @@ class SerialDeviceImpl : public IODeviceImpl
         void setFlowControl( SerialDevice::FlowControl flowControl );
 
         SerialDevice::FlowControl flowControl() const;
+        
+        bool setSignal(SerialDevice::SerialLine signal);
 
         void setTimeout( size_t msec );
 

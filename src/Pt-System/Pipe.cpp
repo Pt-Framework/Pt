@@ -68,16 +68,6 @@ const IODevice& Pipe::in() const
     return _impl->in();
 }
 
-int Pipe::getReadFd() const
-{
-    return _impl->out().fd();
-}
-
-int Pipe::getWriteFd() const
-{
-    return _impl->in().fd();
-}
-
 /// Redirect read-end to stdin.
 /// When the close argument is set, closes the original filedescriptor
 void Pipe::redirectStdin(bool close)

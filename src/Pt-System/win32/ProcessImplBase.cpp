@@ -57,6 +57,10 @@ void ProcessImplBase::start()
     ZeroMemory( &m_pid, sizeof(m_pid) );
 
 #ifndef _WIN32_WCE
+	m_startUp.hStdInput = INVALID_HANDLE_VALUE;
+	m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
+	m_startUp.hStdError = INVALID_HANDLE_VALUE;
+	/*
     if( _procInfo.stdInputClosed() )
     {
         m_startUp.hStdInput = INVALID_HANDLE_VALUE;
@@ -66,8 +70,8 @@ void ProcessImplBase::start()
         SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(), 
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
-    }
-
+    }*/
+/*
     if( _procInfo.stdOutputClosed() )
     { 
         m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
@@ -77,8 +81,8 @@ void ProcessImplBase::start()
         SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(), 
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
-    }
-
+    }*/
+/*
     if( _procInfo.stdErrorClosed())
     {
         m_startUp.hStdError = INVALID_HANDLE_VALUE;
@@ -89,7 +93,7 @@ void ProcessImplBase::start()
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
     }
-
+*/
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
     std::basic_string<TCHAR> tcmd;

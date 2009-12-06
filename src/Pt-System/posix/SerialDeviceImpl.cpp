@@ -125,7 +125,7 @@ void SerialDeviceImpl::close()
 }
 
 
-void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
+void SerialDeviceImpl::setBaudRate( unsigned br )
 {
     struct termios ios;
 
@@ -163,7 +163,8 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
         #ifdef B230400
             case SerialDevice::BaudRate230400: rate = B230400; break;
         #endif
-        throw IOError( PT_ERROR_MSG("no such baud rate") );
+		default:
+			throw IOError( PT_ERROR_MSG("no such baud rate") );
     }
 
     ::cfsetispeed( &ios, rate );
@@ -176,7 +177,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 }
 
 
-SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
+unsigned SerialDeviceImpl::baudRate() const
 {
     struct termios ios;
     if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
@@ -440,6 +441,10 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return _flowControl;
 }
 
+bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+{
+    return false;
+}
 
 void SerialDeviceImpl::flush()
 {

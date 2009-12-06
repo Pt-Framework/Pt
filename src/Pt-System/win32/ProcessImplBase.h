@@ -54,6 +54,26 @@ namespace System {
 
             static unsigned long usedMemory();
 
+			IODevice* stdInput()
+			{
+				throw std::logic_error("Bendri fix me");
+				return 0;
+			}
+
+
+			IODevice* stdOutput()
+			{
+				throw std::logic_error("Bendri fix me");
+				return 0;
+			}
+
+
+			IODevice* stdError()
+			{
+				throw std::logic_error("Bendri fix me");
+				return 0;
+			}
+
     private:
         PROCESS_INFORMATION m_pid;
         ProcessInfo _procInfo;

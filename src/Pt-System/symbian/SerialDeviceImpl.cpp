@@ -314,7 +314,7 @@ void SerialDeviceImpl::sync() const
 {
 }
 
-void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
+void SerialDeviceImpl::setBaudRate( unsigned br )
 {
     // we're currently simulating Bluetooth serial communication 
     // in Symbian over Bluetooth sockets
@@ -325,7 +325,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 }
 
 
-SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
+unsigned SerialDeviceImpl::baudRate() const
 {
     return _rate;
 }
@@ -370,6 +370,11 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
     _flowControl = flowControl;
+}
+
+bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+{
+    return false;
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const

@@ -99,13 +99,13 @@ size_t SerialDevice::onEndWrite()
 }
 
 
-void SerialDevice::setBaudRate( BaudRate rate )
+void SerialDevice::setBaudRate( unsigned rate )
 {
     _impl->setBaudRate( rate );
 }
 
 
-SerialDevice::BaudRate SerialDevice::baudRate() const
+unsigned SerialDevice::baudRate() const
 {
     return _impl->baudRate();
 }
@@ -158,6 +158,10 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
     return _impl->flowControl();
 }
 
+bool SerialDevice::setSignal(SerialDevice::SerialLine signal)
+{
+    return _impl->setSignal(signal);
+}
 
 void SerialDevice::setTimeout( size_t msec )
 {

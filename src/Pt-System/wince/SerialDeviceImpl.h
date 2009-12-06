@@ -72,8 +72,8 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         void flush();
 
-        void setBaudRate( SerialDevice::BaudRate rate );
-        SerialDevice::BaudRate baudRate() const;
+        void setBaudRate( unsigned rate );
+        unsigned baudRate() const;
 
         void setCharSize( int size );
         int charSize() const;
@@ -90,6 +90,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         void setTimeout( size_t timeout );       
         size_t timeout() const;  
         
+        bool setSignal(SerialDevice::SerialLine signal);
     private:
         SerialDeviceImpl* self()
         { return this; }

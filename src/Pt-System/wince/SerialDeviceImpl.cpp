@@ -362,7 +362,7 @@ void SerialDeviceImpl::readCommState( DCB& commState ) const
 }
 
 
-void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
+void SerialDeviceImpl::setBaudRate( unsigned rate )
 {
     DCB commState;
     
@@ -372,11 +372,11 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
 }
 
 
-SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
+unsigned SerialDeviceImpl::baudRate() const
 {
     DCB commState;
     readCommState( commState );
-    return static_cast<SerialDevice::BaudRate>( commState.BaudRate );
+    return commState.BaudRate ;
 }
 
 
@@ -519,6 +519,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     {
         case SerialDevice::FlowControlSoft:
             commState.fInX = commState.fOutX = 1;
+            commState.fRtsControl = RTS_CONTROL_DISABLE;
         break;
 
         case SerialDevice::FlowControlBoth:
@@ -555,6 +556,38 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return SerialDevice::FlowControlBoth;
 }
 
+bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+{
+    switch(signal)
+    {
+        case SerialDevice::CLR_BREAK:
+            return EscapeCommFunction(handle(), CLRBREAK);
+        break;
+        case SerialDevice::CLR_DTR:
+            return EscapeCommFunction(handle(), CLRDTR);
+        break;
+        case SerialDevice::CLR_RTS:
+            return EscapeCommFunction(handle(), CLRRTS);
+        break;
+        case SerialDevice::SET_BREAK:
+            return EscapeCommFunction(handle(), SETBREAK);
+        break;
+        case SerialDevice::SET_DTR:
+            return EscapeCommFunction(handle(), SETDTR);
+        break;
+        case SerialDevice::SET_RTS:
+            return EscapeCommFunction(handle(), SETRTS);
+        break;
+        case SerialDevice::SET_XOFF:
+            return EscapeCommFunction(handle(), SETXOFF);
+        break;
+        case SerialDevice::SET_XON:
+            return EscapeCommFunction(handle(), SETXON);
+        break;
+    }
+
+    return false;
+}
 
 void SerialDeviceImpl::flush()
 {

@@ -48,6 +48,8 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual SelectableImpl& simpl()
         { return *this; }
 
+		void redirect(int newFd, bool close = true);
+
     protected:
         void onAttach(SelectorBase& s);
 
@@ -87,9 +89,9 @@ class PipeImpl
 
         ~PipeImpl();
 
-        IODevice& in();
+        PipeIODevice& in();
 
-        IODevice& out();
+        PipeIODevice& out();
 
     private:
         PipeIODevice        _in;
