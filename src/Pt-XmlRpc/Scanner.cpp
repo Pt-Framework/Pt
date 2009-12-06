@@ -41,9 +41,9 @@ namespace XmlRpc {
 
 namespace
 {
-    void throwInvalidXmlRpcParameter()
+    void throwSerializationError(const char* msg = "invalid XML-RPC parameter")
     {
-        throwInvalidXmlRpcParameter(); // TODO: missing space or intended endless loop?
+        throw SerializationError(msg);
     }
 }
 
@@ -59,13 +59,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnValueBegin;
             }
             else if(node.type() == Xml::Node::EndElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -105,7 +105,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if(ee.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 // is always type string
                 _current->setValue( _value );
@@ -115,7 +115,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -134,7 +134,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     log_debug("OnValueEnd member");
                     _current = _current->finish();
                     if( ! _current )
-                        throw SerializationError("invalid XML-RPC struct");
+                        throwSerializationError("invalid XML-RPC struct");
 
                     _state = OnStructBegin;
                 }
@@ -143,7 +143,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     log_debug("OnValueEnd data");
                     _current = _current->finish();
                     if( ! _current )
-                        throw SerializationError("invalid XML-RPC array");
+                        throwSerializationError("invalid XML-RPC array");
 
                     _state = OnDataEnd;
                 }
@@ -151,7 +151,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
-                        throwInvalidXmlRpcParameter();
+                        throwSerializationError();
 
                     _state = OnValueEnd;
                     return true;
@@ -160,14 +160,14 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
-                        throw SerializationError("invalid XML-RPC fault");
+                        throwSerializationError("invalid XML-RPC fault");
 
                     _state = OnValueEnd;
                     return true;
                 }
                 else
                 {
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
                 }
             }
             else if(node.type() == Xml::Node::StartElement)
@@ -179,14 +179,14 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     _current = _current->finish();
 
                     if( ! _current )
-                        throw SerializationError("invalid XML-RPC element");
+                        throwSerializationError("invalid XML-RPC element");
 
                     _current = _current->beginElement();
                     _state = OnValueBegin;
                 }
                 else
                 {
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
                 }
             }
 
@@ -201,7 +201,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != L"member")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnMemberBegin;
             }
@@ -220,13 +220,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
                 if(ee.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnValueEnd;
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -240,13 +240,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != L"name")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnNameBegin;
             }
             else if(node.type() == Xml::Node::EndElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -266,7 +266,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -280,13 +280,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
                 if(ee.name() != L"name")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnNameEnd;
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -300,13 +300,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnValueBegin;
             }
             else if(node.type() == Xml::Node::EndElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -331,7 +331,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -346,7 +346,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -360,13 +360,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
                 if(ee.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnValueEnd;
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -380,13 +380,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 if(se.name() != L"data")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnDataBegin;
             }
             else if(node.type() == Xml::Node::EndElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -405,7 +405,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
                 if(ee.name() != L"data")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnDataEnd;
             }
@@ -421,13 +421,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
                 if(ee.name() != L"array")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnArrayEnd;
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
@@ -441,13 +441,13 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
                 if(ee.name() != L"value")
-                    throwInvalidXmlRpcParameter();
+                    throwSerializationError();
 
                 _state = OnValueEnd;
             }
             else if(node.type() == Xml::Node::StartElement)
             {
-                throwInvalidXmlRpcParameter();
+                throwSerializationError();
             }
 
             break;
