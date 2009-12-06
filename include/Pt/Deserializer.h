@@ -29,150 +29,11 @@
 #define Pt_Deserializer_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationInfo.h>
+#include <Pt/Composer.h>
 #include <Pt/SerializationContext.h>
 #include <map>
 
 namespace Pt {
-
-class Deserializer;
-
-class IComposer
-{
-    public:
-        virtual ~IComposer()
-        {}
-
-        virtual void setName(const std::string& name) = 0;
-
-        virtual void setId(const std::string& id) = 0;
-
-        virtual void setValue(const Pt::String& value)
-        { throw SerializationError("unexpected value"); }
-
-        virtual void setBool(bool value)
-        { throw SerializationError("unexpected bool value"); }
-
-        virtual void setInt(long value)
-        { throw SerializationError("unexpected integer value"); }
-
-        virtual void setUInt(unsigned long value)
-        { throw SerializationError("unexpected unsigned value"); }
-
-        virtual void setFloat(double value)
-        { throw SerializationError("unexpected float value"); }
-
-        virtual void setReference(const std::string& id)
-        { throw SerializationError("unexpected reference"); }
-
-        virtual IComposer* beginMember(const std::string& name)
-        { throw SerializationError("unexpected struct"); }
-
-        virtual IComposer* beginElement()
-        { throw SerializationError("unexpected sequence"); }
-
-        virtual IComposer* finish() = 0;
-
-    protected:
-        IComposer()
-        {}
-};
-
-
-template <typename T>
-class Composer : public IComposer
-{
-    public:
-        Composer()
-        : _parent(0)
-        , _type(0)
-        , _current(&_si)
-        {}
-
-        void setParent(IComposer* parent)
-        { _parent = parent; }
-
-        void begin(T& type, SerializationContext* context = 0)
-        {
-            _si.clear();
-            _si.setContext(context);
-            _type = &type;
-            _current = &_si;
-        }
-
-        virtual void setName(const std::string& name)
-        {
-            _current->setName(name);
-        }
-
-        virtual void setId(const std::string& id)
-        {
-            _current->setId(id);
-        }
-
-        virtual void setValue(const Pt::String& value)
-        {
-            _current->setValue(value);
-        }
-
-        virtual void setBool(bool value)
-        {
-            _current->setValue(value);
-        }
-
-        virtual void setInt(long value)
-        {
-            _current->setValue(value);
-        }
-
-        virtual void setUInt(unsigned long value)
-        {
-            _current->setValue(value);
-        }
-
-        virtual void setFloat(double value)
-        {
-            _current->setValue(value);
-        }
-
-        virtual void setReference(const std::string& id)
-        {
-           _current->setReference(id);
-        }
-
-        virtual IComposer* beginMember(const std::string& name)
-        {
-            SerializationInfo& child = _current->addMember(name);
-            _current = &child;
-            return this;
-        }
-
-        virtual IComposer* beginElement()
-        {
-            SerializationInfo& child = _current->addElement();
-            _current = &child;
-            return this;
-        }
-
-        virtual IComposer* finish()
-        {
-            if( ! _current->parent() )
-            {
-                *_current >>= Pt::load() >>= *_type;
-                return _parent;
-            }
-
-            _current = _current->parent();
-            return this;
-        }
-
-    private:
-        IComposer* _parent;
-        T* _type;
-        Pt::SerializationInfo _si;
-        Pt::SerializationInfo* _current;
-};
-
 
 class Deserializer
 {
@@ -183,16 +44,33 @@ class Deserializer
         {}
 
         virtual ~Deserializer()
-        {}
+        {
+            delete _current;
+            _current = 0;
+        }
 
-        SerializationContext& context()
-        { return *_context; }
+        SerializationContext* context()
+        { return _context; }
 
-        const SerializationContext& context() const
-        { return *_context; }
+        void clear()
+        {
+            if(_context)
+                _context->reset();
 
-        void setContext(SerializationContext* context)
-        { _context = context; }
+            delete _current;
+            _current = 0;
+        }
+
+        void reset(SerializationContext* context)
+        {
+            if(_context)
+                _context->reset();
+
+            delete _current;
+            _current = 0;
+
+            _context = context;
+        }
 
         /** @brief Deserialize an object
 
@@ -203,43 +81,54 @@ class Deserializer
         void deserialize(T& type)
         {
             Composer<T> deser;
-            deser.begin(type, _context);
+            deser.setContext(_context);
+            deser.begin(type);
 
-            this->get(&deser);
-        }
-
-        void deserialize(IComposer& deser)
-        {
-            this->get(&deser);
-            deser.finish();
+            this->get(deser);
         }
 
         template <typename T>
         void begin(T& type)
         {
-            Composer<T>* deser = new Composer<T>;
-            deser->begin(type, _context);
-            _current = deser;
+            delete _current;
+            _current = 0;
+
+            Composer<T>* composer = new Composer<T>;
+            _current = composer;
+
+            composer->setContext(_context);
+            composer->begin(type);
+            this->onBegin(*composer);
         }
 
         bool advance()
         {
             if( ! _current )
-                return false;
+                return true;
 
-            _current = this->advance(_current);
+            bool finished = this->onAdvance();
+            if(finished)
+            {
+                delete _current;
+                _current = 0;
+            }
 
-            if( ! _current )
-                return false;
+            return finished;
         }
 
-        virtual IComposer* advance(IComposer* deser) = 0;
-
         void finish()
-        { _context->fixup(); }
+        {
+            if(_context)
+                _context->fixup();
+        }
 
     protected:
-        virtual void get(IComposer* deser) = 0;
+        virtual void onBegin(IComposer& deser) = 0;
+
+        virtual bool onAdvance() = 0;
+
+    protected:
+        virtual void get(IComposer& deser) = 0;
 
     private:
         SerializationContext* _context;

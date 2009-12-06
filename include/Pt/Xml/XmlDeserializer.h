@@ -29,7 +29,7 @@
 #define Pt_Xml_XmlDeserializer_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/XmlSerializer.h>
+#include <Pt/Xml/XmlSerializationContext.h>
 #include <Pt/String.h>
 #include <Pt/Deserializer.h>
 #include <memory>
@@ -40,6 +40,8 @@ namespace Xml {
 
 class XmlReader;
 class Node;
+class StartElement;
+class EndElement;
 
 /** @brief Deserialize objects or object data to XML
 
@@ -49,66 +51,42 @@ class Node;
 class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
-        XmlDeserializer(XmlReader& reader);
+        explicit XmlDeserializer(XmlReader& reader);
 
-        XmlDeserializer(std::istream& is);
+        explicit XmlDeserializer(std::istream& is);
 
         //! @brief Destructor
         ~XmlDeserializer();
 
-        // SerializationContext& context()
-        // { return *_context; }
-
-        // const SerializationContext& context() const
-        // { return *_context; }
-
-        // void setContext(SerializationContext& context)
-        // { _context = &context; }
-
         XmlReader& reader()
         { return *_reader; }
 
-        /** @brief Deserialize an object
-
-            This method will deserialize the object \a type from an
-            XML format. The type \a type must be serializable.
-        */
-        // template <typename T>
-        // void deserialize(T& type)
-        // {
-        //     Composer<T> deser;
-        //     deser.begin(type, _context);
-
-        //     this->get(&deser);
-        // }
-
-        // void finish()
-        // { _xmlcontext.fixup(); }
-
-        IComposer* advance(IComposer* deser);
-
     protected:
-        void get(IComposer* deser);
+        virtual void onBegin(IComposer& deser);
 
-        //! @internal
-        void beginDocument(const Node& node);
+        //! @brief Returns true when type is complete
+        virtual bool onAdvance();
 
-        //! @internal
-        void onRootElement(const Node& node);
-
-        //! @internal
-        void onStartElement(const Node& node);
-
-        //! @internal
-        void onWhitespace(const Node& node);
-
-        //! @internal
-        void onContent(const Node& node);
-
-        //! @internal
-        void onEndElement(const Node& node);
+        //virtual void getold(IComposer* deser);
+        virtual void get(IComposer& deser);
 
     private:
+        void OnBegin(const Node& node);
+
+        void OnReferenceBegin(const Node& node);
+
+        void OnMemberBegin(const Node& node);
+
+        void OnValue(const Node& node);
+
+        void OnMemberEnd(const Node& node);
+
+        void beginMember(const StartElement& se);
+
+        void finishMember(const EndElement& ee);
+
+    private:
+        //! @internal
         XmlSerializationContext _xmlcontext;
 
         //! @internal
@@ -123,15 +101,11 @@ class PT_XML_API XmlDeserializer : public Deserializer
         //! @internal
         ProcessNode _processNode;
 
-        size_t _startDepth;
-
         //! @internal
         IComposer* _deser;
 
         //! @internal
-        String _nodeName;
-
-        String _nodeId;
+        String _value;
 };
 
 } // namespace Xml

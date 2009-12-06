@@ -372,13 +372,25 @@ class Composer<Reflex::Reflectable> : public IComposer
         , _current(&_si)
         {}
 
-        void begin(Reflex::Reflectable& t, SerializationContext* context = 0)
+        void begin(Reflex::Reflectable& t)
+        {
+            if(_reflectable)
+                this->clear();
+
+            _reflectable = &t;
+        }
+
+        virtual void clear()
         {
             _si.clear();
-            _si.setContext(context);
-            _reflectable = &t;
+            _reflectable = 0;
             _property = 0;
             _current = &_si;
+        }
+
+        virtual void setContext(SerializationContext* context)
+        {
+            _si.setContext(context);
         }
 
         virtual void setName(const std::string& name)

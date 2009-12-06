@@ -25,37 +25,66 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_SerializationContext_h
-#define Pt_SerializationContext_h
+#ifndef Pt_Xml_XmlSerializationContext_h
+#define Pt_Xml_XmlSerializationContext_h
 
-#include <Pt/Api.h>
-#include <Pt/SerializationInfo.h>
-#include <typeinfo>
-#include <string>
+#include <Pt/Xml/Api.h>
+#include <Pt/SerializationContext.h>
+#include <map>
 
 namespace Pt {
 
-class SerializationNode;
-class SerializationCache;
-class SerializationSurrogate;
+namespace Xml {
 
-class PT_API SerializationContext
+class FixupInfo
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
     public:
-        SerializationContext();
+        FixupInfo()
+        : _instance(0)
+        , _fixup(0)
+        , _type(0)
+        {}
 
-        virtual ~SerializationContext();
+        FixupInfo(void* fixme, FixupHandler handler, const std::type_info* type)
+        : _instance(fixme)
+        , _fixup(handler)
+        , _type(type)
+        {}
 
-        void enableReferencing(bool enabled);
+        ~FixupInfo()
+        {}
 
-        bool referencingEnabled() const;
+        void* instance() const
+        { return _instance; }
+
+        FixupHandler fixup() const
+        { return _fixup; }
+
+        const std::type_info* type() const
+        { return _type; }
+
+    private:
+        void* _instance;
+        FixupHandler _fixup;
+        const std::type_info* _type;
+};
+
+
+class PT_XML_API XmlSerializationContext : public SerializationContext
+{
+    public:
+        XmlSerializationContext();
+
+        //! @brief Destructor
+        ~XmlSerializationContext();
 
         virtual void reset();
 
+    public:
         virtual bool beginSave(const void* p, const std::string& name);
 
         virtual void finishSave();
@@ -65,6 +94,10 @@ class PT_API SerializationContext
         virtual const char* getId(const void* p);
 
         virtual const char* makeId(const void* p);
+
+    private:
+        std::map<const void*, unsigned> _idmap;
+        std::map<const void*, std::string> _refmap;
 
     public:
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
@@ -76,26 +109,12 @@ class PT_API SerializationContext
 
         virtual void fixup();
 
-    public:
-        void setLimit(size_t n);
-
-        size_t limit() const;
-
-        SerializationInfo* get();
-
-        void push(SerializationInfo* si);
-
-        SerializationNode* get(SerializationInfo::Category category);
-
-        void push(SerializationNode* node);
-
-        void addSurrogate(const char* name, SerializationSurrogate* surrogate);
-
-        SerializationSurrogate* surrogate(const char* name) const;
-
     private:
-        SerializationCache* _cache;
+        std::map<std::string, FixupInfo> _targets;
+        std::multimap<std::string, FixupInfo> _pointers;
 };
+
+} // namespace Xml
 
 } // namespace Pt
 

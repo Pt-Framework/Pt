@@ -30,140 +30,78 @@
 
 #include <Pt/Api.h>
 #include <Pt/Formatter.h>
-#include <Pt/SerializationInfo.h>
+#include <Pt/Decomposer.h>
 #include <Pt/SerializationContext.h>
+#include <vector>
 
 namespace Pt {
 
-class SerializationContext;
-
-class IDecomposer
+class Serializer
 {
     public:
-        virtual ~IDecomposer()
+        Serializer()
+        : _context(0)
+        , _formatter(0)
         {}
 
-        virtual void setName(const std::string& name) = 0;
-
-        virtual void format(Formatter& formatter) = 0;
-
-        virtual void beginFormat(Formatter& formatter) {}
-
-        virtual IDecomposer* advance(Formatter& formatter) { return 0; }
-
-    protected:
-        IDecomposer()
-        {}
-};
-
-
-template <typename T>
-class Decomposer : public IDecomposer
-{
-    public:
-        Decomposer()
-        : _type(0)
-        { }
-
-        void begin(const T& type, const std::string& name, SerializationContext* context = 0)
+        virtual ~Serializer()
         {
-            //std::cerr << "begin " << &type << std::endl;
-            _type = &type;
-            _si.clear();
-            _si.setName(name);
-            _si.setContext(context);
-
-            if(context)
+            std::vector<IDecomposer*>::iterator it;
+            for(it = _heap.begin(); it != _heap.end(); ++it)
             {
-                //*context <<= Pt::sym("name") <<= type;
-
-                //Pt::BreakDown b(*context);
-                //symbolize(b, type, "name");
-                //*context <<= Pt::save() <<= type;
-
-                //Pt::BreakDownInfo bi(*context);
-                _si.prepareSerialize();
-                _si <<= Pt::save() <<= type;
-                _si.clear();
-                _si.setName(name);
+                delete *it;
             }
 
-            _current = 0;
-
-            //_it = SerializationInfo::Iterator(&_current);
+            _heap.clear();
+            _stack.clear();
         }
 
-        virtual void setName(const std::string& name)
-        {
-            // TODO should happen before saving otherwise instance name is not available
-            _si.setName(name);
-        }
+        SerializationContext* context()
+        { return _context; }
 
-        virtual void format(Formatter& formatter)
-        {
-            //std::cerr << "format " << _type << std::endl;
-            _si <<= Pt::save() <<= *_type;
-            _si.format(formatter);
-        }
+        Formatter& formatter()
+        { return *_formatter; }
 
-        void beginFormat(Formatter& formatter)
-        {
-            _current = &_si;
-            _current->beginFormat(formatter);
-            _it = _current->begin();
-        }
+        void setFormatter(Formatter& formatter)
+        { _formatter = &formatter; }
 
-        IDecomposer* advance(Formatter& formatter)
+        void clear()
         {
-            if( _it == _current->end() )
+            if(_context)
+                _context->reset();
+
+            std::vector<IDecomposer*>::iterator it;
+            for(it = _heap.begin(); it != _heap.end(); ++it)
             {
-                _current->endFormat(formatter);
-                _current = _current->parent();
-                if(_current)
-                    _it = _current->end();
-
-                return _current != 0 ? this : 0;
+                delete *it;
             }
 
-            if( _it->beginFormat(formatter) )
-            {
-                // _it = _current->begin();
-                // if( _it != _current->end() )
-                // {
-                //     _current = &(*_it);
-                //     return true;
-                // }
-            }
-
-            _it->endFormat(formatter);
-            ++_it;
-            return this;
+            _heap.clear();
+            _stack.clear();
         }
 
-    private:
-        const T* _type;
-        SerializationInfo _si;
-        SerializationInfo* _current;
-        SerializationInfo::Iterator _it; // TODO iterator stack !!!
-};
+        void reset(SerializationContext* context)
+        {
+            if(_context)
+                _context->reset();
 
-class SerializerBase : public Formatter
-{
-    public:
-        SerializerBase()
-        {}
+            std::vector<IDecomposer*>::iterator it;
+            for(it = _heap.begin(); it != _heap.end(); ++it)
+            {
+                delete *it;
+            }
 
-        virtual ~SerializerBase()
-        {}
+            _heap.clear();
+            _stack.clear();
 
-        SerializationContext& context()
-        { return *_context; }
+            _context = context;
+        }
 
-        const SerializationContext& context() const
-        { return *_context; }
-
-        void setContext(SerializationContext& context)
-        { _context = &context; }
+        void queue(IDecomposer& dec)
+        {
+            dec.setContext(_context);
+            _stack.push_back(&dec);
+        }
 
         /** @brief Serialize an object
 
@@ -172,15 +110,45 @@ class SerializerBase : public Formatter
             type must be serializable.
         */
         template <typename T>
-        void serialize(const T& type, const std::string& name)
+        void serialize(const T& type, const char* name)
         {
             Decomposer<T>* dec = new Decomposer<T>;
             _heap.push_back(dec);
             _stack.push_back(dec);
 
-            dec->begin(type, name, _context);
-            dec->setName(name);
-            this->begin(dec);
+            dec->setContext(_context);
+            dec->begin(type, name);
+        }
+
+        void beginFormat()
+        {
+            _current = 0;
+            if( _stack.empty() )
+                return;
+
+            _current = _stack.front();
+            _current->beginFormat(*_formatter);
+        }
+
+        bool advance()
+        {
+            if( ! _current )
+                return false;
+
+            _current = _current->advance(*_formatter);
+            if( _current )
+                return true;
+
+            // at least one on the stack, otherwise _current is 0
+            _stack.front()->clear();
+            _stack.erase( _stack.begin() );
+
+            if( _stack.empty() )
+                return false;
+
+            _current = _stack.front();
+            _current->beginFormat(*_formatter);
+            return true;
         }
 
         void finish()
@@ -189,7 +157,7 @@ class SerializerBase : public Formatter
 
             for(it = _stack.begin(); it != _stack.end(); ++it)
             {
-                (*it)->format(*this);
+                (*it)->format(*_formatter);
             }
 
             for(it = _heap.begin(); it != _heap.end(); ++it)
@@ -201,13 +169,12 @@ class SerializerBase : public Formatter
             _stack.clear();
         }
 
-    protected:
-        virtual void begin(IDecomposer& dec) = 0;
-
     private:
         SerializationContext* _context;
+        Formatter* _formatter;
         std::vector<IDecomposer*> _stack;
         std::vector<IDecomposer*> _heap;
+        IDecomposer* _current;
 };
 
 } // namespace Pt

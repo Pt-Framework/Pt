@@ -305,8 +305,8 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
+            _a1.begin(a1, "");
+            _a2.begin(a2, "");
             this->_r.begin( this->_result.value() );
 
             IDecomposer* argv[2] = { &_a1, &_a2 };
@@ -317,8 +317,8 @@ class RemoteProcedure<R, A1, A2,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
-            _a2.begin(a2);
+            _a1.begin(a1, "");
+            _a2.begin(a2, "");
             this->_r.begin( this->_result.value() );
 
             IDecomposer* argv[2] = { &_a1, &_a2 };
@@ -354,7 +354,7 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
+            _a1.begin(a1, "");
             this->_r.begin( this->_result.value() );
 
             IDecomposer* argv[1] = { &_a1 };
@@ -365,7 +365,7 @@ class RemoteProcedure<R, A1,
         {
             this->_result.clearFault();
 
-            _a1.begin(a1);
+            _a1.begin(a1, "");
             this->_r.begin( this->_result.value() );
 
             IDecomposer* argv[1] = { &_a1 };

@@ -84,6 +84,12 @@ class IntComposer : public Pt::IComposer
             _type = &type;
         }
 
+        virtual void clear()
+        { }
+
+        virtual void setContext(Pt::SerializationContext*)
+        { }
+
         virtual void setName(const std::string& name)
         { }
 
@@ -129,8 +135,15 @@ class VectorComposer : public Pt::IComposer
         void begin(value_type& type)
         {
             type.clear();
+            type.reserve(5);
             _type = &type;
         }
+
+        virtual void clear()
+        { }
+
+        virtual void setContext(Pt::SerializationContext*)
+        { }
 
         virtual void setName(const std::string& name)
         { }
@@ -330,7 +343,6 @@ void SerializationTest::Benchmark3()
     Pt::String num(L"111");
 
     Pt::SerializationContext context;
-    //deser->setContext(&context);
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
@@ -340,59 +352,54 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        Pt::Composer< std::vector<int> >* des = new Pt::Composer< std::vector<int> >();
-        des->begin(vec, &context);
-        Pt::IComposer* deser = des;
+        Pt::Composer< std::vector<int> >* com = new Pt::Composer< std::vector<int> >();
+        com->setContext(&context);
+        com->begin(vec);
+        Pt::IComposer* composer = com;
 
         input.clear();
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        deser = deser->beginMember(name);
-        deser->setInt(v);
-        deser = deser->finish();
+        composer = composer->beginElement();
+        composer->setInt(v);
+        composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        deser = deser->beginMember(name);
-        deser->setInt(v);
-        deser = deser->finish();
+        composer = composer->beginElement();
+        composer->setInt(v);
+        composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        deser = deser->beginMember(name);
-        deser->setInt(v);
-        deser = deser->finish();
+        composer = composer->beginElement();
+        composer->setInt(v);
+        composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        deser = deser->beginMember(name);
-        deser->setInt(v);
-        deser = deser->finish();
+        composer = composer->beginElement();
+        composer->setInt(v);
+        composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        deser = deser->beginMember(name);
-        deser->setInt(v);
-        deser = deser->finish();
-/*
-        std::getline(input, num, Pt::Char(' '));
-        deser = deser->beginMember(name);
-        deser->setValue(num);
-        deser = deser->leaveMember();
-*/
+        composer = composer->beginElement();
+        composer->setInt(v);
+        composer = composer->finish();
 
-        deser->finish();
-        des->begin(vec, &context);
-        delete des;
+        composer->finish();
+
+        delete com;
 
         u += vec.size();
     }
     Pt::Timespan ts = clock.stop();
 
     std::cerr << "Time3: " << ts.toUSecs() << " " << u << std::endl;
-    std::exit(1);
+    //std::exit(1);
 }
 
 

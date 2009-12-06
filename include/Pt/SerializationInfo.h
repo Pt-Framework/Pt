@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2008 by Dr. Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -47,54 +47,82 @@ class SerializationContext;
 class Formatter;
 class SerializationNode;
 
+class FixupInfo
+{
+    public:
+        FixupInfo(void* target, const std::type_info& targetType)
+        : _target(target)
+        , _type(&targetType)
+        {}
+
+        ~FixupInfo()
+        {}
+
+        void* target() const
+        { return _target; }
+
+        const std::type_info& targetType() const
+        { return *_type; }
+
+        bool isNull() const
+        { return _target == 0; }
+
+        template <typename T>
+        T* getTarget() const
+        {
+            if( _target == 0 || typeid(T) != *_type )
+            {
+                throw SerializationError("type mismatch during pointer fixup");
+            }
+
+            return static_cast<T*>( _target );
+        }
+
+    private:
+        void* _target;
+        const std::type_info* _type;
+};
+
+
 template <typename T>
 struct Fixup
 {
     static void do_fixup_ptr(void* fixme,
-                             void* target, 
+                             void* target,
                              const std::type_info& targetType)
     {
         T** from = static_cast<T**>(fixme);
-        fixup(*from, target, targetType);
+        FixupInfo fi(target, targetType);
+        fixup(*from, fi);
     }
 
     static void do_fixup_ref(void* fixme,
-                             void* target, 
+                             void* target,
                              const std::type_info& targetType)
     {
         T* from = static_cast<T*>(fixme);
-        fixup(*from, target, targetType);
+        FixupInfo fi(target, targetType);
+        fixup(*from, fi);
     }
 };
 
 
 template <typename T>
-inline void fixup(T*& fixme, void* target, const std::type_info& targetType)
+inline void fixup(T*& fixme, const FixupInfo& fixup)
 {
-    if(target == 0)
-    {
-        fixme = 0;
-        return;
-    }
+    fixme = 0;
 
-    if( typeid(T) != targetType )
+    if( ! fixup.isNull() )
     {
-        throw SerializationError("type mismatch during pointer fixup");
+        fixme = fixup.getTarget<T>();
     }
-
-    fixme = static_cast<T*>(target);
 }
 
 
 template <typename T>
-void fixup(T& fixme, void* target, const std::type_info& targetType)
+void fixup(T& fixme, void* target, const FixupInfo& fixup)
 {
-    if( typeid(T) != targetType )
-    {
-        throw SerializationError("type mismatch during reference fixup");
-    }
-
-    T* to = static_cast< T* >(target);
+    T* to = fixup.getTarget<T>();
     fixme = *to;
 }
 
@@ -108,7 +136,7 @@ class PT_API SerializationInfo
                                      void* target, const std::type_info& targetType);
 
         enum Category {
-            Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4
+            Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4, Context = 5
         };
 
         class Iterator;
@@ -143,17 +171,14 @@ class PT_API SerializationInfo
     public:
         void clear();
 
-        void prepareSerialize()
-        { _parent = this; }
-
-        bool isPreparing() const
-        { return _parent == this; }
-
         SerializationNode* releaseNode();
 
         Category category() const;
 
         void setCategory(Category category);
+
+        void setContextual()
+        { this->setCategory(Context); }
 
         SerializationContext* context() const
         { return _context; }
@@ -199,22 +224,11 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        bool beginSave(const void* p);
-
-        void finishSave();
-
-        void beginLoad(void* p, const std::type_info& ti) const;
-
-        void finishLoad() const;
-
         /** @brief Deserialization of flat child value types
         */
         template <typename T>
         void getValue(T& value) const
         {
-            if( this->isPreparing() )
-                return;
-
             convert( value, this->toString() );
         }
 
@@ -223,12 +237,12 @@ class PT_API SerializationInfo
         template <typename T>
         void setValue(const T& value)
         {
-            if( this->isPreparing() )
-                return;
-
-            convert( initString(), value );
+            Pt::String* str = initString();
+            if(str)
+                convert( *str, value );
         }
 
+        // TODO setValue/getValue for String
         void getValue(bool& b) const;
 
         void setValue(bool b);
@@ -270,6 +284,14 @@ class PT_API SerializationInfo
 
         void setValue(double f);
 
+        bool beginSave(const void* p);
+
+        void finishSave();
+
+        void beginLoad(void* p, const std::type_info& ti) const;
+
+        void finishLoad() const;
+
         /** @brief Serialization of member data
         */
         SerializationInfo& addMember(const std::string& name);
@@ -308,7 +330,7 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of weak pointers
         */
-        void saveReference(const void* ref);
+        void setReference(const void* ref);
 
         /** @brief Deserialization of weak pointers (parse phase)
         */
@@ -388,7 +410,7 @@ class PT_API SerializationInfo
     protected:
         void load(void* fixme, FixupHandler fh) const;
 
-        Pt::String& initString();
+        Pt::String* initString();
 
     private:
         mutable SerializationNode* _node;
@@ -511,6 +533,9 @@ class SaveInfo
         : si(&info)
         {}
 
+        SerializationInfo& out() const
+        { return *si; }
+
         template <typename T>
         bool save(const T& type)
         {
@@ -524,12 +549,6 @@ class SaveInfo
             return first;
         }
 
-        template <typename T>
-        void put(const T& type)
-        {
-            *si <<= type;
-        }
-
         SerializationInfo* si;
 };
 
@@ -537,7 +556,7 @@ class SaveInfo
 template <typename T>
 struct Save
 {
-    Save(const T& t)
+    explicit Save(const T& t)
     : type(&t)
     {}
 
@@ -563,7 +582,10 @@ inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
 template <typename T>
 inline void operator<<= (SaveInfo& si, const T& type)
 {
-    si.save( type );
+    if( ! si.save(type) )
+    {
+        si.out() <<= type;
+    }
 }
 
 
@@ -576,46 +598,30 @@ class LoadInfo
     public:
         explicit LoadInfo(const SerializationInfo& info)
         : si(&info)
-        //, _loaded(false)
         {}
-
-        ~LoadInfo()
-        { /*if(_loaded) si->finishLoad();*/ }
 
         const SerializationInfo& in() const
         { return *si; }
-
-        // template <typename T>
-        // bool beginLoad(T& type) const
-        // {
-        //     T* tp = &type;
-        //     si->beginLoad( tp, typeid(T) );
-        //     _loaded = true;
-        //     return _loaded;
-        // }
 
         template <typename T>
         void load(T& type) const
         {
             T* tp = &type;
-            //if( si->beginLoad( tp, typeid(T) ) )
+
             si->beginLoad( tp, typeid(T) );
-            //{
-                *si >>= type;
-                si->finishLoad();
-           // }
+            *si >>= type;
+            si->finishLoad();
         }
 
     private:
         const SerializationInfo* si;
-        //mutable bool _loaded;
 };
 
 
 template <typename T>
 struct Load
 {
-    Load(T& t)
+    explicit Load(T& t)
     : type(&t)
     {}
 
@@ -641,16 +647,7 @@ inline void operator >>=(const SerializationInfo& si, const Load<T>& ld)
 template <typename T>
 inline void operator >>=(const LoadInfo& li, T& type)
 {
-    // if(li.in().category() == Pt::SerializationInfo::Reference)
-    // {
-    //     li.in().loadReference(type);
-    // }
-    // else
-    // {
-        li.load(type);
-        //li.beginLoad( type );
-        //li.in() >>= type;
-    //}
+    li.load(type);
 }
 
 
@@ -664,8 +661,7 @@ inline void operator >>=(const SerializationInfo& si, T*& ptr)
 template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
-    si.saveReference( ptr );
-    //std::cerr << "saveReference " << ptr << std::endl;
+    si.setReference( ptr );
     si.setTypeName("reference");
 }
 
@@ -1071,6 +1067,5 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 }
 
 } // namespace Pt
-
 
 #endif

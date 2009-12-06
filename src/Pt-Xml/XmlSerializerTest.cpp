@@ -34,6 +34,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/SerializationSurrogate.h"
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/DateTime.h"
@@ -70,17 +71,12 @@ class DateRef
 };
 
 
-void fixup(DateRef& fixme, void* target, const std::type_info& targetType)
+void fixup(DateRef& fixme, const Pt::FixupInfo& fixup)
 {
-    // NOTE: maybe fixup from Composer with ctx >>= T
-    // NOTE: hide this check in FixupInfo
-    if( typeid(Pt::Date) != targetType )
-    {
-        throw Pt::SerializationError("type mismatch during pointer fixup");
-    }
+    fixme.setDate(0);
 
-    Pt::Date* to = static_cast< Pt::Date* >(target);
-    fixme.setDate(to);
+    if( ! fixup.isNull() )
+        fixme.setDate( fixup.getTarget<Pt::Date>() );
 }
 
 
@@ -100,83 +96,24 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
     si.addMember("n") <<= dr.n();
 }
 
-
-/*void operator <<=(Pt::ISerializationInfo& si, const DateRef& dr)
-{
-    si.addMember("date") <<= dr.date();
-    si.addMember("n") <<= dr.n();
-}*/
-
-
-/*void breakdown(Pt::BreakDown& b, const DateRef& dr)
-{
-    std::cerr << "### breakdown DateRef" << dr.date() << std::endl;
-    breakdown(b, dr.date());
-}
-
-
-void symbolize(Pt::BreakDown& b, const DateRef& dr, const char* name)
-{
-    std::cerr << "### symbolize DateRef " << dr.date() << std::endl;
-    //b.save(dr, name);
-
-    //b._ctx.beginSave(&dr, name);
-    //b.prepareId( dr.date() );
-
-    b._ctx <<= Pt::save() <<= dr;
-
-    //b._ctx.finishSave();
-    //std::cerr << "### DONE symbolize DateRef " << dr.date() << std::endl;
-}*/
-
 } // namespace test
 
 
 namespace Pt {
 
 typedef SmartPtr<Date> DateSmartPtr;
-/*
-void symbolize(Pt::BreakDown& b, const DateSmartPtr& sp, const char* name)
+
+
+void fixup(DateSmartPtr& fixme, const Pt::FixupInfo& fixup)
 {
-    if( ! sp.getPointer() || ! b.save( *sp, name ) )
-    {
-        b.prepareId( sp.getPointer() );
-    }
-}
-
-
-void breakdown(Pt::BreakDown& b, const DateSmartPtr& sp)
-{
-    // if( ! sp.getPointer() || ! b.save( *sp ) )
-    // {
-    //     b.prepareId( sp.getPointer() );
-    // }
-}
-*/
-
-/*void operator <<=(Pt::ISaveInfo& si, const DateSmartPtr& sp)
-{
-    if( ! sp.getPointer() || ! si.save( *sp ) )
-    {
-        si.put( sp.getPointer() );
-    }
-}*/
-
-
-void fixup(DateSmartPtr& fixme, void* target, const std::type_info& targetType)
-{
-    if( target && targetType == typeid(DateSmartPtr) )
-    {
-        DateSmartPtr* to = static_cast< DateSmartPtr* >(target);
-        fixme = *to;
-    }
-    else if(target == 0)
+    if( fixup.isNull() )
     {
         fixme = DateSmartPtr();
     }
     else
     {
-        throw SerializationError("smart pointer fixup failed");
+        DateSmartPtr* to = fixup.getTarget<DateSmartPtr>();
+        fixme = *to;
     }
 }
 
@@ -205,7 +142,7 @@ void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
     {
-        si.put( sp.getPointer() );
+        si.out() <<= sp.getPointer();
     }
 }
 
@@ -233,7 +170,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
-            //Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
+            Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
 
         class IsoDateSurrogate : public Pt::SerializationSurrogate
@@ -277,11 +214,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context().addSurrogate("date", new IsoDateSurrogate);
-            ser.serialize(date1, "date1");
-            //ser.serialize(date1, "date_1b");
-            ser.serialize(dr, "dref");
+            ser.context()->addSurrogate("date", new IsoDateSurrogate);
 
+            ser.serialize(date1, "date1");
+            ser.serialize(dr, "dr");
             ser.serialize(dateptr, "dateptr");
             ser.serialize(datesp, "datesp");
             ser.serialize(datesp2, "datesp2");
@@ -297,13 +233,13 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::DateSmartPtr datesp4;
             Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
-            std::cerr << "\n--------------------" << std::endl;
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            // std::cerr << "\n--------------------" << std::endl;
+            // std::cerr << output.str();
+            // std::cerr << "---------------------\n" << std::endl;
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
-            deser.context().addSurrogate("date", new IsoDateSurrogate);
+            deser.context()->addSurrogate("date", new IsoDateSurrogate);
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.deserialize(dateptr2);
@@ -313,7 +249,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             deser.finish();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
-            std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
+            //std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
             /*std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< datesp3->toIsoString() << std::endl;
             std::cerr << "RESULT: "<< datesp4->toIsoString() << std::endl;*/
@@ -324,60 +260,43 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( nullDate.getPointer() == 0);
         }
 
-        static void dateToIso(Pt::SerializationInfo& si, Pt::Formatter& formatter)
-        {
-            int year = 0;
-            unsigned month = 0;
-            unsigned day = 0;
-
-            si.getMember("year") >>= year;
-            si.getMember("month") >>= month;
-            si.getMember("day") >>= day;
-
-            Pt::Date date(year, month, day);
-            std::string s = date.toIsoString();
-            formatter.addValue( si.name(), si.typeName(), Pt::String::widen(s), si.id() );
-        }
-
-        static void isoToDate(Pt::SerializationInfo& si, Pt::Deserializer& deser)
-        {
-            std::string isoString;
-            si >>= isoString;
-            Pt::Date date = Pt::Date::fromIsoString(isoString);
-            si.addMember("year") <<= date.year();
-            si.addMember("month") <<= date.month();
-            si.addMember("day") <<= date.day();
-        }
-
         void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
-            Pt::Date date_2(2000, 4,18);
+            Pt::Date date2(2000, 4,18);
+
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            //ser.setFormatRule("Pt::Date", &XmlSerializerTest::dateToIso);
-            ser.context().addSurrogate("date", new IsoDateSurrogate);
-            ser.serialize(date1, "date1");
-            ser.serialize(date_2, "date2");
+            ser.context()->addSurrogate("date", new IsoDateSurrogate);
+            ser.context()->enableReferencing(false);
+
+            ser.serialize(date1, "date1a");
+            ser.serialize(date2, "date2a");
+            ser.serialize(date1, "date1b");
+            ser.serialize(date2, "date2b");
+
             ser.finish();
             ser.flush();
 
-            std::cerr << "\n--------------------" << std::endl;
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            // std::cerr << "\n--------------------" << std::endl;
+            // std::cerr << output.str();
+            // std::cerr << "---------------------\n" << std::endl;
 
-            Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
-            Pt::Date date3(1800, 7, 6);
+            Pt::DateTime date3(1, 1, 1, 1, 1, 1, 1);
+            Pt::Date date4(1800, 7, 6);
+
             std::stringstream input( output.str() );
             Pt::TextIStream tis(input, new Pt::Utf8Codec);
+
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
-            //deser.setLoadRule("Pt::Date", &XmlSerializerTest::isoToDate);
-            deser.context().addSurrogate("date", new IsoDateSurrogate);
-            deser.deserialize(date2);
+            deser.context()->enableReferencing(false);
+            deser.context()->addSurrogate("date", new IsoDateSurrogate);
+
             deser.deserialize(date3);
+            deser.deserialize(date4);
             deser.finish();
-            std::cerr << "Date3: " << date3.toIsoString() << std::endl;
+
             // std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
             // std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
             // Pt::Composer<Pt::DateTime> des;
@@ -387,31 +306,79 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             // std::cerr << "DATE: " << date2.toIsoString() << std::endl;
             // deser.finish();
 
-            //PT_UNIT_ASSERT( date1 == date2);
+            PT_UNIT_ASSERT(date1 == date3);
+            PT_UNIT_ASSERT(date2 == date4);
         }
 
         void AdvanceObject()
         {
-            Pt::Date date_2(2000, 4,18);
+            Pt::Date date1a(1889, 4,20);
+            Pt::Date date2a(1945, 4,29);
+            Pt::Date* dateptr1a = &date1a;
+
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
 
-            ser.serialize(date_2, "dateA");
+            ser.serialize(date1a, "date1");
+            ser.serialize(date2a, "date2");
+            ser.serialize(dateptr1a, "dateptr1");
 
-            std::cerr << "\n--------------------" << std::endl;
+            //std::cerr << "\n--------------------" << std::endl;
             ser.beginFormat();
             while( ser.advance() )
             {
-                ser.flush();
-                std::cerr << output.str() << "- ADVANCE -" << std::endl;
-                output.str( std::string() );
+                //ser.flush();
+                //std::cerr << output.str() << "- ADVANCE -" << std::endl;
+                //output.str( std::string() );
             }
 
             ser.finish();
             ser.flush();
 
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            // std::cerr << output.str();
+            // std::cerr << "---------------------\n" << std::endl;
+
+            Pt::Date date1b;
+            Pt::Date date2b;
+            Pt::Date* dateptr1b = 0;
+            std::stringstream input( output.str() );
+            Pt::TextIStream tis(input, new Pt::Utf8Codec);
+
+            tis.buffer().import();
+            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlDeserializer deser(reader);
+
+            deser.begin(date1b);
+            while( tis.buffer().in_avail() )
+            {
+                bool finished = deser.advance();
+                if(finished)
+                    break;
+            }
+
+            deser.begin(date2b);
+            while( tis.buffer().in_avail() )
+            {
+                bool finished = deser.advance();
+                if(finished)
+                    break;
+            }
+
+            deser.begin(dateptr1b);
+            while( tis.buffer().in_avail() )
+            {
+                bool finished = deser.advance();
+                if(finished)
+                    break;
+            }
+
+            deser.finish();
+
+            // std::cerr << "date1b: " << date1b.toIsoString() << std::endl;
+            // std::cerr << "date2b: " << date2b.toIsoString() << std::endl;
+            PT_UNIT_ASSERT(date1a == date1b);
+            PT_UNIT_ASSERT(date2a == date2b);
+            PT_UNIT_ASSERT(dateptr1b == &date1b);
         }
 };
 

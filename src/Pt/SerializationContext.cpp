@@ -27,6 +27,7 @@
  */
 #include "SerializationData.h"
 #include "Pt/SerializationContext.h"
+#include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
 #include <Pt/SerializationInfo.h>
 #include <map>
@@ -38,6 +39,7 @@ class SerializationCache
     public:
         SerializationCache()
         : _limit(64)
+        , refsEnabled(false)
         {}
 
         std::map<std::string, SerializationSurrogate*> _surrogates;
@@ -46,7 +48,20 @@ class SerializationCache
         std::vector<SerializationNode*> _objects;
         std::vector<SerializationNode*> _refs;
         size_t _limit;
+        bool refsEnabled;
 };
+
+
+void SerializationContext::enableReferencing(bool enabled)
+{
+    _cache->refsEnabled = enabled;
+}
+
+
+bool SerializationContext::referencingEnabled() const
+{
+    return _cache->refsEnabled;
+}
 
 
 bool SerializationContext::beginSave(const void* p, const std::string& name)
@@ -70,6 +85,12 @@ const char* SerializationContext::getId(const void* p)
 {
     throw SerializationError("missing unlink information");
     return 0;
+}
+
+
+const char* SerializationContext::makeId(const void* p)
+{
+    return "";
 }
 
 
@@ -174,12 +195,12 @@ SerializationInfo* SerializationContext::get()
 
 void SerializationContext::push(SerializationInfo* si)
 {
-    si->clear();
-
     SerializationNode* node = si->releaseNode();
 
     if(node)
         this->push(node);
+
+    si->clear();
 
     if(_cache->_infos.size() < _cache->_limit)
     {
@@ -235,6 +256,10 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 			node->setCategory(category);
             break;
 
+        case SerializationInfo::Context:
+            node = new ContextNode();
+            break;
+
         default:
             node = 0;
     }
@@ -245,6 +270,8 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 
 void SerializationContext::push(SerializationNode* node)
 {
+    node->clear(*this);
+
     switch( node->category() )
     {
         case SerializationInfo::Scalar:

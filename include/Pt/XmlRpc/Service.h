@@ -262,7 +262,7 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
         IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2, _v3);
-            _r.begin(_rv);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -333,7 +333,7 @@ class BasicServiceProcedure<R, C, A1, A2,
         IDecomposer* endCall()
         {
             _rv = _cb->call(_v1, _v2);
-            _r.begin(_rv);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -404,7 +404,7 @@ class BasicServiceProcedure<R, C, A1,
         IDecomposer* endCall()
         {
             _rv = _cb->call(_v1);
-            _r.begin(_rv);
+            _r.begin(_rv, "");
             return &_r;
         }
 
@@ -457,7 +457,7 @@ class BasicServiceProcedure<R, C, Pt::Void,
         IDecomposer* endCall()
         {
             _rv = _cb->call();
-            _r.begin(_rv);
+            _r.begin(_rv, "");
             return &_r;
         }
 

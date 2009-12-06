@@ -25,63 +25,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Xml/XmlSerializer.h"
+#ifndef Pt_SerializationSurrogate_h
+#define Pt_SerializationSurrogate_h
+
+#include <Pt/Api.h>
 
 namespace Pt {
 
-namespace Xml {
+class SerializationInfo;
 
-XmlSerializer::XmlSerializer()
+class SerializationSurrogate
 {
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
+    public:
+        virtual ~SerializationSurrogate()
+        {}
 
+        virtual void pack(SerializationInfo& it) const = 0;
 
-XmlSerializer::XmlSerializer(std::ostream& os)
-: _formatter(os)
-{
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
+        virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
 
-
-XmlSerializer::XmlSerializer(XmlWriter* writer)
-: _formatter(writer)
-{
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
-
-
-XmlSerializer::~XmlSerializer()
-{
-}
-
-
-void XmlSerializer::attach(std::ostream& os)
-{
-    _formatter.attach(os);
-}
-
-
-void XmlSerializer::attach(XmlWriter& writer)
-{
-    _formatter.attach(writer);
-}
-
-
-void XmlSerializer::detach()
-{
-    _formatter.detach();
-}
-
-
-void XmlSerializer::flush()
-{
-    _formatter.flush();
-}
-
-} // namespace Xml
+    protected:
+        SerializationSurrogate()
+        {}
+};
 
 } // namespace Pt
+
+#endif

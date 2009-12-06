@@ -35,13 +35,6 @@ namespace Pt {
 
 bool SerializationInfo::beginFormat(Formatter& formatter)
 {
-    // if( _context && _bound )
-    // {
-    //     const char* id = _context->getId(_bound);
-    //     if(id)
-    //         this->setId( id ); // prevents this method being const
-    // }
-
     if(this->category() == SerializationInfo::Scalar)
     {
         static_cast<ValueNode*>(_node)->format( formatter,
@@ -57,9 +50,6 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
 
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
         const char* id = _context->getId( refAddr );
-        if( ! id )
-            throw SerializationError("stray reference");
-
         formatter.addReference( this->name(), id);
         return false;
     }
@@ -93,13 +83,6 @@ void SerializationInfo::endFormat(Formatter& formatter)
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    // if( _context && _bound )
-    // {
-    //     const char* id = _context->getId(_bound);
-    //     if(id)
-    //         this->setId( id ); // prevents this method being const
-    // }
-
     if(this->category() == SerializationInfo::Scalar)
     {
         static_cast<ValueNode*>(_node)->format( formatter,
@@ -114,9 +97,6 @@ void SerializationInfo::format(Formatter& formatter)
 
         const void* refAddr = static_cast<const ReferenceNode*>(_node)->address();
         const char* id = _context->getId( refAddr );
-        if( ! id )
-            throw SerializationError("stray reference");
-
         formatter.addReference( this->name(), id);
     }
     else if(this->category() == SerializationInfo::Struct)
@@ -158,104 +138,19 @@ SerializationInfo::Category SerializationInfo::category() const
 
 SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
 {
-    if( this->isPreparing() )
-    {
-        return 0;
-    }
-
-    if(_context)
+    if( _context && this->category() != Context )
         return _context->surrogate(name);
 
     return 0;
 }
 
 
-bool SerializationInfo::beginSave(const void* p)
-{
-    if( this->isPreparing() )
-    {
-        return this->context()->beginSave(p, _name);
-    }
-
-    //std::cerr << "SerializationInfo::beginSave" << std::endl;
-    bool first = true;
-
-    if(_parent == 0 || _parent->_bound)
-    {
-        if(_context)
-        {
-            // all referenced objects are known by the context
-            // if this object is known make an id and set _id
-            // _id can be written when this type is formatted
-            //std::cerr << "beginSave (" << _name << ")"<< p << std::endl;
-            const char* id = _context->makeId(p);
-            if(id)
-            {
-                //std::cerr << "  id (" << _name << ")" << id << std::endl;
-                _id = id;
-            }
-            else
-            {
-                //std::cerr << "  id (" << _name << ") none" << std::endl;
-                first = false;
-            }
-
-            // TODO: return true only if type is saved for the first time
-
-            /// XXX
-            /// if(first)
-                _bound = p;
-        }
-    }
-
-    return first;
-}
-
-
-void SerializationInfo::finishSave()
-{
-    if( this->isPreparing() )
-    {
-        this->context()->finishSave();
-        return;
-    }
-
-    if(_context && _bound)
-    {
-        /// XXX _context->finishSave();
-    }
-}
-
-
-void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
-{
-    if(_parent == 0 || _parent->_bound)
-        _bound = p;
-
-    if(_context && _bound)
-    {
-        _context->beginLoad(p, ti, _name, _id);
-    }
-}
-
-
-void SerializationInfo::finishLoad() const
-{
-    if(_context && _bound)
-    {
-        _context->finishLoad();
-    }
-}
-
-
 SerializationInfo::~SerializationInfo()
 {
-    //std::cerr << "SerializationInfo::~SerializationInfo() BEGIN" << std::endl;
     if(_node)
     {
         if(_context)
         {
-            //std::cerr << "SerializationInfo::~SerializationInfo() PUSH" << std::endl;
             _context->push(_node);
         }
         else
@@ -263,8 +158,6 @@ SerializationInfo::~SerializationInfo()
             delete _node;
         }
     }
-    
-    //std::cerr << "SerializationInfo::~SerializationInfo() END" << std::endl;
 }
 
 
@@ -276,6 +169,9 @@ void SerializationInfo::clear()
             _node->clear(*_context);
         else
             _node->clear();
+
+        if(_node->category() == Context)
+            this->setCategory(Void);
     }
 
     if( _name.size() )
@@ -287,7 +183,6 @@ void SerializationInfo::clear()
     if( _id.size() )
         _id.clear();
 
-    _parent = 0;
     _bound = 0;
 }
 
@@ -302,40 +197,20 @@ SerializationNode* SerializationInfo::releaseNode()
 
 void SerializationInfo::setCategory(Category category)
 {
-    if( this->isPreparing() )
-        return;
-
     if( this->category() != category)
     {
         SerializationNode* node = 0;
 
-        if( _context )
+        if(_node)
         {
-            node = _context->get(category);
+            node = _node->toCategory(_context, category);
         }
         else
         {
-			switch(category)
-			{
-				case Scalar:
-					node = new ValueNode();
-					break;
-
-				case Reference:
-					node = new ReferenceNode();
-					break;
-
-				case Sequence:
-				case Struct:
-					node = new ObjectNode(category);
-					break;
-
-				default:
-					break;
-			}
+            node = SerializationNode::createNode(_context, category);
         }
 
-        delete _node;
+        delete _node; // OPTIMIZE
         _node = node;
     }
 }
@@ -352,25 +227,26 @@ void SerializationInfo::setContext(SerializationContext* context)
 }
 
 
-Pt::String& SerializationInfo::initString()
+Pt::String* SerializationInfo::initString()
 {
+    if( category() == Context )
+        return 0;
+
     this->setCategory(Scalar);
-    return static_cast<ValueNode*>(_node)->setString();
+    return &( static_cast<ValueNode*>(_node)->setString() );
 }
 
 
 // called during serialization, when a reference needs to be unlinked
-void SerializationInfo::saveReference(const void* ref)
+void SerializationInfo::setReference(const void* ref)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
     {
-        this->context()->prepareId(ref);
+        if( _context && this->context()->referencingEnabled() )
+            this->context()->prepareId(ref);
+
         return;
     }
-    /* XXX if(_context )
-    {
-        _context->prepareId( ref );
-    }*/
 
     this->setCategory(Reference);
     static_cast<ReferenceNode*>(_node)->setAddress( const_cast<void*>(ref) );
@@ -385,8 +261,7 @@ void SerializationInfo::setReference(const std::string& id)
 }
 
 
-// called during deserialization, when a reference needs to be relinked
-// by a previously parsed reference id
+// called during deserialization, when a reference needs to be fixed up
 void SerializationInfo::load(void* type, FixupHandler fh) const
 {
     if( this->category() != Reference)
@@ -403,7 +278,7 @@ void SerializationInfo::load(void* type, FixupHandler fh) const
 
 const Pt::String& SerializationInfo::toString() const
 {
-    if( this->category() != Scalar)
+    if( this->category() != Scalar )
         throw SerializationError("not a value");
 
     ValueNode* svalue = (ValueNode*) _node;
@@ -413,7 +288,7 @@ const Pt::String& SerializationInfo::toString() const
 
 void SerializationInfo::getValue(bool& b) const
 {
-    if( this->category() != Scalar)
+    if( this->category() != Scalar )
         throw SerializationError("expected boolean value");
 
     b = static_cast<ValueNode*>(_node)->getBool();
@@ -422,12 +297,11 @@ void SerializationInfo::getValue(bool& b) const
 
 void SerializationInfo::setValue(bool b)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
         return;
 
     this->setCategory(Scalar);
     static_cast<ValueNode*>(_node)->setBool(b);
-    //initValue()->setBool(b);
 }
 
 
@@ -451,7 +325,7 @@ void SerializationInfo::getValue(int& i) const
 
 void SerializationInfo::getValue(long& l) const
 {
-    if( this->category() != Scalar)
+    if( this->category() != Scalar )
         throw SerializationError("expected integer value");
 
     l = static_cast<ValueNode*>(_node)->getInt();
@@ -459,7 +333,7 @@ void SerializationInfo::getValue(long& l) const
 
 void SerializationInfo::setValue(long l)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
         return;
 
     this->setCategory(Scalar);
@@ -496,7 +370,7 @@ void SerializationInfo::getValue(unsigned long& ul) const
 
 void SerializationInfo::setValue(unsigned long ul)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
         return;
 
     this->setCategory(Scalar);
@@ -524,7 +398,7 @@ void SerializationInfo::getValue(double& f) const
 
 void SerializationInfo::setValue(double f)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
         return;
 
     this->setCategory(Scalar);
@@ -532,10 +406,77 @@ void SerializationInfo::setValue(double f)
 }
 
 
+bool SerializationInfo::beginSave(const void* p)
+{
+    if( ! this->context() || ! this->context()->referencingEnabled() )
+        return true;
+
+    if( category() == Context )
+    {
+        return this->context()->beginSave(p, _name);
+    }
+
+    bool first = true;
+
+    if(_parent == 0 || _parent->_bound)
+    {
+        // all referenced objects are known by the context
+        // if this object is referenced, make an id and set _id
+        // _id can be written when this type is formatted
+        const char* id = _context->makeId(p);
+        if(id)
+        {
+            // the id can be "" or a null-terminated string which means,
+            // in either case, the type was saved for the first time.
+            _id = id;
+        }
+        else
+        {
+            // the id can be 0 if the type has already been saved
+            first = false;
+        }
+
+        _bound = p;
+    }
+
+    return first;
+}
+
+
+void SerializationInfo::finishSave()
+{
+    if( category() == Context && this->context() && this->context()->referencingEnabled() )
+    {
+        this->context()->finishSave();
+        return;
+    }
+}
+
+
+void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
+{
+    if(_context && _context->referencingEnabled() && (_parent == 0 || _parent->_bound) )
+    {
+        _bound = p;
+        _context->beginLoad(p, ti, _name, _id);
+    }
+}
+
+
+void SerializationInfo::finishLoad() const
+{
+    if(_context && _context->referencingEnabled() && _bound)
+    {
+        _context->finishLoad();
+    }
+}
+
+
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    if( this->isPreparing() )
+    if( category() == Context )
     {
+        _name = name;
         return *this;
     }
 
@@ -555,6 +496,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
     }
 
     si->_parent = this;
+    si->_next = 0;
     si->setName(name);
 
     onode->push_back(si);
@@ -564,8 +506,10 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 SerializationInfo& SerializationInfo::addElement()
 {
-    if( this->isPreparing() )
+    if( category() == Context )
     {
+        if( _name.size() )
+            _name.clear();
         return *this;
     }
 
@@ -585,6 +529,7 @@ SerializationInfo& SerializationInfo::addElement()
     }
 
     si->_parent = this;
+    si->_next = 0;
     onode->push_back(si);
     return *si;
 }

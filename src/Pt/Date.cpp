@@ -28,6 +28,7 @@
 #include "Pt/Date.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/SerializationContext.h"
+#include "Pt/SerializationSurrogate.h"
 #include <cctype>
 
 namespace Pt {

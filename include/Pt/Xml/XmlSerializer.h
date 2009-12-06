@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2008 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,69 +30,19 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/XmlFormatter.h>
+#include <Pt/Xml/XmlSerializationContext.h>
 #include <Pt/Serializer.h>
-#include <Pt/SerializationContext.h>
-#include <vector>
-#include <map>
 
 namespace Pt {
 
 namespace Xml {
-
-class PT_XML_API XmlSerializationContext : public SerializationContext
-{
-    public:
-        XmlSerializationContext();
-
-        //! @brief Destructor
-        ~XmlSerializationContext();
-
-        virtual void reset();
-
-    public:
-        virtual bool beginSave(const void* p, const std::string& name);
-
-        virtual void finishSave();
-
-        virtual void prepareId(const void* p);
-
-        virtual const char* getId(const void* p);
-
-        virtual const char* makeId(const void* p);
-
-    private:
-        std::map<const void*, unsigned> _idmap;
-        std::map<const void*, std::string> _refmap;
-
-    public:
-        virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
-                               const std::string& name, const std::string& id);
-
-        virtual void finishLoad();
-
-        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
-
-        virtual void fixup();
-
-    private:
-        struct FixupInfo
-        {
-            void* address;
-            void (*fixup)(void* fixme,
-                          void* target, const std::type_info& targetType);
-            const std::type_info* type;
-        };
-
-        std::map<std::string, FixupInfo> _targets;
-        std::multimap<std::string, FixupInfo> _pointers;
-};
 
 /** @brief Serialize objects or object data to XML
 
     Thic class performs XML serialization of a single object or
     object data.
 */
-class PT_XML_API XmlSerializer : public XmlFormatter
+class PT_XML_API XmlSerializer : public Serializer
 {
     public:
         /** @brief Construct a serializer without initializing the
@@ -121,15 +71,6 @@ class PT_XML_API XmlSerializer : public XmlFormatter
         //! @brief Destructor
         ~XmlSerializer();
 
-        SerializationContext& context()
-        { return *_context; }
-
-        const SerializationContext& context() const
-        { return *_context; }
-
-        void setContext(SerializationContext& context)
-        { _context = &context; }
-
         /** @brief Opens this serializer for writing into the given stream.
 
             The serializer will write the objects as XML with
@@ -140,7 +81,7 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             XmlWriter object. If this method is called anyway or called twice an
             std::logic_error is thrown.
         */
-        //void attach(std::ostream& os);
+        void attach(std::ostream& os);
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 
@@ -154,74 +95,20 @@ class PT_XML_API XmlSerializer : public XmlFormatter
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        //void attach(XmlWriter& writer);
+        void attach(XmlWriter& writer);
 
         /** @brief Detaches the currently set writer from this object.
 
             Before detaching the writer, the underlaying stream is flushed.
             If there is no currently set writer, nothing happens.
         */
-        //void detach();
+        void detach();
 
-        /** @brief Serialize an object to XML
-
-            The serializer will serialize the object \a type as
-            XML to the assigned stream. The string \a name will be used
-            as the instance name of \a type and appear as the name of the
-            XML element. The type must be serializable.
-        */
-        template <typename T>
-        void serialize(const T& type, const std::string& name)
-        {
-            Decomposer<T>* dec = new Decomposer<T>;
-            _heap.push_back(dec);
-            _stack.push_back(dec);
-
-            dec->begin(type, name,_context);
-            //dec->setName(name);
-        }
-
-        void beginFormat()
-        {
-            _current = 0;
-            if( _stack.empty() )
-                return;
-
-            _current = _stack.front();
-            _current->beginFormat(*this);
-        }
-
-        bool advance()
-        {
-            if( ! _current )
-                return false;
-
-            _current = _current->advance(*this);
-            if( _current )
-                return true;
-
-            _stack.erase( _stack.begin() );
-
-            if( _stack.empty() )
-                return false;
-
-            _current = _stack.front();
-            _current->beginFormat(*this);
-            return true;
-        }
-
-        void finish();
-
-        //! @internal
-        //void flush();
+        void flush();
 
     private:
+        XmlFormatter _formatter;
         XmlSerializationContext _xmlcontext;
-        SerializationContext* _context;
-
-        std::vector<IDecomposer*> _stack;
-        std::vector<IDecomposer*> _heap;
-        IDecomposer* _current;
 };
 
 } // namespace Xml

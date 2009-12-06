@@ -47,19 +47,66 @@ class SerializationNode
 		void setCategory(SerializationInfo::Category cat)
 		{ _category = cat; }
 
+        virtual SerializationNode* toCategory(SerializationContext* context,
+                                              SerializationInfo::Category category)
+        {
+            return createNode(context, category);
+        }
+
         virtual void setContext(SerializationContext* context) = 0;
 
 		virtual void clear() = 0;
 
         virtual void clear(SerializationContext& ) = 0;
 
-	protected:
+        static SerializationNode* createNode(SerializationContext* context,
+                                             SerializationInfo::Category category);
+
+    protected:
 		SerializationNode(SerializationInfo::Category cat)
 		: _category(cat)
 		{}
 
 	private:
 		SerializationInfo::Category _category;
+};
+
+
+class ContextNode : public SerializationNode
+{
+    public:
+        ContextNode()
+        : SerializationNode(SerializationInfo::Context)
+        , _context(0)
+        {}
+
+        virtual ~ContextNode()
+		{}
+
+        SerializationNode* toCategory(SerializationContext* context,
+                                      SerializationInfo::Category category)
+        {
+            if(category == SerializationInfo::Void)
+                return 0;
+
+            return this;
+        }
+
+        virtual void setContext(SerializationContext* context)
+        { _context = context; }
+
+		virtual void clear()
+        {
+            _context = 0;
+        }
+
+        virtual void clear(SerializationContext& ctx)
+        {
+            _context = 0;
+        }
+
+	private:
+		SerializationContext* _context;
 };
 
 
@@ -120,7 +167,7 @@ class ValueNode : public SerializationNode
             {
                 case Int:
                     return static_cast<bool>(_variant.l);
-                
+
                 case UInt:
                     return static_cast<bool>(_variant.ul);
 
@@ -149,7 +196,7 @@ class ValueNode : public SerializationNode
             {
                 case Bool:
                     return static_cast<long>(_variant.b);
-                
+
                 case UInt:
                     return static_cast<long>(_variant.ul);
 
@@ -178,7 +225,7 @@ class ValueNode : public SerializationNode
             {
                 case Bool:
                     return static_cast<unsigned long>(_variant.b);
-                
+
                 case Int:
                     return static_cast<unsigned long>(_variant.l);
 
@@ -213,7 +260,7 @@ class ValueNode : public SerializationNode
             {
                 case Bool:
                     return static_cast<double>(_variant.b);
-                
+
                 case Int:
                     return static_cast<double>(_variant.l);
 
@@ -238,7 +285,7 @@ class ValueNode : public SerializationNode
                 case Bool:
                     formatter.addBool( name, _variant.b, id );
                     break;
-                
+
                 case Int:
                     formatter.addInt( name, _variant.l, id );
                     break;
@@ -250,7 +297,7 @@ class ValueNode : public SerializationNode
                 case Float:
                     formatter.addFloat( name, _variant.f, id );
                     break;
-                
+
                 default:
                     formatter.addValue( name, type, _value, id );
                     break;
@@ -263,15 +310,15 @@ class ValueNode : public SerializationNode
         virtual void clear()
 		{
 			_type = ValueNode::String;
-			
+
 			if( _value.size() )
 				_value.clear();
 		}
-        
+
         virtual void clear(SerializationContext& context)
 		{
 			_type = ValueNode::String;
-			
+
 			if( _value.size() )
 				_value.clear();
 		}
@@ -430,6 +477,7 @@ class ObjectNode : public SerializationNode
                 SerializationInfo* tmp = it;
                 it = it->sibling();
 				tmp->setSibling(0);
+
                 context.push(tmp);
 			}
 
@@ -447,6 +495,44 @@ class ObjectNode : public SerializationNode
         SerializationInfo* _last;
         unsigned _size;
 };
+
+
+inline SerializationNode* SerializationNode::createNode(SerializationContext* context,
+                                                        SerializationInfo::Category category)
+{
+    SerializationNode* node = 0;
+
+    if( context )
+    {
+        node = context->get(category);
+    }
+    else
+    {
+        switch(category)
+        {
+            case SerializationInfo::Scalar:
+                node = new ValueNode();
+                break;
+
+            case SerializationInfo::Reference:
+                node = new ReferenceNode();
+                break;
+
+            case SerializationInfo::Sequence:
+            case SerializationInfo::Struct:
+                node = new ObjectNode(category);
+                break;
+
+            case SerializationInfo::Context:
+                node = new ContextNode();
+
+            default:
+                break;
+        }
+    }
+
+    return node;
+}
 
 } // namespace Pt
 

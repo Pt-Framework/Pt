@@ -17,10 +17,11 @@ PT_XML_SOURCES = Characters.cpp
                  XmlFormatter.cpp
                  XmlReader.cpp
                  XmlSerializer.cpp
+                XmlSerializationContext.cpp
                  XmlWriter.cpp
                  ;
 
-SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ; 
+SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-Xml :  Pt ;
 SharedLibrary_MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
 
