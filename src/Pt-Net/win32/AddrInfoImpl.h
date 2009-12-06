@@ -33,6 +33,7 @@
 #endif
 
 #include <Pt/Net/Api.h>
+#include <Pt/RefCounted.h>
 #include <string>
  
 #include <winsock2.h>
@@ -48,10 +49,12 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfo
+class AddrInfoImpl : public Pt::RefCounted
 {
     private:
         ::addrinfo* ai;
+         std::string _host;
+         unsigned short _port;
 
     protected:
         void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
@@ -98,21 +101,31 @@ class AddrInfo
         };
 
     public:
-        AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+        AddrInfoImpl(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
         : ai(0)
         {
             init(ipaddr, port, hints);
         }
 
-        AddrInfo(const std::string& ipaddr, unsigned short port);
+        AddrInfoImpl(const std::string& ipaddr, unsigned short port);
 
-        ~AddrInfo();
+        ~AddrInfoImpl();
 
         const_iterator begin() const
         { return const_iterator(ai); }
 
         const_iterator end() const
         { return const_iterator(); }
+
+        inline const std::string& host() const
+		{
+			return _host;
+		}
+
+        inline unsigned short port() const
+		{
+			return _port;
+		}
 };
 
 } // namespace Net

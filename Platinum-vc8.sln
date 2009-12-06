@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "src\Pt\Pt-vc8.vcproj", "{D6FC5308-A4A0-419B-929A-362C863FC786}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
@@ -38,12 +38,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Net", "src\Pt-Net\Pt-Net
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-System", "src\Pt-System\Pt-System-vc8.vcproj", "{D79858C0-34A5-42DB-B136-456DFC6FB50E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
+	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-	ProjectSection(ProjectDependencies) = postProject
-		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Text", "src\Pt-Text\Pt-Text-vc8.vcproj", "{1CC82693-DB84-4C33-8858-95215DF38754}"

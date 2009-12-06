@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "AddrInfo.h"
+#include "AddrInfoImpl.h"
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
 #include <sstream>
@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace Net {
 
-AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
+AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port)
 : ai(0)
 {
     struct addrinfo hints;
@@ -49,18 +49,21 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port)
 }
 
 
-AddrInfo::~AddrInfo()
+AddrInfoImpl::~AddrInfoImpl()
 {
     if (ai)
         ::freeaddrinfo(ai);	
 }
 
 
-void AddrInfo::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
 {
     std::ostringstream p;
     p << port;
     
+    _host = ipaddr;
+    _port = port;
+
     if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
     {
          WSACleanup();

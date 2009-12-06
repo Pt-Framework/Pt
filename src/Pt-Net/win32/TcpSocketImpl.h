@@ -51,6 +51,7 @@ namespace System {
 
 namespace Net {
 
+class AddrInfo;
 class TcpServer;
 class TcpSocket;
 
@@ -87,11 +88,11 @@ class TcpSocketImpl : public System::SelectableImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(TcpServer& server);
+        void accept(const TcpServer& server);
 
-        void connect(const std::string& ipaddr, unsigned short int port);
+        void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port);
+        bool beginConnect(const AddrInfo& addrinfo);
 
         void endConnect();             		
 

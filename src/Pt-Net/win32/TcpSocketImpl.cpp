@@ -27,7 +27,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "TcpSocketImpl.h"
-#include "AddrInfo.h"
+#include <Pt/Net/AddrInfo.h>
+#include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
@@ -92,18 +93,17 @@ void TcpSocketImpl::close()
     _fd = INVALID_SOCKET;
 }
 
-void TcpSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
+void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 {
-	this->beginConnect(ipaddr, port);
+	this->beginConnect(addrinfo);
     this->endConnect();
 }
 
-bool TcpSocketImpl::beginConnect(const std::string& ipaddr, unsigned short int port)
+bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
 {	
-    AddrInfo ai(ipaddr, port);
 	_isConnected = false;
 	
-    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
     {
         try
         {
@@ -199,7 +199,7 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
     }
 }
 
-void TcpSocketImpl::accept(TcpServer& server)
+void TcpSocketImpl::accept(const TcpServer& server)
 {
 	_fd = WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
 
