@@ -233,9 +233,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::DateSmartPtr datesp4;
             Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
-            // std::cerr << "\n--------------------" << std::endl;
-            // std::cerr << output.str();
-            // std::cerr << "---------------------\n" << std::endl;
+            std::cerr << "\n--------------------" << std::endl;
+            std::cerr << output.str();
+            std::cerr << "---------------------\n" << std::endl;
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
