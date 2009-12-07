@@ -419,7 +419,6 @@ void operator >>=(const Pt::SerializationInfo& si, Object& rt)
     }
 }
 
-
 void XmlSerializerTest::DynamicObject()
 {
     std::string data = "<runtime>\n"
