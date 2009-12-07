@@ -32,9 +32,10 @@
 
 int main( int argc, char* argv[])
 {
-	std::cerr << "abc" << std::endl;
+	std::cerr << "started" << std::endl;
     if( argc >= 2)
     {
+        std::cerr << "stopped" << std::endl;
         std::cout << argv[1];
         return 0;
     }

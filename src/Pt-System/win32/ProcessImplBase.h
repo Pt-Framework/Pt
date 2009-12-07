@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris D�rner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,6 +20,9 @@
 #define PT_ProcessImplBase_h
 
 #include "Pt/System/Process.h"
+#include "Pt/System/SystemError.h"
+#include "Pt/NonCopyable.h"
+#include "Pt/System/Pipe.h"
 #include <windows.h>
 #include <stdlib.h>
 #include <cstdlib>
@@ -30,58 +33,58 @@ namespace Pt {
 
 namespace System {
 
-    class ProcessImplBase
-    {
-        public:
-            ProcessImplBase(const ProcessInfo& procInfo);
+class ProcessImplBase : private NonCopyable
+{
+    public:
+        ProcessImplBase(const ProcessInfo& procInfo);
 
-            static void sleep(unsigned int milliSec)
-            { ::Sleep(milliSec); }
+        ~ProcessImplBase();
 
-            const ProcessInfo& procInfo() const
-            { return _procInfo; }
+        static void sleep(unsigned int milliSec)
+        { ::Sleep(milliSec); }
 
-            void start();
+        const ProcessInfo& procInfo() const
+        { return _procInfo; }
 
-            void kill();
+        void start();
 
-            int wait();
+        void kill();
 
-            Process::State state() const
-            { return _state; }
-            
-            bool tryWait(int& status);
+        int wait();
 
-            static unsigned long usedMemory();
+        Process::State state() const
+        { return _state; }
 
-			IODevice* stdInput()
-			{
-				throw std::logic_error("Bendri fix me");
-				return 0;
-			}
+        bool tryWait(int& status);
 
+        static unsigned long usedMemory();
 
-			IODevice* stdOutput()
-			{
-				throw std::logic_error("Bendri fix me");
-				return 0;
-			}
+        IODevice* stdInput()
+        { return _stdInput; }
 
+        IODevice* stdOutput()
+        { return _stdOutput; }
 
-			IODevice* stdError()
-			{
-				throw std::logic_error("Bendri fix me");
-				return 0;
-			}
+        IODevice* stdError()
+        { return _stdError; }
 
     private:
         PROCESS_INFORMATION m_pid;
         ProcessInfo _procInfo;
         Process::State _state;
-    };
+
+        IODevice* _stdInput;
+        IODevice* _stdOutput;
+        IODevice* _stdError;
+
+        Pipe* _stdinPipe;
+        Pipe* _stdoutPipe;
+        Pipe* _stderrPipe;
+};
 
 } // namespace System
 
 } // namespace Pt
 
 #endif
+

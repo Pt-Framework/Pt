@@ -42,12 +42,29 @@ namespace System {
 ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
 : _procInfo(procInfo)
 , _state(Process::Ready)
+, _stdInput(0)
+, _stdOutput(0)
+, _stdError(0)
+, _stdinPipe(0)
+, _stdoutPipe(0)
+, _stderrPipe(0)
 {
+}
+
+
+ProcessImplBase::~ProcessImplBase()
+{
+    delete _stdinPipe;
+    delete _stdoutPipe;
+    delete _stderrPipe;
 }
 
 
 void ProcessImplBase::start()
 {
+    if (_state == Process::Running)
+        throw std::runtime_error("invalid state in process start");
+
     _state = Process::Failed;
 
 	STARTUPINFO m_startUp;
@@ -57,43 +74,95 @@ void ProcessImplBase::start()
     ZeroMemory( &m_pid, sizeof(m_pid) );
 
 #ifndef _WIN32_WCE
+
+    delete _stdinPipe;
+    _stdinPipe = 0;
+    _stdInput = 0;
+
+    delete _stdoutPipe;
+    _stdoutPipe = 0;
+    _stdOutput = 0;
+
+    delete _stderrPipe;
+    _stderrPipe = 0;
+    _stdError = 0;
+
 	m_startUp.hStdInput = INVALID_HANDLE_VALUE;
 	m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
 	m_startUp.hStdError = INVALID_HANDLE_VALUE;
-	/*
-    if( _procInfo.stdInputClosed() )
+
+    if( _procInfo.stdInputMode() == ProcessInfo::Capture )
+    {
+        _stdinPipe = new Pipe();
+        _stdInput = &_stdinPipe->in();
+    }
+    else if( _procInfo.stdInputMode() == ProcessInfo::Close )
     {
         m_startUp.hStdInput = INVALID_HANDLE_VALUE;
     }
     else if( _procInfo.stdInput() )
     {
-        SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(), 
+        _stdInput = _procInfo.stdInput();
+    }
+
+    if(_stdInput)
+    {
+        SetHandleInformation( _stdInput->ioimpl().deviceHandle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
-    }*/
-/*
-    if( _procInfo.stdOutputClosed() )
-    { 
+        m_startUp.hStdInput = _stdInput->ioimpl().deviceHandle();
+    }
+
+    if( _procInfo.stdOutputMode() == ProcessInfo::Capture )
+    {
+        _stdoutPipe = new Pipe();
+        _stdOutput = &_stdoutPipe->out();
+    }
+    else if( _procInfo.stdOutputMode() == ProcessInfo::Close )
+    {
         m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
     }
     else if( _procInfo.stdOutput() )
     {
-        SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(), 
+        _stdOutput = _procInfo.stdOutput();
+    }
+
+    if(_stdOutput)
+    {
+        SetHandleInformation( _stdOutput->ioimpl().deviceHandle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
-    }*/
-/*
-    if( _procInfo.stdErrorClosed())
+        m_startUp.hStdOutput = _stdOutput->ioimpl().deviceHandle();
+    }
+
+    if( _procInfo.stdErrorMode() == ProcessInfo::Capture )
+    {
+        _stderrPipe = new Pipe();
+        _stdError = &_stderrPipe->out();
+    }
+    else if( _procInfo.stdErrorMode() == ProcessInfo::Combine )
+    {
+        _stdError = &_stdinPipe->out();
+    }
+    else if( _procInfo.stdErrorMode() == ProcessInfo::Close )
     {
         m_startUp.hStdError = INVALID_HANDLE_VALUE;
     }
     else if( _procInfo.stdError() )
     {
-        SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(), 
-                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
+        _stdError = _procInfo.stdError();
     }
-*/
+
+    if(_stdError)
+    {
+        SetHandleInformation( _stdError->ioimpl().deviceHandle(), 
+                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        m_startUp.hStdError = _stdError->ioimpl().deviceHandle();
+    }
+
+    // TODO ???
+    // if (_procInfo.detach())
+    // {
+    // }
+
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
     std::basic_string<TCHAR> tcmd;
@@ -104,7 +173,7 @@ void ProcessImplBase::start()
         win32::fromMultiByte( " " + _procInfo.arg(i), targ );
 		tcmd += targ;
     }
-    
+
     std::vector<TCHAR> m_buffer( tcmd.begin(), tcmd.end() );
     m_buffer.push_back(0);
 
