@@ -104,7 +104,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
         if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
         {
             // save our information
-            std::memmove(&servaddr, it->ai_addr, it->ai_addrlen);
+            std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
             log_debug("listen");
             if( ::listen(_fd, backlog) < 0 )

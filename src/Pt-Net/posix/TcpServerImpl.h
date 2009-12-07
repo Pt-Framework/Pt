@@ -54,7 +54,7 @@ class TcpServerImpl : public System::SelectableImpl
         TcpServer& _server;
         int _fd;
         fd_set* _rfds;
-        struct sockaddr_storage servaddr;
+        struct sockaddr_storage _servaddr;
 
     public:
         TcpServerImpl(TcpServer& server);
@@ -66,7 +66,7 @@ class TcpServerImpl : public System::SelectableImpl
         void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
         const struct sockaddr_storage& getAddr() const
-        { return servaddr; }
+        { return _servaddr; }
 
         int fd() const
         { return _fd; }
