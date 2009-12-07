@@ -26,10 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/Process.h"
-#include "Pt/System/Pipe.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+
+#ifdef NDEBUG
+std::string processName = "ProcessTestChild";
+#else
+std::string processName = "ProcessTestChildd";
+#endif
 
 class ProcessTest : public Pt::Unit::TestSuite
 {
@@ -37,32 +42,30 @@ class ProcessTest : public Pt::Unit::TestSuite
         ProcessTest()
         : Pt::Unit::TestSuite("ProcessTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "RedirectIO", *this, &ProcessTest::RedirectIO );
+#ifndef _WIN32_WCE
+            Pt::Unit::TestSuite::registerMethod( "RedirectStdout", *this, &ProcessTest::RedirectStdout );
+            Pt::Unit::TestSuite::registerMethod( "RedirectStderr", *this, &ProcessTest::RedirectStderr );
+            Pt::Unit::TestSuite::registerMethod( "RedirectStdin", *this, &ProcessTest::RedirectStdin );
+            Pt::Unit::TestSuite::registerMethod( "ProcessAbort", *this, &ProcessTest::ProcessAbort );
             Pt::Unit::TestSuite::registerMethod( "EnvVar", *this, &ProcessTest::EnvVar );
+#endif
         }
 
     protected:
-        void RedirectIO();
+        void RedirectStdout();
+        void RedirectStderr();
+        void RedirectStdin();
+        void ProcessAbort();
         void EnvVar();
 };
 
 
-void ProcessTest::RedirectIO()
+void ProcessTest::RedirectStdout()
 {
-#ifdef _WIN32_WCE
-    return;
-#endif
-
-#ifdef NDEBUG
-    Pt::System::ProcessInfo procInfo( "ProcessTestChild");
-#else
-    Pt::System::ProcessInfo procInfo( "ProcessTestChildd");
-#endif
+    Pt::System::ProcessInfo procInfo(processName);
     procInfo.addArg( "testString");
 
-    Pt::System::Pipe pipe;
-    procInfo.setStdOutput( &pipe.in() );
-    procInfo.setStdError(0);
+    procInfo.setStdOutput(Pt::System::ProcessInfo::Capture);
 
     Pt::System::Process p(procInfo);
 
@@ -71,13 +74,72 @@ void ProcessTest::RedirectIO()
     p.wait();
 
     char buffer[1024];
-    int n = pipe.out().read( buffer, 1024);
+    int n = p.stdOutput()->read( buffer, sizeof(buffer));
     buffer[n] = '\0';
 
     reportMessage( std::string("child output: ") + buffer);
 
     PT_UNIT_ASSERT( n > 0);
     PT_UNIT_ASSERT( std::string( buffer) == "testString");
+}
+
+
+void ProcessTest::RedirectStderr()
+{
+    Pt::System::ProcessInfo procInfo(processName);
+    procInfo.addArg( "-e");
+    procInfo.addArg( "testString");
+
+    procInfo.setStdError(Pt::System::ProcessInfo::Capture);
+
+    Pt::System::Process p(procInfo);
+
+    p.setEnvVar("PATH", ".");
+    p.start();
+    p.wait();
+
+    char buffer[1024];
+    int n = p.stdError()->read( buffer, sizeof(buffer));
+    buffer[n] = '\0';
+
+    reportMessage( std::string("child output: ") + buffer);
+
+    PT_UNIT_ASSERT( n > 0);
+    PT_UNIT_ASSERT( std::string( buffer) == "testString");
+}
+
+
+void ProcessTest::RedirectStdin()
+{
+    Pt::System::ProcessInfo procInfo(processName);
+    procInfo.addArg( "-R");
+
+    procInfo.setStdInput(Pt::System::ProcessInfo::Capture);
+
+    Pt::System::Process p(procInfo);
+
+    p.setEnvVar("PATH", ".");
+    p.start();
+
+    p.stdInput()->write("42", 2);
+    p.stdInput()->close();
+
+    int ret = p.wait();
+
+    PT_UNIT_ASSERT(ret == 42);
+}
+
+
+void ProcessTest::ProcessAbort()
+{
+    Pt::System::ProcessInfo procInfo(processName);
+    procInfo.addArg( "-a");
+
+    Pt::System::Process p(procInfo);
+
+    p.setEnvVar("PATH", ".");
+    p.start();
+    PT_UNIT_ASSERT_THROW(p.wait(), Pt::System::ProcessFailed);
 }
 
 

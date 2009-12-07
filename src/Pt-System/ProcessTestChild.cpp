@@ -27,18 +27,35 @@
  */
 
 #include <Pt/Main.h>
+#include <Pt/Arg.h>
 
 #include <iostream>
+#include <stdlib.h>
 
 int main( int argc, char* argv[])
 {
-	std::cerr << "started" << std::endl;
-    if( argc >= 2)
+    Pt::Arg<bool> stderrMsg(argc, argv, 'e');
+    Pt::Arg<bool> doAbort(argc, argv, 'a');
+    Pt::Arg<int> retcode(argc, argv, 'r', 0);
+    Pt::Arg<bool> readRetcode(argc, argv, 'R');
+
+    std::ostream& out = stderrMsg ? std::cerr : std::cout;
+
+    for (int a = 1; a < argc; ++a)
+        out << argv[a];
+
+    if (doAbort)
+        abort();
+
+    if (readRetcode)
     {
-        std::cerr << "stopped" << std::endl;
-        std::cout << argv[1];
-        return 0;
+        int retcode;
+        std::cin >> retcode;
+        if (!std::cin)
+            abort();
+
+        return retcode;
     }
-    
-    return 1;
+
+    return retcode;
 }

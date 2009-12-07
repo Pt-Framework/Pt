@@ -89,6 +89,7 @@ PtUnitTest_MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
 
 Main ProcessTestChild : ProcessTestChild.cpp ;
 Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
+Main_LinkSharedLibraries ProcessTestChild : Pt Pt-System  ;
 Depends Pt-System-test : ProcessTestChild ;
 
 NOTFILE Pt-System-all ;
