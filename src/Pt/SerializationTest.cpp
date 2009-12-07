@@ -96,6 +96,9 @@ class IntComposer : public Pt::IComposer
         virtual void setId(const std::string& id)
         { }
 
+        virtual void setTypeName(const std::string& type)
+        { }
+
         virtual void setValue(const Pt::String& value)
         {
             convert(*_type, value);
@@ -149,6 +152,9 @@ class VectorComposer : public Pt::IComposer
         { }
 
         virtual void setId(const std::string& id)
+        { }
+
+        virtual void setTypeName(const std::string& type)
         { }
 
         virtual Pt::IComposer* beginMember(const std::string& name)

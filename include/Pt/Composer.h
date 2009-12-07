@@ -48,6 +48,8 @@ class IComposer
 
         virtual void setId(const std::string& id) = 0;
 
+        virtual void setTypeName(const std::string& type) = 0;
+
         virtual void setValue(const Pt::String& value)
         { throw SerializationError("unexpected value"); }
 
@@ -123,6 +125,11 @@ class Composer : public IComposer
         virtual void setId(const std::string& id)
         {
             _current->setId(id);
+        }
+
+        virtual void setTypeName(const std::string& type)
+        {
+            _current->setTypeName(type);
         }
 
         virtual void setValue(const Pt::String& value)

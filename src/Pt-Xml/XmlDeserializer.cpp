@@ -133,6 +133,13 @@ void XmlDeserializer::OnBegin(const Node& node)
                 _deser->setId( nodeId.narrow() );
             }
 
+            String type = se.attribute(L"type");
+            if( ! type.empty() )
+            {
+                //std::cerr << "TYPE: " << type.narrow() << std::endl;
+                _deser->setTypeName( type.narrow() );
+            }
+
             String refId = se.attribute(L"ref");
             if( ! refId.empty() )
             {
@@ -283,6 +290,13 @@ void XmlDeserializer::beginMember(const Xml::StartElement& se)
     {
         //std::cerr << "ID: " << nodeId.narrow() << std::endl;
         _deser->setId( nodeId.narrow() );
+    }
+
+    String type = se.attribute(L"type");
+    if( ! type.empty() )
+    {
+        //std::cerr << "TYPE: " << type.narrow() << std::endl;
+        _deser->setTypeName( type.narrow() );
     }
 
     String refId = se.attribute(L"ref");

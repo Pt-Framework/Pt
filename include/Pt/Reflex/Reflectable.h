@@ -406,6 +406,9 @@ class Composer<Reflex::Reflectable> : public IComposer
             //_current->setId(id);
         }
 
+        virtual void setTypeName(const std::string& type)
+        { }
+
         virtual void setValue(const Pt::String& value)
         {
             if(_current)

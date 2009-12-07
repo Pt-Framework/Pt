@@ -380,6 +380,60 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(date2a == date2b);
             PT_UNIT_ASSERT(dateptr1b == &date1b);
         }
+
+        void DynamicObject();
 };
 
 Pt::Unit::RegisterTest<XmlSerializerTest> register_XmlSerializerTest;
+
+class Object
+{
+    public:
+        Object()
+        {}
+
+        virtual ~Object()
+        {}
+};
+
+class Runtime : public Object
+{
+    public:
+        Runtime()
+        {}
+
+        ~Runtime()
+        {}
+
+        static Object* createObject(const char* typeName)
+        { return 0; }
+};
+
+void operator >>=(const Pt::SerializationInfo& si, Object& rt)
+{
+    Pt::SerializationInfo::ConstIterator it;
+    for(it = si.begin(); it != si.end(); ++it)
+    {
+        Object* obj = Runtime::createObject( it->typeName().c_str() );
+        *it >>= Pt::load() >>= *obj;
+    }
+}
+
+
+void XmlSerializerTest::DynamicObject()
+{
+    std::string data = "<runtime>\n"
+                       "  <portList1 type=\"PortList\">\n"
+                       "    <port1 type=\"Port\"id=\"0\">\n"
+                       "      <name>myPort2</name>\n"
+                       "    </port1>\n"
+                       "    <port2 type=\"Port\"id=\"1\">\n"
+                       "      <name>myPort2</name>\n"
+                       "    </port2>\n"
+                       "  </portList1>\n"
+                       "  <connection1 type=\"Connection\">\n"
+                       "    <from ref=\"0\"></from>\n"
+                       "    <to ref=\"1\"></to>\n"
+                       "  </connection1>\n"
+                       "</runtime>\n";
+}
