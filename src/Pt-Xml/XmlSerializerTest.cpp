@@ -117,7 +117,7 @@ void fixup(DateSmartPtr& fixme, const Pt::FixupInfo& fixup)
     }
 }
 
-
+// TODO: rename to load()
 void operator >>=(const LoadInfo& li, DateSmartPtr& sp)
 {
     if(li.in().category() == Pt::SerializationInfo::Reference)
@@ -137,7 +137,7 @@ void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
     si >>= *sp;
 }
 
-
+// TODO: rename save()
 void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
@@ -175,6 +175,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
         class IsoDateSurrogate : public Pt::SerializationSurrogate
         {
+            Pt::SerializationInfo* _si;
+
             public:
                 virtual void pack(Pt::SerializationInfo& si) const
                 {
@@ -199,6 +201,11 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
                     to.addMember("year") <<= date.year();
                     to.addMember("month") <<= date.month();
                     to.addMember("day") <<= date.day();
+                }
+
+                virtual Pt::SerializationInfo& unpack(const Pt::SerializationInfo& from) const
+                {
+                    return *_si;
                 }
         };
 

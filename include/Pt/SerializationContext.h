@@ -45,6 +45,10 @@ class PT_API SerializationContext
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
+        typedef void (*Pack)(SerializationInfo& si);
+
+        typedef void (*Unpack)(const SerializationInfo& from, SerializationInfo& to);
+
     public:
         SerializationContext();
 
@@ -88,6 +92,12 @@ class PT_API SerializationContext
         SerializationNode* get(SerializationInfo::Category category);
 
         void push(SerializationNode* node);
+
+        void setSurrogates(const char* name, Pack pack, Unpack unpack)
+        {
+            // keep function ptrs in Surrogate object and always use context
+            // for temporary SerializationInfos
+        }
 
         void addSurrogate(const char* name, SerializationSurrogate* surrogate);
 

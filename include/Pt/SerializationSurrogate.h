@@ -44,6 +44,8 @@ class SerializationSurrogate
 
         virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
 
+        virtual SerializationInfo& unpack(const SerializationInfo& from) const = 0;
+
     protected:
         SerializationSurrogate()
         {}
