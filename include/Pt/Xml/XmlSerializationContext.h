@@ -36,44 +36,6 @@ namespace Pt {
 
 namespace Xml {
 
-class FixupInfo
-{
-    public:
-        typedef void (*FixupHandler)(void* fixme,
-                                     void* target, const std::type_info& targetType);
-
-    public:
-        FixupInfo()
-        : _instance(0)
-        , _fixup(0)
-        , _type(0)
-        {}
-
-        FixupInfo(void* fixme, FixupHandler handler, const std::type_info* type)
-        : _instance(fixme)
-        , _fixup(handler)
-        , _type(type)
-        {}
-
-        ~FixupInfo()
-        {}
-
-        void* instance() const
-        { return _instance; }
-
-        FixupHandler fixup() const
-        { return _fixup; }
-
-        const std::type_info* type() const
-        { return _type; }
-
-    private:
-        void* _instance;
-        FixupHandler _fixup;
-        const std::type_info* _type;
-};
-
-
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
@@ -110,8 +72,41 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         virtual void fixup();
 
     private:
-        std::map<std::string, FixupInfo> _targets;
-        std::multimap<std::string, FixupInfo> _pointers;
+        class Fixup
+        {
+            public:
+                Fixup()
+                : _instance(0)
+                , _fixup(0)
+                , _type(0)
+                {}
+
+                Fixup(void* fixme, FixupHandler handler, const std::type_info* type)
+                : _instance(fixme)
+                , _fixup(handler)
+                , _type(type)
+                {}
+
+                ~Fixup()
+                {}
+
+                void* instance() const
+                { return _instance; }
+
+                FixupHandler fixup() const
+                { return _fixup; }
+
+                const std::type_info* type() const
+                { return _type; }
+
+            private:
+                void* _instance;
+                SerializationInfo::FixupHandler _fixup;
+                const std::type_info* _type;
+        };
+
+        std::map<std::string, Fixup> _targets;
+        std::multimap<std::string, Fixup> _pointers;
 };
 
 } // namespace Xml

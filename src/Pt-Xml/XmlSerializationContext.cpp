@@ -131,7 +131,7 @@ void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupIn
         return;
 
     //std::cerr << "beginLinkTarget: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
-    FixupInfo fi(obj, 0, &fixupInfo);
+    Fixup fi(obj, 0, &fixupInfo);
     _targets[id] = fi;
 }
 
@@ -144,14 +144,14 @@ void XmlSerializationContext::finishLoad()
 void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
-    FixupInfo fi(obj, fh, 0);
-    _pointers.insert( std::pair<std::string, FixupInfo>(id, fi) );
+    Fixup fi(obj, fh, 0);
+    _pointers.insert( std::pair<std::string, Fixup>(id, fi) );
 }
 
 
 void XmlSerializationContext::fixup()
 {
-    std::multimap<std::string, FixupInfo>::iterator it;
+    std::multimap<std::string, Fixup>::iterator it;
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
         void* fixme = it->second.instance();

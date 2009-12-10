@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/Convert.h>
+#include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>
 #include <typeinfo>
 #include <vector>
@@ -38,95 +39,13 @@
 #include <map>
 #include <list>
 #include <deque>
-#include <typeinfo>
 
 namespace Pt {
 
 class SerializationSurrogate;
 class SerializationContext;
-class Formatter;
 class SerializationNode;
-class SPtr;
-
-class FixupInfo
-{
-    public:
-        FixupInfo(void* target, const std::type_info& targetType)
-        : _target(target)
-        , _type(&targetType)
-        {}
-
-        ~FixupInfo()
-        {}
-
-        void* target() const
-        { return _target; }
-
-        const std::type_info& targetType() const
-        { return *_type; }
-
-        bool isNull() const
-        { return _target == 0; }
-
-        template <typename T>
-        T* getTarget() const
-        {
-            if( _target == 0 || typeid(T) != *_type )
-            {
-                throw SerializationError("type mismatch during pointer fixup");
-            }
-
-            return static_cast<T*>( _target );
-        }
-
-    private:
-        void* _target;
-        const std::type_info* _type;
-};
-
-
-template <typename T>
-struct Fixup
-{
-    static void do_fixup_ptr(void* fixme,
-                             void* target,
-                             const std::type_info& targetType)
-    {
-        T** from = static_cast<T**>(fixme);
-        FixupInfo fi(target, targetType);
-        fixup(*from, fi);
-    }
-
-    static void do_fixup_ref(void* fixme,
-                             void* target,
-                             const std::type_info& targetType)
-    {
-        T* from = static_cast<T*>(fixme);
-        FixupInfo fi(target, targetType);
-        fixup(*from, fi);
-    }
-};
-
-
-template <typename T>
-inline void fixup(T*& fixme, const FixupInfo& fixup)
-{
-    fixme = 0;
-
-    if( ! fixup.isNull() )
-    {
-        fixme = fixup.getTarget<T>();
-    }
-}
-
-
-template <typename T>
-void fixup(T& fixme, void* target, const FixupInfo& fixup)
-{
-    T* to = fixup.getTarget<T>();
-    fixme = *to;
-}
-
+class Formatter;
 
 /** @brief Represents arbitrary types during serialization.
 */
@@ -342,7 +261,7 @@ class PT_API SerializationInfo
         template <typename T>
         void loadReference(T& fixme) const
         {
-            this->load(&fixme, Fixup<T>::do_fixup_ref);
+            this->load(&fixme, FixupThunk<T>::fixupReference);
         }
 
         /** @brief Deserialization of weak pointers
@@ -350,7 +269,7 @@ class PT_API SerializationInfo
         template <typename T>
         void loadPointer(T*& fixme) const
         {
-            this->load(&fixme, Fixup<T>::do_fixup_ptr);
+            this->load(&fixme, FixupThunk<T>::fixupPointer);
         }
 
         bool beginFormat(Formatter& formatter);
@@ -887,7 +806,7 @@ inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         list.resize( list.size() + 1 );
-        *it >>= list.back();
+        *it >>= Pt::load() >>= list.back();
     }
 }
 
@@ -899,8 +818,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
 
     for(it = list.begin(); it != list.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("list");
@@ -914,8 +832,9 @@ inline void operator >>=(const SerializationInfo& si, std::deque<T, A>& deque)
     deque.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
-        deque.resize( deque.size() + 1 );
-        *it >>= deque.back();
+        // NOTE: push_back does not invalidate references to elements
+        deque.push_back( T() );
+        *it >>= Pt::load() >>= deque.back();
     }
 }
 
@@ -927,8 +846,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
 
     for(it = deque.begin(); it != deque.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("deque");
@@ -956,8 +874,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 
     for(it = set.begin(); it != set.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("set");
@@ -985,8 +902,7 @@ inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& mu
 
     for(it = multiset.begin(); it != multiset.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("multiset");
@@ -1030,8 +946,7 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
 
     for(it = map.begin(); it != map.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("map");
@@ -1059,8 +974,7 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 
     for(it = multimap.begin(); it != multimap.end(); ++it)
     {
-        SerializationInfo& newSi = si.addElement();
-        newSi <<= *it;
+        si.addElement() <<= Pt::save() <<= *it;
     }
 
     si.setTypeName("multimap");

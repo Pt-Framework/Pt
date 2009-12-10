@@ -38,13 +38,11 @@ namespace Pt {
 class SerializationNode;
 class SerializationCache;
 class SerializationSurrogate;
-class SPtr;
 
 class PT_API SerializationContext
 {
     public:
-        typedef void (*FixupHandler)(void* fixme,
-                                     void* target, const std::type_info& targetType);
+        typedef SerializationInfo::FixupHandler FixupHandler;
 
         typedef void (*Deflate)(SerializationInfo& si);
 
