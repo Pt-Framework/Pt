@@ -39,6 +39,7 @@
 #include "Pt/Utf8Codec.h"
 #include "Pt/DateTime.h"
 #include "Pt/SmartPtr.h"
+#include "Pt/Any.h"
 
 #include <string>
 #include <sstream>
@@ -401,6 +402,34 @@ class Object
 
         virtual ~Object()
         {}
+
+        void setProperty(const char* name, const Pt::Any& value)
+        { _properties[name] = value; }
+
+    private:
+        std::map<std::string, Pt::Any> _properties;
+};
+
+class Port : public Object
+{
+    public:
+        Port()
+        {}
+
+        virtual ~Port()
+        {}
+};
+
+class PortList : public Object
+{
+    public:
+        PortList()
+        {}
+
+        virtual ~PortList()
+        {}
+
+    private:
 };
 
 class Runtime : public Object
@@ -412,9 +441,41 @@ class Runtime : public Object
         ~Runtime()
         {}
 
-        static Object* createObject(const char* typeName)
-        { return 0; }
+        static Object* createObject(const std::string& typeName)
+        {
+            if(typeName == "Port")
+                return new Port();
+            if(typeName == "PortList")
+                return new PortList();
+
+            return 0;
+        }
 };
+
+void fixup(Pt::SmartPtr<Object>& fixme, const Pt::FixupInfo& fixup)
+{
+    if( fixup.isNull() )
+    {
+        fixme = Pt::SmartPtr<Object>();
+    }
+    else
+    {
+        Pt::SmartPtr<Object>* to = fixup.getTarget< Pt::SmartPtr<Object> >();
+        fixme = *to;
+    }
+}
+
+void operator >>=(const Pt::LoadInfo& li, Pt::SmartPtr<Object>& sp)
+{
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(sp);
+    }
+    else
+    {
+        li.load(sp);
+    }
+}
 
 void operator >>=(const Pt::SerializationInfo& si, Object& rt)
 {
@@ -422,7 +483,10 @@ void operator >>=(const Pt::SerializationInfo& si, Object& rt)
     for(it = si.begin(); it != si.end(); ++it)
     {
         Object* obj = Runtime::createObject( it->typeName().c_str() );
-        *it >>= Pt::load() >>= *obj;
+        Pt::SmartPtr<Object> ptr(obj);
+        rt.setProperty(it->name().c_str(), Pt::Any(ptr));
+
+        *it >>= Pt::load() >>= ptr; // not ptr, but property !!
     }
 }
 
