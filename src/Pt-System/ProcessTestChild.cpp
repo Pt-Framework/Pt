@@ -46,8 +46,8 @@ int main( int argc, char* argv[])
 
     if (doAbort)
     {
-        char* c = 0;
-        *c = 'a';
+        //char* c = 0;
+        //*c = 'a';
         abort();
     }
 
