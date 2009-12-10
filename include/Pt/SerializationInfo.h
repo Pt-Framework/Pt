@@ -46,6 +46,7 @@ class SerializationSurrogate;
 class SerializationContext;
 class Formatter;
 class SerializationNode;
+class SPtr;
 
 class FixupInfo
 {
@@ -185,7 +186,7 @@ class PT_API SerializationInfo
 
         void setContext(SerializationContext* context);
 
-        SerializationSurrogate* surrogate(const char* name) const;
+        SerializationSurrogate getSurrogate(const char* name) const;
 
         SerializationInfo* parent()
         { return _parent; }

@@ -174,41 +174,30 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
 
-        class IsoDateSurrogate : public Pt::SerializationSurrogate
+        static void pack(Pt::SerializationInfo& si)
         {
-            Pt::SerializationInfo* _si;
+            int year = 0;
+            unsigned month = 0, day = 0;
 
-            public:
-                virtual void pack(Pt::SerializationInfo& si) const
-                {
-                    int year = 0;
-                    unsigned month = 0, day = 0;
+            si.getMember("year") >>= year;
+            si.getMember("month") >>= month;
+            si.getMember("day") >>= day;
 
-                    si.getMember("year") >>= year;
-                    si.getMember("month") >>= month;
-                    si.getMember("day") >>= day;
+            Pt::Date date(year, month, day);
+            std::string s = date.toIsoString();
+            si.setValue(s);
+            si.setTypeName("date");
+        }
 
-                    Pt::Date date(year, month, day);
-                    std::string s = date.toIsoString();
-                    si.setValue(s);
-                    si.setTypeName("date");
-                }
-
-                virtual void unpack(Pt::SerializationInfo& to, const Pt::SerializationInfo& from) const
-                {
-                    std::string isoString;
-                    from >>= isoString;
-                    Pt::Date date = Pt::Date::fromIsoString(isoString);
-                    to.addMember("year") <<= date.year();
-                    to.addMember("month") <<= date.month();
-                    to.addMember("day") <<= date.day();
-                }
-
-                virtual Pt::SerializationInfo& unpack(const Pt::SerializationInfo& from) const
-                {
-                    return *_si;
-                }
-        };
+        static void unpack(Pt::SerializationInfo& to, const Pt::SerializationInfo& from)
+        {
+            std::string isoString;
+            from >>= isoString;
+            Pt::Date date = Pt::Date::fromIsoString(isoString);
+            to.addMember("year") <<= date.year();
+            to.addMember("month") <<= date.month();
+            to.addMember("day") <<= date.day();
+        }
 
     protected:
         void Reference()
@@ -222,7 +211,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context()->addSurrogate("date", new IsoDateSurrogate);
+            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dr");
@@ -247,7 +236,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
-            deser.context()->addSurrogate("date", new IsoDateSurrogate);
+            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.deserialize(dateptr2);
@@ -275,7 +264,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context()->addSurrogate("date", new IsoDateSurrogate);
+            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
             ser.context()->enableReferencing(false);
 
             ser.serialize(date1, "date1a");
@@ -286,9 +275,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            // std::cerr << "\n--------------------" << std::endl;
-            // std::cerr << output.str();
-            // std::cerr << "---------------------\n" << std::endl;
+            std::cerr << "\n--------------------" << std::endl;
+            std::cerr << output.str();
+            std::cerr << "---------------------\n" << std::endl;
 
             Pt::DateTime date3(1, 1, 1, 1, 1, 1, 1);
             Pt::Date date4(1800, 7, 6);
@@ -299,7 +288,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
-            deser.context()->addSurrogate("date", new IsoDateSurrogate);
+            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             deser.deserialize(date3);
             deser.deserialize(date4);

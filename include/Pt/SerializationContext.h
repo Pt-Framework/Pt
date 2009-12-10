@@ -38,6 +38,7 @@ namespace Pt {
 class SerializationNode;
 class SerializationCache;
 class SerializationSurrogate;
+class SPtr;
 
 class PT_API SerializationContext
 {
@@ -45,9 +46,9 @@ class PT_API SerializationContext
         typedef void (*FixupHandler)(void* fixme,
                                      void* target, const std::type_info& targetType);
 
-        typedef void (*Pack)(SerializationInfo& si);
+        typedef void (*Deflate)(SerializationInfo& si);
 
-        typedef void (*Unpack)(const SerializationInfo& from, SerializationInfo& to);
+        typedef void (*Inflate)(SerializationInfo& to, const SerializationInfo& from);
 
     public:
         SerializationContext();
@@ -93,15 +94,9 @@ class PT_API SerializationContext
 
         void push(SerializationNode* node);
 
-        void setSurrogates(const char* name, Pack pack, Unpack unpack)
-        {
-            // keep function ptrs in Surrogate object and always use context
-            // for temporary SerializationInfos
-        }
+        void setSurrogates(const char* name, Deflate def, Inflate inf);
 
-        void addSurrogate(const char* name, SerializationSurrogate* surrogate);
-
-        SerializationSurrogate* surrogate(const char* name) const;
+        SerializationSurrogate getSurrogate(const char* name);
 
     private:
         SerializationCache* _cache;

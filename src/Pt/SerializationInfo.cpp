@@ -30,6 +30,7 @@
 #include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
+#include <Pt/SerializationSurrogate.h>
 
 namespace Pt {
 
@@ -136,12 +137,12 @@ SerializationInfo::Category SerializationInfo::category() const
 }
 
 
-SerializationSurrogate* SerializationInfo::surrogate(const char* name) const
+SerializationSurrogate SerializationInfo::getSurrogate(const char* name) const
 {
     if( _context && this->category() != Context )
-        return _context->surrogate(name);
+        return _context->getSurrogate(name);
 
-    return 0;
+    return SerializationSurrogate();
 }
 
 

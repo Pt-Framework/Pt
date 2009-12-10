@@ -42,7 +42,7 @@ class SerializationCache
         , refsEnabled(false)
         {}
 
-        std::map<std::string, SerializationSurrogate*> _surrogates;
+        std::map<std::string, SerializationSurrogate> _sptr;
         std::vector<SerializationInfo*> _infos;
         std::vector<SerializationNode*> _scalars;
         std::vector<SerializationNode*> _objects;
@@ -151,12 +151,6 @@ SerializationContext::~SerializationContext()
     for(iter = _cache->_infos.begin(); iter != _cache->_infos.end(); ++iter)
     {
         delete *iter;
-    }
-
-    std::map<std::string, SerializationSurrogate*>::iterator sit;
-    for(sit = _cache->_surrogates.begin(); sit != _cache->_surrogates.end(); ++sit)
-    {
-        delete sit->second;
     }
 
     delete _cache;
@@ -302,27 +296,20 @@ void SerializationContext::push(SerializationNode* node)
 }
 
 
-void SerializationContext::addSurrogate(const char* name, SerializationSurrogate* surrogate)
+void SerializationContext::setSurrogates(const char* name, Deflate def, Inflate inf)
 {
-    std::map<std::string, SerializationSurrogate*>::iterator it;
-    it = _cache->_surrogates.find(name);
-    if( it != _cache->_surrogates.end() )
-    {
-        delete it->second;
-        it->second = surrogate;
-        return;
-    }
-
-    _cache->_surrogates.insert( std::make_pair(name, surrogate) );
+    // keep function ptrs in Surrogate object and always use context
+    // for temporary SerializationInfos
+    _cache->_sptr[name] = SerializationSurrogate(def, inf);
 }
 
 
-SerializationSurrogate* SerializationContext::surrogate(const char* name) const
+SerializationSurrogate SerializationContext::getSurrogate(const char* name)
 {
-    std::map<std::string, SerializationSurrogate*>::const_iterator it;
-    it = _cache->_surrogates.find(name);
-    if( it == _cache->_surrogates.end() )
-        return 0;
+    std::map<std::string, SerializationSurrogate>::const_iterator it;
+    it = _cache->_sptr.find(name);
+    if( it == _cache->_sptr.end() )
+        return SerializationSurrogate();
 
     return it->second;
 }

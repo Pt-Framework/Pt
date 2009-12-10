@@ -29,26 +29,99 @@
 #define Pt_SerializationSurrogate_h
 
 #include <Pt/Api.h>
+#include <Pt/SerializationContext.h>
 
 namespace Pt {
 
+class SerializationContext;
 class SerializationInfo;
+
+// class SerializationSurrogate
+// {
+//     public:
+//         virtual ~SerializationSurrogate()
+//         {}
+
+//         virtual void pack(SerializationInfo& it) const = 0;
+
+//         virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
+
+//     protected:
+//         SerializationSurrogate()
+//         {}
+// };
 
 class SerializationSurrogate
 {
     public:
-        virtual ~SerializationSurrogate()
-        {}
+        typedef void (*Deflate)(SerializationInfo& si);
 
-        virtual void pack(SerializationInfo& it) const = 0;
+        typedef void (*Inflate)(SerializationInfo& to, const SerializationInfo& from);
 
-        virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
-
-        virtual SerializationInfo& unpack(const SerializationInfo& from) const = 0;
-
-    protected:
+    public:
         SerializationSurrogate()
-        {}
+        : _si(0)
+        , _deflate(0)
+        , _inflate(0)
+        { }
+
+        SerializationSurrogate(Deflate def, Inflate inf)
+        : _si(0)
+        , _deflate(def)
+        , _inflate(inf)
+        { }
+
+        SerializationSurrogate(const SerializationSurrogate& sp)
+        : _si(0)
+        , _deflate(sp._deflate)
+        , _inflate(sp._inflate)
+        { }
+
+        ~SerializationSurrogate()
+        {
+            if( _si && _si->context() )
+            {
+                _si->context()->push(_si);
+            }
+        }
+
+        SerializationSurrogate& operator=(const SerializationSurrogate& sp)
+        {
+            _si = 0;
+            _deflate = sp._deflate;
+            _inflate = sp._inflate;
+            return *this;
+        }
+
+        void deflate(SerializationInfo& si) const
+        {
+            if(_deflate)
+            {
+                _deflate(si);
+            }
+        }
+
+
+        const SerializationInfo& inflate(const SerializationInfo& from)
+        {
+            if( ! _inflate )
+            {
+                return from;
+            }
+
+            if(_si == 0)
+            {
+                _si = from.context()->get();
+                _inflate(*_si, from);
+            }
+
+            return *_si;
+        }
+
+    private:
+        SerializationInfo* _si;
+        Deflate _deflate;
+        Inflate _inflate;
 };
 
 } // namespace Pt
