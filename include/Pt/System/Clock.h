@@ -43,7 +43,7 @@ namespace System {
 class PT_SYSTEM_API Clock
 {
     public:
-        /** @brief Contructs a Clock
+        /** @brief Constructs a Clock
         */
         Clock();
 
