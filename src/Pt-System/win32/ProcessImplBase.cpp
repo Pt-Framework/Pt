@@ -35,6 +35,16 @@
     #include <psapi.h>
 #endif
 
+namespace {
+
+    void checkExitCode(DWORD exitCode)
+    {
+        if(exitCode == 3) // on abort()
+            throw Pt::System::ProcessFailed();
+    }
+
+}
+
 namespace Pt {
 
 namespace System {
@@ -91,10 +101,15 @@ void ProcessImplBase::start()
 	m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
 	m_startUp.hStdError = INVALID_HANDLE_VALUE;
 
+    // Standard Input
+
     if( _procInfo.stdInputMode() == ProcessInfo::Capture )
     {
         _stdinPipe = new Pipe();
         _stdInput = &_stdinPipe->in();
+        SetHandleInformation( _stdinPipe->out().ioimpl().deviceHandle(),
+                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        m_startUp.hStdInput = _stdinPipe->out().ioimpl().deviceHandle();
     }
     else if( _procInfo.stdInputMode() == ProcessInfo::Close )
     {
@@ -103,19 +118,21 @@ void ProcessImplBase::start()
     else if( _procInfo.stdInput() )
     {
         _stdInput = _procInfo.stdInput();
-    }
-
-    if(_stdInput)
-    {
         SetHandleInformation( _stdInput->ioimpl().deviceHandle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdInput = _stdInput->ioimpl().deviceHandle();
     }
 
+    // Standard Output
+
     if( _procInfo.stdOutputMode() == ProcessInfo::Capture )
     {
         _stdoutPipe = new Pipe();
         _stdOutput = &_stdoutPipe->out();
+
+        SetHandleInformation( _stdoutPipe->in().ioimpl().deviceHandle(),
+                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        m_startUp.hStdOutput = _stdoutPipe->in().ioimpl().deviceHandle();
     }
     else if( _procInfo.stdOutputMode() == ProcessInfo::Close )
     {
@@ -123,24 +140,25 @@ void ProcessImplBase::start()
     }
     else if( _procInfo.stdOutput() )
     {
-        _stdOutput = _procInfo.stdOutput();
+        SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(),
+                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
     }
 
-    if(_stdOutput)
-    {
-        SetHandleInformation( _stdOutput->ioimpl().deviceHandle(),
-                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdOutput = _stdOutput->ioimpl().deviceHandle();
-    }
+    // Standard Error
 
     if( _procInfo.stdErrorMode() == ProcessInfo::Capture )
     {
         _stderrPipe = new Pipe();
         _stdError = &_stderrPipe->out();
+
+        SetHandleInformation( _stderrPipe->in().ioimpl().deviceHandle(),
+                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        m_startUp.hStdError = _stderrPipe->in().ioimpl().deviceHandle();
     }
     else if( _procInfo.stdErrorMode() == ProcessInfo::Combine )
     {
-        _stdError = &_stdinPipe->out();
+        m_startUp.hStdError = m_startUp.hStdOutput;
     }
     else if( _procInfo.stdErrorMode() == ProcessInfo::Close )
     {
@@ -148,14 +166,9 @@ void ProcessImplBase::start()
     }
     else if( _procInfo.stdError() )
     {
-        _stdError = _procInfo.stdError();
-    }
-
-    if(_stdError)
-    {
-        SetHandleInformation( _stdError->ioimpl().deviceHandle(), 
+        SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdError = _stdError->ioimpl().deviceHandle();
+        m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
     }
 
     // TODO ???
@@ -227,6 +240,9 @@ int ProcessImplBase::wait()
     DWORD exitCode;
     GetExitCodeProcess( m_pid.hProcess, &exitCode);
     _state = Process::Finished;
+
+    checkExitCode(exitCode);
+
     return exitCode;
 }
 
@@ -247,6 +263,9 @@ bool ProcessImplBase::tryWait(int& status)
         GetExitCodeProcess( m_pid.hProcess, &exitCode);
         status = exitCode;
         _state = Process::Finished;
+
+        checkExitCode(exitCode);
+
         return true;
     }
 
