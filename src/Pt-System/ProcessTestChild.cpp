@@ -45,7 +45,11 @@ int main( int argc, char* argv[])
         out << argv[a];
 
     if (doAbort)
+    {
+        char* c = 0;
+        *c = 'a';
         abort();
+    }
 
     if (readRetcode)
     {

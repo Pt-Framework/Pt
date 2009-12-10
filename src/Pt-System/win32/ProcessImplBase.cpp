@@ -39,8 +39,15 @@ namespace {
 
     void checkExitCode(DWORD exitCode)
     {
-        if(exitCode == 3) // on abort()
-            throw Pt::System::ProcessFailed();
+        switch(exitCode)
+        {
+            case 0xC0000005: // access violation
+            case 3:          // abort()
+                throw Pt::System::ProcessFailed();
+
+            default:
+                break;
+        }
     }
 
 }
