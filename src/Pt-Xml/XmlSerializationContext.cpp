@@ -141,6 +141,21 @@ void XmlSerializationContext::finishLoad()
 }
 
 
+void XmlSerializationContext::rebind(const std::string& id, const void* obj)
+{
+    std::cerr << "rebind " << id << " to " << obj << std::endl;
+    _targets[id].setInstance(obj);
+}
+
+//TODO: give both addresses previous and new
+
+void XmlSerializationContext::rebindFixup(const std::string& id, const void* obj)
+{
+    std::cerr << "rebindFixup " << id << " to " << obj << std::endl;
+    //_pointers[id].setInstance(obj);
+}
+
+
 void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;

@@ -169,9 +169,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
-            Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
-            Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
+            //Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
+            Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
+            //Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
+            //Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
 
         static void pack(Pt::SerializationInfo& si)
@@ -255,6 +256,46 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( date1 == date2);
             PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
             PT_UNIT_ASSERT( nullDate.getPointer() == 0);
+        }
+
+        void MultiSet()
+        {
+            std::multiset<Pt::Date>::iterator it;
+            std::multiset<Pt::Date> dates;
+            dates.insert( Pt::Date(2000, 4,18) );
+            it = dates.insert( Pt::Date(2000, 4,17) );
+            dates.insert( Pt::Date(2000, 4,19) );
+            const Pt::Date* dateptr = &(*it);
+
+            std::stringstream output;
+            Pt::Xml::XmlSerializer ser(output);
+            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+
+            ser.serialize(dates, "dates");
+            ser.serialize(dateptr, "dateptr");
+
+            ser.finish();
+            ser.flush();
+
+            std::cerr << "\n--------------------" << std::endl;
+            std::cerr << output.str();
+            std::cerr << "---------------------\n" << std::endl;
+
+            dates.clear();
+            dateptr = 0;
+
+            std::stringstream input( output.str() );
+            Pt::TextIStream tis(input, new Pt::Utf8Codec);
+
+            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlDeserializer deser(reader);
+            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+
+            deser.deserialize(dates);
+            deser.deserialize(dateptr);
+            deser.finish();
+
+            std::cerr << "dateptr:" << dateptr->toIsoString() << std::endl;
         }
 
         void Object()

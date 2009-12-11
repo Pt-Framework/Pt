@@ -211,8 +211,11 @@ void SerializationInfo::setCategory(Category category)
             node = SerializationNode::createNode(_context, category);
         }
 
-        delete _node; // OPTIMIZE
-        _node = node;
+        if(_node != node) // OPTIMIZE
+        {
+            delete _node; // OPTIMIZE
+            _node = node;
+        }
     }
 }
 
@@ -451,6 +454,15 @@ void SerializationInfo::finishSave()
         this->context()->finishSave();
         return;
     }
+}
+
+
+void SerializationInfo::rebind(const void* obj) const
+{
+    _bound = obj;
+
+    if(_context)
+        _context->rebind(_id, obj);
 }
 
 

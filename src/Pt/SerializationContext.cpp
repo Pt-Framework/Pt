@@ -105,6 +105,11 @@ void SerializationContext::finishLoad()
 }
 
 
+void SerializationContext::rebind(const std::string& id, const void* obj)
+{
+}
+
+
 void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupHandler)
 {
 }

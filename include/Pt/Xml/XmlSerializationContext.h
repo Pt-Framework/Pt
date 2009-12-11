@@ -67,6 +67,10 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void finishLoad();
 
+        virtual void rebind(const std::string& id, const void* obj);
+
+        virtual void rebindFixup(const std::string& id, const void* obj);
+
         virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
 
         virtual void fixup();
@@ -92,6 +96,11 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
                 void* instance() const
                 { return _instance; }
+
+                void setInstance(const void* obj)
+                {
+                    _instance = const_cast<void*>(obj);
+                }
 
                 FixupHandler fixup() const
                 { return _fixup; }

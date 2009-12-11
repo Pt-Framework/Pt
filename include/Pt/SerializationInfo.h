@@ -107,6 +107,8 @@ class PT_API SerializationInfo
 
         SerializationSurrogate getSurrogate(const char* name) const;
 
+        void rebind(const void* obj) const;
+
         SerializationInfo* parent()
         { return _parent; }
 
@@ -885,12 +887,16 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 template <typename T, typename C, typename A>
 inline void operator >>=(const SerializationInfo& si, std::multiset<T, C, A>& multiset)
 {
+    typename std::multiset<T, C, A>::iterator inserted;
+
     multiset.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         T t;
-        *it >>= t;
-        multiset.insert(t);
+        *it >>= Pt::load() >>= t;
+        inserted = multiset.insert(t);
+        const T& x = *inserted;
+        it->rebind(&x);
     }
 }
 
@@ -960,9 +966,13 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
     multimap.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
-        typename std::pair<K, V> v;
-        *it >>= v;
-        multimap.insert(v);
+        K k;
+        si.getMember("first") >>= k;
+
+        std::pair<K, V> elem( k, V() );
+        multimap.insert(elem);
+
+        si.getMember("second") >>= Pt::load() >>= multimap[k];
     }
 }
 
