@@ -963,6 +963,8 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
 template <typename K, typename V, typename P, typename A>
 inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>& multimap)
 {
+    typename std::multimap<K, V, P, A>::iterator mit;
+
     multimap.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
@@ -970,9 +972,9 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
         si.getMember("first") >>= k;
 
         std::pair<K, V> elem( k, V() );
-        multimap.insert(elem);
+        mit = multimap.insert(elem);
 
-        si.getMember("second") >>= Pt::load() >>= multimap[k];
+        si.getMember("second") >>= Pt::load() >>= mit->second;
     }
 }
 
