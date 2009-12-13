@@ -207,10 +207,12 @@ class ReadWritePropertyInfo : public PropertyInfo
 
         void deserialize(const Pt::SerializationInfo& si)
         {
+            std::cerr << "DESERIALIZE PROPERTY BEGIN " << std::endl;
             typedef typename Pt::TypeTraits<A>::Value ValueT;
             ValueT value;
             si >>= value;
             _setter->invoke(value);
+            std::cerr << "DESERIALIZE PROPERTY END" << std::endl;
         }
 
     private:
@@ -315,6 +317,36 @@ class ReadWriteProperty : public PropertyInfo
         PropertyValue<T>* _value;
         Pt::Invokable<A>* _setter;
 };
+
+inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fixup)
+{
+    std::cerr << "FIXUP PROPERTYINFO " << fixup.targetType().name() << std::endl;
+    // if( fixup.isNull() )
+    // {
+    //     fixme = Pt::SmartPtr<Object>();
+    // }
+    // else
+    // {
+    //     Pt::SmartPtr<Object>* to = fixup.getTarget< Pt::SmartPtr<Object> >();
+    //     fixme = *to;
+    // }
+}
+
+inline void operator >>=(const LoadInfo& li, PropertyInfo& pi)
+{
+    std::cerr << "LOAD PROPERTYINFO BEGIN" << std::endl;
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(pi);
+        std::cerr << "LOAD REFERENCE" << std::endl;
+    }
+    else
+    {
+        std::cerr << "LOAD VALUE" << std::endl;
+        //li.load(sp);
+    }
+    std::cerr << "LOAD PROPERTYINFO END" << std::endl;
+}
 
 } // namespace Reflex
 

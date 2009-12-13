@@ -31,6 +31,8 @@
 #include "Pt/Xml/XmlDeserializer.h"
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Reflex/Reflectable.h"
+#include "Pt/Reflex/PropertyInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -193,6 +195,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
             //Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
             //Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
+            Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
         }
 
         static void pack(Pt::SerializationInfo& si)
@@ -542,9 +545,51 @@ void operator >>=(const Pt::SerializationInfo& si, Object& rt)
     }
 }
 
+namespace Pt {
+
+namespace Reflex {
+
+void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Reflex::Reflectable>& sp)
+{
+    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> BEGIN" << std::endl;
+
+    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> END" << std::endl;
+}
+
+}
+
+}
+
+class MyObject : public Pt::Reflex::Reflectable
+{
+    public:
+        MyObject(const std::string& name)
+        : Pt::Reflex::Reflectable(name)
+        {
+            this->registerProperty("child", *this, &MyObject::child, &MyObject::setChild);
+        }
+
+        void setChild(const Pt::SmartPtr<Pt::Reflex::Reflectable>& child)
+        { _child = child; }
+
+        const Pt::SmartPtr<Pt::Reflex::Reflectable>& child() const
+        { return _child; }
+
+    private:
+        Pt::SmartPtr<Pt::Reflex::Reflectable> _child;
+};
+
+
 void XmlSerializerTest::DynamicObject()
 {
-    std::string data = "<runtime>\n"
+    std::string data = "<refl1 id=\"0\">\n"
+                       "    <name>myPort2</name>\n"
+                       "</refl1>\n"
+                       "<myObj>\n"
+                       "    <child ref=\"0\"></child>\n"
+                       "</myObj>\n";
+
+    std::string data2 = "<runtime>\n"
                        "  <portList1 type=\"PortList\">\n"
                        "    <port1 type=\"Port\"id=\"0\">\n"
                        "      <name>myPort2</name>\n"
@@ -558,4 +603,19 @@ void XmlSerializerTest::DynamicObject()
                        "    <to ref=\"1\"></to>\n"
                        "  </connection1>\n"
                        "</runtime>\n";
+
+    std::stringstream input( data );
+    Pt::TextIStream tis(input, new Pt::Utf8Codec);
+
+    Pt::Xml::XmlReader reader(tis);
+    Pt::Xml::XmlDeserializer deser(reader);
+    deser.context()->enableReferencing(true);
+    deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+
+    Pt::Reflex::Reflectable refl1("refl1");
+    MyObject refl2("myObj");
+
+    deser.deserialize(refl1);
+    deser.deserialize(refl2);
+    deser.finish();
 }

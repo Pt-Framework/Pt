@@ -299,6 +299,7 @@ void Reflectable::serialize(SerializationInfo& si) const
 
 void operator >>= (const SerializationInfo& si, Reflectable& r)
 {
+    std::cerr << "DESERIALIZE REFLECTABLE BEGIN" << std::endl;
     Reflectable::PropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
     {
@@ -309,8 +310,10 @@ void operator >>= (const SerializationInfo& si, Reflectable& r)
         if(pinfo == 0)
             continue;
 
-        *pinfo >>= *it;
+        std::cerr << "DESERIALIZE " << it->name() << std::endl;
+        *pinfo >>= Pt::load() >>= *it;
     }
+    std::cerr << "DESERIALIZE REFLECTABLE END" << std::endl;
 }
 
 

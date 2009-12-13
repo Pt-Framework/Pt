@@ -362,145 +362,145 @@ class Reflectable::ConstPropertyIterator
 
 } // Reflex
 
-template <>
-class Composer<Reflex::Reflectable> : public IComposer
-{
-    public:
-        Composer()
-        : _reflectable(0)
-        , _property(0)
-        , _current(&_si)
-        {}
+// template <>
+// class Composer<Reflex::Reflectable> : public IComposer
+// {
+//     public:
+//         Composer()
+//         : _reflectable(0)
+//         , _property(0)
+//         , _current(&_si)
+//         {}
 
-        void begin(Reflex::Reflectable& t)
-        {
-            if(_reflectable)
-                this->clear();
+//         void begin(Reflex::Reflectable& t)
+//         {
+//             if(_reflectable)
+//                 this->clear();
 
-            _reflectable = &t;
-        }
+//             _reflectable = &t;
+//         }
 
-        virtual void clear()
-        {
-            _si.clear();
-            _reflectable = 0;
-            _property = 0;
-            _current = &_si;
-        }
+//         virtual void clear()
+//         {
+//             _si.clear();
+//             _reflectable = 0;
+//             _property = 0;
+//             _current = &_si;
+//         }
 
-        virtual void setContext(SerializationContext* context)
-        {
-            _si.setContext(context);
-        }
+//         virtual void setContext(SerializationContext* context)
+//         {
+//             _si.setContext(context);
+//         }
 
-        virtual void setName(const std::string& name)
-        {
-            if(_property)
-                _current->setName(name);
-            //else
-            //    _reflectable->setObjectName
-        }
+//         virtual void setName(const std::string& name)
+//         {
+//             if(_property)
+//                 _current->setName(name);
+//             //else
+//             //    _reflectable->setObjectName
+//         }
 
-        virtual void setId(const std::string& id)
-        {
-            //_current->setId(id);
-        }
+//         virtual void setId(const std::string& id)
+//         {
+//             //_current->setId(id);
+//         }
 
-        virtual void setTypeName(const std::string& type)
-        { }
+//         virtual void setTypeName(const std::string& type)
+//         { }
 
-        virtual void setValue(const Pt::String& value)
-        {
-            if(_current)
-                _current->setValue(value);
-        }
+//         virtual void setValue(const Pt::String& value)
+//         {
+//             if(_current)
+//                 _current->setValue(value);
+//         }
 
-        virtual void setBool(bool value)
-        {
-            if(_current)
-                _current->setValue(value);
-        }
+//         virtual void setBool(bool value)
+//         {
+//             if(_current)
+//                 _current->setValue(value);
+//         }
 
-        virtual void setInt(long value)
-        {
-            if(_current)
-                _current->setValue(value);
-        }
+//         virtual void setInt(long value)
+//         {
+//             if(_current)
+//                 _current->setValue(value);
+//         }
 
-        virtual void setUInt(unsigned long value)
-        {
-            if(_current)
-                _current->setValue(value);
-        }
+//         virtual void setUInt(unsigned long value)
+//         {
+//             if(_current)
+//                 _current->setValue(value);
+//         }
 
-        virtual void setFloat(double value)
-        {
-            if(_current)
-                _current->setValue(value);
-        }
+//         virtual void setFloat(double value)
+//         {
+//             if(_current)
+//                 _current->setValue(value);
+//         }
 
-        virtual void setReference(const std::string& id)
-        {
-            // always an error
-            //_si.setReference(id);
-        }
+//         virtual void setReference(const std::string& id)
+//         {
+//             // always an error
+//             //_si.setReference(id);
+//         }
 
-        virtual IComposer* beginMember(const std::string& name)
-        {
-            if(_property)
-            {
-                _current = &( _current->addMember(name) );
-                return this;
-            }
+//         virtual IComposer* beginMember(const std::string& name)
+//         {
+//             if(_property)
+//             {
+//                 _current = &( _current->addMember(name) );
+//                 return this;
+//             }
 
-            _property = &( _reflectable->propertyInfo(name) );
+//             _property = &( _reflectable->propertyInfo(name) );
 
-            if(_property)
-            {
-                _current = &_si;
-                return this;
-            }
+//             if(_property)
+//             {
+//                 _current = &_si;
+//                 return this;
+//             }
 
-            // try to find reflectable child and set _reflectable
-            return this;
-        }
+//             // try to find reflectable child and set _reflectable
+//             return this;
+//         }
 
-        virtual IComposer* beginElement()
-        {
-            return this; // always an error
-        }
+//         virtual IComposer* beginElement()
+//         {
+//             return this; // always an error
+//         }
 
-        virtual IComposer* finish()
-        {
-            if(_property)
-            {
-                if( _current->parent() )
-                {
-                    _current = _current->parent();
-                    return this;
-                }
+//         virtual IComposer* finish()
+//         {
+//             if(_property)
+//             {
+//                 if( _current->parent() )
+//                 {
+//                     _current = _current->parent();
+//                     return this;
+//                 }
 
-                _property->deserialize(_si);
-                _si.clear();
-                _property = 0;
-                return this;
-            }
+//                 _property->deserialize(_si);
+//                 _si.clear();
+//                 _property = 0;
+//                 return this;
+//             }
 
-            // if( _reflectable->parent() )
-            // {
-            //     _reflectable = _reflectable->parent();
-            //     return this;
-            // }
+//             // if( _reflectable->parent() )
+//             // {
+//             //     _reflectable = _reflectable->parent();
+//             //     return this;
+//             // }
 
-            return 0;
-        }
+//             return 0;
+//         }
 
-    private:
-        Reflex::Reflectable* _reflectable;
-        Reflex::PropertyInfo* _property;
-        Pt::SerializationInfo _si;
-        Pt::SerializationInfo* _current;
-};
+//     private:
+//         Reflex::Reflectable* _reflectable;
+//         Reflex::PropertyInfo* _property;
+//         Pt::SerializationInfo _si;
+//         Pt::SerializationInfo* _current;
+// };
 
 } // namespace Pt
 
