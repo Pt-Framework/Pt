@@ -887,16 +887,12 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 template <typename T, typename C, typename A>
 inline void operator >>=(const SerializationInfo& si, std::multiset<T, C, A>& multiset)
 {
-    typename std::multiset<T, C, A>::iterator inserted;
-
     multiset.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         T t;
-        *it >>= Pt::load() >>= t;
-        inserted = multiset.insert(t);
-        const T& x = *inserted;
-        it->rebind(&x);
+        *it >>= t;
+        multiset.insert(t);
     }
 }
 
@@ -935,12 +931,19 @@ inline void operator <<=(SerializationInfo& si, const std::pair<A, B>& p)
 template <typename K, typename V, typename P, typename A>
 inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
 {
+    typedef typename std::multimap<K, V, P, A>::iterator MapIterator;
+    std::pair<MapIterator, bool> pos;
+
     map.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
-        typename std::pair<K, V> v;
-        *it >>= v;
-        map.insert(v);
+        K k;
+        si.getMember("first") >>= k;
+
+        std::pair<K, V> elem( k, V() );
+        pos = map.insert(elem);
+        if( pos.second )
+            si.getMember("second") >>= Pt::load() >>= pos.first->second;
     }
 }
 

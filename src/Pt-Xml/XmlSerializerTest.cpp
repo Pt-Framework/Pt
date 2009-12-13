@@ -162,6 +162,26 @@ void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
 
 }
 
+namespace Pt {
+
+inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date>& dset)
+{
+    std::cerr << "OPERATOR >>= multiset<Date>" << std::endl;
+    std::multiset<Pt::Date>::iterator pos;
+
+    dset.clear();
+    for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        Pt::Date tmp;
+        *it >>= Pt::load() >>= tmp;
+        pos = dset.insert(tmp);
+
+        const Pt::Date& dt = *pos;
+        it->rebind(&dt);
+    }
+}
+
+}
 
 class XmlSerializerTest: public Pt::Unit::TestSuite
 {
@@ -260,12 +280,11 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
         void MultiSet()
         {
-            std::multiset<Pt::Date>::iterator it;
             std::multiset<Pt::Date> dates;
             dates.insert( Pt::Date(2000, 4,18) );
-            it = dates.insert( Pt::Date(2000, 4,17) );
+            dates.insert( Pt::Date(2000, 4,17) );
             dates.insert( Pt::Date(2000, 4,19) );
-            const Pt::Date* dateptr = &(*it);
+            const Pt::Date* dateptr = &(*dates.begin() );
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
@@ -295,6 +314,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.deserialize(dateptr);
             deser.finish();
 
+            PT_UNIT_ASSERT( dateptr );
+            PT_UNIT_ASSERT( dates.size() == 3 );
+            PT_UNIT_ASSERT( dateptr == &(*dates.begin()) );
             std::cerr << "dateptr:" << dateptr->toIsoString() << std::endl;
         }
 
