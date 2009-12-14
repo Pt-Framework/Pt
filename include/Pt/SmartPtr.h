@@ -32,6 +32,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Atomicity.h>
+#include <Pt/SerializationInfo.h>
 #include <cstdio>
 
 namespace Pt {
@@ -459,16 +460,67 @@ namespace Pt {
             { return object; }
     };
 
-class SerializationInfo;
 
-template<typename T, typename B, typename C>
-void operator >>=(const SerializationInfo& si, SmartPtr<T,B,C>& date)
+template <typename T, typename M, typename D >
+void fixup(SmartPtr<T,M, D>& fixme, const Pt::FixupInfo& fixup)
 {
+    if( fixup.isNull() )
+    {
+        fixme = SmartPtr<T,M, D>();
+    }
+    else
+    {
+        const SmartPtr<T,M, D>* to = fixup.getTarget< SmartPtr<T,M, D> >();
+        fixme = *to;
+    }
 }
 
-template<typename T, typename B, typename C>
-void operator <<=(SerializationInfo& si, const SmartPtr<T,B,C>& date)
+
+// TODO: rename to load()
+template <typename T, typename M, typename D >
+void operator >>=(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 {
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(sp);
+    }
+    else
+    {
+        li.load(sp);
+    }
+}
+
+
+template <typename T, typename M>
+void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
+{
+    sp = new T(); // TODO: throw if null
+    si >>= *sp;
+}
+
+
+// TODO: rename save()
+template <typename T, typename M, typename D >
+void operator <<=(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
+{
+    if( ! sp.getPointer() || ! si.save( *sp ) )
+    {
+        si.out() <<= sp.getPointer();
+    }
+}
+
+
+template <typename T, typename M, typename D >
+void operator <<=(Pt::SerializationInfo& si, const SmartPtr<T,M, D>& sp)
+{
+    if( sp.getPointer() )
+    {
+        si <<= *sp;
+    }
+    else
+    {
+        si <<= sp.getPointer(); // TODO: throw if null
+    }
 }
 
 } // namespace Pt

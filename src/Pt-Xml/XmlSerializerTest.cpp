@@ -104,68 +104,6 @@ void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
 
 namespace Pt {
 
-typedef SmartPtr<Date> DateSmartPtr;
-
-
-void fixup(DateSmartPtr& fixme, const Pt::FixupInfo& fixup)
-{
-    if( fixup.isNull() )
-    {
-        fixme = DateSmartPtr();
-    }
-    else
-    {
-        const DateSmartPtr* to = fixup.getTarget<DateSmartPtr>();
-        fixme = *to;
-    }
-}
-
-// TODO: rename to load()
-void operator >>=(const LoadInfo& li, DateSmartPtr& sp)
-{
-    if(li.in().category() == Pt::SerializationInfo::Reference)
-    {
-        li.in().loadReference(sp);
-    }
-    else
-    {
-        li.load(sp);
-    }
-}
-
-
-void operator >>=(const Pt::SerializationInfo& si, DateSmartPtr& sp)
-{
-    sp = new Date();
-    si >>= *sp;
-}
-
-// TODO: rename save()
-void operator <<=(Pt::SaveInfo& si, const DateSmartPtr& sp)
-{
-    if( ! sp.getPointer() || ! si.save( *sp ) )
-    {
-        si.out() <<= sp.getPointer();
-    }
-}
-
-
-void operator <<=(Pt::SerializationInfo& si, const DateSmartPtr& sp)
-{
-    if( sp.getPointer() )
-    {
-        si <<= *sp;
-    }
-    else
-    {
-        si <<= Pt::Date();
-    }
-}
-
-}
-
-namespace Pt {
-
 inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date>& dset)
 {
     std::cerr << "OPERATOR >>= multiset<Date>" << std::endl;
@@ -188,6 +126,8 @@ inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date
 class XmlSerializerTest: public Pt::Unit::TestSuite
 {
     public:
+        typedef Pt::SmartPtr<Pt::Date> DateSmartPtr;
+
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
@@ -195,7 +135,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
             Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
-            //Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
+            Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
         }
 
         static void pack(Pt::SerializationInfo& si)
@@ -229,9 +169,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date1(1889, 4, 20);
             test::DateRef dr( &date1 );
             const Pt::Date* dateptr = &date1;
-            Pt::DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
-            Pt::DateSmartPtr datesp2 = datesp;
-            Pt::DateSmartPtr dateNull;
+            DateSmartPtr datesp( new Pt::Date(2000, 6, 25) );
+            DateSmartPtr datesp2 = datesp;
+            DateSmartPtr dateNull;
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
@@ -250,9 +190,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2(1, 1, 1);
             dr.setDate(0);
             Pt::Date* dateptr2 = 0; // const ?
-            Pt::DateSmartPtr datesp3;
-            Pt::DateSmartPtr datesp4;
-            Pt::DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
+            DateSmartPtr datesp3;
+            DateSmartPtr datesp4;
+            DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
             std::cerr << "\n--------------------" << std::endl;
             std::cerr << output.str();
@@ -507,30 +447,6 @@ class Runtime : public Object
         }
 };
 
-void fixup(Pt::SmartPtr<Object>& fixme, const Pt::FixupInfo& fixup)
-{
-    if( fixup.isNull() )
-    {
-        fixme = Pt::SmartPtr<Object>();
-    }
-    else
-    {
-        Pt::SmartPtr<Object>* to = fixup.getTarget< Pt::SmartPtr<Object> >();
-        fixme = *to;
-    }
-}
-
-void operator >>=(const Pt::LoadInfo& li, Pt::SmartPtr<Object>& sp)
-{
-    if(li.in().category() == Pt::SerializationInfo::Reference)
-    {
-        li.in().loadReference(sp);
-    }
-    else
-    {
-        li.load(sp);
-    }
-}
 
 void operator >>=(const Pt::SerializationInfo& si, Object& rt)
 {
