@@ -82,6 +82,9 @@ class PropertyInfo  : public MemberInfo
         virtual void serialize(Pt::SerializationInfo& si) const = 0;
 
         virtual void deserialize(const Pt::SerializationInfo& si) = 0;
+
+        virtual void fixupT(const Pt::FixupInfo& fi)
+        {}
 };
 
 inline void operator<<=(Pt::SerializationInfo& si, const PropertyInfo& pi)
@@ -215,6 +218,16 @@ class ReadWritePropertyInfo : public PropertyInfo
             std::cerr << "DESERIALIZE PROPERTY END" << std::endl;
         }
 
+        virtual void fixupT(const FixupInfo& fi)
+        {
+            std::cerr << "FIXUP PROPERTY BEGIN " << std::endl;
+            typedef typename Pt::TypeTraits<A>::Value ValueT;
+            ValueT value;
+            fixup(value, fi);
+            _setter->invoke(value);
+            std::cerr << "FIXUP PROPERTY END " << std::endl;
+        }
+
     private:
         std::string _name;
         Pt::Callable<R>* _getter;
@@ -318,18 +331,10 @@ class ReadWriteProperty : public PropertyInfo
         Pt::Invokable<A>* _setter;
 };
 
-inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fixup)
+inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fi)
 {
-    std::cerr << "FIXUP PROPERTYINFO " << fixup.targetType().name() << std::endl;
-    // if( fixup.isNull() )
-    // {
-    //     fixme = Pt::SmartPtr<Object>();
-    // }
-    // else
-    // {
-    //     Pt::SmartPtr<Object>* to = fixup.getTarget< Pt::SmartPtr<Object> >();
-    //     fixme = *to;
-    // }
+    std::cerr << "FIXUP PROPERTYINFO " << fi.targetType().name() << std::endl;
+    fixme.fixupT(fi);
 }
 
 inline void operator >>=(const LoadInfo& li, PropertyInfo& pi)

@@ -467,8 +467,8 @@ namespace Reflex {
 
 void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Reflex::Reflectable>& sp)
 {
-    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> BEGIN" << std::endl;
-    sp = new Reflectable("");
+    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> BEGIN " << si.typeName() << std::endl;
+    sp = new Reflectable("xxx");
     si >>= *sp;
     std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> END" << std::endl;
 }
@@ -499,7 +499,7 @@ class MyObject : public Pt::Reflex::Reflectable
 
 void XmlSerializerTest::DynamicObject()
 {
-    std::string data = "<refl1 id=\"0\">\n"
+    std::string data = "<refl1 type=\"Port\"id=\"0\">\n"
                        "    <name>myPort2</name>\n"
                        "</refl1>\n"
                        "<myObj>\n"
@@ -529,10 +529,15 @@ void XmlSerializerTest::DynamicObject()
     deser.context()->enableReferencing(true);
     deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
-    Pt::SmartPtr<Pt::Reflex::Reflectable> refl1( new Pt::Reflex::Reflectable("refl1") );
+    Pt::SmartPtr<Pt::Reflex::Reflectable> refl1;
     MyObject refl2("myObj");
 
     deser.deserialize(refl1);
     deser.deserialize(refl2);
     deser.finish();
+
+    std::cerr << "refl1: " << refl1.getPointer() << std::endl;
+    std::cerr << "refl1: " << refl1.getPointer()->objectName() << std::endl;
+    std::cerr << "CHILD: " << refl2.child().getPointer() << std::endl;
+    std::cerr << "CHILD: " << refl2.child().getPointer()->objectName() << std::endl;
 }
