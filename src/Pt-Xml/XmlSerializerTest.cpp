@@ -468,7 +468,8 @@ namespace Reflex {
 void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Reflex::Reflectable>& sp)
 {
     std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> BEGIN" << std::endl;
-
+    sp = new Reflectable("");
+    si >>= *sp;
     std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> END" << std::endl;
 }
 
@@ -528,7 +529,7 @@ void XmlSerializerTest::DynamicObject()
     deser.context()->enableReferencing(true);
     deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
-    Pt::Reflex::Reflectable refl1("refl1");
+    Pt::SmartPtr<Pt::Reflex::Reflectable> refl1( new Pt::Reflex::Reflectable("refl1") );
     MyObject refl2("myObj");
 
     deser.deserialize(refl1);

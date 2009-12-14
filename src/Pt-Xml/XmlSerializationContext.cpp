@@ -143,7 +143,7 @@ void XmlSerializationContext::finishLoad()
 
 void XmlSerializationContext::rebind(const std::string& id, void* obj)
 {
-    std::cerr << "rebind " << id << " to " << obj << std::endl;
+    //std::cerr << "rebind " << id << " to " << obj << std::endl;
     if(obj)
         _targets[id].setInstance(obj);
     else
@@ -153,7 +153,7 @@ void XmlSerializationContext::rebind(const std::string& id, void* obj)
 
 void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void* from)
 {
-    std::cerr << "rebindFixup " << id << " from " << from << " to " << obj << std::endl;
+    //std::cerr << "rebindFixup " << id << " from " << from << " to " << obj << std::endl;
     std::multimap<std::string, Fixup>::iterator it;
     it = _pointers.lower_bound(id);
     for( ; id == it->first; ++it)

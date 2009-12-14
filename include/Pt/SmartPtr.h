@@ -494,7 +494,7 @@ void operator >>=(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 template <typename T, typename M>
 void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 {
-    sp = new T(); // TODO: throw if null
+    sp = new T();
     si >>= *sp;
 }
 
