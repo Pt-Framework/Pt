@@ -262,6 +262,7 @@ void SerializationInfo::setReference(const std::string& id)
 {
     this->setCategory(Reference);
     static_cast<ReferenceNode*>(_node)->setRefId(id);
+    static_cast<ReferenceNode*>(_node)->setAddress(0);
 }
 
 
@@ -271,7 +272,8 @@ void SerializationInfo::load(void* type, FixupHandler fh) const
     if( this->category() != Reference)
         throw SerializationError("not a reference");
 
-    const std::string& refId = static_cast<const ReferenceNode*>(_node)->refId();
+    const std::string& refId = static_cast<ReferenceNode*>(_node)->refId();
+    static_cast<ReferenceNode*>(_node)->setAddress(type);
 
     if(_context)
     {
@@ -457,12 +459,29 @@ void SerializationInfo::finishSave()
 }
 
 
-void SerializationInfo::rebind(const void* obj) const
+void SerializationInfo::rebind(void* obj) const
 {
     _bound = obj;
 
+    if( ! _context )
+        return;
+
+    _context->rebind(_id, obj);
+
+    // NOTE: all fixup addresses and child addresses are invalid too
+}
+
+
+void SerializationInfo::rebindFixup(void* obj) const
+{
+    if( this->category() != Reference )
+        throw SerializationError("not a reference");
+
+    const std::string& refId = static_cast<const ReferenceNode*>(_node)->refId();
+    void* addr = static_cast<const ReferenceNode*>(_node)->address();
+
     if(_context)
-        _context->rebind(_id, obj);
+        _context->rebindFixup( refId, obj, addr );
 }
 
 

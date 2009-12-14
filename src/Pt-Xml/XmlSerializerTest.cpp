@@ -115,7 +115,7 @@ void fixup(DateSmartPtr& fixme, const Pt::FixupInfo& fixup)
     }
     else
     {
-        DateSmartPtr* to = fixup.getTarget<DateSmartPtr>();
+        const DateSmartPtr* to = fixup.getTarget<DateSmartPtr>();
         fixme = *to;
     }
 }
@@ -178,7 +178,7 @@ inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date
         *it >>= Pt::load() >>= tmp;
         pos = dset.insert(tmp);
 
-        const Pt::Date& dt = *pos;
+        Pt::Date& dt = const_cast<Pt::Date&>(*pos);
         it->rebind(&dt);
     }
 }
@@ -191,11 +191,11 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
+            Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
             Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
-            //Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
-            //Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
-            Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
+            Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
+            Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
+            //Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
         }
 
         static void pack(Pt::SerializationInfo& si)

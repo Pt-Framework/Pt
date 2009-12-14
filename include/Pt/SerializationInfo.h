@@ -107,7 +107,9 @@ class PT_API SerializationInfo
 
         SerializationSurrogate getSurrogate(const char* name) const;
 
-        void rebind(const void* obj) const;
+        void rebind(void* obj) const;
+
+        void rebindFixup(void* obj) const;
 
         SerializationInfo* parent()
         { return _parent; }
@@ -856,15 +858,31 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
 }
 
 
+/** @brief Deserializes a std::set
+
+    Deserialization of references to or from set elements is not reliably
+    possible, due to some of std::set's constraints. However you may
+    overload this operator for your type.
+*/
 template <typename T, typename C, typename A>
 inline void operator >>=(const SerializationInfo& si, std::set<T, C, A>& set)
 {
+    // typedef typename std::set<T, C, A>::iterator SetIterator;
+    // std::pair<SetIterator, bool> pos;
+
     set.clear();
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         T t;
         *it >>= t;
         set.insert(t);
+
+        // T t;
+        // *it >>= Pt::load() >>= t;
+        // pos = set.insert(t);
+        // if( ! pos.second )
+        //     it->rebind(0);
+
     }
 }
 
@@ -887,12 +905,21 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 template <typename T, typename C, typename A>
 inline void operator >>=(const SerializationInfo& si, std::multiset<T, C, A>& multiset)
 {
+    // typename std::multiset<T>::iterator pos;
+
     multiset.clear();
-    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         T t;
         *it >>= t;
         multiset.insert(t);
+
+        // T tmp;
+        // *it >>= Pt::load() >>= tmp;
+        // pos = multiset.insert(tmp);
+
+        // T& t = const_cast<T&>(*pos);
+        // it->rebind(&t);
     }
 }
 
