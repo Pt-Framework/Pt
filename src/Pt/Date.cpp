@@ -138,7 +138,7 @@ void operator>>=(const SerializationInfo& si_, Date& date)
     if(si2.category() == SerializationInfo::Scalar)
     {
         std::string s = si2.toValue<std::string>();
-        convert(date, s);
+        date = Date::fromIsoString(s);
         return;
     }
 
