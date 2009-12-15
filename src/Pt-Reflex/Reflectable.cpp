@@ -67,6 +67,13 @@ struct ReflectableData
 };
 
 
+Reflectable::Reflectable()
+: _data(0)
+{
+    _data = new ReflectableData();
+}
+
+
 Reflectable::Reflectable(const std::string& name)
 : _data(0)
 {
@@ -103,6 +110,12 @@ Reflectable::~Reflectable()
 const std::string& Reflectable::objectName() const
 {
     return _data->objectName;
+}
+
+
+void Reflectable::setName(const std::string& name)
+{
+    _data->objectName = name;
 }
 
 

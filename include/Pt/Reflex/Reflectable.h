@@ -76,11 +76,15 @@ class PT_REFLEX_API Reflectable
         class ConstPropertyIterator;
 
     public:
+        Reflectable();
+
         Reflectable(const std::string& name);
 
         virtual ~Reflectable();
 
         const std::string& objectName() const;
+
+        void setName(const std::string& name);
 
         virtual Pt::Any property(const std::string& name) const;
 
