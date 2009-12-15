@@ -87,6 +87,12 @@ class Deserializer
             this->get(deser);
         }
 
+        void begin(IComposer& composer)
+        {
+            composer.setContext(_context);
+            this->onBegin(composer);
+        }
+
         template <typename T>
         void begin(T& type)
         {
