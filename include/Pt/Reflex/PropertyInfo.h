@@ -85,7 +85,32 @@ class PropertyInfo  : public MemberInfo
 
         virtual void fixupT(const Pt::FixupInfo& fi)
         {}
+
+        virtual void loadValue(const Pt::LoadInfo& li)
+        {}
 };
+
+inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fi)
+{
+std::cerr << "FIXUP BEGIN " << std::endl;
+    fixme.fixupT(fi);
+}
+
+inline void operator >>=(const LoadInfo& li, PropertyInfo& pi)
+{
+    std::cerr << "LOAD PROPERTYINFO BEGIN" << std::endl;
+    if(li.in().category() == Pt::SerializationInfo::Reference)
+    {
+        li.in().loadReference(pi);
+        std::cerr << "LOAD REFERENCE" << std::endl;
+    }
+    else
+    {
+        std::cerr << "LOAD VALUE" << std::endl;
+        li.load(pi);
+    }
+    std::cerr << "LOAD PROPERTYINFO END" << std::endl;
+}
 
 inline void operator<<=(Pt::SerializationInfo& si, const PropertyInfo& pi)
 {
@@ -228,6 +253,9 @@ class ReadWritePropertyInfo : public PropertyInfo
             std::cerr << "FIXUP PROPERTY END " << std::endl;
         }
 
+        virtual void loadValue(const LoadInfo& li)
+        { }
+
     private:
         std::string _name;
         Pt::Callable<R>* _getter;
@@ -325,33 +353,31 @@ class ReadWriteProperty : public PropertyInfo
             _setter->invoke( value );
         }
 
+        virtual void fixupT(const FixupInfo& fi)
+        {
+            std::cerr << "FIXUP VALUEPROPERTY BEGIN " << std::endl;
+            typedef typename Pt::TypeTraits<A>::Value ValueT;
+            ValueT value;
+            fixup(value, fi);
+            _setter->invoke(value);
+            std::cerr << "FIXUP VALUEPROPERTY END " << std::endl;
+        }
+
+        virtual void loadValue(const LoadInfo& li)
+        {
+            T& v = _value->get();
+            const std::type_info& ti = typeid(T);
+
+            li.in().beginLoad(&v, ti);
+            this->deserialize( li.in() );
+            li.in().finishLoad();
+        }
+
     private:
         std::string _name;
         PropertyValue<T>* _value;
         Pt::Invokable<A>* _setter;
 };
-
-inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fi)
-{
-    std::cerr << "FIXUP PROPERTYINFO " << fi.targetType().name() << std::endl;
-    fixme.fixupT(fi);
-}
-
-inline void operator >>=(const LoadInfo& li, PropertyInfo& pi)
-{
-    std::cerr << "LOAD PROPERTYINFO BEGIN" << std::endl;
-    if(li.in().category() == Pt::SerializationInfo::Reference)
-    {
-        li.in().loadReference(pi);
-        std::cerr << "LOAD REFERENCE" << std::endl;
-    }
-    else
-    {
-        std::cerr << "LOAD VALUE" << std::endl;
-        //li.load(sp);
-    }
-    std::cerr << "LOAD PROPERTYINFO END" << std::endl;
-}
 
 } // namespace Reflex
 

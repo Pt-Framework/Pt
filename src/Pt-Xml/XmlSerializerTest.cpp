@@ -483,17 +483,19 @@ class MyObject : public Pt::Reflex::Reflectable
         MyObject(const std::string& name)
         : Pt::Reflex::Reflectable(name)
         {
-            this->registerProperty("child", *this, &MyObject::child, &MyObject::setChild);
+            this->registerProperty("child", *this, _child, &MyObject::setChild);
         }
 
         void setChild(const Pt::SmartPtr<Pt::Reflex::Reflectable>& child)
-        { _child = child; }
+        { _child.set(child); }
 
         const Pt::SmartPtr<Pt::Reflex::Reflectable>& child() const
-        { return _child; }
+        { return _child.get(); }
 
     private:
-        Pt::SmartPtr<Pt::Reflex::Reflectable> _child;
+        Pt::Reflex::PropertyValue<
+            Pt::SmartPtr<
+                Pt::Reflex::Reflectable> > _child;
 };
 
 
