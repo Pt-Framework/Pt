@@ -29,7 +29,7 @@
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
-#include <Pt/SerializationInfo.h>
+#include "Pt/SerializationInfo.h"
 #include <map>
 
 namespace Pt {
@@ -42,7 +42,7 @@ class SerializationCache
         , refsEnabled(false)
         {}
 
-        std::map<std::string, SerializationSurrogate> _sptr;
+        std::map<std::string, Pt::SerializationSurrogate> _surrogates;
         std::vector<SerializationInfo*> _infos;
         std::vector<SerializationNode*> _scalars;
         std::vector<SerializationNode*> _objects;
@@ -310,15 +310,15 @@ void SerializationContext::setSurrogates(const char* name, Deflate def, Inflate 
 {
     // keep function ptrs in Surrogate object and always use context
     // for temporary SerializationInfos
-    _cache->_sptr[name] = SerializationSurrogate(def, inf);
+    _cache->_surrogates[name] = SerializationSurrogate(def, inf);
 }
 
 
 SerializationSurrogate SerializationContext::getSurrogate(const char* name)
 {
     std::map<std::string, SerializationSurrogate>::const_iterator it;
-    it = _cache->_sptr.find(name);
-    if( it == _cache->_sptr.end() )
+    it = _cache->_surrogates.find(name);
+    if( it == _cache->_surrogates.end() )
         return SerializationSurrogate();
 
     return it->second;
