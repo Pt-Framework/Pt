@@ -267,7 +267,7 @@ void SerializationInfo::setReference(const std::string& id)
 
 
 // called during deserialization, when a reference needs to be fixed up
-void SerializationInfo::load(void* type, FixupHandler fh) const
+void SerializationInfo::load(void* type, FixupHandler fh, unsigned m) const
 {
     if( this->category() != Reference)
         throw SerializationError("not a reference");

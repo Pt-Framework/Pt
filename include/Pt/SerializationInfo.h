@@ -263,17 +263,17 @@ class PT_API SerializationInfo
         /** @brief Deserialization of references
         */
         template <typename T>
-        void loadReference(T& fixme) const
+        void loadReference(T& fixme, unsigned m = 0) const
         {
-            this->load(&fixme, FixupThunk<T>::fixupReference);
+            this->load(&fixme, FixupThunk<T>::fixupReference, m);
         }
 
         /** @brief Deserialization of weak pointers
         */
         template <typename T>
-        void loadPointer(T*& fixme) const
+        void loadPointer(T*& fixme, unsigned m = 0) const
         {
-            this->load(&fixme, FixupThunk<T>::fixupPointer);
+            this->load(&fixme, FixupThunk<T>::fixupPointer, m);
         }
 
         bool beginFormat(Formatter& formatter);
@@ -332,7 +332,7 @@ class PT_API SerializationInfo
         { _next = si; }
 
     protected:
-        void load(void* fixme, FixupHandler fh) const;
+        void load(void* fixme, FixupHandler fh, unsigned m) const;
 
         Pt::String* initString();
 
