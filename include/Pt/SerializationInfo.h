@@ -958,7 +958,7 @@ inline void operator <<=(SerializationInfo& si, const std::pair<A, B>& p)
 template <typename K, typename V, typename P, typename A>
 inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
 {
-    typedef typename std::multimap<K, V, P, A>::iterator MapIterator;
+    typedef typename std::map<K, V, P, A>::iterator MapIterator;
     std::pair<MapIterator, bool> pos;
 
     map.clear();
