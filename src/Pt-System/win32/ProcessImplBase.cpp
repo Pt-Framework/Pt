@@ -124,10 +124,9 @@ void ProcessImplBase::start()
     }
     else if( _procInfo.stdInput() )
     {
-        _stdInput = _procInfo.stdInput();
-        SetHandleInformation( _stdInput->ioimpl().deviceHandle(),
+        SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdInput = _stdInput->ioimpl().deviceHandle();
+        m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
     }
 
     // Standard Output
