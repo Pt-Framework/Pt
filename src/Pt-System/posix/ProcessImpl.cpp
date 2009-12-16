@@ -160,7 +160,7 @@ void ProcessImpl::start()
         }
         else if (_procInfo.stdInputMode() == ProcessInfo::Capture)
         {
-            _stdinPipe->closeWriteFd();
+            _stdinPipe->in().close();
             _stdinPipe->redirectStdin();
         }
         else if (_stdInput)
@@ -176,7 +176,7 @@ void ProcessImpl::start()
         }
         else if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
         {
-            _stdoutPipe->closeReadFd();
+            _stdoutPipe->out().close();
             _stdoutPipe->redirectStdout();
         }
         else if (_stdOutput)
@@ -246,13 +246,13 @@ void ProcessImpl::start()
         // check for open pipes
 
         if (_procInfo.stdInputMode() == ProcessInfo::Capture)
-            _stdinPipe->closeReadFd();
+            _stdinPipe->out().close();
 
         if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
-            _stdoutPipe->closeWriteFd();
+            _stdoutPipe->in().close();
 
         if (_procInfo.stdErrorMode() == ProcessInfo::Capture)
-            _stderrPipe->closeWriteFd();
+            _stderrPipe->in().close();
     }
 }
 

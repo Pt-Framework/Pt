@@ -68,8 +68,6 @@ const IODevice& Pipe::in() const
     return _impl->in();
 }
 
-/// Redirect read-end to stdin.
-/// When the close argument is set, closes the original filedescriptor
 void Pipe::redirectStdin(bool close)
 {
     _impl->out().redirect(0, close);
@@ -80,8 +78,6 @@ void Pipe::redirectStdout(bool close)
     _impl->in().redirect(1, close);
 }
 
-/// Redirect write-end to stdout.
-/// When the close argument is set, closes the original filedescriptor
 void Pipe::redirectStderr(bool close)
 {
     _impl->in().redirect(2, close);

@@ -112,12 +112,6 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
         const IODevice& in() const;
 
-        void closeReadFd()
-        { out().close(); }
-
-        void closeWriteFd()
-        { in().close(); }
-
         /// Redirect write-end to stdout.
         /// When the close argument is set, closes the original filedescriptor
         void redirectStdout(bool close = true);
