@@ -149,10 +149,16 @@ void FileImpl::remove(const std::string& path)
 }
 
 
-void FileImpl::move(const std::string& path, const std::string& to)
+bool FileImpl::move(const std::string& path, const std::string& to)
 {
-    if( 0 != ::rename(path.c_str(), to.c_str()) )
-        throwFileErrno(path, PT_SOURCEINFO);
+	int ret = ::rename(path.c_str(), to.c_str());	
+	if( 0 != ret )
+	{
+		if( EXDEV == ret )
+			return false;
+		throwFileErrno(path, PT_SOURCEINFO);
+	}
+	return true;
 }
 
 

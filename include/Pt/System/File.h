@@ -116,8 +116,9 @@ class PT_SYSTEM_API File
 
             The %File object will stay valid after this method was called and
             point to the moved file.
+			return \cTrue if file successfully moved, otherwise \cfalse
         */
-        void move(const std::string& to);
+        bool move(const std::string& to);
 
     public:
         //! @brief Creates a new file at the path given by \a path

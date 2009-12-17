@@ -177,7 +177,7 @@ void FileImpl::remove(const std::string& path)
 }
 
 
-void FileImpl::move(const std::string& path, const std::string& to)
+bool FileImpl::move(const std::string& path, const std::string& to)
 {
     std::basic_string<TCHAR> tpath;
     win32::fromMultiByte(path, tpath);
@@ -187,11 +187,27 @@ void FileImpl::move(const std::string& path, const std::string& to)
 
 #ifdef _WIN32_WCE
     if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-         throwFileError(path, PT_SOURCEINFO);
+	{
+		DWORD error = GetLastError();
+		if (error == ERROR_NOT_SAME_DEVICE)
+		{
+			return false;
+		}
+		throwFileError(path, PT_SOURCEINFO);
+	}
 #else
-    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
-         throwFileError(path, PT_SOURCEINFO);
+    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), 0) )
+	{
+		DWORD error = GetLastError();
+		if (error == ERROR_NOT_SAME_DEVICE)
+		{
+			return false;
+		}
+		throwFileError(path, PT_SOURCEINFO);
+	}
 #endif
+
+	return true;
 }
 
 
