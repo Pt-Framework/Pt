@@ -68,21 +68,6 @@ const IODevice& Pipe::in() const
     return _impl->in();
 }
 
-void Pipe::redirectStdin(bool close)
-{
-    _impl->out().redirect(0, close);
-}
-
-void Pipe::redirectStdout(bool close)
-{
-    _impl->in().redirect(1, close);
-}
-
-void Pipe::redirectStderr(bool close)
-{
-    _impl->in().redirect(2, close);
-}
-
 } // namespace System
 
 } // namespace Pt

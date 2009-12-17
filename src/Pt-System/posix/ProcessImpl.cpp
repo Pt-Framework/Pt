@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ProcessImpl.h"
-#include "IODeviceImpl.h"
+#include "PipeImpl.h"
 
 #include <cstdio>
 #include <vector>
@@ -140,7 +140,7 @@ void ProcessImpl::start()
         else if (_procInfo.stdInputMode() == ProcessInfo::Capture)
         {
             _stdinPipe->in().close();
-            _stdinPipe->redirectStdin();
+            _stdinPipe->impl()->redirectStdin();
         }
         else if (_procInfo.stdInput())
         {
@@ -156,7 +156,7 @@ void ProcessImpl::start()
         else if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
         {
             _stdoutPipe->out().close();
-            _stdoutPipe->redirectStdout();
+            _stdoutPipe->impl()->redirectStdout();
         }
         else if (_procInfo.stdOutput())
         {
@@ -171,11 +171,11 @@ void ProcessImpl::start()
         }
         else if (_procInfo.stdErrorMode() == ProcessInfo::Capture)
         {
-            _stderrPipe->redirectStderr();
+            _stderrPipe->impl()->redirectStderr();
         }
         else if (_procInfo.stdErrorMode() == ProcessInfo::Combine)
         {
-            _stdoutPipe->redirectStderr(false);
+            _stdoutPipe->impl()->redirectStderr(false);
         }
         else if (_procInfo.stdError())
         {

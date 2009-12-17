@@ -112,18 +112,6 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
         const IODevice& in() const;
 
-        /// Redirect write-end to stdout.
-        /// When the close argument is set, closes the original filedescriptor
-        void redirectStdout(bool close = true);
-
-        /// Redirect read-end to stdin.
-        /// When the close argument is set, closes the original filedescriptor
-        void redirectStdin(bool close = true);
-
-        /// Redirect write-end to stdout.
-        /// When the close argument is set, closes the original filedescriptor
-        void redirectStderr(bool close = true);
-
         size_t write(const char* buf, size_t count)
         {
           return in().write(buf, count);
@@ -146,6 +134,8 @@ class PT_SYSTEM_API Pipe : public NonCopyable
           return ch;
         }
 
+        PipeImpl* impl()
+        { return _impl; }
 };
 
 } // namespace System
