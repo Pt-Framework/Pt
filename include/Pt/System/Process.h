@@ -34,6 +34,7 @@
 #include <Pt/NonCopyable.h>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 namespace Pt {
 
