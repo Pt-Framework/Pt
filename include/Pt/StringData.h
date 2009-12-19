@@ -74,13 +74,13 @@ namespace std {
             pointer allocate(size_type n, const void* = 0)
             {
                 //return static_cast<value_type*>(::operator new(n * sizeof(value_type)));
-                return static_cast<pointer>( ::malloc(n * sizeof(value_type)) );
+                return static_cast<pointer>( std::malloc(n * sizeof(value_type)) );
             }
 
             void deallocate(pointer p, size_type)
             { 
             	//::operator delete(p); 
-            	::free(p);
+            	std::free(p);
             }
 
             size_type max_size() const throw()

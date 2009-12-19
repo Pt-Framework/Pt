@@ -36,6 +36,7 @@
 #include "Pt/TextStream.h"
 #include <string>
 #include <sstream>
+#include <cstring>
  
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
@@ -181,18 +182,18 @@ void TextStreamTest::Base64Out()
     Pt::Base64Codec b64c;
 
     const char* from = "abc";
-    memset(to, 0, sizeof(to));
+    std::memset(to, 0, sizeof(to));
     state = Pt::MBState();
     b64c.out(state, from, from+3, nextFrom, to, to+100, nextTo);
     b64c.unshift(state, nextTo, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("YWJj", to) == 0 );
+    PT_UNIT_ASSERT( std::strcmp("YWJj", to) == 0 );
 
     const char* from2 = "abcd";
-    memset(to, 0, sizeof(to));
+    std::memset(to, 0, sizeof(to));
     state = Pt::MBState();
     b64c.out(state, from2, from2+4, nextFrom, to, to+100, nextTo);
     b64c.unshift(state, nextTo, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("YWJjZA==", to) == 0 );
+    PT_UNIT_ASSERT( std::strcmp("YWJjZA==", to) == 0 );
 
     std::stringstream ss3;
     Pt::BasicTextStream<char, char> ts3(ss3, new Pt::Base64Codec);
@@ -210,17 +211,17 @@ void TextStreamTest::Base64In()
     Pt::Base64Codec b64c;
 
     const char* from = "YWJj";
-    memset(to, 0, sizeof(to));
+    std::memset(to, 0, sizeof(to));
     state = Pt::MBState();
     b64c.in(state, from, from+4, nextFrom, to, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("abc", to) == 0 );
+    PT_UNIT_ASSERT( std::strcmp("abc", to) == 0 );
     PT_UNIT_ASSERT( nextTo - to == 3 );
 
     const char* from2 = "YWJjZGU=";
-    memset(to, 0, sizeof(to));
+    std::memset(to, 0, sizeof(to));
     state = Pt::MBState();
     b64c.in(state, from2, from2+8, nextFrom, to, to+100, nextTo);
-    PT_UNIT_ASSERT( strcmp("abcde", to) == 0 );
+    PT_UNIT_ASSERT( std::strcmp("abcde", to) == 0 );
     PT_UNIT_ASSERT( nextTo - to == 5 );
 
     std::stringstream ss3("YWJjZA==");

@@ -34,6 +34,10 @@
 #include <unistd.h>
 #include <iostream>
 
+#ifndef SA_RESTART
+#define SA_RESTART 0
+#endif
+
 namespace {
 
     Pt::System::Pipe* pt_signal_pipe = 0;

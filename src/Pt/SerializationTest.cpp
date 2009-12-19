@@ -41,6 +41,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <cstring> // for atoi only
 
 #include "Pt/System/Clock.h"
 #include "Pt/StringStream.h"
@@ -57,7 +58,7 @@ inline void convert(int& n, const Pt::String& str)
     //int value = 1234;
     //memcpy(&n, &value, sizeof(int));
 
-    n = atoi("111");
+    n = std::atoi("111");
 }
 
 }

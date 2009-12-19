@@ -64,6 +64,13 @@ class FixupInfo
 
             return static_cast<T*>( _target );
         }
+        
+        /** @internal
+            This is needed as a workaround for some compilers (GCC 3.x) to
+            allow access to 'T getTarget(const std::string& name) const'.
+         */
+        template <typename T>
+        friend T getTarget(FixupInfo* fi);
 
     private:
         void* _target;
