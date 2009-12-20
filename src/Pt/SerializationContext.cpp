@@ -115,7 +115,7 @@ void SerializationContext::rebindFixup(const std::string& id, void* obj, void* p
 }
 
 
-void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupHandler)
+void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupHandler, unsigned mid)
 {
 }
 

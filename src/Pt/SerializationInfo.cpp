@@ -277,7 +277,7 @@ void SerializationInfo::load(void* type, FixupHandler fh, unsigned m) const
 
     if(_context)
     {
-        _context->prepareFixup(type, refId, fh);
+        _context->prepareFixup(type, refId, fh, m);
     }
 }
 
@@ -289,6 +289,27 @@ const Pt::String& SerializationInfo::toString() const
 
     ValueNode* svalue = (ValueNode*) _node;
     return svalue->getString();
+}
+
+
+void SerializationInfo::getValue(Pt::String& s) const
+{
+    if( this->category() != Scalar )
+        throw SerializationError("not a value");
+
+    ValueNode* svalue = static_cast<ValueNode*>(_node);
+    s = svalue->getString();
+}
+
+
+void SerializationInfo::setValue(const Pt::String& s)
+{
+    if( category() == Context )
+        return;
+
+    this->setCategory(Scalar);
+    ValueNode* svalue = static_cast<ValueNode*>(_node);
+    svalue->setString() = s;
 }
 
 

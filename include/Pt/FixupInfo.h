@@ -37,9 +37,10 @@ namespace Pt {
 class FixupInfo
 {
     public:
-        FixupInfo(void* target, const std::type_info& targetType)
+        FixupInfo(void* target, const std::type_info& targetType, unsigned mid)
         : _target(target)
         , _type(&targetType)
+        , _mid(mid)
         {}
 
         ~FixupInfo()
@@ -50,6 +51,9 @@ class FixupInfo
 
         const std::type_info& targetType() const
         { return *_type; }
+
+        unsigned memberId() const
+        { return _mid; }
 
         bool isNull() const
         { return _target == 0; }
@@ -64,10 +68,11 @@ class FixupInfo
 
             return static_cast<T*>( _target );
         }
-        
+
         /** @internal
+
             This is needed as a workaround for some compilers (GCC 3.x) to
-            allow access to 'T getTarget(const std::string& name) const'.
+            allow access to 'T* getTarget() const'.
          */
         template <typename T>
         friend T getTarget(FixupInfo* fi);
@@ -75,6 +80,7 @@ class FixupInfo
     private:
         void* _target;
         const std::type_info* _type;
+        unsigned _mid;
 };
 
 
@@ -83,19 +89,21 @@ struct FixupThunk
 {
     static void fixupPointer(void* fixme,
                              void* target,
-                             const std::type_info& targetType)
+                             const std::type_info& targetType,
+                             unsigned mid)
     {
         T** from = static_cast<T**>(fixme);
-        FixupInfo fi(target, targetType);
+        FixupInfo fi(target, targetType, mid);
         fixup(*from, fi);
     }
 
     static void fixupReference(void* fixme,
                                void* target,
-                               const std::type_info& targetType)
+                               const std::type_info& targetType,
+                               unsigned mid)
     {
         T* from = static_cast<T*>(fixme);
-        FixupInfo fi(target, targetType);
+        FixupInfo fi(target, targetType, mid);
         fixup(*from, fi);
     }
 };

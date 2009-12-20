@@ -170,10 +170,10 @@ void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void
 }
 
 
-void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh)
+void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh, unsigned m)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
-    Fixup fi(obj, fh, 0);
+    Fixup fi(obj, fh, 0, m);
     _pointers.insert( std::pair<std::string, Fixup>(id, fi) );
 }
 
@@ -185,11 +185,12 @@ void XmlSerializationContext::fixup()
     {
         void* fixme = it->second.instance();
         std::string id = it->first;
+        unsigned m = it->second.memberId();
 
         if( id == "null" )
         {
             const std::type_info* targetType = &( typeid(void*) );
-            it->second.fixup()(fixme, 0, *targetType);
+            it->second.fixup()(fixme, 0, *targetType, m);
         }
         else if( _targets.find(id) != _targets.end() )
         {
@@ -197,7 +198,7 @@ void XmlSerializationContext::fixup()
             const std::type_info* targetType = _targets[id].type() ;
 
             //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
-            it->second.fixup()(fixme, target, *targetType);
+            it->second.fixup()(fixme, target, *targetType, m);
         }
         else
         {

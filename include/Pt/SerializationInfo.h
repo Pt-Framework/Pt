@@ -53,7 +53,9 @@ class PT_API SerializationInfo
 {
     public:
         typedef void (*FixupHandler)(void* fixme,
-                                     void* target, const std::type_info& targetType);
+                                     void* target,
+                                     const std::type_info& targetType,
+                                     unsigned m);
 
         enum Category {
             Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4, Context = 5
@@ -148,25 +150,10 @@ class PT_API SerializationInfo
         */
         const Pt::String& toString() const;
 
-        /** @brief Deserialization of flat child value types
-        */
-        template <typename T>
-        void getValue(T& value) const
-        {
-            convert( value, this->toString() );
-        }
+        void getValue(Pt::String& s) const;
 
-        /** @brief Serialization of flat data-types
-        */
-        template <typename T>
-        void setValue(const T& value)
-        {
-            Pt::String* str = initString();
-            if(str)
-                convert( *str, value );
-        }
+        void setValue(const Pt::String& s);
 
-        // TODO setValue/getValue for String
         void getValue(bool& b) const;
 
         void setValue(bool b);
@@ -244,6 +231,12 @@ class PT_API SerializationInfo
 
         size_t memberCount() const;
 
+        SerializationInfo* sibling() const
+        { return _next; }
+
+        void setSibling(SerializationInfo* si)
+        { _next = si; }
+
         Iterator begin();
 
         Iterator end();
@@ -263,17 +256,17 @@ class PT_API SerializationInfo
         /** @brief Deserialization of references
         */
         template <typename T>
-        void loadReference(T& fixme, unsigned m = 0) const
+        void loadReference(T& fixme, unsigned mid = 0) const
         {
-            this->load(&fixme, FixupThunk<T>::fixupReference, m);
+            this->load(&fixme, FixupThunk<T>::fixupReference, mid);
         }
 
         /** @brief Deserialization of weak pointers
         */
         template <typename T>
-        void loadPointer(T*& fixme, unsigned m = 0) const
+        void loadPointer(T*& fixme, unsigned mid = 0) const
         {
-            this->load(&fixme, FixupThunk<T>::fixupPointer, m);
+            this->load(&fixme, FixupThunk<T>::fixupPointer, mid);
         }
 
         bool beginFormat(Formatter& formatter);
@@ -283,6 +276,24 @@ class PT_API SerializationInfo
         void format(Formatter& formatter);
 
     public:
+        /** @brief Deserialization of flat child value types
+        */
+        template <typename T>
+        void getValue(T& value) const
+        {
+            convert( value, this->toString() );
+        }
+
+        /** @brief Serialization of flat data-types
+        */
+        template <typename T>
+        void setValue(const T& value)
+        {
+            Pt::String* str = initString();
+            if(str)
+                convert( *str, value );
+        }
+
         /** @internal DEPRECATED
         */
         template <typename T>
@@ -308,8 +319,7 @@ class PT_API SerializationInfo
         T getValue(const std::string& name) const
         {
             T value;
-            const SerializationInfo& info = this->getMember(name);
-            info.toValue(value);
+            this->getMember(name).toValue(value);
             return value;
         }
 
@@ -325,14 +335,8 @@ class PT_API SerializationInfo
         void getValue(const std::string& name, T& value) const
         { this->getMember(name) >>= value; }
 
-        SerializationInfo* sibling() const
-        { return _next; }
-
-        void setSibling(SerializationInfo* si)
-        { _next = si; }
-
     protected:
-        void load(void* fixme, FixupHandler fh, unsigned m) const;
+        void load(void* fixme, FixupHandler fh, unsigned mid) const;
 
         Pt::String* initString();
 

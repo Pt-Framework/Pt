@@ -79,7 +79,7 @@ class PT_API SerializationContext
 
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
 
-        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
+        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler, unsigned mid);
 
         virtual void fixup();
 

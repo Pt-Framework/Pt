@@ -71,7 +71,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
 
-        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler);
+        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler, unsigned m);
 
         virtual void fixup();
 
@@ -85,10 +85,11 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
                 , _type(0)
                 {}
 
-                Fixup(void* fixme, FixupHandler handler, const std::type_info* type)
+                Fixup(void* fixme, FixupHandler handler, const std::type_info* type, unsigned m = 0)
                 : _instance(fixme)
                 , _fixup(handler)
                 , _type(type)
+                , _m(m)
                 {}
 
                 ~Fixup()
@@ -108,10 +109,14 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
                 const std::type_info* type() const
                 { return _type; }
 
+                unsigned memberId() const
+                { return _m; }
+
             private:
                 void* _instance;
                 SerializationInfo::FixupHandler _fixup;
                 const std::type_info* _type;
+                unsigned _m;
         };
 
         std::map<std::string, Fixup> _targets;

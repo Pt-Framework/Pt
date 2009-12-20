@@ -85,7 +85,7 @@ void fixup(DateRef& fixme, const Pt::FixupInfo& fixup)
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
-    si.getMember("date").loadReference(dr);
+    si.getMember("date").loadReference(dr, 1);
 
     int n = 0;
     si.getMember("n") >>= n;
