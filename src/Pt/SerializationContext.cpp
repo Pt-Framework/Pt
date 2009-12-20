@@ -105,7 +105,7 @@ void SerializationContext::finishLoad()
 }
 
 
-void SerializationContext::rebind(const std::string& id, void* obj)
+void SerializationContext::rebindTarget(const std::string& id, void* obj)
 {
 }
 

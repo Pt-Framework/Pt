@@ -487,7 +487,7 @@ void SerializationInfo::rebind(void* obj) const
     if( ! _context )
         return;
 
-    _context->rebind(_id, obj);
+    _context->rebindTarget(_id, obj);
 
     // NOTE: all fixup addresses and child addresses are invalid too
 }

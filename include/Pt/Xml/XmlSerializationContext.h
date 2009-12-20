@@ -67,7 +67,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void finishLoad();
 
-        virtual void rebind(const std::string& id, void* obj);
+        virtual void rebindTarget(const std::string& id, void* obj);
 
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
 

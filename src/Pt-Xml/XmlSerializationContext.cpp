@@ -141,7 +141,7 @@ void XmlSerializationContext::finishLoad()
 }
 
 
-void XmlSerializationContext::rebind(const std::string& id, void* obj)
+void XmlSerializationContext::rebindTarget(const std::string& id, void* obj)
 {
     //std::cerr << "rebind " << id << " to " << obj << std::endl;
     if(obj)
