@@ -59,16 +59,28 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(int fd, bool isAsync)
+void IODeviceImpl::open(int fd, bool isAsync, bool closeOnExec)
 {
     _fd = fd;
 
-    if(isAsync)
+    if (isAsync)
     {
         int flags = fcntl(_fd, F_GETFL);
         flags |= O_NONBLOCK ;
-        fcntl(_fd, F_SETFL, flags);
+        int ret = fcntl(_fd, F_SETFL, flags);
+        if(-1 == ret)
+            throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
     }
+
+    if (closeOnExec)
+    {
+        int flags = fcntl(_fd, F_GETFD);
+        flags |= FD_CLOEXEC ;
+        int ret = fcntl(_fd, F_SETFD, flags);
+        if(-1 == ret)
+            throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
+    }
+
 }
 
 

@@ -179,7 +179,7 @@ const char* TcpSocketImpl::tryConnect()
                 return "socket";
         }
 
-        IODeviceImpl::open(fd, true);
+        IODeviceImpl::open(fd, true, false);
 
         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
@@ -289,7 +289,7 @@ void TcpSocketImpl::endConnect()
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server)
+void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
     socklen_t peeraddr_len = sizeof(_peeraddr);
 
@@ -299,7 +299,7 @@ void TcpSocketImpl::accept(const TcpServer& server)
       throw System::SystemError("accept");
 
 
-    System::IODeviceImpl::open(_fd, true);
+    System::IODeviceImpl::open(_fd, true, closeOnExec);
     //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;

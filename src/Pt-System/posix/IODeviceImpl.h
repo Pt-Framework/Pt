@@ -76,13 +76,13 @@ namespace System {
             std::size_t timeout() const
             { return _timeout; }
 
-            void open(int fd, bool isAsync);
+            void open(int fd, bool isAsync, bool closeOnExec);
 
             virtual void close();
 
             virtual size_t beginRead(char* buffer, size_t n, bool& eof);
 
-            virtual size_t endRead( bool& eof);
+            virtual size_t endRead(bool& eof);
 
             virtual size_t read( char* buffer, size_t count, bool& eof );
 

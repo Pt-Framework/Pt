@@ -151,10 +151,10 @@ bool TcpSocket::isConnected() const
 }
 
 
-void TcpSocket::accept(const TcpServer& server)
+void TcpSocket::accept(const TcpServer& server, bool closeOnExec)
 {
     this->close();
-    _impl->accept(server);
+    _impl->accept(server, closeOnExec);
     this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);

@@ -68,7 +68,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         std::size_t getTimeout() const
         { return timeout(); }
 
-        void accept(const TcpServer& server);
+        void accept(const TcpServer& server, bool closeOnExec = false);
 
         void connect(const AddrInfo& addrinfo);
 
