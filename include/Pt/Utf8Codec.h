@@ -33,6 +33,8 @@
 #include <Pt/Types.h>
 #include <Pt/Char.h>
 #include <Pt/TextCodec.h>
+#include <Pt/String.h>
+#include <string>
 
 namespace Pt {
 
@@ -88,6 +90,14 @@ namespace Pt {
             // inheritdoc
             int do_encoding() const throw()
             { return 0; }
+
+            static String decode(const char* data, unsigned size);
+            static String decode(const std::string& data)
+            { return decode(data.data(), data.size()); }
+
+            static std::string encode(const Char* data, unsigned size);
+            static std::string encode(const String& data)
+            { return encode(data.data(), data.size()); }
     };
 
 } //namespace Pt
