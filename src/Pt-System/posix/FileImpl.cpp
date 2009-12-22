@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "FileImpl.h"
+#include "Pt/System/FileDevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
 #include <string>
@@ -151,14 +152,32 @@ void FileImpl::remove(const std::string& path)
 
 void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
 {
-	int ret = ::rename(path.c_str(), to.c_str());	
+	int ret = ::rename(path.c_str(), to.c_str());
 	if( 0 != ret )
 	{
 		if( EXDEV == ret )
-			return false;
+		{
+			if( ! allowCopy )
+				throw AccessFailed(path, PT_SOURCEINFO);
+
+			FileDevice f1(path.c_str(), IODevice::Read);
+			FileDevice f2(to.c_str(), IODevice::Write);
+
+			char buffer[8192];
+			size_t n = 0;
+			do
+			{
+				if( ! f1.eof() )
+					n = f1.read( buffer + n, sizeof(buffer) - n );
+
+				f2.write( buffer, n );
+			} while(n > 0);
+
+			return;
+		}
+
 		throwFileErrno(path, PT_SOURCEINFO);
 	}
-	return true;
 }
 
 
