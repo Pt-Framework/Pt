@@ -118,7 +118,7 @@ class PT_SYSTEM_API File
             point to the moved file.
 			return \cTrue if file successfully moved, otherwise \cfalse
         */
-        bool move(const std::string& to);
+        void move(const std::string& to, bool allowCopy = true);
 
     public:
         //! @brief Creates a new file at the path given by \a path

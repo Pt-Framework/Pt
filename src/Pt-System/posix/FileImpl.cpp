@@ -149,7 +149,7 @@ void FileImpl::remove(const std::string& path)
 }
 
 
-bool FileImpl::move(const std::string& path, const std::string& to)
+void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
 {
 	int ret = ::rename(path.c_str(), to.c_str());	
 	if( 0 != ret )

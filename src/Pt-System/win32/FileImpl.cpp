@@ -177,37 +177,48 @@ void FileImpl::remove(const std::string& path)
 }
 
 
-bool FileImpl::move(const std::string& path, const std::string& to)
+void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
 {
     std::basic_string<TCHAR> tpath;
     win32::fromMultiByte(path, tpath);
-    
+
     std::basic_string<TCHAR> tto;
     win32::fromMultiByte(to, tto);
 
 #ifdef _WIN32_WCE
     if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-	{
-		DWORD error = GetLastError();
-		if (error == ERROR_NOT_SAME_DEVICE)
-		{
-			return false;
-		}
-		throwFileError(path, PT_SOURCEINFO);
-	}
+    {
+        DWORD error = GetLastError();
+        if(error == ERROR_NOT_SAME_DEVICE)
+        {
+            if( ! allowCopy )
+                throw AccessFailed(path, PT_SOURCEINFO); // better exception class
+
+            if( FALSE == CopyFile( tpath.c_str(), tto.c_str(), TRUE ) )
+                throwFileError(path, PT_SOURCEINFO);
+
+            FileImpl::remove(path);
+            return;
+        }
+
+        throwFileError(path, PT_SOURCEINFO);
+    }
 #else
-    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), 0) )
+    DWORD flags = 0;
+    if(allowCopy)
+        flags = MOVEFILE_COPY_ALLOWED;
+
+    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), flags) )
 	{
-		DWORD error = GetLastError();
-		if (error == ERROR_NOT_SAME_DEVICE)
-		{
-			return false;
-		}
-		throwFileError(path, PT_SOURCEINFO);
+        DWORD error = GetLastError();
+        if (error == ERROR_NOT_SAME_DEVICE)
+        {
+            throw AccessFailed(path, PT_SOURCEINFO); // better exception class
+        }
+
+        throwFileError(path, PT_SOURCEINFO);
 	}
 #endif
-
-	return true;
 }
 
 
@@ -221,7 +232,7 @@ void FileImpl::create(const std::string& path)
                            0, // do not share
                            NULL,
                            CREATE_NEW,
-                           FILE_ATTRIBUTE_NORMAL,                  
+                           FILE_ATTRIBUTE_NORMAL,
                            NULL);
 
     if (h == INVALID_HANDLE_VALUE)

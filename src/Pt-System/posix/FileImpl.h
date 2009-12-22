@@ -50,7 +50,7 @@ class FileImpl
 
         static void remove(const std::string& path);
 
-        static bool move(const std::string& path, const std::string& to);
+        static void move(const std::string& path, const std::string& to, bool allowCopy);
 
         static void create(const std::string& path);
 };

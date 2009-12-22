@@ -95,11 +95,10 @@ void File::remove()
 }
 
 
-bool File::move(const std::string& to)
+void File::move(const std::string& to, bool allowCopy)
 {
-    bool ret = FileImpl::move( _path, to );
+    FileImpl::move( _path, to, allowCopy );
     _path = to;
-	return ret;
 }
 
 
