@@ -199,7 +199,7 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
     }
 }
 
-void TcpSocketImpl::accept(const TcpServer& server)
+void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
 	_fd = WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
 
