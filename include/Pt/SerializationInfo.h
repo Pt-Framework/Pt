@@ -969,12 +969,12 @@ inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        si.getMember("first") >>= k;
+        it->getMember("first") >>= k;
 
         std::pair<K, V> elem( k, V() );
         pos = map.insert(elem);
         if( pos.second )
-            si.getMember("second") >>= Pt::load() >>= pos.first->second;
+            it->getMember("second") >>= Pt::load() >>= pos.first->second;
     }
 }
 
@@ -1003,12 +1003,12 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        si.getMember("first") >>= k;
+        it->getMember("first") >>= k;
 
         std::pair<K, V> elem( k, V() );
         mit = multimap.insert(elem);
 
-        si.getMember("second") >>= Pt::load() >>= mit->second;
+        it->getMember("second") >>= Pt::load() >>= mit->second;
     }
 }
 
