@@ -82,6 +82,9 @@ namespace Pt {
         template <typename T>
         friend T any_cast(const Any&);
 
+        template <typename T>
+        friend struct AnyCast;
+
         public:
             /** @internal */
             class Value
@@ -318,6 +321,56 @@ namespace Pt {
     };
 
 
+    template <typename T>
+    struct AnyCast
+    {
+        static T cast(const Any& any)
+        {
+            // NOTE:
+            // - the first if(...) may not work properly on Linux when loading libs,
+            //   so there is also a comparison of string names (second if(...))
+            // - but: the name() method necessary for string comparison does not
+            //   exist on WinCE, so the second if(...) is not compiled for WinCE
+            typedef typename TypeTraits<T>::Value ValueT;
+
+            if( any.type() == typeid(ValueT) )
+            {
+                const Any::BasicValue<ValueT>* value;
+                value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
+                return value->value();
+            }
+
+#ifndef _WIN32_WCE
+            else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
+            {
+                const Any::BasicValue<ValueT>* value;
+                value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
+                return value->value();
+            }
+#endif
+
+            throw std::bad_cast();
+        }
+    };
+
+    template <typename T>
+    struct AnyCast<T*>
+    {
+        static T* cast(const Any& any)
+        {
+            typedef typename TypeTraits<T>::Value ValueT;
+
+            if( any.type() == typeid(T*) )
+            {
+                const Any::BasicValue<T*>* value;
+                value = static_cast< const Any::BasicValue<T*>* >(any._value);
+                return value->value();
+            }
+
+            throw std::bad_cast();
+        }
+    };
+
     /** @brief Get contained value
 
         This function is used to get the contained value from an Any. It is
@@ -332,31 +385,7 @@ namespace Pt {
     template <typename T>
     inline T any_cast(const Any& any)
     {
-        // NOTE:
-        // - the first if(...) may not work properly on Linux when loading libs,
-        //   so there is also a comparison of string names (second if(...))
-        // - but: the name() method necessary for string comparison does not
-        //   exist on WinCE, so the second if(...) is not compiled for WinCE
-
-        typedef typename Pt::TypeTraits<T>::Value ValueT;
-
-        if( any.type() == typeid(ValueT) )
-        {
-            const Any::BasicValue<ValueT>* value;
-            value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
-            return value->value();
-        }
-
-#ifndef _WIN32_WCE
-        else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
-        {
-            const Any::BasicValue<ValueT>* value;
-            value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
-            return value->value();
-        }
-#endif
-
-        throw std::bad_cast();
+        return AnyCast<T>::cast(any);
     }
 
 
