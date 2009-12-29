@@ -34,6 +34,7 @@
 #include <cstring>
 #include <algorithm>
 #include <utility>
+#include <iostream>
 
 namespace Pt {
 
@@ -93,8 +94,10 @@ namespace Pt {
                     virtual ~Value() {}
                     virtual Value* clone() const = 0;
                     virtual const std::type_info& type() const = 0;
-                    virtual bool equal(const Value& value) const = 0;
-                    virtual bool lt(const Value& value) const = 0;
+                    // virtual bool equal(const Value& value) const = 0;
+                    // virtual bool lt(const Value& value) const = 0;
+                    virtual void* get() = 0;
+                    virtual const void* get() const = 0;
             };
 
             /** @internal */
@@ -118,31 +121,97 @@ namespace Pt {
                     virtual Any::Value* clone() const
                     { return new BasicValue(_value); }
 
-                    virtual bool equal(const Value& value) const
-                    {
-                        try {
-                            const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
-                            return (bv._value == this->_value);
-                        }
-                        catch(...) {}
+                    // virtual bool equal(const Value& value) const
+                    // {
+                    //     // try {
+                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
+                    //     //     return (bv._value == this->_value);
+                    //     // }
+                    //     // catch(...) {}
 
-                        return false;
-                    }
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other == _value;
+                    //     }
 
-                    virtual bool lt(const Value& value) const
-                    {
-                        try {
-                            const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
-                            return (bv._value < this->_value);
-                        }
-                        catch(...) {}
+                    //     return false;
+                    // }
 
-                        bool x = !( typeid(T).before( value.type() ) );
-                        return !x;
-                    }
+                    // virtual bool lt(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other < _value;
+                    //     }
+
+                    //     // try {
+                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
+                    //     //     return (bv._value < this->_value);
+                    //     // }
+                    //     // catch(...) {}
+
+                    //     bool x = !( typeid(T).before( value.type() ) );
+                    //     return !x;
+                    // }
+
+                    virtual void* get()
+                    { return &_value; }
+
+                    virtual const void* get() const
+                    { return &_value; }
 
                 private:
                     T _value;
+            };
+
+            /** @internal */
+            template <typename T>
+            class BasicRefValue : public Value
+            {
+                public:
+                    BasicRefValue(T* value)
+                    : _value(value)
+                    { }
+
+                    virtual const std::type_info& type() const
+                    { return typeid(T); }
+
+                    virtual Any::Value* clone() const
+                    { return new BasicRefValue(_value); }
+
+                    // virtual bool equal(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other == *_value;
+                    //     }
+
+                    //     return false;
+                    // }
+
+                    // virtual bool lt(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other < *_value;
+                    //     }
+
+                    //     bool x = !( typeid(T).before( value.type() ) );
+                    //     return !x;
+                    // }
+
+                    virtual void* get()
+                    { return (void*) _value; }
+
+                    virtual const void* get() const
+                    { return _value; }
+
+                private:
+                    T* _value;
             };
 
         public:
@@ -159,7 +228,16 @@ namespace Pt {
             template <typename T>
             Any(const T& type)
             : _value(0)
-            { (*this) = type; }
+            {
+                _value = new BasicValue<T>(type);
+            }
+
+            template <typename T>
+            explicit Any(T* type)
+            : _value(0)
+            {
+                 _value = new BasicRefValue<T>(type);
+            }
 
             /** @brief Default constructor
 
@@ -254,6 +332,15 @@ namespace Pt {
                 return *this;
             }
 
+            template <typename T>
+            Any& operator=(T* rhs)
+            {
+                Any::Value* tmp = new BasicRefValue<T>(rhs);
+                delete _value;
+                _value = tmp;
+                return *this;
+            }
+
             /** @brief Assign value of other Any
 
                 Assignes the value of another Any by copying the value of the
@@ -272,14 +359,14 @@ namespace Pt {
 
                 @return True if equal
             */
-            template <typename T>
-            bool operator==(const T& value) const
-            {
-                if(_value == 0)
-                    return false;
+            // template <typename T>
+            // bool operator==(const T& value) const
+            // {
+            //     if(_value == 0)
+            //         return false;
 
-                return _value->equal( BasicValue<T>(value) );
-            }
+            //     return _value->equal( BasicValue<T>(value) );
+            // }
 
             /** @brief Check if equal
 
@@ -288,7 +375,7 @@ namespace Pt {
 
                 @return True if equal
             */
-            bool operator==(const Any& a) const;
+            //bool operator==(const Any& a) const;
 
             /** @brief Check if inequal
 
@@ -297,7 +384,7 @@ namespace Pt {
 
                 @return True if different
             */
-            bool operator!=(const Any& a) const;
+            //bool operator!=(const Any& a) const;
 
             /** @brief Check if less
 
@@ -307,13 +394,29 @@ namespace Pt {
 
                 @return True if less
             */
-            bool operator<(const Any& a) const;
+            //bool operator<(const Any& a) const;
 
             const Any::Value* value() const
             { return _value; }
 
             Any::Value* value()
             { return _value; }
+
+            void* get()
+            {
+                if(_value)
+                    return _value->get();
+
+                return 0;
+            }
+
+            const void* get() const
+            {
+                if(_value)
+                    return _value->get();
+
+                return 0;
+            }
 
         private:
             /** @internal */
@@ -335,17 +438,17 @@ namespace Pt {
 
             if( any.type() == typeid(ValueT) )
             {
-                const Any::BasicValue<ValueT>* value;
-                value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
-                return value->value();
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return *vtp;
             }
 
 #ifndef _WIN32_WCE
             else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
             {
-                const Any::BasicValue<ValueT>* value;
-                value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
-                return value->value();
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return *vtp;
             }
 #endif
 
@@ -358,14 +461,28 @@ namespace Pt {
     {
         static T* cast(const Any& any)
         {
+            // NOTE:
+            // - the first if(...) may not work properly on Linux when loading libs,
+            //   so there is also a comparison of string names (second if(...))
+            // - but: the name() method necessary for string comparison does not
+            //   exist on WinCE, so the second if(...) is not compiled for WinCE
             typedef typename TypeTraits<T>::Value ValueT;
 
-            if( any.type() == typeid(T*) )
+            if( any.type() == typeid(ValueT) )
             {
-                const Any::BasicValue<T*>* value;
-                value = static_cast< const Any::BasicValue<T*>* >(any._value);
-                return value->value();
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return vtp;
             }
+
+#ifndef _WIN32_WCE
+            else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
+            {
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return vtp;
+            }
+#endif
 
             throw std::bad_cast();
         }
@@ -420,36 +537,36 @@ inline Any& Any::operator=(const Any& rhs)
 }
 
 
-inline bool Any::operator==(const Any& a) const
-{
-    if(_value && a._value)
-    {
-        return _value->equal( *(a._value) );
-    }
+// inline bool Any::operator==(const Any& a) const
+// {
+//     if(_value && a._value)
+//     {
+//         return _value->equal( *(a._value) );
+//     }
 
-    // if one or both of the Anys is not initialised
-    // they are considered equal if both have NULL values.
-    return _value == a._value;
-}
-
-
-inline bool Any::operator!=(const Any& a) const
-{
-    return !( this->operator==(a) );
-}
+//     // if one or both of the Anys is not initialised
+//     // they are considered equal if both have NULL values.
+//     return _value == a._value;
+// }
 
 
-inline bool Any::operator<(const Any& a) const
-{
-    if(_value && a._value)
-    {
-        return _value->lt( *(a._value) );
-    }
+// inline bool Any::operator!=(const Any& a) const
+// {
+//     return !( this->operator==(a) );
+// }
 
-    // if one of the Anys is not initialised the
-    //one having a NULL valueis considered less.
-    return _value < a._value;
-}
+
+// inline bool Any::operator<(const Any& a) const
+// {
+//     if(_value && a._value)
+//     {
+//         return _value->lt( *(a._value) );
+//     }
+
+//     // if one of the Anys is not initialised the
+//     //one having a NULL valueis considered less.
+//     return _value < a._value;
+// }
 
 } // namespace Pt
 

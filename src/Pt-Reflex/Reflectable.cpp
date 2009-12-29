@@ -56,12 +56,12 @@ NoSuchMethod::~NoSuchMethod() throw()
 
 
 typedef std::vector<PropertyInfo*> Properties;
-typedef std::vector<CallableInfo*> Methods;
+//typedef std::vector<CallableInfo*> Methods; 
 
 
 struct ReflectableData
 {
-    Methods methods;
+    //Methods methods;
     Properties properties;
     std::string objectName;
 };
@@ -97,11 +97,11 @@ Reflectable::~Reflectable()
         delete *iter;
     }
 
-    Methods::iterator it;
-    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-    {
-        delete *it;
-    }
+    // Methods::iterator it;
+    // for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+    // {
+    //     delete *it;
+    // }
 
     delete _data;
 }
@@ -145,17 +145,17 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
-void Reflectable::invoke(const std::string& name, const Any* args, size_t argCount)
-{
-    CallableInfo& ci = this->methodInfo(name);
-    ci.call(args, argCount);
-}
+// void Reflectable::invoke(const std::string& name, const Any* args, size_t argCount)
+// {
+//     CallableInfo& ci = this->methodInfo(name);
+//     ci.call(args, argCount);
+// }
 
 
-Pt::Any Reflectable::call(const std::string& name, const Any* args, size_t argCount)
-{
-    return this->methodInfo(name).call(args, argCount);
-}
+// Pt::Any Reflectable::call(const std::string& name, const Any* args, size_t argCount)
+// {
+//     return this->methodInfo(name).call(args, argCount);
+// }
 
 
 PropertyInfo& Reflectable::propertyInfo(const std::string& name)
@@ -171,30 +171,30 @@ PropertyInfo& Reflectable::propertyInfo(const std::string& name)
 }
 
 
-const CallableInfo& Reflectable::methodInfo(const std::string& name) const
-{
-    Methods::const_iterator it;
-    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-    {
-        if( name == (*it)->name() )
-            return **it;
-    }
+// const CallableInfo& Reflectable::methodInfo(const std::string& name) const
+// {
+//     Methods::const_iterator it;
+//     for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+//     {
+//         if( name == (*it)->name() )
+//             return **it;
+//     }
 
-    throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
-}
+//     throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
+// }
 
 
-CallableInfo& Reflectable::methodInfo(const std::string& name)
-{
-    Methods::iterator it;
-    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-    {
-        if( name == (*it)->name() )
-            return **it;
-    }
+// CallableInfo& Reflectable::methodInfo(const std::string& name)
+// {
+//     Methods::iterator it;
+//     for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+//     {
+//         if( name == (*it)->name() )
+//             return **it;
+//     }
 
-    throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
-}
+//     throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
+// }
 
 
 Reflectable::PropertyIterator Reflectable::propertiesBegin()
@@ -233,46 +233,46 @@ Reflectable::ConstPropertyIterator Reflectable::propertiesEnd() const
 }
 
 
-Reflectable::MethodIterator Reflectable::methodsBegin()
-{
-    if(_data->methods.size() == 0)
-        return 0;
+// Reflectable::MethodIterator Reflectable::methodsBegin()
+// {
+//     if(_data->methods.size() == 0)
+//         return 0;
 
-    return &(_data->methods[0]);
-}
-
-
-Reflectable::MethodIterator Reflectable::methodsEnd()
-{
-    if(_data->methods.size() == 0)
-        return 0;
-
-    return &(_data->methods[0]) + _data->methods.size();
-}
+//     return &(_data->methods[0]);
+// }
 
 
-Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
-{
-    if(_data->methods.size() == 0)
-        return 0;
+// Reflectable::MethodIterator Reflectable::methodsEnd()
+// {
+//     if(_data->methods.size() == 0)
+//         return 0;
 
-    return &(_data->methods[0]);
-}
-
-
-Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
-{
-    if(_data->methods.size() == 0)
-        return 0;
-
-    return &(_data->methods[0]) + _data->methods.size();
-}
+//     return &(_data->methods[0]) + _data->methods.size();
+// }
 
 
-void Reflectable::registerCallableInfo(CallableInfo* ci)
-{
-    _data->methods.push_back( ci );
-}
+// Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
+// {
+//     if(_data->methods.size() == 0)
+//         return 0;
+
+//     return &(_data->methods[0]);
+// }
+
+
+// Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
+// {
+//     if(_data->methods.size() == 0)
+//         return 0;
+
+//     return &(_data->methods[0]) + _data->methods.size();
+// }
+
+
+// void Reflectable::registerCallableInfo(CallableInfo* ci)
+// {
+//     _data->methods.push_back( ci );
+// }
 
 
 void Reflectable::registerPropertyInfo(PropertyInfo* pi)

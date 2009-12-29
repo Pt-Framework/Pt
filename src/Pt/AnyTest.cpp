@@ -41,24 +41,81 @@ class AnyTest : public Pt::Unit::TestSuite
         AnyTest()
         : Pt::Unit::TestSuite("AnyTest")
         {
-            this->registerMethod( "InitTest", *this, &AnyTest::InitTest );
+            this->registerMethod( "Empty", *this, &AnyTest::Empty );
             this->registerMethod( "BoolTest", *this, &AnyTest::BoolTest );
             this->registerMethod( "CharTest", *this, &AnyTest::CharTest );
             this->registerMethod( "IntTest", *this, &AnyTest::IntTest );
             this->registerMethod( "FloatTest", *this, &AnyTest::FloatTest );
             this->registerMethod( "DoubleTest", *this, &AnyTest::DoubleTest );
             this->registerMethod( "StdStringTest", *this, &AnyTest::StdStringTest );
+            this->registerMethod( "Reference", *this, &AnyTest::Reference );
+            this->registerMethod( "ConstReference", *this, &AnyTest::ConstReference );
+            this->registerMethod( "Pointer", *this, &AnyTest::Pointer );
+            this->registerMethod( "ConstPointer", *this, &AnyTest::Pointer );
+            //this->registerMethod( "Equals", *this, &AnyTest::Equals );
         }
 
     protected:
-        void InitTest()
+        void Empty()
         {
             Pt::Any a;
             PT_UNIT_ASSERT( a.empty() );
 
             Pt::Any b(a);
-            PT_UNIT_ASSERT( a == b );
+            PT_UNIT_ASSERT( a.get() == 0 );
+            PT_UNIT_ASSERT( b.get() == 0 );
         }
+
+        void Reference()
+        {
+            int n = 5;
+            Pt::Any a(&n);
+
+            int& i = Pt::any_cast<int&>(a);
+            PT_UNIT_ASSERT( &i == &n );
+        }
+
+        void ConstReference()
+        {
+            int n = 5;
+            const int& ref = n;
+            Pt::Any a(&ref);
+
+            const int& i = Pt::any_cast<const int&>(a);
+            PT_UNIT_ASSERT( &i == &n );
+        }
+
+        void Pointer()
+        {
+            int n = 5;
+            Pt::Any a(&n);
+
+            int* p = Pt::any_cast<int*>(a);
+            PT_UNIT_ASSERT( p == &n );
+        }
+
+        void ConstPointer()
+        {
+            int n = 5;
+            const int* cp = &n;
+            Pt::Any a(cp);
+
+            const int* p = Pt::any_cast<const int*>(a);
+            PT_UNIT_ASSERT( p == cp );
+        }
+
+        // void Equals()
+        // {
+        //     int n = 5;
+        //     Pt::Any a = Pt::Any::makeRef(n);
+
+        //     Pt::Any b(5);
+
+        //     PT_UNIT_ASSERT( b == a );
+        //     PT_UNIT_ASSERT( a == b );
+        //     PT_UNIT_ASSERT( a == a );
+        //     PT_UNIT_ASSERT( b == b );
+        // }
 
         void BoolTest()
         {

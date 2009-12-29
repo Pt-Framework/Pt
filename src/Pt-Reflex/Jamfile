@@ -4,6 +4,7 @@ SubDirC++Flags [ FDefines PT_REFLEX_API_EXPORT ] ;
 
 SharedLibrary Pt-Reflex : PropertyInfo.cpp
                           Reflectable.cpp
+                          Type.cpp
                           ;
 SharedLibrary_LinkSharedLibraries Pt-Reflex : Pt ;
 SharedLibrary_MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;

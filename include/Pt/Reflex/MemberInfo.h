@@ -29,7 +29,6 @@
 #ifndef Pt_Reflex_MemberInfo_h
 #define Pt_Reflex_MemberInfo_h
 
-
 namespace Pt {
 
 namespace Reflex {

@@ -29,7 +29,8 @@
 #undef PT_REFLEX_API_EXPORT
 
 #include "Pt/Reflex/Reflectable.h"
-#include "Pt/Reflex/SignalInfo.h"
+//#include "Pt/Reflex/SignalInfo.h"
+#include "Pt/Reflex/Type.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -162,16 +163,62 @@ class MyClass
         {}
 
         int number() const
-        { return _number; }
+        {
+            std::cerr << "MyClass::number: " << _number << std::endl;
+            return (int)_number;
+        }
 
         void setNumber(int n)
         {
-            std::cerr << "Setting number: " << n << std::endl;
+            std::cerr << "MyClass::setNumber: " << n << std::endl;
             _number = n;
         }
 
+        long& method0(long n)
+        {
+            std::cerr << "MyClass::method 0 called." << std::endl;
+            _number = n;
+            return _number;
+        }
+
+        bool method1(long n) const
+        {
+            std::cerr << "MyClass::method 1 called." << std::endl;
+            return true;
+        }
+
+        void* numaddr()
+        { return &_number; }
+
     private:
-        int _number;
+        long _number;
+};
+
+
+class MyClassType : public Pt::Reflex::Type
+{
+    public:
+        MyClassType(Context& context)
+        : Type( typeid(MyClass), context )
+        { }
+
+        virtual void registerMethods()
+        {
+            this->registerProxy("method0", &MyClassType::method0);
+            this->registerProxy("method1", &MyClassType::method1);
+
+            this->registerProperty("number", &MyClass::number, &MyClass::setNumber);
+        }
+
+        static long& method0(MyClass& self, long n)
+        {
+            return self.method0(n);
+        }
+
+        static bool method1(const MyClass& self, long n)
+        {
+            return self.method1(n);
+        }
 };
 
 
@@ -186,7 +233,6 @@ class ClassTraits<MyClass>
 };
 
 
-
 class TestReflectable : public Pt::Reflex::Reflectable
 {
     public:
@@ -196,10 +242,10 @@ class TestReflectable : public Pt::Reflex::Reflectable
             this->registerProperty("number", *this, _number, &TestReflectable::setNumber);
             this->registerReadProperty("count", *this, _number );
 
-            this->registerMethod("method0", *this, &TestReflectable::method0);
-            this->registerMethod("method1", *this, &TestReflectable::method1);
-            this->registerMethod("method2", *this, &TestReflectable::method2);
-            this->registerMethod("method3", *this, &TestReflectable::method3);
+            // this->registerProxy("method0", *this, &TestReflectable::method0);
+            // this->registerProxy("method1", *this, &TestReflectable::method1);
+            // this->registerProxy("method2", *this, &TestReflectable::method2);
+            // this->registerProxy("method3", *this, &TestReflectable::method3);
         }
 
         int method0()
@@ -234,6 +280,8 @@ class ReflectableTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite( "ReflectableTest" )
         {
             Pt::Unit::TestSuite::registerMethod( "Property", *this, &ReflectableTest::Property );
+            Pt::Unit::TestSuite::registerMethod( "MethodCall", *this, &ReflectableTest::MethodCall );
+            Pt::Unit::TestSuite::registerMethod( "PropertyInfo", *this, &ReflectableTest::PropertyInfo );
             /*Pt::Unit::TestSuite::registerMethod( "SerializeProperty", *this, &ReflectableTest::SerializeProperty );
             Pt::Unit::TestSuite::registerMethod( "PropertyIterator", *this, &ReflectableTest::PropertyIterator );
             Pt::Unit::TestSuite::registerMethod( "ConstPropertyIterator", *this, &ReflectableTest::ConstPropertyIterator );
@@ -243,6 +291,46 @@ class ReflectableTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void MethodCall()
+        {
+            Pt::Reflex::Context context;
+            MyClassType mctype(context);
+
+            context.registerMethods();
+
+            MyClass mc;
+
+            Pt::Any a1( long(5) );
+            mctype.method("method1").call(&mc, &a1, 1);
+
+            Pt::Reflex::CallableInfo& method0 = mctype.method("method0");
+            Pt::Any r = method0.call(&mc, &a1, 1);
+            std::cerr << "r is: "<< Pt::any_cast<long>(r) << std::endl;
+            std::cerr << "numaddr is: "<< mc.numaddr() << std::endl;
+            std::cerr << "r  addr is: "<< r.get() << std::endl;
+
+            Pt::Any a2( long(4) );
+            Pt::Reflex::Type& rtype = method0.retType();
+            rtype.method("=").call(r.get(), &a2, 1);
+            std::cerr << "r is: "<< Pt::any_cast<long>(r) << std::endl;
+        }
+
+        void PropertyInfo()
+        {
+            Pt::Reflex::Context context;
+            MyClassType mctype(context);
+            context.registerMethods();
+
+            MyClass mc;
+
+            Pt::Reflex::PropInfo& pi = mctype.property("number");
+            pi.set( &mc, Pt::Any( int(42) ) );
+
+            Pt::Any value = pi.get(&mc);
+
+            std::cerr << "Number: " << Pt::any_cast<int>(value) << std::endl;
+        }
+
         void Property()
         {
             TestReflectable reflectable;
@@ -262,14 +350,14 @@ class ReflectableTest : public Pt::Unit::TestSuite
             Pt::Any number = rd->property("number");
             std::cerr << "Number is: " <<  Pt::any_cast<int>(number) << std::endl;
 
-            Pt::Signal<> sig;
-            Pt::Reflex::SignalInfo si(sig);
+            // Pt::Signal<> sig;
+            // Pt::Reflex::SignalInfo si(sig);
 
-            Pt::Reflex::Reflectable* rm = meta.create();
-            CallableInfo& ci = rm->methodInfo("method0");
-            si.connect(ci);
+            // Pt::Reflex::Reflectable* rm = meta.create();
+            // CallableInfo& ci = rm->methodInfo("method0");
+            // si.connect(ci);
 
-            si.send(0,0);
+            // si.send(0,0);
             std::cerr << "\n######################"<< std::endl;
 
             /*
@@ -294,8 +382,8 @@ class ReflectableTest : public Pt::Unit::TestSuite
 
             si >>= static_cast<Pt::Reflex::Reflectable&>(reflectable2);
 
-            PT_UNIT_ASSERT( reflectable2.property("count") == 5 );
-            PT_UNIT_ASSERT( reflectable2.property("number") == 5 );
+            PT_UNIT_ASSERT( Pt::any_cast<int>(reflectable2.property("count")) == 5 );
+            PT_UNIT_ASSERT( Pt::any_cast<int>(reflectable2.property("number")) == 5 );
         }
 
         void PropertyIterator()

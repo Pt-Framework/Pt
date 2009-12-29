@@ -30,7 +30,7 @@
 #define Pt_Reflex_Reflectable_h
 
 #include <Pt/Reflex/Api.h>
-#include <Pt/Reflex/MethodInfo.h>
+//#include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/PropertyInfo.h>
 #include <Pt/Deserializer.h>
 #include <Pt/SerializationInfo.h>
@@ -67,9 +67,9 @@ class PT_REFLEX_API NoSuchMethod : public std::logic_error
 class PT_REFLEX_API Reflectable
 {
     public:
-        class MethodIterator;
+        // class MethodIterator;
 
-        class ConstMethodIterator;
+        // class ConstMethodIterator;
 
         class PropertyIterator;
 
@@ -90,15 +90,15 @@ class PT_REFLEX_API Reflectable
 
         virtual void setProperty(const std::string& name, const Pt::Any& value);
 
-        void invoke(const std::string& name, const Any* args, size_t argCount);
+        // void invoke(const std::string& name, const Any* args, size_t argCount);
 
-        Pt::Any call(const std::string& name, const Any* args, size_t argCount);
+        // Pt::Any call(const std::string& name, const Any* args, size_t argCount);
 
         PropertyInfo& propertyInfo(const std::string& name);
 
-        CallableInfo& methodInfo(const std::string& name);
+        // CallableInfo& methodInfo(const std::string& name);
 
-        const CallableInfo& methodInfo(const std::string& name) const;
+        // const CallableInfo& methodInfo(const std::string& name) const;
 
         PropertyIterator propertiesBegin();
 
@@ -108,13 +108,13 @@ class PT_REFLEX_API Reflectable
 
         ConstPropertyIterator propertiesEnd() const;
 
-        MethodIterator methodsBegin();
+        // MethodIterator methodsBegin();
 
-        MethodIterator methodsEnd();
+        // MethodIterator methodsEnd();
 
-        ConstMethodIterator methodsBegin() const;
+        // ConstMethodIterator methodsBegin() const;
 
-        ConstMethodIterator methodsEnd() const;
+        // ConstMethodIterator methodsEnd() const;
 
         template <typename R, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent& parent, R (Object::*getter)() const)
@@ -152,64 +152,64 @@ class PT_REFLEX_API Reflectable
             this->registerPropertyInfo( new ReadWriteProperty<T, A>(name, parent, value, setter) );
         }
 
-        template <typename R, typename ParentT>
-        void registerMethod(const std::string& name, ParentT& parent, R (ParentT::*memFunc)() )
-        {
-            CallableInfo* cb = new MethodInfo<R, ParentT>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <typename R, typename ParentT>
+        // void registerMethod(const std::string& name, ParentT& parent, R (ParentT::*memFunc)() )
+        // {
+        //     CallableInfo* cb = new MethodInfo<R, ParentT>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) const )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) const )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1, typename A2>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1, typename A2>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1, typename A2, typename A3>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1, typename A2, typename A3>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1, typename A2, typename A3, typename A4>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1, typename A2, typename A3, typename A4>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        template <class ParentT, typename A1, typename A2, typename A3, typename A4,
-                                 typename A5, typename A6, typename A7, typename A8>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5, A6, A7, A8) )
-        {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5, A6, A7, A8>(name, parent, memFunc);
-            this->registerCallableInfo(cb);
-        }
+        // template <class ParentT, typename A1, typename A2, typename A3, typename A4,
+        //                          typename A5, typename A6, typename A7, typename A8>
+        // void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5, A6, A7, A8) )
+        // {
+        //     CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5, A6, A7, A8>(name, parent, memFunc);
+        //     this->registerCallableInfo(cb);
+        // }
 
-        void registerCallableInfo(CallableInfo* ci);
+        // void registerCallableInfo(CallableInfo* ci);
 
         void deserialize(const SerializationInfo& si);
 
@@ -233,66 +233,66 @@ PT_REFLEX_API void operator >>= (const SerializationInfo& si, Reflectable& r);
 PT_REFLEX_API void operator <<= (SerializationInfo& si, const Reflectable& r);
 
 
-class Reflectable::MethodIterator
-{
-    public:
-        MethodIterator()
-        : _ci(0)
-        {}
+// class Reflectable::MethodIterator
+// {
+//     public:
+//         MethodIterator()
+//         : _ci(0)
+//         {}
 
-        MethodIterator(CallableInfo** ci)
-        : _ci(ci)
-        {}
+//         MethodIterator(CallableInfo** ci)
+//         : _ci(ci)
+//         {}
 
-        MethodIterator& operator++()
-        {
-            _ci += 1;
-            return *this;
-        }
+//         MethodIterator& operator++()
+//         {
+//             _ci += 1;
+//             return *this;
+//         }
 
-        CallableInfo& operator*()
-        { return **_ci; }
+//         CallableInfo& operator*()
+//         { return **_ci; }
 
-        CallableInfo* operator->()
-        { return *_ci; }
+//         CallableInfo* operator->()
+//         { return *_ci; }
 
-        bool operator!=(const MethodIterator& other) const
-        { return _ci != other._ci; }
+//         bool operator!=(const MethodIterator& other) const
+//         { return _ci != other._ci; }
 
-    private:
-        CallableInfo** _ci;
-};
+//     private:
+//         CallableInfo** _ci;
+// };
 
 
-class Reflectable::ConstMethodIterator
-{
-    public:
-        ConstMethodIterator()
-        : _ci(0)
-        {}
+// class Reflectable::ConstMethodIterator
+// {
+//     public:
+//         ConstMethodIterator()
+//         : _ci(0)
+//         {}
 
-        ConstMethodIterator(CallableInfo* const* ci)
-        : _ci(ci)
-        {}
+//         ConstMethodIterator(CallableInfo* const* ci)
+//         : _ci(ci)
+//         {}
 
-        ConstMethodIterator& operator++()
-        {
-            ++_ci;
-            return *this;
-        }
+//         ConstMethodIterator& operator++()
+//         {
+//             ++_ci;
+//             return *this;
+//         }
 
-        const CallableInfo& operator*() const
-        { return **_ci; }
+//         const CallableInfo& operator*() const
+//         { return **_ci; }
 
-        const CallableInfo* operator->() const
-        { return *_ci; }
+//         const CallableInfo* operator->() const
+//         { return *_ci; }
 
-        bool operator!=(const ConstMethodIterator& other) const
-        { return _ci != other._ci; }
+//         bool operator!=(const ConstMethodIterator& other) const
+//         { return _ci != other._ci; }
 
-    private:
-        CallableInfo* const* _ci;
-};
+//     private:
+//         CallableInfo* const* _ci;
+// };
 
 
 class Reflectable::PropertyIterator
