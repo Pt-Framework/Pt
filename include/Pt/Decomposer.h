@@ -83,7 +83,7 @@ class Decomposer : public IDecomposer
             if( _si.context() && _si.context()->referencingEnabled() )
             {
                 _si.setContextual();
-                _si <<= Pt::save() <<= type;
+                _si << Pt::save() <<= type;
 
                 _si.clear();
                 _si.setName(name);
@@ -107,13 +107,13 @@ class Decomposer : public IDecomposer
         virtual void format(Formatter& formatter)
         {
             //std::cerr << "format " << _type << std::endl;
-            _si <<= Pt::save() <<= *_type;
+            _si << Pt::save() <<= *_type;
             _si.format(formatter);
         }
 
         virtual void beginFormat(Formatter& formatter)
         {
-            _si <<= Pt::save() <<= *_type;
+            _si << Pt::save() <<= *_type;
             _current = &_si;
             _current->beginFormat(formatter);
             _it = _current->begin();

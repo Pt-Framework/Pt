@@ -74,7 +74,7 @@ class DateRef
 };
 
 
-void fixup(DateRef& fixme, const Pt::FixupInfo& fixup)
+void fixup(const Pt::FixupInfo& fixup, DateRef& fixme)
 {
     fixme.setDate(0);
 
@@ -106,14 +106,13 @@ namespace Pt {
 
 inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date>& dset)
 {
-    std::cerr << "OPERATOR >>= multiset<Date>" << std::endl;
     std::multiset<Pt::Date>::iterator pos;
 
     dset.clear();
     for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         Pt::Date tmp;
-        *it >>= Pt::load() >>= tmp;
+        *it >> Pt::load() >>= tmp;
         pos = dset.insert(tmp);
 
         Pt::Date& dt = const_cast<Pt::Date&>(*pos);
@@ -457,7 +456,7 @@ void operator >>=(const Pt::SerializationInfo& si, Object& rt)
         Pt::SmartPtr<Object> ptr(obj);
         rt.setProperty(it->name().c_str(), Pt::Any(ptr));
 
-        *it >>= Pt::load() >>= ptr; // not ptr, but property !!
+        *it >> Pt::load() >>= ptr; // not ptr, but property !!
     }
 }
 

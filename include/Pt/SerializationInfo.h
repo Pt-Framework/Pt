@@ -450,7 +450,9 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 }
 
 
-struct save
+
+
+struct id
 {};
 
 
@@ -481,34 +483,27 @@ class SaveInfo
 };
 
 
-template <typename T>
-struct Save
+inline id save()
 {
-    explicit Save(const T& t)
-    : type(&t)
-    {}
-
-    const T* type;
-};
+    return id();
+}
 
 
-template <typename T>
-inline Save<T> operator<<= (const save&, const T& type)
+inline SaveInfo operator <<(SerializationInfo& si, const id&)
 {
-    return Save<T>(type);
+    return SaveInfo(si);
 }
 
 
 template <typename T>
-inline void operator<<= (SerializationInfo& si, const Save<T>& sv)
+inline void operator <<=(SaveInfo info, const T& type)
 {
-    SaveInfo info(si);
-    info <<= *(sv.type);
+    save( info, type );
 }
 
 
 template <typename T>
-inline void operator<<= (SaveInfo& si, const T& type)
+inline void save(SaveInfo& si, const T& type)
 {
     if( ! si.save(type) )
     {
@@ -517,8 +512,6 @@ inline void operator<<= (SaveInfo& si, const T& type)
 }
 
 
-struct load
-{};
 
 
 class LoadInfo
@@ -546,34 +539,27 @@ class LoadInfo
 };
 
 
-template <typename T>
-struct Load
+inline id load()
 {
-    explicit Load(T& t)
-    : type(&t)
-    {}
-
-    T* type;
-};
-
-
-template <typename T>
-inline Load<T> operator >>= (const load&, T& type)
-{
-    return Load<T>(type);
+    return id();
 }
 
 
-template <typename T>
-inline void operator >>=(const SerializationInfo& si, const Load<T>& ld)
+inline LoadInfo operator >>(const SerializationInfo& si, const id&)
 {
-    LoadInfo info(si);
-    info >>= *(ld.type);
+    return LoadInfo(si);
 }
 
 
 template <typename T>
 inline void operator >>=(const LoadInfo& li, T& type)
+{
+    load(li, type);
+}
+
+
+template <typename T>
+inline void load(const LoadInfo& li, T& type)
 {
     li.load(type);
 }
@@ -787,7 +773,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back(elem);
-        *it >>= Pt::load() >>= vec.back();
+        *it >> Pt::load() >>= vec.back();
     }
 }
 
@@ -799,7 +785,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("array");
@@ -814,7 +800,7 @@ inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         list.resize( list.size() + 1 );
-        *it >>= Pt::load() >>= list.back();
+        *it >> Pt::load() >>= list.back();
     }
 }
 
@@ -826,7 +812,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
 
     for(it = list.begin(); it != list.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("list");
@@ -842,7 +828,7 @@ inline void operator >>=(const SerializationInfo& si, std::deque<T, A>& deque)
     {
         // NOTE: push_back does not invalidate references to elements
         deque.push_back( T() );
-        *it >>= Pt::load() >>= deque.back();
+        *it >> Pt::load() >>= deque.back();
     }
 }
 
@@ -854,7 +840,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
 
     for(it = deque.begin(); it != deque.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("deque");
@@ -898,7 +884,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
 
     for(it = set.begin(); it != set.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("set");
@@ -935,7 +921,7 @@ inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& mu
 
     for(it = multiset.begin(); it != multiset.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("multiset");
@@ -974,7 +960,7 @@ inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
         std::pair<K, V> elem( k, V() );
         pos = map.insert(elem);
         if( pos.second )
-            it->getMember("second") >>= Pt::load() >>= pos.first->second;
+            it->getMember("second") >> Pt::load() >>= pos.first->second;
     }
 }
 
@@ -986,7 +972,7 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
 
     for(it = map.begin(); it != map.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("map");
@@ -1008,7 +994,7 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
         std::pair<K, V> elem( k, V() );
         mit = multimap.insert(elem);
 
-        it->getMember("second") >>= Pt::load() >>= mit->second;
+        it->getMember("second") >> Pt::load() >>= mit->second;
     }
 }
 
@@ -1020,7 +1006,7 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 
     for(it = multimap.begin(); it != multimap.end(); ++it)
     {
-        si.addElement() <<= Pt::save() <<= *it;
+        si.addElement() << Pt::save() <<= *it;
     }
 
     si.setTypeName("multimap");

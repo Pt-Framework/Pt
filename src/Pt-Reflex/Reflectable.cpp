@@ -324,7 +324,7 @@ void operator >>= (const SerializationInfo& si, Reflectable& r)
             continue;
 
         std::cerr << "DESERIALIZE " << it->name() << std::endl;
-        *pinfo >>= Pt::load() >>= *it;
+        *pinfo >> Pt::load() >>= *it;
     }
     std::cerr << "DESERIALIZE REFLECTABLE END" << std::endl;
 }

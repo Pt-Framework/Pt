@@ -180,7 +180,7 @@ class Composer : public IComposer
         {
             if( ! _current->parent() )
             {
-                *_current >>= Pt::load() >>= *_type;
+                *_current >> Pt::load() >>= *_type;
                 return _parent;
             }
 

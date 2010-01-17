@@ -94,7 +94,7 @@ struct FixupThunk
     {
         T** from = static_cast<T**>(fixme);
         FixupInfo fi(target, targetType, mid);
-        fixup(*from, fi);
+        fixup(fi, *from);
     }
 
     static void fixupReference(void* fixme,
@@ -104,13 +104,13 @@ struct FixupThunk
     {
         T* from = static_cast<T*>(fixme);
         FixupInfo fi(target, targetType, mid);
-        fixup(*from, fi);
+        fixup(fi, *from);
     }
 };
 
 
 template <typename T>
-inline void fixup(T*& fixme, const FixupInfo& fixup)
+inline void fixup(const FixupInfo& fixup, T*& fixme )
 {
     fixme = 0;
 
@@ -122,7 +122,7 @@ inline void fixup(T*& fixme, const FixupInfo& fixup)
 
 
 template <typename T>
-void fixup(T& fixme, const FixupInfo& fixup)
+inline void fixup(const FixupInfo& fixup, T& fixme)
 {
     T* to = fixup.getTarget<T>();
     fixme = *to;

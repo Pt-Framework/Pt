@@ -462,7 +462,7 @@ namespace Pt {
 
 
 template <typename T, typename M, typename D >
-void fixup(SmartPtr<T,M, D>& fixme, const Pt::FixupInfo& fixup)
+void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
 {
     if( fixup.isNull() )
     {
@@ -478,7 +478,7 @@ void fixup(SmartPtr<T,M, D>& fixme, const Pt::FixupInfo& fixup)
 
 // TODO: rename to load()
 template <typename T, typename M, typename D >
-void operator >>=(const LoadInfo& li, SmartPtr<T,M, D>& sp)
+void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 {
     if(li.in().category() == Pt::SerializationInfo::Reference)
     {
@@ -501,7 +501,7 @@ void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 
 // TODO: rename save()
 template <typename T, typename M, typename D >
-void operator <<=(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
+void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
     {

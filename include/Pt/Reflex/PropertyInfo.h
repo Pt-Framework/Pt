@@ -90,7 +90,7 @@ class PropertyInfo  : public MemberInfo
         {}
 };
 
-inline void fixup(PropertyInfo& fixme, const Pt::FixupInfo& fi)
+inline void fixup(const Pt::FixupInfo& fi, PropertyInfo& fixme)
 {
 std::cerr << "FIXUP BEGIN " << std::endl;
     fixme.fixupT(fi);
@@ -248,7 +248,7 @@ class ReadWritePropertyInfo : public PropertyInfo
             std::cerr << "FIXUP PROPERTY BEGIN " << std::endl;
             typedef typename Pt::TypeTraits<A>::Value ValueT;
             ValueT value;
-            fixup(value, fi);
+            fixup(fi, value);
             _setter->invoke(value);
             std::cerr << "FIXUP PROPERTY END " << std::endl;
         }
@@ -358,7 +358,7 @@ class ReadWriteProperty : public PropertyInfo
             std::cerr << "FIXUP VALUEPROPERTY BEGIN " << std::endl;
             typedef typename Pt::TypeTraits<A>::Value ValueT;
             ValueT value;
-            fixup(value, fi);
+            fixup(fi, value);
             _setter->invoke(value);
             std::cerr << "FIXUP VALUEPROPERTY END " << std::endl;
         }
