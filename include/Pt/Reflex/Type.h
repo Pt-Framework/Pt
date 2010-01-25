@@ -54,7 +54,7 @@ class PT_REFLEX_API Type
         virtual void registerMethods() = 0;
 
         template <typename R, typename T, typename A>
-        void registerProxy( const char* name, R (*method)(T&, A) )
+        void registerMethod( const char* name, R (*method)(T&, A) )
         {
             MethodInfo<R, T, A>* mi = new MethodInfo<R, T, A>(*_context, name, method);
             _methods[name] = mi;

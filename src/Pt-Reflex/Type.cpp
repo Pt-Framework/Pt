@@ -15,9 +15,9 @@ class BoolType : public Type
 
         virtual void registerMethods()
         {
-            this->registerProxy("=", &BoolType::assign);
-            this->registerProxy("==", &BoolType::eq);
-            this->registerProxy("<", &BoolType::lt);
+            this->registerMethod("=", &BoolType::assign);
+            this->registerMethod("==", &BoolType::eq);
+            this->registerMethod("<", &BoolType::lt);
         }
 
         static bool assign(bool& self, bool b)
@@ -47,9 +47,9 @@ class IntType : public Type
 
         virtual void registerMethods()
         {
-            this->registerProxy("=", &IntType::assign);
-            this->registerProxy("==", &IntType::eq);
-            this->registerProxy("<", &IntType::lt);
+            this->registerMethod("=", &IntType::assign);
+            this->registerMethod("==", &IntType::eq);
+            this->registerMethod("<", &IntType::lt);
         }
 
         static int assign(int& self, int b)
@@ -79,9 +79,9 @@ class LongType : public Type
 
         virtual void registerMethods()
         {
-            this->registerProxy("=", &LongType::assign);
-            this->registerProxy("==", &LongType::eq);
-            this->registerProxy("<", &LongType::lt);
+            this->registerMethod("=", &LongType::assign);
+            this->registerMethod("==", &LongType::eq);
+            this->registerMethod("<", &LongType::lt);
         }
 
         static long assign(long& self, long b)

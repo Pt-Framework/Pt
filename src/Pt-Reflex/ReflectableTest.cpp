@@ -204,8 +204,8 @@ class MyClassType : public Pt::Reflex::Type
 
         virtual void registerMethods()
         {
-            this->registerProxy("method0", &MyClassType::method0);
-            this->registerProxy("method1", &MyClassType::method1);
+            this->registerMethod("method0", &MyClassType::method0);
+            this->registerMethod("method1", &MyClassType::method1);
 
             this->registerProperty("number", &MyClass::number, &MyClass::setNumber);
         }
