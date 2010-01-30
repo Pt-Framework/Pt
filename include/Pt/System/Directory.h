@@ -98,6 +98,9 @@ class PT_SYSTEM_API DirectoryIterator
         //! @brief Returns the name of the file the iterator points at
         const std::string& operator*() const;
 
+        //! @brief Returns the name of the file the iterator points at
+        const std::string* operator->() const;
+
     private:
         //! @internal
         class DirectoryIteratorImpl* _impl;
