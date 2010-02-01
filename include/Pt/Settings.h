@@ -57,26 +57,61 @@ class PT_API SettingsError : public SerializationError
 class PT_API Settings : public SerializationInfo
 {
     public:
+        class ConstEntry
+        {
+            public:
+                explicit ConstEntry(const SerializationInfo* si = 0)
+                : _si(si)
+                {}
+
+                template <typename T>
+                bool get(T& value) const
+                {
+                    if( ! _si )
+                        return false;
+
+                    *_si >>= value;
+                    return true;
+                }
+
+                ConstEntry operator[] (const std::string& name) const
+                {
+                    if( ! _si )
+                        return ConstEntry();
+
+                    const SerializationInfo* si = _si->findMember(name);
+                    return ConstEntry(si);
+                }
+
+            private:
+                const SerializationInfo* _si;
+        };
+
         Settings();
 
         void load( std::basic_istream<Pt::Char>& is );
 
         void save( std::basic_ostream<Pt::Char>& os ) const;
 
-        // TODO getSerializable
-        template <typename T>
-        const bool getObject(T& type, const std::string& name) const
+        ConstEntry entry(const std::string& name) const
         {
             const SerializationInfo* si = this->findMember(name);
-            if(si == 0)
-                return false;
+            return ConstEntry(si);
+        }
 
-            *si >>= type;
-            return true;
+        ConstEntry operator[] (const std::string& name) const
+        {
+            return this->entry(name);
         }
 
         template <typename T>
-        const void setObject(const T& type, const std::string& name)
+        bool getObject(T& type, const std::string& name) const
+        {
+            return this->entry(name).get(type);
+        }
+
+        template <typename T>
+        void setObject(const T& type, const std::string& name)
         {
             SerializationInfo& si = this->addMember(name);
             si <<= type;
