@@ -92,6 +92,8 @@ namespace System {
 
             virtual size_t write( const char* buffer, size_t count );
 
+            void sigwrite( int signo );
+
             virtual void sync() const;
 
             virtual void attach(SelectorBase& s);
