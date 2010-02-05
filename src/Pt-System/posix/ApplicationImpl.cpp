@@ -85,7 +85,7 @@ extern "C" void pt_system_application_sighandler(int sigNo)
 {
     if(pt_signal_pipe)
     {
-        pt_signal_pipe->in()-impl().sigwrite(sigNo);
+        pt_signal_pipe->in()->impl().sigwrite(sigNo);
     }
 }
 
