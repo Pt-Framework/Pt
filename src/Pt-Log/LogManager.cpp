@@ -42,6 +42,7 @@ LogManager::LogManager()
 : _consolePlugin("console", "1.0.0")
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
+, _init(false)
 , _rootTarget(0)
 , _logger(0)
 {
@@ -50,23 +51,32 @@ LogManager::LogManager()
     _pluginManager.registerPlugin( _filePlugin );
     _pluginManager.registerPlugin( _serialPlugin );
 
-    // initialise settings if .settings exist
+    // initialise completely if .settings exist for backward
+    // compatibility wit old code
     std::ifstream fs("Pt-Log.settings");
-    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    _settings.load(ts);
+    if( fs )
+    {
+        Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+        _settings.load(ts);
+        _init = true;
+    }
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
     std::auto_ptr<Target> rootTarget( new Target("", 0) );
     _rootTarget = rootTarget.get();
     _targetMap[""] = _rootTarget;
     _rootTarget->assignLogLevel(Pt::Log::Error, false);
-    _rootTarget->setChannel("console://");
-    _settings >>= *_rootTarget;
+    this->setChannel( *_rootTarget, "console://");
+
+    if(_init)
+        _settings >>= *_rootTarget;
 
     // logger for Pt::Log
     std::auto_ptr<Target> logTarget( new Target("Pt-Log", _rootTarget) );
     _targetMap["Pt-Log"] = logTarget.get();
-    _settings.getObject( *logTarget, "Pt-Log" );
+
+    if(_init)
+        _settings.getObject( *logTarget, "Pt-Log" );
 
     std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
     _logger = logger.get();
@@ -187,6 +197,16 @@ Target& LogManager::target(const std::string& name)
     return *foundTarget;
 }
 
+
+void LogManager::init(const std::string& path)
+{
+    // initialise settings if .settings exist
+    std::ifstream fs( path.c_str() );
+    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+    _settings.load(ts);
+
+    _init = true;
+}
 
 void LogManager::setLogLevel(Target &target, LogLevel level)
 {

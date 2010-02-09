@@ -50,6 +50,8 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
     public:
         ~LogManager();
 
+        void init(const std::string& path);
+
         Target& target(const std::string& name = "");
 
         void setChannel(Target& target, const std::string& url);
@@ -68,6 +70,7 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         Pt::System::BasicPlugin<Pt::Log::FileChannel, Pt::Log::Channel> _filePlugin;
         Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> _serialPlugin;
         Pt::System::PluginManager<Channel> _pluginManager;
+        bool _init;
         Target* _rootTarget;
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
