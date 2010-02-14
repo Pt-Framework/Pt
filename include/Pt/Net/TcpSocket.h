@@ -68,7 +68,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         std::size_t getTimeout() const
         { return timeout(); }
 
-        void accept(const TcpServer& server, bool closeOnExec = false);
+        void accept(const TcpServer& server, bool inherit = false);
 
         void connect(const AddrInfo& addrinfo);
 
@@ -116,6 +116,8 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         // inherit doc
         virtual size_t onWrite(const char* buffer, size_t count);
+
+        virtual void onCancel();
 
     public:
         // inherit doc

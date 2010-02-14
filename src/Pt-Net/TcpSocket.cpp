@@ -30,6 +30,7 @@
 #include "Pt/Net/TcpSocket.h"
 #include <stdexcept>
 #include <memory>
+#include <Pt/System/IOError.h>
 
 namespace Pt {
 
@@ -141,7 +142,15 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
 void TcpSocket::endConnect()
 {
-    _impl->endConnect();
+    try
+    {
+        _impl->endConnect();
+    }
+    catch (...)
+    {
+        close();
+        throw;
+    }
 }
 
 
@@ -151,10 +160,10 @@ bool TcpSocket::isConnected() const
 }
 
 
-void TcpSocket::accept(const TcpServer& server, bool closeOnExec)
+void TcpSocket::accept(const TcpServer& server, bool inherit)
 {
     this->close();
-    _impl->accept(server, closeOnExec);
+    _impl->accept(server, inherit);
     this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
@@ -163,6 +172,7 @@ void TcpSocket::accept(const TcpServer& server, bool closeOnExec)
 
 void TcpSocket::onClose()
 {
+    cancel();
     _impl->close();
 }
 
@@ -187,6 +197,9 @@ void TcpSocket::onDetach(System::SelectorBase& sb)
 
 size_t TcpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
 {
+    if (!_impl->isConnected())
+        throw System::IOPending( PT_ERROR_MSG("connect operation pending") );
+
     return _impl->beginRead(buffer, n, eof);
 }
 
@@ -205,6 +218,9 @@ size_t TcpSocket::onRead(char* buffer, size_t count, bool& eof)
 
 size_t TcpSocket::onBeginWrite(const char* buffer, size_t n)
 {
+    if (!_impl->isConnected())
+        throw System::IOPending( PT_ERROR_MSG("connect operation pending") );
+
     return _impl->beginWrite(buffer, n);
 }
 
@@ -218,6 +234,21 @@ size_t TcpSocket::onEndWrite()
 size_t TcpSocket::onWrite(const char* buffer, size_t count)
 {
     return _impl->write(buffer, count);
+}
+
+
+void TcpSocket::onCancel()
+{
+    if (_impl->isConnected())
+    {
+        _impl->cancel();
+    }
+    else if (enabled())
+    {
+        // we are in connecting state
+        _impl->close();
+        setEnabled(false);
+    }
 }
 
 

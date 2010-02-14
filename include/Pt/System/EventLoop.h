@@ -42,8 +42,6 @@ namespace Pt {
 
 namespace System {
 
-    class Timer;
-    class Application;
     class Selectable;
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
@@ -152,9 +150,9 @@ namespace System {
 
             virtual void onRemove( Selectable& s );
 
-            virtual void onChanged(Selectable& s);
-
             virtual void onReinit(Selectable& s);
+
+            virtual void onChanged(Selectable& s);
 
             virtual void onRun();
 
@@ -178,6 +176,6 @@ namespace System {
 
 } // namespace System
 
-} // namespace Ptv
+} // namespace Pt
 
 #endif

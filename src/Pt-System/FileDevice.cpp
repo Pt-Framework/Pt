@@ -140,6 +140,12 @@ size_t FileDevice::onWrite(const char* buffer, size_t count)
 }
 
 
+void FileDevice::onCancel()
+{
+    return _impl->cancel();
+}
+
+
 size_t FileDevice::onPeek(char* buffer, size_t count)
 {
     return _impl->peek(buffer, count);

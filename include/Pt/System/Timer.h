@@ -59,7 +59,7 @@ namespace System {
             connect(timer.timeout, onTimer);
 
             Pt::System::EventLoop loop;
-            loop.addTimer(timer);
+            loop.add(timer);
             timer.start(1000);
 
             loop.run();

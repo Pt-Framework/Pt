@@ -149,6 +149,10 @@ class PT_SYSTEM_API IODevice : public Selectable
          */
         size_t write(const char* buffer, size_t n);
 
+        /** @brief Cancels asynchronous reading and writing
+        */
+        void cancel();
+
         //! @brief Returns true if device is seekable
         /**
             Tests if the device is seekable.
@@ -212,7 +216,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         */
         bool async() const;
 
-        /** @brief Notifies about availavle data
+        /** @brief Notifies about available data
 
             This signal is send when the IODevice is monitored
             in a Selector or EventLoop and data becomes available.
@@ -272,6 +276,8 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         //! @brief Write bytes to device
         virtual size_t onWrite(const char* buffer, size_t count) = 0;
+
+        virtual void onCancel() = 0;
 
         //! @brief Read data from I/O device without consuming them
         virtual size_t onPeek(char*, size_t)

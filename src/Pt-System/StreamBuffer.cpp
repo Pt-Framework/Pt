@@ -42,8 +42,9 @@ StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
   _ibuffer(0),
   _obufferSize(bufferSize),
   _obuffer(0),
+  _pbmax(4),
   _oextend(extend),
-  _pbmax(4)
+  _exceptionPending(false)
 {
 }
 
@@ -87,6 +88,12 @@ void StreamBufferBase::attach(IODevice& ioDevice)
 
 void StreamBufferBase::beginRead()
 {
+    if (_exceptionPending)
+    {
+        _exceptionPending = false;
+        throw;
+    }
+
     if(_ioDevice == 0 || _ioDevice->reading())
         return;
 
@@ -124,8 +131,19 @@ void StreamBufferBase::beginRead()
 
 void StreamBufferBase::onRead(IODevice& dev)
 {
-    endRead();
-    inputReady.send(*_sb);
+    try
+    {
+        _exceptionPending = true;
+        this->endRead();
+        _exceptionPending = false;
+        inputReady.send(*_sb);
+    }
+    catch (...)
+    {
+        inputReady.send(*_sb);
+        if (_exceptionPending)
+            throw;
+    }
 }
 
 
@@ -141,6 +159,12 @@ void StreamBufferBase::endRead()
 
 void StreamBufferBase::beginWrite()
 {
+    if (_exceptionPending)
+    {
+        _exceptionPending = false;
+        throw;
+    }
+
     if(_ioDevice == 0 || _ioDevice->writing())
         return;
 
@@ -157,8 +181,19 @@ void StreamBufferBase::beginWrite()
 
 void StreamBufferBase::onWrite(IODevice& dev)
 {
-    endWrite();
-    outputReady.send(*_sb);
+    try
+    {
+        _exceptionPending = true;
+        this->endWrite();
+        _exceptionPending = false;
+        outputReady.send(*_sb);
+    }
+    catch (...)
+    {
+        outputReady.send(*_sb);
+        if (_exceptionPending)
+            throw;
+    }
 }
 
 

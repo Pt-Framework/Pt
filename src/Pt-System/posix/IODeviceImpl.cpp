@@ -59,7 +59,7 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(int fd, bool isAsync, bool closeOnExec)
+void IODeviceImpl::open(int fd, bool isAsync, bool inherit)
 {
     _fd = fd;
 
@@ -72,7 +72,7 @@ void IODeviceImpl::open(int fd, bool isAsync, bool closeOnExec)
             throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
     }
 
-    if (closeOnExec)
+    if (!inherit)
     {
         int flags = fcntl(_fd, F_GETFD);
         flags |= FD_CLOEXEC ;
@@ -88,10 +88,14 @@ void IODeviceImpl::close()
 {
     if(_fd != -1)
     {
-        if( ::close(_fd) != 0 )
-            throw IOError( PT_ERROR_MSG("close failed") );
-
+        int fd = _fd;
         _fd = -1;
+
+        while ( ::close(fd) != 0 )
+        {
+            if( errno != EINTR )
+                throw IOError( PT_ERROR_MSG("close failed") );
+        }
     }
 }
 
@@ -176,8 +180,6 @@ size_t IODeviceImpl::endWrite()
 }
 
 
-
-
 size_t IODeviceImpl::write( const char* buffer, size_t count )
 {
     ssize_t ret = 0;
@@ -214,6 +216,22 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 void IODeviceImpl::sigwrite( int signo )
 {
     ::write(_fd, (const void*)&signo, sizeof(int));
+}
+
+
+void IODeviceImpl::cancel()
+{
+    if(_rfds)
+    {
+        FD_CLR( this->fd(), _rfds );
+        _rfds = 0;
+    }
+
+    if(_wfds)
+    {
+        FD_CLR( this->fd(), _wfds );
+        _wfds = 0;
+    }
 }
 
 

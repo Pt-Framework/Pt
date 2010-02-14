@@ -94,6 +94,8 @@ namespace System {
 
             void sigwrite( int signo );
 
+            virtual void cancel();
+
             virtual void sync() const;
 
             virtual void attach(SelectorBase& s);

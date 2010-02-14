@@ -85,6 +85,8 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         size_t onWrite(const char* buffer, size_t count);
 
+        void onCancel();
+
         size_t onPeek(char* buffer, size_t count);
 
         void onSync() const;
