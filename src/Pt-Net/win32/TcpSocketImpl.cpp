@@ -91,6 +91,7 @@ void TcpSocketImpl::close()
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
+    _isConnected = false;
 }
 
 void TcpSocketImpl::connect(const AddrInfo& addrinfo)
@@ -205,6 +206,8 @@ void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 
 	if(_fd == INVALID_SOCKET)
 		throw System::SystemError("accept");	
+    
+    _isConnected = true;
 }
 
 bool TcpSocketImpl::wait(std::size_t umsecs)
