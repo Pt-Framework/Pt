@@ -75,6 +75,8 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual size_t onWrite(const char* buffer, size_t count);
 
         virtual void onSync() const;
+		
+		virtual void onCancel() ;
         
      private:
         HANDLE _waitHandle;

@@ -74,6 +74,10 @@ void SerialDevice::open( const std::string& file, OpenMode mode)
     IODevice::setAsync( mode & IODevice::Async);
 }
 
+void SerialDevice::onCancel()
+{
+
+}
 
 size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {

@@ -212,6 +212,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         void onAttach(SelectorBase&);
 
         void onDetach(SelectorBase&);
+
+		void onCancel();
 };
 
 } //namespace System

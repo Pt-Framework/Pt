@@ -73,7 +73,10 @@ class FileDeviceImpl  : public IODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
-        void sync() const;       
+        void sync() const;    
+
+		void cancel()
+		{  }
         
     private:
         FileDevice& _device;

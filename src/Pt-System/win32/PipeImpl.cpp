@@ -70,6 +70,11 @@ PipeIODevice::~PipeIODevice()
 }
 
 
+void PipeIODevice::onCancel()
+{
+
+}
+
 void PipeIODevice::open(HANDLE handle, bool isAsync)
 {
     this->setHandle(handle);
