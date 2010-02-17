@@ -27,6 +27,7 @@ SharedLibrary Pt : Atomicity.cpp
                    TextStream.cpp
                    Time.cpp
                    Utf8Codec.cpp
+                   #regexp.cpp
                    ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
@@ -43,6 +44,7 @@ PT_TESTS = AnyTest.cpp
            DelegateTest.cpp
            ExceptionTest.cpp
            NonCopyableTest.cpp
+           #RegExpTest.cpp
            SerializationTest.cpp
            SettingsTest.cpp
            SingletonTest.cpp
