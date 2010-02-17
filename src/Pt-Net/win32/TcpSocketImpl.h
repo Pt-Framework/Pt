@@ -135,6 +135,8 @@ class TcpSocketImpl : public System::SelectableImpl
 		void getWaitHandles(System::HandleMap& handles, bool& avail);
 
 		bool checkEvent();
+
+        void cancel();
 };
 
 } // namespace Net

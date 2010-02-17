@@ -33,6 +33,7 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
+#include <sstream>
 
 #define log_debug(x)
 
@@ -82,6 +83,11 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
 
 //	_sendOverlapped.hEvent    = _currentEventHandle;
 //	_receiveOverlapped.hEvent = _currentEventHandle;
+}
+
+void TcpSocketImpl::cancel()
+{
+    //TODO: cancaling
 }
 
 void TcpSocketImpl::close()
@@ -306,14 +312,23 @@ size_t TcpSocketImpl::endRead(bool& eof)
 	if (rc != SOCKET_ERROR)
 		return numberOfBytesReceived; 
 
-	if(WSAECONNRESET == WSAGetLastError()) 
+    DWORD error = WSAGetLastError();
+	if(WSAECONNRESET == error) 
 	{
 		eof = true;
 		return 0;
 	}
+    else if(WSAEWOULDBLOCK == error)
+    {
+        return 0;
+    }
 	else
 	{
-		throw System::SystemError( PT_ERROR_MSG("endRead failed") );
+        std::stringstream ss;
+        ss<<std::string("endRead failed error=");
+        ss<<WSAGetLastError();
+
+		throw System::SystemError( ss.str(), PT_SOURCEINFO);
 	}
 
 
