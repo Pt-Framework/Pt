@@ -7,6 +7,7 @@
 #ifndef REGEXP_DWA20011023_H
 #define REGEXP_DWA20011023_H
 
+#include <Pt/Api.h>
 #include <stdio.h>
 
 #define NSUBEXP  10
@@ -21,12 +22,13 @@ typedef struct regexp {
     char program[1];    /* Unwarranted chumminess with compiler. */
 } regexp;
 
-regexp *regcomp( char *exp );
-int regexec( regexp *prog, char *string );
+PT_API regexp *regcomp( char *exp );
+
+PT_API int regexec( regexp *prog, char *string );
+
 void regerror( char *s );
 
-void
-regerror( char *s )
+void regerror( char *s )
 {
     printf( "re error %s\n", s );
 }

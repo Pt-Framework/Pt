@@ -55,7 +55,7 @@ class RegExpTest : public Pt::Unit::TestSuite
         void Test()
         {
             char* str = "123 abc";
-            regexp* exp = regcomp("(123).*(abc)");
+            regexp* exp = regcomp("^([0-9]+) (456)?");
 
 
             int r =  regexec( exp, str );
