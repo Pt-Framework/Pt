@@ -72,8 +72,21 @@ PipeIODevice::~PipeIODevice()
 
 void PipeIODevice::onCancel()
 {
+    ::CancelIo( handle() );
 
+    DWORD bytes = 0;
+
+    if( this->reading() && ! HasOverlappedIoCompleted(&_readOv) )
+    {
+        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+    }
+
+    if( this->writing() && ! HasOverlappedIoCompleted(&_writeOv) )
+    {
+        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+    }
 }
+
 
 void PipeIODevice::open(HANDLE handle, bool isAsync)
 {

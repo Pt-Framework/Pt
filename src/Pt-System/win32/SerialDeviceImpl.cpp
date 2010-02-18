@@ -238,6 +238,24 @@ bool SerialDeviceImpl::checkEvent()
 }
 
 
+void SerialDeviceImpl::cancel()
+{
+    ::CancelIo( handle() );
+
+    DWORD bytes = 0;
+
+    if( _device.reading() && ! HasOverlappedIoCompleted(&_readOv) )
+    {
+        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+    }
+
+    if( _device.writing() && ! HasOverlappedIoCompleted(&_writeOv) )
+    {
+        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+    }
+}
+
+
 size_t SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
     if(_readOv.hEvent == NULL)

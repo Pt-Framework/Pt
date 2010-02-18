@@ -258,7 +258,7 @@ bool FileDeviceImpl::checkEvent()
         _device.outputReady.send( _device );
         avail = true;
     }
-    
+
     if(_device._rbuf)
     {
         _device.inputReady.send( _device );
@@ -266,7 +266,27 @@ bool FileDeviceImpl::checkEvent()
     }
 
     return avail;
-    
+
+#endif
+}
+
+
+void FileDeviceImpl::cancel()
+{
+#ifndef _WIN32_WCE
+    ::CancelIo( handle() );
+
+    DWORD bytes = 0;
+
+    if( _device.reading() && ! HasOverlappedIoCompleted(&_readOv) )
+    {
+        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+    }
+
+    if( _device.writing() && ! HasOverlappedIoCompleted(&_writeOv) )
+    {
+        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+    }
 #endif
 }
 
@@ -289,26 +309,26 @@ size_t FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
         {
             return 0;
         }
-        
+
         throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
     }
-    
+
     return readBytes;
 }
 
-    
+
 size_t FileDeviceImpl::endRead(bool& eof)
 {
     if( _device.eof() )
-    { 
+    {
         eof = true;
         return 0;
     }
-    
+
     DWORD readBytes = 0;
 
 #ifndef _WIN32_WCE
-   
+
     if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
@@ -321,7 +341,7 @@ size_t FileDeviceImpl::endRead(bool& eof)
             throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
         }
     }
-    
+
 #else
 
     this->read(_device._rbuf, _device._rbuflen, eof);

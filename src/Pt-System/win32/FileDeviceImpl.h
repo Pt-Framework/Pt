@@ -42,24 +42,24 @@ class FileDeviceImpl  : public IODeviceImpl
         FileDeviceImpl(FileDevice& dev);
 
         ~FileDeviceImpl();
- 
+
         void attach(SelectorBase& s);
 
         void detach(SelectorBase& s);
- 
+
         virtual bool wait(std::size_t msecs);
-        
+
         virtual bool setWaitHandle(HANDLE h, bool& avail);
-        
+
         bool checkEvent();
-        
+
         size_t beginRead(char* buffer, size_t n, bool& eof);
 
         size_t endRead(bool& eof);
 
         size_t beginWrite(const char* buffer, size_t n);
 
-        size_t endWrite();		
+        size_t endWrite();
 
         void open( const char* path, IODevice::OpenMode mode);
 
@@ -73,11 +73,10 @@ class FileDeviceImpl  : public IODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
-        void sync() const;    
+        void sync() const;
 
-		void cancel()
-		{  }
-        
+		void cancel();
+
     private:
         FileDevice& _device;
         HANDLE _waitHandle;

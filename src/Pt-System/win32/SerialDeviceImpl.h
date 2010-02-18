@@ -40,7 +40,6 @@ class SerialDeviceImpl : public IODeviceImpl
         void open( const std::string& file, IODevice::OpenMode mode);
 
         void close();
-
         void attach(SelectorBase& s);
 
         void detach(SelectorBase& s);
@@ -50,7 +49,9 @@ class SerialDeviceImpl : public IODeviceImpl
         bool setWaitHandle(HANDLE h, bool& active);
         
         bool checkEvent();
-        
+
+        void cancel();
+
         size_t beginRead(char* buffer, size_t n, bool& eof);
 
         size_t endRead(bool& eof);
