@@ -59,7 +59,7 @@ namespace System {
             //! @brief Destructor.
             ~Condition();
 
-            /** @brief Wait until condition becomes signalled.
+            /** @brief Wait until condition becomes signaled.
 
                 Causes the caller to be suspended until the condition will be
                 signaled. The given mutex will be unlocked before the caller
