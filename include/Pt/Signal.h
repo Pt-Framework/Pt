@@ -235,6 +235,31 @@ inline Connection connect(Signal<const Pt::Event&>& sender, Signal<const Pt::Eve
     return sender.connect( slot(receiver) );
 }
 
+template <typename R>
+void disconnect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))
+{
+    signal.disconnect( slot(func) );
+}
+
+template <typename R, class BaseT, class ClassT>
+void disconnect( Signal<const Pt::Event&>& signal,
+                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) )
+{
+    signal.disconnect( slot(object, memFunc) );
+}
+
+template <typename R, class BaseT, class ClassT>
+void disconnect( Signal<const Pt::Event&>& signal,
+                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) const )
+{
+    signal.disconnect( slot(object, memFunc) );
+}
+
+inline void disconnect(Signal<const Pt::Event&>& sender, Signal<const Pt::Event&>& receiver)
+{
+    sender.disconnect( slot(receiver) );
+}
+
 } // !namespace Pt
 
 #endif
