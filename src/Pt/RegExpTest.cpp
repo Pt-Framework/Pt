@@ -54,17 +54,31 @@ class RegExpTest : public Pt::Unit::TestSuite
     protected:
         void Test()
         {
-            char* str = "123 abc";
-            regexp* exp = regcomp("^([0-9]+) (456)?");
+            // char* str = "123 abc";
+            // regexp* exp = regcomp("^([0-9]+) (abc)?");
 
+            // int r =  regexec( exp, str );
 
-            int r =  regexec( exp, str );
+            // std::cerr << "Result: " << r << std::endl;
+            // for(int n = 0; n < 10 ; ++n)
+            // {
+            //     std::cerr << n <<": " << exp->startp[n] - str  << std::endl;
+            //     std::cerr << n <<": " << exp->endp[n] - str << std::endl;
+            // }
+
+            Pt::String expr = L"^([0-9]+) (abc)?";
+            const Pt::Char* cexpr = expr.c_str();
+            regexp* exp = regcomp( const_cast<Pt::Char*>(cexpr) );
+
+            Pt::String str = L"123 abc";
+            const Pt::Char* cstr = str.c_str();
+            int r =  regexec( exp, const_cast<Pt::Char*>(cstr) );
 
             std::cerr << "Result: " << r << std::endl;
             for(int n = 0; n < 10 ; ++n)
             {
-                std::cerr << n <<": " << exp->startp[n] - str  << std::endl;
-                std::cerr << n <<": " << exp->endp[n] - str << std::endl;
+                std::cerr << n <<": " << exp->startp[n] - cstr  << std::endl;
+                std::cerr << n <<": " << exp->endp[n] - cstr << std::endl;
             }
 
             ::free(exp);

@@ -289,6 +289,11 @@ class Char
 
         //! @brief Subtracts the numeric value of b from the numeric value of b and returns the result.
         //! @return The substraction of the numeric values of b from a.
+        friend Char operator-(const Char& a, int ch)
+        { return a.value() - ch; }
+
+        //! @brief Subtracts the numeric value of b from the numeric value of b and returns the result.
+        //! @return The substraction of the numeric values of b from a.
         friend Char operator-(const Char& a, char ch)
         { return a.value() - ch; }
 
@@ -304,6 +309,9 @@ class Char
 
         friend Char operator&(const Char& a, int b)
         { return a.value() & b; }
+
+        friend Char operator<<(const Char& a, int b)
+        { return a.value() << b; }
 
     private:
         Pt::uint32_t _value;
