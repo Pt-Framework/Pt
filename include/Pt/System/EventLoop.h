@@ -91,6 +91,10 @@ namespace System {
             */
             Signal<const Event&> event;
 
+            /** @brief Emited when the eventloop is exited
+            */
+            Signal<> exited;
+
         protected:
             /** @brief Constructs the EventLoop
             */
@@ -117,7 +121,7 @@ namespace System {
         Events can be added to the internal event queue, even from other threads
         using the method EventLoop::commitEvent or EventLoop::queueEvent. The
         first method will add the event to the internal queue and wake the
-        event loop, the latter allows queuing multiple event and it is up to
+        event loop, the latter allows queing multiple events and it is up to
         the caller to wake the event loop by calling EventLoop::wake when all
         events are added. When the event loop processes its event, the signal
         "event" is send for each processed event. Events are processes in the
