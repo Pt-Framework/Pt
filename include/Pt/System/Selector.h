@@ -126,7 +126,7 @@ namespace System {
                 Selectables and Timers. Use Selector::WaitInfinite to
                 wait without timeout.
 
-                @param msecs timeout in miliseconds
+                @param true on timeout
             */
             bool wait(std::size_t msecs = WaitInfinite);
 
