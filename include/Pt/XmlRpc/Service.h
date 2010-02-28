@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/Http/Server.h>
+#include <Pt/Http/Service.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
 #include <Pt/Void.h>
