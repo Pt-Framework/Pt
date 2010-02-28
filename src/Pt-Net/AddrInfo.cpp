@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Net/AddrInfo.h>
+#include <string.h>
 #include "AddrInfoImpl.h"
 
 namespace Pt
@@ -43,9 +44,16 @@ AddrInfo::AddrInfo(AddrInfoImpl* impl)
 }
 
 
-AddrInfo::AddrInfo(const std::string& host, unsigned short port)
-    : _impl(new AddrInfoImpl(host, port))
+AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool listen)
+    : _impl(0)
 {
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+    if (listen)
+        hints.ai_flags |= AI_PASSIVE;
+    _impl = new AddrInfoImpl(host, port, hints);
+
     _impl->addRef();
 }
 
