@@ -8,10 +8,14 @@ SharedLibrary Pt-Http : Client.cpp
                         ChunkedReader.cpp
                         NotFoundResponder.cpp
                         NotFoundService.cpp
+                        NotAuthenticatedResponder.cpp
+                        NotAuthenticatedService.cpp
                         MessageHeader.cpp
                         Parser.cpp
                         Responder.cpp
+                        Worker.cpp
                         Server.cpp
+                        ServerImpl.cpp
                         Socket.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 SharedLibrary_MakeLocate Pt-Http : $(OUTPUT_TARGET) ;

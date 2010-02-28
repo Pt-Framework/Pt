@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,20 +26,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotFoundService.h"
+#include "NotAuthenticatedService.h"
+#include "NotAuthenticatedResponder.h"
 
-namespace Pt {
-
-namespace Http {
-
-Responder* NotFoundService::createResponder(const Request&)
+namespace Pt
 {
-    return &_responder;
+namespace Http
+{
+
+Responder* NotAuthenticatedService::createResponder(const Request& request)
+{
+    return createResponder(request, std::string(), std::string());
 }
 
-void NotFoundService::releaseResponder(Responder*)
-{ }
+Responder* NotAuthenticatedService::createResponder(const Request& request, const std::string& realm, const std::string& authContent)
+{
+    return new NotAuthenticatedResponder(*this, realm, authContent);
+}
 
-} // namespace Http
+void NotAuthenticatedService::releaseResponder(Responder* responder)
+{
+    delete responder;
+}
 
-} // namespace Pt
+}
+}
+

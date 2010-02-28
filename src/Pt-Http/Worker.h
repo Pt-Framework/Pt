@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,28 +26,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Http_NotFoundResponder_h
-#define Pt_Http_NotFoundResponder_h
+#ifndef PT_HTTP_WORKER_H
+#define PT_HTTP_WORKER_H
 
-#include <Pt/Http/Api.h>
-#include <Pt/Http/Responder.h>
+#include <Pt/System/Selector.h>
+#include <Pt/System/Thread.h>
 
-namespace Pt {
+namespace Pt
+{
+namespace Http
+{
 
-namespace Http {
+class ServerImpl;
 
-class PT_HTTP_API NotFoundResponder : public Responder
+class Worker : public System::AttachedThread
 {
     public:
-        explicit NotFoundResponder(Service& service)
-            : Responder(service)
-            { }
+        explicit Worker(ServerImpl& server)
+            : AttachedThread(callable(*this, &Worker::run)),
+              _server(server)
+        {
+        }
 
-        void reply(std::ostream&, Request& request, Reply& reply);
+        void run();
+
+    private:
+        ServerImpl& _server;
+        System::Selector _selector;
 };
 
-} // namespace Http
+}
+}
 
-} // namespace Pt
+#endif // PT_HTTP_WORKER_H
 
-#endif

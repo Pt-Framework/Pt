@@ -30,106 +30,64 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Reply.h>
-#include <Pt/Http/NotFoundService.h>
-#include <Pt/Net/TcpServer.h>
-#include <Pt/System/Selector.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/Condition.h>
-#include <Pt/Connectable.h>
+#include <Pt/Signal.h>
+#include <Pt/NonCopyable.h>
 #include <string>
-#include <set>
+#include <cstddef>
 
 namespace Pt {
 
 namespace System {
 
-    class AttachedThread;
+class EventLoop;
 
 }
 
 namespace Http {
 
-class Responder;
 class Request;
-class Socket;
 class Service;
+class ServerImpl;
 
-class PT_HTTP_API Server : public Net::TcpServer, public Connectable
+class PT_HTTP_API Server : private Pt::NonCopyable
 {
     public:
-        Server(const std::string& ip, unsigned short int port);
-        ~Server()  { terminate(); }
+        explicit Server(System::EventLoop& eventLoop);
+        Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port);
+        ~Server();
+
+        void listen(const std::string& ip, unsigned short int port);
 
         void addService(const std::string& url, Service& service);
         void removeService(Service& service);
 
-        Responder* getResponder(const Request& request);
-        Responder* getDefaultResponder(const Request& request)
-            { return _defaultService.createResponder(request); }
+        std::size_t readTimeout() const;
+        std::size_t writeTimeout() const;
+        std::size_t keepAliveTimeout() const;
 
-        void onConnect(TcpServer& server);
+        void readTimeout(std::size_t ms);
+        void writeTimeout(std::size_t ms);
+        void keepAliveTimeout(std::size_t ms);
 
-        std::size_t readTimeout() const       { return _readTimeout; }
-        std::size_t writeTimeout() const      { return _writeTimeout; }
-        std::size_t keepAliveTimeout() const  { return _keepAliveTimeout; }
+        unsigned minThreads() const;
+        void minThreads(unsigned m);
 
-        void readTimeout(std::size_t ms)      { _readTimeout = ms; }
-        void writeTimeout(std::size_t ms)     { _writeTimeout = ms; }
-        void keepAliveTimeout(std::size_t ms) { _keepAliveTimeout = ms; }
+        unsigned maxThreads() const;
+        void maxThreads(unsigned m);
 
-        void terminate();
-
-        void run();
-
-    private:
-        std::string _ip;
-        unsigned short int _port;
-
-        typedef std::multimap<std::string, Service*> ServicesType;
-        ServicesType _service;
-        System::Selector _selector;
-        NotFoundService _defaultService;
-
-        std::size_t _readTimeout;
-        std::size_t _writeTimeout;
-        std::size_t _keepAliveTimeout;
-
-        void serverThread();
-
-        System::Mutex _threadMutex;
-        System::Mutex _createThreadMutex;
-        System::Mutex _selectorMutex;
-        System::Condition _threadRunning;
-        System::AttachedThread* _startingThread;
-        unsigned _minThreads;
-        unsigned _maxThreads;
-        atomic_t _waitingThreads;
-        enum {
+        enum Runmode {
           Stopped,
           Starting,
           Running,
           Terminating
-        } _runmode;
-        System::Condition _terminated;
-        System::Condition _threadTerminated;
+        };
 
-        typedef std::set<System::AttachedThread*> Threads;
-        Threads _threads;
-        Threads _terminatedThreads;
+        Signal<Runmode> runmodeChanged;
 
-        typedef std::list<Socket*> ServerSockets;
-        ServerSockets _readySockets;
-        System::Mutex _idleSocketsMutex;
-        ServerSockets _idleSockets;
-
-        bool hasReplyToDo() const  { return !_readySockets.empty(); }
-        friend class Socket;
-        void addReadySockets(Socket* s)
-            { _readySockets.push_back(s); }
-
-        void createThread();
+    private:
+        ServerImpl* _impl;
 };
+
 
 } // namespace Http
 

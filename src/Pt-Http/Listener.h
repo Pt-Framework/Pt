@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,20 +26,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotFoundService.h"
+#ifndef PT_HTTP_LISTENER_H
+#define PT_HTTP_LISTENER_H
 
-namespace Pt {
+#include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
 
-namespace Http {
-
-Responder* NotFoundService::createResponder(const Request&)
+namespace Pt
 {
-    return &_responder;
+namespace Http
+{
+
+class Listener : public Net::TcpServer
+{
+        std::string _ip;
+        unsigned short _port;
+
+    public:
+        Listener(const std::string& ip, unsigned short port)
+            : Net::TcpServer(ip, port),
+              _ip(ip),
+              _port(port)
+        { }
+
+        void wakeConnect()
+        {
+            Net::TcpSocket(_ip, _port);
+        }
+};
+
+}
 }
 
-void NotFoundService::releaseResponder(Responder*)
-{ }
+#endif // PT_HTTP_LISTENER_H
 
-} // namespace Http
-
-} // namespace Pt

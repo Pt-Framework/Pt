@@ -26,20 +26,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotFoundService.h"
+#ifndef Pt_Http_NotAuthenticatedService_h
+#define Pt_Http_NotAuthenticatedService_h
+
+#include <Pt/Http/Service.h>
 
 namespace Pt {
 
 namespace Http {
 
-Responder* NotFoundService::createResponder(const Request&)
+class PT_HTTP_API NotAuthenticatedService : public Service
 {
-    return &_responder;
-}
+    public:
+        NotAuthenticatedService()
+            { }
 
-void NotFoundService::releaseResponder(Responder*)
-{ }
+        Responder* createResponder(const Request&);
+
+        Responder* createResponder(const Request&, const std::string& realm, const std::string& authContent);
+
+        void releaseResponder(Responder* responder);
+
+};
+
 
 } // namespace Http
 
 } // namespace Pt
+
+#endif

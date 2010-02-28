@@ -31,6 +31,8 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Http/Server.h"
 #include "Pt/Http/Client.h"
+#include "Pt/Http/ReplyHeader.h"
+#include "Pt/Http/Request.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/EventLoop.h"
 #include <string>
@@ -57,9 +59,6 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void NotFoundRequest()
         {
-            // Tommi, FIXME
-			this->reportMessage("Server test omitted, needs to be changed");
-/*
             connect(loop->timeout, *loop, &Pt::System::EventLoop::exit);
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
@@ -75,7 +74,6 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginExecute(request);
 
             loop->run();
-*/
         }
 
     private:
@@ -83,8 +81,6 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onReplyHeader(Pt::Http::Client& client)
         {
-            std::cout << "Server=" << client.header().getHeader("server") << std::endl;
-            std::cout << "Connection=" << client.header().getHeader("connection") << std::endl;
         }
 
         std::size_t onReply(Pt::Http::Client& client)
@@ -104,7 +100,6 @@ class ServerTest : public Pt::Unit::TestSuite
         void onReplyFinished(Pt::Http::Client& client)
         {
             PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
-            std::cout << "THE END" << std::endl;
             loop->exit();
         }
 };

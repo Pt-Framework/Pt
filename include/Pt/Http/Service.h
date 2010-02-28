@@ -32,6 +32,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/System/Mutex.h>
 #include <vector>
+#include <string>
 
 namespace Pt {
 
@@ -40,12 +41,43 @@ namespace Http {
 class Responder;
 class Request;
 
-class Service
+class Authenticator
 {
+    public:
+        virtual bool checkAuth(const Request&) const = 0;
+};
+
+class PT_HTTP_API Service
+{
+        std::vector<const Authenticator*> _authenticators;
+        std::string _realm;
+        std::string _authContent;
+
     public:
         virtual ~Service() { }
         virtual Responder* createResponder(const Request&) = 0;
         virtual void releaseResponder(Responder*) = 0;
+
+        bool checkAuth(const Request& request)
+        {
+            for (std::vector<const Authenticator*>::const_iterator it = _authenticators.begin();
+                it != _authenticators.end(); ++it)
+            {
+                if (!(*it)->checkAuth(request))
+                    return false;
+            }
+
+            return true;
+        }
+
+        void setRealm(const std::string& realm, const std::string& content = std::string())
+            { _realm = realm; _authContent = content; }
+
+        const std::string& realm() const        { return _realm; }
+        const std::string& authContent() const  { return _authContent; }
+
+        void addAuthenticator(const Authenticator* auth)
+            { _authenticators.push_back(auth); }
 };
 
 template <typename ResponderType>

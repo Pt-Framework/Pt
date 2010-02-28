@@ -26,9 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/Socket.h>
-#include <Pt/Http/Server.h>
+#include "Socket.h"
+#include "ServerImpl.h"
 #include <cassert>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define log_define(a)
 #define log_trace(a)
@@ -58,24 +60,31 @@ void Socket::ParseEvent::onUrlParam(const std::string& q)
     _request.qparams(q);
 }
 
-Socket::Socket(System::SelectorBase& selector, Server& server)
-    : TcpSocket(server),
+Socket::Socket(ServerImpl& server, Net::TcpServer& tcpServer)
+    : inputSlot(slot(*this, &Socket::onInput)),
+      outputSlot(slot(*this, &Socket::onOutput)),
+      timeoutSlot(slot(*this, &Socket::onTimeout)),
+      _tcpServer(tcpServer),
       _server(server),
       _parseEvent(_request),
       _parser(_parseEvent, false),
       _responder(0)
 {
-    log_info("connection accepted from " << getPeerAddr());
-
     _stream.attachDevice(*this);
-    _stream.buffer().beginRead();
-    Pt::connect(_stream.buffer().inputReady, *this, &Socket::onInput);
-    Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
-    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
+}
 
-    _timer.start(_server.readTimeout());
-
-    addSelector(selector);
+Socket::Socket(Socket& socket)
+    : inputSlot(slot(*this, &Socket::onInput)),
+      outputSlot(slot(*this, &Socket::onOutput)),
+      timeoutSlot(slot(*this, &Socket::onTimeout)),
+      _tcpServer(socket._tcpServer),
+      _server(socket._server),
+      _parseEvent(_request),
+      _parser(_parseEvent, false),
+      _responder(0)
+{
+    _stream.attachDevice(*this);
+    Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
 }
 
 Socket::~Socket()
@@ -84,28 +93,62 @@ Socket::~Socket()
         _responder->release();
 }
 
+void Socket::accept()
+{
+    Net::TcpSocket::accept(_tcpServer);
+
+    _stream.buffer().beginRead();
+
+    _timer.start(_server.readTimeout());
+}
+
+void Socket::setSelector(System::SelectorBase* s)
+{
+    if (selector() == s)
+        return;
+
+    if (selector() != 0)
+    {
+        Pt::disconnect(_stream.buffer().inputReady, inputSlot);
+        Pt::disconnect(_stream.buffer().outputReady, outputSlot);
+        Pt::disconnect(_timer.timeout, timeoutSlot);
+    }
+
+    if (s)
+    {
+        s->add(*this);
+        s->add(_timer);
+
+        Pt::connect(_stream.buffer().inputReady, inputSlot);
+        Pt::connect(_stream.buffer().outputReady, outputSlot);
+        Pt::connect(_timer.timeout, timeoutSlot);
+    }
+    else
+    {
+        TcpSocket::setSelector(0);
+        _timer.setSelector(0);
+    }
+}
+
 void Socket::removeSelector()
 {
     TcpSocket::setSelector(0);
     _timer.setSelector(0);
+    Pt::disconnect(_stream.buffer().inputReady, inputSlot);
+    Pt::disconnect(_stream.buffer().outputReady, outputSlot);
+    Pt::disconnect(_timer.timeout, timeoutSlot);
 }
 
-void Socket::addSelector(System::SelectorBase& selector)
+void Socket::onIODeviceInput(System::IODevice& iodevice)
 {
-    selector.add(*this);
-    selector.add(_timer);
+    inputReady(*this);
 }
 
 void Socket::onInput(System::StreamBuffer& sb)
 {
-    log_trace("onInput");
-    log_debug(this << " read data from " << getPeerAddr());
-
     if (sb.in_avail() == 0 || sb.device()->eof())
     {
-        log_debug("end of stream");
         close();
-        delete this;
         return;
     }
 
@@ -118,7 +161,7 @@ void Socket::onInput(System::StreamBuffer& sb)
         {
             _responder = _server.getDefaultResponder(_request);
             _responder->replyError(_reply.body(), _request, _reply,
-                std::runtime_error("invalid Http header"));
+                std::runtime_error("invalid http header"));
             _responder->release();
             _responder = 0;
 
@@ -148,9 +191,11 @@ void Socket::onInput(System::StreamBuffer& sb)
             }
 
             _contentLength = _request.header().contentLength();
+            log_debug("content length of request is " << _contentLength);
             if (_contentLength == 0)
             {
-                _server.addReadySockets(this);
+                _timer.stop();
+                doReply();
                 return;
             }
 
@@ -186,7 +231,8 @@ void Socket::onInput(System::StreamBuffer& sb)
 
         if (_contentLength <= 0)
         {
-            _server.addReadySockets(this);
+            _timer.stop();
+            doReply();
         }
         else
         {
@@ -197,7 +243,7 @@ void Socket::onInput(System::StreamBuffer& sb)
 
 bool Socket::doReply()
 {
-    log_trace("Http::Socket::doReply");
+    log_trace("http::Socket::doReply");
     try
     {
         _responder->reply(_reply.body(), _request, _reply);
@@ -262,7 +308,6 @@ bool Socket::onOutput(System::StreamBuffer& sb)
         {
             log_debug("don't do keep alive");
             close();
-            delete this;
             return false;
         }
     }
@@ -274,7 +319,6 @@ void Socket::onTimeout()
 {
     log_debug("timeout");
     close();
-    delete this;
 }
 
 void Socket::sendReply()

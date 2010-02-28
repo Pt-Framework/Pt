@@ -31,7 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Http/NotFoundResponder.h>
+#include "NotFoundResponder.h"
 
 namespace Pt {
 

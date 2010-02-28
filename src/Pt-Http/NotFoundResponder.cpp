@@ -26,8 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/NotFoundResponder.h>
-#include <Pt/Http/NotFoundService.h>
+#include "NotFoundResponder.h"
 #include <Pt/Http/Reply.h>
 
 namespace Pt {

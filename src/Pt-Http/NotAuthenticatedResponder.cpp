@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,20 +26,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotFoundService.h"
+#include "NotAuthenticatedResponder.h"
+#include <Pt/Http/Reply.h>
 
-namespace Pt {
-
-namespace Http {
-
-Responder* NotFoundService::createResponder(const Request&)
+namespace Pt
 {
-    return &_responder;
+namespace Http
+{
+
+void NotAuthenticatedResponder::reply(std::ostream& out, Request& request, Reply& reply)
+{
+    reply.setHeader("WWW-Authenticate", "Basic realm=\"" + _realm + '"');
+
+    reply.httpReturn(401, "not authorized");
+
+    if (_content.empty())
+        out << "<html><body><h1>not authorized</h1></body></html>";
+    else
+        out << _content;
+
 }
 
-void NotFoundService::releaseResponder(Responder*)
-{ }
-
-} // namespace Http
-
-} // namespace Pt
+}
+}

@@ -26,20 +26,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotFoundService.h"
+#ifndef Pt_Http_NotFoundResponder_h
+#define Pt_Http_NotFoundResponder_h
+
+#include <Pt/Http/Responder.h>
 
 namespace Pt {
 
 namespace Http {
 
-Responder* NotFoundService::createResponder(const Request&)
+class PT_HTTP_API NotFoundResponder : public Responder
 {
-    return &_responder;
-}
+    public:
+        explicit NotFoundResponder(Service& service)
+            : Responder(service)
+            { }
 
-void NotFoundService::releaseResponder(Responder*)
-{ }
+        void reply(std::ostream&, Request& request, Reply& reply);
+};
 
 } // namespace Http
 
 } // namespace Pt
+
+#endif

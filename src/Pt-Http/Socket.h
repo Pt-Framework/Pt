@@ -29,23 +29,24 @@
 #ifndef Pt_Http_Socket_h
 #define Pt_Http_Socket_h
 
-#include <Pt/Http/Api.h>
-#include <Pt/Http/Parser.h>
+#include <Pt/Net/TcpSocket.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
-#include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
+#include <Pt/Signal.h>
+#include <Pt/Method.h>
+#include "Parser.h"
 
 namespace Pt {
 
 namespace Http {
 
-class Server;
+class ServerImpl;
 class Responder;
 
-class PT_HTTP_API Socket : public Net::TcpSocket, public Connectable
+class Socket : public Net::TcpSocket, public Connectable
 {
         class ParseEvent : public HeaderParser::MessageHeaderEvent
         {
@@ -63,11 +64,18 @@ class PT_HTTP_API Socket : public Net::TcpSocket, public Connectable
         };
 
     public:
-        Socket(System::SelectorBase& s, Server& server);
+        Socket(ServerImpl& server, Net::TcpServer& tcpServer);
+        explicit Socket(Socket& socket);
         ~Socket();
 
-        void onInput(System::StreamBuffer& stream);
-        bool onOutput(System::StreamBuffer& stream);
+        void accept();
+
+        void setSelector(System::SelectorBase* s);
+        void removeSelector();
+
+        void onIODeviceInput(System::IODevice& iodevice);
+        void onInput(System::StreamBuffer& sb);
+        bool onOutput(System::StreamBuffer& sb);
         void onTimeout();
 
         bool doReply();
@@ -75,14 +83,18 @@ class PT_HTTP_API Socket : public Net::TcpSocket, public Connectable
         bool isReady() const
         { return _parser.end() && _contentLength == 0; }
 
-        void addSelector(System::SelectorBase& s);
-        void removeSelector();
-
         const Request& request() const { return _request; }
         const Reply& reply() const     { return _reply; }
 
+        Signal<Socket&> inputReady;
+
+        MethodSlot<void, Socket, System::StreamBuffer&> inputSlot;
+        MethodSlot<bool, Socket, System::StreamBuffer&> outputSlot;
+        MethodSlot<void, Socket> timeoutSlot;
+
     private:
-        Server& _server;
+        Net::TcpServer& _tcpServer;
+        ServerImpl& _server;
 
         ParseEvent _parseEvent;
         HeaderParser _parser;
