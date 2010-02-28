@@ -30,9 +30,10 @@
 #ifndef PT_SYSTEM_QUEUE_H
 #define PT_SYSTEM_QUEUE_H
 
-#include <queue>
+#include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Condition.h>
+#include <queue>
 
 namespace Pt
 {
