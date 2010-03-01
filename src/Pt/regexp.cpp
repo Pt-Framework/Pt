@@ -161,18 +161,27 @@
  * Flags to be passed up and down.
  */
 #define    HASWIDTH    01    /* Known never to match null string. */
-#define    SIMPLE        02    /* Simple enough to be STAR/PLUS operand. */
-#define    SPSTART        04    /* Starts with * or +. */
-#define    WORST        0    /* Worst case. */
+#define    SIMPLE      02    /* Simple enough to be STAR/PLUS operand. */
+#define    SPSTART     04    /* Starts with * or +. */
+#define    WORST       0     /* Worst case. */
 
 /*
  * Global work variables for regcomp().
  */
-static CHARTYPE *regparse;        /* Input-scan pointer. */
-static int regnpar;        /* () count. */
+
+struct parse_data
+{
+    CHARTYPE* regparse; /* Input-scan pointer. */
+    int regnpar;        /* () count. */
+    CHARTYPE* regcode;  /* Code-emit pointer; &regdummy = don't. */
+    long regsize;       /* Code size. */
+};
+
+//static CHARTYPE *regparse;  /* Input-scan pointer. */
+//static int regnpar;         /* () count. */
 static CHARTYPE regdummy;
-static CHARTYPE *regcode;        /* Code-emit pointer; &regdummy = don't. */
-static long regsize;        /* Code size. */
+//static CHARTYPE *regcode;   /* Code-emit pointer; &regdummy = don't. */
+//static long regsize;        /* Code size. */
 
 /*
  * Forward declarations for regcomp()'s friends.
@@ -180,14 +189,14 @@ static long regsize;        /* Code size. */
 #ifndef STATIC
 #define    STATIC    static
 #endif
-STATIC CHARTYPE *reg( int paren, int *flagp );
-STATIC CHARTYPE *regbranch( int *flagp );
-STATIC CHARTYPE *regpiece( int *flagp );
-STATIC CHARTYPE *regatom( int *flagp );
-STATIC CHARTYPE *regnode( int op );
+STATIC CHARTYPE *reg( parse_data* state, int paren, int *flagp );
+STATIC CHARTYPE *regbranch( parse_data* state, int *flagp );
+STATIC CHARTYPE *regpiece( parse_data* state, int *flagp );
+STATIC CHARTYPE *regatom( parse_data* state, int *flagp );
+STATIC CHARTYPE *regnode( parse_data* state,int op );
 STATIC CHARTYPE *regnext( register CHARTYPE *p );
-STATIC void regc( int b );
-STATIC void reginsert( CHARTYPE op, CHARTYPE *opnd );
+STATIC void regc( parse_data* state, int b );
+STATIC void reginsert( parse_data* state, CHARTYPE op, CHARTYPE *opnd );
 STATIC void regtail( CHARTYPE *p, CHARTYPE *val );
 STATIC void regoptail( CHARTYPE *p, CHARTYPE *val );
 
@@ -213,6 +222,8 @@ regcomp( CHARTYPE *exp )
     register CHARTYPE *scan;
     register CHARTYPE *longest;
     register unsigned len;
+    ///CHARTYPE *regparse;
+    parse_data state;
     int flags;
 
     if (exp == NULL)
@@ -222,31 +233,38 @@ regcomp( CHARTYPE *exp )
 #ifdef notdef
     if (exp[0] == '.' && exp[1] == '*') exp += 2;  /* aid grep */
 #endif
-    regparse = exp;
-    regnpar = 1;
-    regsize = 0L;
-    regcode = &regdummy;
-    regc(MAGIC);
-    if (reg(0, &flags) == NULL)
+    ///regparse = exp;
+    state.regparse = exp;
+    ///regnpar = 1;
+    state.regnpar = 1;
+    state.regsize = 0L;
+    state.regcode = &regdummy;
+
+    regc(&state, MAGIC);
+    if (reg(&state, 0, &flags) == NULL)
         return(NULL);
 
     /* Small enough for pointer-storage convention? */
-    if (regsize >= 32767L)        /* Probably could be 65535L. */
+    if (state.regsize >= 32767L)        /* Probably could be 65535L. */
         FAIL("regexp too big");
 
     /* Allocate space. */
-    r = (regexp *)malloc(sizeof(regexp) + (unsigned)regsize);
+    r = (regexp *)malloc(sizeof(regexp) + (unsigned)(state.regsize));
     if (r == NULL)
         FAIL("out of space");
     /*if ( DEBUG_PROFILE )
         profile_memory( sizeof(regexp) + (unsigned)regsize );*/
 
     /* Second pass: emit code. */
-    regparse = exp;
-    regnpar = 1;
-    regcode = r->program;
-    regc(MAGIC);
-    if (reg(0, &flags) == NULL)
+    ///regparse = exp;
+    state.regparse = exp;
+    ///regnpar = 1;
+    state.regnpar = 1;
+    ///regcode = r->program;
+    state.regcode = r->program;
+
+    regc(&state, MAGIC);
+    if (reg(&state, 0, &flags) == NULL)
         return(NULL);
 
     /* Dig out information for optimizations. */
@@ -299,6 +317,8 @@ regcomp( CHARTYPE *exp )
  */
 static CHARTYPE *
 reg(
+    parse_data* state,
+    ///CHARTYPE*& regparse,
     int paren,            /* Parenthesized? */
     int *flagp )
 {
@@ -312,16 +332,16 @@ reg(
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
-        if (regnpar >= NSUBEXP)
+        if (state->regnpar >= NSUBEXP)
             FAIL("too many ()");
-        parno = regnpar;
-        regnpar++;
-        ret = regnode(OPEN+parno);
+        parno = state->regnpar;
+        state->regnpar++;
+        ret = regnode(state, OPEN+parno);
     } else
         ret = NULL;
 
     /* Pick up the branches, linking them together. */
-    br = regbranch(&flags);
+    br = regbranch(state, &flags);
     if (br == NULL)
         return(NULL);
     if (ret != NULL)
@@ -331,9 +351,9 @@ reg(
     if (!(flags&HASWIDTH))
         *flagp &= ~HASWIDTH;
     *flagp |= flags&SPSTART;
-    while (*regparse == '|' || *regparse == '\n') {
-        regparse++;
-        br = regbranch(&flags);
+    while (*state->regparse == '|' || *state->regparse == '\n') {
+        state->regparse++;
+        br = regbranch(state, &flags);
         if (br == NULL)
             return(NULL);
         regtail(ret, br);    /* BRANCH -> BRANCH. */
@@ -343,7 +363,7 @@ reg(
     }
 
     /* Make a closing node, and hook it on the end. */
-    ender = regnode((paren) ? CLOSE+parno : END);    
+    ender = regnode(state, (paren) ? CLOSE+parno : END);    
     regtail(ret, ender);
 
     /* Hook the tails of the branches to the closing node. */
@@ -351,10 +371,10 @@ reg(
         regoptail(br, ender);
 
     /* Check for proper termination. */
-    if (paren && *regparse++ != ')') {
+    if (paren && *state->regparse++ != ')') {
         FAIL("unmatched ()");
-    } else if (!paren && *regparse != '\0') {
-        if (*regparse == ')') {
+    } else if (!paren && *state->regparse != '\0') {
+        if (*state->regparse == ')') {
             FAIL("unmatched ()");
         } else
             FAIL("junk on end");    /* "Can't happen". */
@@ -370,7 +390,7 @@ reg(
  * Implements the concatenation operator.
  */
 static CHARTYPE *
-regbranch( int *flagp )
+regbranch( parse_data* state, int *flagp )
 {
     register CHARTYPE *ret;
     register CHARTYPE *chain;
@@ -379,11 +399,11 @@ regbranch( int *flagp )
 
     *flagp = WORST;        /* Tentatively. */
 
-    ret = regnode(BRANCH);
+    ret = regnode(state, BRANCH);
     chain = NULL;
-    while (*regparse != '\0' && *regparse != ')' &&
-           *regparse != '\n' && *regparse != '|') {
-        latest = regpiece(&flags);
+    while (*state->regparse != '\0' && *state->regparse != ')' &&
+           *state->regparse != '\n' && *state->regparse != '|') {
+        latest = regpiece(state, &flags);
         if (latest == NULL)
             return(NULL);
         *flagp |= flags&HASWIDTH;
@@ -394,7 +414,7 @@ regbranch( int *flagp )
         chain = latest;
     }
     if (chain == NULL)    /* Loop ran zero times. */
-        (void) regnode(NOTHING);
+        (void) regnode(state, NOTHING);
 
     return(ret);
 }
@@ -409,18 +429,18 @@ regbranch( int *flagp )
  * endmarker role is not redundant.
  */
 static CHARTYPE *
-regpiece( int *flagp )
+regpiece( parse_data* state, int *flagp )
 {
     register CHARTYPE *ret;
     register CHARTYPE op;
     register CHARTYPE *next;
     int flags;
 
-    ret = regatom(&flags);
+    ret = regatom(state, &flags);
     if (ret == NULL)
         return(NULL);
 
-    op = *regparse;
+    op = *state->regparse;
     if (!ISMULT(op)) {
         *flagp = flags;
         return(ret);
@@ -431,33 +451,33 @@ regpiece( int *flagp )
     *flagp = (op != '+') ? (WORST|SPSTART) : (WORST|HASWIDTH);
 
     if (op == '*' && (flags&SIMPLE))
-        reginsert(STAR, ret);
+        reginsert(state, STAR, ret);
     else if (op == '*') {
         /* Emit x* as (x&|), where & means "self". */
-        reginsert(BRANCH, ret);            /* Either x */
-        regoptail(ret, regnode(BACK));        /* and loop */
+        reginsert(state, BRANCH, ret);            /* Either x */
+        regoptail(ret, regnode(state, BACK));        /* and loop */
         regoptail(ret, ret);            /* back */
-        regtail(ret, regnode(BRANCH));        /* or */
-        regtail(ret, regnode(NOTHING));        /* null. */
+        regtail(ret, regnode(state, BRANCH));        /* or */
+        regtail(ret, regnode(state, NOTHING));        /* null. */
     } else if (op == '+' && (flags&SIMPLE))
-        reginsert(PLUS, ret);
+        reginsert(state, PLUS, ret);
     else if (op == '+') {
         /* Emit x+ as x(&|), where & means "self". */
-        next = regnode(BRANCH);            /* Either */
+        next = regnode(state, BRANCH);            /* Either */
         regtail(ret, next);
-        regtail(regnode(BACK), ret);        /* loop back */
-        regtail(next, regnode(BRANCH));        /* or */
-        regtail(ret, regnode(NOTHING));        /* null. */
+        regtail(regnode(state, BACK), ret);        /* loop back */
+        regtail(next, regnode(state, BRANCH));        /* or */
+        regtail(ret, regnode(state, NOTHING));        /* null. */
     } else if (op == '?') {
         /* Emit x? as (x|) */
-        reginsert(BRANCH, ret);            /* Either x */
-        regtail(ret, regnode(BRANCH));        /* or */
-        next = regnode(NOTHING);        /* null. */
+        reginsert(state, BRANCH, ret);            /* Either x */
+        regtail(ret, regnode(state, BRANCH));        /* or */
+        next = regnode(state, NOTHING);        /* null. */
         regtail(ret, next);
         regoptail(ret, next);
     }
-    regparse++;
-    if (ISMULT(*regparse))
+    (state->regparse)++;
+    if (ISMULT(*state->regparse))
         FAIL("nested *?+");
 
     return(ret);
@@ -472,62 +492,62 @@ regpiece( int *flagp )
  * separate node; the code is simpler that way and it's not worth fixing.
  */
 static CHARTYPE *
-regatom( int *flagp )
+regatom( parse_data* state, int *flagp )
 {
     register CHARTYPE *ret;
     int flags;
 
     *flagp = WORST;        /* Tentatively. */
 
-    switch (*regparse++) {
+    switch (*state->regparse++) {
     /* FIXME: these chars only have meaning at beg/end of pat? */
     case '^':
-        ret = regnode(BOL);
+        ret = regnode(state, BOL);
         break;
     case '$':
-        ret = regnode(EOL);
+        ret = regnode(state, EOL);
         break;
     case '.':
-        ret = regnode(ANY);
+        ret = regnode(state, ANY);
         *flagp |= HASWIDTH|SIMPLE;
         break;
     case '[': {
             register int classr;
             register int classend;
 
-            if (*regparse == '^') {    /* Complement of range. */
-                ret = regnode(ANYBUT);
-                regparse++;
+            if (*state->regparse == '^') {    /* Complement of range. */
+                ret = regnode(state, ANYBUT);
+                state->regparse++;
             } else
-                ret = regnode(ANYOF);
-            if (*regparse == ']' || *regparse == '-')
-                regc(*regparse++);
-            while (*regparse != '\0' && *regparse != ']') {
-                if (*regparse == '-') {
-                    regparse++;
-                    if (*regparse == ']' || *regparse == '\0')
-                        regc('-');
+                ret = regnode(state, ANYOF);
+            if (*state->regparse == ']' || *state->regparse == '-')
+                regc(state, *state->regparse++);
+            while (*state->regparse != '\0' && *state->regparse != ']') {
+                if (*state->regparse == '-') {
+                    state->regparse++;
+                    if (*state->regparse == ']' || *state->regparse == '\0')
+                        regc(state, '-');
                     else {
-                        classr = UCHARAT(regparse-2)+1;
-                        classend = UCHARAT(regparse);
+                        classr = UCHARAT(state->regparse-2)+1;
+                        classend = UCHARAT(state->regparse);
                         if (classr > classend+1)
                             FAIL("invalid [] range");
                         for (; classr <= classend; classr++)
-                            regc(classr);
-                        regparse++;
+                            regc(state, classr);
+                        state->regparse++;
                     }
                 } else
-                    regc(*regparse++);
+                    regc(state, *state->regparse++);
             }
-            regc('\0');
-            if (*regparse != ']')
+            regc(state, '\0');
+            if (*state->regparse != ']')
                 FAIL("unmatched []");
-            regparse++;
+            state->regparse++;
             *flagp |= HASWIDTH|SIMPLE;
         }
         break;
     case '(':
-        ret = reg(1, &flags);
+        ret = reg(state, 1, &flags);
         if (ret == NULL)
             return(NULL);
         *flagp |= flags&(HASWIDTH|SPSTART);
@@ -544,15 +564,15 @@ regatom( int *flagp )
         FAIL("?+* follows nothing");
         break;
     case '\\':
-        switch (*regparse++) {
+        switch (*state->regparse++) {
         case '\0':
             FAIL("trailing \\");
             break;
         case '<':
-            ret = regnode(WORDA);
+            ret = regnode(state, WORDA);
             break;
         case '>':
-            ret = regnode(WORDZ);
+            ret = regnode(state, WORDZ);
             break;
         /* FIXME: Someday handle \1, \2, ... */
         default:
@@ -572,7 +592,7 @@ regatom( int *flagp )
          * On entry, the char at regparse[-1] is going to go
          * into the string, no matter what it is.  (It could be
          * following a \ if we are entered from the '\' case.)
-         * 
+         *
          * Basic idea is to pick up a good char in  ch  and
          * examine the next char.  If it's *+? then we twiddle.
          * If it's \ then we frozzle.  If it's other magic char
@@ -590,14 +610,14 @@ regatom( int *flagp )
             CHARTYPE *regprev;
             register CHARTYPE ch;
 
-            regparse--;            /* Look at cur char */
-            ret = regnode(EXACTLY);
+            state->regparse--;            /* Look at cur char */
+            ret = regnode(state, EXACTLY);
             for ( regprev = 0 ; ; ) {
-                ch = *regparse++;    /* Get current char */
-                switch (*regparse) {    /* look at next one */
+                ch = *state->regparse++;    /* Get current char */
+                switch (*state->regparse) {    /* look at next one */
 
                 default:
-                    regc(ch);    /* Add cur to string */
+                    regc(state, ch);    /* Add cur to string */
                     break;
 
                 case '.': case '[': case '(':
@@ -606,19 +626,19 @@ regatom( int *flagp )
                 case '\0':
                 /* FIXME, $ and ^ should not always be magic */
                 magic:
-                    regc(ch);    /* dump cur char */
+                    regc(state, ch);    /* dump cur char */
                     goto done;    /* and we are done */
 
                 case '?': case '+': case '*':
                     if (!regprev)     /* If just ch in str, */
                         goto magic;    /* use it */
                     /* End mult-char string one early */
-                    regparse = regprev; /* Back up parse */
+                    state->regparse = regprev; /* Back up parse */
                     goto done;
 
                 case '\\':
-                    regc(ch);    /* Cur char OK */
-                    switch (regparse[1]){ /* Look after \ */
+                    regc(state, ch);    /* Cur char OK */
+                    switch (state->regparse[1]){ /* Look after \ */
                     case '\0':
                     case '<':
                     case '>':
@@ -626,15 +646,15 @@ regatom( int *flagp )
                         goto done; /* Not quoted */
                     default:
                         /* Backup point is \, scan                             * point is after it. */
-                        regprev = regparse;
-                        regparse++; 
+                        regprev = state->regparse;
+                        state->regparse++; 
                         continue;    /* NOT break; */
                     }
                 }
-                regprev = regparse;    /* Set backup point */
+                regprev = state->regparse;    /* Set backup point */
             }
         done:
-            regc('\0');
+            regc(state, '\0');
             *flagp |= HASWIDTH;
             if (!regprev)        /* One char? */
                 *flagp |= SIMPLE;
@@ -649,14 +669,14 @@ regatom( int *flagp )
  - regnode - emit a node
  */
 static CHARTYPE *            /* Location. */
-regnode( int op )
+regnode( parse_data* state, int op )
 {
     register CHARTYPE *ret;
     register CHARTYPE *ptr;
 
-    ret = regcode;
+    ret = state->regcode;
     if (ret == &regdummy) {
-        regsize += 3;
+        state->regsize += 3;
         return(ret);
     }
 
@@ -664,7 +684,7 @@ regnode( int op )
     *ptr++ = op;
     *ptr++ = '\0';        /* Null "next" pointer. */
     *ptr++ = '\0';
-    regcode = ptr;
+    state->regcode = ptr;
 
     return(ret);
 }
@@ -673,12 +693,12 @@ regnode( int op )
  - regc - emit (if appropriate) a byte of code
  */
 static void
-regc( int b )
+regc( parse_data* state, int b )
 {
-    if (regcode != &regdummy)
-        *regcode++ = b;
+    if (state->regcode != &regdummy)
+        *state->regcode++ = b;
     else
-        regsize++;
+        state->regsize++;
 }
 
 /*
@@ -688,6 +708,7 @@ regc( int b )
  */
 static void
 reginsert(
+    parse_data* state,
     CHARTYPE op,
     CHARTYPE *opnd )
 {
@@ -695,14 +716,14 @@ reginsert(
     register CHARTYPE *dst;
     register CHARTYPE *place;
 
-    if (regcode == &regdummy) {
-        regsize += 3;
+    if (state->regcode == &regdummy) {
+        state->regsize += 3;
         return;
     }
 
-    src = regcode;
-    regcode += 3;
-    dst = regcode;
+    src = state->regcode;
+    state->regcode += 3;
+    dst = state->regcode;
     while (src > opnd)
         *--dst = *--src;
 
@@ -756,7 +777,7 @@ regoptail(
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || p == &regdummy || OP(p) != BRANCH)
         return;
-    regtail(OPERAND(p), val);
+    regtail( OPERAND(p), val);
 }
 
 /*
