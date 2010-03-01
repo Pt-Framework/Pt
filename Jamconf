@@ -1,3 +1,5 @@
+ConfigureC++ WITH_LONG_LONG : "#include <iostream>"
+                              "int main() { long long ll = 42; std::cout << ll; }" ;
 
 ConfigureC++ WITH_STDC++_LOCALE : "#include <locale>"
                                   "int main() { return 0; }" ;
@@ -23,7 +25,7 @@ ConfigureC++ WITH_GNU_WINMM : "#include <windows.h>"
                              "#include <mmsystem.h>"
                              "int main() { return timeGetTime(); }"
                             : ""
-                            : "winmm" ; 
+                            : "winmm" ;
 
 ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
                             "#include <mmsystem.h>"

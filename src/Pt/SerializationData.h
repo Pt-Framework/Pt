@@ -161,18 +161,18 @@ class ValueNode : public SerializationNode
             return _value;
         }
 
-        long getBool()
+        bool getBool()
         {
             switch(_type)
             {
                 case Int:
-                    return static_cast<bool>(_variant.l);
+                    return 0 != _variant.l;
 
                 case UInt:
-                    return static_cast<bool>(_variant.ul);
+                    return 0 != _variant.ul;
 
                 case Float:
-                    return static_cast<bool>(_variant.f);
+                    return 0 != _variant.f;
 
                 case String:
                     convert(_variant.b, _value); // fall trough
@@ -190,18 +190,18 @@ class ValueNode : public SerializationNode
             _type = Bool;
         }
 
-        long getInt()
+        long long getInt()
         {
             switch(_type)
             {
                 case Bool:
-                    return static_cast<long>(_variant.b);
+                    return static_cast<long long>(_variant.b);
 
                 case UInt:
-                    return static_cast<long>(_variant.ul);
+                    return static_cast<long long>(_variant.ul);
 
                 case Float:
-                    return static_cast<long>(_variant.f);
+                    return static_cast<long long>(_variant.f);
 
                 case String:
                     convert(_variant.l, _value); // fall trough
@@ -213,24 +213,24 @@ class ValueNode : public SerializationNode
             return _variant.l;
         }
 
-        void setInt(long l)
+        void setInt(long long l)
         {
             _variant.l = l;
             _type = Int;
         }
 
-        unsigned long getUInt()
+        unsigned long long getUInt()
         {
             switch(_type)
             {
                 case Bool:
-                    return static_cast<unsigned long>(_variant.b);
+                    return static_cast<unsigned long long>(_variant.b);
 
                 case Int:
-                    return static_cast<unsigned long>(_variant.l);
+                    return static_cast<unsigned long long>(_variant.l);
 
                 case Float:
-                    return static_cast<unsigned long>(_variant.f);
+                    return static_cast<unsigned long long>(_variant.f);
 
                 case String:
                     convert(_variant.ul, _value); // fall trough
@@ -242,7 +242,7 @@ class ValueNode : public SerializationNode
             return _variant.ul;
         }
 
-        void setUInt(unsigned long ul)
+        void setUInt(unsigned long long ul)
         {
             _variant.ul = ul;
             _type = UInt;
@@ -329,8 +329,8 @@ class ValueNode : public SerializationNode
         union Variant
         {
             bool b;
-            long l;
-            unsigned long ul;
+            long long l;
+            unsigned long long ul;
             double f;
         } _variant;
 };

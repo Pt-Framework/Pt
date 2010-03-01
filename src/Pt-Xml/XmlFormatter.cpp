@@ -142,7 +142,7 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 }
 
 
-void XmlFormatter::addInt(const std::string& name, long value,
+void XmlFormatter::addInt(const std::string& name, long long value,
                           const std::string& id)
 {
     convert(_value, value);
@@ -150,7 +150,7 @@ void XmlFormatter::addInt(const std::string& name, long value,
 }
 
 
-void XmlFormatter::addUInt(const std::string& name, unsigned long value,
+void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
                            const std::string& id)
 {
     convert(_value, value);

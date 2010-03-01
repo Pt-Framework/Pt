@@ -54,10 +54,10 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 		void addBool(const std::string& name, bool value, 
 		             const std::string& id);
 
-		void addInt(const std::string& name, long value, 
+		void addInt(const std::string& name, long long value, 
 		            const std::string& id);
 
-		void addUInt(const std::string& name, unsigned long value, 
+		void addUInt(const std::string& name, unsigned long long value, 
 		             const std::string& id);
 
 		void addFloat(const std::string& name, double value, 

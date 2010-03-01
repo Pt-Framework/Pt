@@ -334,7 +334,7 @@ void SerializationInfo::setValue(bool b)
 
 void SerializationInfo::getValue(short& s) const
 {
-    long l = 0;
+    long long l = 0;
     this->getValue(l);
     // TODO: consider SerializationError on overflow
     s = static_cast<short>(l);
@@ -343,14 +343,23 @@ void SerializationInfo::getValue(short& s) const
 
 void SerializationInfo::getValue(int& i) const
 {
-    long l = 0;
+    long long l = 0;
     this->getValue(l);
     // TODO: consider SerializationError on overflow
     i = static_cast<int>(l);
 }
 
 
-void SerializationInfo::getValue(long& l) const
+void SerializationInfo::getValue(long& i) const
+{
+    long long l = 0;
+    this->getValue(l);
+    // TODO: consider SerializationError on overflow
+    i = static_cast<int>(l);
+}
+
+
+void SerializationInfo::getValue(long long & l) const
 {
     if( this->category() != Scalar )
         throw SerializationError("expected integer value");
@@ -358,7 +367,8 @@ void SerializationInfo::getValue(long& l) const
     l = static_cast<ValueNode*>(_node)->getInt();
 }
 
-void SerializationInfo::setValue(long l)
+
+void SerializationInfo::setValue(long long l)
 {
     if( category() == Context )
         return;
@@ -370,23 +380,32 @@ void SerializationInfo::setValue(long l)
 
 void SerializationInfo::getValue(unsigned short& us) const
 {
-    unsigned long ul = 0;
+    unsigned long long ul = 0;
     this->getValue(ul);
     // TODO: consider SerializationError on overflow
-    us = static_cast<int>(ul);
+    us = static_cast<unsigned short>(ul);
 }
 
 
 void SerializationInfo::getValue(unsigned int& ui) const
 {
-    unsigned long ul = 0;
+    unsigned long long ul = 0;
     this->getValue(ul);
     // TODO: consider SerializationError on overflow
-    ui = static_cast<int>(ul);
+    ui = static_cast<unsigned int>(ul);
 }
 
 
-void SerializationInfo::getValue(unsigned long& ul) const
+void SerializationInfo::getValue(unsigned long& ui) const
+{
+    unsigned long long ul = 0;
+    this->getValue(ul);
+    // TODO: consider SerializationError on overflow
+    ui = static_cast<unsigned long>(ul);
+}
+
+
+void SerializationInfo::getValue(unsigned long long& ul) const
 {
     if( this->category() != Scalar)
         throw SerializationError("expected integer value");
@@ -395,7 +414,7 @@ void SerializationInfo::getValue(unsigned long& ul) const
 }
 
 
-void SerializationInfo::setValue(unsigned long ul)
+void SerializationInfo::setValue(unsigned long long ul)
 {
     if( category() == Context )
         return;

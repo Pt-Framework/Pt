@@ -161,30 +161,40 @@ class PT_API SerializationInfo
         void getValue(short& s) const;
 
         void setValue(short s)
-        { this->setValue( long(s) ); }
+        { this->setValue( static_cast<long long>(s) ); }
 
         void getValue(int& i) const;
 
         void setValue(int i)
-        { this->setValue( long(i) ); }
+        { this->setValue( static_cast<long long>(i) ); }
 
         void getValue(long& l) const;
 
-        void setValue(long l);
+        void setValue(long l)
+        { this->setValue( static_cast<long long>(l) ); }
+
+        void getValue(long long& l) const;
+
+        void setValue(long long l);
 
         void getValue(unsigned short& us) const;
 
         void setValue(unsigned short us)
-        { this->setValue( static_cast<unsigned long>(us) ); }
+        { this->setValue( static_cast<unsigned long long>(us) ); }
 
         void getValue(unsigned int& ui) const;
 
         void setValue(unsigned int ui)
-        { this->setValue( static_cast<unsigned long>(ui) ); }
+        { this->setValue( static_cast<unsigned long long>(ui) ); }
 
         void getValue(unsigned long& ul) const;
 
-        void setValue(unsigned long ul);
+        void setValue(unsigned long ul)
+        { this->setValue( static_cast<unsigned long long>(ul) ); }
+
+        void getValue(unsigned long long& ul) const;
+
+        void setValue(unsigned long long ul);
 
         void getValue(float& f) const;
 
@@ -704,6 +714,32 @@ inline void operator >>=(const SerializationInfo& si, unsigned long& n)
 
 
 inline void operator <<=(SerializationInfo& si, unsigned long n)
+{
+    si.setValue(n);
+    si.setTypeName("int");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, long long& n)
+{
+    si.getValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, long long n)
+{
+    si.setValue(n);
+    si.setTypeName("int");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, unsigned long long& n)
+{
+    si.getValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, unsigned long long n)
 {
     si.setValue(n);
     si.setTypeName("int");
