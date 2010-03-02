@@ -60,7 +60,7 @@ class RegExpTest : public Pt::Unit::TestSuite
             // int r =  regexec( exp, str );
 
             // std::cerr << "Result: " << r << std::endl;
-            // for(int n = 0; n < 10 ; ++n)
+            // for(int n = 0; n < 10 && exp->startp[n]; ++n)
             // {
             //     std::cerr << n <<": " << exp->startp[n] - str  << std::endl;
             //     std::cerr << n <<": " << exp->endp[n] - str << std::endl;
@@ -75,7 +75,7 @@ class RegExpTest : public Pt::Unit::TestSuite
             int r =  regexec( exp, const_cast<Pt::Char*>(cstr) );
 
             std::cerr << "Result: " << r << std::endl;
-            for(int n = 0; n < 10 ; ++n)
+            for(int n = 0; n < 10 && exp->startp[n] ; ++n)
             {
                 std::cerr << n <<": " << exp->startp[n] - cstr  << std::endl;
                 std::cerr << n <<": " << exp->endp[n] - cstr << std::endl;
