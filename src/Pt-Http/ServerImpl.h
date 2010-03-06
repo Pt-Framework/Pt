@@ -53,7 +53,7 @@ class Worker;
 class Listener;
 class ServerImpl;
 
-class IdleSocketEvent : public Event
+class IdleSocketEvent : public BasicEvent<IdleSocketEvent>
 {
         Socket* _socket;
 
@@ -62,46 +62,37 @@ class IdleSocketEvent : public Event
             : _socket(socket)
             { }
 
-        Event& clone(Allocator& allocator) const;
-
-        void destroy(Allocator& allocator);
-
-        const std::type_info& typeInfo() const;
-
         Socket* socket() const   { return _socket; }
 
 };
 
-class ServerStartEvent : public Event
+class ServerStartEvent : public BasicEvent<ServerStartEvent>
 {
         const ServerImpl* _server;
 
     public:
-        explicit ServerStartEvent(ServerImpl* server)
+        explicit ServerStartEvent(const ServerImpl* server)
             : _server(server)
             { }
-
-        Event& clone(Allocator& allocator) const;
-
-        void destroy(Allocator& allocator);
-
-        const std::type_info& typeInfo() const;
 
         const ServerImpl* server() const   { return _server; }
 
 };
 
-class NoWaitingThreadsEvent : public Event
+class NoWaitingThreadsEvent : public BasicEvent<NoWaitingThreadsEvent>
 {
+};
+
+class ThreadTerminatedEvent : public BasicEvent<ThreadTerminatedEvent>
+{
+        Worker* _worker;
+
     public:
-        NoWaitingThreadsEvent()  { }
+        explicit ThreadTerminatedEvent(Worker* worker)
+            : _worker(worker)
+            { }
 
-        Event& clone(Allocator& allocator) const;
-
-        void destroy(Allocator& allocator);
-
-        const std::type_info& typeInfo() const;
-
+        Worker* worker() const   { return _worker; }
 };
 
 class ServerImpl : public Connectable
@@ -137,6 +128,7 @@ class ServerImpl : public Connectable
         void maxThreads(unsigned m)           { _maxThreads = m; }
 
         void onInput(Socket& _socket);
+        void onKeepAliveTimeout(Socket& _socket);
 
         bool isTerminating() const
         { return _runmode == Server::Terminating; }
@@ -149,7 +141,10 @@ class ServerImpl : public Connectable
         }
 
         void addIdleSocket(Socket* _socket);
-        void onEvent(const Event& event);
+        void onIdleSocket(const IdleSocketEvent& event);
+        void onNoWaitingThreads(const NoWaitingThreadsEvent& event);
+        void onThreadTerminated(const ThreadTerminatedEvent& event);
+        void onServerStart(const ServerStartEvent& event);
         void start();
         void terminate();
 

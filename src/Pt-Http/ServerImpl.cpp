@@ -33,57 +33,15 @@
 
 #define log_debug(x)
 #define log_info(x)
+#define log_warn(x)
+#define log_error(x)
+#define log_fatal(x)
 #define log_trace(x)
 
 namespace Pt
 {
 namespace Http
 {
-
-Event& IdleSocketEvent::clone(Allocator& allocator) const
-{
-    return *(new IdleSocketEvent(*this));
-}
-
-void IdleSocketEvent::destroy(Allocator& allocator)
-{
-    delete this;
-}
-
-const std::type_info& IdleSocketEvent::typeInfo() const
-{
-    return typeid(*this);
-}
-
-Event& ServerStartEvent::clone(Allocator& allocator) const
-{
-    return *(new ServerStartEvent(*this));
-}
-
-void ServerStartEvent::destroy(Allocator& allocator)
-{
-    delete this;
-}
-
-const std::type_info& ServerStartEvent::typeInfo() const
-{
-    return typeid(*this);
-}
-
-Event& NoWaitingThreadsEvent::clone(Allocator& allocator) const
-{
-    return *(new NoWaitingThreadsEvent(*this));
-}
-
-void NoWaitingThreadsEvent::destroy(Allocator& allocator)
-{
-    delete this;
-}
-
-const std::type_info& NoWaitingThreadsEvent::typeInfo() const
-{
-    return typeid(*this);
-}
 
 ServerImpl::ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& runmodeChanged)
     : _eventLoop(eventLoop),
@@ -97,15 +55,29 @@ ServerImpl::ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& ru
       _runmodeChanged(runmodeChanged),
       _runmode(Server::Stopped)
 {
-    connect(_eventLoop.event, *this, &ServerImpl::onEvent);
+    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onIdleSocket));
+    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onNoWaitingThreads));
+    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onThreadTerminated));
+    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onServerStart));
+
     connect(_eventLoop.exited, *this, &ServerImpl::terminate);
+
     _eventLoop.commitEvent(ServerStartEvent(this));
 }
 
 ServerImpl::~ServerImpl()
 {
     if (_runmode == Server::Running)
-        terminate();
+    {
+        try
+        {
+            terminate();
+        }
+        catch (const std::exception& e)
+        {
+            log_fatal("exception in http-server termination occured: " << e.what());
+        }
+    }
 }
 
 void ServerImpl::listen(const std::string& ip, unsigned short int port)
@@ -177,7 +149,6 @@ void ServerImpl::terminate()
         delete *it;
     _listener.clear();
 
-
     while (!_queue.empty())
         delete _queue.get();
 
@@ -193,10 +164,19 @@ void ServerImpl::noWaitingThreads()
 void ServerImpl::threadTerminated(Worker* worker)
 {
     log_info("thread " << static_cast<void*>(worker) << " terminated");
+
     System::MutexLock lock(_threadMutex);
+
     _threads.erase(worker);
-    _terminatedThreads.insert(worker);
-    _threadTerminated.signal();
+    if (_runmode == Server::Running)
+    {
+        _eventLoop.commitEvent(ThreadTerminatedEvent(worker));
+    }
+    else
+    {
+        _terminatedThreads.insert(worker);
+        _threadTerminated.signal();
+    }
 }
 
 void ServerImpl::addIdleSocket(Socket* _socket)
@@ -206,34 +186,72 @@ void ServerImpl::addIdleSocket(Socket* _socket)
     _eventLoop.commitEvent(IdleSocketEvent(_socket));
 }
 
-void ServerImpl::onEvent(const Event& event)
+void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
 {
-    if (event.typeInfo() == typeid(IdleSocketEvent))
+    Socket* socket = event.socket();
+
+    log_debug("add idle socket " << static_cast<void*>(socket) << " to selector");
+
+    _idleSockets.insert(socket);
+    socket->setSelector(&_eventLoop);
+    connect(socket->inputReady, *this, &ServerImpl::onInput);
+    connect(socket->keepAliveTimeout, *this, &ServerImpl::onKeepAliveTimeout);
+}
+
+void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
+{
+    System::MutexLock lock(_threadMutex);
+
+    if (_threads.size() >= maxThreads())
     {
-        const IdleSocketEvent& idleSocketEvent = static_cast<const IdleSocketEvent&>(event);
-        Socket* socket = idleSocketEvent.socket();
-
-        log_debug("add idle socket " << static_cast<void*>(socket) << " to selector");
-
-        _idleSockets.insert(socket);
-        socket->setSelector(&_eventLoop);
-        connect(socket->inputReady, *this, &ServerImpl::onInput);
+        log_warn("thread limit " << maxThreads() << " reached");
+        return;
     }
-    else if (event.typeInfo() == typeid(NoWaitingThreadsEvent))
+
+    try
     {
-        System::MutexLock lock(_threadMutex);
         Worker* worker = new Worker(*this);
-        _threads.insert(worker);
-        log_info("create thread " << static_cast<void*>(worker));
-        worker->start();
-    }
-    else if (event.typeInfo() == typeid(ServerStartEvent))
-    {
-        const ServerStartEvent& serverStartEvent = static_cast<const ServerStartEvent&>(event);
-        if (serverStartEvent.server() == this)
+        try
         {
-            start();
+            log_info("create thread " << static_cast<void*>(worker));
+            worker->start();
+            _threads.insert(worker);
+
+            log_debug(_threads.size() << " threads running");
         }
+        catch (const std::exception&)
+        {
+            delete worker;
+            throw;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        log_warn("failed to create thread: " << e.what());
+    }
+}
+
+void ServerImpl::onThreadTerminated(const ThreadTerminatedEvent& event)
+{
+    System::MutexLock lock(_threadMutex);
+    log_trace("thread terminated (" << static_cast<void*>(event.worker()) << ") " << _threads.size() << " threads left");
+    try
+    {
+        event.worker()->join();
+    }
+    catch (const std::exception& e)
+    {
+        log_error("failed to join thread: " << e.what());
+    }
+
+    delete event.worker();
+}
+
+void ServerImpl::onServerStart(const ServerStartEvent& event)
+{
+    if (event.server() == this)
+    {
+        start();
     }
 }
 
@@ -243,8 +261,22 @@ void ServerImpl::onInput(Socket& _socket)
     log_debug("search socket " << static_cast<void*>(&_socket) << " in idle sockets");
     _idleSockets.erase(&_socket);
 
-    disconnect(_socket.inputReady, *this, &ServerImpl::onInput);
-    _queue.put(&_socket);
+    if (_socket.isConnected())
+    {
+        disconnect(_socket.inputReady, *this, &ServerImpl::onInput);
+        _queue.put(&_socket);
+    }
+    else
+    {
+        delete &_socket;
+    }
+}
+
+void ServerImpl::onKeepAliveTimeout(Socket& _socket)
+{
+    log_debug("keep alive timeout; search socket " << static_cast<void*>(&_socket) << " in idle sockets");
+    _idleSockets.erase(&_socket);
+    delete &_socket;
 }
 
 void ServerImpl::addService(const std::string& url, Service& service)
@@ -290,7 +322,7 @@ Responder* ServerImpl::getResponder(const Request& request)
         Responder* resp = it->second->createResponder(request);
         if (resp)
         {
-            log_debug("responder created");
+            log_debug("got responder");
             return resp;
         }
     }

@@ -60,11 +60,11 @@ void Worker::run()
         {
             // do blocking accept
             socket->accept();
-            log_debug("accepted");
+            log_debug("connection accepted from " << socket->getPeerAddr());
 
             if (_server.isTerminating())
             {
-                log_debug("server is terminating - quit thread (l)");
+                log_debug("server is terminating - quit thread");
                 _server._queue.put(socket);
                 break;
             }

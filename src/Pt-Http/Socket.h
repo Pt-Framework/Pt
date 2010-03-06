@@ -87,6 +87,7 @@ class Socket : public Net::TcpSocket, public Connectable
         const Reply& reply() const     { return _reply; }
 
         Signal<Socket&> inputReady;
+        Signal<Socket&> keepAliveTimeout;
 
         MethodSlot<void, Socket, System::StreamBuffer&> inputSlot;
         MethodSlot<bool, Socket, System::StreamBuffer&> outputSlot;

@@ -23,16 +23,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_EVENT_H
 #define PT_EVENT_H
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <typeinfo>
+#include <Pt/Allocator.h>
 
-namespace Pt {
-
-	class Allocator;
+namespace Pt
+{
 
     /** \brief Base class for all event types.
 
@@ -52,10 +53,40 @@ namespace Pt {
             virtual Event& clone(Allocator& allocator) const = 0;
 
             virtual void destroy(Allocator& allocator)= 0;
-            
+
             /** \brief Returns the type info for this class of events.
               */
             virtual const std::type_info& typeInfo() const = 0;
+    };
+
+    template <typename T>
+    class BasicEvent : public Event
+    {
+        public:
+            BasicEvent()
+            {
+            }
+
+            BasicEvent(const BasicEvent& src)
+            {
+            }
+
+            virtual const std::type_info& typeInfo() const
+            {
+                return typeid(T);
+            }
+
+            virtual Event& clone(Allocator& allocator) const
+            {
+                void* pEvent = allocator.allocate(sizeof(T));
+                return *(new (pEvent)T(*static_cast<const T*>(this)));
+            }
+
+            virtual void destroy(Allocator& allocator)
+            {
+                this->~BasicEvent();
+                allocator.deallocate(this, sizeof(T));
+            }
     };
 
 } // namespace Pt
