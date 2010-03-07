@@ -145,7 +145,7 @@ namespace System
     }
 
     template <typename T>
-    void Queue<T>::put(Queue<T>::value_type element)
+    void Queue<T>::put(typename Queue<T>::value_type element)
     {
         MutexLock lock(_mutex);
 
