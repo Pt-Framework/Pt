@@ -50,7 +50,7 @@ class SettingsReader
                                 return this->onSpace(c, reader);
 
                             case '"':
-                                return this->onQoute(c, reader);
+                                return this->onQuote(c, reader);
 
                             case ',':
                                 return this->onComma(c, reader);
@@ -98,7 +98,7 @@ class SettingsReader
                     return this;
                 }
 
-                virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+                virtual State* onQuote(Pt::Char c, SettingsReader& reader)
                 {
                     this->syntaxError(reader.line());
                     return this;
@@ -204,12 +204,12 @@ class SettingsReader
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
                     this->syntaxError(reader.line());
 
-                return OnQoutedValue::instance();
+                return OnQuotedValue::instance();
             }
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
@@ -361,12 +361,18 @@ class SettingsReader
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
-                return this;
+                if (c.value() == '\n')
+                {
+                    reader.pushValue();
+                    return AfterValue::instance();
+                }
+                else
+                    return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
-                return OnQoutedValue::instance();
+                return OnQuotedValue::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -390,7 +396,7 @@ class SettingsReader
         };
 
 
-        class OnQoutedValue : public State
+        class OnQuotedValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
@@ -398,10 +404,10 @@ class SettingsReader
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushValue();
-                return AfterQoutedValue::instance();
+                return AfterQuotedValue::instance();
             }
 
             virtual State* onComma(Pt::Char c, SettingsReader& reader)
@@ -470,7 +476,7 @@ class SettingsReader
             public:
                 static State* instance()
                 {
-                    static OnQoutedValue _state;
+                    static OnQuotedValue _state;
                     return &_state;
                 }
         };
@@ -522,9 +528,9 @@ class SettingsReader
         };
 
 
-        class AfterQoutedValue : public AfterValue
+        class AfterQuotedValue : public AfterValue
         {
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
                 /// TODO: multi-line strings
                 return this;
@@ -540,7 +546,7 @@ class SettingsReader
             public:
                 static State* instance()
                 {
-                    static AfterQoutedValue _state;
+                    static AfterQuotedValue _state;
                     return &_state;
                 }
         };
@@ -656,9 +662,9 @@ class SettingsReader
                 return OnCloseCurly::instance();
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
-                return OnQoutedValue::instance();
+                return OnQuotedValue::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -736,9 +742,9 @@ class SettingsReader
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
-                return OnQoutedTypedValue::instance();
+                return OnQuotedTypedValue::instance();
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
@@ -784,9 +790,9 @@ class SettingsReader
         };
 
 
-        class OnQoutedTypedValue : public OnQoutedValue
+        class OnQuotedTypedValue : public OnQuotedValue
         {
-            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
+            virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
                 return EndTypedValue::instance();
             }
@@ -794,7 +800,7 @@ class SettingsReader
             public:
                 static State* instance()
                 {
-                    static OnQoutedTypedValue _state;
+                    static OnQuotedTypedValue _state;
                     return &_state;
                 }
         };
@@ -896,13 +902,13 @@ static struct SettingsReaderInit
         SettingsReader::OnEqual::instance();
         SettingsReader::OnCurly::instance();
         SettingsReader::OnCloseCurly::instance();
-        SettingsReader::OnQoutedValue::instance();
-        SettingsReader::AfterQoutedValue::instance();
+        SettingsReader::OnQuotedValue::instance();
+        SettingsReader::AfterQuotedValue::instance();
         SettingsReader::OnRValue::instance();
         SettingsReader::AfterRValue::instance();
         SettingsReader::BeginTypedValue::instance();
         SettingsReader::OnTypedValue::instance();
-        SettingsReader::OnQoutedTypedValue::instance();
+        SettingsReader::OnQuotedTypedValue::instance();
         SettingsReader::EndTypedValue::instance();
         SettingsReader::AfterValue::instance();
     }
