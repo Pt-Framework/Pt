@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace System {
 
-class EventLoop;
+class EventLoopBase;
 
 }
 
@@ -52,8 +52,8 @@ class ServerImpl;
 class PT_HTTP_API Server : private Pt::NonCopyable
 {
     public:
-        explicit Server(System::EventLoop& eventLoop);
-        Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port);
+        explicit Server(System::EventLoopBase& eventLoop);
+        Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port);
         ~Server();
 
         void listen(const std::string& ip, unsigned short int port);
@@ -79,7 +79,8 @@ class PT_HTTP_API Server : private Pt::NonCopyable
           Stopped,
           Starting,
           Running,
-          Terminating
+          Terminating,
+          Failed
         };
 
         Signal<Runmode> runmodeChanged;

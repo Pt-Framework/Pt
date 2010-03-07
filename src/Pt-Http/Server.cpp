@@ -34,12 +34,12 @@ namespace Pt {
 
 namespace Http {
 
-Server::Server(System::EventLoop& eventLoop)
+Server::Server(System::EventLoopBase& eventLoop)
     : _impl(new ServerImpl(eventLoop, runmodeChanged))
 {
 }
 
-Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port)
+Server::Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port)
     : _impl(new ServerImpl(eventLoop, runmodeChanged))
 {
     _impl->listen(ip, port);
@@ -47,6 +47,12 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 
 Server::~Server()
 {
+    if (!_impl)
+        return;
+
+    if (_impl->runmode() == Running)
+        _impl->terminate();
+
     delete _impl;
 }
 

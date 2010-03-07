@@ -44,7 +44,7 @@
 namespace Pt
 {
 
-class EventLoop;
+class EventLoopBase;
 
 namespace Http
 {
@@ -98,7 +98,7 @@ class ThreadTerminatedEvent : public BasicEvent<ThreadTerminatedEvent>
 class ServerImpl : public Connectable
 {
     public:
-        ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& runmodeChanged);
+        ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>& runmodeChanged);
         ~ServerImpl();
 
         void listen(const std::string& ip, unsigned short int port);
@@ -133,6 +133,10 @@ class ServerImpl : public Connectable
         bool isTerminating() const
         { return _runmode == Server::Terminating; }
 
+        void terminate();
+        Server::Runmode runmode() const
+        { return _runmode; }
+
     private:
         void runmode(Server::Runmode runmode)
         {
@@ -146,12 +150,11 @@ class ServerImpl : public Connectable
         void onThreadTerminated(const ThreadTerminatedEvent& event);
         void onServerStart(const ServerStartEvent& event);
         void start();
-        void terminate();
 
         friend class Worker;
 
         ////////////////////////////////////////////////////
-        System::EventLoop& _eventLoop;
+        System::EventLoopBase& _eventLoop;
 
         std::size_t _readTimeout;
         std::size_t _writeTimeout;
