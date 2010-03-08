@@ -29,8 +29,6 @@
 #include "Socket.h"
 #include "ServerImpl.h"
 #include <cassert>
-#include <unistd.h>
-#include <fcntl.h>
 
 #define log_define(a)
 #define log_trace(a)
