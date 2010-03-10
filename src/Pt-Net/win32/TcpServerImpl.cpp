@@ -58,8 +58,9 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
-, _selectorHandle(INVALID_HANDLE_VALUE)
+, _currentHandle(_waitEvent)
 {
+    ResetEvent(_currentHandle);
 }
 
 TcpServerImpl::~TcpServerImpl()
@@ -75,7 +76,8 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-	_fd = WSASocket(domain, type, protocol, NULL , 0, WSA_FLAG_OVERLAPPED);
+    _fd = ::socket(domain, type, protocol);
+	//_fd = WSASocket(domain, type, protocol, NULL , 0, 0);
 
     if (_fd == INVALID_SOCKET)
     {
@@ -83,7 +85,6 @@ void TcpServerImpl::create(int domain, int type, int protocol)
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
 
-    attachEvent(_waitEvent, FD_ACCEPT);
 }
 
 void TcpServerImpl::attachEvent(HANDLE ev, long events)
@@ -156,6 +157,8 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
                     throw System::SystemError("listen");
             }
 
+            attachEvent(_currentHandle, FD_ACCEPT);
+
             return;
         }
     }
@@ -197,17 +200,18 @@ void TcpServerImpl::attach(System::SelectorBase& s)
 void TcpServerImpl::detach(System::SelectorBase& s)
 {
     log_debug("detach from selector");
-
-	if( _selectorHandle != INVALID_HANDLE_VALUE)
-		attachEvent(_selectorHandle, 0);
+ 
 }
 
 bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     log_debug("setWaitHandle");
 
-	_selectorHandle = h;
-    attachEvent(_selectorHandle, FD_ACCEPT);
+    if(_currentHandle == h)
+        return true;
+
+	_currentHandle = h;
+    attachEvent(_currentHandle, FD_ACCEPT);
     avail = false;
     return true;
 }
@@ -217,13 +221,18 @@ void TcpServerImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
     log_debug("getWaitHandles");
 }
 
+HANDLE TcpServerImpl::waitHandle() const
+{
+    return _currentHandle;
+}
+
 bool TcpServerImpl::checkEvent()
 {
     log_debug("checkEvent");
 
     WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd, 0, &events) == SOCKET_ERROR)
+    if(WSAEnumNetworkEvents(_fd, _currentHandle, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");
 
     if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)

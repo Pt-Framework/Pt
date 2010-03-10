@@ -71,10 +71,12 @@ class TcpSocketImpl : public System::SelectableImpl
 		WSABUF		  _receiveBuffer;
 		bool          _isConnected;
 		long		  _eventFlags;
+        DWORD         _events;
 
-		void attachEvent(HANDLE ev, long events);
+        void attachEvent(HANDLE ev, long events);
 		size_t checkReceiveResult(bool& eof);
 		size_t TcpSocketImpl::checkSendResult();
+
 
     public:
 
@@ -124,9 +126,8 @@ class TcpSocketImpl : public System::SelectableImpl
 			
         bool wait(std::size_t msecs);
 
-        void attach(System::SelectorBase& sb)
-		{}
-        
+        void attach(System::SelectorBase& sb);
+		       
 
         void detach(System::SelectorBase& sb);
 
@@ -144,3 +145,4 @@ class TcpSocketImpl : public System::SelectableImpl
 } // namespace Pt
 
 #endif
+

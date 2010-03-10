@@ -59,7 +59,7 @@ class TcpServerImpl : public System::SelectableImpl
         SOCKADDR			_servaddr;
         WSAEVENT			_waitEvent;
         Pt::System::Mutex	_mutex;
-		HANDLE				_selectorHandle;
+		HANDLE				_currentHandle;
 
         void attachEvent(HANDLE ev, long events);
 
@@ -76,6 +76,7 @@ class TcpServerImpl : public System::SelectableImpl
         inline SOCKET fd() const
         { return _fd; }
 
+        HANDLE waitHandle() const;
         bool wait(std::size_t msecs);
 
         void attach(System::SelectorBase& s);
