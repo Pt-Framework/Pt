@@ -175,11 +175,18 @@ void TcpSocketImpl::endConnect()
 	if( _isConnected )
 		return;
 
-	if(!this->wait(_timeout))
+
+	HANDLE ev = WSACreateEvent();
+
+	attachEvent(ev, FD_CONNECT);
+
+	if(WaitForSingleObject( ev, 1000 ) == WAIT_TIMEOUT)
 	{	
 		close();
 		throw System::IOTimeout();
 	}
+
+	WSACloseEvent(ev);
 
 	_isConnected = true;
 
@@ -314,37 +321,47 @@ size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
 size_t TcpSocketImpl::endRead(bool& eof)
 {
-	DWORD flags = 0;
-	DWORD numberOfBytesReceived;
-
-	_eventFlags &= ~FD_READ;
+    _eventFlags &= ~FD_READ;
 	attachEvent(_currentEventHandle, _eventFlags);
 
-	int rc = WSARecv(_fd, &_receiveBuffer, 1, &numberOfBytesReceived, &flags, NULL, NULL);		
+    int len =  ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		
 
-	if (rc != SOCKET_ERROR)
-		return numberOfBytesReceived; 
-
-    DWORD error = WSAGetLastError();
-	if(WSAECONNRESET == error) 
-	{
-		eof = true;
-		return 0;
-	}
-    else if(WSAEWOULDBLOCK == error)
+    if( len == -1)
     {
-        return 0;
+        int error = WSAGetLastError();
+
+        switch(error)
+        {
+			case WSAEWOULDBLOCK:
+			{
+				HANDLE ev = WSACreateEvent();
+
+				attachEvent(ev, FD_READ);
+
+				if(WaitForSingleObject(ev,1000) == WAIT_TIMEOUT)
+				{
+					attachEvent(_currentEventHandle, _eventFlags);
+					WSACloseEvent(ev);
+					eof = true;
+					return 0;
+				}
+
+				len =  ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		    
+				attachEvent(_currentEventHandle, _eventFlags);
+				WSACloseEvent(ev);
+			}
+			break;
+			case WSAECONNRESET:
+				eof = true;
+			break;
+        }
+		
     }
-	else
-	{
-        std::stringstream ss;
-        ss<<std::string("endRead failed error=");
-        ss<<WSAGetLastError();
 
-		throw System::SystemError( ss.str(), PT_SOURCEINFO);
-	}
+	if( len == 0)
+		eof = true;
 
-	return numberOfBytesReceived;
+    return len;
 }
 
 size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
