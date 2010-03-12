@@ -34,7 +34,6 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
 #include <sstream>
-
 #define log_debug(x)
 
 namespace Pt {
@@ -77,11 +76,18 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
         log_debug("Error at socket(): "<< WSAGetLastError());
         throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
     }
+
+	//Close the socket on close no delay time
+    struct linger ling;
+    ling.l_onoff = 0;
+    ling.l_linger = 0;
+
+    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
 }
 
 void TcpSocketImpl::cancel()
 {
-    //TODO: cancaling
+    //TODO: canceling
 }
 
 void TcpSocketImpl::close()
@@ -213,28 +219,20 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
     _fd = ::WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
+   
+	if( _fd == SOCKET_ERROR)
+    {
+        log_debug("accept failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("accept failed") );
+    }
+		
+	//Close the socket on close no delay time
+    struct linger ling;
+    ling.l_onoff = 0;
+    ling.l_linger = 0;
 
-	if(_fd == INVALID_SOCKET)
-	{
-        int error = WSAGetLastError();       
+    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
 
-        if( error == WSAEWOULDBLOCK)
-        {
-            WaitForSingleObject( server.impl().waitHandle(), INFINITE );
-            
-            _fd = ::WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
-            ResetEvent( server.impl().waitHandle());
-
-            if(_fd == INVALID_SOCKET)
-                throw System::SystemError("accept");	
-
-        }
-        else
-        {
-		    throw System::SystemError("accept");	
-        }
-	}
-    
     _isConnected = true;
 }
 

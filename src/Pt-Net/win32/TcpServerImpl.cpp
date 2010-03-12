@@ -37,6 +37,7 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
+#include <Mswsock.h>
 
 #define log_debug(x)
 
@@ -47,10 +48,14 @@ namespace Net {
 static struct WsaInit
 {
     WsaInit()
-    { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd); }
+    { 
+		WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd); 
+	}
 
     ~WsaInit()
-    { WSACleanup(); }
+    { 
+		WSACleanup(); 
+	}
 } wsaInit;
 
 
@@ -60,7 +65,7 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 , _waitEvent(WSACreateEvent())
 , _currentHandle(_waitEvent)
 {
-    ResetEvent(_currentHandle);
+    WSAResetEvent(_currentHandle);
 }
 
 TcpServerImpl::~TcpServerImpl()
@@ -76,8 +81,8 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-    _fd = ::socket(domain, type, protocol);
-	//_fd = WSASocket(domain, type, protocol, NULL , 0, 0);
+    //_fd = ::socket(domain, type, protocol);
+	_fd = WSASocket(domain, type, protocol, NULL , 0, 0);
 
     if (_fd == INVALID_SOCKET)
     {
@@ -85,6 +90,15 @@ void TcpServerImpl::create(int domain, int type, int protocol)
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
 
+	//Blocking socket
+	u_long argp = 0;
+	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+
+	//Close on close
+    struct linger ling;
+    ling.l_onoff = 0;
+    ling.l_linger = 0;
+    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
 }
 
 void TcpServerImpl::attachEvent(HANDLE ev, long events)
@@ -92,7 +106,7 @@ void TcpServerImpl::attachEvent(HANDLE ev, long events)
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
         log_debug("Set event failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("attach event to socket failed") );
+        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
     }
 }
 
@@ -100,6 +114,8 @@ void TcpServerImpl::close()
 {
     if (_fd == INVALID_SOCKET)
         return;
+
+    WSASetEvent(_currentHandle); 
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -145,7 +161,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
           // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            log_debug("listen");
+            log_debug("listen");            
 
             if (::listen(_fd, backlog) == SOCKET_ERROR)
             {
@@ -157,8 +173,6 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
                     throw System::SystemError("listen");
             }
 
-            attachEvent(_currentHandle, FD_ACCEPT);
-
             return;
         }
     }
@@ -169,6 +183,8 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
 
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
+
+	attachEvent(_currentHandle, FD_ACCEPT);
     log_debug("wait " << msecs);
 
     // convert unsigned to signed
@@ -182,9 +198,9 @@ bool TcpServerImpl::wait(std::size_t umsecs)
         msecs = std::numeric_limits<int>::max();
     }
 
-    if(WSAWaitForMultipleEvents(1, &_waitEvent, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
+    if(WSAWaitForMultipleEvents(1, &_currentHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
     {
-        WSAResetEvent(_waitEvent);
+        WSAResetEvent(_currentHandle);
 		_server.connectionPending.send(_server);
         return true;
     }
