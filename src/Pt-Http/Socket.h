@@ -69,6 +69,7 @@ class Socket : public Net::TcpSocket, public Connectable
         ~Socket();
 
         void accept();
+        bool hasAccepted() const  { return _accepted; }
 
         void setSelector(System::SelectorBase* s);
         void removeSelector();
@@ -87,7 +88,9 @@ class Socket : public Net::TcpSocket, public Connectable
         const Reply& reply() const     { return _reply; }
 
         Signal<Socket&> inputReady;
-        Signal<Socket&> keepAliveTimeout;
+        Signal<Socket&> timeout;
+
+        System::StreamBuffer& buffer()         { return _stream.buffer(); }
 
         MethodSlot<void, Socket, System::StreamBuffer&> inputSlot;
         MethodSlot<bool, Socket, System::StreamBuffer&> outputSlot;
@@ -107,6 +110,7 @@ class Socket : public Net::TcpSocket, public Connectable
         Responder* _responder;
         System::IOStream _stream;
 
+        bool _accepted;
 };
 
 } // namespace Http

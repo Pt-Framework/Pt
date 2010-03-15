@@ -56,6 +56,7 @@ ServerImpl::ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>
       _runmode(Server::Stopped)
 {
     _eventLoop.event.subscribe(slot(*this, &ServerImpl::onIdleSocket));
+    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onKeepAliveTimeout));
     _eventLoop.event.subscribe(slot(*this, &ServerImpl::onNoWaitingThreads));
     _eventLoop.event.subscribe(slot(*this, &ServerImpl::onThreadTerminated));
     _eventLoop.event.subscribe(slot(*this, &ServerImpl::onServerStart));
@@ -202,7 +203,7 @@ void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
     _idleSockets.insert(socket);
     socket->setSelector(&_eventLoop);
     connect(socket->inputReady, *this, &ServerImpl::onInput);
-    connect(socket->keepAliveTimeout, *this, &ServerImpl::onKeepAliveTimeout);
+    connect(socket->timeout, *this, &ServerImpl::onTimeout);
 }
 
 void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
@@ -271,6 +272,7 @@ void ServerImpl::onInput(Socket& _socket)
     if (_socket.isConnected())
     {
         disconnect(_socket.inputReady, *this, &ServerImpl::onInput);
+        disconnect(_socket.timeout, *this, &ServerImpl::onTimeout);
         _queue.put(&_socket);
     }
     else
@@ -279,11 +281,18 @@ void ServerImpl::onInput(Socket& _socket)
     }
 }
 
-void ServerImpl::onKeepAliveTimeout(Socket& _socket)
+void ServerImpl::onTimeout(Socket& socket)
 {
-    log_debug("keep alive timeout; search socket " << static_cast<void*>(&_socket) << " in idle sockets");
-    _idleSockets.erase(&_socket);
-    delete &_socket;
+    log_debug("timeout; socket " << static_cast<void*>(&socket));
+
+    _eventLoop.commitEvent(KeepAliveTimeoutEvent(&socket));
+}
+
+void ServerImpl::onKeepAliveTimeout(const KeepAliveTimeoutEvent& event)
+{
+    Socket* socket = event.socket();
+    _idleSockets.erase(socket);
+    delete socket;
 }
 
 void ServerImpl::addService(const std::string& url, Service& service)

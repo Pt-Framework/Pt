@@ -74,6 +74,9 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 		
         void discard();
 		
+        void discardException()
+        { _exceptionPending = false; }
+
 		Signal<StreamBuffer&> inputReady;
 
         Signal<StreamBuffer&> outputReady;

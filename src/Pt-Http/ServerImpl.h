@@ -66,6 +66,19 @@ class IdleSocketEvent : public BasicEvent<IdleSocketEvent>
 
 };
 
+class KeepAliveTimeoutEvent : public BasicEvent<KeepAliveTimeoutEvent>
+{
+        Socket* _socket;
+
+    public:
+        explicit KeepAliveTimeoutEvent(Socket* socket)
+            : _socket(socket)
+            { }
+
+        Socket* socket() const   { return _socket; }
+
+};
+
 class ServerStartEvent : public BasicEvent<ServerStartEvent>
 {
         const ServerImpl* _server;
@@ -128,7 +141,7 @@ class ServerImpl : public Connectable
         void maxThreads(unsigned m)           { _maxThreads = m; }
 
         void onInput(Socket& _socket);
-        void onKeepAliveTimeout(Socket& _socket);
+        void onTimeout(Socket& _socket);
 
         bool isTerminating() const
         { return _runmode == Server::Terminating; }
@@ -146,6 +159,7 @@ class ServerImpl : public Connectable
 
         void addIdleSocket(Socket* _socket);
         void onIdleSocket(const IdleSocketEvent& event);
+        void onKeepAliveTimeout(const KeepAliveTimeoutEvent& event);
         void onNoWaitingThreads(const NoWaitingThreadsEvent& event);
         void onThreadTerminated(const ThreadTerminatedEvent& event);
         void onServerStart(const ServerStartEvent& event);

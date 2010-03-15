@@ -66,9 +66,11 @@ Socket::Socket(ServerImpl& server, Net::TcpServer& tcpServer)
       _server(server),
       _parseEvent(_request),
       _parser(_parseEvent, false),
-      _responder(0)
+      _responder(0),
+      _accepted(false)
 {
     _stream.attachDevice(*this);
+    Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
 }
 
 Socket::Socket(Socket& socket)
@@ -79,7 +81,8 @@ Socket::Socket(Socket& socket)
       _server(socket._server),
       _parseEvent(_request),
       _parser(_parseEvent, false),
-      _responder(0)
+      _responder(0),
+      _accepted(false)
 {
     _stream.attachDevice(*this);
     Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
@@ -117,7 +120,6 @@ void Socket::setSelector(System::SelectorBase* s)
         s->add(*this);
         s->add(_timer);
 
-        Pt::connect(_stream.buffer().inputReady, inputSlot);
         Pt::connect(_stream.buffer().outputReady, outputSlot);
         Pt::connect(_timer.timeout, timeoutSlot);
     }
@@ -146,6 +148,7 @@ void Socket::onInput(System::StreamBuffer& sb)
 {
     if (sb.in_avail() == 0 || sb.device()->eof())
     {
+        sb.discardException();
         close();
         return;
     }
@@ -267,47 +270,58 @@ bool Socket::onOutput(System::StreamBuffer& sb)
 
     log_debug("send data to " << getPeerAddr());
 
-    sb.beginWrite();
-
-    if ( sb.out_avail() )
+    try
     {
-        _timer.start(_server.writeTimeout());
-    }
-    else
-    {
-        bool keepAlive = _request.header().keepAlive();
+        sb.beginWrite();
 
-        if (keepAlive)
+        if ( sb.out_avail() )
         {
-            std::string connection = _reply.getHeader("Connection");
-
-            if (connection == "close"
-              || (connection.empty()
-                    && (_reply.header().httpVersionMajor() < 1
-                     || _reply.header().httpVersionMinor() < 1)))
-            {
-                keepAlive = false;
-            }
-        }
-
-        if (keepAlive)
-        {
-            log_debug("do keep alive");
-            _timer.start(_server.keepAliveTimeout());
-            _request.clear();
-            _reply.clear();
-            _parser.reset(false);
-            if (sb.in_avail())
-                onInput(sb);
-            else
-                _stream.buffer().beginRead();
+            _timer.start(_server.writeTimeout());
         }
         else
         {
-            log_debug("don't do keep alive");
-            close();
-            return false;
+            bool keepAlive = _request.header().keepAlive();
+
+            if (keepAlive)
+            {
+                std::string connection = _reply.getHeader("Connection");
+
+                if (connection == "close"
+                  || (connection.empty()
+                        && (_reply.header().httpVersionMajor() < 1
+                         || _reply.header().httpVersionMinor() < 1)))
+                {
+                    keepAlive = false;
+                }
+            }
+
+            if (keepAlive)
+            {
+                log_debug("do keep alive");
+                _timer.start(_server.keepAliveTimeout());
+                _request.clear();
+                _reply.clear();
+                _parser.reset(false);
+                if (sb.in_avail())
+                    onInput(sb);
+                else
+                    _stream.buffer().beginRead();
+            }
+            else
+            {
+                log_debug("don't do keep alive");
+                close();
+                return false;
+            }
         }
+    }
+    catch (const std::exception& e)
+    {
+        log_warn("exception occured when processing request: " << e.what());
+        sb.discardException();
+        close();
+        timeout(*this);
+        return false;
     }
 
     return true;
@@ -316,7 +330,7 @@ bool Socket::onOutput(System::StreamBuffer& sb)
 void Socket::onTimeout()
 {
     log_debug("timeout");
-    keepAliveTimeout(*this);
+    timeout(*this);
 }
 
 void Socket::sendReply()
