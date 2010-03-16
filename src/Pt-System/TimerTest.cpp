@@ -39,10 +39,10 @@ class TimerTest : public Pt::Unit::TestSuite
         , _timer(0)
         , _count(0)
         {
-            //this->registerMethod("Timeout", *this, &TimerTest::Timeout);
+            this->registerMethod("Timeout", *this, &TimerTest::Timeout);
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
-            //this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
-            //this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
+            this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
+            this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
         }
 
         void setUp()
@@ -50,7 +50,7 @@ class TimerTest : public Pt::Unit::TestSuite
             _count = 0;
             _selector = new Pt::System::Selector();
             _timer = new Pt::System::Timer();
-            _timer->start(500);
+            _timer->start(100);
             _selector->add(*_timer);
         }
 
@@ -66,10 +66,10 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 2);
         }
 
@@ -78,10 +78,10 @@ class TimerTest : public Pt::Unit::TestSuite
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::removeTimer );
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
         }
 
@@ -90,10 +90,10 @@ class TimerTest : public Pt::Unit::TestSuite
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::removeAddTimer );
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 2);
         }
 
@@ -102,10 +102,10 @@ class TimerTest : public Pt::Unit::TestSuite
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::destroyTimer );
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
 
-            _selector->wait(1000);
+            _selector->wait(300);
             PT_UNIT_ASSERT(_count == 1);
         }
 

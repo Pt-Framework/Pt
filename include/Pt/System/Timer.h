@@ -69,6 +69,8 @@ namespace System {
     */
     class PT_SYSTEM_API Timer
     {
+        class Sentry;
+
         public:
             /** @brief Default constructor
 
@@ -135,6 +137,7 @@ namespace System {
             { return _finished; }
 
         private:
+            Sentry* _sentry;
             SelectorBase* _selector;
             bool          _active;
             std::size_t   _interval;
