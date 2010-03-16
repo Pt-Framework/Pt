@@ -364,34 +364,28 @@ size_t TcpSocketImpl::endRead(bool& eof)
 
 size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 {
-	DWORD numberOfBytesSent = 0;
-    DWORD flags = 0;
-
 	_sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;   
 
     _eventFlags |= FD_WRITE;
     attachEvent(_currentEventHandle, _eventFlags);	
 
-    numberOfBytesSent = ::send(_fd, _sendBuffer.buf, _sendBuffer.len, 0);	
-
-    if(numberOfBytesSent == 0)
-	    throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
-
-    if( numberOfBytesSent == n )
-    {
-        _events = FD_WRITE;
-        SetEvent(_currentEventHandle);        
-    }
-
 	return 0;
 }
 
 size_t TcpSocketImpl::endWrite()
 {
+	DWORD numberOfBytesSent = 0;
+
 	_eventFlags &= ~FD_WRITE;	
 	attachEvent(_currentEventHandle, _eventFlags);
-	return _sendBuffer.len;
+
+    numberOfBytesSent = ::send(_fd, _sendBuffer.buf, _sendBuffer.len, 0);	
+
+    if(numberOfBytesSent == 0)
+	    throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
+
+	return numberOfBytesSent;
 }
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
