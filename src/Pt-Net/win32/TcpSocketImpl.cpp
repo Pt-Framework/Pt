@@ -46,7 +46,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _waitEvent(WSACreateEvent())
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
-, _timeout(100)
+, _timeout(INFINITE)
 , _events(0)
 {
 	_currentEventHandle = _waitEvent;
@@ -87,7 +87,7 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
 
 void TcpSocketImpl::cancel()
 {
-    //TODO: canceling
+	attachEvent(0, 0);
 }
 
 void TcpSocketImpl::close()
@@ -124,7 +124,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
         }
 
 		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);		
-
+        
 		if( ::connect(_fd, it->ai_addr, (int)it->ai_addrlen) == SOCKET_ERROR)
 		{
 			if( WSAGetLastError() == WSAEWOULDBLOCK)
@@ -186,14 +186,14 @@ void TcpSocketImpl::endConnect()
 
 	attachEvent(ev, FD_CONNECT);
 
-	if(WaitForSingleObject( ev, 1000 ) == WAIT_TIMEOUT)
+	if(WaitForSingleObject( ev, _timeout ) == WAIT_TIMEOUT)
 	{	
 		close();
 		throw System::IOTimeout();
 	}
 
 	WSACloseEvent(ev);
-
+	attachEvent(_currentEventHandle, _eventFlags);
 	_isConnected = true;
 
 }
@@ -336,7 +336,7 @@ size_t TcpSocketImpl::endRead(bool& eof)
 
 				attachEvent(ev, FD_READ);
 
-				if(WaitForSingleObject(ev,1000) == WAIT_TIMEOUT)
+				if(WaitForSingleObject(ev, _timeout) == WAIT_TIMEOUT)
 				{
 					attachEvent(_currentEventHandle, _eventFlags);
 					WSACloseEvent(ev);
@@ -369,7 +369,6 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 
     _eventFlags |= FD_WRITE;
     attachEvent(_currentEventHandle, _eventFlags);	
-
 	return 0;
 }
 
@@ -397,46 +396,37 @@ bool TcpSocketImpl::checkEvent()
 {
     log_debug("checkEvent");
     
-    if( _events == 0)
-    {
-        WSANETWORKEVENTS events;
-        if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
-            throw System::SystemError("ask network events failed");
-        
-        _events = events.lNetworkEvents;
-    }
-	else
-	{
-		ResetEvent(_currentEventHandle);
-	}
+    WSANETWORKEVENTS events;
+
+    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
+        throw System::SystemError("ask network events failed");        
 
 	bool ev = false;
 
-    if((_events & FD_CONNECT) == FD_CONNECT)        
+    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT)        
 	{
 		ev = true;		
 		_isConnected = true;
 		_socket.connected.send(_socket);
 	}
 
-	if((_events & FD_READ) == FD_READ)
+	if((events.lNetworkEvents & FD_READ) == FD_READ)
 	{
         ev = true;
 		_socket.inputReady.send(_socket);	
 	}
 
-	if((_events & FD_WRITE) == FD_WRITE)
+	if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
 	{
        ev = true;
 	   _socket.outputReady.send(_socket);	       
     }
 
-	if((_events & FD_CLOSE) == FD_CLOSE)
+	if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
 	{
+         ev = true;
        _isConnected = false;
     }
-
-    _events = 0;
 
     return ev;
 }
