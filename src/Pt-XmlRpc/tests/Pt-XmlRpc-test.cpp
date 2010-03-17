@@ -515,6 +515,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             //PT_UNIT_ASSERT_EQUALS(r.get().size(), 8)
 
+            r.get();
             static unsigned benchmarkCounter = 0;
 
             if(++benchmarkCounter >= 10000)
