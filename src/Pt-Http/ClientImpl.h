@@ -75,23 +75,25 @@ class ClientImpl : public Connectable
         const Request* _request;
         ReplyHeader _replyHeader;
 
-        std::string _server;
-        unsigned short int _port;
+        Net::AddrInfo _addrInfo;
         Net::TcpSocket _socket;
         System::IOStream _stream;
-        bool _readHeader;
-        long _contentLength;
-        bool _chunkedEncoding;
         ChunkedIStream _chunkedIStream;
-
         std::string _username;
         std::string _password;
+
+        long _contentLength;
+        bool _readHeader;
+        bool _chunkedEncoding;
+        bool _reconnectOnError;
+        bool _errorPending;
 
         void sendRequest(const Request& request);
         void processHeaderAvailable(System::StreamBuffer& sb);
         void processBodyAvailable(System::StreamBuffer& sb);
 
         void reexecute(const Request& request);
+        void reexecuteBegin(const Request& request);
         void doparse();
 
     protected:
@@ -101,15 +103,13 @@ class ClientImpl : public Connectable
 
     public:
         ClientImpl(Client* client);
-        ClientImpl(Client* client, const std::string& server, unsigned short int port);
-
-        ClientImpl(Client* client, System::SelectorBase& selector, const std::string& server, unsigned short int port);
+        ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
+        ClientImpl(Client* client, System::SelectorBase& selector, const Net::AddrInfo& addrinfo);
 
         // Sets the server and port. No actual network connect is done.
-        void connect(const std::string& server, unsigned short int port)
+        void connect(const Net::AddrInfo& addrinfo)
         {
-            _server = server;
-            _port = port;
+            _addrInfo = addrinfo;
         }
 
         // Sends the passed request to the server and parses the headers.
@@ -147,6 +147,8 @@ class ClientImpl : public Connectable
         // received.
         void beginExecute(const Request& request);
 
+        void endExecute();
+
         void setSelector(System::SelectorBase& selector);
 
         // Executes the underlying selector until a event occures or the
@@ -160,11 +162,15 @@ class ClientImpl : public Connectable
                                     : static_cast<std::istream&>(_stream);
         }
 
-        const std::string& server() const
-        { return _server; }
+        const std::string& host() const
+        {
+            return _addrInfo.host();
+        }
 
-        unsigned short int port() const
-        { return _port; }
+        unsigned short port() const
+        {
+            return _addrInfo.port();
+        }
 
         // Sets the username and password for all subsequent requests.
         void auth(const std::string& username, const std::string& password)
@@ -173,6 +179,7 @@ class ClientImpl : public Connectable
         void clearAuth()
         { _username.clear(); _password.clear(); }
 
+        void cancel();
 };
 
 } // namespace Http

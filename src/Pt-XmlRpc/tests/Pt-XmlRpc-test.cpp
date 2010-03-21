@@ -29,7 +29,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/Service.h"
-#include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Http/Server.h"
@@ -127,7 +127,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::throwFault);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onFault );
             multiply.begin();
@@ -166,7 +166,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::throwException);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onException );
             multiply.begin();
@@ -206,7 +206,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyNothing);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onNothingFinished );
 
@@ -236,7 +236,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyNothing);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onExceptionCallback );
 
@@ -259,7 +259,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void ConnectError()
         {
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8002, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8002, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onConnectErrorCallback );
 
@@ -290,7 +290,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyBoolean);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onBooleanFinished );
 
@@ -322,7 +322,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyInt);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
 
@@ -352,7 +352,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyDouble);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<double, double, double> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onDoubleFinished );
 
@@ -382,7 +382,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("echoString", *this, &PtXmlRpcTest::echoString);
             _server->addService("/foo", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/foo");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/foo");
             Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
             connect( echo.finished, *this, &PtXmlRpcTest::onStringEchoFinished );
 
@@ -412,7 +412,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyEmpty);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onEmptyFinished );
 
@@ -443,7 +443,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onArrayFinished );
 
@@ -490,7 +490,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("mergeVector", *this, &PtXmlRpcTest::mergeVector);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
             connect( proc.finished, *this, &PtXmlRpcTest::onArrayBenchmarkFinished );
 
@@ -545,7 +545,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyVector);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onEmptyArrayFinished );
 
@@ -571,7 +571,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiply", *this, &PtXmlRpcTest::multiplyColor);
             _server->addService("/calc", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onStuctFinished );
 
@@ -617,7 +617,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiplyset", *this, &PtXmlRpcTest::multiplySet);
             _server->addService("/test", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/test");
             Pt::XmlRpc::RemoteProcedure<IntSet, IntSet, int> multiply(client, "multiplyset");
             connect( multiply.finished, *this, &PtXmlRpcTest::onSetFinished );
 
@@ -660,7 +660,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             service.registerMethod("multiplyset", *this, &PtXmlRpcTest::multiplyMultiset);
             _server->addService("/test", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/test");
             Pt::XmlRpc::RemoteProcedure<IntMultiset, IntMultiset, int> multiply(client, "multiplyset");
             connect( multiply.finished, *this, &PtXmlRpcTest::onMultisetFinished );
 
@@ -704,7 +704,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             _server->addService("/test", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/test");
             Pt::XmlRpc::RemoteProcedure<IntMap, IntMap, int> multiply(client, "multiplymap");
             connect( multiply.finished, *this, &PtXmlRpcTest::onMultiplyMapFinished );
 
@@ -753,7 +753,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             _server->addService("/test", service);
 
-            Pt::XmlRpc::Client client(*_loop, "127.0.0.1", 8001, "/test");
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/test");
             Pt::XmlRpc::RemoteProcedure<IntMultimap, IntMultimap, int> multiply(client, "multiplymultimap");
             connect( multiply.finished, *this, &PtXmlRpcTest::onMultiplyMultimapFinished );
 

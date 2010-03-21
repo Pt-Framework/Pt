@@ -122,6 +122,7 @@ namespace System {
             fd_set* _wfds;
             fd_set* _efds;
             DestructionSentry* _sentry;
+            bool _errorPending;
     };
 
 } //namespace System

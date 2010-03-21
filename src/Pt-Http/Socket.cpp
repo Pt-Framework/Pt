@@ -98,6 +98,8 @@ void Socket::accept()
 {
     Net::TcpSocket::accept(_tcpServer);
 
+    _accepted = true;
+
     _stream.buffer().beginRead();
 
     _timer.start(_server.readTimeout());
@@ -141,14 +143,18 @@ void Socket::removeSelector()
 
 void Socket::onIODeviceInput(System::IODevice& iodevice)
 {
+    log_debug("onIODeviceInput");
     inputReady(*this);
 }
 
 void Socket::onInput(System::StreamBuffer& sb)
 {
+    log_debug("onInput");
+
+    sb.endRead();
+
     if (sb.in_avail() == 0 || sb.device()->eof())
     {
-        sb.discardException();
         close();
         return;
     }
@@ -272,10 +278,11 @@ bool Socket::onOutput(System::StreamBuffer& sb)
 
     try
     {
-        sb.beginWrite();
+        sb.endWrite();
 
         if ( sb.out_avail() )
         {
+            sb.beginWrite();
             _timer.start(_server.writeTimeout());
         }
         else
@@ -318,7 +325,6 @@ bool Socket::onOutput(System::StreamBuffer& sb)
     catch (const std::exception& e)
     {
         log_warn("exception occured when processing request: " << e.what());
-        sb.discardException();
         close();
         timeout(*this);
         return false;

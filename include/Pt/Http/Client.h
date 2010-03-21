@@ -42,6 +42,10 @@ namespace System {
     class SelectorBase;
 }
 
+namespace Net {
+    class AddrInfo;
+}
+
 namespace Http {
 
 class ClientImpl;
@@ -54,14 +58,17 @@ class PT_HTTP_API Client : private NonCopyable
 
     public:
         Client();
-        Client(const std::string& server, unsigned short int port);
+        Client(const std::string& host, unsigned short int port);
+        Client(const Net::AddrInfo& addr);
 
-        Client(System::SelectorBase& selector, const std::string& server, unsigned short int port);
+        Client(System::SelectorBase& selector, const std::string& host, unsigned short int port);
+        Client(System::SelectorBase& selector, const Net::AddrInfo& addrinfo);
 
         ~Client();
 
-        // Sets the server and port. No actual network connect is done.
-        void connect(const std::string& server, unsigned short int port);
+        // Sets the host and port. No actual network connect is done.
+        void connect(const Net::AddrInfo& addrinfo);
+        void connect(const std::string& host, unsigned short int port);
 
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
@@ -97,6 +104,8 @@ class PT_HTTP_API Client : private NonCopyable
         // received.
         void beginExecute(const Request& request);
 
+        void endExecute();
+
         void setSelector(System::SelectorBase& selector);
 
         // Executes the underlying selector until a event occures or the
@@ -106,7 +115,7 @@ class PT_HTTP_API Client : private NonCopyable
         // Returns the underlying stream, where the reply may be read from.
         std::istream& in();
 
-        const std::string& server() const;
+        const std::string& host() const;
 
         unsigned short int port() const;
 
@@ -114,6 +123,8 @@ class PT_HTTP_API Client : private NonCopyable
         void auth(const std::string& username, const std::string& password);
 
         void clearAuth();
+
+        void cancel();
 
         // Signals that the request is sent to the server.
         Signal<Client&> requestSent;
@@ -127,9 +138,6 @@ class PT_HTTP_API Client : private NonCopyable
 
         // Signals that the reply is completely processed.
         Signal<Client&> replyFinished;
-
-        // Signals that a exception is catched while processing the request.
-        Signal<Client&, const std::exception&> errorOccured;
 };
 
 } // namespace Http

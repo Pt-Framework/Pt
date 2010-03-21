@@ -43,6 +43,7 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 , _wfds(0)
 , _efds(0)
 , _sentry(0)
+, _errorPending(false)
 { }
 
 
@@ -118,6 +119,12 @@ size_t IODeviceImpl::endRead(bool& eof)
         FD_CLR( this->fd(), _rfds );
     }
 
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw IOError("read error", PT_SOURCEINFO);
+    }
+
     return this->read( _device.rbuf(), _device.rbuflen(), eof );
 }
 
@@ -174,6 +181,12 @@ size_t IODeviceImpl::endWrite()
     if(_wfds)
     {
         FD_CLR( this->fd(), _wfds );
+    }
+
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw IOError("write error", PT_SOURCEINFO);
     }
 
     return this->write( _device.wbuf(), _device.wbuflen() );
@@ -357,12 +370,26 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
     if ( FD_ISSET(this->fd(), &efds) )
     {
-        _device.errorOccured(_device);
+        _errorPending = true;
+
+        try
+        {
+            if (_device.reading())
+                _device.inputReady(_device);
+            if (_device.writing())
+                _device.outputReady(_device);
+        }
+        catch (...)
+        {
+            _errorPending = false;
+            throw;
+        }
+        _errorPending = false;
+
         ++avail;
+        return avail;
     }
 
-    if( ! sentry )
-        return avail;
 
     if( _device.wbuf() && FD_ISSET(this->fd(), &wfds) )
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009 by Dr. Marc Boris Duerner, Tommi Maekitalo
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,52 +25,53 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Client_h
-#define Pt_XmlRpc_Client_h
+#ifndef Pt_XmlRpc_HttpClient_h
+#define Pt_XmlRpc_HttpClient_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Fault.h>
-#include <Pt/NonCopyable.h>
-#include <string>
+#include <Pt/XmlRpc/Client.h>
 
 namespace Pt {
 
-class IComposer;
-class IDecomposer;
+namespace System {
+
+class SelectorBase;
+
+}
+
+namespace Net
+{
+    class AddrInfo;
+}
 
 namespace XmlRpc {
 
-class IRemoteProcedure;
-class ClientImpl;
+class HttpClientImpl;
 
-
-class PT_XMLRPC_API Client : public NonCopyable
+class PT_XMLRPC_API HttpClient : public Client
 {
-        ClientImpl* _impl;
-
-    protected:
-        void impl(ClientImpl* i) { _impl = i; }
-
     public:
-        Client();
+        HttpClient();
 
-        virtual ~Client();
+        HttpClient(System::SelectorBase& selector, const std::string& addr,
+               unsigned short port, const std::string& url);
 
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        HttpClient(const std::string& addr, unsigned short port, const std::string& url);
 
-        void endCall();
+        virtual ~HttpClient();
 
-        void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void connect(const Net::AddrInfo& addrinfo, const std::string& url);
 
-        std::size_t timeout() const;
+        void connect(const std::string& addr, unsigned short port,
+                     const std::string& url);
 
-        void timeout(std::size_t t);
+        void url(const std::string& url);
+        void auth(const std::string& username, const std::string& password);
 
-        std::string url() const;
+        void clearAuth();
 
-        const IRemoteProcedure* activeProcedure() const;
-
-        void cancel();
+    private:
+        HttpClientImpl* _impl;
 };
 
 }

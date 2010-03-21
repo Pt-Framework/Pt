@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Http/Client.h>
+#include <Pt/Net/AddrInfo.h>
 #include "ClientImpl.h"
 
 namespace Pt {
@@ -38,31 +39,53 @@ Client::Client()
 {
 }
 
+Client::Client(const Net::AddrInfo& addrinfo)
+: _impl(new ClientImpl(this, addrinfo))
+{
+}
 
-Client::Client(const std::string& server, unsigned short int port)
-: _impl(new ClientImpl(this, server, port))
+Client::Client(const std::string& host, unsigned short int port)
+: _impl(new ClientImpl(this, Net::AddrInfo(host, port)))
 {
 }
 
 
-Client::Client(System::SelectorBase& selector, const std::string& server, unsigned short int port)
-: _impl(new ClientImpl(this, selector, server, port))
+Client::Client(System::SelectorBase& selector, const Net::AddrInfo& addrinfo)
+: _impl(new ClientImpl(this, selector, addrinfo))
+{
+}
+
+Client::Client(System::SelectorBase& selector, const std::string& host, unsigned short int port)
+: _impl(new ClientImpl(this, selector, Net::AddrInfo(host, port)))
 {
 }
 
 Client::~Client()
 {
-  delete _impl;
+    delete _impl;
 }
 
-void Client::connect(const std::string& server, unsigned short int port)
+void Client::connect(const Net::AddrInfo& addrinfo)
 {
-    _impl->connect(server, port);
+    _impl->connect(addrinfo);
+}
+
+void Client::connect(const std::string& host, unsigned short int port)
+{
+    _impl->connect(Net::AddrInfo(host, port));
 }
 
 const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
 {
-    return _impl->execute(request, timeout);
+    try
+    {
+        return _impl->execute(request, timeout);
+    }
+    catch (...)
+    {
+        cancel();
+        throw;
+    }
 }
 
 const ReplyHeader& Client::header()
@@ -85,6 +108,11 @@ void Client::beginExecute(const Request& request)
     _impl->beginExecute(request);
 }
 
+void Client::endExecute()
+{
+    _impl->endExecute();
+}
+
 void Client::setSelector(System::SelectorBase& selector)
 {
     _impl->setSelector(selector);
@@ -100,9 +128,9 @@ std::istream& Client::in()
     return _impl->in();
 }
 
-const std::string& Client::server() const
+const std::string& Client::host() const
 {
-    return _impl->server();
+    return _impl->host();
 }
 
 unsigned short int Client::port() const
@@ -119,6 +147,11 @@ void Client::auth(const std::string& username, const std::string& password)
 void Client::clearAuth()
 {
     _impl->clearAuth();
+}
+
+void Client::cancel()
+{
+    _impl->cancel();
 }
 
 } // namespace Http

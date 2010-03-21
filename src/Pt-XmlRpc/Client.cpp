@@ -26,368 +26,61 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/XmlRpc/Client.h"
-#include "Pt/XmlRpc/RemoteProcedure.h"
-#include "Pt/Xml/XmlError.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/EndElement.h"
-#include "Pt/System/Selector.h"
-#include "Pt/Utf8Codec.h"
-#include "Pt/Http/ReplyHeader.h"
+#include "ClientImpl.h"
 
 namespace Pt {
 
 namespace XmlRpc {
 
 Client::Client()
-: _state(OnBegin)
-, _ts( new Utf8Codec )
-, _reader(_ts)
-, _formatter(_writer)
-, _method(0)
-, _timeout(System::Selectable::WaitInfinite)
+: _impl(0)
 {
-    _writer.useIndent(false);
-    _writer.useEndl(false);
-
-    _request.method("POST");
-    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
-    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
-    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
-    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
 }
-
-
-Client::Client(System::SelectorBase& selector, const std::string& server,
-               unsigned short port, const std::string& url)
-: _state(OnBegin)
-, _client(selector, server, port)
-, _request(url)
-, _ts( new Utf8Codec )
-, _reader(_ts)
-, _formatter(_writer)
-, _method(0)
-, _timeout(System::Selectable::WaitInfinite)
-{
-    _writer.useIndent(false);
-    _writer.useEndl(false);
-
-    _request.method("POST");
-    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
-    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
-    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
-    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
-}
-
-
-Client::Client(const std::string& server, unsigned short port, const std::string& url)
-: _state(OnBegin)
-, _client(server, port)
-, _request(url)
-, _ts( new Utf8Codec )
-, _reader(_ts)
-, _formatter(_writer)
-, _method(0)
-, _timeout(System::Selectable::WaitInfinite)
-{
-    _writer.useIndent(false);
-    _writer.useEndl(false);
-
-    _request.method("POST");
-    Pt::connect(_client.headerReceived, *this, &Client::onReplyHeader);
-    Pt::connect(_client.bodyAvailable, *this, &Client::onReplyBody);
-    Pt::connect(_client.replyFinished, *this, &Client::onReplyFinished);
-    Pt::connect(_client.errorOccured, *this, &Client::onErrorOccured);
-}
-
 
 Client::~Client()
 {
 }
 
-
 void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
-    _method = &method;
-    _state = OnBegin;
-
-    this->prepareRequest(method.name(), argv, argc);
-    _client.beginExecute(_request);
-    _scanner.begin(r);
+    _impl->beginCall(r, method, argv, argc);
 }
 
+void Client::endCall()
+{
+    _impl->endCall();
+}
 
 void Client::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
-    _method = &method;
-    _state = OnBegin;
-
-    this->prepareRequest(method.name(), argv, argc);
-    Http::ReplyHeader header = _client.execute(_request, _timeout);
-
-    std::string body;
-    _client.readBody(body);
-    std::istringstream is(body);
-    _ts.attach(is);
-    _reader.reset(_ts);
-    _scanner.begin(r);
-
-    while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
-    {
-        const Pt::Xml::Node& node = _reader.get();
-        this->advance(node);
-        _reader.next();
-    }
-
-    _ts.detach();
-
-    // let Xml::ParseError SerializationError, ConversionError propagate
-
-    if (_method->failed() )
-    {
-        _state = OnBegin;
-        throw _fault;
-    }
-
-    _state = OnBegin;
-
-    // _method contains a valid return value now
+    _impl->call(r, method, argv, argc);
 }
 
-
-void Client::onReplyHeader(Http::Client& client)
+std::size_t Client::timeout() const
 {
-    _ts.attach( client.in() );
+    return _impl->timeout();
 }
 
-
-std::size_t Client::onReplyBody(Http::Client& client)
+void Client::timeout(std::size_t t)
 {
-    std::size_t n = 0;
-
-    try
-    {
-        while(true)
-        {
-            std::streamsize m = _ts.buffer().import();
-            if( ! m )
-                break;
-
-            n += m;
-
-            while( _reader.advance() ) // Xml::ParseError
-            {
-                const Pt::Xml::Node& node = _reader.get();
-                this->advance(node); // SerializationError, ConversionError
-            }
-        }
-    }
-    catch(const Xml::XmlError& error)
-    {
-        _method->setFault(Fault::invalidXmlRpc, error.what());
-        throw;
-    }
-    catch(const SerializationError& error)
-    {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
-        throw;
-    }
-    catch(const ConversionError& error)
-    {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
-        throw;
-    }
-
-    return n;
+    _impl->timeout(t);
 }
 
-
-void Client::onErrorOccured(Http::Client& client, const std::exception& e)
+std::string Client::url() const
 {
-    if (_method)
-    {
-        // TODO do not map local exceptions to Pt::xmlrpc::Fault
-
-        if (!_method->failed())
-            _method->setFault(Fault::systemError, e.what());
-
-        IRemoteProcedure* method = _method;
-        _method = 0;
-        method->onFinished();
-    }
-    else
-    {
-        throw;
-    }
+    return _impl->url();
 }
 
-
-void Client::onReplyFinished(Http::Client& client)
+const IRemoteProcedure* Client::activeProcedure() const
 {
-    IRemoteProcedure* method = _method;
-    _method = 0;
-    method->onFinished();
+    return _impl->activeProcedure();
 }
 
-
-void Client::prepareRequest(const std::string& name, IDecomposer** argv, unsigned argc)
+void Client::cancel()
 {
-    _request.clear();
-    _request.setHeader("Content-Type", "text/xml");
-    _request.method("POST");
-
-    _writer.begin( _request.body() );
-    _writer.writeStartElement( L"methodCall" );
-    _writer.writeElement( L"methodName", Pt::String::widen(name) );
-    _writer.writeStartElement( L"params" );
-
-    for(unsigned n = 0; n < argc; ++n)
-    {
-        _writer.writeStartElement( L"param" );
-        argv[n]->format(_formatter);
-        _writer.writeEndElement();
-    }
-
-    _writer.writeEndElement();
-    _writer.writeEndElement();
-    _writer.flush();
-}
-
-
-void Client::advance(const Pt::Xml::Node& node)
-{
-    switch(_state)
-    {
-        case OnBegin:
-        { //std::cerr << "Client:: OnBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement)
-            {
-                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"methodResponse" )
-                    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnMethodResponseBegin;
-            }
-
-            break;
-        }
-
-        case OnMethodResponseBegin:
-        { //std::cerr << "Client:: OnMethodResponseBegin" << std::endl;
-            if(node.type() == Xml::Node::StartElement) // <params> or <fault>
-            {
-                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() == L"params")
-                {
-                    _state = OnParamsBegin;
-                    break;
-                }
-
-                else if( se.name() == L"fault")
-                {
-                    _fh.begin(_fault);
-                    _scanner.begin(_fh);
-                    _state = OnFaultBegin;
-                    break;
-                }
-
-                throw SerializationError("invalid XML-RPC methodCall");
-            }
-            break;
-        }
-
-        case OnFaultBegin:
-        { //std::cerr << "Client:: OnFaultBegin" << std::endl;
-            bool finished = _scanner.advance(node); // start with <value>
-            if(finished)
-            {
-                // </fault>
-                _state = OnFaultEnd;
-            }
-
-            break;
-        }
-
-        case OnFaultEnd:
-        { //std::cerr << "Client:: OnFaultEnd" << std::endl;
-            if(node.type() == Xml::Node::EndElement) // </methodResponse>
-            {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"methodResponse" )
-                    throw SerializationError("invalid XML-RPC methodCall");
-
-                _method->setFault(_fault.rc(), _fault.text());
-
-                _state = OnFaultResponseEnd;
-            }
-            break;
-        }
-
-        case OnFaultResponseEnd:
-        { //std::cerr << "Client:: OnFaultEnd" << std::endl;
-            _state = OnFaultResponseEnd;
-            break;
-        }
-
-        case OnParamsBegin:
-        { //std::cerr << "Client:: OnParams" << std::endl;
-            if(node.type() == Xml::Node::StartElement) // <param>
-            {
-                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"param" )
-                    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnParam;
-            }
-
-            break;
-        }
-
-        case OnParam:
-        { //std::cerr << "Client:: OnParam" << std::endl;
-            bool finished = _scanner.advance(node); // start with <value>
-            if(finished)
-            {
-                // </param>
-                _state = OnParamEnd;
-            }
-
-            break;
-        }
-
-        case OnParamEnd:
-        { //std::cerr << "Client:: OnParamsEnd" << std::endl;
-            if(node.type() == Xml::Node::EndElement) // </params>
-            {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"params" )
-                    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnParamsEnd;
-            }
-            break;
-        }
-
-        case OnParamsEnd:
-        { //std::cerr << "Client:: OnParamsEnd" << std::endl;
-            if(node.type() == Xml::Node::EndElement) // </methodResponse>
-            {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"methodResponse" )
-                    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnMethodResponseEnd;
-            }
-            break;
-        }
-
-        case OnMethodResponseEnd:
-        { //std::cerr << "Client:: OnMethodResponseEnd" << std::endl;
-            _state = OnMethodResponseEnd;
-            break;
-        }
-    }
+    _impl->cancel();
 }
 
 }

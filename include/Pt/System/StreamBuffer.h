@@ -74,9 +74,6 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 		
         void discard();
 		
-        void discardException()
-        { _exceptionPending = false; }
-
 		Signal<StreamBuffer&> inputReady;
 
         Signal<StreamBuffer&> outputReady;
@@ -107,7 +104,6 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
         char* _obuffer;
         const size_t _pbmax;
         bool _oextend;
-        bool _exceptionPending;
 };
 
 //! @brief A stream buffer for IODevices with linear buffer area

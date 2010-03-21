@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009 by Tommi Meakitalo
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,56 +25,68 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Client_h
-#define Pt_XmlRpc_Client_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Fault.h>
-#include <Pt/NonCopyable.h>
-#include <string>
+#include "Pt/XmlRpc/HttpClient.h"
+#include "HttpClientImpl.h"
 
-namespace Pt {
-
-class IComposer;
-class IDecomposer;
-
-namespace XmlRpc {
-
-class IRemoteProcedure;
-class ClientImpl;
-
-
-class PT_XMLRPC_API Client : public NonCopyable
+namespace Pt
 {
-        ClientImpl* _impl;
 
-    protected:
-        void impl(ClientImpl* i) { _impl = i; }
+namespace XmlRpc
+{
 
-    public:
-        Client();
+HttpClient::HttpClient()
+: _impl(new HttpClientImpl())
+{
+  impl(_impl);
+}
 
-        virtual ~Client();
 
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+HttpClient::HttpClient(System::SelectorBase& selector, const std::string& server,
+                       unsigned short port, const std::string& url)
+: _impl(new HttpClientImpl(selector, server, port, url))
+{
+    impl(_impl);
+}
 
-        void endCall();
 
-        void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+HttpClient::HttpClient(const std::string& server, unsigned short port, const std::string& url)
+: _impl(new HttpClientImpl(server, port, url))
+{
+    impl(_impl);
+}
 
-        std::size_t timeout() const;
 
-        void timeout(std::size_t t);
+HttpClient::~HttpClient()
+{
+    delete _impl;
+}
 
-        std::string url() const;
+void HttpClient::connect(const Net::AddrInfo& addrinfo, const std::string& url)
+{
+    _impl->connect(addrinfo, url);
+}
 
-        const IRemoteProcedure* activeProcedure() const;
+void HttpClient::connect(const std::string& addr, unsigned short port, const std::string& url)
+{
+    _impl->connect(addr, port, url);
+}
 
-        void cancel();
-};
+void HttpClient::url(const std::string& url)
+{
+    _impl->url(url);
+}
 
+void HttpClient::auth(const std::string& username, const std::string& password)
+{
+    _impl->auth(username, password);
+}
+
+void HttpClient::clearAuth()
+{
+    _impl->clearAuth();
 }
 
 }
 
-#endif
+}
