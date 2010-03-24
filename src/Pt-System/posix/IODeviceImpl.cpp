@@ -375,9 +375,19 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         try
         {
             if (_device.reading())
+            {
+                ++avail;
                 _device.inputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
             if (_device.writing())
+            {
+                ++avail;
                 _device.outputReady(_device);
+            }
         }
         catch (...)
         {
@@ -386,7 +396,6 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
         }
         _errorPending = false;
 
-        ++avail;
         return avail;
     }
 
