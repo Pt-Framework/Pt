@@ -484,6 +484,9 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
 
             sb.endRead();
 
+            if (sb.device()->eof())
+                throw System::IOError( PT_ERROR_MSG("end of input") );
+
             _reconnectOnError = false;
 
             if (_readHeader)
@@ -515,10 +518,10 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
     catch (const std::exception& e)
     {
         _errorPending = true;
-      _client->replyFinished(*_client);
+        _client->replyFinished(*_client);
 
-      if (_errorPending)
-          throw;
+        if (_errorPending)
+            throw;
     }
 }
 

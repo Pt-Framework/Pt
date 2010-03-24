@@ -45,6 +45,8 @@ namespace Http
 
 ServerImpl::ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>& runmodeChanged)
     : _eventLoop(eventLoop),
+      inputSlot(slot(*this, &ServerImpl::onInput)),
+      timeoutSlot(slot(*this, &ServerImpl::onTimeout)),
       _readTimeout(20000),
       _writeTimeout(20000),
       _keepAliveTimeout(30000),
@@ -171,8 +173,6 @@ void ServerImpl::noWaitingThreads()
 
 void ServerImpl::threadTerminated(Worker* worker)
 {
-    log_info("thread " << static_cast<void*>(worker) << " terminated");
-
     System::MutexLock lock(_threadMutex);
 
     _threads.erase(worker);
@@ -191,7 +191,15 @@ void ServerImpl::addIdleSocket(Socket* _socket)
 {
     log_debug("add idle socket " << static_cast<void*>(_socket));
 
-    _eventLoop.commitEvent(IdleSocketEvent(_socket));
+    if (_runmode == Server::Running)
+    {
+        _eventLoop.commitEvent(IdleSocketEvent(_socket));
+    }
+    else
+    {
+        log_debug("server not running; delete " << static_cast<void*>(_socket));
+        delete _socket;
+    }
 }
 
 void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
@@ -202,8 +210,8 @@ void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
 
     _idleSockets.insert(socket);
     socket->setSelector(&_eventLoop);
-    connect(socket->inputReady, *this, &ServerImpl::onInput);
-    connect(socket->timeout, *this, &ServerImpl::onTimeout);
+    connect(socket->inputReady, inputSlot);
+    connect(socket->timeout, timeoutSlot);
 }
 
 void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
@@ -221,7 +229,7 @@ void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
         Worker* worker = new Worker(*this);
         try
         {
-            log_info("create thread " << static_cast<void*>(worker));
+            log_debug("create thread " << static_cast<void*>(worker) << "; running threads=" << _threads.size());
             worker->start();
             _threads.insert(worker);
 
@@ -242,7 +250,7 @@ void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
 void ServerImpl::onThreadTerminated(const ThreadTerminatedEvent& event)
 {
     System::MutexLock lock(_threadMutex);
-    log_trace("thread terminated (" << static_cast<void*>(event.worker()) << ") " << _threads.size() << " threads left");
+    log_debug("thread terminated (" << static_cast<void*>(event.worker()) << ") " << _threads.size() << " threads left");
     try
     {
         event.worker()->join();
@@ -263,21 +271,22 @@ void ServerImpl::onServerStart(const ServerStartEvent& event)
     }
 }
 
-void ServerImpl::onInput(Socket& _socket)
+void ServerImpl::onInput(Socket& socket)
 {
-    _socket.setSelector(0);
-    log_debug("search socket " << static_cast<void*>(&_socket) << " in idle sockets");
-    _idleSockets.erase(&_socket);
+    socket.removeSelector();
+    log_debug("search socket " << static_cast<void*>(&socket) << " in idle sockets");
+    _idleSockets.erase(&socket);
 
-    if (_socket.isConnected())
+    if (socket.isConnected())
     {
-        disconnect(_socket.inputReady, *this, &ServerImpl::onInput);
-        disconnect(_socket.timeout, *this, &ServerImpl::onTimeout);
-        _queue.put(&_socket);
+        disconnect(socket.inputReady, inputSlot);
+        disconnect(socket.timeout, timeoutSlot);
+        _queue.put(&socket);
     }
     else
     {
-        delete &_socket;
+        log_debug("onInput; delete " << static_cast<void*>(&socket));
+        delete &socket;
     }
 }
 
@@ -292,6 +301,7 @@ void ServerImpl::onKeepAliveTimeout(const KeepAliveTimeoutEvent& event)
 {
     Socket* socket = event.socket();
     _idleSockets.erase(socket);
+    log_debug("onKeepAliveTimeout; delete " << static_cast<void*>(&socket));
     delete socket;
 }
 

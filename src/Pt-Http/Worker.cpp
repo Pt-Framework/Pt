@@ -32,6 +32,7 @@
 
 #define log_define(x)
 #define log_debug(x)
+#define log_info(x)
 
 log_define("pt.http.worker")
 
@@ -42,6 +43,7 @@ namespace Http
 
 void Worker::run()
 {
+    log_info("new thread running");
     while (!_server.isTerminating() && _server._queue.numWaiting() < _server.minThreads())
     {
         Socket* socket = _server._queue.get();
@@ -56,42 +58,44 @@ void Worker::run()
         if (_server._queue.numWaiting() == 0)
             _server.noWaitingThreads();
 
-        if (!socket->hasAccepted())
-        {
-            // do blocking accept
-            socket->accept();
-            log_debug("connection accepted from " << socket->getPeerAddr());
-
-            if (_server.isTerminating())
-            {
-                log_debug("server is terminating - quit thread");
-                _server._queue.put(socket);
-                break;
-            }
-
-            // new connection arrived - create new accept socket
-            _server._queue.put(new Socket(*socket));
-        }
-        else if (!socket->isConnected())
-        {
-            log_debug("socket is not connected any more");
-            delete socket;
-        }
-
-        socket->setSelector(&_selector);
-        connect(socket->buffer().inputReady, socket->inputSlot);
-
         try
         {
-            if (socket->buffer().in_avail())
-                socket->onInput(socket->buffer());
+            if (!socket->hasAccepted())
+            {
+                // do blocking accept
+                socket->accept();
+                log_debug("connection accepted from " << socket->getPeerAddr());
 
-            while (_selector.wait(_server.idleTimeout()) && socket->isConnected())
+                if (_server.isTerminating())
+                {
+                    log_debug("server is terminating - quit thread");
+                    _server._queue.put(socket);
+                    break;
+                }
+
+                // new connection arrived - create new accept socket
+                _server._queue.put(new Socket(*socket));
+            }
+            else if (socket->isConnected())
+            {
+                log_debug("process available input");
+                socket->onInput(socket->buffer());
+            }
+            else
+            {
+                log_debug("socket is not connected any more; delete " << static_cast<void*>(socket));
+                delete socket;
+            }
+
+            connect(socket->buffer().inputReady, socket->inputSlot);
+
+            while (socket->wait(_server.idleTimeout()) && socket->isConnected())
                 ;
 
             if (socket->isConnected())
             {
                 log_debug("timeout processing socket");
+                disconnect(socket->buffer().inputReady, socket->inputSlot);
                 _server.addIdleSocket(socket);
             }
             else if (_server.isTerminating())
@@ -100,18 +104,18 @@ void Worker::run()
             }
             else
             {
-                log_debug("socket is not connected any more");
+                log_debug("socket is not connected any more; delete " << static_cast<void*>(socket));
                 delete socket;
             }
         }
         catch (const std::exception& e)
         {
-            log_debug("error occured in device: " << e.what());
+            log_debug("error occured in device: " << e.what() << "; delete " << static_cast<void*>(socket));
             delete socket;
         }
     }
 
-    log_debug("thread terminated");
+    log_info("thread terminated");
     _server.threadTerminated(this);
 }
 

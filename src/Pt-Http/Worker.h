@@ -29,7 +29,6 @@
 #ifndef PT_HTTP_WORKER_H
 #define PT_HTTP_WORKER_H
 
-#include <Pt/System/Selector.h>
 #include <Pt/System/Thread.h>
 
 namespace Pt
@@ -52,7 +51,6 @@ class Worker : public System::AttachedThread
 
     private:
         ServerImpl& _server;
-        System::Selector _selector;
 };
 
 }

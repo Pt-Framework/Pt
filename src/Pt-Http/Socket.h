@@ -93,8 +93,6 @@ class Socket : public Net::TcpSocket, public Connectable
         System::StreamBuffer& buffer()         { return _stream.buffer(); }
 
         MethodSlot<void, Socket, System::StreamBuffer&> inputSlot;
-        MethodSlot<bool, Socket, System::StreamBuffer&> outputSlot;
-        MethodSlot<void, Socket> timeoutSlot;
 
     private:
         Net::TcpServer& _tcpServer;

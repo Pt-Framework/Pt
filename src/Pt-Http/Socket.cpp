@@ -60,8 +60,6 @@ void Socket::ParseEvent::onUrlParam(const std::string& q)
 
 Socket::Socket(ServerImpl& server, Net::TcpServer& tcpServer)
     : inputSlot(slot(*this, &Socket::onInput)),
-      outputSlot(slot(*this, &Socket::onOutput)),
-      timeoutSlot(slot(*this, &Socket::onTimeout)),
       _tcpServer(tcpServer),
       _server(server),
       _parseEvent(_request),
@@ -71,12 +69,12 @@ Socket::Socket(ServerImpl& server, Net::TcpServer& tcpServer)
 {
     _stream.attachDevice(*this);
     Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
+    Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
+    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
 }
 
 Socket::Socket(Socket& socket)
     : inputSlot(slot(*this, &Socket::onInput)),
-      outputSlot(slot(*this, &Socket::onOutput)),
-      timeoutSlot(slot(*this, &Socket::onTimeout)),
       _tcpServer(socket._tcpServer),
       _server(socket._server),
       _parseEvent(_request),
@@ -86,6 +84,8 @@ Socket::Socket(Socket& socket)
 {
     _stream.attachDevice(*this);
     Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
+    Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
+    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
 }
 
 Socket::~Socket()
@@ -107,38 +107,14 @@ void Socket::accept()
 
 void Socket::setSelector(System::SelectorBase* s)
 {
-    if (selector() == s)
-        return;
-
-    if (selector() != 0)
-    {
-        Pt::disconnect(_stream.buffer().inputReady, inputSlot);
-        Pt::disconnect(_stream.buffer().outputReady, outputSlot);
-        Pt::disconnect(_timer.timeout, timeoutSlot);
-    }
-
-    if (s)
-    {
-        s->add(*this);
-        s->add(_timer);
-
-        Pt::connect(_stream.buffer().outputReady, outputSlot);
-        Pt::connect(_timer.timeout, timeoutSlot);
-    }
-    else
-    {
-        TcpSocket::setSelector(0);
-        _timer.setSelector(0);
-    }
+    s->add(*this);
+    s->add(_timer);
 }
 
 void Socket::removeSelector()
 {
     TcpSocket::setSelector(0);
     _timer.setSelector(0);
-    Pt::disconnect(_stream.buffer().inputReady, inputSlot);
-    Pt::disconnect(_stream.buffer().outputReady, outputSlot);
-    Pt::disconnect(_timer.timeout, timeoutSlot);
 }
 
 void Socket::onIODeviceInput(System::IODevice& iodevice)
