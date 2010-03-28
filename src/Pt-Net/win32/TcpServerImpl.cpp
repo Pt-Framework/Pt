@@ -221,6 +221,7 @@ void TcpServerImpl::detach(System::SelectorBase& s)
 
 bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 {
+	
     log_debug("setWaitHandle");
 
     if(_currentHandle == h)
@@ -230,6 +231,22 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
     attachEvent(_currentHandle, FD_ACCEPT);
     avail = false;
     return true;
+}
+
+SOCKET TcpServerImpl::accept()
+{
+    Pt::System::MutexLock lock(_mutex);
+
+	SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
+   
+	if( fd == SOCKET_ERROR)
+	{
+		_mutex.unlock();
+		log_debug("accept failed: "<< WSAGetLastError());
+		throw System::SystemError( PT_ERROR_MSG("accept failed") );
+	}			
+
+	return fd;
 }
 
 void TcpServerImpl::getWaitHandles(System::HandleMap& handles, bool& avail)

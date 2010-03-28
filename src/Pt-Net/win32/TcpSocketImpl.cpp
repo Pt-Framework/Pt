@@ -76,13 +76,6 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
         log_debug("Error at socket(): "<< WSAGetLastError());
         throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
     }
-
-	//Close the socket on close no delay time
-    struct linger ling;
-    ling.l_onoff = 0;
-    ling.l_linger = 0;
-
-    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
 }
 
 void TcpSocketImpl::cancel()
@@ -95,6 +88,12 @@ void TcpSocketImpl::close()
     if( _fd == INVALID_SOCKET )
         return;
 
+	attachEvent(0, 0);
+    linger lin;
+    lin.l_onoff = 1;
+    lin.l_linger = 30;
+
+    ::setsockopt(_fd,  SOL_SOCKET, SO_LINGER, (char*)&lin, sizeof(lin));
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -200,6 +199,7 @@ void TcpSocketImpl::endConnect()
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
 {
+    attachEvent(_waitEvent, _eventFlags);
 }
 
 void TcpSocketImpl::attach(System::SelectorBase& sb)
@@ -218,20 +218,14 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 
 void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
-    _fd = ::WSAAccept(server.impl().fd(), NULL, NULL, NULL, 0);
+    _fd = server.impl().accept();
    
 	if( _fd == SOCKET_ERROR)
     {
         log_debug("accept failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("accept failed") );
     }
-		
-	//Close the socket on close no delay time
-    struct linger ling;
-    ling.l_onoff = 0;
-    ling.l_linger = 0;
-
-    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
+	
 
     _isConnected = true;
 }
@@ -260,7 +254,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 }
 
 bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
-{
+{	
 	avail = false;
 	
 	if( _currentEventHandle == h)
@@ -270,7 +264,7 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 
     attachEvent(_currentEventHandle, _eventFlags);
 
-	return true;    
+	return true; 
 }
 
 void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
@@ -373,18 +367,18 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 }
 
 size_t TcpSocketImpl::endWrite()
-{
+{	
+	_eventFlags &= ~FD_WRITE;	
+	attachEvent(_currentEventHandle, _eventFlags);    
+
 	DWORD numberOfBytesSent = 0;
 
-	_eventFlags &= ~FD_WRITE;	
-	attachEvent(_currentEventHandle, _eventFlags);
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-    numberOfBytesSent = ::send(_fd, _sendBuffer.buf, _sendBuffer.len, 0);	
+    if(rc == SOCKET_ERROR)
+        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") ); 
 
-    if(numberOfBytesSent == 0)
-	    throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
-
-	return numberOfBytesSent;
+	return  numberOfBytesSent;
 }
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
@@ -396,10 +390,10 @@ bool TcpSocketImpl::checkEvent()
 {
     log_debug("checkEvent");
     
-    WSANETWORKEVENTS events;
+	WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
-        throw System::SystemError("ask network events failed");        
+	if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
+		throw System::SystemError("ask network events failed");        
 
 	bool ev = false;
 
@@ -409,7 +403,7 @@ bool TcpSocketImpl::checkEvent()
 		_isConnected = true;
 		_socket.connected.send(_socket);
 	}
-
+	
 	if((events.lNetworkEvents & FD_READ) == FD_READ)
 	{
         ev = true;

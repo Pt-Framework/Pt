@@ -71,7 +71,9 @@ class TcpServerImpl : public System::SelectableImpl
 
         void close();
 
-        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+		SOCKET accept();
+
+		void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
 
         inline SOCKET fd() const
         { return _fd; }
