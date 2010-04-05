@@ -34,6 +34,8 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
 #include <sstream>
+#include <cstring>
+
 #define log_debug(x)
 
 namespace Pt {

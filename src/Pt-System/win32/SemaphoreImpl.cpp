@@ -29,7 +29,7 @@
 #include "SemaphoreImpl.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/Semaphore.h"
-
+#include <climits>
 
 namespace Pt {
 

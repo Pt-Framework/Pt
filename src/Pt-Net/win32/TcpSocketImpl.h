@@ -75,7 +75,7 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void attachEvent(HANDLE ev, long events);
 		size_t checkReceiveResult(bool& eof);
-		size_t TcpSocketImpl::checkSendResult();
+		size_t checkSendResult();
 
 
     public:
