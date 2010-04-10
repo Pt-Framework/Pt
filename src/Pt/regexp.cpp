@@ -249,7 +249,7 @@ regcomp( CHARTYPE *exp )
         FAIL("regexp too big");
 
     /* Allocate space. */
-    r = (regexp*) malloc(sizeof(regexp) + (unsigned)(state.regsize));
+    r = (regexp*) malloc(sizeof(regexp) + ((unsigned)(state.regsize)* sizeof(CHARTYPE)));
     if (r == NULL)
         FAIL("out of space");
     /*if ( DEBUG_PROFILE )
