@@ -46,7 +46,6 @@ class RegExpTest : public Pt::Unit::TestSuite
     protected:
         void Alphabetic()
         {
-            std::clog << "matching alpha" << std::endl;
             Pt::String expr = L"([a-z]+) ([A-Z]+) (xyz)";
             Pt::String str = L"abc DEF xyz ...";
 
