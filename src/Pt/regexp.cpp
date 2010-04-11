@@ -171,7 +171,7 @@
 
 struct parse_state
 {
-    CHARTYPE* regparse; /* Input-scan pointer. */
+    const CHARTYPE* regparse; /* Input-scan pointer. */
     int regnpar;        /* () count. */
     CHARTYPE* regcode;  /* Code-emit pointer; &regdummy = don't. */
     long regsize;       /* Code size. */
@@ -200,6 +200,95 @@ STATIC void reginsert( parse_state* state, CHARTYPE op, CHARTYPE *opnd );
 STATIC void regtail( CHARTYPE *p, CHARTYPE *val );
 STATIC void regoptail( CHARTYPE *p, CHARTYPE *val );
 
+void regerror( char *s )
+{
+    throw Pt::InvalidRegex(s);
+}
+
+
+size_t strlen ( const Pt::Char* str )
+{
+    return std::char_traits<Pt::Char>::length(str);
+}
+
+
+int strncmp(const Pt::Char* c1, const Pt::Char* c2, size_t n)
+{
+    return std::char_traits<Pt::Char>::compare(c1, c2, n);
+}
+
+
+const Pt::Char* strchr(const Pt::Char* str, int c)
+{
+    const Pt::Char term(0);
+    while( *str != term )
+    {
+        if (*str == c)
+            return str;
+
+        ++str;
+    }
+
+    return 0;
+}
+
+
+Pt::Char* strchr(Pt::Char* str, int c)
+{
+    const Pt::Char term(0);
+    while( *str != term )
+    {
+        if (*str == c)
+            return str;
+
+        ++str;
+    }
+
+    return 0;
+}
+
+
+struct regexp_ptr
+{
+    regexp_ptr()
+    : _r(0)
+    {}
+
+    regexp_ptr(regexp* r)
+    : _r(r)
+    {}
+
+    ~regexp_ptr()
+    {
+        if(_r) ::free(_r);
+    }
+
+    regexp_ptr& operator=(regexp* r)
+    {
+        _r = r;
+        return *this;
+    }
+
+    regexp* operator->()
+    {
+        return _r;
+    }
+
+    bool operator!()
+    {
+        return _r == 0;
+    }
+
+    regexp* release()
+    {
+        regexp* r = _r;
+        _r = 0;
+        return r;
+    }
+
+    regexp* _r;
+};
+
 /*
  - regcomp - compile a regular expression into internal code
  *
@@ -215,10 +304,9 @@ STATIC void regoptail( CHARTYPE *p, CHARTYPE *val );
  * Beware that the optimization-preparation code in here knows about some
  * of the structure of the compiled regexp.
  */
-regexp *
-regcomp( CHARTYPE *exp )
+regexp* regcomp( const CHARTYPE *exp )
 {
-    register regexp *r;
+    register regexp_ptr rx;
     register CHARTYPE *scan;
     register CHARTYPE *longest;
     register unsigned len;
@@ -241,16 +329,16 @@ regcomp( CHARTYPE *exp )
     state.regcode = &regdummy;
 
     regc(&state, MAGIC);
-    if (reg(&state, 0, &flags) == NULL)
-        return(NULL);
+    if( reg(&state, 0, &flags) == NULL )
+        return (NULL);
 
     /* Small enough for pointer-storage convention? */
     if (state.regsize >= 32767L)        /* Probably could be 65535L. */
         FAIL("regexp too big");
 
     /* Allocate space. */
-    r = (regexp*) malloc(sizeof(regexp) + ((unsigned)(state.regsize)* sizeof(CHARTYPE)));
-    if (r == NULL)
+    rx = (regexp*) malloc(sizeof(regexp) + ((unsigned)(state.regsize)*sizeof(CHARTYPE)) );
+    if( ! rx )
         FAIL("out of space");
     /*if ( DEBUG_PROFILE )
         profile_memory( sizeof(regexp) + (unsigned)regsize );*/
@@ -261,26 +349,26 @@ regcomp( CHARTYPE *exp )
     ///regnpar = 1;
     state.regnpar = 1;
     ///regcode = r->program;
-    state.regcode = r->program;
+    state.regcode = rx->program;
 
     regc(&state, MAGIC);
-    if (reg(&state, 0, &flags) == NULL)
+    if( reg(&state, 0, &flags) == NULL )
         return(NULL);
 
     /* Dig out information for optimizations. */
-    r->regstart = '\0';    /* Worst-case defaults. */
-    r->reganch = 0;
-    r->regmust = NULL;
-    r->regmlen = 0;
-    scan = r->program+1;            /* First BRANCH. */
+    rx->regstart = '\0';    /* Worst-case defaults. */
+    rx->reganch = 0;
+    rx->regmust = NULL;
+    rx->regmlen = 0;
+    scan = rx->program+1;            /* First BRANCH. */
     if (OP(regnext(scan)) == END) {        /* Only one top-level choice. */
         scan = OPERAND(scan);
 
         /* Starting-point info. */
         if (OP(scan) == EXACTLY)
-            r->regstart = *OPERAND(scan);
+            rx->regstart = *OPERAND(scan);
         else if (OP(scan) == BOL)
-            r->reganch++;
+            rx->reganch++;
 
         /*
          * If there's something expensive in the r.e., find the
@@ -298,12 +386,12 @@ regcomp( CHARTYPE *exp )
                     longest = OPERAND(scan);
                     len = strlen(OPERAND(scan));
                 }
-            r->regmust = longest;
-            r->regmlen = len;
+            rx->regmust = longest;
+            rx->regmlen = len;
         }
     }
 
-    return(r);
+    return rx.release();
 }
 
 /*
@@ -363,7 +451,7 @@ reg(
     }
 
     /* Make a closing node, and hook it on the end. */
-    ender = regnode(state, (paren) ? CLOSE+parno : END);    
+    ender = regnode(state, (paren) ? CLOSE+parno : END);
     regtail(ret, ender);
 
     /* Hook the tails of the branches to the closing node. */
@@ -607,7 +695,7 @@ regatom( parse_state* state, int *flagp )
          * flags |= SIMPLE at the end.
          */
         {
-            CHARTYPE *regprev;
+            const CHARTYPE *regprev;
             register CHARTYPE ch;
 
             state->regparse--;            /* Look at cur char */
@@ -794,16 +882,16 @@ regoptail(
 
 struct match_state
 {
-    CHARTYPE *reginput;      /* String-input pointer. */
-    CHARTYPE *regbol;        /* Beginning of input, for ^ check. */
-    CHARTYPE **regstartp;    /* Pointer to startp array. */
-    CHARTYPE **regendp;      /* Ditto for endp. */
+    const CHARTYPE *reginput;      /* String-input pointer. */
+    const CHARTYPE *regbol;        /* Beginning of input, for ^ check. */
+    const CHARTYPE **regstartp;    /* Pointer to startp array. */
+    const CHARTYPE **regendp;      /* Ditto for endp. */
 };
 
 /*
  * Forwards.
  */
-STATIC int regtry( match_state* state, regexp *prog, CHARTYPE *string );
+STATIC int regtry( match_state* state, regexp *prog, const CHARTYPE *string );
 STATIC int regmatch( match_state* state, CHARTYPE *prog );
 STATIC int regrepeat( match_state* state, CHARTYPE *p );
 
@@ -816,12 +904,10 @@ STATIC char *regprop(CHARTYPE*);
 /*
  - regexec - match a regexp against a string
  */
-int
-regexec(
-    register regexp *prog,
-    register CHARTYPE *string )
+int regexec(register regexp *prog,
+            register const CHARTYPE *string )
 {
-    register CHARTYPE *s;
+    register const CHARTYPE *s;
 
     /* Be paranoid... */
     if (prog == NULL || string == NULL) {
@@ -884,11 +970,11 @@ regexec(
 static int            /* 0 failure, 1 success */
 regtry( match_state* state,
     regexp *prog,
-    CHARTYPE *string )
+    const CHARTYPE *string )
 {
     register int i;
-    register CHARTYPE **sp;
-    register CHARTYPE **ep;
+    register const CHARTYPE **sp;
+    register const CHARTYPE **ep;
 
     state->reginput = string;
     state->regstartp = prog->startp;
@@ -1003,7 +1089,7 @@ regmatch( match_state* state, CHARTYPE *prog )
         case OPEN+8:
         case OPEN+9: {
                 register int no;
-                register CHARTYPE *save;
+                register const CHARTYPE *save;
 
                 no = OP(scan) - OPEN;
                 save = state->reginput;
@@ -1031,7 +1117,7 @@ regmatch( match_state* state, CHARTYPE *prog )
         case CLOSE+8:
         case CLOSE+9: {
                 register int no;
-                register CHARTYPE *save;
+                register const CHARTYPE *save;
 
                 no = OP(scan) - CLOSE;
                 save = state->reginput;
@@ -1050,7 +1136,7 @@ regmatch( match_state* state, CHARTYPE *prog )
             }
             break;
         case BRANCH: {
-                register CHARTYPE *save;
+                register const CHARTYPE *save;
 
                 if (OP(next) != BRANCH)        /* No choice. */
                     next = OPERAND(scan);    /* Avoid recursion. */
@@ -1071,7 +1157,7 @@ regmatch( match_state* state, CHARTYPE *prog )
         case PLUS: {
                 register CHARTYPE nextch;
                 register int no;
-                register CHARTYPE *save;
+                register const CHARTYPE *save;
                 register int min;
 
                 /*
@@ -1123,7 +1209,7 @@ static int
 regrepeat( match_state* state, CHARTYPE *p )
 {
     register int count = 0;
-    register CHARTYPE *scan;
+    register const CHARTYPE *scan;
     register CHARTYPE *opnd;
 
     scan = state->reginput;

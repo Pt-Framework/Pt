@@ -31,7 +31,6 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Regex.h"
-#include "regexp.h"
 
 class RegExpTest : public Pt::Unit::TestSuite
 {
@@ -39,101 +38,71 @@ class RegExpTest : public Pt::Unit::TestSuite
         RegExpTest()
         : Pt::Unit::TestSuite("RegExpTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "BTest", *this, &RegExpTest::Test );
-            Pt::Unit::TestSuite::registerMethod( "ATest", *this, &RegExpTest::Test2 );
-            //Pt::Unit::TestSuite::registerMethod( "MatchNumber", *this, &RegExpTest::MatchNumber );
-        }
-
-        virtual void setUp()
-        {
-
-        }
-
-        virtual void tearDown()
-        {
-
+            Pt::Unit::TestSuite::registerMethod( "Alphabetic", *this, &RegExpTest::Alphabetic );
+            Pt::Unit::TestSuite::registerMethod( "Numbers", *this, &RegExpTest::Numbers );
+            Pt::Unit::TestSuite::registerMethod( "MissingBrace", *this, &RegExpTest::MissingBrace );
         }
 
     protected:
-        void Test()
+        void Alphabetic()
         {
-        try
-        {
-            //Pt::String expr = L"^([0-9]+) (abc)?";
-            Pt::String expr = L"([0-9]+)";
-            const Pt::Char* cexpr = expr.c_str();
+            std::clog << "matching alpha" << std::endl;
+            Pt::String expr = L"([a-z]+) ([A-Z]+) (xyz)";
+            Pt::String str = L"abc DEF xyz ...";
 
-            std::clog << "1 compile " << cexpr  << std::endl;
-            regexp* exp = regcomp( const_cast<Pt::Char*>(cexpr) );
-            if( ! exp )
-                return;
-            std::clog << "1 compile done" << std::endl;
+            Pt::RegexSMatch smatch;
+            Pt::Regex regex(expr);
+            regex.match(str, smatch);
 
-            Pt::String str = L"123 abc";
-            const Pt::Char* cstr = str.c_str();
-            int r =  regexec( exp, const_cast<Pt::Char*>(cstr) );
+            //std::clog << "matches: " << smatch.size() << std::endl;
+            PT_UNIT_ASSERT(smatch.size() == 4)
 
-            std::cerr << "Result: " << r << std::endl;
-            for(int n = 0; n < 10 && exp->startp[n] ; ++n)
-            {
-                std::cerr << n <<": " << exp->startp[n] - cstr  << std::endl;
-                std::cerr << n <<": " << exp->endp[n] - cstr << std::endl;
-            }
+            PT_UNIT_ASSERT(smatch.offsetBegin(0) == 0)
+            PT_UNIT_ASSERT(smatch.offsetEnd(0) == 11)
+            PT_UNIT_ASSERT(smatch.get(0) == L"abc DEF xyz")
 
-            //::free(exp);
-         } catch(const std::exception& ex)
-         {
-            std::clog << "EX: " << ex.what() << std::endl;
-         }
-         catch(...)
-         {
-            std::clog << "EX: unknown"<< std::endl;
-         }
-            std::exit(1);
+            PT_UNIT_ASSERT(smatch.offsetBegin(1) == 0)
+            PT_UNIT_ASSERT(smatch.offsetEnd(1) == 3)
+            PT_UNIT_ASSERT(smatch.get(1) == L"abc")
+
+            PT_UNIT_ASSERT(smatch.offsetBegin(2) == 4)
+            PT_UNIT_ASSERT(smatch.offsetEnd(2) == 7)
+            PT_UNIT_ASSERT(smatch.get(2) == L"DEF")
+
+            PT_UNIT_ASSERT(smatch.offsetBegin(3) == 8)
+            PT_UNIT_ASSERT(smatch.offsetEnd(3) == 11)
+            PT_UNIT_ASSERT(smatch.get(3) == L"xyz")
+
+            // for(unsigned n = 0; n < smatch.size(); ++n)
+            // {
+            //     std::clog << "match " << n << " ("
+            //               << smatch.offsetBegin(n) << " - "
+            //               << smatch.offsetEnd(n) << "): '"
+            //               << smatch.get(n).narrow() << "'" << std::endl;
+            // }
         }
 
-        void Test2()
+        void Numbers()
         {
-            Pt::String expr = L"([0-9]+)";
-            const Pt::Char* cexpr = expr.c_str();
-            std::clog << "2 compile" << std::endl;
-            regexp* exp = regcomp( const_cast<Pt::Char*>(cexpr) );
-            std::clog << "2 compile done" << std::endl;
+            Pt::String expr = L"([0-9]+) ([0-9]+) ([7-9]+) (000)";
+            Pt::String str = L"123 456 789 000";
 
-            Pt::String str = L"123 abc";
-            const Pt::Char* cstr = str.c_str();
-            std::clog << "compile" << std::endl;
-            int r =  regexec( exp, const_cast<Pt::Char*>(cstr) );
-            std::clog << "compile done" << std::endl;
+            Pt::RegexSMatch smatch;
+            Pt::Regex regex(expr);
+            regex.match(str, smatch);
 
-            std::cerr << "Result: " << r << std::endl;
-            for(int n = 0; n < 10 && exp->startp[n] ; ++n)
-            {
-                std::cerr << n <<": " << exp->startp[n] - cstr  << std::endl;
-                std::cerr << n <<": " << exp->endp[n] - cstr << std::endl;
-            }
-
-            //::free(exp);
-            //std::exit(1);
+            PT_UNIT_ASSERT(smatch.size() == 5)
         }
 
-        // void MatchNumber()
-        // {
-        //     std::clog << "matching number" << std::endl;
-        //     Pt::String expr = L"([0-9]+)";
-        //     Pt::String str = L"123 abc";
+        void MissingBrace()
+        {
+            Pt::String expr = L"([0-9]+";
+            Pt::String str = L"123";
 
-        //     Pt::RegexSMatch smatch;
+            Pt::RegexSMatch smatch;
 
-        //     std::clog << "compile" << std::endl;
-        //     Pt::Regex regex(expr);
-
-        //     std::clog << "match" << std::endl;
-        //     regex.match(str, smatch);
-
-        //     std::clog << "matches: " << smatch.size() << std::endl;
-        //     std::exit(1);
-        // }
+            PT_UNIT_ASSERT_THROW(Pt::Regex regex(expr), Pt::InvalidRegex);
+        }
 };
 
 Pt::Unit::RegisterTest<RegExpTest> register_RegExpTest;

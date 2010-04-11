@@ -316,6 +316,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         ////////////////////////////////////////////////////////////
         // Integer
         //
+
+        Pt::XmlRpc::RemoteProcedure<int, int, int>* _multiply;
+
         void Integer()
         {
             Pt::XmlRpc::Service service;
@@ -327,15 +330,20 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             connect( multiply.finished, *this, &PtXmlRpcTest::onIntegerFinished );
 
             multiply.begin(2, 3);
+            _multiply= &multiply;
 
             _loop->run();
         }
 
         void onIntegerFinished(const Pt::XmlRpc::Result<int>& r)
         {
+            static int ttt = 0;
             PT_UNIT_ASSERT_EQUALS(r.get(), 6)
 
-            _loop->exit();
+            if(ttt++ == 1)
+                _loop->exit();
+
+            _multiply->begin(1, 6);
         }
 
         int multiplyInt(int a, int b)

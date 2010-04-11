@@ -9,6 +9,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/Char.h>
+#include <Pt/Regex.h>
+#include <iostream>
 #include <stdexcept>
 #include <stdio.h>
 
@@ -27,8 +29,8 @@
 #define    MAGIC    0234
 
 typedef struct regexp {
-    CHARTYPE *startp[NSUBEXP];
-    CHARTYPE *endp[NSUBEXP];
+    const CHARTYPE *startp[NSUBEXP];
+    const CHARTYPE *endp[NSUBEXP];
     CHARTYPE regstart;        /* Internal use only. */
     char reganch;        /* Internal use only. */
     CHARTYPE *regmust;        /* Internal use only. */
@@ -36,51 +38,8 @@ typedef struct regexp {
     CHARTYPE program[1];    /* Unwarranted chumminess with compiler. */
 } regexp;
 
-PT_API regexp *regcomp( CHARTYPE *exp );
+regexp* regcomp( const CHARTYPE *exp );
 
-PT_API int regexec( regexp *prog, CHARTYPE *string );
-
-void regerror( char *s )
-{
-    throw std::runtime_error(s);
-}
-
-size_t strlen ( const Pt::Char* str )
-{
-    return std::char_traits<Pt::Char>::length(str);
-}
-
-int strncmp(const Pt::Char* c1, const Pt::Char* c2, size_t n)
-{
-    return std::char_traits<Pt::Char>::compare(c1, c2, n);
-}
-
-const Pt::Char* strchr(const Pt::Char* str, int c)
-{
-    const Pt::Char term(0);
-    while( *str != term )
-    {
-        if (*str == c)
-            return str;
-
-        ++str;
-    }
-
-    return 0;
-}
-
-Pt::Char* strchr(Pt::Char* str, int c)
-{
-    const Pt::Char term(0);
-    while( *str != term )
-    {
-        if (*str == c)
-            return str;
-
-        ++str;
-    }
-
-    return 0;
-}
+int regexec( regexp *prog, const CHARTYPE *string );
 
 #endif
