@@ -82,6 +82,7 @@ void TcpSocketImpl::create(int domain, int type, int protocol)
 
 void TcpSocketImpl::cancel()
 {
+	SetEvent(_currentEventHandle);
 	attachEvent(0, 0);
 }
 
