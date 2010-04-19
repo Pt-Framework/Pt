@@ -9,12 +9,17 @@ if $(MSVCDir)
 }
 else if $(VSINSTALLDIR)
 {
+    if $(VS100COMNTOOLS)
+    {
+        TOOLSET ?= vc10 ;
+    }
+
     if $(VS90COMNTOOLS)
     {
         TOOLSET ?= vc9 ;
     }
-    
-	TOOLSET ?= vc8 ;
+   
+    TOOLSET ?= vc8 ;
 }
 else if $(MINGW)
 {
