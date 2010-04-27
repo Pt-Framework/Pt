@@ -202,7 +202,8 @@ void TcpSocketImpl::endConnect()
 
 void TcpSocketImpl::detach(System::SelectorBase& sb)
 {
-    attachEvent(_waitEvent, _eventFlags);
+	if( _fd != INVALID_SOCKET)
+		attachEvent(_waitEvent, _eventFlags);
 }
 
 void TcpSocketImpl::attach(System::SelectorBase& sb)
