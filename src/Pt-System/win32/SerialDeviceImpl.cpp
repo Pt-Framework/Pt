@@ -239,9 +239,10 @@ bool SerialDeviceImpl::checkEvent()
 
 
 void SerialDeviceImpl::cancel()
-{
+{	
     ::CancelIo( handle() );
-
+	::PurgeComm(handle(), PURGE_RXABORT | PURGE_TXABORT| PURGE_RXCLEAR | PURGE_TXCLEAR);
+	/*
     DWORD bytes = 0;
 
     if( _device.reading() && ! HasOverlappedIoCompleted(&_readOv) )
@@ -252,7 +253,7 @@ void SerialDeviceImpl::cancel()
     if( _device.writing() && ! HasOverlappedIoCompleted(&_writeOv) )
     {
         GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
-    }
+    }*/
 }
 
 
