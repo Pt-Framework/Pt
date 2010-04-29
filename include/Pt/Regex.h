@@ -31,7 +31,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/Smartptr.h>
+#include <Pt/SmartPtr.h>
 
 struct regexp;
 
