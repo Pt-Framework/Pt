@@ -241,7 +241,7 @@ bool SerialDeviceImpl::checkEvent()
 void SerialDeviceImpl::cancel()
 {	
     ::CancelIo( handle() );
-	::PurgeComm(handle(), PURGE_RXABORT | PURGE_TXABORT| PURGE_RXCLEAR | PURGE_TXCLEAR);
+	::PurgeComm(handle(), PURGE_RXABORT | PURGE_TXABORT);
 	/*
     DWORD bytes = 0;
 
