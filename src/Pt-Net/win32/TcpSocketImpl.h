@@ -71,6 +71,7 @@ class TcpSocketImpl : public System::SelectableImpl
 		WSABUF		  _receiveBuffer;
 		bool          _isConnected;
 		long		  _eventFlags;
+		size_t		  _dataSends;	
         DWORD         _events;
 
         void attachEvent(HANDLE ev, long events);

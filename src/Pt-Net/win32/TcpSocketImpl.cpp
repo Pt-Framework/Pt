@@ -50,16 +50,20 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE)
 , _events(0)
+, _dataSends(0)
 {
 	_currentEventHandle = _waitEvent;
 }
 
 TcpSocketImpl::~TcpSocketImpl()
 {
+
 	WSAResetEvent(_waitEvent);
 
 	if( _fd != INVALID_SOCKET)
-		WSAEventSelect(_fd,_currentEventHandle,0);
+	{
+		WSAEventSelect(_fd, 0, 0);
+	}
 
 	close();
 
@@ -92,11 +96,6 @@ void TcpSocketImpl::close()
         return;
 
 	attachEvent(0, 0);
-    linger lin;
-    lin.l_onoff = 1;
-    lin.l_linger = 30;
-
-    ::setsockopt(_fd,  SOL_SOCKET, SO_LINGER, (char*)&lin, sizeof(lin));
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -208,7 +207,6 @@ void TcpSocketImpl::detach(System::SelectorBase& sb)
 
 void TcpSocketImpl::attach(System::SelectorBase& sb)
 {
-
 }
 
 void TcpSocketImpl::attachEvent(HANDLE ev, long events)
@@ -318,44 +316,22 @@ size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 size_t TcpSocketImpl::endRead(bool& eof)
 {
     _eventFlags &= ~FD_READ;
-	attachEvent(_currentEventHandle, _eventFlags);
 
-    int len =  ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		
+	//Set socket to blocking mode
+	attachEvent(0,0);
+	
+	u_long argp = 0;
+	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
 
-    if( len == -1)
-    {
-        int error = WSAGetLastError();
-
-        switch(error)
-        {
-			case WSAEWOULDBLOCK:
-			{
-				HANDLE ev = WSACreateEvent();
-
-				attachEvent(ev, FD_READ);
-
-				if(WaitForSingleObject(ev, _timeout) == WAIT_TIMEOUT)
-				{
-					attachEvent(_currentEventHandle, _eventFlags);
-					WSACloseEvent(ev);
-					eof = true;
-					return 0;
-				}
-
-				len =  ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		    
-				attachEvent(_currentEventHandle, _eventFlags);
-				WSACloseEvent(ev);
-			}
-			break;
-			case WSAECONNRESET:
-				eof = true;
-			break;
-        }
-		
-    }
+    int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		
 
 	if( len == 0)
 		eof = true;
+	
+	//Set socket to non-blocking mode
+	argp = 1;
+	retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+	attachEvent(_currentEventHandle, _eventFlags);
 
     return len;
 }
@@ -365,22 +341,54 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 	_sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;   
 
-    _eventFlags |= FD_WRITE;
-    attachEvent(_currentEventHandle, _eventFlags);	
+	DWORD numberOfBytesSent = 0;
+
+	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+
+	if(rc == SOCKET_ERROR)
+	{
+		if(WSAGetLastError() == WSAEWOULDBLOCK)
+		{
+			_dataSends = 0;
+		    _eventFlags |= FD_WRITE;
+			attachEvent(_currentEventHandle, _eventFlags);	
+			return 0;
+		}
+	}
+
+	_dataSends = numberOfBytesSent;
+	SetEvent(_currentEventHandle);
 	return 0;
 }
 
 size_t TcpSocketImpl::endWrite()
 {	
+	if(_dataSends != 0)
+	{
+		size_t n =  _dataSends;
+		_dataSends = 0;
+		return n;
+	}
+	
 	_eventFlags &= ~FD_WRITE;	
-	attachEvent(_currentEventHandle, _eventFlags);    
+
+	//Set socket to blocking mode
+	attachEvent(0, 0);
+
+	u_long argp = 0;
+	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
 
 	DWORD numberOfBytesSent = 0;
 
-    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-    if(rc == SOCKET_ERROR)
-        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") ); 
+	if(rc == SOCKET_ERROR)
+		throw System::SystemError( PT_ERROR_MSG("beginWrite failed") ); 
+
+	//Set socket to non-blocking mode
+	argp = 1;
+	retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+	attachEvent(_currentEventHandle, _eventFlags); 
 
 	return  numberOfBytesSent;
 }
@@ -391,9 +399,15 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 }
 
 bool TcpSocketImpl::checkEvent()
-{
+{	
     log_debug("checkEvent");
     
+	if(_dataSends != 0 )
+	{
+	   _socket.outputReady.send(_socket);
+		return true;
+	}
+
 	WSANETWORKEVENTS events;
 
 	if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
@@ -408,17 +422,17 @@ bool TcpSocketImpl::checkEvent()
 		_socket.connected.send(_socket);
 	}
 	
-	if((events.lNetworkEvents & FD_READ) == FD_READ)
-	{
-        ev = true;
-		_socket.inputReady.send(_socket);	
-	}
-
-	if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
+	if(((events.lNetworkEvents & FD_WRITE) == FD_WRITE))
 	{
        ev = true;
 	   _socket.outputReady.send(_socket);	       
     }
+
+	if((events.lNetworkEvents & FD_READ) == FD_READ)
+	{
+        ev = true;
+		_socket.inputReady.send(_socket);			
+	}
 
 	if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
 	{
