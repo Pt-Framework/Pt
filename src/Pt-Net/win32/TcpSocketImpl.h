@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
  *                            Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -57,7 +57,36 @@ class TcpSocket;
 
 class TcpSocketImpl : public System::SelectableImpl
 {
+    struct DestructionSentry
+    {
+        DestructionSentry(DestructionSentry*& sentry)
+        : _deleted(false)
+        , _sentry(sentry)
+        {
+           sentry = this;
+        }
+
+        ~DestructionSentry()
+        {
+            if( ! _deleted )
+                this->detach();
+        }
+
+        bool operator!() const
+        { return _deleted; }
+
+        void detach()
+        {
+            _sentry = 0;
+            _deleted = true;
+        }
+
+        bool _deleted;
+        DestructionSentry*& _sentry;
+    };
+
 	private:
+        DestructionSentry* _sentry;
         SOCKET	      _fd;
 		SOCKADDR      _peeraddr;
 		TcpSocket&    _socket;
@@ -71,20 +100,16 @@ class TcpSocketImpl : public System::SelectableImpl
 		WSABUF		  _receiveBuffer;
 		bool          _isConnected;
 		long		  _eventFlags;
-		size_t		  _dataSends;	
-        DWORD         _events;
+		size_t		  _dataSends;
 
         void attachEvent(HANDLE ev, long events);
 		size_t checkReceiveResult(bool& eof);
 		size_t checkSendResult();
 
-
     public:
-
         TcpSocketImpl(TcpSocket& socket);
-		~TcpSocketImpl();
 
-		void create(int domain, int type, int protocol);
+        ~TcpSocketImpl();
 
         void close();
 
@@ -97,7 +122,7 @@ class TcpSocketImpl : public System::SelectableImpl
 
         bool beginConnect(const AddrInfo& addrinfo);
 
-        void endConnect();             		
+        void endConnect();
 
 		size_t beginRead(char* buffer, size_t n, bool& eof);
 
@@ -112,23 +137,22 @@ class TcpSocketImpl : public System::SelectableImpl
 		size_t write(const char* buffer, size_t count);
 
 		std::string getSockAddr() const;
-		
+
 		std::string getPeerAddr() const;
 
 		void setTimeout(std::size_t msecs)
-		{ 
+		{
 			_timeout = msecs;
 		}
-		
+
 		std::size_t timeout() const
 		{
 			return _timeout;
 		}
-			
+
         bool wait(std::size_t msecs);
 
         void attach(System::SelectorBase& sb);
-		       
 
         void detach(System::SelectorBase& sb);
 

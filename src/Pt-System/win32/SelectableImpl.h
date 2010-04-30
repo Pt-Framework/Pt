@@ -34,18 +34,18 @@ class Selectable;
 class SelectableImpl
 {
     public:
-        virtual ~SelectableImpl() 
+        virtual ~SelectableImpl()
         {}
 
         virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
-        
+
         virtual void getWaitHandles(HandleMap& handles, bool& avail)
         { }
 
         virtual bool checkEvent() = 0;
 };
 
-} // namespace System    
+} // namespace System
 
 } //namespace Pt
 

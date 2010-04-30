@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo, 
+ * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo,
  *                    Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,6 +35,7 @@
 #include <Pt/Net/TcpSocket.h>
 #include <sstream>
 #include <cstring>
+#include <cassert>
 
 #define log_debug(x)
 
@@ -43,52 +44,35 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
-: _socket(socket)
+:  _sentry(0)
+, _socket(socket)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE)
-, _events(0)
 , _dataSends(0)
 {
 	_currentEventHandle = _waitEvent;
 }
 
+
 TcpSocketImpl::~TcpSocketImpl()
 {
-
 	WSAResetEvent(_waitEvent);
-
-	if( _fd != INVALID_SOCKET)
-	{
-		WSAEventSelect(_fd, 0, 0);
-	}
-
-	close();
-
     WSACloseEvent(_waitEvent);
-    _waitEvent = INVALID_HANDLE_VALUE;
+
+    if(_sentry)
+        _sentry->detach();
 }
 
-void TcpSocketImpl::create(int domain, int type, int protocol)
-{
-    log_debug("create socket");
-
-	_fd = WSASocket(domain, type, protocol, NULL, 0, 0);
-
-    if (_fd == INVALID_SOCKET)
-    {
-        log_debug("Error at socket(): "<< WSAGetLastError());
-        throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
-    }
-}
 
 void TcpSocketImpl::cancel()
 {
 	SetEvent(_currentEventHandle);
 	attachEvent(0, 0);
 }
+
 
 void TcpSocketImpl::close()
 {
@@ -101,31 +85,40 @@ void TcpSocketImpl::close()
     _isConnected = false;
 }
 
+
 void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 {
 	this->beginConnect(addrinfo);
     this->endConnect();
 }
 
+
 bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
-{	
-	_isConnected = false;
-	
+{
+    assert( ! _isConnected );
+
     for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
     {
         try
         {
-			this->create(it->ai_family, SOCK_STREAM, 0);
-			_eventFlags |= FD_CONNECT;
-			attachEvent(_currentEventHandle, _eventFlags);
+            _fd = WSASocket(it->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+
+            if (_fd == INVALID_SOCKET)
+            {
+                log_debug("Error at socket(): "<< WSAGetLastError());
+                throw System::SystemError(PT_ERROR_MSG("creating socket failed"));
+            }
+
+            _eventFlags |= FD_CONNECT;
+            attachEvent(_currentEventHandle, _eventFlags);
         }
         catch (const System::SystemError&)
         {
-          continue;
+             continue;
         }
 
-		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);		
-        
+		std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+
 		if( ::connect(_fd, it->ai_addr, (int)it->ai_addrlen) == SOCKET_ERROR)
 		{
 			if( WSAGetLastError() == WSAEWOULDBLOCK)
@@ -150,6 +143,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
 	return false;
 }
 
+
 void TcpSocketImpl::endConnect()
 {
 	_eventFlags &= ~FD_CONNECT;
@@ -162,14 +156,14 @@ void TcpSocketImpl::endConnect()
 		if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
 		{
 			DWORD error = WSAGetLastError();
-			
+
 			if( error != WSAEINPROGRESS)
 				throw System::SystemError("getsockopt");
 		}
 		else if(sockerr != 0)
 		{
 			throw System::IOError("connect");
-		}	
+		}
 
     }
     catch(...)
@@ -188,7 +182,7 @@ void TcpSocketImpl::endConnect()
 	attachEvent(ev, FD_CONNECT);
 
 	if(WaitForSingleObject( ev, _timeout ) == WAIT_TIMEOUT)
-	{	
+	{
 		close();
 		throw System::IOTimeout();
 	}
@@ -199,15 +193,18 @@ void TcpSocketImpl::endConnect()
 
 }
 
+
 void TcpSocketImpl::detach(System::SelectorBase& sb)
 {
 	if( _fd != INVALID_SOCKET)
 		attachEvent(_waitEvent, _eventFlags);
 }
 
+
 void TcpSocketImpl::attach(System::SelectorBase& sb)
 {
 }
+
 
 void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 {
@@ -218,26 +215,27 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
     }
 }
 
+
 void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
     _fd = server.impl().accept();
-   
+
 	if( _fd == SOCKET_ERROR)
     {
         log_debug("accept failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("accept failed") );
     }
-	
 
     _isConnected = true;
 }
+
 
 bool TcpSocketImpl::wait(std::size_t umsecs)
 {
     log_debug("wait " << msecs);
 
     int msecs = umsecs;
-	if(umsecs == Pt::System::SelectorBase::WaitInfinite) 
+	if(umsecs == Pt::System::SelectorBase::WaitInfinite)
     {
         msecs = INFINITE;
     }
@@ -255,24 +253,27 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     return false;
 }
 
+
 bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
-{	
+{
 	avail = false;
-	
+
 	if( _currentEventHandle == h)
-		return true;   
+		return true;
 
     _currentEventHandle = h;
 
     attachEvent(_currentEventHandle, _eventFlags);
 
-	return true; 
+	return true;
 }
+
 
 void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 {
-    //handles.add(_currentEventHandle, &_socket); 
+    //handles.add(_currentEventHandle, &_socket);
 }
+
 
 std::string TcpSocketImpl::getSockAddr() const
 {
@@ -287,161 +288,183 @@ std::string TcpSocketImpl::getSockAddr() const
     return inet_ntoa(sa->sin_addr);
 }
 
+
 std::string TcpSocketImpl::getPeerAddr() const
 {
 	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
     return inet_ntoa(sa->sin_addr);
 }
 
+
 size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-	_eventFlags |= FD_READ;
+    assert(buffer != 0);
+    _eventFlags |= FD_READ;
 
-	_receiveBuffer.buf = buffer;
+    _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n;
 
-	if( _receiveBuffer.buf == 0)
-		 throw System::SystemError( PT_ERROR_MSG("beginRead failed") );
-
-	attachEvent(_currentEventHandle, _eventFlags);
-
-	return 0;
+    attachEvent(_currentEventHandle, _eventFlags);
+    return 0;
 }
+
 
 size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-	return 0;
+    return 0;
 }
+
 
 size_t TcpSocketImpl::endRead(bool& eof)
 {
     _eventFlags &= ~FD_READ;
 
-	//Set socket to blocking mode
-	attachEvent(0,0);
-	
-	u_long argp = 0;
-	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    //Set socket to blocking mode
+    attachEvent(0,0);
 
-    int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);		
+    u_long argp = 0;
+    int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
 
-	if( len == 0)
-		eof = true;
-	
-	//Set socket to non-blocking mode
-	argp = 1;
-	retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
-	attachEvent(_currentEventHandle, _eventFlags);
+    int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
+
+    if( len == 0)
+        eof = true;
+
+    //Set socket to non-blocking mode
+    argp = 1;
+    retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    attachEvent(_currentEventHandle, _eventFlags);
 
     return len;
 }
 
+
 size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 {
-	_sendBuffer.buf = const_cast<char*>(buffer);
-    _sendBuffer.len = n;   
+    _sendBuffer.buf = const_cast<char*>(buffer);
+    _sendBuffer.len = n;
 
-	DWORD numberOfBytesSent = 0;
+    DWORD numberOfBytesSent = 0;
 
-	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-	if(rc == SOCKET_ERROR)
-	{
-		if(WSAGetLastError() == WSAEWOULDBLOCK)
-		{
-			_dataSends = 0;
-		    _eventFlags |= FD_WRITE;
-			attachEvent(_currentEventHandle, _eventFlags);	
-			return 0;
-		}
-	}
+    if(rc == SOCKET_ERROR)
+    {
+        if(WSAGetLastError() == WSAEWOULDBLOCK)
+        {
+            _dataSends = 0;
+            _eventFlags |= FD_WRITE;
+            attachEvent(_currentEventHandle, _eventFlags);
+            return 0;
+        }
+    }
 
-	_dataSends = numberOfBytesSent;
-	SetEvent(_currentEventHandle);
-	return 0;
+    _dataSends = numberOfBytesSent;
+    SetEvent(_currentEventHandle);
+    return 0;
 }
+
 
 size_t TcpSocketImpl::endWrite()
-{	
-	if(_dataSends != 0)
-	{
-		size_t n =  _dataSends;
-		_dataSends = 0;
-		return n;
-	}
-	
-	_eventFlags &= ~FD_WRITE;	
+{
+    if(_dataSends != 0)
+    {
+        size_t n =  _dataSends;
+        _dataSends = 0;
+        return n;
+    }
 
-	//Set socket to blocking mode
-	attachEvent(0, 0);
+    _eventFlags &= ~FD_WRITE;
 
-	u_long argp = 0;
-	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    //Set socket to blocking mode
+    attachEvent(0, 0);
 
-	DWORD numberOfBytesSent = 0;
+    u_long argp = 0;
+    int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
 
-	int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+    DWORD numberOfBytesSent = 0;
 
-	if(rc == SOCKET_ERROR)
-		throw System::SystemError( PT_ERROR_MSG("beginWrite failed") ); 
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-	//Set socket to non-blocking mode
-	argp = 1;
-	retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
-	attachEvent(_currentEventHandle, _eventFlags); 
+    if(rc == SOCKET_ERROR)
+        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
 
-	return  numberOfBytesSent;
+    //Set socket to non-blocking mode
+    argp = 1;
+    retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    attachEvent(_currentEventHandle, _eventFlags);
+
+    return  numberOfBytesSent;
 }
+
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-	return 0;
+    return 0;
 }
 
+
 bool TcpSocketImpl::checkEvent()
-{	
+{
     log_debug("checkEvent");
-    
-	if(_dataSends != 0 )
-	{
-	   _socket.outputReady.send(_socket);
-		return true;
-	}
 
-	WSANETWORKEVENTS events;
+    DestructionSentry sentry(_sentry);
 
-	if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
-		throw System::SystemError("ask network events failed");        
+    if(_dataSends != 0 )
+    {
+       _socket.outputReady.send(_socket);
 
-	bool ev = false;
-
-    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT)        
-	{
-		ev = true;		
-		_isConnected = true;
-		_socket.connected.send(_socket);
-	}
-	
-	if(((events.lNetworkEvents & FD_WRITE) == FD_WRITE))
-	{
-       ev = true;
-	   _socket.outputReady.send(_socket);	       
+       //if( ! _sentry )
+           return true;
     }
 
-	if((events.lNetworkEvents & FD_READ) == FD_READ)
-	{
-        ev = true;
-		_socket.inputReady.send(_socket);			
-	}
+    WSANETWORKEVENTS events;
 
-	if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
-	{
+    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    bool ev = false;
+
+    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT)
+    {
+        ev = true;
+        _isConnected = true;
+        _socket.connected.send(_socket);
+
+        if( ! _sentry )
+           return ev;
+    }
+
+    if(((events.lNetworkEvents & FD_WRITE) == FD_WRITE))
+    {
+       ev = true;
+       _socket.outputReady.send(_socket);
+
+       if( ! _sentry )
+           return ev;
+    }
+
+    if((events.lNetworkEvents & FD_READ) == FD_READ)
+    {
+        ev = true;
+        _socket.inputReady.send(_socket);
+
+        if( ! _sentry )
+           return ev;
+    }
+
+    if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
+    {
          ev = true;
        _isConnected = false;
+
+       if( ! _sentry )
+           return ev;
     }
 
     return ev;
 }
 
 } // namespace Net
+
 } // namespace Pt
