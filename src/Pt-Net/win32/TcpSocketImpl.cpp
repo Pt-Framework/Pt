@@ -271,9 +271,8 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 
 void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 {
-    //handles.add(_currentEventHandle, &_socket);
+ 
 }
-
 
 std::string TcpSocketImpl::getSockAddr() const
 {
@@ -323,7 +322,7 @@ size_t TcpSocketImpl::endRead(bool& eof)
     attachEvent(0,0);
 
     u_long argp = 0;
-    int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
 
     int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
 
@@ -332,7 +331,7 @@ size_t TcpSocketImpl::endRead(bool& eof)
 
     //Set socket to non-blocking mode
     argp = 1;
-    retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
     attachEvent(_currentEventHandle, _eventFlags);
 
     return len;
@@ -380,7 +379,7 @@ size_t TcpSocketImpl::endWrite()
     attachEvent(0, 0);
 
     u_long argp = 0;
-    int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
 
     DWORD numberOfBytesSent = 0;
 
@@ -391,7 +390,7 @@ size_t TcpSocketImpl::endWrite()
 
     //Set socket to non-blocking mode
     argp = 1;
-    retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
     attachEvent(_currentEventHandle, _eventFlags);
 
     return  numberOfBytesSent;
