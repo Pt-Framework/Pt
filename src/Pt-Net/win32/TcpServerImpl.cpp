@@ -81,7 +81,6 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-    //_fd = ::socket(domain, type, protocol);
 	_fd = WSASocket(domain, type, protocol, NULL , 0, 0);
 
     if (_fd == INVALID_SOCKET)
@@ -89,16 +88,6 @@ void TcpServerImpl::create(int domain, int type, int protocol)
         log_debug("Error at socket(): "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
-
-	//Blocking socket
-	u_long argp = 0;
-	int retVal = ::ioctlsocket(_fd, FIONBIO, &argp);
-
-	//Close on close
-    struct linger ling;
-    ling.l_onoff = 0;
-    ling.l_linger = 0;
-    ::setsockopt(_fd, SOL_SOCKET, SO_DONTLINGER, (char*)&ling, sizeof(ling));
 }
 
 void TcpServerImpl::attachEvent(HANDLE ev, long events)
@@ -183,7 +172,6 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
 
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
-
 	attachEvent(_currentHandle, FD_ACCEPT);
     log_debug("wait " << msecs);
 
@@ -193,7 +181,7 @@ bool TcpServerImpl::wait(std::size_t umsecs)
     {
         msecs = INFINITE;
     }
-    else if( umsecs > std::numeric_limits<int>::max() )
+    else if( umsecs > static_cast<std::size_t>(std::numeric_limits<int>::max()) )
     {
         msecs = std::numeric_limits<int>::max();
     }
@@ -220,8 +208,7 @@ void TcpServerImpl::detach(System::SelectorBase& s)
 }
 
 bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
-{
-	
+{	
     log_debug("setWaitHandle");
 
     if(_currentHandle == h)
@@ -235,17 +222,21 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 
 SOCKET TcpServerImpl::accept()
 {
-    Pt::System::MutexLock lock(_mutex);
+	//Set the server socket in bloking-mode
+	u_long argp = 0;
+	attachEvent(0,0);		
+	::ioctlsocket(_fd, FIONBIO, &argp);
 
 	SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
    
 	if( fd == SOCKET_ERROR)
 	{
-		_mutex.unlock();
 		log_debug("accept failed: "<< WSAGetLastError());
 		throw System::SystemError( PT_ERROR_MSG("accept failed") );
 	}			
 
+	//Reset the bloking mode
+	attachEvent(_currentHandle, FD_ACCEPT);
 	return fd;
 }
 

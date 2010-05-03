@@ -58,7 +58,6 @@ class TcpServerImpl : public System::SelectableImpl
         SOCKET				_fd;
         SOCKADDR			_servaddr;
         WSAEVENT			_waitEvent;
-        Pt::System::Mutex	_mutex;
 		HANDLE				_currentHandle;
 
         void attachEvent(HANDLE ev, long events);
