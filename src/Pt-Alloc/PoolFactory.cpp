@@ -1,10 +1,10 @@
-
 #include <Pt/Alloc/PoolFactory.h>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <algorithm>
 
 namespace Pt{
+
 namespace Alloc{
 
 /// Fewest # of objects managed by a Chunk.
@@ -25,7 +25,7 @@ PoolFactory::PoolFactory(void)
 
 PoolFactory::~PoolFactory(void)
 {
-#ifdef DO_EXTRA_PT_TESTS
+#ifndef NDEBUG
     trimEmptyChunk();
     assert(_chunks.empty() && "Memory leak detected!");
 #endif
@@ -58,6 +58,7 @@ void PoolFactory::init(std::size_t blockSize, std::size_t pageSize)
 
 void* PoolFactory::allocate()
 {
+	//std::cerr << "A" << std::flush;
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
     assert( ( NULL == _emptyChunk ) || ( _emptyChunk->hasAvailable(_numBlocks) ) );
     assert( countEmptyChunks() < 2 );
@@ -75,10 +76,7 @@ void* PoolFactory::allocate()
             {
                 if (iter == _chunks.end())
                 {
-                    if(!createChunk())
-                    {
-                        return NULL;
-                    }
+                    createChunk();
                     break;
                 }
                 if (!iter->isFilled())
@@ -104,17 +102,24 @@ void* PoolFactory::allocate()
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
     assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
     assert(countEmptyChunks() < 2);
-
+#ifndef NDEBUG
+    if ( _allocChunk->isCorrupt( _numBlocks, _blockSize, true ) )
+    {
+        assert( false );
+        return 0;
+    }
+#endif
     return place;
 }
 
 bool PoolFactory::deallocate(void* p)
 {
-    Chunk* foundChunk = findChunk(p);
-    if (NULL == foundChunk)
-    {
-        return false;
-    }
+Chunk * hint=0;
+    // Chunk* foundChunk = findChunk(p);
+    // if (0 == foundChunk)
+    // {
+        // return false;
+    // }
 
     assert(!_chunks.empty());
     assert(&_chunks.front() <= _deallocChunk);
@@ -123,19 +128,13 @@ bool PoolFactory::deallocate(void* p)
     assert(&_chunks.back() >= _allocChunk);
     assert(countEmptyChunks() < 2);
 
-    //Chunk* foundChunk = findChunk(p);
-    //if (NULL == foundChunk)
-    //{
-    //    return false;
-    //}
-
-    //Chunk* foundChunk = (NULL == hint) ? findChunk(p) : hint;
-    //if ( NULL == foundChunk )
-    //{
-    //    return false;
-    //}
+    Chunk* foundChunk = (0 == hint) ? findChunk(p) : hint;
+    if ( 0 == foundChunk )
+    {
+       return false;
+    }
     assert(foundChunk->hasBlock(p, _numBlocks * _blockSize));
-#ifdef CHECK_FOR_CORRUPTION
+#ifndef NDEBUG
     if ( foundChunk->isCorrupt( _numBlocks, _blockSize, true ) )
     {
         assert( false );
@@ -154,11 +153,10 @@ bool PoolFactory::deallocate(void* p)
     return true;
 }
 
+
 bool PoolFactory::trimEmptyChunk()
 {
-    // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
-    assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
-    if (NULL == _emptyChunk)
+    if(0 == _emptyChunk)
     {
         return false;
     }
@@ -189,13 +187,13 @@ bool PoolFactory::trimEmptyChunk()
         {
             _deallocChunk = &_chunks.front();
             // TODO: check whether free blocks still available or not.
-            //assert( _deallocChunk->_blocksAvailable < _numBlocks );
+            assert( _deallocChunk->blocksAvailable() < _numBlocks );
         }
         if (_allocChunk == _emptyChunk)
         {
             _allocChunk = &_chunks.back();
             // TODO: check whether free blocks still available or not.
-            //assert(_allocChunk->_blocksAvailable < _numBlocks);
+            assert(_allocChunk->blocksAvailable()  < _numBlocks);
         }
     }
 
@@ -204,6 +202,7 @@ bool PoolFactory::trimEmptyChunk()
 
     return true;
 }
+
 
 bool PoolFactory::trimChunkList()
 {
@@ -224,27 +223,7 @@ bool PoolFactory::trimChunkList()
     return true;
 }
 
-std::size_t PoolFactory::countEmptyChunks() const
-{
-#ifdef DO_EXTRA_PT_TESTS
-    // This code is only used for specialized tests of the allocator.
-    // It is #ifdef-ed so that its O(C) complexity does not overwhelm the
-    // functions which call it.
-    std::size_t count = 0;
-    for ( ChunkCIter it( _chunks.begin() ); it != _chunks.end(); ++it )
-    {
-        const Chunk & chunk = *it;
-        if ( chunk.hasAvailable( _numBlocks ) )
-        {
-            ++count;
-        }
-    }
-    return count;
-#else
-    return ( NULL == _emptyChunk ) ? 0 : 1;
-#endif
-}
-
+#ifndef NDEBUG
 bool PoolFactory::isCorrupt(void) const
 {
     const bool isEmpty = _chunks.empty();
@@ -359,18 +338,20 @@ bool PoolFactory::isCorrupt(void) const
 
     return false;
 }
+#endif
 
-const bool PoolFactory::hasBlock(void* p) const
+bool PoolFactory::hasBlock(void* p) const
 {
     ChunkCIter citer = _chunks.begin();
     for( ; citer != _chunks.end(); ++citer)
     {
         if((*citer).hasBlock(p, _numBlocks * _blockSize))
-       {
-           return true;
-       }
+        {
+            return true;
+        }
     }
-    return false;
+    
+	return false;
 }
 
 void PoolFactory::doDeallocate(void * p)
@@ -382,7 +363,7 @@ void PoolFactory::doDeallocate(void * p)
     assert(_emptyChunk != _deallocChunk);
     assert(!_deallocChunk->hasAvailable(_numBlocks));
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
-    assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
+    assert((0 == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
 
     // call into the chunk, will adjust the inner list but won't release memory
     _deallocChunk->deallocate(p, _blockSize);
@@ -395,7 +376,7 @@ void PoolFactory::doDeallocate(void * p)
         // empty chunks.  Since _emptyChunk may only point to a previously
         // cleared Chunk, if it points to something else besides _deallocChunk,
         // then PoolFactory currently has 2 empty Chunks.
-        if ( NULL != _emptyChunk )
+        if ( 0 != _emptyChunk )
         {
             // If last Chunk is empty, just change what _deallocChunk
             // points to, and release the last.  Otherwise, swap an empty
@@ -421,44 +402,28 @@ void PoolFactory::doDeallocate(void * p)
     }
 
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
-    assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
+    assert((0 == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
 }
 
-bool PoolFactory::createChunk( void )
+void PoolFactory::createChunk( void )
 {
-    bool allocated = false;
-    try
-    {
-        std::size_t size = _chunks.size();
-        // Calling _chunks.reserve *before* creating and initializing the new
-        // Chunk means that nothing is leaked by this function in case an
-        // exception is thrown from reserve.
-        if (_chunks.capacity() == size)
-        {
-            if (0 == size)
-            {
-                size = 4;
-            }
-            _chunks.reserve(size * 2);
-        }
-        Chunk newChunk;
-        allocated = newChunk.init( _blockSize, _numBlocks );
-        if (allocated)
-        {
-            _chunks.push_back(newChunk );
-        }
-    }
-    catch ( ... )
-    {
-        allocated = false;
-    }
-    if (!allocated )
-    {
-        return false;
-    }
+	std::size_t size = _chunks.size();
+	// Calling _chunks.reserve *before* creating and initializing the new
+	// Chunk means that nothing is leaked by this function in case an
+	// exception is thrown from reserve.
+	if (_chunks.capacity() == size)
+	{
+		if (0 == size)
+		{
+			size = 4;
+		}
+		_chunks.reserve(size * 2);
+	}
+	Chunk newChunk;
+	newChunk.init( _blockSize, _numBlocks );
+	_chunks.push_back(newChunk );
     _allocChunk = &_chunks.back();
     _deallocChunk = &_chunks.front();
-    return true;
 }
     
 Chunk *PoolFactory::findChunk(void *p) const
@@ -519,6 +484,25 @@ Chunk *PoolFactory::findChunk(void *p) const
 
     return NULL;
 }
+
+#ifndef NDEBUG
+std::size_t PoolFactory::countEmptyChunks() const
+{
+    // This code is only used for specialized tests of the allocator.
+    // It is #ifdef-ed so that its O(C) complexity does not overwhelm the
+    // functions which call it.
+    std::size_t count = 0;
+    for ( ChunkCIter it( _chunks.begin() ); it != _chunks.end(); ++it )
+    {
+        const Chunk & chunk = *it;
+        if ( chunk.hasAvailable( _numBlocks ) )
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+#endif
 
 }
 }

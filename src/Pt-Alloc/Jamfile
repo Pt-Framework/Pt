@@ -6,6 +6,8 @@ SubDirC++Flags [ FDefines PT_ALLOC_API_EXPORT ] ;
 PT_ALLOC_SOURCES = Chunk.cpp 
 				   PoolFactory.cpp 
 				   PoolAllocator.cpp 
+				   VariableAllocator.cpp 
+				   VariableChunk.cpp 
 				   ;
 
 SharedLibrary Pt-Alloc : $(PT_ALLOC_SOURCES) ;

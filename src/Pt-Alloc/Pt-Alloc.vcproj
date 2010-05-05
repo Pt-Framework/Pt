@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="Pt-Alloc"
 	ProjectGUID="{19AFA54A-2703-4E79-9388-E0375ACB4EA0}"
 	RootNamespace="Pt-Alloc"
 	Keyword="MakeFileProj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -81,15 +82,15 @@
 				Name="tests"
 				>
 				<File
-					RelativePath="..\tests\ChunkTest.cpp"
+					RelativePath=".\tests\ChunkTest.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\tests\ChunkTest.h"
+					RelativePath=".\tests\ChunkTest.h"
 					>
 				</File>
 				<File
-					RelativePath="..\tests\Pt-Alloc-test.cpp"
+					RelativePath=".\tests\Pt-Alloc-test.cpp"
 					>
 				</File>
 			</Filter>
@@ -99,10 +100,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\include\Pt\Alloc\Allocator.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\include\Pt\Alloc\Api.h"
 				>
@@ -116,15 +113,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\Alloc\PoolBase.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\Pt\Alloc\PoolFactory.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Alloc\PoolSingleton.h"
 				>
 			</File>
 		</Filter>

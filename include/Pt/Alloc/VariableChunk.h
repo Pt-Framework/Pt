@@ -1,6 +1,5 @@
-
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris D�rner                          *
+ *   Copyright (C) 2008-2010 by Bendri Batti                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,32 +17,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CHUNK_TEST_H
-#define CHUNK_TEST_H
+#ifndef VARIABLE_CHUNK_H
+#define VARIABLE_CHUNK_H
 
-#undef PT_API_EXPORT
+#include <Pt/Alloc/Api.h>
+#include <cstddef>
 
-#include <Pt/Unit/TestSuite.h>
+namespace Pt {
+namespace Alloc {
 
-class ChunkTest : public Pt::Unit::TestSuite
+class VariableChunk
 {
-public:
-    ChunkTest() : Pt::Unit::TestSuite("ChunkTest")
-    {
-        Pt::Unit::TestSuite::registerMethod( "Test chunk initialization", *this, &ChunkTest::initTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk complex test for allocate and deallocate method", *this, &ChunkTest::complexAllocateDeallocateTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &ChunkTest::allocateDeallocate );
-		Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &ChunkTest::trimTest );
-        //Pt::Unit::TestSuite::registerMethod( "Test chunk deallocate method", *this, &ChunkTest::deallocate );
-    }
+	public:
+		VariableChunk(VariableChunk* nextChunk, std::size_t chunkSize);
+		
+		~VariableChunk();
 
-protected:
-    void initTest();    
-    void complexAllocateDeallocateTest();
-    void allocateDeallocate();
-	void trimTest();
-    //void deallocate();
+		void* allocate(std::size_t reqSize);
+
+		VariableChunk *nextVariableChunk()
+		{ return _nextChunk; }
+
+		std::size_t spaceAvailable()
+		{ return _chunkSize - _bytesAlreadyAllocated; }
+
+		enum { DEFAULT_VARIABLE_CHUNK_SIZE = 4096 };
+
+	private:
+		VariableChunk* _nextChunk;
+		void* _mem;
+		std::size_t _chunkSize;
+		std::size_t _bytesAlreadyAllocated;
 
 };
 
+}
+}
 #endif

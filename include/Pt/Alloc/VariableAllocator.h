@@ -1,6 +1,5 @@
-
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris D�rner                          *
+ *   Copyright (C) 2008-2010 by Bendri Batti                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,32 +17,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CHUNK_TEST_H
-#define CHUNK_TEST_H
+#ifndef VARIABLE_ALLOCATOR_H
+#define VARIABLE_ALLOCATOR_H
 
-#undef PT_API_EXPORT
+#include <Pt/Alloc/Api.h>
+#include <Pt/Allocator.h>
 
-#include <Pt/Unit/TestSuite.h>
+namespace Pt{
+namespace Alloc {
 
-class ChunkTest : public Pt::Unit::TestSuite
+class VariableChunk;
+
+class PT_ALLOC_API VariableAllocator : public Pt::Allocator
 {
-public:
-    ChunkTest() : Pt::Unit::TestSuite("ChunkTest")
-    {
-        Pt::Unit::TestSuite::registerMethod( "Test chunk initialization", *this, &ChunkTest::initTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk complex test for allocate and deallocate method", *this, &ChunkTest::complexAllocateDeallocateTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &ChunkTest::allocateDeallocate );
-		Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &ChunkTest::trimTest );
-        //Pt::Unit::TestSuite::registerMethod( "Test chunk deallocate method", *this, &ChunkTest::deallocate );
-    }
+	public:
+		VariableAllocator( std::size_t size = 4096 );
+		~VariableAllocator();
+		void* allocate( std::size_t size );
+		void deallocate( void* p, std::size_t size );
 
-protected:
-    void initTest();    
-    void complexAllocateDeallocateTest();
-    void allocateDeallocate();
-	void trimTest();
-    //void deallocate();
-
+	private:
+		VariableChunk* _listOfVariableChunk;
+		void expandStorage( std::size_t size );
 };
 
+}
+}
 #endif
+

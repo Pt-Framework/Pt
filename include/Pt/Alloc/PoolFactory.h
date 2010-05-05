@@ -21,7 +21,6 @@
 #define POOL_FACTORY_H
 
 #include <Pt/Alloc/Chunk.h>
-#include <Pt/Alloc/Allocator.h>
 #include <vector>
 
 namespace Pt{
@@ -73,13 +72,7 @@ public:
      */
     bool trimChunkList();
 
-    /** 
-     * @brief Returns count of empty Chunks held by this allocator.  
-     * Complexity is O(C) where C is the total number of Chunks - empty or used.
-     * @return count of empty Chunks held by this allocator.
-     */
-    std::size_t countEmptyChunks( void ) const;
-
+#ifndef NDEBUG	
     /** 
      * @brief Determines if PoolFactory is corrupt.  
      * Checks data members to see if any have erroneous values, or violate class invariants.  
@@ -89,6 +82,13 @@ public:
      * @return True if PoolFactory is corrupt in Release mode, or assert in debug mode.
      */
     bool isCorrupt(void) const;
+	
+    /** @brief Returns count of empty Chunks held by this allocator.  
+     * Complexity is O(C) where C is the total number of Chunks - empty or used.
+     * @return count of empty Chunks held by this allocator.
+     */
+    std::size_t countEmptyChunks( void ) const;
+#endif
 
     /** 
      * @brief Returns true if the block at address p is within a Chunk owned by
@@ -97,7 +97,9 @@ public:
      * @param[in] p Represents the address of the memory to search.
      * @return True if block at address p is within a Chunk owned by this PoolFactory.
      */
-    const bool hasBlock(void* p) const;
+     bool hasBlock(void* p) const;
+	 	 
+
 
 private:
 
@@ -113,9 +115,8 @@ private:
      * @brief Creates an empty Chunk and adds it to the end of the ChunkList.
      * All calls to the lower-level memory allocation functions occur inside
      * this function, and so the only try-catch block is inside here.
-     * @return true for success, false for failure.
      */
-    bool createChunk( void );
+    void createChunk( void );
 
     /** 
      * Finds the Chunk which owns the block at address p.  It starts at

@@ -20,6 +20,9 @@
 #ifndef POOLALLOCATOR_H
 #define POOLALLOCATOR_H
 
+#include <Pt/Alloc/Api.h>
+#include <Pt/Allocator.h>
+
 namespace Pt {
 namespace Alloc {
 
@@ -31,7 +34,7 @@ class PoolFactory;
  * Designed to be a non-templated base class of AllocatorSingleton so that
  * implementation details can be safely hidden in the source code file.
  */
-class PT_ALLOC_API PoolAllocator
+class PT_ALLOC_API PoolAllocator : public Pt::Allocator
 {
 public:
     /** 
@@ -84,26 +87,15 @@ public:
      * @return NULL if nothing allocated and doThrow is false.  Else the
      * pointer to an available block of memory.
      */
-    void* allocate(std::size_t size, bool doThrow);
+    void* allocate(std::size_t size);
 
     /** 
      * @brief Deallocates a block of memory at a given place and of a specific
      * size.  Complexity is almost always constant-time, and is O(C) only if
      * it has to search for which Chunk deallocates.  This never throws.
      */
-    void deallocate(void* p, std::size_t size );
+    void deallocate(void* p, std::size_t size);
 
-    /** 
-     * @brief Deallocates a block of memory at a given place but of unknown size
-     * size.  
-     *
-     * Complexity is O(F + C) where F is the count of PoolFactory's
-     * in the pool, and C is the number of Chunks in all PoolFactory's.  This
-     * does not throw exceptions.  This overloaded version of Deallocate is
-     * called by the nothow delete operator - which is called when the nothrow
-     * new operator is used, but a constructor throws an exception.
-     */
-    void deallocate( void * p );
 
     /**
      * @brief Returns max # of bytes which this can allocate.
@@ -127,7 +119,7 @@ public:
      * Chunks in all PoolFactory's.  This will never throw.
      * @return True if any memory released, or false if none released.
      */
-    bool trimExcessMemory( void );
+    bool trim( void );
 
     /** 
      * @brief Returns true if anything in implementation is corrupt.

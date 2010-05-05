@@ -11,7 +11,7 @@ namespace Pt{
 namespace Alloc{
 
 Chunk::Chunk(void):
-_pData(NULL)
+_pData(0)
 {
 }
 
@@ -19,32 +19,20 @@ Chunk::~Chunk(void)
 {
 }
 
-bool Chunk::init( std::size_t blockSize, Pt::uint8_t blocks )
+void Chunk::init( std::size_t blockSize, Pt::uint8_t blocks )
 {
     assert(blockSize > 0);
     assert(blocks > 0);
 
     // Overflow check
-    const std::size_t allocSize = blockSize * blocks;
+    std::size_t allocSize = blockSize * blocks;
     assert( allocSize / blockSize == blocks);
 
-#ifdef USE_NEW_TO_ALLOCATE
     // If this new operator fails, it will throw, and the exception will get
     // caught one layer up.
-    _pData = static_cast< unsigned char * >( ::operator new ( allocSize ) );
-#else
-    // malloc can't throw, so its only way to indicate an error is to return
-    // a NULL pointer, so we have to check for that.
-    //_pData = static_cast<Pt::uint8_t*>(::std::malloc(allocSize));
-    _pData = new (std::nothrow) Pt::uint8_t[allocSize];
-    if(NULL == _pData) 
-    {
-        return false;
-    }
-#endif
+    _pData = static_cast< Pt::uint8_t* >( ::operator new ( allocSize ) );
 
     reset(blockSize, blocks);
-    return true;
 }
 
 void Chunk::reset(std::size_t blockSize, Pt::uint8_t blocks)
@@ -66,13 +54,10 @@ void Chunk::reset(std::size_t blockSize, Pt::uint8_t blocks)
 
 void Chunk::release()
 {
-    assert( NULL != _pData );
-#ifdef USE_NEW_TO_ALLOCATE
+	//std::cerr << "." << std::flush;
+    assert( 0 != _pData );
     ::operator delete (_pData);
-#else
-    //::std::free(static_cast<void*>(_pData));
-    ::operator delete (_pData);
-#endif
+
 }
 
 // Chunk::Allocate ------------------------------------------------------------
@@ -80,7 +65,7 @@ void* Chunk::allocate(std::size_t blockSize)
 {
     if(isFilled())
     {
-        return NULL;
+        return 0;
     }
 
     assert((_firstAvailableBlock * blockSize) / blockSize == _firstAvailableBlock);
@@ -102,7 +87,7 @@ void Chunk::deallocate(void* p, std::size_t blockSize)
     assert((toRelease - _pData) % blockSize == 0);
     Pt::uint8_t index = static_cast< Pt::uint8_t >((toRelease - _pData) / blockSize);
 
-#if defined(DEBUG) || defined(_DEBUG)
+#ifndef NDEBUG
     // Check if block was already deleted.  Attempting to delete the same
     // block more than once causes Chunk's linked-list of stealth indexes to
     // become corrupt.  And causes count of _blocksAvailable to be wrong.
@@ -121,7 +106,7 @@ void Chunk::deallocate(void* p, std::size_t blockSize)
 }
 
 // Chunk::IsCorrupt -----------------------------------------------------------
-
+#ifndef NDEBUG
 bool Chunk::isCorrupt(Pt::uint8_t numBlocks, std::size_t blockSize, bool checkIndexes) const
 {
     if(numBlocks < _blocksAvailable)
@@ -273,6 +258,7 @@ bool Chunk::isBlockAvailable(void* p, Pt::uint8_t numBlocks, std::size_t blockSi
 
     return false;
 }
-
+#endif
 }
+
 }

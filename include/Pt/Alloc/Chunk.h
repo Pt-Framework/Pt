@@ -87,10 +87,9 @@ public:
     /**
      * @brief Initializes a just-constructed Chunk.
      * @param blockSize Number of bytes per block.
-     * @param blocks Number of blocks per Chunk.
-     * @return True for success, false for failure.
+     * @param blocks Number of blocks per Chunk.    
      */
-    bool init( std::size_t blockSize, Pt::uint8_t blocks );
+    void init( std::size_t blockSize, Pt::uint8_t blocks );
 
     /** 
      * @brief Allocate a block within the Chunk.  
@@ -124,13 +123,14 @@ public:
      * The stealth indexes inside each block are set to point to the next block. 
      * This assumes the Chunk's data was already using Init.
      */
-     void reset( std::size_t blockSize, unsigned char blocks );
+     void reset( std::size_t blockSize, Pt::uint8_t blocks );
 
     /**
      * @brief Releases the allocated block of memory.
      */
     void release();
-
+	
+#ifndef NDEBUG
     /** 
      * @brief Determines if the Chunk has been corrupted.
      * @param numBlocks Total # of blocks in the Chunk.
@@ -141,15 +141,9 @@ public:
      * @return True if Chunk is corrupt.
      */
     bool isCorrupt( Pt::uint8_t numBlocks, std::size_t blockSize, bool checkIndexes ) const;
-
-    /** 
-     * @brief Determines if block is available.
-     * @param p Address of block managed by Chunk.
-     * @param numBlocks Total # of blocks in the Chunk.
-     * @param blockSize # of bytes in each block.
-     * @return True if block is available, else false if allocated.
-     */
-    bool isBlockAvailable(void * p, Pt::uint8_t numBlocks, size_t blockSize) const;
+	
+	bool isBlockAvailable(void* p, Pt::uint8_t numBlocks, std::size_t blockSize) const;
+#endif
 
     /**
      * @brief Returns true if block at address P is inside this Chunk.
@@ -160,11 +154,19 @@ public:
         return ( _pData <= pc ) && ( pc < _pData + chunkLength );
     }
 
+	/**
+     * TODO: rename this method, maybe as isEmpty / empty
+	 */
     bool hasAvailable(Pt::uint8_t numBlocks ) const
     { return ( _blocksAvailable == numBlocks ); }
 
     bool isFilled( void ) const
     { return ( 0 == _blocksAvailable ); }
+	
+	const Pt::uint8_t blocksAvailable() const
+	{
+		return _blocksAvailable;
+    }
 
 private:
     /// Pointer to array of allocated blocks.

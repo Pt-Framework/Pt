@@ -1,5 +1,6 @@
 
 #include <Pt/Alloc/Chunk.h>
+#include <Pt/Alloc/PoolAllocator.h>
 #include <Pt/Types.h>
 #include <Pt/DateTime.h>
 #include <Pt/System/Clock.h>
@@ -11,10 +12,26 @@
 void ChunkTest::initTest()
 {
     Pt::Alloc::Chunk chunk;
-    PT_UNIT_ASSERT(true == chunk.init(4, 10));
+    chunk.init(4, 10);
     PT_UNIT_ASSERT(chunk._pData > 0 );
     PT_UNIT_ASSERT(chunk._blocksAvailable == 10);
     PT_UNIT_ASSERT(chunk._firstAvailableBlock == 0);
+}
+
+void ChunkTest::trimTest()
+{
+	Pt::Alloc::PoolAllocator pool(4096, 256, 4);
+
+	unsigned* tmp;
+
+	for( int i=0; i<2000; i++)
+	{
+		tmp = (unsigned*)pool.allocate(sizeof(unsigned));
+
+		pool.deallocate(tmp, sizeof(unsigned) );
+
+		tmp++;
+	}
 }
 
 void ChunkTest::complexAllocateDeallocateTest()
@@ -23,7 +40,7 @@ void ChunkTest::complexAllocateDeallocateTest()
     std::vector<Pt::Alloc::Chunk> test;
     Pt::uint32_t* array[1024];
     test.push_back(chunkArray);
-    PT_UNIT_ASSERT(test[0].init(sizeof(Pt::uint32_t), 255));
+	test[0].init(sizeof(Pt::uint32_t), 255);
 
     Pt::DateTime timeStart = Pt::System::Clock::getLocalTime();
     Pt::uint32_t k = 0;
@@ -77,7 +94,7 @@ void ChunkTest::allocateDeallocate()
 {
     Pt::uint32_t* array[100];
     Pt::Alloc::Chunk chunk;
-    PT_UNIT_ASSERT(true == chunk.init(sizeof(Pt::uint32_t), 255));
+    chunk.init(sizeof(Pt::uint32_t), 255);
     PT_UNIT_ASSERT(chunk._pData > 0 );
     PT_UNIT_ASSERT(chunk._blocksAvailable == 255);
     PT_UNIT_ASSERT(chunk._firstAvailableBlock == 0);

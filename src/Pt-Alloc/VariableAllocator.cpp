@@ -1,6 +1,5 @@
-
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris D�rner                          *
+ *   Copyright (C) 2008-2010 by Bendri Batti                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,34 +15,48 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+ ***************************************************************************/		
 
-#ifndef CHUNK_TEST_H
-#define CHUNK_TEST_H
+#include <Pt/Alloc/VariableAllocator.h>
+#include <Pt/Alloc/VariableChunk.h>
 
-#undef PT_API_EXPORT
+namespace Pt {
+namespace Alloc {
 
-#include <Pt/Unit/TestSuite.h>
+	VariableAllocator::VariableAllocator( std::size_t size )
+	: _listOfVariableChunk(0)
+	{
+		expandStorage(size);
+	}
+	
+	VariableAllocator::~VariableAllocator()
+	{
+		VariableChunk* memchunk = _listOfVariableChunk;
+		while( memchunk )
+		{
+			_listOfVariableChunk = memchunk->nextVariableChunk();
+			delete memchunk;
+			memchunk = _listOfVariableChunk;
+		}
+	}
+	
+	void* VariableAllocator::allocate( std::size_t size )
+	{
+		std::size_t space = _listOfVariableChunk->spaceAvailable();
+		if( size > space )
+			expandStorage( size );
 
-class ChunkTest : public Pt::Unit::TestSuite
-{
-public:
-    ChunkTest() : Pt::Unit::TestSuite("ChunkTest")
-    {
-        Pt::Unit::TestSuite::registerMethod( "Test chunk initialization", *this, &ChunkTest::initTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk complex test for allocate and deallocate method", *this, &ChunkTest::complexAllocateDeallocateTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &ChunkTest::allocateDeallocate );
-		Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &ChunkTest::trimTest );
-        //Pt::Unit::TestSuite::registerMethod( "Test chunk deallocate method", *this, &ChunkTest::deallocate );
-    }
+		return _listOfVariableChunk->allocate(size);
+	}
+	
+	void VariableAllocator::deallocate( void* p, std::size_t size )
+	{
+	}
 
-protected:
-    void initTest();    
-    void complexAllocateDeallocateTest();
-    void allocateDeallocate();
-	void trimTest();
-    //void deallocate();
+	void VariableAllocator::expandStorage(std::size_t size)
+	{
+		_listOfVariableChunk = new VariableChunk(_listOfVariableChunk, size);
+	}
 
-};
-
-#endif
+}
+}
