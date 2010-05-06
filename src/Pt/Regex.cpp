@@ -29,7 +29,6 @@
 #include "Pt/Regex.h"
 #include "regexp.h"
 #include <stdexcept>
-#include <locale>
 #include <cctype>
 
 namespace Pt {
