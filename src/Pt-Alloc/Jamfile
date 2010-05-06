@@ -11,8 +11,8 @@ PT_ALLOC_SOURCES = Chunk.cpp
 				   ;
 
 SharedLibrary Pt-Alloc : $(PT_ALLOC_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Alloc : Pt Pt-System ;
-SharedLibrary_MakeLocate Pt-Alloc : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-Alloc : Pt ;
+MakeLocate Pt-Alloc : $(OUTPUT_TARGET) ;
 
 SubInclude TOP src Pt-Alloc tests ;
 
