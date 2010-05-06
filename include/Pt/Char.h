@@ -710,6 +710,8 @@ _STLP_END_NAMESPACE
 
 #ifdef PT_WITH_STD_LOCALE
 #include <Pt/Facets.h>
+#else
+#include <Pt/String.h>
 #endif
 
 #endif
