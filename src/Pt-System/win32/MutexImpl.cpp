@@ -37,62 +37,38 @@ namespace System {
 
 MutexImpl::MutexImpl()
 {
-    _handle = CreateMutex(NULL, FALSE, NULL);
-
-    if( !_handle )
-        throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
+	InitializeCriticalSection(&_handle);
 }
 
 
-MutexImpl::MutexImpl(int recursive)
+MutexImpl::MutexImpl(int)
 {
-    _handle = CreateMutex(NULL, FALSE, NULL);
-
-    if( !_handle )
-        throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
+	InitializeCriticalSection(&_handle);
 }
 
 
 MutexImpl::~MutexImpl()
 {
-    ::CloseHandle(_handle);
+	DeleteCriticalSection(&_handle);
 }
 
 
 void MutexImpl::lock()
-{
-    #ifdef _WIN32_WCE
-        DWORD ret = WaitForSingleObject(_handle, INFINITE);
-    #else
-        DWORD ret = WaitForSingleObjectEx(_handle, INFINITE, FALSE);
-    #endif
-
-    if(ret != WAIT_OBJECT_0)
-        throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
+{    
+	EnterCriticalSection(&_handle);
 }
 
 
 bool MutexImpl::tryLock()
 {
-    #ifdef _WIN32_WCE
-        DWORD ret = WaitForSingleObject(_handle, 0);
-    #else
-        DWORD ret = WaitForSingleObjectEx(_handle, 0, FALSE);
-    #endif
-
-    if(ret != WAIT_OBJECT_0 && ret != WAIT_TIMEOUT)
-        throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
-
-    return ret == WAIT_OBJECT_0;
+	DWORD ret = TryEnterCriticalSection(&_handle);
+    return ret != 0;
 }
 
 
 void MutexImpl::unlock()
 {
-    if( ! ReleaseMutex(_handle) )
-    {
-        throw SystemError( PT_ERROR_MSG("ReleaseMutex failed") );
-    }
+	LeaveCriticalSection(&_handle);
 }
 
 

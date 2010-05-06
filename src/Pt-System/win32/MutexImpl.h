@@ -44,7 +44,7 @@ class MutexImpl
 		void unlock();
 
 	private:
-		HANDLE _handle;
+		CRITICAL_SECTION _handle;
 };
 
 class ReadWriteMutexImpl
