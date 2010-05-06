@@ -36,8 +36,17 @@ namespace System {
 EventLoop::EventLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)
+, _usedalloc(&_allocator)
 {
     _selector = new SelectorImpl();
+}
+
+EventLoop::EventLoop(Allocator& a)
+:_exitLoop(false)
+, _allocator(/*255, 64*/)
+, _usedalloc(&a)
+{
+	_selector = new SelectorImpl();
 }
 
 
@@ -49,7 +58,7 @@ EventLoop::~EventLoop()
         {
             Event* ev = _eventQueue.front();
             _eventQueue.pop_front();
-            ev->destroy(_allocator);
+            ev->destroy(*_usedalloc);
         }
     }
     catch(...)
@@ -150,7 +159,7 @@ void EventLoop::onCommitEvent(const Event& ev)
 
         // TODO: use a continuous block of memory to store events
         // this avoids new/delete
-        Event& clonedEvent = ev.clone(_allocator);
+        Event& clonedEvent = ev.clone(*_usedalloc);
 
         try
         {
@@ -158,7 +167,7 @@ void EventLoop::onCommitEvent(const Event& ev)
         }
         catch(...)
         {
-            clonedEvent.destroy(_allocator);
+            clonedEvent.destroy(*_usedalloc);
             throw;
         }
     }
@@ -186,11 +195,11 @@ void EventLoop::onProcessEvents()
         }
         catch(...)
         {
-            ev->destroy(_allocator);
+            ev->destroy(*_usedalloc);
             throw;
         }
 
-        ev->destroy(_allocator);
+        ev->destroy(*_usedalloc);
     }
 }
 

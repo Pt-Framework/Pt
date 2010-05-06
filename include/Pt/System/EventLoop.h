@@ -145,6 +145,8 @@ namespace System {
             */
             EventLoop();
 
+			EventLoop(Allocator& a);
+
             /** @brief Destructs the EventLoop
              */
             virtual ~EventLoop();
@@ -174,6 +176,7 @@ namespace System {
             bool _exitLoop;
             SelectorImpl* _selector;
             Allocator _allocator;
+			Allocator* _usedalloc;
             std::deque<Event* > _eventQueue;
             RecursiveMutex _queueMutex;
     };
