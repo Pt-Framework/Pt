@@ -63,25 +63,36 @@ bool Regex::match(const Pt::String& str, RegexSMatch& smatch) const
     smatch._str = str;
 
     regexp* exp = const_cast<regexp*>( _expr.getPointer() );
-    int ret = regexec( exp, str.c_str() );
+    int ret = regexec( exp, smatch._match, str.c_str() );
 
     if(ret == 0)
     {
         smatch._size = 0;
-        smatch._startp[0] = 0;
-        smatch._endp[0] = 0;
+        smatch._match->startp[0] = 0;
+        smatch._match->endp[0] = 0;
         return false;
     }
 
     unsigned n = 0;
-    for(n = 0; n < 10 && _expr->startp[n] ; ++n)
-    {
-        smatch._startp[n] = _expr->startp[n];
-        smatch._endp[n] = _expr->endp[n];
-    }
+    for(n = 0; n < 10 && smatch._match->startp[n] ; ++n)
+    { }
 
     smatch._size = n;
     return true;
+}
+
+
+RegexSMatch::RegexSMatch()
+: _size(0)
+, _match(0)
+{
+    _match = new pt_regmatch_t;
+}
+
+
+RegexSMatch::~RegexSMatch()
+{
+    delete _match;
 }
 
 
@@ -90,14 +101,31 @@ unsigned RegexSMatch::size() const
     return _size;
 }
 
+unsigned RegexSMatch::offsetBegin(unsigned n) const
+{
+    return _match->startp[n] - _str.c_str();
+}
+
+
+unsigned RegexSMatch::offsetEnd(unsigned n) const
+{
+    return _match->endp[n] - _str.c_str();
+}
+
+
+bool RegexSMatch::has(unsigned n) const
+{
+    return _match->startp[n] != 0;
+}
+
 
 Pt::String RegexSMatch::get(unsigned n) const
 {
-    return Pt::String( _startp[n], _endp[n] );
+    return Pt::String( _match->startp[n], _match->endp[n] );
 }
 
-/*
-  std::string RegexSMatch::format(const std::string& s) const
+
+  Pt::String RegexSMatch::format(const Pt::String& str) const
   {
     enum state_type
     {
@@ -109,9 +137,9 @@ Pt::String RegexSMatch::get(unsigned n) const
     } state;
 
     state = state_0;
-    std::string ret;
+    Pt::String ret;
 
-    for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+    for (Pt::String::const_iterator it = str.begin(); it != str.end(); ++it)
     {
       char ch = *it;
 
@@ -130,14 +158,16 @@ Pt::String RegexSMatch::get(unsigned n) const
           break;
 
         case state_var0:
-          if (std::isdigit(ch))
+          if( isdigit(ch) )
           {
-            ret = std::string(s.begin(), it - 1);
-            regoff_t s = matchbuf[ch - '0'].rm_so;
-            regoff_t e = matchbuf[ch - '0'].rm_eo;
-            if (s >= 0 && e >= 0)
-              ret.append(str, s, e-s);
-            state = state_1;
+            ret = Pt::String(str.begin(), it - 1);
+            const Pt::Char* s = _match->startp[ch - '0'];
+            const Pt::Char* e = _match->endp[ch - '0'];
+
+            if (s != 0 && e != 0)
+              ret.append(s, e-s);
+
+              state = state_1;
           }
           else
             state = state_0;
@@ -153,12 +183,14 @@ Pt::String RegexSMatch::get(unsigned n) const
           break;
 
         case state_var1:
-          if (std::isdigit(ch))
+          if( isdigit(ch) )
           {
-            unsigned s = matchbuf[ch - '0'].rm_so;
-            unsigned e = matchbuf[ch - '0'].rm_eo;
-            if (s >= 0 && e >= 0)
-              ret.append(str, s, e-s);
+            const Pt::Char* s = _match->startp[ch - '0'];
+            const Pt::Char* e = _match->endp[ch - '0'];
+
+            if (s != 0 && e != 0)
+              ret.append(s, e-s);
+
             state = state_1;
           }
           else if (ch == '$')
@@ -176,7 +208,7 @@ Pt::String RegexSMatch::get(unsigned n) const
     {
       case state_0:
       case state_var0:
-        return s;
+        return str;
 
       case state_esc:
         return ret + '\\';
@@ -190,7 +222,7 @@ Pt::String RegexSMatch::get(unsigned n) const
 
     return ret;
   }
-*/
+
 
 
 }

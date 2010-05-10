@@ -28,9 +28,14 @@
  */
 #define    MAGIC    0234
 
-typedef struct regexp {
-    const CHARTYPE *startp[NSUBEXP];
-    const CHARTYPE *endp[NSUBEXP];
+struct pt_regmatch_t
+{
+    const CHARTYPE* startp[NSUBEXP];
+    const CHARTYPE* endp[NSUBEXP];
+};
+
+typedef struct regexp
+{
     CHARTYPE regstart;        /* Internal use only. */
     char reganch;        /* Internal use only. */
     CHARTYPE *regmust;        /* Internal use only. */
@@ -40,6 +45,6 @@ typedef struct regexp {
 
 regexp* regcomp( const CHARTYPE *exp );
 
-int regexec( regexp *prog, const CHARTYPE *string );
+int regexec( regexp *prog, pt_regmatch_t *match, const CHARTYPE *string );
 
 #endif

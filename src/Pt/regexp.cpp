@@ -618,6 +618,7 @@ regatom( parse_state* state, int *flagp )
                     else {
                         classr = UCHARAT(state->regparse-2)+1;
                         classend = UCHARAT(state->regparse);
+
                         if (classr > classend+1)
                             FAIL("invalid [] range");
                         for (; classr <= classend; classr++)
@@ -891,7 +892,7 @@ struct match_state
 /*
  * Forwards.
  */
-STATIC int regtry( match_state* state, regexp *prog, const CHARTYPE *string );
+STATIC int regtry( match_state* state, regexp *prog, pt_regmatch_t* match, const CHARTYPE *string );
 STATIC int regmatch( match_state* state, CHARTYPE *prog );
 STATIC int regrepeat( match_state* state, CHARTYPE *p );
 
@@ -905,6 +906,7 @@ STATIC char *regprop(CHARTYPE*);
  - regexec - match a regexp against a string
  */
 int regexec(register regexp *prog,
+            pt_regmatch_t *match,
             register const CHARTYPE *string )
 {
     register const CHARTYPE *s;
@@ -942,21 +944,21 @@ int regexec(register regexp *prog,
 
     /* Simplest case:  anchored match need be tried only once. */
     if (prog->reganch)
-        return(regtry(&state, prog, string));
+        return(regtry(&state, prog, match, string));
 
     /* Messy cases:  unanchored match. */
     s = string;
     if (prog->regstart != '\0')
         /* We know what char it must start with. */
         while ((s = strchr(s, prog->regstart)) != NULL) {
-            if (regtry(&state, prog, s))
+            if (regtry(&state, prog, match, s))
                 return(1);
             s++;
         }
     else
         /* We don't -- general case. */
         do {
-            if (regtry(&state, prog, s))
+            if (regtry(&state, prog, match, s))
                 return(1);
         } while (*s++ != '\0');
 
@@ -969,26 +971,27 @@ int regexec(register regexp *prog,
  */
 static int            /* 0 failure, 1 success */
 regtry( match_state* state,
-    regexp *prog,
-    const CHARTYPE *string )
+        regexp *prog,
+        pt_regmatch_t* match,
+        const CHARTYPE *string )
 {
     register int i;
     register const CHARTYPE **sp;
     register const CHARTYPE **ep;
 
     state->reginput = string;
-    state->regstartp = prog->startp;
-    state->regendp = prog->endp;
+    state->regstartp = match->startp;
+    state->regendp = match->endp;
 
-    sp = prog->startp;
-    ep = prog->endp;
+    sp = match->startp;
+    ep = match->endp;
     for (i = NSUBEXP; i > 0; i--) {
         *sp++ = NULL;
         *ep++ = NULL;
     }
     if (regmatch(state, prog->program + 1)) {
-        prog->startp[0] = string;
-        prog->endp[0] = state->reginput;
+        match->startp[0] = string;
+        match->endp[0] = state->reginput;
         return(1);
     } else
         return(0);

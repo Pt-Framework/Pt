@@ -34,6 +34,7 @@
 #include <Pt/SmartPtr.h>
 
 struct regexp;
+struct pt_regmatch_t;
 
 namespace Pt {
 
@@ -88,35 +89,30 @@ class PT_API RegexSMatch
     private:
         Pt::String _str;
         unsigned _size;
-        const Pt::Char* _startp[10];
-        const Pt::Char* _endp[10];
+        pt_regmatch_t* _match;
 
     public:
-        RegexSMatch()
-        : _size(0)
-        {
-        }
+        RegexSMatch();
+
+        ~RegexSMatch();
 
         /// returns the number of expressions, which were found
         unsigned size() const;
 
         /// returns the start position of the n-th expression
-        unsigned offsetBegin(unsigned n) const
-        { return _startp[n] - _str.c_str(); }
+        unsigned offsetBegin(unsigned n) const;
 
         /// returns the end position of the n-th expression
-        unsigned offsetEnd(unsigned n) const
-        { return _endp[n] - _str.c_str(); }
+        unsigned offsetEnd(unsigned n) const;
 
         /// returns true if the n-th element is set.
-        bool has(unsigned n) const
-        { return _startp[n] != 0; }
+        bool has(unsigned n) const;
 
         /// returns the n-th element. No range checking is done.
         Pt::String get(unsigned n) const;
 
         /// replace each occurence of "$n" with the n-th element (n: 0..9).
-        //std::string format(const std::string& s) const;
+        Pt::String format(const Pt::String& str) const;
 
         /// returns the n-th element. No range checking is done.
         Pt::String operator[] (unsigned n) const
