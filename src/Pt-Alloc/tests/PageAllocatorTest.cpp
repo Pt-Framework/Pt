@@ -17,25 +17,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef VARIABLE_ALLOCATOR_TEST_H
-#define VARIABLE_ALLOCATOR_TEST_H
+#ifndef PAGE_ALLOCATOR_TEST_H
+#define PAGE_ALLOCATOR_TEST_H
 
 #undef PT_API_EXPORT
 
 #include <Pt/Unit/TestSuite.h>
-#include <Pt/Alloc/VariableAllocator.h>
+#include <Pt/Alloc/PageAllocator.h>
 #include <Pt/Types.h>
 #include <Pt/DateTime.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/RegisterTest.h>
 
-class VariableAllocatorTest : public Pt::Unit::TestSuite
+class PageAllocatorTest : public Pt::Unit::TestSuite
 {
 public:
-    VariableAllocatorTest() : Pt::Unit::TestSuite("VariableAllocatorTest")
+    PageAllocatorTest() : Pt::Unit::TestSuite("PageAllocatorTest")
     {
-        Pt::Unit::TestSuite::registerMethod( "benchMarkPrimitiveTypes", *this, &VariableAllocatorTest::benchMarkPrimitiveTypes );
+        Pt::Unit::TestSuite::registerMethod( "benchMarkPrimitiveTypes", *this, &PageAllocatorTest::benchMarkPrimitiveTypes );
         //Pt::Unit::TestSuite::registerMethod( "Test chunk deallocate method", *this, &ChunkTest::deallocate );
     }
 
@@ -45,22 +45,22 @@ protected:
 		Pt::uint16_t* arrayOfUnsigned[1000];
 
 		Pt::DateTime timeStart = Pt::System::Clock::getLocalTime();
-		Pt::Alloc::VariableAllocator variableAllocator;
+		Pt::Alloc::PageAllocator pageAllocator;
 		for(Pt::uint32_t j = 0; j < 500; ++j)
 		{
 			for(Pt::uint32_t i = 0; i < 1000; ++i)
 			{
-				arrayOfUnsigned[i] = (Pt::uint16_t*)variableAllocator.allocate(sizeof(Pt::uint16_t));
+				arrayOfUnsigned[i] = (Pt::uint16_t*)pageAllocator.allocate(sizeof(Pt::uint16_t));
 			}
 			
 			for(Pt::uint32_t i = 0; i < 1000; ++i)
 			{
-				variableAllocator.deallocate((void*)arrayOfUnsigned[i], sizeof(Pt::uint16_t));
+				pageAllocator.deallocate((void*)arrayOfUnsigned[i], sizeof(Pt::uint16_t));
 			}
 		}
 		Pt::DateTime timeEnd  = Pt::System::Clock::getLocalTime();    
 		Pt::Timespan timeSpan = timeEnd - timeStart;
-		std::cout << "Elapsed time with variable allocator: " << (int)timeSpan.msecs() << " ms\n";
+		std::cout << "Elapsed time with page allocator: " << (int)timeSpan.msecs() << " ms\n";
 
 		Pt::DateTime timeStart1 = Pt::System::Clock::getLocalTime();
 		for(Pt::uint32_t j = 0; j < 500; ++j)
@@ -77,10 +77,10 @@ protected:
 		}
 		Pt::DateTime timeEnd1  = Pt::System::Clock::getLocalTime();    
 		Pt::Timespan timeSpan1 = timeEnd1 - timeStart1;
-		std::cout << "Elapsed time without variable allocator: " << (int)timeSpan1.msecs() << " ms\n";
+		std::cout << "Elapsed time without page allocator: " << (int)timeSpan1.msecs() << " ms\n";
 	}
 };
 
-Pt::Unit::RegisterTest<VariableAllocatorTest> register_VariableAllocatorTest;
+Pt::Unit::RegisterTest<PageAllocatorTest> register_PageAllocatorTest;
 
 #endif
