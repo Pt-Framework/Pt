@@ -29,6 +29,11 @@ SharedLibrary Pt : Atomicity.cpp
                    Utf8Codec.cpp
                    Regex.cpp
                    regexp.cpp
+				   Chunk.cpp 
+				   PoolFactory.cpp
+				   PoolAllocator.cpp
+				   Page.cpp
+				   PageAllocator.cpp
                    ;
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
