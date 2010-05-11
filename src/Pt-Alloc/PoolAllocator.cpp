@@ -27,9 +27,6 @@ _pool(0),
 _maxObjectSize(maxObjectSize),
 _objectAlignSize(objectAlignSize)
 {
-#ifdef DO_EXTRA_PT_TESTS
-    std::cout << "PoolAllocator " << this << std::endl;
-#endif
     assert( 0 != objectAlignSize );
     const std::size_t allocCount = getOffset( maxObjectSize, objectAlignSize );
     _pool = new PoolFactory[allocCount];
@@ -41,9 +38,6 @@ _objectAlignSize(objectAlignSize)
 
 PoolAllocator::~PoolAllocator(void)
 {
-#ifdef DO_EXTRA_PT_TESTS
-    std::cout << "~PoolAllocator " << this << std::endl;
-#endif
     assert( 0 != _objectAlignSize );
     delete [] _pool;
 }

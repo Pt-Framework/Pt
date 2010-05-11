@@ -85,7 +85,6 @@ void PoolFactory::init(std::size_t blockSize, std::size_t pageSize)
 
 void* PoolFactory::allocate()
 {
-	//std::cerr << "A" << std::flush;
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
     assert( ( NULL == _emptyChunk ) || ( _emptyChunk->hasAvailable(_numBlocks) ) );
     assert( countEmptyChunks() < 2 );
@@ -141,13 +140,6 @@ void* PoolFactory::allocate()
 
 bool PoolFactory::deallocate(void* p)
 {
-Chunk * hint=0;
-    // Chunk* foundChunk = findChunk(p);
-    // if (0 == foundChunk)
-    // {
-        // return false;
-    // }
-
     assert(!_chunks.empty());
     assert(&_chunks.front() <= _deallocChunk);
     assert(&_chunks.back() >= _deallocChunk);
@@ -155,7 +147,7 @@ Chunk * hint=0;
     assert(&_chunks.back() >= _allocChunk);
     assert(countEmptyChunks() < 2);
 
-    Chunk* foundChunk = (0 == hint) ? findChunk(p) : hint;
+    Chunk* foundChunk = findChunk(p);
     if ( 0 == foundChunk )
     {
        return false;
