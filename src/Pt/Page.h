@@ -53,7 +53,7 @@ class Page
 
 	private:
 		Page* _nextChunk;
-		void* _mem;
+		char* _mem;
 		std::size_t _chunkSize;
 		std::size_t _bytesAlreadyAllocated;
 
