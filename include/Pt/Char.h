@@ -356,7 +356,7 @@ struct char_traits<Pt::Char>
 
     inline static const char_type* find(const char_type* s, size_t n, const char_type& a);
 
-    inline static char_type* move(char_type* s1, const char_type* s2, int_type n);
+    inline static char_type* move(char_type* s1, const char_type* s2, size_t n);
 
     inline static char_type* copy(char_type* s1, const char_type* s2, size_t n);
 
@@ -425,7 +425,7 @@ char_traits<Pt::Char>::find(const char_type* s, size_t n, const char_type& a)
 }
 
 inline char_traits<Pt::Char>::char_type*
-char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, int_type n)
+char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, size_t n)
 {
     return (Pt::Char*)std::memmove(s1, s2, n * sizeof(Pt::Char));
 }

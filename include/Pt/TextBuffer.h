@@ -155,7 +155,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                         {
                             if(_ebufsize > 0)
                             {
-                                _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
+                                _ebufsize -= static_cast<int>(_target->rdbuf()->sputn(_ebuf, _ebufsize));
                                 if(_ebufsize)
                                     return -1;
                             }
@@ -264,7 +264,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if(res == CodecType::partial && _ebufsize == 0)
                     break;
 
-                _ebufsize -= _target->rdbuf()->sputn(_ebuf, _ebufsize);
+                _ebufsize -= static_cast<int>(_target->rdbuf()->sputn(_ebuf, _ebufsize));
                 if(_ebufsize)
                     return traits_type::eof();
             }
@@ -314,7 +314,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
                 std::char_traits<char_type>::move( _ibuf,
                                                    this->gptr() - _pbmax,
-                                                   movelen );
+                                                   static_cast<size_t>(movelen));
                 this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
             }
 
@@ -323,8 +323,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             size = bufavail < size ? bufavail : size;
             if(size)
             {
-                n = _target->rdbuf()->sgetn( _ebuf + _ebufsize, size );
-                _ebufsize += n;
+                n = _target->rdbuf()->sgetn( _ebuf + _ebufsize,  size );
+                _ebufsize += static_cast<int>(n);
                 if(n == 0)
                     atEof = true;
             }
@@ -354,7 +354,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if(consumed)
             {
                 std::char_traits<extern_type>::move( _ebuf, _ebuf + consumed, _ebufsize );
-                _ebufsize -= consumed;
+                _ebufsize -= static_cast<int>(consumed);
             }
 
             std::streamsize generated = toNext - toBegin;
