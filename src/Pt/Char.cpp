@@ -58,7 +58,7 @@ ctype<Pt::Char>::~ctype()
 
 bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
 {
-    return m == ctypeMask(c);
+    return (m & ctypeMask(c)) != 0;
 }
 
 
