@@ -295,14 +295,14 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
                     //std::cerr << "-> begin call" << std::endl;
                     _args = _proc->beginCall();
                     if( ! *_args)
-                        std::runtime_error("too many arguments");
+                        throw std::runtime_error("too many arguments");
                 }
                 else
                 {
                     //std::cerr << "-> next argument" << std::endl;
                     ++_args;
                     if( ! *_args)
-                        std::runtime_error("too many arguments");
+                        throw std::runtime_error("too many arguments");
                 }
 
                 _scanner.begin(**_args);
