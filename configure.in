@@ -1,0 +1,86 @@
+AC_INIT(pt, 0.9.1, [Marc Duerner <nomail>])
+AM_INIT_AUTOMAKE
+
+AC_PREREQ([2.5.9])
+
+abi_current=7
+abi_revision=0
+abi_age=0
+sonumber=${abi_current}:${abi_revision}:${abi_age}
+AC_SUBST(sonumber)
+
+unset CDPATH
+
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([src/Pt/config.h ])
+AC_CONFIG_FILES([include/Pt/config.h])
+AC_CONFIG_SRCDIR([src/Pt/Connectable.cpp])
+
+AC_HEADER_DIRENT
+
+AC_PROG_CC
+AC_PROG_CXX
+
+AC_LANG(C++)
+
+AC_CHECK_HEADERS(sys/filio.h)
+AC_CHECK_HEADERS(csignal)
+
+AC_CHECK_LIB(nsl, setsockopt)
+AC_CHECK_LIB(socket, accept)
+AC_CHECK_LIB(rt, sem_destroy)
+AC_SEARCH_LIBS(dlopen, dl, , AC_MSG_ERROR([dlopen not found]))
+AC_SEARCH_LIBS(inet_ntop, nsl socket resolv)
+AC_CHECK_FUNCS(inet_ntop accept4)
+
+ACX_PTHREAD
+
+AC_PROG_LIBTOOL
+
+PT_CXXFLAGS='-I${includedir}'
+PT_LDFLAGS='-L${libdir} -lPt'
+
+AC_SUBST(PT_CXXFLAGS)
+AC_SUBST(PT_LDFLAGS)
+
+case "${host_cpu}-${host_os}" in
+*-aix*)
+    SHARED_LIB_FLAG=-qmkshrobj
+    ;;
+*-darwin*)
+    SHARED_LIB_FLAG=-dynamiclib
+    ;;
+*)  
+    SHARED_LIB_FLAG=-shared
+    ;;
+esac
+
+AC_SUBST(SHARED_LIB_FLAG)
+
+#
+# checking existence of suseconds_t, needed by hirestime.h
+#
+AC_CHECKING(for suseconds_t)
+
+AC_CHECK_TYPE(
+  suseconds_t,
+  [PT_SUSECONDS=PT_SUSECONDS_T],
+  [PT_SUSECONDS=PT_SUSECONDS_TIME_T],
+  [#include <sys/time.h>])
+
+AC_SUBST(PT_SUSECONDS)
+
+AC_COMPILE_IFELSE(
+  [#include <netinet/tcp.h>
+   int i = TCP_DEFER_ACCEPT;
+  ],
+  AC_DEFINE(HAVE_TCP_DEFER_ACCEPT, [], [defined if TCP_DEFER_ACCEPT is defined]))
+
+AC_CONFIG_FILES([
+  Makefile
+  src/Makefile
+  src/Pt/Makefile
+  include/Makefile
+  ])
+
+AC_OUTPUT
