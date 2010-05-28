@@ -16,6 +16,6 @@ noinst_HEADERS = \
 	posix/TcpSocketImpl.h
 
 libPt_Net_la_LIBADD = $(top_builddir)/src/Pt/libPt.la \
-	$(top_builddir)/src/Pt/libPt-System.la
+	$(top_builddir)/src/Pt-System/libPt-System.la
 
 libPt_Net_la_LDFLAGS = -version-info @sonumber@ @SHARED_LIB_FLAG@
