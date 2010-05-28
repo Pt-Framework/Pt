@@ -112,7 +112,10 @@ nobase_include_HEADERS = \
 	Pt/System/SystemError.h \
 	Pt/System/Thread.h \
 	Pt/System/Timer.h \
-	Pt/System/Url.h
+	Pt/System/Url.h \
+	Pt/Net/AddrInfo.h \
+	Pt/Net/Api.h \
+	Pt/Net/TcpServer.h \
+	Pt/Net/TcpSocket.h \
+	Pt/Net/UdpSocket.h
 
-nobase_nodist_include_HEADERS = \
-        Pt/config.h

@@ -13,7 +13,6 @@ unset CDPATH
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/Pt/config.h ])
-AC_CONFIG_FILES([include/Pt/config.h])
 AC_CONFIG_SRCDIR([src/Pt/Connectable.cpp])
 
 AC_HEADER_DIRENT
@@ -68,6 +67,7 @@ AC_CONFIG_FILES([
   src/Makefile
   src/Pt/Makefile
   src/Pt-System/Makefile
+  src/Pt-Net/Makefile
   include/Makefile
   ])
 
