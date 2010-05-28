@@ -57,19 +57,6 @@ esac
 
 AC_SUBST(SHARED_LIB_FLAG)
 
-#
-# checking existence of suseconds_t, needed by hirestime.h
-#
-AC_CHECKING(for suseconds_t)
-
-AC_CHECK_TYPE(
-  suseconds_t,
-  [PT_SUSECONDS=PT_SUSECONDS_T],
-  [PT_SUSECONDS=PT_SUSECONDS_TIME_T],
-  [#include <sys/time.h>])
-
-AC_SUBST(PT_SUSECONDS)
-
 AC_COMPILE_IFELSE(
   [#include <netinet/tcp.h>
    int i = TCP_DEFER_ACCEPT;
@@ -80,6 +67,7 @@ AC_CONFIG_FILES([
   Makefile
   src/Makefile
   src/Pt/Makefile
+  src/Pt-System/Makefile
   include/Makefile
   ])
 
