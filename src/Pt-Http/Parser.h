@@ -30,14 +30,13 @@
 #define Pt_Http_Parser_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/MessageHeader.h>
 #include <string>
 #include <iostream>
 
 namespace Pt {
 
 namespace Http {
-
-class MessageHeader;
 
 class PT_HTTP_API HeaderParser
 {
@@ -59,7 +58,7 @@ class PT_HTTP_API HeaderParser
         class PT_HTTP_API MessageHeaderEvent : public Event
         {
                 MessageHeader& _header;
-                std::string _key;
+                char _key[MessageHeader::MAXHEADERSIZE];
 
             public:
                 explicit MessageHeaderEvent(MessageHeader& header)

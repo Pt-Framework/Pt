@@ -29,16 +29,70 @@
 #define Pt_Arg_h
 
 #include <Pt/Api.h>
-#include <Pt/Convert.h>
+#include <sstream>
+#include <string.h>
 
 namespace Pt
 {
+
+class ArgBase
+{
+  protected:
+    bool m_isset;
+
+    static void removeArg(int& argc, char* argv[], int pos, int n)
+    {
+      for ( ; pos < argc - n; ++pos)
+        argv[pos] = argv[pos + n];
+      argc -= n;
+      argv[argc] = 0;
+    }
+
+  public:
+    ArgBase()
+      : m_isset(false)
+    { }
+
+    /**
+     * returns true if the option was found and the default value was not used
+     */
+    bool isSet() const   { return m_isset; }
+};
+
+template <typename T>
+class ArgBaseT : public ArgBase
+{
+    T m_value;
+
+  protected:
+    explicit ArgBaseT(const T& def)
+      : m_value(def)
+    { }
+
+    bool extract(const char* str, int& argc, char* argv[], int i, int n)
+    {
+      std::istringstream s(str);
+      s >> m_value;
+      if (!s.fail())
+      {
+        m_isset = true;
+        removeArg(argc, argv, i, n);
+        return true;
+      }
+      return false;
+    }
+
+  public:
+    /**
+     returns the value.
+     */
+    const T& getValue() const   { return m_value; }
 
     /** @brief Read and extract commandline parameters from argc/argv.
 
         Programs usually need some parameters. Usually they start with a '-'
         followed by a single character and optionally a value.
-        Arg<T> extracts these and other parametes.
+        Arg<T> extracts these and other parameters.
 
         This default class processes paramters with a value, which defines
         a input-extractor-operator operator>> (istream&, T&).
@@ -50,676 +104,445 @@ namespace Pt
         \code
           int main(int argc, char* argv[])
           {
-            cxxtools::Arg<int> option_n(argc, argv, 'n', 0);
+            Pt::Arg<int> option_n(argc, argv, 'n', 0);
+            std::cout << "value for -n: " << option_n << endl;
+          }
+        \endcode
+
+     */
+    operator T() const   { return m_value; }
+};
+
+template <>
+class ArgBaseT<const char*> : public ArgBase
+{
+    const char* m_value;
+
+  protected:
+    explicit ArgBaseT(const char* def)
+      : m_value(def)
+    { }
+
+    bool extract(const char* str, int& argc, char* argv[], int i, int n)
+    {
+      m_value = str;
+      m_isset = true;
+      removeArg(argc, argv, i, n);
+      return true;
+    }
+
+  public:
+    /// returns the extracted value.
+    const char* getValue() const   { return m_value; }
+
+    /// class is convertible to "const char*"
+    operator const char*() const   { return m_value; }
+
+
+};
+
+template <>
+class ArgBaseT<std::string> : public ArgBase
+{
+    std::string m_value;
+
+  protected:
+    explicit ArgBaseT(const std::string& def)
+      : m_value(def)
+    { }
+
+    bool extract(const char* str, int& argc, char* argv[], int i, int n)
+    {
+      m_value = str;
+      m_isset = true;
+      removeArg(argc, argv, i, n);
+      return true;
+    }
+
+  public:
+    /// returns the extracted value.
+    const std::string& getValue() const   { return m_value; }
+
+    /// class is convertible to "const std::string&"
+    operator const std::string&() const   { return m_value; }
+
+};
+
+    /** @brief Read and extract commandline parameters from argc/argv.
+
+        Programs usually need some parameters. Usually they start with a '-'
+        followed by a single character and optionally a value.
+        Arg<T> extracts these and other parameters.
+
+        This default class processes paramters with a value, which defines
+        a input-extractor-operator operator>> (istream&, T&).
+
+        Options are removed from the option-list, so programs can easily check
+        after all options are extracted, if there are parameters left.
+
+        example:
+        \code
+          int main(int argc, char* argv[])
+          {
+            Pt::Arg<int> option_n(argc, argv, 'n', 0);
             std::cout << "value for -n: " << option_n << endl;
           }
         \endcode
 
      */
     template <typename T>
-    class Arg
-    {
-        public:
-            /** @brief Default constructor. Initializes value.
-
-                \param def    initial value
-            */
-            Arg(const T& def = T())
-              : m_value(def),
-                m_isset(false)
-              { }
-
-            /** @brief extract parameter.
-
-               \param argc      1. parameter of main
-               \param argv      2. of main
-               \param ch        optioncharacter
-               \param def       default-value
-
-               example:
-               \code
-                Arg<unsigned> offset(argc, argv, 'o', 0);
-                unsigned value = offset.getValue();
-               \endcode
-            */
-            Arg(int& argc, char* argv[], char ch, const T& def = T())
-              : m_value(def),
-                m_isset(false)
-            {
-              set(argc, argv, ch);
-            }
-
-            /** @brief definition of long options.
-
-               GNU defines long options starting with "--". This (and more) is
-               supported here. Instead of giving a single option-character, you
-               specify a string.
-
-               example:
-               \code
-                 Arg<int> option_number(argc, argv, "--number", 0);
-                 std::cout << "number =" << option_number.getValue() << std::endl;
-               \endcode
-            */
-            Arg(int& argc, char* argv[], const char* str, const T& def = T())
-              : m_value(def),
-                m_isset(false)
-            {
-              m_isset = set(argc, argv, str);
-            }
-
-            Arg(int& argc, char* argv[])
-              : m_isset(false)
-            {
-              m_isset = set(argc, argv);
-            }
-
-           /** @brief extract parameter.
-
-               \param argc      1. parameter of main
-               \param argv      2. of main
-               \param ch        optioncharacter
-
-               example:
-               \code
-                Arg<unsigned> offset;
-                offset.set(argc, argv, 'o');
-                unsigned value = offset.getValue();
-               \endcode
-            */
-            bool set(int& argc, char* argv[], char ch)
-            {
-              // don't extract value, when already found
-              if (m_isset)
-                return false;
-
-              for (int i = 1; i < argc - 1; ++i)
-                if (argv[i][0] == '-' && argv[i][1] == ch && argv[i][2] == '\0')
-                {
-                  Pt::convert(m_value, argv[i + 1]);
-                  {
-                    m_isset = true;
-                    for ( ; i < argc - 2; ++i)
-                      argv[i] = argv[i + 2];
-                    argc -= 2;
-                    argv[argc] = 0;
-                    return true;
-                  }
-                }
-
-              return false;
-            }
-
-            /** @brief definition of long options.
-
-                GNU defines long options starting with "--". This (and more) is
-                supported here. Instead of giving a single option-character, you
-                specify a string.
-
-                example:
-                \code
-                  Arg<int> option_number;
-                  number.set(argc, argv, "--number");
-                  std::cout << "number =" << option_number.getValue() << std::endl;
-                \endcode
-             */
-            bool set(int& argc, char* argv[], const char* str)
-            {
-              // don't extract value, when already found
-              if (m_isset)
-                return false;
-
-              for (int i = 1; i < argc - 1; ++i)
-                if (std::strcmp(argv[i], str) == 0)
-                {
-                  Pt::convert(m_value, argv[i + 1]);
-                  {
-                    m_isset = true;
-                    for ( ; i < argc - 2; ++i)
-                      argv[i] = argv[i + 2];
-                    argc -= 2;
-                    argv[argc] = 0;
-                    return true;
-                  }
-                }
-
-              return false;
-            }
-
-            /** @brief Reads next parameter and removes it.
-            */
-            bool set(int& argc, char* argv[])
-            {
-                // don't extract value, when already found
-                if (m_isset)
-                  return false;
-
-                if (argc > 1)
-                {
-                  Pt::convert(m_value, argv[1]);
-                  {
-                    m_isset = true;
-                    for (int i = 1; i < argc - 1; ++i)
-                      argv[i] = argv[i + 1];
-                    argc -= 1;
-                    argv[argc] = 0;
-                  }
-                  //else
-                  //  m_isset = false;
-                }
-                else
-                  m_isset = false;
-
-                return m_isset;
-            }
-
-            /** @brief returns the value.
-            */
-            const T& getValue() const   { return m_value; }
-
-            /** @brief returns the value.
-
-                Instead of calling getValue() the argument can be converted
-                implicitly.
-
-                example:
-
-                \code
-                void print(int i)
-                { std::cout << i << std::endl; }
-
-                int main(int argc, char* argv[])
-                {
-                  cxxtools::Arg<int> value(argc, argv, 'v', 0);
-                  print(value);   // pass argument as a int to the function
-                }
-                \endcode
-            */
-            operator T() const   { return m_value; }
-
-            /** @brief returns true, if the option was found and the default was not used.
-            */
-            bool isSet() const   { return m_isset; }
-
-        private:
-            T    m_value;
-            bool m_isset;
-    };
-
-    ////////////////////////////////////////////////////////////////////////
-    /** @brief specialization for bool.
-
-        Often programs need some switches, which are switched on or off.
-        Users just enter a option without parameter.
-
-        example:
-        \code
-          Arg<bool> debug(argc, argv, 'd');
-          if (debug)
-            std::cout << "debug-mode is set" << std::endl;
-        \endcode
-     */
-    template <>
-    class Arg<bool>
+    class Arg : public ArgBaseT<T>
     {
       public:
-        /** @brief default constructor. Initializes value.
+        /**
+         default constructor. Initializes value.
 
-            \param def    initial value
+         \param def    initial value
          */
-        Arg(bool def = false)
-          : m_value(def),
-            m_isset(false)
-            { }
+    Arg(const T& def = T())
+      : ArgBaseT<T>(def)
+      { }
 
-        /** @brief extract parameter.
+    /**
+     extract parameter.
 
-            \param argc      1. parameter of main
-            \param argv      2. of main
-            \param ch        optioncharacter
-            \param def       default-value
+     \param argc      1. parameter of main
+     \param argv      2. of main
+     \param ch        optioncharacter
+     \param def       default-value
 
-            example:
-            \code
-             Arg<unsigned> offset(argc, argv, 'o', 0);
-             unsigned value = offset.getValue();
-            \endcode
-        */
-        Arg(int& argc, char* argv[], char ch, bool def = false)
-          : m_value(def),
-            m_isset(false)
+     example:
+     \code
+      Pt::Arg<unsigned> offset(argc, argv, 'o', 0);
+      unsigned value = offset.getValue();
+     \endcode
+     */
+    Arg(int& argc, char* argv[], char ch, const T& def = T())
+      : ArgBaseT<T>(def)
+    {
+      set(argc, argv, ch);
+    }
+
+    /**
+     GNU defines long options starting with "--". This (and more) is
+     supported here. Instead of giving a single option-character, you
+     specify a string.
+
+     example:
+     \code
+       Pt::Arg<int> option_number(argc, argv, "--number", 0);
+       std::cout << "number =" << option_number.getValue() << std::endl;
+     \endcode
+     */
+    Arg(int& argc, char* argv[], const char* str, const T& def = T())
+      : ArgBaseT<T>(def)
+    {
+      this->m_isset = set(argc, argv, str);
+    }
+
+    Arg(int& argc, char* argv[])
+      : ArgBaseT<T>(T())
+    {
+      this->m_isset = set(argc, argv);
+    }
+
+    /**
+     extract parameter.
+
+     \param argc      1. parameter of main
+     \param argv      2. of main
+     \param ch        optioncharacter
+
+     example:
+     \code
+      Pt::Arg<unsigned> offset;
+      offset.set(argc, argv, 'o');
+      unsigned value = offset.getValue();
+     \endcode
+     */
+    bool set(int& argc, char* argv[], char ch)
+    {
+      // don't extract value, when already found
+      if (this->m_isset)
+        return false;
+
+      for (int i = 1; i < argc; ++i)
+      {
+        if (argv[i][0] == '-' && argv[i][1] == ch)
         {
-          m_isset = set(argc, argv, ch);
+          if (argv[i][2] == '\0' && i < argc - 1)
+          {
+            // -O foo
+            if (this->extract(argv[i + 1], argc, argv, i, 2))
+              return true;
+          }
+
+          // -Ofoo
+          if (this->extract(argv[i] + 2, argc, argv, i, 1))
+            return true;
         }
+      }
 
-        Arg(int& argc, char* argv[], const char* str, bool def = false)
-          : m_value(def),
-            m_isset(false)
+      return false;
+    }
+
+    /**
+     GNU defines long options starting with "--". This (and more) is
+     supported here. Instead of giving a single option-character, you
+     specify a string.
+
+     example:
+     \code
+       Pt::Arg<int> option_number;
+       number.set(argc, argv, "--number");
+       std::cout << "number =" << option_number.getValue() << std::endl;
+     \endcode
+     */
+    bool set(int& argc, char* argv[], const char* str)
+    {
+      // don't extract value, when already found
+      if (this->m_isset)
+        return false;
+
+      unsigned n = strlen(str);
+      for (int i = 1; i < argc; ++i)
+      {
+        if (strncmp(argv[i], str, n) == 0)
         {
-          m_isset = set(argc, argv, str);
+          if (i < argc - 1 && argv[i][n] == '\0')
+          {
+            // --option value
+            if (this->extract(argv[i + 1], argc, argv, i, 2))
+              return true;
+          }
+
+          if (argv[i][n] == '=')
+          {
+            // --option=vlaue
+            if (this->extract(argv[i] + n, argc, argv, i, 1))
+              return true;
+          }
         }
+      }
 
-        /** @brief Use this constructor to extract a bool-parameter.
+      return false;
+    }
 
-            As a special case options can be grouped. The parameter is
-            recognized also in a argument, which starts with a '-' and contains
-            somewhere the given character.
+    /**
+     Reads next parameter and removes it.
+     */
+    bool set(int& argc, char* argv[])
+    {
+      // don't extract value, when already found
+      if (this->m_isset)
+        return false;
 
-            example:
-            \code
-             Arg<bool> debug(argc, argv, 'd');
-             Arg<bool> ignore(argc, argv, 'i');
-            \endcode
+      if (argc > 1)
+        this->extract(argv[1], argc, argv, 1, 1);
 
-            Arguments debug and ignore are both set when the program is called
-            with:
-            \code
-             prog -id
+      return this->m_isset;
+    }
+};
 
-             prog -i -d
-            \endcode
+////////////////////////////////////////////////////////////////////////
+/**
+ specialization for bool.
 
-            Options can also switched off with a following '-' like this:
-            \code
-             prog -d-
-            \endcode
+ Often programs need some switches, which are switched on or off.
+ Users just enter a option without parameter.
 
-            In the program use:
-            \code
-             Arg<bool> debug(argc, argv, 'd');
-             if (debug.isSet())
-             {
-               if (debug)
-                 std::cout << "you entered -d" << std::endl;
-               else
-                 std::cout << "you entered -d-" << std::endl;
-             }
-             else
-               std::cout << "no -d option given" << std::endl;
-            \endcode
+ example:
+ \code
+   Pt::Arg<bool> debug(argc, argv, 'd');
+   if (debug)
+     std::cout << "debug-mode is set" << std::endl;
+ \endcode
+ */
+template <>
+class Arg<bool> : public ArgBase
+{
+  public:
+    /**
+     default constructor. Initializes value.
 
-            This is useful, if a program defaults to some enabled feature,
-            which can be disabled.
-        */
-        bool set(int& argc, char* argv[], char ch)
+     \param def    initial value
+     */
+    Arg(bool def = false)
+      : m_value(def)
+    { }
+
+    /**
+     extract parameter.
+
+     \param argc      1. parameter of main
+     \param argv      2. of main
+     \param ch        optioncharacter
+     \param def       default-value
+
+     example:
+     \code
+      Pt::Arg<unsigned> offset(argc, argv, 'o', 0);
+      unsigned value = offset.getValue();
+     \endcode
+     */
+    Arg(int& argc, char* argv[], char ch, bool def = false)
+      : m_value(def)
+    {
+      m_isset = set(argc, argv, ch);
+    }
+
+    Arg(int& argc, char* argv[], const char* str, bool def = false)
+      : m_value(def)
+    {
+      m_isset = set(argc, argv, str);
+    }
+
+    /**
+     Use this constructor to extract a bool-parameter.
+
+     As a special case options can be grouped. The parameter is
+     recognized also in a argument, which starts with a '-' and contains
+     somewhere the given character.
+
+     example:
+     \code
+      Pt::Arg<bool> debug(argc, argv, 'd');
+      Pt::Arg<bool> ignore(argc, argv, 'i');
+     \endcode
+
+     Arguments debug and ignore are both set when the program is called
+     with:
+     \code
+      prog -id
+
+      prog -i -d
+     \endcode
+
+     Options can also switched off with a following '-' like this:
+     \code
+      prog -d-
+     \endcode
+
+     In the program use:
+     \code
+      Arg<bool> debug(argc, argv, 'd');
+      if (debug.isSet())
+      {
+        if (debug)
+          std::cout << "you entered -d" << std::endl;
+        else
+          std::cout << "you entered -d-" << std::endl;
+      }
+      else
+        std::cout << "no -d option given" << std::endl;
+     \endcode
+
+     This is useful, if a program defaults to some enabled feature,
+     which can be disabled.
+     */
+    bool set(int& argc, char* argv[], char ch)
+    {
+      // don't extract value, when already found
+      if (m_isset)
+        return false;
+
+      for (int i = 1; i < argc; ++i)
+      {
+        if (argv[i][0] == '-' && argv[i][1] != '-')
         {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc; ++i)
-            if (argv[i][0] == '-' && argv[i][1] != '-')
-            {
-              // starts with a '-', but not with "--"
-              if (argv[i][1] == ch && argv[i][2] == '\0')
+          // starts with a '-', but not with "--"
+          if (argv[i][1] == ch && argv[i][2] == '\0')
+          {
+            // single option found
+            m_value = true;
+            m_isset = true;
+            removeArg(argc, argv, i, 1);
+            return true;
+          }
+          else if (argv[i][1] == ch && argv[i][2] == '-' && argv[i][3] == '\0')
+          {
+            // Option was explicitly disabled with -x-
+            m_value = false;
+            m_isset = true;
+            removeArg(argc, argv, i, 1);
+            return true;
+          }
+          else
+          {
+            // look, if we find the option in an optiongroup
+            for (char* p = argv[i] + 1; *p != '\0'; ++p)
+              if (*p == ch)
               {
-                // single option found
+                // here it is - extract it
                 m_value = true;
                 m_isset = true;
-                for ( ; i < argc - 1; ++i)
-                  argv[i] = argv[i + 1];
-                argc -= 1;
-                argv[argc] = 0;
+                do
+                {
+                  *p = *(p + 1);
+                } while (*p++ != '\0');
+
                 return true;
               }
-              else if (argv[i][1] == ch && argv[i][2] == '-' && argv[i][3] == '\0')
-              {
-                // Option was explicitly disabled with -x-
-                m_value = false;
-                m_isset = true;
-                for ( ; i < argc - 1; ++i)
-                  argv[i] = argv[i + 1];
-                argc -= 1;
-                argv[argc] = 0;
-                return true;
-              }
-              else
-              {
-                // look, if we find the option in a optiongroup
-                for (char* p = argv[i] + 1; *p != '\0'; ++p)
-                  if (*p == ch)
-                  {
-                    // her it is - extract it
-                    m_value = true;
-                    m_isset = true;
-                    do
-                    {
-                      *p = *(p + 1);
-                    } while (*p++ != '\0');
-
-                    return true;
-                  }
-              }
-            }
-
-          return false;
-        }
-
-        /** @brief Setter for long-options.
-
-            The option-parameter is defined with a string. This can extract
-            long-options like:
-            \code
-              prog --debug
-            \endcode
-
-            with
-            \code
-              Arg<bool> debug(argc, argv, "--debug");
-            \endcode
-        */
-        bool set(int& argc, char* argv[], const char* str)
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc; ++i)
-            if (std::strcmp(argv[i], str) == 0)
-            {
-              m_value = true;
-              m_isset = true;
-              for ( ; i < argc - 1; ++i)
-                argv[i] = argv[i + 1];
-              argc -= 1;
-              argv[argc] = 0;
-              return true;
-            }
-
-          return false;
-        }
-
-        /** @brief returns true, if options is set.
-        */
-        bool isTrue() const   { return m_value; }
-
-        /** @brief returns true, if options is not set.
-        */
-        bool isFalse() const  { return !m_value; }
-
-        /** @brief convertible to bool.
-        */
-        operator bool() const  { return m_value; }
-
-        /** @brief returns true, if option is explicitly set
-        */
-        bool isSet() const             { return m_isset; }
-
-      private:
-        bool m_value;
-        bool m_isset;
-    };
-
-    ////////////////////////////////////////////////////////////////////////
-    /** @brief Special handling for "const char*".
-
-        "const char*" is not extracted with a stream. This is more flexible
-        and easier to process. Also parameters can contain spaces.
-    */
-    template <>
-    class Arg<const char*>
-    {
-      public:
-        Arg(const char* def = 0)
-          : m_value(def),
-            m_isset(false)
-        { }
-
-        Arg(int& argc, char* argv[], char ch, const char* def = 0)
-          : m_value(def),
-            m_isset(false)
-        {
-          m_isset = set(argc, argv, ch);
-        }
-
-        Arg(int& argc, char* argv[], const char* str, const char* def = 0)
-          : m_value(def),
-            m_isset(false)
-        {
-          m_isset = set(argc, argv, str);
-        }
-
-        Arg(int& argc, char* argv[])
-          : m_value(0),
-            m_isset(false)
-        {
-          m_isset = set(argc, argv);
-        }
-
-        /** @brief Constructor for the short form.
-         */
-        bool set(int& argc, char* argv[], char ch)
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc - 1; ++i)
-            if (argv[i][0] == '-' && argv[i][1] == ch && argv[i][2] == '\0')
-            {
-              m_value = argv[i + 1];
-              m_isset = true;
-              for ( ; i < argc - 2; ++i)
-                argv[i] = argv[i + 2];
-              argc -= 2;
-              argv[argc] = 0;
-              return true;
-            }
-
-          return false;
-        }
-
-        /** @brief setter for the long form.
-        */
-        bool set(int& argc, char* argv[], const char* str, const char* def = 0)
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc - 1; ++i)
-            if (std::strcmp(argv[i], str) == 0)
-            {
-              m_value = argv[i + 1];
-              m_isset = true;
-              for ( ; i < argc - 2; ++i)
-                argv[i] = argv[i + 2];
-              argc -= 2;
-              argv[argc] = 0;
-              return true;
-            }
-
-          return false;
-        }
-
-        /** @brief extracts the next parameter.
-        */
-        bool set(int& argc, char* argv[])
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          if (argc > 1)
-          {
-            m_value = argv[1];
-            m_isset = true;
-            for (int i = 1; i < argc - 1; ++i)
-              argv[i] = argv[i + 1];
-            argc -= 1;
-            argv[argc] = 0;
-            return true;
           }
-          else
-            return false;
         }
+      }
 
-        /** @brief returns the extracted value.
-        */
-        const char* getValue() const   { return m_value; }
+      return false;
+    }
 
-        /** @brief argument is convertible to "const char*"
-        */
-        operator const char*() const   { return m_value; }
+    /**
+     Setter for long-options.
 
-        /** @brief returns true, when the option is not set and the default is used.
-        */
-        bool isSet() const             { return m_isset; }
+     The option-parameter is defined with a string. This can extract
+     long-options like:
+     \code
+       prog --debug
+     \endcode
 
-      private:
-        const char* m_value;
-        bool        m_isset;
-    };
+     with
+     \code
+       Arg<bool> debug(argc, argv, "--debug");
+     \endcode
 
-    ////////////////////////////////////////////////////////////////////////
-    /** @brief Special handling for std::string.
-
-        input-operator for std::string reads just the first word. This is
-        not, what we normally expect, so this is specialized here.
-    */
-    template <>
-    class Arg<std::string>
+     */
+    bool set(int& argc, char* argv[], const char* str)
     {
-      public:
-        Arg(const std::string& def = std::string())
-          : m_value(def),
-            m_isset(false)
-        { }
+      // don't extract value, when already found
+      if (m_isset)
+        return false;
 
-        /** @brief Constructor for the short form.
-        */
-        Arg(int& argc, char* argv[], char ch, const std::string& def = std::string())
-          : m_value(def),
-            m_isset(false)
+      for (int i = 1; i < argc; ++i)
+      {
+        if (strcmp(argv[i], str) == 0)
         {
-          m_isset = set(argc, argv, ch);
+          m_value = true;
+          m_isset = true;
+          removeArg(argc, argv, i, 1);
+          return true;
         }
+      }
 
-        /** @brief Constructor for the long form.
-        */
-        Arg(int& argc, char* argv[], const char* str, const std::string& def = std::string())
-          : m_value(def),
-            m_isset(false)
-        {
-          m_isset = set(argc, argv, str);
-        }
+      return false;
+    }
 
-        /** @brief Extracts the next parameter.
-        */
-        Arg(int& argc, char* argv[])
-          : m_value(std::string()),
-            m_isset(false)
-        {
-          m_isset = set(argc, argv);
-        }
+    /**
+     returns true, if options is set.
+     */
+    bool isTrue() const   { return m_value; }
 
-        /** @brief setter for the short form.
-        */
-        bool set(int& argc, char* argv[], char ch)
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
+    /**
+     returns true, if options is not set.
+     */
+    bool isFalse() const  { return !m_value; }
 
-          for (int i = 1; i < argc - 1; ++i)
-            if (argv[i][0] == '-' && argv[i][1] == ch && argv[i][2] == '\0')
-            {
-              m_value = argv[i + 1];
-              m_isset = true;
-              for ( ; i < argc - 2; ++i)
-                argv[i] = argv[i + 2];
-              argc -= 2;
-              argv[argc] = 0;
-              return true;
-            }
+    /**
+     convertable to bool.
+     */
+    operator bool() const  { return m_value; }
 
-          return false;
-        }
-
-        /** @brief setter for the long form.
-        */
-        bool set(int& argc, char* argv[], const char* str)
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc - 1; ++i)
-            if (std::strcmp(argv[i], str) == 0)
-            {
-              m_value = argv[i + 1];
-              m_isset = true;
-              for ( ; i < argc - 2; ++i)
-                argv[i] = argv[i + 2];
-              argc -= 2;
-              argv[argc] = 0;
-              return true;
-            }
-
-          return false;
-        }
-
-        /** @brief Extracts the next parameter.
-        */
-        bool set(int& argc, char* argv[])
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          if (argc > 1)
-          {
-            m_value = argv[1];
-            m_isset = true;
-            for (int i = 1; i < argc - 1; ++i)
-              argv[i] = argv[i + 1];
-            argc -= 1;
-            argv[argc] = 0;
-            return true;
-          }
-          else
-            return false;
-        }
-
-        /** @brief Extracts the next non-option-parameter.
-        */
-        bool setNoOpt(int& argc, char* argv[])
-        {
-          // don't extract value, when already found
-          if (m_isset)
-            return false;
-
-          for (int i = 1; i < argc; ++i)
-            if (argv[i][0] != '-')
-            {
-              m_isset = true;
-              m_value = argv[i];
-              for ( ; i < argc - 1; ++i)
-                argv[i] = argv[i + 1];
-              --argc;
-              argv[argc] = 0;
-              return true;
-            }
-
-          return false;
-        }
-
-        /** @brief returns the extracted value.
-        */
-        const std::string& getValue() const   { return m_value; }
-
-        /** @brief argument is convertible to "const std::string&"
-        */
-        operator const std::string&() const   { return m_value; }
-
-        /** @brief returns true, when the option is not set and the default is used.
-        */
-        bool isSet() const             { return m_isset; }
-
-      private:
-        std::string m_value;
-        bool        m_isset;
-    };
+  private:
+    bool m_value;
+};
 
 } // namespace Pt
 

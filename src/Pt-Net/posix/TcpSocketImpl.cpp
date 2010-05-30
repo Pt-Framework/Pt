@@ -40,11 +40,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-//#include <iostream>
-#define log_debug(x) //std::cout << x << std::endl;
-#define log_trace(x) //std::cout << x << std::endl;
+#define log_debug(x)
+#define log_trace(x)
 
-namespace {
+namespace
+{
 
     void formatIp(const sockaddr_storage& addr, std::string& str)
     {

@@ -56,7 +56,7 @@ void IODevice::beginRead(char* buffer, size_t n)
         throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
 
     if (!enabled())
-        throw std::logic_error( PT_ERROR_MSG("Device not enabled") );
+        throw DeviceClosed( PT_ERROR_MSG("Device not enabled") );
 
     if (_rbuf)
         throw IOPending( PT_ERROR_MSG("read operation pending") );
@@ -132,7 +132,7 @@ size_t IODevice::read(char* buffer, size_t n)
 }
 
 
-void IODevice::beginWrite(const char* buffer, size_t n)
+size_t IODevice::beginWrite(const char* buffer, size_t n)
 {
     if (!async())
         throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
@@ -153,6 +153,8 @@ void IODevice::beginWrite(const char* buffer, size_t n)
     _wbuf = buffer;
     _wbuflen = n;
     _wavail = r;
+
+    return r;
 }
 
 

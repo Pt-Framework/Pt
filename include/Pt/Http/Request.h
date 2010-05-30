@@ -44,6 +44,12 @@ class Request
         std::ostringstream _body;
 
     public:
+        struct Auth
+        {
+            std::string user;
+            std::string password;
+        };
+
         explicit Request(const std::string& url = std::string())
         : _header(url)
         { }
@@ -54,27 +60,27 @@ class Request
         const RequestHeader& header() const
         { return _header; }
 
-        void setHeader(const std::string& key, const std::string& value)
+        void setHeader(const char* key, const char* value)
         {
             _header.setHeader(key, value);
         }
 
-        void addHeader(const std::string& key, const std::string& value)
+        void addHeader(const char* key, const char* value)
         {
             _header.addHeader(key, value);
         }
 
-        void removeHeader(const std::string& key)
+        void removeHeader(const char* key)
         {
             _header.removeHeader(key);
         }
 
-        std::string getHeader(const std::string& key) const
+        const char* getHeader(const char* key) const
         {
             return _header.getHeader(key);
         }
 
-        bool hasHeader(const std::string& key) const
+        bool hasHeader(const char* key) const
         {
             return _header.hasHeader(key);
         }
@@ -115,6 +121,8 @@ class Request
 
         void sendBody(std::ostream& out) const
         { out << _body.str(); }
+
+        Auth auth() const;
 
 };
 

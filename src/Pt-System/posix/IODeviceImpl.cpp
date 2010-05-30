@@ -167,6 +167,14 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
+    ssize_t ret = ::write(_fd, (const void*)buffer, n);
+
+    if (ret > 0)
+        return static_cast<size_t>(ret);
+
+    if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
+        throw System::IOError("lost connection to peer");
+
     if(_wfds)
     {
         FD_SET( this->fd(), _wfds );
@@ -187,6 +195,12 @@ size_t IODeviceImpl::endWrite()
     {
         _errorPending = false;
         throw IOError("write error", PT_SOURCEINFO);
+    }
+
+    if (_device.wavail() > 0)
+    {
+        size_t n = _device.wavail();
+        return n;
     }
 
     return this->write( _device.wbuf(), _device.wbuflen() );
@@ -322,6 +336,7 @@ void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
         {
             FD_SET(this->fd(), &rfds);
         }
+
         if( _device.wbuf() )
         {
             FD_SET(this->fd(), &wfds);
@@ -374,7 +389,10 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
         try
         {
-            if (_device.reading())
+            bool reading = _device.reading();
+            bool writing = _device.writing();
+
+            if (reading)
             {
                 ++avail;
                 _device.inputReady(_device);
@@ -383,10 +401,19 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
             if( ! _sentry )
                 return avail;
 
-            if (_device.writing())
+            if (writing)
             {
                 ++avail;
                 _device.outputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
+            if (!reading && !writing)
+            {
+                avail = true;
+                _device.close();
             }
         }
         catch (...)
@@ -400,7 +427,7 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
 
-    if( _device.wbuf() && FD_ISSET(this->fd(), &wfds) )
+    if( _device.wavail() > 0 || FD_ISSET(this->fd(), &wfds) )
     {
         _device.outputReady(_device);
         ++avail;
@@ -418,6 +445,6 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     return avail;
 }
 
-}//namespaec System
+}//namespace System
 
 }//namespace Pt

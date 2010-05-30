@@ -39,10 +39,10 @@ Server::Server(System::EventLoopBase& eventLoop)
 {
 }
 
-Server::Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port)
+Server::Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port, int backlog)
     : _impl(new ServerImpl(eventLoop, runmodeChanged))
 {
-    _impl->listen(ip, port);
+    _impl->listen(ip, port, backlog);
 }
 
 Server::~Server()
@@ -56,9 +56,9 @@ Server::~Server()
     delete _impl;
 }
 
-void Server::listen(const std::string& ip, unsigned short int port)
+void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
-    _impl->listen(ip, port);
+    _impl->listen(ip, port, backlog);
 }
 
 void Server::addService(const std::string& url, Service& service)

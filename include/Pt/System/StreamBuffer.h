@@ -66,11 +66,11 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 	    
 		void endRead();
 
-		void beginWrite();
+		size_t beginWrite();
 
         void onWrite(IODevice& dev);
 
-        void endWrite();
+        size_t endWrite();
 		
         void discard();
 		

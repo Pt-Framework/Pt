@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/Parser.h>
+#include "Parser.h"
 #include <Pt/Http/MessageHeader.h>
 #include <cctype>
 #include <algorithm>
@@ -110,12 +110,12 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onKey(const std::string& key)
     {
-        _key = key;
+        strncpy(_key, key.c_str(), MessageHeader::MAXHEADERSIZE);
     }
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)
     {
-        _header.addHeader(_key, value);
+        _header.addHeader(_key, value.c_str());
     }
 
     std::size_t HeaderParser::advance(std::streambuf& sb)

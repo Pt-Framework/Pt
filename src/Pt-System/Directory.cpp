@@ -76,7 +76,7 @@ DirectoryIterator& DirectoryIterator::operator++()
 
 DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 {
-    if (*this == it )
+    if (_impl == it._impl)
         return *this;
 
     if( _impl && 0 == _impl->deref() )

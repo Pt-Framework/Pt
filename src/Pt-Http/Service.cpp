@@ -26,25 +26,72 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotAuthenticatedResponder.h"
-#include <Pt/Http/Reply.h>
+#include <Pt/Http/Service.h>
+#include <Pt/Http/Responder.h>
 
 namespace Pt
 {
+
 namespace Http
 {
 
-void NotAuthenticatedResponder::reply(std::ostream& out, Request& request, Reply& reply)
+Responder* Service::doCreateResponder(const Request& request)
 {
-    reply.setHeader("WWW-Authenticate", ("Basic realm=\"" + _realm + '"').c_str());
+    System::MutexLock lock(_mutex);
+    ++_responderCount;
+    return createResponder(request);
+}
 
-    reply.httpReturn(401, "not authorized");
+void Service::doReleaseResponder(Responder* responder)
+{
+    System::MutexLock lock(_mutex);
+    releaseResponder(responder);
+    if (--_responderCount <= 0)
+        _isIdle.signal();
+}
 
-    if (_content.empty())
-        out << "<html><body><h1>not authorized</h1></body></html>";
+void Service::waitIdle()
+{
+    System::MutexLock lock(_mutex);
+    while (_responderCount > 0)
+        _isIdle.wait(lock);
+}
+
+bool Service::checkAuth(const Request& request)
+{
+    for (std::vector<const Authenticator*>::const_iterator it = _authenticators.begin();
+        it != _authenticators.end(); ++it)
+    {
+        if (!(*it)->checkAuth(request))
+            return false;
+    }
+
+    return true;
+}
+
+CachedServiceBase::~CachedServiceBase()
+{
+    for (Responders::iterator it = responders.begin(); it != responders.end(); ++it)
+        delete *it;
+}
+
+Responder* CachedServiceBase::createResponder(const Request& request)
+{
+    if (responders.empty())
+    {
+        return newResponder();
+    }
     else
-        out << _content;
+    {
+        Responder* ret = responders.back();
+        responders.pop_back();
+        return ret;
+    }
+}
 
+void CachedServiceBase::releaseResponder(Responder* resp)
+{
+    responders.push_back(resp);
 }
 
 }

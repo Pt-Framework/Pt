@@ -72,9 +72,9 @@ void TcpServerImpl::close()
 }
 
 
-void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog)
+void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags)
 {
-    log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
+    log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog << " flags " << flags);
 
     AddrInfo ai(ipaddr, port, true);
 

@@ -131,6 +131,16 @@ namespace System {
             {}
     };
 
+    class PT_SYSTEM_API DeviceClosed : public IOError
+    {
+        public:
+            DeviceClosed(const std::string& what, const SourceInfo& si);
+
+            DeviceClosed(const char* what);
+
+            ~DeviceClosed() throw()
+            {}
+    };
 } // namespace System
 
 } // namespace Pt

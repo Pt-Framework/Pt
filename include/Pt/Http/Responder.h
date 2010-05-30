@@ -55,7 +55,7 @@ class PT_HTTP_API Responder
         virtual void reply(std::ostream&, Request& request, Reply& reply) = 0;
         virtual void replyError(std::ostream&, Request& request, Reply& reply, const std::exception& ex);
 
-        void release()     { _service.releaseResponder(this); }
+        void release()     { _service.doReleaseResponder(this); }
 
     private:
         Service& _service;

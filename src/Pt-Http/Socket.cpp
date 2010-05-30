@@ -96,7 +96,7 @@ Socket::~Socket()
 
 void Socket::accept()
 {
-    Net::TcpSocket::accept(_tcpServer);
+    Net::TcpSocket::accept(_tcpServer, Net::TcpSocket::DEFER_ACCEPT);
 
     _accepted = true;
 
@@ -263,20 +263,8 @@ bool Socket::onOutput(System::StreamBuffer& sb)
         }
         else
         {
-            bool keepAlive = _request.header().keepAlive();
-
-            if (keepAlive)
-            {
-                std::string connection = _reply.getHeader("Connection");
-
-                if (connection == "close"
-                  || (connection.empty()
-                        && (_reply.header().httpVersionMajor() < 1
-                         || _reply.header().httpVersionMinor() < 1)))
-                {
-                    keepAlive = false;
-                }
-            }
+            bool keepAlive = _request.header().keepAlive()
+                          && _reply.header().keepAlive();
 
             if (keepAlive)
             {
@@ -317,10 +305,10 @@ void Socket::onTimeout()
 
 void Socket::sendReply()
 {
-    const std::string contentLength = "Content-Length";
-    const std::string server = "Server";
-    const std::string connection = "Connection";
-    const std::string date = "Date";
+    const char* contentLength = "Content-Length";
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
 
     _stream << "HTTP/"
         << _reply.header().httpVersionMajor() << '.'
@@ -353,7 +341,8 @@ void Socket::sendReply()
 
     if (!_reply.header().hasHeader(date))
     {
-        _stream << "Date: " << MessageHeader::htdateCurrent() << "\r\n";
+        char buffer[50];
+        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
     _stream << "\r\n";

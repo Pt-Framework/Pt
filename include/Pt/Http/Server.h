@@ -53,10 +53,10 @@ class PT_HTTP_API Server : private Pt::NonCopyable
 {
     public:
         explicit Server(System::EventLoopBase& eventLoop);
-        Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port);
+        Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
         ~Server();
 
-        void listen(const std::string& ip, unsigned short int port);
+        void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
         void addService(const std::string& url, Service& service);
         void removeService(Service& service);

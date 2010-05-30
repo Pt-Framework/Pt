@@ -138,19 +138,21 @@ void StreamBufferBase::endRead()
 }
 
 
-void StreamBufferBase::beginWrite()
+size_t StreamBufferBase::beginWrite()
 {
     if(_ioDevice == 0 || _ioDevice->writing())
-        return;
+        return 0;
 
     if( _sb->pptr() )
     {
         size_t avail = _sb->pptr() - _sb->pbase();
         if(avail > 0)
         {
-            _ioDevice->beginWrite(_obuffer, avail);
+            return _ioDevice->beginWrite(_obuffer, avail);
         }
     }
+
+    return 0;
 }
 
 
@@ -160,14 +162,15 @@ void StreamBufferBase::onWrite(IODevice& dev)
 }
 
 
-void StreamBufferBase::endWrite()
+size_t StreamBufferBase::endWrite()
 {
     size_t leftover = 0;
+    size_t written = 0;
 
     if( _sb->pptr() )
     {
         size_t avail = _sb->pptr() - _sb->pbase();
-        size_t written = _ioDevice->endWrite();
+        written = _ioDevice->endWrite();
 
         leftover = avail - written;
         if(leftover > 0)
@@ -178,6 +181,8 @@ void StreamBufferBase::endWrite()
 
     _sb->setp(_obuffer, _obuffer + _obufferSize);
     _sb->pbump( leftover );
+
+    return written;
 }
 
 

@@ -53,7 +53,6 @@ ServerImpl::ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>
       _idleTimeout(100),
       _minThreads(5),
       _maxThreads(200),
-      _waitingThreads(0),
       _runmodeChanged(runmodeChanged),
       _runmode(Server::Stopped)
 {
@@ -83,10 +82,10 @@ ServerImpl::~ServerImpl()
     }
 }
 
-void ServerImpl::listen(const std::string& ip, unsigned short int port)
+void ServerImpl::listen(const std::string& ip, unsigned short int port, int backlog)
 {
     log_debug("listen on " << ip << " port " << port);
-    Listener* listener = new Listener(ip, port);
+    Listener* listener = new Listener(ip, port, backlog, Net::TcpServer::DEFER_ACCEPT);
     try
     {
         _listener.push_back(listener);
@@ -157,6 +156,9 @@ void ServerImpl::terminate()
         while (!_queue.empty())
             delete _queue.get();
 
+        for (std::set<Socket*>::iterator it = _idleSockets.begin(); it != _idleSockets.end(); ++it)
+            delete *it;
+
         runmode(Server::Stopped);
     }
     catch (const std::exception& e)
@@ -167,6 +169,7 @@ void ServerImpl::terminate()
 
 void ServerImpl::noWaitingThreads()
 {
+    System::MutexLock lock(_threadMutex);
     if (_runmode == Server::Running)
         _eventLoop.commitEvent(NoWaitingThreadsEvent());
 }
@@ -309,20 +312,21 @@ void ServerImpl::addService(const std::string& url, Service& service)
 {
     log_debug("add service for url <" << url << '>');
 
-    System::MutexLock serviceLock(_serviceMutex);
-    _service.insert(ServicesType::value_type(url, &service));
+    System::WriteLock serviceLock(_serviceMutex);
+    _services.insert(ServicesType::value_type(url, &service));
 }
 
 void ServerImpl::removeService(Service& service)
 {
-    System::MutexLock serviceLock(_serviceMutex);
+    System::WriteLock serviceLock(_serviceMutex);
+    service.waitIdle();
 
-    ServicesType::iterator it = _service.begin();
-    while (it != _service.end())
+    ServicesType::iterator it = _services.begin();
+    while (it != _services.end())
     {
         if (it->second == &service)
         {
-            _service.erase(it++);
+            _services.erase(it++);
         }
         else
         {
@@ -335,17 +339,17 @@ Responder* ServerImpl::getResponder(const Request& request)
 {
     log_debug("get responder for url <" << request.url() << '>');
 
-    System::MutexLock serviceLock(_serviceMutex);
+    System::ReadLock serviceLock(_serviceMutex);
 
-    for (ServicesType::const_iterator it = _service.lower_bound(request.url());
-        it != _service.end() && it->first == request.url(); ++it)
+    for (ServicesType::const_iterator it = _services.lower_bound(request.url());
+        it != _services.end() && it->first == request.url(); ++it)
     {
         if (!it->second->checkAuth(request))
         {
             return _noAuthService.createResponder(request, it->second->realm(), it->second->authContent());
         }
 
-        Responder* resp = it->second->createResponder(request);
+        Responder* resp = it->second->doCreateResponder(request);
         if (resp)
         {
             log_debug("got responder");

@@ -28,7 +28,7 @@
 
 #include "ClientImpl.h"
 #include <Pt/Http/Client.h>
-#include <Pt/Http/Parser.h>
+#include "Parser.h"
 #include <Pt/System/IOError.h>
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
@@ -338,11 +338,11 @@ void ClientImpl::sendRequest(const Request& request)
 {
     log_debug("send request " << request.url());
 
-    static const std::string contentLength = "Content-Length";
-    static const std::string connection = "Connection";
-    static const std::string date = "Date";
-    static const std::string host = "Host";
-    static const std::string authorization = "Authorization";
+    static const char* contentLength = "Content-Length";
+    static const char* connection = "Connection";
+    static const char* date = "Date";
+    static const char* host = "Host";
+    static const char* authorization = "Authorization";
 
     _stream << request.method() << ' '
             << request.url() << " HTTP/"
@@ -367,7 +367,8 @@ void ClientImpl::sendRequest(const Request& request)
 
     if (!request.header().hasHeader(date))
     {
-        _stream << "Date: " << MessageHeader::htdateCurrent() << "\r\n";
+        char buffer[50];
+        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
     if (!request.header().hasHeader(host))
@@ -641,10 +642,17 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
                 throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
         }
 
-        if (!_chunkedIStream.eod() || !_parser.end())
+        if (_socket.enabled())
         {
-            log_debug("call beginRead");
-            sb.beginRead();
+            if ((!_chunkedIStream.eod() || !_parser.end()))
+            {
+                log_debug("call beginRead");
+                sb.beginRead();
+            }
+        }
+        else
+        {
+            cancel();
         }
     }
     else
@@ -672,9 +680,13 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
 
             _client->replyFinished(*_client);
         }
-        else
+        else if (_socket.enabled() && _stream.good())
         {
             sb.beginRead();
+        }
+        else
+        {
+            cancel();
         }
     }
 }

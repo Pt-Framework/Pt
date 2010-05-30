@@ -31,7 +31,6 @@
 
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-#include <Pt/Http/Parser.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/System/Selectable.h>
@@ -42,6 +41,7 @@
 #include <string>
 #include <sstream>
 #include <cstddef>
+#include "Parser.h"
 #include "ChunkedReader.h"
 
 namespace Pt {

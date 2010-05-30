@@ -53,21 +53,17 @@ class PT_NET_API AddressInUse : public System::IOError
     class TcpServerImpl* _impl;
 
     public:
+      enum { INHERIT = 1, DEFER_ACCEPT = 2 };
+
       TcpServer();
 
       /** @brief Creates a server socket and listens on an address
       */
-      TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+      TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
 
       ~TcpServer();
 
-      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
-
-      /// @brief TODO
-      //const struct sockaddr_storage& getAddr() const;
-
-      /// @brief TODO
-      int getFd() const;
+      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
 
       // inherit doc
       virtual System::SelectableImpl& simpl();

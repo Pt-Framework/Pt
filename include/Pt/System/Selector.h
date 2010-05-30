@@ -64,7 +64,7 @@ namespace System {
 
         int main()
         {
-            using cxxtools::System;
+            using Pt::System;
 
             Timer timer;
             timer.start(1000);

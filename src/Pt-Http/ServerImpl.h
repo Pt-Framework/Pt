@@ -114,7 +114,7 @@ class ServerImpl : public Connectable
         ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>& runmodeChanged);
         ~ServerImpl();
 
-        void listen(const std::string& ip, unsigned short int port);
+        void listen(const std::string& ip, unsigned short int port, int backlog);
         void noWaitingThreads();
 
         void addService(const std::string& url, Service& service);
@@ -179,7 +179,6 @@ class ServerImpl : public Connectable
         std::size_t _idleTimeout;
         unsigned _minThreads;
         unsigned _maxThreads;
-        atomic_t _waitingThreads;
 
         Signal<Server::Runmode>& _runmodeChanged;
         Server::Runmode _runmode;
@@ -201,8 +200,8 @@ class ServerImpl : public Connectable
 
         ////////////////////////////////////////////////////
         typedef std::multimap<std::string, Service*> ServicesType;
-        System::Mutex _serviceMutex;
-        ServicesType _service;
+        System::ReadWriteMutex _serviceMutex;
+        ServicesType _services;
         NotFoundService _defaultService;
         NotAuthenticatedService _noAuthService;
 };

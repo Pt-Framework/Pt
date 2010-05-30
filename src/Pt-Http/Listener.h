@@ -43,8 +43,8 @@ class Listener : public Net::TcpServer
         unsigned short _port;
 
     public:
-        Listener(const std::string& ip, unsigned short port)
-            : Net::TcpServer(ip, port),
+        Listener(const std::string& ip, unsigned short port, int backlog, unsigned flags)
+            : Net::TcpServer(ip, port, backlog, flags),
               _ip(ip),
               _port(port)
         { }
