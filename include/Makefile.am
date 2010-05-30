@@ -113,9 +113,12 @@ nobase_include_HEADERS = \
 	Pt/System/Thread.h \
 	Pt/System/Timer.h \
 	Pt/System/Url.h \
+	Pt/System/LogLevel.h \
+	Pt/System/LogTarget.h \
+	Pt/System/LogChannel.h \
+	Pt/System/Logger.h \
 	Pt/Net/AddrInfo.h \
 	Pt/Net/Api.h \
 	Pt/Net/TcpServer.h \
 	Pt/Net/TcpSocket.h \
 	Pt/Net/UdpSocket.h
-

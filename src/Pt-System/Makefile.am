@@ -44,7 +44,13 @@ libPt_System_la_SOURCES = \
 	SystemError.cpp \
 	Thread.cpp \
 	Timer.cpp \
-	Url.cpp
+	Url.cpp \
+    ConsoleChannel.cpp \
+    FileChannel.cpp \
+    Logger.cpp \
+    LogManager.cpp \
+    SerialChannel.cpp \
+    LogTarget.cpp
 
 noinst_HEADERS = \
 	posix/ApplicationImpl.h \
@@ -63,7 +69,12 @@ noinst_HEADERS = \
 	posix/SelectorImpl.h \
 	posix/SemaphoreImpl.h \
 	posix/SerialDeviceImpl.h \
-	posix/ThreadImpl.h
+	posix/ThreadImpl.h \
+	ConsoleChannel.h \
+	FileChannel.h \
+	LogManager.h \
+	SerialChannel.h
+
 
 libPt_System_la_LIBADD = $(top_builddir)/src/Pt/libPt.la
 libPt_System_la_CXXFLAGS = $(PTHREAD_CFLAGS)

@@ -1,0 +1,96 @@
+/*
+ * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#ifndef Pt_System_LogManager_h
+#define Pt_System_LogManager_h
+
+#include "Pt/System/Api.h"
+#include "Pt/System/LogTarget.h"
+#include "ConsoleChannel.h"
+#include "FileChannel.h"
+#include "SerialChannel.h"
+#include <Pt/DateTime.h>
+#include <Pt/Settings.h>
+#include <Pt/Singleton.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Plugin.h>
+#include <string>
+#include <map>
+
+namespace Pt {
+
+namespace System {
+
+class Message;
+class Logger;
+
+class LogManager : public Pt::Singleton<LogManager>
+{
+    friend class Pt::Singleton<LogManager>;
+
+    protected:
+        LogManager();
+
+    public:
+        ~LogManager();
+
+        void init(const std::string& path);
+
+        LogTarget& target(const std::string& name = std::string());
+
+        void setChannel(LogTarget& target, const std::string& url);
+
+        void log(LogTarget& target, const Message& message);
+
+        void setLogLevel(LogTarget &target, LogLevel level);
+
+    protected:
+        void updateChildren(LogTarget &target, LogLevel level);
+
+        LogChannel& channel(const std::string& url);
+
+    private:
+        Pt::System::BasicPlugin<ConsoleChannel, LogChannel> _consolePlugin;
+        Pt::System::BasicPlugin<FileChannel, LogChannel> _filePlugin;
+        Pt::System::BasicPlugin<SerialChannel, LogChannel> _serialPlugin;
+        Pt::System::PluginManager<LogChannel> _pluginManager;
+        bool _init;
+        LogTarget* _rootTarget;
+        std::map<std::string, LogTarget*> _targetMap;
+        std::map<std::string, LogChannel*> _channelMap;
+        Pt::System::RecursiveMutex _mutex;
+        Settings _settings;
+        Logger* _logger;
+};
+
+}
+
+}
+
+#endif
+
