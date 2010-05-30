@@ -200,7 +200,7 @@ STATIC void reginsert( parse_state* state, CHARTYPE op, CHARTYPE *opnd );
 STATIC void regtail( CHARTYPE *p, CHARTYPE *val );
 STATIC void regoptail( CHARTYPE *p, CHARTYPE *val );
 
-void regerror( char *s )
+void regerror( const char *s )
 {
     throw Pt::InvalidRegex(s);
 }
@@ -1321,7 +1321,7 @@ regdump( regexp *r )
 static char *
 regprop( CHARTYPE *op )
 {
-    register char *p;
+    register const char *p;
     static char buf[50];
 
     (void) strcpy(buf, ":");
