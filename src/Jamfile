@@ -1,7 +1,6 @@
 SubDir TOP src ;
 
 SubInclude TOP src Pt ;
-SubInclude TOP src Pt-Alloc ;
 SubInclude TOP src Pt-Reflex ;
 SubInclude TOP src Pt-System ;
 SubInclude TOP src Pt-Cma ;
