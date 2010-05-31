@@ -84,6 +84,17 @@ nobase_include_HEADERS = \
 	Pt/Vector2d.h \
 	Pt/Vector2d.tpp \
 	Pt/Void.h \
+	Pt/Cma/Api.h \
+	Pt/Cma/ComponentBuilder.h \
+	Pt/Cma/ComponentFactory.h \
+	Pt/Cma/Component.h \
+	Pt/Cma/ComponentLibrary.h \
+	Pt/Cma/IAggregated.h \
+	Pt/Cma/IComponentBuilder.h \
+	Pt/Cma/IPrefs.h \
+	Pt/Cma/ITestSuite.h \
+	Pt/Cma/IUnknown.h \
+	Pt/Cma/TypeId.h \
 	Pt/System/Api.h \
 	Pt/System/Application.h \
 	Pt/System/Clock.h \

@@ -67,6 +67,7 @@ AC_CONFIG_FILES([
   src/Makefile
   src/Pt/Makefile
   src/Pt-System/Makefile
+  src/Pt-Cma/Makefile
   src/Pt-Net/Makefile
   src/Pt-Unit/Makefile
   src/Pt-Http/Makefile
