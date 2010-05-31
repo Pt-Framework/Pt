@@ -40,8 +40,9 @@ SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt ;
 DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt ;
 
-PT_TESTS = AnyTest.cpp
-           AtomicTest.cpp
+PT_TESTS = AllocatorTest.cpp
+		   AnyTest.cpp
+           AtomicTest.cpp		   
            ByteorderTest.cpp
            CharTest.cpp
            ConversionTest.cpp
@@ -63,7 +64,7 @@ PT_TESTS = AnyTest.cpp
            TimespanTest.cpp
            TypesTest.cpp
            TypeTraitsTest.cpp
-           VariantTest.cpp
+           VariantTest.cpp		   
            ;
 
 PtUnitTest Pt-test : Pt-test.cpp $(PT_TESTS) ;

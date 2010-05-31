@@ -31,7 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 
-class ChunkTest;
+class AllocatorTest;
 
 namespace Pt{
 
@@ -67,7 +67,7 @@ namespace Pt{
  */
 class Chunk
 {
-    friend class ::ChunkTest;
+    friend class ::AllocatorTest;
 public:
 
     /**
