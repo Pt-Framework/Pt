@@ -135,4 +135,57 @@ nobase_include_HEADERS = \
 	Pt/Unit/TestMethod.h \
 	Pt/Unit/TestProtocol.h \
 	Pt/Unit/TestSuite.h \
-	Pt/Unit/TextProtocol.h
+	Pt/Unit/TextProtocol.h \
+	Pt/Http/Api.h \
+	Pt/Http/Client.h \
+	Pt/Http/Message.h \
+	Pt/Http/MessageHeader.h \
+	Pt/Http/Reply.h \
+	Pt/Http/ReplyHeader.h \
+	Pt/Http/Request.h \
+	Pt/Http/RequestHeader.h \
+	Pt/Http/Responder.h \
+	Pt/Http/Server.h \
+	Pt/Http/Service.h \
+	Pt/Reflex/Api.h \
+	Pt/Reflex/CallableInfo.h \
+	Pt/Reflex/Context.h \
+	Pt/Reflex/MemberInfo.h \
+	Pt/Reflex/MethodInfoBase.h \
+	Pt/Reflex/MethodInfo.h \
+	Pt/Reflex/PropertyInfo.h \
+	Pt/Reflex/PropertyValue.h \
+	Pt/Reflex/Reflectable.h \
+	Pt/Reflex/SignalInfo.h \
+	Pt/Reflex/Type.h \
+	Pt/Xml/Api.h \
+	Pt/Xml/Characters.h \
+	Pt/Xml/Comment.h \
+	Pt/Xml/DocTypeDeclaration.h \
+	Pt/Xml/EndDocument.h \
+	Pt/Xml/EndElement.h \
+	Pt/Xml/EntityResolver.h \
+	Pt/Xml/NamespaceContext.h \
+	Pt/Xml/Namespace.h \
+	Pt/Xml/Node.h \
+	Pt/Xml/ProcessingInstruction.h \
+	Pt/Xml/QName.h \
+	Pt/Xml/StartElement.h \
+	Pt/Xml/XmlDeclaration.h \
+	Pt/Xml/XmlDeserializer.h \
+	Pt/Xml/XmlError.h \
+	Pt/Xml/XmlFormatter.h \
+	Pt/Xml/XmlReader.h \
+	Pt/Xml/XmlSerializationContext.h \
+	Pt/Xml/XmlSerializer.h \
+	Pt/Xml/XmlWriter.h \
+	Pt/XmlRpc/Api.h \
+	Pt/XmlRpc/Client.h \
+	Pt/XmlRpc/Fault.h \
+	Pt/XmlRpc/Formatter.h \
+	Pt/XmlRpc/HttpClient.h \
+	Pt/XmlRpc/RemoteProcedure.h \
+	Pt/XmlRpc/Responder.h \
+	Pt/XmlRpc/Result.h \
+	Pt/XmlRpc/Scanner.h \
+	Pt/XmlRpc/Service.h
