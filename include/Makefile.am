@@ -121,4 +121,18 @@ nobase_include_HEADERS = \
 	Pt/Net/Api.h \
 	Pt/Net/TcpServer.h \
 	Pt/Net/TcpSocket.h \
-	Pt/Net/UdpSocket.h
+	Pt/Net/UdpSocket.h \
+	Pt/Unit/Api.h \
+	Pt/Unit/Application.h \
+	Pt/Unit/Assertion.h \
+	Pt/Unit/RegisterTest.h \
+	Pt/Unit/Reporter.h \
+	Pt/Unit/TestCase.h \
+	Pt/Unit/TestContext.h \
+	Pt/Unit/TestFixture.h \
+	Pt/Unit/Test.h \
+	Pt/Unit/TestMain.h \
+	Pt/Unit/TestMethod.h \
+	Pt/Unit/TestProtocol.h \
+	Pt/Unit/TestSuite.h \
+	Pt/Unit/TextProtocol.h
