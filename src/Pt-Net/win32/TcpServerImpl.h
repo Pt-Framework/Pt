@@ -72,7 +72,7 @@ class TcpServerImpl : public System::SelectableImpl
 
 		SOCKET accept();
 
-		void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5);
+		void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned  = 0);
 
         inline SOCKET fd() const
         { return _fd; }

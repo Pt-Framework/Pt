@@ -110,7 +110,7 @@ void TcpServerImpl::close()
     _fd = INVALID_SOCKET;
 }
 
-void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog)
+void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned)
 {
     log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
 
