@@ -42,12 +42,9 @@
  * regular-expression syntax might require a total rethink.
  */
 #include "regexp.h"
-/*#include "debug.h"*/
 #include <stdio.h>
 #include <ctype.h>
-#ifndef ultrix
-#include <stdlib.h>
-#endif
+#include <cstdlib>
 #include <string.h>
 
 /*
@@ -260,7 +257,7 @@ struct regexp_ptr
 
     ~regexp_ptr()
     {
-        if(_r) ::free(_r);
+        if(_r) std::free(_r);
     }
 
     regexp_ptr& operator=(regexp* r)
@@ -337,7 +334,7 @@ regexp* regcomp( const CHARTYPE *exp )
         FAIL("regexp too big");
 
     /* Allocate space. */
-    rx = (regexp*) malloc(sizeof(regexp) + ((unsigned)(state.regsize)*sizeof(CHARTYPE)) );
+    rx = (regexp*) std::malloc(sizeof(regexp) + ((unsigned)(state.regsize)*sizeof(CHARTYPE)) );
     if( ! rx )
         FAIL("out of space");
     /*if ( DEBUG_PROFILE )
@@ -413,7 +410,7 @@ reg(
     register CHARTYPE *ret;
     register CHARTYPE *br;
     register CHARTYPE *ender;
-    register int parno;
+    register int parno = 0;
     int flags;
 
     *flagp = HASWIDTH;    /* Tentatively. */
@@ -1321,7 +1318,7 @@ regdump( regexp *r )
 static char *
 regprop( CHARTYPE *op )
 {
-    register const char *p;
+    register const char *p = "";
     static char buf[50];
 
     (void) strcpy(buf, ":");

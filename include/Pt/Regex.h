@@ -32,6 +32,7 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/SmartPtr.h>
+#include <cstdlib>
 
 struct regexp;
 struct pt_regmatch_t;
@@ -49,7 +50,7 @@ class RegexDestroyPolicy<regexp>
     protected:
         void destroy(regexp* expr)
         {
-            ::free(expr);
+            std::free(expr);
         }
 };
 

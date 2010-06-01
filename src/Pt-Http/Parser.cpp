@@ -30,6 +30,7 @@
 #include <Pt/Http/MessageHeader.h>
 #include <cctype>
 #include <algorithm>
+#include <string.h>
 
 #define log_debug(e)
 #define log_warn(e)

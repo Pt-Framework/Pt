@@ -89,27 +89,6 @@ rule SharedLibraryImpl
 }
 
 
-rule Library
-{
-    local _l = $(PRELIB)$(<)$(SUFLIB) ;
-    Depends $(<) : $(_l) ;
-
-     # Add grist to file names
-    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
-    
-    
-    C++FLAGS on $(_objects) = $(C++FLAGS) -shared ;
-    CCFLAGS on $(_objects) =  $(CCFLAGS) -shared ;
-   
-
-    LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
-    Objects $(2) : $(1) ;
-
-    LibraryImpl $(<) : $(>) ;
-}
-
-
-
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
     $(LINK) $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group

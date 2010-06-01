@@ -37,6 +37,7 @@
 #include <Pt/Db/Value.h>
 #include <Pt/Db/Statement.h>
 #include <Pt/System/Thread.h>
+#include <stdlib.h>
 
 namespace {
 
