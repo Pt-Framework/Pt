@@ -7,12 +7,19 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : Atomicity.cpp
                    Char.cpp
+                   Chunk.cpp
                    Connection.cpp
                    Connectable.cpp
                    ConversionError.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
+				   Page.cpp
+				   PageAllocator.cpp
+				   PoolAllocator.cpp
+				   PoolFactory.cpp
+                   Regex.cpp
+                   regexp.cpp
                    SerializationError.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
@@ -27,49 +34,40 @@ SharedLibrary Pt : Atomicity.cpp
                    TextStream.cpp
                    Time.cpp
                    Utf8Codec.cpp
-                   Regex.cpp
-                   regexp.cpp
-				   Chunk.cpp 
-				   PoolFactory.cpp
-				   PoolAllocator.cpp
-				   Page.cpp
-				   PageAllocator.cpp
                    ;
 
-SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
-SharedLibrary_Install Pt ;
-DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt ;
+MakeLocate Pt : $(OUTPUT_TARGET) ;
 
-PT_TESTS = AllocatorTest.cpp
-		   AnyTest.cpp
-           AtomicTest.cpp		   
-           ByteorderTest.cpp
-           CharTest.cpp
-           ConversionTest.cpp
-           DateTest.cpp
-           DateTimeTest.cpp
-           DelegateTest.cpp
-           ExceptionTest.cpp
-           NonCopyableTest.cpp
-           RegExpTest.cpp
-           SerializationTest.cpp
-           SettingsTest.cpp
-           SingletonTest.cpp
-           SignalTest.cpp
-           SmartPtrTest.cpp
-           StringStreamTest.cpp
-           StringTest.cpp
-           TextStreamTest.cpp
-           TimeTest.cpp
-           TimespanTest.cpp
-           TypesTest.cpp
-           TypeTraitsTest.cpp
-           VariantTest.cpp		   
-           ;
+PtUnitTest Pt-test : Pt-test.cpp
+                     AllocatorTest.cpp
+		             AnyTest.cpp
+                     AtomicTest.cpp
+                     ByteorderTest.cpp
+                     CharTest.cpp
+                     ConversionTest.cpp
+                     DateTest.cpp
+                     DateTimeTest.cpp
+                     DelegateTest.cpp
+                     ExceptionTest.cpp
+                     NonCopyableTest.cpp
+                     RegExpTest.cpp
+                     SerializationTest.cpp
+                     SettingsTest.cpp
+                     SingletonTest.cpp
+                     SignalTest.cpp
+                     SmartPtrTest.cpp
+                     StringStreamTest.cpp
+                     StringTest.cpp
+                     TextStreamTest.cpp
+                     TimeTest.cpp
+                     TimespanTest.cpp
+                     TypesTest.cpp
+                     TypeTraitsTest.cpp
+                     VariantTest.cpp
+                     ;
 
-PtUnitTest Pt-test : Pt-test.cpp $(PT_TESTS) ;
-Main_LinkSharedLibraries Pt-test : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate Pt-test : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-test : Pt Pt-System Pt-Unit ;
+MakeLocate Pt-test : $(OUTPUT_TARGET) ;
 
 NOTFILE Pt-all ;
 DEPENDS Pt-all : Pt Pt-test ;
