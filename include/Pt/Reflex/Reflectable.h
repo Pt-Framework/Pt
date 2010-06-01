@@ -52,15 +52,6 @@ class PT_REFLEX_API NoSuchProperty : public std::runtime_error
 };
 
 
-class PT_REFLEX_API NoSuchMethod : public std::runtime_error
-{
-    public:
-        NoSuchMethod(const std::string& methodName, const SourceInfo& si);
-
-        ~NoSuchMethod() throw();
-};
-
-
 class PT_REFLEX_API PropertyNotReadable : public std::runtime_error
 {
     public:
