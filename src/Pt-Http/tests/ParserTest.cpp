@@ -29,7 +29,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Http/Parser.h"
+#include "Parser.h"
 #include <string>
 
 class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::Event

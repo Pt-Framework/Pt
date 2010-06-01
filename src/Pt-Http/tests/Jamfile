@@ -1,5 +1,6 @@
 SubDir TOP src Pt-Http tests ;
 SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Http ;
 
 PtUnitTest Pt-Http-test : Pt-Http-test.cpp
                           ServerTest.cpp
