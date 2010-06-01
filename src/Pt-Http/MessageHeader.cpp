@@ -69,7 +69,6 @@ int MessageHeader::StringLessIgnoreCase::compare
                 : *it2 ? -1 : 0;
 }
 
-const unsigned MessageHeader::MAXHEADERSIZE;
 
 const char* MessageHeader::getHeader(const char* key) const
 {
