@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,13 +30,12 @@
 #include "Pt/SerializationInfo.h"
 #include <algorithm>
 
-
 namespace Pt {
 
 namespace Reflex {
 
 NoSuchProperty::NoSuchProperty(const std::string& propertyName, const SourceInfo& si)
-: std::logic_error("Property '" + propertyName + "' not found" + si)
+: std::runtime_error("Property '" + propertyName + "' not found" + si)
 {
 }
 
@@ -45,23 +44,33 @@ NoSuchProperty::~NoSuchProperty() throw()
 }
 
 
-NoSuchMethod::NoSuchMethod(const std::string& methodName, const SourceInfo& si)
-: std::logic_error("Method '" + methodName + "' not found" + si)
-{
-}
-
-NoSuchMethod::~NoSuchMethod() throw()
+PropertyNotReadable::PropertyNotReadable(const std::string& propertyName, const SourceInfo& si)
+: std::runtime_error("Property '" + propertyName + "' is not readable" + si)
 {
 }
 
 
-typedef std::vector<PropertyInfo*> Properties;
-//typedef std::vector<CallableInfo*> Methods; 
+PropertyNotReadable::~PropertyNotReadable() throw()
+{
+}
+
+
+PropertyNotWritable::PropertyNotWritable(const std::string& propertyName, const SourceInfo& si)
+: std::runtime_error("Property '" + propertyName + "' is not writable" + si)
+{
+}
+
+
+PropertyNotWritable::~PropertyNotWritable() throw()
+{
+}
+
+
+typedef std::vector<Property*> Properties;
 
 
 struct ReflectableData
 {
-    //Methods methods;
     Properties properties;
     std::string objectName;
 };
@@ -96,12 +105,6 @@ Reflectable::~Reflectable()
     {
         delete *iter;
     }
-
-    // Methods::iterator it;
-    // for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-    // {
-    //     delete *it;
-    // }
 
     delete _data;
 }
@@ -145,20 +148,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
-// void Reflectable::invoke(const std::string& name, const Any* args, size_t argCount)
-// {
-//     CallableInfo& ci = this->methodInfo(name);
-//     ci.call(args, argCount);
-// }
-
-
-// Pt::Any Reflectable::call(const std::string& name, const Any* args, size_t argCount)
-// {
-//     return this->methodInfo(name).call(args, argCount);
-// }
-
-
-PropertyInfo& Reflectable::propertyInfo(const std::string& name)
+Property& Reflectable::propertyInfo(const std::string& name)
 {
     Properties::iterator it;
     for( it = _data->properties.begin(); it != _data->properties.end(); ++it)
@@ -169,32 +159,6 @@ PropertyInfo& Reflectable::propertyInfo(const std::string& name)
 
     throw NoSuchProperty(objectName() + "." + name, PT_SOURCEINFO);
 }
-
-
-// const CallableInfo& Reflectable::methodInfo(const std::string& name) const
-// {
-//     Methods::const_iterator it;
-//     for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-//     {
-//         if( name == (*it)->name() )
-//             return **it;
-//     }
-
-//     throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
-// }
-
-
-// CallableInfo& Reflectable::methodInfo(const std::string& name)
-// {
-//     Methods::iterator it;
-//     for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
-//     {
-//         if( name == (*it)->name() )
-//             return **it;
-//     }
-
-//     throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
-// }
 
 
 Reflectable::PropertyIterator Reflectable::propertiesBegin()
@@ -233,49 +197,7 @@ Reflectable::ConstPropertyIterator Reflectable::propertiesEnd() const
 }
 
 
-// Reflectable::MethodIterator Reflectable::methodsBegin()
-// {
-//     if(_data->methods.size() == 0)
-//         return 0;
-
-//     return &(_data->methods[0]);
-// }
-
-
-// Reflectable::MethodIterator Reflectable::methodsEnd()
-// {
-//     if(_data->methods.size() == 0)
-//         return 0;
-
-//     return &(_data->methods[0]) + _data->methods.size();
-// }
-
-
-// Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
-// {
-//     if(_data->methods.size() == 0)
-//         return 0;
-
-//     return &(_data->methods[0]);
-// }
-
-
-// Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
-// {
-//     if(_data->methods.size() == 0)
-//         return 0;
-
-//     return &(_data->methods[0]) + _data->methods.size();
-// }
-
-
-// void Reflectable::registerCallableInfo(CallableInfo* ci)
-// {
-//     _data->methods.push_back( ci );
-// }
-
-
-void Reflectable::registerPropertyInfo(PropertyInfo* pi)
+void Reflectable::registerPropertyInfo(Property* pi)
 {
     _data->properties.push_back( pi );
 }
@@ -310,9 +232,9 @@ void Reflectable::serialize(SerializationInfo& si) const
 }
 
 
-void operator >>= (const SerializationInfo& si, Reflectable& r)
+void operator >>=(const SerializationInfo& si, Reflectable& r)
 {
-    std::cerr << "DESERIALIZE REFLECTABLE BEGIN" << std::endl;
+
     Reflectable::PropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
     {
@@ -323,14 +245,12 @@ void operator >>= (const SerializationInfo& si, Reflectable& r)
         if(pinfo == 0)
             continue;
 
-        std::cerr << "DESERIALIZE " << it->name() << std::endl;
-        *pinfo >> Pt::load() >>= *it;
+        *pinfo >>= *it;
     }
-    std::cerr << "DESERIALIZE REFLECTABLE END" << std::endl;
 }
 
 
-void operator <<= (SerializationInfo& si, const Reflectable& r)
+void operator <<=(SerializationInfo& si, const Reflectable& r)
 {
     Reflectable::ConstPropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)

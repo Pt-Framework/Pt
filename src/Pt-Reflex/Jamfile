@@ -2,19 +2,14 @@ SubDir TOP src Pt-Reflex ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_REFLEX_API_EXPORT ] ;
 
-SharedLibrary Pt-Reflex : PropertyInfo.cpp
-                          Reflectable.cpp
-                          Type.cpp
-                          ;
-SharedLibrary_LinkSharedLibraries Pt-Reflex : Pt ;
-SharedLibrary_MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
-SharedLibrary_Install Pt-Reflex ;
+SharedLibrary Pt-Reflex : Reflectable.cpp ;
+LinkSharedLibraries Pt-Reflex : Pt ;
+MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
 
 PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
-Main_LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
-PtUnitTest_MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
+MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
 
-# Define pseudo targets to call from projects
 NOTFILE Pt-Reflex-all ;
 DEPENDS Pt-Reflex-all : Pt-Reflex
                         Pt-Reflex-test

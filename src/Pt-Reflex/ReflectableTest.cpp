@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2007 by Marc Boris Drner
  * Copyright (C) 2007 by Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,209 +29,11 @@
 #undef PT_REFLEX_API_EXPORT
 
 #include "Pt/Reflex/Reflectable.h"
-//#include "Pt/Reflex/SignalInfo.h"
-#include "Pt/Reflex/Type.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
-
-using namespace Pt::Reflex;
-
-class ClassDef;
-
-
-template <typename T>
-class ClassTraits
-{
-    public:
-        static void construct(Reflectable&, T& instance )
-        { }
-};
-
-
-class ClassDef
-{
-    typedef Reflectable* (*Create)(ClassDef const *);
-
-    public:
-        ClassDef(ClassDef const* base, Create c)
-        : _base(base)
-        , _create(c)
-        { }
-
-        Reflectable* create() const
-        {
-            return _create(this);
-        }
-
-        ClassDef const* base() const
-        { return _base; }
-
-    private:
-        ClassDef const * const _base;
-        Create _create;
-};
-
-
-template <typename C>
-class StaticObject : public Reflectable
-{
-    public:
-        StaticObject()
-        : Reflectable("")
-        {
-            _object = new C;
-            ClassTraits<C>::construct(*this, *_object);
-        }
-
-    private:
-        C* _object;
-};
-
-
-class DynamicObject : public Reflectable
-{
-    public:
-        DynamicObject(ClassDef const* def)
-        : Reflectable("")
-        {
-            if( def->base() )
-            {
-                _base = def->base()->create();
-                this->include(*_base);
-            }
-        }
-
-    private:
-        Reflectable* _base;
-};
-
-
-/** Static classes
-*/
-template <class T>
-Reflectable* createStaticObject(ClassDef const* def)
-{
-    return new StaticObject<T>();
-}
-
-
-template <typename T>
-ClassDef staticClass()
-{
-    return ClassDef(0, &createStaticObject<T>);
-}
-
-
-/** Meta classes
-*/
-template <class T>
-static Reflectable* createMetaObject(ClassDef const* cdef)
-{
-    return new T;
-}
-
-
-template <typename T>
-ClassDef metaClass()
-{
-    return ClassDef( 0, &createMetaObject<T> );
-}
-
-
-/** Dynamic classes
-*/
-Reflectable* createDynamicObject(ClassDef const* def)
-{
-    return new DynamicObject(def);
-}
-
-
-ClassDef dynamicClass(ClassDef const* base)
-{
-    return ClassDef(base, &createDynamicObject);
-}
-
-
-class MyClass
-{
-    public:
-        MyClass()
-        : _number(3)
-        {}
-
-        int number() const
-        {
-            std::cerr << "MyClass::number: " << _number << std::endl;
-            return (int)_number;
-        }
-
-        void setNumber(int n)
-        {
-            std::cerr << "MyClass::setNumber: " << n << std::endl;
-            _number = n;
-        }
-
-        long& method0(long n)
-        {
-            std::cerr << "MyClass::method 0 called." << std::endl;
-            _number = n;
-            return _number;
-        }
-
-        bool method1(long n) const
-        {
-            std::cerr << "MyClass::method 1 called." << std::endl;
-            return true;
-        }
-
-        void* numaddr()
-        { return &_number; }
-
-    private:
-        long _number;
-};
-
-
-class MyClassType : public Pt::Reflex::Type
-{
-    public:
-        MyClassType(Context& context)
-        : Type( typeid(MyClass), context )
-        { }
-
-        virtual void registerMethods()
-        {
-            this->registerMethod("method0", &MyClassType::method0);
-            this->registerMethod("method1", &MyClassType::method1);
-
-            this->registerProperty("number", &MyClass::number, &MyClass::setNumber);
-        }
-
-        static long& method0(MyClass& self, long n)
-        {
-            return self.method0(n);
-        }
-
-        static bool method1(const MyClass& self, long n)
-        {
-            return self.method1(n);
-        }
-};
-
-
-template <>
-class ClassTraits<MyClass>
-{
-    public:
-        static void construct(Pt::Reflex::Reflectable& refl, MyClass& mc)
-        {
-            refl.registerProperty("number", mc, &MyClass::number, &MyClass::setNumber);
-        }
-};
-
 
 class TestReflectable : public Pt::Reflex::Reflectable
 {
@@ -241,26 +43,7 @@ class TestReflectable : public Pt::Reflex::Reflectable
         {
             this->registerProperty("number", *this, _number, &TestReflectable::setNumber);
             this->registerReadProperty("count", *this, _number );
-
-            // this->registerProxy("method0", *this, &TestReflectable::method0);
-            // this->registerProxy("method1", *this, &TestReflectable::method1);
-            // this->registerProxy("method2", *this, &TestReflectable::method2);
-            // this->registerProxy("method3", *this, &TestReflectable::method3);
         }
-
-        int method0()
-        { std::cerr << "XXX method 0 called." << std::endl;
-            return 0;
-        }
-
-        void method1(int) const
-        {}
-
-        void method2(int, bool)
-        {}
-
-        void method3(int, bool, char)
-        {}
 
         void setNumber(int i)
         { _number.set(i); }
@@ -279,96 +62,12 @@ class ReflectableTest : public Pt::Unit::TestSuite
         ReflectableTest()
         : Pt::Unit::TestSuite( "ReflectableTest" )
         {
-            Pt::Unit::TestSuite::registerMethod( "Property", *this, &ReflectableTest::Property );
-            Pt::Unit::TestSuite::registerMethod( "MethodCall", *this, &ReflectableTest::MethodCall );
-            Pt::Unit::TestSuite::registerMethod( "PropertyInfo", *this, &ReflectableTest::PropertyInfo );
-            /*Pt::Unit::TestSuite::registerMethod( "SerializeProperty", *this, &ReflectableTest::SerializeProperty );
+            Pt::Unit::TestSuite::registerMethod( "SerializeProperty", *this, &ReflectableTest::SerializeProperty );
             Pt::Unit::TestSuite::registerMethod( "PropertyIterator", *this, &ReflectableTest::PropertyIterator );
             Pt::Unit::TestSuite::registerMethod( "ConstPropertyIterator", *this, &ReflectableTest::ConstPropertyIterator );
-            Pt::Unit::TestSuite::registerMethod( "Method1", *this, &ReflectableTest::Method1 );
-            Pt::Unit::TestSuite::registerMethod( "Method2", *this, &ReflectableTest::Method2 );
-            Pt::Unit::TestSuite::registerMethod( "Method3", *this, &ReflectableTest::Method3 );*/
         }
 
     protected:
-        void MethodCall()
-        {
-            Pt::Reflex::Context context;
-            MyClassType mctype(context);
-
-            context.registerMethods();
-
-            MyClass mc;
-
-            Pt::Any a1( long(5) );
-            mctype.method("method1").call(&mc, &a1, 1);
-
-            Pt::Reflex::CallableInfo& method0 = mctype.method("method0");
-            Pt::Any r = method0.call(&mc, &a1, 1);
-            std::cerr << "r is: "<< Pt::any_cast<long>(r) << std::endl;
-            std::cerr << "numaddr is: "<< mc.numaddr() << std::endl;
-            std::cerr << "r  addr is: "<< r.get() << std::endl;
-
-            Pt::Any a2( long(4) );
-            Pt::Reflex::Type& rtype = method0.retType();
-            rtype.method("=").call(r.get(), &a2, 1);
-            std::cerr << "r is: "<< Pt::any_cast<long>(r) << std::endl;
-        }
-
-        void PropertyInfo()
-        {
-            Pt::Reflex::Context context;
-            MyClassType mctype(context);
-            context.registerMethods();
-
-            MyClass mc;
-
-            Pt::Reflex::PropInfo& pi = mctype.property("number");
-            pi.set( &mc, Pt::Any( int(42) ) );
-
-            Pt::Any value = pi.get(&mc);
-
-            std::cerr << "Number: " << Pt::any_cast<int>(value) << std::endl;
-        }
-
-        void Property()
-        {
-            TestReflectable reflectable;
-
-            std::cerr << "\n######################"<< std::endl;
-            /*MyClass mc;
-            ClassInfo ci(mc);
-            ci.setProperty("number", 5);
-
-            ClassInfo ci2(reflectable);*/
-
-            ClassDef meta = metaClass<TestReflectable>();
-            ClassDef stat = staticClass<MyClass>();
-            ClassDef dyna = dynamicClass(&stat);
-
-            Reflectable* rd = dyna.create();
-            Pt::Any number = rd->property("number");
-            std::cerr << "Number is: " <<  Pt::any_cast<int>(number) << std::endl;
-
-            // Pt::Signal<> sig;
-            // Pt::Reflex::SignalInfo si(sig);
-
-            // Pt::Reflex::Reflectable* rm = meta.create();
-            // CallableInfo& ci = rm->methodInfo("method0");
-            // si.connect(ci);
-
-            // si.send(0,0);
-            std::cerr << "\n######################"<< std::endl;
-
-            /*
-            TestReflectable reflectable;
-
-            reflectable.setProperty("number", Pt::Any( int(5) ) );
-            Pt::Any number = reflectable.property("count");
-            PT_UNIT_ASSERT( number == 5 )
-            */
-        }
-
         void SerializeProperty()
         {
             TestReflectable reflectable;
@@ -390,7 +89,7 @@ class ReflectableTest : public Pt::Unit::TestSuite
         {
             TestReflectable reflectable;
 
-            Reflectable::PropertyIterator it = reflectable.propertiesBegin();
+            Pt::Reflex::Reflectable::PropertyIterator it = reflectable.propertiesBegin();
             PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
             PT_UNIT_ASSERT( it->name() == std::string("number") )
 
@@ -406,7 +105,7 @@ class ReflectableTest : public Pt::Unit::TestSuite
         {
             const TestReflectable reflectable;
 
-            Reflectable::ConstPropertyIterator it = reflectable.propertiesBegin();
+            Pt::Reflex::Reflectable::ConstPropertyIterator it = reflectable.propertiesBegin();
             PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
             PT_UNIT_ASSERT( it->name() == std::string("number") )
 
@@ -417,28 +116,6 @@ class ReflectableTest : public Pt::Unit::TestSuite
             ++it;
             PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );
         }
-/*
-        void Method1()
-        {
-            TestReflectable refl;
-            PT_UNIT_ASSERT( refl.methodInfo("method1").argName(0) == std::string("int") );
-        }
-
-        void Method2()
-        {
-            TestReflectable refl;
-            PT_UNIT_ASSERT( refl.methodInfo("method2").argName(0) == std::string("int") );
-            PT_UNIT_ASSERT( refl.methodInfo("method2").argName(1) == std::string("bool") );
-        }
-
-        void Method3()
-        {
-            TestReflectable refl;
-            PT_UNIT_ASSERT( refl.methodInfo("method3").argName(0) == std::string("int") );
-            PT_UNIT_ASSERT( refl.methodInfo("method3").argName(1) == std::string("bool") );
-            PT_UNIT_ASSERT( refl.methodInfo("method3").argName(2) == std::string("char") );
-        }
-*/
 };
 
 
