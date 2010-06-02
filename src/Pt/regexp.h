@@ -34,17 +34,17 @@ struct pt_regmatch_t
     const CHARTYPE* endp[NSUBEXP];
 };
 
-typedef struct regexp
+struct pt_regexp
 {
     CHARTYPE regstart;        /* Internal use only. */
     char reganch;        /* Internal use only. */
     CHARTYPE *regmust;        /* Internal use only. */
     int regmlen;        /* Internal use only. */
     CHARTYPE program[1];    /* Unwarranted chumminess with compiler. */
-} regexp;
+};
 
-regexp* regcomp( const CHARTYPE *exp );
+pt_regexp* regcomp( const CHARTYPE *exp );
 
-int regexec( regexp *prog, pt_regmatch_t *match, const CHARTYPE *string );
+int regexec( pt_regexp *prog, pt_regmatch_t *match, const CHARTYPE *string );
 
 #endif

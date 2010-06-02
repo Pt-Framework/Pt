@@ -34,7 +34,7 @@
 #include <Pt/SmartPtr.h>
 #include <cstdlib>
 
-struct regexp;
+struct pt_regexp;
 struct pt_regmatch_t;
 
 namespace Pt {
@@ -45,10 +45,10 @@ template <typename objectType>
 class RegexDestroyPolicy;
 
 template <>
-class RegexDestroyPolicy<regexp>
+class RegexDestroyPolicy<pt_regexp>
 {
     protected:
-        void destroy(regexp* expr)
+        void destroy(pt_regexp* expr)
         {
             std::free(expr);
         }
@@ -67,7 +67,7 @@ class PT_API InvalidRegex : public std::invalid_argument
 
 class PT_API Regex
 {
-      SmartPtr<regexp, ExternalRefCounted<regexp>, RegexDestroyPolicy<regexp> > _expr;
+      SmartPtr<pt_regexp, ExternalRefCounted<pt_regexp>, RegexDestroyPolicy<pt_regexp> > _expr;
 
     public:
         explicit Regex(const Pt::Char* ex);

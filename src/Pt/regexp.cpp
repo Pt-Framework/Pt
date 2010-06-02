@@ -251,7 +251,7 @@ struct regexp_ptr
     : _r(0)
     {}
 
-    regexp_ptr(regexp* r)
+    regexp_ptr(pt_regexp* r)
     : _r(r)
     {}
 
@@ -260,13 +260,13 @@ struct regexp_ptr
         if(_r) std::free(_r);
     }
 
-    regexp_ptr& operator=(regexp* r)
+    regexp_ptr& operator=(pt_regexp* r)
     {
         _r = r;
         return *this;
     }
 
-    regexp* operator->()
+    pt_regexp* operator->()
     {
         return _r;
     }
@@ -276,14 +276,14 @@ struct regexp_ptr
         return _r == 0;
     }
 
-    regexp* release()
+    pt_regexp* release()
     {
-        regexp* r = _r;
+        pt_regexp* r = _r;
         _r = 0;
         return r;
     }
 
-    regexp* _r;
+    pt_regexp* _r;
 };
 
 /*
@@ -301,7 +301,7 @@ struct regexp_ptr
  * Beware that the optimization-preparation code in here knows about some
  * of the structure of the compiled regexp.
  */
-regexp* regcomp( const CHARTYPE *exp )
+pt_regexp* regcomp( const CHARTYPE *exp )
 {
     register regexp_ptr rx;
     register CHARTYPE *scan;
@@ -334,11 +334,11 @@ regexp* regcomp( const CHARTYPE *exp )
         FAIL("regexp too big");
 
     /* Allocate space. */
-    rx = (regexp*) std::malloc(sizeof(regexp) + ((unsigned)(state.regsize)*sizeof(CHARTYPE)) );
+    rx = (pt_regexp*) std::malloc(sizeof(pt_regexp) + ((unsigned)(state.regsize)*sizeof(CHARTYPE)) );
     if( ! rx )
         FAIL("out of space");
     /*if ( DEBUG_PROFILE )
-        profile_memory( sizeof(regexp) + (unsigned)regsize );*/
+        profile_memory( sizeof(pt_regexp) + (unsigned)regsize );*/
 
     /* Second pass: emit code. */
     ///regparse = exp;
@@ -889,7 +889,7 @@ struct match_state
 /*
  * Forwards.
  */
-STATIC int regtry( match_state* state, regexp *prog, pt_regmatch_t* match, const CHARTYPE *string );
+STATIC int regtry( match_state* state, pt_regexp *prog, pt_regmatch_t* match, const CHARTYPE *string );
 STATIC int regmatch( match_state* state, CHARTYPE *prog );
 STATIC int regrepeat( match_state* state, CHARTYPE *p );
 
@@ -902,7 +902,7 @@ STATIC char *regprop(CHARTYPE*);
 /*
  - regexec - match a regexp against a string
  */
-int regexec(register regexp *prog,
+int regexec(register pt_regexp *prog,
             pt_regmatch_t *match,
             register const CHARTYPE *string )
 {
@@ -968,7 +968,7 @@ int regexec(register regexp *prog,
  */
 static int            /* 0 failure, 1 success */
 regtry( match_state* state,
-        regexp *prog,
+        pt_regexp *prog,
         pt_regmatch_t* match,
         const CHARTYPE *string )
 {
@@ -1274,7 +1274,7 @@ regnext( register CHARTYPE *p )
  - regdump - dump a regexp onto stdout in vaguely comprehensible form
  */
 void
-regdump( regexp *r )
+regdump( pt_regexp *r )
 {
     register CHARTYPE *s;
     register CHARTYPE op = EXACTLY;    /* Arbitrary non-END op. */
