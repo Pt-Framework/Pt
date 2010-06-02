@@ -139,10 +139,6 @@
 #define    OPERAND(p)    ((p) + 3)
 
 /*
- * See regmagic.h for one further detail of program structure.
- */
-
-/*
  * Utility definitions.
  */
 #ifndef CHARBITS
