@@ -32,7 +32,6 @@
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Reflex/Reflectable.h"
-#include "Pt/Reflex/PropertyInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
