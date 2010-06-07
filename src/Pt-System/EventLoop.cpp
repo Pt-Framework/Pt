@@ -98,7 +98,10 @@ void EventLoop::onRun()
         RecursiveLock lock(_queueMutex);
 
         if(_exitLoop)
+        {
+            _exitLoop = false;
             break;
+        }
 
         if( !_eventQueue.empty() )
         {
