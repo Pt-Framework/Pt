@@ -64,7 +64,7 @@
             <li><a href="group__DateTime.html">Dates and Times</a></li>
             <li><a href="textstreams.html">Character Conversion</a></li>
             <li><a href="plugins.html">Plugins</a></li>
-            <li><a href="unittests.html">Unit Testing</a></li>
+            <li><a href="group__unittest.html">Unit Testing</a></li>
           </ul>
         </div>
       </td>
