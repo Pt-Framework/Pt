@@ -354,7 +354,7 @@ class BasicServiceProcedure<R, C, A1, A2,
         Decomposer<RV> _r;
 };
 
-/// TODO
+
 /*
 template < typename R,
            class C,

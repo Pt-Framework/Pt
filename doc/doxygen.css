@@ -47,6 +47,7 @@ DIV.nav {
 	line-height: 140%;
 }
 DIV.navtab {
+       display: none;
        background-color: #e8eef2;
        border: 1px solid #84b0c7;
        text-align: center;
@@ -54,7 +55,9 @@ DIV.navtab {
        margin-right: 15px;
        padding: 2px;
 }
-
+div.navpath {
+       display: none;
+}
 TD.navtab {
        font-size: 70%;
 }
