@@ -60,8 +60,8 @@
                 <th class="news-table-header">Headline</th>
             </tr>
             <tr>
-                <td valign="top" class="news-table-date"><b>28&nbsp;Feb 2009</b></td>
-                <td><a href="news.html">Technical Release (TR-4) coming soon</a></td>
+                <td valign="top" class="news-table-date"><b>28&nbsp;Jun 2010</b></td>
+                <td><a href="news.html">Technical Release (TR-4) released</a></td>
             </tr>
             <tr>
                 <td valign="top" class="news-table-date"><b>15&nbsp;Feb 2008</b></td>
@@ -71,22 +71,17 @@
                 <td valign="top" class="news-table-date"><b>16&nbsp;Oct 2007</b></td>
                 <td><a href="news.html">Technical Release (TR-2) released</a></td>
             </tr>
-            
-            <tr>
-                <td valign="top" class="news-table-date"><b>21&nbsp;May 2007</b></td>
-                <td><a href="news.html">TR-2 coming soon</a></td>
-            </tr>
-    
+
             <tr>
                 <td valign="top" class="news-table-date"><b>25&nbsp;Feb 2007</b></td>
                 <td><a href="news.html">New Project Website available</a></td>
             </tr>
-          
+
             <tr>
                 <td valign="top" class="news-table-date"><b>05&nbsp;Feb 2007</b></td>
                 <td><a href="news.html">Technical Release (TR-1) released</a></td>
             </tr>
-            
+
         </table>
         <p>View <a href="news.html" title="more news">more news...</a></p>
     </div>

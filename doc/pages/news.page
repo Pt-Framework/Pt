@@ -9,22 +9,23 @@
         <table cellspacing="0" class="news-article">
             <tr>
                 <th class="news-article-header" >
-                    <b>TR-4 coming soon</b>
+                    <b>TR-4 released</b>
                     <br/>
-                    <i>Posted on February 28, 2009</i>
+                    <i>Posted on June 6, 2010</i>
                 </th>
             </tr>
             <tr>
                 <td class="news-article-body">
-                    The fourth technical release will include a complete
-                    review of the systems programming module (Pt::System),
-                    and the networking module (Pt-Net), minor adjustments
-                    to the logging facilities and text handling classes.
-                    The Pt::Text module has been inegrated into the Pt core
-                    module, which reduced binary size considerably.
-                    The following modules will be part of the 1.0 release:
-                    Pt (core), Pt::System, Pt-Net, Pt-Unit, Pt-Log, Pt-Math
-                    Pt-Xml.
+                    The fourth technical release includes not only a complete
+                    review of the systems programming module (Pt-System) and the 
+                    networking module (Pt-Net), but also two new modules: Pt-Http
+                    and Pt-XmlRpc. The logging facilities have been integrated into the
+                    Pt-System module and the text handling classes have been inegrated
+                    into the Pt core module. This leads to reduced binary size and fewer
+                    shared libraries.
+
+                    At least the following modules will be part of the 1.0 release:
+                    Pt (core), Pt-System, Pt-Net, Pt-Unit, Pt-Xml.
                 </td>
             </tr>
         </table>
@@ -41,7 +42,7 @@
             </tr>
             <tr>
                 <td class="news-article-body">
-                    Starting with this TR, the Pt core module is in a soft-freeze, 
+                    Starting with this TR, the Pt core module is in a soft-freeze,
                     thus source compatibility should not be broken except in case of
                     critical bugs. Changes and additions can still be made of course,
                     if they do not break sorce compatibility.
@@ -64,30 +65,13 @@
             </tr>
             <tr>
                 <td class="news-article-body">
-                    Besides all the features anounced previously, TR-2 includes support
-                    for AIX, a new module for reflection and updates to the Unit testing
-                    framework. %Pt has been shown to compile and run successfully on symbian
-                    based operating systems (UIQ3 and symbian 9.1).
-                </td>
-            </tr>
-        </table>
-    
-        <br/>
-
-        <table cellspacing="0" class="news-article">
-            <tr>
-                <th class="news-article-header" >
-                    <b>TR-2 coming soon</b>
-                    <br/>
-                    <i>Posted on May 5, 2007</i>
-                </th>
-            </tr>
-            <tr>
-                <td class="news-article-body">
-            The release of a second technical release will include support for
-            async I/O and I/O multiplexing on all available I/O devices, atomic
-            operations for integers and pointers, a logging framework and date
-            and time classes.
+                    The second technical release adds support for async I/O and
+                    I/O multiplexing on all available I/O devices, atomic
+                    operations for integers and pointers, a logging framework, date
+                    and time classes, a new module for reflection and updates to the
+                    Unit testing framework.
+                    AIX unix is supported now and Pt has been shown to compile and 
+                    run successfully on symbian based operating systems.
                 </td>
             </tr>
         </table>
@@ -126,8 +110,8 @@
                 <td class="news-article-body">
                     This slightly longer development sprint has lead to the TR-1
                     release. Many improvements have been made to the core module
-                    and the %Gfx module. A new module for network programming was
-                    added (%Pt::Net). %Pt can now be built wit the intel compiler
+                    and the Gfx module. A new module for network programming was
+                    added (%Pt::Net). Pt can now be built wit the intel compiler
                     on win32. The code is available as a tarball in the download
                     section or as a tag in the subversion repository (tags/tr1).
                 </td>
@@ -153,26 +137,8 @@
                 </td>
             </tr>
         </table>
-        
+
         <br/>
-        
-        <table cellspacing="0" class="news-article">
-            <tr>
-                <th class="news-article-header" >
-                    <b>New Project Management</b>
-                    <br/>
-                    <i>Posted on November 1, 2006</i>
-                </th>
-            </tr>
-            <tr>
-                <td class="news-article-body">
-            The project management can now be used by developers to coordinate
-            their efforts to improve Pt. It is not mandatory to take
-            part in this process, but highly encouraged. Progress
-            can be monitored on the "Project Overview" link on the Pt website.
-                </td>
-            </tr>
-        </table>
 
         <br/>
 
