@@ -10,12 +10,23 @@
             The Platinum framework  is licensed under the <b>GNU Library General
             Public License (LGPL)</b> for all platforms. The intent in licensing
             it in this way is to provide it for use in all projects both open
-            and proprietary. The full body of the license is provided for
-            your inspection
+            and proprietary.
+        </p>
+        <p>
+            As a <b>special exception</b>, you may use this file as part of a free
+            software library without restriction. Specifically, if other files
+            instantiate templates or use macros or inline functions from this
+            file, or you compile this file and link it with other files to
+            produce an executable, this file does not by itself cause the
+            resulting executable to be covered by the GNU General Public
+            License. This exception does not however invalidate any other
+            reasons why the executable file might be covered by the GNU Library
+            General Public License.
+        </p>
+        <p>
+            The full body of the license is provided for your inspection
             <a href="http://www.gnu.org/licenses/lgpl.html#TOC1">here</a>.
         </p>
-
-        <br><br><br><br><br><br><br><br><br><br>
         <br><br><br><br><br><br><br><br><br><br>
         <br><br><br><br><br><br><br><br><br><br>
     </div>

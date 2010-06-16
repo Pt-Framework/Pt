@@ -467,7 +467,7 @@ HR { height: 1px;
     text-align:left;
     border: 1px solid #CCCCCC;
     -moz-border-radius: 12px 12px 0px 0px;
-    width:100%;
+    width:auto;
 }
 
 .news-article-header {
