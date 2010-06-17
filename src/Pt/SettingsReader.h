@@ -364,7 +364,7 @@ class SettingsReader
                 if (c.value() == '\n')
                 {
                     reader.pushValue();
-                    return AfterValue::instance();
+                    return AfterRValue::instance();
                 }
                 else
                     return this;

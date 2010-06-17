@@ -31,7 +31,7 @@ namespace Pt {
 
 void SettingsReader::State::syntaxError(unsigned line)
 {
-	throw SettingsError( PT_ERROR_MSG("syntax error"), line);
+    throw SettingsError( PT_ERROR_MSG("syntax error"), line);
 }
 
 
