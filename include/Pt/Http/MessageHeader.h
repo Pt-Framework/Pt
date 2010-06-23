@@ -83,7 +83,7 @@ class PT_HTTP_API MessageHeader
 
           public:
             const_iterator()
-                : current_value(0, 0)
+                : current_value((const char*)0,(const char*) 0)
             { }
 
             explicit const_iterator(const char* p)
