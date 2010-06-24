@@ -88,7 +88,8 @@ void Worker::run()
                 continue;
             }
 
-            connect(socket->buffer().inputReady, socket->inputSlot);
+            Connection inputConnection = connect(socket->buffer().inputReady,
+                socket->inputSlot);
 
             while (socket->wait(_server.idleTimeout()) && socket->isConnected())
                 ;
@@ -96,7 +97,7 @@ void Worker::run()
             if (socket->isConnected())
             {
                 log_debug("timeout processing socket");
-                disconnect(socket->buffer().inputReady, socket->inputSlot);
+                inputConnection.close();
                 _server.addIdleSocket(socket);
             }
             else if (_server.isTerminating())
