@@ -48,13 +48,13 @@ namespace Net {
 static struct WsaInit
 {
     WsaInit()
-    { 
-		WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd); 
+    {
+		WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);
 	}
 
     ~WsaInit()
-    { 
-		WSACleanup(); 
+    {
+		WSACleanup();
 	}
 } wsaInit;
 
@@ -104,15 +104,20 @@ void TcpServerImpl::close()
     if (_fd == INVALID_SOCKET)
         return;
 
-    WSASetEvent(_currentHandle); 
+    log_debug("close socket");
+
+    WSASetEvent(_currentHandle);
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
 }
 
-void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned)
+void TcpServerImpl::listen(const std::string& ipaddr,
+                           unsigned short int port,
+                           int backlog, unsigned)
 {
-    log_debug("listen on " << ipaddr << " port " << port << " backlog " << backlog);
+    log_debug("listen on " << ipaddr << " port " << port
+              << " backlog " << backlog << " flags " << flags);
 
     AddrInfo ai(ipaddr, port, true);
 
@@ -131,12 +136,9 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
           continue;
         }
 
-        // NOTE: set a socket option to reuse an address immediately after being closed
-
         // TODO: use WSA functions
 
         log_debug("setsockopt SO_REUSEADDR");
-
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
 		{
 			close();
@@ -144,13 +146,12 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
 		}
 
         log_debug("bind");
-
         if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
         {
           // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            log_debug("listen");            
+            log_debug("listen");
 
             if (::listen(_fd, backlog) == SOCKET_ERROR)
             {
@@ -167,7 +168,11 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port, i
     }
 
 	close();
-    throw System::SystemError("bind");
+
+    if (WSAGetLastError() == WSAEADDRINUSE)
+        throw AddressInUse();
+    else
+        throw System::SystemError("bind");
 }
 
 bool TcpServerImpl::wait(std::size_t umsecs)
@@ -186,6 +191,8 @@ bool TcpServerImpl::wait(std::size_t umsecs)
         msecs = std::numeric_limits<int>::max();
     }
 
+    // Does this work if socket is closed?
+
     if(WSAWaitForMultipleEvents(1, &_currentHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
     {
         WSAResetEvent(_currentHandle);
@@ -196,19 +203,35 @@ bool TcpServerImpl::wait(std::size_t umsecs)
     return false;
 }
 
+
 void TcpServerImpl::attach(System::SelectorBase& s)
 {
     log_debug("attach to selector");
 }
 
+
 void TcpServerImpl::detach(System::SelectorBase& s)
 {
     log_debug("detach from selector");
- 
+
+    //Do we need this ?
+    //
+    // Consider this scenario:
+    // - TcpServer is registered in a Selector
+    // - TcpServer is removed from Selector
+    // - user calls wait directly on Selector
+    //
+
+    // bool active = false;
+    // this->setWaitHandle(_waitHandle, active);
+
+    // if(active)
+    //     _device.setState(Selectable::Avail);
 }
 
+
 bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
-{	
+{
     log_debug("setWaitHandle");
 
     if(_currentHandle == h)
@@ -220,22 +243,23 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
     return true;
 }
 
+
 SOCKET TcpServerImpl::accept()
 {
-	//Set the server socket in bloking-mode
+	// set the server socket to blocking-mode
 	u_long argp = 0;
-	attachEvent(0,0);		
+	attachEvent(0,0);
 	::ioctlsocket(_fd, FIONBIO, &argp);
 
 	SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
-   
+
 	if( fd == SOCKET_ERROR)
 	{
 		log_debug("accept failed: "<< WSAGetLastError());
 		throw System::SystemError( PT_ERROR_MSG("accept failed") );
-	}			
+	}
 
-	//Reset the bloking mode
+	// reset the blocking mode
 	attachEvent(_currentHandle, FD_ACCEPT);
 	return fd;
 }
@@ -254,7 +278,10 @@ bool TcpServerImpl::checkEvent()
 {
     log_debug("checkEvent");
 
-    WSANETWORKEVENTS events;
+    if (_fd == INVALID_SOCKET)
+        return false;
+
+        WSANETWORKEVENTS events;
 
     if(WSAEnumNetworkEvents(_fd, _currentHandle, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");

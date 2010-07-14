@@ -220,12 +220,6 @@ void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
 {
     _fd = server.impl().accept();
 
-	if( _fd == SOCKET_ERROR)
-    {
-        log_debug("accept failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("accept failed") );
-    }
-
     _isConnected = true;
 }
 

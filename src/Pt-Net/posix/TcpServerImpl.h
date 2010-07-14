@@ -63,7 +63,9 @@ class TcpServerImpl : public System::SelectableImpl
 
         void close();
 
-        void listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags);
+        void listen(const std::string& ipaddr,
+                    unsigned short int port,
+                    int backlog = 5, unsigned flags = 0);
 
         const struct sockaddr_storage& getAddr() const
         { return _servaddr; }
