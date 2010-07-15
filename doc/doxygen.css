@@ -410,6 +410,10 @@ HR { height: 1px;
   /*left: -26px;*/
 }
 
+#maintext    {
+    padding: 0em 1em 1em 1em;
+    margin-right: 23em;
+}
 
 .sidebar    {
     float: left;
@@ -449,6 +453,14 @@ HR { height: 1px;
 .sidebar a:hover {
     text-decoration: none;
     color: #154374;
+}
+
+.newsbar    {
+    float: right;
+    width: 22em;
+    margin: 0em 0em;
+    padding: 0em 0em;
+    font-size: 100%;
 }
 
 .news-table {

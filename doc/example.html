@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+    <title>Platinum C++ Framework</title>
+    <meta content="Pt Reference Manual" name="description">
+    <meta content="The Pt Development Team" name="author">
+    <link rel="stylesheet" href="doxygen.css" type="text/css">
+</head>
+<body style="margin:0px;">
+
+<div style="background:rgb(210, 70, 60); margin-bottom:20px;">
+	<div style="background:rgb(225, 140, 125); text-align:right; color:white; padding:0.2em;">
+        <a class="qindexH" href="index.html">Webmaster</a>&nbsp;  |&nbsp;
+	    <a class="qindexH" href="index.html">Imprint</a>&nbsp;
+	</div>
+
+	<div style="margin-top:10px; background:rgb(195, 0, 20); font-size:28px; color:white; font-weight:bold; padding:15px 0px 17px 20px;">
+	          <div style="float:right; width:118px; margin-top:-1px;"><img src="platinum-logo.gif" alt="Platinum"></div>
+	          Platinum C++ Framework
+	</div>
+
+	<div style="color:white; background:rgb(195, 0, 20); border-top:1px solid rgb(225, 140, 125); padding:5px 10px 5px 10px;">
+		<a class="qindexH" href="index.html">Main</a>&nbsp; |&nbsp;
+        <a class="qindexH" href="license.html">License</a>&nbsp; |&nbsp;
+		<a class="qindexH" href="docs.html">Documentation</a>&nbsp; |&nbsp;
+		<a class="qindexH" href="download.html">Download</a>&nbsp;  |&nbsp;
+        <a class="qindexH" href="mailinglist.html">Support</a>&nbsp;
+	</div>
+</div>
+
+
+<div style="margin:20px;">
+
+<div class="contents">
+
+    <!-- <div class="sidebar"> -->
+    <!--     <div class="sidebar-major" > -->
+    <!--         <b>About Platinum</b> -->
+    <!--     </div> -->
+    <!--     <ul> -->
+    <!--         <li><a href="index.html">Main</a></li> -->
+    <!--         <li><a href="news.html">News</a></li> -->
+    <!--         <li><a href="faq.html">FAQ</a></li> -->
+    <!--         <li><a href="license.html">License</a></li> -->
+    <!--         <li><a href="acknowledgements.html">Acknowledgements</a></li> -->
+    <!--     </ul> -->
+
+    <!--     <div class="sidebar-major" > -->
+    <!--         <b>Community</b> -->
+    <!--     </div> -->
+    <!--     <ul> -->
+    <!--         <li><a href="people.html">People</a></li> -->
+    <!--         <li><a href="mailinglist.html">Mailing Lists</a></li> -->
+    <!--         <li><a href="http://www.tntnet.org/">Tntnet</a></li> -->
+    <!--         <li><a href="http://www.s11n.net/">s11n</a></li> -->
+    <!--         <li><a href="http://www.t2-project.org/">T2 Project</a></li> -->
+    <!--     </ul> -->
+
+    <!--     <div class="sidebar-major" > -->
+    <!--         <b>Develop</b> -->
+    <!--     </div> -->
+    <!--     <ul> -->
+    <!--         <li><a href="docs.html">Documentation</a></li> -->
+    <!--         <li><a href="project.html">Project Overview</a></li> -->
+    <!--         <li><a href="download.html">Subversion</a></li> -->
+    <!--     </ul> -->
+
+    <!--     <div class="sidebar-major" > -->
+    <!--         <b>Download</b> -->
+    <!--     </div> -->
+    <!--     <ul> -->
+    <!--         <li><a href="http://pt-framework.org/Platinum-1.0.0-tr4.zip">Latest Source</a></li> -->
+    <!--     </ul> -->
+    <!-- </div> -->
+
+
+    <div class="newsbar">
+        <table cellspacing="0" class="news-article">
+            <tr>
+                <th class="news-article-header" >
+                    <b>TR-4 released</b>
+                    <br/>
+                    <i>Posted on June 6, 2010</i>
+                </th>
+
+            </tr>
+            <tr>
+                <td class="news-article-body">
+                    The fourth technical release includes not only a complete
+                    review of the systems programming module (Pt-System) and the 
+                    networking module (Pt-Net), but also two new modules: Pt-Http
+                    and Pt-XmlRpc. The logging facilities have been integrated into the
+                    Pt-System module and the text handling classes have been inegrated
+                    into the Pt core module. This leads to reduced binary size and fewer
+                    shared libraries.
+
+                    At least the following modules will be part of the 1.0 release:
+                    Pt (core), Pt-System, Pt-Net, Pt-Unit, Pt-Xml.
+                </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <table cellspacing="0" class="news-article">
+            <tr>
+                <th class="news-article-header" >
+                    <b>TR-3 released</b>
+                    <br/>
+                    <i>Posted on February 15, 2008</i>
+                </th>
+            </tr>
+
+            <tr>
+                <td class="news-article-body">
+                    Starting with this TR, the Pt core module is in a soft-freeze,
+                    thus source compatibility should not be broken except in case of
+                    critical bugs. Changes and additions can still be made of course,
+                    if they do not break sorce compatibility.
+                    New features include support for Solaris, and OS-X. The GUI module
+                    for Mac OS-X uses the Objective-C Cocoa API's, though it is not yet
+                    complete.
+                </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <table cellspacing="0" class="news-article">
+            <tr>
+                <th class="news-article-header" >
+                    <b>TR-2 released</b>
+                    <br/>
+                    <i>Posted on October 16, 2007</i>
+                </th>
+            </tr>
+            <tr>
+
+                <td class="news-article-body">
+                    The second technical release adds support for async I/O and
+                    I/O multiplexing on all available I/O devices, atomic
+                    operations for integers and pointers, a logging framework, date
+                    and time classes, a new module for reflection and updates to the
+                    Unit testing framework.
+                    AIX unix is supported now and Pt has been shown to compile and 
+                    run successfully on symbian based operating systems.
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="maintext">
+        <h3>The Power in your Hands</h3>
+        <p>
+            Platinum is a comprehensive C++ framework, that allows
+            developers to write high-performance applications for many
+            platforms with only one codebase. It provides a large amount of
+            features and is still remarkably easy to use. It intergrates well
+            into existing toolkits and frameworks.
+        </p>
+
+        <b>...unleash the power of Pt today!</b>
+
+        <br/>
+
+        <p>
+            A consistent API for advanced object modeling, multithreading,
+            synchronous and asynchronous I/O, file-system access, system
+            programming, plugins, networking, database access, graphics, XML
+            processing and graphical user interfaces is provided on all
+            supported platforms.
+        </p>
+
+        <p>
+            Pt can be used on embedded devices, desktops or large servers.
+            The supported platforms include Windows, Windows CE, Linux, QNX,
+            and Unix. It lets you spend your time on your application without
+            tedious low-level programming.
+        </p>
+
+        <p>
+            A high degree of performance is achieved through the use of modern C++
+            features. Programs will benefit from the many optimizations included
+            in the framework.
+        </p>
+
+        <p>
+            Pt is designed from the ground up to be flexible and extensible.
+            It provides simple solutions to your problems without being intrusive.
+            It integrates well with existing code bases or other toolkits and
+            frameworks. Programs written with Pt tend to be significantly
+            shorter and much easier to understand.
+        </p>
+
+        <p>
+            Its not just open, its free! Published under the LGPL it allows you
+            to write commercial and open-source applications and be part of the
+            great community that develops Pt and determines its future.
+        </p>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+    </div>
+</div>
+
+</div>
+
+<div style="font-size:0.9em; font-style:italic; margin-top:40px; border-top:1px solid black; padding:10px 10px 30px 10px;">
+	<div style="float:left;">Copyright &copy; 2003-2007 The Pt Development Team</div>
+	<div style="float:right;">Pt 1.0</div>
+</div>
+
+</body>
+</html>
