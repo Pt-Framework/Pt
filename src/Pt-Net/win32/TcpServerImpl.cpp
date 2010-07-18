@@ -33,6 +33,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/Selector.h>
+#include <Pt/System/Selectable.h>
 #include <cerrno>
 #include <cassert>
 #include <cstring>
@@ -177,6 +178,12 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
+	if(_server.avail())
+	{
+		_server.connectionPending.send(_server);
+        return true;
+	}
+
 	attachEvent(_currentHandle, FD_ACCEPT);
     log_debug("wait " << msecs);
 
@@ -214,19 +221,12 @@ void TcpServerImpl::detach(System::SelectorBase& s)
 {
     log_debug("detach from selector");
 
-    //Do we need this ?
-    //
-    // Consider this scenario:
-    // - TcpServer is registered in a Selector
-    // - TcpServer is removed from Selector
-    // - user calls wait directly on Selector
-    //
+    bool active = checkEvent();
 
-    // bool active = false;
-    // this->setWaitHandle(_waitHandle, active);
+    if(active)
+		_server.setState(Pt::System::Selectable::Avail);
 
-    // if(active)
-    //     _device.setState(Selectable::Avail);
+	this->setWaitHandle(_waitEvent, active);
 }
 
 
@@ -236,10 +236,12 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 
     if(_currentHandle == h)
         return true;
+		
+	avail = _server.avail();
 
-	_currentHandle = h;
+    _currentHandle = h;
     attachEvent(_currentHandle, FD_ACCEPT);
-    avail = false;
+    
     return true;
 }
 
@@ -261,6 +263,7 @@ SOCKET TcpServerImpl::accept()
 
 	// reset the blocking mode
 	attachEvent(_currentHandle, FD_ACCEPT);
+	_server.setState(Pt::System::Selectable::Idle);
 	return fd;
 }
 
@@ -276,12 +279,18 @@ HANDLE TcpServerImpl::waitHandle() const
 
 bool TcpServerImpl::checkEvent()
 {
-    log_debug("checkEvent");
+	log_debug("checkEvent");
 
     if (_fd == INVALID_SOCKET)
         return false;
 
-        WSANETWORKEVENTS events;
+	if(_server.avail())
+	{
+		_server.connectionPending.send(_server);		
+		return true;
+	}
+
+    WSANETWORKEVENTS events;
 
     if(WSAEnumNetworkEvents(_fd, _currentHandle, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");
