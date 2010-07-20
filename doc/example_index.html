@@ -31,19 +31,25 @@ Container Elements
 ======= */
 
 .bodyliner {
+    top: 0px;
+    left: 0px;
+    position: absolute;
 	height: 92px;
 	width: 100%;
 	background-color: #C30014;
 	z-index: 1;
 }
 .bodyliner2 {
+    top: 92px;
+    left 0px;
+    position: absolute;
 	height: 28px;
 	width: 100%;
 	background-color: #c84246;
 	z-index: 1;
 }
 
-#container { position: relative; top: -120px;  background-color: #fff; width: 800px; margin: 0 auto; padding: 0;}
+#container { position: relative; z-index: 2; background-color: #fff; width: 800px; margin: 0 auto; padding: 0;}
 
 /* -------------- Header Elements -----------------*/
 #header { background: url(images/header-prototyp.png) 0 center no-repeat;
@@ -109,23 +115,23 @@ width: 200px; float: right;
 
 		<div class="bodyliner">bodyliner</div>
 		<div class="bodyliner2">bodyliner</div>
-				
+
 		<div id="container">
-	
+
 			<div id="header">
 				<div id="logo"></div>
 				<h2>  The Power in your Hands</h2>
 				<div class="phrases">Wer nicht weiss, in welchen Hafen er will,<br />f&uuml;r den ist kein Wind der richtige.<br />Lucius Annaeus Seneca</div>
 			</div>
-				
+
 			<ul class="menu">
 				<li><a id="main_link" href="main.html">Main</a></li>
-				<li><a id="reference_link" href="example.html">Reference</a></li>					
+				<li><a id="reference_link" href="example.html">Reference</a></li
 				<li><a href="about.html">About</a></li>
-				<li><a href="impressum.html">Impressum</a></li>				
+				<li><a href="impressum.html">Impressum</a></li>
 			</ul>
-			
-			<div id="content">			
+
+			<div id="content">
 			    <div id="newsbar">
 					<table cellspacing="0" class="news-article">
 						<tr>
@@ -139,7 +145,7 @@ width: 200px; float: right;
 						<tr>
 							<td class="news-article-body">
 								The fourth technical release includes not only a complete
-								review of the systems programming module (Pt-System) and the 
+								review of the systems programming module (Pt-System) and the
 								networking module (Pt-Net), but also two new modules: Pt-Http
 								and Pt-XmlRpc. The logging facilities have been integrated into the
 								Pt-System module and the text handling classes have been inegrated
