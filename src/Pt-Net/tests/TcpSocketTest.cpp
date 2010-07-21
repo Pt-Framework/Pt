@@ -66,7 +66,15 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             Pt::Net::TcpSocket client;
             connect(client.connected, *this, &TcpSocketTest::onConnectFailed);
 
-            client.beginConnect("127.0.0.2", 9000);
+            try
+            {
+                client.beginConnect("127.0.0.2", 9000);
+            }
+            catch(const Pt::System::IOError& ex)
+            {
+                return;
+            }
+
             selector.add(client);
             selector.wait(1000);
         }
