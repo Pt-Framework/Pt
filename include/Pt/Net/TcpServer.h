@@ -50,7 +50,8 @@ class PT_NET_API AddressInUse : public System::IOError
 
   class PT_NET_API TcpServer : public System::Selectable
   {
-    class TcpServerImpl* _impl;
+      friend class TcpServerImpl;
+      TcpServerImpl* _impl;
 
     public:
       enum { INHERIT = 1, DEFER_ACCEPT = 2 };

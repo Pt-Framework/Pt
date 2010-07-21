@@ -36,8 +36,9 @@
 
 #include "Pt/Net/Api.h"
 #include "Pt/Signal.h"
+#include "Pt/Net/AddrInfo.h"
 #include "SelectableImpl.h"
-#include "SelectableImpl.h"
+#include "AddrInfoImpl.h"
 #include <string>
 #include <windows.h>
 #include <winsock2.h>
@@ -86,6 +87,9 @@ class TcpSocketImpl : public System::SelectableImpl
     };
 
 	private:
+		AddrInfo _addrInfo;
+		const char* _connectResult;
+		AddrInfoImpl::const_iterator _addrInfoPtr;
         DestructionSentry* _sentry;
         SOCKET	      _fd;
 		SOCKADDR      _peeraddr;
@@ -102,10 +106,12 @@ class TcpSocketImpl : public System::SelectableImpl
 		long		  _eventFlags;
 		size_t		  _dataSends;
 
+		int checkConnect();
         void attachEvent(HANDLE ev, long events);
 		size_t checkReceiveResult(bool& eof);
 		size_t checkSendResult();
-
+		const char* tryConnect();
+		void checkPendingError();
     public:
         TcpSocketImpl(TcpSocket& socket);
 

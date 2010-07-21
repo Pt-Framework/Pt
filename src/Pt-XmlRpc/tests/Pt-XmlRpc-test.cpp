@@ -262,8 +262,17 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8002, "/calc");
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
             connect( multiply.finished, *this, &PtXmlRpcTest::onConnectErrorCallback );
-
-            multiply.begin();
+            try
+            {
+                multiply.begin();
+            }
+            catch (const std::exception& e)
+            {
+                //PT_UNIT_ASSERT_MSG(false, std::string("unexpected exception ") + typeid(e).name() + ": " + e.what());
+                //Boolean();
+                _loop->processEvents();
+                return;
+            }
 
             try
             {

@@ -41,6 +41,7 @@
 #include <Mswsock.h>
 
 #define log_debug(x)
+//#define log_debug(x) std::clog << x<< std::endl;
 
 namespace Pt {
 
@@ -89,6 +90,8 @@ void TcpServerImpl::create(int domain, int type, int protocol)
         log_debug("Error at socket(): "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
+
+    log_debug("server socket " << _fd);
 }
 
 void TcpServerImpl::attachEvent(HANDLE ev, long events)
@@ -118,7 +121,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                            int backlog, unsigned)
 {
     log_debug("listen on " << ipaddr << " port " << port
-              << " backlog " << backlog << " flags " << flags);
+              << " backlog " << backlog << " flags " << 0);
 
     AddrInfo ai(ipaddr, port, true);
 
@@ -147,12 +150,12 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 		}
 
         log_debug("bind");
-        if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
+        if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
         {
           // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            log_debug("listen");
+            log_debug("listen ");
 
             if (::listen(_fd, backlog) == SOCKET_ERROR)
             {
@@ -178,14 +181,16 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
-	if(_server.avail())
+    log_debug(_fd << " wait " << umsecs);
+
+    if( _server.avail() )
 	{
 		_server.connectionPending.send(_server);
         return true;
 	}
 
 	attachEvent(_currentHandle, FD_ACCEPT);
-    log_debug("wait " << msecs);
+    log_debug("wait for accept");
 
     // convert unsigned to signed
     int msecs = umsecs;
