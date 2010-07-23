@@ -510,6 +510,81 @@ ul.menu li.active a {
     padding:10px 10px 30px 10px;
 }
 
+
+
+
+#localnav {
+    background:url(bg_localnav.png) no-repeat left -10px;
+    width: 195px;
+    list-style: none;
+    padding: 0px 10px 60px 15px;
+    float: left;
+    margin-left: 0px;
+}
+
+#localnav ul.first {
+    border-top: 9px solid rgb(195, 0, 20);
+    padding-top: 5px;
+    padding-left: 0px;
+}
+
+#localnav ul {
+    list-style: none;
+    margin: 0;
+    background:url(localnav_bottom2.png) no-repeat -10px bottom;
+}
+
+#localnav a, #localnav span, #localnav strong {
+    display: block;
+    color: #000;
+    font: normal 110%;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+#localnav a:hover, #localnav a:focus {
+    color: rgb(195, 0, 20);
+    text-decoration: none;
+}
+
+#localnav a.on, #localnav strong, #localnav span.on {
+    background: #148cb5;
+    color: #fff;
+}
+
+#localnav li {
+    background: none;
+    border-top: 1px solid #ddd;
+    padding: 5px 0px;
+}
+
+#localnav li.first, #localnav li:first-child {
+    border-top:none;
+}
+
+#localnav li.last {
+    border-top:none;
+}
+
+#localnav li ul {
+    margin-bottom:10px;
+}
+
+#localnav li li {
+    background:transparent url(/images/template/screen/bullet_localnav.png) no-repeat left .85em;
+    border:none;
+    margin-left:15px;
+    padding:4px 4px 4px 14px;
+}
+
+#localnav li li a {
+    color:#148cb5;
+    font-family:Arial, sans-serif;
+    font-size:92%;
+    padding: 0;
+}
+
+
 .sidebar    {
     float: left;
     width: 17em;
