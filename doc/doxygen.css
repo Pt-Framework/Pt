@@ -402,7 +402,7 @@ HR { height: 1px;
 /* the main content of the page */
 #content    {
     padding: 0em 1em 1em 1em;
-    margin-left: 18em;
+    margin-left: 15em;
 }
 
 #content h2 {
@@ -679,6 +679,7 @@ ul.menu li.active a {
     padding:5px 10px 5px 15px;
     color:white;
     font-weight:bold;
+    font-size: 14px;
     background:#C30014;
     border: 1px solid gray;
     border-bottom: none;
@@ -689,6 +690,7 @@ ul.menu li.active a {
 .docs-page-body {
     background:rgb(229, 229, 229);
     margin:0px;
+    font-size: 14px;
     padding:10px;
     border: 1px solid gray;
     border-top: none;
@@ -699,7 +701,7 @@ ul.menu li.active a {
 .docs-page-body ul {
     padding:0px;
     margin:0px;
-    margin-left:35px;
+    margin-left:25px;
 }
 
 .docs-page-body a {
