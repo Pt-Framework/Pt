@@ -7,13 +7,13 @@ BODY,TD {
 }
 H1 {
        color: #154374;
-	background-color: #f0f0f0;
-	border: 1px solid #CCCCCC;
-       padding-bottom:7px;
-       padding-top:7px;
+	/* background-color: #f0f0f0; */
+	/* border: 1px solid #CCCCCC; */
+       /* padding-bottom:7px; */
+       /* padding-top:7px; */
        text-align: center;
-       font-size: 180%;
-       	-moz-border-radius: 12px 12px 12px 12px;
+       font-size: 30px;
+       	/* -moz-border-radius: 12px 12px 12px 12px; */
 }
 H2 {
 	font-size: 150%;
@@ -402,7 +402,7 @@ HR { height: 1px;
 /* the main content of the page */
 #content    {
     padding: 0em 1em 1em 1em;
-    margin-left: 15em;
+    margin-left: 16em;
 }
 
 #content h2 {
@@ -514,7 +514,7 @@ ul.menu li.active a {
 
 
 #localnav {
-    background:url(bg_localnav.png) no-repeat left -10px;
+    background:url(sidemenu-bg.png) no-repeat left -10px;
     width: 195px;
     list-style: none;
     padding: 0px 10px 60px 15px;
@@ -524,20 +524,23 @@ ul.menu li.active a {
 
 #localnav ul.first {
     border-top: 9px solid rgb(195, 0, 20);
-    padding-top: 5px;
+    padding-top: 0px;
     padding-left: 0px;
+/* background-color: #f3f3f3; */
 }
 
 #localnav ul {
     list-style: none;
     margin: 0;
-    background:url(localnav_bottom2.png) no-repeat -10px bottom;
+
 }
 
 #localnav a, #localnav span, #localnav strong {
     display: block;
     color: #000;
-    font: normal 110%;
+    font-weight:bold;
+    font-size: 14px;
+    color: #757575;
     padding: 5px 10px;
     text-decoration: none;
 }
@@ -554,7 +557,9 @@ ul.menu li.active a {
 
 #localnav li {
     background: none;
-    border-top: 1px solid #ddd;
+/* border-left: 1px solid #ccc; */
+/* border-right: 1px solid #ccc; */
+    border-top: 1px solid #ccc;
     padding: 5px 0px;
 }
 
@@ -563,7 +568,10 @@ ul.menu li.active a {
 }
 
 #localnav li.last {
-    border-top:none;
+    background:url(localnav_bottom2.png) no-repeat -10px bottom;
+border-left: none;
+border-right: none;
+
 }
 
 #localnav li ul {
@@ -587,10 +595,10 @@ ul.menu li.active a {
 
 .sidebar    {
     float: left;
-    width: 17em;
+    width: 15em;
     margin: 0em 0em;
     padding: 0em 0em;
-    font-size: 100%;
+    font-size: 14px;
     background-color: #f0f0f0;
     text-decoration: none;
     font-style: none;
@@ -604,7 +612,8 @@ ul.menu li.active a {
     padding-bottom:7px;
     padding-top:7px;
     padding-left:1.5em;
-    font-size: 120%;
+    font-size: 14px%;
+    font-style: bold;
     -moz-border-radius: 0px 12px 12px 0px;
 }
 
@@ -675,33 +684,38 @@ ul.menu li.active a {
     padding:7px;
 }
 
+
+
+
 .docs-page-header {
     padding:5px 10px 5px 15px;
+    background:url(box_header_bg.gif) no-repeat right 0px;
     color:white;
     font-weight:bold;
     font-size: 14px;
-    background:#C30014;
-    border: 1px solid gray;
-    border-bottom: none;
-    -moz-border-radius: 12px 12px 0px 0px;
-    height:1.1em;
+    /* background:#C30014; */
+    /* border: 1px solid gray; */
+    /* border-bottom: none; */
+    /* -moz-border-radius: 12px 12px 0px 0px; */
+    height:16px;
 }
 
 .docs-page-body {
-    background:rgb(229, 229, 229);
+    background:#eeeeee;
     margin:0px;
     font-size: 14px;
     padding:10px;
-    border: 1px solid gray;
-    border-top: none;
-    -moz-border-radius: 0px 0px 12px 12px;
-    height:11em;
+    /* border: 1px solid gray; */
+    /* border-top: none; */
+    /* -moz-border-radius: 0px 0px 12px 12px; */
+    height: 150px;
 }
 
 .docs-page-body ul {
     padding:0px;
     margin:0px;
-    margin-left:25px;
+    margin-left:5px;
+list-style: none;
 }
 
 .docs-page-body a {
