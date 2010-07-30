@@ -216,13 +216,13 @@ std::string Directory::updir()
 }
 
 
-std::string rootdir()
+std::string Directory::rootdir()
 {
     return DirectoryImpl::rootdir();
 }
 
 
-std::string tmpdir()
+std::string Directory::tmpdir()
 {
     return DirectoryImpl::tmpdir();
 }
