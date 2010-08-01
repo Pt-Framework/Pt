@@ -91,6 +91,12 @@ div.navpath a {
     font-style: none;
     text-decoration: none;
 }
+div.navpath a:hover {
+    color: #ffffff;
+}
+div.navpath a:visited {
+    color: #ffffff;
+}
 
 DIV.navtab {
     background-color: #f0f0f0;
@@ -129,7 +135,7 @@ DIV.qindex {
 A.qindex {
        text-decoration: none;
        font-weight: normal;
-       color: #555555;
+       color: #000000;
 }
 A.qindex:visited {
        text-decoration: none;
@@ -143,7 +149,7 @@ A.qindex:hover {
 A.qindexHL {
 	text-decoration: none;
     font-weight: bold;
-    color: #154374
+    color: #000000
 }
 A.qindexHL:hover {
 	text-decoration: none;
@@ -152,11 +158,24 @@ A.qindexHL:hover {
 }
 A.qindexHL:visited {
     text-decoration: none;
-    font-weight: bold;
+    font-weight: bold
 }
 
-td A.el { text-decoration: none; font-weight: bold; color: rgb(45, 55, 140) }
-A.el:hover { text-decoration: none; font-weight: bold; color: #C30014 }
+A.el {
+    text-decoration: none;
+    font-weight: bold;
+    color: #2d378c
+}
+A.el:hover {
+    text-decoration: none;
+    font-weight: bold;
+    color: #C30014
+}
+A.el:visited {
+    text-decoration: none;
+    font-weight: bold;
+    color: #2d378c
+}
 
 A.elRef { font-weight: bold }
 A.code:link { text-decoration: none; font-weight: normal; color: #0000FF}
@@ -181,7 +200,13 @@ PRE.fragment {
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
-DIV.ah { background-color: black; font-weight: bold; color: #ffffff; margin-bottom: 3px; margin-top: 3px }
+DIV.ah {
+    background-color: black;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 3px;
+    margin-top: 3px
+}
 
 DIV.groupHeader {
        margin-left: 16px;
@@ -428,17 +453,14 @@ TH.dirtab { background: #e8eef2;
 .directory img { vertical-align: -30%; }
 
 
-/* the main content of the page */
+/* the main content pages */
 #content    {
     padding: 0em 1em 1em 1em;
     margin-left: 13em;
 }
 
 #content h2 {
-  /* padding-left: 24px; */
-  /* background: url(section_head.png) no-repeat left center; */
-  position: relative;
-  /*left: -26px;*/
+    position: relative;
 }
 
 #container    {
@@ -497,7 +519,7 @@ ul.menu {
 	list-style: none;
 }
 ul.menu li {
-	float: left;
+    float: left;
 }
 ul.menu a {
     margin-top: 1px;
@@ -514,6 +536,10 @@ ul.menu a {
     font-size: 14px;
 }
 ul.menu a:hover {
+	color: #ffffff;
+	font-weight: bold;
+}
+ul.menu a:visited {
 	color: #ffffff;
 	font-weight: bold;
 }
