@@ -11,7 +11,7 @@ BODY,TD {
        font-size: 14px;
 }
 BODY {
-    background-image:url(header_bg.gif) ;
+    background-image:url(header_bg.gif);
     background-repeat: repeat-x;
     text-align: center;
     background-color: white;
@@ -34,18 +34,17 @@ H2 {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-	/* color: rgb(55, 75, 165); */
+    margin-top: 15px;
 }
 H2 A {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-	/* color: rgb(55, 75, 165); */
+    margin-top: 15px;
 }
 H3 {
     font-size: 14px;
     color: #000000;
-    /* color: #154374; */
 }
 CAPTION {
     font-weight: bold
@@ -55,9 +54,7 @@ HR { height: 1px;
      border-top: 1px solid black;
 }
 a {
-    /* color: rgb(55, 75, 165); */
-    /* color: rgb(31, 98, 163); */
-    color: #888888;
+    color: #2d378c;
 }
 A:hover {
     text-decoration: none;
@@ -264,16 +261,7 @@ SPAN.stringliteral { color: #002080 }
 SPAN.charliteral   { color: #008080 }
 
 table.memberdecls {
-    margin:0 ;
-}
-
-table.memberdecls H2 {
-	font-size: 20px;
-    color: #000000;
-    font-weight: normal;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    margin-left: -3px;
+    margin: 0;
 }
 
 .mdescLeft {
@@ -335,8 +323,8 @@ TH.dirtab { background: #e8eef2;
 
 /* Style for detailed member documentation */
 .memtemplate {
-  font-size: 80%;
-  color: #606060;
+  font-size: 12px;
+  color: #000000;
   font-weight: normal;
 }
 .memnav {
@@ -348,35 +336,42 @@ TH.dirtab { background: #e8eef2;
   padding: 2px;
 }
 .memitem {
-  background-color: #F0F0F0;
-  padding-bottom:1px;
   margin-top: 10px;
 }
+.memproto {
+  font-size: 16px;
+
+  border-top:1px solid #bbbbbb;
+  border-bottom:1px solid #bbbbbb;
+  background-color: #eff0f0;
+}
 .memname {
+  font-size: 16px;
+  /* font-weight: bold; */
+  /* color: #2d378c; */
   padding: 3px;
   white-space: nowrap;
-  font-weight: bold;
-}
-.memdoc{
-  padding-left: 10px;
-}
-.memproto {
-  background-color: #CCCCCC;
-  width: 100%;
-  font-weight: bold;
 }
 .paramkey {
   text-align: right;
 }
 .paramtype {
   white-space: nowrap;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: normal;
+  color: #000000;
 }
 .paramname {
-  color: #602020;
+  font-size: 16px;
+  color: #000000;
   font-style: italic;
   white-space: nowrap;
 }
+.memdoc{
+  font-size: 14px;
+  padding-left: 10px;
+}
+
 /* End Styling for detailed member documentation */
 
 /* for the tree view */

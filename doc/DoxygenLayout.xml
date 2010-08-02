@@ -19,14 +19,13 @@
       <tab type="globals" visible="yes" title=""/>
     </tab>
     <tab type="dirs" visible="yes" title=""/>
-    <tab type="examples" visible="yes" title=""/>  
+    <tab type="examples" visible="yes" title=""/>
   </navindex>
 
   <!-- Layout definition for a class page -->
   <class>
-    <briefdescription visible="no"/>
     <includes visible="$SHOW_INCLUDE_FILES"/>
-    <detaileddescription title=""/>
+    <briefdescription visible="yes"/>
     <inheritancegraph visible="$CLASS_GRAPH"/>
     <collaborationgraph visible="$COLLABORATION_GRAPH"/>
     <allmemberslink visible="no"/>
@@ -62,6 +61,7 @@
       <related title="" subtitle=""/>
       <membergroups visible="yes"/>
     </memberdecl>
+    <detaileddescription title=""/>
     <memberdef>
       <typedefs title=""/>
       <enums title=""/>
@@ -78,8 +78,7 @@
 
   <!-- Layout definition for a namespace page -->
   <namespace>
-    <briefdescription visible="no"/>
-    <detaileddescription title=""/>
+    <briefdescription visible="yes"/>
     <memberdecl>
       <nestednamespaces visible="no" title=""/>
       <classes visible="yes" title=""/>
@@ -89,6 +88,7 @@
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
+    <detaileddescription title=""/>
     <memberdef>
       <typedefs title=""/>
       <enums title=""/>
@@ -128,8 +128,7 @@
 
   <!-- Layout definition for a group page -->
   <group>
-    <briefdescription visible="no"/>
-    <detaileddescription title=""/>
+    <briefdescription visible="yes"/>
     <groupgraph visible="$GROUP_GRAPHS"/>
     <memberdecl>
       <classes visible="yes" title=""/>
@@ -152,6 +151,7 @@
       <friends title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
+    <detaileddescription title=""/>
     <memberdef>
       <pagedocs/>
       <defines title=""/>
