@@ -1,6 +1,6 @@
 /* dark-blue: #154374; */
 /* dark-red : #c30013; */
-/* mid-blue : rgb(31, 98, 163); */
+/* mid-blue : rgb(31, 98, 163); #2d378c */
 /*            rgb(40, 65, 150)*/
 
 BODY,H1,H2,H3,H4,H5,H6,P,CENTER,TD,TH,UL,DL,DIV {
@@ -109,16 +109,26 @@ div.navpath a:visited {
 }
 
 DIV.navtab {
-    background-color: #eff0f0;
-    border: 1px solid #cccccc;
-    margin-top: 10px;
-    margin-right: 15px;
-    padding: 5px;
+    /* border: 1px solid #cccccc; */
+    /* border-right: 1px solid #bbbbbb; */
+    /* background-color: #eff0f0; */
+    /* position: relative; */
+    /* top: 50px; */
+    /* margin-bottom: 50px; */
+    margin-right: 0px;
+    margin-top: 24px;
+    padding-right: 15px;
 }
 TD.navtab {
     font-size: 14px;
-    font-weight: normal;
-    min-width: 100px;
+}
+TD.navtab A {
+    color: #2d378c;
+    /* font-weight: bold; */
+}
+TD.navtab A:visited {
+    color: #2d378c;
+    /* font-weight: bold; */
 }
 
 A.qindexH {
@@ -163,12 +173,10 @@ A.qindexHL {
 }
 A.qindexHL:hover {
 	text-decoration: none;
-    font-weight: bold;
     color: #c30013
 }
 A.qindexHL:visited {
     text-decoration: none;
-    font-weight: bold
 }
 
 A.el {
@@ -336,40 +344,39 @@ TH.dirtab { background: #e8eef2;
   padding: 2px;
 }
 .memitem {
-  margin-top: 10px;
+    margin-top: 20px;
+    margin-left: 20px;
 }
 .memproto {
-  font-size: 16px;
-
-  border-top:1px solid #bbbbbb;
-  border-bottom:1px solid #bbbbbb;
-  background-color: #eff0f0;
+    /* position: relative; */
+    /* left: -100px; */
+    font-weight: normal;
+    /* border-bottom:1px solid #bbbbbb; */
 }
-.memname {
-  font-size: 16px;
-  /* font-weight: bold; */
-  /* color: #2d378c; */
-  padding: 3px;
-  white-space: nowrap;
+.memname, .memname td {
+    font-size: 20px;
+    font-weight: normal;
+    padding: 0px;
+    white-space: nowrap;
 }
 .paramkey {
-  text-align: right;
+    text-align: right;
 }
 .paramtype {
-  white-space: nowrap;
-  font-size: 16px;
-  font-weight: normal;
-  color: #000000;
+    font-size: 20px;
+    white-space: nowrap;
+    font-weight: normal;
+    color:  #2d378c;
 }
 .paramname {
-  font-size: 16px;
-  color: #000000;
-  font-style: italic;
-  white-space: nowrap;
+    color: #000000;
+    font-size: 20px;
+    font-weight: normal;
+    font-style: italic;
+    white-space: nowrap;
 }
 .memdoc{
-  font-size: 14px;
-  padding-left: 10px;
+    padding-top: 5px;
 }
 
 /* End Styling for detailed member documentation */
