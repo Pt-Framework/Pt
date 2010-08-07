@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2004-2007 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -218,7 +218,7 @@ namespace Pt {
         public:
             /** @brief Construct with value
 
-                Constructs the Any from an value of arbitrary type. The type
+                Constructs the %Any from an value of arbitrary type. The type
                 to be assigned must be copy-constructible. Memory is allocated
                 to store the value. If an exception is thrown during
                 construction, the Any will be empty and the exception is
@@ -233,6 +233,15 @@ namespace Pt {
                 _value = new BasicValue<T>(type);
             }
 
+            /** @brief Construct with reference
+
+                Constructs the %Any from a pointer to an arbitrary type. The
+                constructed %Any will not make a copy, but only keep a shallow
+                pointer. It is the resposibility of the caller to make sure
+                the type pointed to exists longer than the created %Any.
+
+                @param type Value to assign
+            */
             template <typename T>
             explicit Any(T* type)
             : _value(0)
@@ -249,7 +258,7 @@ namespace Pt {
             : _value(0)
             { }
 
-            /** @brief Assigns an abstract value
+            /** @internal @brief Assigns an abstract value
             */
             Any& assign(Value* value);
 
@@ -333,6 +342,15 @@ namespace Pt {
                 return *this;
             }
 
+            /** @brief Assign reference
+
+                Initializes an %Any from a pointer to an arbitrary type. The
+                assignment will not make a copy, but only keep a shallow
+                pointer. It is the resposibility of the caller to make sure
+                the type pointed to exists longer than the %Any.
+
+                @param type Value to assign
+            */
             template <typename T>
             Any& operator=(T* rhs)
             {
@@ -353,7 +371,7 @@ namespace Pt {
             */
             Any& operator=(const Any& rhs);
 
-            /** @brief Check if equal
+            /* @brief Check if equal
 
                 Returns true if the contained type and the passed type are
                 equal and have equal values.
@@ -369,7 +387,7 @@ namespace Pt {
             //     return _value->equal( BasicValue<T>(value) );
             // }
 
-            /** @brief Check if equal
+            /* @brief Check if equal
 
                 Returns true if the contained types are equal and have
                 equal values.
@@ -378,7 +396,7 @@ namespace Pt {
             */
             //bool operator==(const Any& a) const;
 
-            /** @brief Check if inequal
+            /* @brief Check if inequal
 
                 Returns true if the contained types have different values
                 or if the conatained types are different.
@@ -387,7 +405,7 @@ namespace Pt {
             */
             //bool operator!=(const Any& a) const;
 
-            /** @brief Check if less
+            /* @brief Check if less
 
                 Returns true if the value of the contained type is less than
                 the contained value of the other Any. If the contained types
@@ -397,12 +415,24 @@ namespace Pt {
             */
             //bool operator<(const Any& a) const;
 
+            /** @internal @brief Returns the value which the %Any contains
+            */
             const Any::Value* value() const
             { return _value; }
 
+            /** @internal @brief Returns the value which the %Any contains
+            */
             Any::Value* value()
             { return _value; }
 
+            /** @brief Get pointer to stored value
+
+                Returns a pointer to the stored value or 0 if the %Any is
+                empty. Use Any::type to find out which type is stored in
+                the &Any.
+
+                @return Pointer to stored value or 0 if empty
+            */
             void* get()
             {
                 if(_value)
@@ -411,6 +441,14 @@ namespace Pt {
                 return 0;
             }
 
+            /** @brief Get pointer to stored value
+
+                Returns a pointer to the stored value or 0 if the %Any is
+                empty. Use Any::type to find out which type is stored in
+                the &Any.
+
+                @return Pointer to stored value or 0 if empty
+            */
             const void* get() const
             {
                 if(_value)

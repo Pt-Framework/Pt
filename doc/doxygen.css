@@ -273,35 +273,35 @@ table.memberdecls {
 }
 
 .mdescLeft {
-    padding: 0px 0px 6px 0px;
+    padding: 0px 0px 12px 0px;
 	font-size: 12px;
 	font-style: italic;
 	margin: 0px;
 }
 .mdescRight {
-    padding: 0px 0px 6px 0px;
+    padding: 0px 0px 12px 0px;
 	font-size: 12px;
 	font-style: italic;
 	margin: 0px;
 }
 .memItemLeft {
-	padding: 0px 0px 0px 0px;
+	padding: 0px 0px 3px 0px;
     font-size: 14px;
 }
 .memItemRight {
-	padding: 0px 0px 0px 0px;
+	padding: 0px 0px 3px 0px;
     font-size: 14px;
 }
 .memTemplItemLeft {
-	padding: 0px 0px 0px 0px;
+	padding: 0px 0px 3px 0px;
 	font-size: 14px;
 }
 .memTemplItemRight {
-	padding: 0px 0px 0px 0px;
+	padding: 0px 0px 3px 0px;
 	font-size: 14px;
 }
 .memTemplParams {
-	padding: 0px 0px 0px 0px;
+	padding: 0px 0px 2px 0px;
     color: #606060;
 	font-size: 12px;
 }
