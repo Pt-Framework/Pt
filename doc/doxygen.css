@@ -109,25 +109,28 @@ div.navpath a:visited {
 }
 
 DIV.navtab {
-    /* border: 1px solid #cccccc; */
-    /* border-right: 1px solid #bbbbbb; */
-    /* background-color: #eff0f0; */
-    /* position: relative; */
-    /* top: 50px; */
-    /* margin-bottom: 50px; */
+    border: 1px solid #dddddd;
+    background-color: #f6f6f6;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     margin-right: 0px;
     margin-top: 24px;
-    padding-right: 15px;
+    -moz-border-radius:5px;
+    -khtml-border-radius:5px;
 }
 TD.navtab {
     font-size: 14px;
 }
 TD.navtab A {
-    color: #2d378c;
+    /* color: #2d378c; */
+    /* color: #000000; */
     /* font-weight: bold; */
 }
 TD.navtab A:visited {
-    color: #2d378c;
+    /* color: #2d378c; */
+/* color: #000000; */
     /* font-weight: bold; */
 }
 
@@ -168,7 +171,7 @@ A.qindex:hover {
 
 A.qindexHL {
 	text-decoration: none;
-    font-weight: bold;
+    font-weight: normal;
     color: #000000
 }
 A.qindexHL:hover {
@@ -237,22 +240,20 @@ DIV.groupHeader {
 DIV.groupText { margin-left: 16px; font-style: italic; font-size: 90% }
 
 TD.indexkey {
-    background-color: #eff0f0;
 	font-weight: bold;
     font-size: 14px;
-	padding-right  : 10px;
-	padding-top    : 5px;
-	padding-left   : 10px;
-    padding-bottom : 5px;
+	padding-right  : 5px;
+	padding-top    : 10px;
+	padding-left   : 5px;
+    padding-bottom : 0px;
 }
 TD.indexvalue {
-    background-color: #eff0f0;
 	font-style: italic;
     font-size: 14px;
-	padding-right  : 10px;
-	padding-top    : 5px;
-	padding-left   : 10px;
-    padding-bottom : 5px;
+	padding-right  : 5px;
+	padding-top    : 10px;
+	padding-left   : 5px;
+    padding-bottom : 0px;
 }
 TR.memlist {
    background-color: #f0f0f0;
@@ -285,24 +286,24 @@ table.memberdecls {
 	margin: 0px;
 }
 .memItemLeft {
-	padding: 0px 0px 3px 0px;
+	padding: 0px 0px 2px 0px;
     font-size: 14px;
 }
 .memItemRight {
-	padding: 0px 0px 3px 0px;
+	padding: 0px 0px 2px 0px;
     font-size: 14px;
 }
 .memTemplItemLeft {
-	padding: 0px 0px 3px 0px;
+	padding: 0px 0px 2px 0px;
 	font-size: 14px;
 }
 .memTemplItemRight {
-	padding: 0px 0px 3px 0px;
+	padding: 0px 0px 2px 0px;
 	font-size: 14px;
 }
 .memTemplParams {
 	padding: 0px 0px 2px 0px;
-    color: #606060;
+    font-style: italic;
 	font-size: 12px;
 }
 .search     { color: #003399;
@@ -348,12 +349,11 @@ TH.dirtab { background: #e8eef2;
     margin-left: 20px;
 }
 .memproto {
-    /* position: relative; */
-    /* left: -100px; */
     font-weight: normal;
-    /* border-bottom:1px solid #bbbbbb; */
+    border-bottom:1px solid #dddddd;
 }
 .memname, .memname td {
+    color: #000000;
     font-size: 20px;
     font-weight: normal;
     padding: 0px;
@@ -363,10 +363,10 @@ TH.dirtab { background: #e8eef2;
     text-align: right;
 }
 .paramtype {
+    color: #000000;
     font-size: 20px;
     white-space: nowrap;
     font-weight: normal;
-    color:  #2d378c;
 }
 .paramname {
     color: #000000;
@@ -684,11 +684,16 @@ color: rgb(55, 75, 165);
     height:16px;
 }
 .docs-page-body {
-    background:#eff0f0;
+    border-left: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+    background:#f6f6f6;
     margin:0px;
     font-size: 14px;
     padding: 10px;
     height: 150px;
+    -moz-border-radius: 0px 0px 5px 5px;
+    -khtml-border-radius: 0px 0px 5px 5px;
 }
 .docs-page-body ul {
     padding:0px;
