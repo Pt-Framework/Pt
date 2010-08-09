@@ -441,12 +441,12 @@ div.contents hr {
     font-size: 16px;
 }
 
-#header .phrases {
+#header .search {
     float: right;
     color: white;
-    margin-top: 10px;
-    text-align: right;
+    margin: 10px 0px 0px 0px;
     font-size: 12px;
+    display: block;
 }
 
 ul.menu {
