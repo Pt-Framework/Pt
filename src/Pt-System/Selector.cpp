@@ -192,7 +192,7 @@ bool SelectorBase::wait(std::size_t msecs)
         this->onWait(0);
         return true;
     }
-	
+
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
@@ -216,7 +216,7 @@ bool SelectorBase::wait(std::size_t msecs)
 
 
 void SelectorBase::wake()
-{ 
+{
     this->onWake();
 }
 

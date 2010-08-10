@@ -188,7 +188,6 @@ namespace System {
 
             virtual void onWake() = 0;
 
-        private:
             /** @internal Update all timers and return true if a timer fired
 
                 @param timeout interval to next expiring timer

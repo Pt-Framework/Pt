@@ -162,6 +162,9 @@ namespace System {
 
             virtual void onRun();
 
+            //virtual void onRun2();
+            //int waitNext(size_t msecs);
+
             virtual bool onWait(std::size_t msecs);
 
             virtual void onWake();

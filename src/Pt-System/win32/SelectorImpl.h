@@ -51,28 +51,28 @@ class HandleMap
         {
             if(_handles.empty())
                 return 0;
-                
+
             return &_handles[0];
         }
 
         size_t size() const
         { return _handles.size(); }
-        
+
         Selectable* at(size_t n)
         { return _selectables[n]; }
-        
+
         void pop_front()
         {
             _selectables.erase( _selectables.begin() );
             _handles.erase( _handles.begin() );
         }
-        
+
         void remove(Selectable& s)
         {
             if( _selectables.empty() )
                 return;
-      
-            std::vector<Selectable*>::iterator it;          
+
+            std::vector<Selectable*>::iterator it;
             std::vector<HANDLE>::iterator hit =_handles.begin();
             for(it = _selectables.begin(); it != _selectables.end(); )
             {
@@ -86,7 +86,7 @@ class HandleMap
                     it = _selectables.erase(it);
                     hit = _handles.erase(hit);
                 }
-            }  
+            }
         }
 
     private:
@@ -97,6 +97,13 @@ class HandleMap
 
 class SelectorImpl
 {
+    public:
+        enum Result
+        {
+            Event   = 0x01,
+            Timeout = 0x02
+        };
+
     public:
         SelectorImpl();
 
@@ -110,6 +117,8 @@ class SelectorImpl
 
         bool wait(std::size_t msecs);
 
+        int waitNext(std::size_t msecs);
+
         void wake();
 
         void setParent(Application* app)
@@ -117,7 +126,7 @@ class SelectorImpl
             _app = app;
         }
 
-    private:       
+    private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;

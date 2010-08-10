@@ -120,6 +120,86 @@ void EventLoop::onRun()
 }
 
 
+// void EventLoop::onRun2()
+// {
+//     while( true )
+//     {
+//         int result = this->waitNext( this->idleTimeout() );
+
+//         if(result & SelectorImpl::Event)
+//         {
+//             RecursiveLock lock(_queueMutex);
+
+//             if(_exitLoop)
+//             {
+//                 _exitLoop = false;
+//                 break;
+//             }
+
+//             if( !_eventQueue.empty() )
+//             {
+//                 lock.unlock();
+//                 this->processEvents();
+//             }
+
+//             lock.unlock();
+//         }
+
+//         if(result & SelectorImpl::Timeout)
+//         {
+//             timeout.send();
+//         }
+//     }
+
+//     exited();
+// }
+
+
+// int EventLoop::waitNext(std::size_t msecs)
+// {
+//     size_t timerTimeout = Selector::WaitInfinite;
+
+//     // If a timer is immediately ready, still check for an
+//     // active selectable to avoid timer preemption
+//     if ( updateTimer(timerTimeout) )
+//     {
+//          return _selector->waitNext(0);
+//     }
+
+//     // This handles the case when no timer will become
+//     // active in the given timeout. The result of the
+//     // wait call indicates activity
+//     if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
+//     {
+//         return _selector->waitNext(msecs);
+//     }
+
+//     // A timer will become active before the timeout expires
+//     while(true)
+//     {
+//         int result = _selector->waitNext(timerTimeout);
+
+//         if(result & SelectorImpl::Timeout)
+//         {
+//             if( ! updateTimer(timerTimeout) )
+//                 continue;
+
+//             return 0;
+//         }
+
+//         return result;
+
+//         // if( this->onWait(timerTimeout) )
+//         //     return true;
+
+//         // if( updateTimer(timerTimeout) )
+//         //     return true;
+//     }
+
+//     return false;
+// }
+
+
 bool EventLoop::onWait(std::size_t msecs)
 {
     if( _selector->wait(msecs) )
