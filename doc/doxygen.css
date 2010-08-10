@@ -492,8 +492,9 @@ ul.menu li.active a {
 
 #maintext    {
     float: left;
-    width: 60%;
-    padding: 0em 1em 1em 1em;
+    width: 63%;
+    padding: 5px 0px 0px 0px;
+    text-align: justify;
 }
 
 .clear {
@@ -630,11 +631,38 @@ color: rgb(55, 75, 165);
 
 #newsbar    {
     float: right;
-    width: 35%;
+    width: 34%;
     margin: 0;
     padding: 0;
-    padding-top: 6px;
-    font-size: 100%;
+    margin-top: 14px;
+}
+
+#download {
+    background:url(download90.gif) no-repeat center 0px;
+    padding-top: 23px;
+    padding-left: 14px;
+    padding-bottom: 34px;
+    font-size: 14px;
+    font-weight:bold;
+    text-align: left;
+    color: #2d378c;
+}
+
+#download-link {
+    color:black;
+    font-size: 20px;
+    font-weight: normal;
+    padding: 17px 18px 0px 0px;
+    text-align: center;
+}
+
+#newstop {
+    padding:5px 10px 5px 15px;
+    background:url(box_header_bg.gif) no-repeat right 0px;
+    color:white;
+    font-weight:bold;
+    font-size: 14px;
+    height:16px;
 }
 
 .news-table {
@@ -648,28 +676,30 @@ color: rgb(55, 75, 165);
 }
 .news-article {
     text-align:left;
-    border: 1px solid #CCCCCC;
-    -moz-border-radius: 12px 12px 0px 0px;
-    width:auto;
+    /* border: 1px solid #CCCCCC; */
+    /* -moz-border-radius: 12px 12px 0px 0px; */
 }
 .news-article-header {
-    background-color:#f0f0f0;
-    border-bottom: 1px solid #CCCCCC;
-    -moz-border-radius: 12px 12px 0px 0px;
-    padding-left:16px;
-    padding-top:4px;
-    padding-bottom:2px;
+    padding-top:8px;
+    /* border-bottom: 1px solid #CCCCCC; */
+    /* -moz-border-radius: 12pxfont-weight:bold;font-weight:bold; 12px 0px 0px; */
+
 }
 .news-article-header b {
-    font-size: 120%;
+    font-size: 14px;
     /* color:#154374; */
-color: rgb(55, 75, 165);
+    color: rgb(55, 75, 165);
 }
 .news-article-header i {
-    font-size: 80%;
+    font-size: 12px;
+    font-weight: normal;
 }
 .news-article-body {
-    padding:7px;
+    font-size: 12px;
+    padding-top:5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #CCCCCC;
+    text-align: justify;
 }
 
 
