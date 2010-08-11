@@ -120,13 +120,19 @@ void EventLoop::onRun()
 }
 
 
-// void EventLoop::onRun2()
+// void EventLoop::onRun()
 // {
 //     while( true )
 //     {
-//         int result = this->waitNext( this->idleTimeout() );
+//         WaitResult result = this->waitNext( this->idleTimeout() );
 
-//         if(result & SelectorImpl::Event)
+//         if( result.isTimeout() )
+//         {
+//             timeout.send();
+//             continue;
+//         }
+
+//         if( result.isEvent() )
 //         {
 //             RecursiveLock lock(_queueMutex);
 
@@ -136,7 +142,7 @@ void EventLoop::onRun()
 //                 break;
 //             }
 
-//             if( !_eventQueue.empty() )
+//             if( ! _eventQueue.empty() )
 //             {
 //                 lock.unlock();
 //                 this->processEvents();
@@ -144,18 +150,13 @@ void EventLoop::onRun()
 
 //             lock.unlock();
 //         }
-
-//         if(result & SelectorImpl::Timeout)
-//         {
-//             timeout.send();
-//         }
 //     }
 
 //     exited();
 // }
 
 
-// int EventLoop::waitNext(std::size_t msecs)
+// WaitResult EventLoop::waitNext(std::size_t msecs)
 // {
 //     size_t timerTimeout = Selector::WaitInfinite;
 
@@ -163,7 +164,7 @@ void EventLoop::onRun()
 //     // active selectable to avoid timer preemption
 //     if ( updateTimer(timerTimeout) )
 //     {
-//          return _selector->waitNext(0);
+//          return _selector->waitNext(0).setTimer();
 //     }
 
 //     // This handles the case when no timer will become
@@ -177,26 +178,16 @@ void EventLoop::onRun()
 //     // A timer will become active before the timeout expires
 //     while(true)
 //     {
-//         int result = _selector->waitNext(timerTimeout);
+//         WaitResult result = _selector->waitNext(timerTimeout);
 
-//         if(result & SelectorImpl::Timeout)
-//         {
-//             if( ! updateTimer(timerTimeout) )
-//                 continue;
+//         if( result.isActive() )
+//             return result;
 
-//             return 0;
-//         }
-
-//         return result;
-
-//         // if( this->onWait(timerTimeout) )
-//         //     return true;
-
-//         // if( updateTimer(timerTimeout) )
-//         //     return true;
+//         if( updateTimer(timerTimeout) )
+//             return result.setTimer();
 //     }
 
-//     return false;
+//     return WaitResult();
 // }
 
 

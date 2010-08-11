@@ -257,7 +257,7 @@ bool SelectorImpl::wait( std::size_t umsecs )
 }
 
 
-int SelectorImpl::waitNext( std::size_t umsecs )
+WaitResult SelectorImpl::waitNext( std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -297,7 +297,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
         throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
     }
 
-    bool avail = false;
+    WaitResult ret;
+    //bool avail = false;
     try
     {
         // check all selectables that did not require waiting
@@ -306,7 +307,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
             Selectable* s = *_currentAvail;
             if( s->enabled() && s->simpl().checkEvent() )
             {
-                avail = true;
+                //avail = true;
+                ret.setDevice();
             }
             if( _currentAvail != _avail.end() &&
                *_currentAvail == s )
@@ -317,7 +319,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
 
         if( result == WAIT_TIMEOUT)
         {
-            return 0;
+            //return avail ? Selector::IO : Selector::Timeout;
+            return ret;
         }
 
         const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
@@ -325,7 +328,7 @@ int SelectorImpl::waitNext( std::size_t umsecs )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            return Event;
+            return ret.setEvent();
         }
         // I/O event at offset 1 was active
         else if (offset == 1)
@@ -335,7 +338,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
                 Selectable* dev = *_current;
                 if ( dev->enabled() && dev->simpl().checkEvent() )
                 {
-                    avail = true;
+                    //avail = true;
+                    ret.setDevice();
                 }
 
                 if( _current != _devices.end() &&
@@ -349,7 +353,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
         {
             Selectable* selectable = _handles.at(offset);
             if( selectable->enabled() && selectable->simpl().checkEvent() )
-                avail = true;
+                //avail = true;
+                ret.setDevice();
 
         }
     }
@@ -360,7 +365,8 @@ int SelectorImpl::waitNext( std::size_t umsecs )
         throw;
     }
 
-    return 0;
+    //avail ? Selector::IO : Selector::Timeout;
+    return ret;
 }
 
 } //namespace System

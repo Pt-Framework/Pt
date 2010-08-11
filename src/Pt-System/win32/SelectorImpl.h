@@ -98,13 +98,6 @@ class HandleMap
 class SelectorImpl
 {
     public:
-        enum Result
-        {
-            Event   = 0x01,
-            Timeout = 0x02
-        };
-
-    public:
         SelectorImpl();
 
         ~SelectorImpl();
@@ -117,7 +110,7 @@ class SelectorImpl
 
         bool wait(std::size_t msecs);
 
-        int waitNext(std::size_t msecs);
+        WaitResult waitNext(std::size_t msecs);
 
         void wake();
 

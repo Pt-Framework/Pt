@@ -46,6 +46,58 @@ namespace System {
     class Application;
     class SelectorImpl;
 
+    class WaitResult
+    {
+        enum ResultType
+        {
+            Timeout = 0x00,
+            Event   = 0x01,
+            Device  = 0x02,
+            Timer   = 0x04
+        };
+
+        public:
+            WaitResult()
+            : _type(Timeout)
+            {}
+
+            bool isTimeout() const
+            { return _type == WaitResult::Timeout; }
+
+            bool isActive() const
+            { return _type != WaitResult::Timeout; }
+
+            bool isEvent() const
+            { return WaitResult::Event == (_type & WaitResult::Event); }
+
+             WaitResult& setEvent()
+            {
+                _type |= WaitResult::Event;
+                return *this;
+            }
+
+            bool isDevice() const
+            { return WaitResult::Device == (_type & WaitResult::Device); }
+
+             WaitResult& setDevice()
+            {
+                _type |= WaitResult::Device;
+                return *this;
+            }
+
+            bool isTimer() const
+            { return WaitResult::Timer == (_type & WaitResult::Timer); }
+
+            WaitResult& setTimer()
+            {
+                _type |= WaitResult::Timer;
+                return *this;
+            }
+
+        private:
+            int _type;
+    };
+
     /** @brief Reports activity on a set of devices.
 
         A Selector can be used to monitor a set of Selectables and Timers

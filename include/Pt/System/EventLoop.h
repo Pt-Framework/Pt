@@ -151,6 +151,8 @@ namespace System {
              */
             virtual ~EventLoop();
 
+            //WaitResult waitNext(size_t msecs);
+
         protected:
             virtual void onAdd( Selectable& s );
 
@@ -161,9 +163,6 @@ namespace System {
             virtual void onChanged(Selectable& s);
 
             virtual void onRun();
-
-            //virtual void onRun2();
-            //int waitNext(size_t msecs);
 
             virtual bool onWait(std::size_t msecs);
 
