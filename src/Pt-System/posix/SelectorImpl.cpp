@@ -238,6 +238,115 @@ bool SelectorImpl::wait(std::size_t msecs)
 }
 
 
+WaitResult SelectorImpl::waitNext(std::size_t msecs)
+{
+    WaitResult result;
+
+    fd_set rfds = _rfds;
+    fd_set wfds = _wfds;
+    fd_set efds = _efds;
+
+    msecs = _avail.size() ? 0 : msecs;
+    int avail = -1;
+
+    while( true )
+    {
+        struct timeval* timeout = 0;
+        struct timeval tv;
+        if(msecs != Selector::WaitInfinite)
+        {
+            tv.tv_sec = msecs / 1000;
+            tv.tv_usec = (msecs % 1000) * 1000;
+            timeout = &tv;
+        }
+
+        _clock.start();
+        avail = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        Pt::int64_t elapsed = _clock.stop().totalMSecs();
+
+        if( avail < 0 && errno != EINTR )
+        {
+            throw IOError( PT_ERROR_MSG("select failed") );
+        }
+
+        if( avail > 0 || _avail.size() )
+            break;
+
+        if(msecs == SelectorBase::WaitInfinite)
+            continue;
+
+        if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
+            return result; // timeout
+
+        msecs -= int(elapsed);
+    }
+
+    if( FD_ISSET(_wakePipe[0], &efds) )
+    {
+        throw IOError( PT_ERROR_MSG("pipe failed") );
+    }
+
+    if( FD_ISSET(_wakePipe[0], &rfds) )
+    {
+        --avail;
+
+        static char buffer[1024];
+        while(true)
+        {
+            int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
+            if(ret > 0)
+            {
+                //avail = true;
+                result.setEvent();
+                continue;
+            }
+
+            if (ret == -1)
+            {
+                if(errno == EINTR)
+                    continue;
+
+                if(errno == EAGAIN)
+                    break;
+            }
+
+            throw IOError( PT_ERROR_MSG("pipe read failed") );
+        }
+    }
+
+    try
+    {
+        avail += _avail.size();
+        if(avail > 0)
+            result.setDevice();
+
+        for( _current = _devices.begin(); _current != _devices.end(); )
+        {
+            Selectable* selectable = *_current;
+            avail -= selectable->simpl().checkEvent(rfds, wfds, efds);
+
+            if(avail <= 0)
+                break;
+
+            if(_current != _devices.end())
+            {
+                if(*_current == selectable)
+                {
+                    ++_current;
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+        _current = _devices.end();
+        throw;
+    }
+
+    return result;
+}
+
+
 void SelectorImpl::wake()
 {
     ::write( _wakePipe[1], "W", 1);

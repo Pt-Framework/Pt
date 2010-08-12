@@ -47,6 +47,8 @@ class SelectorImpl
 
         bool wait(std::size_t msecs);
 
+        WaitResult waitNext(std::size_t msecs);
+
         void wake();
 
     private:
