@@ -156,39 +156,39 @@ void EventLoop::onRun()
 // }
 
 
-// WaitResult EventLoop::waitNext(std::size_t msecs)
-// {
-//     size_t timerTimeout = Selector::WaitInfinite;
+WaitResult EventLoop::waitNext(std::size_t msecs)
+{
+    size_t timerTimeout = Selector::WaitInfinite;
 
-//     // If a timer is immediately ready, still check for an
-//     // active selectable to avoid timer preemption
-//     if ( updateTimer(timerTimeout) )
-//     {
-//          return _selector->waitNext(0).setTimer();
-//     }
+    // If a timer is immediately ready, still check for an
+    // active selectable to avoid timer preemption
+    if ( updateTimer(timerTimeout) )
+    {
+         return _selector->waitNext(0).setTimer();
+    }
 
-//     // This handles the case when no timer will become
-//     // active in the given timeout. The result of the
-//     // wait call indicates activity
-//     if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
-//     {
-//         return _selector->waitNext(msecs);
-//     }
+    // This handles the case when no timer will become
+    // active in the given timeout. The result of the
+    // wait call indicates activity
+    if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
+    {
+        return _selector->waitNext(msecs);
+    }
 
-//     // A timer will become active before the timeout expires
-//     while(true)
-//     {
-//         WaitResult result = _selector->waitNext(timerTimeout);
+    // A timer will become active before the timeout expires
+    while(true)
+    {
+        WaitResult result = _selector->waitNext(timerTimeout);
 
-//         if( result.isActive() )
-//             return result;
+        if( result.isActive() )
+            return result;
 
-//         if( updateTimer(timerTimeout) )
-//             return result.setTimer();
-//     }
+        if( updateTimer(timerTimeout) )
+            return result.setTimer();
+    }
 
-//     return WaitResult();
-// }
+    return WaitResult();
+}
 
 
 bool EventLoop::onWait(std::size_t msecs)

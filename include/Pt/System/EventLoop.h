@@ -151,7 +151,7 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            //WaitResult waitNext(size_t msecs);
+            WaitResult waitNext(size_t msecs);
 
         protected:
             virtual void onAdd( Selectable& s );
