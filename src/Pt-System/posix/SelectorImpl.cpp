@@ -209,6 +209,8 @@ bool SelectorImpl::wait(std::size_t msecs)
 
     try
     {
+        avail += _avail.size();
+
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
             Selectable* selectable = *_current;

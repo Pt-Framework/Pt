@@ -65,6 +65,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
 
         void onInput(Pt::System::StreamBuffer& buffer)
         {
+            buffer.endRead();
             std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
 
             char in[20];
@@ -199,7 +200,9 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
             _pos += dev.endWrite();
             size_t len= std::min(sizeof(_buffer), _out.size()-_pos);
             std::memcpy(_buffer, &(_out.c_str()[_pos]), len);
-            dev.beginWrite(_buffer, len);
+
+            if(len > 0)
+                dev.beginWrite(_buffer, len);
         }
 
         void RemoveTest()
