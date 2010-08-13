@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/Timer.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -38,6 +38,7 @@ class TimerTest : public Pt::Unit::TestSuite
         : TestSuite("TimerTest")
         , _timer(0)
         , _count(0)
+        , _loop(0)
         {
             this->registerMethod("Timeout", *this, &TimerTest::Timeout);
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
@@ -48,16 +49,21 @@ class TimerTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _count = 0;
-            _selector = new Pt::System::Selector();
+
             _timer = new Pt::System::Timer();
             _timer->start(100);
-            _selector->add(*_timer);
+
+            _loop = new Pt::System::EventLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop->setIdleTimeout(2000);
+            _loop->add(*_timer);
         }
 
         void tearDown()
         {
-            delete _selector;
-            _selector = 0;
+            delete _loop;
+            _loop = 0;
+
             delete _timer;
             _timer = 0;
         }
@@ -66,22 +72,21 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
 
-            _selector->wait(300);
-            PT_UNIT_ASSERT(_count == 1);
-
-            _selector->wait(300);
+            _loop->run();
             PT_UNIT_ASSERT(_count == 2);
         }
 
         void RemoveOnTimeout()
         {
+            Pt::System::Timer exitTimer;
+            exitTimer.start(500);
+            _loop->add(exitTimer);
+            connect(exitTimer.timeout, *_loop, &Pt::System::EventLoop::exit);
+
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::removeTimer );
 
-            _selector->wait(300);
-            PT_UNIT_ASSERT(_count == 1);
-
-            _selector->wait(300);
+            _loop->run();
             PT_UNIT_ASSERT(_count == 1);
         }
 
@@ -90,39 +95,40 @@ class TimerTest : public Pt::Unit::TestSuite
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::removeAddTimer );
 
-            _selector->wait(300);
-            PT_UNIT_ASSERT(_count == 1);
-
-            _selector->wait(300);
+            _loop->run();
             PT_UNIT_ASSERT(_count == 2);
         }
 
         void DestroyOnTimeout()
         {
+            Pt::System::Timer exitTimer;
+            exitTimer.start(500);
+            _loop->add(exitTimer);
+            connect(exitTimer.timeout, *_loop, &Pt::System::EventLoop::exit);
+
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::destroyTimer );
 
-            _selector->wait(300);
-            PT_UNIT_ASSERT(_count == 1);
-
-            _selector->wait(300);
+            _loop->run();
             PT_UNIT_ASSERT(_count == 1);
         }
 
         void onTimeout()
         {
             _count++;
+            if(_count >= 2)
+                _loop->exit();
         }
 
         void removeTimer()
         {
-            _timer->setSelector(0);
+            _loop->remove(*_timer);
         }
 
         void removeAddTimer()
         {
-            _timer->setSelector(0);
-            _timer->setSelector(_selector);
+            _loop->remove(*_timer);
+            _loop->add(*_timer);
         }
 
         void destroyTimer()
@@ -133,7 +139,7 @@ class TimerTest : public Pt::Unit::TestSuite
 
     private:
         Pt::System::Timer* _timer;
-        Pt::System::Selector* _selector;
+        Pt::System::EventLoop* _loop;
         unsigned _count;
 };
 
