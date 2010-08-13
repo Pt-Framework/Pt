@@ -117,7 +117,7 @@ set_is_win95( void )
                       && (os_info.dwMajorVersion == 5);
 
   is_winvista = (os_info.dwPlatformId == VER_PLATFORM_WIN32_NT)
-                      && (os_info.dwMajorVersion == 6);
+                      && (os_info.dwMajorVersion >= 6);
 }
 
 int maxline()
