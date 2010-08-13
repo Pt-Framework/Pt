@@ -37,8 +37,8 @@ class TimerTest : public Pt::Unit::TestSuite
         TimerTest()
         : TestSuite("TimerTest")
         , _timer(0)
-        , _count(0)
         , _loop(0)
+        , _count(0)
         {
             this->registerMethod("Timeout", *this, &TimerTest::Timeout);
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
