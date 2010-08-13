@@ -27,6 +27,8 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/Clock.h"
+#include "Pt/Timespan.h"
 #include "Pt/Allocator.h"
 
 class E1: public Pt::Event
@@ -77,11 +79,12 @@ class EventLoopTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("EventLoopTest")
         {
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
+            Pt::Unit::TestSuite::registerMethod( "IdleTimeout", *this, &EventLoopTest::IdleTimeout);
         }
 
         void setUp()
         {
-            _cnt= 0;
+            _cnt = 0;
         }
 
     private:
@@ -89,11 +92,10 @@ class EventLoopTest : public Pt::Unit::TestSuite
         {
             Pt::System::EventLoop el;
             connect(el.timeout, el, &Pt::System::EventLoop::exit);
+            el.setIdleTimeout(500);
 
             el.event.subscribe( slot(*this, &EventLoopTest::onE1) );
             el.event.subscribe( slot(*this, &EventLoopTest::onE2) );
-
-            el.setIdleTimeout(1000);
 
             el.commitEvent( E1() );
             el.commitEvent( E2() );
@@ -111,8 +113,25 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void onE2(const E2&)
         {
             ++_cnt;
+            PT_UNIT_ASSERT(2 == _cnt);
         }
 
+        void IdleTimeout()
+        {
+            Pt::System::EventLoop el;
+            el.setIdleTimeout(300);
+            connect(el.timeout, el, &Pt::System::EventLoop::exit);
+
+            Pt::System::Clock clock;
+            clock.start();
+            el.run();
+            Pt::Timespan elapsed = clock.stop();
+
+            PT_UNIT_ASSERT(elapsed.totalMSecs() > 280);
+            PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
+        }
+
+        private:
             int _cnt;
 };
 
