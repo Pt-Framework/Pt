@@ -25,6 +25,8 @@
  */
 #include "Pt/System/Timer.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/Clock.h"
+#include "Pt/Timespan.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -72,8 +74,14 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
 
+            Pt::System::Clock clock;
+            clock.start();
             _loop->run();
-            PT_UNIT_ASSERT(_count == 2);
+            Pt::Timespan elapsed = clock.stop();
+
+            PT_UNIT_ASSERT(_count == 3);
+            PT_UNIT_ASSERT(elapsed.totalMSecs() > 280);
+            PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
         }
 
         void RemoveOnTimeout()
@@ -96,7 +104,7 @@ class TimerTest : public Pt::Unit::TestSuite
             connect( _timer->timeout, *this, &TimerTest::removeAddTimer );
 
             _loop->run();
-            PT_UNIT_ASSERT(_count == 2);
+            PT_UNIT_ASSERT(_count == 3);
         }
 
         void DestroyOnTimeout()
@@ -116,7 +124,7 @@ class TimerTest : public Pt::Unit::TestSuite
         void onTimeout()
         {
             _count++;
-            if(_count >= 2)
+            if(_count >= 3)
                 _loop->exit();
         }
 

@@ -28,7 +28,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/Pipe.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
+#include "Pt/System/StreamBuffer.h"
+#include "Pt/System/IOStream.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -41,78 +43,179 @@ class PipeTest : public Pt::Unit::TestSuite
     public:
         PipeTest()
         : Pt::Unit::TestSuite("PipeTest")
+        , _loop(0)
+        , _pos(0)
         {
-            Pt::Unit::TestSuite::registerMethod( "testAsyncWriteRead", *this, &PipeTest::testAsyncWriteRead );
-            Pt::Unit::TestSuite::registerMethod( "testSyncWriteRead", *this, &PipeTest::testSyncWriteRead );
+            Pt::Unit::TestSuite::registerMethod( "AsyncRead", *this, &PipeTest::AsyncRead );
+            Pt::Unit::TestSuite::registerMethod( "AsyncWrite", *this, &PipeTest::AsyncWrite );
+            Pt::Unit::TestSuite::registerMethod( "RemoveFromLoop", *this, &PipeTest::RemoveFromLoop );
+            Pt::Unit::TestSuite::registerMethod( "PipeIOStream", *this, &PipeTest::PipeIOStream );
+        }
+
+        void setUp()
+        {
+            _data.clear();
+            _result.clear();
+
+            _loop = new Pt::System::EventLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop->setIdleTimeout(2000);
+        }
+
+        void tearDown()
+        {
+            delete _loop;
+            _loop = 0;
         }
 
     protected:
-        void testAsyncWriteRead();
-        void testSyncWriteRead();
+        void AsyncRead()
+        {
+            _data = "Hello World, where do you want to GOTO day!";
+
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            pipe.in().write( _data.c_str(), _data.size() );
+
+            pipe.out().beginRead(_buffer, sizeof(_buffer));
+            connect(pipe.out().inputReady, *this, &PipeTest::onRead);
+
+            _loop->add( pipe.out() );
+            _loop->run();
+
+            //this->reportMessage(_result);
+            PT_UNIT_ASSERT(_result == _data);
+        }
+
+        void onRead(Pt::System::IODevice& dev)
+        {
+            size_t sz = dev.endRead();
+            _result.append(_buffer, sz);
+
+            if( _result.size() < _data.size() )
+                dev.beginRead(_buffer, sizeof(_buffer));
+            else
+                _loop->exit();
+        }
+
+        void AsyncWrite()
+        {
+            _data = "Hello World, where do you want to GOTO day!";
+            _pos = 0;
+
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+
+            std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
+            pipe.in().beginWrite(_buffer, sizeof(_buffer));
+            connect(pipe.in().outputReady, *this, &PipeTest::onWrite);
+
+            _loop->add( pipe.in() );
+            _loop->run();
+
+            char buffer[1024];
+            size_t n = pipe.out().read(buffer, sizeof(buffer));
+            std::string result(buffer, n);
+            //this->reportMessage(result);
+            PT_UNIT_ASSERT(result == _data);
+        }
+
+        void onWrite(Pt::System::IODevice& dev)
+        {
+            _pos += dev.endWrite();
+            size_t len = std::min(sizeof(_buffer), _data.size() - _pos);
+            if(0 == len)
+            {
+                _loop->exit();
+                return;
+            }
+
+            std::memcpy(_buffer, _data.c_str()+_pos, len);
+            dev.beginWrite(_buffer, len);
+        }
+
+        void RemoveFromLoop()
+        {
+            std::string out("Hello World, where do you want to GOTO day!");
+
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            pipe.in().write( out.c_str(), out.size() );
+
+            pipe.out().beginRead(_buffer, sizeof(_buffer));
+            connect(pipe.out().inputReady, *this, &PipeTest::onReadRemove);
+
+            Pt::System::Selector selector;
+            _loop->add( pipe.out() );
+            _loop->run();
+        }
+
+        void onReadRemove(Pt::System::IODevice& dev)
+        {
+            size_t sz = dev.endRead();
+            _result.append(_buffer, sz);
+            dev.close();
+            _loop->setIdleTimeout(200);
+        }
+
+        void PipeIOStream()
+        {
+            _data = "Hello world!";
+            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            _loop->add( pipe.in() );
+            _loop->add( pipe.out() );
+
+            outbuf.attach( pipe.in() );
+            connect(outbuf.outputReady, *this, &PipeTest::onStreamOutput);
+
+            inbuf.attach( pipe.out() );
+            connect(inbuf.inputReady, *this, &PipeTest::onStreamInput);
+
+            //std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;
+            PT_UNIT_ASSERT( 0 == outbuf.out_avail() );
+
+            //std::cerr << "Writing: " << "Hello world!" << std::endl;
+            outbuf.sputn(_data.c_str(), 12);
+            //std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
+            PT_UNIT_ASSERT( 12 == outbuf.out_avail() );
+            outbuf.beginWrite();
+
+            _loop->run();
+
+            PT_UNIT_ASSERT( 0 == inbuf.out_avail() );
+            //std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
+        }
+
+        void onStreamInput(Pt::System::StreamBuffer& buffer)
+        {
+            buffer.endRead();
+            //std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+            PT_UNIT_ASSERT( 0 < buffer.in_avail() );
+
+            char in[20];
+            size_t n = buffer.sgetn( in, buffer.in_avail() );
+            //std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
+            PT_UNIT_ASSERT( 0 < n );
+
+            std::string data(in, n);
+            PT_UNIT_ASSERT( _data.find(data) == 0 );
+
+            _loop->exit();
+        }
+
+        void onStreamOutput(Pt::System::StreamBuffer& buffer)
+        {
+            //std::cerr << "Closing pipe" << std::endl;
+            buffer.device()->close();
+            inbuf.beginRead();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::string _data;
+        size_t _pos;
+        char _buffer[10];
+        std::string _result;
+        Pt::System::StreamBuffer inbuf;
+        Pt::System::StreamBuffer outbuf;
 };
 
-void PipeTest::testAsyncWriteRead()
-{
-    std::string out("Hello World, where do you want to GOTO day!");    
-    std::string in;
-    const int size = 8;
-    char buffer[size];
-
-    Pt::System::Pipe pipe( Pt::System::IODevice::Async );
-    Pt::System::Selector selector;
-    
-    std::size_t writtenBytes = 0;
-    while( writtenBytes < out.size() )
-    {
-        Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, 
-                                                                   out.size() - writtenBytes );
-        selector.add(writeRes);
-        bool activity = selector.wait(500);
-        PT_UNIT_ASSERT_MSG(activity, "Wait output failed");
-
-        writtenBytes += pipe.output().endWrite(writeRes);
-    }
-
-    std::size_t readBytes = 0;
-    while( readBytes < out.size() )
-    {       
-        Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
-        selector.add(res);
-        bool activity = selector.wait(500);
-        PT_UNIT_ASSERT_MSG(activity, "Wait input failed");
-
-        const std::size_t n = pipe.input().endRead(res);
-        readBytes +=  n;
-        in.append(buffer, n);
-    }
-
-    PT_UNIT_ASSERT_MSG( in == out, "Input does not match output");    
-}
-
-void PipeTest::testSyncWriteRead()
-{
-    std::string out("Hello World, where do you want to GOTO day!");    
-    std::string in;
-    const int size = 8;
-    char buffer[size];    
-
-    Pt::System::Pipe pipe(Pt::System::IODevice::Sync);
-
-    std::size_t writtenBytes = 0;
-    while(writtenBytes < out.size())
-    {
-        writtenBytes += pipe.output().write( out.c_str(), out.size() );
-    }
-
-    std::size_t totalReadBytes = 0;
-    while(totalReadBytes < out.size())
-    {
-        const std::size_t readBytes = pipe.input().read(buffer, size);
-        totalReadBytes +=  readBytes;
-        in.append(buffer, readBytes);
-    }
-
-    PT_UNIT_ASSERT_MSG( in == out, "Input does not match output");
-}
 
 Pt::Unit::RegisterTest<PipeTest> register_PipeTest;

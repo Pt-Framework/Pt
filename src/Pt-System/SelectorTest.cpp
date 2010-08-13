@@ -37,49 +37,49 @@ class IOStreamTest : public Pt::Unit::TestSuite
         IOStreamTest()
         : Pt::Unit::TestSuite("IOStreamTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
+            //Pt::Unit::TestSuite::registerMethod( "AsyncIO", *this, &IOStreamTest::AsyncIO );
         }
 
-        void AsyncIO()
-        {
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            eloop.add( pipe.in() );
-            eloop.add( pipe.out() );
+        // void AsyncIO()
+        // {
+        //     Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+        //     eloop.add( pipe.in() );
+        //     eloop.add( pipe.out() );
 
-            outbuf.attach( pipe.in() );
-            connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
+        //     outbuf.attach( pipe.in() );
+        //     connect(outbuf.outputReady, *this, &IOStreamTest::onOutput);
 
-            inbuf.attach( pipe.out() );
-            connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
+        //     inbuf.attach( pipe.out() );
+        //     connect(inbuf.inputReady, *this, &IOStreamTest::onInput);
 
-            std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;
-            std::cerr << "Writing: " << "Hello world!" << std::endl;
-            outbuf.sputn("Hello world!", 12);
-            std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
-            outbuf.beginWrite();
+        //     std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;
+        //     std::cerr << "Writing: " << "Hello world!" << std::endl;
+        //     outbuf.sputn("Hello world!", 12);
+        //     std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
+        //     outbuf.beginWrite();
 
-            eloop.run();
+        //     eloop.run();
 
-            std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
-        }
+        //     std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
+        // }
 
-        void onInput(Pt::System::StreamBuffer& buffer)
-        {
-            buffer.endRead();
-            std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
+        // void onInput(Pt::System::StreamBuffer& buffer)
+        // {
+        //     buffer.endRead();
+        //     std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
 
-            char in[20];
-            size_t n = buffer.sgetn( in, buffer.in_avail() );
-            std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
-            eloop.exit();
-        }
+        //     char in[20];
+        //     size_t n = buffer.sgetn( in, buffer.in_avail() );
+        //     std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
+        //     eloop.exit();
+        // }
 
-        void onOutput(Pt::System::StreamBuffer& buffer)
-        {
-            std::cerr << "Closing pipe" << std::endl;
-            buffer.device()->close();
-            inbuf.beginRead();
-        }
+        // void onOutput(Pt::System::StreamBuffer& buffer)
+        // {
+        //     std::cerr << "Closing pipe" << std::endl;
+        //     buffer.device()->close();
+        //     inbuf.beginRead();
+        // }
 
     private:
         Pt::System::EventLoop eloop;
@@ -96,10 +96,10 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         SelectorTest()
         : Pt::Unit::TestSuite("SelectorTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
-            Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
-            Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );
-            Pt::Unit::TestSuite::registerMethod( "RemoveTest", *this, &SelectorTest::RemoveTest );
+            //Pt::Unit::TestSuite::registerMethod( "WaitTimer", *this, &SelectorTest::WaitTimer );
+            //Pt::Unit::TestSuite::registerMethod( "ReadTest", *this, &SelectorTest::ReadTest );
+            //Pt::Unit::TestSuite::registerMethod( "WriteTest", *this, &SelectorTest::WriteTest );
+            //Pt::Unit::TestSuite::registerMethod( "RemoveTest", *this, &SelectorTest::RemoveTest );
         }
 
         void setUp()
@@ -109,127 +109,127 @@ Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
         }
 
     private:
-        void onTimeout1()
-        {
-            _timeval = _clock.stop();
-            _counter++;
-        }
+        // void onTimeout1()
+        // {
+        //     _timeval = _clock.stop();
+        //     _counter++;
+        // }
 
-        void WaitTimer()
-        {
-            Pt::System::Timer timer;
-            connect(timer.timeout, *this, &SelectorTest::onTimeout1);
-            timer.start(100);
+        // void WaitTimer()
+        // {
+        //     Pt::System::Timer timer;
+        //     connect(timer.timeout, *this, &SelectorTest::onTimeout1);
+        //     timer.start(100);
 
-            Pt::System::Selector selector;
-            selector.add(timer);
+        //     Pt::System::Selector selector;
+        //     selector.add(timer);
 
-            Pt::Timespan elapsed = 0;
-            for (size_t i = 0; i < 5; i++)
-            {
-                _timeval  = 0;
-                _clock.start();
+        //     Pt::Timespan elapsed = 0;
+        //     for (size_t i = 0; i < 5; i++)
+        //     {
+        //         _timeval  = 0;
+        //         _clock.start();
 
-                selector.wait();
-                elapsed += _timeval;
-            }
+        //         selector.wait();
+        //         elapsed += _timeval;
+        //     }
 
-            PT_UNIT_ASSERT(5 == _counter);
-            PT_UNIT_ASSERT(elapsed > 90000 * 5);
-            PT_UNIT_ASSERT(elapsed < 110000 * 5);
-        }
+        //     PT_UNIT_ASSERT(5 == _counter);
+        //     PT_UNIT_ASSERT(elapsed > 90000 * 5);
+        //     PT_UNIT_ASSERT(elapsed < 110000 * 5);
+        // }
 
-        void ReadTest()
-        {
-            std::string out("Hello World, where do you want to GOTO day!");
+        // void ReadTest()
+        // {
+        //     std::string out("Hello World, where do you want to GOTO day!");
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            pipe.in().write( out.c_str(), out.size() );
+        //     Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+        //     pipe.in().write( out.c_str(), out.size() );
 
-            pipe.out().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.out().inputReady, *this, &SelectorTest::onRead);
+        //     pipe.out().beginRead(_buffer, sizeof(_buffer));
+        //     connect(pipe.out().inputReady, *this, &SelectorTest::onRead);
 
-            Pt::System::Selector selector;
-            selector.add( pipe.out() );
-            while(_result.size() < out.size())
-            {
-                bool avail = selector.wait(5000);
-                PT_UNIT_ASSERT(avail);
-            }
+        //     Pt::System::Selector selector;
+        //     selector.add( pipe.out() );
+        //     while(_result.size() < out.size())
+        //     {
+        //         bool avail = selector.wait(5000);
+        //         PT_UNIT_ASSERT(avail);
+        //     }
 
-            this->reportMessage(_result);
-            PT_UNIT_ASSERT(_result == out);
-        }
+        //     this->reportMessage(_result);
+        //     PT_UNIT_ASSERT(_result == out);
+        // }
 
-        void onRead(Pt::System::IODevice& dev)
-        {
-            size_t sz = dev.endRead();
-            _result.append(_buffer, sz);
-            dev.beginRead(_buffer, sizeof(_buffer));
-        }
+        // void onRead(Pt::System::IODevice& dev)
+        // {
+        //     size_t sz = dev.endRead();
+        //     _result.append(_buffer, sz);
+        //     dev.beginRead(_buffer, sizeof(_buffer));
+        // }
 
-        void WriteTest()
-        {
-            _out = "Hello World, where do you want to GOTO day!";
+        // void WriteTest()
+        // {
+        //     _out = "Hello World, where do you want to GOTO day!";
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+        //     Pt::System::Pipe pipe(Pt::System::Pipe::Async);
 
-            _pos = 0;
-            std::memcpy(_buffer, _out.c_str(),  sizeof(_buffer));
-            pipe.in().beginWrite(_buffer, sizeof(_buffer));
-            connect(pipe.in().outputReady, *this, &SelectorTest::onWrite);
+        //     _pos = 0;
+        //     std::memcpy(_buffer, _out.c_str(),  sizeof(_buffer));
+        //     pipe.in().beginWrite(_buffer, sizeof(_buffer));
+        //     connect(pipe.in().outputReady, *this, &SelectorTest::onWrite);
 
-            Pt::System::Selector selector;
-            selector.add( pipe.in() );
-            while(_pos < _out.size())
-            {
-                bool avail = selector.wait(5000);
-                PT_UNIT_ASSERT(avail);
-            }
+        //     Pt::System::Selector selector;
+        //     selector.add( pipe.in() );
+        //     while(_pos < _out.size())
+        //     {
+        //         bool avail = selector.wait(5000);
+        //         PT_UNIT_ASSERT(avail);
+        //     }
 
-            char buffer[1024];
-            size_t n = pipe.out().read(buffer, sizeof(buffer));
-            std::string inp(buffer, n);
-            this->reportMessage(inp);
+        //     char buffer[1024];
+        //     size_t n = pipe.out().read(buffer, sizeof(buffer));
+        //     std::string inp(buffer, n);
+        //     this->reportMessage(inp);
 
-            PT_UNIT_ASSERT(_out.find(inp) != std::string::npos);
-        }
+        //     PT_UNIT_ASSERT(_out.find(inp) != std::string::npos);
+        // }
 
-        void onWrite(Pt::System::IODevice& dev)
-        {
-            _pos += dev.endWrite();
-            size_t len= std::min(sizeof(_buffer), _out.size()-_pos);
-            std::memcpy(_buffer, &(_out.c_str()[_pos]), len);
+        // void onWrite(Pt::System::IODevice& dev)
+        // {
+        //     _pos += dev.endWrite();
+        //     size_t len= std::min(sizeof(_buffer), _out.size()-_pos);
+        //     std::memcpy(_buffer, &(_out.c_str()[_pos]), len);
 
-            if(len > 0)
-                dev.beginWrite(_buffer, len);
-        }
+        //     if(len > 0)
+        //         dev.beginWrite(_buffer, len);
+        // }
 
-        void RemoveTest()
-        {
-            std::string out("Hello World, where do you want to GOTO day!");
+        // void RemoveTest()
+        // {
+        //     std::string out("Hello World, where do you want to GOTO day!");
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            pipe.in().write( out.c_str(), out.size() );
+        //     Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+        //     pipe.in().write( out.c_str(), out.size() );
 
-            pipe.out().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.out().inputReady, *this, &SelectorTest::onReadRemove);
+        //     pipe.out().beginRead(_buffer, sizeof(_buffer));
+        //     connect(pipe.out().inputReady, *this, &SelectorTest::onReadRemove);
 
-            Pt::System::Selector selector;
-            selector.add( pipe.out() );
+        //     Pt::System::Selector selector;
+        //     selector.add( pipe.out() );
 
-            bool avail = selector.wait(5000);
-            PT_UNIT_ASSERT(avail);
-            avail = selector.wait(1000);
-            PT_UNIT_ASSERT(!avail);
-        }
+        //     bool avail = selector.wait(5000);
+        //     PT_UNIT_ASSERT(avail);
+        //     avail = selector.wait(1000);
+        //     PT_UNIT_ASSERT(!avail);
+        // }
 
-        void onReadRemove(Pt::System::IODevice& dev)
-        {
-            size_t sz = dev.endRead();
-            _result.append(_buffer, sz);
-            dev.close();
-        }
+        // void onReadRemove(Pt::System::IODevice& dev)
+        // {
+        //     size_t sz = dev.endRead();
+        //     _result.append(_buffer, sz);
+        //     dev.close();
+        // }
 
     private:
         std::string _out;
