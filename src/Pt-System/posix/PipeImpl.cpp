@@ -63,7 +63,8 @@ void PipeIODevice::redirect(int newFd, bool close)
     if (close)
     {
         IODevice::close();
-        _impl.open(newFd, async(), false);
+        // last arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
+        _impl.open(newFd, async(), true);
     }
 }
 
