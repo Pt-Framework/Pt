@@ -168,30 +168,23 @@ class PipeTest : public Pt::Unit::TestSuite
             inbuf.attach( pipe.out() );
             connect(inbuf.inputReady, *this, &PipeTest::onStreamInput);
 
-            //std::cerr << "\nOUT_AVAIL: " << outbuf.out_avail() << std::endl;
             PT_UNIT_ASSERT( 0 == outbuf.out_avail() );
-
-            //std::cerr << "Writing: " << "Hello world!" << std::endl;
             outbuf.sputn(_data.c_str(), 12);
-            //std::cerr << "OUT_AVAIL: " << outbuf.out_avail() << std::endl;
             PT_UNIT_ASSERT( 12 == outbuf.out_avail() );
             outbuf.beginWrite();
 
             _loop->run();
 
             PT_UNIT_ASSERT( 0 == inbuf.out_avail() );
-            //std::cerr << "IN_AVAIL: " << inbuf.in_avail() << std::endl;
         }
 
         void onStreamInput(Pt::System::StreamBuffer& buffer)
         {
             buffer.endRead();
-            //std::cerr << "IN_AVAIL: " << buffer.in_avail() << std::endl;
             PT_UNIT_ASSERT( 0 < buffer.in_avail() );
 
             char in[20];
             size_t n = buffer.sgetn( in, buffer.in_avail() );
-            //std::cerr << "Read: "; std::cerr.write(in, n ) << std::endl;
             PT_UNIT_ASSERT( 0 < n );
 
             std::string data(in, n);
@@ -202,7 +195,6 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onStreamOutput(Pt::System::StreamBuffer& buffer)
         {
-            //std::cerr << "Closing pipe" << std::endl;
             buffer.device()->close();
             inbuf.beginRead();
         }

@@ -85,7 +85,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
                   #SerialDeviceTest.cpp
-                  SelectorTest.cpp
+                  #SelectorTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   ;
