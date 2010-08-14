@@ -47,6 +47,7 @@ class PT_NET_API AddressInUse : public System::IOError
         {}
 };
 
+class TcpServerImpl;
 
   class PT_NET_API TcpServer : public System::Selectable
   {
