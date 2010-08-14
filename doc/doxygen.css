@@ -626,10 +626,10 @@ border-right: none;
 .sidebar a:hover {
     text-decoration: none;
     /* color: #154374; */
-color: rgb(55, 75, 165);
+    color: rgb(55, 75, 165);
 }
 
-#newsbar    {
+#sidebar    {
     float: right;
     width: 34%;
     margin: 0;
@@ -658,50 +658,66 @@ color: rgb(55, 75, 165);
     text-align:left;
 }
 
-#newstop {
+.newsbar {
     padding:5px 10px 5px 15px;
     background:url(box_header_bg.gif) no-repeat right 0px;
     color:white;
     font-weight:bold;
     font-size: 14px;
-    height:16px;
+    height: 16px;
 }
 
-.news-table {
-    text-align:left;
-}
-.news-table-header {
-    border-bottom: 2px solid #CCCCCC;
-}
-.news-table-date {
-    width:8em;
-}
-.news-article {
-    text-align:left;
-    /* border: 1px solid #CCCCCC; */
-    /* -moz-border-radius: 12px 12px 0px 0px; */
-}
-.news-article-header {
-    padding-top:8px;
-    /* border-bottom: 1px solid #CCCCCC; */
-    /* -moz-border-radius: 12pxfont-weight:bold;font-weight:bold; 12px 0px 0px; */
-
-}
-.news-article-header b {
+.newsbar-header {
     font-size: 14px;
-    /* color:#154374; */
-    color: rgb(55, 75, 165);
+    text-align: left;
+    padding-top: 8px;
+
 }
-.news-article-header i {
+.newsbar-header i {
     font-size: 12px;
     font-weight: normal;
 }
-.news-article-body {
+.newsbar-body {
     font-size: 12px;
     padding-top:5px;
     padding-bottom: 8px;
     border-bottom: 1px solid #CCCCCC;
     text-align: justify;
+}
+.newsbar-link {
+    margin-top: 4px;
+    text-align: right;
+}
+
+
+
+.news-article {
+    background:url(regular-news.png) no-repeat 740px 14px;
+    padding-left: 10px;
+    padding-right: 70px;
+    text-align:left;
+}
+.news-article-header {
+    font-size: 15px;
+    font-weight: bold;
+}
+.news-article-subheader {
+    font-size: 12px;
+    font-style: italic;
+    color: #000000;
+}
+.news-article-body {
+    font-size: 14px;
+    padding-top:14px;
+    padding-bottom: 14px;
+    text-align: justify;
+}
+#news-item2 {
+    padding-top: 14px;
+    margin-bottom: 14px;
+    background-color: #eff0f0;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
 }
 
 
