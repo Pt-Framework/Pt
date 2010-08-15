@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+    <title>Platinum C++ Framework</title>
+    <meta content="Pt Reference Manual" name="description">
+    <meta content="The Pt Development Team" name="author">
+    <link rel="stylesheet" href="htdocs/doxygen.css" type="text/css">
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="header">
+    <div id="logo"><h3>The Power in your Hands</h3></div>
+
+    <div class="search">
+        <form action="http://search.freefind.com/find.html" method="get" accept-charset="utf-8" target="_self">
+          <p style="margin: 0; padding-bottom:2px;"><b>Search Site:</b></p>
+          <p style="margin: 0;">
+            <input type="hidden" name="si" value="43943317">
+            <input type="hidden" name="pid" value="r">
+            <input type="hidden" name="n" value="0">
+            <input type="hidden" name="_charset_" value="">
+            <input type="hidden" name="bcd" value="&#247;">
+            <input style="background-color: #FFFFFF;
+                          border: 1px solid #ffffff;
+                          font-size: 12px;
+                          width: 160px"
+                   type="text" name="query" value="Search...">
+          </p>
+
+        </form>
+    </div>
+
+    <ul class="menu">
+        <li class="active"><a href="index.html">Main</a></li>
+        <li><a href="news.html">News</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="htdocs/docs.html">Documentation</a></li>
+        <li><a href="htdocs/download.html">Download</a></li>
+        <li><a href="htdocs/mailinglist.html">Support</a></li>
+    </ul>
+
+</div>
+
+<div class="contents">
+
+    <div id="sidebar">
+
+        <div class="sidemenu">
+            <div class="sidemenu-header">
+                About Pt
+            </div>
+            <div class="sidemenu-body">
+                <a>Why use Pt?</a>
+                <br/>
+                <a>Applications using Pt</a>
+                <br/>
+                <a>People</a>
+                <br/>
+                <a>Acknowledgements</a>
+                <br/>
+                <a>License</a>
+                <br/>
+                <a>FAQ</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="maintext">
+        <h2>Why use Pt?</h2>
+
+        <h3>Modular Design</h3>
+        <p>
+            Platinum is highly modular and every module builds to a separate libray.
+            Library modules can depend on other modules and form a hierarchy. The
+            core module is relatively small and the extentions make up for the
+            most part of the library. This allows the programmer to select only
+            the parts of the framework that he really needs.
+        </p>
+
+        <h3>Consistent use of the C++ Standard Library</h3>
+        <p>
+            The C++ standard library is available for almost all devices. It is one
+            of the best documented pieces of software in the C++ world and a great
+            example how both, good design and high performance can be achieved. Pt
+            truly embraces the C++ standard library like few others do and benefits
+            greatly from the effort the designers have put into it. IO is done
+            with real iostreams and there is no need for yet another string class or
+            set of container classes. All exceptions thrown by Pt are derived from
+            std::exception and std::allocators can be used when needed.
+        </p>
+
+        <h3>Error Handling using Exceptions</h3>
+        <p>
+            In traditional C/C++ programs without exceptions approximately half of
+            the code is required for error handling. Error states constantly have to
+            be checked and passed through the many layers that form a big application.
+            This is not only troublesome and error-prone, but can also have a very negative
+            effect on the performance. It requires to check for errors even in situations
+            when no error has occured. Exceptions have been introduced to the C++
+            language to solve these problems. They effectively separate error handling
+            from the normal program flow, which lets the program run faster and eliminates
+            many lines of code.
+        </p>
+
+        <h3>Generic Programming</h3>
+        <p>
+            Platinum makes extensive use of templates and generic programming and this is the
+            main reason why it beats most other toolkits in performance. This technique is
+            sometimes refered to as compile time polymorphism, because a compiler is able
+            to inline code more often and this eliminate many function calls. But
+            performance is is not the only reason for templates. Generic programming
+            offers flexibility and code reuse that can not easily achieved with classic
+            object-oriented methods.
+        </p>
+        <h3>Object-Orientation</h3>
+        <p>
+            Most of the framework consists of classes - it is a class library after all!
+            Multiple inheritance and RTTI are supported, and there are some prime example
+            within Pt how these often misunderstood features can lead to elegant and
+            robust code.
+        </p>
+
+    </div>
+</div>
+
+<div class="clear">&nbsp;</div>
+
+<div id="footer">
+	<div style="float:left;">Copyright &copy; 2003-2010 The Pt Development Team</div>
+	<div style="float:right;">Pt 1.0</div>
+</div>
+
+</div>
+
+</body>
+</html>
