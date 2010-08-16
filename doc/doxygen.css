@@ -413,6 +413,7 @@ TH.dirtab { background: #e8eef2;
 }
 
 #container .contents    {
+	clear: both;
     text-align: left;
     padding-top: 0px;
 }
