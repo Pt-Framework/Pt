@@ -31,7 +31,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
-#include "Pt/System/Thread.h"
+#include "Pt/System/EventLoop.h"
 #include <string>
 
 class TcpSocketTest : public Pt::Unit::TestSuite
@@ -39,9 +39,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
     public:
         TcpSocketTest()
         : Pt::Unit::TestSuite("TcpSocketTest")
+        , _loop(0)
         {
-            this->registerMethod( "NonBlockingWithSelector", *this,
-                                  &TcpSocketTest::NonBlockingWithSelector);
+            this->registerMethod( "NonBlockingWithLoop", *this,
+                                  &TcpSocketTest::NonBlockingWithLoop);
             this->registerMethod( "NonBlockingWithWait", *this,
                                   &TcpSocketTest::NonBlockingWithWait);
             this->registerMethod( "ConnectFailed", *this,
@@ -50,19 +51,26 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void setUp()
         {
+            _loop = new Pt::System::EventLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop->setIdleTimeout(2000);
+
             _acceptor = new Pt::Net::TcpSocket();
+
+            _connectFailed = false;
         }
 
         void tearDown()
         {
             _acceptor->close();
             delete _acceptor;
+
+            delete _loop;
+            _loop = 0;
         }
 
         void ConnectFailed()
         {
-            Pt::System::Selector selector;
-
             Pt::Net::TcpSocket client;
             connect(client.connected, *this, &TcpSocketTest::onConnectFailed);
 
@@ -70,17 +78,22 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             {
                 client.beginConnect("127.0.0.2", 9000);
             }
-            catch(const Pt::System::IOError& ex)
+            catch(const Pt::System::IOError&)
             {
+                // success
                 return;
             }
 
-            selector.add(client);
-            selector.wait(1000);
+            _loop->add(client);
+            _loop->run();
+
+            PT_UNIT_ASSERT( _connectFailed );
         }
 
         void onConnectFailed(Pt::Net::TcpSocket& socket)
         {
+            _connectFailed = true;
+            _loop->exit();
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
 
@@ -98,7 +111,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             connect(client.outputReady, *this, &TcpSocketTest::onOutput);
             client.beginConnect("127.0.0.1", 8000);
 
-            server.wait(1000); //on accept 
+            server.wait(1000); //on accept
             client.wait(1000); //on connect
 			client.wait(1000); //on write
             _acceptor->wait(1000);//on read
@@ -106,30 +119,25 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             this->reportMessage("FINISHED");
         }
 
-        void NonBlockingWithSelector()
+        void NonBlockingWithLoop()
         {
             Pt::Net::TcpServer server("127.0.0.1", 8000);
             //{
                 this->reportMessage("\nSTART");
-                Pt::System::Selector selector;
 
                 connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
-                selector.add(server);
+                _loop->add(server);
 
                 connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
-                selector.add(*_acceptor);
+                _loop->add(*_acceptor);
 
                 Pt::Net::TcpSocket client;
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
                 client.beginConnect("127.0.0.1", 8000);
-				selector.add(client);				
-                
+				_loop->add(client);
 
-                selector.wait(1000);
-                selector.wait(1000);
-                selector.wait(1000);
-                selector.wait(1000);
+                _loop->run();
 
             //    server.close();
             //}
@@ -159,6 +167,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void onInput(Pt::System::IODevice& device)
         {
+            _loop->exit();
             std::size_t n = device.endRead();
             std::string msg("INPUT RECEIVED: ");
             msg.append(input, n);
@@ -175,7 +184,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
     private:
         Pt::Net::TcpSocket* _acceptor;
+        Pt::System::EventLoop* _loop;
         char input[200];
+        bool _connectFailed;
 
 };
 
