@@ -35,6 +35,7 @@ H2 {
     color: #000000;
     font-weight: normal;
     margin-top: 15px;
+    border-bottom:1px solid #CCCCCC;
 }
 H2 A {
 	font-size: 20px;
@@ -690,11 +691,13 @@ border-right: none;
 }
 
 
-
+#news-main {
+    float: left;
+    width: 63%;
+    padding: 5px 0px 0px 0px;
+}
 .news-article {
-    background:url(regular-news.png) no-repeat 740px 14px;
     padding-left: 10px;
-    padding-right: 70px;
     text-align:left;
 }
 .news-article-header {
@@ -707,9 +710,12 @@ border-right: none;
     color: #000000;
 }
 .news-article-body {
+    background:url(regular-news.png) no-repeat left 14px;
     font-size: 14px;
     padding-top:14px;
     padding-bottom: 14px;
+    padding-left: 60px;
+    padding-right: 20px;
     text-align: justify;
 }
 #news-item2 {
