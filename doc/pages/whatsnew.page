@@ -1,4 +1,4 @@
-/** \page whatsnew What's New
+/** \page whatsnew_old What's New
 
 @section modular_design Modular Design
 Platinum is highly modular and every module builds to a separate libray.
