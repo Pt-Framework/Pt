@@ -24,9 +24,6 @@ class ClockImpl
         static Timespan getSystemTicks();
 
     private:
-        DWORD           _procAffinity;
-        DWORD           _sysAffinity;
-        HANDLE          _currentProcessHandle;
         LARGE_INTEGER   _frequency;
         LARGE_INTEGER   _startValue;
         LARGE_INTEGER   _stopValue;

@@ -34,26 +34,35 @@ namespace Pt {
 namespace System {
 
 ClockImpl::ClockImpl()
-: _procAffinity(0)
-, _sysAffinity(0)
-, _currentProcessHandle(0)
 {
-    _currentProcessHandle = GetCurrentProcess();
+    //DWORD procAffinity;
+    //DWORD sysAffinity;
+    DWORD_PTR cpuMask = 0x01;
 
 #ifndef _WIN32_WCE
+    // HANDLE currentProcessHandle = GetCurrentProcess();
 
-    if( !GetProcessAffinityMask( _currentProcessHandle,  &_procAffinity, &_sysAffinity ))
-        throw SystemError( PT_ERROR_MSG("GetProcessAffinityMask failed") );
+    // if( ! GetProcessAffinityMask( currentProcessHandle,  &procAffinity, &sysAffinity ))
+    //     throw SystemError( PT_ERROR_MSG("GetProcessAffinityMask failed") );
 
-    if( !SetProcessAffinityMask( _currentProcessHandle, 0x01 ) )
-        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
+    // if( ! SetProcessAffinityMask( currentProcessHandle, 0x01 ) )
+    //     throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
 
-    if( !SetThreadAffinityMask( GetCurrentThread(), 0x01 ) )
+    DWORD_PTR threadAffinity = SetThreadAffinityMask( GetCurrentThread(), cpuMask );
+    if( ! threadAffinity )
         throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
 #endif
 
-    if( !QueryPerformanceFrequency( &_frequency ) )
+    if( ! QueryPerformanceFrequency( &_frequency ) )
         throw SystemError( PT_ERROR_MSG("QueryPerformanceFrequency failed") );
+
+#ifndef _WIN32_WCE
+    // if( ! SetProcessAffinityMask( currentProcessHandle, procAffinity ) )
+    //     throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
+
+    if( ! SetThreadAffinityMask( GetCurrentThread(), threadAffinity ) )
+        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
+#endif
 }
 
 
