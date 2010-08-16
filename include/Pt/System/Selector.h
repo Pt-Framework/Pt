@@ -172,16 +172,6 @@ namespace System {
             */
             void remove(Timer& timer);
 
-            /** @brief Wait for activity
-
-                This method will wait for activity on the registered
-                Selectables and Timers. Use Selector::WaitInfinite to
-                wait without timeout.
-
-                @param true on timeout
-            */
-            bool wait(std::size_t msecs = WaitInfinite);
-
             /** @brief Wakes the selctor from waiting
 
                 This method can be used to end a Selector::wait call
@@ -193,6 +183,16 @@ namespace System {
         protected:
             //! @brief Default constructor
             SelectorBase();
+
+            /** @brief Wait for activity
+
+                This method will wait for activity on the registered
+                Selectables and Timers. Use Selector::WaitInfinite to
+                wait without timeout.
+
+                @param true on timeout
+            */
+            bool wait(std::size_t msecs = WaitInfinite);
 
             void onAddTimer(Timer& timer);
 

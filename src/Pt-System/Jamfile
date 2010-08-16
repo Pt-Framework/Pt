@@ -74,9 +74,9 @@ Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System  ;
 Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
 
-Main PipeDemo : PipeDemo.cpp ;
-Main_LinkSharedLibraries PipeDemo : Pt Pt-System  ;
-Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
+# Main PipeDemo : PipeDemo.cpp ;
+# Main_LinkSharedLibraries PipeDemo : Pt Pt-System  ;
+# Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
 PT_SYSTEM_TESTS = ApplicationTest.cpp
                   DirectoryTest.cpp

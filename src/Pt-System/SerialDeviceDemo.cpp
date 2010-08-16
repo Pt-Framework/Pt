@@ -26,7 +26,7 @@
 #include <Pt/Main.h>
 #include <Pt/System/SerialDevice.h>
 #include <Pt/System/Thread.h>
-#include <Pt/System/Selector.h>
+#include <Pt/System/EventLoop.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -88,8 +88,8 @@ void readMousePnp(const std::string& port)
 
 const size_t size = 1024;
 char buffer[size];
-        
-        
+
+
 void onInput(Pt::System::IODevice& dev)
 {
     size_t n = dev.endRead();
@@ -110,7 +110,7 @@ int main( int argc, char* argv[] )
     {
         std::string port = argv[1]; // COM1: or /dev/ttyS0
         std::cerr << "'=> Opening " << port << std::endl;
-        
+
         readMousePnp(port);
 
         Pt::System::SerialDevice serialDevice(port, Pt::System::SerialDevice::Read);
@@ -121,15 +121,12 @@ int main( int argc, char* argv[] )
         serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
         serialDevice.setTimeout(100);
         connect(serialDevice.inputReady, onInput);
-        
-        Pt::System::Selector selector;
-        selector.add(serialDevice);
+
+        Pt::System::EventLoop loop;
+        loop.add(serialDevice);
 
         serialDevice.beginRead(buffer, size);
-        while(true)
-        {
-            selector.wait();
-        }
+        loop.run();
     }
     catch (const std::exception& e)
     {

@@ -91,69 +91,69 @@ void EventLoop::onChanged(Selectable& s)
 }
 
 
-void EventLoop::onRun()
-{
-    while( true )
-    {
-        RecursiveLock lock(_queueMutex);
-
-        if(_exitLoop)
-        {
-            _exitLoop = false;
-            break;
-        }
-
-        if( !_eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }
-
-        lock.unlock();
-
-        bool active = this->wait( this->idleTimeout() );
-        if( ! active )
-            timeout.send();
-    }
-
-    exited();
-}
-
-
 // void EventLoop::onRun()
 // {
 //     while( true )
 //     {
-//         WaitResult result = this->waitNext( this->idleTimeout() );
+//         RecursiveLock lock(_queueMutex);
 
-//         if( result.isTimeout() )
+//         if(_exitLoop)
 //         {
-//             timeout.send();
-//             continue;
+//             _exitLoop = false;
+//             break;
 //         }
 
-//         if( result.isEvent() )
+//         if( !_eventQueue.empty() )
 //         {
-//             RecursiveLock lock(_queueMutex);
-
-//             if(_exitLoop)
-//             {
-//                 _exitLoop = false;
-//                 break;
-//             }
-
-//             if( ! _eventQueue.empty() )
-//             {
-//                 lock.unlock();
-//                 this->processEvents();
-//             }
-
 //             lock.unlock();
+//             this->processEvents();
 //         }
+
+//         lock.unlock();
+
+//         bool active = this->wait( this->idleTimeout() );
+//         if( ! active )
+//             timeout.send();
 //     }
 
 //     exited();
 // }
+
+
+void EventLoop::onRun()
+{
+    while( true )
+    {
+        WaitResult result = this->waitNext( this->idleTimeout() );
+
+        if( result.isTimeout() )
+        {
+            timeout.send();
+            continue;
+        }
+
+        if( result.isEvent() )
+        {
+            RecursiveLock lock(_queueMutex);
+
+            if(_exitLoop)
+            {
+                _exitLoop = false;
+                break;
+            }
+
+            if( ! _eventQueue.empty() )
+            {
+                lock.unlock();
+                this->processEvents();
+            }
+
+            lock.unlock();
+        }
+    }
+
+    exited();
+}
 
 
 WaitResult EventLoop::waitNext(std::size_t msecs)
