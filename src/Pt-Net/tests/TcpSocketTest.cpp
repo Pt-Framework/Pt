@@ -56,8 +56,6 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _loop->setIdleTimeout(2000);
 
             _acceptor = new Pt::Net::TcpSocket();
-
-            _connectFailed = false;
         }
 
         void tearDown()
@@ -86,13 +84,11 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             _loop->add(client);
             _loop->run();
-
-            PT_UNIT_ASSERT( _connectFailed );
+            PT_UNIT_ASSERT( false == client.isConnected() );
         }
 
         void onConnectFailed(Pt::Net::TcpSocket& socket)
         {
-            _connectFailed = true;
             _loop->exit();
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
@@ -186,8 +182,6 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         Pt::Net::TcpSocket* _acceptor;
         Pt::System::EventLoop* _loop;
         char input[200];
-        bool _connectFailed;
-
 };
 
 Pt::Unit::RegisterTest<TcpSocketTest> register_TcpSocketTest;
