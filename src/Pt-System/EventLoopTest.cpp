@@ -79,6 +79,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("EventLoopTest")
         {
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
+            //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
             Pt::Unit::TestSuite::registerMethod( "IdleTimeout", *this, &EventLoopTest::IdleTimeout);
         }
 
@@ -130,6 +131,39 @@ class EventLoopTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(elapsed.totalMSecs() > 280);
             PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
         }
+
+        // Pt::System::EventLoop* _loop;
+
+        // void LoopBenchmark()
+        // {
+        //     Pt::System::EventLoop el;
+        //     connect(el.timeout, el, &Pt::System::EventLoop::exit);
+        //     el.setIdleTimeout(500);
+
+        //     el.event.subscribe( slot(*this, &EventLoopTest::onBenchmarkEvent) );
+
+        //     _loop = &el;
+        //     el.commitEvent( E1() );
+
+        //     Pt::System::Clock clock;
+        //     clock.start();
+        //     el.run();
+        //     Pt::Timespan elapsed = clock.stop();
+
+        //     std::cerr << "\n#### LoopTime: " << ( 5000000/elapsed.totalMSecs() ) * 1000 << " ev/s" << std::endl;
+        //     std::exit(1);
+        // }
+
+        // void onBenchmarkEvent(const E1&)
+        // {
+        //     if(++_cnt > 5000000)
+        //     {
+        //         _loop->exit();
+        //         return;
+        //     }
+
+        //     _loop->commitEvent( E1() );
+        // }
 
         private:
             int _cnt;
