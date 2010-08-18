@@ -36,8 +36,6 @@ namespace Pt {
 
 namespace System {
 
-    class SelectorBase;
-
     /** @brief Notifies clients in constant intervals
 
         Timers can be used to be notified if a time interval expires. It
