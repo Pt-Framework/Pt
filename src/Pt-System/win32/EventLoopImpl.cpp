@@ -41,7 +41,6 @@ namespace Pt {
 namespace System {
 
 EventLoopImpl::EventLoopImpl()
-: _app(0)
 {
     _current = _devices.end();
     _currentAvail = _avail.end();

@@ -29,7 +29,7 @@
 #include "win32.h"
 #include "SerialDeviceImpl.h"
 #include "Pt/System/IODevice.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
 #include "Pt/System/SystemError.h"
 #include <iostream>
 
@@ -130,12 +130,12 @@ void SerialDeviceImpl::close()
 }
 
 
-void SerialDeviceImpl::attach(SelectorBase& s)
+void SerialDeviceImpl::attach(EventLoopBase& s)
 {
 }
 
 
-void SerialDeviceImpl::detach(SelectorBase& s)
+void SerialDeviceImpl::detach(EventLoopBase& s)
 {
     bool active = false;
     this->setWaitHandle(_waitHandle, active);

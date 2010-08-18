@@ -82,10 +82,10 @@ class TcpServerImpl;
       virtual bool onWait(std::size_t msecs);
 
       // inherit doc
-      virtual void onAttach(System::SelectorBase&);
+      virtual void onAttach(System::EventLoopBase&);
 
       // inherit doc
-      virtual void onDetach(System::SelectorBase&);
+      virtual void onDetach(System::EventLoopBase&);
   };
 
 } // namespace Net

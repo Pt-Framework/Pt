@@ -39,7 +39,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void open(HANDLE handle, bool isAsync);
 
         virtual bool checkEvent();
-        
+
         virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         virtual IODeviceImpl& ioimpl()
@@ -51,10 +51,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 		void redirect(int newFd, bool close = true);
 
     protected:
-        void onAttach(SelectorBase& s);
+        void onAttach(EventLoopBase& s);
 
-        void onDetach(SelectorBase& s);
-    
+        void onDetach(EventLoopBase& s);
+
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
@@ -64,7 +64,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         size_t onEndWrite();
 
         bool onWait(std::size_t msecs);
-        
+
         //! @brief Closes the I/O device
         virtual void onClose();
 
@@ -75,9 +75,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual size_t onWrite(const char* buffer, size_t count);
 
         virtual void onSync() const;
-		
+
 		virtual void onCancel() ;
-        
+
      private:
         HANDLE _waitHandle;
         OVERLAPPED _readOv;

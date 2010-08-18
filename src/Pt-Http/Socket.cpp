@@ -105,7 +105,7 @@ void Socket::accept()
     _timer.start(_server.readTimeout());
 }
 
-void Socket::setSelector(System::SelectorBase* s)
+void Socket::setSelector(System::EventLoopBase* s)
 {
     s->add(*this);
     s->add(_timer);

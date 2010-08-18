@@ -97,10 +97,10 @@ class PT_NET_API TcpSocket : public System::IODevice
         virtual bool onWait(std::size_t msecs);
 
         // inherit doc
-        virtual void onAttach(System::SelectorBase&);
+        virtual void onAttach(System::EventLoopBase&);
 
         // inherit doc
-        virtual void onDetach(System::SelectorBase&);
+        virtual void onDetach(System::EventLoopBase&);
 
         // inherit doc
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);

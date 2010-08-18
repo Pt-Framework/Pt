@@ -50,11 +50,6 @@ class EventLoopImpl
 
         void wake();
 
-        void setParent(Application* app)
-        {
-            _app = app;
-        }
-
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
@@ -64,7 +59,6 @@ class EventLoopImpl
         std::set<Selectable*> _devices;
         std::set<Selectable*> _dirty;
         std::set<Selectable*> _avail;
-        Application* _app;
 };
 
 }//namespace System

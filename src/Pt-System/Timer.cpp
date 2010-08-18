@@ -25,7 +25,7 @@
  */
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
 #include <limits>
 
 namespace Pt {
@@ -158,7 +158,7 @@ bool Timer::update(const Timespan& now)
 }
 
 
-void Timer::setSelector(SelectorBase* selector)
+void Timer::setSelector(EventLoopBase* selector)
 {
     if(_selector == selector)
         return;

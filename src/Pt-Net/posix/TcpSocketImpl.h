@@ -43,7 +43,7 @@
 namespace Pt {
 
 namespace System {
-    class SelectorBase;
+    class EventLoopBase;
 }
 
 namespace Net {

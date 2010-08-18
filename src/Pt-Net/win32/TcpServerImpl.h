@@ -44,7 +44,7 @@
 namespace Pt {
 
 namespace System {
-    class SelectorBase;
+    class EventLoopBase;
 }
 
 namespace Net {
@@ -82,9 +82,9 @@ class TcpServerImpl : public System::SelectableImpl
         HANDLE waitHandle() const;
         bool wait(std::size_t msecs);
 
-        void attach(System::SelectorBase& s);
+        void attach(System::EventLoopBase& s);
 
-        void detach(System::SelectorBase& s);
+        void detach(System::EventLoopBase& s);
 
         // implementation using WSAEventSelect
         virtual bool setWaitHandle(HANDLE h, bool& avail);

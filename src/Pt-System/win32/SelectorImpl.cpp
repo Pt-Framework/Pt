@@ -155,7 +155,7 @@ bool SelectorImpl::wait( std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
-    if(umsecs == Selector::WaitInfinite)
+    if(umsecs == SelectorBase::WaitInfinite)
     {
         msecs = INFINITE;
     }
@@ -261,7 +261,7 @@ WaitResult SelectorImpl::waitNext( std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
-    if(umsecs == Selector::WaitInfinite)
+    if(umsecs == SelectorBase::WaitInfinite)
     {
         msecs = INFINITE;
     }

@@ -30,7 +30,7 @@
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Selector.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
@@ -41,7 +41,7 @@ class SelectableImpl;
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
-        static const std::size_t WaitInfinite = Selector::WaitInfinite;
+        static const std::size_t WaitInfinite = EventLoopBase::WaitInfinite;
 
         enum State
         {
@@ -55,11 +55,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
-        void setSelector(SelectorBase* parent);
+        void setSelector(EventLoopBase* parent);
 
-        SelectorBase* selector();
+        EventLoopBase* selector();
 
-        const SelectorBase* selector() const;
+        const EventLoopBase* selector() const;
 
         //! @brief Closes the I/O device
         /*!
@@ -103,12 +103,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual bool onWait(std::size_t msecs) = 0;
 
-        virtual void onAttach(SelectorBase&) = 0;
+        virtual void onAttach(EventLoopBase&) = 0;
 
-        virtual void onDetach(SelectorBase&) = 0;
+        virtual void onDetach(EventLoopBase&) = 0;
 
     private:
-        SelectorBase* _parent;
+        EventLoopBase* _parent;
         State _state;
 };
 

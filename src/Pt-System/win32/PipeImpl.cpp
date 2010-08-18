@@ -27,8 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "PipeImpl.h"
-#include "SelectorImpl.h"
-#include "Pt/System/Selector.h"
+#include "Pt/System/EventLoop.h"
 #include "Pt/System/SystemError.h"
 #include <windows.h>
 #include <sstream>
@@ -134,11 +133,11 @@ bool PipeIODevice::onWait(std::size_t msecs)
 bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 {
     // set avail to true if data is immediately available. This will
-    // let the Selector check the other Selectables with a timeout of
+    // let the EventLoop check the other Selectables with a timeout of
     // 0 and call checkEvent on this object
 
     // the previous handle might be this objects event handle
-    // or the one assigned by the Selector
+    // or the one assigned by the EventLoop
     HANDLE prevHandle = _readOv.hEvent;
 
     // if the handle changes, we need to stop any previous I/O operation
@@ -162,7 +161,7 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 
     // If _rbuf is set by IODevice::beginRead but the previous event used in
     // the overlapped structs is NULL, IODevice::beginRead was called before
-    // the IODevice was added to a Selector or IODevice::wait was called for
+    // the IODevice was added to a EventLoop or IODevice::wait was called for
     // the first time.
     if( ! prevHandle && _rbuf )
     {
@@ -207,14 +206,14 @@ bool PipeIODevice::checkEvent()
 }
 
 
-void PipeIODevice::onAttach(SelectorBase& s)
+void PipeIODevice::onAttach(EventLoopBase& s)
 {
 }
 
 
-void PipeIODevice::onDetach(SelectorBase& s)
+void PipeIODevice::onDetach(EventLoopBase& s)
 {
-    // handle the case when we were added to a Selector and beginRead
+    // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
     // cancel the overlapped operation or set the active flag in which
     // case we set Avail so the next waiter knows data is available
@@ -234,7 +233,7 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
         return 0;
 
     // if we can can read data immediately, we return the number of bytes
-    // that were read, so the Selector calls checkEvent on us even if the
+    // that were read, so the EventLoop calls checkEvent on us even if the
     // event in the overlapped struct is not fired
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
@@ -260,12 +259,12 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 size_t PipeIODevice::onEndRead(bool& eof)
 {
     if( this->eof() )
-    { 
+    {
         eof = true;
         return 0;
     }
 
-    // a IODevice::beginRead outside a Selector was followed by an endRead
+    // a IODevice::beginRead outside a EventLoop was followed by an endRead
     // This happens when the IODevice is async, but used synchronously
     if(_readOv.hEvent == NULL)
     {

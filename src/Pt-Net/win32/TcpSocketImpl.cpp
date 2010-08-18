@@ -262,14 +262,14 @@ void TcpSocketImpl::endConnect()
 }
 
 
-void TcpSocketImpl::detach(System::SelectorBase& sb)
+void TcpSocketImpl::detach(System::EventLoopBase& sb)
 {
 	if( _fd != INVALID_SOCKET)
 		attachEvent(_waitEvent, _eventFlags);
 }
 
 
-void TcpSocketImpl::attach(System::SelectorBase& sb)
+void TcpSocketImpl::attach(System::EventLoopBase& sb)
 {
 }
 
@@ -298,7 +298,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     log_debug(_fd << " wait " << umsecs);
 
     int msecs = umsecs;
-	if(umsecs == Pt::System::SelectorBase::WaitInfinite)
+	if(umsecs == Pt::System::EventLoopBase::WaitInfinite)
     {
         msecs = INFINITE;
     }

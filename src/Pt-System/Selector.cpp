@@ -32,123 +32,123 @@ namespace Pt {
 
 namespace System {
 
-SelectorBase::~SelectorBase()
-{
-    while( _timers.size() )
-    {
-       Timer* timer = _timers.begin()->second;
-        timer->setSelector(0);
-    }
+// SelectorBase::~SelectorBase()
+// {
+//     while( _timers.size() )
+//     {
+//        Timer* timer = _timers.begin()->second;
+//         timer->setSelector(0);
+//     }
 
-    //while( _selectables.size() )
-    //{
-    //   Selectable* sel = *_selectables.begin();
-    //    sel->setSelector(0);
-    //}
-}
-
-
-void SelectorBase::add(Selectable& s)
-{
-    s.setSelector(this);
-}
+//     //while( _selectables.size() )
+//     //{
+//     //   Selectable* sel = *_selectables.begin();
+//     //    sel->setSelector(0);
+//     //}
+// }
 
 
-void SelectorBase::remove(Selectable& s)
-{
-    if(s.selector() == this)
-        s.setSelector(0);
-}
+// void SelectorBase::add(Selectable& s)
+// {
+//     s.setSelector(this);
+// }
 
 
-void SelectorBase::add(Timer& timer)
-{
-    timer.setSelector(this);
-}
+// void SelectorBase::remove(Selectable& s)
+// {
+//     if(s.selector() == this)
+//         s.setSelector(0);
+// }
 
 
-void SelectorBase::remove( Timer& timer )
-{
-    if(timer.selector() == this)
-        timer.setSelector(0);
-}
+// void SelectorBase::add(Timer& timer)
+// {
+//     timer.setSelector(this);
+// }
 
 
-void SelectorBase::onAddTimer(Timer& timer)
-{
-    if( timer.active() )
-    {
-        TimerMap::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-        //_timers.insert( std::make_pair(timer.finished(), &timer) );
-    }
-}
+// void SelectorBase::remove( Timer& timer )
+// {
+//     if(timer.selector() == this)
+//         timer.setSelector(0);
+// }
 
 
-void SelectorBase::onRemoveTimer( Timer& timer )
-{
-    std::multimap<Timespan, Timer*>::iterator it;
-    for(it = _timers.begin(); it != _timers.end(); ++it)
-    {
-        if(it->second == &timer)
-        {
-            _timers.erase(it);
-            return;
-        }
-    }
-}
+// void SelectorBase::onAddTimer(Timer& timer)
+// {
+//     if( timer.active() )
+//     {
+//         TimerMap::value_type elem(timer.finished(), &timer);
+//         _timers.insert(elem);
+//         //_timers.insert( std::make_pair(timer.finished(), &timer) );
+//     }
+// }
 
 
-void SelectorBase::onTimerChanged(Timer& timer)
-{
-    if( timer.active() )
-    {
-        TimerMap::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-        //_timers.insert( std::make_pair(timer.finished(), &timer) );
-    }
-    else
-    {
-        SelectorBase::onRemoveTimer(timer);
-    }
-}
+// void SelectorBase::onRemoveTimer( Timer& timer )
+// {
+//     std::multimap<Timespan, Timer*>::iterator it;
+//     for(it = _timers.begin(); it != _timers.end(); ++it)
+//     {
+//         if(it->second == &timer)
+//         {
+//             _timers.erase(it);
+//             return;
+//         }
+//     }
+// }
 
 
-bool SelectorBase::updateTimer(std::size_t& lowestTimeout)
-{
-    if( _timers.empty() )
-        return false;
+// void SelectorBase::onTimerChanged(Timer& timer)
+// {
+//     if( timer.active() )
+//     {
+//         TimerMap::value_type elem(timer.finished(), &timer);
+//         _timers.insert(elem);
+//         //_timers.insert( std::make_pair(timer.finished(), &timer) );
+//     }
+//     else
+//     {
+//         SelectorBase::onRemoveTimer(timer);
+//     }
+// }
 
-    Timespan now = Clock::getSystemTicks();
-    Timer* timer = _timers.begin()->second;
-    bool timerActive = now >= timer->finished();
-	
-    while( ! _timers.empty() )
-    {
-        timer = _timers.begin()->second;
 
-        if( now < timer->finished() )
-        {
-            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
-            lowestTimeout = (remaining / 1000);
-            if(remaining % 1000 > 0) ++lowestTimeout;
-            break;
-        }
+// bool SelectorBase::updateTimer(std::size_t& lowestTimeout)
+// {
+//     if( _timers.empty() )
+//         return false;
 
-        timer->update(now);
+//     Timespan now = Clock::getSystemTicks();
+//     Timer* timer = _timers.begin()->second;
+//     bool timerActive = now >= timer->finished();
 
-        if( ! _timers.empty() )
-        {
-            timer = _timers.begin()->second;
-            _timers.erase( _timers.begin() );
-            TimerMap::value_type elem(timer->finished(), timer);
-            _timers.insert(elem);
-            //_timers.insert( std::make_pair(timer->finished(), timer) );
-        }
-    }
+//     while( ! _timers.empty() )
+//     {
+//         timer = _timers.begin()->second;
 
-    return timerActive;
-}
+//         if( now < timer->finished() )
+//         {
+//             Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+//             lowestTimeout = (remaining / 1000);
+//             if(remaining % 1000 > 0) ++lowestTimeout;
+//             break;
+//         }
+
+//         timer->update(now);
+
+//         if( ! _timers.empty() )
+//         {
+//             timer = _timers.begin()->second;
+//             _timers.erase( _timers.begin() );
+//             TimerMap::value_type elem(timer->finished(), timer);
+//             _timers.insert(elem);
+//             //_timers.insert( std::make_pair(timer->finished(), timer) );
+//         }
+//     }
+
+//     return timerActive;
+// }
 
 
 /*bool SelectorBase::wait(unsigned int msecs)
@@ -181,50 +181,50 @@ bool SelectorBase::updateTimer(std::size_t& lowestTimeout)
 }*/
 
 
-bool SelectorBase::wait(std::size_t msecs)
-{
-    size_t timerTimeout = Selector::WaitInfinite;
+// bool SelectorBase::wait(std::size_t msecs)
+// {
+//     size_t timerTimeout = SelectorBase::WaitInfinite;
 
-    // If a timer is immediately ready, still check for an
-    // active selectable to avoid timer preemption
-    if ( updateTimer(timerTimeout) )
-    {
-        this->onWait(0);
-        return true;
-    }
+//     // If a timer is immediately ready, still check for an
+//     // active selectable to avoid timer preemption
+//     if ( updateTimer(timerTimeout) )
+//     {
+//         this->onWait(0);
+//         return true;
+//     }
 
-    // This handles the case when no timer will become
-    // active in the given timeout. The result of the
-    // wait call indicates activity
-    if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
-    {
-        return this->onWait(msecs);
-    }
+//     // This handles the case when no timer will become
+//     // active in the given timeout. The result of the
+//     // wait call indicates activity
+//     if(timerTimeout > msecs || timerTimeout == SelectorBase::WaitInfinite)
+//     {
+//         return this->onWait(msecs);
+//     }
 
-    // A timer will become active before the timeout expires
-    while(true)
-    {
-        if( this->onWait(timerTimeout) )
-            return true;
+//     // A timer will become active before the timeout expires
+//     while(true)
+//     {
+//         if( this->onWait(timerTimeout) )
+//             return true;
 
-        if( updateTimer(timerTimeout) )
-            return true;
-    }
+//         if( updateTimer(timerTimeout) )
+//             return true;
+//     }
 
-    return false;
-}
-
-
-void SelectorBase::wake()
-{
-    this->onWake();
-}
+//     return false;
+// }
 
 
-SelectorBase::SelectorBase()
-{}
+// void SelectorBase::wake()
+// {
+//     this->onWake();
+// }
 
 
+// SelectorBase::SelectorBase()
+// {}
+
+/*
 Selector::Selector()
 : _impl( 0 )
 {
@@ -277,6 +277,7 @@ SelectorImpl& Selector::impl()
 {
 	return *_impl;
 }
+*/
 
 }//namespace System
 

@@ -93,7 +93,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 }
 
 
-ClientImpl::ClientImpl(Client* client, System::SelectorBase& selector, const Net::AddrInfo& addrinfo)
+ClientImpl::ClientImpl(Client* client, System::EventLoopBase& selector, const Net::AddrInfo& addrinfo)
 : _client(client)
 , _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
@@ -115,7 +115,7 @@ ClientImpl::ClientImpl(Client* client, System::SelectorBase& selector, const Net
 }
 
 
-void ClientImpl::setSelector(System::SelectorBase& selector)
+void ClientImpl::setSelector(System::EventLoopBase& selector)
 {
     selector.add(_socket);
 }

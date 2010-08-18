@@ -221,13 +221,13 @@ SelectableImpl& SerialDevice::simpl()
 }
 
 
-void SerialDevice::onAttach(SelectorBase& s)
+void SerialDevice::onAttach(EventLoopBase& s)
 {
     _impl->attach(s);
 }
 
 
-void SerialDevice::onDetach(SelectorBase& s)
+void SerialDevice::onDetach(EventLoopBase& s)
 {
     _impl->detach(s);
 }

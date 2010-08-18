@@ -32,7 +32,7 @@
 #include "TcpServerImpl.h"
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
-#include <Pt/System/Selector.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/System/Selectable.h>
 #include <cerrno>
 #include <cassert>
@@ -194,7 +194,7 @@ bool TcpServerImpl::wait(std::size_t umsecs)
 
     // convert unsigned to signed
     int msecs = umsecs;
-	if(umsecs == Pt::System::SelectorBase::WaitInfinite) 
+	if(umsecs == Pt::System::EventLoopBase::WaitInfinite) 
     {
         msecs = INFINITE;
     }
@@ -216,13 +216,13 @@ bool TcpServerImpl::wait(std::size_t umsecs)
 }
 
 
-void TcpServerImpl::attach(System::SelectorBase& s)
+void TcpServerImpl::attach(System::EventLoopBase& s)
 {
     log_debug("attach to selector");
 }
 
 
-void TcpServerImpl::detach(System::SelectorBase& s)
+void TcpServerImpl::detach(System::EventLoopBase& s)
 {
     log_debug("detach from selector");
 

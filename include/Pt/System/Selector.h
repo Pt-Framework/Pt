@@ -41,62 +41,62 @@ namespace Pt {
 
 namespace System {
 
-    class Timer;
-    class Selectable;
-    class Application;
-    class SelectorImpl;
+    // class Timer;
+    // class Selectable;
+    // class Application;
+    // class SelectorImpl;
 
-    class WaitResult
-    {
-        enum ResultType
-        {
-            Timeout = 0x00,
-            Event   = 0x01,
-            Device  = 0x02,
-            Timer   = 0x04
-        };
+    // class WaitResult
+    // {
+    //     enum ResultType
+    //     {
+    //         Timeout = 0x00,
+    //         Event   = 0x01,
+    //         Device  = 0x02,
+    //         Timer   = 0x04
+    //     };
 
-        public:
-            WaitResult()
-            : _type(Timeout)
-            {}
+    //     public:
+    //         WaitResult()
+    //         : _type(Timeout)
+    //         {}
 
-            bool isTimeout() const
-            { return _type == WaitResult::Timeout; }
+    //         bool isTimeout() const
+    //         { return _type == WaitResult::Timeout; }
 
-            bool isActive() const
-            { return _type != WaitResult::Timeout; }
+    //         bool isActive() const
+    //         { return _type != WaitResult::Timeout; }
 
-            bool isEvent() const
-            { return WaitResult::Event == (_type & WaitResult::Event); }
+    //         bool isEvent() const
+    //         { return WaitResult::Event == (_type & WaitResult::Event); }
 
-             WaitResult& setEvent()
-            {
-                _type |= WaitResult::Event;
-                return *this;
-            }
+    //          WaitResult& setEvent()
+    //         {
+    //             _type |= WaitResult::Event;
+    //             return *this;
+    //         }
 
-            bool isDevice() const
-            { return WaitResult::Device == (_type & WaitResult::Device); }
+    //         bool isDevice() const
+    //         { return WaitResult::Device == (_type & WaitResult::Device); }
 
-             WaitResult& setDevice()
-            {
-                _type |= WaitResult::Device;
-                return *this;
-            }
+    //          WaitResult& setDevice()
+    //         {
+    //             _type |= WaitResult::Device;
+    //             return *this;
+    //         }
 
-            bool isTimer() const
-            { return WaitResult::Timer == (_type & WaitResult::Timer); }
+    //         bool isTimer() const
+    //         { return WaitResult::Timer == (_type & WaitResult::Timer); }
 
-            WaitResult& setTimer()
-            {
-                _type |= WaitResult::Timer;
-                return *this;
-            }
+    //         WaitResult& setTimer()
+    //         {
+    //             _type |= WaitResult::Timer;
+    //             return *this;
+    //         }
 
-        private:
-            int _type;
-    };
+    //     private:
+    //         int _type;
+    // };
 
     /** @brief Reports activity on a set of devices.
 
@@ -134,55 +134,55 @@ namespace System {
         continously. The %EventLoop and %Application classes provide the same API
         as the Selector itself.
     */
-    class PT_SYSTEM_API SelectorBase : public Connectable
-                                     , protected NonCopyable
-    {
-        friend class Selectable;
-        friend class Timer;
+    // class PT_SYSTEM_API SelectorBase : public Connectable
+    //                                  , protected NonCopyable
+    // {
+        // friend class Selectable;
+        // friend class Timer;
 
-        public:
-            static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+        // public:
+            //static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
             //! @brief Destructor
-            virtual ~SelectorBase();
+            //virtual ~SelectorBase();
 
-            /** @brief Adds an IOResult
+            // /** @brief Adds an IOResult
 
-                Adds an IOResult to the selector. IOResult are removed
-                automatically when they get destroyed.
-            */
-            void add(Selectable& s);
+            //     Adds an IOResult to the selector. IOResult are removed
+            //     automatically when they get destroyed.
+            // */
+            // void add(Selectable& s);
 
-            /** @brief Cancel an IOResult.
-            */
-            void remove(Selectable& s);
+            // /** @brief Cancel an IOResult.
+            // */
+            // void remove(Selectable& s);
 
-            /** @brief Adds a Timer
+            // /** @brief Adds a Timer
 
-                Adds a Timer to the selector. Timers are removed
-                automatically when they get destroyed.
+            //     Adds a Timer to the selector. Timers are removed
+            //     automatically when they get destroyed.
 
-                @param timer The device to add
-            */
-            void add(Timer& timer);
+            //     @param timer The device to add
+            // */
+            // void add(Timer& timer);
 
-            /** @brief Removes a Timer
+            // /** @brief Removes a Timer
 
-                @param timer The timer to remove
-            */
-            void remove(Timer& timer);
+            //     @param timer The timer to remove
+            // */
+            // void remove(Timer& timer);
 
-            /** @brief Wakes the selctor from waiting
+            // /** @brief Wakes the selctor from waiting
 
-                This method can be used to end a Selector::wait call
-                before the timeout expires. It is supposed to be used from
-                another thread and thus is thread-safe.
-            */
-            void wake();
+            //     This method can be used to end a Selector::wait call
+            //     before the timeout expires. It is supposed to be used from
+            //     another thread and thus is thread-safe.
+            // */
+            // void wake();
 
-        protected:
+        // protected:
             //! @brief Default constructor
-            SelectorBase();
+            // SelectorBase();
 
             /** @brief Wait for activity
 
@@ -192,13 +192,13 @@ namespace System {
 
                 @param true on timeout
             */
-            bool wait(std::size_t msecs = WaitInfinite);
+            // bool wait(std::size_t msecs = WaitInfinite);
 
-            void onAddTimer(Timer& timer);
+            // void onAddTimer(Timer& timer);
 
-            void onRemoveTimer( Timer& timer );
+            // void onRemoveTimer( Timer& timer );
 
-            void onTimerChanged( Timer& timer );
+            // void onTimerChanged( Timer& timer );
 
             //void attach(Selectable& s)
             //{
@@ -212,56 +212,56 @@ namespace System {
             //    this->onRemove(s); // TODO: use onDetach
             //}
 
-            /** @brief A Selectable is added to this %Selector
+            // /** @brief A Selectable is added to this %Selector
 
-                Do not throw exceptions.
-            */
-            virtual void onAdd(Selectable&) = 0; // TODO: onEnable
+            //     Do not throw exceptions.
+            // */
+            // virtual void onAdd(Selectable&) = 0; // TODO: onEnable
 
-            /** @brief A Selectable is removed from this %Selector
+            // /** @brief A Selectable is removed from this %Selector
 
-                Do not throw exceptions.
-            */
-            virtual void onRemove(Selectable&) = 0; // TODO: onDisable
+            //     Do not throw exceptions.
+            // */
+            // virtual void onRemove(Selectable&) = 0; // TODO: onDisable
 
-            /** @brief A Selectable is reinitialised and needs to be updated
+            // /** @brief A Selectable is reinitialised and needs to be updated
 
-                Do not throw exceptions.
-            */
-            virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
+            //     Do not throw exceptions.
+            // */
+            // virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
 
-            /** @brief A Selectable in this %Selector has changed
+            // /** @brief A Selectable in this %Selector has changed
 
-                Do not throw exceptions.
-            */
-            virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
+            //     Do not throw exceptions.
+            // */
+            // virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
-            virtual bool onWait(std::size_t msecs) = 0;
+            // virtual bool onWait(std::size_t msecs) = 0;
 
-            virtual void onWake() = 0;
+            // virtual void onWake() = 0;
 
-            /** @internal Update all timers and return true if a timer fired
+            // /** @internal Update all timers and return true if a timer fired
 
-                @param timeout interval to next expiring timer
-            */
-            bool updateTimer(size_t& timeout);
+            //     @param timeout interval to next expiring timer
+            // */
+            // bool updateTimer(size_t& timeout);
 
-            //! @internal
-            typedef std::multimap<Timespan, Timer*> TimerMap;
+            // //! @internal
+            // typedef std::multimap<Timespan, Timer*> TimerMap;
 
-            //! @internal
-            //typedef std::list<Selectable*> SelectableList;
+            // //! @internal
+            // //typedef std::list<Selectable*> SelectableList;
 
-            //! @internal
-            TimerMap _timers;
+            // //! @internal
+            // TimerMap _timers;
 
-            //! @internal
-            //SelectableList _selectables;
+            // //! @internal
+            // //SelectableList _selectables;
 
-            //! @internal
-            void* _reserved;
-    };
-
+            // //! @internal
+            // void* _reserved;
+    //};
+/*
     class PT_SYSTEM_API Selector : public SelectorBase
     {
         public:
@@ -288,7 +288,7 @@ namespace System {
             //! @internal
             class SelectorImpl* _impl;
     };
-
+*/
 } //namespace System
 
 } //namespace Pt

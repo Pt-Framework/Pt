@@ -31,7 +31,7 @@
 #include "AddrInfoImpl.h"
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
-#include <Pt/System/Selector.h>
+#include <Pt/System/EventLoop.h>
 #include <cerrno>
 #include <cassert>
 #include <cstring>
@@ -151,7 +151,7 @@ bool TcpServerImpl::wait(std::size_t msecs)
 
     struct timeval* timeout = 0;
     struct timeval tv;
-    if(msecs != System::Selector::WaitInfinite)
+    if(msecs != System::EventLoop::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;
@@ -186,7 +186,7 @@ bool TcpServerImpl::wait(std::size_t msecs)
 }
 
 
-void TcpServerImpl::attach(System::SelectorBase& s)
+void TcpServerImpl::attach(System::EventLoopBase& s)
 {
     log_debug("attach to selector");
 
@@ -197,7 +197,7 @@ void TcpServerImpl::attach(System::SelectorBase& s)
 }
 
 
-void TcpServerImpl::detach(System::SelectorBase& s)
+void TcpServerImpl::detach(System::EventLoopBase& s)
 {
     log_debug("detach from selector");
     this->exitSelect();

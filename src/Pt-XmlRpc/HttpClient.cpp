@@ -42,7 +42,7 @@ HttpClient::HttpClient()
 }
 
 
-HttpClient::HttpClient(System::SelectorBase& selector, const std::string& server,
+HttpClient::HttpClient(System::EventLoopBase& selector, const std::string& server,
                        unsigned short port, const std::string& url)
 : _impl(new HttpClientImpl(selector, server, port, url))
 {

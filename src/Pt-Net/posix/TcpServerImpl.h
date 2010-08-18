@@ -41,7 +41,7 @@
 namespace Pt {
 
 namespace System {
-    class SelectorBase;
+    class EventLoopBase;
 }
 
 namespace Net {
@@ -75,9 +75,9 @@ class TcpServerImpl : public System::SelectableImpl
 
         bool wait(std::size_t msecs);
 
-        void attach(System::SelectorBase& s);
+        void attach(System::EventLoopBase& s);
 
-        void detach(System::SelectorBase& s);
+        void detach(System::EventLoopBase& s);
 
         // implementation using select
         virtual int initSelect(fd_set&, fd_set&, fd_set&);

@@ -142,7 +142,6 @@ class PipeTest : public Pt::Unit::TestSuite
             pipe.out().beginRead(_buffer, sizeof(_buffer));
             connect(pipe.out().inputReady, *this, &PipeTest::onReadRemove);
 
-            Pt::System::Selector selector;
             _loop->add( pipe.out() );
             _loop->run();
         }

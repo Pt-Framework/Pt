@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-class SelectorBase;
+class EventLoopBase;
 
 }
 
@@ -53,7 +53,7 @@ class PT_XMLRPC_API HttpClient : public Client
     public:
         HttpClient();
 
-        HttpClient(System::SelectorBase& selector, const std::string& addr,
+        HttpClient(System::EventLoopBase& selector, const std::string& addr,
                unsigned short port, const std::string& url);
 
         HttpClient(const std::string& addr, unsigned short port, const std::string& url);

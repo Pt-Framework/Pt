@@ -40,9 +40,9 @@ class SerialDeviceImpl : public IODeviceImpl
         void open( const std::string& file, IODevice::OpenMode mode);
 
         void close();
-        void attach(SelectorBase& s);
+        void attach(EventLoopBase& s);
 
-        void detach(SelectorBase& s);
+        void detach(EventLoopBase& s);
 
         bool wait(std::size_t msecs);
         
