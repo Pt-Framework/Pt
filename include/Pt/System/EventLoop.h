@@ -201,7 +201,6 @@ namespace System {
 
                 @param timeout interval to next expiring timer
             */
-
             bool updateTimer(size_t& timeout);
 
             void onAddTimer(Timer& timer);
@@ -224,25 +223,25 @@ namespace System {
 
             /** @brief A Selectable is added to this %Selector
 
-                Do not throw exceptions.
+                Does not throw exceptions.
             */
             virtual void onAdd(Selectable&) = 0; // TODO: onEnable
 
             /** @brief A Selectable is removed from this %Selector
 
-                Do not throw exceptions.
+                Does not throw exceptions.
             */
             virtual void onRemove(Selectable&) = 0; // TODO: onDisable
 
             /** @brief A Selectable is reinitialised and needs to be updated
 
-                Do not throw exceptions.
+                Does not throw exceptions.
             */
             virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
 
             /** @brief A Selectable in this %Selector has changed
 
-                Do not throw exceptions.
+                Does not throw exceptions.
             */
             virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
@@ -314,8 +313,6 @@ namespace System {
              */
             virtual ~EventLoop();
 
-            WaitResult waitNext(size_t msecs);
-
         protected:
             virtual void onAdd( Selectable& s );
 
@@ -334,6 +331,9 @@ namespace System {
             virtual void onCommitEvent(const Event& event);
 
             virtual void onProcessEvents();
+
+        private:
+            WaitResult waitNext(size_t msecs);
 
         private:
             bool _exitLoop;
