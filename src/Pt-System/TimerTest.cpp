@@ -55,8 +55,8 @@ class TimerTest : public Pt::Unit::TestSuite
             _timer = new Pt::System::Timer();
             _timer->start(100);
 
-            _loop = new Pt::System::EventLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop = new Pt::System::MainLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
             _loop->add(*_timer);
         }
@@ -89,7 +89,7 @@ class TimerTest : public Pt::Unit::TestSuite
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
             _loop->add(exitTimer);
-            connect(exitTimer.timeout, *_loop, &Pt::System::EventLoop::exit);
+            connect(exitTimer.timeout, *_loop, &Pt::System::MainLoop::exit);
 
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::removeTimer );
@@ -112,7 +112,7 @@ class TimerTest : public Pt::Unit::TestSuite
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
             _loop->add(exitTimer);
-            connect(exitTimer.timeout, *_loop, &Pt::System::EventLoop::exit);
+            connect(exitTimer.timeout, *_loop, &Pt::System::MainLoop::exit);
 
             connect( _timer->timeout, *this, &TimerTest::onTimeout );
             connect( _timer->timeout, *this, &TimerTest::destroyTimer );
@@ -147,7 +147,7 @@ class TimerTest : public Pt::Unit::TestSuite
 
     private:
         Pt::System::Timer* _timer;
-        Pt::System::EventLoop* _loop;
+        Pt::System::MainLoop* _loop;
         unsigned _count;
 };
 

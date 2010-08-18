@@ -154,7 +154,7 @@ WaitResult EventLoopImpl::waitNext( std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
-    if(umsecs == EventLoop::WaitInfinite)
+    if(umsecs == MainLoop::WaitInfinite)
     {
         msecs = INFINITE;
     }

@@ -62,6 +62,18 @@ void EventSink::commitEvent(const Event& event)
 }
 
 
+void EventSink::queueEvent(const Event& event)
+{
+    this->onQueueEvent(event);
+}
+
+
+void EventSink::wake()
+{
+    this->onWake();
+}
+
+
 void EventSink::onConnect(EventSource& source)
 {
     RecursiveLock lock1( _mutex );

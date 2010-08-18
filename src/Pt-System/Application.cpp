@@ -56,7 +56,7 @@ Application::Application(int argc, char** argv)
 
     _impl = new ApplicationImpl;
 
-    _owner = new EventLoop();
+    _owner = new MainLoop();
     this->init(*_owner);
 }
 

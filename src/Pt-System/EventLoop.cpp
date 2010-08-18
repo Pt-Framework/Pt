@@ -160,18 +160,9 @@ bool EventLoopBase::updateTimer(std::size_t& lowestTimeout)
 }
 
 
-void EventLoopBase::wake()
-{
-    this->onWake();
-}
 
 
-
-
-
-
-
-EventLoop::EventLoop()
+MainLoop::MainLoop()
 : _exitLoop(false)
 , _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
@@ -179,7 +170,7 @@ EventLoop::EventLoop()
     _impl = new EventLoopImpl();
 }
 
-EventLoop::EventLoop(Allocator& a)
+MainLoop::MainLoop(Allocator& a)
 :_exitLoop(false)
 , _allocator(/*255, 64*/)
 , _usedalloc(&a)
@@ -188,7 +179,7 @@ EventLoop::EventLoop(Allocator& a)
 }
 
 
-EventLoop::~EventLoop()
+MainLoop::~MainLoop()
 {
     try
     {
@@ -206,30 +197,30 @@ EventLoop::~EventLoop()
 }
 
 
-void EventLoop::onAdd( Selectable& s )
+void MainLoop::onAdd( Selectable& s )
 {
     return _impl->add( s );
 }
 
 
-void EventLoop::onRemove( Selectable& s )
+void MainLoop::onRemove( Selectable& s )
 {
     _impl->remove( s );
 }
 
 
-void EventLoop::onReinit(Selectable& s)
+void MainLoop::onReinit(Selectable& s)
 {
 }
 
 
-void EventLoop::onChanged(Selectable& s)
+void MainLoop::onChanged(Selectable& s)
 {
     _impl->changed(s);
 }
 
 
-// void EventLoop::onRun()
+// void MainLoop::onRun()
 // {
 //     while( true )
 //     {
@@ -258,7 +249,7 @@ void EventLoop::onChanged(Selectable& s)
 // }
 
 
-void EventLoop::onRun()
+void MainLoop::onRun()
 {
     while( true )
     {
@@ -294,9 +285,9 @@ void EventLoop::onRun()
 }
 
 
-WaitResult EventLoop::waitNext(std::size_t msecs)
+WaitResult MainLoop::waitNext(std::size_t msecs)
 {
-    size_t timerTimeout = EventLoop::WaitInfinite;
+    size_t timerTimeout = MainLoop::WaitInfinite;
 
     // If a timer is immediately ready, still check for an
     // active selectable to avoid timer preemption
@@ -308,7 +299,7 @@ WaitResult EventLoop::waitNext(std::size_t msecs)
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    if(timerTimeout > msecs || timerTimeout == EventLoop::WaitInfinite)
+    if(timerTimeout > msecs || timerTimeout == MainLoop::WaitInfinite)
     {
         return _impl->waitNext(msecs);
     }
@@ -329,13 +320,13 @@ WaitResult EventLoop::waitNext(std::size_t msecs)
 }
 
 
-void EventLoop::onWake()
+void MainLoop::onWake()
 {
     _impl->wake();
 }
 
 
-void EventLoop::onExit()
+void MainLoop::onExit()
 {
     RecursiveLock lock(_queueMutex);
     _exitLoop = true;
@@ -345,7 +336,7 @@ void EventLoop::onExit()
 }
 
 
-void EventLoop::onCommitEvent(const Event& ev)
+void MainLoop::onCommitEvent(const Event& ev)
 {
     {
         RecursiveLock lock( _queueMutex );
@@ -369,7 +360,29 @@ void EventLoop::onCommitEvent(const Event& ev)
 }
 
 
-void EventLoop::onProcessEvents()
+void MainLoop::onQueueEvent(const Event& ev)
+{
+    {
+        RecursiveLock lock( _queueMutex );
+
+        // TODO: use a continuous block of memory to store events
+        // this avoids new/delete
+        Event& clonedEvent = ev.clone(*_usedalloc);
+
+        try
+        {
+            _eventQueue.push_back(&clonedEvent);
+        }
+        catch(...)
+        {
+            clonedEvent.destroy(*_usedalloc);
+            throw;
+        }
+    }
+}
+
+
+void MainLoop::onProcessEvents()
 {
     while( false == _exitLoop )
     {

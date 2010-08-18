@@ -91,8 +91,8 @@ class EventLoopTest : public Pt::Unit::TestSuite
     private:
         void DispatchTest()
         {
-            Pt::System::EventLoop el;
-            connect(el.timeout, el, &Pt::System::EventLoop::exit);
+            Pt::System::MainLoop el;
+            connect(el.timeout, el, &Pt::System::MainLoop::exit);
             el.setIdleTimeout(500);
 
             el.event.subscribe( slot(*this, &EventLoopTest::onE1) );
@@ -119,9 +119,9 @@ class EventLoopTest : public Pt::Unit::TestSuite
 
         void IdleTimeout()
         {
-            Pt::System::EventLoop el;
+            Pt::System::MainLoop el;
             el.setIdleTimeout(300);
-            connect(el.timeout, el, &Pt::System::EventLoop::exit);
+            connect(el.timeout, el, &Pt::System::MainLoop::exit);
 
             Pt::System::Clock clock;
             clock.start();
@@ -132,15 +132,15 @@ class EventLoopTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
         }
 
-        // Pt::System::EventLoop* _loop;
+        // Pt::System::MainLoop* _loop;
 
         // void LoopBenchmark()
         // {
-        //     Pt::System::EventLoop el;
-        //     connect(el.timeout, el, &Pt::System::EventLoop::exit);
+        //     Pt::System::MainLoop el;
+        //     connect(el.timeout, el, &Pt::System::MainLoop::exit);
         //     el.setIdleTimeout(500);
 
-        //     el.event.subscribe( slot(*this, &EventLoopTest::onBenchmarkEvent) );
+        //     el.event.subscribe( slot(*this, &MainLoopTest::onBenchmarkEvent) );
 
         //     _loop = &el;
         //     el.commitEvent( E1() );

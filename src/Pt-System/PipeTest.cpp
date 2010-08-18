@@ -57,8 +57,8 @@ class PipeTest : public Pt::Unit::TestSuite
             _data.clear();
             _result.clear();
 
-            _loop = new Pt::System::EventLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop = new Pt::System::MainLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
         }
 
@@ -199,7 +199,7 @@ class PipeTest : public Pt::Unit::TestSuite
         }
 
     private:
-        Pt::System::EventLoop* _loop;
+        Pt::System::MainLoop* _loop;
         std::string _data;
         size_t _pos;
         char _buffer[10];

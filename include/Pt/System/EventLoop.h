@@ -144,23 +144,10 @@ namespace System {
             */
             void remove(Timer& timer);
 
-            /** @brief Wakes the selctor from waiting
-
-                This method can be used to end a Selector::wait call
-                before the timeout expires. It is supposed to be used from
-                another thread and thus is thread-safe.
-            */
-            void wake();
-
             /** @brief Starts the event loop
             */
             void run()
             { this->onRun(); }
-
-            /** @brief Processes all events which are currently in the event queue
-            */
-            void processEvents()
-            { this->onProcessEvents(); }
 
             /** @brief Stops the %EventLoop.
             */
@@ -245,13 +232,9 @@ namespace System {
             */
             virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
-            virtual void onWake() = 0;
-
             virtual void onRun() = 0;
 
             virtual void onExit() = 0;
-
-            virtual void onProcessEvents() = 0;
 
         private:
             size_t _timeout;
@@ -276,42 +259,72 @@ namespace System {
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
-        The System EventLoop can be used as the central entity of a thread or
+        An %MainLoop can be used to monitor a set of Selectables and Timers
+        and react to activity on them. The wait call can be performed with
+        a timeout and the respective timeout signal is sent if it occurs.
+        Clients can be notified about Timer and Selectable activity by
+        connecting to the appropriate signals of the Timer and Selectable
+        classes.
+
+        The following example uses a %MainLoop to wait on acitvity on
+        a Timer, which is set to time-out after 1000 msecs.
+
+        @code
+        // slot to handle timer activity
+        void onTimer();
+
+        int main()
+        {
+            using Pt::System;
+
+            Timer timer;
+            timer.start(1000);
+            connect(timer.timeout, ontimer);
+
+            MainLoop loop;
+            loop.addTimer(timer);
+            loop.run();
+
+            return 0;
+        }
+        @endcode
+
+        The MainLoop can be used as the central entity of a thread or
         process to dispatch application events and wait on multiple IODevices or
         Timers for activity.
 
         Events can be added to the internal event queue, even from other threads
-        using the method EventLoop::commitEvent or EventLoop::queueEvent. The
+        using the method MainLoop::commitEvent or MainLoop::queueEvent. The
         first method will add the event to the internal queue and wake the
         event loop, the latter allows queing multiple events and it is up to
-        the caller to wake the event loop by calling EventLoop::wake when all
+        the caller to wake the event loop by calling MainLoop::wake when all
         events are added. When the event loop processes its event, the signal
         "event" is send for each processed event. Events are processes in the
         order they were added.
 
-        To start the %EventLoop the method EventLoop::run must be executed. It blocks
-        until the event loop is stopped. To stop the %EventLoop, EventLoop::exit
+        To start the %MainLoop the method MainLoop::run must be executed. It blocks
+        until the event loop is stopped. To stop the %MainLoop, MainLoop::exit
         must be called. The delivery of the events occurs inside the thread that
         started the execution of the event loop.
 
-        %IODevices and %Timers can be added to an %EventLoop just as to Selector.
-        In fact a %Selector is used internally to implement the %EventLoop.
+        %IODevices and %Timers can be added to an %MainLoop just as to Selector.
+        In fact a %Selector is used internally to implement the %MainLoop.
 
-        Since the %EventLoop is a Runnable, it can be easily assigned to a Thread
+        Since the %MainLoop is a Runnable, it can be easily assigned to a Thread
         to give it its own event loop.
      */
-    class PT_SYSTEM_API EventLoop : public EventLoopBase
+    class PT_SYSTEM_API MainLoop : public EventLoopBase
     {
         public:
-            /** @brief Constructs the EventLoop
+            /** @brief Constructs the MainLoop
             */
-            EventLoop();
+            MainLoop();
 
-			EventLoop(Allocator& a);
+			MainLoop(Allocator& a);
 
-            /** @brief Destructs the EventLoop
+            /** @brief Destructs the MainLoop
              */
-            virtual ~EventLoop();
+            virtual ~MainLoop();
 
         protected:
             virtual void onAdd( Selectable& s );
@@ -324,11 +337,13 @@ namespace System {
 
             virtual void onRun();
 
-            virtual void onWake();
-
             virtual void onExit();
 
             virtual void onCommitEvent(const Event& event);
+
+            virtual void onQueueEvent(const Event& event);
+
+            virtual void onWake();
 
             virtual void onProcessEvents();
 

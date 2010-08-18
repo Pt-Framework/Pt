@@ -122,7 +122,7 @@ int main( int argc, char* argv[] )
         serialDevice.setTimeout(100);
         connect(serialDevice.inputReady, onInput);
 
-        Pt::System::EventLoop loop;
+        Pt::System::MainLoop loop;
         loop.add(serialDevice);
 
         serialDevice.beginRead(buffer, size);

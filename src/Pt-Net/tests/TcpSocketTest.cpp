@@ -51,8 +51,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void setUp()
         {
-            _loop = new Pt::System::EventLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::EventLoop::exit);
+            _loop = new Pt::System::MainLoop();
+            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
 
             _acceptor = new Pt::Net::TcpSocket();
@@ -180,7 +180,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
     private:
         Pt::Net::TcpSocket* _acceptor;
-        Pt::System::EventLoop* _loop;
+        Pt::System::MainLoop* _loop;
         char input[200];
 };
 

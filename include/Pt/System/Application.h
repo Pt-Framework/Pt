@@ -105,7 +105,7 @@ namespace System {
             int     _argc;
             char**  _argv;
             EventLoopBase* _loop;
-            EventLoop* _owner;
+            MainLoop* _owner;
     };
 
 } // namespace system

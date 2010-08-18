@@ -48,7 +48,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void setUp()
         {
-            loop = new Pt::System::EventLoop();
+            loop = new Pt::System::MainLoop();
             loop->setIdleTimeout(2000);
         }
 
@@ -59,7 +59,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void NotFoundRequest()
         {
-            connect(loop->timeout, *loop, &Pt::System::EventLoop::exit);
+            connect(loop->timeout, *loop, &Pt::System::MainLoop::exit);
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
@@ -77,7 +77,7 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 
     private:
-        Pt::System::EventLoop* loop;
+        Pt::System::MainLoop* loop;
 
         void onReplyHeader(Pt::Http::Client& client)
         {

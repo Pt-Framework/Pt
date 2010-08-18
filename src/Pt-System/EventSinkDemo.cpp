@@ -74,7 +74,7 @@ class TestThread
     public:
         TestThread()
         : _loop()
-        , _thread( callable(_loop, &Pt::System::EventLoop::run) )
+        , _thread( callable(_loop, &Pt::System::MainLoop::run) )
         {
             _thread.start();
         }
@@ -86,7 +86,7 @@ class TestThread
         }
 
     private:
-        Pt::System::EventLoop _loop;
+        Pt::System::MainLoop _loop;
         Pt::System::AttachedThread _thread;
 };
 

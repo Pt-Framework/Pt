@@ -51,8 +51,23 @@ namespace System {
 
             void commitEvent(const Event& event);
 
+            void queueEvent(const Event& event);
+
+            void wake();
+
+            /** @brief Processes all events which are currently in the event queue
+            */
+            void processEvents()
+            { this->onProcessEvents(); }
+
         protected:
             virtual void onCommitEvent(const Event& event) = 0;
+
+            virtual void onQueueEvent(const Event& event) = 0;
+
+            virtual void onWake() = 0;
+
+            virtual void onProcessEvents() = 0;
 
         private:
             void onConnect(EventSource& source);
