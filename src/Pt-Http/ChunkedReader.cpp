@@ -201,7 +201,7 @@ namespace Pt
         if (_chunkSize > 0)
           _state = &ChunkedReader::onData;
         else
-          _state = 0;
+          _state = &ChunkedReader::onTrailer;
       }
       else
         throwInvalidCharacter(ch);
@@ -281,6 +281,26 @@ namespace Pt
       }
       else
         throwInvalidCharacter(ch);
+    }
+
+    void ChunkedReader::onTrailer()
+    {
+      char ch = _ib->sbumpc();
+      if (ch == '\n')
+        _state = 0;
+      else if (ch == '\r')
+        ;
+      else
+        _state = &ChunkedReader::onTrailerData;
+    }
+
+    void ChunkedReader::onTrailerData()
+    {
+      // the trailer is actually ignored
+
+      char ch = _ib->sbumpc();
+      if (ch == '\n')
+        _state = &ChunkedReader::onTrailer;
     }
 
   }

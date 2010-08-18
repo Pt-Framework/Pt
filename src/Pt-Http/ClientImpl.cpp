@@ -231,19 +231,8 @@ void ClientImpl::readBody(std::string& s)
 
         log_debug("eod=" << _chunkedIStream.eod());
 
-        if (_chunkedIStream.eod())
-        {
-            _parser.readHeader();
-            doparse();
-
-            if (_parser.fail())
-                throw std::runtime_error("http parser failed"); // TODO define exception class
-        }
-        else
-            throw std::runtime_error("chunked stream not complete");
-
-        if (_chunkedIStream.fail())
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+        if (!_chunkedIStream.eod())
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body: incomplete chunked data stream") );
     }
     else
     {

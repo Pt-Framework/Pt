@@ -43,6 +43,8 @@ namespace Pt
                 void onData();
                 void onDataEnd0();
                 void onDataEnd();
+                void onTrailer();
+                void onTrailerData();
 
             public:
                 explicit ChunkedReader(std::streambuf* ib, unsigned bufsize = 8192);
