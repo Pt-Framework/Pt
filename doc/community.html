@@ -13,7 +13,16 @@
 <div id="container">
 
 <div id="header">
-    <div id="logo"><h3>The Power in your Hands</h3></div>
+     <table id="logo">
+        <tr>
+            <td>
+                <a href="index.html"><img src="htdocs/platinum-logo.gif" border="0"/></a>
+            </td>
+            <td>
+                <h3>The Power in your Hands</h3>
+            </td>
+        </tr>
+    </table>
 
     <div class="search">
         <form action="http://search.freefind.com/find.html" method="get" accept-charset="utf-8" target="_self">
@@ -47,16 +56,18 @@
 <div class="contents">
 
     <div class="sidebar">
+
         <br/>
-        <div style="margin-bottom:18px;" class="people" id="people-left">
-            <div class="people-header">Mailing List</div>
-            <div class="people-body">
-            <a>Archives</a> <br/>
-            <a>Subscribe</a> <br/>
+
+        <div style="margin-bottom:18px;" class="menubox">
+            <div class="menubox-header">Mailing List</div>
+            <div class="menubox-body">
+                <a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">Archives</a> <br/>
+                <a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">Subscribe</a> <br/>
             </div>
         </div>
 
-        <div class="newsbar">People</div>
+        <div class="sidebar-header">People</div>
 
         <div class="sidebar-entry-title"> Marc Dürner </div>
         <div class="sidebar-entry-subtitle"> Developer since 2005 </div>
@@ -90,7 +101,7 @@
 
         <br/>
 
-        <div class="newsbar">Partner Projects</div>
+        <div class="sidebar-header">Partner Projects</div>
 
         <div class="sidebar-entry-title"> T2 Project </div>
         <div class="sidebar-entry-subtitle"> Platform Development Environment </div>
@@ -104,13 +115,19 @@
     </div>
 
 <div id="maintext">
-  <h2>Acknowledgements</h2>
+    <h2>Acknowledgements</h2>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <p>
+        We would like to acknowledge the following people, organisations and
+        companies that have contributed to the development of the Platinum
+        C++ framework:
+    </p>
+
+    <div class="infobox">
+        <div class="infobox-header" >
            Deutsche Börse Systems AG
         </div>
-        <div id="deubo" class="news-article-body">
+        <div id="deubo" class="infobox-body">
             We appreciate the many suggestions and good ideas of the people
             working at the MD&C department to improve Pt on POSIX platforms.
             With this feedback Pt was ported to AIX and Solaris.
@@ -119,11 +136,11 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            PTV AG
         </div>
-        <div id="ptv" class="news-article-body">
+        <div id="ptv" class="infobox-body">
             We thank PTV AG for supporting the Platinum C++ framework and
             for encouaging their developers to commit code to the project.
             Their expertise of the Windows CE ans Symbian S60 platforms
@@ -133,11 +150,11 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            Eckhardt + Partner GmbH
         </div>
-        <div  id="eckpart" class="news-article-body">
+        <div  id="eckpart" class="infobox-body">
             We thank Eckhardt + Partner GmbH for supporting the Platinum
             C++ framework and for encouaging their developers to commit
             code to the project.
@@ -146,11 +163,11 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            Atesion GmbH
         </div>
-        <div id="atesion" class="news-article-body">
+        <div id="atesion" class="infobox-body">
             Atesion GmbH not only uses Pt in its MeaProcess product line,
             but also contributed to the development of Pt in Windows and
             POSIX based systems.
@@ -159,11 +176,11 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            Peter Barth
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Peter ported Pt to the Symbian S60 platform. We thank him not
             only for the good work, but also for the many suggestions to
             improve Pt and a very pleasant time.
@@ -172,11 +189,11 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            Bernd Goseberg
         </div>
-        <div id="news-item" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             We are grateful to Bernd for his invaluable support and patience
             during the design and implementation of the Pt website.
         </div>
@@ -185,15 +202,19 @@
 <br/>
 
 <h2>People</h2>
+    <p>
+        The following people are developing the Platinum C++ framework. If you
+        know someone who deserves to be on this list please let us know.
+    </p>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            Marc Duerner
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2005
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Marc is a software engineer at Eckhardt+Partner GmBH and has written the initial code base of Pt.
             His interests include object-oriented and generic program design and multi-platform development.
             Marc earned a PhD in Chemistry from Sheffield Hallam University in 2004.
@@ -202,14 +223,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Bendri Batti
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2008
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Bendri has finished his studies in 2003 (Dipl.Ing(FH) Nachrichten- und Kommunikationstechnik)
             and has been developing software in c/c++ for embedded devices and multi-platform software
             for a number of different operating systems since then. He currently employed by PTV AG in Karlsruhe
@@ -219,14 +240,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Aloysius Indrayanto
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2005
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
         Aloysius completed his B.Sc. in Electrical Engineering in early 2004.
         He has been interested in C/C++ programming since before he started his college.
         After his graduation, he work as an assistant lecturer for about 6 months and then
@@ -239,14 +260,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Laurentiu-Gheorghe Crisan
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2007
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
         Laurentiu has many years of experience in object-oriented software architecture
         in the automotive and automatisation industry. He earned an M Sc. in Computer
         Science and Multimedia in 2003 at the University of Applied Science Karlsruhe.
@@ -257,14 +278,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Tommi Mäkitalo
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2008
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
         Tommi is interested C++ development in general and HTTP and database programming
         in particular, since he graduated from Fachhochschule Frankfurt in 1995.
         Tommi is also the founder of the TNTnet web application server (www.tntnet.org).
@@ -274,14 +295,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Stephan Beal
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2005
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
         Stephan has been a professional C++ developer for many years. He currently works
         for navigating.de in Berlin, Germany. Besides Pt, he works on s11n, a C++
         serialization framework (www.s11n.net).
@@ -290,14 +311,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Christian Taedcke
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2008
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Christian finished his studies of electrical engineering in 2006 and received
             his degree (Dipl.-Ing.) from RWTH Aachen University. He is working as a C++ developer
             for embedded systems and employed by PTV AG in Karlsruhe, Germany where Platinum is
@@ -307,14 +328,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Bjoern Streule
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2007
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Bjoern has finished his degree in 2002 (Dipl. Ing. (FH) Nachrichten- und
             Kommunikationstechnik) and has been developing object-oriented software
             for desktop systems and embedded devices since then. He is currently employed
@@ -324,14 +345,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Roman Schnider
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2007
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Roman finished his studies in Information Technology in late 2002. Since
             then, he has been developing multi-platform software for a number of
             different operating systems. He is employed by PTV AG in Karlsruhe where
@@ -341,14 +362,14 @@
 
     <br/>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Sebastian Pieck
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Developer since 2007
         </div>
-        <div id="devel" class="news-article-body">
+        <div id="person-male" class="infobox-body">
             Sebastian is currently employed at Continental Automotive Systems. He is
             interested in embedded real-time control systems and attends to QNX
             compatibility of Platinum predominantly. He earned a Dr.-Ing. in

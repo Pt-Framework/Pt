@@ -34,8 +34,7 @@ H2 {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 15px;
-}
+    margin-top: 15px;}
 H2 A {
 	font-size: 20px;
     color: #000000;
@@ -63,12 +62,12 @@ a:visited {
 	color: #000000;
 }
 
+/* Doxygen styles */
 
 DIV.header DIV.summary {
     display: none;
 }
 
-/* Do not display navigation on top of class doc */
 DIV.nav {
 	display: none;
 	width: 100%;
@@ -130,7 +129,7 @@ TD.navtab A {
 }
 TD.navtab A:visited {
     /* color: #2d378c; */
-/* color: #000000; */
+    /* color: #000000; */
     /* font-weight: bold; */
 }
 
@@ -329,8 +328,8 @@ TH.dirtab { background: #e8eef2;
             font-weight: bold;
 }
 
-
 /* Style for detailed member documentation */
+
 .memtemplate {
   font-size: 12px;
   color: #000000;
@@ -379,9 +378,8 @@ TH.dirtab { background: #e8eef2;
     padding-top: 5px;
 }
 
-/* End Styling for detailed member documentation */
-
 /* for the tree view */
+
 .ftvtree {
 	font-family: sans-serif;
 	margin:0.5em;
@@ -393,16 +391,7 @@ TH.dirtab { background: #e8eef2;
 .directory div { display: none; margin: 0px; }
 .directory img { vertical-align: -30%; }
 
-
-/* the main content pages */
-#content    {
-    padding: 0em 1em 1em 1em;
-    margin-left: 13em;
-}
-
-#content h2 {
-    position: relative;
-}
+/* Page elements*/
 
 #container    {
     text-align: left;
@@ -429,14 +418,14 @@ div.contents hr {
 }
 
 #logo {
+    padding-left: 6px;
     float: left;
     height: 90px;
-    background: url(platinum-logo.gif) 10px center no-repeat;
 }
 
 #logo h3 {
-	padding-left: 112px;
-    padding-top: 37px;
+    padding-left: 6px;
+    padding-top: 4px;
     color: #FFFFFF;
     margin: 0;
     font-size: 16px;
@@ -507,12 +496,21 @@ ul.menu li.active a {
     text-align: justify;
 }
 
+
 .sidebar    {
     float: right;
     width: 34%;
     margin: 0;
     padding: 0;
     margin-top: 14px;
+}
+.sidebar-header {
+    padding:5px 10px 5px 15px;
+    background:url(box_header_bg.gif) no-repeat right 0px;
+    color:white;
+    font-weight:bold;
+    font-size: 14px;
+    height: 16px;
 }
 .sidebar-entry-title {
     font-size: 14px;
@@ -527,22 +525,43 @@ ul.menu li.active a {
     font-style: italic;
     padding-left: 14px;
 }
-.sidebar-body {
-    /* border-left: 1px solid #cccccc; */
-    /* border-bottom: 1px solid #cccccc; */
-    /* border-right: 1px solid #cccccc; */
-    /* background:#eff0f0; */
-    /* -moz-border-radius: 0px 0px 5px 5px; */
-    /* -khtml-border-radius: 0px 0px 5px 5px; */
-    margin-bottom:24px;
+.sidebar-note-title {
     font-size: 14px;
-    padding-top: 10px;
-    padding-left: 15px;
+    font-weight: bold;
+    text-align: left;
+    padding-top: 8px;
 }
-.sidebar-body a {
-    line-height: 20px;
-    color: #000000;
+.sidebar-note-subtitle {
+    font-size: 12px;
+    font-weight: normal;
+    font-style: italic;
 }
+.sidebar-note-body {
+    font-size: 12px;
+    padding-top:5px;
+    padding-bottom: 8px;
+    text-align: justify;
+}
+
+
+.menubox {
+    border: 1px solid #cccccc;
+    background:#eff0f0;
+    font-size: 14px;
+    padding: 10px;
+    margin-bottom: 14px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -khtml-border-radius: 5px 5px 5px 5px;
+}
+.menubox-header {
+    font-weight: bold;
+    border-bottom: 1px solid #cccccc;
+}
+.menubox-body {
+    text-align: justify;
+    padding-top:10px;
+}
+
 
 #download {
     background:url(download90.gif) no-repeat center 0px;
@@ -553,7 +572,6 @@ ul.menu li.active a {
     font-weight:bold;
     text-align: left;
 }
-
 #download-link {
     border-top:1px solid #CCCCCC;
     color:black;
@@ -565,51 +583,21 @@ ul.menu li.active a {
     text-align:left;
 }
 
-.newsbar {
-    padding:5px 10px 5px 15px;
-    background:url(box_header_bg.gif) no-repeat right 0px;
-    color:white;
-    font-weight:bold;
-    font-size: 14px;
-    height: 16px;
-}
 
-.newsbar-header {
-    font-size: 14px;
-    text-align: left;
-    padding-top: 8px;
-}
-.newsbar-header i {
-    font-size: 12px;
-    font-weight: normal;
-}
-.newsbar-body {
-    font-size: 12px;
-    padding-top:5px;
-    padding-bottom: 8px;
-    text-align: justify;
-}
-.newsbar-link {
-    margin-top: 4px;
-    text-align: right;
-}
-
-
-
-.news-article {
+.infobox {
     padding-left: 10px;
     text-align:left;
 }
-.news-article-header {
+.infobox-header {
     font-size: 15px;
     font-weight: bold;
 }
-.news-article-subheader {
+.infobox-subheader {
     font-size: 12px;
     font-style: italic;
     color: #000000;
 }
-.news-article-body {
+.infobox-body {
     font-size: 14px;
     padding-top:14px;
     padding-bottom: 14px;
@@ -617,52 +605,23 @@ ul.menu li.active a {
     padding-right: 20px;
     text-align: justify;
 }
-#news-item2 {
+#infobox-highlight {
     padding-top: 14px;
     margin-bottom: 14px;
     background-color: #eff0f0;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
 }
-#news-item {
-    background:url(regular-news.png) no-repeat left 14px;
-}
 
 
-
-
-.people {
-    border: 1px solid #cccccc;
-    background:#eff0f0;
-    font-size: 14px;
-    padding: 10px;
-    margin-bottom: 14px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -khtml-border-radius: 5px 5px 5px 5px;
+#news-normal {
+    background:url(news-normal.png) no-repeat left 14px;
 }
-.people-header {
-    font-weight: bold;
-    border-bottom: 1px solid #cccccc;
-}
-.people-body {
-    text-align: justify;
-    padding-top:10px;
-}
-#people-left_ {
-    float: left;
-}
-#people-right_ {
-    float: right;
-}
-
 #ptv {
     background:url(ptv_logo.gif) no-repeat left 14px;
 }
 #deubo {
     background:url(db_logo.gif) no-repeat left 14px;
-}
-#devel {
-    background:url(devel.png) no-repeat left 14px;
 }
 #eckpart {
     background:url(ep_logo.png) no-repeat left 14px;
@@ -670,8 +629,12 @@ ul.menu li.active a {
 #atesion {
     background:url(atesion_logo.gif) no-repeat left 14px;
 }
+#person-male {
+    background:url(person-male.png) no-repeat left 14px;
+}
 
-.docs-page-header {
+
+.docs-groupbox-header {
     padding:5px 10px 5px 15px;
     background:url(box_header_bg.gif) no-repeat right 0px;
     color:white;
@@ -679,7 +642,7 @@ ul.menu li.active a {
     font-size: 14px;
     height:16px;
 }
-.docs-page-body {
+.docs-groupbox-body {
     border-left: 1px solid #dddddd;
     border-bottom: 1px solid #dddddd;
     border-right: 1px solid #dddddd;
@@ -691,100 +654,16 @@ ul.menu li.active a {
     -moz-border-radius: 0px 0px 5px 5px;
     -khtml-border-radius: 0px 0px 5px 5px;
 }
-.docs-page-body ul {
+.docs-groupbox-body ul {
     padding:0px;
     margin:0px;
     margin-left:5px;
     list-style: none;
 }
-.docs-page-body a {
+.docs-groupbox-body a {
     color: #000000;
     text-decoration: none;
 }
-.docs-page-body a:hover {
+.docs-groupbox-body a:hover {
     color: #c30013;
-}
-
-
-
-
-
-
-#localnav {
-    background:url(sidemenu-bg.png) no-repeat left -10px;
-    width: 195px;
-    list-style: none;
-    padding: 0px 10px 60px 15px;
-    float: left;
-    margin-left: 0px;
-}
-
-#localnav ul.first {
-    border-top: 9px solid rgb(195, 0, 20);
-    padding-top: 0px;
-    padding-left: 0px;
-/* background-color: #f3f3f3; */
-}
-
-#localnav ul {
-    list-style: none;
-    margin: 0;
-
-}
-
-#localnav a, #localnav span, #localnav strong {
-    display: block;
-    color: #000;
-    font-weight:bold;
-    font-size: 14px;
-    color: #757575;
-    padding: 5px 10px;
-    text-decoration: none;
-}
-
-#localnav a:hover, #localnav a:focus {
-    color: rgb(195, 0, 20);
-    text-decoration: none;
-}
-
-#localnav a.on, #localnav strong, #localnav span.on {
-    background: #148cb5;
-    color: #fff;
-}
-
-#localnav li {
-    background: none;
-/* border-left: 1px solid #ccc; */
-/* border-right: 1px solid #ccc; */
-    border-top: 1px solid #ccc;
-    padding: 5px 0px;
-}
-
-#localnav li.first, #localnav li:first-child {
-    border-top:none;
-}
-
-#localnav li.last {
-    background:url(localnav_bottom2.png) no-repeat -10px bottom;
-border-left: none;
-border-right: none;
-
-}
-
-#localnav li ul {
-    margin-bottom:10px;
-}
-
-#localnav li li {
-    background:transparent url(/images/template/screen/bullet_localnav.png) no-repeat left .85em;
-    border:none;
-    margin-left:15px;
-    padding:4px 4px 4px 14px;
-}
-
-#localnav li li a {
-    color:#148cb5;
-    font-family:Arial, sans-serif;
-    font-size:92%;
-    padding: 0;
 }

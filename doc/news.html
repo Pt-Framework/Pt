@@ -13,7 +13,16 @@
 <div id="container">
 
 <div id="header">
-    <div id="logo"><h3>The Power in your Hands</h3></div>
+    <table id="logo">
+        <tr>
+            <td>
+                <a href="index.html"><img src="htdocs/platinum-logo.gif" border="0"/></a>
+            </td>
+            <td>
+                <h3>The Power in your Hands</h3>
+            </td>
+        </tr>
+    </table>
 
     <div class="search">
         <form action="http://search.freefind.com/find.html" method="get" accept-charset="utf-8" target="_self">
@@ -50,7 +59,7 @@
 
         <br/>
 
-        <div class="newsbar">All News</div>
+        <div class="sidebar-header">All News</div>
 
         <div class="sidebar-entry-title"> TR-4 released </div>
         <div class="sidebar-entry-subtitle"> Posted on June 6, 2010 </div>
@@ -81,14 +90,14 @@
 
     <div id="maintext">
     <h2>Latest News and Releases</h2>
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
            TR-4 released
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on June 6, 2010
         </div>
-        <div  id="devel" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             The fourth technical release includes not only a complete
             review of the systems programming module (Pt-System) and the
             networking module (Pt-Net), but also two new modules: Pt-Http
@@ -102,14 +111,14 @@
         </div>
     </div>
 
-    <div id="news-item2" class="news-article">
-        <div class="news-article-header" >
+    <div id="infobox-highlight" class="infobox">
+        <div class="infobox-header" >
             TR-3 released
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on February 15, 2008
         </div>
-        <div  id="devel" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             Starting with this TR, the Pt core module is in a soft-freeze,
             thus source compatibility should not be broken except in case of
             critical bugs. Changes and additions can still be made of course,
@@ -120,14 +129,14 @@
         </div>
     </div>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             TR-2 released
          </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on October 16, 2007
         </div>
-        <div  id="devel" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             The second technical release adds support for async I/O and
             I/O multiplexing on all available I/O devices, atomic
             operations for integers and pointers, a logging framework, date
@@ -139,14 +148,14 @@
     </div>
 
 
-    <div  id="news-item2" class="news-article">
-        <div class="news-article-header" >
+    <div  id="infobox-highlight" class="infobox">
+        <div class="infobox-header" >
             New Project Website
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on February 25, 2007
         </div>
-        <div  id="news-item" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             The new project website integrates the generated doxygen
             documentation into the project pages. The online reference
             documentation was improved and contains class groups for easier
@@ -154,14 +163,14 @@
         </div>
     </div>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             TR-1 released
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on February 5, 2007
         </div>
-        <div  id="devel" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             This slightly longer development sprint has lead to the TR-1
             release. Many improvements have been made to the core module
             and the Gfx module. A new module for network programming was
@@ -171,14 +180,14 @@
         </div>
     </div>
 
-    <div  id="news-item2" class="news-article">
-        <div class="news-article-header" >
+    <div  id="infobox-highlight" class="infobox">
+        <div class="infobox-header" >
             Development News
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on February 5, 2007
         </div>
-        <div  id="devel" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             During the last month, enhancements have been made to the
             Gfx module and the core module, Most notably to the image
             classes and the reflection API. A new module for unit testing
@@ -186,28 +195,28 @@
         </div>
     </div>
 
-    <div class="news-article">
-        <div class="news-article-header" >
+    <div class="infobox">
+        <div class="infobox-header" >
             Pt and Tntnet at LinuxWorldExpo in Cologne
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on October 14, 2006
         </div>
-        <div  id="news-item" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             Platinum was presented together with Tntnet, the open-source
             web application server, at LinuxWorldExpo in Cologne in the
             open source pavillion.
         </div>
     </div>
 
-    <div  id="news-item2" class="news-article">
-        <div class="news-article-header" >
+    <div  id="infobox-highlight" class="infobox">
+        <div class="infobox-header" >
             Pt on Sourceforge
         </div>
-        <div class="news-article-subheader">
+        <div class="infobox-subheader">
             Posted on September 22, 2006
         </div>
-        <div  id="news-item" class="news-article-body">
+        <div id="news-normal" class="infobox-body">
             The Platinum C++ framework is now hosted on sourceforge.net.
             The source code is available through an SVN repository and
             generated documentation can be viewed online now.
