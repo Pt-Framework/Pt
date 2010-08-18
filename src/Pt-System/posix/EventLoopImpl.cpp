@@ -148,7 +148,7 @@ WaitResult EventLoopImpl::waitNext(std::size_t msecs)
     {
         struct timeval* timeout = 0;
         struct timeval tv;
-        if(msecs != EventLoop::WaitInfinite)
+        if(msecs != MainLoop::WaitInfinite)
         {
             tv.tv_sec = msecs / 1000;
             tv.tv_usec = (msecs % 1000) * 1000;
@@ -167,7 +167,7 @@ WaitResult EventLoopImpl::waitNext(std::size_t msecs)
         if( avail > 0 || _avail.size() )
             break;
 
-        if(msecs == EventLoop::WaitInfinite)
+        if(msecs == MainLoop::WaitInfinite)
             continue;
 
         if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
