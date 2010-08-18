@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "SelectorImpl.h"
+#include "EventLoopImpl.h"
 #include "Pt/System/EventLoop.h"
 
 namespace Pt {
@@ -38,7 +38,7 @@ EventLoop::EventLoop()
 , _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
 {
-    _selector = new SelectorImpl();
+    _impl = new EventLoopImpl();
 }
 
 EventLoop::EventLoop(Allocator& a)
@@ -46,7 +46,7 @@ EventLoop::EventLoop(Allocator& a)
 , _allocator(/*255, 64*/)
 , _usedalloc(&a)
 {
-	_selector = new SelectorImpl();
+	_impl = new EventLoopImpl();
 }
 
 
@@ -64,19 +64,19 @@ EventLoop::~EventLoop()
     catch(...)
     {}
 
-    delete _selector;
+    delete _impl;
 }
 
 
 void EventLoop::onAdd( Selectable& s )
 {
-    return _selector->add( s );
+    return _impl->add( s );
 }
 
 
 void EventLoop::onRemove( Selectable& s )
 {
-    _selector->remove( s );
+    _impl->remove( s );
 }
 
 
@@ -87,7 +87,7 @@ void EventLoop::onReinit(Selectable& s)
 
 void EventLoop::onChanged(Selectable& s)
 {
-    _selector->changed(s);
+    _impl->changed(s);
 }
 
 
@@ -158,27 +158,27 @@ void EventLoop::onRun()
 
 WaitResult EventLoop::waitNext(std::size_t msecs)
 {
-    size_t timerTimeout = Selector::WaitInfinite;
+    size_t timerTimeout = EventLoop::WaitInfinite;
 
     // If a timer is immediately ready, still check for an
     // active selectable to avoid timer preemption
     if ( updateTimer(timerTimeout) )
     {
-         return _selector->waitNext(0).setTimer();
+         return _impl->waitNext(0).setTimer();
     }
 
     // This handles the case when no timer will become
     // active in the given timeout. The result of the
     // wait call indicates activity
-    if(timerTimeout > msecs || timerTimeout == Selector::WaitInfinite)
+    if(timerTimeout > msecs || timerTimeout == EventLoop::WaitInfinite)
     {
-        return _selector->waitNext(msecs);
+        return _impl->waitNext(msecs);
     }
 
     // A timer will become active before the timeout expires
     while(true)
     {
-        WaitResult result = _selector->waitNext(timerTimeout);
+        WaitResult result = _impl->waitNext(timerTimeout);
 
         if( result.isActive() )
             return result;
@@ -193,18 +193,18 @@ WaitResult EventLoop::waitNext(std::size_t msecs)
 
 bool EventLoop::onWait(std::size_t msecs)
 {
-    if( _selector->wait(msecs) )
-    {
-        RecursiveLock lock(_queueMutex);
+    // if( _impl->wait(msecs) )
+    // {
+    //     RecursiveLock lock(_queueMutex);
 
-        if( !_eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }
+    //     if( !_eventQueue.empty() )
+    //     {
+    //         lock.unlock();
+    //         this->processEvents();
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     return false;
 }
@@ -212,7 +212,7 @@ bool EventLoop::onWait(std::size_t msecs)
 
 void EventLoop::onWake()
 {
-    _selector->wake();
+    _impl->wake();
 }
 
 

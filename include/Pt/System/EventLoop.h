@@ -112,6 +112,8 @@ namespace System {
             size_t _timeout;
     };
 
+    class EventLoopImpl;
+
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
         The System EventLoop can be used as the central entity of a thread or
@@ -176,7 +178,7 @@ namespace System {
 
         private:
             bool _exitLoop;
-            SelectorImpl* _selector;
+            EventLoopImpl* _impl;
             Allocator _allocator;
 			Allocator* _usedalloc;
             std::deque<Event* > _eventQueue;
