@@ -170,13 +170,13 @@ SelectableImpl& FileDevice::simpl()
 }
 
 
-void FileDevice::onAttach(SelectorBase& s)
+void FileDevice::onAttach(EventLoopBase& s)
 {
     _impl->attach(s);
 }
 
 
-void FileDevice::onDetach(SelectorBase& s)
+void FileDevice::onDetach(EventLoopBase& s)
 {
     _impl->detach(s);
 }

@@ -270,7 +270,7 @@ void IODeviceImpl::sync() const
 }
 
 
-void IODeviceImpl::attach(SelectorBase& s)
+void IODeviceImpl::attach(EventLoopBase& s)
 {
     if( this->fd() > FD_SETSIZE )
     {
@@ -279,7 +279,7 @@ void IODeviceImpl::attach(SelectorBase& s)
 }
 
 
-void IODeviceImpl::detach(SelectorBase& s)
+void IODeviceImpl::detach(EventLoopBase& s)
 {
     this->exitSelect();
 }
@@ -303,7 +303,7 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
 {
     struct timeval* timeout = 0;
     struct timeval tv;
-    if(msecs != Selector::WaitInfinite)
+    if(msecs != EventLoop::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;

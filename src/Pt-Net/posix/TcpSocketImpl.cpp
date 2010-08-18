@@ -241,6 +241,11 @@ void TcpSocketImpl::endConnect()
         FD_CLR( this->fd(), _wfds );
     }
 
+    if(_efds)
+    {
+        FD_CLR( this->fd(), _efds );
+    }
+
     checkPendingError();
 
     if( _isConnected )

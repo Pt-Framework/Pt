@@ -98,9 +98,9 @@ namespace System {
 
             virtual void sync() const;
 
-            virtual void attach(SelectorBase& s);
+            virtual void attach(EventLoopBase& s);
 
-            virtual void detach(SelectorBase& s);
+            virtual void detach(EventLoopBase& s);
 
             virtual bool wait(std::size_t msecs);
 

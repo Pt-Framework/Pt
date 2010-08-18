@@ -91,9 +91,9 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void onSync() const;
 
-        virtual void onAttach(SelectorBase&);
+        virtual void onAttach(EventLoopBase&);
 
-        virtual void onDetach(SelectorBase&);
+        virtual void onDetach(EventLoopBase&);
 
     private:
         std::string _path;
