@@ -203,15 +203,6 @@ namespace System {
             */
 
             bool updateTimer(size_t& timeout);
-            /** @brief Wait for activity
-
-                This method will wait for activity on the registered
-                Selectables and Timers. Use Selector::WaitInfinite to
-                wait without timeout.
-
-                @param true on timeout
-            */
-            bool wait(std::size_t msecs = WaitInfinite);
 
             void onAddTimer(Timer& timer);
 
@@ -254,8 +245,6 @@ namespace System {
                 Do not throw exceptions.
             */
             virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
-
-            virtual bool onWait(std::size_t msecs) = 0;
 
             virtual void onWake() = 0;
 
@@ -337,8 +326,6 @@ namespace System {
             virtual void onChanged(Selectable& s);
 
             virtual void onRun();
-
-            virtual bool onWait(std::size_t msecs);
 
             virtual void onWake();
 

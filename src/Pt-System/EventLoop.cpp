@@ -160,40 +160,6 @@ bool EventLoopBase::updateTimer(std::size_t& lowestTimeout)
 }
 
 
-bool EventLoopBase::wait(std::size_t msecs)
-{
-    size_t timerTimeout = EventLoopBase::WaitInfinite;
-
-    // If a timer is immediately ready, still check for an
-    // active selectable to avoid timer preemption
-    if ( updateTimer(timerTimeout) )
-    {
-        this->onWait(0);
-        return true;
-    }
-
-    // This handles the case when no timer will become
-    // active in the given timeout. The result of the
-    // wait call indicates activity
-    if(timerTimeout > msecs || timerTimeout == EventLoopBase::WaitInfinite)
-    {
-        return this->onWait(msecs);
-    }
-
-    // A timer will become active before the timeout expires
-    while(true)
-    {
-        if( this->onWait(timerTimeout) )
-            return true;
-
-        if( updateTimer(timerTimeout) )
-            return true;
-    }
-
-    return false;
-}
-
-
 void EventLoopBase::wake()
 {
     this->onWake();
@@ -360,25 +326,6 @@ WaitResult EventLoop::waitNext(std::size_t msecs)
     }
 
     return WaitResult();
-}
-
-
-bool EventLoop::onWait(std::size_t msecs)
-{
-    // if( _impl->wait(msecs) )
-    // {
-    //     RecursiveLock lock(_queueMutex);
-
-    //     if( !_eventQueue.empty() )
-    //     {
-    //         lock.unlock();
-    //         this->processEvents();
-    //     }
-
-    //     return true;
-    // }
-
-    return false;
 }
 
 
