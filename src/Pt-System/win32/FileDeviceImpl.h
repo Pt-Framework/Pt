@@ -43,9 +43,9 @@ class FileDeviceImpl  : public IODeviceImpl
 
         ~FileDeviceImpl();
 
-        void attach(SelectorBase& s);
+        void attach(EventLoopBase& s);
 
-        void detach(SelectorBase& s);
+        void detach(EventLoopBase& s);
 
         virtual bool wait(std::size_t msecs);
 

@@ -123,12 +123,12 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 }
 
 
-void FileDeviceImpl::attach(SelectorBase& s)
+void FileDeviceImpl::attach(EventLoopBase& s)
 {
 }
 
 
-void FileDeviceImpl::detach(SelectorBase& s)
+void FileDeviceImpl::detach(EventLoopBase& s)
 {
     bool active = false;
     this->setWaitHandle(_waitHandle, active);
