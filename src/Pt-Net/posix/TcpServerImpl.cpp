@@ -151,7 +151,7 @@ bool TcpServerImpl::wait(std::size_t msecs)
 
     struct timeval* timeout = 0;
     struct timeval tv;
-    if(msecs != System::MainLoop::WaitInfinite)
+    if(msecs != System::EventLoopBase::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;

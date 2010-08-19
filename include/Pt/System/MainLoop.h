@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace System {
 
-    class EventLoopImpl;
+    class MainLoopImpl;
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
@@ -136,7 +136,7 @@ namespace System {
 
         private:
             bool _exitLoop;
-            EventLoopImpl* _impl;
+            MainLoopImpl* _impl;
             Allocator _allocator;
 			Allocator* _usedalloc;
             std::deque<Event* > _eventQueue;

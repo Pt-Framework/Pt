@@ -303,7 +303,7 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
 {
     struct timeval* timeout = 0;
     struct timeval tv;
-    if(msecs != MainLoop::WaitInfinite)
+    if(msecs != EventLoopBase::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;

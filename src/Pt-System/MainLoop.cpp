@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "EventLoopImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/System/MainLoop.h"
 
 namespace Pt {
@@ -38,7 +38,7 @@ MainLoop::MainLoop()
 , _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
 {
-    _impl = new EventLoopImpl();
+    _impl = new MainLoopImpl();
 }
 
 MainLoop::MainLoop(Allocator& a)
@@ -46,7 +46,7 @@ MainLoop::MainLoop(Allocator& a)
 , _allocator(/*255, 64*/)
 , _usedalloc(&a)
 {
-	_impl = new EventLoopImpl();
+	_impl = new MainLoopImpl();
 }
 
 
