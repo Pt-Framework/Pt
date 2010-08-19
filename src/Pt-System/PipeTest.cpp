@@ -28,7 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/Pipe.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include "Pt/System/StreamBuffer.h"
 #include "Pt/System/IOStream.h"
 #include "Pt/Unit/Assertion.h"

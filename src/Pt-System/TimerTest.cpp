@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/Timer.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
 #include "Pt/Timespan.h"
 #include "Pt/Unit/Assertion.h"

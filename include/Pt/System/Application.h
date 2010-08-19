@@ -29,7 +29,7 @@
 #define PT_SYSTEM_APPLICATION_H
 
 #include <Pt/System/Api.h>
-#include <Pt/System/EventLoop.h>
+#include <Pt/System/MainLoop.h>
 #include <Pt/Application.h>
 #include <Pt/Connectable.h>
 #include <Pt/Event.h>

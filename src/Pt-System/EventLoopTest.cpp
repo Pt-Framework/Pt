@@ -26,7 +26,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
 #include "Pt/Timespan.h"
 #include "Pt/Allocator.h"

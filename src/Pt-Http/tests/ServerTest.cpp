@@ -34,7 +34,7 @@
 #include "Pt/Http/ReplyHeader.h"
 #include "Pt/Http/Request.h"
 #include "Pt/Net/TcpSocket.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include <string>
 
 class ServerTest : public Pt::Unit::TestSuite

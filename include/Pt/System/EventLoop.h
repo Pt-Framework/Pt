@@ -31,16 +31,11 @@
 
 #include <Pt/Event.h>
 #include <Pt/Signal.h>
-#include <Pt/Allocator.h>
 #include <Pt/Timespan.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
-#include <deque>
 #include <map>
-#include <list>
 
 namespace Pt {
 
@@ -48,8 +43,6 @@ namespace System {
 
     class Timer;
     class Selectable;
-    class Application;
-    class SelectorImpl;
 
     class WaitResult
     {
@@ -253,110 +246,6 @@ namespace System {
 
             //! @internal
             void* _reserved;
-    };
-
-    class EventLoopImpl;
-
-    /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
-
-        An %MainLoop can be used to monitor a set of Selectables and Timers
-        and react to activity on them. The wait call can be performed with
-        a timeout and the respective timeout signal is sent if it occurs.
-        Clients can be notified about Timer and Selectable activity by
-        connecting to the appropriate signals of the Timer and Selectable
-        classes.
-
-        The following example uses a %MainLoop to wait on acitvity on
-        a Timer, which is set to time-out after 1000 msecs.
-
-        @code
-        // slot to handle timer activity
-        void onTimer();
-
-        int main()
-        {
-            using Pt::System;
-
-            Timer timer;
-            timer.start(1000);
-            connect(timer.timeout, ontimer);
-
-            MainLoop loop;
-            loop.addTimer(timer);
-            loop.run();
-
-            return 0;
-        }
-        @endcode
-
-        The MainLoop can be used as the central entity of a thread or
-        process to dispatch application events and wait on multiple IODevices or
-        Timers for activity.
-
-        Events can be added to the internal event queue, even from other threads
-        using the method MainLoop::commitEvent or MainLoop::queueEvent. The
-        first method will add the event to the internal queue and wake the
-        event loop, the latter allows queing multiple events and it is up to
-        the caller to wake the event loop by calling MainLoop::wake when all
-        events are added. When the event loop processes its event, the signal
-        "event" is send for each processed event. Events are processes in the
-        order they were added.
-
-        To start the %MainLoop the method MainLoop::run must be executed. It blocks
-        until the event loop is stopped. To stop the %MainLoop, MainLoop::exit
-        must be called. The delivery of the events occurs inside the thread that
-        started the execution of the event loop.
-
-        %IODevices and %Timers can be added to an %MainLoop just as to Selector.
-        In fact a %Selector is used internally to implement the %MainLoop.
-
-        Since the %MainLoop is a Runnable, it can be easily assigned to a Thread
-        to give it its own event loop.
-     */
-    class PT_SYSTEM_API MainLoop : public EventLoopBase
-    {
-        public:
-            /** @brief Constructs the MainLoop
-            */
-            MainLoop();
-
-			MainLoop(Allocator& a);
-
-            /** @brief Destructs the MainLoop
-             */
-            virtual ~MainLoop();
-
-        protected:
-            virtual void onAdd( Selectable& s );
-
-            virtual void onRemove( Selectable& s );
-
-            virtual void onReinit(Selectable& s);
-
-            virtual void onChanged(Selectable& s);
-
-            virtual void onRun();
-
-            virtual void onExit();
-
-            virtual void onCommitEvent(const Event& event);
-
-            virtual void onQueueEvent(const Event& event);
-
-            virtual void onWake();
-
-            virtual void onProcessEvents();
-
-        private:
-            WaitResult waitNext(size_t msecs);
-
-        private:
-            bool _exitLoop;
-            EventLoopImpl* _impl;
-            Allocator _allocator;
-			Allocator* _usedalloc;
-            std::deque<Event* > _eventQueue;
-            RecursiveMutex _queueMutex;
     };
 
 } // namespace System

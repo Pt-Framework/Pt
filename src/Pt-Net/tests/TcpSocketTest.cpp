@@ -31,7 +31,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include <string>
 
 class TcpSocketTest : public Pt::Unit::TestSuite

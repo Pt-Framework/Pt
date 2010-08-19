@@ -33,6 +33,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           IOError.cpp
                           IOStream.cpp
                           Library.cpp
+                          MainLoop.cpp
                           Mutex.cpp
                           Pipe.cpp
                           Plugin.cpp
