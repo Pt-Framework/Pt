@@ -30,7 +30,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/EventLoop.h"
+#include "Pt/System/MainLoop.h"
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ void MainLoopImpl::exit()
 }
 
 
-void MainLoopImpl::waitNext( WaitResult& result, std::size_t umsecs )
+void MainLoopImpl::waitNext( WaitResult& result, std::size_t msecs )
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;

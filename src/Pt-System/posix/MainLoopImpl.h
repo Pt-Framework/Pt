@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace System {
 
-class Application;
+class MainLoop;
 
 class MainLoopImpl
 {

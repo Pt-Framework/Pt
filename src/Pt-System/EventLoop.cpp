@@ -36,18 +36,18 @@ namespace Pt {
 namespace System {
 
 EventLoopBase::EventLoopBase()
-: _timeout(WaitInfinite)
-, _allocator(/*255, 64*/)
+: _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
+, _timeout(WaitInfinite)
 , _exitLoop(false)
 {
 }
 
 
 EventLoopBase::EventLoopBase(Allocator& a)
-: _timeout(WaitInfinite)
-, _allocator(/*255, 64*/)
+: _allocator(/*255, 64*/)
 , _usedalloc(&a)
+, _timeout(WaitInfinite)
 , _exitLoop(false)
 {
 }
