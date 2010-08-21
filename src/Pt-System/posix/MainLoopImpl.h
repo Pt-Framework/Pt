@@ -45,7 +45,11 @@ class MainLoopImpl
 
         void changed(Selectable& s);
 
-        WaitResult waitNext(std::size_t msecs);
+        void run(MainLoop& loop);
+
+        void exit();
+
+        void waitNext(WaitResult& result, std::size_t msecs);
 
         void wake();
 

@@ -150,7 +150,30 @@ void MainLoopImpl::wake()
 }
 
 
-WaitResult MainLoopImpl::waitNext( std::size_t umsecs )
+void MainLoopImpl::run(MainLoop& loop)
+{
+    WaitResult result;
+    result.setInit();
+
+    while(true)
+    {
+        size_t timeout = loop.runNext(result);
+
+        if( result.isExit() )
+            return;
+
+        this->waitNext(result, timeout);
+    }
+}
+
+
+void MainLoopImpl::exit()
+{
+
+}
+
+
+void MainLoopImpl::waitNext( WaitResult& ret, std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -190,7 +213,6 @@ WaitResult MainLoopImpl::waitNext( std::size_t umsecs )
         throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
     }
 
-    WaitResult ret;
     try
     {
         // check all selectables that did not require waiting
@@ -211,7 +233,7 @@ WaitResult MainLoopImpl::waitNext( std::size_t umsecs )
 
         if( result == WAIT_TIMEOUT)
         {
-            return ret;
+            return;
         }
 
         const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
@@ -219,7 +241,8 @@ WaitResult MainLoopImpl::waitNext( std::size_t umsecs )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            return ret.setEvent();
+            ret.setEvent();
+            return;
         }
         // I/O event at offset 1 was active
         else if (offset == 1)
@@ -255,8 +278,6 @@ WaitResult MainLoopImpl::waitNext( std::size_t umsecs )
         _currentAvail = _avail.end();
         throw;
     }
-
-    return ret;
 }
 
 } //namespace System

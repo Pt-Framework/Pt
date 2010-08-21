@@ -29,11 +29,8 @@
 #ifndef PT_SYSTEM_MAINLOOP_H
 #define PT_SYSTEM_MAINLOOP_H
 
-#include <Pt/Allocator.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Mutex.h>
 #include <Pt/System/EventLoop.h>
-#include <deque>
 
 namespace Pt {
 
@@ -96,9 +93,11 @@ namespace System {
 
         Since the %MainLoop is a Runnable, it can be easily assigned to a Thread
         to give it its own event loop.
-     */
+    */
     class PT_SYSTEM_API MainLoop : public EventLoopBase
     {
+        friend class MainLoopImpl;
+
         public:
             /** @brief Constructs the MainLoop
             */
@@ -123,24 +122,10 @@ namespace System {
 
             virtual void onExit();
 
-            virtual void onCommitEvent(const Event& event);
-
-            virtual void onQueueEvent(const Event& event);
-
             virtual void onWake();
 
-            virtual void onProcessEvents();
-
         private:
-            WaitResult waitNext(size_t msecs);
-
-        private:
-            bool _exitLoop;
             MainLoopImpl* _impl;
-            Allocator _allocator;
-			Allocator* _usedalloc;
-            std::deque<Event* > _eventQueue;
-            RecursiveMutex _queueMutex;
     };
 
 } // namespace System

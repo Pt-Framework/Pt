@@ -37,12 +37,36 @@ namespace System {
 
 EventLoopBase::EventLoopBase()
 : _timeout(WaitInfinite)
+, _allocator(/*255, 64*/)
+, _usedalloc(&_allocator)
+, _exitLoop(false)
+{
+}
+
+
+EventLoopBase::EventLoopBase(Allocator& a)
+: _timeout(WaitInfinite)
+, _allocator(/*255, 64*/)
+, _usedalloc(&a)
+, _exitLoop(false)
 {
 }
 
 
 EventLoopBase::~EventLoopBase()
 {
+    try
+    {
+        while ( ! _eventQueue.empty() )
+        {
+            Event* ev = _eventQueue.front();
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+        }
+    }
+    catch(...)
+    {}
+
     while( _timers.size() )
     {
        Timer* timer = _timers.begin()->second;
@@ -80,6 +104,24 @@ void EventLoopBase::remove( Timer& timer )
 {
     if(timer.selector() == this)
         timer.setSelector(0);
+}
+
+
+void EventLoopBase::run()
+{
+    _exitLoop = false;
+    this->onRun();
+    exited();
+}
+
+
+void EventLoopBase::exit()
+{
+    RecursiveLock lock(_queueMutex);
+    _exitLoop = true;
+    lock.unlock();
+
+    this->onExit();
 }
 
 
@@ -158,6 +200,126 @@ bool EventLoopBase::updateTimer(std::size_t& lowestTimeout)
 
     return timerActive;
 }
+
+
+size_t EventLoopBase::runNext(WaitResult& result)
+{
+    if( result.isTimeout() )
+    {
+        timeout.send();
+    }
+
+    if( result.isEvent() )
+    {
+        RecursiveLock lock(_queueMutex);
+
+        if(_exitLoop)
+        {
+            result.clear();
+            result.setExit();
+            return 0;
+        }
+
+        if( ! _eventQueue.empty() )
+        {
+            lock.unlock();
+            this->processEvents();
+        }
+
+        lock.unlock();
+    }
+
+    result.clear();
+
+    size_t timerTimeout = EventLoopBase::WaitInfinite;
+
+    // Check for active timers and process them
+    updateTimer(timerTimeout);
+
+    // no timer will become active within the idle timeout
+    if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoopBase::WaitInfinite)
+    {
+        return this->idleTimeout();
+    }
+
+    // A timer will become active before the timeout expires
+    result.setTimer();
+    return timerTimeout;
+}
+
+
+void EventLoopBase::onCommitEvent(const Event& ev)
+{
+    {
+        RecursiveLock lock( _queueMutex );
+
+        // TODO: use a continuous block of memory to store events
+        // this avoids new/delete
+        Event& clonedEvent = ev.clone( this->allocator() );
+
+        try
+        {
+            _eventQueue.push_back(&clonedEvent);
+        }
+        catch(...)
+        {
+            clonedEvent.destroy( this->allocator() );
+            throw;
+        }
+    }
+
+    this->wake();
+}
+
+
+void EventLoopBase::onQueueEvent(const Event& ev)
+{
+    RecursiveLock lock( _queueMutex );
+
+    // TODO: use a continuous block of memory to store events
+    // this avoids new/delete
+    Event& clonedEvent = ev.clone( this->allocator() );
+
+    try
+    {
+        _eventQueue.push_back(&clonedEvent);
+    }
+    catch(...)
+    {
+        clonedEvent.destroy( this->allocator() );
+        throw;
+    }
+}
+
+
+void EventLoopBase::onProcessEvents()
+{
+    while( false == _exitLoop )
+    {
+        RecursiveLock lock(_queueMutex);
+
+        if ( _eventQueue.empty() || _exitLoop )
+            break;
+
+        Event* ev = _eventQueue.front();
+        _eventQueue.pop_front();
+
+        try
+        {
+            lock.unlock();
+            event.send(*ev);
+        }
+        catch(...)
+        {
+            ev->destroy( this->allocator() );
+            throw;
+        }
+
+        ev->destroy( this->allocator() );
+    }
+}
+
+
 
 } // namespace System
 

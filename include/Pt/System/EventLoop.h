@@ -32,10 +32,13 @@
 #include <Pt/Event.h>
 #include <Pt/Signal.h>
 #include <Pt/Timespan.h>
+#include <Pt/Allocator.h>
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
+#include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
 #include <map>
+#include <deque>
 
 namespace Pt {
 
@@ -48,10 +51,12 @@ namespace System {
     {
         enum ResultType
         {
-            Timeout = 0x00,
-            Event   = 0x01,
-            Device  = 0x02,
-            Timer   = 0x04
+            Timeout = 0,
+            Event   = 1,
+            Device  = 2,
+            Timer   = 4,
+            Exit    = 8,
+            Init    = 16,
         };
 
         public:
@@ -59,37 +64,53 @@ namespace System {
             : _type(Timeout)
             {}
 
+            void clear()
+            { _type = Timeout; }
+
             bool isTimeout() const
             { return _type == WaitResult::Timeout; }
 
             bool isActive() const
             { return _type != WaitResult::Timeout; }
 
+            bool isInit() const
+            { return WaitResult::Init == (_type & WaitResult::Init); }
+
+            void setInit()
+            {
+                _type |= WaitResult::Init;
+            }
+
+            bool isExit() const
+            { return WaitResult::Exit == (_type & WaitResult::Exit); }
+
+            void setExit()
+            {
+                _type |= WaitResult::Exit;
+            }
+
             bool isEvent() const
             { return WaitResult::Event == (_type & WaitResult::Event); }
 
-             WaitResult& setEvent()
+            void setEvent()
             {
                 _type |= WaitResult::Event;
-                return *this;
             }
 
             bool isDevice() const
             { return WaitResult::Device == (_type & WaitResult::Device); }
 
-             WaitResult& setDevice()
+            void setDevice()
             {
                 _type |= WaitResult::Device;
-                return *this;
             }
 
             bool isTimer() const
             { return WaitResult::Timer == (_type & WaitResult::Timer); }
 
-            WaitResult& setTimer()
+            void setTimer()
             {
                 _type |= WaitResult::Timer;
-                return *this;
             }
 
         private:
@@ -110,6 +131,9 @@ namespace System {
             /** @brief Destructs the EventLoop
             */
             virtual ~EventLoopBase();
+
+            Allocator& allocator()
+            { return *_usedalloc; }
 
             /** @brief Adds an IOResult
 
@@ -139,13 +163,11 @@ namespace System {
 
             /** @brief Starts the event loop
             */
-            void run()
-            { this->onRun(); }
+            void run();
 
             /** @brief Stops the %EventLoop.
             */
-            void exit()
-            { this->onExit(); }
+            void exit();
 
             /** @brief Sets the idle timeout
             */
@@ -177,11 +199,17 @@ namespace System {
             */
             EventLoopBase();
 
+            /** @brief Construct an EventLoop with a custom allocator
+            */
+            EventLoopBase(Allocator& a);
+
             /** @internal Update all timers and return true if a timer fired
 
                 @param timeout interval to next expiring timer
             */
             bool updateTimer(size_t& timeout);
+
+            size_t runNext(WaitResult& result);
 
             void onAddTimer(Timer& timer);
 
@@ -225,11 +253,24 @@ namespace System {
             */
             virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
+            virtual void onCommitEvent(const Event& event);
+
+            virtual void onQueueEvent(const Event& event);
+
+            virtual void onProcessEvents();
+
             virtual void onRun() = 0;
 
             virtual void onExit() = 0;
 
         private:
+            //! @internal
+            Allocator _allocator;
+
+            //! @internal
+			Allocator* _usedalloc;
+
+            //! @internal
             size_t _timeout;
 
             //! @internal
@@ -243,6 +284,15 @@ namespace System {
 
             //! @internal
             //SelectableList _selectables;
+
+           //! @internal
+            bool _exitLoop;
+
+            //! @internal
+            std::deque<Event* > _eventQueue;
+
+            //! @internal
+            RecursiveMutex _queueMutex;
 
             //! @internal
             void* _reserved;

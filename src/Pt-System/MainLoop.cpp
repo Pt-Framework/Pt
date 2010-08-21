@@ -34,17 +34,13 @@ namespace Pt {
 namespace System {
 
 MainLoop::MainLoop()
-: _exitLoop(false)
-, _allocator(/*255, 64*/)
-, _usedalloc(&_allocator)
 {
     _impl = new MainLoopImpl();
 }
 
+
 MainLoop::MainLoop(Allocator& a)
-:_exitLoop(false)
-, _allocator(/*255, 64*/)
-, _usedalloc(&a)
+: EventLoopBase(a)
 {
 	_impl = new MainLoopImpl();
 }
@@ -52,18 +48,6 @@ MainLoop::MainLoop(Allocator& a)
 
 MainLoop::~MainLoop()
 {
-    try
-    {
-        while ( ! _eventQueue.empty() )
-        {
-            Event* ev = _eventQueue.front();
-            _eventQueue.pop_front();
-            ev->destroy(*_usedalloc);
-        }
-    }
-    catch(...)
-    {}
-
     delete _impl;
 }
 
@@ -89,6 +73,27 @@ void MainLoop::onChanged(Selectable& s)
 {
     _impl->changed(s);
 }
+
+
+void MainLoop::onRun()
+{
+    _impl->run(*this);
+}
+
+
+void MainLoop::onExit()
+{
+    this->wake();
+}
+
+
+void MainLoop::onWake()
+{
+    _impl->wake();
+}
+
+
+
 
 
 // void MainLoop::onRun()
@@ -120,165 +125,75 @@ void MainLoop::onChanged(Selectable& s)
 // }
 
 
-void MainLoop::onRun()
-{
-    while( true )
-    {
-        WaitResult result = this->waitNext( this->idleTimeout() );
+// void MainLoop::onRun()
+// {
+//     while( true )
+//     {
+//         WaitResult result = this->waitNext( this->idleTimeout() );
 
-        if( result.isTimeout() )
-        {
-            timeout.send();
-            continue;
-        }
+//         if( result.isTimeout() )
+//         {
+//             timeout.send();
+//             continue;
+//         }
 
-        if( result.isEvent() )
-        {
-            RecursiveLock lock(_queueMutex);
+//         if( result.isEvent() )
+//         {
+//             RecursiveLock lock(_queueMutex);
 
-            if(_exitLoop)
-            {
-                _exitLoop = false;
-                break;
-            }
+//             if(_exitLoop)
+//             {
+//                 _exitLoop = false;
+//                 break;
+//             }
 
-            if( ! _eventQueue.empty() )
-            {
-                lock.unlock();
-                this->processEvents();
-            }
+//             if( ! _eventQueue.empty() )
+//             {
+//                 lock.unlock();
+//                 this->processEvents();
+//             }
 
-            lock.unlock();
-        }
-    }
+//             lock.unlock();
+//         }
+//     }
 
-    exited();
-}
-
-
-WaitResult MainLoop::waitNext(std::size_t msecs)
-{
-    size_t timerTimeout = MainLoop::WaitInfinite;
-
-    // If a timer is immediately ready, still check for an
-    // active selectable to avoid timer preemption
-    if ( updateTimer(timerTimeout) )
-    {
-         return _impl->waitNext(0).setTimer();
-    }
-
-    // This handles the case when no timer will become
-    // active in the given timeout. The result of the
-    // wait call indicates activity
-    if(timerTimeout > msecs || timerTimeout == MainLoop::WaitInfinite)
-    {
-        return _impl->waitNext(msecs);
-    }
-
-    // A timer will become active before the timeout expires
-    while(true)
-    {
-        WaitResult result = _impl->waitNext(timerTimeout);
-
-        if( result.isActive() )
-            return result;
-
-        if( updateTimer(timerTimeout) )
-            return result.setTimer();
-    }
-
-    return WaitResult();
-}
+//     exited();
+// }
 
 
-void MainLoop::onWake()
-{
-    _impl->wake();
-}
+// WaitResult MainLoop::waitNext(std::size_t msecs)
+// {
+//     size_t timerTimeout = MainLoop::WaitInfinite;
 
+//     // If a timer is immediately ready, still check for an
+//     // active selectable to avoid timer preemption
+//     if ( updateTimer(timerTimeout) )
+//     {
+//          return _impl->waitNext(0).setTimer();
+//     }
 
-void MainLoop::onExit()
-{
-    RecursiveLock lock(_queueMutex);
-    _exitLoop = true;
-    lock.unlock();
+//     // This handles the case when no timer will become
+//     // active in the given timeout. The result of the
+//     // wait call indicates activity
+//     if(timerTimeout > msecs || timerTimeout == MainLoop::WaitInfinite)
+//     {
+//         return _impl->waitNext(msecs);
+//     }
 
-    this->wake();
-}
+//     // A timer will become active before the timeout expires
+//     while(true)
+//     {
+//         WaitResult result = _impl->waitNext(timerTimeout);
 
+//         if( result.isActive() )
+//             return result;
 
-void MainLoop::onCommitEvent(const Event& ev)
-{
-    {
-        RecursiveLock lock( _queueMutex );
+//         if( updateTimer(timerTimeout) )
+//             return result.setTimer();
+//     }
 
-        // TODO: use a continuous block of memory to store events
-        // this avoids new/delete
-        Event& clonedEvent = ev.clone(*_usedalloc);
-
-        try
-        {
-            _eventQueue.push_back(&clonedEvent);
-        }
-        catch(...)
-        {
-            clonedEvent.destroy(*_usedalloc);
-            throw;
-        }
-    }
-
-    this->wake();
-}
-
-
-void MainLoop::onQueueEvent(const Event& ev)
-{
-    {
-        RecursiveLock lock( _queueMutex );
-
-        // TODO: use a continuous block of memory to store events
-        // this avoids new/delete
-        Event& clonedEvent = ev.clone(*_usedalloc);
-
-        try
-        {
-            _eventQueue.push_back(&clonedEvent);
-        }
-        catch(...)
-        {
-            clonedEvent.destroy(*_usedalloc);
-            throw;
-        }
-    }
-}
-
-
-void MainLoop::onProcessEvents()
-{
-    while( false == _exitLoop )
-    {
-        RecursiveLock lock(_queueMutex);
-
-        if ( _eventQueue.empty() || _exitLoop )
-            break;
-
-        Event* ev = _eventQueue.front();
-        _eventQueue.pop_front();
-
-        try
-        {
-            lock.unlock();
-            event.send(*ev);
-        }
-        catch(...)
-        {
-            ev->destroy(*_usedalloc);
-            throw;
-        }
-
-        ev->destroy(*_usedalloc);
-    }
-}
+//     return WaitResult();
+// }
 
 } // namespace System
 

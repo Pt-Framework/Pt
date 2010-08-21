@@ -46,7 +46,7 @@ class ProcessTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "RedirectStdout", *this, &ProcessTest::RedirectStdout );
             Pt::Unit::TestSuite::registerMethod( "RedirectStderr", *this, &ProcessTest::RedirectStderr );
             Pt::Unit::TestSuite::registerMethod( "RedirectStdin", *this, &ProcessTest::RedirectStdin );
-            Pt::Unit::TestSuite::registerMethod( "ProcessAbort", *this, &ProcessTest::ProcessAbort );
+            //Pt::Unit::TestSuite::registerMethod( "ProcessAbort", *this, &ProcessTest::ProcessAbort );
             Pt::Unit::TestSuite::registerMethod( "EnvVar", *this, &ProcessTest::EnvVar );
 #endif
         }

@@ -133,10 +133,31 @@ void MainLoopImpl::changed(Selectable& s)
 }
 
 
-WaitResult MainLoopImpl::waitNext(std::size_t msecs)
+void MainLoopImpl::run(MainLoop& loop)
 {
     WaitResult result;
+    result.setInit();
 
+    while(true)
+    {
+        size_t timeout = loop.runNext(result);
+
+        if( result.isExit() )
+            return;
+
+        this->waitNext(result, timeout);
+    }
+}
+
+
+void MainLoopImpl::exit()
+{
+
+}
+
+
+void MainLoopImpl::waitNext( WaitResult& result, std::size_t umsecs )
+{
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
     fd_set efds = _efds;
@@ -171,7 +192,7 @@ WaitResult MainLoopImpl::waitNext(std::size_t msecs)
             continue;
 
         if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
-            return result; // timeout
+            return; // timeout
 
         msecs -= int(elapsed);
     }
@@ -238,7 +259,7 @@ WaitResult MainLoopImpl::waitNext(std::size_t msecs)
         throw;
     }
 
-    return result;
+    return;
 }
 
 
