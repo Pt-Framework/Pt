@@ -20,7 +20,6 @@
 #ifndef PT_SYSTEM_SELECTABLEIMPL_H
 #define PT_SYSTEM_SELECTABLEIMPL_H
 
-#include "SelectorImpl.h"
 #include "Pt/System/Api.h"
 #include <cstddef>
 #include <windows.h>
@@ -30,6 +29,7 @@ namespace Pt {
 namespace System {
 
 class Selectable;
+class HandleMap;
 
 class SelectableImpl
 {

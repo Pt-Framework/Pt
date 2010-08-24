@@ -32,69 +32,6 @@ namespace Pt {
 
 namespace System {
 
-class HandleMap
-{
-    public:
-        HandleMap()
-        {}
-
-        ~HandleMap()
-        { }
-
-        void add(HANDLE h, Selectable* s)
-        {
-            _handles.push_back(h);
-            _selectables.push_back(s);
-        }
-
-        HANDLE* handles()
-        {
-            if(_handles.empty())
-                return 0;
-
-            return &_handles[0];
-        }
-
-        size_t size() const
-        { return _handles.size(); }
-
-        Selectable* at(size_t n)
-        { return _selectables[n]; }
-
-        void pop_front()
-        {
-            _selectables.erase( _selectables.begin() );
-            _handles.erase( _handles.begin() );
-        }
-
-        void remove(Selectable& s)
-        {
-            if( _selectables.empty() )
-                return;
-
-            std::vector<Selectable*>::iterator it;
-            std::vector<HANDLE>::iterator hit =_handles.begin();
-            for(it = _selectables.begin(); it != _selectables.end(); )
-            {
-                if(*it != &s)
-                {
-                    ++it;
-                    ++hit;
-                }
-                else
-                {
-                    it = _selectables.erase(it);
-                    hit = _handles.erase(hit);
-                }
-            }
-        }
-
-    private:
-        std::vector<HANDLE> _handles;
-        std::vector<Selectable*> _selectables;
-};
-
-
 class SelectorImpl
 {
     public:

@@ -39,7 +39,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           Plugin.cpp
                           Process.cpp
                           Selectable.cpp
-                          Selector.cpp
                           SerialDevice.cpp
                           Semaphore.cpp
                           StreamBuffer.cpp
@@ -86,7 +85,6 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
                   #SerialDeviceTest.cpp
-                  #SelectorTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   ;
