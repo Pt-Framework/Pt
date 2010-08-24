@@ -114,9 +114,9 @@ namespace System {
 
             virtual void onDetach(Selectable&);
 
-            virtual void onAdd( Selectable& s );
+            virtual void onEnable( Selectable& s );
 
-            virtual void onRemove( Selectable& s );
+            virtual void onDisable( Selectable& s );
 
             virtual void onReinit(Selectable& s);
 

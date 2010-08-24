@@ -217,33 +217,29 @@ namespace System {
 
             void onTimerChanged( Timer& timer );
 
-            //void attach(Selectable& s)
-            //{
-            //    _selectables.push_back(&s);
-            //    this->onAdd(s); // TODO: use onAttach
-            //}
+            /** @brief A Selectable is attached to this %Selector
 
-            //void detach(Selectable& s)
-            //{
-            //    _selectables.remove(&s);
-            //    this->onRemove(s); // TODO: use onDetach
-            //}
-
+                Does not throw exceptions.
+            */
             virtual void onAttach(Selectable&) = 0;
 
+            /** @brief A Selectable is detached from this %Selector
+
+                Does not throw exceptions.
+            */
             virtual void onDetach(Selectable&) = 0;
 
-            /** @brief A Selectable is added to this %Selector
+            /** @brief A Selectable is enabled
 
                 Does not throw exceptions.
             */
-            virtual void onAdd(Selectable&) = 0; // TODO: onEnable
+            virtual void onEnable(Selectable&) = 0;
 
-            /** @brief A Selectable is removed from this %Selector
+            /** @brief A Selectable is disabled
 
                 Does not throw exceptions.
             */
-            virtual void onRemove(Selectable&) = 0; // TODO: onDisable
+            virtual void onDisable(Selectable&) = 0;
 
             /** @brief A Selectable is reinitialised and needs to be updated
 
@@ -279,9 +275,6 @@ namespace System {
 
             //! @internal
             typedef std::multimap<Timespan, Timer*> TimerMap;
-
-            //! @internal
-            //typedef std::list<Selectable*> SelectableList;
 
             //! @internal
             TimerMap _timers;

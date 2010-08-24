@@ -108,14 +108,14 @@ void MainLoopImpl::detach(Selectable& s)
 }
 
 
-void MainLoopImpl::add(Selectable& s)
+void MainLoopImpl::enable(Selectable& s)
 {
     s.simpl().initSelect(_rfds, _wfds, _efds);
     _devices.insert( &s );
 }
 
 
-void MainLoopImpl::remove(Selectable& s)
+void MainLoopImpl::disable(Selectable& s)
 {
    std::set<Selectable*>::iterator it = _devices.find( &s );
    if( it == _devices.end() )

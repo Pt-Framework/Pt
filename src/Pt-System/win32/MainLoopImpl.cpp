@@ -108,13 +108,13 @@ void MainLoopImpl::detach(Selectable& s)
 }
 
 
-void MainLoopImpl::add(Selectable& s)
+void MainLoopImpl::enable(Selectable& s)
 {
     _dirty.insert(&s);
 }
 
 
-void MainLoopImpl::remove(Selectable& s)
+void MainLoopImpl::disable(Selectable& s)
 {
     _dirty.erase(&s);
     _handles.remove(s);

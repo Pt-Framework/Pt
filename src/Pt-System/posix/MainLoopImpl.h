@@ -43,9 +43,9 @@ class MainLoopImpl
 
         void detach( Selectable& s );
 
-        void add( Selectable& dev );
+        void enable( Selectable& dev );
 
-        void remove( Selectable& dev );
+        void disable( Selectable& dev );
 
         void changed(Selectable& s);
 

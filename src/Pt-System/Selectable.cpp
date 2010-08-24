@@ -37,7 +37,7 @@ Selectable::~Selectable()
     if(_parent)
     {
         if( this->enabled() )
-            _parent->onRemove(*this);
+            _parent->onDisable(*this);
 
         _parent->onDetach(*this);
     }
@@ -51,7 +51,7 @@ void Selectable::setSelector(EventLoop* parent)
         this->onDetach(*_parent);
 
         if( this->enabled() )
-            _parent->onRemove(*this);
+            _parent->onDisable(*this);
 
         _parent->onDetach(*this);
         _parent = 0;
@@ -64,7 +64,7 @@ void Selectable::setSelector(EventLoop* parent)
         parent->onAttach(*this);
 
         if( this->enabled() )
-            parent->onAdd(*this);
+            parent->onEnable(*this);
     }
 
     _parent = parent;
@@ -153,12 +153,12 @@ void Selectable::setState(State state)
     if(state == Disabled)
     {
         if(_parent)
-            _parent->onRemove(*this);
+            _parent->onDisable(*this);
     }
     else if(_state == Disabled)
     {
         if(_parent)
-            _parent->onAdd(*this);
+            _parent->onEnable(*this);
     }
 
     //State prev = _state;

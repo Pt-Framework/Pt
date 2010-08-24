@@ -108,9 +108,9 @@ class MainLoopImpl
 
         void detach( Selectable& s );
 
-        void add( Selectable& s );
+        void enable( Selectable& s );
 
-        void remove( Selectable& s );
+        void disable( Selectable& s );
 
         void changed(Selectable& s);
 
