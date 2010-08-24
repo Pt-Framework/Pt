@@ -16,7 +16,7 @@ class ApplicationImpl
 
         virtual ~ApplicationImpl();
 
-        void init(EventLoopBase& s);
+        void init(EventLoop& s);
 
         bool catchSystemSignal(int sig);
 

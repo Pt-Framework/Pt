@@ -83,10 +83,10 @@ class PipeIODevice : public Pt::System::IODevice
         SelectableImpl& simpl()
         { return _impl; }
 
-        void onAttach(EventLoopBase& s)
+        void onAttach(EventLoop& s)
         { _impl.attach(s); }
 
-        void onDetach(EventLoopBase& s)
+        void onDetach(EventLoop& s)
         { _impl.detach(s); }
 
     private:

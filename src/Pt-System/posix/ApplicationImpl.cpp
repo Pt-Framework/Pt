@@ -105,7 +105,7 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
-void ApplicationImpl::init(EventLoopBase& s)
+void ApplicationImpl::init(EventLoop& s)
 {
     pt_signal_pipe->out().setSelector(&s);
     connect(pt_signal_pipe->out().inputReady, processSignal);
