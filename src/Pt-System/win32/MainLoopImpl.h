@@ -104,6 +104,10 @@ class MainLoopImpl
 
         ~MainLoopImpl();
 
+        void attach( Selectable& s );
+
+        void detach( Selectable& s );
+
         void add( Selectable& s );
 
         void remove( Selectable& s );
@@ -124,6 +128,7 @@ class MainLoopImpl
         HandleMap _handles;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*>::iterator _currentAvail;
+        std::set<Selectable*> _attached;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _dirty;
         std::set<Selectable*> _avail;

@@ -52,6 +52,18 @@ MainLoop::~MainLoop()
 }
 
 
+void MainLoop::onAttach(Selectable& s)
+{
+    return _impl->attach( s );
+}
+
+
+void MainLoop::onDetach(Selectable& s)
+{
+    return _impl->detach( s );
+}
+
+
 void MainLoop::onAdd( Selectable& s )
 {
     return _impl->add( s );

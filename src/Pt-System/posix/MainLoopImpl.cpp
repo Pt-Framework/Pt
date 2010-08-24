@@ -76,9 +76,15 @@ MainLoopImpl::MainLoopImpl()
 MainLoopImpl::~MainLoopImpl()
 {
     std::set<Selectable*>::iterator it;
-    while( _devices.size() )
+    // while( _devices.size() )
+    // {
+    //     it = _devices.begin();
+    //     (*it)->setSelector(0);
+    // }
+
+    while( _attached.size() )
     {
-        it = _devices.begin();
+        it = _attached.begin();
         (*it)->setSelector(0);
     }
 
@@ -87,6 +93,18 @@ MainLoopImpl::~MainLoopImpl()
         ::close(_wakePipe[0]);
         ::close(_wakePipe[1]);
     }
+}
+
+
+void MainLoopImpl::attach(Selectable& s)
+{
+    _attached.insert(&s);
+}
+
+
+void MainLoopImpl::detach(Selectable& s)
+{
+    _attached.erase(&s);
 }
 
 

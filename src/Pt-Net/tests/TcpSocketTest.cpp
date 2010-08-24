@@ -118,7 +118,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void NonBlockingWithLoop()
         {
             Pt::Net::TcpServer server("127.0.0.1", 8000);
-            //{
+            {
                 this->reportMessage("\nSTART");
 
                 connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
@@ -135,9 +135,12 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
                 _loop->run();
 
-            //    server.close();
-            //}
-            //server.listen("127.0.0.1", 8000);
+                server.close();
+
+                delete _loop;
+                _loop  = 0;
+            }
+            server.listen("127.0.0.1", 8000);
 
             this->reportMessage("FINISHED");
         }

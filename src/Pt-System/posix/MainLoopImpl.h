@@ -39,6 +39,10 @@ class MainLoopImpl
 
         ~MainLoopImpl();
 
+        void attach( Selectable& s );
+
+        void detach( Selectable& s );
+
         void add( Selectable& dev );
 
         void remove( Selectable& dev );
@@ -59,6 +63,7 @@ class MainLoopImpl
         fd_set _wfds;
         fd_set _efds;
         std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _attached;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _avail;
         Clock _clock;

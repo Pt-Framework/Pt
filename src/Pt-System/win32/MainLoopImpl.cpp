@@ -64,29 +64,47 @@ MainLoopImpl::MainLoopImpl()
 MainLoopImpl::~MainLoopImpl()
 {
     std::set<Selectable*>::iterator it;
-    while( _devices.size() )
-    {
-        it = _devices.begin();
-        (*it)->setSelector(0);
-    }
+    // while( _devices.size() )
+    // {
+    //     it = _devices.begin();
+    //     (*it)->setSelector(0);
+    // }
 
-    while( _dirty.size() )
-    {
-        it = _dirty.begin();
-        (*it)->setSelector(0);
-    }
+    // while( _dirty.size() )
+    // {
+    //     it = _dirty.begin();
+    //     (*it)->setSelector(0);
+    // }
 
-    while( _handles.size() )
+    // while( _handles.size() )
+    // {
+    //     Selectable* s = _handles.at(0);
+    //     if( s )
+    //         s->setSelector(0);
+    //     else
+    //         _handles.pop_front();
+    // }
+
+    while( _attached.size() )
     {
-        Selectable* s = _handles.at(0);
-        if( s )
-            s->setSelector(0);
-        else
-            _handles.pop_front();
+        it = _attached.begin();
+        (*it)->setSelector(0);
     }
 
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
+}
+
+
+void MainLoopImpl::attach(Selectable& s)
+{
+    _attached.insert(&s);
+}
+
+
+void MainLoopImpl::detach(Selectable& s)
+{
+    _attached.erase(&s);
 }
 
 

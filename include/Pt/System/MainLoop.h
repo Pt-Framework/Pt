@@ -110,6 +110,10 @@ namespace System {
             virtual ~MainLoop();
 
         protected:
+            virtual void onAttach(Selectable&);
+
+            virtual void onDetach(Selectable&);
+
             virtual void onAdd( Selectable& s );
 
             virtual void onRemove( Selectable& s );

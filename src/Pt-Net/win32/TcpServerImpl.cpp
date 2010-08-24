@@ -226,11 +226,15 @@ void TcpServerImpl::detach(System::EventLoop& s)
 {
     log_debug("detach from selector");
 
+    if (_fd == INVALID_SOCKET)
+        return;
+
     bool active = checkEvent();
 
     if(active)
 		_server.setState(Pt::System::Selectable::Avail);
 
+    log_debug("server is active: " << active);
 	this->setWaitHandle(_waitEvent, active);
 }
 

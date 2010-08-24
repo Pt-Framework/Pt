@@ -229,6 +229,10 @@ namespace System {
             //    this->onRemove(s); // TODO: use onDetach
             //}
 
+            virtual void onAttach(Selectable&) = 0;
+
+            virtual void onDetach(Selectable&) = 0;
+
             /** @brief A Selectable is added to this %Selector
 
                 Does not throw exceptions.

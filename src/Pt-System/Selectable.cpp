@@ -46,12 +46,15 @@ void Selectable::setSelector(EventLoop* parent)
         if( this->enabled() )
             _parent->onRemove(*this);
 
+        _parent->onDetach(*this);
         _parent = 0;
     }
 
     if(parent)
     {
         this->onAttach(*parent);
+
+        parent->onAttach(*this);
 
         if( this->enabled() )
             parent->onAdd(*this);
