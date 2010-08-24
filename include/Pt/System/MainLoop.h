@@ -94,7 +94,7 @@ namespace System {
         Since the %MainLoop is a Runnable, it can be easily assigned to a Thread
         to give it its own event loop.
     */
-    class PT_SYSTEM_API MainLoop : public EventLoopBase
+    class PT_SYSTEM_API MainLoop : public EventLoop
     {
         friend class MainLoopImpl;
 

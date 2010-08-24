@@ -82,10 +82,10 @@ namespace System {
             */
             ~Timer();
 
-            EventLoopBase* selector()
+            EventLoop* selector()
             { return _selector; }
 
-            void setSelector(EventLoopBase* s);
+            void setSelector(EventLoop* s);
 
             /** @brief Returs true if timer is active
             */
@@ -136,7 +136,7 @@ namespace System {
 
         private:
             Sentry* _sentry;
-            EventLoopBase* _selector;
+            EventLoop* _selector;
             bool          _active;
             std::size_t   _interval;
             Timespan      _remaining;

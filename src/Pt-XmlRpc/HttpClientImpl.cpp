@@ -46,7 +46,7 @@ HttpClientImpl::HttpClientImpl()
     Pt::connect(_client.replyFinished, *this, &HttpClientImpl::onReplyFinished);
 }
 
-HttpClientImpl::HttpClientImpl(System::EventLoopBase& selector, const std::string& addr,
+HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& addr,
        unsigned short port, const std::string& url)
 : _client(selector, addr, port)
 , _request(url)

@@ -41,7 +41,7 @@ class SelectableImpl;
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
-        static const std::size_t WaitInfinite = EventLoopBase::WaitInfinite;
+        static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
         enum State
         {
@@ -55,11 +55,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
-        void setSelector(EventLoopBase* parent);
+        void setSelector(EventLoop* parent);
 
-        EventLoopBase* selector();
+        EventLoop* selector();
 
-        const EventLoopBase* selector() const;
+        const EventLoop* selector() const;
 
         //! @brief Closes the I/O device
         /*!
@@ -103,12 +103,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual bool onWait(std::size_t msecs) = 0;
 
-        virtual void onAttach(EventLoopBase&) = 0;
+        virtual void onAttach(EventLoop&) = 0;
 
-        virtual void onDetach(EventLoopBase&) = 0;
+        virtual void onDetach(EventLoop&) = 0;
 
     private:
-        EventLoopBase* _parent;
+        EventLoop* _parent;
         State _state;
 };
 

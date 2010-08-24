@@ -61,13 +61,13 @@ namespace System {
     class EventSource;
     class EventSink;
     class EventLoop;
-    class EventLoopBase;
     class File;
     class FileDevice;
     class FileInfo;
     class IODevice;
     class IOStream;
     class IStream;
+    class MainLoop;
     class Mutex;
     class OStream;
     class Pipe;
@@ -75,8 +75,6 @@ namespace System {
     class Process;
     class ReadWriteMutex;
     class Selectable;
-    class Selector;
-    class SelectorBase;
     class Semaphore;
     class SerialDevice;
     class SharedLib;

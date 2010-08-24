@@ -40,7 +40,7 @@ MainLoop::MainLoop()
 
 
 MainLoop::MainLoop(Allocator& a)
-: EventLoopBase(a)
+: EventLoop(a)
 {
 	_impl = new MainLoopImpl();
 }

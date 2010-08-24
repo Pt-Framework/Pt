@@ -39,7 +39,7 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
-void ApplicationImpl::init(EventLoopBase& s)
+void ApplicationImpl::init(EventLoop& s)
 {
 }
 

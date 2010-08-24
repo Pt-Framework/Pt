@@ -43,7 +43,7 @@ namespace Pt
 namespace Http
 {
 
-ServerImpl::ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>& runmodeChanged)
+ServerImpl::ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& runmodeChanged)
     : _eventLoop(eventLoop),
       inputSlot(slot(*this, &ServerImpl::onInput)),
       timeoutSlot(slot(*this, &ServerImpl::onTimeout)),

@@ -183,13 +183,13 @@ bool TcpSocket::onWait(std::size_t msecs)
 }
 
 
-void TcpSocket::onAttach(System::EventLoopBase& sb)
+void TcpSocket::onAttach(System::EventLoop& sb)
 {
     _impl->attach(sb);
 }
 
 
-void TcpSocket::onDetach(System::EventLoopBase& sb)
+void TcpSocket::onDetach(System::EventLoop& sb)
 {
     _impl->detach(sb);
 }

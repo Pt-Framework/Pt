@@ -73,13 +73,13 @@ namespace System {
         public:
             explicit Application(int argc = 0, char** argv = 0);
 
-            Application(EventLoopBase* loop, int argc = 0, char** argv = 0);
+            Application(EventLoop* loop, int argc = 0, char** argv = 0);
 
             ~Application();
 
             static Application& instance();
 
-            EventLoopBase& loop()
+            EventLoop& loop()
 			{ return *_loop; }
 
             void run()
@@ -98,18 +98,18 @@ namespace System {
 			{ return *_impl; }
 
         protected:
-            void init(EventLoopBase& loop);
+            void init(EventLoop& loop);
 
         private:
             ApplicationImpl* _impl;
             int     _argc;
             char**  _argv;
-            EventLoopBase* _loop;
+            EventLoop* _loop;
             MainLoop* _owner;
     };
 
-} // namespace system
+} // namespace System
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

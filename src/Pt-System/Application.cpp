@@ -61,7 +61,7 @@ Application::Application(int argc, char** argv)
 }
 
 
-Application::Application(EventLoopBase* loop, int argc, char** argv)
+Application::Application(EventLoop* loop, int argc, char** argv)
 : Pt::Application(argc, argv)
 , _loop(0)
 , _owner(0)
@@ -107,7 +107,7 @@ bool Application::raiseSystemSignal(int sig)
 }
 
 
-void Application::init(EventLoopBase& loop)
+void Application::init(EventLoop& loop)
 {
     _loop = &loop;
     _impl->init(*_loop);

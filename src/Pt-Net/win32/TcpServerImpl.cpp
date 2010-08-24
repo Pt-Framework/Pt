@@ -194,7 +194,7 @@ bool TcpServerImpl::wait(std::size_t umsecs)
 
     // convert unsigned to signed
     int msecs = umsecs;
-	if(umsecs == Pt::System::EventLoopBase::WaitInfinite) 
+	if(umsecs == Pt::System::EventLoop::WaitInfinite) 
     {
         msecs = INFINITE;
     }
@@ -216,13 +216,13 @@ bool TcpServerImpl::wait(std::size_t umsecs)
 }
 
 
-void TcpServerImpl::attach(System::EventLoopBase& s)
+void TcpServerImpl::attach(System::EventLoop& s)
 {
     log_debug("attach to selector");
 }
 
 
-void TcpServerImpl::detach(System::EventLoopBase& s)
+void TcpServerImpl::detach(System::EventLoop& s)
 {
     log_debug("detach from selector");
 

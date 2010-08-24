@@ -56,24 +56,6 @@ EventSink::~EventSink()
 }
 
 
-void EventSink::commitEvent(const Event& event)
-{
-    this->onCommitEvent(event);
-}
-
-
-void EventSink::queueEvent(const Event& event)
-{
-    this->onQueueEvent(event);
-}
-
-
-void EventSink::wake()
-{
-    this->onWake();
-}
-
-
 void EventSink::onConnect(EventSource& source)
 {
     RecursiveLock lock1( _mutex );
@@ -103,6 +85,24 @@ void EventSink::onUnsubscribe(EventSource& source)
             return;
         }
     }
+}
+
+
+void EventSink::commitEvent(const Event& event)
+{
+    this->onCommitEvent(event);
+}
+
+
+void EventSink::queueEvent(const Event& event)
+{
+    this->onQueueEvent(event);
+}
+
+
+void EventSink::wake()
+{
+    this->onWake();
 }
 
 } // namespace System

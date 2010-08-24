@@ -119,8 +119,8 @@ namespace System {
 
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
     */
-    class PT_SYSTEM_API EventLoopBase : public Connectable
-                                      , public EventSink
+    class PT_SYSTEM_API EventLoop : public Connectable
+                                  , public EventSink
     {
         friend class Selectable;
         friend class Timer;
@@ -130,7 +130,7 @@ namespace System {
 
             /** @brief Destructs the EventLoop
             */
-            virtual ~EventLoopBase();
+            virtual ~EventLoop();
 
             Allocator& allocator()
             { return *_usedalloc; }
@@ -197,11 +197,11 @@ namespace System {
         protected:
             /** @brief Constructs the EventLoop
             */
-            EventLoopBase();
+            EventLoop();
 
             /** @brief Construct an EventLoop with a custom allocator
             */
-            EventLoopBase(Allocator& a);
+            EventLoop(Allocator& a);
 
             /** @internal Update all timers and return true if a timer fired
 
@@ -253,15 +253,15 @@ namespace System {
             */
             virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
+            virtual void onRun() = 0;
+
+            virtual void onExit() = 0;
+
             virtual void onCommitEvent(const Event& event);
 
             virtual void onQueueEvent(const Event& event);
 
             virtual void onProcessEvents();
-
-            virtual void onRun() = 0;
-
-            virtual void onExit() = 0;
 
         private:
             //! @internal

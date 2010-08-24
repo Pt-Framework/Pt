@@ -158,7 +158,7 @@ bool Timer::update(const Timespan& now)
 }
 
 
-void Timer::setSelector(EventLoopBase* selector)
+void Timer::setSelector(EventLoop* selector)
 {
     if(_selector == selector)
         return;

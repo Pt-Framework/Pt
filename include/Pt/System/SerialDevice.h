@@ -209,9 +209,9 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         size_t onWrite(const char* buffer, size_t count);
 
-        void onAttach(EventLoopBase&);
+        void onAttach(EventLoop&);
 
-        void onDetach(EventLoopBase&);
+        void onDetach(EventLoop&);
 
 		void onCancel();
 };

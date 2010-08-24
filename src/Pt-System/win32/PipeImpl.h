@@ -51,9 +51,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 		void redirect(int newFd, bool close = true);
 
     protected:
-        void onAttach(EventLoopBase& s);
+        void onAttach(EventLoop& s);
 
-        void onDetach(EventLoopBase& s);
+        void onDetach(EventLoop& s);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

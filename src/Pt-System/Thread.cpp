@@ -50,12 +50,12 @@ Thread::Thread(const Callable<void>& cb)
 }
 
 
-Thread::Thread(EventLoopBase& loop)
+Thread::Thread(EventLoop& loop)
 : _state(Thread::Ready)
 , _impl(0)
 {
     _impl = new ThreadImpl();
-	_impl->init( callable(loop, &EventLoopBase::run) );
+	_impl->init( callable(loop, &EventLoop::run) );
 }
 
 

@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace System {
 
-class EventLoopBase;
+class EventLoop;
 
 }
 
@@ -52,8 +52,8 @@ class ServerImpl;
 class PT_HTTP_API Server : private Pt::NonCopyable
 {
     public:
-        explicit Server(System::EventLoopBase& eventLoop);
-        Server(System::EventLoopBase& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
+        explicit Server(System::EventLoop& eventLoop);
+        Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
         ~Server();
 
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);

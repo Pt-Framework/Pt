@@ -48,7 +48,7 @@ class HttpClientImpl : public ClientImpl
     public:
         HttpClientImpl();
 
-        HttpClientImpl(System::EventLoopBase& selector, const std::string& addr,
+        HttpClientImpl(System::EventLoop& selector, const std::string& addr,
                unsigned short port, const std::string& url);
 
         HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url);

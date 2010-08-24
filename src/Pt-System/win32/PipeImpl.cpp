@@ -206,12 +206,12 @@ bool PipeIODevice::checkEvent()
 }
 
 
-void PipeIODevice::onAttach(EventLoopBase& s)
+void PipeIODevice::onAttach(EventLoop& s)
 {
 }
 
 
-void PipeIODevice::onDetach(EventLoopBase& s)
+void PipeIODevice::onDetach(EventLoop& s)
 {
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will

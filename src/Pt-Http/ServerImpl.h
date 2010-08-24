@@ -44,7 +44,7 @@
 namespace Pt
 {
 
-class EventLoopBase;
+class EventLoop;
 
 namespace Http
 {
@@ -124,7 +124,7 @@ class ActiveSocketEvent : public BasicEvent<ActiveSocketEvent>
 class ServerImpl : public Connectable
 {
     public:
-        ServerImpl(System::EventLoopBase& eventLoop, Signal<Server::Runmode>& runmodeChanged);
+        ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& runmodeChanged);
         ~ServerImpl();
 
         void listen(const std::string& ip, unsigned short int port, int backlog);
@@ -182,7 +182,7 @@ class ServerImpl : public Connectable
         friend class Worker;
 
         ////////////////////////////////////////////////////
-        System::EventLoopBase& _eventLoop;
+        System::EventLoop& _eventLoop;
 
         MethodSlot<void, ServerImpl, Socket&> inputSlot;
         MethodSlot<void, ServerImpl, Socket&> timeoutSlot;

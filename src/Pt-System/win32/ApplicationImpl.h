@@ -7,7 +7,7 @@ namespace Pt {
 
 namespace System  {
 
-class EventLoopBase;
+class EventLoop;
 
 class ApplicationImpl
 {
@@ -16,7 +16,7 @@ class ApplicationImpl
 
         virtual ~ApplicationImpl();
 
-        void init(EventLoopBase& s);
+        void init(EventLoop& s);
 
         bool catchSystemSignal(int sig);
 

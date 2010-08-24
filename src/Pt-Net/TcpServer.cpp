@@ -103,13 +103,13 @@ bool TcpServer::onWait(std::size_t msecs)
 }
 
 
-void TcpServer::onAttach(System::EventLoopBase& sb)
+void TcpServer::onAttach(System::EventLoop& sb)
 {
     _impl->attach(sb);
 }
 
 
-void TcpServer::onDetach(System::EventLoopBase& sb)
+void TcpServer::onDetach(System::EventLoop& sb)
 {
     _impl->detach(sb);
 }

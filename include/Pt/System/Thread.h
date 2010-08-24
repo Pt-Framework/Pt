@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace System {
 
-    class EventLoopBase;
+    class EventLoop;
 
     /** @brief Platform independent threads
 
@@ -95,7 +95,7 @@ namespace System {
                 a separate thread. The Thread is not started on construction,
                 but when start() is called.
             */
-            explicit Thread(EventLoopBase& loop);
+            explicit Thread(EventLoop& loop);
 
             /** @brief Initialize with a thread entry
 
@@ -222,7 +222,7 @@ namespace System {
                 a separate thread. The Thread is not started on construction,
                 but when start() is called.
             */
-            explicit AttachedThread(EventLoopBase& loop)
+            explicit AttachedThread(EventLoop& loop)
             : Thread(loop)
             {}
 

@@ -47,7 +47,7 @@
 namespace Pt {
 
 namespace System {
-    class EventLoopBase;
+    class EventLoop;
 }
 
 namespace Net {
@@ -158,9 +158,9 @@ class TcpSocketImpl : public System::SelectableImpl
 
         bool wait(std::size_t msecs);
 
-        void attach(System::EventLoopBase& sb);
+        void attach(System::EventLoop& sb);
 
-        void detach(System::EventLoopBase& sb);
+        void detach(System::EventLoop& sb);
 
 		bool setWaitHandle(HANDLE h, bool& avail);
 

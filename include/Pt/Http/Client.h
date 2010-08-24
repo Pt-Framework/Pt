@@ -39,7 +39,7 @@
 namespace Pt {
 
 namespace System {
-    class EventLoopBase;
+    class EventLoop;
 }
 
 namespace Net {
@@ -61,8 +61,8 @@ class PT_HTTP_API Client : private NonCopyable
         Client(const std::string& host, unsigned short int port);
         Client(const Net::AddrInfo& addr);
 
-        Client(System::EventLoopBase& selector, const std::string& host, unsigned short int port);
-        Client(System::EventLoopBase& selector, const Net::AddrInfo& addrinfo);
+        Client(System::EventLoop& selector, const std::string& host, unsigned short int port);
+        Client(System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
         ~Client();
 
@@ -106,7 +106,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         void endExecute();
 
-        void setSelector(System::EventLoopBase& selector);
+        void setSelector(System::EventLoop& selector);
 
         // Executes the underlying selector until a event occures or the
         // specified timeout is reached.

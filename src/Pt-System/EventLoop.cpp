@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-EventLoopBase::EventLoopBase()
+EventLoop::EventLoop()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
 , _timeout(WaitInfinite)
@@ -44,7 +44,7 @@ EventLoopBase::EventLoopBase()
 }
 
 
-EventLoopBase::EventLoopBase(Allocator& a)
+EventLoop::EventLoop(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
 , _timeout(WaitInfinite)
@@ -53,7 +53,7 @@ EventLoopBase::EventLoopBase(Allocator& a)
 }
 
 
-EventLoopBase::~EventLoopBase()
+EventLoop::~EventLoop()
 {
     try
     {
@@ -81,33 +81,33 @@ EventLoopBase::~EventLoopBase()
 }
 
 
-void EventLoopBase::add(Selectable& s)
+void EventLoop::add(Selectable& s)
 {
     s.setSelector(this);
 }
 
 
-void EventLoopBase::remove(Selectable& s)
+void EventLoop::remove(Selectable& s)
 {
     if(s.selector() == this)
         s.setSelector(0);
 }
 
 
-void EventLoopBase::add(Timer& timer)
+void EventLoop::add(Timer& timer)
 {
     timer.setSelector(this);
 }
 
 
-void EventLoopBase::remove( Timer& timer )
+void EventLoop::remove( Timer& timer )
 {
     if(timer.selector() == this)
         timer.setSelector(0);
 }
 
 
-void EventLoopBase::run()
+void EventLoop::run()
 {
     _exitLoop = false;
     this->onRun();
@@ -115,7 +115,7 @@ void EventLoopBase::run()
 }
 
 
-void EventLoopBase::exit()
+void EventLoop::exit()
 {
     RecursiveLock lock(_queueMutex);
     _exitLoop = true;
@@ -125,7 +125,7 @@ void EventLoopBase::exit()
 }
 
 
-void EventLoopBase::onAddTimer(Timer& timer)
+void EventLoop::onAddTimer(Timer& timer)
 {
     if( timer.active() )
     {
@@ -136,7 +136,7 @@ void EventLoopBase::onAddTimer(Timer& timer)
 }
 
 
-void EventLoopBase::onRemoveTimer( Timer& timer )
+void EventLoop::onRemoveTimer( Timer& timer )
 {
     std::multimap<Timespan, Timer*>::iterator it;
     for(it = _timers.begin(); it != _timers.end(); ++it)
@@ -150,7 +150,7 @@ void EventLoopBase::onRemoveTimer( Timer& timer )
 }
 
 
-void EventLoopBase::onTimerChanged(Timer& timer)
+void EventLoop::onTimerChanged(Timer& timer)
 {
     if( timer.active() )
     {
@@ -160,12 +160,12 @@ void EventLoopBase::onTimerChanged(Timer& timer)
     }
     else
     {
-        EventLoopBase::onRemoveTimer(timer);
+        EventLoop::onRemoveTimer(timer);
     }
 }
 
 
-bool EventLoopBase::updateTimer(std::size_t& lowestTimeout)
+bool EventLoop::updateTimer(std::size_t& lowestTimeout)
 {
     if( _timers.empty() )
         return false;
@@ -202,7 +202,7 @@ bool EventLoopBase::updateTimer(std::size_t& lowestTimeout)
 }
 
 
-size_t EventLoopBase::runNext(WaitResult& result)
+size_t EventLoop::runNext(WaitResult& result)
 {
     if( result.isTimeout() )
     {
@@ -231,13 +231,13 @@ size_t EventLoopBase::runNext(WaitResult& result)
 
     result.clear();
 
-    size_t timerTimeout = EventLoopBase::WaitInfinite;
+    size_t timerTimeout = EventLoop::WaitInfinite;
 
     // Check for active timers and process them
     updateTimer(timerTimeout);
 
     // no timer will become active within the idle timeout
-    if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoopBase::WaitInfinite)
+    if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoop::WaitInfinite)
     {
         return this->idleTimeout();
     }
@@ -248,7 +248,7 @@ size_t EventLoopBase::runNext(WaitResult& result)
 }
 
 
-void EventLoopBase::onCommitEvent(const Event& ev)
+void EventLoop::onCommitEvent(const Event& ev)
 {
     {
         RecursiveLock lock( _queueMutex );
@@ -272,7 +272,7 @@ void EventLoopBase::onCommitEvent(const Event& ev)
 }
 
 
-void EventLoopBase::onQueueEvent(const Event& ev)
+void EventLoop::onQueueEvent(const Event& ev)
 {
     RecursiveLock lock( _queueMutex );
 
@@ -292,7 +292,7 @@ void EventLoopBase::onQueueEvent(const Event& ev)
 }
 
 
-void EventLoopBase::onProcessEvents()
+void EventLoop::onProcessEvents()
 {
     while( false == _exitLoop )
     {

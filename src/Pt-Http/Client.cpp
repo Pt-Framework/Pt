@@ -50,12 +50,12 @@ Client::Client(const std::string& host, unsigned short int port)
 }
 
 
-Client::Client(System::EventLoopBase& selector, const Net::AddrInfo& addrinfo)
+Client::Client(System::EventLoop& selector, const Net::AddrInfo& addrinfo)
 : _impl(new ClientImpl(this, selector, addrinfo))
 {
 }
 
-Client::Client(System::EventLoopBase& selector, const std::string& host, unsigned short int port)
+Client::Client(System::EventLoop& selector, const std::string& host, unsigned short int port)
 : _impl(new ClientImpl(this, selector, Net::AddrInfo(host, port)))
 {
 }
@@ -113,7 +113,7 @@ void Client::endExecute()
     _impl->endExecute();
 }
 
-void Client::setSelector(System::EventLoopBase& selector)
+void Client::setSelector(System::EventLoop& selector)
 {
     _impl->setSelector(selector);
 }

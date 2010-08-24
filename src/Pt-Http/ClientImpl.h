@@ -104,7 +104,7 @@ class ClientImpl : public Connectable
     public:
         ClientImpl(Client* client);
         ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
-        ClientImpl(Client* client, System::EventLoopBase& selector, const Net::AddrInfo& addrinfo);
+        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
         // Sets the server and port. No actual network connect is done.
         void connect(const Net::AddrInfo& addrinfo)
@@ -149,7 +149,7 @@ class ClientImpl : public Connectable
 
         void endExecute();
 
-        void setSelector(System::EventLoopBase& selector);
+        void setSelector(System::EventLoop& selector);
 
         // Executes the underlying selector until a event occures or the
         // specified timeout is reached.

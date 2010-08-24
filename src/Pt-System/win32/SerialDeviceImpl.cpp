@@ -130,12 +130,12 @@ void SerialDeviceImpl::close()
 }
 
 
-void SerialDeviceImpl::attach(EventLoopBase& s)
+void SerialDeviceImpl::attach(EventLoop& s)
 {
 }
 
 
-void SerialDeviceImpl::detach(EventLoopBase& s)
+void SerialDeviceImpl::detach(EventLoop& s)
 {
     bool active = false;
     this->setWaitHandle(_waitHandle, active);
