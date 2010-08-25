@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2007 PTV AG
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +29,6 @@
 #include "win32.h"
 #include "FileDeviceImpl.h"
 #include "Pt/System/IODevice.h"
-#include "Pt/System/Selector.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
 #include <cassert>

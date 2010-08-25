@@ -213,7 +213,7 @@ void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
     log_debug("add idle socket " << static_cast<void*>(socket) << " to selector");
 
     _idleSockets.insert(socket);
-    socket->setSelector(&_eventLoop);
+    socket->setParent(&_eventLoop);
     socket->inputConnection = connect(socket->inputReady, inputSlot);
     socket->timeoutConnection = connect(socket->timeout, timeoutSlot);
 }
@@ -282,7 +282,7 @@ void ServerImpl::onServerStart(const ServerStartEvent& event)
 
 void ServerImpl::onInput(Socket& socket)
 {
-    socket.removeSelector();
+    socket.setParent(0);
     log_debug("search socket " << static_cast<void*>(&socket) << " in idle sockets");
     _idleSockets.erase(&socket);
 

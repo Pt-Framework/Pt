@@ -55,11 +55,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
-        void setSelector(EventLoop* parent);
+        void setParent(EventLoop* parent);
 
-        EventLoop* selector();
+        EventLoop* parent();
 
-        const EventLoop* selector() const;
+        const EventLoop* parent() const;
 
         //! @brief Closes the I/O device
         /*!

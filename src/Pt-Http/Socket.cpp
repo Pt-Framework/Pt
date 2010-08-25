@@ -105,16 +105,13 @@ void Socket::accept()
     _timer.start(_server.readTimeout());
 }
 
-void Socket::setSelector(System::EventLoop* s)
+void Socket::setParent(System::EventLoop* parent)
 {
-    s->add(*this);
-    s->add(_timer);
-}
+    parent->add(*this);
+    parent->add(_timer);
 
-void Socket::removeSelector()
-{
-    TcpSocket::setSelector(0);
-    _timer.setSelector(0);
+    if( ! parent )
+        _timer.setParent(0);
 }
 
 void Socket::onIODeviceInput(System::IODevice& iodevice)

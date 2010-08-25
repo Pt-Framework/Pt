@@ -36,8 +36,6 @@ namespace Pt {
 
 namespace System {
 
-    class MainLoopImpl;
-
     /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
         An %MainLoop can be used to monitor a set of Selectables and Timers

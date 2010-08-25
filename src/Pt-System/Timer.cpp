@@ -64,7 +64,7 @@ class Timer::Sentry
 
 Timer::Timer()
 : _sentry(0)
-, _selector(0)
+, _loop(0)
 , _active(false)
 , _interval(0)
 , _remaining(0)
@@ -76,8 +76,8 @@ Timer::~Timer()
 {
     try
     {
-        if(_selector)
-            _selector->remove(*this);
+        if(_loop)
+            _loop->remove(*this);
     }
     catch(...) {}
 
@@ -108,8 +108,8 @@ void Timer::start(std::size_t interval)
     _remaining = Pt::int64_t(_interval) * 1000;
     _finished = Clock::getSystemTicks() + _remaining;
 
-    if(_selector)
-        _selector->onTimerChanged(*this);
+    if(_loop)
+        _loop->onTimerChanged(*this);
 }
 
 
@@ -119,8 +119,8 @@ void Timer::stop()
     _remaining = 0;
     _finished = 0;
 
-    if(_selector)
-        _selector->onTimerChanged(*this);
+    if(_loop)
+        _loop->onTimerChanged(*this);
 }
 
 
@@ -158,22 +158,22 @@ bool Timer::update(const Timespan& now)
 }
 
 
-void Timer::setSelector(EventLoop* selector)
+void Timer::setParent(EventLoop* loop)
 {
-    if(_selector == selector)
+    if(_loop == loop)
         return;
 
-    if(_selector)
+    if(_loop)
     {
-        _selector->onRemoveTimer(*this);
+        _loop->onRemoveTimer(*this);
     }
 
-    if(selector)
+    if(loop)
     {
-        selector->onAddTimer(*this);
+        loop->onAddTimer(*this);
     }
 
-    _selector = selector;
+    _loop = loop;
 }
 
 }

@@ -67,20 +67,20 @@ MainLoopImpl::~MainLoopImpl()
     // while( _devices.size() )
     // {
     //     it = _devices.begin();
-    //     (*it)->setSelector(0);
+    //     (*it)->setParent(0);
     // }
 
     // while( _dirty.size() )
     // {
     //     it = _dirty.begin();
-    //     (*it)->setSelector(0);
+    //     (*it)->setParent(0);
     // }
 
     // while( _handles.size() )
     // {
     //     Selectable* s = _handles.at(0);
     //     if( s )
-    //         s->setSelector(0);
+    //         s->setParent(0);
     //     else
     //         _handles.pop_front();
     // }
@@ -88,7 +88,7 @@ MainLoopImpl::~MainLoopImpl()
     while( _attached.size() )
     {
         it = _attached.begin();
-        (*it)->setSelector(0);
+        (*it)->setParent(0);
     }
 
     CloseHandle( _wakeEvent );

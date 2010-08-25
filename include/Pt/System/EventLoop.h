@@ -125,6 +125,12 @@ namespace System {
         friend class Selectable;
         friend class Timer;
 
+        //! @internal
+        typedef std::multimap<Timespan, Timer*> TimerQueue;
+
+        //! @internal
+        typedef std::deque<Event*> EventQueue;
+
         public:
             static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
@@ -135,14 +141,14 @@ namespace System {
             Allocator& allocator()
             { return *_usedalloc; }
 
-            /** @brief Adds an IOResult
+            /** @brief Adds a Selectable
 
-                Adds an IOResult to the selector. IOResult are removed
+                Adds a Selectable to the selector. Selectable are removed
                 automatically when they get destroyed.
             */
             void add(Selectable& s);
 
-            /** @brief Cancel an IOResult.
+            /** @brief Removes a Selectable.
             */
             void remove(Selectable& s);
 
@@ -203,19 +209,7 @@ namespace System {
             */
             EventLoop(Allocator& a);
 
-            /** @internal Update all timers and return true if a timer fired
-
-                @param timeout interval to next expiring timer
-            */
-            bool updateTimer(size_t& timeout);
-
             size_t runNext(WaitResult& result);
-
-            void onAddTimer(Timer& timer);
-
-            void onRemoveTimer( Timer& timer );
-
-            void onTimerChanged( Timer& timer );
 
             /** @brief A Selectable is attached to this %Selector
 
@@ -265,34 +259,38 @@ namespace System {
 
         private:
             //! @internal
+            bool updateTimer(size_t& timeout);
+
+            //! @internal
+            void onAddTimer(Timer& timer);
+
+            //! @internal
+            void onRemoveTimer( Timer& timer );
+
+            //! @internal
+            void onTimerChanged( Timer& timer );
+
+        private:
+            //! @internal
+            RecursiveMutex _queueMutex;
+
+            //! @internal
             Allocator _allocator;
 
             //! @internal
 			Allocator* _usedalloc;
 
             //! @internal
+            EventQueue _eventQueue;
+
+            //! @internal
+            TimerQueue _timers;
+
+            //! @internal
             size_t _timeout;
 
             //! @internal
-            typedef std::multimap<Timespan, Timer*> TimerMap;
-
-            //! @internal
-            TimerMap _timers;
-
-            //! @internal
-            //SelectableList _selectables;
-
-           //! @internal
             bool _exitLoop;
-
-            //! @internal
-            std::deque<Event* > _eventQueue;
-
-            //! @internal
-            RecursiveMutex _queueMutex;
-
-            //! @internal
-            void* _reserved;
     };
 
 } // namespace System

@@ -79,13 +79,13 @@ MainLoopImpl::~MainLoopImpl()
     // while( _devices.size() )
     // {
     //     it = _devices.begin();
-    //     (*it)->setSelector(0);
+    //     (*it)->setParent(0);
     // }
 
     while( _attached.size() )
     {
         it = _attached.begin();
-        (*it)->setSelector(0);
+        (*it)->setParent(0);
     }
 
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )

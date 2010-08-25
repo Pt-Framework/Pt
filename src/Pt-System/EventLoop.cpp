@@ -70,40 +70,34 @@ EventLoop::~EventLoop()
     while( _timers.size() )
     {
        Timer* timer = _timers.begin()->second;
-        timer->setSelector(0);
+        timer->setParent(0);
     }
-
-    //while( _selectables.size() )
-    //{
-    //   Selectable* sel = *_selectables.begin();
-    //    sel->setSelector(0);
-    //}
 }
 
 
 void EventLoop::add(Selectable& s)
 {
-    s.setSelector(this);
+    s.setParent(this);
 }
 
 
 void EventLoop::remove(Selectable& s)
 {
-    if(s.selector() == this)
-        s.setSelector(0);
+    if(s.parent() == this)
+        s.setParent(0);
 }
 
 
 void EventLoop::add(Timer& timer)
 {
-    timer.setSelector(this);
+    timer.setParent(this);
 }
 
 
 void EventLoop::remove( Timer& timer )
 {
-    if(timer.selector() == this)
-        timer.setSelector(0);
+    if(timer.parent() == this)
+        timer.setParent(0);
 }
 
 
@@ -122,83 +116,6 @@ void EventLoop::exit()
     lock.unlock();
 
     this->onExit();
-}
-
-
-void EventLoop::onAddTimer(Timer& timer)
-{
-    if( timer.active() )
-    {
-        TimerMap::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-        //_timers.insert( std::make_pair(timer.finished(), &timer) );
-    }
-}
-
-
-void EventLoop::onRemoveTimer( Timer& timer )
-{
-    std::multimap<Timespan, Timer*>::iterator it;
-    for(it = _timers.begin(); it != _timers.end(); ++it)
-    {
-        if(it->second == &timer)
-        {
-            _timers.erase(it);
-            return;
-        }
-    }
-}
-
-
-void EventLoop::onTimerChanged(Timer& timer)
-{
-    if( timer.active() )
-    {
-        TimerMap::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-        //_timers.insert( std::make_pair(timer.finished(), &timer) );
-    }
-    else
-    {
-        EventLoop::onRemoveTimer(timer);
-    }
-}
-
-
-bool EventLoop::updateTimer(std::size_t& lowestTimeout)
-{
-    if( _timers.empty() )
-        return false;
-
-    Timespan now = Clock::getSystemTicks();
-    Timer* timer = _timers.begin()->second;
-    bool timerActive = now >= timer->finished();
-
-    while( ! _timers.empty() )
-    {
-        timer = _timers.begin()->second;
-
-        if( now < timer->finished() )
-        {
-            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
-            lowestTimeout = (remaining / 1000);
-            if(remaining % 1000 > 0) ++lowestTimeout;
-            break;
-        }
-
-        timer->update(now);
-
-        if( ! _timers.empty() )
-        {
-            timer = _timers.begin()->second;
-            _timers.erase( _timers.begin() );
-            TimerMap::value_type elem(timer->finished(), timer);
-            _timers.insert(elem);
-            //_timers.insert( std::make_pair(timer->finished(), timer) );
-        }
-    }
-
-    return timerActive;
 }
 
 
@@ -253,8 +170,6 @@ void EventLoop::onCommitEvent(const Event& ev)
     {
         RecursiveLock lock( _queueMutex );
 
-        // TODO: use a continuous block of memory to store events
-        // this avoids new/delete
         Event& clonedEvent = ev.clone( this->allocator() );
 
         try
@@ -276,8 +191,6 @@ void EventLoop::onQueueEvent(const Event& ev)
 {
     RecursiveLock lock( _queueMutex );
 
-    // TODO: use a continuous block of memory to store events
-    // this avoids new/delete
     Event& clonedEvent = ev.clone( this->allocator() );
 
     try
@@ -320,6 +233,79 @@ void EventLoop::onProcessEvents()
 }
 
 
+bool EventLoop::updateTimer(std::size_t& lowestTimeout)
+{
+    if( _timers.empty() )
+        return false;
+
+    Timespan now = Clock::getSystemTicks();
+    Timer* timer = _timers.begin()->second;
+    bool timerActive = now >= timer->finished();
+
+    while( ! _timers.empty() )
+    {
+        timer = _timers.begin()->second;
+
+        if( now < timer->finished() )
+        {
+            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+            lowestTimeout = (remaining / 1000);
+            if(remaining % 1000 > 0) ++lowestTimeout;
+            break;
+        }
+
+        timer->update(now);
+
+        if( ! _timers.empty() )
+        {
+            timer = _timers.begin()->second;
+            _timers.erase( _timers.begin() );
+            TimerQueue::value_type elem(timer->finished(), timer);
+            _timers.insert(elem);
+            //_timers.insert( std::make_pair(timer->finished(), timer) );
+        }
+    }
+
+    return timerActive;
+}
+
+
+void EventLoop::onAddTimer(Timer& timer)
+{
+    if( timer.active() )
+    {
+        TimerQueue::value_type elem(timer.finished(), &timer);
+        _timers.insert(elem);
+    }
+}
+
+
+void EventLoop::onRemoveTimer( Timer& timer )
+{
+    std::multimap<Timespan, Timer*>::iterator it;
+    for(it = _timers.begin(); it != _timers.end(); ++it)
+    {
+        if(it->second == &timer)
+        {
+            _timers.erase(it);
+            return;
+        }
+    }
+}
+
+
+void EventLoop::onTimerChanged(Timer& timer)
+{
+    if( timer.active() )
+    {
+        TimerQueue::value_type elem(timer.finished(), &timer);
+        _timers.insert(elem);
+    }
+    else
+    {
+        EventLoop::onRemoveTimer(timer);
+    }
+}
 
 } // namespace System
 

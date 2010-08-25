@@ -44,7 +44,7 @@ Selectable::~Selectable()
 }
 
 
-void Selectable::setSelector(EventLoop* parent)
+void Selectable::setParent(EventLoop* parent)
 {
     if(_parent)
     {
@@ -71,13 +71,13 @@ void Selectable::setSelector(EventLoop* parent)
 }
 
 
-EventLoop* Selectable::selector()
+EventLoop* Selectable::parent()
 {
     return _parent;
 }
 
 
-const EventLoop* Selectable::selector() const
+const EventLoop* Selectable::parent() const
 {
     return _parent;
 }

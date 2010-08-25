@@ -39,7 +39,7 @@ namespace System {
     /** @brief Notifies clients in constant intervals
 
         Timers can be used to be notified if a time interval expires. It
-        usually works with a Selector or event loop, where the Timer
+        usually works with an event loop, where the Timer
         needs to be registered. Timers send the timeout signal
         in given intervals, to which the interested clients connect. The
         interval can be changed at any time and timers
@@ -82,10 +82,10 @@ namespace System {
             */
             ~Timer();
 
-            EventLoop* selector()
-            { return _selector; }
+            EventLoop* parent()
+            { return _loop; }
 
-            void setSelector(EventLoop* s);
+            void setParent(EventLoop* s);
 
             /** @brief Returs true if timer is active
             */
@@ -100,7 +100,7 @@ namespace System {
             /** @brief Starts the timer
 
                 Start a timer from the moment this method is called. The
-                Timer needs to be registered with a Selector or event loop,
+                Timer needs to be registered with an event loop,
                 otherwise the timeout signal will not be sent.
 
                 @param interval Timeout interval in milliseconds
@@ -109,14 +109,14 @@ namespace System {
 
             /** @brief Stops the timer
 
-                If the Timer is registered with a Selector or an event loop,
+                If the Timer is registered with an event loop,
                 the timout signal will not be sent anymore.
             */
             void stop();
 
             /** @brief Update the timer
 
-                This method is supposed to be called by the Selector or an
+                This method is supposed to be called by the
                 event loop. If the interval timeout is passed the Timer
                 will send the timeout signal and return true, otherwise
                 internal times are updated and false is returned.
@@ -135,12 +135,12 @@ namespace System {
             { return _finished; }
 
         private:
-            Sentry* _sentry;
-            EventLoop* _selector;
-            bool          _active;
-            std::size_t   _interval;
-            Timespan      _remaining;
-            Timespan      _finished;
+            Sentry*     _sentry;
+            EventLoop*  _loop;
+            bool        _active;
+            std::size_t _interval;
+            Timespan    _remaining;
+            Timespan    _finished;
     };
 
 }
