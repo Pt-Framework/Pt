@@ -648,7 +648,7 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
     {
         log_debug("content-length(pre)=" << _contentLength);
 
-        while (_stream.good() && _contentLength > 0 && sb.in_avail() > 0)                                            
+        while (_stream.good() && _contentLength > 0 && sb.in_avail() > 0)
         {
             _contentLength -= _client->bodyAvailable(*_client); // TODO: may throw exception
             log_debug("content-length(post)=" << _contentLength);
