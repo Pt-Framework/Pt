@@ -39,7 +39,7 @@ EventLoop::EventLoop()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
 , _timeout(WaitInfinite)
-, _exitLoop(false)
+, _state(0)
 {
 }
 
@@ -48,7 +48,7 @@ EventLoop::EventLoop(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
 , _timeout(WaitInfinite)
-, _exitLoop(false)
+, _state(0)
 {
 }
 
@@ -103,7 +103,7 @@ void EventLoop::remove( Timer& timer )
 
 void EventLoop::run()
 {
-    _exitLoop = false;
+    _state = 0;
     this->onRun();
     exited();
 }
@@ -112,7 +112,7 @@ void EventLoop::run()
 void EventLoop::exit()
 {
     RecursiveLock lock(_queueMutex);
-    _exitLoop = true;
+    _state = 1;
     lock.unlock();
 
     this->onExit();
@@ -130,7 +130,7 @@ size_t EventLoop::runNext(WaitResult& result)
     {
         RecursiveLock lock(_queueMutex);
 
-        if(_exitLoop)
+        if(_state == 1)
         {
             result.clear();
             result.setExit();
@@ -207,11 +207,11 @@ void EventLoop::onQueueEvent(const Event& ev)
 
 void EventLoop::onProcessEvents()
 {
-    while( false == _exitLoop )
+    while( 0 == _state )
     {
         RecursiveLock lock(_queueMutex);
 
-        if ( _eventQueue.empty() || _exitLoop )
+        if ( _eventQueue.empty() || 1 == _state )
             break;
 
         Event* ev = _eventQueue.front();

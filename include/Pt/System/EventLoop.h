@@ -290,7 +290,7 @@ namespace System {
             size_t _timeout;
 
             //! @internal
-            bool _exitLoop;
+            int _state;
     };
 
 } // namespace System
