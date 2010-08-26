@@ -149,7 +149,7 @@ class ClientImpl : public Connectable
 
         void endExecute();
 
-        void setSelector(System::EventLoop& selector);
+        void setParent(System::EventLoop& loop);
 
         // Executes the underlying selector until a event occures or the
         // specified timeout is reached.
