@@ -9,10 +9,10 @@
 	>
 	<Platforms>
 		<Platform
-			Name="Win32"
+			Name="Pocket PC 2003 (ARMV4)"
 		/>
 		<Platform
-			Name="Pocket PC 2003 (ARMV4)"
+			Name="Win32"
 		/>
 	</Platforms>
 	<ToolFiles>
@@ -141,7 +141,7 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A201}"
 			>
 			<File
 				RelativePath="..\src\Pt\Any.cpp"
@@ -151,7 +151,7 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EB01}"
 			>
 			<File
 				RelativePath="..\include\Pt\Any.h"
