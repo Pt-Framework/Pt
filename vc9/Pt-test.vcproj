@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="Platinum"
+	Name="Pt-test"
 	ProjectGUID="{01B4D49A-4559-47EB-A802-811D89F013FB}"
-	RootNamespace="Platinum"
+	RootNamespace="Pt-test"
 	Keyword="MakeFileProj"
 	TargetFrameworkVersion="0"
 	>
@@ -44,9 +44,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd .. &amp; .\jam -q -sCONFIG=release  -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
-				ReBuildCommandLine="cd .. &amp; .\jam -qa -sCONFIG=release  -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
-				CleanCommandLine="cd .. &amp; .\jam -q -sCONFIG=release  -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; clean"
+				BuildCommandLine="cd .. &amp; .\jam -q -sCONFIG=release -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
+				ReBuildCommandLine="cd .. &amp; .\jam -qa -sCONFIG=release -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
+				CleanCommandLine="cd .. &amp; .\jam -q -sCONFIG=release -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; clean"
 				Output="cd .. &amp; .\bin\Pt-test"
 				PreprocessorDefinitions="WIN32;NDEBUG;"
 				IncludeSearchPath=""
