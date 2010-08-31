@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Platinum", "Pt-test.vcproj", "{01B4D49A-4559-47EB-A802-811D89F013FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "Pt.vcproj", "{01B4D49A-4559-47EB-A802-811D89F013FA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-test", "Pt-test.vcproj", "{01B4D49A-4559-47EB-A802-811D89F013FB}"
 EndProject
 Global
 	GlobalSection(IntelOptPkgProperties) = preSolution
@@ -12,6 +14,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01B4D49A-4559-47EB-A802-811D89F013FA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{01B4D49A-4559-47EB-A802-811D89F013FA}.Debug|Win32.Build.0 = Debug|Win32
+		{01B4D49A-4559-47EB-A802-811D89F013FA}.Release|Win32.ActiveCfg = Release|Win32
+		{01B4D49A-4559-47EB-A802-811D89F013FA}.Release|Win32.Build.0 = Release|Win32
 		{01B4D49A-4559-47EB-A802-811D89F013FB}.Debug|Win32.ActiveCfg = Debug|Win32
 		{01B4D49A-4559-47EB-A802-811D89F013FB}.Debug|Win32.Build.0 = Debug|Win32
 		{01B4D49A-4559-47EB-A802-811D89F013FB}.Release|Win32.ActiveCfg = Release|Win32
