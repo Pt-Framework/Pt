@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-test", "Pt-test.vcproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-System", "Pt-System.vcproj", "{D6FC5308-A4A0-419B-929A-362C863FC788}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-System-test", "Pt-System-test.vcproj", "{D6FC5308-A4A0-419B-929A-362C863FC789}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Pocket PC 2003 (ARMV4) = Debug|Pocket PC 2003 (ARMV4)
@@ -45,6 +47,16 @@ Global
 		{D6FC5308-A4A0-419B-929A-362C863FC788}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
 		{D6FC5308-A4A0-419B-929A-362C863FC788}.Release|Win32.ActiveCfg = Release|Win32
 		{D6FC5308-A4A0-419B-929A-362C863FC788}.Release|Win32.Build.0 = Release|Win32
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Debug|Win32.Build.0 = Debug|Win32
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Release|Win32.ActiveCfg = Release|Win32
+		{D6FC5308-A4A0-419B-929A-362C863FC789}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
