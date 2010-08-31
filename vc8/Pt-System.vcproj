@@ -144,7 +144,43 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A203}"
 			>
 			<File
+				RelativePath="..\src\Pt-System\ConsoleChannel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\ConsoleChannel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\FileChannel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\FileChannel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\Pt-System\Logger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\LogManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\LogManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\LogTarget.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\SerialChannel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt-System\SerialChannel.h"
 				>
 			</File>
 		</Filter>
@@ -158,11 +194,135 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\Pt\System\Application.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Clock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Condition.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Directory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\EventLoop.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\EventSink.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\EventSource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\File.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\FileDevice.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\FileInfo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\IODevice.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\IOError.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\IOStream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Library.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\LogChannel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\Pt\System\Logger.h"
 				>
 			</File>
 			<File
 				RelativePath="..\include\Pt\System\LogLevel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\LogTarget.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\MainLoop.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Mutex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Pipe.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Plugin.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Process.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Queue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Selectable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Selector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Semaphore.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\SerialDevice.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\StreamBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\SystemError.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Thread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Timer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\Pt\System\Url.h"
 				>
 			</File>
 		</Filter>
