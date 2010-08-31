@@ -42,6 +42,12 @@
 
 #endif
 
+
+/** @defgroup Logging Logging
+    @brief Configurable and thread-safe logging framework
+
+*/
+
 namespace Pt {
 
 /** @namespace Pt::System
