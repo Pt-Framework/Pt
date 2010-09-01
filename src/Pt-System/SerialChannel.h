@@ -49,11 +49,11 @@ class SerialChannel : public Pt::Connectable
     protected:
         void processEvent(const Pt::Event& ev);
 
-        virtual void _open(const std::string& url);
+        virtual void onOpen(const std::string& url);
 
-        virtual void _close();
+        virtual void onClose();
 
-        virtual void _write(const std::string& message);
+        virtual void onWrite(const std::string& message);
 
     private:
         Pt::System::SerialDevice _device;

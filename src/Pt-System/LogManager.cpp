@@ -35,6 +35,8 @@
 #include <memory>
 #include <fstream>
 
+log_define("Pt.System")
+
 namespace Pt {
 
 namespace System {
@@ -43,9 +45,8 @@ LogManager::LogManager()
 : _consolePlugin("console", "1.0.0")
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
-, _init(false)
 , _rootTarget(0)
-, _logger(0)
+//, _logger(0)
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );
@@ -54,13 +55,13 @@ LogManager::LogManager()
 
     // initialise completely if .settings exist for backward
     // compatibility wit old code
-    std::ifstream fs("Pt-Log.settings");
-    if( fs )
-    {
-        Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-        _settings.load(ts);
-        _init = true;
-    }
+    //std::ifstream fs("Pt-Log.settings");
+    //if( fs )
+    //{
+    //    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+    //    _settings.load(ts);
+    //    _init = true;
+    //}
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
     std::auto_ptr<LogTarget> rootTarget( new LogTarget("", 0) );
@@ -69,34 +70,34 @@ LogManager::LogManager()
     _rootTarget->assignLogLevel(Pt::System::Error, false);
     this->setChannel( *_rootTarget, "console://");
 
-    if(_init)
-        _settings >>= *_rootTarget;
+    //if(_init)
+    //    _settings >>= *_rootTarget;
 
-    // logger for Pt::Log
-    std::auto_ptr<LogTarget> logTarget( new LogTarget("Pt-Log", _rootTarget) );
-    _targetMap["Pt-Log"] = logTarget.get();
+    //// logger for Pt::Log
+    //std::auto_ptr<LogTarget> logTarget( new LogTarget("Pt-Log", _rootTarget) );
+    //_targetMap["Pt-Log"] = logTarget.get();
 
-    if(_init)
-        _settings.getObject( *logTarget, "Pt-Log" );
+    //if(_init)
+    //    _settings.getObject( *logTarget, "Pt-Log" );
 
-    std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
-    _logger = logger.get();
+    //std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
+    //_logger = logger.get();
 
-    _logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
+    //_logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
 
-    logger.release();
-    logTarget.release();
+    //logger.release();
+    //logTarget.release();
     rootTarget.release();
 }
 
 
 LogManager::~LogManager()
 {
-    _logger->info(PT_SOURCEINFO) << "Logging system shutdown" << endlog;
+    //_logger->info(PT_SOURCEINFO) << "Logging system shutdown" << endlog;
 
-    // logger for Pt::Log
-    delete _logger;
-    _logger = 0;
+    //logger for Pt::Log
+    //delete _logger;
+    //_logger = 0;
 
     // target hierachy
     std::map<std::string, LogTarget*>::iterator it;
@@ -116,6 +117,46 @@ LogManager::~LogManager()
     }
 
     _channelMap.clear();
+}
+
+
+void LogManager::init(const std::string& path)
+{
+    Pt::System::RecursiveLock lock( _mutex );
+
+    std::ifstream fs( path.c_str() );
+    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+    _settings.load(ts);
+
+    Settings::ConstEntry entry;
+    for(entry = _settings.begin(); entry != _settings.end(); ++entry)
+    {
+        //std::map<std::string, LogTarget*>::iterator iter = _targetMap.find( entry.name() );
+        //if( iter == _targetMap.end() )
+        //    continue;
+
+        //LogTarget* target = iter->second;
+        //this->initTarget(*target, entry);
+        LogTarget& target = this->target( entry.name() );
+        this->initTarget(target, entry);
+    }
+}
+
+
+void LogManager::initTarget(LogTarget& target, const Settings::ConstEntry& entry)
+{
+    Pt::String value;
+
+    if( entry["logLevel"].get(value) )
+    {
+        LogLevel level = toLogLevel( value.narrow() );
+        this->setLogLevel( target, level );
+    }
+
+    if( entry["channel"].get(value) )
+    {
+        this->setChannel( target, value.narrow() );
+    }
 }
 
 
@@ -155,13 +196,13 @@ LogTarget& LogManager::target(const std::string& name)
 
         if( token.empty() )
         {
-            throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
+            throw std::invalid_argument("Invalid logger name");
         }
 
         // insert a '.' before the next token unless its the first
         if( ! targetName.empty() )
         {
-            targetName += ".";
+            targetName += '.';
         }
         targetName += token;
 
@@ -169,7 +210,7 @@ LogTarget& LogManager::target(const std::string& name)
         begin = end + 1;
         if( begin >= name.size() )
         {
-            throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
+            throw std::invalid_argument("Invalid logger name");
         }
 
         // create the logger if not existing. We might want to iterate the
@@ -178,36 +219,26 @@ LogTarget& LogManager::target(const std::string& name)
         std::map<std::string, LogTarget*>::iterator it = _targetMap.find(targetName);
         if( it != _targetMap.end() )
         {
-            _logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
+            //_logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
             foundTarget = it->second;
         }
         else
         {
-            _logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName
-                                             << ", parent: " << foundTarget->name() << endlog;
+            //_logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName
+            //                                 << ", parent: " << foundTarget->name() << endlog;
 
             // The target inherits the log level of the parent upon contruction
             foundTarget = new LogTarget(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
 
             // The settings for the target might override the inherited log level
-            _settings.getObject(*foundTarget, targetName);
+            //this->initTarget(*foundTarget, _settings.entry(targetName) );
         }
     }
 
     return *foundTarget;
 }
 
-
-void LogManager::init(const std::string& path)
-{
-    // initialise settings if .settings exist
-    std::ifstream fs( path.c_str() );
-    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    _settings.load(ts);
-
-    _init = true;
-}
 
 void LogManager::setLogLevel(LogTarget &target, LogLevel level)
 {
@@ -239,7 +270,8 @@ void LogManager::updateChildren(LogTarget &target, LogLevel level)
             break;  // It's not a child. Leave this loop/method.
         }
 
-        // Is it a direct child? Update the target's log level and descent recursivly.
+        // For each direct child, update the target's log level and descent recursivly.
+        // It is a direct child if we do not find another '.' after the parent name
         endPos = childTargetName.find( ".", targetName.size() );
         if( endPos == std::string::npos && foundTarget->inheritsLogLevel() )
         {
@@ -256,16 +288,16 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
     LogChannel& chan = this->channel(url);
     target.assignChannel( chan );
 
-    if(_logger)
-        _logger->beginLog(PT_SOURCEINFO) << info << target.name()<< " set to " << url << endlog;
+    //if(_logger)
+    //    _logger->beginLog(PT_SOURCEINFO) << info << target.name()<< " set to " << url << endlog;
 }
 
 
-void LogManager::log(LogTarget& target, const Message& message)
+void LogManager::log(LogTarget& target, const LogMessage& message)
 {
     Pt::System::RecursiveLock lock( _mutex );
     ;
-    // sreach target hierachy upwards for a valid channel
+    // search target hierachy upwards for a valid channel
     for( LogTarget* current = &target; current != 0; current = current->_parent )
     {
         if( current->_channel )
@@ -296,7 +328,7 @@ LogChannel& LogManager::channel(const std::string& url)
     size_t colon = url.find(':');
     if(colon == std::string::npos)
     {
-        throw  std::invalid_argument("Invalid channel url" + PT_SOURCEINFO);
+        throw  std::invalid_argument("Invalid channel url");
     }
 
     std::string protocol = url.substr(0, colon);
@@ -304,14 +336,14 @@ LogChannel& LogManager::channel(const std::string& url)
     LogChannel* ch = _pluginManager.create(protocol);
     if(ch == 0)
     {
-        throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
+        throw std::invalid_argument("No such channel");
     }
 
 
     // TODO: handle exceptions from open()
     ch->open(url);
-    if(_logger)
-        _logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
+    //if(_logger)
+    //    _logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
 
     _channelMap[url] =  ch;
     return *ch;

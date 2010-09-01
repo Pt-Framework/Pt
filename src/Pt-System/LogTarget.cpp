@@ -79,6 +79,12 @@ void LogTarget::setChannel(const std::string& url)
 }
 
 
+void LogTarget::init(const std::string& file)
+{
+    LogManager::instance().init(file);
+}
+
+
 LogTarget& LogTarget::get(const std::string& name)
 {
     // thread-safe
@@ -86,7 +92,7 @@ LogTarget& LogTarget::get(const std::string& name)
 }
 
 
-void LogTarget::log(const Message& message)
+void LogTarget::log(const LogMessage& message)
 {
     // thread-safe
     LogManager::instance().log(*this, message);
@@ -118,21 +124,21 @@ void LogTarget::assignChannel(LogChannel& ch)
 }
 
 
-void operator>>= (const SerializationInfo& si, LogTarget& target)
-{
-    const SerializationInfo* member = si.findMember("logLevel");
-    if(member)
-    {
-        LogLevel l = toLogLevel( member->toString().narrow() );
-        target.assignLogLevel( l, false );
-    }
-
-    member = si.findMember("channel");
-    if(member)
-    {
-        target.setChannel( member->toString().narrow() );
-    }
-}
+//void operator>>= (const SerializationInfo& si, LogTarget& target)
+//{
+//    const SerializationInfo* member = si.findMember("logLevel");
+//    if(member)
+//    {
+//        LogLevel l = toLogLevel( member->toString().narrow() );
+//        target.assignLogLevel( l, false );
+//    }
+//
+//    member = si.findMember("channel");
+//    if(member)
+//    {
+//        target.setChannel( member->toString().narrow() );
+//    }
+//}
 
 }
 

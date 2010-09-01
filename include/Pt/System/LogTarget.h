@@ -41,10 +41,9 @@ class SerializationInfo;
 namespace System {
 
 class LogChannel;
-class Message;
+class LogMessage;
 
-/** @brief Target of log-messages
-    @ingroup Logging
+/** @brief Target of log-messages.
 
     All created targets form a hierachy within the logging manager.
     To add an instance to this hierachy use the static Target::get
@@ -70,13 +69,15 @@ class Message;
     or higher to the console channel it inherited from its parent. The
     target ping writes messages with a log-level of Error of higher
     asnychronously to the serial port.
+    
+    @ingroup Logging
 */
  
 class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 {
     friend class LogManager;
     friend class Logger;
-    friend PT_SYSTEM_API void operator >>= (const SerializationInfo& si, LogTarget& target);
+    //friend PT_SYSTEM_API void operator >>= (const SerializationInfo& si, LogTarget& target);
 
     protected:
         //! @internal Used within logging-manager
@@ -124,6 +125,16 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         */
         void setChannel(const std::string& url);
 
+        /** @brief Initialize logging targets with a settings file
+        
+            The given settings file is parsed and all listed targets are 
+            created and initialized. If a target exists already, it is
+            reinitialized.
+
+            @param file Path to a setings file
+        */
+        static void init(const std::string& file);
+
         /** @brief Get a target from the logging manager
 
             The target is created if it does not exist, otherwise the
@@ -133,10 +144,10 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         */
         static LogTarget& get(const std::string& name);
 
-        //! @internal Used by Logger
-        void log(const Message& msg);
-
     protected:
+        //! @internal Used by Logger
+        void log(const LogMessage& msg);
+
         //! @internal Only used on LogManager initialisation
         bool inheritsLogLevel() const;
 
@@ -172,7 +183,7 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         void* _reserved;
 };
 
-PT_SYSTEM_API void operator >>= (const SerializationInfo& si, LogTarget& target);
+//PT_SYSTEM_API void operator >>= (const SerializationInfo& si, LogTarget& target);
 
 } // namespace Log
 

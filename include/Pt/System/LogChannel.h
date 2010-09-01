@@ -37,7 +37,6 @@ namespace Pt {
 namespace System {
 
 /** @brief Logging channel
-    @ingroup Logging
 
     This is the base class for all logging channels use by the logging targets
     in the LogManager. Channels are either loaded as a plugin or created by the
@@ -45,6 +44,8 @@ namespace System {
     opaque and only referred to by their URL's. A channel supports synchronous
     and asynchronous logging, whereby the latter one usually involves a thread
     and a message qeueue.
+    
+    @ingroup Logging
 */
 class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
 {
@@ -66,17 +67,17 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
             to open it correctly.
         */
         void open(const std::string url)
-        { this->_open(url); }
+        { this->onOpen(url); }
 
         /** @brief Closes the channel
         */
         void close()
-        { this->_close(); }
+        { this->onClose(); }
 
         /** @brief Writes data to the channel
         */
         void write(const std::string& message)
-        { this->_write( message); }
+        { this->onWrite( message); }
 
     protected:
         /** @brief Open the channel from URL
@@ -84,15 +85,15 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
             The URL is specific to the channel and may contain attributes
             to open it correctly.
         */
-        virtual void _open(const std::string& url) = 0;
+        virtual void onOpen(const std::string& url) = 0;
 
         /** @brief Closes the channel
         */
-        virtual void _close() = 0;
+        virtual void onClose() = 0;
 
         /** @brief Writes data to the channel
         */
-        virtual void _write(const std::string& message) = 0;
+        virtual void onWrite(const std::string& message) = 0;
 };
 
 }

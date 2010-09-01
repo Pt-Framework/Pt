@@ -45,17 +45,17 @@ ConsoleChannel::~ConsoleChannel()
 }
 
 
-void ConsoleChannel::_open(const std::string& url)
+void ConsoleChannel::onOpen(const std::string& url)
 {
 }
 
 
-void ConsoleChannel::_close()
+void ConsoleChannel::onClose()
 {
 }
 
 
-void ConsoleChannel::_write(const std::string& message)
+void ConsoleChannel::onWrite(const std::string& message)
 {
     std::cerr << message;
 }

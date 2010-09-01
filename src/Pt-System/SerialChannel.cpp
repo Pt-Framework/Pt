@@ -53,7 +53,7 @@ SerialChannel::~SerialChannel()
 }
 
 
-void SerialChannel::_open(const std::string& urlstr)
+void SerialChannel::onOpen(const std::string& urlstr)
 {
     //TODO Use System::Url for "comm" scheme as soon as protocol handler for "comm" is implemented
     //System::Url url(urlstr);
@@ -82,13 +82,13 @@ void SerialChannel::_open(const std::string& urlstr)
 }
 
 
-void SerialChannel::_close()
+void SerialChannel::onClose()
 {
     _device.close();
 }
 
 
-void SerialChannel::_write(const std::string& message)
+void SerialChannel::onWrite(const std::string& message)
 {
     if(_device.enabled() == false)
         return;

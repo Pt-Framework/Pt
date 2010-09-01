@@ -44,41 +44,39 @@ namespace Pt {
 namespace System {
 
 class Target;
-class Message;
 class Logger;
 
-/// TODO:
 /*
+    TODO:
     - use formatting optimizations (cxxtools log)
     - allow settings for channels
     - always set channel pointer in Target
     - file rolling
     - create LogManager instance on static initialization
     - log_init()
-    - LogLevel names
 */
 
-/** @brief %Log message
+/** @brief %Log message.
     @ingroup Logging
 */
-class PT_SYSTEM_API Message : protected Pt::NonCopyable
+class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
 {
     friend class Logger;
 
     public:
-        Message(Logger& logger, const LogLevel level, const SourceInfo& source)
+        LogMessage(Logger& logger, const LogLevel level, const SourceInfo& source)
         : _logger(&logger)
         , _level(level)
         , _source(source)
         {}
 
-        Message(Logger& logger, const LogLevel level)
+        LogMessage(Logger& logger, const LogLevel level)
         : _logger(&logger)
         , _level(level)
         , _source("unknown", "unknown", "unknown")
         {}
 
-        ~Message()
+        ~LogMessage()
         {}
 
         void clear()
@@ -103,26 +101,26 @@ class PT_SYSTEM_API Message : protected Pt::NonCopyable
         { _source = source; }
 
         template <typename T>
-        Message& operator<<(const T& value);
+        LogMessage& operator<<(const T& value);
 
-        Message& operator<<( LogLevel (*pf)() )
+        LogMessage& operator<<( LogLevel (*pf)() )
         {
             setLogLevel( pf() );
             return *this;
         }
 
-        Message& operator<<( Message& (*pf)(Message&) )
+        LogMessage& operator<<( LogMessage& (*pf)(LogMessage&) )
         {
             return pf(*this);
         }
 
-        inline Message& operator<<(std::ios_base& (*pf)(std::ios_base&))
+        inline LogMessage& operator<<(std::ios_base& (*pf)(std::ios_base&))
         {
             pf(_text);
             return *this;
         }
 
-        /** @brief Sends a log-message
+        /** @brief Sends a log message
 
             This method ends a log message and sends it to the logger target
             if the logger is enabled. Alternatively, the stream API can be used
@@ -132,7 +130,7 @@ class PT_SYSTEM_API Message : protected Pt::NonCopyable
         void send();
 
     protected:
-        Message(const Message& other)
+        LogMessage(const LogMessage& other)
         : _logger(other._logger)
         , _level(other._level)
         , _source(other._source)
@@ -148,15 +146,14 @@ class PT_SYSTEM_API Message : protected Pt::NonCopyable
 
 /** @brief Manipulator to end a log-message
 */
-inline Message& endlog(Message& msg)
+inline LogMessage& endlog(LogMessage& msg)
 {
     msg.send();
     return msg;
 }
 
 
-/** @brief Write log-messages to a target
-    @ingroup Logging
+/** @brief Write log-messages to a target.
 
     The Logger is the central class of the logging framework on the client
     side. It is used to write log-messages to a logging target maintained
@@ -185,6 +182,8 @@ inline Message& endlog(Message& msg)
     To avoid this cost, either check wheter the logger is enabled at the
     desired level by calling Logger::enabled, or use one of the logging
     macros instead.
+
+    @ingroup Logging
 */
 class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 {
@@ -222,7 +221,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         LogTarget& target() const
         { return *_target; }
 
-        void log(const Message& msg)
+        void log(const LogMessage& msg)
         {
             if( this->enabled( msg.logLevel() ) )
             {
@@ -237,79 +236,79 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
             the logger is disabled this function only performs a integer
             comparison.
         */
-        Message beginLog(const Pt::SourceInfo& si)
+        LogMessage beginLog(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Trace, si);
+            return LogMessage(*this, Pt::System::Trace, si);
         }
 
-        Message beginLog(LogLevel level, const Pt::SourceInfo& si)
+        LogMessage beginLog(LogLevel level, const Pt::SourceInfo& si)
         {
-            return Message(*this, level, si);
+            return LogMessage(*this, level, si);
         }
 
-        Message trace(const Pt::SourceInfo& si)
+        LogMessage trace(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Trace, si);
+            return LogMessage(*this, Pt::System::Trace, si);
         }
 
-        Message debug(const Pt::SourceInfo& si)
+        LogMessage debug(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Debug, si);
+            return LogMessage(*this, Pt::System::Debug, si);
         }
 
-        Message info(const Pt::SourceInfo& si)
+        LogMessage info(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Info, si);
+            return LogMessage(*this, Pt::System::Info, si);
         }
 
-        Message warn(const Pt::SourceInfo& si)
+        LogMessage warn(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Warn, si);
+            return LogMessage(*this, Pt::System::Warn, si);
         }
 
-        Message error(const Pt::SourceInfo& si)
+        LogMessage error(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Error, si);
+            return LogMessage(*this, Pt::System::Error, si);
         }
 
-        Message fatal(const Pt::SourceInfo& si)
+        LogMessage fatal(const Pt::SourceInfo& si)
         {
-            return Message(*this, Pt::System::Fatal, si);
+            return LogMessage(*this, Pt::System::Fatal, si);
         }
 
-        Message trace()
+        LogMessage trace()
         {
-            return Message(*this, Pt::System::Trace);
+            return LogMessage(*this, Pt::System::Trace);
         }
 
-        Message debug()
+        LogMessage debug()
         {
-            return Message(*this, Pt::System::Debug);
+            return LogMessage(*this, Pt::System::Debug);
         }
 
-        Message info()
+        LogMessage info()
         {
-            return Message(*this, Pt::System::Info);
+            return LogMessage(*this, Pt::System::Info);
         }
 
-        Message warn()
+        LogMessage warn()
         {
-            return Message(*this, Pt::System::Warn);
+            return LogMessage(*this, Pt::System::Warn);
         }
 
-        Message error()
+        LogMessage error()
         {
-            return Message(*this, Pt::System::Error);
+            return LogMessage(*this, Pt::System::Error);
         }
 
-        Message fatal()
+        LogMessage fatal()
         {
-            return Message(*this, Pt::System::Fatal);
+            return LogMessage(*this, Pt::System::Fatal);
         }
 
-        Message operator<<( LogLevel (*pf)() )
+        LogMessage operator<<( LogLevel (*pf)() )
         {
-            return Message( *this, pf() );
+            return LogMessage( *this, pf() );
         }
 
     protected:
@@ -325,7 +324,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
 
 template <typename T>
-inline Message& Message::operator<<(const T& value)
+inline LogMessage& LogMessage::operator<<(const T& value)
 {
     if( _logger->enabled(_level) )
         _text << value;
@@ -334,14 +333,13 @@ inline Message& Message::operator<<(const T& value)
 }
 
 
-inline void Message::send()
+inline void LogMessage::send()
 {
     _logger->log(*this);
 }
 
 
-/** @brief Sentry class to log a scope
-    @ingroup Logging
+/** @brief Sentry class to log a scope.
 
     The constructor of this class send a log-message that a scope was entered,
     the destructor sends a log-message the the scope was left. This makes tracing
@@ -361,6 +359,8 @@ inline void Message::send()
         if(c) return; // Destructor sends log-message
     }
     @endcode
+
+    @ingroup Logging
 */
 class LoggedScope
 {
@@ -399,17 +399,21 @@ class LoggedScope
 }
 
 #ifdef NLOG
-    #define PT_LOG(logger, level, message)
+    #define log_message_impl(logger, level, message)
 
+	#define log_init(file)
     #define log_define(category)
     #define log_xxxx(level, expr)
 #else
-    #define PT_LOG(logger, level, expr) \
+    #define log_message_impl(logger, level, expr) \
     if( logger.enabled( Pt::System::level() ) ) \
     { \
         logger.beginLog( Pt::System::level(), PT_SOURCEINFO) << expr << Pt::System::endlog; \
     }
 
+    #define log_init(file) \
+    Pt::System::LogTarget::init(file);
+    
     #define log_define(category) \
     static Pt::System::Logger pt_logger(category);
 
@@ -422,12 +426,13 @@ class LoggedScope
     } while (false)
 #endif
 
-#define PT_LOG_FATAL(logger, expr) PT_LOG(logger, fatal, expr)
-#define PT_LOG_ERROR(logger, expr) PT_LOG(logger, error, expr)
-#define PT_LOG_WARN(logger, expr)  PT_LOG(logger, warn, expr)
-#define PT_LOG_INFO(logger, expr)  PT_LOG(logger, info, expr)
-#define PT_LOG_DEBUG(logger, expr) PT_LOG(logger, debug, expr)
-#define PT_LOG_TRACE(logger, expr) PT_LOG(logger, trace, expr)
+// deprecated
+#define PT_LOG_FATAL(logger, expr) log_message_impl(logger, fatal, expr)
+#define PT_LOG_ERROR(logger, expr) log_message_impl(logger, error, expr)
+#define PT_LOG_WARN(logger, expr)  log_message_impl(logger, warn, expr)
+#define PT_LOG_INFO(logger, expr)  log_message_impl(logger, info, expr)
+#define PT_LOG_DEBUG(logger, expr) log_message_impl(logger, debug, expr)
+#define PT_LOG_TRACE(logger, expr) log_message_impl(logger, trace, expr)
 
 #define log_fatal(expr) log_xxxx(Fatal, expr)
 #define log_error(expr) log_xxxx(Error, expr)
@@ -435,5 +440,12 @@ class LoggedScope
 #define log_info(expr)  log_xxxx(Info, expr)
 #define log_debug(expr) log_xxxx(Debug, expr)
 #define log_trace(expr) log_xxxx(Trace, expr)
+
+#define log_message_fatal(logger, expr) PT_LOG(logger, fatal, expr)
+#define log_message_error(logger, expr) PT_LOG(logger, error, expr)
+#define log_message_warn(logger, expr)  PT_LOG(logger, warn, expr)
+#define log_message_info(logger, expr)  PT_LOG(logger, info, expr)
+#define log_message_denug(logger, expr) PT_LOG(logger, debug, expr)
+#define log_message_trace(logger, expr) PT_LOG(logger, trace, expr)
 
 #endif

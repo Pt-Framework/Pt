@@ -44,26 +44,23 @@ FileChannel::~FileChannel()
 }
 
 
-void FileChannel::_open(const std::string& url)
+void FileChannel::onOpen(const std::string& url)
 {
-
 	std::string filename = url.substr(7);
 	m_out.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
 }
 
 
-void FileChannel::_close()
+void FileChannel::onClose()
 {
 	m_out.close();
 }
 
 
-void FileChannel::_write(const std::string& message)
+void FileChannel::onWrite(const std::string& message)
 {
     m_out << message << std::flush;
 }
-
-
 
 } // namespace System
 

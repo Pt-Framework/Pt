@@ -45,7 +45,7 @@ class LoggerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("LoggerTest")
         {
             Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
-            Pt::Unit::TestSuite::registerMethod( "TestInheritance", *this, &LoggerTest::TestInheritance );
+            Pt::Unit::TestSuite::registerMethod( "Inheritance", *this, &LoggerTest::Inheritance );
             Pt::Unit::TestSuite::registerMethod( "LogFatal", *this, &LoggerTest::LogFatal );
             Pt::Unit::TestSuite::registerMethod( "LogError", *this, &LoggerTest::LogError );
             Pt::Unit::TestSuite::registerMethod( "LogWarn", *this, &LoggerTest::LogWarn );
@@ -61,36 +61,13 @@ class LoggerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger logger("LoggerTest.a.b.c");
 
-            try {
-                Pt::System::Logger logger(".");
-                PT_UNIT_ASSERT(false);
-            }
-            catch(const std::invalid_argument&)
-            {}
-
-            try {
-                Pt::System::Logger logger("a..b");
-                PT_UNIT_ASSERT(false);
-            }
-            catch(const std::invalid_argument&)
-            {}
-
-            try {
-                Pt::System::Logger logger("a.");
-                PT_UNIT_ASSERT(false);
-            }
-            catch(const std::invalid_argument&)
-            { }
-
-            try {
-                Pt::System::Logger logger(".a");
-                PT_UNIT_ASSERT(false);
-            }
-            catch(const std::invalid_argument&)
-            {  }
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l1("."), std::invalid_argument)
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l2("a..b"), std::invalid_argument)
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l3("a."), std::invalid_argument)
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l4(".a"), std::invalid_argument)
         }
 
-        void TestInheritance()
+        void Inheritance()
         { 
             Pt::System::Logger logger_m("m");
             Pt::System::Logger logger_m_a("m.a");

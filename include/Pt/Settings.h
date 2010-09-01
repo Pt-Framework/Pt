@@ -83,11 +83,42 @@ class PT_API Settings : public SerializationInfo
                     return ConstEntry(si);
                 }
 
+                ConstEntry& operator++()
+                {
+                    if(_si)
+                        _si = _si->sibling();
+
+                    return *this;
+                }
+
+                const std::string& name() const
+                { return _si->name(); }
+
+                bool operator!=(const ConstEntry& other) const
+                { return _si != other._si; }
+
+                bool operator==(const ConstEntry& other) const
+                { return _si == other._si; }
+
             private:
                 const SerializationInfo* _si;
         };
 
         Settings();
+
+        ConstEntry begin() const
+        { 
+            SerializationInfo::ConstIterator it = SerializationInfo::begin();
+            const SerializationInfo* si = 0;
+            
+            if( it != SerializationInfo::end() )
+                si = &(*it);
+
+            return ConstEntry(si); 
+        }
+
+        ConstEntry end() const
+        { return ConstEntry(); }  
 
         void load( std::basic_istream<Pt::Char>& is );
 

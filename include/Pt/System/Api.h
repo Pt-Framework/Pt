@@ -42,10 +42,82 @@
 
 #endif
 
-
 /** @defgroup Logging Logging
     @brief Configurable and thread-safe logging framework
 
+    There are two ways to log, either by using static loggers or by
+    using specific logger instances for a program scope. To use a 
+    static logger it has to be defined first in a source file, and 
+    then log macros can be used to send log messages via the static logger:
+    
+    @code
+    log_define("mylogger")
+    
+    int multiply(int a, int b)
+    {
+        log_info("multipy " << a << " by " << b)
+        return a*b;
+    }
+    @endcode
+    
+    log_define and log_info are macros that expand to nothing if NLOG is
+    defined. if NLOG is not defined, log_define expands to a static logger
+    object.
+    The alternative is to use specific loggers. To do so, a Logger 
+    object must be instanciated, for example as a class member variable.
+    
+    @code
+    class Calculator
+    {
+        public:
+            Calculator();
+            
+            int multiply(int a, int b);
+
+        private:
+            Pt::System::Logger _logger;
+    };
+    @endcode
+    
+    Messages can then be written to the Logger using the appropriate 
+    log macro.
+    
+    @code
+    int Calculator::multiply(int a, int b)
+    {
+        log_message_info(_logger, "multipy " << a << " by " << b);
+        return a*b;
+    }
+    @endcode
+    
+    As before log_message_info expands to nothing if NLOG is defined.
+    It is also possible to not use any macros, but create message 
+    objects and write them with logger instances.
+    
+    @code
+    Pt::System::Logger logger("mylogger");
+    Pt::System::LogMessage message(logger, Pt::System::Info);
+    message << "hello world" << Pt::System::endlog;
+    @endcode
+    
+    Now, if NLOG is defined somewhere, it will not affect this logger
+    and the message is send.
+    
+    There are two ways how the logging framework can be initialized.
+    Either use log_init at program start to load a settings file, or
+    initialize logger targets using the logging API. To change the
+    log level or channel of a target, one has to get a reference to
+    the target first. Then the log level and channel can be changed.
+    
+    @code
+    Pt::System::LogTarget& target = Pt::System::LogTarget::get("");
+    target.setLogLevel(Pt::System::Info);
+    target.setChannel("file://myfile.log");
+    @endcode
+    
+    The code example above changes the log level and channel of the
+    root logger target to write messages of a level of Pt::System::Info
+    or higher to a specified log file.
 */
 
 namespace Pt {

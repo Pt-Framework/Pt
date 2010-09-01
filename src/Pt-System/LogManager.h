@@ -65,11 +65,13 @@ class LogManager : public Pt::Singleton<LogManager>
 
         void setChannel(LogTarget& target, const std::string& url);
 
-        void log(LogTarget& target, const Message& message);
+        void log(LogTarget& target, const LogMessage& message);
 
         void setLogLevel(LogTarget &target, LogLevel level);
 
     protected:
+        void initTarget(LogTarget& target, const Settings::ConstEntry& entry);
+
         void updateChildren(LogTarget &target, LogLevel level);
 
         LogChannel& channel(const std::string& url);
@@ -79,13 +81,12 @@ class LogManager : public Pt::Singleton<LogManager>
         Pt::System::BasicPlugin<FileChannel, LogChannel> _filePlugin;
         Pt::System::BasicPlugin<SerialChannel, LogChannel> _serialPlugin;
         Pt::System::PluginManager<LogChannel> _pluginManager;
-        bool _init;
         LogTarget* _rootTarget;
         std::map<std::string, LogTarget*> _targetMap;
         std::map<std::string, LogChannel*> _channelMap;
         Pt::System::RecursiveMutex _mutex;
         Settings _settings;
-        Logger* _logger;
+        //Logger* _logger;
 };
 
 }
