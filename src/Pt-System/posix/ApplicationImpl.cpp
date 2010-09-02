@@ -26,7 +26,6 @@
 #include "ApplicationImpl.h"
 #include "IODeviceImpl.h"
 #include "Pt/System/Pipe.h"
-#include "Pt/System/Selector.h"
 #include "Pt/System/Application.h"
 #include "Pt/System/SystemError.h"
 #include <string.h>

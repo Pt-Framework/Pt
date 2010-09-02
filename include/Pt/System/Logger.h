@@ -184,7 +184,7 @@ inline LogMessage& endlog(LogMessage& msg)
 class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 {
     friend class LogManager;
-    friend class LoggerTest;
+    friend class ::LoggerTest;
 
     public:
         /** @brief Constructs a new logger for a target and log-level
