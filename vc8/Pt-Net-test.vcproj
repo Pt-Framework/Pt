@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="Pt-Net-test"
+	ProjectGUID="{D6FC5308-A4A0-419B-929A-362C863FC791}"
+	RootNamespace="Pt-Net-test"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+		<Platform
+			Name="Pocket PC 2003 (ARMV4)"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\tmp\src\Pt-Net"
+			ConfigurationType="0"
+			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-Net-test"
+				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-Net-test"
+				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug clean"
+				Output="$(OutDir)\Pt-Net-testd.exe"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Pocket PC 2003 (ARMV4)"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\tmp\src\Pt-Net"
+			ConfigurationType="0"
+			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
+			ExcludeBuckets="7"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Net-test"
+				ReBuildCommandLine="cd ..) &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Net-test"
+				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				Output="$(OutDir)\Pt-Net-testd.exe"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\Pt"
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\tmp\src\Pt-Net"
+			ConfigurationType="0"
+			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release Pt-Net-test"
+				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release Pt-Net-test"
+				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release clean"
+				Output="$(OutDir)\Pt-Net-test.exe"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Pocket PC 2003 (ARMV4)"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\tmp\src\Pt-Net"
+			ConfigurationType="0"
+			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
+			ExcludeBuckets="7"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release) -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Net-test"
+				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Net-test"
+				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=release -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				Output="$(OutDir)\Pt-Net-test.exe"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A204}"
+			>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EB04}"
+			>
+		</Filter>
+		<File
+			RelativePath="..\src\Pt-Net\Jamfile"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
