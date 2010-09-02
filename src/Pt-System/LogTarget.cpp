@@ -68,7 +68,8 @@ void LogTarget::setLogLevel(LogLevel level)
 
 std::string LogTarget::channel() const
 {
-    return "";
+    // thread-safe
+    return LogManager::instance().getChannel(*this);
 }
 
 
@@ -121,6 +122,7 @@ bool LogTarget::inheritsChannel() const
 void LogTarget::assignChannel(LogChannel& ch)
 {
     _channel = &ch;
+    _inheritChannel = false;
 }
 
 

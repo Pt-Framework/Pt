@@ -183,6 +183,10 @@
 				RelativePath="..\src\Pt-System\SerialChannel.h"
 				>
 			</File>
+			<File
+				RelativePath="..\src\Pt-System\Url.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

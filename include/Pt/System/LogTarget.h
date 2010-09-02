@@ -175,7 +175,7 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
         //! @internal
         LogChannel* _channel;
-
+        
         //! @internal
         bool _inheritChannel;
 

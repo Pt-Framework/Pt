@@ -61,18 +61,27 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         virtual ~LogChannel()
         {}
 
+        const std::string& url() const
+        { return _url; }
+
         /** @brief Open the channel from URL
 
             The URL is specific to the channel and may contain attributes
             to open it correctly.
         */
         void open(const std::string url)
-        { this->onOpen(url); }
+        { 
+            _url = url;
+            this->onOpen(url); 
+        }
 
         /** @brief Closes the channel
         */
         void close()
-        { this->onClose(); }
+        { 
+            this->onClose(); 
+            _url.clear();
+        }
 
         /** @brief Writes data to the channel
         */
@@ -94,6 +103,9 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         /** @brief Writes data to the channel
         */
         virtual void onWrite(const std::string& message) = 0;
+        
+    private:
+        std::string _url;
 };
 
 }

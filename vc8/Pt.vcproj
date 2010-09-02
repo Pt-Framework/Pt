@@ -64,10 +64,10 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt"
-				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt"
+				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-test"
+				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-test"
 				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug clean"
-				Output="$(OutDir)\Ptd.dll"
+				Output="$(OutDir)\Pt-testd.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""

@@ -42,11 +42,13 @@ namespace System {
 
 class PT_SYSTEM_API InvalidUrl : public std::logic_error
 {
-public:
-    inline InvalidUrl(const char* _what, const SourceInfo& _si);
+    public:
+        InvalidUrl(const char* msg);
 
-    ~InvalidUrl() throw()
-    {}
+        InvalidUrl(const std::string& msg);
+
+        ~InvalidUrl() throw()
+        {}
 };
 
 
@@ -117,7 +119,7 @@ class PT_SYSTEM_API Url {
         void setPath(const std::string& path);
 
         //! Returns the argument for the given key
-        const std::string& arg(const std::string& key) const;
+        std::string& arg(const std::string& key);
 
         //! Add argument to Url
         void addArg(const std::string& name, const std::string& value);

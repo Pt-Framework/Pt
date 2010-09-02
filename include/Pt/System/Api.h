@@ -51,6 +51,7 @@
     then log macros can be used to send log messages via the static logger:
     
     @code
+    #include <Pt/System/Logger.h>
     log_define("mylogger")
     
     int multiply(int a, int b)

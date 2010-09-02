@@ -39,6 +39,8 @@
 #include <iostream>
 #include <sstream>
 
+class LoggerTest;
+
 namespace Pt {
 
 namespace System {
@@ -49,11 +51,6 @@ class Logger;
 /*
     TODO:
     - use formatting optimizations (cxxtools log)
-    - allow settings for channels
-    - always set channel pointer in Target
-    - file rolling
-    - create LogManager instance on static initialization
-    - log_init()
 */
 
 /** @brief %Log message.
@@ -152,7 +149,6 @@ inline LogMessage& endlog(LogMessage& msg)
     return msg;
 }
 
-
 /** @brief Write log-messages to a target.
 
     The Logger is the central class of the logging framework on the client
@@ -188,13 +184,14 @@ inline LogMessage& endlog(LogMessage& msg)
 class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 {
     friend class LogManager;
+    friend class LoggerTest;
 
     public:
         /** @brief Constructs a new logger for a target and log-level
 
             The constructed logger will log to the target with the given name.
             If the target does not exist yet within the loggin framework it
-            will be created and configured.
+            will be created.
         */
         Logger(const std::string& name);
 
@@ -202,7 +199,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
             The constructed logger will log to the target with the given name.
             If the target does not exist yet within the loggin framework it
-            will be created and configured.
+            will be created.
         */
         Logger(const char* name);
 
@@ -215,11 +212,6 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         bool enabled(LogLevel level) const
         { return level <= _target->logLevel(); }
-
-        /** @brief Returns the target of this logger
-        */
-        LogTarget& target() const
-        { return *_target; }
 
         void log(const LogMessage& msg)
         {
@@ -316,6 +308,11 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         Logger(LogTarget& target)
         : _target( &target )
         {}
+
+        /** @brief Returns the target of this logger
+        */
+        LogTarget& target() const
+        { return *_target; }
 
     private:
         //! @internal

@@ -144,6 +144,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A204}"
 			>
 			<File
+				RelativePath="..\src\Pt-System\DirectoryTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\Pt-System\LoggerTest.cpp"
 				>
 			</File>

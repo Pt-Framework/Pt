@@ -33,6 +33,7 @@
 #include <Pt/System/LogChannel.h>
 #include <fstream>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -52,10 +53,16 @@ class FileChannel : public LogChannel
 
         virtual void onWrite(const std::string& message);
 
+        void rotate();
+
+        std::string makePath(int n);
+
 	private:
-
-		std::fstream m_out;
-
+		std::ofstream _fs;
+		std::string _file;
+        std::size_t _maxSize;
+        std::size_t _numBackup;
+        std::size_t _curSize;
 };
 
 } // namespace System

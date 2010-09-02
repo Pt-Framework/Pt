@@ -35,8 +35,13 @@ namespace Pt {
 
 namespace System {
 
-InvalidUrl::InvalidUrl(const char* _what, const SourceInfo& _si)
-: std::logic_error(_what + _si)
+InvalidUrl::InvalidUrl(const char* msg)
+: std::logic_error(msg)
+{ }
+
+
+InvalidUrl::InvalidUrl(const std::string& msg)
+: std::logic_error(msg)
 { }
 
 
@@ -138,12 +143,16 @@ Url::ArgumentMap Url::fromString(const std::string& args)
 std::string Url::toString(const ArgumentMap& args)
 {
     std::ostringstream os;
+    unsigned n = 0;
 
     // add Url arguments ...
     Url::ArgumentMap::const_iterator i = args.begin();
     while(i != args.end())
     {
-        if(i != args.begin())
+        if( i->second.empty() )
+            continue;
+
+        if(++n > 1)
             os << '&';
 
         // add urlencoded arg...
@@ -164,14 +173,9 @@ void Url::addArg(const std::string& name, const std::string& value)
 }
 
 
-const std::string& Url::arg(const std::string& name) const
+std::string& Url::arg(const std::string& key)
 {
-    static std::string emptyStr;
-    ArgumentMap::const_iterator i = _args.find(name);
-    if(i != _args.end())
-        return i->second;
-
-    return emptyStr;
+    return _args[key];
 }
 
 
@@ -229,31 +233,11 @@ Url& Url::operator=(const char* url)
 Url& Url::operator=(const std::string& url)
 {
     using std::string;
-    // file-Urls are handled specially ...
-    if(url.substr(0, 5) == "file:" || url.substr(0, 1) == "/")
-    {
-        _proto  = "file";
-        _host   = "";
-        _user   = "";
-        _passwd = "";
-        _port   = 0;
-
-        if(url.find("file:") != string::npos) {
-            _path = decode( url.substr(6, string::npos) );
-        }
-        else
-            _path = decode( url );
-
-        _args.clear();
-        _anchor = "";
-
-        return *this;
-    }
 
     // search for protocol delimiter ...
     string::size_type protoEndPos = url.find("://");
     if(protoEndPos == string::npos) {
-        throw InvalidUrl("Invalid url", PT_SOURCEINFO);
+        throw InvalidUrl("Invalid url");
     }
     string proto = url.substr(0, protoEndPos);
 
@@ -280,16 +264,16 @@ Url& Url::operator=(const std::string& url)
     // find the length of the path ...
     string::size_type pathLen;
     if(argsStartPos != string::npos)
-        pathLen = argsStartPos - pathStartPos;
+        pathLen = argsStartPos - pathStartPos -1;
     else if(anchorStartPos != string::npos)
-        pathLen = anchorStartPos - pathStartPos;
+        pathLen = anchorStartPos - pathStartPos -1;
     else
         pathLen = string::npos;
 
     // get the path ...
     string path = "/";
     if(pathStartPos != string::npos)
-        path = url.substr(pathStartPos, pathLen);
+        path = url.substr(pathStartPos + 1, pathLen);
 
     string::size_type argsLen;
     if(anchorStartPos != string::npos)

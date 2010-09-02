@@ -27,7 +27,10 @@
  */
 
 #include "FileChannel.h"
+#include "Pt/System/Url.h"
 #include <iostream>
+#include <sstream>
+#include <cstdio>
 
 namespace Pt {
 
@@ -35,6 +38,9 @@ namespace System {
 
 FileChannel::FileChannel()
 : LogChannel()
+, _maxSize(1*1024*1024)
+, _numBackup(1)
+, _curSize(0)
 {
 }
 
@@ -44,22 +50,85 @@ FileChannel::~FileChannel()
 }
 
 
-void FileChannel::onOpen(const std::string& url)
+void FileChannel::onOpen(const std::string& urlstring)
 {
-	std::string filename = url.substr(7);
-	m_out.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
+    _maxSize = 1*1024*1024;
+    _numBackup = 1;
+    Pt::System::Url url(urlstring);
+
+    std::string value = url.arg("size");
+    std::istringstream ss(value);
+    ss >> _maxSize;
+
+    value = url.arg("files");
+    unsigned maxFile = 1;
+    std::istringstream ss2(value);
+    ss2 >> maxFile;
+    _numBackup = maxFile - 1;
+    
+    _file = url.path();
+
+	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::app);
+	_curSize = _fs.tellp();
+
+	if(_curSize > _maxSize)
+    {
+        this->rotate();
+    }
 }
 
 
 void FileChannel::onClose()
 {
-	m_out.close();
+    _fs.clear();
+	_fs.close();
+	_curSize = 0;
 }
 
 
 void FileChannel::onWrite(const std::string& message)
 {
-    m_out << message << std::flush;
+    if(_curSize + message.size() > _maxSize)
+    {
+        this->rotate();
+    }
+    
+    _fs << message << std::flush;
+    _curSize += message.size();
+}
+
+
+void FileChannel::rotate()
+{
+    _fs.clear();
+    _fs.close();
+  
+    if(_numBackup > 0)
+    {
+        std::string to = makePath(_numBackup);
+        std::remove( to.c_str() );
+        
+        for(unsigned n = _numBackup; n > 0 ; --n)
+        {
+            std::string from = makePath(n-1);
+            std::rename( from.c_str(), to.c_str() );
+            to = from;
+        }
+    }
+	
+	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::trunc);
+	_curSize = 0;
+}
+
+
+std::string FileChannel::makePath(int n)
+{
+    if(n == 0)
+        return _file;
+
+	std::ostringstream oss;
+	oss << _file << '.' << n;
+	return oss.str();
 }
 
 } // namespace System

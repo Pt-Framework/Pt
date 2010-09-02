@@ -46,22 +46,11 @@ LogManager::LogManager()
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
 , _rootTarget(0)
-//, _logger(0)
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );
     _pluginManager.registerPlugin( _filePlugin );
     _pluginManager.registerPlugin( _serialPlugin );
-
-    // initialise completely if .settings exist for backward
-    // compatibility wit old code
-    //std::ifstream fs("Pt-Log.settings");
-    //if( fs )
-    //{
-    //    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    //    _settings.load(ts);
-    //    _init = true;
-    //}
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
     std::auto_ptr<LogTarget> rootTarget( new LogTarget("", 0) );
@@ -70,35 +59,12 @@ LogManager::LogManager()
     _rootTarget->assignLogLevel(Pt::System::Error, false);
     this->setChannel( *_rootTarget, "console://");
 
-    //if(_init)
-    //    _settings >>= *_rootTarget;
-
-    //// logger for Pt::Log
-    //std::auto_ptr<LogTarget> logTarget( new LogTarget("Pt-Log", _rootTarget) );
-    //_targetMap["Pt-Log"] = logTarget.get();
-
-    //if(_init)
-    //    _settings.getObject( *logTarget, "Pt-Log" );
-
-    //std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
-    //_logger = logger.get();
-
-    //_logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
-
-    //logger.release();
-    //logTarget.release();
     rootTarget.release();
 }
 
 
 LogManager::~LogManager()
 {
-    //_logger->info(PT_SOURCEINFO) << "Logging system shutdown" << endlog;
-
-    //logger for Pt::Log
-    //delete _logger;
-    //_logger = 0;
-
     // target hierachy
     std::map<std::string, LogTarget*>::iterator it;
     for( it = _targetMap.begin(); it != _targetMap.end(); ++it )
@@ -126,17 +92,12 @@ void LogManager::init(const std::string& path)
 
     std::ifstream fs( path.c_str() );
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    _settings.load(ts);
+    Settings settings;
+    settings.load(ts);
 
     Settings::ConstEntry entry;
-    for(entry = _settings.begin(); entry != _settings.end(); ++entry)
+    for(entry = settings.begin(); entry != settings.end(); ++entry)
     {
-        //std::map<std::string, LogTarget*>::iterator iter = _targetMap.find( entry.name() );
-        //if( iter == _targetMap.end() )
-        //    continue;
-
-        //LogTarget* target = iter->second;
-        //this->initTarget(*target, entry);
         LogTarget& target = this->target( entry.name() );
         this->initTarget(target, entry);
     }
@@ -219,20 +180,13 @@ LogTarget& LogManager::target(const std::string& name)
         std::map<std::string, LogTarget*>::iterator it = _targetMap.find(targetName);
         if( it != _targetMap.end() )
         {
-            //_logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
             foundTarget = it->second;
         }
         else
         {
-            //_logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName
-            //                                 << ", parent: " << foundTarget->name() << endlog;
-
             // The target inherits the log level of the parent upon contruction
             foundTarget = new LogTarget(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
-
-            // The settings for the target might override the inherited log level
-            //this->initTarget(*foundTarget, _settings.entry(targetName) );
         }
     }
 
@@ -282,21 +236,78 @@ void LogManager::updateChildren(LogTarget &target, LogLevel level)
 }
 
 
+std::string LogManager::getChannel(const LogTarget& target)
+{
+    Pt::System::RecursiveLock lock( _mutex );
+    
+    // search target hierachy upwards for a valid channel
+    for( const LogTarget* current = &target; current != 0; current = current->_parent )
+    {
+        if( current->_channel )
+        {
+            return current->_channel->url();
+        }
+    }
+    
+    return std::string();
+}
+
+
 void LogManager::setChannel(LogTarget& target, const std::string& url)
 {
     Pt::System::RecursiveLock lock( _mutex );
-    LogChannel& chan = this->channel(url);
-    target.assignChannel( chan );
 
-    //if(_logger)
-    //    _logger->beginLog(PT_SOURCEINFO) << info << target.name()<< " set to " << url << endlog;
+    if( ! target.inheritsChannel() )
+    {
+        std::map<std::string, LogChannel*>::iterator it;
+        for(it = _channelMap.begin(); it != _channelMap.end(); ++it)
+        {
+            if(it->second == target._channel)
+            {
+                it->second->close();
+                _pluginManager.destroy( it->second );
+                _channelMap.erase(it);
+                break;
+            }
+        }
+    }
+
+    LogChannel* ch = 0;
+    
+    std::map<std::string, LogChannel*>::iterator it = _channelMap.find(url);
+    if( it != _channelMap.end() )
+    {
+        ch = it->second;
+    }
+    else
+    {
+        // use the url schema to create a new channel
+        size_t colon = url.find(':');
+        if(colon == std::string::npos)
+        {
+            throw  std::invalid_argument("Invalid channel url");
+        }
+
+        std::string protocol = url.substr(0, colon);
+
+        ch = _pluginManager.create(protocol);
+        if(ch == 0)
+        {
+            throw std::invalid_argument("No such channel");
+        }
+
+        ch->open(url);
+        _channelMap[url] =  ch;
+    }
+
+    target.assignChannel( *ch );
 }
 
 
 void LogManager::log(LogTarget& target, const LogMessage& message)
 {
     Pt::System::RecursiveLock lock( _mutex );
-    ;
+
     // search target hierachy upwards for a valid channel
     for( LogTarget* current = &target; current != 0; current = current->_parent )
     {
@@ -313,40 +324,6 @@ void LogManager::log(LogTarget& target, const LogMessage& message)
             return;
         }
     }
-}
-
-
-LogChannel& LogManager::channel(const std::string& url)
-{
-    std::map<std::string, LogChannel*>::iterator it = _channelMap.find(url);
-    if( it != _channelMap.end() )
-    {
-        return *it->second;
-    }
-
-    // use the url schema to create a new channel
-    size_t colon = url.find(':');
-    if(colon == std::string::npos)
-    {
-        throw  std::invalid_argument("Invalid channel url");
-    }
-
-    std::string protocol = url.substr(0, colon);
-
-    LogChannel* ch = _pluginManager.create(protocol);
-    if(ch == 0)
-    {
-        throw std::invalid_argument("No such channel");
-    }
-
-
-    // TODO: handle exceptions from open()
-    ch->open(url);
-    //if(_logger)
-    //    _logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
-
-    _channelMap[url] =  ch;
-    return *ch;
 }
 
 }
