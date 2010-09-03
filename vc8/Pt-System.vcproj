@@ -172,10 +172,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\Pt-System\LogTarget.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\Pt-System\SerialChannel.cpp"
 				>
 			</File>
@@ -263,10 +259,6 @@
 			</File>
 			<File
 				RelativePath="..\include\Pt\System\LogLevel.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\Pt\System\LogTarget.h"
 				>
 			</File>
 			<File

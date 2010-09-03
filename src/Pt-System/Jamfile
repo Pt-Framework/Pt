@@ -33,6 +33,8 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           IOError.cpp
                           IOStream.cpp
                           Library.cpp
+                          Logger.cpp
+                          LogManager.cpp
                           MainLoop.cpp
                           Mutex.cpp
                           Pipe.cpp
@@ -48,10 +50,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           Url.cpp
                           ConsoleChannel.cpp
                           FileChannel.cpp
-                          Logger.cpp
-                          LogManager.cpp
                           SerialChannel.cpp
-                          LogTarget.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;

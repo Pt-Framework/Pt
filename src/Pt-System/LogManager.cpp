@@ -27,11 +27,11 @@
  */
 
 #include "LogManager.h"
-#include <Pt/System/LogTarget.h>
 #include <Pt/System/Logger.h>
-#include <Pt/Text/TextStream.h>
-#include <Pt/Text/Utf8Codec.h>
- #include <Pt/System/Clock.h>
+#include <Pt/System/Clock.h>
+#include <Pt/TextStream.h>
+#include <Pt/Utf8Codec.h>
+#include <Pt/DateTime.h>
 #include <memory>
 #include <fstream>
 
@@ -46,6 +46,7 @@ LogManager::LogManager()
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
 , _rootTarget(0)
+, _concurrency(1)
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );
@@ -53,7 +54,7 @@ LogManager::LogManager()
     _pluginManager.registerPlugin( _serialPlugin );
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
-    std::auto_ptr<LogTarget> rootTarget( new LogTarget("", 0) );
+    std::auto_ptr<LogTarget> rootTarget( new LogTarget("", _concurrency, 0) );
     _rootTarget = rootTarget.get();
     _targetMap[""] = _rootTarget;
     _rootTarget->assignLogLevel(Pt::System::Error, false);
@@ -91,9 +92,22 @@ void LogManager::init(const std::string& path)
     Pt::System::RecursiveLock lock( _mutex );
 
     std::ifstream fs( path.c_str() );
-    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(fs, new Pt::Utf8Codec);
     Settings settings;
     settings.load(ts);
+
+    Settings::ConstEntry entry;
+    for(entry = settings.begin(); entry != settings.end(); ++entry)
+    {
+        LogTarget& target = this->target( entry.name() );
+        this->initTarget(target, entry);
+    }
+}
+
+
+void LogManager::init(const Settings& settings)
+{
+    Pt::System::RecursiveLock lock( _mutex );
 
     Settings::ConstEntry entry;
     for(entry = settings.begin(); entry != settings.end(); ++entry)
@@ -185,7 +199,7 @@ LogTarget& LogManager::target(const std::string& name)
         else
         {
             // The target inherits the log level of the parent upon contruction
-            foundTarget = new LogTarget(targetName, foundTarget);
+            foundTarget = new LogTarget(targetName, _concurrency, foundTarget);
             _targetMap[targetName] = foundTarget;
         }
     }
@@ -241,11 +255,11 @@ std::string LogManager::getChannel(const LogTarget& target)
     Pt::System::RecursiveLock lock( _mutex );
     
     // search target hierachy upwards for a valid channel
-    for( const LogTarget* current = &target; current != 0; current = current->_parent )
+    for( const LogTarget* current = &target; current != 0; current = current->parent() )
     {
-        if( current->_channel )
+        if( current->channel() )
         {
-            return current->_channel->url();
+            return current->channel()->url();
         }
     }
     
@@ -262,7 +276,7 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
         std::map<std::string, LogChannel*>::iterator it;
         for(it = _channelMap.begin(); it != _channelMap.end(); ++it)
         {
-            if(it->second == target._channel)
+            if(it->second == target.channel())
             {
                 it->second->close();
                 _pluginManager.destroy( it->second );
@@ -309,9 +323,9 @@ void LogManager::log(LogTarget& target, const LogMessage& message)
     Pt::System::RecursiveLock lock( _mutex );
 
     // search target hierachy upwards for a valid channel
-    for( LogTarget* current = &target; current != 0; current = current->_parent )
+    for( LogTarget* current = &target; current != 0; current = current->parent() )
     {
-        if( current->_channel )
+        if( current->channel() )
         {
             // format the message string
             std::string level = toString( message.logLevel() );
@@ -320,7 +334,7 @@ void LogManager::log(LogTarget& target, const LogMessage& message)
                               level + " - "  + message.text() + "\n";
 
             // write data to channel
-            current->_channel->write(str);
+            current->channel()->write(str);
             return;
         }
     }

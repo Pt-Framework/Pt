@@ -30,15 +30,14 @@
 #define Pt_System_LogManager_h
 
 #include "Pt/System/Api.h"
-#include "Pt/System/LogTarget.h"
 #include "ConsoleChannel.h"
 #include "FileChannel.h"
 #include "SerialChannel.h"
-#include <Pt/DateTime.h>
-#include <Pt/Settings.h>
-#include <Pt/Singleton.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/Plugin.h>
+#include "Pt/System/LogLevel.h"
+#include "Pt/System/Mutex.h"
+#include "Pt/System/Plugin.h"
+#include "Pt/Singleton.h"
+#include "Pt/Settings.h"
 #include <string>
 #include <map>
 
@@ -46,8 +45,8 @@ namespace Pt {
 
 namespace System {
 
-class Message;
-class Logger;
+class LogTarget;
+class LogMessage;
 
 class LogManager : public Pt::Singleton<LogManager>
 {
@@ -60,6 +59,8 @@ class LogManager : public Pt::Singleton<LogManager>
         ~LogManager();
 
         void init(const std::string& path);
+        
+        void init(const Settings& settings);
 
         LogTarget& target(const std::string& name = std::string());
         
@@ -85,7 +86,7 @@ class LogManager : public Pt::Singleton<LogManager>
         std::map<std::string, LogTarget*> _targetMap;
         std::map<std::string, LogChannel*> _channelMap;
         Pt::System::RecursiveMutex _mutex;
-        //Logger* _logger;
+        int _concurrency;
 };
 
 }

@@ -30,8 +30,6 @@
 //#include "DllLoggerTest.h"
 
 #include "Pt/System/Logger.h"
-#include "Pt/System/LogTarget.h"
-#include "Pt/System/IOError.h"
 #include "Pt/System/Url.h"
 #include "Pt/System/File.h"
 #include "Pt/System/Clock.h"
@@ -48,7 +46,7 @@ class LoggerTest : public Pt::Unit::TestSuite
         LoggerTest()
         : Pt::Unit::TestSuite("LoggerTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "BenchmarkLogger", *this, &LoggerTest::BenchmarkLogger );
+            //Pt::Unit::TestSuite::registerMethod( "BenchmarkLogger", *this, &LoggerTest::BenchmarkLogger );
             Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
             Pt::Unit::TestSuite::registerMethod( "Inheritance", *this, &LoggerTest::Inheritance );
             Pt::Unit::TestSuite::registerMethod( "LogFatal", *this, &LoggerTest::LogFatal );
@@ -102,16 +100,17 @@ class LoggerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger logger("");
 
+            unsigned count = 100000000;
             Pt::System::Clock clock;
             clock.start();
-            for(unsigned n = 0; n < 594967295; n++)
+            for(unsigned n = 0; n < count; n++)
             {
                 log_message_trace(logger, "Hallo");
             }
             
             Pt::Timespan ts = clock.stop();
-            std::cerr << "\n time per log: " << (ts.toUSecs()/594967295.0)*1000<< " nsec" << std::endl;
-            std::exit(1);
+            double usecs = ts.toUSecs();
+            std::cerr << "\nlog time: " << (usecs/count)*1000 << " nsec" << std::endl;
         }
         
         void Inheritance()
@@ -129,70 +128,66 @@ class LoggerTest : public Pt::Unit::TestSuite
             Pt::System::Logger logger_m_a_b_b("m.a.b.b");
             Pt::System::Logger logger_m_b("m.b");
             Pt::System::Logger logger_m_b_a("m.b.a");
+
+            logger_m.target().setLogLevel(Pt::System::Trace);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
             
-            //Pt::System::LogTarget::initLogLevel("m", Pt::System::Trace);
-            //
-            //logger_m.target().setLogLevel(Pt::System::Trace);
+            logger_m_a_b.target().setLogLevel(Pt::System::Error);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
 
+            logger_m_a.target().setLogLevel(Pt::System::Info);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
 
-            //PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
-            //
-            //logger_m_a_b.target().setLogLevel(Pt::System::Error);
-            //PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
-
-            //logger_m_a.target().setLogLevel(Pt::System::Info);
-            //PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
-            //PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
-
-            //logger_m.target().setLogLevel(Pt::System::Fatal);
-            //PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Fatal );
-            //PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Fatal );
-            //PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Fatal );
-            //PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Info );
-            //PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
-            //PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Fatal );
-            //PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Fatal );
+            logger_m.target().setLogLevel(Pt::System::Fatal);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Fatal );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::System::Fatal );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::System::Fatal );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::System::Info );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Fatal );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Fatal );
         }
 
         void LogFatal()

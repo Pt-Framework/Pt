@@ -28,12 +28,124 @@
 
 #include "LogManager.h"
 #include "Pt/System/Logger.h"
-#include "Pt/System/LogTarget.h"
-#include <iostream>
 
 namespace Pt {
 
 namespace System {
+
+/////////////////////////////////////////////////////////////////////
+// LogTarget
+/////////////////////////////////////////////////////////////////////
+
+LogTarget::LogTarget(const std::string& name, int concurrency, LogTarget* parent)
+: _parent(parent)
+, _name(name)
+, _concurrency(concurrency)
+, _loglevel(0)
+, _inheritLogLevel(true)
+
+, _channel(0)
+, _inheritChannel(true)
+, _reserved(0)
+
+{
+    _loglevel = Fatal;
+
+    if(parent)
+        _loglevel = _parent->_loglevel;
+}
+
+
+LogTarget::~LogTarget()
+{
+}
+
+
+const std::string& LogTarget::name() const
+{
+    return _name;
+}
+
+
+void LogTarget::setLogLevel(LogLevel level)
+{
+    // thread-safe
+    LogManager::instance().setLogLevel(*this, level);
+}
+
+
+std::string LogTarget::channelUrl() const
+{
+    // thread-safe
+    return LogManager::instance().getChannel(*this);
+}
+
+
+void LogTarget::setChannel(const std::string& url)
+{
+    // thread-safe
+    LogManager::instance().setChannel(*this, url);
+}
+
+
+void LogTarget::initTargets(const std::string& file)
+{
+    // thread-safe
+    LogManager::instance().init(file);
+}
+
+
+void LogTarget::initTargets(const Settings& settings)
+{
+    // thread-safe
+    LogManager::instance().init(settings);
+}
+
+
+
+LogTarget& LogTarget::get(const std::string& name)
+{
+    // thread-safe
+    return LogManager::instance().target(name);
+}
+
+
+void LogTarget::log(const LogMessage& message)
+{
+    // thread-safe
+    LogManager::instance().log(*this, message);
+}
+
+
+bool LogTarget::inheritsLogLevel() const
+{
+    return _inheritLogLevel;
+}
+
+
+void LogTarget::assignLogLevel(int level, bool inherited)
+{
+    atomicSet(_loglevel, level);
+    _inheritLogLevel = inherited;
+}
+
+
+bool LogTarget::inheritsChannel() const
+{
+    return _inheritChannel;
+}
+
+
+void LogTarget::assignChannel(LogChannel& ch)
+{
+    _channel = &ch;
+    _inheritChannel = false;
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// Logger
+/////////////////////////////////////////////////////////////////////
 
 Logger::Logger(const std::string& name)
 : _target( &LogManager::instance().target(name) )
@@ -45,6 +157,12 @@ Logger::Logger(const char* name)
 : _target( &LogManager::instance().target(name) )
 {
 }
+
+
+//bool Logger::enabled(LogLevel level) const
+//{ 
+//    return level <= _target->logLevel(); 
+//}
 
 } // namespace System
 
