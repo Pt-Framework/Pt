@@ -1,10 +1,8 @@
 /** \page faq FAQ
 
-@htmlinclude sidebar.html
-
 \htmlonly
 
-    <div id="content">
+    <div class="contents">
         <h3>Can I write closed source applications using Pt?</h3>
         <p>
             Yes, you can. Pt is distributed under the LGPL with two license

@@ -78,7 +78,8 @@
 
   <!-- Layout definition for a namespace page -->
   <namespace>
-    <briefdescription visible="yes"/>
+    <briefdescription visible="no"/>
+    <detaileddescription title=""/>
     <memberdecl>
       <nestednamespaces visible="no" title=""/>
       <classes visible="yes" title=""/>
@@ -88,7 +89,6 @@
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
     <memberdef>
       <typedefs title=""/>
       <enums title=""/>
@@ -97,6 +97,51 @@
     </memberdef>
     <authorsection visible="yes"/>
   </namespace>
+
+  <!-- Layout definition for a group page -->
+  <group>
+    <briefdescription visible="no"/>
+    <detaileddescription title=""/>
+    <groupgraph visible="$GROUP_GRAPHS"/>
+    <memberdecl>
+      <classes visible="yes" title=""/>
+      <namespaces visible="no" title=""/>
+      <dirs visible="yes" title=""/>
+      <nestedgroups visible="yes" title=""/>
+      <files visible="yes" title=""/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <enumvalues title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <signals title=""/>
+      <publicslots title=""/>
+      <protectedslots title=""/>
+      <privateslots title=""/>
+      <events title=""/>
+      <properties title=""/>
+      <friends title=""/>
+      <membergroups visible="yes"/>
+    </memberdecl>
+    <memberdef>
+      <pagedocs/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <enumvalues title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <signals title=""/>
+      <publicslots title=""/>
+      <protectedslots title=""/>
+      <privateslots title=""/>
+      <events title=""/>
+      <properties title=""/>
+      <friends title=""/>
+    </memberdef>
+    <authorsection visible="yes"/>
+  </group>
 
   <!-- Layout definition for a file page -->
   <file>
@@ -125,51 +170,6 @@
     </memberdef>
     <authorsection/>
   </file>
-
-  <!-- Layout definition for a group page -->
-  <group>
-    <briefdescription visible="yes"/>
-    <groupgraph visible="$GROUP_GRAPHS"/>
-    <memberdecl>
-      <classes visible="yes" title=""/>
-      <namespaces visible="no" title=""/>
-      <dirs visible="yes" title=""/>
-      <nestedgroups visible="yes" title=""/>
-      <files visible="yes" title=""/>
-      <defines title=""/>
-      <typedefs title=""/>
-      <enums title=""/>
-      <enumvalues title=""/>
-      <functions title=""/>
-      <variables title=""/>
-      <signals title=""/>
-      <publicslots title=""/>
-      <protectedslots title=""/>
-      <privateslots title=""/>
-      <events title=""/>
-      <properties title=""/>
-      <friends title=""/>
-      <membergroups visible="yes"/>
-    </memberdecl>
-    <detaileddescription title=""/>
-    <memberdef>
-      <pagedocs/>
-      <defines title=""/>
-      <typedefs title=""/>
-      <enums title=""/>
-      <enumvalues title=""/>
-      <functions title=""/>
-      <variables title=""/>
-      <signals title=""/>
-      <publicslots title=""/>
-      <protectedslots title=""/>
-      <privateslots title=""/>
-      <events title=""/>
-      <properties title=""/>
-      <friends title=""/>
-    </memberdef>
-    <authorsection visible="yes"/>
-  </group>
 
   <!-- Layout definition for a directory page -->
   <directory>

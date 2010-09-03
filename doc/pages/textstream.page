@@ -1,4 +1,4 @@
-/** \page textstreams "Using TextStreams"
+/** \page textstreams Using TextStreams
 @section textstreams_usage Using TextStreams
 
 This tutorial will show how to use a TextStream object to read data from or write data to a stream while the character
