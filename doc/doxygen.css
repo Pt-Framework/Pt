@@ -349,7 +349,7 @@ TH.dirtab { background: #e8eef2;
 }
 .memproto {
     font-weight: normal;
-    border-bottom:1px solid #dddddd;
+    border-bottom: 0px solid #dddddd;
 }
 .memname, .memname td {
     color: #000000;
