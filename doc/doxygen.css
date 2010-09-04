@@ -353,7 +353,7 @@ TH.dirtab { background: #e8eef2;
 }
 .memname, .memname td {
     color: #000000;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: normal;
     padding: 0px;
     white-space: nowrap;
@@ -363,13 +363,13 @@ TH.dirtab { background: #e8eef2;
 }
 .paramtype {
     color: #000000;
-    font-size: 20px;
+    font-size: 22px;
     white-space: nowrap;
     font-weight: normal;
 }
 .paramname {
     color: #000000;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: normal;
     font-style: italic;
     white-space: nowrap;
