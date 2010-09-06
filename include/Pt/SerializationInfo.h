@@ -388,10 +388,10 @@ class SerializationInfo::Iterator
             return *this;
         }
 
-        SerializationInfo& operator*()
+        SerializationInfo& operator*() const
         { return *_si; }
 
-        SerializationInfo* operator->()
+        SerializationInfo* operator->() const
         { return _si; }
 
         bool operator!=(const Iterator& other) const
@@ -431,10 +431,10 @@ class SerializationInfo::ConstIterator
             return *this;
         }
 
-        const SerializationInfo& operator*()
+        const SerializationInfo& operator*() const
         { return *_si; }
 
-        const SerializationInfo* operator->()
+        const SerializationInfo* operator->() const
         { return _si; }
 
         bool operator!=(const ConstIterator& other) const

@@ -93,12 +93,15 @@ void LogManager::init(const std::string& path)
 
     std::ifstream fs( path.c_str() );
     Pt::TextIStream ts(fs, new Pt::Utf8Codec);
-    Settings settings;
-    settings.load(ts);
+    Settings s;
+    s.load(ts);
 
-    Settings::ConstEntry entry;
-    for(entry = settings.begin(); entry != settings.end(); ++entry)
+    const Settings& settings = s;
+
+    Settings::ConstIterator it;
+    for(it = settings.begin(); it != settings.end(); ++it)
     {
+        Settings::ConstEntry entry = *it;
         LogTarget& target = this->target( entry.name() );
         this->initTarget(target, entry);
     }
@@ -109,9 +112,10 @@ void LogManager::init(const Settings& settings)
 {
     Pt::System::RecursiveLock lock( _mutex );
 
-    Settings::ConstEntry entry;
-    for(entry = settings.begin(); entry != settings.end(); ++entry)
+    Settings::ConstIterator it;
+    for(it = settings.begin(); it != settings.end(); ++it)
     {
+        Settings::ConstEntry entry = *it;
         LogTarget& target = this->target( entry.name() );
         this->initTarget(target, entry);
     }

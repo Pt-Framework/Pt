@@ -62,6 +62,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsTest::Section );
             Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsTest::ArrayOfArrays );
             Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
+            Pt::Unit::TestSuite::registerMethod( "Iterator", *this, &SettingsTest::Iterator );
+            Pt::Unit::TestSuite::registerMethod( "ConstIterator", *this, &SettingsTest::ConstIterator );
         }
 
     protected:
@@ -80,18 +82,58 @@ class SettingsTest : public Pt::Unit::TestSuite
         void Section();
         void ArrayOfArrays();
         void LoadSaveSerializable();
+        void Iterator();
+        void ConstIterator();
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
-/*
-std::ifstream in("/home/marc/Desktop/maprenderer.settings");
-PT_UNIT_ASSERT(in)
 
-Pt::Text::TextIStream ts(in, new Pt::Text::Utf8Codec);
-Pt::Settings settings;
-settings.load(&ts);
-*/
+void SettingsTest::Iterator()
+{
+    Pt::Settings settings;
+    PT_UNIT_ASSERT( settings.begin() == settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
+
+    Pt::Date date(2001, 11, 15);
+    settings.root().add("myDate", date);
+    PT_UNIT_ASSERT( settings.begin() != settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
+
+    Pt::Settings::Entry& entry = *settings.begin();
+    PT_UNIT_ASSERT( entry.name() == "myDate" );
+
+    Pt::Date date2(2000, 1, 1);
+    entry.get(date2);
+    PT_UNIT_ASSERT( date2.year() == 2001 );
+    PT_UNIT_ASSERT( date2.month() == 11 );
+    PT_UNIT_ASSERT( date2.day() == 15 );
+
+    int n = 0;
+    entry.set(42);
+    PT_UNIT_ASSERT( entry.get(n) );
+    PT_UNIT_ASSERT( n == 42 );
+}
+
+void SettingsTest::ConstIterator()
+{
+    Pt::Settings s;
+
+    const Pt::Settings& settings = s;
+    PT_UNIT_ASSERT( settings.begin() == settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
+
+    s.root().add("number", 42);
+    PT_UNIT_ASSERT( settings.begin() != settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
+
+    Pt::Settings::ConstEntry& entry = *settings.begin();
+    PT_UNIT_ASSERT( entry.name() == "number" );
+
+    int n = 0;
+    PT_UNIT_ASSERT( entry.get(n) );
+    PT_UNIT_ASSERT( n == 42 );
+}
 
 void SettingsTest::LoadSaveSerializable()
 {
@@ -104,7 +146,7 @@ void SettingsTest::LoadSaveSerializable()
     settings.save(ts);
 
     Pt::Date date2(2000, 1, 1);
-    settings.getObject(date2, "myDate");
+    settings.entry("myDate").get(date2);
     PT_UNIT_ASSERT( date2.year() == 2001 );
     PT_UNIT_ASSERT( date2.month() == 11 );
     PT_UNIT_ASSERT( date2.day() == 15 );
