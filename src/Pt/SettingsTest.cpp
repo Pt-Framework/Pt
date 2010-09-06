@@ -96,12 +96,12 @@ void SettingsTest::Iterator()
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
     Pt::Date date(2001, 11, 15);
-    settings.root().add("myDate", date);
+    settings.root().add("myEntry").set(date);
     PT_UNIT_ASSERT( settings.begin() != settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
     Pt::Settings::Entry& entry = *settings.begin();
-    PT_UNIT_ASSERT( entry.name() == "myDate" );
+    PT_UNIT_ASSERT( entry.name() == "myEntry" );
 
     Pt::Date date2(2000, 1, 1);
     entry.get(date2);
@@ -113,6 +113,10 @@ void SettingsTest::Iterator()
     entry.set(42);
     PT_UNIT_ASSERT( entry.get(n) );
     PT_UNIT_ASSERT( n == 42 );
+
+    settings.root().remove("myEntry");
+    PT_UNIT_ASSERT( settings.begin() == settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 }
 
 void SettingsTest::ConstIterator()
@@ -123,7 +127,7 @@ void SettingsTest::ConstIterator()
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
-    s.root().add("number", 42);
+    s.root().add("number").set(42);
     PT_UNIT_ASSERT( settings.begin() != settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 

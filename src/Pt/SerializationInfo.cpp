@@ -576,6 +576,22 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 }
 
 
+void SerializationInfo::removeMember(const std::string& name)
+{
+    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    {
+        ObjectNode* snode = static_cast<ObjectNode*>(_node);
+
+        SerializationInfo* si = snode->remove(name);
+
+        if(_context)
+            _context->push(si);
+        else
+            delete si;
+    }
+}
+
+
 SerializationInfo& SerializationInfo::addElement()
 {
     if( category() == Context )

@@ -219,6 +219,10 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of member data
         */
+        void removeMember(const std::string& name);
+
+        /** @brief Serialization of member data
+        */
         SerializationInfo& addElement();
 
         /** @brief Deserialization of member data

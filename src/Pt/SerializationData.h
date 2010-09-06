@@ -433,6 +433,41 @@ class ObjectNode : public SerializationNode
             _last = si;
 		}
 
+        SerializationInfo* remove(const std::string& name)
+		{
+            SerializationInfo* prev = 0;
+
+            for(SerializationInfo* it = begin(); it != end(); it = it->sibling())
+			{
+                if(it->name() == name)
+                {
+                    SerializationInfo* next = it->sibling();
+                    if( prev )
+                    {
+                        prev->setSibling( next );
+                    }
+
+                    if(it == _first)
+                    {
+                        _first = next;
+                    }
+
+                    if(it == _last)
+                    {
+                        _last = prev;
+                    }
+
+                    --_size;
+                    it->setSibling(0);
+                    return it;
+                }
+
+                prev = it;
+			}
+
+            return 0;
+		}
+
         SerializationInfo* begin()
         { return _first; }
 

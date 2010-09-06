@@ -85,18 +85,19 @@ class PT_API Settings : public SerializationInfo
                         *_si <<= value;
                 }
 
-                template <typename T>
-                void add(const std::string& name, const T& value)
+                Entry add(const std::string& name)
                 {
-                    if( _si )
-                        _si->addMember(name) <<= value;
+                    if( ! _si )
+                        return Entry();
+
+                    SerializationInfo& si = _si->addMember(name);
+                    return Entry(&si);
                 }
 
-                template <typename T>
-                void add(const char* name, const T& value)
+                void remove(const std::string& name)
                 {
                     if( _si )
-                        _si->addMember(name) <<= value;
+                        _si->removeMember(name);
                 }
 
                 Iterator begin() const
