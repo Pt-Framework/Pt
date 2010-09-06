@@ -5,10 +5,12 @@
     <div class="contents">
 
         <p>
-            The Platinum framework  is licensed under the <b>GNU Library General
-            Public License (LGPL)</b> for all platforms. The intent in licensing
-            it in this way is to provide it for use in all projects both open
-            and proprietary.
+            The Platinum Framework is free software; you can redistribute it and/or
+            modify it under the terms of the GNU Lesser General Public
+            License as published by the Free Software Foundation; either
+            version 2.1 of the License, or (at your option) any later version.
+            The intent in licensing it in this way is to provide it for use in all
+            projects both open and proprietary.
         </p>
         <p>
             As a <b>special exception</b>, you may use this file as part of a free
@@ -22,11 +24,15 @@
             General Public License.
         </p>
         <p>
-            The full body of the license is provided for your inspection
-            <a href="http://www.gnu.org/licenses/lgpl.html#TOC1">here</a>.
+            This library is distributed in the hope that it will be useful,
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+            Lesser General Public License for more details.
         </p>
-        <br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br>
+            The full body of the license is provided for your inspection
+            <a href="http://www.gnu.org/licenses/lgpl-2.1.html">here</a>.
+        </p>
+ 
     </div>
 
 \endhtmlonly

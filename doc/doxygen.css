@@ -538,7 +538,7 @@ ul.menu li.active a {
 }
 .sidebar-note-body {
     font-size: 12px;
-    padding-top:5px;
+    padding-top: 5px;
     padding-bottom: 8px;
     text-align: justify;
 }
@@ -581,6 +581,9 @@ ul.menu li.active a {
     margin-top:2px;
     padding:13px 0 0;
     text-align:left;
+}
+.newsbar-link {
+    text-align: right;
 }
 
 

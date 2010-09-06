@@ -59,40 +59,65 @@
 
         <br/>
 
-        <div class="sidebar-header">All News</div>
+        <div class="sidebar-header">News</div>
 
-        <div class="sidebar-entry-title"> TR-4 released </div>
-        <div class="sidebar-entry-subtitle"> Posted on June 6, 2010 </div>
+        <div class="sidebar-entry-title"> <a href="#news8">New Domain and Website</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on September 10, 2010 </div>
 
-        <div class="sidebar-entry-title"> TR-3 released </div>
-        <div class="sidebar-entry-subtitle"> Posted on February 15, 2008 </div>
+        <div class="sidebar-entry-title"> <a href="#news6">LinuxTag in Berlin</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on June 2, 2009 </div>
 
-        <div class="sidebar-entry-title"> TR-2 released </div>
-        <div class="sidebar-entry-subtitle"> Posted on October 16, 2007 </div>
-
-        <div class="sidebar-entry-title"> New Project Website </div>
+        <div class="sidebar-entry-title"> <a href="#news3">Doxygen Online Documentation</a> </div>
         <div class="sidebar-entry-subtitle"> Posted on Febuary 25, 2007 </div>
 
-        <div class="sidebar-entry-title"> TR-1 released </div>
-        <div class="sidebar-entry-subtitle"> Posted on February 5, 2007 </div>
-
-        <div class="sidebar-entry-title"> Development News </div>
-        <div class="sidebar-entry-subtitle"> Posted on February 5, 2007 </div>
-
-        <div class="sidebar-entry-title"> LinuxWorldExpo in Cologne </div>
+        <div class="sidebar-entry-title"> <a href="#news1">LinuxWorldExpo in Cologne</a> </div>
         <div class="sidebar-entry-subtitle"> Posted on October 14, 2006 </div>
 
-        <div class="sidebar-entry-title"> Pt on Sourceforge </div>
+        <div class="sidebar-entry-title"> <a href="#news0">Pt on Sourceforge</a> </a></div>
         <div class="sidebar-entry-subtitle"> Posted on September 22, 2006 </div>
+
+        <br/>
+        <br/>
+
+        <div class="sidebar-header">Releases</div>
+
+        <div class="sidebar-entry-title"> <a href="#news7">TR-4 released</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on June 6, 2010 </div>
+
+        <div class="sidebar-entry-title"> <a href="#news5">TR-3 released</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on February 15, 2008 </div>
+
+        <div class="sidebar-entry-title"> <a href="#news4">TR-2 released</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on October 16, 2007 </div>
+
+        <div class="sidebar-entry-title"> <a href="#news2">TR-1 released</a> </div>
+        <div class="sidebar-entry-subtitle"> Posted on February 5, 2007 </div>
 
     </div>
 
 
     <div id="maintext">
     <h2>Latest News and Releases</h2>
+
     <div class="infobox">
         <div class="infobox-header" >
-           TR-4 released
+           <a name="news8"></a> New Domain and Website
+        </div>
+        <div class="infobox-subheader">
+            Posted on September 10, 2010
+        </div>
+        <div id="news-normal" class="infobox-body">
+            The website has been significantly improved and moved to a
+            new domain http://www.pt-framwork.org. We hope you enjoy the
+            new layout and would like to thank Bernd Goseberg for his
+            support. The old sourceforge address will continue to work
+            and refer to the new address.
+        </div>
+    </div>
+
+    <div id="infobox-highlight" class="infobox">
+        <div class="infobox-header" >
+           <a name="news7"></a> TR-4 released
         </div>
         <div class="infobox-subheader">
             Posted on June 6, 2010
@@ -111,9 +136,24 @@
         </div>
     </div>
 
+    <div class="infobox">
+        <div class="infobox-header" >
+            <a name="news6"></a> Pt at LinuxTag in Berlin
+        </div>
+        <div class="infobox-subheader">
+            Posted on June 2, 2009
+        </div>
+        <div id="news-normal" class="infobox-body">
+            Pt will be presented together with our partner projects T2
+            (www.t2-project.org) and tntnet (www.tntnet.org) at LinuxTag
+            2009 in Berlin. We are looking forward to many intersting
+            discussions.
+        </div>
+    </div>
+
     <div id="infobox-highlight" class="infobox">
         <div class="infobox-header" >
-            TR-3 released
+            <a name="news5"></a> TR-3 released
         </div>
         <div class="infobox-subheader">
             Posted on February 15, 2008
@@ -131,7 +171,7 @@
 
     <div class="infobox">
         <div class="infobox-header" >
-            TR-2 released
+            <a name="news4"></a> TR-2 released
          </div>
         <div class="infobox-subheader">
             Posted on October 16, 2007
@@ -142,15 +182,15 @@
             operations for integers and pointers, a logging framework, date
             and time classes, a new module for reflection and updates to the
             Unit testing framework.
-            AIX unix is supported now and Pt has been shown to compile and 
+            AIX unix is supported now and Pt has been shown to compile and
             run successfully on symbian based operating systems.
         </div>
     </div>
 
 
-    <div  id="infobox-highlight" class="infobox">
+    <div id="infobox-highlight" class="infobox">
         <div class="infobox-header" >
-            New Project Website
+            <a name="news3"></a> Doxygen Online Documentation
         </div>
         <div class="infobox-subheader">
             Posted on February 25, 2007
@@ -165,7 +205,7 @@
 
     <div class="infobox">
         <div class="infobox-header" >
-            TR-1 released
+            <a name="news2"></a> TR-1 released
         </div>
         <div class="infobox-subheader">
             Posted on February 5, 2007
@@ -173,31 +213,19 @@
         <div id="news-normal" class="infobox-body">
             This slightly longer development sprint has lead to the TR-1
             release. Many improvements have been made to the core module
-            and the Gfx module. A new module for network programming was
-            added (%Pt::Net). Pt can now be built wit the intel compiler
-            on win32. The code is available as a tarball in the download
-            section or as a tag in the subversion repository (tags/tr1).
+            and the Gfx module most notably to the image classes and the
+            reflection API. New modules for network programming (Pt::Net)
+            and unit testing (Pt::Unit) were added. Pt::Unit allows protocol
+            and data driven testing. Pt can now be built with the intel
+            compiler on win32. The code is available as a tarball in the
+            download section or as a tag in the subversion repository
+            (tags/tr1).
         </div>
     </div>
 
-    <div  id="infobox-highlight" class="infobox">
+    <div id="infobox-highlight" class="infobox">
         <div class="infobox-header" >
-            Development News
-        </div>
-        <div class="infobox-subheader">
-            Posted on February 5, 2007
-        </div>
-        <div id="news-normal" class="infobox-body">
-            During the last month, enhancements have been made to the
-            Gfx module and the core module, Most notably to the image
-            classes and the reflection API. A new module for unit testing
-            was added. Pt::Unit allows protocol- and data-driven testing.
-        </div>
-    </div>
-
-    <div class="infobox">
-        <div class="infobox-header" >
-            Pt and Tntnet at LinuxWorldExpo in Cologne
+            <a name="news1"></a> Pt at LinuxWorldExpo in Cologne
         </div>
         <div class="infobox-subheader">
             Posted on October 14, 2006
@@ -209,9 +237,9 @@
         </div>
     </div>
 
-    <div  id="infobox-highlight" class="infobox">
+    <div class="infobox">
         <div class="infobox-header" >
-            Pt on Sourceforge
+            <a name="news0"></a> Pt on Sourceforge
         </div>
         <div class="infobox-subheader">
             Posted on September 22, 2006
