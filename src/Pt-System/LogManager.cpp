@@ -98,10 +98,9 @@ void LogManager::init(const std::string& path)
 
     const Settings& settings = s;
 
-    Settings::ConstIterator it;
-    for(it = settings.begin(); it != settings.end(); ++it)
+    Settings::ConstEntry entry;
+    for(entry = settings.begin(); entry != settings.end(); ++entry)
     {
-        Settings::ConstEntry entry = *it;
         LogTarget& target = this->target( entry.name() );
         this->initTarget(target, entry);
     }
@@ -112,10 +111,9 @@ void LogManager::init(const Settings& settings)
 {
     Pt::System::RecursiveLock lock( _mutex );
 
-    Settings::ConstIterator it;
-    for(it = settings.begin(); it != settings.end(); ++it)
+    Settings::ConstEntry entry;
+    for(entry = settings.begin(); entry != settings.end(); ++entry)
     {
-        Settings::ConstEntry entry = *it;
         LogTarget& target = this->target( entry.name() );
         this->initTarget(target, entry);
     }

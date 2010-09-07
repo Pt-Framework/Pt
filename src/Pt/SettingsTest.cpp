@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
- * 
+ * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -62,8 +62,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsTest::Section );
             Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsTest::ArrayOfArrays );
             Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
-            Pt::Unit::TestSuite::registerMethod( "Iterator", *this, &SettingsTest::Iterator );
-            Pt::Unit::TestSuite::registerMethod( "ConstIterator", *this, &SettingsTest::ConstIterator );
+            Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
+            Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
         }
 
     protected:
@@ -82,14 +82,14 @@ class SettingsTest : public Pt::Unit::TestSuite
         void Section();
         void ArrayOfArrays();
         void LoadSaveSerializable();
-        void Iterator();
-        void ConstIterator();
+        void Entry();
+        void ConstEntry();
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
 
-void SettingsTest::Iterator()
+void SettingsTest::Entry()
 {
     Pt::Settings settings;
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
@@ -117,9 +117,35 @@ void SettingsTest::Iterator()
     settings.root().remove("myEntry");
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
+
+    settings.root().add("aaa");
+    settings.root().add("bbb");
+    settings.root().add("ccc");
+    PT_UNIT_ASSERT( settings.entry("aaa") != settings.end() );
+    PT_UNIT_ASSERT( settings.entry("bbb") != settings.end() );
+    PT_UNIT_ASSERT( settings.entry("ccc") != settings.end() );
+
+    settings.root().remove("ccc");
+    settings.root().remove("bbb");
+    settings.root().remove("aaa");
+    PT_UNIT_ASSERT( settings.begin() == settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
+
+    settings.root().add("aaa");
+    settings.root().add("bbb");
+    settings.root().add("ccc");
+    PT_UNIT_ASSERT( settings.entry("aaa") != settings.end() );
+    PT_UNIT_ASSERT( settings.entry("bbb") != settings.end() );
+    PT_UNIT_ASSERT( settings.entry("ccc") != settings.end() );
+
+    settings.root().remove("aaa");
+    settings.root().remove("bbb");
+    settings.root().remove("ccc");
+    PT_UNIT_ASSERT( settings.begin() == settings.end() );
+    PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 }
 
-void SettingsTest::ConstIterator()
+void SettingsTest::ConstEntry()
 {
     Pt::Settings s;
 
@@ -131,7 +157,7 @@ void SettingsTest::ConstIterator()
     PT_UNIT_ASSERT( settings.begin() != settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
-    Pt::Settings::ConstEntry& entry = *settings.begin();
+    Pt::Settings::ConstEntry entry = settings.begin();
     PT_UNIT_ASSERT( entry.name() == "number" );
 
     int n = 0;

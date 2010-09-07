@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
  * Copyright (C) 2005 Stephan Beal
  * 
  * This library is free software; you can redistribute it and/or

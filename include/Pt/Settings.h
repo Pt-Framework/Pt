@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
- * 
+ * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,24 +32,29 @@
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
 #include <iostream>
-#include <sstream>
 #include <cassert>
 
 namespace Pt {
 
+/** @brief Settings Format Error
+*/
 class PT_API SettingsError : public SerializationError
 {
     public:
+        //! @brief Constructor.
         SettingsError(const char* what, unsigned line);
 
-        //! @brief Destructor
+        //! @brief Destructor.
         ~SettingsError() throw()
         {}
 
+        /** @brief Returns the line number where the error occured.
+        */
         unsigned line() const
         { return _line; }
 
     private:
+        //! @internal
         unsigned _line;
 };
 
@@ -58,15 +63,24 @@ class PT_API SettingsError : public SerializationError
 class PT_API Settings : public SerializationInfo
 {
     public:
-        class Iterator;
-        class ConstIterator;
-
+        /** @brief Modifiable Settings Entry
+        */
         class Entry
         {
             public:
                 explicit Entry(SerializationInfo* si = 0)
                 : _si(si)
                 {}
+
+                Entry(const Entry& entry)
+                : _si(entry._si)
+                {}
+
+                Entry& operator=(const Entry& entry)
+                {
+                    _si = entry._si;
+                    return *this;
+                }
 
                 template <typename T>
                 bool get(T& value) const
@@ -100,25 +114,28 @@ class PT_API Settings : public SerializationInfo
                         _si->removeMember(name);
                 }
 
-                Iterator begin() const
+                Entry begin() const
                 {
                     if( ! _si )
-                        return Iterator();
+                        return this->end();
 
-                    Iterator it;
-                    it.init( _si->begin() );
-                    return it;
+                    SerializationInfo::Iterator it =_si->begin();
+                    if( it == _si->end() )
+                        return this->end();
+
+                    SerializationInfo& si = *it;
+                    return Entry(&si);
                 }
 
-                Iterator end() const
+                Entry end() const
                 {
-                    return Iterator();
+                    return Entry();
                 }
 
                 Entry entry(const std::string& name) const
                 {
                     if( ! _si )
-                        return Entry();
+                        return this->end();
 
                     SerializationInfo* si = _si->findMember(name);
                     return Entry(si);
@@ -126,16 +143,39 @@ class PT_API Settings : public SerializationInfo
 
                 Entry operator[] (const std::string& name) const
                 {
-                       return this->entry(name);
+                    return this->entry(name);
                 }
 
                 const std::string& name() const
                 { return _si->name(); }
 
+                Entry& operator*()
+                { return *this; }
+
+                Entry* operator->()
+                { return this; }
+
+                Entry& operator++()
+                {
+                    _si = _si->sibling();
+                    return *this;
+                }
+
+                bool operator!=(const Entry& other) const
+                { return _si != other._si; }
+
+                bool operator==(const Entry& other) const
+                { return _si == other._si; }
+
+                bool operator!() const
+                { return _si == 0; }
+
             private:
                 SerializationInfo* _si;
         };
 
+        /** @brief Constant Settings Entry
+        */
         class ConstEntry
         {
             public:
@@ -153,25 +193,28 @@ class PT_API Settings : public SerializationInfo
                     return true;
                 }
 
-                ConstIterator begin() const
+                ConstEntry begin() const
                 {
                     if( ! _si )
-                        return ConstIterator();
+                        return this->end();
 
-                    ConstIterator it;
-                    it.init( _si->begin() );
-                    return it;
+                    SerializationInfo::ConstIterator it =_si->begin();
+                    if(it == _si->end())
+                        return this->end();
+
+                    const SerializationInfo& si = *it;
+                    return ConstEntry(&si);
                 }
 
-                ConstIterator end() const
+                ConstEntry end() const
                 {
-                    return ConstIterator();
+                    return ConstEntry();
                 }
 
                 ConstEntry entry(const std::string& name) const
                 {
                     if( ! _si )
-                        return ConstEntry();
+                        return end();
 
                     const SerializationInfo* si = _si->findMember(name);
                     return ConstEntry(si);
@@ -185,130 +228,51 @@ class PT_API Settings : public SerializationInfo
                 const std::string& name() const
                 { return _si->name(); }
 
+                const ConstEntry& operator*() const
+                { return *this; }
+
+                const ConstEntry* operator->() const
+                { return this; }
+
+                ConstEntry& operator++()
+                {
+                    _si = _si->sibling();
+                    return *this;
+                }
+
+                bool operator!=(const ConstEntry& other) const
+                { return _si != other._si; }
+
+                bool operator==(const ConstEntry& other) const
+                { return _si == other._si; }
+
+                bool operator!() const
+                { return _si == 0; }
+
             private:
                 const SerializationInfo* _si;
-        };
-
-        class Iterator
-        {
-            public:
-                Iterator()
-                {}
-
-                void init(const SerializationInfo::Iterator& it)
-                {
-                    _it = it;
-                }
-
-                Iterator(const Iterator& other)
-                : _it(other._it)
-                {}
-
-                Iterator& operator=(const Iterator& other)
-                {
-                    _it = other._it;
-                    return *this;
-                }
-
-                Entry operator*() const
-                {
-                    SerializationInfo& si = *_it;
-                    return Entry(&si);
-                }
-
-                Iterator& operator++()
-                {
-                    ++_it;
-                    return *this;
-                }
-
-                bool operator!=(const Iterator& other) const
-                { return _it != other._it; }
-
-                bool operator==(const Iterator& other) const
-                { return _it == other._it; }
-
-            private:
-                SerializationInfo::Iterator _it;
-        };
-
-        class ConstIterator
-        {
-            public:
-                ConstIterator()
-                {}
-
-                void init(const SerializationInfo::ConstIterator& it)
-                {
-                    _it = it;
-                }
-
-                ConstIterator(const ConstIterator& other)
-                : _it(other._it)
-                {}
-
-                ConstIterator& operator=(const ConstIterator& other)
-                {
-                    _it = other._it;
-                    return *this;
-                }
-
-                ConstEntry operator*() const
-                {
-                    const SerializationInfo& si = *_it;
-                    return ConstEntry(&si);
-                }
-
-                ConstIterator& operator++()
-                {
-                    ++_it;
-                    return *this;
-                }
-
-                bool operator!=(const ConstIterator& other) const
-                { return _it != other._it; }
-
-                bool operator==(const ConstIterator& other) const
-                { return _it == other._it; }
-
-            private:
-                SerializationInfo::ConstIterator _it;
         };
 
     public:
         Settings();
 
-        ConstIterator begin() const
-        {
-            ConstIterator it;
-            it.init( SerializationInfo::begin() );
-            return it;
-        }
+        ConstEntry begin() const
+        { return root().begin(); }
 
-        ConstIterator end() const
-        { return ConstIterator(); }
+        ConstEntry end() const
+        { return root().end(); }
 
         ConstEntry root() const
-        {
-            const SerializationInfo* si = this;
-            return ConstEntry(si);
-        }
+        { return ConstEntry(this); }
 
-        Iterator begin()
-        {
-            Iterator it;
-            it.init( SerializationInfo::begin() );
-            return it;
-        }
+        Entry begin()
+        { return root().begin(); }
 
-        Iterator end()
-        { return Iterator(); }
+        Entry end()
+        { return root().end(); }
 
         Entry root()
-        {
-            SerializationInfo* si = this;
-            return Entry(si);
-        }
+        { return Entry(this); }
 
         void load( std::basic_istream<Pt::Char>& is );
 
@@ -316,8 +280,7 @@ class PT_API Settings : public SerializationInfo
 
         ConstEntry entry(const std::string& name) const
         {
-            const SerializationInfo* si = this->findMember(name);
-            return ConstEntry(si);
+            return root().entry(name);
         }
 
         ConstEntry operator[] (const std::string& name) const
@@ -336,17 +299,18 @@ class PT_API Settings : public SerializationInfo
             return this->entry(name);
         }
 
+        // @internal DEPRECATED
         template <typename T>
-        bool getObject(T& type, const std::string& name) const
+        bool getObject(T& value, const std::string& name) const
         {
-            return this->entry(name).get(type);
+            return this->entry(name).get(value);
         }
 
+        // @internal DEPRECATED
         template <typename T>
-        void setObject(const T& type, const std::string& name)
+        void setObject(const T& value, const std::string& name)
         {
-            SerializationInfo& si = this->addMember(name);
-            si <<= type;
+            this->root().add(name).set(value);
         }
 };
 
