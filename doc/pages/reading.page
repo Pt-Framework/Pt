@@ -1,0 +1,70 @@
+/** \page reading Recomended Reading
+
+\htmlonly
+
+    <div class="contents">
+
+        <h2>Books</h2>
+
+        <div class="infobox">
+
+            <div class="infobox-header" >
+                The C++ Programming Language
+            </div>
+            <div class="infobox-subheader">
+               Bjarne Stroustrup
+            </div>
+
+            <br/>
+
+            <div class="infobox-header" >
+                Modern C++ Design
+            </div>
+            <div class="infobox-subheader">
+                Alexei Alexandrescu
+            </div>
+
+            <br/>
+
+            <div class="infobox-header" >
+                C++ Templates: The Complete Guide
+            </div>
+            <div class="infobox-subheader">
+                Nicolai M. Josuttis, David Vandevoorde
+            </div>
+
+            <br/>
+
+            <div class="infobox-header" >
+                Design Patterns. Elements of Reusable Object-Oriented Software
+            </div>
+            <div class="infobox-subheader">
+                Erich Gamma, Richard Helm, Ralph E. Johnson, John Vlissides
+            </div>
+
+            <br/>
+
+            <div class="infobox-header" >
+                Windows System Programming
+            </div>
+            <div class="infobox-subheader">
+                Johnson M. Hart
+            </div>
+
+            <br/>
+
+            <div class="infobox-header" >
+                Unix Network Programming
+            </div>
+            <div class="infobox-subheader">
+                W. Richard Stevens, Bill Fenner, Andrew Rudoff
+            </div>
+
+            <br/>
+        </div>
+
+    </div>
+
+\endhtmlonly
+
+*/

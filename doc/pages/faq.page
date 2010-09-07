@@ -10,8 +10,8 @@
             inline code from the Pt header files (i.e. C++ class templates).
         </p>
 
-        <br/
->
+        <br/>
+
         <h3>Why is Pt licensed under the LGPL with exceptions?</h3>
         <p>
             The LGPL requires that users must be able to replace the LGPL
@@ -28,6 +28,19 @@
         <p>
             The special exception permits convenient use of the library in
             proprietary and non-GPL open source applications.
+        </p>
+
+        <br/>
+
+        <h3>May I use Code from Platinum directly?</h3>
+        <p>
+            Yes you may. We understand, that in some situations, it is
+            desirable to directly import some of the classes into a project,
+            instead of linking against the framwork provided as it is.
+            We do not mind if you do this, but can not give you the
+            same support as for the framework. Still, we would very much
+            like to hear from you! There are several projects that include 
+            code from the framwork directly.
         </p>
 
     </div>

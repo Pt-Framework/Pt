@@ -1,0 +1,172 @@
+/** \page platforms Supported Platforms
+
+\htmlonly
+
+    <div class="contents">
+
+        <h2>MS Windows (XP, Vista, Windows 7, Windows Embedded)</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  Visual Studio 2005 <br/>
+                  Visual Studio 2008 <br/>
+                  Visual Studio 2010 <br/>
+                  MinGW 3.x <br/>
+                  MinGW 4.x
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  x86-64
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>Mac OS-X</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  gcc
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  x86-64 <br/>
+                  PowerPC
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>Linux</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  gcc
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  x86-64 <br/>
+                  PowerPC <br/>
+                  arm <br/>
+                  mips <br/>
+                  sh <br/>
+                  avr-32 <br/>
+                  sparc <br/>
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>MS Windows CE</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  Visual Studio 2005 <br/>
+                  Visual Studio 2008 <br/>
+                  Visual Studio 2010 <br/>
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  PowerPC <br/>
+                  arm <br/>
+                  mips <br/>
+                  sh <br/>
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>QNX Neutrino</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  gcc
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  PowerPC <br/>
+                  arm <br/>
+                  sh <br/>
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>Solaris (v10 and newer)</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  SunCC <br/>
+                  gcc
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                  sparc <br/>
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>IBM AIX (v5 and newer)</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  xlc <br/>
+                  gcc
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  PowerPC
+              </td>
+            </tr>
+        </table>
+
+        <br/>
+
+        <h2>Symbian S60 (experimental)</h2>
+
+        <table style="padding-left: 14px" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Compilers:</b> <br/>
+                  gcce
+              </td>
+              <td style="width: 180px; vertical-align:top;">
+                  <b>Architectures:</b> <br/>
+                  x86 <br/>
+                 arm <br/>
+              </td>
+            </tr>
+        </table>
+
+    </div>
+
+\endhtmlonly
+
+*/
