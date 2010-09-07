@@ -44,9 +44,12 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
         typedef basic_string<Pt::Char> string_type;
 
         // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-        #if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
+        template <typename T>
+        class __numpunct_cache;
+
+        //#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
         typedef __numpunct_cache<Pt::Char>  __cache_type;
-        #endif
+        //#endif
 
         static locale::id id;
         virtual locale::id& __get_id (void) const { return id; }
