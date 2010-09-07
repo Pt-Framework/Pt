@@ -45,6 +45,9 @@ class Callee : public Pt::Connectable
         int slot0()
         { ++_count; return 9;}
 
+        int slot2(int, int)
+        { ++_count; return 7;}
+
         int destroySelf()
         {
             delete this;
@@ -72,6 +75,7 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileCall", *this, &DelegateTest::DeleteWhileCall );
             Pt::Unit::TestSuite::registerMethod( "Copy", *this, &DelegateTest::Copy );
             Pt::Unit::TestSuite::registerMethod( "Call0", *this, &DelegateTest::Call0 );
+            Pt::Unit::TestSuite::registerMethod( "Call2", *this, &DelegateTest::Call2 );
             Pt::Unit::TestSuite::registerMethod( "ChainDelegates", *this, &DelegateTest::ChainDelegates );
         }
 
@@ -111,6 +115,36 @@ class DelegateTest : public Pt::Unit::TestSuite
             // Closing connections must remove them
             connection.close();
             delegate.invoke();
+            PT_UNIT_ASSERT( recv->count() == 0 )
+            PT_UNIT_ASSERT( delegate.connectionCount() == 0)
+
+            delete recv;
+        }
+
+        void Call2()
+        {
+            // A connect must lead to a new connection
+            Callee* recv = new Callee;
+            Pt::Delegate<int, int, int> delegate;
+            delegate += slot(*recv, &Callee::slot2);
+            PT_UNIT_ASSERT(delegate.connectionCount() == 1)
+
+            // A deleted receiver must remove itself from a signal
+            delete recv;
+            delegate.invoke(1, 2);
+            PT_UNIT_ASSERT(delegate.connectionCount() == 0)
+
+            // A delegate must call its slot when connected
+            recv = new Callee;
+            Pt::Connection connection = delegate += slot(*recv, &Callee::slot2);
+            int ret = delegate.call(1, 2);
+            PT_UNIT_ASSERT( recv->count() == 1)
+            PT_UNIT_ASSERT( ret == 7)
+            recv->reset();
+
+            // Closing connections must remove them
+            connection.close();
+            delegate.invoke(1, 2);
             PT_UNIT_ASSERT( recv->count() == 0 )
             PT_UNIT_ASSERT( delegate.connectionCount() == 0)
 

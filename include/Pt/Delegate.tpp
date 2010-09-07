@@ -118,6 +118,14 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         return delegate.connect( slot);
     }
 
+    /** Connect a Delegate to a Slot.
+    */
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    Connection operator +=(Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
+    {
+        return delegate.connect( slot);
+    }
+
 
     /** Connect a Delegate to a function.
     */
@@ -208,15 +216,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-    Connection connect(Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>& slot)
-    {
-        return delegate.connect( slot );
-    }
-
-
     /** Connect a Delegate to a function.
     */
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
@@ -305,15 +304,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
     {
         return connect( delegate,  slot(receiver) );
     }
-
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-    Connection connect(Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
 
     /** Connect a Delegate to a function.
     */
@@ -404,15 +394,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-    Connection connect(Delegate<R,A1,A2,A3,A4,A5,A6,A7>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
-
     /** Connect a Delegate to a function.
     */
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
@@ -501,15 +482,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
     {
         return connect( delegate,  slot(receiver) );
     }
-
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6>
-    Connection connect(Delegate<R,A1,A2,A3,A4,A5,A6>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5,A6>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
 
     /** Connect a Delegate to a function.
     */
@@ -600,15 +572,6 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4, class A5>
-    Connection connect(Delegate<R,A1,A2,A3,A4,A5>& delegate, const BasicSlot<R,A1,A2,A3,A4,A5>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
-
     /** Connect a Delegate to a function.
     */
     template <typename R,class A1, class A2, class A3, class A4, class A5>
@@ -697,15 +660,6 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
     {
         return connect( delegate,  slot(receiver) );
     }
-
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3, class A4>
-    Connection connect(Delegate<R,A1,A2,A3,A4>& delegate, const BasicSlot<R,A1,A2,A3,A4>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
 
     /** Connect a Delegate to a function.
     */
@@ -796,15 +750,6 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2, class A3>
-    Connection connect(Delegate<R,A1,A2,A3>& delegate, const BasicSlot<R,A1,A2,A3>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
-
     /** Connect a Delegate to a function.
     */
     template <typename R,class A1, class A2, class A3>
@@ -893,15 +838,6 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
     {
         return connect( delegate,  slot(receiver) );
     }
-
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1, class A2>
-    Connection connect(Delegate<R,A1,A2>& delegate, const BasicSlot<R,A1,A2>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
 
     /** Connect a Delegate to a function.
     */
@@ -992,15 +928,6 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R,class A1>
-    Connection connect(Delegate<R,A1>& delegate, const BasicSlot<R,A1>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
-
     /** Connect a Delegate to a function.
     */
     template <typename R,class A1>
@@ -1089,15 +1016,6 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
     {
         return connect( delegate,  slot(receiver) );
     }
-
-    /** Connect a Delegate to a Slot.
-    */
-    template <typename R>
-    Connection connect(Delegate<R>& delegate, const BasicSlot<R>& slot)
-    {
-        return delegate.connect(slot);
-    }
-
 
     /** Connect a Delegate to a function.
     */
