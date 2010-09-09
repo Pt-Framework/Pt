@@ -77,7 +77,7 @@ the target first. Then the log level and channel can be changed.
 @code
 Pt::System::LogTarget& target = Pt::System::LogTarget::get("");
 target.setLogLevel(Pt::System::Info);
-target.setChannel("file://myfile.log");
+target.setChannel("file:///myfile.log");
 @endcode
 
 The code example above changes the log level and channel of the
