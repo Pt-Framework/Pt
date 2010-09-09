@@ -1031,6 +1031,7 @@ rule Object
         case .C :   C++ $(<) : $(>) ;
         case .cc :  C++ $(<) : $(>) ;
         case .cpp : C++ $(<) : $(>) ;
+        case .cxx : C++ $(<) : $(>) ;
         case .mm :  C++ $(<) : $(>) ;
         case .f :   Fortran $(<) : $(>) ;
         case .l :   Cc $(<) : $(<:S=.c) ;
