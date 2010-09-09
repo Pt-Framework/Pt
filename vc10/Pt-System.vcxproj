@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test debug|Win32">
+      <Configuration>Test debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test release|Win32">
+      <Configuration>Test release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt-System\Application.cpp" />
+    <ClCompile Include="..\src\Pt-System\ApplicationTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Clock.cpp" />
+    <ClCompile Include="..\src\Pt-System\Condition.cpp" />
+    <ClCompile Include="..\src\Pt-System\ConsoleChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\Directory.cpp" />
+    <ClCompile Include="..\src\Pt-System\DirectoryTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventLoop.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventLoopDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventLoopTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSink.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSinkDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSource.cpp" />
+    <ClCompile Include="..\src\Pt-System\File.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileDevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileInfo.cpp" />
+    <ClCompile Include="..\src\Pt-System\IODevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\IOError.cpp" />
+    <ClCompile Include="..\src\Pt-System\IOStream.cpp" />
+    <ClCompile Include="..\src\Pt-System\Library.cpp" />
+    <ClCompile Include="..\src\Pt-System\Logger.cpp" />
+    <ClCompile Include="..\src\Pt-System\LoggerTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\LogManager.cpp" />
+    <ClCompile Include="..\src\Pt-System\MainLoop.cpp" />
+    <ClCompile Include="..\src\Pt-System\Mutex.cpp" />
+    <ClCompile Include="..\src\Pt-System\Pipe.cpp" />
+    <ClCompile Include="..\src\Pt-System\PipeDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\PipeTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Plugin.cpp" />
+    <ClCompile Include="..\src\Pt-System\PluginDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\Process.cpp" />
+    <ClCompile Include="..\src\Pt-System\ProcessTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\ProcessTestChild.cpp" />
+    <ClCompile Include="..\src\Pt-System\Pt-System-test.cpp" />
+    <ClCompile Include="..\src\Pt-System\Selectable.cpp" />
+    <ClCompile Include="..\src\Pt-System\Selector.cpp" />
+    <ClCompile Include="..\src\Pt-System\SelectorTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Semaphore.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialDevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialDeviceDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialDeviceTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\StreamBuffer.cpp" />
+    <ClCompile Include="..\src\Pt-System\SystemError.cpp" />
+    <ClCompile Include="..\src\Pt-System\TestPlugin.cpp" />
+    <ClCompile Include="..\src\Pt-System\Thread.cpp" />
+    <ClCompile Include="..\src\Pt-System\ThreadTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Timer.cpp" />
+    <ClCompile Include="..\src\Pt-System\TimerTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Url.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ApplicationImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ClockImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ConditionImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\DirectoryImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\EventLoopImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\FileDeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\FileImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\IODeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\LibraryImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\MainLoopImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\MutexImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\PipeImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ProcessImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ProcessImplBase.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\SelectorImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\SemaphoreImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\SerialDeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\ThreadImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\ApplicationImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\ClockImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\ConditionImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\DirectoryImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\EventLoopImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\FileDeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\FileImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\IODeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\LibraryImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\MainLoopImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\MutexImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\PipeImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\ProcessImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\SelectorImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\SemaphoreImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\SerialDeviceImpl.cpp" />
+    <ClCompile Include="..\src\Pt-System\wince\ThreadImpl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Pt\System\Api.h" />
+    <ClInclude Include="..\include\Pt\System\Application.h" />
+    <ClInclude Include="..\include\Pt\System\Clock.h" />
+    <ClInclude Include="..\include\Pt\System\Condition.h" />
+    <ClInclude Include="..\include\Pt\System\Directory.h" />
+    <ClInclude Include="..\include\Pt\System\EventLoop.h" />
+    <ClInclude Include="..\include\Pt\System\EventSink.h" />
+    <ClInclude Include="..\include\Pt\System\EventSource.h" />
+    <ClInclude Include="..\include\Pt\System\File.h" />
+    <ClInclude Include="..\include\Pt\System\FileDevice.h" />
+    <ClInclude Include="..\include\Pt\System\FileInfo.h" />
+    <ClInclude Include="..\include\Pt\System\IODevice.h" />
+    <ClInclude Include="..\include\Pt\System\IOError.h" />
+    <ClInclude Include="..\include\Pt\System\IOStream.h" />
+    <ClInclude Include="..\include\Pt\System\Library.h" />
+    <ClInclude Include="..\include\Pt\System\LogChannel.h" />
+    <ClInclude Include="..\include\Pt\System\Logger.h" />
+    <ClInclude Include="..\include\Pt\System\LogLevel.h" />
+    <ClInclude Include="..\include\Pt\System\MainLoop.h" />
+    <ClInclude Include="..\include\Pt\System\Mutex.h" />
+    <ClInclude Include="..\include\Pt\System\Pipe.h" />
+    <ClInclude Include="..\include\Pt\System\Plugin.h" />
+    <ClInclude Include="..\include\Pt\System\Process.h" />
+    <ClInclude Include="..\include\Pt\System\Queue.h" />
+    <ClInclude Include="..\include\Pt\System\Selectable.h" />
+    <ClInclude Include="..\include\Pt\System\Selector.h" />
+    <ClInclude Include="..\include\Pt\System\Semaphore.h" />
+    <ClInclude Include="..\include\Pt\System\SerialDevice.h" />
+    <ClInclude Include="..\include\Pt\System\StreamBuffer.h" />
+    <ClInclude Include="..\include\Pt\System\SystemError.h" />
+    <ClInclude Include="..\include\Pt\System\Thread.h" />
+    <ClInclude Include="..\include\Pt\System\Timer.h" />
+    <ClInclude Include="..\include\Pt\System\Url.h" />
+    <ClInclude Include="..\src\Pt-System\ConsoleChannel.h" />
+    <ClInclude Include="..\src\Pt-System\FileChannel.h" />
+    <ClInclude Include="..\src\Pt-System\LogManager.h" />
+    <ClInclude Include="..\src\Pt-System\SerialChannel.h" />
+    <ClInclude Include="..\src\Pt-System\TestPlugin.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ApplicationImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ClockImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ConditionImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\DirectoryImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\EventLoopImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\FileDeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\FileImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\FileInfoImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\IODeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\LibraryImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\MainLoopImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\MutexImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\PipeImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ProcessImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ProcessImplBase.h" />
+    <ClInclude Include="..\src\Pt-System\win32\SelectableImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\SelectorImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\SemaphoreImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\SerialDeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ThreadImpl.h" />
+    <ClInclude Include="..\src\Pt-System\win32\win32.h" />
+    <ClInclude Include="..\src\Pt-System\wince\ApplicationImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\ClockImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\ConditionImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\DirectoryImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\EventLoopImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\FileDeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\FileImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\FileInfoImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\IODeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\IOMonitorImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\LibraryImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\MainLoopImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\MutexImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\PipeImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\ProcessImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\SelectableImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\SelectorImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\SemaphoreImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\SerialDeviceImpl.h" />
+    <ClInclude Include="..\src\Pt-System\wince\ThreadImpl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Pt-System\Jamfile" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{337014AF-CEE8-44C9-9E4F-161EF9AA3173}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-System</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-System</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-System-test.unit</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-System-test.unit</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug clean</NMakeCleanCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-System</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-System</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-System-test.unit</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-System-test.unit</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

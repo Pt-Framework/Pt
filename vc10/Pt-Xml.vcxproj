@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test debug|Win32">
+      <Configuration>Test debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test release|Win32">
+      <Configuration>Test release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt-Xml\Characters.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Comment.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\DocTypeDeclaration.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\EndElement.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\EntityResolver.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Namespace.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\NamespaceContext.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\ProcessingInstruction.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Pt-Xml-test.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\QName.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\StartElement.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlDeserializer.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlError.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlFormatter.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlReader.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlReaderTest.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializationContext.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializer.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializerTest.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlTest.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlWriter.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlWriterTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Pt-Xml\Jamfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Pt\Xml\Api.h" />
+    <ClInclude Include="..\include\Pt\Xml\Characters.h" />
+    <ClInclude Include="..\include\Pt\Xml\Comment.h" />
+    <ClInclude Include="..\include\Pt\Xml\DocTypeDeclaration.h" />
+    <ClInclude Include="..\include\Pt\Xml\EndDocument.h" />
+    <ClInclude Include="..\include\Pt\Xml\EndElement.h" />
+    <ClInclude Include="..\include\Pt\Xml\EntityResolver.h" />
+    <ClInclude Include="..\include\Pt\Xml\Namespace.h" />
+    <ClInclude Include="..\include\Pt\Xml\NamespaceContext.h" />
+    <ClInclude Include="..\include\Pt\Xml\Node.h" />
+    <ClInclude Include="..\include\Pt\Xml\ProcessingInstruction.h" />
+    <ClInclude Include="..\include\Pt\Xml\QName.h" />
+    <ClInclude Include="..\include\Pt\Xml\StartElement.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlDeclaration.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlDeserializer.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlError.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlFormatter.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlReader.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlSerializationContext.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlSerializer.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlWriter.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BAA62A66-4EA8-4988-BF40-FEDFD5FEC595}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-Xml</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-Xml</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug clean</NMakeCleanCommandLine>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-Xml-test.unit</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt-Xml-test.unit</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug clean</NMakeCleanCommandLine>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-Xml</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-Xml</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'">
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-Xml-test.unit</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-Xml-test.unit</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

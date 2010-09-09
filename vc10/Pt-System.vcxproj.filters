@@ -1,0 +1,354 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt-System\Url.cpp" />
+    <ClCompile Include="..\src\Pt-System\LogManager.cpp" />
+    <ClCompile Include="..\src\Pt-System\LoggerTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Logger.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\Timer.cpp" />
+    <ClCompile Include="..\src\Pt-System\Thread.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialDeviceDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialDevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\SerialChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\SelectorTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\Selector.cpp" />
+    <ClCompile Include="..\src\Pt-System\Selectable.cpp" />
+    <ClCompile Include="..\src\Pt-System\PipeTest.cpp" />
+    <ClCompile Include="..\src\Pt-System\MainLoop.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileDevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSinkDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSink.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventLoop.cpp" />
+    <ClCompile Include="..\src\Pt-System\ConsoleChannel.cpp" />
+    <ClCompile Include="..\src\Pt-System\Application.cpp" />
+    <ClCompile Include="..\src\Pt-System\Directory.cpp" />
+    <ClCompile Include="..\src\Pt-System\StreamBuffer.cpp" />
+    <ClCompile Include="..\src\Pt-System\IOError.cpp" />
+    <ClCompile Include="..\src\Pt-System\IODevice.cpp" />
+    <ClCompile Include="..\src\Pt-System\File.cpp" />
+    <ClCompile Include="..\src\Pt-System\Pipe.cpp" />
+    <ClCompile Include="..\src\Pt-System\Process.cpp" />
+    <ClCompile Include="..\src\Pt-System\IOStream.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventSource.cpp" />
+    <ClCompile Include="..\src\Pt-System\Clock.cpp" />
+    <ClCompile Include="..\src\Pt-System\Library.cpp" />
+    <ClCompile Include="..\src\Pt-System\TestPlugin.cpp" />
+    <ClCompile Include="..\src\Pt-System\SystemError.cpp" />
+    <ClCompile Include="..\src\Pt-System\Semaphore.cpp" />
+    <ClCompile Include="..\src\Pt-System\Pt-System-test.cpp" />
+    <ClCompile Include="..\src\Pt-System\PluginDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\Plugin.cpp" />
+    <ClCompile Include="..\src\Pt-System\PipeDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\Mutex.cpp" />
+    <ClCompile Include="..\src\Pt-System\FileInfo.cpp" />
+    <ClCompile Include="..\src\Pt-System\EventLoopDemo.cpp" />
+    <ClCompile Include="..\src\Pt-System\Condition.cpp" />
+    <ClCompile Include="..\src\Pt-System\win32\SerialDeviceImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\SelectorImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\PipeImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\MainLoopImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\FileDeviceImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\EventLoopImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ClockImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ApplicationImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\MutexImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\SemaphoreImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\FileImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ProcessImplBase.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ProcessImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ThreadImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\LibraryImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\IODeviceImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\DirectoryImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\win32\ConditionImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\MainLoopImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\EventLoopImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\SerialDeviceImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\PipeImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\ThreadImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\SemaphoreImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\SelectorImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\ProcessImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\MutexImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\LibraryImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\IODeviceImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\FileImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\FileDeviceImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\DirectoryImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\ConditionImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\ClockImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\wince\ApplicationImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\ApplicationTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\EventLoopTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\DirectoryTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\ProcessTestChild.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\ProcessTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\SerialDeviceTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\ThreadTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-System\TimerTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Pt-System\LogManager.h" />
+    <ClInclude Include="..\src\Pt-System\FileChannel.h" />
+    <ClInclude Include="..\src\Pt-System\SerialChannel.h" />
+    <ClInclude Include="..\src\Pt-System\ConsoleChannel.h" />
+    <ClInclude Include="..\src\Pt-System\TestPlugin.h" />
+    <ClInclude Include="..\src\Pt-System\win32\ApplicationImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\SerialDeviceImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\SelectorImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\SelectableImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\PipeImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\MainLoopImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\FileDeviceImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\EventLoopImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\ClockImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\MutexImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\FileImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\ProcessImplBase.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\win32.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\ThreadImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\SemaphoreImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\ProcessImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\LibraryImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\IODeviceImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\FileInfoImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\DirectoryImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\win32\ConditionImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\MainLoopImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\EventLoopImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\SerialDeviceImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\SelectableImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\ThreadImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\SemaphoreImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\SelectorImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\ProcessImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\MutexImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\LibraryImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\IOMonitorImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\IODeviceImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\FileInfoImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\FileImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\FileDeviceImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\DirectoryImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\ConditionImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\ClockImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\ApplicationImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-System\wince\PipeImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Pt\System\Logger.h" />
+    <ClInclude Include="..\include\Pt\System\LogChannel.h" />
+    <ClInclude Include="..\include\Pt\System\Api.h" />
+    <ClInclude Include="..\include\Pt\System\Url.h" />
+    <ClInclude Include="..\include\Pt\System\Timer.h" />
+    <ClInclude Include="..\include\Pt\System\Thread.h" />
+    <ClInclude Include="..\include\Pt\System\SerialDevice.h" />
+    <ClInclude Include="..\include\Pt\System\Selector.h" />
+    <ClInclude Include="..\include\Pt\System\Selectable.h" />
+    <ClInclude Include="..\include\Pt\System\MainLoop.h" />
+    <ClInclude Include="..\include\Pt\System\FileDevice.h" />
+    <ClInclude Include="..\include\Pt\System\EventSink.h" />
+    <ClInclude Include="..\include\Pt\System\EventLoop.h" />
+    <ClInclude Include="..\include\Pt\System\Application.h" />
+    <ClInclude Include="..\include\Pt\System\StreamBuffer.h" />
+    <ClInclude Include="..\include\Pt\System\LogLevel.h" />
+    <ClInclude Include="..\include\Pt\System\IOError.h" />
+    <ClInclude Include="..\include\Pt\System\IODevice.h" />
+    <ClInclude Include="..\include\Pt\System\Queue.h" />
+    <ClInclude Include="..\include\Pt\System\Condition.h" />
+    <ClInclude Include="..\include\Pt\System\Directory.h" />
+    <ClInclude Include="..\include\Pt\System\File.h" />
+    <ClInclude Include="..\include\Pt\System\Process.h" />
+    <ClInclude Include="..\include\Pt\System\Pipe.h" />
+    <ClInclude Include="..\include\Pt\System\Clock.h" />
+    <ClInclude Include="..\include\Pt\System\IOStream.h" />
+    <ClInclude Include="..\include\Pt\System\Plugin.h" />
+    <ClInclude Include="..\include\Pt\System\Library.h" />
+    <ClInclude Include="..\include\Pt\System\FileInfo.h" />
+    <ClInclude Include="..\include\Pt\System\SystemError.h" />
+    <ClInclude Include="..\include\Pt\System\Semaphore.h" />
+    <ClInclude Include="..\include\Pt\System\Mutex.h" />
+    <ClInclude Include="..\include\Pt\System\EventSource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Pt-System\Jamfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="wince">
+      <UniqueIdentifier>{4366d762-ee65-4cea-af9e-30fdc8418c73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="win32">
+      <UniqueIdentifier>{79286bc9-22a1-40eb-832f-83a477663ea5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{515780a1-a27c-4ff7-af08-5f79a691238f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

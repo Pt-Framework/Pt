@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt-Net\TcpSocket.cpp" />
+    <ClCompile Include="..\src\Pt-Net\TcpServer.cpp" />
+    <ClCompile Include="..\src\Pt-Net\AddrInfo.cpp" />
+    <ClCompile Include="..\src\Pt-Net\win32\TcpSocketImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\win32\TcpServerImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\win32\AddrInfoImpl.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\wince\AddrInfoImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\wince\TcpSocketImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\wince\TcpServerImpl.cpp">
+      <Filter>wince</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\tests\TcpSocketTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Net\tests\Pt-Net-test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\Pt\Signal.tpp" />
+    <None Include="..\include\Pt\Delegate.tpp" />
+    <None Include="..\include\Pt\StringData.tpp" />
+    <None Include="..\include\Pt\String.tpp" />
+    <None Include="..\include\Pt\Vector2d.tpp" />
+    <None Include="..\include\Pt\Method.tpp" />
+    <None Include="..\include\Pt\Function.tpp" />
+    <None Include="..\include\Pt\ConstMethod.tpp" />
+    <None Include="..\include\Pt\Invokable.tpp" />
+    <None Include="..\include\Pt\Slot.tpp" />
+    <None Include="..\include\Pt\Callable.tpp" />
+    <None Include="..\src\Pt-Net\Jamfile" />
+    <None Include="..\src\Pt-Net\tests\Jamfile">
+      <Filter>tests</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Pt\Slot.h" />
+    <ClInclude Include="..\include\Pt\Arg.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.cw.x86.h" />
+    <ClInclude Include="..\include\Pt\Settings.h" />
+    <ClInclude Include="..\include\Pt\SerializationInfo.h" />
+    <ClInclude Include="..\include\Pt\Facets.h" />
+    <ClInclude Include="..\include\Pt\Any.h" />
+    <ClInclude Include="..\include\Pt\Regex.h" />
+    <ClInclude Include="..\include\Pt\TextBuffer.h" />
+    <ClInclude Include="..\include\Pt\Char.h" />
+    <ClInclude Include="..\include\Pt\PoolAllocator.h" />
+    <ClInclude Include="..\include\Pt\PageAllocator.h" />
+    <ClInclude Include="..\include\Pt\Types.h" />
+    <ClInclude Include="..\include\Pt\Signal.h" />
+    <ClInclude Include="..\include\Pt\Formatter.h" />
+    <ClInclude Include="..\include\Pt\Event.h" />
+    <ClInclude Include="..\include\Pt\SmartPtr.h" />
+    <ClInclude Include="..\include\Pt\FixupInfo.h" />
+    <ClInclude Include="..\include\Pt\Decomposer.h" />
+    <ClInclude Include="..\include\Pt\Composer.h" />
+    <ClInclude Include="..\include\Pt\Base64Codec.h" />
+    <ClInclude Include="..\include\Pt\Convert.h" />
+    <ClInclude Include="..\include\Pt\Utf8Codec.h" />
+    <ClInclude Include="..\include\Pt\StringData.h" />
+    <ClInclude Include="..\include\Pt\SerializationContext.h" />
+    <ClInclude Include="..\include\Pt\TextStream.h" />
+    <ClInclude Include="..\include\Pt\SerializationSurrogate.h" />
+    <ClInclude Include="..\include\Pt\Deserializer.h" />
+    <ClInclude Include="..\include\Pt\Serializer.h" />
+    <ClInclude Include="..\include\Pt\Singleton.h" />
+    <ClInclude Include="..\include\Pt\Vector2d.h" />
+    <ClInclude Include="..\include\Pt\TypeInfo.h" />
+    <ClInclude Include="..\include\Pt\String.h" />
+    <ClInclude Include="..\include\Pt\Variant.h" />
+    <ClInclude Include="..\include\Pt\TextCodec.h" />
+    <ClInclude Include="..\include\Pt\SerializationError.h" />
+    <ClInclude Include="..\include\Pt\PackPop.h" />
+    <ClInclude Include="..\include\Pt\Pack1.h" />
+    <ClInclude Include="..\include\Pt\Api.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.ppc.h" />
+    <ClInclude Include="..\include\Pt\StringStream.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.windows.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.sun.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.x86_64.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.x86.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.sparc.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.mips.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.avr32.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.arm.h" />
+    <ClInclude Include="..\include\Pt\ConversionError.h" />
+    <ClInclude Include="..\include\Pt\Void.h" />
+    <ClInclude Include="..\include\Pt\TypeTraits.h" />
+    <ClInclude Include="..\include\Pt\Timespan.h" />
+    <ClInclude Include="..\include\Pt\Time.h" />
+    <ClInclude Include="..\include\Pt\SourceInfo.h" />
+    <ClInclude Include="..\include\Pt\RefCounted.h" />
+    <ClInclude Include="..\include\Pt\NonCopyable.h" />
+    <ClInclude Include="..\include\Pt\Method.h" />
+    <ClInclude Include="..\include\Pt\Main.h" />
+    <ClInclude Include="..\include\Pt\Invokable.h" />
+    <ClInclude Include="..\include\Pt\Function.h" />
+    <ClInclude Include="..\include\Pt\Delegate.h" />
+    <ClInclude Include="..\include\Pt\DateTime.h" />
+    <ClInclude Include="..\include\Pt\Date.h" />
+    <ClInclude Include="..\include\Pt\ConstMethod.h" />
+    <ClInclude Include="..\include\Pt\Connection.h" />
+    <ClInclude Include="..\include\Pt\Connectable.h" />
+    <ClInclude Include="..\include\Pt\Callable.h" />
+    <ClInclude Include="..\include\Pt\Byteorder.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.pthread.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.generic.h" />
+    <ClInclude Include="..\include\Pt\Application.h" />
+    <ClInclude Include="..\include\Pt\Allocator.h" />
+    <ClInclude Include="..\src\Pt-Net\win32\TcpSocketImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-Net\win32\TcpServerImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-Net\win32\AddrInfoImpl.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-Net\wince\AddrInfoImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-Net\wince\TcpSocketImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Pt-Net\wince\TcpServerImpl.h">
+      <Filter>wince</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="win32">
+      <UniqueIdentifier>{aa551878-b82a-479a-8593-cf31858df6a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="wince">
+      <UniqueIdentifier>{62bd60c3-9cf7-44b0-b92c-bc98e6c45066}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{13ca1b33-e959-4477-85a3-c4859eb62538}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\src\Pt-Net\tests\TcpSocketTest.obj">
+      <Filter>tests</Filter>
+    </Object>
+    <Object Include="..\src\Pt-Net\tests\Pt-Net-test.obj">
+      <Filter>tests</Filter>
+    </Object>
+  </ItemGroup>
+</Project>

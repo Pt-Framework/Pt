@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test debug|Win32">
+      <Configuration>Test debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Test release|Win32">
+      <Configuration>Test release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt\AllocatorTest.cpp" />
+    <ClCompile Include="..\src\Pt\AnyTest.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.cw.x86.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.arm.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.avr32.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.mips.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.ppc.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.sparc.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.x86.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.gcc.x86_64.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.generic.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.pthread.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.sun.cpp" />
+    <ClCompile Include="..\src\Pt\Atomicity.windows.cpp" />
+    <ClCompile Include="..\src\Pt\AtomicTest.cpp" />
+    <ClCompile Include="..\src\Pt\ByteorderTest.cpp" />
+    <ClCompile Include="..\src\Pt\Char.cpp" />
+    <ClCompile Include="..\src\Pt\CharTest.cpp" />
+    <ClCompile Include="..\src\Pt\Chunk.cpp" />
+    <ClCompile Include="..\src\Pt\Connectable.cpp" />
+    <ClCompile Include="..\src\Pt\Connection.cpp" />
+    <ClCompile Include="..\src\Pt\ConversionError.cpp" />
+    <ClCompile Include="..\src\Pt\ConversionTest.cpp" />
+    <ClCompile Include="..\src\Pt\Date.cpp" />
+    <ClCompile Include="..\src\Pt\DateTest.cpp" />
+    <ClCompile Include="..\src\Pt\DateTime.cpp" />
+    <ClCompile Include="..\src\Pt\DateTimeTest.cpp" />
+    <ClCompile Include="..\src\Pt\DelegateTest.cpp" />
+    <ClCompile Include="..\src\Pt\Deserializer.cpp" />
+    <ClCompile Include="..\src\Pt\ExceptionTest.cpp" />
+    <ClCompile Include="..\src\Pt\Facets.cpp" />
+    <ClCompile Include="..\src\Pt\NonCopyableTest.cpp" />
+    <ClCompile Include="..\src\Pt\Page.cpp" />
+    <ClCompile Include="..\src\Pt\PageAllocator.cpp" />
+    <ClCompile Include="..\src\Pt\PoolAllocator.cpp" />
+    <ClCompile Include="..\src\Pt\PoolFactory.cpp" />
+    <ClCompile Include="..\src\Pt\Pt-test.cpp" />
+    <ClCompile Include="..\src\Pt\Regex.cpp" />
+    <ClCompile Include="..\src\Pt\regexp.cpp" />
+    <ClCompile Include="..\src\Pt\RegExpTest.cpp" />
+    <ClCompile Include="..\src\Pt\SerializationContext.cpp" />
+    <ClCompile Include="..\src\Pt\SerializationError.cpp" />
+    <ClCompile Include="..\src\Pt\SerializationInfo.cpp" />
+    <ClCompile Include="..\src\Pt\SerializationTest.cpp" />
+    <ClCompile Include="..\src\Pt\Serializer.cpp" />
+    <ClCompile Include="..\src\Pt\Settings.cpp" />
+    <ClCompile Include="..\src\Pt\SettingsReader.cpp" />
+    <ClCompile Include="..\src\Pt\SettingsTest.cpp" />
+    <ClCompile Include="..\src\Pt\SettingsWriter.cpp" />
+    <ClCompile Include="..\src\Pt\Signal.cpp" />
+    <ClCompile Include="..\src\Pt\SignalTest.cpp" />
+    <ClCompile Include="..\src\Pt\SingletonTest.cpp" />
+    <ClCompile Include="..\src\Pt\SmartPtrTest.cpp" />
+    <ClCompile Include="..\src\Pt\StringStream.cpp" />
+    <ClCompile Include="..\src\Pt\StringStreamTest.cpp" />
+    <ClCompile Include="..\src\Pt\StringTest.cpp" />
+    <ClCompile Include="..\src\Pt\TextBuffer.cpp" />
+    <ClCompile Include="..\src\Pt\TextCodec.cpp" />
+    <ClCompile Include="..\src\Pt\TextStream.cpp" />
+    <ClCompile Include="..\src\Pt\TextStreamTest.cpp" />
+    <ClCompile Include="..\src\Pt\Time.cpp" />
+    <ClCompile Include="..\src\Pt\TimespanTest.cpp" />
+    <ClCompile Include="..\src\Pt\TimeTest.cpp" />
+    <ClCompile Include="..\src\Pt\TypesTest.cpp" />
+    <ClCompile Include="..\src\Pt\TypeTraitsTest.cpp" />
+    <ClCompile Include="..\src\Pt\Unicode.cpp" />
+    <ClCompile Include="..\src\Pt\UnicodeTable.cpp" />
+    <ClCompile Include="..\src\Pt\Utf8Codec.cpp" />
+    <ClCompile Include="..\src\Pt\VariantTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Pt\Allocator.h" />
+    <ClInclude Include="..\include\Pt\Any.h" />
+    <ClInclude Include="..\include\Pt\Api.h" />
+    <ClInclude Include="..\include\Pt\Application.h" />
+    <ClInclude Include="..\include\Pt\Arg.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.cw.x86.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.arm.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.avr32.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.mips.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.ppc.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.sparc.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.x86.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.gcc.x86_64.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.generic.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.pthread.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.sun.h" />
+    <ClInclude Include="..\include\Pt\Atomicity.windows.h" />
+    <ClInclude Include="..\include\Pt\Base64Codec.h" />
+    <ClInclude Include="..\include\Pt\Byteorder.h" />
+    <ClInclude Include="..\include\Pt\Callable.h" />
+    <ClInclude Include="..\include\Pt\Char.h" />
+    <ClInclude Include="..\include\Pt\Composer.h" />
+    <ClInclude Include="..\include\Pt\Connectable.h" />
+    <ClInclude Include="..\include\Pt\Connection.h" />
+    <ClInclude Include="..\include\Pt\ConstMethod.h" />
+    <ClInclude Include="..\include\Pt\ConversionError.h" />
+    <ClInclude Include="..\include\Pt\Convert.h" />
+    <ClInclude Include="..\include\Pt\Date.h" />
+    <ClInclude Include="..\include\Pt\DateTime.h" />
+    <ClInclude Include="..\include\Pt\Decomposer.h" />
+    <ClInclude Include="..\include\Pt\Delegate.h" />
+    <ClInclude Include="..\include\Pt\Deserializer.h" />
+    <ClInclude Include="..\include\Pt\Event.h" />
+    <ClInclude Include="..\include\Pt\Facets.h" />
+    <ClInclude Include="..\include\Pt\FixupInfo.h" />
+    <ClInclude Include="..\include\Pt\Formatter.h" />
+    <ClInclude Include="..\include\Pt\Function.h" />
+    <ClInclude Include="..\include\Pt\Invokable.h" />
+    <ClInclude Include="..\include\Pt\Main.h" />
+    <ClInclude Include="..\include\Pt\Method.h" />
+    <ClInclude Include="..\include\Pt\NonCopyable.h" />
+    <ClInclude Include="..\include\Pt\Pack1.h" />
+    <ClInclude Include="..\include\Pt\PackPop.h" />
+    <ClInclude Include="..\include\Pt\PageAllocator.h" />
+    <ClInclude Include="..\include\Pt\PoolAllocator.h" />
+    <ClInclude Include="..\include\Pt\RefCounted.h" />
+    <ClInclude Include="..\include\Pt\Regex.h" />
+    <ClInclude Include="..\include\Pt\SerializationContext.h" />
+    <ClInclude Include="..\include\Pt\SerializationError.h" />
+    <ClInclude Include="..\include\Pt\SerializationInfo.h" />
+    <ClInclude Include="..\include\Pt\SerializationSurrogate.h" />
+    <ClInclude Include="..\include\Pt\Serializer.h" />
+    <ClInclude Include="..\include\Pt\Settings.h" />
+    <ClInclude Include="..\include\Pt\Signal.h" />
+    <ClInclude Include="..\include\Pt\Singleton.h" />
+    <ClInclude Include="..\include\Pt\Slot.h" />
+    <ClInclude Include="..\include\Pt\SmartPtr.h" />
+    <ClInclude Include="..\include\Pt\SourceInfo.h" />
+    <ClInclude Include="..\include\Pt\String.h" />
+    <ClInclude Include="..\include\Pt\StringData.h" />
+    <ClInclude Include="..\include\Pt\StringStream.h" />
+    <ClInclude Include="..\include\Pt\TextBuffer.h" />
+    <ClInclude Include="..\include\Pt\TextCodec.h" />
+    <ClInclude Include="..\include\Pt\TextStream.h" />
+    <ClInclude Include="..\include\Pt\Time.h" />
+    <ClInclude Include="..\include\Pt\Timespan.h" />
+    <ClInclude Include="..\include\Pt\TypeInfo.h" />
+    <ClInclude Include="..\include\Pt\Types.h" />
+    <ClInclude Include="..\include\Pt\TypeTraits.h" />
+    <ClInclude Include="..\include\Pt\Utf8Codec.h" />
+    <ClInclude Include="..\include\Pt\Variant.h" />
+    <ClInclude Include="..\include\Pt\Vector2d.h" />
+    <ClInclude Include="..\include\Pt\Void.h" />
+    <ClInclude Include="..\src\Pt\Chunk.h" />
+    <ClInclude Include="..\src\Pt\Page.h" />
+    <ClInclude Include="..\src\Pt\PoolFactory.h" />
+    <ClInclude Include="..\src\Pt\regexp.h" />
+    <ClInclude Include="..\src\Pt\SerializationData.h" />
+    <ClInclude Include="..\src\Pt\SettingsReader.h" />
+    <ClInclude Include="..\src\Pt\SettingsWriter.h" />
+    <ClInclude Include="..\src\Pt\Unicode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\Pt\Callable.tpp" />
+    <None Include="..\include\Pt\ConstMethod.tpp" />
+    <None Include="..\include\Pt\Delegate.tpp" />
+    <None Include="..\include\Pt\Function.tpp" />
+    <None Include="..\include\Pt\Invokable.tpp" />
+    <None Include="..\include\Pt\Method.tpp" />
+    <None Include="..\include\Pt\Signal.tpp" />
+    <None Include="..\include\Pt\Slot.tpp" />
+    <None Include="..\include\Pt\String.tpp" />
+    <None Include="..\include\Pt\StringData.tpp" />
+    <None Include="..\include\Pt\Vector2d.tpp" />
+    <None Include="..\src\Pt\Jamfile" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2D621638-43BC-4846-A8B1-D9A299E90476}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeOutput>
+    </NMakeOutput>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug Pt</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=debug clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test debug|Win32'">
+    <NMakeOutput />
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sTOP=$(SolutionDir)..\ -sCONFIG=debug Pt-test</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sTOP=$(SolutionDir)..\ -sCONFIG=debug Pt-test</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sTOP=$(SolutionDir)\..\ -sCONFIG=debug clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeOutput>
+    </NMakeOutput>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test release|Win32'">
+    <NMakeOutput />
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>cd .. &amp; jam.exe -q -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-test</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; jam.exe -qa -sTOP=$(SolutionDir)..\ -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release Pt-test</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cd .. &amp; jam.exe -sTOOLSET=vc10 -sVISUALC="$(VSInstallDir)\" -sCONFIG=release clean</NMakeCleanCommandLine>
+    <NMakeIncludeSearchPath>..\include;.\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

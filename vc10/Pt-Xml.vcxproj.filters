@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\Pt-Xml\XmlFormatter.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializationContext.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlDeserializer.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializer.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlWriter.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlReader.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlTest.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlError.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\StartElement.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\ProcessingInstruction.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\NamespaceContext.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Namespace.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\EndElement.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Comment.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Characters.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\EntityResolver.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\DocTypeDeclaration.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\QName.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\Pt-Xml-test.cpp" />
+    <ClCompile Include="..\src\Pt-Xml\XmlReaderTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Xml\XmlWriterTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Pt-Xml\XmlSerializerTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Pt-Xml\Jamfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Pt\Xml\XmlFormatter.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlSerializationContext.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlSerializer.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlDeserializer.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlWriter.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlReader.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlError.h" />
+    <ClInclude Include="..\include\Pt\Xml\StartElement.h" />
+    <ClInclude Include="..\include\Pt\Xml\ProcessingInstruction.h" />
+    <ClInclude Include="..\include\Pt\Xml\Node.h" />
+    <ClInclude Include="..\include\Pt\Xml\NamespaceContext.h" />
+    <ClInclude Include="..\include\Pt\Xml\Namespace.h" />
+    <ClInclude Include="..\include\Pt\Xml\EndElement.h" />
+    <ClInclude Include="..\include\Pt\Xml\EndDocument.h" />
+    <ClInclude Include="..\include\Pt\Xml\Characters.h" />
+    <ClInclude Include="..\include\Pt\Xml\EntityResolver.h" />
+    <ClInclude Include="..\include\Pt\Xml\XmlDeclaration.h" />
+    <ClInclude Include="..\include\Pt\Xml\DocTypeDeclaration.h" />
+    <ClInclude Include="..\include\Pt\Xml\Api.h" />
+    <ClInclude Include="..\include\Pt\Xml\QName.h" />
+    <ClInclude Include="..\include\Pt\Xml\Comment.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tests">
+      <UniqueIdentifier>{1c5eb7c4-03ed-42cc-9463-286ef6a036c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
