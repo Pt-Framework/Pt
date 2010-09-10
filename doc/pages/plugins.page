@@ -50,7 +50,7 @@ To load a plugin in an application the Pt::PluginManager class is used. It is a 
 
 @code
 PluginManager<Greeter> manager;
-manager.loadPlugin("/path/to/plugin.so");
+manager.loadPlugin("PluginList", "/path/to/plugin.so");
 Greeter * greeter = manager.create("en");
 if(greeter)
 {
@@ -59,6 +59,6 @@ if(greeter)
 }
 @endcode
 
-First we need to load the shared library with PluginManager::loadPlugin. Alternatively, we can try to open all plugins from a directory with PluginManager::openDir. Then we can create an instance of a Greeter by a feature string with PluginMaanager::create. Normally, one would ask the user for a language and then see if we can create a Greeter. if the instance could be created we use it like a normal C++ class, but will not delete it directly, but use the PluginManager::destroy method. The rationale behind this is that the allocator in a shared library can differ from the allocator in the application and the same code needs to delete what it created. The life-time of the created classes is bound to the life-time of the PluginManager. When the PluginManager goes out of scope it will not only destroy all created instances, it will also unload all loaded plugin libraries.
+First we need to load the shared library with PluginManager::loadPlugin. Then we can create an instance of a Greeter by a feature string with PluginMaanager::create. Normally, one would ask the user for a language and then see if we can create a Greeter. if the instance could be created we use it like a normal C++ class, but will not delete it directly, but use the PluginManager::destroy method. The rationale behind this is that the allocator in a shared library can differ from the allocator in the application and the same code needs to delete what it created. The life-time of the created classes is bound to the life-time of the PluginManager. When the PluginManager goes out of scope it will not only destroy all created instances, it will also unload all loaded plugin libraries.
 
 */

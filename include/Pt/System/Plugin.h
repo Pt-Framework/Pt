@@ -151,7 +151,7 @@ namespace System {
 
             ~PluginManager();
 
-            void loadPlugin(const std::string& path);
+            void loadPlugin(const std::string& sym, const std::string& path);
 
             void registerPlugin(PluginT& plugin);
 
@@ -204,19 +204,19 @@ namespace System {
 
 
     template <class IfaceT, typename PluginT >
-    void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path)
-    {       
+    void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& sym, const std::string& path)
+    {
         Library shlib(path);
 
-    	void* symbol = shlib.resolve( "PluginList" );
+    	void* symbol = shlib.resolve( sym.c_str() );
     	if( ! symbol )
     	    return;
 
 		PluginId** plugins = (PluginId**) symbol;
 
-        for(; *plugins != 0; ++plugins) 
+        for(; *plugins != 0; ++plugins)
         {
-            if( (*plugins)->iface() == _iface ) 
+            if( (*plugins)->iface() == _iface )
             {
                 PluginT* p = (PluginT*)(*plugins);
                 this->registerPlugin(*p);

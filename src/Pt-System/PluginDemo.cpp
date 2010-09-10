@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         std::cerr << "Loading " << shlibName << std::endl;
 
         Pt::System::PluginManager<TestPlugin> pm;
-        pm.loadPlugin( shlibName );
+        pm.loadPlugin( "PluginList", shlibName );
 
 		Pt::System::PluginManager<TestPlugin>::Iterator it;
 		for(it = pm.begin(); it != pm.end(); ++it)
