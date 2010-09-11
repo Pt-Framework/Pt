@@ -34,6 +34,10 @@
 
 namespace std {
 
+// gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
+template <typename T>
+class __numpunct_cache;
+
 /** @brief Numpunct localization facet
     @ingroup Unicode
 */
@@ -42,10 +46,6 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
     public:
         typedef Pt::Char char_type;
         typedef basic_string<Pt::Char> string_type;
-
-        // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-        template <typename T>
-        class __numpunct_cache;
 
         //#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
         typedef __numpunct_cache<Pt::Char>  __cache_type;
