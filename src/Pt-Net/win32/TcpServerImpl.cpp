@@ -126,6 +126,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
     AddrInfo ai(ipaddr, port, true);
 
     BOOL reuseAddr = TRUE;
+    static const int on = 1;
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one
@@ -148,6 +149,19 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 			close();
             throw System::SystemError("setsockopt");
 		}
+
+
+#ifdef IPPROTO_IPV6
+        if (it->ai_family == AF_INET6)
+        {
+          if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
+          {
+              log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno << ": " << strerror(errno));
+              ::close();
+              throw System::SystemError("setsockopt IPV6_V6ONLY");
+          }
+        }
+#endif
 
         log_debug("bind");
         if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )

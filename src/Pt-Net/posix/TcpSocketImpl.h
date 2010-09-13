@@ -85,7 +85,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void endConnect();
 
-        void accept(const TcpServer& server, bool inherit);
+        void accept(const TcpServer& server, unsigned inherit);
 
         void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 

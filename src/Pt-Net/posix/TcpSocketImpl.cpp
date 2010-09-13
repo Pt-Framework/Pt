@@ -296,8 +296,9 @@ void TcpSocketImpl::endConnect()
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, bool inherit)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
+    bool inherit = (flags & TcpSocket::INHERIT) != 0;
     socklen_t peeraddr_len = sizeof(_peeraddr);
 
     log_debug( "accept " << server.impl().fd() );

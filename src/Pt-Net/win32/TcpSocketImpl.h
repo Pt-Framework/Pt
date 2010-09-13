@@ -122,7 +122,7 @@ class TcpSocketImpl : public System::SelectableImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(const TcpServer& server, bool closeOnExec);
+        void accept(const TcpServer& server, unsigned flags);
 
         void connect(const AddrInfo& addrinfo);
 

@@ -36,6 +36,7 @@
 #include <cassert>
 #include <cstring>
 #include <unistd.h>
+#include <netinet/tcp.h>
 
 #define log_debug(x)
 
@@ -48,7 +49,6 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 , _fd(-1)
 , _rfds(0)
 {
-
 }
 
 
@@ -83,7 +83,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
     AddrInfo ai(ipaddr, port, true);
 
-    static const int reuseAddr = 1;
+    static const int on = 1;
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one
@@ -99,11 +99,24 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         }
 
         log_debug("setsockopt SO_REUSEADDR");
-        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr)) < 0)
+        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
         {
             close();
-            throw System::SystemError("setsockopt");
+            throw System::SystemError("setsockopt SO_REUSEADDR");
         }
+
+#ifdef IPPROTO_IPV6
+        if (it->ai_family == AF_INET6)
+        {
+          if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
+          {
+              log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno <<
+                        ": " << strerror(errno));
+              close();
+              throw System::SystemError("setsockopt IPV6_V6ONLY");
+          }
+        }
+#endif
 
         log_debug("bind");
         if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
@@ -122,6 +135,32 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                     throw System::SystemError("listen");
             }
 
+            if( flags & TcpSocket::INHERIT == 0 )
+            {
+                int flags = ::fcntl(_fd, F_GETFD);
+                flags |= FD_CLOEXEC ;
+                int ret = ::fcntl(_fd, F_SETFD, flags);
+                if (ret == -1)
+                {
+                    close();
+                    throw SystemError("Could not set FD_CLOEXEC"));
+                }
+            }
+
+#ifdef TCP_DEFER_ACCEPT
+            if( flags & TcpServer::DEFER_ACCEPT != 0 )
+            {
+                int deferSecs = 30;
+
+                log_debug("set TCP_DEFER_ACCEPT to " << deferSecs);
+
+                if( ::setsockopt(_fd, SOL_TCP, TCP_DEFER_ACCEPT, &deferSecs, sizeof(deferSecs)) < 0)
+                {
+                    close();
+                    throw SystemError("setsockopt TCP_DEFER_ACCEPT");
+                }
+            }
+#endif
             return;
         }
     }

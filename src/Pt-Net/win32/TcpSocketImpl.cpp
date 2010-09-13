@@ -284,7 +284,7 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, bool closeOnExec)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
     _fd = server.impl().accept();
     log_debug("accepted " << _fd);
