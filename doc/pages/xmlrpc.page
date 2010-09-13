@@ -1,5 +1,4 @@
-/** \defgroup xmlrpc XML-RPC Client and Server
-    @brief Remote method calls using XML and HTTP
+/** \page xmlrpc XML-RPC Communication
 
 @section xmlrpc_Overwiew Overview
 
@@ -223,7 +222,7 @@ void operator<<=(Pt::SerializationInfo& si, const Address& address)
 int main(int argc, char** argv)
 {
   // constructor takes address and port for listen
-  Pt::http::HttpServer server("127.0.0.1", 7002);
+  Pt::Http::HttpServer server("127.0.0.1", 7002);
 
   // add the service to the server
   CalculatorService service;
