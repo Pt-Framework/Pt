@@ -35,6 +35,7 @@
 #include <cerrno>
 #include <cassert>
 #include <cstring>
+#include <fcntl.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
 
@@ -135,7 +136,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                     throw System::SystemError("listen");
             }
 
-            if( flags & TcpSocket::INHERIT == 0 )
+            if( flags & TcpServer::INHERIT == 0 )
             {
                 int flags = ::fcntl(_fd, F_GETFD);
                 flags |= FD_CLOEXEC ;
@@ -143,7 +144,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 if (ret == -1)
                 {
                     close();
-                    throw SystemError("Could not set FD_CLOEXEC"));
+                    throw System::SystemError("Could not set FD_CLOEXEC");
                 }
             }
 
@@ -157,7 +158,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 if( ::setsockopt(_fd, SOL_TCP, TCP_DEFER_ACCEPT, &deferSecs, sizeof(deferSecs)) < 0)
                 {
                     close();
-                    throw SystemError("setsockopt TCP_DEFER_ACCEPT");
+                    throw System::SystemError("setsockopt TCP_DEFER_ACCEPT");
                 }
             }
 #endif
