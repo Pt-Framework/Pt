@@ -74,7 +74,6 @@
 namespace Pt {
 
 /** @brief Source code info class
-    @ingroup Pt
 
     This class is used to store information about a location in the source 
     code. The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo

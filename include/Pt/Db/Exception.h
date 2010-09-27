@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2004-2006 Marc Boris Duerner
  * Copyright (C) 2005-2006 Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -42,7 +42,6 @@ namespace Pt {
 namespace Db {
 
     /** @brief This indicates that a resource could not be accessed.
-        @ingroup Pt
 
         An exception of class AccessError is used to report failed access
         to a resource due to missing authorization, missing access rights
@@ -62,21 +61,18 @@ namespace Db {
     };
 
     /** @brief Basic exception type for database interaction.
-        @ingroup Pt
-        
+
         This exception is used to inform about database errors. Commonly databases
         return some kind of error values. To be able to use the benefits of exceptions
         this class encapsulates such error values.
-        
      */
     class PT_DB_API DatabaseException : public std::logic_error
     {
         public:
-            
             /**
              * @brief The possible error values of a DatabaseException.
              *
-             * 
+             *
              */
             enum DatabaseError
             {
@@ -89,37 +85,37 @@ namespace Db {
                 TYPE_MISMATCH,          //!< A parameter provided was of wrong type.
                 AUTHORIZATION_FAILED    //!< The authorization failed.
             };
-            
-            /** @brief Constructs a DataBaseException with no specific error value. 
-                
+
+            /** @brief Constructs a DataBaseException with no specific error value.
+
                 @param what The message text of the DatabaseException.
                 @param statement The statement that failed.
                 @param si The SourceInfo where the error occurred.
              */
             DatabaseException( const std::string& what, const std::string& statement, const SourceInfo& si ) throw();
-                
-            /** @brief Constructs a DataBaseException with a specific error value. 
-                
+
+            /** @brief Constructs a DataBaseException with a specific error value.
+
                 The error value allows the catcher to implement specific code for specific error values.
-                
+
                 @param what The message text of the DatabaseException.
                 @param statement The statement that failed.
                 @param error An error value which concretizes the DataBaseException.
                 @param si The SourceInfo where the error occurred.
              */
             DatabaseException( const std::string& what, const std::string& statement, const DatabaseError& error, const SourceInfo& si ) throw();
-            
+
             //! @brief Destructor.
             ~DatabaseException() throw();
-            
+
             /** @brief Returns the error value of this DataBaseException.
-            
+
                 @return The error value of this DataBaseException.
              */
             const DatabaseException::DatabaseError& databaseError() const;
-                
+
             const std::string& statement() const;
-                
+
         private:
             DatabaseError m_dbError;
             std::string m_statement;

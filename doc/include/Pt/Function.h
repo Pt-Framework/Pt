@@ -25,11 +25,12 @@
 
 namespace Pt {
 
-/** @brief Wraps free functions into a generic callable for use with the signals/slots framework
-    @ingroup sigslot
+/** @brief Wraps free functions into a generic callable for use with the signals/slots
 
     The %Function class wraps free functions in the form of a Callable,
     for use with the signals/slots framework.
+
+    @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>
 class Function : public Callable<R, ARGUMENTS>

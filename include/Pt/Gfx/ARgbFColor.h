@@ -43,7 +43,6 @@ namespace Pt {
 
 #include <Pt/Pack1.h>
         /** @brief Floated ARGB color class.
-         *  @ingroup Gfx
          *
          *  This is the temporary color model for Pt::Gfx.
          *  \n\n

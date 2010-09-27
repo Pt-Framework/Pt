@@ -167,7 +167,7 @@ class ArgBaseT<std::string> : public ArgBase
 
 };
 
-    /** @brief Read and extract commandline parameters from argc/argv.
+    /** @brief Read and extract commandline parameters.
 
     Programs usually need some parameters. Usually they start with a '-'
     followed by a single character and optionally a value.
@@ -344,11 +344,10 @@ class Arg : public ArgBaseT<T>
 };
 
 ////////////////////////////////////////////////////////////////////////
-/**
- specialization for bool.
+/** @brief Read and extract commandline parameters.
 
- Often programs need some switches, which are switched on or off.
- Users just enter a option without parameter.
+ Specialization for boolean parameters. Programs often need some switches,
+ which are switched on or off. Users just enter a option without parameter.
 
  example:
  \code

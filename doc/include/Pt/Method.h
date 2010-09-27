@@ -8,11 +8,12 @@
 namespace Pt {
 
 /** @brief Adapter for class methods
-    @ingroup sigslot
 
     The %Method class wraps member functions as Callable objects
-    so that they can be used with the signals/slots framework. There are 
+    so that they can be used with the signals/slots framework. There are
     partial specializations of this class template for up to ten arguments.
+
+    @ingroup sigslot
 */
 template <typename R, class ClassT, typename ARGUMENTS>
 class Method : public Callable<R, ARGUMENTS>

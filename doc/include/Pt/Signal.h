@@ -15,11 +15,12 @@
 
 namespace Pt {
 
-/** @brief Multicast %Signal
-    @ingroup sigslot
+/** @brief Multicast %Signal to call multiple slots.
 
     A %Signal can be connected to multiple slots. The return value of the
     target method is ignored when the slots are invoked.
+
+    @ingroup sigslot
 */
 template <typename ARGUMENTS>
 class Signal : public SignalBase {
@@ -62,12 +63,13 @@ class Signal : public SignalBase {
 
 
 /** @brief  Wraps %Signal objects so that they can act as Slots.
-    @ingroup sigslot
 
     SignalSlot is a "slot wrapper" for %Signal objects. That is, it
     effectively converts a %Signal object into a Slot object, so that it
     can be used as the target of another %Signal. This allows chaining of
     %Signals.
+
+    @ingroup sigslot
 */
 template <typename ARGUMENTS>
 class SignalSlot : public BasicSlot<R, ARGUMENTS>

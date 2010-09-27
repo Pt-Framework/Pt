@@ -68,40 +68,39 @@ inline std::string toString(LogLevel level)
     };
 }
 
-/**
- * @brief Converts a string to the appropriate log level.
- * @ingroup Logging
- *
- * @param levelStr The log level string to convert.
- * @return The appropriate log level object.
+/** @brief Converts a string to the appropriate log level.
+
+    @param str A String to convert.
+    @return The log level.
+    @ingroup Logging
  */
-inline LogLevel toLogLevel(const std::string& levelString)
+inline LogLevel toLogLevel(const std::string& str)
 {
-    if(levelString == "None")
+    if(str == "None")
     {
         return None;
     }
-    else if(levelString == "Fatal")
+    else if(str == "Fatal")
     {
         return Fatal;
     }
-    else if(levelString == "Error")
+    else if(str == "Error")
     {
         return Error;
     }
-    else if(levelString == "Warn")
+    else if(str == "Warn")
     {
         return Warn;
     }
-    else if(levelString == "Info")
+    else if(str == "Info")
     {
         return Info;
     }
-    else if(levelString == "Debug")
+    else if(str == "Debug")
     {
         return Debug;
     }
-    else if(levelString == "Trace")
+    else if(str == "Trace")
     {
         return Trace;
     }

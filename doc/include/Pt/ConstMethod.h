@@ -2,11 +2,12 @@
 namespace Pt {
 
 /** @brief Adapter for const class methods
-    @ingroup sigslot
 
     The %ConstMethod class wraps const member functions as Callable objects
     so that they can be used with the signals/slots framework. There are 
     partial specializations of this class template for up to ten arguments.
+
+    @ingroup sigslot
 */
 template < typename R,typename ClassT, typename ARGUMENTS>
 class ConstMethod : public Callable<R, ARGUMENTS>

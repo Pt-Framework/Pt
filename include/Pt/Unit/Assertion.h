@@ -38,7 +38,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief %Test %Assertion exception
-        @ingroup unittest
 
         Assertions are modeled as an exception type, which is thrown by Unit
         tests when an assertion has failed. This class implements
@@ -55,6 +54,8 @@ namespace Unit {
                 PT_UNIT_ASSERT(ten == 10)
             }
         @endcode
+
+        @ingroup unittest
     */
     class PT_UNIT_API Assertion
     {

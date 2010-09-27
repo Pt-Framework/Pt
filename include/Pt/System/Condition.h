@@ -38,7 +38,6 @@ namespace Pt {
 namespace System {
 
     /** @brief This class is used to control concurrent access.
-        @ingroup Pt-System
 
         The Condition class is used to control concurrent access in a queued
         manner. The Condition class supports two types of signalling events,

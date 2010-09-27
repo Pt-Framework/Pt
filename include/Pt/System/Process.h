@@ -40,8 +40,11 @@ namespace Pt {
 
 namespace System {
 
-//! ProcessFailed exception
-// thrown when a process does not terminate normally in wait()
+/** @brief Indicates program failure.
+
+    This exception is thrown, when a process does not terminate
+    normally in wait().
+*/
 class ProcessFailed : public std::runtime_error
 {
     public:
@@ -51,7 +54,7 @@ class ProcessFailed : public std::runtime_error
 };
 
 
-//! Process parameters
+//! @brief %Process startup parameters
 class ProcessInfo
 {
     public:
@@ -137,7 +140,7 @@ class ProcessInfo
         IODevice* _stderr;
 };
 
-//! Process Environment
+//! @brief Executes shell commands
 class PT_SYSTEM_API Process : private NonCopyable
 {
     public:
@@ -154,7 +157,7 @@ class PT_SYSTEM_API Process : private NonCopyable
         /**
             @param command Name of the executable along with its arguments
         */
-        explicit Process(const std::string& commandline);
+        explicit Process(const std::string& command);
 
         //! Constructs a Process with a process info structure
         explicit Process(const ProcessInfo& procInfo);

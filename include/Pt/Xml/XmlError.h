@@ -3,7 +3,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,12 +13,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,16 +33,17 @@ namespace Pt {
 
 namespace Xml {
 
-//! Exception that is thrown when a parse error occured.
+//! @brief Exception that is thrown when a parse error occured.
 class PT_XML_API XmlError : public std::runtime_error
 {
     public:
-        /**
-            * @brief Creates a new ParseError object using the given reason and source info.
-            *
-            * @param what The reason of the parse error.
-            * @param info Source info containing information about where the exception occured.
-            */
+        /** @brief XML format errors.
+
+            Creates a new XmlError object using the given reason and source info.
+
+            @param what The reason of the parse error.
+            @param line Line number where the exception occured.
+        */
         XmlError(const char* what, unsigned line);
 
         unsigned line() const

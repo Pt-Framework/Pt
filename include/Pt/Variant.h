@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-    /**
+    /**    @internal
            Variant provides a really convenient way to lexically cast
            strings and other streamable types to/from each other.
 

@@ -37,7 +37,6 @@ namespace Unit {
 
     template <class TestT>
     /** @brief Registers tests to an application
-        @ingroup unittest
 
         Tests can be registered easily with the RegisterTest<> class
         template to an Unit::Application at program initialisation.
@@ -53,6 +52,8 @@ namespace Unit {
         The constructor of the RegisterTest class template will
         register an instance of its template parameter to the
         application.
+
+        @ingroup unittest
     */
     struct RegisterTest
     {

@@ -30,20 +30,17 @@
 #include <Pt/Unit/TestSuite.h>
 
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Unit
-{
+namespace Unit {
 
-/**
- * The ComponentTestProtocol is used for running component tests
- * defined in component test protocol files (ctp).
+/** @brief Implements a simple text protocol.
+
+    The %TextProtocol is used for running tests defined in text
+    protocol files.
  */
 class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
 {
-    //friend const Archive& operator>>(const Archive& ar, TextProtocol& suite);
-
     public:
 
         /**

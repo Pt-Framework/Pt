@@ -105,7 +105,7 @@ class IBlob : public RefCounted
         std::size_t _size;
 };
 
-/** @brief Default Blob value implementation
+/** @brief Default %Blob value implementation
 
     This implementation uses new/delete to create and destroy
     the shared objects and new/delete to allocate memory for

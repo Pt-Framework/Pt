@@ -40,12 +40,13 @@ namespace Unit {
     class TestSuite;
 
     /** @brief Protocol for test suites
-        @ingroup unittest
 
         This is the base class for protocols that can be used to run a test
         suite. The default implementation will simply run each registered
         test of the test suite without passing it any data. Implementors
         need to override the method TestProtocol::run.
+
+        @ingroup unittest
     */
     class PT_UNIT_API TestProtocol
     {

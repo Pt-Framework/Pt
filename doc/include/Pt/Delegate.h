@@ -2,12 +2,13 @@
 namespace Pt {
 
     /** @brief Connects to one slot and handle return value.
-        \ingroup sigslot
 
         Delegates can only be connected to one slot, but have the advantage
         that they return the return value of the connected slot when called.
         There are partial specializations of this class template for up to 
         ten arguments.
+
+        \ingroup sigslot
     */
     template < typename R, typename ARGUMENTS>
     class Delegate : Connectable
@@ -38,17 +39,18 @@ namespace Pt {
             */
             inline void invoke(ARGUMENTS) const;
 
-            //! @brief Same as %Delegate::call()
+            //! @brief Same as call()
             R operator()(ARGUMENTS) const;
     };
 
 /** @brief  Wraps %Delegate objects so that they can act as Slots.
-    @ingroup sigslot
 
     DelegateSlot is a "slot wrapper" for %Delegate objects. That is, it
     effectively converts a %Delegate object into a Slot object, so that it
     can be used as the target of another %Delegate. This allows chaining of
-    %Delegates.
+    delegates.
+
+    @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>
 class DelegateSlot : public BasicSlot<R, ARGUMENTS>

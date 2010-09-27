@@ -262,14 +262,11 @@ namespace Pt {
     };
 
 
-    /** \param T Contained type
-        \param Model Model for linking/unlinking
-        \param DestroyPolicy policy, to destroy the object
-    */
     template <typename T,
               typename Model = ExternalRefCounted<T>,
               typename Destroy = DeletePolicy<T> >
-    /** \brief Policy based smart pointer.
+    /** @brief Policy based smart pointer.
+
         The SmartPtr implements a model that determines how the contained
         raw pointer is managed. The default model is RefCounted, which uses a
         non-intrusive reference counting mechanism.
@@ -280,6 +277,10 @@ namespace Pt {
         the object is destroyed by deleting it, but this can be overridden by
         implementing a different DestroyPolicy. The DestroyPolicy needs to
         implement a method destroy(T*), which releases the underlying pointer.
+
+        \param T Contained type.
+        \param Model Model for linking/unlinking.
+        \param DestroyPolicy policy, to destroy the object.
     */
     class SmartPtr : public Model,
                      public Destroy

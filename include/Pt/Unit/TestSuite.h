@@ -42,7 +42,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Protocol and data driven testing
-        @ingroup unittest
 
         The TestSuite is used to implement protocol and data driven tests.
         It inherits its ability to register methods and properties from
@@ -71,6 +70,8 @@ namespace Unit {
         after each test. The TestProtocol can be replaced with a customised
         one and reflection can be used to call any method multiple times with
         the required data.
+
+        @ingroup unittest
     */
     class PT_UNIT_API TestSuite : public Test
                                 , public TestFixture
@@ -155,6 +156,7 @@ namespace Unit {
 
                 @param name Name of the method to be run
                 @param args Arguments to invoke the method
+                @param argCount Number of arguments
             */
             void runTest( const std::string& name, const SerializationInfo* args = 0, size_t argCount = 0);
 

@@ -116,7 +116,10 @@ class PT_SYSTEM_API File
 
             The %File object will stay valid after this method was called and
             point to the moved file.
-			return \cTrue if file successfully moved, otherwise \cfalse
+
+            @param to Location of new file
+            @param allowCopy Allow copy between drives
+			@return True if file successfully moved, otherwise false
         */
         void move(const std::string& to, bool allowCopy = true);
 

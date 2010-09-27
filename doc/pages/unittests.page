@@ -3,8 +3,8 @@
 @section unittest_SimpleTests A Simple Test Case
 
 The TestCase class can be used to implement simple unit test. This is simply
-done by deriving from TestCase and implementing the %TestCase::test method.
-The member functions %TestCase::setUp and %TestCase::tearDown can be used
+done by deriving from TestCase and implementing the test() method.
+The member functions setUp() and tearDown() can be used
 to manage any resources the test might require. The PT_UNIT_ASSERT macro
 can be used to assert test conditions during the test.
 

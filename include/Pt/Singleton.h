@@ -37,12 +37,11 @@
 
 namespace Pt {
 
-    /** @brief Singleton class template
-       @ingroup Pt
-      
+    /** @brief %Singleton class template
+
         @param T Type of the singleton
         @param A Allocator for type T
-      
+
         The Singleton class template can be used to easily implement the Singleton
         design pattern. It can either be used directly or as a base class. An
         allocator can be used to control how the singleton instance will be
@@ -57,6 +56,8 @@ namespace Pt {
                    // ...
                };
         @endcode
+
+       @ingroup Pt
      */
     template <typename T>
     class Singleton : public NonCopyable

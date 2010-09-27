@@ -39,7 +39,7 @@ namespace System {
 
 /** @brief Mutual exclusion device.
 
-    A Mutex is a mutual exclusion device. It is used to synchronize
+    A %Mutex is a mutual exclusion device. It is used to synchronize
     the access to data which is accessed by more than one thread or
     process at the same time. Mutexes are not recursive, that is the
     same thread can not lock a mutex multiple times without deadlocking.
@@ -88,7 +88,7 @@ class PT_SYSTEM_API Mutex : private NonCopyable
 
 /** @brief MutexLock class for Mutex.
 
-    The MutexLock class adds functionality for scoped
+    The %MutexLock class adds functionality for scoped
     locking. In the constructor of a  MutexLock, the mutex is locked
     and in the destructor it is unlocked. This way if for example an
     exception occures in the protected section the Mutex will be unlocked

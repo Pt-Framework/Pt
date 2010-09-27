@@ -25,11 +25,12 @@
 namespace Pt {
 
 /** @brief Interface for invokable entities
-    @ingroup sigslot
 
     Invokable is a type which can be "called" via the invoke() member with a
     number of arguments, but does not provide a return value. It serves as
     a base type for other types in the Pt signals/slots framework.
+
+    @ingroup sigslot
 */
 template <typename ARGUMENTS>
 class Invokable {

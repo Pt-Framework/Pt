@@ -40,7 +40,7 @@ namespace Pt {
 
 
 /**
- * @brief A dynamic two dimensional array.
+ * @internal A dynamic two dimensional array.
  *
  * @tparam T The type of the elements.
  * @tparam Container The type of the underlying (random access) container.

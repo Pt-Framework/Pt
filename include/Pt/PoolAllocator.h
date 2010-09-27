@@ -36,11 +36,10 @@ namespace Pt {
 
 class PoolFactory;
 
-/**
- * @class PoolAllocator
- * Manages pool of fixed-size allocators.
- * Designed to be a non-templated base class of AllocatorSingleton so that
- * implementation details can be safely hidden in the source code file.
+/** @brief Manages a pool of fixed-size allocators.
+
+    Designed to be a non-templated base class of AllocatorSingleton so that
+    implementation details can be safely hidden in the source code file.
  */
 class PT_API PoolAllocator : public Pt::Allocator
 {
@@ -56,7 +55,6 @@ public:
                       std::size_t objectAlignSize );
 
     /** 
-
      * @brief Destructor releases all blocks, all Chunks, and PoolFactory's.
      * 
      * Any outstanding blocks are unavailable, and should not be used after

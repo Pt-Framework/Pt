@@ -40,13 +40,14 @@ namespace Pt {
 
 namespace Unit {
 
-/** @brief Test event reporter
-    @ingroup unittest
+/** @brief %Test event reporter
 
     This class is the base class for all reporters for test events. It
     lets the implementor override several virtual methods that are called
     on perticular events during the test. Reporters can be made to print
     information to the console or write XML logs.
+
+    @ingroup unittest
 */
 class PT_UNIT_API Reporter : protected NonCopyable
 {
@@ -97,6 +98,7 @@ class PT_UNIT_API Reporter : protected NonCopyable
             assertion fails when a user defined condition is not met.
 
             @param test The failed test
+            @param a The Assertion that failed
         */
         virtual void reportAssertion(const TestContext& test, const Assertion& a) = 0;
 
@@ -107,6 +109,7 @@ class PT_UNIT_API Reporter : protected NonCopyable
             nexpected in a test scenario
 
             @param test The failed test
+            @param ex The Assertion that failed
         */
         virtual void reportException(const TestContext& test, const std::exception& ex) = 0;
 

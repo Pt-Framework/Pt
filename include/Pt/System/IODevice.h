@@ -161,14 +161,14 @@ class PT_SYSTEM_API IODevice : public Selectable
         */
         bool seekable() const;
 
-        //! @brief Move the next read position to the given offset
-        /**
+        /** @brief Move the next read position to the given offset
+
             Tries to move the current read position to the given offset.
             SeekMode determines the relative starting point of offset.
 
-            \param offset the offset the pointer should be moved by.
-            \param mode determines the relative starting offset.
-            \return the new abosulte read positing.
+            \param offset Offset the pointer should be moved by.
+            \param sd The seek mode.
+            \return New abosulte read positing.
             \throw IOError
         */
         pos_type seek(off_type offset, std::ios::seekdir sd);

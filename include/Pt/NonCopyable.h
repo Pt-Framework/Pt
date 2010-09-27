@@ -37,7 +37,6 @@
 namespace Pt {
 
     /** @brief Protects derived classes from being copied
-     *  @ingroup Pt
      *
      *  The NonCopyable class has a private copy constructor and assignment
      *  operator, therefore derived classes cannot be copied. This class
@@ -53,6 +52,7 @@ namespace Pt {
      *  @endcode
      *
      *    Trying to copy a NonCopyable object will cause compile-time error.
+     *  @ingroup Pt
      */
     class  NonCopyable {
         public:

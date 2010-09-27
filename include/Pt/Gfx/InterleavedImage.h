@@ -46,7 +46,6 @@ namespace Pt {
 
 
         /** @brief Interleaved image class.
-         *  @ingroup Gfx
          *
          *  There are two common memory structures for an image:
          *    - Interleaved image which is represented by grouping the pixels together

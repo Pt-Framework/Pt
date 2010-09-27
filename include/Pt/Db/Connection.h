@@ -46,13 +46,13 @@ namespace Db {
     class Value;
     class Statement;
 
-    /** \brief This class holds a Connection to a database.
-        
+    /** \brief This class holds a connection to a database.
+
         A Connection object is created with a specific implementation
         of a database connection (SqLite, mySql, ...). The actual
-        Connection is referencecounted. You can copy this class as 
+        Connection is referencecounted. You can copy this class as
         you need. The connection will be closed if their are no further
-        references to it. 
+        references to it.
     */
     class PT_DB_API Connection
     {

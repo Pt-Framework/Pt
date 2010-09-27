@@ -42,7 +42,7 @@ namespace System {
     class ApplicationImpl;
 
     /**
-     * \brief The Application class provides an event loop for console applications
+     * \brief The %Application class provides an event loop for console applications
      * without a GUI.
      *
      * This class is used by non-GUI applications to provide the applications's event

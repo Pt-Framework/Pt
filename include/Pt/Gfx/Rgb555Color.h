@@ -42,7 +42,6 @@ namespace Pt {
 
 #include <Pt/Pack1.h>
         /** @brief Packed 15-bit RGB color class.
-         *  @ingroup Gfx
          *
          *  This class is exist so that the raw memory buffer of an image implementation
          *  which use this color model could be casted directly to hardware image buffer

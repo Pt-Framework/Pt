@@ -36,13 +36,15 @@
 namespace Pt {
 
     /** @brief %Connection management for signal and slot objects
-        @ingroup sigslot
+
 
         This class implements connection management for signal and slot
         objects. It makes sure that all connections where this object
         is involved are closed on destruction. Deriving classes can
         overload Connectable::opened and Connectable::closed to tune
         connection managenment.
+
+        @ingroup sigslot
     */
     class PT_API Connectable
     {

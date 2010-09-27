@@ -35,86 +35,86 @@
 
 namespace Pt {
 
-    /// \exclude
+    /// @internal
     typedef unsigned char  uchar;
-    /// \exclude
+    /// @internal
     typedef unsigned short ushort;
-    /// \exclude
+    /// @internal
     typedef unsigned int   uint;
-    /// \exclude
+    /// @internal
     typedef unsigned long  ulong;
 
-    /// \exclude
+    /// @internal
     using std::size_t;
-    /// \exclude
+    /// @internal
     typedef std::ptrdiff_t ssize_t;
 
-    /// \exclude
+    /// @internal
     typedef signed char int8_t;
-    /// \exclude
+    /// @internal
     typedef unsigned char uint8_t;
 
 #if USHRT_MAX == 0xffff
-    /// \exclude
+    /// @internal
     typedef short int16_t;
-    /// \exclude
+    /// @internal
     typedef unsigned short uint16_t;
 #elif UINT_MAX == 0xffff
-    /// \exclude
+    /// @internal
     typedef int int16_t;
-    /// \exclude
+    /// @internal
     typedef unsigned int uint16_t;
 #elif ULONG_MAX == 0xffff
-    /// \exclude
+    /// @internal
     typedef long int16_t;
-    /// \exclude
+    /// @internal
     typedef unsigned long uint16_t;
 #endif
 
 #if USHRT_MAX == 0xffffffffUL
-    /// \exclude
+    /// @internal
     typedef short int32_t;
-    /// \exclude
+    /// @internal
     typedef unsigned short uint32_t;
 #elif UINT_MAX == 0xffffffffUL
-    /// \exclude
+    /// @internal
     typedef int int32_t;
-    /// \exclude
+    /// @internal
     typedef unsigned int uint32_t;
 #elif ULONG_MAX == 0xffffffffUL
-    /// \exclude
+    /// @internal
     typedef long int32_t;
-    /// \exclude
+    /// @internal
     typedef unsigned long uint32_t;
 #endif
 
 #if UINT_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// \exclude
+    /// @internal
     typedef int int64_t;
-    /// \exclude
+    /// @internal
     typedef unsigned int uint64_t;
 #elif ULONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// \exclude
+    /// @internal
     typedef long int64_t;
-    /// \exclude
+    /// @internal
     typedef unsigned long uint64_t;
 #elif ULLONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// \exclude
+    /// @internal
     typedef long long int64_t;
-    /// \exclude
+    /// @internal
     typedef unsigned long long uint64_t;
 #elif defined(__GNUC__) || defined(__MWERKS_SYMBIAN__)
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// \exclude
+    /// @internal
     typedef long long int64_t;
-    /// \exclude
+    /// @internal
     typedef unsigned long long uint64_t;
 #endif
 

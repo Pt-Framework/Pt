@@ -38,9 +38,8 @@ namespace Pt {
 namespace Gui {
 
     /**
-     * \brief An interface that can be implemented by application classes that want to 
-     * provide an event loop for applications with or without a GUI.
-     * 
+     * \brief %Application with a GUI event-loop.
+     *
      * This interface provides methods for running and stopping the application, for
      * adding and processing of events and a signal (event) to which slots can be connected to
      * listen for events that are sent to the event queue.

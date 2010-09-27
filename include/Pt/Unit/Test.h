@@ -41,13 +41,14 @@ namespace Unit {
 
     class TestContext;
 
-    /** @brief Test base class
-        @ingroup unittest
+    /** @brief %Test base class
 
         This is the base class for all types of tests that can be registered
         and run in a test application. It provides a virtual method run that
         is overriden by the derived classes and signals to inform about
         events that occur while the test is run.
+
+        @ingroup unittest
     */
     class PT_UNIT_API Test : public Connectable,
                              protected NonCopyable

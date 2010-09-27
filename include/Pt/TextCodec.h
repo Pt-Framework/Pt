@@ -317,7 +317,7 @@ class codecvt : public std::codecvt_base
 namespace Pt {
 
 /**
- * @brief Generic TextCodec class/facet which may be subclassed by specific Codec classes.
+ * @brief Generic %TextCodec base class for specific codecs.
  *
  * This class contains default implementations for the methods do_unshift(), do_encoding()
  * and do_always_noconv() so sub-classes do not have to implement this default behaviour.

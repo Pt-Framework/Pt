@@ -36,7 +36,7 @@
 
 namespace Pt {
 
-/** @brief Settings Format Error
+/** @brief %Settings Format Error
 */
 class PT_API SettingsError : public SerializationError
 {

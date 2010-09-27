@@ -38,7 +38,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Run registered tests
-        @ingroup unittest
 
         The application class serves as an environment for a number of tests
         to be run. An application object is usually created in the main loop
@@ -59,6 +58,8 @@ namespace Unit {
 
         The TestMain.h include already defines a main loop with an application
         for the common use case.
+
+        @ingroup unittest
     */
     class PT_UNIT_API Application : public Test
     {
