@@ -36,12 +36,12 @@ namespace Pt {
 namespace System {
 
 InvalidUrl::InvalidUrl(const char* msg)
-: std::logic_error(msg)
+: std::invalid_argument(msg)
 { }
 
 
 InvalidUrl::InvalidUrl(const std::string& msg)
-: std::logic_error(msg)
+: std::invalid_argument(msg)
 { }
 
 
