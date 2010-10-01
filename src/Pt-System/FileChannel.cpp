@@ -65,10 +65,14 @@ void FileChannel::onOpen(const std::string& urlstring)
     std::istringstream ss2(value);
     ss2 >> maxFile;
     _numBackup = maxFile - 1;
-    
+
     _file = url.path();
 
 	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::app);
+
+    if( !_fs)
+        throw std::invalid_argument("invalid file name: " + _file);
+
 	_curSize = _fs.tellp();
 
 	if(_curSize > _maxSize)
@@ -92,7 +96,7 @@ void FileChannel::onWrite(const std::string& message)
     {
         this->rotate();
     }
-    
+
     _fs << message << std::flush;
     _curSize += message.size();
 }
@@ -102,12 +106,12 @@ void FileChannel::rotate()
 {
     _fs.clear();
     _fs.close();
-  
+
     if(_numBackup > 0)
     {
         std::string to = makePath(_numBackup);
         std::remove( to.c_str() );
-        
+
         for(unsigned n = _numBackup; n > 0 ; --n)
         {
             std::string from = makePath(n-1);
@@ -115,7 +119,7 @@ void FileChannel::rotate()
             to = from;
         }
     }
-	
+
 	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::trunc);
 	_curSize = 0;
 }

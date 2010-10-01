@@ -565,7 +565,7 @@ class LoggedScope
     }
 
     #define log_init(file) \
-    Pt::System::LogTarget::init(file);
+    Pt::System::LogTarget::initTargets(file);
     
     #define log_define(category) \
     static Pt::System::Logger pt_logger(category);

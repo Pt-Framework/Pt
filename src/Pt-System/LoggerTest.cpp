@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2006 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -95,7 +95,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW( Pt::System::Logger l3("a."), std::invalid_argument)
             PT_UNIT_ASSERT_THROW( Pt::System::Logger l4(".a"), std::invalid_argument)
         }
-        
+
         void BenchmarkLogger()
         {
             Pt::System::Logger logger("");
@@ -107,14 +107,14 @@ class LoggerTest : public Pt::Unit::TestSuite
             {
                 log_message_trace(logger, "Hallo");
             }
-            
+
             Pt::Timespan ts = clock.stop();
-            double usecs = ts.toUSecs();
+            double usecs = static_cast<double>( ts.toUSecs() );
             std::cerr << "\nlog time: " << (usecs/count)*1000 << " nsec" << std::endl;
         }
-        
+
         void Inheritance()
-        { 
+        {
             Pt::System::Logger logger_m("m");
             Pt::System::Logger logger_m_a("m.a");
             Pt::System::Logger logger_m_a_a("m.a.a");
@@ -143,7 +143,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::System::Trace );
             PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::System::Trace );
             PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::System::Trace );
-            
+
             logger_m_a_b.target().setLogLevel(Pt::System::Error);
             PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
             PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );
@@ -243,9 +243,9 @@ class LoggerTest : public Pt::Unit::TestSuite
             {
                 logger.info() << "log message #" << n << Pt::System::endlog;
             }
-            
-            Pt::System::LogTarget::get("LoggerTest.FileChannel").setChannel("console://");            
-            
+
+            Pt::System::LogTarget::get("LoggerTest.FileChannel").setChannel("console://");
+
             PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log") )
             PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.1") )
             PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.2") )
@@ -264,7 +264,7 @@ class LoggerTest : public Pt::Unit::TestSuite
 #endif
                 Pt::System::LogTarget::get("LoggerTest.SerialChannelTest").setChannel(url);
                 Pt::System::LogTarget::get("LoggerTest.SerialChannelTest").setLogLevel(Pt::System::Trace);
-    
+
                 for(int n = 0; n < 10; ++n)
                 {
                     logger.info() << "Info Message on serial device" << Pt::System::endlog;
@@ -272,7 +272,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             }
             catch( const Pt::System::AccessFailed& )
             {
-                reportMessage( "No such serial device: " + url ); 
+                reportMessage( "No such serial device: " + url );
             }
         }
 };

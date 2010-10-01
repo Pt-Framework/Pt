@@ -41,7 +41,7 @@ namespace System {
     @ingroup Logging
 */
 enum LogLevel {
-    None  = 0,
+    None = 0,
     Fatal = 100,
     Error = 200,
     Warn  = 300,
@@ -49,64 +49,6 @@ enum LogLevel {
     Debug = 500,
     Trace = 600
 };
-
-/** @brief Converts a log-level to a string
-    @ingroup Logging
-*/
-inline std::string toString(LogLevel level)
-{
-    switch (level)
-    {
-        case None:  return "None";
-        case Fatal: return "Fatal";
-        case Error: return "Error";
-        case Warn:  return "Warning";
-        case Info:  return "Info";
-        case Debug: return "Debug";
-        case Trace: return "Trace";
-        default:    throw std::logic_error("Unknown log level in LogLevel::toString() method.");
-    };
-}
-
-/** @brief Converts a string to the appropriate log level.
-
-    @param str A String to convert.
-    @return The log level.
-    @ingroup Logging
- */
-inline LogLevel toLogLevel(const std::string& str)
-{
-    if(str == "None")
-    {
-        return None;
-    }
-    else if(str == "Fatal")
-    {
-        return Fatal;
-    }
-    else if(str == "Error")
-    {
-        return Error;
-    }
-    else if(str == "Warn")
-    {
-        return Warn;
-    }
-    else if(str == "Info")
-    {
-        return Info;
-    }
-    else if(str == "Debug")
-    {
-        return Debug;
-    }
-    else if(str == "Trace")
-    {
-        return Trace;
-    }
-
-    throw std::logic_error("invalid logevel");
-}
 
 
 inline LogLevel trace()

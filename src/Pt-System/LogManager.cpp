@@ -37,6 +37,62 @@
 
 log_define("Pt.System")
 
+namespace {
+
+inline std::string toString(Pt::System::LogLevel level)
+{
+    switch (level)
+    {
+        case Pt::System::None:  return "None";
+        case Pt::System::Fatal: return "Fatal";
+        case Pt::System::Error: return "Error";
+        case Pt::System::Warn:  return "Warning";
+        case Pt::System::Info:  return "Info";
+        case Pt::System::Debug: return "Debug";
+        case Pt::System::Trace: return "Trace";
+    };
+
+    return "None";
+}
+
+inline Pt::System::LogLevel toLogLevel(const std::string& str)
+{
+    if(str == "None")
+    {
+        return Pt::System::None;
+    }
+    else if(str == "Fatal")
+    {
+        return Pt::System::Fatal;
+    }
+    else if(str == "Error")
+    {
+        return Pt::System::Error;
+    }
+    else if(str == "Warn")
+    {
+        return Pt::System::Warn;
+    }
+    else if(str == "Info")
+    {
+        return Pt::System::Info;
+    }
+    else if(str == "Debug")
+    {
+        return Pt::System::Debug;
+    }
+    else if(str == "Trace")
+    {
+        return Pt::System::Trace;
+    }
+
+    throw std::invalid_argument("invalid log level: " + str);
+    return Pt::System::None;
+}
+
+}
+
+
 namespace Pt {
 
 namespace System {
