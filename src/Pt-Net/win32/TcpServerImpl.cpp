@@ -150,8 +150,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
             throw System::SystemError("setsockopt");
 		}
 
-
-#ifdef IPPROTO_IPV6
+#if defined(IPPROTO_IPV6) && defined(IPV6_V6ONLY)
         if (it->ai_family == AF_INET6)
         {
           if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
