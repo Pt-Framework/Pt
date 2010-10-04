@@ -26,7 +26,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #include <Pt/Net/AddrInfo.h>
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
@@ -150,13 +149,13 @@ void TcpServerImpl::listen(const std::string& ipaddr,
             throw System::SystemError("setsockopt");
 		}
 
-#if defined(IPPROTO_IPV6) && defined(IPV6_V6ONLY)
+#if defined(IPV6_V6ONLY)
         if (it->ai_family == AF_INET6)
         {
-          if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
+          if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0)
           {
               log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno << ": " << strerror(errno));
-              ::close();
+              close();
               throw System::SystemError("setsockopt IPV6_V6ONLY");
           }
         }
