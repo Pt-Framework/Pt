@@ -30,22 +30,12 @@
 #define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/System/IOError.h>
 #include <Pt/System/Selectable.h>
 #include <string>
 
 namespace Pt {
 
 namespace Net {
-
-class PT_NET_API AddressInUse : public System::IOError
-{
-    public:
-        AddressInUse();
-
-        ~AddressInUse() throw()
-        {}
-};
 
 class TcpServerImpl;
 

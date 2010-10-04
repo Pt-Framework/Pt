@@ -15,7 +15,7 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ * y
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -30,11 +30,14 @@
 #include <string.h>
 #include "AddrInfoImpl.h"
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Net
-{
+namespace Net {
+
+AddressInUse::AddressInUse()
+: IOError("address in use")
+{ }
+
 
 AddrInfo::AddrInfo(AddrInfoImpl* impl)
   : _impl(impl)

@@ -45,13 +45,14 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
-:  _sentry(0)
+: _connectResult(0)
+, _sentry(0)
 , _socket(socket)
 , _fd(INVALID_SOCKET)
 , _waitEvent(WSACreateEvent())
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
-, _timeout(INFINITE)
+, _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
 , _dataSends(0)
 {
 	_currentEventHandle = _waitEvent;

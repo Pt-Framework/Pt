@@ -30,13 +30,21 @@
 #define PT_NET_ADDRINFO_H
 
 #include <Pt/Net/Api.h>
+#include <Pt/System/IOError.h>
 #include <string>
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Net
-{
+namespace Net {
+
+    class PT_NET_API AddressInUse : public System::IOError
+    {
+        public:
+            AddressInUse();
+
+            ~AddressInUse() throw()
+            {}
+    };
 
     class AddrInfoImpl;
 

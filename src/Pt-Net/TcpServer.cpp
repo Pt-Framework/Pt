@@ -34,11 +34,6 @@ namespace Pt {
 
 namespace Net {
 
-AddressInUse::AddressInUse()
-: IOError("address in use")
-{ }
-
-
 TcpServer::TcpServer()
 : _impl(0)
 {
