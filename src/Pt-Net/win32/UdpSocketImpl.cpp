@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 #include "UdpSocketImpl.h"
 #include <Pt/Net/AddrInfo.h>
 #include <Pt/System/EventLoop.h>
@@ -97,11 +98,10 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         if( _fd == INVALID_SOCKET )
             continue;
 
-#if defined(IPPROTO_IPV6) && defined(IPV6_V6ONLY)
-
+#if defined(IPV6_V6ONLY)
         if( it->ai_family == AF_INET6 )
         {
-            if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0 )
+            if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
             {
                 this->close();
                 throw System::SystemError("setsockopt IPV6_V6ONLY failed");
