@@ -62,6 +62,13 @@ class UdpSocketImpl : public System::SelectableImpl
 
         void endConnect();
 
+        size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t read(char* buffer, size_t count, bool& eof);
+        size_t endRead(bool& eof);
+
+        size_t beginWrite(const char* buffer, size_t n);
+        size_t write(const char* buffer, size_t n);
+        size_t endWrite();
         bool wait(std::size_t umsecs);
 
         bool setWaitHandle(HANDLE h, bool& avail);
@@ -86,6 +93,8 @@ class UdpSocketImpl : public System::SelectableImpl
         const char*                  _connectResult;
         std::size_t	                 _timeout;
         std::size_t		             _dataSends;
+        WSABUF                       _sendBuffer;
+        WSABUF		                 _receiveBuffer;
 };
 
 } // namespace Net

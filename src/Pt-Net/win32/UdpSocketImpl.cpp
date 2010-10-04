@@ -165,7 +165,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 
     throw System::IOError("connect failed");
 
-	//this->beginConnect(addrinfo);
+    //this->beginConnect(addrinfo);
     //this->endConnect();
 }
 
@@ -194,7 +194,7 @@ const char* UdpSocketImpl::tryConnect()
     {
         while (true)
         {
-			_fd = WSASocket(_addrInfoPtr->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
+            _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
 
              if (_fd != INVALID_SOCKET)
                 break;
@@ -240,17 +240,17 @@ void UdpSocketImpl::checkPendingError()
 void UdpSocketImpl::endConnect()
 {
     _eventFlags &= ~FD_CONNECT;
-	this->setEventFlags(_currentEventHandle, _eventFlags);
+    this->setEventFlags(_currentEventHandle, _eventFlags);
 
-	checkPendingError();
+    checkPendingError();
 
-	if( _isConnected )
-		return;
+    if( _isConnected )
+        return;
 
-	_eventFlags |= FD_CONNECT;
-	this->setEventFlags(_currentEventHandle, _eventFlags);
+    _eventFlags |= FD_CONNECT;
+    this->setEventFlags(_currentEventHandle, _eventFlags);
 
-	try
+    try
     {
         while (true)
         {
@@ -270,10 +270,10 @@ void UdpSocketImpl::endConnect()
                 if( sockerr == 0 )
                 {
                     _isConnected = true;
-					_eventFlags &= ~FD_CONNECT;
-					this->setEventFlags(_currentEventHandle, _eventFlags);
+                    _eventFlags &= ~FD_CONNECT;
+                    this->setEventFlags(_currentEventHandle, _eventFlags);
                     return;
-				}
+                }
 
                 if (++_addrInfoPtr == _addrInfo.impl()->end())
                 {
@@ -290,11 +290,11 @@ void UdpSocketImpl::endConnect()
             _connectResult = tryConnect();
 
             if( _isConnected )
-			{
-				_eventFlags &= ~FD_CONNECT;
-				this->setEventFlags(_currentEventHandle, _eventFlags);
+            {
+                _eventFlags &= ~FD_CONNECT;
+                this->setEventFlags(_currentEventHandle, _eventFlags);
                 return;
-			}
+            }
 
             checkPendingError();
         }
@@ -309,10 +309,10 @@ void UdpSocketImpl::endConnect()
 
 bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 {
-	avail = _dataSends != 0;
+    avail = _dataSends != 0;
 
-	if( _currentEventHandle == h)
-		return true;
+    if( _currentEventHandle == h)
+        return true;
 
     _currentEventHandle = h;
 
@@ -324,7 +324,7 @@ bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 bool UdpSocketImpl::wait(std::size_t umsecs)
 {
     DWORD msecs = umsecs;
-	if(umsecs == Pt::System::EventLoop::WaitInfinite)
+    if(umsecs == Pt::System::EventLoop::WaitInfinite)
     {
         msecs = INFINITE;
     }
@@ -334,12 +334,12 @@ bool UdpSocketImpl::wait(std::size_t umsecs)
     }
 
     // why dataSends ?
-	if( _dataSends != 0 ||
+    if( _dataSends != 0 ||
         WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
-	{
-		this->checkEvent();
-		return true;
-	}
+    {
+        this->checkEvent();
+        return true;
+    }
 
     return false;
 }
@@ -351,6 +351,117 @@ void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
     {
         throw System::SystemError("WSAEventSelectt failed");
     }
+}
+
+
+
+size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    assert(buffer != 0);
+    _eventFlags |= FD_READ;
+
+    _receiveBuffer.buf = buffer;
+    _receiveBuffer.len = n;
+
+    setEventFlags(_currentEventHandle, _eventFlags);
+    return 0;
+}
+
+
+size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
+{
+    return 0;
+}
+
+
+size_t UdpSocketImpl::endRead(bool& eof)
+{
+    _eventFlags &= ~FD_READ;
+   
+    int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
+
+    if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
+    {
+        //Set socket to blocking mode
+        setEventFlags(0,0);
+
+        u_long argp = 0;
+        ::ioctlsocket(_fd, FIONBIO, &argp);
+
+        len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
+
+        //Set socket to non-blocking mode
+        argp = 1;
+        ::ioctlsocket(_fd, FIONBIO, &argp);
+    }
+
+    setEventFlags(_currentEventHandle, _eventFlags);
+
+    return len;
+}
+
+size_t UdpSocketImpl::write(const char* buffer, size_t n)
+{
+    return 0;
+}
+
+size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
+{
+     _sendBuffer.buf = const_cast<char*>(buffer);
+    _sendBuffer.len = n;
+
+    DWORD numberOfBytesSent = 0;
+
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+
+    if(rc == SOCKET_ERROR)
+    {
+        if(WSAGetLastError() == WSAEWOULDBLOCK)
+        {
+            _dataSends = 0;
+            _eventFlags |= FD_WRITE;
+            setEventFlags(_currentEventHandle, _eventFlags);
+            return 0;
+        }
+    }
+
+    _dataSends = numberOfBytesSent;
+    //SetEvent(_currentEventHandle);
+    return numberOfBytesSent;
+}
+
+
+size_t UdpSocketImpl::endWrite()
+{
+    
+    if(_dataSends != 0)
+    {
+        size_t n =  _dataSends;
+        _dataSends = 0;
+        return n;
+    }
+
+    _eventFlags &= ~FD_WRITE;
+
+    //Set socket to blocking mode
+    setEventFlags(0, 0);
+
+    u_long argp = 0;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    DWORD numberOfBytesSent = 0;
+
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+
+    if(rc == SOCKET_ERROR)
+        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
+
+    //Set socket to non-blocking mode
+    argp = 1;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+    setEventFlags(_currentEventHandle, _eventFlags);
+
+    return  numberOfBytesSent;
 }
 
 
@@ -370,37 +481,6 @@ bool UdpSocketImpl::checkEvent()
         throw System::SystemError("WSAEnumNetworkEvents failed");
 
     bool ev = false;
-
-    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
-    {
-		int s = FD_CONNECT_BIT;
-		if(events.iErrorCode[s] != 0)
-		{
-			if (++_addrInfoPtr == _addrInfo.impl()->end())
-			{
-				// no more addrInfo - propagate error
-				_connectResult = "connect failed";
-				///_socket.connected.send(_socket);
-				return true;
-			}
-
-			_connectResult = tryConnect();
-			if (_isConnected)
-			{
-				///_socket.connected.send(_socket);
-				return true;
-			}
-		}
-		else
-		{
-			ev = true;
-			_isConnected = true;
-			///_socket.connected.send(_socket);
-
-			///if( ! _sentry )
-			///   return ev;
-		}
-    }
 
     if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
     {
