@@ -124,6 +124,7 @@ namespace System {
     {
         friend class Selectable;
         friend class Timer;
+        friend class MainLoopImpl;
 
         //! @internal
         typedef std::multimap<Timespan, Timer*> TimerQueue;

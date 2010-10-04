@@ -136,7 +136,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                     throw System::SystemError("listen");
             }
 
-            if( flags & TcpServer::INHERIT == 0 )
+            if( (flags & TcpServer::INHERIT) == 0 )
             {
                 int flags = ::fcntl(_fd, F_GETFD);
                 flags |= FD_CLOEXEC ;
@@ -149,7 +149,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
             }
 
 #ifdef TCP_DEFER_ACCEPT
-            if( flags & TcpServer::DEFER_ACCEPT != 0 )
+            if( (flags & TcpServer::DEFER_ACCEPT) != 0 )
             {
                 int deferSecs = 30;
 

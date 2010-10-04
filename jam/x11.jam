@@ -2,6 +2,7 @@ if ! $(X11_JAM) {
 X11_JAM = true ;
 
 X11_INCLUDE_PATHS = /usr/include
+                    /usr/include/X11
                     /usr/X11R7/include
                     /usr/X11R6/include
                     /opt/X11R7/include
@@ -11,7 +12,12 @@ X11_LIBRARY_PATHS = /usr/lib
                     /usr/X11R7/lib
                     /usr/X11R6/lib
                     /opt/X11R6/lib
-                    /opt/X11R7/lib ;
+                    /opt/X11R7/lib
+                    /usr/lib64
+                    /usr/X11R7/lib64
+                    /usr/X11R6/lib64
+                    /opt/X11R6/lib64
+                    /opt/X11R7/lib64 ;
 
 
 rule X11Includes
