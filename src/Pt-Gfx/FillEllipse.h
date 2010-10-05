@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -69,11 +70,11 @@ class FillEllipse
             @param topLeft Top-left point of the ellipse
             @param size Size of the ellipse
         */
-        void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
+        void draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size );
 
     private:
         Fill* _fill;
-        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, int x, int y, int width );
+        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, int x, int y, int width );
 };
 
 }

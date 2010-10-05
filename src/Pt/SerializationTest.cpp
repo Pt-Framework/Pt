@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2007 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,7 +33,7 @@
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
 #include "Pt/SerializationContext.h"
-#include "Pt/Math/MathUtils.h"
+#include "Pt/Math.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -198,7 +198,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
         }
-    
+
     protected:
         void Benchmark1();
         void Benchmark2();
@@ -530,7 +530,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(floatVal2);
-    PT_UNIT_ASSERT( Pt::Math::equal(floatVal2, 77.3547f,   Pt::Math::Eps3) );
+    PT_UNIT_ASSERT( Pt::equal(floatVal2, 77.3547f,   Pt::Eps3) );
     PT_UNIT_ASSERT(si.toString().find(Pt::String(L"77.354"))== 0 );
     si >>= floatVal2;
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
@@ -541,7 +541,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(doubleVal2);
-    PT_UNIT_ASSERT( Pt::Math::equal(doubleVal2, 198.8196, Pt::Math::Eps6) );
+    PT_UNIT_ASSERT( Pt::equal(doubleVal2, 198.8196, Pt::Eps6) );
     Pt::String asString = si.toString();
     PT_UNIT_ASSERT( asString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;

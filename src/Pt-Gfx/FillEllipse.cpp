@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -44,7 +45,7 @@ FillEllipse::~FillEllipse()
 { }
 
 
-void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, int x, int y, int width )
+void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, int x, int y, int width )
 {
     const int imageWidth = static_cast<int>( image.width() );
     const int imageHeight = static_cast<int>( image.height() );
@@ -63,16 +64,16 @@ void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Ma
 }
 
 
-void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
-{    
-    
+void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size )
+{
+
     if( size.width() == 0 || size.height() == 0 )
         return;
-    
+
     if( size.width() ==  1 && size.height() == 1 )
         return;
 
-    /* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */      
+    /* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */
     int errorx = 1;
     int errory = 1;
 
@@ -85,7 +86,7 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
     const int       a      = size.width() /2;
     const int       b      = size.height() /2;
     const int       xc     = topLeft.x() + a;
-    const int       yc     = topLeft.y() + b;        
+    const int       yc     = topLeft.y() + b;
     int             x      = 0;
     int             y      = b;
     unsigned int    width  = 1;
@@ -100,46 +101,46 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
     long            d2xt   = 2*b2;
     long            d2yt   = 2*a2;
 
-    while( y >= 0 && x <= a ) 
+    while( y >= 0 && x <= a )
     {
         if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
         {
             //Increment x
-            x++; 
-            dxt += d2xt; 
+            x++;
+            dxt += d2xt;
             t   += dxt;
-            
+
             width += 2;
         }
         else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
         {
             outputSpan(image, brush, topLeft, xc-x, yc-y, width  - errorx);
-            
+
             if( y!=0 )
                 outputSpan(image, brush, topLeft, xc-x, yc+y - errory, width  - errorx);
-                
+
              //Increment Y
-            y--; 
-            dyt += d2yt; 
+            y--;
+            dyt += d2yt;
             t   += dyt;
         }
-        else 
+        else
         {
             outputSpan( image, brush, topLeft, xc-x, yc-y, width -errorx );
-            
+
             if( y != 0 )
                 outputSpan( image, brush, topLeft, xc-x, yc+y -errory, width - errorx );
-                
+
              //Increment x
-            x++; 
-            dxt += d2xt; 
+            x++;
+            dxt += d2xt;
             t   += dxt;
-            
+
             //Increment Y
-            y--; 
-            dyt += d2yt; 
+            y--;
+            dyt += d2yt;
             t   += dyt;
-            
+
             width += 2;
         }
     }

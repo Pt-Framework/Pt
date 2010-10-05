@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris D�rner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -53,7 +53,7 @@ Painter::~Painter()
 // The symbian Impl tracks its own activation state
 // give it a chance to clean up internal context
 #ifdef __SYMBIAN32__
-    _painterImpl->cleanUp();    
+    _painterImpl->cleanUp();
 #endif
 }
 
@@ -115,20 +115,20 @@ const std::list<std::string>& Painter::fontFamilyNames()
 }
 
 
-void Painter::drawPixel(const Math::Point& to)
+void Painter::drawPixel(const Gfx::Point& to)
 {
     this->begin();
     _painterImpl->drawPixel(to);
 }
 
 
-void Painter::drawLine(const Math::Point& from, const Math::Point& to)
+void Painter::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     this->begin();
     _painterImpl->drawLine(from, to);
 }
 
-void Painter::drawText( const Math::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void Painter::drawText( const Gfx::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
     this->begin();
     _painterImpl->drawText(to, text);
@@ -149,35 +149,35 @@ void Painter::fillRect(const Gfx::Rect& rect)
 }
 
 
-void Painter::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
+void Painter::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     this->begin();
     _painterImpl->drawEllipse(topLeft, size);
 }
 
 
-void Painter::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
+void Painter::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     this->begin();
     _painterImpl->fillEllipse(topLeft, size);
 }
 
 
-void Painter::drawPolyline(const Math::Point* points, const size_t pointCount)
+void Painter::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
     this->begin();
     _painterImpl->drawPolyline(points, pointCount);
 }
 
 
-void Painter::fillPolygon(const Math::Point* points, const size_t pointCount)
+void Painter::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
     this->begin();
     _painterImpl->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
+void Painter::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.
@@ -188,7 +188,7 @@ void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 }
 
 
-void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect)
+void Painter::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.
@@ -199,7 +199,7 @@ void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, cons
 }
 
 
-void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect)
+void Painter::drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Region& fromRect)
 {
     if (from.size().width() == 0 || from.size().height() == 0) {
         return;  // Don't try to draw empty pixmaps.
@@ -210,7 +210,7 @@ void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region&
 }
 
 
-void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
+void Painter::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
     if (pm.size().width() == 0 || pm.size().height() == 0) {
         return;  // Don't try to draw empty pixmaps.

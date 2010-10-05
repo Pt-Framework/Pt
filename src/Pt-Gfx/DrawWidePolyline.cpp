@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2008 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -40,7 +41,7 @@ DrawWidePolyline::DrawWidePolyline()
 DrawWidePolyline::~DrawWidePolyline()
 { }
 
-int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
+int DrawWidePolyline::polyBuildPoly( const Pt::Gfx::PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
 {
     int	    top, bottom;
     double  miny, maxy;
@@ -221,7 +222,7 @@ int DrawWidePolyline::buildLineEdge( double x0, double y0, double k, int dx, int
 }
 
 void DrawWidePolyline::fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h)
-{    
+{
     Pt::ssize_t ypos = std::max( 0, y );
 
     Pt::ssize_t yend = 0;
@@ -255,10 +256,10 @@ void DrawWidePolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigne
     while( (left_count || left_height) && (right_count || right_height) )
     {
         unsigned int height;
-        
+
         if (!left_height && left_count)
         { // Load fields from next left edge, right edge
-            
+
             left_height = left->height();
             left_x		= left->x();
             left_stepx	= left->stepx();
@@ -266,7 +267,7 @@ void DrawWidePolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigne
             left_e		= left->e();
             left_dy		= left->dy();
             left_dx		= left->dx();
-            
+
             --left_count;
             ++left;
         }
@@ -298,7 +299,7 @@ void DrawWidePolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigne
             {
                 int xpos = std::max( left_x, 0 );
                 const int endx = std::min<int>( right_x, image.width() -1);
-                
+
                 _stroke->stroke( image, pen, xpos, y, endx - xpos + 1 );
             }
 
@@ -353,7 +354,7 @@ void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdg
 
 void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt)
 {
-    std::vector<Pt::Math::Point>    points;
+    std::vector<Pt::Gfx::Point>    points;
     std::vector<size_t>             widths;
 
     int      xorgi = 0;
@@ -361,7 +362,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
     int 	 n;
     LineEdge edge1;
     LineEdge edge2;
-    int		 edgey1; 
+    int		 edgey1;
     int		 edgey2;
     bool	 edgeleft1;
     bool	 edgeleft2;
@@ -422,9 +423,9 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
         _stroke->stroke( image, pen, points[i].x(), points[i].y(), widths[i] );
 }
 
-int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
+int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths)
 {
-    Pt::Math::Point *tpts, *bpts;
+    Pt::Gfx::Point *tpts, *bpts;
     size_t* twids, *bwids;
     int x, y, e, ex;
     int slw;
@@ -493,9 +494,9 @@ int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
-    Pt::Math::Point *pts;
+    Pt::Gfx::Point *pts;
     size_t *wids;
     double radius, x0, y0, el, er, yk, xlk, xrk, k;
     int xbase, ybase, y, boty, xl, xr, xcl, xcr;
@@ -791,7 +792,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;
-    Pt::Math::PointF    vertices[4];
+    Pt::Gfx::PointF    vertices[4];
     LineSlope           slopes[4];
     int		            edgecount;
     LineEdge            left[4], right[4];
@@ -860,7 +861,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         // compute vertex (mx,my) of miter quadrilateral
         my = (pLeft->dy()  * (pRight->xa() * pRight->dy() - pRight->ya() * pRight->dx()) -
              pRight->dy() * (pLeft->xa()  * pLeft->dy()  - pLeft->ya()  * pLeft->dx() )) / (double) denom;
-        
+
         if (pLeft->dy() != 0)
             mx = pLeft->xa() + (my - pLeft->ya()) * (double) pLeft->dx() / (double) pLeft->dy();
         else
@@ -878,7 +879,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
     {
         case Pen::MiterJoin :
         default: // join by adding a quadrilateral
-            
+
             edgecount = 4;
             slopes[2].setDX( pLeft->dx() );
             slopes[2].setDY( pLeft->dy() );
@@ -908,7 +909,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
 
         case Pen::BevelJoin: //join by adding a triangle
         {
-            Pt::Math::PointF midpoint;
+            Pt::Gfx::PointF midpoint;
             edgecount = 3;
 
             // Third edge of triangle will pass through midpoint.
@@ -943,7 +944,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
 
         case Pen::TriangularJoin: // join by adding a stubby quadrilateral
         {
-            Pt::Math::PointF midpoint, newpoint;
+            Pt::Gfx::PointF midpoint, newpoint;
             double mid2, mid, dx2, dy2, dx3, dy3;
 
             edgecount = 4;

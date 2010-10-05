@@ -2,12 +2,12 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 
 #include <Pt/Main.h>
 #include <Pt/SourceInfo.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gui/Application.h>
@@ -92,26 +92,26 @@ class GfxPerf : public Pt::Gui::Widget
         {
             Pt::ssize_t x =  100;
             Pt::ssize_t y = 100;
-            
-            std::vector<Pt::Math::Point> points(5);
-            points[0] = Pt::Math::Point( x-50, y-50);
-            points[1] = Pt::Math::Point(100+ x, y -50);
-            points[2] = Pt::Math::Point(100+ x, 100+ y);
-            points[3] = Pt::Math::Point(50+ x, 150+ y);
-            points[4] = Pt::Math::Point(x, 100+ y);
-            
+
+            std::vector<Pt::Gfx::Point> points(5);
+            points[0] = Pt::Gfx::Point( x-50, y-50);
+            points[1] = Pt::Gfx::Point(100+ x, y -50);
+            points[2] = Pt::Gfx::Point(100+ x, 100+ y);
+            points[3] = Pt::Gfx::Point(50+ x, 150+ y);
+            points[4] = Pt::Gfx::Point(x, 100+ y);
+
            _clock.start();
            _imagePainter.setBrush( _solidBrush );
            _imagePainter.fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
-          
+
            _out<<"ImagePainter-> FillPolygon SolidBrush :"<< _time.totalMSecs() <<std::endl;
-           
+
            _clock.start();
            painter().setBrush( _solidBrush );
            painter().fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
-          
+
            _out<<"Native-> FillPolygon SolidBrush :"<< _time.totalMSecs()<<std::endl;
            _out<<std::endl;
 
@@ -119,103 +119,103 @@ class GfxPerf : public Pt::Gui::Widget
            _imagePainter.setBrush( _textureBrush );
            _imagePainter.fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
-          
+
            _out<<"ImagePainter-> FillPolygon TextureBrush :"<< _time.totalMSecs()<<std::endl;
-           
+
            _clock.start();
            painter().setBrush( _textureBrush );
            painter().fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
-          
+
            _out<<"Native-> FillPolygon TextureBrush :"<< _time.totalMSecs()<<std::endl;
            _out<<std::endl;
         }
-        
+
         void measureText()
         {
-        
+
             const Pt::String text(L"Hallo Platinum!");
-            
+
             //Load cache with glyphs.
            _imagePainter.setFont( Pt::Gfx::Font( "Bitstream Vera Sans", 24, Pt::Gfx::Font::NormalStyle, 470 ) );
-           _imagePainter.drawText( Pt::Math::Point( 30, 200) ,text);
+           _imagePainter.drawText( Pt::Gfx::Point( 30, 200) ,text);
 
             for( size_t i = 0; i < 20; i++ )
-            {            
+            {
                 _imagePainter.setFont( Pt::Gfx::Font( "Bitstream Vera Sans", 24, Pt::Gfx::Font::NormalStyle, 370 * i) );
-               _clock.start();          
-               _imagePainter.drawText( Pt::Math::Point( 30, 200), text );
-               
+               _clock.start();
+               _imagePainter.drawText( Pt::Gfx::Point( 30, 200), text );
+
                _time = _clock.stop();
-               
+
                _out<<"ImagePainter-> DrawText :"<< _time.totalMSecs() <<std::endl;
-               
+
                painter().setFont( Pt::Gfx::Font( "Bitstream Vera Sans", 24, Pt::Gfx::Font::NormalStyle, 370*i ) );
-               
-               _clock.start();                      
-                painter().drawText( Pt::Math::Point( 30, 200) ,text);
-               
+
+               _clock.start();
+                painter().drawText( Pt::Gfx::Point( 30, 200) ,text);
+
                _time = _clock.stop();
-               
+
                _out<<"Native-> DrawText :"<< _time.totalMSecs() <<std::endl;
                _out<<std::endl;
            }
         }
-        
+
         void measureLine()
         {
             _clock.start();
-            
-            _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );            
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 100 ) );
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 100 , 40 ) );            
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 40 ) );            
-            
-            _time = _clock.stop();            
-            
+
+            _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 100 ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 100 , 40 ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 40 ) );
+
+            _time = _clock.stop();
+
             _out<<"ImagePainter-> DrawThinLine:"<< _time.totalMSecs() <<std::endl;
 
             _clock.start();
-            
+
             painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 100 ) );
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 100 , 40 ) );            
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 40 ) );            
-            
-            _time = _clock.stop();            
-            
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 100 ) );
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 100 , 40 ) );
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 40 ) );
+
+            _time = _clock.stop();
+
             _out<<"Native-> DrawThinLine:"<< _time.totalMSecs() <<std::endl;
 
             _out<<std::endl;
-            
+
             _clock.start();
-            
-            _imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );            
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 100 ) );
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 100 , 40 ) );            
-            _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 40 ) );            
-            
-            _time = _clock.stop();            
-            
+
+            _imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 100 ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 100 , 40 ) );
+            _imagePainter.drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 40 ) );
+
+            _time = _clock.stop();
+
             _out<<"ImagePainter-> DrawThickLine:"<< _time.totalMSecs() <<std::endl;
 
             _clock.start();
-            
+
             painter().setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor( 0 ,0 ,0 ) ) );
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 100 ) );
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 100 , 40 ) );            
-            painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40 , 40 ) );            
-                       
-            _time = _clock.stop();            
-            
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 100 ) );
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 100 , 40 ) );
+            painter().drawLine( Pt::Gfx::Point( 10,10 ), Pt::Gfx::Point( 40 , 40 ) );
+
+            _time = _clock.stop();
+
             _out<<"Native-> DrawThickLine:"<< _time.totalMSecs() <<std::endl;
             _out<<std::endl;
         }
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
-        {            
-            measureLine();            
-            measurePolygon();            
+        {
+            measureLine();
+            measurePolygon();
             measureText();
         }
 

@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
  * Copyright (C) 2005-2007 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -63,14 +63,14 @@ void WidgetPainterImpl::end()
 void WidgetPainterImpl::setClipping(PhTile_t* tiles)
 {
 	std::vector<PhRect_t> rects;
-	
+
 	for(PhTile_t* tile = tiles; tile != 0; tile = tile->next)
 	{
 		PhRect_t rect;
 		memcpy( &rect, &tile->rect, sizeof(PhRect_t) );
 		rects.push_back(rect);
 	}
-	
+
 	if( rects.size() )
 		PgSetMultiClipCx(_gc,rects.size(), &rects[0] );
   	else
@@ -78,7 +78,7 @@ void WidgetPainterImpl::setClipping(PhTile_t* tiles)
 }
 
 
-void WidgetPainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+void WidgetPainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
@@ -114,7 +114,7 @@ void WidgetPainterImpl::fillRect(const Gfx::Rect& rect)
 }
 
 
-void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+void WidgetPainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
@@ -127,11 +127,11 @@ void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 }
 
 
-void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
+void WidgetPainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& region)
 {
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
-	
+
 	PhPoint_t _to = { to.x(), to.y() };
 	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
 

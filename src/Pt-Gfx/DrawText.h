@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -30,7 +31,7 @@
 
 #include "FreeType.h"
 #include <Pt/Gfx/ARgbImage.h>
-#include "Pt/Math/Point.h"
+#include "Pt/Gfx/Point.h"
 #include "Pt/String.h"
 #include "Pt/Gfx/ARgbColor.h"
 #include "Pt/Gfx/Font.h"
@@ -87,7 +88,7 @@ class DrawText
             @param text The text to draw
             @param background The background color of the font
         */
-        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const String& text, const ARgbColor* background = 0 );
+        void draw( ARgbImage& image, const ARgbColor& color, const Gfx::Point& pos, const String& text, const ARgbColor* background = 0 );
 
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
@@ -125,7 +126,7 @@ class DrawText
 
                     const int px = yOffset + x ;
 
-                    assert( &(*pixel) >= &(*image.begin()) && 
+                    assert( &(*pixel) >= &(*image.begin()) &&
                             &(*pixel) <= &(*image.end()) );
 
                     if( buffer[ px ] )

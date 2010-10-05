@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2005-2007 by Marc Boris Duerner
  * Copyright (C) 2005-2007 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -63,22 +63,22 @@ class DemoWidget : public Pt::Gui::Widget
             {
                 case Pt::Gui::KeyEvent::Left:
                     this->erase();
-                    _pos = Pt::Math::Point(_pos.x() - 10, _pos. y());
+                    _pos = Pt::Gfx::Point(_pos.x() - 10, _pos. y());
                     this->refresh();
                     break;
                 case Pt::Gui::KeyEvent::Right:
                     this->erase();
-                    _pos = Pt::Math::Point(_pos.x() + 10, _pos. y());
+                    _pos = Pt::Gfx::Point(_pos.x() + 10, _pos. y());
                     this->refresh();
                     break;
                 case Pt::Gui::KeyEvent::Up:
                     this->erase();
-                    _pos = Pt::Math::Point(_pos.x(), _pos. y() -10);
+                    _pos = Pt::Gfx::Point(_pos.x(), _pos. y() -10);
                     this->refresh();
                     break;
                 case Pt::Gui::KeyEvent::Down:
                     this->erase();
-                    _pos = Pt::Math::Point(_pos.x(), _pos. y()+ 10);
+                    _pos = Pt::Gfx::Point(_pos.x(), _pos. y()+ 10);
                     this->refresh();
                     break;
 
@@ -108,7 +108,7 @@ class DemoWidget : public Pt::Gui::Widget
 
             Pt::Gfx::ImagePainter imagePainter(image);
             imagePainter.setFont(font24);
-            imagePainter.drawText(Pt::Math::Point(32, 33), L"Hello World!", &white);
+            imagePainter.drawText(Pt::Gfx::Point(32, 33), L"Hello World!", &white);
 
             Pt::Gui::Painter painter = this->painter();
             painter.drawImage(_pos, image);
@@ -116,7 +116,7 @@ class DemoWidget : public Pt::Gui::Widget
         }
 
     private:
-        Pt::Math::Point _pos;
+        Pt::Gfx::Point _pos;
 };
 
 

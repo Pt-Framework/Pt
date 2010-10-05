@@ -2,12 +2,12 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,19 +17,19 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Main.h>
 #include <Pt/SourceInfo.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gui/Application.h>
@@ -56,36 +56,36 @@ class DrawRectDemo : public Pt::Gui::Widget
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
-            Pt::Math::Rect rect1( Pt::Math::Point(10, 10), Pt::Math::Size(40, 15) );
+            Pt::Gfx::Rect rect1( Pt::Gfx::Point(10, 10), Pt::Gfx::Size(40, 15) );
             _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
 			_imagePainter.fillRect( rect1 ) ;
-           // _imagePainter.drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
-           // _imagePainter.drawLine( Pt::Math::Point(10 + 40, 10 + 2), Pt::Math::Point(10 + 40, 10 + 14));
-            _imagePainter.drawLine( Pt::Math::Point(10 + 40, 10), Pt::Math::Point(10 + 40, 10 + 15));
+           // _imagePainter.drawLine( Pt::Gfx::Point(10, 10), Pt::Gfx::Point(10 + 40, 10));
+           // _imagePainter.drawLine( Pt::Gfx::Point(10 + 40, 10 + 2), Pt::Gfx::Point(10 + 40, 10 + 14));
+            _imagePainter.drawLine( Pt::Gfx::Point(10 + 40, 10), Pt::Gfx::Point(10 + 40, 10 + 15));
             _imagePainter.setPen(Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0x0000, 0x0000, 0xffff ) ) );
-            _imagePainter.drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
+            _imagePainter.drawLine( Pt::Gfx::Point(10, 10), Pt::Gfx::Point(10 + 40, 10));
 
 
             //_imagePainter.drawRect( rect1 ) ;
-            painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+            painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );
 
-            Pt::Math::Rect rect2( Pt::Math::Point(55, 10), Pt::Math::Size(40, 15) );
+            Pt::Gfx::Rect rect2( Pt::Gfx::Point(55, 10), Pt::Gfx::Size(40, 15) );
             this->painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             this->painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
             this->painter().fillRect( rect2 ) ;
-            this->painter().drawLine( Pt::Math::Point(10 + 40, 10), Pt::Math::Point(10 + 40, 10 + 15));
+            this->painter().drawLine( Pt::Gfx::Point(10 + 40, 10), Pt::Gfx::Point(10 + 40, 10 + 15));
 			this->painter().setPen(Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0x0000, 0x0000, 0xffff ) ) );
-			this->painter().drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
+			this->painter().drawLine( Pt::Gfx::Point(10, 10), Pt::Gfx::Point(10 + 40, 10));
 
-            //this->painter().drawLine( Pt::Math::Point(55 , 10), Pt::Math::Point(55 + 40, 10));
+            //this->painter().drawLine( Pt::Gfx::Point(55 , 10), Pt::Gfx::Point(55 + 40, 10));
 			//this->painter().drawRect( rect2 ) ;
 
-            Pt::Math::Rect rect3( Pt::Math::Point(10, 30), Pt::Math::Size(40, 14) );
+            Pt::Gfx::Rect rect3( Pt::Gfx::Point(10, 30), Pt::Gfx::Size(40, 14) );
 			this->painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
 			this->painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
 			this->painter().fillRect( rect3 ) ;
-			//this->painter().drawLine( Pt::Math::Point(10, 30), Pt::Math::Point(10 + 40, 30));
+			//this->painter().drawLine( Pt::Gfx::Point(10, 30), Pt::Gfx::Point(10 + 40, 30));
 			//this->painter().drawRect( rect3 ) ;
 
 

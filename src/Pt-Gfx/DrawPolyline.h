@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,7 +25,7 @@
 
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <vector>
 
 #include "Stroke.h"
@@ -51,7 +52,7 @@ class DrawPolyline
         virtual ~DrawPolyline()
         { }
 
-   
+
         /** @brief Draw a line on an image
 
             The line described by a two points will be drawn on an ARgbImage.
@@ -63,11 +64,11 @@ class DrawPolyline
             @param from Begin of the line
             @param end End of the line
         */
-        virtual void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount ) = 0;
+        virtual void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount ) = 0;
 
         inline void setOutput( Stroke& d )
         { _stroke = &d; }
-        
+
 
     protected:
         Stroke*                 _stroke;

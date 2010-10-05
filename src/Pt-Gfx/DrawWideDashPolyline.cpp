@@ -1,9 +1,14 @@
 /*
+ * Copyright (C) 2006-2008 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2006-2007 Marc Boris Duerner
+ * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,17 +18,18 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/Math/MathUtils.h>
+#include "Pt/Math.h"
+
 #include "DrawWideDashPolyline.h"
 #include "LineFace.h"
 #include "LineSlope.h"
@@ -41,7 +47,7 @@ DrawWideDashPolyline::DrawWideDashPolyline()
 DrawWideDashPolyline::~DrawWideDashPolyline()
 { }
 
-void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::Point* pPts, size_t npt )
+void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* pPts, size_t npt )
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0
@@ -205,7 +211,7 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
                 fillRect(image, pen, (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
             break;
 
-            case Pen::ButtCap:			
+            case Pen::ButtCap:
             default:
 
             break;
@@ -218,8 +224,8 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     int		            dashNum, dashIndex, dashRemain;
     double	            L, l;
     double	            k;
-    Pt::Math::PointF	vertices[4];
-    Pt::Math::PointF    saveRight, saveBottom;
+    Pt::Gfx::PointF	vertices[4];
+    Pt::Gfx::PointF    saveRight, saveBottom;
     LineSlope	        slopes[4];
     LineEdge	        left[2], right[2];
     LineFace	        lcapFace, rcapFace;
@@ -280,7 +286,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     }
     else // Neither horizontal nor vertical.
     {
-        L = Pt::Math::hypot((double) dx, (double) dy);
+        L = Pt::hypot((double) dx, (double) dy);
         r = l / L;		// this is ell / L, not 1 / L
         rdx = r * dx;
         rdy = r * dy;

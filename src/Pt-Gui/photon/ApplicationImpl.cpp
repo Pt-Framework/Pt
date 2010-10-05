@@ -2,12 +2,12 @@
  * Copyright (C) 2006 Marc Boris Duerner
  * Copyright (C) 2006 Aloysius Indrayanto
  * Copyright (C) 2006 Sebastian Pieck
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -59,19 +59,19 @@ void EventLoopImpl::setApp(Application& app)
 {
 	_app = &app;
 }
-			
+
 int EventLoopImpl::run()
 {
 	PhEventArm();
 	PtMainLoop();
 	return 0;
 }
-			
+
 
 void EventLoopImpl::exit()
 {
 	PtExit(EXIT_SUCCESS);
-}			
+}
 
 
 void EventLoopImpl::commitEvent(const Pt::Event& event)
@@ -107,10 +107,10 @@ void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& ev)
 		}
 	}
 
-	MouseMoveEvent mev(widget, 
-	                                    pev->pos.x + ev.translation.x, 
-	                                    pev->pos.y + ev.translation.y, 
-	                                    action, 
+	MouseMoveEvent mev(widget,
+	                                    pev->pos.x + ev.translation.x,
+	                                    pev->pos.y + ev.translation.y,
+	                                    action,
 	                                    mod);
 
 	_app->event(mev);
@@ -120,7 +120,7 @@ void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& ev)
 void EventLoopImpl::buttonPress(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
 	PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(&ev);
-	
+
 	MouseEvent::Button button = MouseEvent::LeftButton;
 	if(pev->buttons & Ph_BUTTON_SELECT)
 		button = MouseEvent::LeftButton;
@@ -133,8 +133,8 @@ void EventLoopImpl::buttonPress(Pt::Gui::Widget& widget, PhEvent_t& ev)
 	if(pev->click_count >= 2)
 		action = MouseEvent::DoubleClick;
 
-	Pt::Gui::MouseEvent mev(widget, 
-	                                       pev->pos.x + ev.translation.x, 
+	Pt::Gui::MouseEvent mev(widget,
+	                                       pev->pos.x + ev.translation.x,
 	                                       pev->pos.y + ev.translation.y,
 	                                       button,
 	                                       action,
@@ -156,8 +156,8 @@ void EventLoopImpl::buttonRelease(Pt::Gui::Widget& widget, PhEvent_t& ev)
 	else if(pev->buttons & Ph_BUTTON_ADJUST)
 		button = MouseEvent::MiddleButton;
 
-	Pt::Gui::MouseEvent mev(widget, 
-	                                       pev->pos.x + ev.translation.x, 
+	Pt::Gui::MouseEvent mev(widget,
+	                                       pev->pos.x + ev.translation.x,
 	                                       pev->pos.y + ev.translation.y,
 	                                       button,
 	                                       MouseEvent::Release,
@@ -169,13 +169,13 @@ void EventLoopImpl::buttonRelease(Pt::Gui::Widget& widget, PhEvent_t& ev)
 void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
 	PhRect_t* rect = PhGetRects(&ev);
-	
+
 	for(int n = 0; n < ev.num_rects;++n, ++rect)
 	{
-		PaintEvent pev(widget, 
-		                         Math::Point( rect->ul.x, rect->ul.y), 
-		                         Math::Size( rect->lr.x - rect->ul.x + 1, rect->lr.y - rect->ul.y + 1) );
-		
+		PaintEvent pev(widget,
+		                         Gfx::Point( rect->ul.x, rect->ul.y),
+		                         Gfx::Size( rect->lr.x - rect->ul.x + 1, rect->lr.y - rect->ul.y + 1) );
+
 		_app->event(pev);
 	}
 }
@@ -203,7 +203,7 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 		{
 			size_t oldHeight = widget.size().height();
 			size_t oldWidth = widget.size().width();
-			
+
 			widget.impl().setClipping();
 
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
@@ -211,13 +211,13 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 
 			if( ev.size.h > oldHeight )
 			{
-				PaintEvent pev (widget,  Math::Point( 0, oldHeight ), Math::Size( ev.size.w, ev.size.h - oldHeight) );
+				PaintEvent pev (widget,  Gfx::Point( 0, oldHeight ), Gfx::Size( ev.size.w, ev.size.h - oldHeight) );
 				_app->event(pev);
 			}
 
 			if( ev.size.w > oldWidth )
 			{
-				PaintEvent pev (widget,  Math::Point( oldWidth, 0 ), Math::Size( ev.size.w-oldWidth, oldHeight) );
+				PaintEvent pev (widget,  Gfx::Point( oldWidth, 0 ), Gfx::Size( ev.size.w-oldWidth, oldHeight) );
 				_app->event(pev);
 			}
 
@@ -229,7 +229,7 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 			_app->event(mev);
 			break;
 		}
-		
+
 		case Ph_WM_TOFRONT:
 		case Ph_WM_FFRONT:
 		case Ph_WM_FOCUS:
@@ -245,7 +245,7 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 		case Ph_WM_NO_FOCUS_LIST:
 			break;
 
-		default: 
+		default:
 			break;
 	}
 }
@@ -336,7 +336,7 @@ void ApplicationImpl::processEvents()
 
 
 int ApplicationImpl::run()
-{  
+{
 	return EventLoopImpl::instance().run();
 }
 

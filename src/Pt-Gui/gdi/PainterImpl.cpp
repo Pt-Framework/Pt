@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2006 Marc Boris D�rner
- * 
+ * Copyright (C) 2006 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -436,7 +436,7 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Pt::Math::Point& to)
+void PainterImpl::drawPixel(const Pt::Gfx::Point& to)
 {
     ensureActivePainter();
 
@@ -450,7 +450,7 @@ void PainterImpl::drawPixel(const Pt::Math::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to)
+void PainterImpl::drawLine(const Pt::Gfx::Point& from, const  Pt::Gfx::Point& to)
 {
     ensureActivePainter();
 
@@ -468,7 +468,7 @@ void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& 
 }
 
 
-void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
+void PainterImpl::drawText(const Pt::Gfx::Point& to, const Pt::String& text)
 {
     ensureActivePainter();
 
@@ -482,7 +482,7 @@ void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
 
     // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
     //DrawTextW(_drawable.deviceContext(), (wchar_t*)_stringStream.str().c_str(), -1, &rectangle, DT_NOCLIP);
-    
+
     _text.clear();
 	text.toUtf16( std::back_inserter(_text) );
     DrawTextW(_drawable.deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP);
@@ -494,8 +494,8 @@ void PainterImpl::fillRect(const Pt::Gfx::Rect& rect)
     ensureActivePainter();
 
     RECT rectangle;
-    const Pt::Math::Point topLeft     = rect.topLeft();
-    const Pt::Math::Point bottomRight = rect.bottomRight();
+    const Pt::Gfx::Point topLeft     = rect.topLeft();
+    const Pt::Gfx::Point bottomRight = rect.bottomRight();
     SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
     HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_drawable.deviceContext(), OBJ_BRUSH);
@@ -517,8 +517,8 @@ void PainterImpl::drawRect(const Pt::Gfx::Rect& rect)
     // Temporarily select the empty brush to only draw the outline.
     HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
 
-    const Pt::Math::Point topLeft     = rect.topLeft();
-    const Pt::Math::Point bottomRight = rect.bottomRight();
+    const Pt::Gfx::Point topLeft     = rect.topLeft();
+    const Pt::Gfx::Point bottomRight = rect.bottomRight();
     Rectangle(_drawable.deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
     // Select the original brush again.
@@ -526,7 +526,7 @@ void PainterImpl::drawRect(const Pt::Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
+void PainterImpl::drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
 {
     ensureActivePainter();
 
@@ -545,7 +545,7 @@ void PainterImpl::drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Si
 }
 
 
-void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
+void PainterImpl::fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
 {
     ensureActivePainter();
 
@@ -564,7 +564,7 @@ void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Si
 }
 
 
-void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const
+void PainterImpl::drawPolyline(const Pt::Gfx::Point* points, const size_t pointCount) const
 {
     if (_pen.size() == 0)
        return;
@@ -597,7 +597,7 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
 }
 
 
-void PainterImpl::fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const
+void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount) const
 {
     ensureActivePainter();
 
@@ -620,7 +620,7 @@ void PainterImpl::fillPolygon(const Pt::Math::Point* points, const size_t pointC
 }
 
 
-void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap, const  Pt::Gfx::Region& pixmapRegion)
+void PainterImpl::drawPixmap(const Pt::Gfx::Point& to, Pixmap& pixmap, const  Pt::Gfx::Region& pixmapRegion)
 {
     ensureActivePainter();
 
@@ -639,7 +639,7 @@ void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap, const  P
     pixmap.impl().endPaint();
 }
 
-void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap)
+void PainterImpl::drawPixmap(const Pt::Gfx::Point& to, Pixmap& pixmap)
 {
     ensureActivePainter();
 
@@ -659,7 +659,7 @@ void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap)
 }
 
 
-void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image)
 {
     ensureActivePainter();
 
@@ -667,7 +667,7 @@ void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& ima
 }
 
 
-void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
+void PainterImpl::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
 {
     ensureActivePainter();
 

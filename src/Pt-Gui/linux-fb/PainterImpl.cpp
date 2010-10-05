@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
  * Copyright (C) 2005-2007 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 #include "PainterImpl.h"
 
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf16Codec.h"
@@ -124,80 +124,80 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 }
 
 
-void PainterImpl::drawPixel(const Math::Point& to)
+void PainterImpl::drawPixel(const Gfx::Point& to)
 {
 
 }
 
 
-void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
 
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
+void PainterImpl::drawText(const Gfx::Point& to, const Pt::String& text)
 {
 
 }
 
 
-void PainterImpl::drawRect(const Math::Rect& rect)
+void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
 
 }
 
 
-void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
 
 }
 
 
-void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 
 }
 
 
-void PainterImpl::fillRect(const Math::Rect& rect)
+void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
 
 }
 
 
-void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 
 }
 
 
-void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
 
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
 
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm,
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm,
                              const Gfx::Region& pmRegion)
 {
 
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 {
     this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                             const Gfx::Region& imageRegion)
 {
 

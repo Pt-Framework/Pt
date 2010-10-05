@@ -2,12 +2,12 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 
 #include <Pt/Main.h>
 #include <Pt/SourceInfo.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gui/Application.h>
@@ -90,16 +90,16 @@ class FillPolygonDemo : public Pt::Gui::Widget
 
         void drawContent(int x, int y)
         {
-            std::vector<Pt::Math::Point> points(5);
-            points[0] = Pt::Math::Point( x-50, y-50);
-            points[1] = Pt::Math::Point(100+ x, y -50);
-            points[2] = Pt::Math::Point(100+ x, 100+ y);
-            points[3] = Pt::Math::Point(50+ x, 150+ y);
-            points[4] = Pt::Math::Point(x, 100+ y);
+            std::vector<Pt::Gfx::Point> points(5);
+            points[0] = Pt::Gfx::Point( x-50, y-50);
+            points[1] = Pt::Gfx::Point(100+ x, y -50);
+            points[2] = Pt::Gfx::Point(100+ x, 100+ y);
+            points[3] = Pt::Gfx::Point(50+ x, 150+ y);
+            points[4] = Pt::Gfx::Point(x, 100+ y);
 
             _imagePainter.fillPolygon( &points[0], points.size() );
 
-            painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+            painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );
         }
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
@@ -112,7 +112,7 @@ class FillPolygonDemo : public Pt::Gui::Widget
             _imagePainter.setBrush(_solidBrush);
             this->drawContent(-30, 200);
             this->drawContent(250, 300);
-            this->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+            this->painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );
         }
 
         virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)

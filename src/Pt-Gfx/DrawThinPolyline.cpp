@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -46,7 +47,7 @@ DrawThinPolyline::DrawThinPolyline()
 DrawThinPolyline::~DrawThinPolyline()
 { }
 
-void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount )
+void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount )
 {
     switch( pen.style() )
     {
@@ -65,20 +66,20 @@ void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Math::Point
 }
 
 
-void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount)
+void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount)
 {
     if (points <= 0)
         return;
 
-    const Math::Point* ppt = points;	
+    const Gfx::Point* ppt = points;
     int xstart, ystart;
     int x1, x2, y1, y2;
-    
+
     int  dashNum    = 0;
     int  dashIndex  = 0;
     int  dashOffset = 0;
     bool isDoubleDash = (pen.style() == Pen::DoubleDash);
-    
+
     std::vector<unsigned int> dashes(2);
     dashes[0] = pen.size() * 3; // Length of `on' dashes.
     dashes[1] = pen.size();		// Length of `off' dashes.
@@ -137,7 +138,7 @@ void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Math::P
             }
 
             // We have Bresenham parameters and two points, so all we need to
-            // do now is draw (updating dashNum, dashIndex and dashOffset).			
+            // do now is draw (updating dashNum, dashIndex and dashOffset).
             bresenhamDasheLineSegment( image, pen, &dashNum, &dashIndex, &dashes[0], dashes.size(),
                                        &dashOffset, isDoubleDash, signdx, signdy, axis, x1, y1,
                                         e, e1, e2, len);
@@ -150,8 +151,8 @@ void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Math::P
     if (pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1))
     {
         if (dashNum & 1)
-        {// Background dash. paint, in paint type #0			
-            
+        {// Background dash. paint, in paint type #0
+
             /*
                 if (isDoubleDash)
                     _stroke->stroke( image, pen, x2, y2);
@@ -160,14 +161,14 @@ void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Math::P
         else
         {// Foreground dash
             /* use a paint type that cycles through 1..(numPixels-1) */
-            
+
             /*
             int numPixels = pGC->numPixels;
             int paintType = 1 + ((dashNum / 2) % (numPixels - 1));
             MI_PAINT_POINT(paintedSet, pGC->pixels[paintType], x2, y2);
             */
 
-            _stroke->stroke( image, pen, x2, y2);			
+            _stroke->stroke( image, pen, x2, y2);
         }
     }
 }
@@ -176,8 +177,8 @@ void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Math::P
 // Endpoint semantics are used.
 void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pen, int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len)
 {
-    std::vector<Math::Point>  ptInit_bg;
-    Math::Point *pptLast_fg,  *pptLast_bg = 0;
+    std::vector<Gfx::Point>  ptInit_bg;
+    Gfx::Point *pptLast_fg,  *pptLast_bg = 0;
     std::vector<unsigned int>  widthInit_bg;
     unsigned int *pwidthLast_fg, *pwidthLast_bg = 0;
     int		x, y;
@@ -191,12 +192,12 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
     int numSpans_fg, numSpans_bg = 0;
     int ycurr_fg, ycurr_bg = 0;
 
-    Math::Point *ppt_fg, *ppt_bg = 0;
+    Gfx::Point *ppt_fg, *ppt_bg = 0;
     unsigned int *pwidth_fg, *pwidth_bg = 0;
     bool firstspan_fg, firstspan_bg = false;
 
     // Set up work arrays
-    std::vector<Math::Point> ptInit_fg(len);
+    std::vector<Gfx::Point> ptInit_fg(len);
     std::vector<unsigned int> widthInit_fg(len);
 
     pptLast_fg = &ptInit_fg[len - 1];
@@ -232,7 +233,7 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
     // loop, generating dashes (in the absence of dashing, would
     // generate len pixels in all)
     for ( ; ; )
-    { 
+    {
         len -= thisDash;
 
         /* reset variables used in MI_ADD_POINT() */
@@ -271,38 +272,38 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
         {
             case xAxis:
             default:
-            if (dashIndex & 1) 
+            if (dashIndex & 1)
             {
-                if (isDoubleDash) 
+                if (isDoubleDash)
                 {
                     while (thisDash--)
                     {
                         addPoint( x, y, &ppt_bg, &pwidth_bg, numSpans_bg, ycurr_bg, firstspan_bg, signdy );
 
-                        if ((e += e1) >= 0) 
-                        { 
-                            e += e3; 
-                            y += signdy; 
-                        } 
-                        
+                        if ((e += e1) >= 0)
+                        {
+                            e += e3;
+                            y += signdy;
+                        }
+
                         x += signdx;
                     }
                 }
-                else 
+                else
                 {
                     /* not double dashing; no background dash */
                     while (thisDash--)
                     {
-                        if ((e += e1) >= 0) 
-                        { 
-                            e += e3; 
-                            y += signdy; 
-                        } 
-                        
+                        if ((e += e1) >= 0)
+                        {
+                            e += e3;
+                            y += signdy;
+                        }
+
                         x += signdx;
                     }
                 }
-            } 
+            }
             else
             {
                 /* create foreground dash */
@@ -310,72 +311,72 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
                 {
                     addPoint(x, y, &ppt_fg, &pwidth_fg, numSpans_fg, ycurr_fg, firstspan_fg, signdy);
 
-                    if ((e += e1) >= 0) 
-                    { 
-                        e += e3; 
-                        y += signdy; 
-                    } 
-                    
+                    if ((e += e1) >= 0)
+                    {
+                        e += e3;
+                        y += signdy;
+                    }
+
                     x += signdx;
                 }
             }
         break;
         case yAxis:
-            if (dashIndex & 1) 
+            if (dashIndex & 1)
             {
-                if (isDoubleDash) 
+                if (isDoubleDash)
                 {
                     /* create background dash */
                     while (thisDash--)
                     {
-                        addPoint(x, y, &ppt_bg, &pwidth_bg, numSpans_bg, ycurr_bg, firstspan_bg, signdy); 		
+                        addPoint(x, y, &ppt_bg, &pwidth_bg, numSpans_bg, ycurr_bg, firstspan_bg, signdy);
 
-                        if ((e += e1) >= 0) 
-                        { 
-                            e += e3; 
-                            x += signdx; 
-                        } 
-                        
+                        if ((e += e1) >= 0)
+                        {
+                            e += e3;
+                            x += signdx;
+                        }
+
                         y += signdy;
-                    }		
+                    }
                 }
-                else 
+                else
                 {
                     /* not double dashing; no background dash */
                     while (thisDash--)
                     {
-                        if ((e += e1) >= 0) 
-                        { 
-                            e += e3; 
-                            x += signdx; 
-                        } 
-                        
+                        if ((e += e1) >= 0)
+                        {
+                            e += e3;
+                            x += signdx;
+                        }
+
                         y += signdy;
-                    }	
+                    }
                 }
-            } 
+            }
             else
             {
                 /* create foreground dash */
                 while (thisDash--)
                 {
-                    addPoint(x, y, &ppt_fg, &pwidth_fg, numSpans_fg, ycurr_fg, firstspan_fg, signdy); 		
+                    addPoint(x, y, &ppt_fg, &pwidth_fg, numSpans_fg, ycurr_fg, firstspan_fg, signdy);
 
-                    if ((e += e1) >= 0) 
-                    { 
-                        e += e3; 
-                        x += signdx; 
-                    } 
-                    
+                    if ((e += e1) >= 0)
+                    {
+                        e += e3;
+                        x += signdx;
+                    }
+
                     y += signdy;
-                }	
+                }
             }
             break;
         }
 
         if (numSpans_fg > 0)
         { // Have a foreground dash to paint.
-            Math::Point *pptStart_fg;
+            Gfx::Point *pptStart_fg;
             unsigned int *pwidthStart_fg;
 
             if (signdy >= 0)
@@ -402,10 +403,10 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
             }
         }
 
-        if (isDoubleDash && numSpans_bg > 0)			
+        if (isDoubleDash && numSpans_bg > 0)
         {// Have a background dash to paint.
 
-            Math::Point *pptStart_bg;
+            Gfx::Point *pptStart_bg;
             unsigned int *pwidthStart_bg;
 
             if (signdy >= 0)
@@ -429,12 +430,12 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
 
         dashNum++;
         dashIndex++;
-        
+
         if (dashIndex == numInDashList)
             dashIndex = 0;
-    
+
         dashRemaining = (int)(pDash[dashIndex]);
-        
+
         if ((thisDash = dashRemaining) >= len)
         {
             dashRemaining -= len;
@@ -448,9 +449,9 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
     *pdashOffset = (int)(pDash[dashIndex]) - dashRemaining;
 }
 
-void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount)
+void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount)
 {
-    const Math::Point *ppt;
+    const Gfx::Point *ppt;
 
     int xstart;
     int ystart;
@@ -469,7 +470,7 @@ void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::
     ystart = ppt->y();
     x2 = xstart;
     y2 = ystart;
-    
+
     while( --pointCount )
     {
         x1 = x2;
@@ -481,7 +482,7 @@ void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::
 
         if (x1 == x2)  // Vertical line.
         {
-            if (y1 > y2)		
+            if (y1 > y2)
             { 	// Make line go top to bottom, keeping endpoint semantics.
                 int tmp;
 
@@ -502,7 +503,7 @@ void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::
         }
         else if (y1 == y2)  // Horizontal line.
         {
-            if (x1 > x2)			
+            if (x1 > x2)
             { // Force line from left to right, keeping endpoint semantics.
                 int tmp;
 
@@ -510,7 +511,7 @@ void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::
                 x2 = x1 + 1;
                 x1 = tmp + 1;
             }
-      
+
             // Draw line
             if (x1 != x2)
                 _stroke->stroke(image, pen, x1, y1, x2 - x1);
@@ -549,15 +550,15 @@ void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::
             }
 
             // We have Bresenham parameters and two points, so all we need to do now is draw.
-            len = (axis == xAxis) ? adx : ady; 
-        
+            len = (axis == xAxis) ? adx : ady;
+
             bresenhamLineSegment(image, pen, signdx, signdy, axis, x1, y1, e, e1, e2, len );
         }
     }
-  
+
     // Paint the last point if the end style isn't CapNotLast.  (I.e. assume
     // that a round/butt/projecting/triangular cap that is one pixel wide is
-    // the same as the single pixel of the endpoint.)  
+    // the same as the single pixel of the endpoint.)
     if (pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
         _stroke->stroke( image, pen, x2, y2);
 }
@@ -567,26 +568,26 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
     if (len == 0)
         return;
 
-    std::vector<Math::Point> ptInit(len);
+    std::vector<Gfx::Point> ptInit(len);
     std::vector<unsigned int> widthInit(len);
 
-    Math::Point* pptLast     = &ptInit[len - 1];
+    Gfx::Point* pptLast     = &ptInit[len - 1];
     unsigned int *pwidthLast = &widthInit[len - 1];
 
     int x, y;
     int e3;
     int numSpans = 0;
     int ycurr = 0;
-    Math::Point  *ppt = pptLast;
+    Gfx::Point  *ppt = pptLast;
     unsigned int *pwidth = pwidthLast;
     bool firstspan = true;
-    
+
     if (signdy >= 0)
     {
         ppt  = &ptInit[0];
         pwidth = &widthInit[0];
     }
-      
+
     e3 = e2 - e1;
     e = e - e1;
 
@@ -602,26 +603,26 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
             {
                 addPoint(x, y, &ppt, &pwidth, numSpans, ycurr, firstspan, signdy);
 
-                if ((e += e1) >= 0) 
-                { 
-                    e += e3; 
-                    y+=signdy; 
-                } 
-                
+                if ((e += e1) >= 0)
+                {
+                    e += e3;
+                    y+=signdy;
+                }
+
                 x+=signdx;
             }
         break;
         case yAxis:
             while (len--)
             {
-                addPoint(x, y, &ppt, &pwidth, numSpans, ycurr, firstspan, signdy); 		
+                addPoint(x, y, &ppt, &pwidth, numSpans, ycurr, firstspan, signdy);
 
-                if ((e += e1) >= 0) 
-                { 
-                    e += e3; 
-                    x += signdx; 
-                } 
-                
+                if ((e += e1) >= 0)
+                {
+                    e += e3;
+                    x += signdx;
+                }
+
                 y += signdy;
             }
         break;
@@ -629,13 +630,13 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
 
     if (numSpans > 0)
     {
-        if (signdy < 0)	
+        if (signdy < 0)
         {// Spans are offset, so shift downward.
-            Math::Point *ppt_src	 = pptLast - (numSpans - 1);
-            Math::Point *ppt_dst	 = &ptInit[0];
+            Gfx::Point *ppt_src	 = pptLast - (numSpans - 1);
+            Gfx::Point *ppt_dst	 = &ptInit[0];
             unsigned int *pwidth_src = pwidthLast - (numSpans - 1);
             unsigned int *pwidth_dst = &widthInit[0];
-            
+
             int count = numSpans;
 
             while (count--)
@@ -647,7 +648,7 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
 
         for( int i = 0; i < numSpans; ++i)
             _stroke->stroke( image, pen, ptInit[i].x(), ptInit[i].y(), widthInit[i]);
-    }	
+    }
 }
 
 } // namespace Gfx

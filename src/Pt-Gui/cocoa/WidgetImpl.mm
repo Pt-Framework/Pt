@@ -24,7 +24,7 @@ namespace Pt {
 
 namespace Gui {
 
-WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
+WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
 : _apiWidget(apiWidget)
 {
     _window = nil;
@@ -32,15 +32,15 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 
     if(parent == 0)
     {
-        _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())      
-                                                        styleMask:NSTitledWindowMask | 
-                                                                  NSClosableWindowMask | 
+        _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())
+                                                        styleMask:NSTitledWindowMask |
+                                                                  NSClosableWindowMask |
                                                                   NSMiniaturizableWindowMask |
                                                                   NSResizableWindowMask
                                                          backing:NSBackingStoreBuffered
                                                          defer:NO];
-    
-        [_window setAcceptsMouseMovedEvents:YES];   
+
+        [_window setAcceptsMouseMovedEvents:YES];
         [_window setContentView: _view];
         [_window setDelegate: _view];
     }
@@ -49,7 +49,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
         [parent->impl()._view addSubview:_view];
         [_view setFrame:NSMakeRect(at.x(), at.y(), size.width(), size.height())];
     }
-    
+
     _painter.setView(_view);
 }
 
@@ -62,26 +62,26 @@ WidgetImpl::~WidgetImpl()
 
 
 Pt::String WidgetImpl::title() const
-{ 
-/*    
+{
+/*
     NSString* str = [window title];
-    [str getBytes:(void *)buffer 
+    [str getBytes:(void *)buffer
                   maxLength:(NSUInteger)
                   usedLength:(NSUInteger *)
                   encoding:(NSStringEncoding)
-                  options:(NSStringEncodingConversionOptions)options 
-                  range:(NSRange)range 
+                  options:(NSStringEncodingConversionOptions)options
+                  range:(NSRange)range
                   remainingRange:(NSRangePointer)leftover
 */
-                  
-    return L""; 
+
+    return L"";
 }
 
 
 void WidgetImpl::setTitle(const Pt::String& text)
 {
     //TODO: use Byteorder.h to determine endianess of encoding
-    NSString* str = [[NSString alloc] initWithBytes: text.c_str() 
+    NSString* str = [[NSString alloc] initWithBytes: text.c_str()
                                                      length: text.size() * sizeof(Pt::Char)
                                                      encoding: NSUTF32LittleEndianStringEncoding];
     [_window setTitle:str];

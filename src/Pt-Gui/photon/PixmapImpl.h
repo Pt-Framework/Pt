@@ -20,7 +20,7 @@
 #define Pt_PixmapImpl_h
 
 #include "Pt/Api.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Size.h"
 #include "Pt/Gui/Painter.h"
 #include <photon/PhRender.h>
 #include <Pt.h>
@@ -39,7 +39,7 @@ namespace Gui {
 
             virtual ~PixmapImpl();
 
-            const Math::Size& size() const
+            const Gfx::Size& size() const
             { return _size; }
 
             Painter painter();
@@ -51,7 +51,7 @@ namespace Gui {
 			{ return &_image; }
 
         private:
-            Math::Size _size;
+            Gfx::Size _size;
             PixmapPainterImpl _painter;
             PmMemoryContext_t* _mc;
             PhImage_t _image;

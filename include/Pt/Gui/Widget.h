@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,7 +32,7 @@
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Region.h>
 #include <Pt/String.h>
@@ -186,7 +186,7 @@ namespace Gui {
              * @param at The position of this widget inside its parent relative to the parent's top-left corner.
              * @param size The size of this widget. The size must be >0 for width and height.
              */
-            Widget(Widget& parent, const Math::Point& at, const Math::Size& size);
+            Widget(Widget& parent, const Gfx::Point& at, const Gfx::Size& size);
 
             /**
              * @brief Constructs a new widget using the platform's default position and size.
@@ -219,7 +219,7 @@ namespace Gui {
              * @param at The position of this widget inside its parent relative to the parent's top-left corner.
              * @param size The size of this widget. The size must be >0 for width and height.
              */
-            Widget(const Math::Point& at, const Math::Size& size);
+            Widget(const Gfx::Point& at, const Gfx::Size& size);
 
             /**
              * @brief Constructs a new top-level widget using the platform's default position and
@@ -350,7 +350,7 @@ namespace Gui {
              * @see resize()
              * @see rect()
              */
-            const Math::Size& size() const;
+            const Gfx::Size& size() const;
 
             /**
              * @brief Moves the widget to the given position (x, y).
@@ -381,7 +381,7 @@ namespace Gui {
              * @return The y-position of this widget relative to its parent widget.
              */
             ssize_t y() const;
-            
+
             /**
              * @brief Returns the width of this widget.
              *
@@ -395,7 +395,7 @@ namespace Gui {
              * @return The height of this widget.
              */
             size_t height() const;
-            
+
             /**
              * @brief Resizes this widget to the given width and height.
              *
@@ -405,7 +405,7 @@ namespace Gui {
              * @param height The new height for this widget.
              * @see move()
              * @see size()
-             * @see resize(Math::Size&)
+             * @see resize(Gfx::Size&)
              */
             virtual void resize(size_t width, size_t height);
 
@@ -419,7 +419,7 @@ namespace Gui {
             * @see size()
             * @see resize(size_t, size_t)
             */
-            virtual void resize(const Math::Size& newSize);
+            virtual void resize(const Gfx::Size& newSize);
 
             /**
              * @brief Makes this widget visible.
@@ -444,7 +444,7 @@ namespace Gui {
              * @see show()
              */
             virtual void hide();
-            
+
             /**
              * @brief Calculates and returns the minimum size of this widget.
              *
@@ -458,7 +458,7 @@ namespace Gui {
              * @return The minimum size of this widget.
              * @see preferredSize()
              */
-            virtual Math::Size minimumSize();
+            virtual Gfx::Size minimumSize();
 
             /**
              * @brief Calculates and returns the preferred size of this widget.
@@ -475,7 +475,7 @@ namespace Gui {
              * @return The preferred size of this widget.
              * @see minimumSize()
              */
-            virtual Math::Size preferredSize();
+            virtual Gfx::Size preferredSize();
 
             /**
              * @brief Updates the layout of this widget by doing a re-layout of all child widgets.
@@ -758,7 +758,7 @@ namespace Gui {
              * @see _keyEvent()
              */
             void keyEvent(const KeyEvent& event);
-            
+
         public:
             //! @brief Signal which is sent when the widget is closed by the underlying platform.
             //! To get informed about signals use one of the connect()-methods.

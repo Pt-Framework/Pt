@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 #define PTV_GUI_LAYOUT_H
 
 #include <Pt/Connectable.h>
-#include <Pt/Math/Size.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gui/Api.h>
 
@@ -55,7 +55,7 @@ namespace Gui {
      *
      * Most LayoutManagers provide a specific LayoutData class, which derives from the basic
      * LayoutData class and stores all information which are necessary to layout one widget.
-     * 
+     *
      * To inform the LayoutManager about which LayoutData object is associated with which
      * LayoutData object each LayoutManager provides a specific method, which for consistency
      * reasons should have a signature similar to:
@@ -97,7 +97,7 @@ namespace Gui {
 
             /**
              * @brief Returns the container widget this LayoutManager does the layouting for.
-             * 
+             *
              * Returns the container widget this LayoutManager does the layouting for. For every
              * widget there is only one LayoutManager. If a LayoutManager is created for a widget
              * which already has a LayoutManager, the older LayoutManager is destroyed.
@@ -109,7 +109,7 @@ namespace Gui {
 
             /**
              * @brief Returns the container widget this LayoutManager does the layouting for.
-             * 
+             *
              * Returns the container widget this LayoutManager does the layouting for. For every
              * widget there is only one LayoutManager. If a LayoutManager is created for a widget
              * which already has a LayoutManager, the older LayoutManager is destroyed.
@@ -157,7 +157,7 @@ namespace Gui {
              *
              * @return The minium layout size.
              */
-            virtual Math::Size minimumSize() = 0;
+            virtual Gfx::Size minimumSize() = 0;
 
             /**
              * @brief Calculates and returns the preferred size for the container widget's layout.
@@ -172,7 +172,7 @@ namespace Gui {
              *
              * @return The preferred layout size.
              */
-            virtual Math::Size preferredSize() = 0;
+            virtual Gfx::Size preferredSize() = 0;
 
         protected:
             /**

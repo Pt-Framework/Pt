@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2007 Sebastian Pieck                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,8 +26,8 @@
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/String.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
 
 
 namespace Pt {
@@ -40,8 +40,8 @@ namespace Gui {
     class WidgetImpl
     {
         public:
-            WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at = Math::Point(0, 0),
-                                                          const Math::Size& size = Math::Size(400, 300));
+            WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at = Gfx::Point(0, 0),
+                                                          const Gfx::Size& size = Gfx::Size(400, 300));
 
             virtual ~WidgetImpl();
 

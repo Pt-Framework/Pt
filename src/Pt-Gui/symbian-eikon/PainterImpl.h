@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -55,18 +55,18 @@ namespace Gui {
 
     /**
      * @brief Painter implementation for symbian CGraphicsContext.
-     * 
+     *
      * This is the base class for two seperate painter implementations:
      * PixmapPainter and WidgetPainter.
-     * 
+     *
      * Both will use a CGraphicsContext to draw, but different implementations
      * of begin/end to activate the context.
-     * 
+     *
      * This painter will only draw when a context is provided.
      * If the context can not be activated we're assuming that there is no
      * window/bitmap server connection and simply do nothing at all.
      */
-    class PainterImpl 
+    class PainterImpl
     {
         public:
             PainterImpl();
@@ -78,16 +78,16 @@ namespace Gui {
              * to the window/font server is about to be destroyed
              */
             void destructResources();
-            
+
             virtual void begin();
 
             virtual void end();
 
             /**
-             * @brief will be called from Painter::~Painter() 
+             * @brief will be called from Painter::~Painter()
              */
             virtual void cleanUp();
-            
+
             void setPen(const Gfx::Pen& pen);
 
             const Gfx::Pen& pen() const;
@@ -106,35 +106,35 @@ namespace Gui {
 
             const std::list<std::string>& fontFamilyNames();
 
-            virtual void drawPixel(const Math::Point& to);
+            virtual void drawPixel(const Gfx::Point& to);
 
-            virtual void drawLine(const Math::Point& from, const Math::Point& to);
+            virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
-            virtual void drawText(const Math::Point& to, const Pt::String& text);
+            virtual void drawText(const Gfx::Point& to, const Pt::String& text);
 
             virtual void drawRect(const Gfx::Rect& rect);
 
-            virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
+            virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
 
             virtual void fillRect(const Gfx::Rect& rect);
 
-            virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
+            virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
-            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image);
-            
-            void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image);
+            void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image);
 
-            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
-            
-            void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image, const Pt::Gfx::Region& imageRegion);
+            void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgb8888Image& image);
+
+            void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
+
+            void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgb8888Image& image, const Pt::Gfx::Region& imageRegion);
 
             /**
              * @brief Helper struct to hold the necessary context information
@@ -148,24 +148,24 @@ namespace Gui {
                 CEikonEnv* _coeEnv;
                 TPoint _offset;
                 TRect _clipRect;
-                
-                ContextInfo() 
+
+                ContextInfo()
                 : _gc(0)
                 , _device(0)
                 , _nativeFont(0)
                 , _coeEnv(0)
                 , _offset(0, 0)
                 , _clipRect(0, 0, 0, 0)
-                {                    
+                {
                 }
             };
-                        
+
         protected:
             /**
              * @brief Apply context information to the attributes of this class.
-             */            
+             */
             void applyContextInfo(const ContextInfo& contextInfo);
-            
+
             template <typename Iterator>
             void drawImage(ssize_t x, ssize_t y, Iterator begin, Iterator end, size_t width, size_t height)
             {
@@ -178,11 +178,11 @@ namespace Gui {
 
             /**
              * @brief Ensure active context and activate pen.
-             * 
+             *
              * @see activatePen
              */
             void updatePen();
-            
+
             /**
              * @brief Activate pen but only if it has changed.
              * <br/><b>Graphic context must be active</b>
@@ -191,11 +191,11 @@ namespace Gui {
 
             /**
              * @brief Ensure active context and activate font.
-             * 
+             *
              * @see activateFont
              */
             void updateFont();
-            
+
             /**
              * @brief Activate font but only if it has changed.
              * <br/><b>Graphic context must be active</b>
@@ -204,7 +204,7 @@ namespace Gui {
 
             /**
              * @brief Ensure active context and activate brush.
-             * 
+             *
              * @see activateBrush
              */
             void updateBrush();
@@ -212,19 +212,19 @@ namespace Gui {
             /**
              * @brief Activate brush but only if it has changed.
              * <br/><b>Graphic context must be active</b>
-             */            
+             */
             void activateBrush();
 
             /**
              * @brief This will ensure that the graphic context is active.
-             */ 
+             */
             bool ensureActiveContext();
-            
+
             /**
              * @brief Release font resources.
              */
             void freeFont();
-            
+
         protected:
             // current pen
             Gfx::Pen _pen;
@@ -247,7 +247,7 @@ namespace Gui {
             Gfx::Brush* _oldBrushRef;
             // see above
             Gfx::Font*  _oldFontRef;
-            
+
             // symbian context information
             CGraphicsContext* _gc;
             CGraphicsDevice* _device;
@@ -259,21 +259,21 @@ namespace Gui {
             TPoint _offset;
             // holds the current clipping rectangle
             TRect _clipRect;
-            
+
             // TODO: Use auto_ptr? Feasible with symbian classes?
             CFbsBitmap* _brushBitmap;
-            CFbsBitmap* _drawBitmap;  
-            
+            CFbsBitmap* _drawBitmap;
+
         private:
-            // These are used to unlink the 
+            // These are used to unlink the
             static const Gfx::Pen _defaultPen;
             static const Gfx::Brush _defaultBrush;
             static const Gfx::Font _defaultFont;
-                
+
     };
-    
+
     class Drawable;
-    
+
     /**
      * @brief Concrete Painter implementation used when drawing into Drawables.
      */
@@ -282,7 +282,7 @@ namespace Gui {
         public:
             /**
              * @brief Construct Painter.
-             * 
+             *
              * @param drawable Drawable to draw to.
              */
             ConcretePainter(Drawable& drawable);
@@ -301,12 +301,12 @@ namespace Gui {
              * @brief Deactivate painter.
              */
             virtual void end();
-            
+
         private:
             Drawable& _drawable;
-            
+
             // flag to indicate if context is active.
-            bool _active;            
+            bool _active;
     };
 
 } // namespace Gui

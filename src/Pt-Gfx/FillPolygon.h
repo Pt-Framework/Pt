@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,7 +25,7 @@
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Gfx/ClipPolygon.h>
 #include "Edge.h"
@@ -69,7 +70,7 @@ class FillPolygon
             @see FillPolygon::draw
         */
         void operator() ( ARgbImage& image, const Brush& brush,
-                          const Math::Point* points, size_t pointCount )
+                          const Gfx::Point* points, size_t pointCount )
         { this->draw(image, brush, points, pointCount); }
 
         /** @brief Fill a polygon on an image
@@ -83,7 +84,7 @@ class FillPolygon
             @param points Polygon points
         */
         virtual void draw( ARgbImage& image, const Brush& brush,
-                           const Math::Point* points, size_t pointCount );
+                           const Gfx::Point* points, size_t pointCount );
 
     private:
         Fill*             _fill;

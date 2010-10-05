@@ -2,12 +2,12 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 #ifndef PT_GFX_CLIPPOLYGON_H
 #define PT_GFX_CLIPPOLYGON_H
 
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Rect.h>
 
@@ -59,7 +59,7 @@ class ClipPolygon
 
             @see ClipPolygon::clip
         */
-        void operator() (std::vector<Pt::Math::Point>& in,
+        void operator() (std::vector<Pt::Gfx::Point>& in,
                          const Pt::Gfx::Rect& clippingArea )
         { this-> clip(in, clippingArea); }
 
@@ -73,23 +73,23 @@ class ClipPolygon
             @param clippingArea Rectangle to clip against
 
         */
-        void clip( std::vector<Pt::Math::Point>& in,
+        void clip( std::vector<Pt::Gfx::Point>& in,
                    const Pt::Gfx::Rect& clippingArea );
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;
 
-        void clipEdge( const std::vector<Pt::Math::Point>& in,
-                       std::vector<Pt::Math::Point>& out,
-                       Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1);
+        void clipEdge( const std::vector<Pt::Gfx::Point>& in,
+                       std::vector<Pt::Gfx::Point>& out,
+                       Pt::Gfx::Point edgePoint0, Pt::Gfx::Point edgePoint1);
 
-        Pt::Math::Point intersect( const Pt::Math::Point& from,
-                                   const Pt::Math::Point& to,
-                                   const Pt::Math::Point& edge0,
-                                   Pt::Math::Point& edge1 );
+        Pt::Gfx::Point intersect( const Pt::Gfx::Point& from,
+                                   const Pt::Gfx::Point& to,
+                                   const Pt::Gfx::Point& edge0,
+                                   Pt::Gfx::Point& edge1 );
 
-        bool inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0,
-                     Pt::Math::Point& edge1 );
+        bool inside( const Pt::Gfx::Point& p, const Pt::Gfx::Point& edge0,
+                     Pt::Gfx::Point& edge1 );
 };
 
 }

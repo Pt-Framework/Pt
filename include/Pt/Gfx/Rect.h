@@ -1,11 +1,12 @@
 /*
  * Copyright (C) 2006 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,107 +30,177 @@
 #ifndef PT_GFX_RECT_H
 #define PT_GFX_RECT_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Math/Math.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 
 
 namespace Pt {
 
     namespace Gfx {
-
         //! \brief A generic Rect class
         template<typename PointT, typename SizeT>
         class BasicRect {
             public:
-                //! Construct a BasicRect at with a given Math::Rect
-                BasicRect(const Pt::Math::BasicRect<PointT,SizeT>& val)
-                : _r(val)
-                {}
-
                 //! Construct a BasicRect at a given position and BasicSize<SizeT>
-                BasicRect(const Pt::Math::BasicPoint<PointT>& p = Pt::Math::BasicPoint<PointT>(0, 0), const Pt::Math::BasicSize<SizeT>& s = Pt::Math::BasicSize<SizeT>(1, 1))
-                : _r(p,s)
+                BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(0, 0))
+                : _p(p), _s(s)
                 {}
 
-                BasicRect( const Pt::Math::BasicPoint<PointT>& p1, const Pt::Math::BasicPoint<PointT>& p2 )
-                : _r(p1, Math::Size( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 ) )
+                //! Construct a BasicRect at with a given BasicPoints
+                BasicRect( const Pt::Gfx::BasicPoint<PointT>& p1, const Pt::Gfx::BasicPoint<PointT>& p2 )
+                : _p(p1), _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
                 {}
 
+                BasicRect(const Pt::Gfx::BasicRect<PointT,SizeT>& val)
+                : _p(val._p), _s(val._s)
+                {}
 
-                Pt::Math::BasicRect<PointT,SizeT>& mathRect()
-                { return _r; }
+                bool isNull() const
+                {
+                    return (_s.width() == 0 || _s.height() == 0 );
+                }
 
-                const Pt::Math::BasicRect<PointT,SizeT>& mathRect() const
-                { return _r; }
+                void set(const Pt::Gfx::BasicRect<PointT,SizeT>& val)
+                {
+                    _p = val._p;
+                    _s = val._s;
+                }
 
-                void set(const Pt::Math::BasicRect<PointT,SizeT>& val)
-                { _r = val; }
+                BasicRect& setGeometry(const Pt::Gfx::BasicPoint<PointT>& p,
+                                       const Pt::Gfx::BasicSize<SizeT>& s)
+                {
+                    _p = p;
+                    _s = s;
+                    return *this;
+                }
+
+
+                BasicRect& setGeometry(const Pt::Gfx::BasicPoint<PointT>& p1, const Pt::Gfx::BasicPoint<PointT>& p2)
+                {
+                    this->setOrigin( p1 );
+                    this->setWidth(p2.x() - p1.x() + 1);
+                    this->setHeight(p2.y() - p1.y() + 1);
+                    return *this;
+                }
 
                 //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
-                void setSize(const Pt::Math::BasicSize<SizeT>& s)
-                { _r.setSize(s); }
+                void setOrigin(const Pt::Gfx::BasicPoint<PointT>& p)
+                {
+                    _p = p;
+                }
 
+                void setOrigin(PointT x, PointT y)
+                {
+                    _p.set(x, y);
+                }
 
-                const Pt::Math::BasicSize<SizeT>& size() const
-                { return _r.size(); }
-
-
-                PointT left() const
-                { return _r.x(); }
-
-
-                PointT top() const
-                { return _r.y(); }
-
-
-                PointT x() const
-                { return _r.x(); }
-
-
-                PointT y() const
-                { return _r.y(); }
+                //! Return the BasicPoint<PointT> as a BasicPoint<PointT>
+                const Pt::Gfx::BasicPoint<PointT>& origin() const
+                {
+                    return _p;
+                }
 
                 BasicRect& setX(PointT x)
                 {
-                    _r.setX( x );
+                    _p.setX( x );
                     return *this;
                 }
 
                 BasicRect& setY(PointT y)
                 {
-                    _r.setY( y );
+                    _p.setY( y );
                     return *this;
                 }
 
-                PointT right() const
-                { return _r.x() + _r.width() - 1; }
-
-                PointT bottom() const
+                PointT x() const
                 {
-                    return _r.y() + _r.height() - 1;
+                    return _p.x();
+                }
+
+                PointT y() const
+                {
+                    return _p.y();
+                }
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setSize(const Pt::Gfx::BasicSize<SizeT>& s)
+                {
+                    _s = s;
+                }
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setSize(SizeT width, SizeT height)
+                {
+                    _s.setWidthHeight(width, height);
+                }
+
+                const Pt::Gfx::BasicSize<SizeT>& size() const
+                {
+                    return _s;
+                }
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setWidth(SizeT w)
+                {
+                    _s.setWidth(w);
+                }
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setHeight(SizeT w)
+                {
+                    _s.setHeight(w);
+                }
+
+                SizeT width() const
+                {
+                    return _s.width();
+                }
+
+                SizeT height() const
+                {
+                    return _s.height();
                 }
 
                 void setLeft(PointT value)
                 {
-                    _r.setWidth( _r.width() + _r.x() - value );
-                    _r.setX( value );
+                    setWidth( this->width() + this->x() - value );
+                    setX( value );
                 }
 
                 void setTop(PointT value)
                 {
-                    _r.setHeight( _r.y() - value  + _r.height());
-                    _r.setY( value );
+                    setHeight( this->height() + this->y() - value );
+                    setY( value );
                 }
 
                 void setRight( PointT value )
                 {
-                    _r.setWidth( width() + (value - right()) );
+                    setWidth( this->width() + (value - right()) );
                 }
 
                 void setBottom( PointT value )
                 {
-                    _r.setHeight( height() + value - this->bottom() );
+                    setHeight( this->height() + value - this->bottom() );
+                }
+
+                PointT left() const
+                {
+                    return _p.x();
+                }
+
+                PointT top() const
+                {
+                    return _p.y();
+                }
+
+                PointT right() const
+                {
+                    return _p.x() + _s.width() - 1;
+                }
+
+                PointT bottom() const
+                {
+                    return _p.y() + _s.height() - 1;
                 }
 
                 BasicRect& addLeft(PointT delta)
@@ -180,83 +251,49 @@ namespace Pt {
                   return * this;
                 }
 
-                SizeT width() const
-                { return _r.width(); }
-
-                SizeT height() const
-                { return _r.height(); }
-
-                BasicRect& setWidth(SizeT w)
-                {
-                     _r.setWidth(w);
-                     return *this;
-                }
-
-                BasicRect& setHeight(SizeT h)
-                {
-                    _r.setHeight(h);
-                     return *this;
-                }
-
-                BasicRect& setGeometry(const Pt::Math::BasicPoint<PointT>& p, const Pt::Math::BasicSize<SizeT>& s)
-                {
-                    _r.setGeometry(p,s);
-                    return *this;
-                }
-
-                BasicRect& setGeometry(const Pt::Math::BasicPoint<PointT>& p1, const Pt::Math::BasicPoint<PointT>& p2)
-                {
-                    _r.setOrigin( p1 );
-                    _r.setWidth(p2.x() - p1.x() + 1);
-                    _r.setHeight(p2.y() - p1.y() + 1);
-                    return *this;
-                }
-
-                bool isNull() const
-                {
-                    return (_r.width() == 0 || _r.height() == 0 );
-                }
-
                 //! Return the top left coordinates as a const BasicPoint<SizeT>
-                const Pt::Math::BasicPoint<PointT>& topLeft() const
-                { return _r.origin(); }
+                const Pt::Gfx::BasicPoint<PointT>& topLeft() const
+                { return this->origin(); }
 
                 //! Return the top right coordinates as a const BasicPoint<SizeT>
-                const Pt::Math::BasicPoint<PointT> topRight() const
-                { return Pt::Math::BasicPoint<PointT>(_r.x() + _r.width(), _r.y()); }
+                const Pt::Gfx::BasicPoint<PointT> topRight() const
+                { return Pt::Gfx::BasicPoint<PointT>(this->x() + this->width(), this->y()); }
 
                 //! Return the bottom left coordinates as a const BasicPoint<SizeT>
-                const Pt::Math::BasicPoint<PointT> bottomLeft() const
-                { return Pt::Math::BasicPoint<PointT>(_r.x(), _r.y() + _r.height()); }
+                const Pt::Gfx::BasicPoint<PointT> bottomLeft() const
+                { return Pt::Gfx::BasicPoint<PointT>(this->x(), this->y() + this->height()); }
 
                 //! Return the bottom right coordinates as a const BasicPoint<SizeT>
-                const Pt::Math::BasicPoint<PointT> bottomRight() const
-                { return Pt::Math::BasicPoint<PointT>(_r.x() + _r.width(), _r.y() + _r.height()); }
+                const Pt::Gfx::BasicPoint<PointT> bottomRight() const
+                { return Pt::Gfx::BasicPoint<PointT>(this->x() + this->width(), this->y() + this->height()); }
 
-                bool operator==(const BasicRect& other) const
-                { return _r == other._r; }
-
-                bool operator!=(const BasicRect& other) const
-                { return _r != other._r; }
-
-                BasicRect<PointT,SizeT>& operator = (const BasicRect<PointT,SizeT>& rhs)
+                BasicRect<PointT,SizeT>& operator = (const BasicRect<PointT,SizeT>& val)
                 {
-                    _r = rhs._r;
+                    _p = val._p;
+                    _s = val._s;
                     return *this;
                 }
 
-                BasicRect<PointT,SizeT>& operator = (const Math::BasicRect<PointT,SizeT>& mr)
+                bool operator==(const BasicRect& other) const
                 {
-                    _r = mr;
-                    return *this;
+                    return _p == other._p && _s == other._s;
+                }
+
+                bool operator!=(const BasicRect& other) const
+                {
+                    return _p != other._p || _s != other._s;
                 }
 
             protected:
-                Pt::Math::BasicRect<PointT,SizeT> _r;
-
+                Pt::Gfx::BasicPoint<PointT> _p;
+                Pt::Gfx::BasicSize<SizeT>  _s;
         };
 
-    } // namespace Math
+
+        typedef BasicRect<Pt::ssize_t, Pt::size_t>  Rect;
+        typedef BasicRect<double, double>           RectF;
+
+    } // namespace Gfx
 
 } // namespace Pt
 

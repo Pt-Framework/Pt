@@ -20,9 +20,8 @@
 #ifndef PT_SYMBIANTOOLS_H_
 #define PT_SYMBIANTOOLS_H_
 
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
-#include "Pt/Gfx/Rect.h"
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
 
 #include <e32std.h>
 
@@ -32,36 +31,36 @@ namespace Gui {
 
 /**
  * @brief Various helper methods when dealing with Symbian.
- * 
- * This mainly helps in converting basic structures from Symbian to Pt 
+ *
+ * This mainly helps in converting basic structures from Symbian to Pt
  * and vice versa.
  */
 namespace SymbianTools {
 
 /**
- * @brief Make a symbian TPoint from Pt::Math::Point
+ * @brief Make a symbian TPoint from Pt::Gfx::Point
  */
-static TPoint makeTPoint(const Math::Point& point)
+static TPoint makeTPoint(const Gfx::Point& point)
 {
     return TPoint(point.x(), point.y());
 }
 
 /**
- * @brief Make a symbian TRect from Pt::Math::Rect
+ * @brief Make a symbian TRect from Pt::Gfx::Rect
  */
 static TRect makeTRect(const Gfx::Rect& rect)
 {
-    return TRect(rect.x(), rect.y(), 
+    return TRect(rect.x(), rect.y(),
             rect.x() + rect.width(), rect.y() + rect.height());
 }
 
 /**
- * @brief Make a symbian TRect from Pt::Math::Point and Pt::Math::Size
+ * @brief Make a symbian TRect from Pt::Gfx::Point and Pt::Gfx::Size
  */
-static TRect makeTRect(const Math::Point& point, const Math::Size& size)
+static TRect makeTRect(const Gfx::Point& point, const Gfx::Size& size)
 {
-    return TRect(point.x(), point.y(), 
-            point.x() + size.width(), 
+    return TRect(point.x(), point.y(),
+            point.x() + size.width(),
             point.y() + size.height());
 }
 
@@ -70,7 +69,7 @@ static TRect makeTRect(const Math::Point& point, const Math::Size& size)
  */
 static TRect makeTRect(const Pt::Gfx::Region& rgn)
 {
-    return TRect(rgn.x(), rgn.y(), 
+    return TRect(rgn.x(), rgn.y(),
             rgn.x() + rgn.width(), rgn.y() + rgn.height());
 }
 
@@ -80,10 +79,10 @@ static TRect makeTRect(const Pt::Gfx::Region& rgn)
 static Pt::Gfx::Region makeRegion(const TRect& rect)
 {
     return Pt::Gfx::Region(
-            Pt::Math::Point(rect.iTl.iX, rect.iTl.iY),
-            Pt::Math::Size(rect.iBr.iX - rect.iTl.iX, 
+            Pt::Gfx::Point(rect.iTl.iX, rect.iTl.iY),
+            Pt::Gfx::Size(rect.iBr.iX - rect.iTl.iX,
                     rect.iBr.iY - rect.iTl.iY)
-    );    
+    );
 }
 
 }

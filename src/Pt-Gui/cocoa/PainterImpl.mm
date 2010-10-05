@@ -40,7 +40,7 @@ PainterImpl::~PainterImpl()
 
 
 void PainterImpl::begin()
-{   
+{
 }
 
 
@@ -113,13 +113,13 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 }
 
 
-void PainterImpl::drawPixel(const Math::Point& to)
+void PainterImpl::drawPixel(const Gfx::Point& to)
 {
 
 }
 
 
-void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     _paintQueue.push_back( new DrawLine(from, to, _pen) );
 }
@@ -131,19 +131,19 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
+void PainterImpl::drawText(const Gfx::Point& to, const Pt::String& text)
 {
 
 }
 
 
-void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
 
 }
 
 
-void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 
 }
@@ -155,38 +155,38 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 
 }
 
 
-void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
 
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
-    Pt::Gfx::Region region( Pt::Math::Point(0, 0), pm.size() );
+    Pt::Gfx::Region region( Pt::Gfx::Point(0, 0), pm.size() );
     _paintQueue.push_back(new DrawPixmap(to, pm, region) );
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion)
 {
     _paintQueue.push_back(new DrawPixmap(to, pm, pmRegion) );
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 {
     this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                             const Gfx::Region& imageRegion)
 {
 
@@ -199,7 +199,7 @@ void PainterImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size
 }
 
 
-PainterImpl::DrawLine::DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen)
+PainterImpl::DrawLine::DrawLine(const Gfx::Point& from, const Gfx::Point& to, const Gfx::Pen& pen)
 : _from(from)
 , _to(to)
 , _pen(pen)
@@ -218,7 +218,7 @@ void PainterImpl::DrawLine::paint()
               green: _pen.color().green() / float(0xffff)
               blue: _pen.color().blue() / float(0xffff)
               alpha: 1.0 ] setStroke];
-    
+
     [NSBezierPath setDefaultLineWidth:_pen.size()];
     [NSBezierPath strokeLineFromPoint:NSMakePoint( _from.x(), _from.y() )
                   toPoint:NSMakePoint( _to.x(), _to.y() )];
@@ -249,7 +249,7 @@ void PainterImpl::DrawRect::paint()
 }
 
 
-PainterImpl::DrawPixmap::DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
+PainterImpl::DrawPixmap::DrawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& region)
 : _to(to)
 , _region(region)
 {
@@ -265,12 +265,12 @@ PainterImpl::DrawPixmap::~DrawPixmap()
 
 
 void PainterImpl::DrawPixmap::paint()
-{ 
+{
     //std::cerr << "Drawing pixmap" << std::endl;
 
-    [_image drawAtPoint:NSMakePoint( _to.x(), _to.y() ) 
-            fromRect:NSZeroRect 
-            operation:NSCompositeCopy 
+    [_image drawAtPoint:NSMakePoint( _to.x(), _to.y() )
+            fromRect:NSZeroRect
+            operation:NSCompositeCopy
             fraction:1.0];
 }
 

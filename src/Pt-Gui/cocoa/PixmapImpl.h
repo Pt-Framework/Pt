@@ -22,7 +22,7 @@
 #include "PixmapPainter.h"
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Painter.h>
-#include <Pt/Math/Size.h>
+#include <Pt/Gfx/Size.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSImage.h>
@@ -43,16 +43,16 @@ namespace Gui {
 
             virtual ~PixmapImpl();
 
-            const Math::Size& size() const
+            const Gfx::Size& size() const
             { return _size; }
 
             Painter painter();
 
             NSImage* image() const
             { return _image; }
-        
+
         private:
-            Pt::Math::Size _size;
+            Pt::Gfx::Size _size;
             NSImage* _image;
             PixmapPainter _painter;
     };

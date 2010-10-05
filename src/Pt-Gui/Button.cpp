@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris D�rner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,19 +15,19 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Button.h"
 #include "Pt/Gui/Painter.h"
@@ -56,7 +56,7 @@ namespace Pt {
 namespace Gui {
 
 
-Button::Button(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text)
+Button::Button(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const Pt::String& text)
 : Widget(parent, at, size)
 , _pressed(false)
 , _backbuffer(new Pixmap(size.width(), size.height()))
@@ -108,26 +108,26 @@ void Button::drawPressed(Painter& painter)
     Brush brush(this->backgroundColor());
 
     painter.setBrush(brush);
-    painter.fillRect( Gfx::Rect( Math::Point(0, 0), size() ) );
+    painter.fillRect( Gfx::Rect( Gfx::Point(0, 0), size() ) );
 
     // ... then draw the border around the button.
     Pen borderPen(1, ARgbColor(16384, 16384, 16384), Pen::SolidStyle, Pen::FlatCap);
 
     painter.setPen(borderPen);
-    painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
-    painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
+    painter.drawLine(Gfx::Point(0, 0), Gfx::Point(size().width() - 1, 0));
+    painter.drawLine(Gfx::Point(0, 0), Gfx::Point(0, size().height() - 1));
 
     borderPen = Pen(1, ARgbColor(32768, 32768, 32768), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
-    painter.drawLine(Math::Point(1, 1), Math::Point(size().width() - 2, 1));
-    painter.drawLine(Math::Point(1, 1), Math::Point(1, size().height() - 2));
+    painter.drawLine(Gfx::Point(1, 1), Gfx::Point(size().width() - 2, 1));
+    painter.drawLine(Gfx::Point(1, 1), Gfx::Point(1, size().height() - 2));
 
     borderPen = Pen(1, ARgbColor(65535, 65535, 65535), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
-    painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
-    painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
+    painter.drawLine(Gfx::Point(size().width() - 1, 0), Gfx::Point(size().width() - 1, size().height()));
+    painter.drawLine(Gfx::Point(0, size().height() - 1), Gfx::Point(size().width(), size().height() - 1));
 
     this->drawText(painter, 0);
 }
@@ -139,26 +139,26 @@ void Button::drawNormal(Painter& painter, bool focused)
     Brush brush(this->backgroundColor());
 
     painter.setBrush(brush);
-    painter.fillRect( Gfx::Rect( Math::Point(0, 0), size() ) );
+    painter.fillRect( Gfx::Rect( Gfx::Point(0, 0), size() ) );
 
     // ... then draw the border around the button.
     Pen borderPen(1, ARgbColor(65535, 65535, 65535), Pen::SolidStyle, Pen::FlatCap);
 
     painter.setPen(borderPen);
-    painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
-    painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
+    painter.drawLine(Gfx::Point(0, 0), Gfx::Point(size().width() - 1, 0));
+    painter.drawLine(Gfx::Point(0, 0), Gfx::Point(0, size().height() - 1));
 
     borderPen = Pen(1, ARgbColor(16384, 16384, 16384), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
-    painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
-    painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
+    painter.drawLine(Gfx::Point(size().width() - 1, 0), Gfx::Point(size().width() - 1, size().height()));
+    painter.drawLine(Gfx::Point(0, size().height() - 1), Gfx::Point(size().width(), size().height() - 1));
 
     borderPen = Pen(1, ARgbColor(32768, 32768, 32768), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
-    painter.drawLine(Math::Point(size().width() - 2, 1), Math::Point(size().width() - 2, size().height() - 1));
-    painter.drawLine(Math::Point(1, size().height() - 2), Math::Point(size().width() - 1, size().height() - 2));
+    painter.drawLine(Gfx::Point(size().width() - 2, 1), Gfx::Point(size().width() - 2, size().height() - 1));
+    painter.drawLine(Gfx::Point(1, size().height() - 2), Gfx::Point(size().width() - 1, size().height() - 2));
 
     this->drawText(painter, 1);
 }
@@ -190,26 +190,26 @@ void Button::drawText(Painter& painter, const Pt::ssize_t offset) const
     {
         // First paint white "shadow". The use the text color for disabled widget.
         painter.setPen(Pen(4, ARgbColor(65535, 65535, 65535)));
-        painter.drawText( Math::Point(x + offset + 1, y + offset + 1), _text.c_str());
+        painter.drawText( Gfx::Point(x + offset + 1, y + offset + 1), _text.c_str());
 
         painter.setPen(Pen(4, ARgbColor(32768, 32768, 32768)));
     }
-    
-    painter.drawText( Math::Point(x + offset, y + offset), _text.c_str());
+
+    painter.drawText( Gfx::Point(x + offset, y + offset), _text.c_str());
 }
 
 
-Math::Size Button::minimumSize()
+Gfx::Size Button::minimumSize()
 {
-    return Math::Size(0, 0);
+    return Gfx::Size(0, 0);
 }
 
 
-Math::Size Button::preferredSize()
+Gfx::Size Button::preferredSize()
 {
     FontMetrics metrics = painter().fontMetrics(_text);
 
-    return Math::Size(metrics.width() + 14 + insets().left() + insets().right(),
+    return Gfx::Size(metrics.width() + 14 + insets().left() + insets().right(),
                       metrics.height() * 2 + insets().top()  + insets().bottom());
 }
 

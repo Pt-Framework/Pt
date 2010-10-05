@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,8 +28,8 @@
 
 #include "Pt/Gui/HorizontalLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 #include <algorithm>
 #include <list>
 
@@ -143,7 +143,7 @@ void HorizontalLayout::update()
                 height = w->preferredSize().height();
                 break;
         };
-        
+
         // The width of the specific widget is either all the same (uniform) or specific (varying).
         size_t width = (_widthBehaviour == UniformWidth ? maxWidth : w->preferredSize().width());
 
@@ -160,19 +160,19 @@ void HorizontalLayout::update()
     }
 }
 
-Math::Size HorizontalLayout::minimumSize()
+Gfx::Size HorizontalLayout::minimumSize()
 {
     return calculateSize(this->widget(), false);
 }
 
 
-Math::Size HorizontalLayout::preferredSize()
+Gfx::Size HorizontalLayout::preferredSize()
 {
     return calculateSize(this->widget(), true);
 }
 
 
-Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
+Gfx::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 {
     if (_widthBehaviour == VaryingWidth) {
         const std::list<Widget*>& children = parent.childWidgets();
@@ -199,7 +199,7 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
 
         allWidth += (children.size() - 1) * _gap;
 
-        return Math::Size(allWidth, maxHeight);
+        return Gfx::Size(allWidth, maxHeight);
 
     } else {  // _widthBehaviour == UniformWidth
 
@@ -225,7 +225,7 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
             childrenIter++;
         }
 
-        return Math::Size(maxWidth * children.size() + _gap * (children.size() - 1), maxHeight);
+        return Gfx::Size(maxWidth * children.size() + _gap * (children.size() - 1), maxHeight);
     }
 }
 

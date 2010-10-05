@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris D�rner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -89,13 +89,13 @@ namespace Gui {
             virtual const std::list<std::string>& fontFamilyNames();
 
             // inerhit doc
-            virtual void drawPixel(const Math::Point& to);
+            virtual void drawPixel(const Gfx::Point& to);
 
             // inerhit doc
-            virtual void drawLine(const Math::Point& from, const Math::Point& to);
+            virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
             // inerhit doc
-            virtual void drawText(const Pt::Math::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0);
+            virtual void drawText(const Pt::Gfx::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0);
 
             // inerhit doc
             virtual void drawRect(const Gfx::Rect& rect);
@@ -104,28 +104,28 @@ namespace Gui {
             virtual void fillRect(const Gfx::Rect& rect);
 
             // inerhit doc
-            virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
             // inerhit doc
-            virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
             // inerhit doc
-            virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
+            virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
 
             // inerhit doc
-            virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
+            virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
 
             // inerhit doc
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
 
             // inerhit doc
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect);
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect);
 
             // inerhit doc
-            virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Region& fromRect);
 
             // inerhit doc
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
         protected:
             /**

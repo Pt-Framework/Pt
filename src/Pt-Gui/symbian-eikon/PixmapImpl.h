@@ -26,7 +26,7 @@
 #include "ApplicationImpl.h"
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Painter.h>
-#include <Pt/Math/Size.h>
+#include <Pt/Gfx/Size.h>
 
 class CFbsBitmap;
 class CFbsBitGc;
@@ -38,7 +38,7 @@ namespace Gui {
 
     /**
      * @brief Pixmap implementation using symbian CFbsBitmap
-     * 
+     *
      * The underlying resources can only be allocated from the OS
      * when there is a connection to the bitmap server available.
      * This is usually provided by the Eikon application framework.
@@ -64,58 +64,58 @@ namespace Gui {
             /**
              * @brief Get size of pixmap.
              */
-            const Math::Size& size() const { return _size; }
+            const Gfx::Size& size() const { return _size; }
 
             /**
              * @brief Provide painter to pixmap.
              */
             Painter painter();
-            
-            /** 
+
+            /**
              * @brief From Drawable: Enable drawing to native graphics context.
              * This will be called by the painer to retrieve context information.
-             */ 
-            virtual PainterImpl::ContextInfo beginDraw();            
-            
+             */
+            virtual PainterImpl::ContextInfo beginDraw();
+
             /**
              * @brief From Drawable: Disable drawing to native gfx context.
              * This will be called by the painer to end drawing.
              */
-            virtual void endDraw();            
+            virtual void endDraw();
 
             /**
-             * @brief Get native bitmap. 
+             * @brief Get native bitmap.
              * This might return 0 if the bitmap has not been constructed properly.
              */
             const CFbsBitmap* getNativeBitmap() const { return _bitmap; }
-            
+
             /**
              * @brief From Resource: Get type of resource.
              */
             virtual Types Type() const { return TypePixmap; }
-            
-        private:            
+
+        private:
             /**
              * @brief Construct underlying symbian resources (bitmap etc.)
              */
             void construct();
-            
+
             /**
              * @brief Destruct underlying symbian resources.
              */
             void destruct();
 
-            Pt::Math::Size _size;
+            Pt::Gfx::Size _size;
             ConcretePainter _painter;
 
             // default font
             const class CFont* _defaultFont;
-            
+
             // TODO: Use auto_ptr? Feasible with symbian classes?
             CFbsBitmap* _bitmap;
             CFbsBitGc* _bitmapGc;
             CFbsBitmapDevice* _bitmapDevice;
-            
+
             // some global error flag
             int _lastError;
     };

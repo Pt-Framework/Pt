@@ -30,33 +30,37 @@
 #include <iostream>
 
 @implementation WidgetView
-- (WidgetView*) initWithWidget: (Pt::Gui::Widget*) widget
+
+- (WidgetView*) initWithWidget: (Pt::Gui::Widget*) widget
 {
     self = [super init];
     if(self)
     {
         _widget = widget;
     }
-    
+
     return self;
 }
 
 
-- (void) drawRect:(NSRect)rect{    //std::cerr << "View::drawRect " << _widget << " " 
+- (void) drawRect:(NSRect)rect
+{
+    //std::cerr << "View::drawRect " << _widget << " "
     //          << rect.size.width << ", " << rect.size.height << std::endl;
 
-    Pt::Gui::PaintEvent pev(*_widget, Pt::Math::Point(rect.origin.x, rect.origin.y), 
-                                      Pt::Math::Size(rect.size.width, rect.size.height));
+    Pt::Gui::PaintEvent pev(*_widget, Pt::Gfx::Point(rect.origin.x, rect.origin.y),
+                                      Pt::Gfx::Size(rect.size.width, rect.size.height));
 
     [NSApp processEvent: &pev];
-    //[super drawRect:rect];}
+    //[super drawRect:rect];
+}
 
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
     //std::cerr << "View::setFrame " << frameRect.size.width << ", " << frameRect.size.height << std::endl;
     [super setFrameOrigin:origin];
-    
+
     Pt::Gui::MoveEvent mev(*_widget, origin.x, origin.y);
     [NSApp processEvent: &mev];
 }
@@ -66,33 +70,36 @@
 {
     //std::cerr << "View::setFrameSize " << frameSize.width << ", " << frameSize.height << std::endl;
     [super setFrameSize:frameSize];
-    
+
     Pt::Gui::ResizeEvent rev(*_widget, frameSize.width, frameSize.height);
     [NSApp processEvent: &rev];
 }
 
-- (void) mouseDown:(NSEvent*)ev{
+
+- (void) mouseDown:(NSEvent*)ev
+{
     //std::cerr << "Mouse Down: " << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
-    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
-                            Pt::Gui::MouseEvent::LeftButton, 
-                            Pt::Gui::MouseEvent::Press, 
+    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y,
+                            Pt::Gui::MouseEvent::LeftButton,
+                            Pt::Gui::MouseEvent::Press,
                             0); //modifiers
-    
+
     [NSApp processEvent: &mev];
     //[super mouseDown: ev];
 }
 
-- (void) mouseUp:(NSEvent*)ev{
+- (void) mouseUp:(NSEvent*)ev
+{
     //std::cerr << "Mouse Up: " << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
-    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
-                            Pt::Gui::MouseEvent::LeftButton, 
-                            Pt::Gui::MouseEvent::Release, 
+    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y,
+                            Pt::Gui::MouseEvent::LeftButton,
+                            Pt::Gui::MouseEvent::Release,
                             0); //modifiers
-    
+
     [NSApp processEvent: &mev];
     //[super mouseUp: ev];
 }
@@ -102,10 +109,10 @@
     //std::cerr << "Mouse Dragged: " << std::endl;
     NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
 
-    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
-                                Pt::Gui::MouseMoveEvent::Moved,  
+    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y,
+                                Pt::Gui::MouseMoveEvent::Moved,
                                 Pt::Gui::MouseMoveEvent::LeftButtonDown);
-    
+
     [NSApp processEvent: &mev];
     //[super mouseDragged: event];
 }
@@ -115,10 +122,10 @@
     //std::cerr << "Mouse Moved: " << std::endl;
     NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
 
-    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
-                                Pt::Gui::MouseMoveEvent::Moved,  
+    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y,
+                                Pt::Gui::MouseMoveEvent::Moved,
                                 0);
-    
+
     [NSApp processEvent: &mev];
     //[super mouseMoved: event];
 }
@@ -129,4 +136,5 @@
     [NSApp processEvent: &cev];
     return YES;
 }
-@end
+
+@end

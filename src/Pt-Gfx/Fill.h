@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,7 +22,7 @@
 #ifndef PT_GFX_FILL_H
 #define PT_GFX_FILL_H
 
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Gfx.h>
 
 namespace Pt {
@@ -57,9 +58,9 @@ class PT_GFX_API Fill
             @param length number of pixels to fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            const Math::Point& origin,
+                            const Gfx::Point& origin,
                             ssize_t xpos, ssize_t ypos, size_t length ) = 0;
-                            
+
 
 };
 
@@ -79,7 +80,7 @@ class PT_GFX_API FillTexture : public Fill
             to this function.
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Math::Point& origin,
+                           const Gfx::Point& origin,
                            ssize_t xpos, ssize_t ypos, size_t length );
 };
 
@@ -96,7 +97,7 @@ class PT_GFX_API FillSolid : public Fill
         /** @sa Fill::fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Math::Point& origin,
+                           const Gfx::Point& origin,
                            ssize_t xpos, ssize_t ypos, size_t length );
 };
 

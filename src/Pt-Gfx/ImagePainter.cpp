@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,26 +18,27 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "Pt/Math.h"
+
 #include "Pt/Gfx/ImagePainter.h"
 #include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
-#include "Pt/Math/Point.h"
+#include "Pt/Gfx/Point.h"
 #include "Pt/Gfx/Brush.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/String.h"
 #include "Pt/System/Clock.h"
-#include "Pt/Math/MathUtils.h"
 
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
@@ -196,21 +198,21 @@ const std::list<std::string>& ImagePainter::fontFamilyNames()
     return empty;
 }
 
-void ImagePainter::drawPixel(const  Math::Point& to)
+void ImagePainter::drawPixel(const  Gfx::Point& to)
 {
     _image.pixel( to.x(), to.y()) = _pen.color();
 }
 
-void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
+void ImagePainter::drawLine(const Gfx::Point& from, const  Gfx::Point& to)
 {
     if( _pen.size()  == 0 )
         return;
 
-    const Pt::Math::Point points[] = { from, to };
+    const Pt::Gfx::Point points[] = { from, to };
     _drawPolyline->draw(_image, _pen, points, 2);
 }
 
-void ImagePainter::drawText( const Math::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
+void ImagePainter::drawText( const Gfx::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
 {
     _drawText->draw( _image, _pen.color(),  to, text, outline );
 }
@@ -223,19 +225,19 @@ void ImagePainter::drawRect(const  Gfx::Rect& rect)
     //
     this->drawLine(rect.topLeft(), rect.topRight() );
 
-    this->drawLine(Pt::Math::Point( rect.topRight().x() - 1, rect.topRight().y()),
-                   Pt::Math::Point( rect.bottomRight().x() - 1, rect.bottomRight().y() -1 ) );
+    this->drawLine(Pt::Gfx::Point( rect.topRight().x() - 1, rect.topRight().y()),
+                   Pt::Gfx::Point( rect.bottomRight().x() - 1, rect.bottomRight().y() -1 ) );
 
-    this->drawLine(Pt::Math::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ),
-                   Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ) );
+    this->drawLine(Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ),
+                   Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ) );
 
-    this->drawLine(Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ),
+    this->drawLine(Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ),
                    rect.topLeft() );
 }
 
 void ImagePainter::fillRect(const  Gfx::Rect& rect)
 {
-    std::vector<Pt::Math::Point> points(4);
+    std::vector<Pt::Gfx::Point> points(4);
     points[0] = rect.topLeft();
     points[1] = rect.topRight();
     points[2] = rect.bottomRight();
@@ -243,17 +245,17 @@ void ImagePainter::fillRect(const  Gfx::Rect& rect)
     this->fillPolygon( &points[0], points.size() );
 }
 
-void ImagePainter::drawEllipse( const  Math::Point& topLeft, const  Math::Size& size )
+void ImagePainter::drawEllipse( const  Gfx::Point& topLeft, const  Gfx::Size& size )
 {
     _drawEllipse->draw( _image, _pen, topLeft, size );
 }
 
-void ImagePainter::fillEllipse( const  Math::Point& topLeft, const  Math::Size& size )
+void ImagePainter::fillEllipse( const  Gfx::Point& topLeft, const  Gfx::Size& size )
 {
     _fillEllipse->draw( _image, _brush, topLeft, size );
 }
 
-void ImagePainter::drawPolyline( const  Math::Point* points, const size_t pointCount )
+void ImagePainter::drawPolyline( const  Gfx::Point* points, const size_t pointCount )
 {
     if( _pen.size()  == 0 )
         return;
@@ -261,16 +263,16 @@ void ImagePainter::drawPolyline( const  Math::Point* points, const size_t pointC
     _drawPolyline->draw( _image, _pen, points, pointCount );
 }
 
-void ImagePainter::fillPolygon( const  Math::Point* points, const size_t pointCount )
+void ImagePainter::fillPolygon( const  Gfx::Point* points, const size_t pointCount )
 {
     _fillPolygon->draw( _image, _brush, points, pointCount );
 }
 
-void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image )
+void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
 {
 }
 
-void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image, const Region& imageRegion )
+void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image, const Region& imageRegion )
 {
 }
 

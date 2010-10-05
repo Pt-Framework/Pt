@@ -23,8 +23,8 @@
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
 #ifdef __OBJC__
@@ -46,8 +46,8 @@ namespace Gui {
     {
         public:
             WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(0, 0),
-                         const Math::Size& size = Math::Size(400, 300) );
+                         const Gfx::Point& at = Gfx::Point(0, 0),
+                         const Gfx::Size& size = Gfx::Size(400, 300) );
 
             virtual ~WidgetImpl();
 
@@ -69,7 +69,7 @@ namespace Gui {
 
         private:
             Widget& _apiWidget;
-            NSWindow* _window; 
+            NSWindow* _window;
             NSView* _view;
             WidgetPainter _painter;
     };

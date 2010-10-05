@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -110,13 +111,13 @@ class PT_GFX_API ImagePainter : public Painter
         virtual const std::list<std::string>& fontFamilyNames();
 
         //!@see Pt::Gfx::Painter
-        virtual void drawPixel(const  Math::Point& to);
+        virtual void drawPixel(const  Gfx::Point& to);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawLine(const  Math::Point& from, const  Math::Point& to);
+        virtual void drawLine(const  Gfx::Point& from, const  Gfx::Point& to);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawText(const  Math::Point& to, const Pt::String& text,
+        virtual void drawText(const  Gfx::Point& to, const Pt::String& text,
                               const Pt::Gfx::ARgbColor* outline = 0 );
 
         //!@see Pt::Gfx::Painter
@@ -126,22 +127,22 @@ class PT_GFX_API ImagePainter : public Painter
         virtual void fillRect(const  Gfx::Rect& rect);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawEllipse(const  Math::Point& topLeft, const  Math::Size& size);
+        virtual void drawEllipse(const  Gfx::Point& topLeft, const  Gfx::Size& size);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillEllipse(const  Math::Point& topLeft, const  Math::Size& size);
+        virtual void fillEllipse(const  Gfx::Point& topLeft, const  Gfx::Size& size);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawPolyline(const  Math::Point* points, const size_t pointCount);
+        virtual void drawPolyline(const  Gfx::Point* points, const size_t pointCount);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillPolygon(const  Math::Point* points, const size_t pointCount);
+        virtual void fillPolygon(const  Gfx::Point* points, const size_t pointCount);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawImage(const  Math::Point& to, const ARgbImage& image);
+        virtual void drawImage(const  Gfx::Point& to, const ARgbImage& image);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawImage(const  Math::Point& to, const ARgbImage& image,
+        virtual void drawImage(const  Gfx::Point& to, const ARgbImage& image,
                                const  Region& imageRegion);
 
     private:

@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -42,16 +43,16 @@ class DrawThinPolyline : public DrawPolyline
 
             @see DrawLine::draw
         */
-        void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
+        void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
 
     private:
         void bresenhamLineSegment(ARgbImage& image, const Pen& pen, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
-        void bresenhamDasheLineSegment(ARgbImage& image, const Pen& pen, int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, 
+        void bresenhamDasheLineSegment(ARgbImage& image, const Pen& pen, int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy,
                                        int axis, int x1, int y1, int e, int e1, int e2, int len);
 
-        void drawLine( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );  
-        void drawSolid( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount );
-        void drawDash( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount);
+        void drawLine( ARgbImage& image, const Pen& pen, const Gfx::Point& from, const Gfx::Point& to );
+        void drawSolid( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount );
+        void drawDash( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount);
 
         inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t length )
         {
@@ -68,19 +69,19 @@ class DrawThinPolyline : public DrawPolyline
             sign = 1;
             absdelta = p2 - p1;
 
-            if ( absdelta < 0) 
-            { 
-                absdelta = -absdelta; 
-                sign = -1; 
+            if ( absdelta < 0)
+            {
+                absdelta = -absdelta;
+                sign = -1;
             }
         }
 
-        inline void addPoint(int xx, int yy, Math::Point** ppt, unsigned int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
+        inline void addPoint(int xx, int yy, Gfx::Point** ppt, unsigned int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
         {
             if (!firstspan && yy == ycurr)
             {
                 int xdelta = xx - (*ppt)->x();
-                
+
                 if (xdelta < 0)
                 {
                     (**pwidth) -= xdelta;
@@ -90,7 +91,7 @@ class DrawThinPolyline : public DrawPolyline
                 {
                     unsigned int widthcurr = **pwidth;
                     (**pwidth) = std::max( widthcurr, (unsigned int)(1 + xdelta));
-                } 
+                }
             }
             else
             {
@@ -101,7 +102,7 @@ class DrawThinPolyline : public DrawPolyline
                 }
                 else
                     firstspan = false;
-                
+
                 (*ppt)->setX(xx);
                 (*ppt)->setY(yy);
                 **pwidth = 1;

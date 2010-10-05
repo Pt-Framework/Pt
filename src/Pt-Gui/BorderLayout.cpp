@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2007 Tobias Mueller
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,8 +28,8 @@
 
 #include "Pt/Gui/BorderLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 
 #include <list>
 #include <cmath>
@@ -49,7 +49,7 @@ BorderLayout::BorderLayout(Widget& widget, size_t spacing)
 , _south(0)
 , _west(0)
 , _center(0)
-{    
+{
 }
 
 
@@ -114,7 +114,7 @@ void BorderLayout::update()
     }
 
     if (_east != 0) {
-        const Pt::Math::Size& preferredSize = _east->preferredSize();
+        const Pt::Gfx::Size& preferredSize = _east->preferredSize();
         _east->move(right -preferredSize .width(), top);
         _east->resize(preferredSize.width(), size_t(std::max(ssize_t(0), bottom - top)));
         right -= _east->size().width() + _spacing;
@@ -133,7 +133,7 @@ void BorderLayout::update()
 }
 
 
-Math::Size BorderLayout::minimumSize()
+Gfx::Size BorderLayout::minimumSize()
 {
     size_t maxWidth        = 0;
     size_t maxHeight       = 0;
@@ -168,12 +168,12 @@ Math::Size BorderLayout::minimumSize()
     maxWidth   = std::max(maxWidth, middleMaxWidth);
     maxHeight += middleMaxHeight;
 
-    return Math::Size(maxWidth  + this->widget().insets().left() + this->widget().insets().right(),
+    return Gfx::Size(maxWidth  + this->widget().insets().left() + this->widget().insets().right(),
                       maxHeight + this->widget().insets().top()  + this->widget().insets().bottom());
 }
 
 
-Math::Size BorderLayout::preferredSize()
+Gfx::Size BorderLayout::preferredSize()
 {
     size_t maxWidth        = 0;
     size_t maxHeight       = 0;
@@ -208,7 +208,7 @@ Math::Size BorderLayout::preferredSize()
     maxWidth   = std::max(maxWidth, middleMaxWidth);
     maxHeight += middleMaxHeight;
 
-    return Math::Size(maxWidth  + this->widget().insets().left() + this->widget().insets().right(),
+    return Gfx::Size(maxWidth  + this->widget().insets().left() + this->widget().insets().right(),
                       maxHeight + this->widget().insets().top()  + this->widget().insets().bottom());
 }
 

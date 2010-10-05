@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -38,7 +39,7 @@ namespace Gfx{
 ClipPolygon::ClipPolygon()
 { }
 
-void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Gfx::Rect& clippingArea )
+void ClipPolygon::clip( std::vector<Pt::Gfx::Point>& in, const Pt::Gfx::Rect& clippingArea )
 {
     if( clippingArea.isNull())
     {
@@ -46,7 +47,7 @@ void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Gfx::Rect& c
         return;
     }
 
-    std::vector<Pt::Math::Point> buffer;
+    std::vector<Pt::Gfx::Point> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
 
@@ -61,15 +62,15 @@ void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Gfx::Rect& c
 }
 
 
-void ClipPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<Pt::Math::Point>& out,
-                 Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1)
+void ClipPolygon::clipEdge( const std::vector<Pt::Gfx::Point>& in, std::vector<Pt::Gfx::Point>& out,
+                 Pt::Gfx::Point edgePoint0, Pt::Gfx::Point edgePoint1)
 {
     if( in.empty() )
         return;
 
-    Pt::Math::Point p;
-    Pt::Math::Point i;
-    Pt::Math::Point s = in[ in.size() - 1 ];
+    Pt::Gfx::Point p;
+    Pt::Gfx::Point i;
+    Pt::Gfx::Point s = in[ in.size() - 1 ];
 
     for( size_t j = 0; j < in.size(); ++j )
     {
@@ -100,9 +101,9 @@ void ClipPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<
 }
 
 
-Pt::Math::Point ClipPolygon::intersect( const Pt::Math::Point& from, const Pt::Math::Point& to, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
+Pt::Gfx::Point ClipPolygon::intersect( const Pt::Gfx::Point& from, const Pt::Gfx::Point& to, const Pt::Gfx::Point& edge0, Pt::Gfx::Point& edge1 )
 {
-    Pt::Math::Point p;
+    Pt::Gfx::Point p;
 
     if( edge0.y() == edge1.y() )
     {
@@ -120,7 +121,7 @@ Pt::Math::Point ClipPolygon::intersect( const Pt::Math::Point& from, const Pt::M
 }
 
 
-bool ClipPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
+bool ClipPolygon::inside( const Pt::Gfx::Point& p, const Pt::Gfx::Point& edge0, Pt::Gfx::Point& edge1 )
 {
 /*  TODO: is very performant but at time has a logic bug :).
       return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||

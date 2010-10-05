@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
  * Copyright (C) 2006 Tobias Mueller
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Gui {
 
-WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size)
+WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
 : _widget(widget)
 , _painter(0)
 , _deviceContextUsageCount(0)
@@ -55,11 +55,11 @@ WidgetImpl::WidgetImpl(Widget& widget, Widget* parent)
 , _painter(0)
 , _deviceContextUsageCount(0)
 {
-    init(widget, parent, Math::Point(CW_USEDEFAULT, CW_USEDEFAULT), Math::Size(CW_USEDEFAULT, CW_USEDEFAULT));
+    init(widget, parent, Gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), Gfx::Size(CW_USEDEFAULT, CW_USEDEFAULT));
 }
 
 
-void WidgetImpl::init(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size)
+void WidgetImpl::init(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
 {
     basic_string<TCHAR> windowClassName;
     HWND                parentWindowHandle;
@@ -136,7 +136,7 @@ void WidgetImpl::setTitle(const Pt::String& text)
 Pt::String WidgetImpl::title()
 {
     int length = GetWindowTextLengthW(_hwnd);
-    
+
     std::vector<wchar_t> buffer(length + 1);
     GetWindowTextW(_hwnd, &buffer[0], length);
 
@@ -144,7 +144,7 @@ Pt::String WidgetImpl::title()
     //Pt::TextStream textStream(ss, new Pt::Utf8Codec());
     //Pt::String result;
     //getline(textStream, result);
-    
+
     return Pt::String::fromUtf16( buffer.begin(), buffer.end() );
 }
 

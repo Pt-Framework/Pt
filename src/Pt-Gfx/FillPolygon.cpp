@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Dr. Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,18 +18,18 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "FillPolygon.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/System/Clock.h"
 
 #include <iostream>
@@ -44,14 +45,14 @@ FillPolygon::FillPolygon()
 { }
 
 
-void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Math::Point* points_, size_t pointCount )
+void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Gfx::Point* points_, size_t pointCount )
 {
-    std::vector<Math::Point> points( pointCount );
-    std::memcpy( &points[0], points_ , sizeof( Math::Point) * pointCount );
+    std::vector<Gfx::Point> points( pointCount );
+    std::memcpy( &points[0], points_ , sizeof( Gfx::Point) * pointCount );
 
     // find unclipped origin coordinates
     //
-    Math::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
+    Gfx::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
     //Pt::ssize_t xorig = ;
     //Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
     for(size_t n = 0; n < points.size(); ++n)
@@ -60,7 +61,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Math::Point*
         origin.setY( std::min( origin.y(), points[n].y() ) );
     }
 
-    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width(), image.height() )) );
+    _clipper(points, Pt::Gfx::Rect( Pt::Gfx::Point(0,0), Pt::Gfx::Size( image.width(), image.height() )) );
 
     if( points.end() != points.begin() )
         points.push_back( points[0] );
@@ -78,8 +79,8 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Math::Point*
     // Fill the global edge table. Two points yield an edge.
     //
     Edge edge;
-    Pt::Math::Point* bottom = 0;
-    Pt::Math::Point* top = 0;
+    Pt::Gfx::Point* bottom = 0;
+    Pt::Gfx::Point* top = 0;
 
     for( size_t i = 1; i < points.size(); ++i )
     {

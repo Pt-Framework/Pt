@@ -2,12 +2,13 @@
  * Copyright (C) 2006-2008 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,23 +18,21 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "DrawWideSolidPolyline.h"
-#include <Pt/Math/Point.h>
-#include <Pt/Math/MathUtils.h>
+#include <Pt/Math.h>
+#include <Pt/Gfx/Point.h>
 #include <algorithm>
 #include <cmath>
-
-using namespace Pt::Math;
 
 namespace Pt {
 namespace Gfx {
@@ -88,10 +87,10 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
         if (x1 != x2 || y1 != y2)
         {
             somethingDrawn = true;
-            
-            if (npt == 1 && pen.capStyle() == Pen::ProjectingCap && !selfJoin) // last point; and need a projecting cap here                
+
+            if (npt == 1 && pen.capStyle() == Pen::ProjectingCap && !selfJoin) // last point; and need a projecting cap here
                 projectRight = true;
-            
+
             // Draw segment (pixel=1), returning faces.
             drawSegment( image, pen, Point(x1, y1), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
 
@@ -103,7 +102,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
                 }
                 else if (pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap )
                 {
-                    // Invoke miLineArc, isInt = true, to draw a round cap on left face in paint type #1. 
+                    // Invoke miLineArc, isInt = true, to draw a round cap on left face in paint type #1.
                     lineArc( image, pen, &leftFace, 0,(double)0.0, (double)0.0, true );
                 }
             }
@@ -123,10 +122,10 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
         {
             if (selfJoin) // Add line join to close the polyline, pixel=1.
                 lineJoin( image, pen, &firstFace, &rightFace);
-            
+
             else if (pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap )
                 // Invoke miLineArc, isInt = true, to draw round cap on right face, pixel=1.
-                lineArc( image, pen, 0, &rightFace, (double)0.0, (double)0.0, true );			
+                lineArc( image, pen, 0, &rightFace, (double)0.0, (double)0.0, true );
         }
     }
 
@@ -176,7 +175,7 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
         tx = from.x();
         from.setX( to.x());
         to.setX(tx);
-        
+
         ty = from.y();
         from.setY(to.y());
         to.setY(ty);
@@ -193,7 +192,7 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
     dy = to.y() - from.y();
     signdx = 1;
     dx = to.x() - from.x();
-    
+
     if (dx < 0)
         signdx = -1;
 
@@ -215,9 +214,9 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
         leftFace->setXA(0);
         leftFace->setYA(-rightFace->ya());
         leftFace->setK(rightFace->k()); // k = xa * dy - ya * dx
-      
+
         x = from.x();
-      
+
         if (projectLeft)
             x -= (lw >> 1);
 
@@ -255,10 +254,10 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
 
         fillRect( image, pen, x, y,(unsigned int)dx, (unsigned int)dy );
     }
-    else 
+    else
     { // General case: segment is neither horizontal nor vertical.
         l = 0.5 * ((double) lw);
-        L = Math::hypot((double) dx, (double) dy);
+        L = Pt::hypot((double) dx, (double) dy);
 
         if (dx < 0)
         {
@@ -274,7 +273,7 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
             top    = &lefts[0];
             bottom = &rights[1];
         }
-      
+
         r = l / L; // this is ell / L, not 1 / L.
 
         ya = -r * dx;
@@ -341,7 +340,7 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
             bottomy = buildLineEdge( xa, ya, 0.0, -dy, dx, to.x(), to.y(), (dx < 0 ? true : false), bottom );
             maxy = -ya;
         }
-        
+
         finaly = ceil(maxy) + to.y();
 
         if (dx < 0)

@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -58,7 +58,7 @@ namespace Pt {
 namespace Gui {
 
 
-Widget::Widget(Widget& newParent, const Math::Point& at, const Math::Size& size)
+Widget::Widget(Widget& newParent, const Gfx::Point& at, const Gfx::Size& size)
 : _parent(&newParent)
 , _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
@@ -71,7 +71,7 @@ Widget::Widget(Widget& newParent, const Math::Point& at, const Math::Size& size)
 }
 
 
-Widget::Widget(const Math::Point& at, const Math::Size& size)
+Widget::Widget(const Gfx::Point& at, const Gfx::Size& size)
 : _parent(0)
 , _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
@@ -85,7 +85,7 @@ Widget::Widget(const Math::Point& at, const Math::Size& size)
 
 Widget::Widget(Widget& newParent)
 : _parent(&newParent)
-, _region(Math::Point(0, 0), Math::Size(0, 0))
+, _region(Gfx::Point(0, 0), Gfx::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 , _enabled(true)
@@ -98,7 +98,7 @@ Widget::Widget(Widget& newParent)
 
 Widget::Widget()
 : _parent(0)
-, _region(Math::Point(0, 0), Math::Size(0, 0))
+, _region(Gfx::Point(0, 0), Gfx::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 , _enabled(true)
@@ -182,7 +182,7 @@ const Pt::Gfx::Region& Widget::region() const
 }
 
 
-const Math::Size& Widget::size() const
+const Gfx::Size& Widget::size() const
 {
     return region().size();
 }
@@ -241,7 +241,7 @@ void Widget::resize(size_t width, size_t height)
 }
 
 
-void Widget::resize(const Math::Size& newSize)
+void Widget::resize(const Gfx::Size& newSize)
 {
     this->resize(newSize.width(), newSize.height());
 }
@@ -260,13 +260,13 @@ void Widget::hide()
 }
 
 
-Math::Size Widget::minimumSize()
+Gfx::Size Widget::minimumSize()
 {
-    return Math::Size(0, 0); // TODO
+    return Gfx::Size(0, 0); // TODO
 }
 
 
-Math::Size Widget::preferredSize()
+Gfx::Size Widget::preferredSize()
 {
     // Non-top-level widgets that are not containers should override this method to provide a specific preferred size.
     // Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
@@ -275,7 +275,7 @@ Math::Size Widget::preferredSize()
     // NullLayout. So I currently check the returned preferred size to match (0, 0). If it does, I suspect that there is
     // no layout manager set. Is this good?
 
-    Math::Size preferredSize = layout().preferredSize();
+    Gfx::Size preferredSize = layout().preferredSize();
     if (preferredSize.width() == 0 && preferredSize.height() == 0) {
         // No layout manager given. Use the current size as preferred size.
         return size();

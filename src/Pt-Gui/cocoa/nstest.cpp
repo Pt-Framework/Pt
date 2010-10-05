@@ -3,7 +3,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,12 +13,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,9 +35,9 @@
 class MyWidget : public Pt::Gui::Widget
 {
     Pt::Gui::Pixmap pm;
-    
+
     public:
-        MyWidget( Pt::Math::Point at, Pt::Math::Size size)
+        MyWidget( Pt::Gfx::Point at, Pt::Gfx::Size size)
         : Pt::Gui::Widget(at, size)
         , pm(100, 100)
         {
@@ -45,10 +45,10 @@ class MyWidget : public Pt::Gui::Widget
             //{
                 Pt::Gui::Painter pp = pm.painter();
                 pp.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0, 0, 0xffff) ) );
-                pp.fillRect( Pt::Math::Rect(Pt::Math::Point(0, 0), Pt::Math::Size(100, 100)) );
+                pp.fillRect( Pt::Gfx::Rect(Pt::Gfx::Point(0, 0), Pt::Gfx::Size(100, 100)) );
             //}
         }
-    
+
     protected:
         void _mouseEvent(const Pt::Gui::MouseEvent& ev)
         {
@@ -56,12 +56,12 @@ class MyWidget : public Pt::Gui::Widget
             //{
             //    Pt::Gui::Painter pp = pm.painter();
             //    pp.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0, 0, 0xffff) ) );
-            //    pp.fillRect( Pt::Math::Rect(Pt::Math::Point(0, 0), Pt::Math::Size(100, 100)) );
+            //    pp.fillRect( Pt::Gfx::Rect(Pt::Gfx::Point(0, 0), Pt::Gfx::Size(100, 100)) );
             //}
             Pt::Gui::Painter wp = this->painter();
             /*wp.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0xeeee, 0, 0) ) );
-            wp.fillRect( Pt::Math::Rect(Pt::Math::Point(ev.x(), ev.y()), Pt::Math::Size(4, 4)) );*/
-            wp.drawPixmap(Pt::Math::Point(0,0), pm);
+            wp.fillRect( Pt::Gfx::Rect(Pt::Gfx::Point(ev.x(), ev.y()), Pt::Gfx::Size(4, 4)) );*/
+            wp.drawPixmap(Pt::Gfx::Point(0,0), pm);
         }
 };
 
@@ -69,13 +69,13 @@ int main( int argc, const char* argv[])
 {
     Pt::Gui::Application app;
 
-    MyWidget widget( Pt::Math::Point(50, 400), Pt::Math::Size(300, 200) );
-    //Pt::Gui::Widget child(widget, Pt::Math::Point(0, 0), Pt::Math::Size(80, 80) );
-            
+    MyWidget widget( Pt::Gfx::Point(50, 400), Pt::Gfx::Size(300, 200) );
+    //Pt::Gui::Widget child(widget, Pt::Gfx::Point(0, 0), Pt::Gfx::Size(80, 80) );
+
     widget.setTitle(L"NSTest");
     connect(widget.closed, app, &Pt::Gui::Application::exit);
     widget.show();
-    
+
     app.run();
     return 0;
 }

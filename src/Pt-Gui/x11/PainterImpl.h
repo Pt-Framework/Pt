@@ -87,31 +87,31 @@ namespace Gui {
 
             int depth() const;
 
-            void drawPixel(const Math::Point& to);
+            void drawPixel(const Gfx::Point& to);
 
-            void drawLine(const Math::Point& from, const Math::Point& to);
+            void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
-            void drawText(const Math::Point& to, const Pt::String& text);
+            void drawText(const Gfx::Point& to, const Pt::String& text);
 
             void drawRect(const Gfx::Rect& rect);
 
-            void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            void drawPolyline(const Math::Point* points, const size_t pointCount);
+            void drawPolyline(const Gfx::Point* points, const size_t pointCount);
 
             void fillRect(const Gfx::Rect& rect);
 
-            void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            void fillPolygon(const Math::Point* points, const size_t pointCount);
+            void fillPolygon(const Gfx::Point* points, const size_t pointCount);
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm);
+            void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
-            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
 
-            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+            void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                            const Gfx::Region& imageRegion);
 
             template <typename Iterator>

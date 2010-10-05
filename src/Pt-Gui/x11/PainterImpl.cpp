@@ -208,7 +208,7 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
         Display* display = X11EventLoop::instance().display();
         Pixmap tile( brush.texture().width(), brush.texture().width() );
         Painter painter = tile.painter();
-        painter.drawImage( Math::Point(0, 0), brush.texture() );
+        painter.drawImage( Gfx::Point(0, 0), brush.texture() );
         XSetFillStyle( display, _brushGc, FillTiled );
         XSetTile( display, _brushGc, tile.impl().x11Drawable() );
     }
@@ -359,7 +359,7 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Math::Point& to)
+void PainterImpl::drawPixel(const Gfx::Point& to)
 {
     Display* display = X11EventLoop::instance().display();
     XDrawPoint( display, _drawable->x11Drawable(), _penGc, to.x(), to.y() );
@@ -367,7 +367,7 @@ void PainterImpl::drawPixel(const Math::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
@@ -377,7 +377,7 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
+void PainterImpl::drawText(const Gfx::Point& to, const Pt::String& text)
 {
 #ifndef _AIX
     XftColor xftColor;
@@ -404,7 +404,7 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
     if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
@@ -422,7 +422,7 @@ void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCoun
 }
 
 
-void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     // Ellipse which has 0 width or height does not have to be drawn.
     // (Its not possible to draw a 0 pixel wide/high ellipse in X11.)
@@ -442,7 +442,7 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     Display* display = X11EventLoop::instance().display();
     XFillArc(display, _drawable->x11Drawable(), _brushGc, topLeft.x(), topLeft.y(), size.width(), size.height(), 0, 360*64);
@@ -450,7 +450,7 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
-void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
     Display* display = X11EventLoop::instance().display();
 
@@ -465,7 +465,7 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
     Display* display = X11EventLoop::instance().display();
     ::Pixmap from = pm.impl().x11Drawable();
@@ -481,7 +481,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm,
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm,
                              const Gfx::Region& pmRegion)
 {
     Display* display = X11EventLoop::instance().display();
@@ -498,13 +498,13 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm,
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 {
     this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                             const Gfx::Region& imageRegion)
 {
     Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);

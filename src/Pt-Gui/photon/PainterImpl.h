@@ -67,31 +67,31 @@ namespace Gui {
 
             const std::list<std::string>& fontFamilyNames();
 
-            virtual void drawPixel(const Math::Point& to);
+            virtual void drawPixel(const Gfx::Point& to);
 
-            virtual void drawLine(const Math::Point& from, const Math::Point& to) = 0;
+            virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to) = 0;
 
-            virtual void drawText(const Math::Point& to, const Pt::String& text);
+            virtual void drawText(const Gfx::Point& to, const Pt::String& text);
 
             virtual void drawRect(const Gfx::Rect& rect) = 0;
 
-            virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
+            virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
 
             virtual void fillRect(const Gfx::Rect& rect) = 0;
 
-            virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
+            virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm) = 0;
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm) = 0;
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) = 0;
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) = 0;
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                                        const Gfx::Region& imageRegion);
 
         protected:

@@ -1,12 +1,13 @@
 /*
  * Copyright (C) 2006-2007 by Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -31,7 +32,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Math/Size.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
 
 #include <cstddef>
@@ -202,7 +204,7 @@ namespace Gfx {
              * @param to The pixel is drawn at this point.
              * @see setPen()
              */
-            virtual void drawPixel(const Pt::Math::Point& to) = 0;
+            virtual void drawPixel(const Pt::Gfx::Point& to) = 0;
 
             /**
              * @brief Draws a line between the two given points, excluding the last point.
@@ -217,7 +219,7 @@ namespace Gfx {
              * @param to The line is drawn to this point (exclusively), starting from 'from'.
              * @see setPen()
              */
-            virtual void drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to) = 0;
+            virtual void drawLine(const Pt::Gfx::Point& from, const  Pt::Gfx::Point& to) = 0;
 
             /**
              * @brief Draws a Text at the specified position with an outline.
@@ -232,7 +234,7 @@ namespace Gfx {
              * @see setPen()
              * @see setFont()
              */
-            virtual void drawText( const Pt::Math::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
+            virtual void drawText( const Pt::Gfx::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
 
             /**
              * @brief Draws a rectangle outline.
@@ -272,9 +274,9 @@ namespace Gfx {
              * @param diameter The diameter of the circle.
              * @see setPen()
              */
-            inline void drawCircle(const Pt::Math::Point& topLeft, size_t diameter)
+            inline void drawCircle(const Pt::Gfx::Point& topLeft, size_t diameter)
             {
-                drawEllipse(topLeft, Pt::Math::Size(diameter, diameter));
+                drawEllipse(topLeft, Pt::Gfx::Size(diameter, diameter));
             }
 
             /**
@@ -293,9 +295,9 @@ namespace Gfx {
              * @param diameter The diameter of the circle.
              * @see setBrush()
              */
-            inline void fillCircle(const Pt::Math::Point& topLeft, size_t diameter)
+            inline void fillCircle(const Pt::Gfx::Point& topLeft, size_t diameter)
             {
-                fillEllipse(topLeft, Pt::Math::Size(diameter, diameter));
+                fillEllipse(topLeft, Pt::Gfx::Size(diameter, diameter));
             }
 
             /**
@@ -311,7 +313,7 @@ namespace Gfx {
              * @param size The horizontal and vertical size of the ellipse.
              * @see setPen()
              */
-            virtual void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
+            virtual void drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size) = 0;
 
             /**
              * @brief Draws a filled ellipse with the given size at the specified position.
@@ -326,7 +328,7 @@ namespace Gfx {
              * @param size The horizontal and vertical size of the ellipse.
              * @see setBrush()
              */
-            virtual void fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
+            virtual void fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size) = 0;
 
             /**
              * @brief Draws a polyline of multiple line segments connected by points.
@@ -345,7 +347,7 @@ namespace Gfx {
              * @param pointCount Specifies the number of points of the points array that should be
              * used to draw the polyline.
              */
-            virtual void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) = 0;
+            virtual void drawPolyline(const Pt::Gfx::Point* points, const size_t pointCount) = 0;
 
             /**
              * @brief Draws/Fills a polygon by connecting the given points to a flat shape.
@@ -363,7 +365,7 @@ namespace Gfx {
              * @param pointCount Specifies the number of points of the points array that should be
              * used to draw the polygon.
              */
-            virtual void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) = 0;
+            virtual void fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount) = 0;
 
             /**
              * @brief Draws an image at the given position.
@@ -379,7 +381,7 @@ namespace Gfx {
              * @param to The x|y-position to where the image should be drawn on the painter's area.
              * @param image The image to be drawn.
              */
-            virtual void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image) = 0;
+            virtual void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image) = 0;
 
             /**
              * @brief Draws a rectangle segment of an image at the given position.
@@ -398,14 +400,14 @@ namespace Gfx {
              * the top-left corner of the cut-out image segment in this painter's coordinate space.
              *
              * To not only draw a part of this image, but all of it, use the method
-             * drawImage(const Pt::Math::Point& to, const ARgbImage& image);
+             * drawImage(const Pt::Gfx::Point& to, const ARgbImage& image);
              *
              * @param to The x|y-position to where the image semgnet should be drawn on the painter's area.
              * @param image The image of which a segment specified by 'imageRect' should to be drawn.
              * @param imageRegion Specifies the position and size of the segment that is to be cut out
              * of the image to be drawn at the specified position.
              */
-            virtual void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion) = 0;
+            virtual void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion) = 0;
     };
 
 } // namespace Gfx

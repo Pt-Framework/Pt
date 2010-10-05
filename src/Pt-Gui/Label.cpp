@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Tobias Mueller
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,8 +32,8 @@
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Label.h"
 #include "Pt/Gui/MouseEvent.h"
@@ -53,7 +53,7 @@ namespace Pt {
 namespace Gui {
 
 
-Label::Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text)
+Label::Label(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const Pt::String& text)
 : Widget(parent, at, size)
 , _backbuffer(new Pixmap(size.width(), size.height()))
 , _text(text)
@@ -87,10 +87,10 @@ void Label::update()
     Brush brush(backgroundColor());
 
     widgetPainter.setBrush(brush);
-    widgetPainter.fillRect(Gfx::Rect(Math::Point(0, 0), size()));
+    widgetPainter.fillRect(Gfx::Rect(Gfx::Point(0, 0), size()));
 
     backbufferPainter.setBrush(brush);
-    backbufferPainter.fillRect(Gfx::Rect(Math::Point(0, 0), size()));
+    backbufferPainter.fillRect(Gfx::Rect(Gfx::Point(0, 0), size()));
 
     if( !_text.empty() ) {
         Pen pen(1, foregroundColor());
@@ -102,22 +102,22 @@ void Label::update()
         widgetPainter.setFont(font);
         backbufferPainter.setFont(font);
 
-        widgetPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
-        backbufferPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+        widgetPainter.drawText( Gfx::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+        backbufferPainter.drawText( Gfx::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
     }
 }
 
 
-Math::Size Label::minimumSize()
+Gfx::Size Label::minimumSize()
 {
-    return Math::Size(0, 0);
+    return Gfx::Size(0, 0);
 }
 
 
-Math::Size Label::preferredSize()
+Gfx::Size Label::preferredSize()
 {
     FontMetrics metrics = painter().fontMetrics(_text);
-    return Math::Size(metrics.width(), metrics.height());
+    return Gfx::Size(metrics.width(), metrics.height());
 }
 
 

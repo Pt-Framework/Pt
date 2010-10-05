@@ -2,6 +2,7 @@
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2010 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -44,25 +45,25 @@ class DrawWideSolidPolyline : public DrawWidePolyline
 
             @see DrawLine::draw
         */
-        void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
+        void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
 
 
     private:
         void drawDashSegment( ARgbImage& image, const Pen& pen,
-                                    Pt::Math::Point from, Pt::Math::Point to,
+                                    Pt::Gfx::Point from, Pt::Gfx::Point to,
                                     bool projectLeft, bool projectRight,
                                     LineFace* leftFace, LineFace* rightFace );
 
         void drawSegment(ARgbImage& image, const Pen& pen,
-                         Pt::Math::Point from, Pt::Math::Point to,
+                         Pt::Gfx::Point from, Pt::Gfx::Point to,
                          bool projectLeft, bool projectRight,
                          LineFace* leftFace, LineFace* rightFace);
-    
-        void drawLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
-        void drawDashLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
-        
 
-        
+        void drawLine( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+        void drawDashLine( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+
+
+
 };
 
 } // namespace Gfx

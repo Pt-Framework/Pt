@@ -51,14 +51,14 @@ namespace Gui {
 
 	class Pixmap;
 
-    class PainterImpl 
+    class PainterImpl
     {
         class Paint;
         class DrawLine;
         class DrawRect;
         class DrawPixmap;
         class FillRect;
-        
+
         public:
             PainterImpl();
 
@@ -86,31 +86,31 @@ namespace Gui {
 
             const std::list<std::string>& fontFamilyNames();
 
-            virtual void drawPixel(const Math::Point& to);
+            virtual void drawPixel(const Gfx::Point& to);
 
-            virtual void drawLine(const Math::Point& from, const Math::Point& to);
+            virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
-            virtual void drawText(const Math::Point& to, const Pt::String& text);
+            virtual void drawText(const Gfx::Point& to, const Pt::String& text);
 
             virtual void drawRect(const Gfx::Rect& rect);
 
-            virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
+            virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
 
             virtual void fillRect(const Gfx::Rect& rect);
 
-            virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-            virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
+            virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+            virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image,
                                        const Gfx::Region& imageRegion);
 
         protected:
@@ -139,15 +139,15 @@ namespace Gui {
     class PainterImpl::DrawLine : public PainterImpl::Paint
     {
         public:
-            DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen);
-            
+            DrawLine(const Gfx::Point& from, const Gfx::Point& to, const Gfx::Pen& pen);
+
             virtual ~DrawLine();
-            
+
             virtual void paint();
-        
+
         private:
-            Math::Point _from;
-            Math::Point _to;
+            Gfx::Point _from;
+            Gfx::Point _to;
             Gfx::Pen _pen;
     };
 
@@ -156,11 +156,11 @@ namespace Gui {
     {
         public:
             DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen);
-            
+
             virtual ~DrawRect();
-            
+
             virtual void paint();
-        
+
         private:
             const Gfx::Rect _rect;
             Gfx::Pen _pen;
@@ -170,14 +170,14 @@ namespace Gui {
     class PainterImpl::DrawPixmap : public PainterImpl::Paint
     {
         public:
-            DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region);
-            
+            DrawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& region);
+
             virtual ~DrawPixmap();
-            
+
             virtual void paint();
-        
+
         private:
-            Math::Point _to;
+            Gfx::Point _to;
             Gfx::Region _region;
             NSImage* _image;
     };
@@ -187,11 +187,11 @@ namespace Gui {
     {
         public:
             FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush);
-            
+
             virtual ~FillRect();
-            
+
             virtual void paint();
-        
+
         private:
             const Gfx::Rect _rect;
             Gfx::Brush _brush;

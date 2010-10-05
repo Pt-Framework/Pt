@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Tobias Mueller
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,19 +15,19 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 #include "Pt/Gui/ImageButton.h"
 #include <Pt/Gui/Painter.h>
 #include "Pt/Gui/CloseEvent.h"
@@ -54,7 +54,7 @@ namespace Pt {
 namespace Gui {
 
 
-ImageButton::ImageButton(Widget& parent, const  Pt::Math::Point& at, const  Pt::Math::Size& size,
+ImageButton::ImageButton(Widget& parent, const  Pt::Gfx::Point& at, const  Pt::Gfx::Size& size,
                          const Pt::Gfx::ARgbImage* normalState, const Pt::Gfx::ARgbImage* pressedState,
                          const Pt::Gfx::ARgbImage* disabledState)
 : Widget(parent, at, size)
@@ -68,7 +68,7 @@ ImageButton::ImageButton(Widget& parent, const  Pt::Math::Point& at, const  Pt::
     {
         // TODO Throw exception.
     }
-    
+
     setForegroundColor(Gfx::ARgbColor(0, 0, 0));
     setBackgroundColor(Gfx::ARgbColor(0xffff, 0xffff, 0xffff));
 }
@@ -101,7 +101,7 @@ void ImageButton::update()
             offset = 1;
         }
     }
-    
+
     drawBackground(widgetPainter,     imageToDraw, offset);
     drawBackground(backbufferPainter, imageToDraw, offset);
 }
@@ -110,25 +110,25 @@ void ImageButton::update()
 void ImageButton::drawBackground(Painter& painter, const Pt::Gfx::ARgbImage* image, const Pt::ssize_t offset)
 {
     painter.setBrush(Gfx::Brush(backgroundColor()));
-    painter.fillRect(Gfx::Rect(Math::Point(0, 0), this->size()));
+    painter.fillRect(Gfx::Rect(Gfx::Point(0, 0), this->size()));
 
     ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)image->width())  / 2;
     ssize_t y = ((ssize_t)this->size().height() - (ssize_t)image->height()) / 2;
-    painter.drawImage(Math::Point(x + offset, y + offset), *image);
+    painter.drawImage(Gfx::Point(x + offset, y + offset), *image);
 }
 
 
 
-Math::Size ImageButton::minimumSize()
+Gfx::Size ImageButton::minimumSize()
 {
-    return Math::Size(_normalStateImage->width() + insets().left() + insets().right(),
+    return Gfx::Size(_normalStateImage->width() + insets().left() + insets().right(),
                       _normalStateImage->height() + insets().top() + insets().bottom());
 }
 
 
-Math::Size ImageButton::preferredSize()
+Gfx::Size ImageButton::preferredSize()
 {
-    return Math::Size(_normalStateImage->width() + insets().left() + insets().right(),
+    return Gfx::Size(_normalStateImage->width() + insets().left() + insets().right(),
                       _normalStateImage->height() + insets().top() + insets().bottom());
 }
 

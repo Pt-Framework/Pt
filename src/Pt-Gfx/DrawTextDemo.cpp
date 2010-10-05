@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2007 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,19 +15,19 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <Pt/Main.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/System/Clock.h>
 #include <Pt/System/Thread.h>
 #include <Pt/Gfx/ImagePainter.h>
@@ -118,7 +118,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
     {
-        this->painter().drawPixmap(Pt::Math::Point(0,0), *_pixmap);
+        this->painter().drawPixmap(Pt::Gfx::Point(0,0), *_pixmap);
     }
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
@@ -129,7 +129,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
         Pt::Gfx::Brush blueBrush( Pt::Gfx::ARgbColor(0,0, 0xcccc) );
         _pixmap->painter().setBrush( blueBrush );
-        _pixmap->painter().fillRect( Pt::Math::Rect( Pt::Math::Point(0,0), this->size() ) );
+        _pixmap->painter().fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0,0), this->size() ) );
     }
 
     void nextFrame(const Pt::Event& event)
@@ -142,17 +142,17 @@ class DrawTextDemo : public Pt::Gui::Widget
 
         Pt::Gfx::Brush blueBrush( Pt::Gfx::ARgbColor(0,0, 0xcccc) );
         _imagePainter.setBrush( blueBrush );
-        _imagePainter.fillRect( Pt::Math::Rect(Pt::Math::Point(80, 0), Pt::Math::Size(280, 260)) );
+        _imagePainter.fillRect( Pt::Gfx::Rect(Pt::Gfx::Point(80, 0), Pt::Gfx::Size(280, 260)) );
 
         Pt::Gfx::ARgbColor yellow( 0xcccc, 0xbbbb, 0x0 );
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 42 ,Pt::Gfx::Font::NormalStyle, _angle ) );
-        _imagePainter.drawText( Pt::Math::Point(200, 135), text, &yellow );
+        _imagePainter.drawText( Pt::Gfx::Point(200, 135), text, &yellow );
 
         Pt::Gfx::Brush redBrush( Pt::Gfx::ARgbColor(0xdddd,0, 0) );
         _imagePainter.setBrush( redBrush );
 
-        _imagePainter.fillRect( Pt::Math::Rect( Pt::Math::Point( 0, this->size().height() - 40 ),
-                                                Pt::Math::Size( this->size().width(), 40) ) );
+        _imagePainter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point( 0, this->size().height() - 40 ),
+                                                Pt::Gfx::Size( this->size().width(), 40) ) );
 
         if( --_tickerTextPos < -_tickerTextWidth )
         {
@@ -161,19 +161,19 @@ class DrawTextDemo : public Pt::Gui::Widget
 
         Pt::Gfx::ARgbColor white( 0xffff, 0xffff, 0xffff );
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 28) );
-        _imagePainter.drawText( Pt::Math::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
+        _imagePainter.drawText( Pt::Gfx::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
 
-        _pixmap->painter().drawImage( Pt::Math::Point( 0, 0 ),
+        _pixmap->painter().drawImage( Pt::Gfx::Point( 0, 0 ),
                                       _image,
-                                      Pt::Gfx::Region( Pt::Math::Point(80,0),
-                                                       Pt::Math::Size(280, 260) ) );
+                                      Pt::Gfx::Region( Pt::Gfx::Point(80,0),
+                                                       Pt::Gfx::Size(280, 260) ) );
 
-        _pixmap->painter().drawImage( Pt::Math::Point( 0, this->size().height() - 40 ),
+        _pixmap->painter().drawImage( Pt::Gfx::Point( 0, this->size().height() - 40 ),
                                       _image,
-                                      Pt::Gfx::Region(  Pt::Math::Point( 0, this->size().height() - 40 ),
-                                                        Pt::Math::Size(this->size().width(), 40) ) );
+                                      Pt::Gfx::Region(  Pt::Gfx::Point( 0, this->size().height() - 40 ),
+                                                        Pt::Gfx::Size(this->size().width(), 40) ) );
 
-        this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
+        this->painter().drawPixmap(Pt::Gfx::Point( 0, 0 ), *_pixmap);
         //time = clock.stop();
         //std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }

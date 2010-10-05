@@ -21,7 +21,7 @@
 #define Pt_Gui_Gdi_PixmapImpl_h
 
 #include <Pt/Api.h>
-#include <Pt/Math/Size.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gui/Painter.h>
 #include "Drawable.h"
 #include "PixmapPainter.h"
@@ -41,7 +41,7 @@ namespace Gui {
 
             virtual ~PixmapImpl();
 
-            const Math::Size& size() const
+            const Gfx::Size& size() const
             { return _size; }
 
             Painter painter();
@@ -61,7 +61,7 @@ namespace Gui {
             void setupDeviceContext();
 
         private:
-            Math::Size      _size;
+            Gfx::Size      _size;
             HDC            _deviceContext;
             HBITMAP        _bitmapHandle;
             PixmapPainter* _painter;

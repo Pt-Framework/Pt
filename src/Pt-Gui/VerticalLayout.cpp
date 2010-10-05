@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 Marc Boris D�rner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,8 +28,8 @@
 
 #include "Pt/Gui/VerticalLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Math/Point.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Point.h"
+#include "Pt/Gfx/Size.h"
 
 #include <list>
 
@@ -88,7 +88,7 @@ ssize_t VerticalLayout::maximumHeight() const
     // If the mode is "uniform height" then the heighest widget's height is used.
     if (_mode == UniformHeight)
     {
-        for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) 
+        for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++)
         {
             Widget* w = *childrenIter;
             maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
@@ -105,14 +105,14 @@ void VerticalLayout::update()
     size_t  widgetWidth  = this->widget().size().width();
     ssize_t y = 0;
 
-    // Calculate the position for each widget according to the order 
+    // Calculate the position for each widget according to the order
     // they were added to the layout.
-    for(WidgetMap::const_iterator it = _widgets.begin(); it != _widgets.end(); it++) 
+    for(WidgetMap::const_iterator it = _widgets.begin(); it != _widgets.end(); it++)
     {
         Widget* w = it->first;
         const LayoutData& layoutData = it->second;
 
-        // Determine x-position and width according to the orientation 
+        // Determine x-position and width according to the orientation
         // (left, right, center, grab).
         size_t x     = 0;
         size_t width = 0;
@@ -155,19 +155,19 @@ void VerticalLayout::update()
     }
 }
 
-Math::Size VerticalLayout::minimumSize()
+Gfx::Size VerticalLayout::minimumSize()
 {
     return calculateSize(this->widget(), false);
 }
 
 
-Math::Size VerticalLayout::preferredSize()
+Gfx::Size VerticalLayout::preferredSize()
 {
     return calculateSize(this->widget(), true);
 }
 
 
-Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
+Gfx::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 {
     const std::list<Widget*>& children = parent.childWidgets();
     ssize_t maxWidth  = 0;
@@ -194,7 +194,7 @@ Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
         }
 
         allHeight += (children.size() - 1) * _gap;
-        return Math::Size(maxWidth, allHeight);
+        return Gfx::Size(maxWidth, allHeight);
 
     }
     else
@@ -216,7 +216,7 @@ Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
             }
         }
 
-        return Math::Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
+        return Gfx::Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
     }
 }
 

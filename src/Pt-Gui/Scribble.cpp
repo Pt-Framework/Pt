@@ -3,7 +3,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,18 +13,17 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/Main.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include "Pt/Gui/Application.h"
 #include <Pt/Gui/Widget.h>
@@ -59,11 +58,11 @@ class ScribbleWidget : public Pt::Gui::Widget
         {
             Widget::setTitle(L"Scribble");
 
-            _redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
-            _greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
-            _blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
-            _clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
-            
+            _redButton.reset  ( new Button( *this, Gfx::Point(10, 10),  Gfx::Size(70, 30), L"RED")   );
+            _greenButton.reset( new Button( *this, Gfx::Point(10, 45),  Gfx::Size(70, 30), L"GREEN")  );
+            _blueButton.reset ( new Button( *this, Gfx::Point(10, 80),  Gfx::Size(70, 30), L"BLUE")  );
+            _clearButton.reset( new Button( *this, Gfx::Point(10, 115), Gfx::Size(70, 30), L"CLEAR") );
+
             _pixmap.reset( new Pixmap( size().width(), size().height() ) );
 
             updatePen();
@@ -71,7 +70,7 @@ class ScribbleWidget : public Pt::Gui::Widget
             // Clear the backbuffer (pixmap) with white color
             Gui::Painter pixmapPainter = _pixmap->painter();
             pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
-            pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect(Gfx::Point(0, 0), this->size() ) );
 
            _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
             connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
@@ -108,10 +107,10 @@ class ScribbleWidget : public Pt::Gui::Widget
             Gui::Painter pixmapPainter = _pixmap->painter();
 
             widgetPainter.setBrush(brush);
-            widgetPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
+            widgetPainter.fillRect( Gfx::Rect(Gfx::Point(0, 0), this->size() ) );
 
             pixmapPainter.setBrush(brush);
-            pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect(Gfx::Point(0, 0), this->size() ) );
         }
 
         void setPenColor(const ARgbColor& color)
@@ -138,11 +137,11 @@ class ScribbleWidget : public Pt::Gui::Widget
             if( event.modifiers() & MouseMoveEvent::LeftButtonDown )
             {
                 Gui::Painter widgetPainter = painter();
-                widgetPainter.drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
-                
+                widgetPainter.drawLine( Gfx::Point(_lastX, _lastY), Gfx::Point(event.x(), event.y()) );
+
                 Gui::Painter pixmapPainter = _pixmap->painter();
-                pixmapPainter.drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
-                
+                pixmapPainter.drawLine( Gfx::Point(_lastX, _lastY), Gfx::Point(event.x(), event.y()) );
+
                 _lastX = event.x();
                 _lastY = event.y();
             }
@@ -171,9 +170,9 @@ class ScribbleWidget : public Pt::Gui::Widget
             Gui::Painter pixmapPainter = newPixmap->painter();
 
             pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
-            pixmapPainter.fillRect( Gfx::Rect( Math::Point(0, 0), newPixmap->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect( Gfx::Point(0, 0), newPixmap->size() ) );
 
-            pixmapPainter.drawPixmap( Math::Point(0, 0), *_pixmap );
+            pixmapPainter.drawPixmap( Gfx::Point(0, 0), *_pixmap );
             _pixmap.reset(newPixmap);
 
             setPenColor(_penColor);
@@ -183,7 +182,7 @@ class ScribbleWidget : public Pt::Gui::Widget
         {
         	//std::cerr << "Scribble Paint:" << this << " "
         	//          << event.region().width() << ":" << event.region().height() << std::endl;
-            
+
             Gui::Painter widgetPainter = painter();
             widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
         }

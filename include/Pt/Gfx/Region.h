@@ -1,12 +1,13 @@
 /*
  * Copyright (C) 2006-2007 by Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
- * 
+ * Copyright (C) 2010 Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,11 +30,9 @@
 #ifndef PT_GFX_REGION_H
 #define PT_GFX_REGION_H
 
-#include <Pt/Math/Math.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Size.h>
-#include <Pt/Math/Rect.h>
-#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 
 
 namespace Pt {
@@ -44,7 +43,7 @@ namespace Pt {
         class Region
         {
             public:
-                Region(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
+                Region(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
                 : _topLeft(topLeft)
                 , _size(size)
                 {
@@ -53,12 +52,12 @@ namespace Pt {
                     }*/
                 }
 
-                void setSize(const Pt::Math::Size& size)
+                void setSize(const Pt::Gfx::Size& size)
                 {
                     _size = size;
                 }
 
-                const Pt::Math::Size& size() const
+                const Pt::Gfx::Size& size() const
                 {
                     return _size;
                 }
@@ -169,7 +168,7 @@ namespace Pt {
                     return *this;
                 }
 
-                Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
+                Region& setGeometry(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
                 {
                     /*if (size.width() <= 0 || size.height() <= 0) {
                         throw new std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
@@ -180,7 +179,7 @@ namespace Pt {
                     return *this;
                 }
 
-                Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Point& bottomRight)
+                Region& setGeometry(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Point& bottomRight)
                 {
                     if (topLeft.x() > bottomRight.x() || topLeft.y() > bottomRight.y()) {
                         throw std::logic_error("The bottom right point needs to be bottom-right from the top-left point!" + PT_SOURCEINFO);
@@ -193,14 +192,14 @@ namespace Pt {
                     return *this;
                 }
 
-                Pt::Math::Point topLeft() const
+                Pt::Gfx::Point topLeft() const
                 {
                     return _topLeft;
                 }
 
-                Pt::Math::Rect toRect() const
+                Pt::Gfx::Rect toRect() const
                 {
-                    return Pt::Math::Rect(_topLeft, _size);
+                    return Pt::Gfx::Rect(_topLeft, _size);
                 }
 
                 bool operator==(const Region& other) const
@@ -214,8 +213,8 @@ namespace Pt {
                 }
 
             protected:
-                Pt::Math::Point _topLeft;
-                Pt::Math::Size  _size;
+                Pt::Gfx::Point _topLeft;
+                Pt::Gfx::Size  _size;
         };
 
     } // namespace Gfx

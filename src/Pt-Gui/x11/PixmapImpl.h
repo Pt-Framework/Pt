@@ -21,7 +21,7 @@
 #define Pt_PixmapImpl_h
 
 #include "Pt/Api.h"
-#include "Pt/Math/Size.h"
+#include "Pt/Gfx/Size.h"
 #include "Pt/Gui/Painter.h"
 #include "Drawable.h"
 
@@ -44,7 +44,7 @@ namespace Gui {
 
             virtual ~PixmapImpl();
 
-            const Math::Size& size() const
+            const Gfx::Size& size() const
             { return _size; }
 
             Painter painter();
@@ -54,7 +54,7 @@ namespace Gui {
 
         private:
             ::Pixmap _x11Pixmap;
-            Math::Size _size;
+            Gfx::Size _size;
             PixmapPainterImpl* _painter;
     };
 

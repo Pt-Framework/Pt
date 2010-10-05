@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2007 Aloysius Indrayanto
  * Copyright (C) 2006-2007 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -76,7 +76,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( view.size(2,2) == 32 )
         }
 
- 
+
         void ARgbPixelIterator()
         {
             Pt::Gfx::PlanarARgbView view;
@@ -85,7 +85,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             Pt::Gfx::PlanarARgbView::PixelIterator it(view, 0, 0);
             Pt::Gfx::PlanarARgbView::PixelIterator end(view, 3, 1);
 
-            Pt::Math::Size size = end - it;
+            Pt::Gfx::Size size = end - it;
             PT_UNIT_ASSERT( size.width() == 2 );
             PT_UNIT_ASSERT( size.height() == 2 );
 
@@ -118,7 +118,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             Pt::Gfx::PlanarARgbView::ConstPixelIterator it(view, 0, 0);
             Pt::Gfx::PlanarARgbView::ConstPixelIterator end(view, 3, 1);
 
-            Pt::Math::Size size = end - it;
+            Pt::Gfx::Size size = end - it;
             PT_UNIT_ASSERT( size.width() == 2 );
             PT_UNIT_ASSERT( size.height() == 2 );
 
@@ -193,7 +193,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             Pt::Gfx::Yv12View::PixelIterator it(model, 0, 0);
             Pt::Gfx::Yv12View::PixelIterator end(model, 4, 3);
 
-            Pt::Math::Size size = end - it;
+            Pt::Gfx::Size size = end - it;
             PT_UNIT_ASSERT( size.width() == 4);
             PT_UNIT_ASSERT( size.height() == 4);
 
@@ -216,7 +216,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             Pt::Gfx::Yv12View::ConstPixelIterator it(model, 0, 0);
             Pt::Gfx::Yv12View::ConstPixelIterator end(model, 4, 3);
 
-            Pt::Math::Size size = end - it;
+            Pt::Gfx::Size size = end - it;
             PT_UNIT_ASSERT( size.width() == 4);
             PT_UNIT_ASSERT( size.height() == 4);
 

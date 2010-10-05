@@ -45,15 +45,15 @@ namespace Gui {
 
 			void setClipping(PhTile_t* tiles);
 
-            void drawLine(const Math::Point& from, const Math::Point& to);
+            void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
             void drawRect(const Gfx::Rect& rect);
 
             void fillRect(const Gfx::Rect& rect);
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm);
+            void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
         private:
             PhRid_t _rid;
