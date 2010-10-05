@@ -129,6 +129,10 @@ class LoggerTest : public Pt::Unit::TestSuite
             Pt::System::Logger logger_m_b("m.b");
             Pt::System::Logger logger_m_b_a("m.b.a");
 
+            Pt::System::LogTarget& root = Pt::System::LogTarget::get("");
+            root.setLogLevel(Pt::System::Info);
+            PT_UNIT_ASSERT( logger_m.target().logLevel() == Pt::System::Info );
+
             logger_m.target().setLogLevel(Pt::System::Trace);
             PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::System::Trace );
             PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::System::Trace );

@@ -274,31 +274,31 @@ void LogManager::setLogLevel(LogTarget &target, LogLevel level)
 }
 
 
-void LogManager::updateChildren(LogTarget &target, LogLevel level)
+void LogManager::updateChildren(LogTarget& target, LogLevel level)
 {
     // Find the direct children of this target and set their LogLevels,
     // if their LogLevels haven't been set explicitely
-    const std::string targetName = target.name() + ".";
+    const std::string targetName = target.name() + '.';
 
-    std::string::size_type startPos;
-    std::string::size_type endPos;
-
+    // if target name is empty (root target) we must consider all entries
+    // in the target map, otherwise jump to the first possible child target
     std::map<std::string, LogTarget*>::iterator it;
-    for (it = _targetMap.upper_bound(targetName); it != _targetMap.end(); ++it)
+    it = target.name().empty() ? _targetMap.begin()
+                               : _targetMap.upper_bound(targetName);
+
+    for( ; it != _targetMap.end(); ++it)
     {
         LogTarget* foundTarget = it->second;
-
         const std::string& childTargetName = foundTarget->name();
-        startPos = childTargetName.find(targetName);
 
-        if (startPos != 0)
+        if( target.name().size() > 0 && 0 != childTargetName.find(targetName) )
         {
-            break;  // It's not a child. Leave this loop/method.
+            break; // target is not a child
         }
 
         // For each direct child, update the target's log level and descent recursivly.
         // It is a direct child if we do not find another '.' after the parent name
-        endPos = childTargetName.find( ".", targetName.size() );
+        std::string::size_type endPos = childTargetName.find( '.', targetName.size() );
         if( endPos == std::string::npos && foundTarget->inheritsLogLevel() )
         {
             foundTarget->assignLogLevel( target.logLevel(), true );
@@ -311,7 +311,7 @@ void LogManager::updateChildren(LogTarget &target, LogLevel level)
 std::string LogManager::getChannel(const LogTarget& target)
 {
     Pt::System::RecursiveLock lock( _mutex );
-    
+
     // search target hierachy upwards for a valid channel
     for( const LogTarget* current = &target; current != 0; current = current->parent() )
     {
@@ -320,7 +320,7 @@ std::string LogManager::getChannel(const LogTarget& target)
             return current->channel()->url();
         }
     }
-    
+
     return std::string();
 }
 
@@ -345,7 +345,7 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
     }
 
     LogChannel* ch = 0;
-    
+
     std::map<std::string, LogChannel*>::iterator it = _channelMap.find(url);
     if( it != _channelMap.end() )
     {
