@@ -93,17 +93,30 @@ class DrawText
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
         {
-            Pt::uint32_t                yOffset = 0;
-            int                            dsy        = ypos;
-            int                            dsx        = 0;
-            const Pt::ssize_t            x2        = image.width() - 1;
-            const Pt::ssize_t            y2        = image.height() - 1;
-            ARgbImage::PixelIterator    pixel;
+            Pt::uint32_t             yOffset = 0;
+            int                      dsy     = 0;
+            int                      dsx     = 0;
+            const Pt::ssize_t        x2      = image.width() - 1;
+            const Pt::ssize_t        y2      = image.height() - 1;
+            ARgbImage::PixelIterator pixel;
 
             if( bmPitch < width )
                 bmPitch += width;
 
-            for( Pt::int32_t y = 0; y < height; ++y, ++dsy )
+            // NOTE: The PixelIterator should not take negative X or Y coordinate, hence we need to offset the starting position
+            int ofsx = 0;
+            if(xpos < 0) {
+                ofsx = -xpos;
+                xpos = 0;
+            }
+            int ofsy = 0;
+            if(ypos < 0) {
+                ofsy = -ypos;
+                ypos = 0;
+            }
+            dsy = ypos;
+
+            for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
             {
                 yOffset = y * bmPitch;
 
@@ -113,10 +126,10 @@ class DrawText
                 if( dsy > y2 )
                     break;
 
-                dsx        = xpos;
-                pixel   = image.iterator( dsx, dsy );
+                dsx   = xpos;
+                pixel = image.iterator( dsx, dsy );
 
-                for( Pt::int32_t x = 0; x < width; ++x, ++dsx, ++pixel )
+                for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx, ++pixel )
                 {
                     if( dsx < 0 )
                         continue;
@@ -125,6 +138,7 @@ class DrawText
                         break;
 
                     const int px = yOffset + x ;
+
 
                     assert( &(*pixel) >= &(*image.begin()) &&
                             &(*pixel) <= &(*image.end()) );
