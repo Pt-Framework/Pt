@@ -41,31 +41,35 @@ namespace Pt {
         template<typename PointT, typename SizeT>
         class BasicRect {
             public:
-                //! Construct a BasicRect at a given position and BasicSize<SizeT>
+                //! @brief Construct a BasicRect using the given BasicPoint and BasicSize<SizeT>
                 BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(0, 0))
                 : _p(p), _s(s)
                 {}
 
-                //! Construct a BasicRect at with a given BasicPoints
+                //! @brief Construct a BasicRect at with the given BasicPoints
                 BasicRect( const Pt::Gfx::BasicPoint<PointT>& p1, const Pt::Gfx::BasicPoint<PointT>& p2 )
                 : _p(p1), _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
                 {}
 
+                //! @brief Construct a BasicRect at with the given BasicRect
                 BasicRect(const Pt::Gfx::BasicRect<PointT,SizeT>& val)
                 : _p(val._p), _s(val._s)
                 {}
 
+                //! @brief Returns true if the BasicRect has a zero width and height
                 bool isNull() const
                 {
                     return (_s.width() == 0 || _s.height() == 0 );
                 }
 
+                //! @brief Set this BasicRect using the given BasicRect (copy)
                 void set(const Pt::Gfx::BasicRect<PointT,SizeT>& val)
                 {
                     _p = val._p;
                     _s = val._s;
                 }
 
+                //! @brief Set this BasicRect using the given BasicPoint and BasicSize
                 BasicRect& setGeometry(const Pt::Gfx::BasicPoint<PointT>& p,
                                        const Pt::Gfx::BasicSize<SizeT>& s)
                 {
@@ -74,7 +78,7 @@ namespace Pt {
                     return *this;
                 }
 
-
+                //! @brief Set this BasicRect using the given BasicPoints
                 BasicRect& setGeometry(const Pt::Gfx::BasicPoint<PointT>& p1, const Pt::Gfx::BasicPoint<PointT>& p2)
                 {
                     this->setOrigin( p1 );
@@ -83,187 +87,211 @@ namespace Pt {
                     return *this;
                 }
 
-                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                //! @brief Set the origin of this BasicRect using the given BasicPoint
                 void setOrigin(const Pt::Gfx::BasicPoint<PointT>& p)
                 {
                     _p = p;
                 }
 
+                //! @brief Set the origin of this BasicRect using the given X and Y values
                 void setOrigin(PointT x, PointT y)
                 {
                     _p.set(x, y);
                 }
 
-                //! Return the BasicPoint<PointT> as a BasicPoint<PointT>
+                //! @brief Return the origin of this BasicRect as a const BasicPoint
                 const Pt::Gfx::BasicPoint<PointT>& origin() const
                 {
                     return _p;
                 }
 
+                //! @brief Set the X origin of this BasicRect
                 BasicRect& setX(PointT x)
                 {
                     _p.setX( x );
                     return *this;
                 }
 
+                //! @brief Set the Y origin of this BasicRect
                 BasicRect& setY(PointT y)
                 {
                     _p.setY( y );
                     return *this;
                 }
 
+                //! @brief Return the X origin of this BasicRect
                 PointT x() const
                 {
                     return _p.x();
                 }
 
+                //! @brief Return the Y origin of this BasicRect
                 PointT y() const
                 {
                     return _p.y();
                 }
 
-                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                //! @brief Set the width and height of this BasicRect using the given BasicSize
                 void setSize(const Pt::Gfx::BasicSize<SizeT>& s)
                 {
                     _s = s;
                 }
 
-                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                //! @brief Set the width and height of this BasicRect using the given width and height values
                 void setSize(SizeT width, SizeT height)
                 {
                     _s.setWidthHeight(width, height);
                 }
 
+                //! @brief Return the width and height of this BasicRect as a const BasicSize
                 const Pt::Gfx::BasicSize<SizeT>& size() const
                 {
                     return _s;
                 }
 
-                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                //! @brief Set the width of this BasicRect
                 void setWidth(SizeT w)
                 {
                     _s.setWidth(w);
                 }
 
-                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                //! @brief Set the height of this BasicRect
                 void setHeight(SizeT w)
                 {
                     _s.setHeight(w);
                 }
 
+                //! @brief Return the width of this BasicRect
                 SizeT width() const
                 {
                     return _s.width();
                 }
 
+                //! @brief Return the height of this BasicRect
                 SizeT height() const
                 {
                     return _s.height();
                 }
 
+                //! @brief Move the left side of this BasicRect to the given coordinate (does not resize the BasicRect)
                 void setLeft(PointT value)
                 {
                     setWidth( this->width() + this->x() - value );
                     setX( value );
                 }
 
+                //! @brief Move the top side of this BasicRect to the given coordinate (does not resize the BasicRect)
                 void setTop(PointT value)
                 {
                     setHeight( this->height() + this->y() - value );
                     setY( value );
                 }
 
+                //! @brief Move the right side of this BasicRect to the given coordinate (resize the BasicRect)
                 void setRight( PointT value )
                 {
                     setWidth( this->width() + (value - right()) );
                 }
 
+                //! @brief Move the bottom side of this BasicRect to the given coordinate (resize the BasicRect)
                 void setBottom( PointT value )
                 {
                     setHeight( this->height() + value - this->bottom() );
                 }
 
+                //! @brief Return the X coordinate of the left side of this BasicRect
                 PointT left() const
                 {
                     return _p.x();
                 }
 
+                //! @brief Return the Y coordinate of the top side of this BasicRect
                 PointT top() const
                 {
                     return _p.y();
                 }
 
+                //! @brief Return the X coordinate of the right side of this BasicRect
                 PointT right() const
                 {
                     return _p.x() + _s.width() - 1;
                 }
 
+                //! @brief Return the Y coordinate of the bottom side of this BasicRect
                 PointT bottom() const
                 {
                     return _p.y() + _s.height() - 1;
                 }
 
+                //! @brief Increment the position of the left side of this BasicRect by the given value
                 BasicRect& addLeft(PointT delta)
                 {
                   setLeft( left() + delta);
                   return *this;
                 }
 
+                //! @brief Decrement the position of the left side of this BasicRect by the given value
                 BasicRect& subLeft(PointT delta)
                 {
                   setLeft( left() - delta);
                   return *this;
                 }
 
+                //! @brief Increment the position of the top side of this BasicRect by the given value
                 BasicRect& addTop(PointT delta)
                 {
                   setTop( top() +  delta);
                   return *this;
                 }
 
+                //! @brief Decrement the position of the top side of this BasicRect by the given value
                 BasicRect& subTop(PointT delta)
                 {
                   setTop( top() -  delta);
                   return *this;
                 }
 
+                //! @brief Increment the position of the right side of this BasicRect by the given value
                 BasicRect& addRight(PointT delta)
                 {
                   setRight( right() +  delta);
                   return *this;
                 }
 
+                //! @brief Decrement the position of the right side of this BasicRect by the given value
                 BasicRect& subRight(PointT delta)
                 {
                   setRight( right() -  delta);
                   return *this;
                 }
 
+                //! @brief Increment the position of the bottom side of this BasicRect by the given value
                 BasicRect& addBottom(PointT delta)
                 {
                   setBottom( bottom() +  delta);
                   return *this;
                 }
 
+                //! @brief Decrement the position of the bottom side of this BasicRect by the given value
                 BasicRect& subBottom(PointT delta)
                 {
                   setBottom( bottom() -  delta);
                   return * this;
                 }
 
-                //! Return the top left coordinates as a const BasicPoint<SizeT>
+                //! @brief Return the top left coordinates as a const BasicPoint<SizeT>
                 const Pt::Gfx::BasicPoint<PointT>& topLeft() const
                 { return this->origin(); }
 
-                //! Return the top right coordinates as a const BasicPoint<SizeT>
+                //! @brief Return the top right coordinates as a const BasicPoint<SizeT>
                 const Pt::Gfx::BasicPoint<PointT> topRight() const
                 { return Pt::Gfx::BasicPoint<PointT>(this->x() + this->width(), this->y()); }
 
-                //! Return the bottom left coordinates as a const BasicPoint<SizeT>
+                //! @brief Return the bottom left coordinates as a const BasicPoint<SizeT>
                 const Pt::Gfx::BasicPoint<PointT> bottomLeft() const
                 { return Pt::Gfx::BasicPoint<PointT>(this->x(), this->y() + this->height()); }
 
-                //! Return the bottom right coordinates as a const BasicPoint<SizeT>
+                //! @brief Return the bottom right coordinates as a const BasicPoint<SizeT>
                 const Pt::Gfx::BasicPoint<PointT> bottomRight() const
                 { return Pt::Gfx::BasicPoint<PointT>(this->x() + this->width(), this->y() + this->height()); }
 

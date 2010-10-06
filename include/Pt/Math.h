@@ -43,7 +43,7 @@
 
 
 namespace Pt {
-    //! Natural const
+    //! Various constants for PI
     static const double PI      = 3.14159265358979323846;  // pi
     static const double PI_2    = 6.28318530717958647692;  // 2*pi
     static const double PI_HALF = 1.57079632679489661923;  // pi/2
@@ -52,14 +52,14 @@ namespace Pt {
     static const double PI_SQR  = 9.86960440108935861883449099987615114f; //pi^2
 
     /**
-        * @brief Fast sine calculation, not as precise as sin(theta)
-        *
-        * theta is required in rad [0, 2*PI]
-        *
-        * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
-        *
-        * In range [0, 2*PI] max. abs error in fast mode is 0.06
-        */
+      * @brief Fast sine calculation, not as precise as sin(theta)
+      *
+      * theta is required in rad [0, 2*PI]
+      *
+      * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
+      *
+      * In range [0, 2*PI] max. abs error in fast mode is 0.06
+      */
     template <typename T, bool accurate>
     T fastSin(const T& theta)
     {
@@ -89,14 +89,14 @@ namespace Pt {
     }
 
     /**
-        * @brief Fast cosine calculation, not as precise as cos(theta)
-        *
-        * theta is required in rad [0, 2*PI]
-        *
-        * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
-        *
-        * In range [0, 2*PI] max. abs error in fast mode is 0.06
-        */
+      * @brief Fast cosine calculation, not as precise as cos(theta)
+      *
+      * theta is required in rad [0, 2*PI]
+      *
+      * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
+      *
+      * In range [0, 2*PI] max. abs error in fast mode is 0.06
+      */
     template <typename T, bool accurate>
     T fastCos(const T& theta)
     {
@@ -113,7 +113,8 @@ namespace Pt {
         return fastSin<T, accurate>(sinTheta);
     }
 
-
+    /** @brief Return the Euclidean distance of the given values
+      */
     inline double hypot(double x, double y)
     {
         #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
@@ -123,11 +124,15 @@ namespace Pt {
         #endif
     }
 
+    /** @brief A faster rounding function.
+      */
     inline int round(double d)
     {
         return static_cast<int>(d<0 ? d-.5 : d+.5);
     }
 
+    /** @brief Return the absolute value for the given 64-bit integer.
+      */
     inline Pt::int64_t abs(Pt::int64_t value)
     {
         return value < 0 ? -value : value;

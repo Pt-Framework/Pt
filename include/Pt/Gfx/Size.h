@@ -70,25 +70,28 @@ namespace Pt {
                     _h = h;
                 }
 
+                //! @brief Increment the width of the BasicSize by the given value
                 const BasicSize& addWidth(T w)
                 {
                     _w += w;
                     return *this;
                 }
 
+                //! @brief Decrement the width of the BasicSize by the given value
                 const BasicSize& subWidth(T w)
                 {
                     _w -= w;
                     return *this;
                 }
 
+                //! @brief Increment the height of the BasicSize by the given value
                 const BasicSize& addHeight(T h)
                 {
                     _h += h;
                     return *this;
                 }
 
-
+                //! @brief Decrement the height of the BasicSize by the given value
                 const BasicSize& subHeight(T h)
                 {
                     _h -= h;
@@ -128,8 +131,8 @@ namespace Pt {
                 T _h;
         };
 
-        typedef BasicSize<Pt::size_t>      Size;
-        typedef BasicSize<double>          SizeF;
+        typedef BasicSize<Pt::size_t> Size;
+        typedef BasicSize<double>     SizeF;
 
     } // namespace Gfx
 

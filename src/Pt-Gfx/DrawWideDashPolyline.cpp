@@ -556,7 +556,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
         fillLine( image, pen,  y, h, left, right, nleft, nright);
 
         // If DashStyle line style and cap mode is round, draw a round cap
-        if( !first && ( pen.style() == Pen::DashStyle) && ( pen.capStyle() == Pen::RoundCap) || ( pen.capStyle() == Pen::TriangularCap) )
+        if( ( !first && ( pen.style() == Pen::DashStyle) && ( pen.capStyle() == Pen::RoundCap) ) || ( pen.capStyle() == Pen::TriangularCap) )
         {
             lcapFace.setX( x2 );
             lcapFace.setY( y2 );

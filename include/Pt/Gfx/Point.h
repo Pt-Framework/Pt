@@ -47,68 +47,79 @@ namespace Pt {
         template<typename T>
         class BasicPoint {
             public:
+                //! @brief Construct a BasicPoint of (0,0)
                 BasicPoint()
-                : _x(0)
-                , _y(0)
+                : _x(0), _y(0)
                 {}
 
+                //! @brief Construct a BasicPoint of (x,y)
                 BasicPoint(T x, T y)
-                : _x(x)
-                , _y(y)
+                : _x(x), _y(y)
                 {}
 
+                //! @brief Construct a BasicPoint from another BasicPoint
                 BasicPoint(const BasicPoint& pt)
-                : _x(pt._x)
-                , _y(pt._y)
+                : _x(pt._x), _y(pt._y)
                 { }
 
-                T x() const
-                { return _x; }
-
-                T y() const
-                { return _y; }
-
-                void setX(T x_)
-                {_x = x_; }
-
-                void setY(T y_)
-                {_y = y_; }
-
+                //! @brief Set the X and Y components of the BasicPoint
                 void set(T x_, T y_)
                 {
                     _x = x_;
                     _y = y_;
                 }
 
+                //! @brief Set the X component of the BasicPoint
+                void setX(T x_)
+                {_x = x_; }
+
+                //! @brief Set the Y component of the BasicPoint
+                void setY(T y_)
+                {_y = y_; }
+
+                //! @brief Return the X component of the BasicPoint
+                T x() const
+                { return _x; }
+
+                //! @brief Return the Y component of the BasicPoint
+                T y() const
+                { return _y; }
+
+                //! @brief Increment the X component of the BasicPoint by the given value
                 const BasicPoint& addX(T x)
                 {
                   _x +=  x;
                   return *this;
                 }
 
+                //! @brief Decrement the X component of the BasicPoint by the given value
                 const BasicPoint& subX(T x)
                 {
                   _x -=  x;
                   return *this;
                 }
+                //! @brief Increment the Y component of the BasicPoint by the given value
                 const BasicPoint& addY(T y)
                 {
                   _y +=  y;
                   return *this;
                 }
 
+                //! @brief Decrement the Y component of the BasicPoint by the given value
                 const BasicPoint& subY(T y)
                 {
                   _y -=  y;
                   return *this;
                 }
 
+                //! @brief Move the BasicPoint as far as th given the X and Y distances
                 const BasicPoint& move(T dx, T dy)
                 {
                     _x += dx; _y += dy; return *this;
                 }
 
 
+                //! @brief Calculate distance between this BasicPoint and the given BasicPoint
                 template<typename T2>
                 T calcDistance(const BasicPoint<T2>& otherPoint) const
                 {
@@ -183,16 +194,16 @@ namespace Pt {
                 T _y;
         };
 
-        typedef BasicPoint<Pt::ssize_t>    Point;
-        typedef BasicPoint<double>         PointF;
+        typedef BasicPoint<Pt::ssize_t>  Point;
+        typedef BasicPoint<double>       PointF;
+
 
 
         /** @brief functor to compare to points.
-
-            First point is smaller as second if the x value
-            is smaller or the x values are equal and the
-            y value of first point is smaller.
-        */
+          *
+          * The first point is defined as smaller than the second one if the x value
+          * is smaller or the x values are equal and the y value of first point is smaller.
+          */
         class PointCompareFunctorXY
         {
         public:
@@ -201,7 +212,7 @@ namespace Pt {
                 if( (pt1.x() < pt2.x()) ||
                     ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) )
                 {
-                        return true;
+                    return true;
                 }
                 return false;
             }
