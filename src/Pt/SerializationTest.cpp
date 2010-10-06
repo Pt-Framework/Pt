@@ -530,7 +530,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(floatVal2);
-    PT_UNIT_ASSERT( Pt::equal(floatVal2, 77.3547f,   Pt::Eps3) );
+    PT_UNIT_ASSERT( floatVal2 > 77.3 && floatVal2 < 77.4f );
     PT_UNIT_ASSERT(si.toString().find(Pt::String(L"77.354"))== 0 );
     si >>= floatVal2;
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
@@ -541,7 +541,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(doubleVal2);
-    PT_UNIT_ASSERT( Pt::equal(doubleVal2, 198.8196, Pt::Eps6) );
+    PT_UNIT_ASSERT( doubleVal2 > 198.8 && doubleVal2 < 198.9 );
     Pt::String asString = si.toString();
     PT_UNIT_ASSERT( asString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
