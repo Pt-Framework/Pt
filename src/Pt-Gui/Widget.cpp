@@ -85,28 +85,27 @@ Widget::Widget(const Gfx::Point& at, const Gfx::Size& size)
 
 Widget::Widget(Widget& newParent)
 : _parent(&newParent)
-, _region(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _region(Gfx::Point(0, 0), Gfx::Size(400, 300))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 , _enabled(true)
 {
     newParent.addChild(*this);
-    _impl = new WidgetImpl(*this, &newParent);
+    _impl = new WidgetImpl(*this, &newParent, _region.topLeft(), _region.size());
     _layout.reset(NullLayout::createFor(*this));
 }
 
 
 Widget::Widget()
 : _parent(0)
-, _region(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _region(Gfx::Point(0, 0), Gfx::Size(400, 300))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 , _enabled(true)
 {
-    _impl = new WidgetImpl(*this, 0);
+    _impl = new WidgetImpl(*this, 0, _region.topLeft(), _region.size());
     _layout.reset(NullLayout::createFor(*this));
 }
-
 
 Widget::~Widget()
 {

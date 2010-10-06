@@ -57,15 +57,20 @@ int main(int argc, char* argv[])
         Pt::Gui::Pixmap pm(100, 100);
         {
         	Pt::Gui::Painter painter = pm.painter();
+            painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0x0, 0, 0) ) );
+            painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(100,100) ) );
         	painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0xffff, 0, 0) ) );
         	painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(20, 20), Pt::Gfx::Size(100,100) ) );
+            painter.setPen( Pt::Gfx::Pen(Pt::Gfx::ARgbColor(0, 0, 0xffff)) );
         	painter.drawLine( Pt::Gfx::Point(10,20), Pt::Gfx::Point(100,120) );
         }
 
         {
         	Pt::Gui::Painter painter = widget.painter();
-        	painter.setPen( Pt::Gfx::Pen(Pt::Gfx::ARgbColor(0, 0, 0xffff)) );
+            painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0x0, 0, 0) ) );
+            painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(widget.width(),widget.height()) ) );
         	painter.drawPixmap( Pt::Gfx::Point(10, 10), pm );
+            painter.setPen( Pt::Gfx::Pen(Pt::Gfx::ARgbColor(0, 0, 0xffff)) );
         	painter.drawLine( Pt::Gfx::Point(10,10), Pt::Gfx::Point(200,100) );
         }
 
