@@ -50,17 +50,39 @@ using namespace Pt;
 using namespace Pt::Gui;
 using namespace Pt::Gfx;
 
+class MyApplication : public Application {
+    public:
+        MyApplication(ProgressBar& pbar)
+        : _pbar(pbar)
+        {}
+
+        void dec()
+        {
+            _pbar.setValue(_pbar.value() - 1);
+            _pbar.update();
+        }
+
+        void inc()
+        {
+            _pbar.setValue(_pbar.value() + 1);
+            _pbar.update();
+        }
+
+    private:
+        ProgressBar& _pbar;
+};
+
 int main(int argc, char* argv[])
 {
     try
     {
-        Application app;
-
         Widget mainWidget(Point(100, 100), Size(400, 300));
         Panel  mainPanel(mainWidget, Point(0, 0), Size(400, 300));
 
             Widget pbarWidget(mainPanel, Point(0, 0), Size(400, 100));
                 ProgressBar pbar(pbarWidget,  Point(0, 0), Size(400, 100));
+                pbar.setMinimum(0);
+                pbar.setMaximum(10);
 
             Widget ltbnWidget(mainPanel, Point(0, 0), Size(400, 200));
                 Label  label1 (ltbnWidget, Point(0, 0), Size(1, 1), Pt::String::widen("Label 1" ));
@@ -80,12 +102,13 @@ int main(int argc, char* argv[])
             gridLayout.setLayoutData(button2, SimpleGridLayoutData(1, 1));
         gridLayout.update();
 
-        connect(button1.clicked, app, &Application::exit);
-
-        connect(mainWidget.closed, app, &Application::exit);
+        MyApplication app(pbar);
+        connect(button1.clicked,   app, &MyApplication::dec);
+        connect(button2.clicked,   app, &MyApplication::inc);
+        connect(mainWidget.closed, app, &MyApplication::exit);
         mainWidget.show();
-
         return app.run();
+
     }
     catch(const std::exception& e)
     {
