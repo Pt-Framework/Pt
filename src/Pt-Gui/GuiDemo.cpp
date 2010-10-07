@@ -37,42 +37,53 @@
 #include <Pt/Gui/PaintEvent.h>
 #include <Pt/Gui/KeyEvent.h>
 #include <Pt/Gui/Label.h>
+#include <Pt/Gui/Panel.h>
+#include <Pt/Gui/SimpleGridLayout.h>
+#include <Pt/Gui/VerticalLayout.h>
+#include <Pt/Gui/ProgressBar.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <string>
 #include <iostream>
 
+using namespace Pt;
+using namespace Pt::Gui;
+using namespace Pt::Gfx;
 
 int main(int argc, char* argv[])
 {
     try
     {
-        Pt::Gui::Application app;
+        Application app;
 
-        Pt::Gui::Widget widget;
-        connect(widget.closed, app, &Pt::Gui::Application::exit);
+        Widget mainWidget(Point(100, 100), Size(400, 300));
+        Panel  mainPanel(mainWidget, Point(0, 0), Size(400, 300));
 
-        widget.show();
+            Widget pbarWidget(mainPanel, Point(0, 0), Size(400, 100));
+                ProgressBar pbar(pbarWidget,  Point(0, 0), Size(400, 100));
 
-        Pt::Gui::Pixmap pm(100, 100);
-        {
-            Pt::Gui::Painter painter = pm.painter();
-            painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0x0, 0, 0) ) );
-            painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(100,100) ) );
-            painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0xffff, 0, 0) ) );
-            painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(20, 20), Pt::Gfx::Size(100,100) ) );
-            painter.setPen( Pt::Gfx::Pen(Pt::Gfx::ARgbColor(0, 0, 0xffff)) );
-            painter.drawLine( Pt::Gfx::Point(10,20), Pt::Gfx::Point(100,120) );
-        }
+            Widget ltbnWidget(mainPanel, Point(0, 0), Size(400, 200));
+                Label  label1 (ltbnWidget, Point(0, 0), Size(1, 1), Pt::String::widen("Label 1" ));
+                Label  label2 (ltbnWidget, Point(0, 0), Size(1, 1), Pt::String::widen("Label 2" ));
+                Button button1(ltbnWidget, Point(0, 0), Size(1, 1), Pt::String::widen("Button 1"));
+                Button button2(ltbnWidget, Point(0, 0), Size(1, 1), Pt::String::widen("Button 2"));
 
-        {
-            Pt::Gui::Painter painter = widget.painter();
-            painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0x0, 0, 0) ) );
-            painter.fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(widget.width(),widget.height()) ) );
-            painter.drawPixmap( Pt::Gfx::Point(10, 10), pm );
-            painter.setPen( Pt::Gfx::Pen(Pt::Gfx::ARgbColor(0, 0, 0xffff)) );
-            painter.drawLine( Pt::Gfx::Point(10,10), Pt::Gfx::Point(200,100) );
-        }
+        VerticalLayout vertLayout = VerticalLayout::create(mainPanel);
+            vertLayout.set(ltbnWidget, VerticalLayout::Grab, Margin(0, 0, 0, 0));
+            vertLayout.set(pbarWidget, VerticalLayout::Grab, Margin(10, 10, 10, 10));
+        vertLayout.update();
+
+        SimpleGridLayout gridLayout = SimpleGridLayout::create(ltbnWidget, 2, 2, 0, 0);
+            gridLayout.setLayoutData(label1,  SimpleGridLayoutData(0, 0));
+            gridLayout.setLayoutData(label2,  SimpleGridLayoutData(0, 1));
+            gridLayout.setLayoutData(button1, SimpleGridLayoutData(1, 0));
+            gridLayout.setLayoutData(button2, SimpleGridLayoutData(1, 1));
+        gridLayout.update();
+
+        connect(button1.clicked, app, &Application::exit);
+
+        connect(mainWidget.closed, app, &Application::exit);
+        mainWidget.show();
 
         return app.run();
     }

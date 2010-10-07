@@ -36,6 +36,10 @@ Main WidgetDemo : WidgetDemo.cpp ;
 Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui  ;
 Main_MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
 
+Main GuiDemo : GuiDemo.cpp ;
+Main_LinkSharedLibraries GuiDemo : Pt Pt-System Pt-Gfx Pt-Gui  ;
+Main_MakeLocate GuiDemo : $(OUTPUT_TARGET) ;
+
 Main Scribble : Scribble.cpp ;
 Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui  ;
 Main_MakeLocate Scribble : $(OUTPUT_TARGET) ;
