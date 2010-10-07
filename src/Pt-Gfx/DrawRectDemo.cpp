@@ -66,6 +66,8 @@ class DrawRectDemo : public Pt::Gui::Widget
             _imagePainter.setPen(Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0x0000, 0x0000, 0xffff ) ) );
             _imagePainter.drawLine( Pt::Gfx::Point(10, 10), Pt::Gfx::Point(10 + 40, 10));
 
+            painter().setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0, 0, 0) ) );
+            painter().fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(1000,1000) ) );
 
             //_imagePainter.drawRect( rect1 ) ;
             painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );

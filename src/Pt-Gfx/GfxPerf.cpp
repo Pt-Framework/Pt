@@ -214,6 +214,10 @@ class GfxPerf : public Pt::Gui::Widget
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
+
+            painter().setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0, 0, 0x7fff) ) );
+            painter().fillRect( Pt::Gfx::Rect( Pt::Gfx::Point(0, 0), Pt::Gfx::Size(1000,1000) ) );
+
             measureLine();
             measurePolygon();
             measureText();
