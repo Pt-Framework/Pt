@@ -49,7 +49,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 {
 	public:
 	ImagePainterDemo()
-	: _image( )
+	: _image( 400, 300, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) )
 	, _imagePainter( _image )
 	, _angle( -300 )
 	, _out("Time.txt")

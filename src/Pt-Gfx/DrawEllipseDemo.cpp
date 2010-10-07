@@ -77,12 +77,11 @@ class DrawEllipseDemo : public Pt::Gui::Widget
     public:
         DrawEllipseDemo()
         : _texture( 21, 21, Pt::Gfx::ARgbColor(0,0,0xdddd) )
-        , _image( )
+        , _image(400, 300, Pt::Gfx::ARgbColor( 0xffff, 0, 0 ))
         , _imagePainter( _image )
         , _angle(0 )
         {
             this->setTitle(L"DrawEllipseDemo");
-
             std::copy( texture_data, texture_data + (21*21), _texture.data() );
         }
 
@@ -124,14 +123,14 @@ class DrawEllipseDemo : public Pt::Gui::Widget
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
-        _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
+        _image.resize( event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
     }
 
     private:
-        Pt::Gfx::ARgbImage _texture;
-        Pt::Gfx::ARgbImage        _image;
-        Pt::Gfx::ImagePainter    _imagePainter;
-        Pt::ssize_t                _angle;
+        Pt::Gfx::ARgbImage    _texture;
+        Pt::Gfx::ARgbImage    _image;
+        Pt::Gfx::ImagePainter _imagePainter;
+        Pt::ssize_t           _angle;
 };
 
 
