@@ -138,23 +138,6 @@ namespace Pt {
         return value < 0 ? -value : value;
     }
 
-    // accuracy for equal comparison
-    static const double Eps9    = 10e-9;
-    static const double Eps8    = 10e-8;
-    static const double Eps7    = 10e-7;
-    static const double Eps6    = 10e-6;
-    static const double Eps5    = 10e-5;
-    static const double Eps4    = 10e-4;
-    static const double Eps3    = 10e-3;
-    static const double Eps2    = 10e-2;
-    static const double Eps1    = 10e-1;
-
-    template<typename T>
-    inline bool equal(const T& val, const T& val2, const double& eps)
-    {
-        double diff = std::fabs(val - val2);
-        return diff < eps;
-    }
 } // namespace Pt
 
 #endif // PT_MATH_H
