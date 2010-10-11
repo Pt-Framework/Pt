@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2007 by Marc Boris Duerner
  * Copyright (C) 2006-2007 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -178,6 +178,40 @@ PT_API atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch);
     Sets \a dest to \a exch and returns the initial value of \a dest.
 */
 PT_API void* atomicExchange(void* volatile& dest, void* exch);
+
+
+
+
+////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
+
+union new_atomic_t
+{
+    int   i; // 32 bit in both 32 bit and 64 bit platforms
+    long  l; // 32 bit in 32 bit platform and 64 bit in 64 bit platform
+    void* p; // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
+
+#ifdef __cplusplus
+    // To prevent link error
+    inline new_atomic_t()
+    {}
+
+    // Copy ctor (platform specific)
+    new_atomic_t(const volatile new_atomic_t& r);
+
+    // Make this data type convertible directly to a plain int (platform specific)
+    //operator int() const;
+
+    // User must not set the union directly.
+    // Hence using any of these functions will cause undefined reference error in link-time
+    inline explicit new_atomic_t(int);
+    inline explicit new_atomic_t(long);
+    inline explicit new_atomic_t(void*);
+#endif
+};
+
+PT_API int                new_atomicGet      (volatile new_atomic_t& val);
+PT_API void               new_atomicSet      (volatile new_atomic_t& val, int n);
+PT_API const new_atomic_t new_atomicIncrement(volatile new_atomic_t& val);
 
 }
 
