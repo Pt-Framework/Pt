@@ -776,6 +776,13 @@ inline void operator <<=(SerializationInfo& si, double n)
 }
 
 
+inline void operator <<=(SerializationInfo& si, const char* str)
+{
+    si.setValue(str);
+    si.setTypeName("string");
+}
+
+
 inline void operator >>=(const SerializationInfo& si, std::string& n)
 {
     si.getValue(n);
