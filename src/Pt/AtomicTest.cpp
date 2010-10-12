@@ -54,7 +54,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             std::cout << "\n####################################################################\n";
 
             volatile Pt::new_atomic_t my_value(0);
-            volatile Pt::new_atomic_t my_value2(0);
 
             Pt::new_atomicSet(my_value, 3);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
