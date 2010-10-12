@@ -99,6 +99,10 @@ void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
 }
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
+new_atomic_t::new_atomic_t(int v)
+: l(v)
+{}
+
 int new_atomicGet(volatile new_atomic_t& val)
 {
 #if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
@@ -125,19 +129,19 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return InterlockedDecrement( const_cast<LONG*>(&val.l) );
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
+int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
-    return InterlockedExchange( const_cast<LONG*>(&val.l), exch.l );
+    return InterlockedExchange( const_cast<LONG*>(&val.l), exch );
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
+int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
-    return InterlockedCompareExchange( const_cast<LONG*>(&val.l), exch.l, comp.l );
+    return InterlockedCompareExchange( const_cast<LONG*>(&val.l), exch, comp );
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
+int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
-    return InterlockedExchangeAdd( const_cast<LONG*>(&val.l), add.l );
+    return InterlockedExchangeAdd( const_cast<LONG*>(&val.l), add );
 }
 
 void* new_atomicExchange(void* volatile& val, void* exch)

@@ -184,22 +184,14 @@ PT_API void* atomicExchange(void* volatile& dest, void* exch);
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
-union new_atomic_t
+union PT_API new_atomic_t
 {
     int   i; // 32 bit in both 32 bit and 64 bit platforms
     long  l; // 32 bit in 32 bit platform and 64 bit in 64 bit platform
     void* p; // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
 
 #ifdef __cplusplus
-    // To prevent link error
-    inline new_atomic_t()
-    {}
-
-    // User must not set the union directly.
-    // Hence using any of these functions will cause undefined reference error in link-time
-    inline explicit new_atomic_t(int);
-    inline explicit new_atomic_t(long);
-    inline explicit new_atomic_t(void*);
+    explicit new_atomic_t(int v = 0);
 #endif
 };
 
@@ -207,9 +199,9 @@ PT_API int   new_atomicGet            (volatile new_atomic_t& val);
 PT_API void  new_atomicSet            (volatile new_atomic_t& val, int n);
 PT_API int   new_atomicIncrement      (volatile new_atomic_t& val);
 PT_API int   new_atomicDecrement      (volatile new_atomic_t& val);
-PT_API int   new_atomicExchange       (volatile new_atomic_t& val, new_atomic_t exch);
-PT_API int   new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp);
-PT_API int   new_atomicExchangeAdd    (volatile new_atomic_t& val, new_atomic_t add);
+PT_API int   new_atomicExchange       (volatile new_atomic_t& val, int exch);
+PT_API int   new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp);
+PT_API int   new_atomicExchangeAdd    (volatile new_atomic_t& val, int add);
 PT_API void* new_atomicExchange       (void* volatile& val, void* exch);
 PT_API void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 }

@@ -133,6 +133,10 @@ void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
+new_atomic_t::new_atomic_t(int v)
+: l(v)
+{}
+
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "mfence" : : : "memory" );
@@ -165,35 +169,35 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return tmp - 1;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
+int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     volatile register long ret;
 
     // Using cmpxchg and a loop here on purpose
     asm volatile ( "1:; lock; cmpxchgq %2, %0; jne 1b"
-                   : "=m"(val.l),  "=a"(ret)
-                   :  "r"(exch.l),  "m"(val.l), "a"(val.l) );
+                   : "=m"(val.l),      "=a"(ret)
+                   :  "r"((long)exch),  "m"(val.l), "a"(val.l) );
 
     return ret;
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
+int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
     volatile register long old;
 
     asm volatile ( "lock; cmpxchgq %2, %0"
-                   : "=m"(val.l),  "=a"(old)
-                   :  "r"(exch.l),  "m"(val.l), "a"(comp.l) );
+                   : "=m"(val.l),      "=a"(old)
+                   :  "r"((long)exch),  "m"(val.l), "a"((long) comp) );
     return old;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
+int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
     volatile register long ret;
 
     asm volatile ( "lock; xaddq %0, %1"
-                   : "=r"(ret),   "=m"(val.l)
-                   :  "0"(add.l),  "m"(val.l) );
+                   : "=r"(ret),       "=m"(val.l)
+                   :  "0"((long)add),  "m"(val.l) );
 
     return ret;
 }
