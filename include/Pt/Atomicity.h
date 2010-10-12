@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2006-2007 by Marc Boris Duerner
- * Copyright (C) 2006-2007 by Aloysius Indrayanto
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -195,12 +195,6 @@ union new_atomic_t
     inline new_atomic_t()
     {}
 
-    // Copy ctor (platform specific)
-    new_atomic_t(const volatile new_atomic_t& r);
-
-    // Make this data type convertible directly to a plain int (platform specific)
-    //operator int() const;
-
     // User must not set the union directly.
     // Hence using any of these functions will cause undefined reference error in link-time
     inline explicit new_atomic_t(int);
@@ -209,10 +203,15 @@ union new_atomic_t
 #endif
 };
 
-PT_API int                new_atomicGet      (volatile new_atomic_t& val);
-PT_API void               new_atomicSet      (volatile new_atomic_t& val, int n);
-PT_API const new_atomic_t new_atomicIncrement(volatile new_atomic_t& val);
-
+PT_API int   new_atomicGet            (volatile new_atomic_t& val);
+PT_API void  new_atomicSet            (volatile new_atomic_t& val, int n);
+PT_API int   new_atomicIncrement      (volatile new_atomic_t& val);
+PT_API int   new_atomicDecrement      (volatile new_atomic_t& val);
+PT_API int   new_atomicExchange       (volatile new_atomic_t& val, new_atomic_t exch);
+PT_API int   new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp);
+PT_API int   new_atomicExchangeAdd    (volatile new_atomic_t& val, new_atomic_t add);
+PT_API void* new_atomicCompareExchange(void* volatile& ptr, void* exch, void* comp);
+PT_API void* new_atomicExchange       (void* volatile& dest, void* exch);
 }
 
 #endif

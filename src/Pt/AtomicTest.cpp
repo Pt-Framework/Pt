@@ -41,9 +41,32 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 			Pt::Unit::TestSuite::registerMethod( "GetSet", *this, &AtomicTestSuite::GetSet );
             Pt::Unit::TestSuite::registerMethod( "Integer", *this, &AtomicTestSuite::Integer );
             Pt::Unit::TestSuite::registerMethod( "Pointer", *this, &AtomicTestSuite::Pointer );
+
+            Pt::Unit::TestSuite::registerMethod( "NewAtomicTest", *this, &AtomicTestSuite::NewAtomicTest );
         }
 
     protected:
+        ////////////////////////////////////////// START OF TEMPORARY TESTING ///////////////////////////////////////////
+        void NewAtomicTest()
+        {
+            std::cout << "\n####################################################################\n";
+
+            PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(void*) );
+
+            volatile Pt::new_atomic_t v;
+            Pt::new_atomicSet(v, 3);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 3);
+
+            Pt::new_atomicSet(v, 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 0);
+
+            PT_UNIT_ASSERT(Pt::new_atomicIncrement(v) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 1);
+
+            std::cout << "\n####################################################################\n";
+        }
+        ////////////////////////////////////////// END OF TEMPORARY TESTING ///////////////////////////////////////////
+
         void GetSet()
         {
 			volatile Pt::atomic_t x = 1;
@@ -51,18 +74,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
 			volatile Pt::atomic_t y = Pt::atomicGet(x);
 			PT_UNIT_ASSERT(y == 3);
-
-////////////////////////////////////////// START OF TEMPORARY TESTING ///////////////////////////////////////////
-            std::cout << "\n####################################################################\n";
-
-            volatile Pt::new_atomic_t my_atom;
-            Pt::new_atomicSet(my_atom, 3);
-
-            volatile int test = Pt::new_atomicGet(my_atom);
-            PT_UNIT_ASSERT(test == 3);
-
-            std::cout << "\n####################################################################\n";
-////////////////////////////////////////// END OF TEMPORARY TESTING ///////////////////////////////////////////
 		}
 
         void Integer()

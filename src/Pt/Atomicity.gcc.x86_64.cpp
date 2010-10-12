@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 by Marc Boris Duerner
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -129,12 +130,6 @@ void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
 }
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-//new_atomic_t::operator int() const
-//{ return this->l; }
-
-new_atomic_t::new_atomic_t(const volatile new_atomic_t& r)
-: l(r.l)
-{}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
@@ -148,7 +143,7 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
     asm volatile ("mfence" : : : "memory");
 }
 
-const new_atomic_t new_atomicIncrement(volatile new_atomic_t& val)
+int new_atomicIncrement(volatile new_atomic_t& val)
 {
     static const long d = 1;
     long              tmp;
@@ -156,7 +151,31 @@ const new_atomic_t new_atomicIncrement(volatile new_atomic_t& val)
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.l)
                    :  "0"(d),    "m"(val.l) );
-    return val;
+    return tmp + 1;
+}
+
+int new_atomicDecrement(volatile new_atomic_t& val)
+{
+}
+
+int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
+{
+}
+
+int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
+{
+}
+
+int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
+{
+}
+
+void* new_atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
+{
+}
+
+void* new_atomicExchange(void* volatile& dest, void* exch)
+{
 }
 
 } // namespace Pt
