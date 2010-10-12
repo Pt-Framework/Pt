@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -125,6 +125,96 @@ void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
                       : "=m" (dest), "=a" (old)
                       : "r" (exch), "m" (dest), "a" (comp));
         return old;
+}
+
+////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
+
+int new_atomicGet(volatile new_atomic_t& val)
+{
+    asm volatile ( "lock; addl $0,0(%%esp)" : : : "memory" );
+    return val.i;
+}
+
+void new_atomicSet(volatile new_atomic_t& val, int n)
+{
+    val.i = n;
+    asm volatile ( "lock; addl $0,0(%%esp)" : : : "memory" );
+}
+
+int new_atomicIncrement(volatile new_atomic_t& val)
+{
+    volatile register int tmp;
+
+    asm volatile ( "lock; xaddl %0, %1"
+                   : "=r"(tmp), "=m"(val.i)
+                   :  "0"(1),    "m"(val.i) );
+
+    return tmp + 1;
+}
+
+int new_atomicDecrement(volatile new_atomic_t& val)
+{
+    volatile register int tmp;
+
+    asm volatile ( "lock; xaddl %0, %1"
+                   : "=r"(tmp), "=m"(val.i)
+                   :  "0"(-1),   "m"(val.i) );
+
+    return tmp - 1;
+}
+
+int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
+{
+    volatile register int ret;
+
+    // Using cmpxchg and a loop here on purpose
+    asm volatile ( "1:; lock; cmpxchgl %2, %0; jne 1b"
+                   : "=m"(val.i),  "=a"(ret)
+                   :  "r"(exch.i),  "m"(val.i), "a"(val.i) );
+
+    return ret;
+}
+
+int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
+{
+    volatile register int old;
+
+    asm volatile ( "lock; cmpxchgl %2, %0"
+                   : "=m"(val.i),  "=a"(old)
+                   :  "r"(exch.i),  "m"(val.i), "a"(comp.i) );
+    return old;
+}
+
+int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
+{
+    volatile register int ret;
+
+    asm volatile ( "lock; xaddl %0, %1"
+                   : "=r"(ret),   "=m"(val.i)
+                   :  "0"(add.i),  "m"(val.i) );
+
+    return ret;
+}
+
+void* new_atomicExchange(void* volatile& val, void* exch)
+{
+    void* ret;
+
+    asm volatile ( "1:; lock; cmpxchgl %2, %0; jne 1b"
+                   : "=m"(val),  "=a"(ret)
+                   :  "r"(exch),  "m"(val), "a"(val) );
+
+    return ret;
+}
+
+void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+{
+    void* old;
+
+    asm volatile ( "lock; cmpxchgl %2, %0"
+                   : "=m"(val),  "=a"(old)
+                   :  "r"(exch),  "m"(val), "a" (comp) );
+    return old;
 }
 
 } // namespace Pt
