@@ -210,8 +210,8 @@ PT_API int   new_atomicDecrement      (volatile new_atomic_t& val);
 PT_API int   new_atomicExchange       (volatile new_atomic_t& val, new_atomic_t exch);
 PT_API int   new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp);
 PT_API int   new_atomicExchangeAdd    (volatile new_atomic_t& val, new_atomic_t add);
-PT_API void* new_atomicCompareExchange(void* volatile& ptr, void* exch, void* comp);
-PT_API void* new_atomicExchange       (void* volatile& dest, void* exch);
+PT_API void* new_atomicExchange       (void* volatile& val, void* exch);
+PT_API void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 }
 
 #endif

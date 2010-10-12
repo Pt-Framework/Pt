@@ -38,16 +38,31 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         AtomicTestSuite()
         : Pt::Unit::TestSuite("AtomicityTest")
         {
-			Pt::Unit::TestSuite::registerMethod( "GetSet", *this, &AtomicTestSuite::GetSet );
+            Pt::Unit::TestSuite::registerMethod( "GetSet", *this, &AtomicTestSuite::GetSet );
             Pt::Unit::TestSuite::registerMethod( "Integer", *this, &AtomicTestSuite::Integer );
             Pt::Unit::TestSuite::registerMethod( "Pointer", *this, &AtomicTestSuite::Pointer );
 
-            Pt::Unit::TestSuite::registerMethod( "NewAtomicTest", *this, &AtomicTestSuite::NewAtomicTest );
+            Pt::Unit::TestSuite::registerMethod( "new_GetSet", *this, &AtomicTestSuite::new_GetSet );
+            Pt::Unit::TestSuite::registerMethod( "new_Integer", *this, &AtomicTestSuite::new_Integer );
+            Pt::Unit::TestSuite::registerMethod( "new_Pointer", *this, &AtomicTestSuite::new_Pointer );
         }
 
     protected:
         ////////////////////////////////////////// START OF TEMPORARY TESTING ///////////////////////////////////////////
-        void NewAtomicTest()
+        void new_GetSet()
+        {
+            std::cout << "\n####################################################################\n";
+
+            volatile Pt::new_atomic_t my_value;
+
+            Pt::new_atomicSet(my_value, 3);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
+
+            Pt::new_atomicSet(my_value, 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 0);
+        }
+
+        void new_Integer()
         {
             std::cout << "\n####################################################################\n";
 
@@ -56,12 +71,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             volatile Pt::new_atomic_t my_value;
             volatile Pt::new_atomic_t my_exchange;
             volatile Pt::new_atomic_t my_compare;
-
-            Pt::new_atomicSet(my_value, 3);
-            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
-
-            Pt::new_atomicSet(my_value, 0);
-            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 0);
 
             PT_UNIT_ASSERT(Pt::new_atomicIncrement(my_value) == 1);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 1);
@@ -138,12 +147,22 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -200);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -200);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_compare) == -20);
+        }
+
+        void new_Pointer()
+        {
+            std::cout << "\n####################################################################\n";
+
+            int            a = 0;
+            int            b = 1;
+            void* volatile p = 0;
+
+            PT_UNIT_ASSERT(Pt::new_atomicExchange(p, (void*)&a) == 0);
+            PT_UNIT_ASSERT(p == (void*)&a);
 /*
             int a = 0, b = 1;
             void* volatile p = 0;
 
-            Pt::atomicExchange( p, (void*)&a );
-            PT_UNIT_ASSERT(p == (void*)&a);
 
             Pt::atomicCompareExchange( p, (void*)(&b), (void*)&a );
             PT_UNIT_ASSERT(p == (void*)&b);
@@ -152,8 +171,8 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(p == (void*)&b);
 
 */
-            std::cout << "\n####################################################################\n";
         }
+
         ////////////////////////////////////////// END OF TEMPORARY TESTING ///////////////////////////////////////////
 
         void GetSet()

@@ -200,12 +200,21 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
     return ret;
 }
 
-void* new_atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
+void* new_atomicExchange(void* volatile& val, void* exch)
+{
+    void* ret;
+
+    asm volatile ( "1:; lock; cmpxchgq %2, %0; jne 1b"
+                   : "=m"(val),  "=a"(ret)
+                   :  "r"(exch),  "m"(val), "a"(val) );
+
+    return ret;
+}
+
+void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
 }
 
-void* new_atomicExchange(void* volatile& dest, void* exch)
-{
-}
+
 
 } // namespace Pt
