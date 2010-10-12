@@ -153,24 +153,18 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         {
             std::cout << "\n####################################################################\n";
 
-            int            a = 0;
-            int            b = 1;
+            int            a = 1;
+            int            b = 2;
             void* volatile p = 0;
 
             PT_UNIT_ASSERT(Pt::new_atomicExchange(p, (void*)&a) == 0);
             PT_UNIT_ASSERT(p == (void*)&a);
-/*
-            int a = 0, b = 1;
-            void* volatile p = 0;
 
-
-            Pt::atomicCompareExchange( p, (void*)(&b), (void*)&a );
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(p, (void*)&b, (void*)&a) == (void*)&a);
             PT_UNIT_ASSERT(p == (void*)&b);
 
-            Pt::atomicCompareExchange( p, (void*)(&a), (void*)&a );
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(p, (void*)&a, (void*)&a) == (void*)&b);
             PT_UNIT_ASSERT(p == (void*)&b);
-
-*/
         }
 
         ////////////////////////////////////////// END OF TEMPORARY TESTING ///////////////////////////////////////////

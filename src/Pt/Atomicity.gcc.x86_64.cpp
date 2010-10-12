@@ -213,8 +213,12 @@ void* new_atomicExchange(void* volatile& val, void* exch)
 
 void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
+    void* old;
+
+    asm volatile ( "lock; cmpxchgq %2, %0"
+                   : "=m"(val),  "=a"(old)
+                   :  "r"(exch),  "m"(val), "a" (comp) );
+    return old;
 }
-
-
 
 } // namespace Pt
