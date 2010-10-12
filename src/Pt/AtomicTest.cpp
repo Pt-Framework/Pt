@@ -53,16 +53,82 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(void*) );
 
-            volatile Pt::new_atomic_t v;
-            Pt::new_atomicSet(v, 3);
-            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 3);
+            volatile Pt::new_atomic_t my_value;
+            Pt::new_atomicSet(my_value, 3);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
 
-            Pt::new_atomicSet(v, 0);
-            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 0);
+            Pt::new_atomicSet(my_value, 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 0);
 
-            PT_UNIT_ASSERT(Pt::new_atomicIncrement(v) == 1);
-            PT_UNIT_ASSERT(Pt::new_atomicGet(v) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicIncrement(my_value) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 1);
 
+            PT_UNIT_ASSERT(Pt::new_atomicIncrement(my_value) == 2);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 2);
+
+            PT_UNIT_ASSERT(Pt::new_atomicDecrement(my_value) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 1);
+
+            PT_UNIT_ASSERT(Pt::new_atomicDecrement(my_value) == 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 0);
+
+            PT_UNIT_ASSERT(Pt::new_atomicDecrement(my_value) == -1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -1);
+
+            PT_UNIT_ASSERT(Pt::new_atomicDecrement(my_value) == -2);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -2);
+
+            volatile Pt::new_atomic_t my_exchange;
+            Pt::new_atomicSet(my_exchange, -5);
+            PT_UNIT_ASSERT(Pt::new_atomicExchange(my_value, my_exchange) == -2);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -5);
+
+/*
+            Pt::atomicExchange(v, -5);
+            PT_UNIT_ASSERT(v == -5);
+
+            Pt::atomicExchange(v, 1);
+            PT_UNIT_ASSERT(v == 1);
+
+            Pt::atomicExchange(v, 0);
+            PT_UNIT_ASSERT(v == 0);
+
+            Pt::atomicExchangeAdd(v, 3);
+            PT_UNIT_ASSERT(v == 3);
+
+            Pt::atomicExchangeAdd(v, -5);
+            PT_UNIT_ASSERT(v == -2);
+
+            Pt::atomicExchangeAdd(v, 6);
+            PT_UNIT_ASSERT(v == 4);
+
+            Pt::atomicCompareExchange(v, 5, 4);
+            PT_UNIT_ASSERT(v == 5);
+
+            Pt::atomicCompareExchange(v, 9, 7);
+            PT_UNIT_ASSERT(v == 5);
+
+            Pt::atomicCompareExchange(v, -20, 5);
+            PT_UNIT_ASSERT(v == -20);
+
+            Pt::atomicCompareExchange(v, -200, -20);
+            PT_UNIT_ASSERT(v == -200);
+
+
+            int a = 0, b = 1;
+            void* volatile p = 0;
+
+            Pt::atomicExchange( p, (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&a);
+
+            Pt::atomicCompareExchange( p, (void*)(&b), (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&b);
+
+            Pt::atomicCompareExchange( p, (void*)(&a), (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&b);
+
+*/
             std::cout << "\n####################################################################\n";
         }
         ////////////////////////////////////////// END OF TEMPORARY TESTING ///////////////////////////////////////////

@@ -27,6 +27,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/Atomicity.h>
+
 #include <Pt/Atomicity.gcc.x86_64.h>
 #include <Pt/Types.h>
 
@@ -156,10 +158,25 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
+    static const long d = -1;
+    long              tmp;
+
+    asm volatile ( "lock; xaddq %0, %1"
+                   : "=r"(tmp), "=m"(val.l)
+                   :  "0"(d),    "m"(val.l) );
+    return tmp - 1;
 }
 
 int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
 {
+    volatile register long ret;
+
+    // Using cmpxchg and a loop here on purpose
+    asm volatile ( "1:; lock; cmpxchgq %2, %0; jne 1b"
+                   : "=m"(val.l),  "=a"(ret)
+                   :  "r"(exch.l),  "m"(val.l), "a"(val.l) );
+
+    return ret;
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
