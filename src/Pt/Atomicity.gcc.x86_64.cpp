@@ -147,8 +147,8 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
-    static const long d = 1;
-    long              tmp;
+    static const long      d = 1;
+    volatile register long tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.l)
@@ -158,8 +158,8 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
-    static const long d = -1;
-    long              tmp;
+    static const long      d = -1;
+    volatile register long tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.l)
@@ -185,6 +185,13 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
 {
+    volatile register long ret;
+
+    asm volatile ( "lock; xaddq %0, %1"
+                   : "=r"(ret),   "=m"(val.l)
+                   :  "0"(add.l),  "m"(val.l) );
+
+    return ret;
 }
 
 void* new_atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)

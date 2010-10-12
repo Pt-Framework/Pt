@@ -84,25 +84,31 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -5);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -5);
 
+            Pt::new_atomicSet(my_exchange, 1);
+            PT_UNIT_ASSERT(Pt::new_atomicExchange(my_value, my_exchange) == -5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 1);
+
+            Pt::new_atomicSet(my_exchange, 0);
+            PT_UNIT_ASSERT(Pt::new_atomicExchange(my_value, my_exchange) == 1);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 0);
+
+            Pt::new_atomicSet(my_exchange, 3);
+            PT_UNIT_ASSERT(Pt::new_atomicExchangeAdd(my_value, my_exchange) == 0);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 3);
+
+            Pt::new_atomicSet(my_exchange, -5);
+            PT_UNIT_ASSERT(Pt::new_atomicExchangeAdd(my_value, my_exchange) == 3);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -2);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -5);
+
+            Pt::new_atomicSet(my_exchange, 6);
+            PT_UNIT_ASSERT(Pt::new_atomicExchangeAdd(my_value, my_exchange) == -2);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 4);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 6);
 /*
-            Pt::atomicExchange(v, -5);
-            PT_UNIT_ASSERT(v == -5);
-
-            Pt::atomicExchange(v, 1);
-            PT_UNIT_ASSERT(v == 1);
-
-            Pt::atomicExchange(v, 0);
-            PT_UNIT_ASSERT(v == 0);
-
-            Pt::atomicExchangeAdd(v, 3);
-            PT_UNIT_ASSERT(v == 3);
-
-            Pt::atomicExchangeAdd(v, -5);
-            PT_UNIT_ASSERT(v == -2);
-
-            Pt::atomicExchangeAdd(v, 6);
-            PT_UNIT_ASSERT(v == 4);
-
             Pt::atomicCompareExchange(v, 5, 4);
             PT_UNIT_ASSERT(v == 5);
 
