@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by PTV AG
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Aloysius Indrayanto
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,16 +17,21 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
+#include <windows.h>
+
+#include <Pt/Atomicity.h>
 
 #include <Pt/Atomicity.windows.h>
 
@@ -91,6 +96,58 @@ atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t c
 void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
 {
     return InterlockedCompareExchangePointer(&ptr, ex, cmp);
+}
+////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
+
+int new_atomicGet(volatile new_atomic_t& val)
+{
+#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
+    MemoryBarrier();
+#endif
+    return val.l;
+}
+
+void new_atomicSet(volatile new_atomic_t& val, int n)
+{
+    val.l = n;
+#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
+    MemoryBarrier();
+#endif
+}
+
+int new_atomicIncrement(volatile new_atomic_t& val)
+{
+    return InterlockedIncrement( const_cast<LONG*>(&val.l) );
+}
+
+int new_atomicDecrement(volatile new_atomic_t& val)
+{
+    return InterlockedDecrement( const_cast<LONG*>(&val.l) );
+}
+
+int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
+{
+    return InterlockedExchange( const_cast<LONG*>(&val.l), exch.l );
+}
+
+int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
+{
+    return InterlockedCompareExchange( const_cast<LONG*>(&val.l), exch.l, comp.l );
+}
+
+int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
+{
+    return InterlockedExchangeAdd( const_cast<LONG*>(&val.l), add.l );
+}
+
+void* new_atomicExchange(void* volatile& val, void* exch)
+{
+    return InterlockedExchangePointer( const_cast<void**>(&val), exch );
+}
+
+void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+{
+    return InterlockedCompareExchangePointer( const_cast<void**>(&val), exch, comp );
 }
 
 } // namespace Pt
