@@ -54,6 +54,9 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(void*) );
 
             volatile Pt::new_atomic_t my_value;
+            volatile Pt::new_atomic_t my_exchange;
+            volatile Pt::new_atomic_t my_compare;
+
             Pt::new_atomicSet(my_value, 3);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 3);
 
@@ -78,7 +81,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(Pt::new_atomicDecrement(my_value) == -2);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -2);
 
-            volatile Pt::new_atomic_t my_exchange;
             Pt::new_atomicSet(my_exchange, -5);
             PT_UNIT_ASSERT(Pt::new_atomicExchange(my_value, my_exchange) == -2);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -5);
@@ -108,20 +110,35 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(Pt::new_atomicExchangeAdd(my_value, my_exchange) == -2);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 4);
             PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 6);
+
+            Pt::new_atomicSet(my_exchange, 5);
+            Pt::new_atomicSet(my_compare, 4);
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(my_value, my_exchange, my_compare) == 4);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_compare) == 4);
+
+            Pt::new_atomicSet(my_exchange, 9);
+            Pt::new_atomicSet(my_compare, 7);
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(my_value, my_exchange, my_compare) == 5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == 5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == 9);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_compare) == 7);
+
+            Pt::new_atomicSet(my_exchange, -20);
+            Pt::new_atomicSet(my_compare, 5);
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(my_value, my_exchange, my_compare) == 5);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -20);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -20);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_compare) == 5);
+
+            Pt::new_atomicSet(my_exchange, -200);
+            Pt::new_atomicSet(my_compare, -20);
+            PT_UNIT_ASSERT(Pt::new_atomicCompareExchange(my_value, my_exchange, my_compare) == -20);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_value) == -200);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_exchange) == -200);
+            PT_UNIT_ASSERT(Pt::new_atomicGet(my_compare) == -20);
 /*
-            Pt::atomicCompareExchange(v, 5, 4);
-            PT_UNIT_ASSERT(v == 5);
-
-            Pt::atomicCompareExchange(v, 9, 7);
-            PT_UNIT_ASSERT(v == 5);
-
-            Pt::atomicCompareExchange(v, -20, 5);
-            PT_UNIT_ASSERT(v == -20);
-
-            Pt::atomicCompareExchange(v, -200, -20);
-            PT_UNIT_ASSERT(v == -200);
-
-
             int a = 0, b = 1;
             void* volatile p = 0;
 

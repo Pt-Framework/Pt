@@ -181,6 +181,12 @@ int new_atomicExchange(volatile new_atomic_t& val, new_atomic_t exch)
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, new_atomic_t exch, new_atomic_t comp)
 {
+    volatile register long old;
+
+    asm volatile ( "lock; cmpxchgq %2, %0"
+                   : "=m"(val.l),  "=a"(old)
+                   :  "r"(exch.l),  "m"(val.l), "a"(comp.l) );
+    return old;
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, new_atomic_t add)
