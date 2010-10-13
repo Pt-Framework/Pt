@@ -62,6 +62,3 @@
 #else
     #include "Atomicity.generic.cpp"
 #endif
-
-
-
