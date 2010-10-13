@@ -171,38 +171,122 @@ new_atomic_t::new_atomic_t(int v)
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
+    asm volatile ( "" : : : "memory" );
+    return val.i;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
+    val.i = n;
+    asm volatile ( "" : : : "memory" );
 }
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
+    int tmp, result = 0;
+
+    asm volatile ("    .set    mips32\n"
+                  "1:  ll      %0, %2\n"
+                  "    addu    %1, %0, 1\n"
+                  "    sc      %1, %2\n"
+                  "    beqz    %1, 1b\n"
+                  "    .set    mips0\n"
+                  : "=&r" (result), "=&r" (tmp), "=m" (val.i)
+                  : "m" (val.i));
+    return result + 1;
 }
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
+    int tmp, result = 0;
+
+    asm volatile ("    .set    mips32\n"
+                            "1:  ll      %0, %2\n"
+                            "    subu    %1, %0, 1\n"
+                            "    sc      %1, %2\n"
+                            "    beqz    %1, 1b\n"
+                            "    .set    mips0\n"
+                            : "=&r" (result), "=&r" (tmp), "=m" (val.i)
+                            : "m" (val.i));
+    return result - 1;
 }
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
+    int result, tmp;
+
+    asm volatile ("    .set    mips32\n"
+                            "1:  ll      %0, %2\n"
+                            "    move    %1, %4\n"
+                            "    sc      %1, %2\n"
+                            "    beqz    %1, 1b\n"
+                            "    .set    mips0\n"
+                            : "=&r" (result), "=&r" (tmp), "=m" (val.i)
+                            : "m" (val.i), "r" (exch));
+    return(result);
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
+    int old, tmp;
+
+    asm volatile ("    .set    mips32\n"
+                            "1:  ll      %0, %2\n"
+                            "    bne     %0, %5, 2f\n"
+                            "    move    %1, %4\n"
+                            "    sc      %1, %2\n"
+                            "    beqz    %1, 1b\n"
+                            "2:  .set    mips0\n"
+                            : "=&r" (old), "=&r" (tmp), "=m" (val.i)
+                            : "m" (val.i), "r" (exch), "r" (comp));
+    return(old);
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
+    int result, tmp;
+
+    asm volatile ("    .set    mips32\n"
+                            "1:  ll      %0, %2\n"
+                            "    addu    %1, %0, %4\n"
+                            "    sc      %1, %2\n"
+                            "    beqz    %1, 1b\n"
+                            "    .set    mips0\n"
+                            : "=&r" (result), "=&r" (tmp), "=m" (val.i)
+                            : "m" (val.i), "r" (add));
+    return result;
 }
 
 void* new_atomicExchange(void* volatile& val, void* exch)
 {
+    void* result, tmp;
+
+    asm volatile ("    .set    mips32\n"
+                    "1:  ll      %0, %2\n"
+                    "    move    %1, %4\n"
+                    "    sc      %1, %2\n"
+                    "    beqz    %1, 1b\n"
+                    "    .set    mips0\n"
+                    : "=&r" (result), "=&r" (tmp), "=m" (val)
+                    : "m" (val), "r" (exch));
+    return(result);
 }
 
 void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
+    void* old;
+    void* tmp;
+
+    asm volatile ("    .set    mips32\n"
+                            "1:  ll      %0, %2\n"
+                            "    bne     %0, %5, 2f\n"
+                            "    move    %1, %4\n"
+                            "    sc      %1, %2\n"
+                            "    beqz    %1, 1b\n"
+                            "2:  .set    mips0\n"
+                            : "=&r" (old), "=&r" (tmp), "=m" (val)
+                            : "m" (val), "r" (exch), "r" (comp));
+    return(old);
 }
 
 } // namespace Pt
