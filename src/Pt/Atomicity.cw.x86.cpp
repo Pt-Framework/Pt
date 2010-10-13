@@ -1,12 +1,13 @@
 /*
  * Copyright (C) 2008 by PTV AG
  * Copyright (C) 2008 by Peter Barth
- * 
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,16 +17,18 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include <Pt/Atomicity.h>
 
 #include <Pt/Atomicity.cw.x86.h>
 
@@ -36,8 +39,8 @@ static long MyInterlockedIncrement(volatile long* param)
     __asm
     {
         mov ecx, param
-        mov eax,1 
-        lock xadd dword ptr [ecx],eax 
+        mov eax,1
+        lock xadd dword ptr [ecx],eax
         inc eax
     }
 }
@@ -45,10 +48,10 @@ static long MyInterlockedIncrement(volatile long* param)
 static long MyInterlockedDecrement(volatile long* param)
 {
     __asm
-    {   
+    {
         mov ecx, param
-        mov eax,-1 
-        lock xadd dword ptr [ecx],eax 
+        mov eax,-1
+        lock xadd dword ptr [ecx],eax
         dec eax
     }
 }
@@ -59,7 +62,7 @@ static long MyInterlockedExchangeAdd(volatile long* param, long t)
     {
         mov ecx, param
         mov eax, t
-        lock xadd dword ptr [ecx],eax 
+        lock xadd dword ptr [ecx],eax
     }
 }
 
@@ -67,11 +70,11 @@ static long MyInterlockedExchange(volatile long* param, long t)
 {
     __asm
     {
-        mov ecx,param 
-        mov edx,t 
-        mov eax,dword ptr [ecx] 
+        mov ecx,param
+        mov edx,t
+        mov eax,dword ptr [ecx]
 _loop:
-        lock cmpxchg dword ptr [ecx],edx 
+        lock cmpxchg dword ptr [ecx],edx
         jne _loop
     }
 }
@@ -80,12 +83,12 @@ static void* MyInterlockedExchangePointer(void* volatile* param, void* t)
 {
     __asm
     {
-        mov ecx,dword ptr param 
+        mov ecx,dword ptr param
         mov edx,dword ptr t
-        mov eax,dword ptr [ecx] 
+        mov eax,dword ptr [ecx]
 _loop:
-        lock cmpxchg dword ptr [ecx],edx 
-        jne _loop 
+        lock cmpxchg dword ptr [ecx],edx
+        jne _loop
     }
 }
 
@@ -93,10 +96,10 @@ static long MyInterlockedCompareExchange(volatile long* param, long t, long c)
 {
     __asm
     {
-        mov ecx,param 
-        mov edx,t 
-        mov eax,c 
-        lock cmpxchg dword ptr [ecx],edx 
+        mov ecx,param
+        mov edx,t
+        mov eax,c
+        lock cmpxchg dword ptr [ecx],edx
     }
 }
 
@@ -104,10 +107,10 @@ static void* MyInterlockedCompareExchangePointer(void* volatile* param, void* t,
 {
     __asm
     {
-        mov ecx,param 
-        mov edx,t 
-        mov eax,c 
-        lock cmpxchg dword ptr [ecx],edx 
+        mov ecx,param
+        mov edx,t
+        mov eax,c
+        lock cmpxchg dword ptr [ecx],edx
     }
 }
 
