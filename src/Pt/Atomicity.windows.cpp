@@ -97,6 +97,7 @@ void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
 {
     return InterlockedCompareExchangePointer(&ptr, ex, cmp);
 }
+
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
