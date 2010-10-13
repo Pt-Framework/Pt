@@ -213,38 +213,165 @@ new_atomic_t::new_atomic_t(int v)
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
+    asm volatile ("membar   #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory");
+    return val.i;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
+    val.i = n;
+    asm volatile ("membar   #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory");
 }
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
+    register volatile int* dest asm("g1") = &val.i;
+    register int tmp asm("o4");
+    register int ret asm("o5");
+
+    asm volatile(
+            "1:     ld      [%%g1], %%o4\n\t"
+            "       add     %%o4, 1, %%o5\n\t"
+            /*      cas     [%%g1], %%o4, %%o5 */
+            "       .word   0xdbe0500c\n\t"
+            "       cmp     %%o4, %%o5\n\t"
+            "       bne     1b\n\t"
+            "        add    %%o5, 1, %%o5"
+            : "=&r" (tmp), "=&r" (ret)
+            : "r" (dest)
+            : "memory", "cc");
+
+    return ret;
 }
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
+    register volatile int* dest asm("g1") = &val.i;
+    register int tmp asm("o4");
+    register int ret asm("o5");
+
+    asm volatile(
+            "1:     ld      [%%g1], %%o4\n\t"
+            "       sub     %%o4, 1, %%o5\n\t"
+            /*      cas     [%%g1], %%o4, %%o5 */
+            "       .word   0xdbe0500c\n\t"
+            "       cmp     %%o4, %%o5\n\t"
+            "       bne     1b\n\t"
+            "        sub    %%o5, 1, %%o5"
+            : "=&r" (tmp), "=&r" (ret)
+            : "r" (dest)
+            : "memory", "cc");
+
+        return ret;
 }
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
+    register volatile int* dest asm("g1") = &val.i;
+    register int tmp asm("o4");
+    register int ret asm("o5");
+
+    asm volatile(
+            "1:     ld      [%%g1], %%o4\n\t"
+            "       mov     %3, %%o5\n\t"
+            /*      cas     [%%g1], %%o4, %%o5 */
+            "       .word   0xdbe0500c\n\t"
+            "       cmp     %%o4, %%o5\n\t"
+            "       bne     1b\n\t"
+            "        nop"
+            : "=&r" (tmp), "=&r" (ret)
+            : "r" (dest), "r" (exch)
+            : "memory", "cc");
+
+    return ret;
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
+    register volatile int* dest asm("g1") = &val.i;
+    register int _comp asm("o4") = comp;
+    register int _exch asm("o5") = exch;
+
+    asm volatile(
+            /* cas [%%g1], %%o4, %%o5 */
+            ".word 0xdbe0500c"
+            : "=r" (_exch)
+            : "0" (_exch), "r" (dest), "r" (_comp)
+            : "memory");
+
+    return exch;
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
+    register volatile int* dest asm("g1") = &val.i;
+    register int tmp asm("o4");
+    register int ret asm("o5");
+
+    asm volatile(
+            "1:     ld      [%%g1], %%o4\n\t"
+            "       add     %%o4, %3, %%o5\n\t"
+            /*      cas     [%%g1], %%o4, %%o5 */
+            "       .word   0xdbe0500c\n\t"
+            "       cmp     %%o4, %%o5\n\t"
+            "       bne     1b\n\t"
+            "        add    %%o5, %3, %%o5"
+            : "=&r" (tmp), "=&r" (ret)
+            : "r" (dest), "r" (add)
+            : "memory", "cc");
+
+    return ret;
 }
 
 void* new_atomicExchange(void* volatile& val, void* exch)
 {
+       register void* volatile* dest asm("g1") = &val;
+       register void* tmp asm("o4");
+       register void* ret asm("o5");
+
+       asm volatile(
+#if defined(__sparcv9)
+               "1:     ldx     [%%g1], %%o4\n\t"
+#else
+               "1:     ld      [%%g1], %%o4\n\t"
+#endif
+               "       mov     %3, %%o5\n\t"
+#if defined(__sparcv9)
+               /*      casx    [%%g1], %%o4, %%o5 */
+               "       .word   0xdbf0500c\n\t"
+#else
+               /*      cas     [%%g1], %%o4, %%o5 */
+               "       .word   0xdbe0500c\n\t"
+#endif
+               "       cmp     %%o4, %%o5\n\t"
+               "       bne     1b\n\t"
+               "        nop"
+               : "=&r" (tmp), "=&r" (ret)
+               : "r" (dest), "r" (exch)
+               : "memory", "cc");
+
+        return ret;
 }
 
 void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
+    register void* volatile* dest asm("g1") = &val;
+    register void* _comp asm("o4") = comp;
+    register void* _exch asm("o5") = exch;
+
+    asm volatile(
+#if defined(__sparcv9)
+        /* casx [%%g1], %%o4, %%o5 */
+        ".word 0xdbf0500c"
+#else
+        /* cas [%%g1], %%o4, %%o5 */
+        ".word 0xdbe0500c"
+#endif
+        : "=r" (_exch)
+        : "0" (_exch), "r" (dest), "r" (_comp)
+        : "memory");
+
+    return exch;
 }
 
 } // namespace Pt
