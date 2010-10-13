@@ -162,4 +162,47 @@ atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
     return result;
 }
 
+
+////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
+
+new_atomic_t::new_atomic_t(int v)
+: i(v)
+{}
+
+int new_atomicGet(volatile new_atomic_t& val)
+{
+}
+
+void new_atomicSet(volatile new_atomic_t& val, int n)
+{
+}
+
+int new_atomicIncrement(volatile new_atomic_t& val)
+{
+}
+
+int new_atomicDecrement(volatile new_atomic_t& val)
+{
+}
+
+int new_atomicExchange(volatile new_atomic_t& val, int exch)
+{
+}
+
+int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+{
+}
+
+int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+{
+}
+
+void* new_atomicExchange(void* volatile& val, void* exch)
+{
+}
+
+void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+{
+}
+
 } // namespace Pt
