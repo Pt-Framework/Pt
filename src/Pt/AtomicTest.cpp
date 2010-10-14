@@ -151,7 +151,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
         void Integer()
         {
-            PT_UNIT_ASSERT( sizeof(Pt::atomic_t) == sizeof(void*) );
+            //PT_UNIT_ASSERT( sizeof(Pt::atomic_t) == sizeof(void*) );
 
             volatile Pt::atomic_t v = 0;
 
