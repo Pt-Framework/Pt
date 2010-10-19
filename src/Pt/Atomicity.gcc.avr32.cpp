@@ -179,15 +179,15 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
     volatile int tmp;
-    asm volatile(
-        "in %0, __SREG__"           "\n\t"
+    asm volatile (
+        "in  %0, __SREG__"           "\n\t"
         "cli"                       "\n\t"
-        "ld __tmp_reg__, %a1"       "\n\t"
+        "ld  __tmp_reg__, %a1"       "\n\t"
         "inc __tmp_reg__"           "\n\t"
-        "st %a1, __tmp_reg__"       "\n\t"
+        "st  %a1, __tmp_reg__"       "\n\t"
         "out __SREG__, %0"          "\n\t"
-        : "=&r" (tmp)
-        : "e" (&val.i32)
+        : "=&r"(tmp)
+        :   "e"(&val.i32)
         : "memory"
     );
 
@@ -197,15 +197,15 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
     volatile int tmp;
-    asm volatile(
-        "in %0, __SREG__"           "\n\t"
+    asm volatile (
+        "in  %0, __SREG__"           "\n\t"
         "cli"                       "\n\t"
-        "ld __tmp_reg__, %a1"       "\n\t"
+        "ld  __tmp_reg__, %a1"       "\n\t"
         "dec __tmp_reg__"           "\n\t"
-        "st %a1, __tmp_reg__"       "\n\t"
+        "st  %a1, __tmp_reg__"       "\n\t"
         "out __SREG__, %0"          "\n\t"
-        : "=&r" (tmp)
-        : "e" (&val.i32)
+        : "=&r"(tmp)
+        :   "e"(&val.i32)
         : "memory"
     );
 
@@ -215,17 +215,17 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     int ret;
-    asm volatile("xchg %[ret], %[val], %[exch]"
-                 : [ret] "=&r"(ret), "=m"(val.i32)
-                 : "m"(val.i32), [val] "r"(&val), [exch] "r"(exch)
-                 : "memory");
+    asm volatile ( "xchg %[ret], %[val], %[exch]"
+                  : [ret] "=&r"(ret), "=m"(val.i32)
+                  : "m"(val.i32), [val] "r"(&val), [exch] "r"(exch)
+                  : "memory" );
     return ret;
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
     volatile int ret;
-    asm volatile(
+    asm volatile (
             "1:     ssrf    5\n"
             "       ld.w    %[ret], %[val]\n"
             "       cp.w    %[ret], %[comp]\n"
@@ -235,38 +235,39 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
             "2:\n"
             : [ret] "=&r"(ret), [val] "=m"(val.i32)
             : "m"(&val.i32), [comp] "ir"(comp), [exch] "r"(exch)
-            : "memory", "cc");
+            : "memory", "cc"
+    );
     return ret;
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
     int result;
-    asm volatile("1:     ssrf    5\n"
-                 "       ld.w    %0, %1\n"
-                 "       add     %0, %3\n"
-                 "       stcond  %2, %0\n"
-                 "       brne    1b"
-                 : "=&r"(result), "=o"(val.i32)
-                 : "m"(val.i32), "r"(add)
-                 : "cc", "memory");
+    asm volatile ( "1:     ssrf    5\n"
+                   "       ld.w    %0, %1\n"
+                   "       add     %0, %3\n"
+                   "       stcond  %2, %0\n"
+                   "       brne    1b"
+                   : "=&r"(result), "=o"(val.i32)
+                   : "m"(val.i32), "r"(add)
+                   : "cc", "memory" );
     return result;
 }
 
 void* new_atomicExchange(void* volatile& val, void* exch)
 {
     int ret;
-    asm volatile("xchg %[ret], %[val], %[new_val]"
-                 : [ret] "=&r"(ret), "=m"(val)
-                 : "m"(val), [val] "r"(&val), [new_val] "r"(new_val)
-                 : "memory");
+    asm volatile ( "xchg %[ret], %[val], %[new_val]"
+                   : [ret] "=&r"(ret), "=m"(val)
+                   : "m"(val), [val] "r"(&val), [new_val] "r"(new_val)
+                   : "memory" );
     return ret;
 }
 
 void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     volatile int ret;
-    asm volatile(
+    asm volatile (
             "1:     ssrf    5\n"
             "       ld.w    %[ret], %[val]\n"
             "       cp.w    %[ret], %[comp]\n"
@@ -276,7 +277,8 @@ void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
             "2:\n"
             : [ret] "=&r"(ret), [val] "=m"(val)
             : "m"(&val), [comp] "ir"(comp), [exch] "r"(exch)
-            : "memory", "cc");
+            : "memory", "cc"
+    );
     return ret;
 }
 
