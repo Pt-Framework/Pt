@@ -213,10 +213,10 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 {
     __asm
     {
-        mov ecx, val.l
-        mov eax,1
-        lock xadd dword ptr [ecx],eax
-        inc eax
+        mov       ecx, val.l
+        mov       eax, 1
+        lock xadd dword ptr [ecx], eax
+        inc       eax
     }
 }
 
@@ -224,10 +224,10 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 {
     __asm
     {
-        mov ecx, val.l
-        mov eax,-1
-        lock xadd dword ptr [ecx],eax
-        dec eax
+        mov       ecx, val.l
+        mov       eax, -1
+        lock xadd dword ptr [ecx], eax
+        dec       eax
     }
 }
 
@@ -235,12 +235,12 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     __asm
     {
-        mov ecx,val.l
-        mov edx,exch
-        mov eax,dword ptr [ecx]
+        mov          ecx, val.l
+        mov          edx, exch
+        mov          eax, dword ptr [ecx]
 _loop:
-        lock cmpxchg dword ptr [ecx],edx
-        jne _loop
+        lock cmpxchg dword ptr [ecx], edx
+        jne          _loop
     }
 }
 
@@ -248,10 +248,10 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
     __asm
     {
-        mov ecx,val.l
-        mov edx,exch
-        mov eax,comp
-        lock cmpxchg dword ptr [ecx],edx
+        mov          ecx, val.l
+        mov          edx, exch
+        mov          eax, comp
+        lock cmpxchg dword ptr [ecx], edx
     }
 }
 
@@ -259,9 +259,9 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
     __asm
     {
-        mov ecx, val.l
-        mov eax, add
-        lock xadd dword ptr [ecx],eax
+        mov       ecx, val.l
+        mov       eax, add
+        lock xadd dword ptr [ecx], eax
     }
 }
 
@@ -269,12 +269,12 @@ void* new_atomicExchange(void* volatile& val, void* exch)
 {
     __asm
     {
-        mov ecx,dword ptr val
-        mov edx,dword ptr exch
-        mov eax,dword ptr [ecx]
+        mov          ecx, dword ptr val
+        mov          edx, dword ptr exch
+        mov          eax, dword ptr [ecx]
 _loop:
-        lock cmpxchg dword ptr [ecx],edx
-        jne _loop
+        lock cmpxchg dword ptr [ecx], edx
+        jne          _loop
     }
 }
 
@@ -282,10 +282,10 @@ void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     __asm
     {
-        mov ecx,val
-        mov edx,exch
-        mov eax,cmp
-        lock cmpxchg dword ptr [ecx],edx
+        mov          ecx, val
+        mov          edx, exch
+        mov          eax, cmp
+        lock cmpxchg dword ptr [ecx], edx
     }
 }
 
