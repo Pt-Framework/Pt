@@ -106,7 +106,7 @@ new_atomic_t::new_atomic_t(int v)
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
-#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
+#if !defined(_WIN32_WCE) && (_MSC_VER >= 1400) && !defined(__GNUC__)
     MemoryBarrier();
 #endif
     return val.l;
@@ -115,7 +115,7 @@ int new_atomicGet(volatile new_atomic_t& val)
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
     val.l = n;
-#if ! defined(_WIN32_WCE) && (_MSC_VER >= 1400) && ! defined(__GNUC__)
+#if !defined(_WIN32_WCE) && (_MSC_VER >= 1400) && !defined(__GNUC__)
     MemoryBarrier();
 #endif
 }

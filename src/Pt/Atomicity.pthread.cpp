@@ -208,6 +208,7 @@ atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
 }
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
+typedef void(*cleanup_proc_t)(void *);
 
 new_atomic_t::new_atomic_t(int v)
 : i(v)
@@ -217,7 +218,7 @@ int new_atomicGet(volatile new_atomic_t& val)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -232,7 +233,7 @@ int new_atomicGet(volatile new_atomic_t& val)
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -247,7 +248,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -266,7 +267,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -285,7 +286,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -304,7 +305,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -323,7 +324,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
     int ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -342,7 +343,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
 {
     void* ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -361,7 +362,7 @@ void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* ret = 0;
 
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
+    pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
     assert(thr_ret == 0);
 
@@ -377,3 +378,5 @@ void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 }
 
 } // namespace Pt
+
+
