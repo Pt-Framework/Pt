@@ -30,6 +30,7 @@
 #define PT_ATOMICITY_H
 
 #include <Pt/Api.h>
+#include <Pt/Types.h>
 
 #if defined(PT_ATOMICITY_GCC_ARM)
     #include <Pt/Atomicity.gcc.arm.h>
@@ -184,26 +185,67 @@ PT_API void* atomicExchange(void* volatile& dest, void* exch);
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
+/** @brief Atomic integers to be used with atomicity functions.
+  * A variable of this type must not be accessed directly by users. Use the provided atomicity functions.
+  */
 union PT_API new_atomic_t
 {
-    int   i; // 32 bit in both 32 bit and 64 bit platforms
-    long  l; // 32 bit in 32 bit platform and 64 bit in 64 bit platform
-    void* p; // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
-
+    int     i;   // 32 bit in both 32 bit and 64 bit platforms
+    long    l;   // 32 bit in 32 bit platform and 64 bit in 64 bit platform
+    int32_t i32; // Always 32-bit in any platform
+    int64_t i64; // Always 64-bit in any platform
+    void*   p;   // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
 #ifdef __cplusplus
     explicit new_atomic_t(int v = 0);
 #endif
 };
 
-PT_API int   new_atomicGet            (volatile new_atomic_t& val);
-PT_API void  new_atomicSet            (volatile new_atomic_t& val, int n);
-PT_API int   new_atomicIncrement      (volatile new_atomic_t& val);
-PT_API int   new_atomicDecrement      (volatile new_atomic_t& val);
-PT_API int   new_atomicExchange       (volatile new_atomic_t& val, int exch);
-PT_API int   new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp);
-PT_API int   new_atomicExchangeAdd    (volatile new_atomic_t& val, int add);
-PT_API void* new_atomicExchange       (void* volatile& val, void* exch);
-PT_API void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp);
-}
+/** @brief Atomically get a value
+  * Returns the value after employing a memory fence.
+  */
+PT_API int new_atomicGet(volatile new_atomic_t& val);
 
+/** @brief Atomically set a value
+  * Sets the value and employs a memory fence.
+  */
+PT_API void new_atomicSet(volatile new_atomic_t& val, int n);
+
+/** @brief Increases a value by one as an atomic operation
+  * Returns the resulting incremented value.
+  */
+PT_API int new_atomicIncrement(volatile new_atomic_t& val);
+
+/** @brief Decreases a value by one as an atomic operation
+  * Returns the resulting decremented value.
+  */
+PT_API int new_atomicDecrement(volatile new_atomic_t& val);
+
+/** @brief Performs an atomic exchange operation
+  * Sets \a val to \a exch and returns the initial value of \a val.
+  */
+PT_API int new_atomicExchange(volatile new_atomic_t& val, int exch);
+
+/** @brief Performs an atomic compare-and-exchange operation
+  * If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
+  * value of of \a val is returned.
+  */
+PT_API int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp);
+
+/** @brief Performs atomic addition of two values
+  *  Returns the initial value of the addend.
+  */
+PT_API int new_atomicExchangeAdd(volatile new_atomic_t& val, int add);
+
+/** @brief Performs an atomic exchange operation
+  * Sets \a val to \a exch and returns the initial value of \a val.
+  */
+PT_API void* new_atomicExchange(void* volatile& val, void* exch);
+
+/** @brief Performs an atomic compare-and-exchange operation
+  * If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
+  * value of \a ptr is returned.
+  */
+PT_API void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp);
+
+}
 #endif

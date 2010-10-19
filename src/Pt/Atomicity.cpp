@@ -59,6 +59,8 @@
 
 #elif defined(PT_ATOMICITY_PTHREAD)
     #include "Atomicity.pthread.cpp"
+
 #else
     #include "Atomicity.generic.cpp"
+
 #endif

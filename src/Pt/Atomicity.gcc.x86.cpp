@@ -132,18 +132,18 @@ void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "lock; addl $0,0(%%esp)" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile ( "lock; addl $0,0(%%esp)" : : : "memory" );
 }
 
@@ -152,8 +152,8 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     volatile register int tmp;
 
     asm volatile ( "lock; xaddl %0, %1"
-                   : "=r"(tmp), "=m"(val.i)
-                   :  "0"(1),    "m"(val.i) );
+                   : "=r"(tmp), "=m"(val.i32)
+                   :  "0"(1),    "m"(val.i32) );
 
     return tmp + 1;
 }
@@ -163,8 +163,8 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     volatile register int tmp;
 
     asm volatile ( "lock; xaddl %0, %1"
-                   : "=r"(tmp), "=m"(val.i)
-                   :  "0"(-1),   "m"(val.i) );
+                   : "=r"(tmp), "=m"(val.i32)
+                   :  "0"(-1),   "m"(val.i32) );
 
     return tmp - 1;
 }
@@ -175,8 +175,8 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 
     // Using cmpxchg and a loop here on purpose
     asm volatile ( "1:; lock; cmpxchgl %2, %0; jne 1b"
-                   : "=m"(val.i), "=a"(ret)
-                   :  "r"(exch),   "m"(val.i), "a"(val.i) );
+                   : "=m"(val.i32), "=a"(ret)
+                   :  "r"(exch),     "m"(val.i32), "a"(val.i32) );
 
     return ret;
 }
@@ -186,8 +186,8 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     volatile register int old;
 
     asm volatile ( "lock; cmpxchgl %2, %0"
-                   : "=m"(val.i), "=a"(old)
-                   :  "r"(exch),   "m"(val.i), "a"(comp) );
+                   : "=m"(val.i32), "=a"(old)
+                   :  "r"(exch),     "m"(val.i32), "a"(comp) );
     return old;
 }
 
@@ -196,8 +196,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     volatile register int ret;
 
     asm volatile ( "lock; xaddl %0, %1"
-                   : "=r"(ret), "=m"(val.i)
-                   :  "0"(add),  "m"(val.i) );
+                   : "=r"(ret), "=m"(val.i32)
+                   :  "0"(add),  "m"(val.i32) );
 
     return ret;
 }

@@ -161,18 +161,18 @@ void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile( "sync 0" : : : "memory" )
 }
 
@@ -187,7 +187,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
         "st %a1, __tmp_reg__"       "\n\t"
         "out __SREG__, %0"          "\n\t"
         : "=&r" (tmp)
-        : "e" (&val.i)
+        : "e" (&val.i32)
         : "memory"
     );
 
@@ -205,7 +205,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
         "st %a1, __tmp_reg__"       "\n\t"
         "out __SREG__, %0"          "\n\t"
         : "=&r" (tmp)
-        : "e" (&val.i)
+        : "e" (&val.i32)
         : "memory"
     );
 
@@ -216,8 +216,8 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     int ret;
     asm volatile("xchg %[ret], %[val], %[exch]"
-                 : [ret] "=&r"(ret), "=m"(val.i)
-                 : "m"(val.i), [val] "r"(&val), [exch] "r"(exch)
+                 : [ret] "=&r"(ret), "=m"(val.i32)
+                 : "m"(val.i32), [val] "r"(&val), [exch] "r"(exch)
                  : "memory");
     return ret;
 }
@@ -233,8 +233,8 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
             "       stcond  %[val], %[exch]\n"
             "       brne    1b\n"
             "2:\n"
-            : [ret] "=&r"(ret), [val] "=m"(val.i)
-            : "m"(&val.i), [comp] "ir"(comp), [exch] "r"(exch)
+            : [ret] "=&r"(ret), [val] "=m"(val.i32)
+            : "m"(&val.i32), [comp] "ir"(comp), [exch] "r"(exch)
             : "memory", "cc");
     return ret;
 }
@@ -247,8 +247,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
                  "       add     %0, %3\n"
                  "       stcond  %2, %0\n"
                  "       brne    1b"
-                 : "=&r"(result), "=o"(val.i)
-                 : "m"(val.i), "r"(add)
+                 : "=&r"(result), "=o"(val.i32)
+                 : "m"(val.i32), "r"(add)
                  : "cc", "memory");
     return result;
 }
