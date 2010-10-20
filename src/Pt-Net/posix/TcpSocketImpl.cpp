@@ -369,7 +369,7 @@ int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
     else if (FD_ISSET(this->fd(), &wfds) )
     {
-        //int sockerr = checkConnect();
+        int sockerr = checkConnect();
         if (_isConnected)
         {
             _socket.connected.send(_socket);
