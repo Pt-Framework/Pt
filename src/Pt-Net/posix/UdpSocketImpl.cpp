@@ -33,6 +33,8 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
 #include <cerrno>
+#include <stdio.h>
+#include <errno.h>
 #include <cstring>
 #include <cassert>
 #include <fcntl.h>
@@ -220,31 +222,12 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
             memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-            req.imr_interface.s_addr = inet_addr("127.0.0.1");//htonl(INADDR_ANY);
+            req.imr_interface.s_addr = htonl(INADDR_ANY);
 
             if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
             {
                 return; // success
             }
-
-            switch(errno)
-             {
-                 case EBADF:printf("1\n"); break;
-
-                 case EFAULT:printf("2\n"); break;
-
-                 case EINVAL:printf("EINVAL \n"); break;
-
-                 case ENOBUFS:printf("4\n"); break;
-
-                 case ENOPROTOOPT:printf("5\n"); break;
-
-                 case ENOTSOCK:printf("6\n"); break;
-
-                 case EDOM:printf("7\n"); break;
-
-                 case EISCONN:printf("8\n"); break;
-               }
         }
         else if(it->ai_family == AF_INET6)
         {
@@ -260,6 +243,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             }
         }
     }
+
 
     throw System::IOError("multicast group join failed");
 }
@@ -443,7 +427,6 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
 
         if(errno != EAGAIN)
         {
-            perror("sendto: ");
             throw System::IOError("udp socket I/O failed");
         }
 
