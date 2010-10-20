@@ -259,7 +259,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 
 void* new_atomicExchange(void* volatile& val, void* exch)
 {
-    void* result, tmp;
+    void* result;
+	void* tmp;
 
     asm volatile ( "    .set mips32\n"
                    "1:  ll   %0, %2\n"
