@@ -3,6 +3,7 @@ SubDirHdrs $(TOP)/include ;
 
 PtUnitTest Pt-Net-test : Pt-Net-test.cpp
                          TcpSocketTest.cpp
+                         UdpSocketTest.cpp
                          ;
 Main_LinkSharedLibraries Pt-Net-test : Pt Pt-Net Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate Pt-Net-test : $(OUTPUT_TARGET) ;

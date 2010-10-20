@@ -30,6 +30,7 @@
 #define Pt_Net_UdpSocket_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/Net/AddrInfo.h>
 #include <Pt/Signal.h>
 #include <Pt/System/IODevice.h>
 
@@ -37,14 +38,84 @@ namespace Pt {
 
 namespace Net {
 
+class AddrInfo;
 
 class PT_NET_API UdpSocket : public System::IODevice
 {
     class UdpSocketImpl* _impl;
 
     public:
-        UdpSocket()
-        {}
+        UdpSocket();
+
+        ~UdpSocket();
+
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+
+        void connect(const std::string& ipaddr, unsigned short int port)
+        {
+            connect( AddrInfo(ipaddr, port) );
+        }
+
+        void connect(const AddrInfo& addrinfo);
+
+        bool isConnected() const;
+
+        bool isBound() const;
+
+        void setBroadcast();
+
+        void joinMulticastGroup(const std::string& ipaddr);
+
+        void dropMulticastGroup(const std::string& ipaddr);
+
+        std::string getSockAddr() const;
+
+        std::string getPeerAddr() const;
+
+        void setTimeout(std::size_t msecs);
+
+        std::size_t timeout() const;
+
+    protected:
+        // inherit doc
+        virtual void onClose();
+
+        // inherit doc
+        virtual bool onWait(std::size_t msecs);
+
+        // inherit doc
+        virtual void onAttach(System::EventLoop&);
+
+        // inherit doc
+        virtual void onDetach(System::EventLoop&);
+
+        // inherit doc
+        virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);
+
+        // inherit doc
+        virtual size_t onEndRead(bool& eof);
+
+        // inherit doc
+        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+
+        // inherit doc
+        virtual size_t onBeginWrite(const char* buffer, size_t n);
+
+        // inherit doc
+        virtual size_t onEndWrite();
+
+        // inherit doc
+        virtual size_t onWrite(const char* buffer, size_t count);
+
+        // inherit doc
+        virtual void onCancel();
+
+    public:
+        // inherit doc
+        virtual System::SelectableImpl& simpl();
+
+        // inherit doc
+        virtual System::IODeviceImpl& ioimpl();
 };
 
 } // namespace Net
