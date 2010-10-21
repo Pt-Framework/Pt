@@ -40,15 +40,47 @@
 #include <string>
 #include <windows.h>
 #include <winsock2.h>
+#include <Ws2tcpip.h>
 
 namespace Pt {
 
 namespace Net {
 
+class UdpSocket;
+
 class UdpSocketImpl : public System::SelectableImpl
 {
+    private:
+        struct DestructionSentry
+        {
+            DestructionSentry(DestructionSentry*& sentry)
+            : _deleted(false)
+            , _sentry(sentry)
+            {
+               sentry = this;
+            }
+
+            ~DestructionSentry()
+            {
+                if( ! _deleted )
+                    this->detach();
+            }
+
+            bool operator!() const
+            { return _deleted; }
+
+            void detach()
+            {
+                _sentry = 0;
+                _deleted = true;
+            }
+
+            bool _deleted;
+            DestructionSentry*& _sentry;
+        };
+
     public:
-        UdpSocketImpl();
+        UdpSocketImpl(UdpSocket& socket);
 
         ~UdpSocketImpl();
 
@@ -58,28 +90,65 @@ class UdpSocketImpl : public System::SelectableImpl
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& ai);
+        bool isConnected() const;
 
-        void endConnect();
+        bool isBound() const;
+
+        void setBroadcast();
+
+        void joinMulticastGroup(const std::string& ipaddr);
+
+        void dropMulticastGroup(const std::string& ipaddr);
+
+        void cancel();
+
+        std::string getSockAddr() const;
+
+		std::string getPeerAddr() const;
+
+		void setTimeout(std::size_t msecs)
+		{
+			_timeout = msecs;
+		}
+
+		std::size_t timeout() const
+		{
+			return _timeout;
+		}
 
         size_t beginRead(char* buffer, size_t n, bool& eof);
+
         size_t read(char* buffer, size_t count, bool& eof);
+
         size_t endRead(bool& eof);
 
         size_t beginWrite(const char* buffer, size_t n);
+
         size_t write(const char* buffer, size_t n);
+
         size_t endWrite();
-        bool wait(std::size_t umsecs);
+
+        //bool beginConnect(const AddrInfo& ai);
+        //void endConnect();
+        //bool wait(std::size_t umsecs);
+
+        void attach(System::EventLoop& loop);
+
+        void detach(System::EventLoop& loop);
 
         bool setWaitHandle(HANDLE h, bool& avail);
 
-    private:
-        const char* tryConnect();
-        void checkPendingError();
+    protected:
+        //const char* tryConnect();
+        //void checkPendingError();
+
         void setEventFlags(HANDLE ev, long events);
+
         bool checkEvent();
 
     private:
+        UdpSocket&                   _socket;
+        DestructionSentry*           _sentry;
         SOCKET                       _fd;
         AddrInfo                     _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;

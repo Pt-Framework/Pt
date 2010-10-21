@@ -275,6 +275,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         //! @brief Write bytes to device
         virtual size_t onWrite(const char* buffer, size_t count) = 0;
 
+        //! @brief Cancel all I/O operations,
         virtual void onCancel() = 0;
 
         //! @brief Read data from I/O device without consuming them

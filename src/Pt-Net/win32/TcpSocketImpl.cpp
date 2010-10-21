@@ -345,6 +345,7 @@ void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 
 }
 
+
 std::string TcpSocketImpl::getSockAddr() const
 {
 	SOCKADDR sockadr;
@@ -357,6 +358,27 @@ std::string TcpSocketImpl::getSockAddr() const
 	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&sockadr);
     return inet_ntoa(sa->sin_addr);
 }
+
+
+// std::string TcpSocketImpl::getSockAddr() const
+// {
+//     SOCKADDR sockadr;
+//     int l = sizeof(sockadr);
+//     int ret = getsockname(_fd, &sockadr, &l);
+
+//     SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
+//     DWORD len = 32;
+//     TCHAR adr[32];
+//     WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
+
+//     std::string address(32, '\0');
+//     for(unsigned n = 0; n < len; n++)
+//     {
+//         address.push_back( int(adr[n]) );
+//     }
+
+//     return adr;
+// }
 
 
 std::string TcpSocketImpl::getPeerAddr() const

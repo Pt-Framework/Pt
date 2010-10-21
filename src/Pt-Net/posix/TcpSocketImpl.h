@@ -42,10 +42,6 @@
 
 namespace Pt {
 
-namespace System {
-    class EventLoopBase;
-}
-
 namespace Net {
 
 class TcpServer;

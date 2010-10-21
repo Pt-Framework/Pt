@@ -120,6 +120,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         // inherit doc
         virtual size_t onWrite(const char* buffer, size_t count);
 
+        // inherit doc
         virtual void onCancel();
 
     public:
