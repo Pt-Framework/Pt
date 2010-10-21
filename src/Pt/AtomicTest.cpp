@@ -67,7 +67,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         {
             std::cout << "\n####################################################################\n";
 
-            PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(int64_t*) );
+            PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(Pt::int64_t*) );
 
             volatile Pt::new_atomic_t my_value(0);
 
