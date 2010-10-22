@@ -184,7 +184,7 @@ void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: l(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
@@ -195,12 +195,12 @@ int new_atomicGet(volatile new_atomic_t& val)
         xchg Barrier, eax
     }
 
-    return val.l;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.l = n;
+    val.i32 = n;
 
     atomic_t Barrier;
     __asm
@@ -213,7 +213,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 {
     __asm
     {
-        mov       ecx, val.l
+        mov       ecx, val.i32
         mov       eax, 1
         lock xadd dword ptr [ecx], eax
         inc       eax
@@ -224,7 +224,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 {
     __asm
     {
-        mov       ecx, val.l
+        mov       ecx, val.i32
         mov       eax, -1
         lock xadd dword ptr [ecx], eax
         dec       eax
@@ -235,7 +235,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
     __asm
     {
-        mov          ecx, val.l
+        mov          ecx, val.i32
         mov          edx, exch
         mov          eax, dword ptr [ecx]
 _loop:
@@ -248,7 +248,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
     __asm
     {
-        mov          ecx, val.l
+        mov          ecx, val.i32
         mov          edx, exch
         mov          eax, comp
         lock cmpxchg dword ptr [ecx], edx
@@ -259,7 +259,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
     __asm
     {
-        mov       ecx, val.l
+        mov       ecx, val.i32
         mov       eax, add
         lock xadd dword ptr [ecx], eax
     }

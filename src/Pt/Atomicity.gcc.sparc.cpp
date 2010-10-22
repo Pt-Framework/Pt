@@ -207,6 +207,8 @@ void* atomicExchange(void* volatile& ptr, void* exch)
 
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
+// The asm below are made for spar 32-bit
+
 new_atomic_t::new_atomic_t(int v)
 : i(v)
 {}

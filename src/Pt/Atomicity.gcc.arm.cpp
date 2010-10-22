@@ -176,24 +176,24 @@ atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile ( "" : : : "memory" );
 }
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
-    int a, b, c;
+    int32_t a, b, c;
 
     asm volatile ( "0:\n\t"
                    "ldr   %0, [%3]\n\t"
@@ -202,15 +202,15 @@ int new_atomicIncrement(volatile new_atomic_t& val)
                    "cmp   %0, %2\n\t"
                    "swpne %1, %2, [%3]\n\t"
                    "bne   0b"
-                   : "=&r"(a),     "=&r"(b), "=&r"(c)
-                   :   "r"(&val.i),  "r"(1)
+                   : "=&r"(a),        "=&r"(b), "=&r"(c)
+                   :   "r"(&val.i32),   "r"(1)
                    : "cc", "memory" );
     return b;
 }
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
-    int a, b, c;
+    int32_t a, b, c;
 
     asm volatile ( "0:\n\t"
                    "ldr   %0, [%3]\n\t"
@@ -219,25 +219,25 @@ int new_atomicDecrement(volatile new_atomic_t& val)
                    "cmp   %0, %2\n\t"
                    "swpne %1, %2, [%3]\n\t"
                    "bne   0b"
-                   : "=&r"(a),     "=&r"(b), "=&r"(c)
-                   :   "r"(&val.i),  "r"(-1)
+                   : "=&r"(a),        "=&r"(b), "=&r"(c)
+                   :   "r"(&val.i32),   "r"(-1)
                    : "cc", "memory" );
     return b;
 }
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
-    int a;
+    int32_t a;
 
     asm volatile ( "swp %0, %2, [%1]"
                    : "=&r"(a)
-                   :   "r"(&val.i), "r"(exch) );
+                   :   "r"(&val.i32), "r"(exch) );
     return a;
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
-    int a, b;
+    int32_t a, b;
 
     asm volatile ( "0:\n\t"
                    "ldr   %1, [%2]\n\t"
@@ -249,15 +249,15 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
                    "swpne %3, %0, [%2]\n\t"
                    "bne   0b\n\t"
                    "1:"
-                   : "=&r"(a),     "=&r"(b)
-                   :   "r"(&val.i),  "r"(exch), "r"(comp)
+                   : "=&r"(a),        "=&r"(b)
+                   :   "r"(&val.i32),   "r"(exch), "r"(comp)
                    : "cc", "memory" );
     return a;
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
-    int a, b, c;
+    int32_t a, b, c;
 
     asm volatile ( "0:\n\t"
                    "ldr   %0, [%3]\n\t"
@@ -266,8 +266,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
                    "cmp   %0, %2\n\t"
                    "swpne %1, %2, [%3]\n\t"
                    "bne   0b"
-                   : "=&r"(a),     "=&r"(b), "=&r"(c)
-                   :   "r"(&val.i),  "r"(add)
+                   : "=&r"(a),        "=&r"(b), "=&r"(c)
+                   :   "r"(&val.i32),   "r"(add)
                    : "cc", "memory" );
     return a;
 }

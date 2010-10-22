@@ -151,7 +151,7 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
-    volatile register long tmp;
+    volatile register int64_t tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.i64)
@@ -161,7 +161,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
-    volatile register long tmp;
+    volatile register int64_t tmp;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(tmp), "=m"(val.i64)
@@ -171,33 +171,33 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
-    volatile register long ret;
+    volatile register int64_t ret;
 
     // Using cmpxchg and a loop here on purpose
     asm volatile ( "1:; lock; cmpxchgq %2, %0; jne 1b"
                    : "=m"(val.i64),    "=a"(ret)
-                   :  "r"((long)exch),  "m"(val.i64), "a"(val.i64) );
+                   :  "r"((int64_t)exch),  "m"(val.i64), "a"(val.i64) );
 
     return ret;
 }
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
-    volatile register long old;
+    volatile register int64_t old;
 
     asm volatile ( "lock; cmpxchgq %2, %0"
                    : "=m"(val.i64),    "=a"(old)
-                   :  "r"((long)exch),  "m"(val.i64), "a"((long) comp) );
+                   :  "r"((int64_t)exch),  "m"(val.i64), "a"((int64_t) comp) );
     return old;
 }
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
-    volatile register long ret;
+    volatile register int64_t ret;
 
     asm volatile ( "lock; xaddq %0, %1"
                    : "=r"(ret),       "=m"(val.i64)
-                   :  "0"((long)add),  "m"(val.i64) );
+                   :  "0"((int64_t)add),  "m"(val.i64) );
 
     return ret;
 }

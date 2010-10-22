@@ -178,7 +178,7 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
-    volatile int tmp;
+    volatile int32_t tmp;
     asm volatile (
         "in  %0, __SREG__"           "\n\t"
         "cli"                       "\n\t"
@@ -196,7 +196,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
-    volatile int tmp;
+    volatile int32_t tmp;
     asm volatile (
         "in  %0, __SREG__"           "\n\t"
         "cli"                       "\n\t"
@@ -214,7 +214,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
-    int ret;
+    int32_t ret;
     asm volatile ( "xchg %[ret], %[val], %[exch]"
                   : [ret] "=&r"(ret), "=m"(val.i32)
                   : "m"(val.i32), [val] "r"(&val), [exch] "r"(exch)
@@ -224,7 +224,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
-    volatile int ret;
+    volatile int32_t ret;
     asm volatile (
             "1:     ssrf    5\n"
             "       ld.w    %[ret], %[val]\n"
@@ -242,7 +242,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
-    int result;
+    int32_t result;
     asm volatile ( "1:     ssrf    5\n"
                    "       ld.w    %0, %1\n"
                    "       add     %0, %3\n"
@@ -256,7 +256,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 
 void* new_atomicExchange(void* volatile& val, void* exch)
 {
-    int ret;
+    int32_t ret;
     asm volatile ( "xchg %[ret], %[val], %[new_val]"
                    : [ret] "=&r"(ret), "=m"(val)
                    : "m"(val), [val] "r"(&val), [new_val] "r"(new_val)
@@ -266,7 +266,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
 
 void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
-    volatile int ret;
+    volatile int32_t ret;
     asm volatile (
             "1:     ssrf    5\n"
             "       ld.w    %[ret], %[val]\n"

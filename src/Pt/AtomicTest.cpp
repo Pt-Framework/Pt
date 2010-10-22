@@ -67,8 +67,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         {
             std::cout << "\n####################################################################\n";
 
-            PT_UNIT_ASSERT( sizeof(Pt::new_atomic_t) == sizeof(Pt::int64_t*) );
-
             volatile Pt::new_atomic_t my_value(0);
 
             PT_UNIT_ASSERT(Pt::new_atomicIncrement(my_value) == 1);
@@ -151,8 +149,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
         void Integer()
         {
-            //PT_UNIT_ASSERT( sizeof(Pt::atomic_t) == sizeof(void*) );
-
             volatile Pt::atomic_t v = 0;
 
             Pt::atomicIncrement(v);
