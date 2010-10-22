@@ -51,6 +51,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void setUp()
         {
+            std::memset(input, 0, 20);
+
             _loop = new Pt::System::MainLoop();
             connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
@@ -95,7 +97,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithWait()
         {
-            this->reportMessage("\nSTART");
+            //this->reportMessage("\nSTART");
 
             Pt::Net::TcpServer server("127.0.0.1", 8000);
             connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
@@ -112,14 +114,15 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 			client.wait(1000); //on write
             _acceptor->wait(1000);//on read
 
-            this->reportMessage("FINISHED");
+            PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
+            //this->reportMessage("FINISHED");
         }
 
         void NonBlockingWithLoop()
         {
             Pt::Net::TcpServer server("127.0.0.1", 8000);
             {
-                this->reportMessage("\nSTART");
+                //this->reportMessage("\nSTART");
 
                 connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
                 _loop->add(server);
@@ -142,14 +145,15 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             }
             server.listen("127.0.0.1", 8000);
 
-            this->reportMessage("FINISHED");
+            PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
+            //this->reportMessage("FINISHED");
         }
 
         void onAccept(Pt::Net::TcpServer& server)
         {
             _acceptor->accept(server);
-            this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
-                                 " PEER: " + _acceptor->getPeerAddr() );
+            //this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
+            //                     " PEER: " + _acceptor->getPeerAddr() );
 
             _acceptor->beginRead(input, 200);
         }
@@ -157,8 +161,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void onConnect(Pt::Net::TcpSocket& socket)
         {
             socket.endConnect();
-            this->reportMessage( "CONNECTED IP: " + socket.getSockAddr() +
-                                 " PEER: " + socket.getPeerAddr() );
+            //this->reportMessage( "CONNECTED IP: " + socket.getSockAddr() +
+            //                     " PEER: " + socket.getPeerAddr() );
 
             static const char buffer[] = "Hello World !!!";
             socket.beginWrite(buffer, sizeof(buffer));
@@ -168,16 +172,16 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             _loop->exit();
             std::size_t n = device.endRead();
-            std::string msg("INPUT RECEIVED: ");
-            msg.append(input, n);
-            this->reportMessage(msg);
+            //std::string msg("INPUT RECEIVED: ");
+            //msg.append(input, n);
+            //this->reportMessage(msg);
             PT_UNIT_ASSERT(n > 5);
         }
 
         void onOutput(Pt::System::IODevice& device)
         {
             std::size_t n = device.endWrite();
-            this->reportMessage("OUTPUT SENT");
+            //this->reportMessage("OUTPUT SENT");
             PT_UNIT_ASSERT(n > 5);
         }
 

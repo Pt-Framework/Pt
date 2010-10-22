@@ -37,6 +37,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/UdpSocket.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -48,39 +49,8 @@ namespace Pt {
 
 namespace Net {
 
-class UdpSocket;
-
 class UdpSocketImpl : public System::IODeviceImpl
 {
-    private:
-        struct DestructionSentry
-        {
-            DestructionSentry(DestructionSentry*& sentry)
-            : _deleted(false)
-            , _sentry(sentry)
-            {
-               sentry = this;
-            }
-
-            ~DestructionSentry()
-            {
-                if( ! _deleted )
-                    this->detach();
-            }
-
-            bool operator!() const
-            { return _deleted; }
-
-            void detach()
-            {
-                _sentry = 0;
-                _deleted = true;
-            }
-
-            bool _deleted;
-            DestructionSentry*& _sentry;
-        };
-
     public:
         UdpSocketImpl(UdpSocket& socket);
 
@@ -90,7 +60,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const AddrInfo& addrinfo, int mode = UdpSocket::Unicast);
 
         bool isConnected() const;
 

@@ -138,7 +138,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const AddrInfo& ai, int mode)
 {
     AddrInfoImpl::const_iterator it = ai.impl()->begin();
     for( ; it != ai.impl()->end(); ++it)
@@ -162,6 +162,16 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 
         if( _fd < 0 )
             continue;
+
+        const int on = 1;
+        if( mode == UdpSocket::Broadcast &&
+            0 > ::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
+        {
+            if( ! _isBound )
+                this->close();
+
+            throw System::SystemError("setsockopt");
+        }
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
