@@ -126,8 +126,9 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Broadcast()
         {
-            _sender->connect("255.255.255.255", 8000);
             _sender->setBroadcast();
+            _sender->connect("255.255.255.255", 8000);
+
             PT_UNIT_ASSERT( _sender->isConnected() );
 
             _receiver->bind("", 8000, 0);
@@ -163,10 +164,10 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void onBroadcastInput(Pt::System::IODevice& device)
         {
-            //char* buffer = device.rbuf();
+            char* buffer = device.rbuf();
             std::size_t n = device.endRead();
 
-            //std::string msg(buffer, n);
+            std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);
 
             _loop->exit();

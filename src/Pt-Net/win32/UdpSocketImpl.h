@@ -148,6 +148,7 @@ class UdpSocketImpl : public System::SelectableImpl
 
     private:
         UdpSocket&                   _socket;
+        bool                         _broadcast;
         DestructionSentry*           _sentry;
         SOCKET                       _fd;
         AddrInfo                     _addrInfo;

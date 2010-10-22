@@ -45,12 +45,6 @@ class PT_NET_API UdpSocket : public System::IODevice
     class UdpSocketImpl* _impl;
 
     public:
-        enum Mode
-        {
-            Unicast = 0,
-            Broadcast = 1
-        };
-
         UdpSocket();
 
         ~UdpSocket();

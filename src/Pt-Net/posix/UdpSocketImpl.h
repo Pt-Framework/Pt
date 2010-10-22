@@ -37,7 +37,6 @@
 #include "IODeviceImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
-#include "Pt/Net/UdpSocket.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -48,6 +47,8 @@
 namespace Pt {
 
 namespace Net {
+
+class UdpSocket;
 
 class UdpSocketImpl : public System::IODeviceImpl
 {
@@ -60,7 +61,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
 
-        void connect(const AddrInfo& addrinfo, int mode = UdpSocket::Unicast);
+        void connect(const AddrInfo& addrinfo);
 
         bool isConnected() const;
 
@@ -90,6 +91,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
     private:
         UdpSocket&                   _socket;
+        bool                         _broadcast;
         bool                         _isConnected;
         bool                         _isBound;
         sockaddr_storage             _peeraddr;

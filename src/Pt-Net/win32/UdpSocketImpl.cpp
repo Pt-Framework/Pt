@@ -42,6 +42,7 @@ namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _socket(socket)
+, _broadcast(false)
 , _sentry(0)
 , _connectResult(0)
 , _fd(INVALID_SOCKET)
@@ -170,6 +171,16 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         if( _fd == INVALID_SOCKET )
             continue;
 
+        if(_broadcast)
+        {
+            const int on = 1;
+            if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
+            {
+                this->close();
+                throw System::SystemError("setsockopt");
+            }
+        }
+
         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
         if( 0 == ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) )
@@ -200,17 +211,7 @@ bool UdpSocketImpl::isBound() const
 
 void UdpSocketImpl::setBroadcast()
 {
-    // TODO: Boadcast could be a connect parameter
-    if( _fd == INVALID_SOCKET )
-        return;
-
-    const int on = 1;
-
-    if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
-    {
-        this->close();
-        throw System::SystemError("setsockopt");
-    }
+    _broadcast = true;
 }
 
 
