@@ -1,11 +1,12 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
- * 
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -78,8 +79,8 @@ namespace std {
             }
 
             void deallocate(pointer p, size_type)
-            { 
-            	//::operator delete(p); 
+            {
+            	//::operator delete(p);
             	std::free(p);
             }
 
@@ -112,7 +113,7 @@ class StringData {
         StringData(const allocator_type& a = allocator_type());
 
         StringData(const Pt::Char* s, size_type length, const allocator_type& a = allocator_type());
-        
+
         StringData(size_type capacity, const allocator_type& a = allocator_type());
 
         StringData(const wchar_t* wstr, size_type length, const allocator_type& a);
@@ -124,14 +125,14 @@ class StringData {
         allocator_type get_allocator() const
         { return _allocator; }
 
-        atomic_type refs() const;
+        int refs() const;
 
-        atomic_type ref();
+        int ref();
 
-        atomic_type unref();
+        int unref();
 
         void setInitial()
-        { atomicSet(_n, atomic_type(1)); }
+        { atomicSet(_n, 1); }
 
         /** @brief Check if in busy state
 
@@ -142,7 +143,7 @@ class StringData {
             invalidate an iterator even if the class was not shared.
         */
         bool busy() const
-        { return refs() == atomic_type(-1); }
+        { return refs() == -1; }
 
         /** @brief Enter busy state
 
@@ -151,12 +152,12 @@ class StringData {
             normally invalidate any iterator as well.
         */
         void setBusy()
-        { atomicSet(_n, atomic_type(-1)); }
+        { atomicSet(_n, -1); }
 
         bool shared() const
         {
-            atomic_t n = refs();
-            return (n > 1) && ( n != atomic_type(-1) );
+            int n = refs();
+            return ( (n > 1) && ( n != -1) );
         }
 
         Pt::Char* str();

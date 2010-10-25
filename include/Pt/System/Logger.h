@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -175,7 +176,7 @@ inline LogMessage& endlog(LogMessage& msg)
     or higher to the console channel it inherited from its parent. The
     target ping writes messages with a log-level of Error of higher
     asnychronously to the serial port.
-    
+
     @ingroup Logging
 */
 class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
@@ -193,21 +194,20 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         /** @brief Returns the name of the target.
         */
         const std::string& name() const;
-        
+
         //! @brief Returns the log-level of the target.
         int logLevel() const
-        { 
-            if(0 == _concurrency)
-                return _loglevel; 
-
+        {
+            // ###
+            //if(0 == _concurrency) return _loglevel;
             return atomicGet(_loglevel);
         }
-        
+
         /** @brief Sets the log-level of the target and its children.
 
             This method is thread-safe. The log-level can also be set
-            in the settings file of the used for initialization. All 
-            children of this target inherit the given LogLevel unless 
+            in the settings file of the used for initialization. All
+            children of this target inherit the given LogLevel unless
             they are already set to a log level explicitly i.e. this
             method has een called on a child before.
         */
@@ -228,27 +228,27 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
         //! @brief Write log message to this target
         void log(const LogMessage& msg);
-        
+
         /** @brief Initialize logging targets with a settings file
-        
-            The given settings file is parsed and all listed targets are 
+
+            The given settings file is parsed and all listed targets are
             created and initialized. If a target exists already, it is
             reinitialized.
 
             @param file Path to a settings file
         */
         static void initTargets(const std::string& file);
-        
+
         /** @brief Initialize logging targets with a settings
-        
+
             All targets listed in the given settings are created and
             initialized. If a target exists already, it is reinitialized.
 
             @param settings Settings to apply to target list
         */
-        
+
         static void initTargets(const Settings& settings);
-        
+
         /** @brief Get a target from the logging manager
 
             The target is created if it does not exist, otherwise the
@@ -367,8 +367,8 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         /** @brief Returns true if the log level is enabled for the target
         */
         bool enabled(LogLevel level) const
-        { 
-            return level <= _target->logLevel(); 
+        {
+            return level <= _target->logLevel();
         }
 
         void log(const LogMessage& msg)
@@ -463,9 +463,9 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         }
 
         //! @internal
-        LogTarget& target() const 
+        LogTarget& target() const
         { return *_target; }
-    
+
     protected:
         //! @internal
         Logger(LogTarget& target)
@@ -566,7 +566,7 @@ class LoggedScope
 
     #define log_init(file) \
     Pt::System::LogTarget::initTargets(file);
-    
+
     #define log_define(category) \
     static Pt::System::Logger pt_logger(category);
 

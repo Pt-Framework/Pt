@@ -30,164 +30,13 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.cw.x86.h>
-
 namespace Pt {
 
-static long MyInterlockedIncrement(volatile long* param)
-{
-    __asm
-    {
-        mov ecx, param
-        mov eax,1
-        lock xadd dword ptr [ecx],eax
-        inc eax
-    }
-}
-
-static long MyInterlockedDecrement(volatile long* param)
-{
-    __asm
-    {
-        mov ecx, param
-        mov eax,-1
-        lock xadd dword ptr [ecx],eax
-        dec eax
-    }
-}
-
-static long MyInterlockedExchangeAdd(volatile long* param, long t)
-{
-    __asm
-    {
-        mov ecx, param
-        mov eax, t
-        lock xadd dword ptr [ecx],eax
-    }
-}
-
-static long MyInterlockedExchange(volatile long* param, long t)
-{
-    __asm
-    {
-        mov ecx,param
-        mov edx,t
-        mov eax,dword ptr [ecx]
-_loop:
-        lock cmpxchg dword ptr [ecx],edx
-        jne _loop
-    }
-}
-
-static void* MyInterlockedExchangePointer(void* volatile* param, void* t)
-{
-    __asm
-    {
-        mov ecx,dword ptr param
-        mov edx,dword ptr t
-        mov eax,dword ptr [ecx]
-_loop:
-        lock cmpxchg dword ptr [ecx],edx
-        jne _loop
-    }
-}
-
-static long MyInterlockedCompareExchange(volatile long* param, long t, long c)
-{
-    __asm
-    {
-        mov ecx,param
-        mov edx,t
-        mov eax,c
-        lock cmpxchg dword ptr [ecx],edx
-    }
-}
-
-static void* MyInterlockedCompareExchangePointer(void* volatile* param, void* t, void* c)
-{
-    __asm
-    {
-        mov ecx,param
-        mov edx,t
-        mov eax,c
-        lock cmpxchg dword ptr [ecx],edx
-    }
-}
-
-
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    atomic_t Barrier;
-    __asm
-    {
-        xchg Barrier, eax
-    }
-
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-
-    atomic_t Barrier;
-    __asm
-    {
-        xchg Barrier, eax
-    }
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& value)
-{
-    return MyInterlockedIncrement( const_cast<atomic_t*>(&value) );
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& value)
-{
-    return MyInterlockedDecrement( const_cast<atomic_t*>(&value) );
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& value, atomic_t n)
-{
-    return MyInterlockedExchangeAdd(const_cast<atomic_t*>(&value), n);
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& value, atomic_t new_val)
-{
-    return MyInterlockedExchange(const_cast<atomic_t*>(&value), new_val);
-}
-
-
-void* atomicExchange(void* volatile& ptr, void* new_val)
-{
-    return MyInterlockedExchangePointer( const_cast<void**>(&ptr), new_val );
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t cmp)
-{
-    return MyInterlockedCompareExchange(const_cast<atomic_t*>(&value), ex, cmp);
-}
-
-
-void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
-{
-    return MyInterlockedCompareExchangePointer(&ptr, ex, cmp);
-}
-
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i32(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     long Barrier;
     __asm
@@ -198,7 +47,7 @@ int new_atomicGet(volatile new_atomic_t& val)
     return val.i32;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i32 = n;
 
@@ -209,7 +58,7 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
     }
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     __asm
     {
@@ -220,7 +69,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     }
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     __asm
     {
@@ -231,7 +80,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     }
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     __asm
     {
@@ -244,7 +93,7 @@ _loop:
     }
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     __asm
     {
@@ -255,7 +104,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     }
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     __asm
     {
@@ -265,7 +114,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     }
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     __asm
     {
@@ -278,7 +127,7 @@ _loop:
     }
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     __asm
     {

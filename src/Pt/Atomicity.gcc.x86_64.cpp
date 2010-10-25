@@ -29,127 +29,27 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.gcc.x86_64.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    asm volatile ("mfence" : : : "memory");
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-    asm volatile ("mfence" : : : "memory");
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& val)
-{
-        static const atomic_t d = 1;
-        atomic_t tmp;
-
-        asm volatile ("lock; xaddq %0, %1"
-                      : "=r" (tmp), "=m" (val)
-                      : "0" (d), "m" (val));
-
-        return tmp+1;
-}
-
-atomic_t atomicDecrement(volatile atomic_t& val)
-{
-        static const atomic_t d = -1;
-        volatile register atomic_t tmp;
-
-        asm volatile ("lock; xaddq %0, %1"
-                      : "=r" (tmp), "=m" (val)
-                      : "0" (d), "m" (val));
-
-        return tmp-1;
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add)
-{
-        volatile register atomic_t ret;
-
-        asm volatile ("lock; xaddq %0, %1"
-                      : "=r" (ret), "=m" (val)
-                      : "0" (add), "m" (val));
-
-        return ret;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& val, atomic_t new_val)
-{
-        volatile register atomic_t ret;
-
-        // using cmpxchg and a loop here on purpose
-        asm volatile ("1:; lock; cmpxchgq %2, %0; jne 1b"
-                      : "=m" (val), "=a" (ret)
-                      : "r" (new_val), "m" (val), "a" (val));
-
-        return ret;
-}
-
-
-void* atomicExchange(void* volatile& val, void* new_val)
-{
-        void* ret;
-
-        asm volatile ("1:; lock; cmpxchgq %2, %0; jne 1b"
-                      : "=m" (val), "=a" (ret)
-                      : "r" (new_val), "m" (val), "a" (val));
-
-        return ret;
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
-{
-        volatile register atomic_t old;
-
-        asm volatile ("lock; cmpxchgq %2, %0"
-                      : "=m" (dest), "=a" (old)
-                      : "r" (exch), "m" (dest), "a" (comp));
-        return old;
-}
-
-
-void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
-{
-        void* old;
-
-        asm volatile ("lock; cmpxchgq %2, %0"
-                      : "=m" (dest), "=a" (old)
-                      : "r" (exch), "m" (dest), "a" (comp));
-        return old;
-}
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i64(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     asm volatile ( "mfence" : : : "memory" );
     return val.i64;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i64 = n;
     asm volatile ( "mfence" : : : "memory" );
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     volatile register int64_t tmp;
 
@@ -159,7 +59,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     return tmp + 1;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     volatile register int64_t tmp;
 
@@ -169,7 +69,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return tmp - 1;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     volatile register int64_t ret;
 
@@ -181,7 +81,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
     return ret;
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     volatile register int64_t old;
 
@@ -191,7 +91,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return old;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     volatile register int64_t ret;
 
@@ -202,7 +102,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return ret;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     void* ret;
 
@@ -213,7 +113,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
     return ret;
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* old;
 

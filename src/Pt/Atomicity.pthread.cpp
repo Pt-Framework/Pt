@@ -29,192 +29,20 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.pthread.h>
 #include <cassert>
 #include <pthread.h>
 
 namespace Pt {
 
-static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-
-
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ret = val;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-    pthread_cleanup_pop (0);
-
-    return ret;
-}
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    val = n;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-    pthread_cleanup_pop (0);
-}
-
-atomic_t atomicIncrement(volatile atomic_t& dest)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ++dest;
-    ret = dest;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-atomic_t atomicDecrement(volatile atomic_t& dest)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    --dest;
-    ret = dest;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
-{
-    atomic_t old = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int ret = pthread_mutex_lock(&mtx);
-    assert (ret == 0);
-
-    old = dest;
-    if(old == comp)
-    {
-        dest = exch;
-    }
-
-    ret = pthread_mutex_unlock(&mtx);
-    assert (ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return old;
-}
-
-void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
-{
-    void* old = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int ret = pthread_mutex_lock(&mtx);
-    assert(ret == 0);
-
-    old = dest;
-    if(old == comp)
-    {
-        dest = exch;
-    }
-
-    ret = pthread_mutex_unlock(&mtx);
-    assert(ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return old;
-}
-
-atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ret = dest;
-    dest = exch;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return ret;
-}
-
-void* atomicExchange(void* volatile& dest, void* exch)
-{
-    void* ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert(thr_ret == 0);
-
-    ret = dest;
-    dest = exch;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert(thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return ret;
-}
-
-atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
-{
-    atomic_t ret = 0;
-
-    pthread_cleanup_push ((void(*)(void *))pthread_mutex_unlock, (void *)&mtx);
-    int thr_ret = pthread_mutex_lock(&mtx);
-    assert (thr_ret == 0);
-
-    ret = dest;
-    dest += add;
-
-    thr_ret = pthread_mutex_unlock(&mtx);
-    assert (thr_ret == 0);
-
-    pthread_cleanup_pop (0);
-
-    return (ret);
-}
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 typedef void(*cleanup_proc_t)(void *);
 
-new_atomic_t::new_atomic_t(int v)
+static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+
+atomic_t::atomic_t(int v)
 : i(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     int ret = 0;
 
@@ -231,7 +59,7 @@ int new_atomicGet(volatile new_atomic_t& val)
     return ret;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     pthread_cleanup_push((cleanup_proc_t)pthread_mutex_unlock, (void *)&mtx);
     int thr_ret = pthread_mutex_lock(&mtx);
@@ -244,7 +72,7 @@ void new_atomicSet(volatile new_atomic_t& val, int n)
     pthread_cleanup_pop(0);
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     int ret = 0;
 
@@ -263,7 +91,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     return ret;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     int ret = 0;
 
@@ -282,7 +110,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return ret;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     int ret = 0;
 
@@ -301,7 +129,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
     return ret;
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     int ret = 0;
 
@@ -320,7 +148,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return ret;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     int ret = 0;
 
@@ -339,7 +167,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return ret;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     void* ret = 0;
 
@@ -358,7 +186,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
     return ret;
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* ret = 0;
 

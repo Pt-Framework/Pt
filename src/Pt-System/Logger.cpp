@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,10 +50,13 @@ LogTarget::LogTarget(const std::string& name, int concurrency, LogTarget* parent
 , _reserved(0)
 
 {
+/*
     _loglevel = Fatal;
-
-    if(parent)
-        _loglevel = _parent->_loglevel;
+    if(parent) _loglevel = _parent->_loglevel;
+*/
+    // ###
+    atomicSet(_loglevel, Fatal);
+    if(parent) atomicSet(_loglevel, atomicGet(_parent->_loglevel));
 }
 
 
@@ -160,8 +164,8 @@ Logger::Logger(const char* name)
 
 
 //bool Logger::enabled(LogLevel level) const
-//{ 
-//    return level <= _target->logLevel(); 
+//{
+//    return level <= _target->logLevel();
 //}
 
 } // namespace System

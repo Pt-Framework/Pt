@@ -2,12 +2,13 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +18,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -141,7 +142,7 @@ namespace Pt {
     class ExternalRefCounted
     {
         public:
-            atomic_t refs() const
+            int refs() const
             { return _count ? *_count : 0; }
 
         protected:
@@ -188,7 +189,9 @@ namespace Pt {
     template <typename T>
     class ExternalAtomicRefCounted
     {
-        volatile atomic_t* rc;
+        public:
+            int refs() const
+            { return rc ? atomicGet(*rc) : 0; }
 
         protected:
             ExternalAtomicRefCounted()
@@ -224,9 +227,8 @@ namespace Pt {
                     rc = 0;
             }
 
-        public:
-            atomic_t refs() const
-            { return rc ? *rc : 0; }
+        private:
+            volatile atomic_t* rc;
     };
 
     /**

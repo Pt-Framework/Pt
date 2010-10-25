@@ -29,221 +29,27 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.gcc.ppc.h>
 #include <csignal>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    asm volatile ("sync" : : : "memory");
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-    asm volatile ("sync" : : : "memory");
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& val)
-{
-    atomic_t result = 0, tmp;
-    asm volatile ("\n1:\n\t"
-                  "lwarx %0, 0, %2\n\t"
-                  "addi %1, %0, 1\n\t"
-                  "stwcx. %1, 0, %2\n\t"
-                  "bne- 1b\n"
-                  "isync\n"
-                  : "=&b" (result), "=&b" (tmp): "r" (&val): "cc", "memory");
-    return result + 1;
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& val)
-{
-    atomic_t result = 0, tmp;
-    asm volatile ("\n1:\n\t"
-                  "lwarx %0, 0, %2\n\t"
-                  "addi %1, %0, -1\n\t"
-                  "stwcx. %1, 0, %2\n\t"
-                  "bne- 1b\n"
-                  "isync\n"
-                  : "=&b" (result), "=&b" (tmp): "r" (&val): "cc", "memory");
-
-    return result - 1;
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add)
-{
-/* ALTERNATIVE
-    volatile register atomic_t ret  = 0;
-    volatile register atomic_t zero = 0;
-
-    asm volatile (
-        "0:    lwarx  %0, %3, %1\n\t"
-        "      add    %0, %2, %0\n\t"
-        "      stwcx. %0, %3, %1\n\t"
-        "      bne-   0b        \n\t"
-        "      isync                "
-        : "=&r"(ret)
-        :   "r"(&val), "r"(n), "r"(zero)
-        : "cr0", "memory", "r0"
-    );
-*/
-
-    atomic_t result, tmp;
-    asm volatile ("\n1:\n\t"
-                  "lwarx %0, 0, %2\n\t"
-                  "add %1, %0, %3\n\t"
-                  "stwcx. %1, 0, %2\n\t"
-                  "bne 1b\n"
-                  "isync\n"
-                  : "=&r" (result), "=&r" (tmp)
-                  : "r" (&val), "r" (add) : "cc", "memory");
-    return result;
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& val, atomic_t exch, atomic_t comp)
-{
-/* ALTERNATIVE:
-    atomicCompareExchange( long *dest, long xchg, long compare)
-    long ret = 0;
-    long scratch;
-    __asm__ __volatile__(
-        "0:    lwarx %0,0,%2\n"
-        "      xor. %1,%4,%0\n"
-        "      bne 1f\n"
-        "      stwcx. %3,0,%2\n"
-        "      bne- 0b\n"
-        "      isync\n"
-        "1:    "
-        : "=&r"(ret), "=&r"(scratch)
-        : "r"(dest), "r"(xchg), "r"(compare)
-        : "cr0","memory","r0");
-    return ret;
-*/
-
-    atomic_t tmp = 0;
-    asm volatile ("\n1:\n\t"
-                  "lwarx %0, 0, %1\n\t"
-                  "cmpw %0, %2\n\t"
-                  "bne- 2f\n\t"
-                  "stwcx. %3, 0, %1\n\t"
-                  "bne- 1b\n"
-                  "2:\n"
-                  "isync\n"
-                  : "=&r" (tmp)
-                  : "b" (&val), "r" (comp), "r" (exch): "cc", "memory");
-
-    return tmp;
-}
-
-
-void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
-{
-/* ALTERNATIVE:
-    atomicCompareExchange( void **dest, void* xchg, void* compare)
-    long ret = 0;
-    long scratch;
-    __asm__ __volatile__(
-        "0:    lwarx %0,0,%2\n"
-        "      xor. %1,%4,%0\n"
-        "      bne 1f\n"
-        "      stwcx. %3,0,%2\n"
-        "      bne- 0b\n"
-        "      isync\n"
-        "1:    "
-        : "=&r"(ret), "=&r"(scratch)
-        : "r"(dest), "r"(xchg), "r"(compare)
-        : "cr0","memory");
-    return (void*)ret;
-*/
-    void* tmp = 0;
-    asm volatile ("\n1:\n\t"
-                  "lwarx %0, 0, %1\n\t"
-                  "cmpw %0, %2\n\t"
-                  "bne- 2f\n\t"
-                  "stwcx. %3, 0, %1\n\t"
-                  "bne- 1b\n"
-                  "2:"
-                  "isync\n"
-                  : "=&r" (tmp)
-                  : "b" (&ptr), "r" (comp), "r" (exch): "cc", "memory");
-
-    return tmp;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch)
-{
-    volatile atomic_t ret = 0;
-
-/* ALTERNATIVE:
-    asm volatile (
-        "0:    lwarx  %0, 0, %1\n\t"
-        "      stwcx. %2, 0, %1\n\t"
-        "      bne-   0b       \n\t"
-        "      isync               "
-        : "=&r"(ret)
-        :   "r"(&val),  "r"(exch)
-        : "cr0","memory", "r0"
-    );
-*/
-
-    asm volatile (
-        "\n1:\n\t"
-        "lwarx  %0, 0, %2\n\t"
-        "stwcx. %3, 0, %2\n\t"
-        "bne    1b\n"
-        "isync\n"
-        : "=r" (ret) : "0" (ret), "b" (&val), "r" (exch): "cc", "memory");
-
-    return ret;
-}
-
-
-void* atomicExchange(void* volatile& dest, void* exch)
-{
-    void* ret = 0;
-
-    asm volatile (
-        "0:    lwarx  %0, 0, %1\n\t"
-        "      stwcx. %2, 0, %1\n\t"
-        "      bne-   0b       \n\t"
-        "      isync"
-        : "=&r"(ret)
-        :   "r"(&dest),  "r"(exch)
-        : "cr0","memory", "r0"
-    );
-
-    return ret;
-}
-
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i32(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     asm volatile ( "sync" : : : "memory" );
     return val.i32;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i32 = n;
     asm volatile ( "sync" : : : "memory" );
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     int result = 0, tmp;
     asm volatile ( "\n1:\n\t"
@@ -258,7 +64,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     return result + 1;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     int result = 0, tmp;
     asm volatile ( "\n1:\n\t"
@@ -274,7 +80,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return result - 1;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     volatile int ret = 0;
 
@@ -290,7 +96,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 
     return ret;}
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
 
     int tmp = 0;
@@ -309,7 +115,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return tmp;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     int result, tmp;
     asm volatile ( "\n1:\n\t"
@@ -324,7 +130,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return result;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     void* ret = 0;
 
@@ -340,7 +146,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
     return ret;
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* tmp = 0;
     asm volatile ( "\n1:\n\t"

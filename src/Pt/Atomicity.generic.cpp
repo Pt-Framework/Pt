@@ -29,135 +29,63 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.generic.h>
 #include <csignal>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& dest)
-{
-    return dest++;
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& dest)
-{
-    return dest--;
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
-{
-    atomic_t tmp = dest;
-
-    if(dest== comp)
-        dest = exch;
-
-    return tmp;
-}
-
-
-void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
-{
-    void* tmp = dest;
-
-    if(dest== comp)
-        dest = exch;
-
-    return tmp;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
-{
-    atomic_t tmp = dest;
-    dest = exch;
-    return tmp;
-}
-
-
-void* atomicExchange(void* volatile& dest, void* exch)
-{
-    void* tmp = dest;
-    dest = exch;
-    return tmp;
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
-{
-    atomic_t tmp = dest;
-    dest += add;
-    return tmp;
-}
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     return val.i;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i = n;
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     return ++val.i;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     return --val.i;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     int tmp = val.i;
     val.i = exch;
     return tmp;
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     int tmp = val.i;
     if(val.i == comp) val.i = exch;
     return tmp;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     int tmp = val.i;
     val.i += add;
     return tmp;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     void* tmp = val;
     val = exch;
     return tmp;
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* tmp = val;
     if(val == comp) val = exch;

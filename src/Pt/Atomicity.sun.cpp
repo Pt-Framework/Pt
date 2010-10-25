@@ -30,121 +30,47 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.sun.h>
 #include <sys/types.h>
 #include <sys/atomic.h>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    membar_consumer();
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-    membar_producer();
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& value)
-{
-    volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);
-
-    return atomic_inc_ulong_nv( uvalue );
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& value)
-{
-    volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);
-
-    return atomic_dec_ulong_nv( uvalue);
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& value, atomic_t n)
-{
-    volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);
-    volatile ulong_t& un = reinterpret_cast<volatile ulong_t&>(n);
-
-    volatile atomic_t result = atomic_add_long_nv(uvalue, un);
-    return result - n;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& value, atomic_t newval)
-{
-    volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);
-    volatile ulong_t& unewval = reinterpret_cast<volatile ulong_t&>(newval);
-
-    return atomic_swap_ulong(uvalue, unewval);
-}
-
-
-void* atomicExchange(void* volatile& ptr, void* new_val)
-{
-    return atomic_swap_ptr(&ptr, new_val);
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t cmp)
-{
-    volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&value);
-    volatile ulong_t& uex = reinterpret_cast<volatile ulong_t&>(ex);
-    volatile ulong_t& ucmp = reinterpret_cast<volatile ulong_t&>(cmp);
-
-    return atomic_cas_ulong(uvalue, ucmp, uex);
-}
-
-
-void* atomicCompareExchange(void* volatile& ptr, void* ex, void* cmp)
-{
-    return atomic_cas_ptr(&ptr, cmp, ex);
-}
-
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : l(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     membar_consumer();
     return val.l;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.l = n;
     membar_producer();
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&val.l);
     return atomic_inc_ulong_nv(uvalue);
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&val.l);
     return atomic_dec_ulong_nv(uvalue);
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     volatile ulong_t* uvalue  = reinterpret_cast<volatile ulong_t*>(&val.l);
     volatile ulong_t  unewval = exch;
     return atomic_swap_ulong(uvalue, unewval);
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&val.l);
     volatile ulong_t  uex    = exch;
@@ -152,7 +78,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return atomic_cas_ulong(uvalue, ucmp, uex);
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     volatile ulong_t* uvalue = reinterpret_cast<volatile ulong_t*>(&val.l);
     volatile ulong_t  un     = add;
@@ -160,12 +86,12 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return result - add;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     return atomic_swap_ptr(&val, exch);
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     return atomic_cas_ptr(&val, comp, exch);
 }

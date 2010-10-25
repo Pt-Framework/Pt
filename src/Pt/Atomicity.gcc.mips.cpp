@@ -29,159 +29,27 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.gcc.mips.h>
 #include <csignal>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    asm volatile ( "" : : : "memory" );
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-    asm volatile ( "" : : : "memory" );
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& val)
-{
-    atomic_t tmp, result = 0;
-
-    asm volatile ( "    .set    mips32\n"
-                   "1:  ll      %0, %2\n"
-                   "    addu    %1, %0, 1\n"
-                   "    sc      %1, %2\n"
-                   "    beqz    %1, 1b\n"
-                   "    .set    mips0\n"
-                   : "=&r"(result), "=&r"(tmp), "=m"(val)
-                   :   "m"(val) );
-    return result + 1;
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& val)
-{
-    atomic_t tmp, result = 0;
-
-    asm volatile ("    .set    mips32\n"
-                            "1:  ll      %0, %2\n"
-                            "    subu    %1, %0, 1\n"
-                            "    sc      %1, %2\n"
-                            "    beqz    %1, 1b\n"
-                            "    .set    mips0\n"
-                            : "=&r" (result), "=&r" (tmp), "=m" (val)
-                            : "m" (val));
-    return result - 1;
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
-{
-    atomic_t old, tmp;
-
-    asm volatile ("    .set    mips32\n"
-                            "1:  ll      %0, %2\n"
-                            "    bne     %0, %5, 2f\n"
-                            "    move    %1, %4\n"
-                            "    sc      %1, %2\n"
-                            "    beqz    %1, 1b\n"
-                            "2:  .set    mips0\n"
-                            : "=&r" (old), "=&r" (tmp), "=m" (dest)
-                            : "m" (dest), "r" (exch), "r" (comp));
-    return(old);
-}
-
-
-void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
-{
-    atomic_t* old;
-    atomic_t* tmp;
-
-    asm volatile ("    .set    mips32\n"
-                            "1:  ll      %0, %2\n"
-                            "    bne     %0, %5, 2f\n"
-                            "    move    %1, %4\n"
-                            "    sc      %1, %2\n"
-                            "    beqz    %1, 1b\n"
-                            "2:  .set    mips0\n"
-                            : "=&r" (old), "=&r" (tmp), "=m" (dest)
-                            : "m" (dest), "r" (exch), "r" (comp));
-    return(old);
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
-{
-    atomic_t result, tmp;
-
-    asm volatile ("    .set    mips32\n"
-                            "1:  ll      %0, %2\n"
-                            "    move    %1, %4\n"
-                            "    sc      %1, %2\n"
-                            "    beqz    %1, 1b\n"
-                            "    .set    mips0\n"
-                            : "=&r" (result), "=&r" (tmp), "=m" (dest)
-                            : "m" (dest), "r" (exch));
-    return(result);
-}
-
-
-void* atomicExchange(void* volatile& val, void* exch)
-{
-    atomic_t* result, tmp;
-
-    asm volatile ("    .set    mips32\n"
-                    "1:  ll      %0, %2\n"
-                    "    move    %1, %4\n"
-                    "    sc      %1, %2\n"
-                    "    beqz    %1, 1b\n"
-                    "    .set    mips0\n"
-                    : "=&r" (result), "=&r" (tmp), "=m" (val)
-                    : "m" (val), "r" (exch));
-    return(result);
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
-{
-    atomic_t result, tmp;
-
-    asm volatile ("    .set    mips32\n"
-                            "1:  ll      %0, %2\n"
-                            "    addu    %1, %0, %4\n"
-                            "    sc      %1, %2\n"
-                            "    beqz    %1, 1b\n"
-                            "    .set    mips0\n"
-                            : "=&r" (result), "=&r" (tmp), "=m" (dest)
-                            : "m" (dest), "r" (add));
-    return result;
-}
-
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i32(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     asm volatile ( "" : : : "memory" );
     return val.i32;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i32 = n;
     asm volatile ( "" : : : "memory" );
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     int tmp, result = 0;
 
@@ -196,7 +64,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     return result + 1;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     int tmp, result = 0;
 
@@ -211,7 +79,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
     return result - 1;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     int result, tmp;
 
@@ -226,7 +94,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
     return(result);
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     int old, tmp;
 
@@ -242,7 +110,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return(old);
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     int result, tmp;
 
@@ -257,7 +125,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return result;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
     void* result;
 	void* tmp;
@@ -273,7 +141,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
     return(result);
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     void* old;
     void* tmp;

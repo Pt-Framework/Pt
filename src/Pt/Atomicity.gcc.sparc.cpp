@@ -29,203 +29,27 @@
 
 #include <Pt/Atomicity.h>
 
-#include <Pt/Atomicity.gcc.sparc.h>
 #include <csignal>
 
 namespace Pt {
 
-atomic_t atomicGet(volatile atomic_t& val)
-{
-    asm volatile ("membar	#LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory");
-    return val;
-}
-
-
-void atomicSet(volatile atomic_t& val, atomic_t n)
-{
-    val = n;
-    asm volatile ("membar	#LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory");
-}
-
-
-atomic_t atomicIncrement(volatile atomic_t& val)
-{
-    register volatile atomic_t* dest asm("g1") = &val;
-    register atomic_t tmp asm("o4");
-    register atomic_t ret asm("o5");
-
-    asm volatile(
-            "1:     ld      [%%g1], %%o4\n\t"
-            "       add     %%o4, 1, %%o5\n\t"
-            /*      cas     [%%g1], %%o4, %%o5 */
-            "       .word   0xdbe0500c\n\t"
-            "       cmp     %%o4, %%o5\n\t"
-            "       bne     1b\n\t"
-            "        add    %%o5, 1, %%o5"
-            : "=&r" (tmp), "=&r" (ret)
-            : "r" (dest)
-            : "memory", "cc");
-
-    return ret;
-}
-
-
-atomic_t atomicDecrement(volatile atomic_t& val)
-{
-    register volatile atomic_t* dest asm("g1") = &val;
-    register atomic_t tmp asm("o4");
-    register atomic_t ret asm("o5");
-
-    asm volatile(
-            "1:     ld      [%%g1], %%o4\n\t"
-            "       sub     %%o4, 1, %%o5\n\t"
-            /*      cas     [%%g1], %%o4, %%o5 */
-            "       .word   0xdbe0500c\n\t"
-            "       cmp     %%o4, %%o5\n\t"
-            "       bne     1b\n\t"
-            "        sub    %%o5, 1, %%o5"
-            : "=&r" (tmp), "=&r" (ret)
-            : "r" (dest)
-            : "memory", "cc");
-
-        return ret;
-}
-
-
-atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add)
-{
-       register volatile atomic_t* dest asm("g1") = &val;
-       register atomic_t tmp asm("o4");
-       register atomic_t ret asm("o5");
-
-       asm volatile(
-               "1:     ld      [%%g1], %%o4\n\t"
-               "       add     %%o4, %3, %%o5\n\t"
-               /*      cas     [%%g1], %%o4, %%o5 */
-               "       .word   0xdbe0500c\n\t"
-               "       cmp     %%o4, %%o5\n\t"
-               "       bne     1b\n\t"
-               "        add    %%o5, %3, %%o5"
-               : "=&r" (tmp), "=&r" (ret)
-               : "r" (dest), "r" (add)
-               : "memory", "cc");
-
-        return ret;
-}
-
-
-atomic_t atomicCompareExchange(volatile atomic_t& val, atomic_t exch, atomic_t comp)
-{
-    register volatile atomic_t* dest asm("g1") = &val;
-    register atomic_t _comp asm("o4") = comp;
-    register atomic_t _exch asm("o5") = exch;
-
-    asm volatile(
-            /* cas [%%g1], %%o4, %%o5 */
-            ".word 0xdbe0500c"
-            : "=r" (_exch)
-            : "0" (_exch), "r" (dest), "r" (_comp)
-            : "memory");
-
-    return exch;
-}
-
-
-void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
-{
-    register void* volatile* dest asm("g1") = &ptr;
-    register void* _comp asm("o4") = comp;
-    register void* _exch asm("o5") = exch;
-
-    asm volatile(
-#if defined(__sparcv9)
-        /* casx [%%g1], %%o4, %%o5 */
-        ".word 0xdbf0500c"
-#else
-        /* cas [%%g1], %%o4, %%o5 */
-        ".word 0xdbe0500c"
-#endif
-        : "=r" (_exch)
-        : "0" (_exch), "r" (dest), "r" (_comp)
-        : "memory");
-
-    return exch;
-}
-
-
-atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch)
-{
-    register volatile atomic_t* dest asm("g1") = &val;
-    register atomic_t tmp asm("o4");
-    register atomic_t ret asm("o5");
-
-    asm volatile(
-            "1:     ld      [%%g1], %%o4\n\t"
-            "       mov     %3, %%o5\n\t"
-            /*      cas     [%%g1], %%o4, %%o5 */
-            "       .word   0xdbe0500c\n\t"
-            "       cmp     %%o4, %%o5\n\t"
-            "       bne     1b\n\t"
-            "        nop"
-            : "=&r" (tmp), "=&r" (ret)
-            : "r" (dest), "r" (exch)
-            : "memory", "cc");
-
-    return ret;
-}
-
-
-void* atomicExchange(void* volatile& ptr, void* exch)
-{
-       register void* volatile* dest asm("g1") = &ptr;
-       register void* tmp asm("o4");
-       register void* ret asm("o5");
-
-       asm volatile(
-#if defined(__sparcv9)
-               "1:     ldx     [%%g1], %%o4\n\t"
-#else
-               "1:     ld      [%%g1], %%o4\n\t"
-#endif
-               "       mov     %3, %%o5\n\t"
-#if defined(__sparcv9)
-               /*      casx    [%%g1], %%o4, %%o5 */
-               "       .word   0xdbf0500c\n\t"
-#else
-               /*      cas     [%%g1], %%o4, %%o5 */
-               "       .word   0xdbe0500c\n\t"
-#endif
-               "       cmp     %%o4, %%o5\n\t"
-               "       bne     1b\n\t"
-               "        nop"
-               : "=&r" (tmp), "=&r" (ret)
-               : "r" (dest), "r" (exch)
-               : "memory", "cc");
-
-        return ret;
-}
-
-////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
-
-// The asm below are made for spar 32-bit
-
-new_atomic_t::new_atomic_t(int v)
+atomic_t::atomic_t(int v)
 : i32(v)
 {}
 
-int new_atomicGet(volatile new_atomic_t& val)
+int atomicGet(volatile atomic_t& val)
 {
     asm volatile ( "membar #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory" );
     return val.i32;
 }
 
-void new_atomicSet(volatile new_atomic_t& val, int n)
+void atomicSet(volatile atomic_t& val, int n)
 {
     val.i32 = n;
     asm volatile ( "membar #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory" );
 }
 
-int new_atomicIncrement(volatile new_atomic_t& val)
+int atomicIncrement(volatile atomic_t& val)
 {
     register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
@@ -246,7 +70,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
     return ret;
 }
 
-int new_atomicDecrement(volatile new_atomic_t& val)
+int atomicDecrement(volatile atomic_t& val)
 {
     register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
@@ -267,7 +91,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
         return ret;
 }
 
-int new_atomicExchange(volatile new_atomic_t& val, int exch)
+int atomicExchange(volatile atomic_t& val, int exch)
 {
     register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
@@ -288,7 +112,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
     return ret;
 }
 
-int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
+int atomicCompareExchange(volatile atomic_t& val, int exch, int comp)
 {
     register volatile int* dest asm("g1") = &val.i32;
     register int _comp asm("o4") = comp;
@@ -304,7 +128,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
     return exch;
 }
 
-int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
+int atomicExchangeAdd(volatile atomic_t& val, int add)
 {
     register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
@@ -325,7 +149,7 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
     return ret;
 }
 
-void* new_atomicExchange(void* volatile& val, void* exch)
+void* atomicExchange(void* volatile& val, void* exch)
 {
        register void* volatile* dest asm("g1") = &val;
        register void* tmp asm("o4");
@@ -355,7 +179,7 @@ void* new_atomicExchange(void* volatile& val, void* exch)
         return ret;
 }
 
-void* new_atomicCompareExchange(void* volatile& val, void* exch, void* comp)
+void* atomicCompareExchange(void* volatile& val, void* exch, void* comp)
 {
     register void* volatile* dest asm("g1") = &val;
     register void* _comp asm("o4") = comp;
