@@ -198,8 +198,6 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         //! @brief Returns the log-level of the target.
         int logLevel() const
         {
-            // ###
-            //if(0 == _concurrency) return _loglevel;
             return atomicGet(_loglevel);
         }
 
@@ -285,9 +283,6 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
         //! @internal
         std::string _name;
-
-        //! @internal
-        int _concurrency;
 
         //! @internal
         mutable volatile atomic_t _loglevel;

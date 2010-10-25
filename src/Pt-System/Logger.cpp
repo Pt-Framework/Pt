@@ -41,22 +41,14 @@ namespace System {
 LogTarget::LogTarget(const std::string& name, int concurrency, LogTarget* parent)
 : _parent(parent)
 , _name(name)
-, _concurrency(concurrency)
-, _loglevel(0)
+, _loglevel(Fatal)
 , _inheritLogLevel(true)
-
 , _channel(0)
 , _inheritChannel(true)
 , _reserved(0)
-
 {
-/*
-    _loglevel = Fatal;
-    if(parent) _loglevel = _parent->_loglevel;
-*/
-    // ###
-    atomicSet(_loglevel, Fatal);
-    if(parent) atomicSet(_loglevel, atomicGet(_parent->_loglevel));
+    if(parent)
+        atomicSet(_loglevel, atomicGet(_parent->_loglevel));
 }
 
 
