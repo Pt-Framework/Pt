@@ -166,18 +166,18 @@ atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile ( "" : : : "memory" );
 }
 
@@ -191,8 +191,8 @@ int new_atomicIncrement(volatile new_atomic_t& val)
                    "    sc   %1, %2\n"
                    "    beqz %1, 1b\n"
                    "    .set mips0\n"
-                   : "=&r"(result), "=&r"(tmp), "=m"(val.i)
-                   :   "m"(val.i));
+                   : "=&r"(result), "=&r"(tmp), "=m"(val.i32)
+                   :   "m"(val.i32));
     return result + 1;
 }
 
@@ -206,8 +206,8 @@ int new_atomicDecrement(volatile new_atomic_t& val)
                    "    sc   %1, %2\n"
                    "    beqz %1, 1b\n"
                    "    .set mips0\n"
-                   : "=&r"(result), "=&r"(tmp), "=m"(val.i)
-                   :   "m"(val.i));
+                   : "=&r"(result), "=&r"(tmp), "=m"(val.i32)
+                   :   "m"(val.i32));
     return result - 1;
 }
 
@@ -221,8 +221,8 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
                    "    sc   %1, %2\n"
                    "    beqz %1, 1b\n"
                    "    .set mips0\n"
-                   : "=&r"(result), "=&r"(tmp), "=m"(val.i)
-                   :   "m"(val.i),    "r"(exch) );
+                   : "=&r"(result),  "=&r"(tmp), "=m"(val.i32)
+                   :   "m"(val.i32),   "r"(exch) );
     return(result);
 }
 
@@ -237,8 +237,8 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
                    "    sc   %1, %2\n"
                    "    beqz %1, 1b\n"
                    "2:  .set mips0\n"
-                   : "=&r"(old),  "=&r"(tmp),  "=m"(val.i)
-                   :   "m"(val.i),  "r"(exch),  "r"(comp) );
+                   : "=&r"(old),    "=&r"(tmp),  "=m"(val.i32)
+                   :   "m"(val.i32),  "r"(exch),  "r"(comp) );
     return(old);
 }
 
@@ -252,8 +252,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
                    "    sc   %1, %2\n"
                    "    beqz %1, 1b\n"
                    "    .set mips0\n"
-                   : "=&r"(result), "=&r"(tmp), "=m"(val.i)
-                   :   "m"(val.i),    "r"(add) );
+                   : "=&r"(result),  "=&r"(tmp), "=m"(val.i32)
+                   :   "m"(val.i32),   "r"(add) );
     return result;
 }
 

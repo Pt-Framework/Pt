@@ -210,24 +210,24 @@ void* atomicExchange(void* volatile& ptr, void* exch)
 // The asm below are made for spar 32-bit
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "membar #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile ( "membar #LoadLoad | #LoadStore | #StoreStore | #StoreLoad" : : : "memory" );
 }
 
 int new_atomicIncrement(volatile new_atomic_t& val)
 {
-    register volatile int* dest asm("g1") = &val.i;
+    register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
     register int ret asm("o5");
 
@@ -248,7 +248,7 @@ int new_atomicIncrement(volatile new_atomic_t& val)
 
 int new_atomicDecrement(volatile new_atomic_t& val)
 {
-    register volatile int* dest asm("g1") = &val.i;
+    register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
     register int ret asm("o5");
 
@@ -269,7 +269,7 @@ int new_atomicDecrement(volatile new_atomic_t& val)
 
 int new_atomicExchange(volatile new_atomic_t& val, int exch)
 {
-    register volatile int* dest asm("g1") = &val.i;
+    register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
     register int ret asm("o5");
 
@@ -290,7 +290,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
 
 int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 {
-    register volatile int* dest asm("g1") = &val.i;
+    register volatile int* dest asm("g1") = &val.i32;
     register int _comp asm("o4") = comp;
     register int _exch asm("o5") = exch;
 
@@ -306,7 +306,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
 
 int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
 {
-    register volatile int* dest asm("g1") = &val.i;
+    register volatile int* dest asm("g1") = &val.i32;
     register int tmp asm("o4");
     register int ret asm("o5");
 

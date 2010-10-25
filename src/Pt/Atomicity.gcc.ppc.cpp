@@ -228,18 +228,18 @@ void* atomicExchange(void* volatile& dest, void* exch)
 ////////////////////////////////////////// BELOW ARE FOR TEMPORARY TESTING ///////////////////////////////////////////
 
 new_atomic_t::new_atomic_t(int v)
-: i(v)
+: i32(v)
 {}
 
 int new_atomicGet(volatile new_atomic_t& val)
 {
     asm volatile ( "sync" : : : "memory" );
-    return val.i;
+    return val.i32;
 }
 
 void new_atomicSet(volatile new_atomic_t& val, int n)
 {
-    val.i = n;
+    val.i32 = n;
     asm volatile ( "sync" : : : "memory" );
 }
 
@@ -252,8 +252,8 @@ int new_atomicIncrement(volatile new_atomic_t& val)
                    "stwcx. %1, 0, %2\n\t"
                    "bne-   1b\n"
                    "isync\n"
-                   : "=&b"(result), "=&b"(tmp)
-                   :   "r"(&val.i)
+                   : "=&b"(result),  "=&b"(tmp)
+                   :   "r"(&val.i32)
                    :  "cc", "memory" );
     return result + 1;
 }
@@ -267,8 +267,8 @@ int new_atomicDecrement(volatile new_atomic_t& val)
                    "stwcx. %1, 0, %2\n\t"
                    "bne-   1b\n"
                    "isync\n"
-                   : "=&b"(result), "=&b"(tmp)
-                   :   "r"(&val.i)
+                   : "=&b"(result),  "=&b"(tmp)
+                   :   "r"(&val.i32)
                    : "cc", "memory" );
 
     return result - 1;
@@ -285,7 +285,7 @@ int new_atomicExchange(volatile new_atomic_t& val, int exch)
         "bne    1b\n"
         "isync\n"
         : "=r"(ret)
-        :  "0"(ret), "b"(&val.i), "r"(exch)
+        :  "0"(ret), "b"(&val.i32), "r"(exch)
         : "cc", "memory" );
 
     return ret;}
@@ -303,7 +303,7 @@ int new_atomicCompareExchange(volatile new_atomic_t& val, int exch, int comp)
                    "2:\n"
                    "isync\n"
                    : "=&r"(tmp)
-                   :   "b"(&val.i), "r"(comp), "r"(exch)
+                   :   "b"(&val.i32), "r"(comp), "r"(exch)
                    : "cc", "memory" );
 
     return tmp;
@@ -318,8 +318,8 @@ int new_atomicExchangeAdd(volatile new_atomic_t& val, int add)
                    "stwcx. %1, 0, %2\n\t"
                    "bne    1b\n"
                    "isync\n"
-                   : "=&r"(result), "=&r"(tmp)
-                   :   "r"(&val.i),   "r"(add)
+                   : "=&r"(result),   "=&r"(tmp)
+                   :   "r"(&val.i32),   "r"(add)
                    : "cc", "memory" );
     return result;
 }
