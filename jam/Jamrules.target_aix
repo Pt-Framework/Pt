@@ -4,14 +4,6 @@ SUFDLL    = .a ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
 
-if $(CONFIG) = debug
-{
-	SUFLIB  = d.a ;
-	SUFDLL  = d.a ;
-	SUFEXE	= d ;
-	SUFDBG  = d ;
-}
-
 TOOLSET ?= xlc ;
 OSPLAT ?= ppc ;
 TARGET_OSPLAT ?= ppc ;

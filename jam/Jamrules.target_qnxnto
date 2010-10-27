@@ -2,20 +2,9 @@
 #
 TOOLSET ?= qcc ;
 
-# System specific library naming
-#
-if $(CONFIG:L) = debug 
-{
-	SUFLIB = d.a ;
-	SUFDLL = d.so ;
-	SUFEXE	= d ;
-}
-else
-{
-	SUFLIB = .a ;
-	SUFDLL = .so ;
-	SUFEXE	= "" ;
-}
+SUFLIB = .a ;
+SUFDLL = .so ;
+SUFEXE	= "" ;
 
 PRELIB = lib ;
 

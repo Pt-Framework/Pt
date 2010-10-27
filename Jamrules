@@ -199,10 +199,17 @@ JamInclude unittest.jam ;
 # set directory to build object files into
 ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
 
-ALL_LOCATE_TARGET = bin$(SLASH)$(CONFIG) ;
+ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 
 # set directory to build library/binary files into
-OUTPUT_TARGET = bin$(SLASH)$(CONFIG) ;
+OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
+
+if $(CONFIG:L) = "debug"
+{
+    SUFLIB  = -debug$(SUFLIB) ;
+    SUFDLL  = -debug$(SUFDLL) ;
+    #SUFEXE  = -debug$(SUFEXE) ;
+}
 
 # Print project information
 Echo ;

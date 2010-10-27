@@ -32,21 +32,11 @@ else
 
 SUFOBJ	= .obj ;
 PRELIB	= "" ;
+SUFLIB	= .lib ;
+SUFEXE	= .exe ;
+SUFDLL	= .dll ;
+SUFDBG  = "" ;
 
-if $(CONFIG) = debug 
-{
-	SUFLIB	= d.lib ;
-	SUFEXE	= d.exe ;
-	SUFDLL	= d.dll ;
-	SUFDBG  = d ;
-}
-else
-{
-	SUFLIB	= .lib ;
-	SUFEXE	= .exe ;
-	SUFDLL	= .dll ;
-	SUFDBG  = "" ;
-}
 
 
 

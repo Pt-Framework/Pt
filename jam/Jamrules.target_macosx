@@ -4,12 +4,4 @@ SUFDLL    = .so ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
 
-if $(CONFIG:L) = debug 
-{
-	SUFLIB  = d.a ;
-	SUFDLL  = d.so ;
-	SUFEXE	= d ;
-	SUFDBG  = d ;
-}
-
 TOOLSET ?= xcode ;

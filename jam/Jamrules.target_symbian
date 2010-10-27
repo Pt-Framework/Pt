@@ -1,19 +1,8 @@
 SUFOBJ	= .o ;
 PRELIB	= "" ;
-
-if $(CONFIG:L) = debug 
-{
-	SUFLIB	= d.lib ;
-	SUFEXE	= d.exe ;
-	SUFDLL	= d.dll ;
-	SUFDBG  = d ;
-}
-else
-{
-	SUFLIB	= .lib ;
-	SUFEXE	= .exe ;
-	SUFDLL	= .dll ;
-	SUFDBG  = "" ;
-}
+SUFLIB	= .lib ;
+SUFEXE	= .exe ;
+SUFDLL	= .dll ;
+SUFDBG  = "" ;
 
 

@@ -4,14 +4,6 @@ SUFDLL    = .so ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
 
-if $(CONFIG) = debug
-{
-	SUFLIB  = d.so ;
-	SUFDLL  = d.so ;
-	SUFEXE	= d ;
-	SUFDBG  = d ;
-}
-
 TOOLSET ?= sunpro ;
 OSPLAT ?= sparc ;
 TARGET_OSPLAT ?= sparc ;
