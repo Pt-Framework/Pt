@@ -10,7 +10,7 @@ if $(TARGET_OS:L) = "nt"
 
     if $(MINGW) || $(TOOLSET) = "gcc"
     {
-        SYSLIBS = -lversion -lwinmm -lpsapi ; 
+        SYSLIBS = -lversion -lwinmm -lpsapi ;
                   #$(MINGW)$(SLASH)lib$(SLASH)libversion.a
                   #$(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
                   #$(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
@@ -204,12 +204,12 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # set directory to build library/binary files into
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
-if $(CONFIG:L) = "debug"
-{
-    SUFLIB  = -debug$(SUFLIB) ;
-    SUFDLL  = -debug$(SUFDLL) ;
-    #SUFEXE  = -debug$(SUFEXE) ;
-}
+# if $(CONFIG:L) = "debug"
+# {
+#     SUFLIB  = -debug$(SUFLIB) ;
+#     SUFDLL  = -debug$(SUFDLL) ;
+#     #SUFEXE  = -debug$(SUFEXE) ;
+# }
 
 # Print project information
 Echo ;
@@ -222,7 +222,6 @@ Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
 Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
 Echo "Graphic User Interface (GUI)    :" $(GUI) ;
 Echo "System Interface (SYS)          :" $(SYS) ;
-Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
 Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
 Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
