@@ -27,6 +27,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Application.h"
+#include <csignal>
 
 #ifndef SIGUSR1
 #define SIGUSR1 -1
