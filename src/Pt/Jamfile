@@ -1,9 +1,7 @@
 SubDir TOP src Pt ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
-
-#Main itest : itest.mm ;
-#Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
+# SubDirObjects tmp $(CONFIG) Pt ;
 
 SharedLibrary Pt : Atomicity.cpp
                    Char.cpp
@@ -71,3 +69,9 @@ MakeLocate Pt-test : $(OUTPUT_TARGET) ;
 
 NOTFILE Pt-all ;
 DEPENDS Pt-all : Pt Pt-test ;
+
+
+
+############################################
+# Main itest : itest.mm ;
+# Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
