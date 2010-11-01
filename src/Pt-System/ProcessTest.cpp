@@ -33,7 +33,7 @@
 #ifdef NDEBUG
 std::string processName = "ProcessTestChild";
 #else
-std::string processName = "ProcessTestChildd";
+std::string processName = "ProcessTestChild";
 #endif
 
 class ProcessTest : public Pt::Unit::TestSuite
