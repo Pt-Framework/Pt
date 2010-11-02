@@ -70,14 +70,25 @@ static SSLContext clientContext("client.pem", "password");
 class SSLMemoryConnection {
     public:
         SSLMemoryConnection(SSLContext& sslContext);
-        ~SSLMemoryConnection();
+        virtual ~SSLMemoryConnection();
 
-        int write(const char* buff, int len);
+        void connect();
+        void feedData(const char* buff, int len);
+
+        const char* getStateString();
+
+        virtual void onSendData(const char* buff, int len) = 0;
+        virtual void onRecvData(const char* buff, int len) = 0;
 
     protected:
         BIO* _in;
         BIO* _out;
         SSL* _ssl;
+
+    private:
+        void _recvBinaryDataFromInputBuffer();
+        void _sendBinaryDataFromOutputBuffer();
+
 };
 
 SSLMemoryConnection::SSLMemoryConnection(SSLContext& sslContext)
@@ -86,47 +97,132 @@ SSLMemoryConnection::SSLMemoryConnection(SSLContext& sslContext)
   _ssl( SSL_new(sslContext._ctx) )
 {
    SSL_set_bio(_ssl, _in, _out);
-
-      if (SSL_in_init(_ssl))
-      {
-         cerr << SSL_state_string_long(_ssl) << endl;;
-      }
 }
 
 SSLMemoryConnection::~SSLMemoryConnection()
 {
+    SSL_free(_ssl);
+    BIO_free(_in);
+    BIO_free(_out);
 }
 
-int SSLMemoryConnection::write(const char* sbuff, int len)
+void SSLMemoryConnection::connect()
 {
-    while(len > 0) {
-        //
-        int srcBytesWritten = SSL_write(_ssl, sbuff, len);
-        if(srcBytesWritten < 0)
-            throw "Could not write!";
+    SSL_connect(_ssl);
+    _sendBinaryDataFromOutputBuffer();
+}
+
+void SSLMemoryConnection::feedData(const char* buff, int len)
+{
+    while(len) {
+        size_t bytesWritten = BIO_write(_in, buff, len);
+        if(bytesWritten > 0)
+            len -= bytesWritten;
         else
-            len -= srcBytesWritten;
-        //
-        while(BIO_ctrl_pending(_out) > 0) {
-            char dbuff[4096];
-            int  bytesToSend = BIO_read(_out, dbuff, sizeof(dbuff));
-            if(bytesToSend <= 0) {
-                if(!BIO_should_retry(_out)) throw "Output buffer error!";
-            }
-            else {
-                cerr << string(dbuff, bytesToSend) << endl;
-            }
-        }
+            throw "Input buffer error!";
+        _recvBinaryDataFromInputBuffer();
+    }
+}
+const char* SSLMemoryConnection::getStateString()
+{
+    return SSL_state_string_long(_ssl);
+}
+
+void SSLMemoryConnection::_recvBinaryDataFromInputBuffer()
+{
+    while(BIO_ctrl_pending(_in) > 0) {
+        char buff[4096];
+        int  bytesToSend = BIO_read(_in, buff, sizeof(buff));
+        if(bytesToSend > 0)
+            onRecvData(buff, bytesToSend);
+        else if(!BIO_should_retry(_in))
+            throw "Output buffer error!";
+    }
+}
+
+void SSLMemoryConnection::_sendBinaryDataFromOutputBuffer()
+{
+    while(BIO_ctrl_pending(_out) > 0) {
+        char buff[4096];
+        int  bytesToSend = BIO_read(_out, buff, sizeof(buff));
+        if(bytesToSend > 0)
+            onSendData(buff, bytesToSend);
+        else if(!BIO_should_retry(_out))
+            throw "Output buffer error!";
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class TestServer : public SSLMemoryConnection {
+    public:
+        TestServer()
+        : SSLMemoryConnection(serverContext), _client(0)
+        {}
+
+        void setClient(SSLMemoryConnection* client);
+
+        virtual ~TestServer()
+        {}
+
+        virtual void onSendData(const char* buff, int len);
+        virtual void onRecvData(const char* buff, int len);
+
+    private:
+        SSLMemoryConnection* _client;
+};
+
+class TestClient : public SSLMemoryConnection {
+    public:
+        TestClient(TestServer& server)
+        : SSLMemoryConnection(clientContext), _server(server)
+        { _server.setClient(this); }
+
+        virtual ~TestClient()
+        {}
+
+        virtual void onSendData(const char* buff, int len);
+        virtual void onRecvData(const char* buff, int len);
+
+    private:
+        TestServer& _server;
+};
+
+void TestServer::setClient(SSLMemoryConnection* client)
+{ _client = client; }
+
+void TestServer::onSendData(const char* buff, int len)
+{
+    cerr << "[SERVER] onSendData(): " << getStateString() << endl;
+    _client->feedData(buff, len);
+}
+
+void TestServer::onRecvData(const char* buff, int len)
+{
+    cerr << "[SERVER] onRecvData(): " << getStateString() << endl;
+}
+
+void TestClient::onSendData(const char* buff, int len)
+{
+    cerr << "[CLIENT] onSendData(): " << getStateString() << endl;
+    _server.feedData(buff, len);
+}
+
+void TestClient::onRecvData(const char* buff, int len)
+{
+    cerr << "[CLIENT] onRecvData(): " << getStateString() << endl;
+    cerr << string(buff, len) << endl;
+}
+
 int main()
 {
     try {
-        SSLMemoryConnection memClient(clientContext);
-      //  memClient.write("Hello world!", 12);
+        TestServer memServer;
+
+        TestClient memClient(memServer);
+        memClient.connect();
+
+        //memClient.write("Hello world!", 12);
     }
     catch(const char* msg) {
         cerr << msg << endl;
