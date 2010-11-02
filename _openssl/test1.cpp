@@ -69,6 +69,11 @@ class SSLMemoryConnection {
         SSLMemoryConnection(SSLContext& sslContext);
         virtual ~SSLMemoryConnection();
 
+        const char* getStatusString();
+
+        virtual void write(const char* buff, int len) = 0;
+        virtual void onRecvData(const char* buff, int len) = 0;
+
     protected:
         SSL* _ssl;
         BIO* _in;
@@ -89,25 +94,24 @@ SSLMemoryConnection::SSLMemoryConnection(SSLContext& sslContext)
 }
 
 SSLMemoryConnection::~SSLMemoryConnection()
-{
-    SSL_free(_ssl);
-    //BIO_free(_in);
-    //BIO_free(_out);
-}
+{ SSL_free(_ssl); }
+
+const char* SSLMemoryConnection::getStatusString()
+{ return SSL_state_string_long(_ssl); }
 
 void SSLMemoryConnection::processMessage(SSLMemoryConnection& src, SSLMemoryConnection& dst)
 {
-    char buffer[1024];
-    int  read    = BIO_read(src._out, buffer, sizeof(buffer));
-    int  written = (read > 0) ? BIO_write(dst._in, buffer, read) : -1;
+    char buff[4096];
+    int  read    = BIO_read(src._out, buff, sizeof(buff));
+    int  written = (read > 0) ? BIO_write(dst._in, buff, read) : -1;
 
     if(written > 0) {
         if(!SSL_is_init_finished(dst._ssl)) {
             SSL_do_handshake(dst._ssl);
         }
         else {
-            read = SSL_read(dst._ssl, buffer, sizeof(buffer));
-            cerr << string(buffer, read) << endl;
+            read = SSL_read(dst._ssl, buff, sizeof(buff));
+            dst.onRecvData(buff, read);
         }
     }
 }
@@ -118,16 +122,32 @@ class SSLMemoryServer : public SSLMemoryConnection {
     public:
         SSLMemoryServer(SSLContext& sslContext);
         virtual ~SSLMemoryServer();
+
+        virtual void write(const char* buff, int len);
+        virtual void onRecvData(const char* buff, int len);
+
+        friend class SSLMemoryClient;
+
+    private:
+        SSLMemoryConnection* _client;
 };
 
 SSLMemoryServer::SSLMemoryServer(SSLContext& sslContext)
-: SSLMemoryConnection(sslContext)
-{
-    SSL_set_accept_state(_ssl);
-}
+: SSLMemoryConnection(sslContext), _client(0)
+{ SSL_set_accept_state(_ssl); }
 
 SSLMemoryServer::~SSLMemoryServer()
+{ }
+
+void SSLMemoryServer::write(const char* buff, int len)
 {
+    SSL_write(_ssl, buff, len);
+    SSLMemoryConnection::processMessage(*this, *_client);
+}
+
+void SSLMemoryServer::onRecvData(const char* buff, int len)
+{
+    cerr << "[SERVER] " + string(buff, len) << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,29 +159,42 @@ class SSLMemoryClient : public SSLMemoryConnection {
 
         void connect(SSLMemoryServer& server);
 
+        virtual void write(const char* buff, int len);
+        virtual void onRecvData(const char* buff, int len);
+
     private:
-        SSLMemoryServer* _server;
+        SSLMemoryConnection* _server;
 };
 
 SSLMemoryClient::SSLMemoryClient(SSLContext& sslContext)
 : SSLMemoryConnection(sslContext), _server(0)
-{
-    SSL_set_connect_state(_ssl);
-}
+{ SSL_set_connect_state(_ssl); }
 
 SSLMemoryClient::~SSLMemoryClient()
-{
-}
+{ }
 
 void SSLMemoryClient::connect(SSLMemoryServer& server)
 {
+    server._client = this;
     _server = &server;
 
     SSL_do_handshake(_ssl);
-    SSLMemoryConnection::processMessage(*this,    *_server);
-    SSLMemoryConnection::processMessage(*_server, *this   );
-    SSLMemoryConnection::processMessage(*this,    *_server);
-    SSLMemoryConnection::processMessage(*_server, *this   );
+
+    while(SSL_get_state(_ssl) != SSL_ST_OK) {
+        SSLMemoryConnection::processMessage(*this,    *_server);
+        SSLMemoryConnection::processMessage(*_server, *this   );
+    }
+}
+
+void SSLMemoryClient::write(const char* buff, int len)
+{
+    SSL_write(_ssl, buff, len);
+    SSLMemoryConnection::processMessage(*this, *_server);
+}
+
+void SSLMemoryClient::onRecvData(const char* buff, int len)
+{
+    cerr << "[CLIENT] " + string(buff, len) << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +208,15 @@ int main()
         SSLMemoryServer server(serverContext);
         SSLMemoryClient client(clientContext);
 
+        cerr << "[MAIN()] " << server.getStatusString() << endl;
+        cerr << "[MAIN()] " << client.getStatusString() << endl;
+
         client.connect(server);
+        cerr << "[MAIN()] " << server.getStatusString() << endl;
+        cerr << "[MAIN()] " << client.getStatusString() << endl;
+
+        client.write("Hello world!", 12);
+        server.write("Hello world!", 12);
     }
     catch(const char* msg) {
         cerr << msg << endl;
