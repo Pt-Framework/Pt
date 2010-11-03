@@ -12,10 +12,7 @@ SSLConnector::SSLConnector(SSLContext& sslContext)
 }
 
 SSLConnector::~SSLConnector()
-{
-    SSL_free(_ssl);
-//    BIO_free(_in);
-}
+{ SSL_free(_ssl); }
 
 const char* SSLConnector::getStatusString()
 { return SSL_state_string_long(_ssl); }
