@@ -3,22 +3,12 @@
 
 #include "SSLConnector.h"
 
-class SSLMemoryConnection {
+class SSLMemoryConnector : public SSLConnector {
     public:
-        SSLMemoryConnection(SSLContext& sslContext);
-        virtual ~SSLMemoryConnection();
-
-        const char* getStatusString();
-
-        virtual void write(const char* buff, int len) = 0;
-        virtual void onRecvData(const char* buff, int len) = 0;
+        SSLMemoryConnector(SSLContext& sslContext);
+        virtual ~SSLMemoryConnector();
 
     protected:
-        SSL* _ssl;
-        BIO* _in;
-        BIO* _out;
-
-        static void processMessage(SSLMemoryConnection& src, SSLMemoryConnection& dst);
 };
 
 #endif

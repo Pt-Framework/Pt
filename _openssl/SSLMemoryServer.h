@@ -3,7 +3,7 @@
 
 #include "SSLMemoryConnector.h"
 
-class SSLMemoryServer : public SSLMemoryConnection {
+class SSLMemoryServer : public SSLMemoryConnector {
     public:
         SSLMemoryServer(SSLContext& sslContext);
         virtual ~SSLMemoryServer();
@@ -13,7 +13,7 @@ class SSLMemoryServer : public SSLMemoryConnection {
         friend class SSLMemoryClient;
 
     private:
-        SSLMemoryConnection* _client;
+        SSLMemoryConnector* _client;
 };
 
 #endif

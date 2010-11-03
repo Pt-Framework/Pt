@@ -11,9 +11,7 @@ class SSLContext {
         SSLContext(const char* keyfile, const char* password);
         ~SSLContext();
 
-        friend class SSLMemoryConnection;
-        friend class SSLMemoryServer;
-        friend class SSLMemoryClient;
+        friend class SSLConnector;
 
     private:
         SSL_CTX*    _ctx;
