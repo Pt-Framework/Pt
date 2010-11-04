@@ -9,12 +9,15 @@ SSLMemoryClient::~SSLMemoryClient()
 
 void SSLMemoryClient::connect(SSLMemoryServer& server)
 {
+    // Connect
     SSLConnector::connect();
 
+    // Ensure that the client and server reference each other
     server._client = this;
     _server = &server;
 
-    while(SSL_get_state(_ssl) != SSL_ST_OK) {
+    // Perform message passing until the connection is established
+    while(!connectionEstablished()) {
         SSLMemoryConnector::processMessage(*this,    *_server);
         SSLMemoryConnector::processMessage(*_server, *this   );
     }
@@ -22,7 +25,10 @@ void SSLMemoryClient::connect(SSLMemoryServer& server)
 
 int SSLMemoryClient::write(const char* buff, int len)
 {
-    SSLConnector::write(buff, len);
+    const int bytesWritten = SSLConnector::write(buff, len);
+
     SSLMemoryConnector::processMessage(*this, *_server);
+
+    return bytesWritten;
 }
 

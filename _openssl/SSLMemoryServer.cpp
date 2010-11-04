@@ -9,6 +9,9 @@ SSLMemoryServer::~SSLMemoryServer()
 
 int SSLMemoryServer::write(const char* buff, int len)
 {
-    SSLConnector::write(buff, len);
+    const int bytesWritten = SSLConnector::write(buff, len);
+
     SSLMemoryConnector::processMessage(*this, *_client);
+
+    return bytesWritten;
 }

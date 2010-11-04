@@ -2,13 +2,13 @@
 
 BIO* SSLContext::_bioErr = 0;
 
-int SSLContext::_passwordCallback(char* buff, int num, int rwflag, void* userdata)
+int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
     // Get the SSLContext instance
     SSLContext& sslCtx = *reinterpret_cast<SSLContext*>(userdata);
 
     // If the wanted length is not the same with the given password length, just return 0
-    if(num < sslCtx._pswd.length() + 1) return 0;
+    if((unsigned) num < sslCtx._pswd.length() + 1) return 0;
 
     // Copy the password to the buffer and return the length
     strcpy(buff, &sslCtx._pswd[0]);

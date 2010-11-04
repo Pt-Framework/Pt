@@ -16,7 +16,10 @@ class SSLConnector {
         virtual ~SSLConnector();
 
         //! \brief Get the current status string of this SSL connector.
-        const char* getStatusString();
+        const char* getStatusString() const;
+
+        //! \brief Check if this SSL connector has been connected to the SSL connector at the other end.
+        bool connectionEstablished() const;
 
         //! \brief Activate this SSL connector as an SSL connector client and initiate a connection to an SSL connector server.
         //! It is the responsibility of the developer to \ref pullData() from this SSL connector client and \ref pushData() to the correct SSL connector server.
@@ -30,12 +33,12 @@ class SSLConnector {
         virtual int write(const char* buff, int len);
 
         //! \brief Ovevride this function to receive decrypted data.
-        virtual void onRecvData(const char* buff, int len) = 0;
+        virtual void onRecvData(const char* buff, int len) const = 0;
 
         //! \brief Pull data from the output buffer of this SSL connector.
         //! The pulled data must be send through the communication medium and written to the input buffer of the SSL conenctor at the other end.
         //! This functions return the number of bytes actually read.
-        int pullData(char* buff, int buffSize);
+        int pullData(char* buff, int buffSize) const;
 
         //! \brief Push data to the input buffer of this SSL connector.
         //! The pushed data must be the data received from the output buffer of the SSL conenctor at the other end through the communication medium.
@@ -43,9 +46,9 @@ class SSLConnector {
         int pushData(const char* buff, int len);
 
     protected:
-        SSL* _ssl; // OpenSSL's SSL handle
         BIO* _in;  // Input BIO
         BIO* _out; // Output BIO
+        SSL* _ssl; // OpenSSL's SSL handle
 };
 
 #endif

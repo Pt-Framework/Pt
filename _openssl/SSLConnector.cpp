@@ -15,8 +15,11 @@ SSLConnector::SSLConnector(SSLContext& sslContext)
 SSLConnector::~SSLConnector()
 { SSL_free(_ssl); }
 
-const char* SSLConnector::getStatusString()
+const char* SSLConnector::getStatusString() const
 { return SSL_state_string_long(_ssl); }
+
+bool SSLConnector::connectionEstablished() const
+{ return SSL_get_state(_ssl) == SSL_ST_OK; }
 
 void SSLConnector::connect()
 {
@@ -25,10 +28,28 @@ void SSLConnector::connect()
 }
 
 int SSLConnector::write(const char* buff, int len)
-{ return SSL_write(_ssl, buff, len); }
+{
+    int bytesWritten = SSL_write(_ssl, buff, len);
 
-int SSLConnector::pullData(char* buff, int buffSize)
-{ return BIO_read(_out, buff, buffSize); }
+    if(bytesWritten < 0) {
+        if(!SSL_want_read(_ssl)) throw "Connection error!";
+        return 0;
+    }
+
+    return bytesWritten;
+}
+
+int SSLConnector::pullData(char* buff, int buffSize) const
+{
+    const int bytesRead = BIO_read(_out, buff, buffSize);
+
+    if(bytesRead < 0) {
+        if(!BIO_should_retry(_out)) throw "Output buffer error!";
+        return 0;
+    }
+
+    return bytesRead;
+}
 
 int SSLConnector::pushData(const char* buff, int len)
 {
@@ -38,7 +59,7 @@ int SSLConnector::pushData(const char* buff, int len)
         SSL_do_handshake(_ssl);
     }
     else {
-        char rbuff[4096];
+        char rbuff[8192];
         const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
         onRecvData(rbuff, bytesRead);
     }

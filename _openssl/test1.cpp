@@ -13,7 +13,7 @@ class MySSLMemoryServer : public SSLMemoryServer {
         virtual ~MySSLMemoryServer()
         {}
 
-        virtual void onRecvData(const char* buff, int len)
+        virtual void onRecvData(const char* buff, int len) const
         { cerr << "[SERVER] " + string(buff, len) << endl; }
 };
 
@@ -26,7 +26,7 @@ class MySSLMemoryClient : public SSLMemoryClient {
         virtual ~MySSLMemoryClient()
         {}
 
-        virtual void onRecvData(const char* buff, int len)
+        virtual void onRecvData(const char* buff, int len) const
         { cerr << "[CLIENT] " + string(buff, len) << endl; }
 };
 
