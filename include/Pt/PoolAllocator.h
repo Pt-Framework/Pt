@@ -31,10 +31,15 @@
 
 #include <Pt/Api.h>
 #include <Pt/Allocator.h>
+#include <Pt/Types.h>
+#include <Pt/SmartPtr.h>
+
+class AllocatorTest;
 
 namespace Pt {
 
 class PoolFactory;
+class Chunk;
 
 /** @brief Manages a pool of fixed-size allocators.
 
@@ -43,6 +48,7 @@ class PoolFactory;
  */
 class PT_API PoolAllocator : public Pt::Allocator
 {
+	friend class ::AllocatorTest;
 public:
     /** 
      * @brief The only available constructor needs certain parameters in order to
@@ -169,6 +175,42 @@ private:
      * @brief Size of alignment boundaries.
      */
     const std::size_t _objectAlignSize;
+
+protected:
+   
+   /** @brief Proxy class for Chunk
+
+    Use to test chunk class. This proxy class is needed under windows, because Chunk symbol
+	is not exported.
+	*/
+	class PT_API ChunkProxy
+	{
+	public:
+		ChunkProxy();
+		~ChunkProxy();
+		
+		void init(std::size_t blockSize, Pt::uint8_t blocks);
+		void* allocate( std::size_t blockSize );
+		void deallocate(void* p, std::size_t blockSize);
+		void reset( std::size_t blockSize, Pt::uint8_t blocks );    
+		void release();
+		bool operator== (const ChunkProxy& rhs);
+	
+#ifndef NDEBUG
+		
+		bool isCorrupt( Pt::uint8_t numBlocks, std::size_t blockSize, bool checkIndexes ) const;
+		bool isBlockAvailable(void* p, Pt::uint8_t numBlocks, std::size_t blockSize) const;
+#endif
+		
+		bool hasBlock( void* p, std::size_t chunkLength ) const;
+		bool hasAvailable(Pt::uint8_t numBlocks ) const;
+		bool isFilled() const;	
+		const Pt::uint8_t blocksAvailable() const;
+		const Pt::Chunk& chunk();
+
+	private:
+		Pt::SmartPtr<Pt::Chunk> _chunk;
+	};
 
 
 };

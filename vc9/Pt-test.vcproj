@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
@@ -27,7 +27,7 @@
 				BuildCommandLine="cd .. &amp; .\jam -q  -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
 				ReBuildCommandLine="cd .. &amp; .\jam -qa -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; Pt"
 				CleanCommandLine="cd .. &amp; .\jam -q -sTOOLSET=vc9 -sVISUALC=&quot;\&quot;$(VSInstallDir)&quot;&quot; clean"
-				Output="cd .. &amp; .\bin\Pt-testd"
+				Output="cd .. &amp; .\build\debug\Pt-test.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG;"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -86,7 +86,107 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\src\Pt\AllocatorTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\AnyTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\AtomicTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\ByteorderTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\CharTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\ConversionTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\pt\DateTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\DateTimeTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\DelegateTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\ExceptionTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\NonCopyableTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\Pt-test.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\RegExpTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\SerializationTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\SettingsTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\SignalTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\SingletonTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\SmartPtrTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\StringStreamTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\StringTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\TextStreamTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\TimespanTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\TimeTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\TypesTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\TypeTraitsTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\Pt\VariantTest.cpp"
 				>
 			</File>
 		</Filter>

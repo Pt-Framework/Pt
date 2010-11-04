@@ -49,9 +49,8 @@ public:
     }
 
 protected:
-    void initTest();
-    void complexAllocateDeallocateTest();
-    void allocateDeallocate();
+	void complexAllocateDeallocateTest();
+	void allocateDeallocate();
 	void trimTest();
 	void benchMarkPrimitiveTypes();
 
@@ -116,8 +115,8 @@ void AllocatorTest::trimTest()
 
 void AllocatorTest::complexAllocateDeallocateTest()
 {
-    Pt::Chunk chunkArray;
-    std::vector<Pt::Chunk> test;
+	Pt::PoolAllocator::ChunkProxy chunkArray;
+	std::vector<Pt::PoolAllocator::ChunkProxy> test;
     Pt::uint32_t* array[1024];
     test.push_back(chunkArray);
 	test[0].init(sizeof(Pt::uint32_t), 255);
@@ -134,7 +133,7 @@ void AllocatorTest::complexAllocateDeallocateTest()
                 k++;
                 if(k > test.size()-1)
                 {
-                    Pt::Chunk chunkArray1;
+                    Pt::PoolAllocator::ChunkProxy chunkArray1;
                     std::size_t size = test.size();
                     test.reserve(size * 2);
                     chunkArray1.init(sizeof(Pt::uint32_t), 255);
@@ -173,25 +172,25 @@ void AllocatorTest::complexAllocateDeallocateTest()
 void AllocatorTest::allocateDeallocate()
 {
     Pt::uint32_t* array[100];
-    Pt::Chunk chunk;
+    Pt::PoolAllocator::ChunkProxy chunk;
     chunk.init(sizeof(Pt::uint32_t), 255);
-    PT_UNIT_ASSERT(chunk._pData > 0 );
-    PT_UNIT_ASSERT(chunk._blocksAvailable == 255);
-    PT_UNIT_ASSERT(chunk._firstAvailableBlock == 0);
+    PT_UNIT_ASSERT(chunk.chunk()._pData > 0 );
+    PT_UNIT_ASSERT(chunk.chunk()._blocksAvailable == 255);
+    PT_UNIT_ASSERT(chunk.chunk()._firstAvailableBlock == 0);
 
     for (Pt::uint32_t i = 0; i < 100; i++)
     {
         array[i] = (Pt::uint32_t*)chunk.allocate(sizeof(Pt::uint32_t));
         PT_UNIT_ASSERT(array[i] > 0);
-        PT_UNIT_ASSERT(chunk._blocksAvailable == 255 - (i+1));
-        PT_UNIT_ASSERT(chunk._firstAvailableBlock == (i+1));
+        PT_UNIT_ASSERT(chunk.chunk()._blocksAvailable == 255 - (i+1));
+        PT_UNIT_ASSERT(chunk.chunk()._firstAvailableBlock == (i+1));
     }
 
     for (Pt::uint32_t i = 0; i < 100; i++)
     {
         chunk.deallocate(array[i], sizeof(Pt::uint32_t));
-        PT_UNIT_ASSERT(chunk._firstAvailableBlock == i);
-        PT_UNIT_ASSERT(chunk._blocksAvailable == 155 + (i+1));
+        PT_UNIT_ASSERT(chunk.chunk()._firstAvailableBlock == i);
+        PT_UNIT_ASSERT(chunk.chunk()._blocksAvailable == 155 + (i+1));
     }
 }
 

@@ -1,14 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "Pt.vcproj", "{01B4D49A-4559-47EB-A802-811D89F013FA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-test", "Pt-test.vcproj", "{01B4D49A-4559-47EB-A802-811D89F013FB}"
 EndProject
 Global
-	GlobalSection(IntelOptPkgProperties) = preSolution
-		LoadPackage = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
@@ -25,5 +22,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(IntelOptPkgProperties) = preSolution
+		LoadPackage = true
 	EndGlobalSection
 EndGlobal

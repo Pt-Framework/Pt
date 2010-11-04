@@ -28,6 +28,7 @@
 
 #include <Pt/PoolAllocator.h>
 #include "PoolFactory.h"
+#include "Chunk.h"
 
 #include <cassert>
 
@@ -178,6 +179,76 @@ bool PoolAllocator::isCorrupt() const
     }
 #endif	
     return false;
+}
+
+PoolAllocator::ChunkProxy::ChunkProxy():
+_chunk(new Chunk())
+{
+}
+
+PoolAllocator::ChunkProxy::~ChunkProxy()
+{
+}
+
+bool PoolAllocator::ChunkProxy::operator== (const ChunkProxy& rhs)
+{
+	return *_chunk == *rhs._chunk;
+}
+
+void PoolAllocator::ChunkProxy::init(std::size_t blockSize, Pt::uint8_t blocks)
+{ 
+	_chunk->init(blockSize, blocks); 
+}
+
+void* PoolAllocator::ChunkProxy::allocate( std::size_t blockSize )
+{ 
+	return _chunk->allocate(blockSize); 
+}
+
+void PoolAllocator::ChunkProxy::deallocate(void* p, std::size_t blockSize)
+{ 
+	_chunk->deallocate(p, blockSize); 
+}
+
+void PoolAllocator::ChunkProxy::reset( std::size_t blockSize, Pt::uint8_t blocks )
+{ 
+	_chunk->reset(blockSize, blocks); 
+}
+
+void PoolAllocator::ChunkProxy::release()
+{ 
+	_chunk->release(); 
+}
+	
+#ifndef NDEBUG
+		
+bool PoolAllocator::ChunkProxy::isCorrupt( Pt::uint8_t numBlocks, std::size_t blockSize, bool checkIndexes ) const
+{ 
+	return _chunk->isCorrupt(numBlocks, blockSize, checkIndexes); 
+}
+
+bool PoolAllocator::ChunkProxy::isBlockAvailable(void* p, Pt::uint8_t numBlocks, std::size_t blockSize) const
+{ 
+	return _chunk->isBlockAvailable(p, numBlocks, blockSize); 
+}
+
+#endif
+
+bool PoolAllocator::ChunkProxy::hasBlock( void* p, std::size_t chunkLength ) const
+{ return _chunk->hasBlock(p, chunkLength); }
+
+bool PoolAllocator::ChunkProxy::hasAvailable(Pt::uint8_t numBlocks ) const
+{ return _chunk->hasAvailable(numBlocks); }
+
+bool PoolAllocator::ChunkProxy::isFilled() const
+{ return _chunk->isFilled(); }
+
+const Pt::uint8_t PoolAllocator::ChunkProxy::blocksAvailable() const
+{ return _chunk->blocksAvailable(); }
+
+const Pt::Chunk& PoolAllocator::ChunkProxy::chunk()
+{
+	return *_chunk;
 }
 
 }

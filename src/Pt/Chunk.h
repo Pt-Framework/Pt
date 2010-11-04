@@ -67,7 +67,7 @@ namespace Pt{
  */
 class Chunk
 {
-    friend class ::AllocatorTest;
+	friend class ::AllocatorTest;
 public:
 
     /**
