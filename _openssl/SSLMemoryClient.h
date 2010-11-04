@@ -7,7 +7,7 @@
 class SSLMemoryClient : public SSLMemoryConnector {
     public:
         // Construct a memory-based SSL client that uses the given context
-        SSLMemoryClient(SSLContext& sslContext);
+        SSLMemoryClient(SSLContext& sslContext, const char* sessionID);
 
         // Standard dtor
         virtual ~SSLMemoryClient();
@@ -15,11 +15,14 @@ class SSLMemoryClient : public SSLMemoryConnector {
         // Override the connect() method
         virtual void connect(SSLMemoryServer& server);
 
+        // Override the disconnect() method
+        virtual void disconnect();
+
         // Override the write() method
         virtual int write(const char* buff, int len);
 
     private:
-        SSLMemoryConnector* _server;
+        SSLMemoryServer* _server;
 };
 
 #endif

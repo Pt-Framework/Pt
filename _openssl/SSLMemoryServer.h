@@ -7,7 +7,7 @@
 class SSLMemoryServer : public SSLMemoryConnector {
     public:
         // Construct a memory-based SSL server that uses the given context
-        SSLMemoryServer(SSLContext& sslContext);
+        SSLMemoryServer(SSLContext& sslContext, const char* sessionID);
 
         // Standard dtor
         virtual ~SSLMemoryServer();

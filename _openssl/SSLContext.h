@@ -8,7 +8,7 @@
 class SSLContext {
     public:
         //! \brief Construct an SSL context that uses the given certificate-key file and password.
-        SSLContext(const char* caFile, const char* keyFile, const char* password);
+        SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID);
 
         //! \brief Standard dtor.
         ~SSLContext();

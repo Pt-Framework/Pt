@@ -1,11 +1,11 @@
 #include "SSLMemoryConnector.h"
 
-SSLMemoryConnector::SSLMemoryConnector(SSLContext& sslContext)
-: SSLConnector(sslContext)
-{ }
+SSLMemoryConnector::SSLMemoryConnector(SSLContext& sslContext, const char* sessionID)
+: SSLConnector(sslContext, sessionID)
+{}
 
 SSLMemoryConnector::~SSLMemoryConnector()
-{ }
+{}
 
 void SSLMemoryConnector::processMessage(SSLConnector& src, SSLConnector& dst)
 {
@@ -14,7 +14,7 @@ void SSLMemoryConnector::processMessage(SSLConnector& src, SSLConnector& dst)
     const int bytesRead = src.pullData(buff, sizeof(buff));
 
     // Write data to destination
-    if(bytesRead) {
+    if(bytesRead > 0) {
         int bytesLeft = bytesRead;
         while(bytesLeft) {
             const int bytesWritten = dst.pushData(buff + bytesRead - bytesLeft, bytesLeft);

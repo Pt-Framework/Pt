@@ -15,7 +15,7 @@ int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* use
     return sslCtx._pswd.length();
 }
 
-SSLContext::SSLContext(const char* caFile, const char* keyFile, const char* password)
+SSLContext::SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID)
 : _pswd(password ? password : "")
 {
     // Only need to perform these once for every application
@@ -39,10 +39,14 @@ SSLContext::SSLContext(const char* caFile, const char* keyFile, const char* pass
     }
 
     // Load and verify CA list (if given)
-    if(caFile && !SSL_CTX_load_verify_locations(_ctx, caFile, 0)) throw "Could not read CA list!";
+    if(caFile && !SSL_CTX_load_verify_locations(_ctx, caFile, 0)) throw "Could not read/verify CA list!";
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx,1);
 #endif
+
+    // Set some options
+    SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+    if(sessionID) SSL_CTX_set_session_id_context(_ctx, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 }
 
 SSLContext::~SSLContext()

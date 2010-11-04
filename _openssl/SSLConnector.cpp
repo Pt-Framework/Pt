@@ -1,15 +1,21 @@
 #include "SSLConnector.h"
 
-SSLConnector::SSLConnector(SSLContext& sslContext)
+SSLConnector::SSLConnector(SSLContext& sslContext, const char* sessionID)
 : _in ( BIO_new(BIO_s_mem()) ),
   _out( BIO_new(BIO_s_mem()) ),
   _ssl( SSL_new(sslContext._ctx) )
 {
+    // Connect the BIO
     BIO_set_nbio(_in, 1);
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
+
+    // Star as server by default
     SSL_set_accept_state(_ssl);
+
+    // Set session ID
+    if(sessionID) SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 }
 
 SSLConnector::~SSLConnector()
@@ -25,6 +31,18 @@ void SSLConnector::connect()
 {
     SSL_set_connect_state(_ssl);
     SSL_do_handshake(_ssl);
+}
+
+void SSLConnector::disconnect()
+{
+    SSL_shutdown(_ssl);
+    SSL_shutdown(_ssl);
+}
+
+void SSLConnector::reset()
+{
+    SSL_clear(_ssl);
+    SSL_clear(_ssl);
 }
 
 int SSLConnector::write(const char* buff, int len)
@@ -61,7 +79,13 @@ int SSLConnector::pushData(const char* buff, int len)
     else {
         char rbuff[8192];
         const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
-        onRecvData(rbuff, bytesRead);
+        if(bytesRead > 0) {
+            onRecvData(rbuff, bytesRead);
+        }
+        else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
+            SSL_shutdown(_ssl);
+            SSL_shutdown(_ssl);
+        }
     }
 
     return bytesWritten;

@@ -1,11 +1,11 @@
 #include "SSLMemoryServer.h"
 
-SSLMemoryServer::SSLMemoryServer(SSLContext& sslContext)
-: SSLMemoryConnector(sslContext), _client(0)
-{ }
+SSLMemoryServer::SSLMemoryServer(SSLContext& sslContext, const char* sessionID)
+: SSLMemoryConnector(sslContext, sessionID), _client(0)
+{}
 
 SSLMemoryServer::~SSLMemoryServer()
-{ }
+{}
 
 int SSLMemoryServer::write(const char* buff, int len)
 {

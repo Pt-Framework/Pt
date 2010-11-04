@@ -7,7 +7,7 @@
 class SSLMemoryConnector : public SSLConnector {
     public:
         // Construct a memory-based SSL connector that uses the given context
-        SSLMemoryConnector(SSLContext& sslContext);
+        SSLMemoryConnector(SSLContext& sslContext, const char* sessionID);
 
         // Standard dtor
         virtual ~SSLMemoryConnector();

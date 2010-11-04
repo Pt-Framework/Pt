@@ -10,7 +10,7 @@
 class SSLConnector {
     public:
         //! \brief Construct an SSL connector that uses the given context.
-        SSLConnector(SSLContext& sslContext);
+        SSLConnector(SSLContext& sslContext, const char* sessionID);
 
         //! \brief Standard dtor.
         virtual ~SSLConnector();
@@ -25,6 +25,12 @@ class SSLConnector {
         //! It is the responsibility of the developer to \ref pullData() from this SSL connector client and \ref pushData() to the correct SSL connector server.
         //! A derivative class that override this class must always calls the original implementation before executing any other SSL operation.
         virtual void connect();
+
+        //! \brief Disconnect the connection.
+        virtual void disconnect();
+
+        //! \brief Reset this SSL connector.
+        void reset();
 
         //! \brief Write data to this SSL connector.
         //! The written data will be encrypted and sent to the SSL conenctor at the other end through the communication medium
