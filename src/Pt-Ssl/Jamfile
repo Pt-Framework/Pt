@@ -4,4 +4,5 @@ SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
 Main ssltest : ssltest.cpp ;
 LinkSharedLibraries ssltest : Pt Pt-Net Pt-System ;
+LINKLIBS on ssltest$(SUFEXE) += -lssl ;
 MakeLocate ssltest : $(OUTPUT_TARGET) ;

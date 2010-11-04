@@ -4,6 +4,7 @@
 #include <Pt/Net/TcpSocket.h>
 #include <iostream>
 #include <stdexcept>
+#include <openssl/ssl.h>
 
 class Client : public Pt::Connectable
 {
