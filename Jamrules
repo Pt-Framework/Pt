@@ -204,12 +204,15 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # set directory to build library/binary files into
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
-# if $(CONFIG:L) = "debug"
-# {
-#     SUFLIB  = -debug$(SUFLIB) ;
-#     SUFDLL  = -debug$(SUFDLL) ;
-#     #SUFEXE  = -debug$(SUFEXE) ;
-# }
+WITH_OPENSSL = "no" ;
+
+for local arg in $(ARGV)
+{
+    if $(arg) = "--with-openssl"
+    {
+        WITH_OPENSSL = "yes" ;
+    }
+}
 
 # Print project information
 Echo ;
@@ -222,6 +225,7 @@ Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
 Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
 Echo "Graphic User Interface (GUI)    :" $(GUI) ;
 Echo "System Interface (SYS)          :" $(SYS) ;
+Echo "Use OpenSSL (--with-openssl)    :" $(WITH_OPENSSL) ;
 Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
 Echo "Optimisation (OPTIM)            :" $(OPTIM) ;

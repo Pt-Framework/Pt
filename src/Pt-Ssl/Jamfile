@@ -1,0 +1,7 @@
+SubDir TOP src Pt-Ssl ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
+
+Main ssltest : ssltest.cpp ;
+LinkSharedLibraries ssltest : Pt Pt-Net Pt-System ;
+MakeLocate ssltest : $(OUTPUT_TARGET) ;

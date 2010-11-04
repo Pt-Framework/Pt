@@ -17,3 +17,8 @@ if $(GUI) != none
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Xml ;
 SubInclude TOP src Pt-XmlRpc ;
+
+if $(WITH_OPENSSL) = yes
+{
+    SubInclude TOP src Pt-Ssl ;
+}
