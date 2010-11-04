@@ -217,6 +217,20 @@ ALWAYS clean uninstall ;
 # Rules
 #
 
+rule First
+{
+     DEPENDS first : $(<) ;
+     Clean clean : $(<) ;
+}
+
+
+actions First
+{
+    echo creating $(<)
+    touch $(<)
+}
+
+
 rule As
 {
     DEPENDS $(<) : $(>) ;
