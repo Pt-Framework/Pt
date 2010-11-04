@@ -20,7 +20,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\bin"
+			OutputDirectory="..\build"
 			IntermediateDirectory="..\tmp\src\Pt-Xml"
 			ConfigurationType="0"
 			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
@@ -30,7 +30,7 @@
 				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-Xml"
 				ReBuildCommandLine="cd .. &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug Pt-Xml"
 				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug clean"
-				Output="$(OutDir)\Pt-Xmld.dll"
+				Output="$(OutDir)\Pt-Xml.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -41,7 +41,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Pocket PC 2003 (ARMV4)"
-			OutputDirectory="..\bin"
+			OutputDirectory="..\build"
 			IntermediateDirectory="..\tmp\src\Pt-Xml"
 			ConfigurationType="0"
 			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
@@ -52,7 +52,7 @@
 				BuildCommandLine="cd .. &amp; jam.exe -q -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Xml"
 				ReBuildCommandLine="cd ..) &amp; jam.exe -qa -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm Pt-Xml"
 				CleanCommandLine="cd .. &amp; jam.exe -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
-				Output="$(OutDir)\Pt-Xmld.dll"
+				Output="$(OutDir)\Pt-Xml.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -78,7 +78,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\bin"
+			OutputDirectory="..\build"
 			IntermediateDirectory="..\tmp\src\Pt-Xml"
 			ConfigurationType="0"
 			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
@@ -99,7 +99,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Pocket PC 2003 (ARMV4)"
-			OutputDirectory="..\bin"
+			OutputDirectory="..\build"
 			IntermediateDirectory="..\tmp\src\Pt-Xml"
 			ConfigurationType="0"
 			BuildLogFile="$(SolutionDir)\$(TargetName).htm"
