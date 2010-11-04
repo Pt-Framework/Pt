@@ -32,8 +32,8 @@ class MySSLMemoryClient : public SSLMemoryClient {
 
 int main()
 {
-    SSLContext serverContext("server.pem", "password");
-    SSLContext clientContext("client.pem", "password");
+    SSLContext serverContext("root.pem", "server.pem", "password");
+    SSLContext clientContext("root.pem", "client.pem", "password");
 
     try {
         MySSLMemoryServer server(serverContext);

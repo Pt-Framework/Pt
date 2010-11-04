@@ -4,21 +4,24 @@
 #include <string>
 #include <openssl/ssl.h>
 
-#define CA_LIST "root.pem"
-
+//! \brief SSL context.
 class SSLContext {
     public:
-        SSLContext(const char* keyfile, const char* password);
+        //! \brief Construct an SSL context that uses the given certificate-key file and password.
+        SSLContext(const char* caFile, const char* keyFile, const char* password);
+
+        //! \brief Standard dtor.
         ~SSLContext();
 
         friend class SSLConnector;
 
     private:
-        SSL_CTX*    _ctx;
-        std::string _pswd;
+        SSL_CTX*    _ctx;    // OpenSSL's SSL context
+        std::string _pswd;   // The password
+        static BIO* _bioErr; // Error BIO for OpenSSL
 
-        static BIO* _bioErr;
-        static int  _passwordCallback(char* buf, int num, int rwflag, void* userdata);
+        // Password callback to feed the password to OpenSSL
+        static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
 };
 
 #endif

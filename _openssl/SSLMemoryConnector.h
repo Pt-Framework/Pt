@@ -3,12 +3,18 @@
 
 #include "SSLConnector.h"
 
+// Just for testing: memory-based SSL connector
 class SSLMemoryConnector : public SSLConnector {
     public:
+        // Construct a memory-based SSL connector that uses the given context
         SSLMemoryConnector(SSLContext& sslContext);
+
+        // Standard dtor
         virtual ~SSLMemoryConnector();
 
     protected:
+        // Used for passing messages between memory-based SSL connectors
+        static void processMessage(SSLConnector& src, SSLConnector& dst);
 };
 
 #endif

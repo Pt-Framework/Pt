@@ -3,14 +3,20 @@
 
 #include "SSLMemoryServer.h"
 
+// Just for testing: memory-based SSL client
 class SSLMemoryClient : public SSLMemoryConnector {
     public:
+        // Construct a memory-based SSL client that uses the given context
         SSLMemoryClient(SSLContext& sslContext);
+
+        // Standard dtor
         virtual ~SSLMemoryClient();
 
-        void connect(SSLMemoryServer& server);
+        // Override the connect() method
+        virtual void connect(SSLMemoryServer& server);
 
-        virtual void write(const char* buff, int len);
+        // Override the write() method
+        virtual int write(const char* buff, int len);
 
     private:
         SSLMemoryConnector* _server;
