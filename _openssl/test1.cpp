@@ -35,11 +35,11 @@ class MySSLMemoryClient : public SSLMemoryClient {
 int main()
 {
     try {
-        cerr << "----- Contexts initialized -----" << endl;
+        cerr << "----- Initializing SSL contexts -----" << endl;
         SSLContext serverContext("root.pem", "server.pem", "password", "session123");
         SSLContext clientContext("root.pem", "client.pem", "password", "session123");
 
-        cerr << "----- Server & client initialized -----" << endl;
+        cerr << "----- Initializing SSL server and client -----" << endl;
         MySSLMemoryServer server(serverContext, "session123");
         MySSLMemoryClient client(clientContext, "session123");
         cerr << "[MAIN()] Server: " << server.getStatusString() << endl;
@@ -51,10 +51,10 @@ int main()
         cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
 
         cerr << "----- Sending messages -----" << endl;
-        client.write("Hello world!", 12);
-        server.write("Hello world!", 12);
-        client.write("Hello world!", 12);
-        server.write("Hello world!", 12);
+        client.write("Hello world from client!", 25);
+        server.write("Hello world from server!", 25);
+        client.write("Hello world from client!", 25);
+        server.write("Hello world from server!", 25);
 
         cerr << "----- Disconnecting client & server -----" << endl;
         client.disconnect();
@@ -71,8 +71,10 @@ int main()
         cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
 
         cerr << "----- Sending messages -----" << endl;
-        client.write("Hello world!", 12);
-        server.write("Hello world!", 12);
+        client.write("Hello world from client!", 25);
+        server.write("Hello world from server!", 25);
+        client.write("Hello world from client!", 25);
+        server.write("Hello world from server!", 25);
     }
     catch(const char* msg) {
         cerr << msg << endl;

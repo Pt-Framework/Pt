@@ -34,14 +34,12 @@ void SSLConnector::connect()
 }
 
 void SSLConnector::disconnect()
-{
-    SSL_shutdown(_ssl);
-    SSL_shutdown(_ssl);
-}
+{ SSL_shutdown(_ssl); }
 
 void SSLConnector::reset()
 {
-    SSL_clear(_ssl);
+    BIO_reset(_in);
+    BIO_reset(_out);
     SSL_clear(_ssl);
 }
 
@@ -83,7 +81,6 @@ int SSLConnector::pushData(const char* buff, int len)
             onRecvData(rbuff, bytesRead);
         }
         else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
-            SSL_shutdown(_ssl);
             SSL_shutdown(_ssl);
         }
     }

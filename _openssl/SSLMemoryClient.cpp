@@ -16,11 +16,13 @@ void SSLMemoryClient::connect(SSLMemoryServer& server)
     server._client = this;
     _server = &server;
 
-    // Perform message passing until the connection is established
+    // Perform message passing until the connection is established and then pass possible remaining messages
     while(!connectionEstablished()) {
         SSLMemoryConnector::processMessage(*this,    *_server);
         SSLMemoryConnector::processMessage(*_server, *this   );
     }
+    SSLMemoryConnector::processMessage(*this,    *_server);
+    SSLMemoryConnector::processMessage(*_server, *this   );
 }
 
 void SSLMemoryClient::disconnect()
@@ -28,11 +30,7 @@ void SSLMemoryClient::disconnect()
     // Disconnect
     SSLConnector::disconnect();
 
-    // Perform message passing until the connection is de-established
-    SSLMemoryConnector::processMessage(*this,    *_server);
-    SSLMemoryConnector::processMessage(*_server, *this   );
-    SSLMemoryConnector::processMessage(*this,    *_server);
-    SSLMemoryConnector::processMessage(*_server, *this   );
+    // Perform message passing once
     SSLMemoryConnector::processMessage(*this,    *_server);
     SSLMemoryConnector::processMessage(*_server, *this   );
 
