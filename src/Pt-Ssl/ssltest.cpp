@@ -1,3 +1,8 @@
+/* Alright, I'm lazy, so I put it here so that I can copy and paste the command ;)
+    ./jam.sh -q --with-openssl
+    export LD_LIBRARY_PATH=.
+*/
+
 #include <Pt/Connectable.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Net/TcpServer.h>
