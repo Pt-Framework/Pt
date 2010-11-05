@@ -190,6 +190,9 @@ int main(int argc, char** argv)
     {
         std::cerr << "[## MAIN ##] Error: " << ex.what() << std::endl;
     }
-
+    catch(const char* ex)
+    {
+        std::cerr << "[## MAIN ##] Error: " << ex << std::endl;
+    }
     return 1;
 }
