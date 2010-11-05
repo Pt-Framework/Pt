@@ -2,19 +2,17 @@ SubDir TOP src Pt-Ssl ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
-Main testm : SSLContext.cpp SSLConnector.cpp SSLMemoryConnector.cpp SSLMemoryServer.cpp SSLMemoryClient.cpp testm.cpp ;
-LinkSharedLibraries testm : Pt Pt-Net Pt-System ;
-LinkFlags testm : -lssl ;
-MakeLocate testm : $(OUTPUT_TARGET) ;
+Main ssltestm : SSLContext.cpp SSLConnector.cpp SSLMemoryConnector.cpp SSLMemoryServer.cpp SSLMemoryClient.cpp ssltestm.cpp ;
+LinkSharedLibraries ssltestm : Pt Pt-Net Pt-System ;
+LinkFlags ssltestm : -lssl ;
+MakeLocate ssltestm : $(OUTPUT_TARGET) ;
 
-Main tests : tests.cpp ;
-LinkSharedLibraries tests : Pt Pt-Net Pt-System ;
-LinkFlags tests : -lssl ;
-MakeLocate tests : $(OUTPUT_TARGET) ;
+Main ssltests : ssltests.cpp ;
+LinkSharedLibraries ssltests : Pt Pt-Net Pt-System ;
+LinkFlags ssltests : -lssl ;
+MakeLocate ssltests : $(OUTPUT_TARGET) ;
 
 File $(OUTPUT_TARGET)/root.pem   : root.pem ;
 File $(OUTPUT_TARGET)/client.pem : client.pem ;
 File $(OUTPUT_TARGET)/server.pem : server.pem ;
-File $(OUTPUT_TARGET)/dh1024.pem   : dh1024.pem ;
-
-
+File $(OUTPUT_TARGET)/dh1024.pem : dh1024.pem ;
