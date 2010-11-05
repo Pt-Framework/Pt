@@ -1,3 +1,5 @@
+// Build using: ./jam.sh -q --with-openssl
+
 #include <iostream>
 using namespace std;
 
