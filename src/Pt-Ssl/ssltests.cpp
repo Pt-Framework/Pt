@@ -35,13 +35,14 @@
 #include <Pt/Net/TcpSocket.h>
 #include <iostream>
 #include <stdexcept>
-#include <openssl/ssl.h>
 
-class Client : public Pt::Connectable
+#include "SSLConnector.h"
+
+class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector
 {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port)
-        : _loop(loop)
+        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
+        : SSLConnector(sslClientContext, 0), _loop(loop)
         {
             _loop.add(_socket);
 
@@ -55,83 +56,110 @@ class Client : public Pt::Connectable
     protected:
         void onConnect(Pt::Net::TcpSocket& socket)
         {
-            std::cout << "connected to server" << std::endl;
             _socket.endConnect();
+            std::cout << "[CLIENT-TCP] Connected to server" << std::endl;
 
-            _socket.beginWrite("Hello", 5);
+            std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            Pt::Ssl::SSLConnector::connect();
+            std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+            _socket.beginWrite(_sslbuff, bytesRead);
         }
 
         void onOutput(Pt::System::IODevice& socket)
         {
             std::size_t n = _socket.endWrite();
-            std::cout << "client wrote " << n << " bytes" << std::endl;
+            std::cout << "[CLIENT-TCP] Wrote " << n << " bytes" << std::endl;
 
-            _socket.beginRead(inbuf, 200);
+            _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
 
         void onInput(Pt::System::IODevice& socket)
         {
             std::size_t n = _socket.endRead();
-            std::cout << "client read " << n << " bytes: ";
-            std::cout.write(inbuf, n) << std::endl;
+            std::cout << "[CLIENT-TCP] Read " << n << " bytes" << std::endl;
 
-            _socket.close();
+            Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
+            std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+            if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
+
+            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+            _socket.beginWrite(_sslbuff, bytesRead);
+        }
+
+        virtual void onRecvData(const char* buff, int len) const
+        {
+            std::cout << "[CLIENT-SSL] " + std::string(buff, len) << std::endl;
             _loop.exit();
         }
 
     private:
         Pt::System::EventLoop& _loop;
-        Pt::Net::TcpSocket _socket;
-        char inbuf[200];
+        Pt::Net::TcpSocket     _socket;
+        char                   _tcpbuff[8192];
+        char                   _sslbuff[8192];
 };
 
 
-class Server : public Pt::Connectable
+class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector
 {
     public:
-        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port)
-        : _loop(loop)
+        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
+        : SSLConnector(sslServerContext, 0), _loop(loop)
         {
             _server.listen(addr, port);
             _server.connectionPending += Pt::slot(*this, &Server::onAccept);
             _loop.add(_server);
 
-            _conn.inputReady += Pt::slot(*this, &Server::onInput);
-            _conn.outputReady += Pt::slot(*this, &Server::onOutput);
-            _loop.add(_conn);
+            _client.inputReady += Pt::slot(*this, &Server::onInput);
+            _client.outputReady += Pt::slot(*this, &Server::onOutput);
+            _loop.add(_client);
         }
 
     protected:
         void onAccept(Pt::Net::TcpServer& server)
         {
-            std::cout << "accepting client connection" << std::endl;
-            _conn.accept(server);
+            _client.accept(server);
+            std::cout << "[SERVER-TCP] Accepting client connection" << std::endl;
 
-            _conn.beginRead(inbuf, 200);
+            std::cout << "[SERVER-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+            _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
 
         void onOutput(Pt::System::IODevice& socket)
         {
-            std::size_t n = _conn.endWrite();
-            std::cout << "server wrote " << n << " bytes" << std::endl;
+            std::size_t n = _client.endWrite();
+            std::cout << "[SERVER-TCP] Wrote " << n << " bytes" << std::endl;
 
-            _conn.close();
+            _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
 
         void onInput(Pt::System::IODevice& socket)
         {
-            std::size_t n = _conn.endRead();
-            std::cout << "server read " << n << " bytes: ";
-            std::cout.write(inbuf, n) << std::endl;
+            std::size_t n = _client.endRead();
+            std::cout << "[SERVER-TCP] Read " << n << " bytes" << std::endl;
 
-            _conn.beginWrite("Bye!", 4);
+            Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
+            std::cout << "[SERVER-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+            if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from server!", 25);
+
+            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+            _client.beginWrite(_sslbuff, bytesRead);
         }
+
+        virtual void onRecvData(const char* buff, int len) const
+        { std::cout << "[SERVER-SSL] " + std::string(buff, len) << std::endl; }
 
     private:
         Pt::System::EventLoop& _loop;
-        Pt::Net::TcpServer _server;
-        Pt::Net::TcpSocket _conn;
-        char inbuf[200];
+        Pt::Net::TcpServer     _server;
+        Pt::Net::TcpSocket     _client;
+        char                   _tcpbuff[8192];
+        char                   _sslbuff[8192];
 };
 
 
@@ -139,23 +167,28 @@ int main(int argc, char** argv)
 {
     try
     {
-        std::cout << "OpenSSL test progam started..." << std::endl;
+        std::cout << "[## MAIN ##] OpenSSL test progam started..." << std::endl;
+
+        Pt::Ssl::SSLContext serverContext("root.pem", "server.pem", "password", 0);
+        Pt::Ssl::SSLContext clientContext("root.pem", "client.pem", "password", 0);
 
         Pt::System::MainLoop loop;
 
         std::string addr("127.0.0.1");
         unsigned short port = 8000;
-        Server server(loop, addr, port);
-        Client client(loop, addr, port);
 
+        Server server(loop, addr, port, serverContext);
+        Client client(loop, addr, port, clientContext);
+
+        loop.setIdleTimeout(2000);
         loop.run();
 
-        std::cout << "OpenSSL test progam finished..." << std::endl;
+        std::cout << "[## MAIN ##] OpenSSL test progam finished..." << std::endl;
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << "error: " << ex.what() << std::endl;
+        std::cerr << "[## MAIN ##] Error: " << ex.what() << std::endl;
     }
 
     return 1;

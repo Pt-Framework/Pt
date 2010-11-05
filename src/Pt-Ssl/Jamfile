@@ -7,7 +7,7 @@ LinkSharedLibraries ssltestm : Pt Pt-Net Pt-System ;
 LinkFlags ssltestm : -lssl ;
 MakeLocate ssltestm : $(OUTPUT_TARGET) ;
 
-Main ssltests : ssltests.cpp ;
+Main ssltests : SSLContext.cpp SSLConnector.cpp ssltests.cpp ;
 LinkSharedLibraries ssltests : Pt Pt-Net Pt-System ;
 LinkFlags ssltests : -lssl ;
 MakeLocate ssltests : $(OUTPUT_TARGET) ;
