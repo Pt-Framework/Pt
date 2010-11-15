@@ -1,0 +1,88 @@
+SubDir TOP src Pt-Ssl openssl ;
+
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl ;
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto ;
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/evp ;
+
+File $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf.h  : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf-linux.h ;
+
+File $(TOP)/src/Pt-Ssl/openssl/include/aes.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/aes/aes.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/asn1.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/asn1_mac.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1_mac.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/asn1t.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1t.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/bio.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/bio/bio.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/blowfish.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/bf/blowfish.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/bn.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/bn/bn.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/buffer.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/buffer/buffer.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/camellia.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/camellia/camellia.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/cast.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/cast/cast.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/cms.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/cms/cms.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/comp.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/comp/comp.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/conf_api.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/conf/conf_api.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/conf.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/conf/conf.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/crypto.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/crypto.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/des.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/des/des.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/des_old.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/des/des_old.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/dh.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/dh/dh.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/dsa.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/dsa/dsa.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/dso.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/dso/dso.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/dtls1.h       : $(TOP)/src/Pt-Ssl/openssl/ssl/dtls1.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ebcdic.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/ebcdic.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ecdh.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/ecdh/ecdh.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ecdsa.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/ecdsa/ecdsa.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ec.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ec/ec.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/engine.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/engine/engine.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/e_os2.h       : $(TOP)/src/Pt-Ssl/openssl/e_os2.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/err.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/err/err.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/evp.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/evp/evp.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/hmac.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/hmac/hmac.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/idea.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/idea/idea.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/krb5_asn.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/krb5/krb5_asn.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/kssl.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/kssl.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/lhash.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/lhash/lhash.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/md4.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/md4/md4.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/md5.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/md5/md5.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/mdc2.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/mdc2/mdc2.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/modes.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/modes/modes.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/objects.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/objects/objects.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/obj_mac.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/objects/obj_mac.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ocsp.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/ocsp/ocsp.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/opensslconf.h : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/opensslv.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslv.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ossl_typ.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/ossl_typ.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/pem2.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/pem/pem2.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/pem.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/pem/pem.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/pkcs12.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/pkcs12/pkcs12.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/pkcs7.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/pkcs7/pkcs7.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/pqueue.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/pqueue/pqueue.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/rand.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/rand/rand.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/rc2.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rc2/rc2.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/rc4.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rc4/rc4.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ripemd.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/ripemd/ripemd.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/rsa.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rsa/rsa.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/safestack.h   : $(TOP)/src/Pt-Ssl/openssl/crypto/stack/safestack.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/seed.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/seed/seed.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/sha.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/sha/sha.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ssl23.h       : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl23.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ssl2.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl2.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ssl3.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl3.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ssl.h         : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/stack.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/stack/stack.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/symhacks.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/symhacks.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/tls1.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/tls1.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ts.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ts/ts.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/txt_db.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/txt_db/txt_db.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ui_compat.h   : $(TOP)/src/Pt-Ssl/openssl/crypto/ui/ui_compat.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/ui.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ui/ui.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/whrlpool.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/whrlpool/whrlpool.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/x509.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/x509/x509.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/x509v3.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/x509v3/x509v3.h ;
+File $(TOP)/src/Pt-Ssl/openssl/include/x509_vfy.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/x509/x509_vfy.h ;
+
+Library Pt-Ssl-openssl :
+    ssl/s2_meth.c
+;
+
+Library_MakeLocate Pt-Ssl-openssl : $(OUTPUT_TARGET) ;
