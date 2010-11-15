@@ -6,6 +6,7 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/evp ;
 
+# Well, in other platform, we need to copy other files
 File $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf-linux.h ;
 
 File $(TOP)/src/Pt-Ssl/openssl/include/openssl/aes.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/aes/aes.h ;
