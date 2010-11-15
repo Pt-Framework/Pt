@@ -8,7 +8,7 @@
     for(var i = 0; i < files.length; ++i) {
         var parts = files[i].split('/');
         var last  = parts[parts.length - 1];
-        var ltok  = 'File $(TOP)/src/Pt-Ssl/openssl/include/' + last;
+        var ltok  = 'File $(TOP)/src/Pt-Ssl/openssl/include/openssl/' + last;
         ltoks.push(ltok);
         rtoks.push(' : $(TOP)/src/Pt-Ssl/openssl/' + files[i] + ' ;');
         if(ltok.length >  rtokmlen) rtokmlen = ltok.length;
