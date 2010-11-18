@@ -26,6 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <iostream>
+
 #include "SSLSocketClient.h"
 
 namespace Pt {
@@ -62,19 +64,28 @@ int SSLSocketClient::write(const char* buff, int len)
 void SSLSocketClient::_onTCPConnect(Pt::Net::TcpSocket& socket)
 {
     _socket.endConnect();
+    std::cout << "[CLIENT-TCP] Connected to server" << std::endl;
+
+    std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
     SSLConnector::connect();
+    std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
     _doSSL();
 }
 
 void SSLSocketClient::_onTCPOutput(Pt::System::IODevice& socket)
 {
-    _socket.endWrite();
+    const int byteCount = _socket.endWrite();
+    std::cout << "[CLIENT-TCP] Wrote " << byteCount << " bytes" << std::endl;
+
     _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketClient::_onTCPInput(Pt::System::IODevice& socket)
 {
     const int byteCount = _socket.endRead();
+    std::cout << "[CLIENT-TCP] Read " << byteCount << " bytes" << std::endl;
+
     if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
     _doSSL();
 }
@@ -94,37 +105,9 @@ void SSLSocketClient::_doSSL()
     if(_inBuff.length()) {
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
+        std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
     }
 }
 
-
-/*
-
-        void onConnect(Pt::Net::TcpSocket& socket)
-        {
-            Pt::Ssl::SSLConnector::connect();
-            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-            _socket.beginWrite(_sslbuff, bytesRead);
-        }
-
-        void onOutput(Pt::System::IODevice& socket)
-        {
-            std::size_t n = _socket.endWrite();
-
-            _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
-        }
-
-        void onInput(Pt::System::IODevice& socket)
-        {
-            std::size_t n = _socket.endRead();
-
-            Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
-
-//            if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
-
-            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-            _socket.beginWrite(_sslbuff, bytesRead);
-        }
-*/
 } // namespace Pt
 } // namespace Ssl

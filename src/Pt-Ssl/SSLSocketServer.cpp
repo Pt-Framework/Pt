@@ -25,6 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include <iostream>
+
 #include "SSLSocketServer.h"
 
 namespace Pt {
@@ -55,18 +58,24 @@ int SSLSocketServer::write(const char* buff, int len)
 void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
 {
     _client.accept(server);
+    std::cout << "[SERVER-TCP] Accepting client connection" << std::endl;
+
     _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 {
-    _client.endWrite();
+    const int byteCount = _client.endWrite();
+    std::cout << "[SERVER-TCP] Wrote " << byteCount << " bytes" << std::endl;
+
     _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketServer::_onTCPInput(Pt::System::IODevice& socket)
 {
     const int byteCount = _client.endRead();
+    std::cout << "[SERVER-TCP] Read " << byteCount << " bytes" << std::endl;
+
     if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
     _doSSL();
 }
@@ -86,6 +95,7 @@ void SSLSocketServer::_doSSL()
     if(_inBuff.length()) {
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
+        std::cout << "[SERVER-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
     }
 }
 
