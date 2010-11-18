@@ -31,6 +31,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
 
 #include "SSLConnector.h"
 
@@ -52,6 +53,18 @@ class SSLSocketServer : public Connectable, public SSLConnector {
         friend class SSLSocketClient;
 
     private:
+        void _onTCPAccept(Pt::Net::TcpServer& server);
+        void _onTCPOutput(Pt::System::IODevice& socket);
+        void _onTCPInput(Pt::System::IODevice& socket);
+
+        void _doSSL();
+
+    private:
+        System::EventLoop& _loop;
+        Net::TcpServer     _server;
+        Net::TcpSocket     _client;
+        std::string        _outBuff;
+        std::string        _inBuff;
 };
 
 

@@ -32,21 +32,27 @@ namespace Pt {
 namespace Ssl {
 
 SSLSocketClient::SSLSocketClient(System::EventLoop& loop, const std::string& addr, unsigned short port, SSLContext& sslContext, const char* sessionID)
-: SSLConnector(sslContext, sessionID)
-{}
+: SSLConnector(sslContext, sessionID), _loop(loop)
+{
+    _loop.add(_socket);
+
+    _socket.connected   += Pt::slot(*this, &SSLSocketClient::_onTCPConnect);
+    _socket.inputReady  += Pt::slot(*this, &SSLSocketClient::_onTCPInput  );
+    _socket.outputReady += Pt::slot(*this, &SSLSocketClient::_onTCPOutput );
+
+    _socket.beginConnect(addr, port);
+}
 
 SSLSocketClient::~SSLSocketClient()
 {}
 
 void SSLSocketClient::connect()
 {
-    // Connect
     SSLConnector::connect();
 }
 
 void SSLSocketClient::disconnect()
 {
-    // Disconnect
     SSLConnector::disconnect();
 }
 
@@ -59,6 +65,51 @@ int SSLSocketClient::write(const char* buff, int len)
     return bytesWritten;
 }
 
+void SSLSocketClient::_onTCPConnect(Pt::Net::TcpSocket& socket)
+{
+    _socket.endConnect();
+}
 
+void SSLSocketClient::_onTCPOutput(Pt::System::IODevice& socket)
+{
+}
+
+void SSLSocketClient::_onTCPInput(Pt::System::IODevice& socket)
+{
+}
+
+void SSLSocketClient::_doSSL()
+{
+}
+
+
+/*
+
+        void onConnect(Pt::Net::TcpSocket& socket)
+        {
+            Pt::Ssl::SSLConnector::connect();
+            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+            _socket.beginWrite(_sslbuff, bytesRead);
+        }
+
+        void onOutput(Pt::System::IODevice& socket)
+        {
+            std::size_t n = _socket.endWrite();
+
+            _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
+        }
+
+        void onInput(Pt::System::IODevice& socket)
+        {
+            std::size_t n = _socket.endRead();
+
+            Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
+
+//            if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
+
+            const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+            _socket.beginWrite(_sslbuff, bytesRead);
+        }
+*/
 } // namespace Pt
 } // namespace Ssl

@@ -56,6 +56,17 @@ class SSLSocketClient : public Connectable, public SSLConnector {
         virtual int write(const char* buff, int len);
 
     private:
+        void _onTCPConnect(Pt::Net::TcpSocket& socket);
+        void _onTCPOutput(Pt::System::IODevice& socket);
+        void _onTCPInput(Pt::System::IODevice& socket);
+
+        void _doSSL();
+
+    private:
+        System::EventLoop& _loop;
+        Net::TcpSocket     _socket;
+        std::string        _outBuff;
+        std::string        _inBuff;
 };
 
 } // namespace Pt

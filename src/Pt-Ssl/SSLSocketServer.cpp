@@ -31,8 +31,16 @@ namespace Pt {
 namespace Ssl {
 
 SSLSocketServer::SSLSocketServer(System::EventLoop& loop, const std::string& addr, unsigned short port, SSLContext& sslContext, const char* sessionID)
-: SSLConnector(sslContext, sessionID)
-{}
+: SSLConnector(sslContext, sessionID), _loop(loop)
+{
+    _server.listen(addr, port);
+    _server.connectionPending += Pt::slot(*this, &SSLSocketServer::_onTCPAccept);
+    _loop.add(_server);
+
+    _client.inputReady  += Pt::slot(*this, &SSLSocketServer::_onTCPInput );
+    _client.outputReady += Pt::slot(*this, &SSLSocketServer::_onTCPOutput);
+    _loop.add(_client);
+}
 
 SSLSocketServer::~SSLSocketServer()
 {}
@@ -44,6 +52,22 @@ int SSLSocketServer::write(const char* buff, int len)
 //    SSLSocketConnector::processMessage(*this, *_client);
 
     return bytesWritten;
+}
+
+void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
+{
+}
+
+void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
+{
+}
+
+void SSLSocketServer::_onTCPInput(Pt::System::IODevice& socket)
+{
+}
+
+void SSLSocketServer::_doSSL()
+{
 }
 
 } // namespace Pt
