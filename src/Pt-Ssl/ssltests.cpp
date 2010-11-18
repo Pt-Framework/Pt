@@ -38,8 +38,7 @@
 
 #include "SSLConnector.h"
 
-class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector
-{
+class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
         : SSLConnector(sslClientContext, 0), _loop(loop)
@@ -103,8 +102,7 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector
 };
 
 
-class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector
-{
+class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
         : SSLConnector(sslServerContext, 0), _loop(loop)

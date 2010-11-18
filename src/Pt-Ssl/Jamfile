@@ -13,6 +13,11 @@ LinkSharedLibraries ssltests : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests : Pt-Ssl-openssl ;
 MakeLocate ssltests : $(OUTPUT_TARGET) ;
 
+Main ssltests2 : SSLContext.cpp SSLConnector.cpp SSLSocketServer.cpp SSLSocketClient.cpp ssltests2.cpp ;
+LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
+LinkLibraries ssltests2 : Pt-Ssl-openssl ;
+MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
+
 File $(OUTPUT_TARGET)/root.pem   : root.pem ;
 File $(OUTPUT_TARGET)/client.pem : client.pem ;
 File $(OUTPUT_TARGET)/server.pem : server.pem ;
