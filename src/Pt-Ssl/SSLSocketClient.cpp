@@ -46,40 +46,55 @@ SSLSocketClient::SSLSocketClient(System::EventLoop& loop, const std::string& add
 SSLSocketClient::~SSLSocketClient()
 {}
 
-void SSLSocketClient::connect()
-{
-    SSLConnector::connect();
-}
-
 void SSLSocketClient::disconnect()
 {
     SSLConnector::disconnect();
+    _doSSL();
 }
 
 int SSLSocketClient::write(const char* buff, int len)
 {
-    const int bytesWritten = SSLConnector::write(buff, len);
-
-//    SSLSocketConnector::processMessage(*this, *_server);
-
-    return bytesWritten;
+    _outBuff += std::string(buff, len);
+    _doSSL();
+    return len;
 }
 
 void SSLSocketClient::_onTCPConnect(Pt::Net::TcpSocket& socket)
 {
     _socket.endConnect();
+    SSLConnector::connect();
+    _doSSL();
 }
 
 void SSLSocketClient::_onTCPOutput(Pt::System::IODevice& socket)
 {
+    _socket.endWrite();
+    _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketClient::_onTCPInput(Pt::System::IODevice& socket)
 {
+    const int byteCount = _socket.endRead();
+    if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
+    _doSSL();
 }
 
 void SSLSocketClient::_doSSL()
 {
+    int byteCount = 0;
+
+    if(_outBuff.length()) {
+        byteCount = SSLConnector::write(_outBuff.data(), _outBuff.length());
+        if(byteCount > 0) _outBuff.erase(0, byteCount);
+    }
+
+    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+    if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
+
+    if(_inBuff.length()) {
+        byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
+        if(byteCount > 0) _inBuff.erase(0, byteCount);
+    }
 }
 
 

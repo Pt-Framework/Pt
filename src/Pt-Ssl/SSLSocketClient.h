@@ -46,9 +46,6 @@ class SSLSocketClient : public Connectable, public SSLConnector {
         // Standard dtor
         virtual ~SSLSocketClient();
 
-        // Override the connect() method
-        virtual void connect();
-
         // Override the disconnect() method
         virtual void disconnect();
 
@@ -65,6 +62,10 @@ class SSLSocketClient : public Connectable, public SSLConnector {
     private:
         System::EventLoop& _loop;
         Net::TcpSocket     _socket;
+
+        char               _tcpbuff[8192];
+        char               _sslbuff[8192];
+
         std::string        _outBuff;
         std::string        _inBuff;
 };

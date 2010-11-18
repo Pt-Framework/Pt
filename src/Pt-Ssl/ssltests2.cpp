@@ -43,8 +43,7 @@ class Server : public Pt::Ssl::SSLSocketServer {
         }
 
         virtual void onRecvData(const char* buff, int len) const
-        {
-        }
+        { std::cout << "[SERVER-SSL] " + std::string(buff, len) << std::endl; }
 };
 
 class Client : public Pt::Ssl::SSLSocketClient {
@@ -55,8 +54,7 @@ class Client : public Pt::Ssl::SSLSocketClient {
         }
 
         virtual void onRecvData(const char* buff, int len) const
-        {
-        }
+        { std::cout << "[CLIENT-SSL] " + std::string(buff, len) << std::endl; }
 };
 
 int main(int argc, char** argv)

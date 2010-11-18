@@ -47,27 +47,46 @@ SSLSocketServer::~SSLSocketServer()
 
 int SSLSocketServer::write(const char* buff, int len)
 {
-    const int bytesWritten = SSLConnector::write(buff, len);
-
-//    SSLSocketConnector::processMessage(*this, *_client);
-
-    return bytesWritten;
+    _outBuff += std::string(buff, len);
+    _doSSL();
+    return len;
 }
 
 void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
 {
+    _client.accept(server);
+    _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 {
+    _client.endWrite();
+    _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
 
 void SSLSocketServer::_onTCPInput(Pt::System::IODevice& socket)
 {
+    const int byteCount = _client.endRead();
+    if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
+    _doSSL();
 }
 
 void SSLSocketServer::_doSSL()
 {
+    int byteCount = 0;
+
+    if(_outBuff.length()) {
+        byteCount = SSLConnector::write(_outBuff.data(), _outBuff.length());
+        if(byteCount > 0) _outBuff.erase(0, byteCount);
+    }
+
+    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+    if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
+
+    if(_inBuff.length()) {
+        byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
+        if(byteCount > 0) _inBuff.erase(0, byteCount);
+    }
 }
 
 } // namespace Pt

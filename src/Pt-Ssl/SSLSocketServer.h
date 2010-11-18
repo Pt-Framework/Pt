@@ -63,6 +63,10 @@ class SSLSocketServer : public Connectable, public SSLConnector {
         System::EventLoop& _loop;
         Net::TcpServer     _server;
         Net::TcpSocket     _client;
+
+        char               _tcpbuff[8192];
+        char               _sslbuff[8192];
+
         std::string        _outBuff;
         std::string        _inBuff;
 };
