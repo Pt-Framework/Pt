@@ -88,7 +88,7 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _socket.beginWrite(_sslbuff, bytesRead);
         }
 
-        virtual void onRecvData(const char* buff, int len) const
+        virtual void onRecvData(const char* buff, int len)
         {
             std::cout << "[CLIENT-SSL] " + std::string(buff, len) << std::endl;
             _loop.exit();
@@ -149,7 +149,7 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _client.beginWrite(_sslbuff, bytesRead);
         }
 
-        virtual void onRecvData(const char* buff, int len) const
+        virtual void onRecvData(const char* buff, int len)
         { std::cout << "[SERVER-SSL] " + std::string(buff, len) << std::endl; }
 
     private:

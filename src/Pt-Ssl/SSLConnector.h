@@ -69,7 +69,7 @@ class PT_SSL_API SSLConnector {
         virtual int write(const char* buff, int len);
 
         //! \brief Ovevride this function to receive decrypted data.
-        virtual void onRecvData(const char* buff, int len) const = 0;
+        virtual void onRecvData(const char* buff, int len) = 0;
 
         //! \brief Pull data from the output buffer of this SSL connector.
         //! The pulled data must be send through the communication medium and written to the input buffer of the SSL conenctor at the other end.

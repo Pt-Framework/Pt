@@ -52,6 +52,9 @@ class SSLSocketClient : public Connectable, public SSLConnector {
         // Override the write() method
         virtual int write(const char* buff, int len);
 
+        // Override this method
+        virtual void onSSLConnect() = 0;
+
     private:
         void _onTCPConnect(Pt::Net::TcpSocket& socket);
         void _onTCPOutput(Pt::System::IODevice& socket);
@@ -65,6 +68,7 @@ class SSLSocketClient : public Connectable, public SSLConnector {
 
         char               _tcpbuff[8192];
         char               _sslbuff[8192];
+        bool               _connected;
 
         std::string        _outBuff;
         std::string        _inBuff;

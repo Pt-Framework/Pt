@@ -34,7 +34,7 @@ namespace Pt {
 namespace Ssl {
 
 SSLSocketClient::SSLSocketClient(System::EventLoop& loop, const std::string& addr, unsigned short port, SSLContext& sslContext, const char* sessionID)
-: SSLConnector(sslContext, sessionID), _loop(loop)
+: SSLConnector(sslContext, sessionID), _loop(loop), _connected(false)
 {
     _loop.add(_socket);
 
@@ -52,6 +52,7 @@ void SSLSocketClient::disconnect()
 {
     SSLConnector::disconnect();
     _doSSL();
+    _loop.exit();
 }
 
 int SSLSocketClient::write(const char* buff, int len)
@@ -99,13 +100,23 @@ void SSLSocketClient::_doSSL()
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-    if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
+    if(!_inBuff.length()) {
+        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+        if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
+    }
 
-    if(_inBuff.length()) {
+    while(_inBuff.length()) {
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
         std::cout << "[CLIENT-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+        if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
+    }
+
+    if(!_connected && SSLConnector::connectionEstablished()) {
+        _connected = true;
+        onSSLConnect();
     }
 }
 

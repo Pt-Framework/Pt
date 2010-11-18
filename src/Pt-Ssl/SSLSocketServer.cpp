@@ -89,14 +89,20 @@ void SSLSocketServer::_doSSL()
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-    if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
+    if(!_inBuff.length()) {
+        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+        if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
+    }
 
-    if(_inBuff.length()) {
+    while(_inBuff.length()) {
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
         std::cout << "[SERVER-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+        if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
     }
+
 }
 
 } // namespace Pt
