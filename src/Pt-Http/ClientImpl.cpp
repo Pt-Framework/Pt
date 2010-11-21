@@ -332,6 +332,7 @@ void ClientImpl::sendRequest(const Request& request)
     static const char* date = "Date";
     static const char* host = "Host";
     static const char* authorization = "Authorization";
+    static const char* userAgent = "User-Agent";
 
     _stream << request.method() << ' '
             << request.url() << " HTTP/"
@@ -367,6 +368,11 @@ void ClientImpl::sendRequest(const Request& request)
         if (port != 80)
             _stream << ':' << port;
         _stream << "\r\n";
+    }
+
+    if (!request.header().hasHeader(userAgent))
+    {
+        _stream << "User-Agent: Pt-Http-client\r\n";
     }
 
     if (!_username.empty() && !request.header().hasHeader(authorization))

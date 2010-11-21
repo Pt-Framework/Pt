@@ -41,7 +41,6 @@
 #include <string>
 #include <sstream>
 #include <cstddef>
-#include "Parser.h"
 #include "ChunkedReader.h"
 
 namespace Pt {
@@ -110,6 +109,7 @@ class ClientImpl : public Connectable
         void connect(const Net::AddrInfo& addrinfo)
         {
             _addrInfo = addrinfo;
+            _socket.close();
         }
 
         // Sends the passed request to the server and parses the headers.
