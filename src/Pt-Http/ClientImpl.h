@@ -42,6 +42,7 @@
 #include <sstream>
 #include <cstddef>
 #include "ChunkedReader.h"
+#include "Parser.h"
 
 namespace Pt {
 
