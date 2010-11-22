@@ -18,9 +18,9 @@ LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests2 : Pt-Ssl-openssl ;
 MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
 
-File $(OUTPUT_TARGET)/root.pem   : root.pem ;
-File $(OUTPUT_TARGET)/client.pem : client.pem ;
-File $(OUTPUT_TARGET)/server.pem : server.pem ;
-File $(OUTPUT_TARGET)/dh1024.pem : dh1024.pem ;
+File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;
+File [ FDirName $(OUTPUT_TARGET) client.pem ] : client.pem ;
+File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
+File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
 
 SubInclude TOP src Pt-Ssl openssl ;

@@ -6,83 +6,96 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/evp ;
 
-# Well, in other platform, we need to copy other files
-File $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf-linux.h ;
+if $(TARGET_OS) = "win32"
+{
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win32.h ] ;
+}
+else if $(TARGET_OS) = "wince"
+{
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-wince.h ] ;
+}
+else
+{
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-linux.h ] ;
+}
 
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/aes.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/aes/aes.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/asn1.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/asn1_mac.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1_mac.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/asn1t.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/asn1/asn1t.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/bio.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/bio/bio.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/blowfish.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/bf/blowfish.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/bn.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/bn/bn.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/buffer.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/buffer/buffer.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/camellia.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/camellia/camellia.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/cast.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/cast/cast.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/cms.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/cms/cms.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/comp.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/comp/comp.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/conf_api.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/conf/conf_api.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/conf.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/conf/conf.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/crypto.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/crypto.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/des.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/des/des.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/des_old.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/des/des_old.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/dh.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/dh/dh.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/dsa.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/dsa/dsa.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/dso.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/dso/dso.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/dtls1.h       : $(TOP)/src/Pt-Ssl/openssl/ssl/dtls1.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ebcdic.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/ebcdic.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ecdh.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/ecdh/ecdh.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ecdsa.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/ecdsa/ecdsa.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ec.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ec/ec.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/engine.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/engine/engine.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/e_os2.h       : $(TOP)/src/Pt-Ssl/openssl/e_os2.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/err.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/err/err.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/evp.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/evp/evp.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/hmac.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/hmac/hmac.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/idea.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/idea/idea.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/krb5_asn.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/krb5/krb5_asn.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/kssl.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/kssl.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/lhash.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/lhash/lhash.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/md4.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/md4/md4.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/md5.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/md5/md5.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/mdc2.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/mdc2/mdc2.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/modes.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/modes/modes.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/objects.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/objects/objects.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/obj_mac.h     : $(TOP)/src/Pt-Ssl/openssl/crypto/objects/obj_mac.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ocsp.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/ocsp/ocsp.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/opensslconf.h : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslconf.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/opensslv.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/opensslv.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ossl_typ.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/ossl_typ.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/pem2.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/pem/pem2.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/pem.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/pem/pem.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/pkcs12.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/pkcs12/pkcs12.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/pkcs7.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/pkcs7/pkcs7.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/pqueue.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/pqueue/pqueue.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/rand.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/rand/rand.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/rc2.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rc2/rc2.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/rc4.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rc4/rc4.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ripemd.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/ripemd/ripemd.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/rsa.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/rsa/rsa.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/safestack.h   : $(TOP)/src/Pt-Ssl/openssl/crypto/stack/safestack.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/seed.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/seed/seed.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/sha.h         : $(TOP)/src/Pt-Ssl/openssl/crypto/sha/sha.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ssl23.h       : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl23.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ssl2.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl2.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ssl3.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl3.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ssl.h         : $(TOP)/src/Pt-Ssl/openssl/ssl/ssl.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/stack.h       : $(TOP)/src/Pt-Ssl/openssl/crypto/stack/stack.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/symhacks.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/symhacks.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/tls1.h        : $(TOP)/src/Pt-Ssl/openssl/ssl/tls1.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ts.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ts/ts.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/txt_db.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/txt_db/txt_db.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ui_compat.h   : $(TOP)/src/Pt-Ssl/openssl/crypto/ui/ui_compat.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/ui.h          : $(TOP)/src/Pt-Ssl/openssl/crypto/ui/ui.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/whrlpool.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/whrlpool/whrlpool.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/x509.h        : $(TOP)/src/Pt-Ssl/openssl/crypto/x509/x509.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/x509v3.h      : $(TOP)/src/Pt-Ssl/openssl/crypto/x509v3/x509v3.h ;
-File $(TOP)/src/Pt-Ssl/openssl/include/openssl/x509_vfy.h    : $(TOP)/src/Pt-Ssl/openssl/crypto/x509/x509_vfy.h ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl aes.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto aes aes.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl asn1.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto asn1 asn1.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl asn1_mac.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto asn1 asn1_mac.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl asn1t.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto asn1 asn1t.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl bio.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto bio bio.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl blowfish.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto bf blowfish.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl bn.h          ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto bn bn.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl buffer.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto buffer buffer.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl camellia.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto camellia camellia.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl cast.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto cast cast.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl cms.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto cms cms.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl comp.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto comp comp.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl conf_api.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto conf conf_api.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl conf.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto conf conf.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl crypto.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto crypto.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl des.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto des des.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl des_old.h     ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto des des_old.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl dh.h          ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto dh dh.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl dsa.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto dsa dsa.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl dso.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto dso dso.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl dtls1.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl dtls1.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ebcdic.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ebcdic.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ecdh.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ecdh ecdh.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ecdsa.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ecdsa ecdsa.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ec.h          ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ec ec.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl engine.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto engine engine.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl e_os2.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl e_os2.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl err.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto err err.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl evp.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto evp evp.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl hmac.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto hmac hmac.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl idea.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto idea idea.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl krb5_asn.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto krb5 krb5_asn.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl kssl.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl kssl.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl lhash.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto lhash lhash.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl md4.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto md4 md4.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl md5.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto md5 md5.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl mdc2.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto mdc2 mdc2.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl modes.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto modes modes.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl objects.h     ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto objects objects.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl obj_mac.h     ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto objects obj_mac.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ocsp.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ocsp ocsp.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl opensslconf.h ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl opensslv.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslv.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ossl_typ.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ossl_typ.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl pem2.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto pem pem2.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl pem.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto pem pem.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl pkcs12.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto pkcs12 pkcs12.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl pkcs7.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto pkcs7 pkcs7.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl pqueue.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto pqueue pqueue.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl rand.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto rand rand.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl rc2.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto rc2 rc2.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl rc4.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto rc4 rc4.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ripemd.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ripemd ripemd.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl rsa.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto rsa rsa.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl safestack.h   ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto stack safestack.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl seed.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto seed seed.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl sha.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto sha sha.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ssl23.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl ssl23.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ssl2.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl ssl2.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ssl3.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl ssl3.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ssl.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl ssl.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl stack.h       ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto stack stack.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl symhacks.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto symhacks.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl tls1.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl ssl tls1.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ts.h          ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ts ts.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl txt_db.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto txt_db txt_db.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ui_compat.h   ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ui ui_compat.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl ui.h          ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto ui ui.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl whrlpool.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto whrlpool whrlpool.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl x509.h        ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto x509 x509.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl x509v3.h      ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto x509v3 x509v3.h ] ;
+File [ FDirName $(TOP) src Pt-Ssl openssl include openssl x509_vfy.h    ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto x509 x509_vfy.h ] ;
 
-Library Pt-Ssl-openssl :
+Library Pt-Ssl-openssl  :
     ssl/s2_meth.c
     ssl/s2_srvr.c
     ssl/s2_clnt.c
