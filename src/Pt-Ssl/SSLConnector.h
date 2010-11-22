@@ -28,6 +28,8 @@
 #ifndef PT_SSL_SSLCONNECTOR_H
 #define PT_SSL_SSLCONNECTOR_H
 
+#include <string>
+
 #include "SSLContext.h"
 
 namespace Pt {
@@ -58,6 +60,9 @@ class PT_SSL_API SSLConnector {
 
         //! \brief Disconnect the connection.
         virtual void disconnect();
+
+        //! \brief Get the peer CN (Common Name).
+        const std::string getPeerCN() const;
 
         //! \brief Reset this SSL connector.
         void reset();

@@ -58,6 +58,7 @@ class Client : public Pt::Ssl::SSLSocketClient {
 
         virtual void onSSLConnect()
         {
+            std::cout << "[CLIENT-SSL] Peer CN = " + getPeerCN() << std::endl;
             write("Hello world from client!", 25);
         }
 

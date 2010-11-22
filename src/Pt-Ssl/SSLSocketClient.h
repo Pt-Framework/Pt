@@ -66,8 +66,8 @@ class SSLSocketClient : public Connectable, public SSLConnector {
         System::EventLoop& _loop;
         Net::TcpSocket     _socket;
 
-        char               _tcpbuff[8192];
-        char               _sslbuff[8192];
+        char               _tcpbuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+        char               _sslbuff[32768]; // SSL records can be up to 16KB, so this is just for safety
         bool               _connected;
 
         std::string        _outBuff;
