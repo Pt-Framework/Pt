@@ -6,16 +6,19 @@ SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 Main ssltestm : SSLContext.cpp SSLConnector.cpp SSLMemoryConnector.cpp SSLMemoryServer.cpp SSLMemoryClient.cpp ssltestm.cpp ;
 LinkSharedLibraries ssltestm : Pt Pt-Net Pt-System ;
 LinkLibraries ssltestm : Pt-Ssl-openssl ;
-LinkFlags ssltestm : -lssl ;
+# LINKLIBS on ssltestm += crypt32.lib user32.lib gdi32.lib ;
+MakeLocate ssltestm : $(OUTPUT_TARGET) ;
 
 Main ssltests : SSLContext.cpp SSLConnector.cpp ssltests.cpp ;
 LinkSharedLibraries ssltests : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests : Pt-Ssl-openssl ;
+# LINKLIBS on ssltests += crypt32.lib user32.lib gdi32.lib ;
 MakeLocate ssltests : $(OUTPUT_TARGET) ;
 
 Main ssltests2 : SSLContext.cpp SSLConnector.cpp SSLSocketServer.cpp SSLSocketClient.cpp ssltests2.cpp ;
 LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests2 : Pt-Ssl-openssl ;
+# LINKLIBS on ssltests2 += crypt32.lib user32.lib gdi32.lib ;
 MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
 
 File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;
@@ -24,3 +27,4 @@ File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
 File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
 
 SubInclude TOP src Pt-Ssl openssl ;
+
