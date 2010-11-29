@@ -34,7 +34,7 @@ namespace Pt {
 namespace Ssl {
 
 // Just for testing: memory-based SSL connector
-class SSLMemoryConnector : public SSLConnector {
+class SSLMemoryConnector : public Connectable, public SSLConnector {
     public:
         // Construct a memory-based SSL connector that uses the given context
         SSLMemoryConnector(SSLContext& sslContext, const char* sessionID);

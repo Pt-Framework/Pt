@@ -29,6 +29,7 @@
 #define PT_SSL_SSLCONNECTOR_H
 
 #include <string>
+#include <Pt/Signal.h>
 
 #include "SSLContext.h"
 
@@ -73,9 +74,6 @@ class PT_SSL_API SSLConnector {
         //! A derivative class that override this class must always calls the original implementation before executing any other SSL operation.
         virtual int write(const char* buff, int len);
 
-        //! \brief Ovevride this function to receive decrypted data.
-        virtual void onRecvData(const char* buff, int len) = 0;
-
         //! \brief Pull data from the output buffer of this SSL connector.
         //! The pulled data must be send through the communication medium and written to the input buffer of the SSL conenctor at the other end.
         //! This functions return the number of bytes actually read.
@@ -86,10 +84,17 @@ class PT_SSL_API SSLConnector {
         //! This functions return the number of bytes actually written.
         int pushData(const char* buff, int len);
 
+        //! \brief Signal that will be called when decrypted data is available.
+        Signal<SSLConnector&> decryptedDataAvailable;
+
+        //! \brief Call this function to get the decrypted data.
+        int readDecryptedData(char* buff, int size);
+
     protected:
-        BIO* _in;  // Input BIO
-        BIO* _out; // Output BIO
-        SSL* _ssl; // OpenSSL's SSL handle
+        BIO*        _in;  // Input BIO
+        BIO*        _out; // Output BIO
+        SSL*        _ssl; // OpenSSL's SSL handle
+        std::string _ddb; // Decrypted data buffer
 };
 
 

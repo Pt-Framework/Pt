@@ -120,7 +120,8 @@ int SSLConnector::pushData(const char* buff, int len)
         char rbuff[8192];
         const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
         if(bytesRead > 0) {
-            onRecvData(rbuff, bytesRead);
+            _ddb += std::string(rbuff, bytesRead);
+            decryptedDataAvailable(*this);
         }
         else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
             SSL_shutdown(_ssl);
@@ -130,6 +131,21 @@ int SSLConnector::pushData(const char* buff, int len)
     return bytesWritten;
 }
 
+int SSLConnector::readDecryptedData(char* buff, int size)
+{
+    const int avail = _ddb.length();
+    if(!avail) return 0;
+
+    if(avail <= size) {
+        memcpy(buff, _ddb.data(), avail);
+        _ddb.clear();
+        return avail;
+    }
+
+    memcpy(buff, _ddb.data(), size);
+    _ddb.erase(0, size);
+    return size;
+}
 
 } // namespace Pt
 } // namespace Ssl

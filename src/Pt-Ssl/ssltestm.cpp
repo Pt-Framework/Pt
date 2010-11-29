@@ -41,13 +41,26 @@ class MySSLMemoryServer : public SSLMemoryServer {
     public:
         MySSLMemoryServer(SSLContext& sslContext, const char* sessionID)
         : SSLMemoryServer(sslContext, sessionID)
-        {}
+        {
+            this->decryptedDataAvailable += Pt::slot(*this, &MySSLMemoryServer::onDecryptedDataAvailable);
+        }
 
         virtual ~MySSLMemoryServer()
         {}
 
-        virtual void onRecvData(const char* buff, int len)
-        { cerr << "[SERVER] " + string(buff, len) << endl; }
+        void onDecryptedDataAvailable(SSLConnector& ssl)
+        {
+            std::string cum;
+            char        buff[128];
+
+            int len = 0;
+            do {
+                len = readDecryptedData(buff, sizeof(buff));
+                cum += std::string(buff, len);
+            } while(len > 0);
+
+            cerr << "[SERVER] " + cum << endl;
+        }
 };
 
 // Our test client
@@ -55,13 +68,26 @@ class MySSLMemoryClient : public SSLMemoryClient {
     public:
         MySSLMemoryClient(SSLContext& sslContext, const char* sessionID)
         : SSLMemoryClient(sslContext, sessionID)
-        {}
+        {
+            this->decryptedDataAvailable += Pt::slot(*this, &MySSLMemoryClient::onDecryptedDataAvailable);
+        }
 
         virtual ~MySSLMemoryClient()
         {}
 
-        virtual void onRecvData(const char* buff, int len)
-        { cerr << "[CLIENT] " + string(buff, len) << endl; }
+        void onDecryptedDataAvailable(SSLConnector& ssl)
+        {
+            std::string cum;
+            char        buff[128];
+
+            int len = 0;
+            do {
+                len = readDecryptedData(buff, sizeof(buff));
+                cum += std::string(buff, len);
+            } while(len > 0);
+
+            cerr << "[CLIENT] " + cum << endl;
+        }
 };
 
 int main()

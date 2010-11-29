@@ -52,8 +52,8 @@ class SSLSocketClient : public Connectable, public SSLConnector {
         // Override the write() method
         virtual int write(const char* buff, int len);
 
-        // Override this method
-        virtual void onSSLConnect() = 0;
+        // Signal
+        Signal<SSLConnector&> connected;
 
     private:
         void _onTCPConnect(Pt::Net::TcpSocket& socket);

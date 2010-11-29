@@ -50,6 +50,8 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _socket.outputReady += Pt::slot(*this, &Client::onOutput);
 
             _socket.beginConnect(addr, port);
+
+            this->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
         }
 
     protected:
@@ -88,9 +90,19 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _socket.beginWrite(_sslbuff, bytesRead);
         }
 
-        virtual void onRecvData(const char* buff, int len)
+        void onDecryptedDataAvailable(SSLConnector& ssl)
         {
-            std::cout << "[CLIENT-SSL] " + std::string(buff, len) << std::endl;
+            std::string cum;
+            char        buff[128];
+
+            int len = 0;
+            do {
+                len = readDecryptedData(buff, sizeof(buff));
+                cum += std::string(buff, len);
+            } while(len > 0);
+
+            std::cout << "[CLIENT-SSL] " + cum << std::endl;
+
             _loop.exit();
         }
 
@@ -114,6 +126,8 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _client.inputReady += Pt::slot(*this, &Server::onInput);
             _client.outputReady += Pt::slot(*this, &Server::onOutput);
             _loop.add(_client);
+
+            this->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
         }
 
     protected:
@@ -149,8 +163,19 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             _client.beginWrite(_sslbuff, bytesRead);
         }
 
-        virtual void onRecvData(const char* buff, int len)
-        { std::cout << "[SERVER-SSL] " + std::string(buff, len) << std::endl; }
+        void onDecryptedDataAvailable(SSLConnector& ssl)
+        {
+            std::string cum;
+            char        buff[128];
+
+            int len = 0;
+            do {
+                len = readDecryptedData(buff, sizeof(buff));
+                cum += std::string(buff, len);
+            } while(len > 0);
+
+            std::cout << "[SERVER-SSL] " + cum << std::endl;
+        }
 
     private:
         Pt::System::EventLoop& _loop;

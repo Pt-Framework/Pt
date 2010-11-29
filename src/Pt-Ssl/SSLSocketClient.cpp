@@ -116,7 +116,8 @@ void SSLSocketClient::_doSSL()
 
     if(!_connected && SSLConnector::connectionEstablished()) {
         _connected = true;
-        onSSLConnect();
+        connected(*this);
+
         //SSL_SESSION* sess = SSL_get1_session(_ssl);
         //SSL_set_session(_ssl, sess);
         //SSL_SESSION_free(sess);
