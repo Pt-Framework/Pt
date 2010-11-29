@@ -68,6 +68,8 @@ void ThreadImpl::detach()
         if(ret != 0)
             throw SystemError( PT_ERROR_MSG("pthread_detach") );
     }
+
+    _detached = true;
 }
 
 
@@ -94,6 +96,9 @@ void ThreadImpl::start()
 
     if(ret != 0)
         throw SystemError( PT_ERROR_MSG("pthread_create") );
+
+    if (_detached)
+        detach();
 }
 
 

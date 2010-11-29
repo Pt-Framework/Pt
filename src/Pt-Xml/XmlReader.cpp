@@ -309,7 +309,15 @@ struct XmlReaderImpl
         {
             if(c == ';')
             {
-                reader.resolveEntity(reader._token);
+                try
+                {
+                    reader.resolveEntity(reader._token);
+                }
+                catch (const std::exception&)
+                {
+                    throw XmlError("invalid entity", reader.line());
+                }
+
                 reader._chars.content() += reader._token;
                 reader._token.clear();
                 return OnCharacters::instance();
@@ -322,6 +330,30 @@ struct XmlReaderImpl
         static State* instance()
         {
             static OnEntityReference _state;
+            return &_state;
+        }
+    };
+
+
+    struct OnAttributeEntityReference : public State
+    {
+        virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
+        {
+            if(c == ';')
+            {
+                reader.resolveEntity(reader._token);
+                reader._chars.content() += reader._token;
+                reader._token.clear();
+                return OnAttributeValue::instance();
+            }
+
+            reader._token += c;
+            return this;
+        }
+
+        static State* instance()
+        {
+            static OnAttributeEntityReference _state;
             return &_state;
         }
     };
@@ -507,9 +539,63 @@ struct XmlReaderImpl
             return BeforeAttribute::instance();
         }
 
+        virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onOpenBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onSlash(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onEqual(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onExclam(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
+        virtual State* onQuest(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._attr.value() += c;
+            return this;
+        }
+
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            reader._attr.value() += c;;
+            if (c == '&')
+            {
+                reader._token.clear();
+                return OnAttributeEntityReference::instance();
+            }
+
+            reader._attr.value() += c;
             return this;
         }
 

@@ -93,7 +93,9 @@ void XmlWriter::writeStartElement(const Pt::String& localName, const Attribute* 
 
     for(size_t n = 0; n < attrCount; ++n)
     {
-        _tos << Pt::Char(' ') << attr[n].name() << Pt::String(L"=\"") << attr[n].value() << Pt::Char('"');
+        _tos << Pt::Char(' ') << attr[n].name() << Pt::String(L"=\"");
+        writeCharacters( attr[n].value() );
+        _tos << Pt::Char('"');
     }
 
     _tos << Pt::Char(L'>');
@@ -147,7 +149,9 @@ void XmlWriter::writeElement(const Pt::String& localName, const Attribute* attr,
 
     for(size_t n = 0; n < attrCount; ++n)
     {
-        _tos << Pt::Char(' ') << attr[n].name() << Pt::String(L"=\"") << attr[n].value() << Pt::Char('"');
+        _tos << Pt::Char(' ') << attr[n].name() << Pt::String(L"=\"");
+        writeCharacters( attr[n].value() );
+        _tos << Pt::Char('"');
     }
 
     _tos << Pt::Char(L'>');
