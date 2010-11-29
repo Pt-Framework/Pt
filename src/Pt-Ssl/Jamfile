@@ -18,11 +18,14 @@ LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests2 : Pt-Ssl-openssl ;
 MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
 
-if $(TARGET_OS) = "win32"
+if $(TARGET_OS) = "nt"
 {
-    LinkFlags ssltestm  : crypt32.lib user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    LinkFlags ssltests  : crypt32.lib user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    LinkFlags ssltests2 : crypt32.lib user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags ssltestm  : #crypt32.lib 
+                          user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags ssltests  : #crypt32.lib 
+                          user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags ssltests2 : #crypt32.lib 
+                          user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
 }
 
 File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;

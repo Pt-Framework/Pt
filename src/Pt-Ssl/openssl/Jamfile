@@ -6,10 +6,10 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/crypto/evp ;
 
-if $(TARGET_OS) = "win32"
+if $(TARGET_OS) = "nt"
 {
     File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
-         [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win32.h ] ;
+         [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win-x86.h ] ;
 }
 else if $(TARGET_OS) = "wince"
 {
