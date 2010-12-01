@@ -25,11 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCONNECTOR_H
-#define PT_SSL_SSLCONNECTOR_H
+#ifndef PT_SSL_SSLCONNECTOR2_H
+#define PT_SSL_SSLCONNECTOR2_H
 
 #include <string>
 #include <Pt/Signal.h>
+#include <Pt/System/IODevice.h>
 
 #include "SSLContext.h"
 
@@ -40,13 +41,13 @@ namespace Ssl {
 //! \brief SSL connector.
 //! By default this connector will act as an SSL connector server.
 //! Call \ref connect() to convert it to an SSL conenctor client and initiate a connection to an SSL connector server.
-class PT_SSL_API SSLConnector {
+class PT_SSL_API SSLConnector2 {
     public:
         //! \brief Construct an SSL connector that uses the given context.
-        SSLConnector(SSLContext& sslContext, const char* sessionID);
+        SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
 
         //! \brief Standard dtor.
-        virtual ~SSLConnector();
+        virtual ~SSLConnector2();
 
         //! \brief Get the current status string of this SSL connector.
         const char* getStatusString() const;
@@ -85,16 +86,17 @@ class PT_SSL_API SSLConnector {
         int pushData(const char* buff, int len);
 
         //! \brief Signal that will be called when decrypted data is available.
-        Signal<SSLConnector&> decryptedDataAvailable;
+        Signal<SSLConnector2&> decryptedDataAvailable;
 
         //! \brief Call this function to get the decrypted data.
         int readDecryptedData(char* buff, int size);
 
     protected:
-        BIO*        _in;  // Input BIO
-        BIO*        _out; // Output BIO
-        SSL*        _ssl; // OpenSSL's SSL handle
-        std::string _ddb; // Decrypted data buffer
+        BIO*              _in;  // Input BIO
+        BIO*              _out; // Output BIO
+        SSL*              _ssl; // OpenSSL's SSL handle
+        std::string       _ddb; // Decrypted data buffer
+        System::IODevice& _iod; // IO Device
 };
 
 

@@ -4,7 +4,7 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
 Main ssltestm : SSLContext.cpp SSLConnector.cpp SSLMemoryConnector.cpp SSLMemoryServer.cpp SSLMemoryClient.cpp ssltestm.cpp ;
-LinkSharedLibraries ssltestm : Pt Pt-Net Pt-System ;
+LinkSharedLibraries ssltestm : Pt-System ;
 LinkLibraries ssltestm : Pt-Ssl-openssl ;
 MakeLocate ssltestm : $(OUTPUT_TARGET) ;
 
@@ -18,13 +18,20 @@ LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests2 : Pt-Ssl-openssl ;
 MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
 
+Main ssltests3 : SSLContext.cpp SSLConnector2.cpp ssltests3.cpp ;
+LinkSharedLibraries ssltests3 : Pt-System ;
+LinkLibraries ssltests3 : Pt-Ssl-openssl ;
+MakeLocate ssltests3 : $(OUTPUT_TARGET) ;
+
 if $(TARGET_OS) = "nt"
 {
-    LinkFlags ssltestm  : #crypt32.lib 
+    LinkFlags ssltestm  : #crypt32.lib
                           user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    LinkFlags ssltests  : #crypt32.lib 
+    LinkFlags ssltests  : #crypt32.lib
                           user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    LinkFlags ssltests2 : #crypt32.lib 
+    LinkFlags ssltests2 : #crypt32.lib
+                          user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags ssltests3 : #crypt32.lib
                           user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
 }
 

@@ -46,6 +46,7 @@ class PT_SSL_API SSLContext {
         ~SSLContext();
 
         friend class SSLConnector;
+        friend class SSLConnector2;
 
     private:
         SSL_CTX*    _ctx;    // OpenSSL's SSL context
