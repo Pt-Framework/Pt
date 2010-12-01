@@ -103,6 +103,9 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         int _pullData(char* buff, int buffSize) const;
         int _pushData(const char* buff, int len);
         void _doSSL();
+
+        void _onIODOutput(System::IODevice& iod);
+        void _onIODInput(System::IODevice& iod);
 };
 
 

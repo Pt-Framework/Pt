@@ -86,7 +86,6 @@ class Client : public Pt::Ssl::SSLSocketClient {
             } while(len > 0);
 
             std::cout << "[CLIENT-SSL] " + cum << std::endl;
-            write("Hello world from server!", 25);
 
             disconnect();
         }

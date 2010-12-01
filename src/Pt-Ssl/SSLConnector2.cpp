@@ -51,6 +51,13 @@ SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext,
 
     // Set session ID
     if(sessionID) SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+
+    // Connect the signals
+    _iod.inputReady  += Pt::slot(*this, &SSLConnector2::_onIODInput  );
+    _iod.outputReady += Pt::slot(*this, &SSLConnector2::_onIODOutput );
+
+    // Kick start the IO device
+    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
 }
 
 SSLConnector2::~SSLConnector2()
@@ -180,7 +187,7 @@ void SSLConnector2::_doSSL()
     while(_inBuff.length()) {
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-        std::cerr << "[SSLConnector2] Status = " << getStatusString() << std::endl;
+        std::cerr << "[SSLConnector2] SSL status = " << getStatusString() << std::endl;
 
         byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
         if(byteCount > 0) _iod.beginWrite(_sslBuff, byteCount);
@@ -190,6 +197,23 @@ void SSLConnector2::_doSSL()
         _connected = true;
         connected(*this);
     }
+}
+
+void SSLConnector2::_onIODOutput(System::IODevice& iod)
+{
+    const int byteCount = _iod.endWrite();
+    std::cerr << "[SSLConnector2] Wrote " << byteCount << " bytes to the IO device" << std::endl;
+
+    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+}
+
+void SSLConnector2::_onIODInput(System::IODevice& iod)
+{
+    const int byteCount = _iod.endRead();
+    std::cerr << "[SSLConnector2] Read " << byteCount << " bytes from the IO device" << std::endl;
+
+    if(byteCount > 0) _inBuff += std::string(_iodBuff, byteCount);
+    _doSSL();
 }
 
 } // namespace Pt

@@ -33,19 +33,32 @@
 #include <stdexcept>
 
 #include <Pt/System/MainLoop.h>
+#include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
 
 #include "SSLConnector2.h"
 
-/*
-class Server : public Pt::Ssl::SSLSocketServer {
+class Server : public Pt::Ssl::SSLConnector2 {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
-        : SSLSocketServer(loop, addr, port, sslServerContext, 0)
+        : SSLConnector2(_client, sslServerContext, 0), _loop(loop)
         {
+            _server.listen(addr, port);
+            _server.connectionPending += Pt::slot(*this, &Server::onAccept);
+            _loop.add(_server);
+
             this->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
         }
 
-        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector& ssl)
+        void onAccept(Pt::Net::TcpServer& server)
+        {
+            std::cout << "[Server-TCP   ] Accepting client connection" << std::endl;
+            _client.accept(server);
+
+            std::cout << "[Server-SSL   ] Status = " << getStatusString() << std::endl;
+        }
+
+        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
         {
             std::string cum;
             char        buff[128];
@@ -56,27 +69,42 @@ class Server : public Pt::Ssl::SSLSocketServer {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[SERVER-SSL] " + cum << std::endl;
-            write("Hello world from server!", 25);
+            std::cout << "[Server-SSL   ] " + cum << std::endl;
+
+            write("Hello world from client!", 25);
         }
+
+    private:
+        Pt::System::EventLoop& _loop;
+        Pt::Net::TcpServer     _server;
+        Pt::Net::TcpSocket     _client;
 };
 
-class Client : public Pt::Ssl::SSLSocketClient {
+class Client : public Pt::Ssl::SSLConnector2 {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : SSLSocketClient(loop, addr, port, sslClientContext, 0)
+        : SSLConnector2(_socket, sslClientContext, 0), _loop(loop)
         {
+            _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
+            _socket.beginConnect(addr, port);
+
             this->connected              += Pt::slot(*this, &Client::onSSLConnect            );
             this->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
         }
 
-        void onSSLConnect(Pt::Ssl::SSLConnector& ssl)
+        void _onTCPConnect(Pt::Net::TcpSocket& socket)
         {
-            std::cout << "[CLIENT-SSL] Peer CN = " + getPeerCN() << std::endl;
+            _socket.endConnect();
+            connect();
+        }
+
+        void onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
+        {
+            std::cout << "[Client-SSL   ] Peer CN = " + getPeerCN() << std::endl;
             write("Hello world from client!", 25);
         }
 
-        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector& ssl)
+        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
         {
             std::string cum;
             char        buff[128];
@@ -87,13 +115,14 @@ class Client : public Pt::Ssl::SSLSocketClient {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[CLIENT-SSL] " + cum << std::endl;
-            write("Hello world from server!", 25);
-
-            disconnect();
+            std::cout << "[Client-SSL   ] " + cum << std::endl;
         }
+
+    private:
+        Pt::System::EventLoop& _loop;
+        Pt::Net::TcpSocket     _socket;
 };
-*/
+
 int main(int argc, char** argv)
 {
     try
@@ -107,8 +136,8 @@ int main(int argc, char** argv)
         Pt::Ssl::SSLContext serverContext("root.pem", "server.pem", "password", 0);
         Pt::Ssl::SSLContext clientContext("root.pem", "client.pem", "password", 0);
 
-        //Server server(loop, addr, port, serverContext);
-        //Client client(loop, addr, port, clientContext);
+        Server server(loop, addr, port, serverContext);
+        Client client(loop, addr, port, clientContext);
 
         loop.setIdleTimeout(2000);
         loop.run();
