@@ -149,7 +149,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        std::cout << "[## MAIN ##] OpenSSL test progam started..." << std::endl;
+        std::cout << "[### MAIN() ##] OpenSSL test progam started..." << std::endl;
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -164,16 +164,16 @@ int main(int argc, char** argv)
         loop.setIdleTimeout(2000);
         loop.run();
 
-        std::cout << "[## MAIN ##] OpenSSL test progam finished..." << std::endl;
+        std::cout << "[### MAIN() ##] OpenSSL test progam finished..." << std::endl;
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << "[## MAIN ##] Error: " << ex.what() << std::endl;
+        std::cerr << "[### MAIN() ##] Error: " << ex.what() << std::endl;
     }
     catch(const char* ex)
     {
-        std::cerr << "[## MAIN ##] Error: " << ex << std::endl;
+        std::cerr << "[### MAIN() ##] Error: " << ex << std::endl;
     }
     return 1;
 }
