@@ -46,18 +46,12 @@ SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext,
     SSL_set_bio(_ssl, _in, _out);
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
-    // Star as server by default
-    SSL_set_accept_state(_ssl);
-
     // Set session ID
     if(sessionID) SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 
     // Connect the signals
     _iod.inputReady  += Pt::slot(*this, &SSLConnector2::_onIODInput  );
     _iod.outputReady += Pt::slot(*this, &SSLConnector2::_onIODOutput );
-
-    // Kick start the IO device
-    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
 }
 
 SSLConnector2::~SSLConnector2()
@@ -69,10 +63,17 @@ const char* SSLConnector2::getStatusString() const
 bool SSLConnector2::connectionEstablished() const
 { return SSL_get_state(_ssl) == SSL_ST_OK; }
 
+void SSLConnector2::accept()
+{
+    SSL_set_accept_state(_ssl);
+    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+}
+
 void SSLConnector2::connect()
 {
     SSL_set_connect_state(_ssl);
     SSL_do_handshake(_ssl);
+    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
     _doSSL();
 }
 

@@ -57,7 +57,10 @@ class Server : public Pt::Connectable {
             _client.accept(server);
             _loop.add(_client);
 
+            std::cout << "[Server-SSL   ] Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2(_client, _sslContext, 0);
+            _ssl->accept();
+
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
             std::cout << "[Server-SSL   ] Status = " << _ssl->getStatusString() << std::endl;
         }
@@ -91,6 +94,7 @@ class Client : public Pt::Connectable {
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _loop(loop)
         {
+            std::cout << "[Client-TCP   ] Connecting to server" << std::endl;
             _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
             _socket.beginConnect(addr, port);
             _loop.add(_socket);
@@ -103,6 +107,7 @@ class Client : public Pt::Connectable {
         {
             _socket.endConnect();
 
+            std::cout << "[Client-SSL   ] Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2(_socket, _sslContext, 0);
 
             _ssl->connected              += Pt::slot(*this, &Client::onSSLConnect            );

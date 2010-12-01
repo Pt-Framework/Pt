@@ -39,8 +39,6 @@ namespace Ssl {
 
 //!
 //! \brief SSL connector.
-//! By default this connector will act as an SSL connector server.
-//! Call \ref connect() to convert it to an SSL conenctor client and initiate a connection to an SSL connector server.
 class PT_SSL_API SSLConnector2 : public Connectable {
     public:
         //! \brief Construct an SSL connector that uses the given context.
@@ -55,13 +53,14 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         //! \brief Check if this SSL connector has been connected to the SSL connector at the other end.
         bool connectionEstablished() const;
 
+        //! \brief Activate this SSL connector as an SSL connector server and wait for a connection from an SSL connector client.
+        void accept();
+
         //! \brief Activate this SSL connector as an SSL connector client and initiate a connection to an SSL connector server.
-        //! It is the responsibility of the developer to \ref pullData() from this SSL connector client and \ref pushData() to the correct SSL connector server.
-        //! A derivative class that override this class must always calls the original implementation before executing any other SSL operation.
-        virtual void connect();
+        void connect();
 
         //! \brief Disconnect the connection.
-        virtual void disconnect();
+        void disconnect();
 
         //! \brief Get the peer CN (Common Name).
         const std::string getPeerCN() const;
