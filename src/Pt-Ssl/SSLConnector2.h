@@ -50,14 +50,14 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         //! \brief Get the current status string of this SSL connector.
         const char* getStatusString() const;
 
-        //! \brief Check if this SSL connector has been connected to the SSL connector at the other end.
-        bool connectionEstablished() const;
-
         //! \brief Activate this SSL connector as an SSL connector server and wait for a connection from an SSL connector client.
         void accept();
 
         //! \brief Activate this SSL connector as an SSL connector client and initiate a connection to an SSL connector server.
         void connect();
+
+        //! \brief Check if this SSL connector client has been connected to the SSL connector server at the other end.
+        bool connectionEstablished() const;
 
         //! \brief Disconnect the connection.
         void disconnect();
