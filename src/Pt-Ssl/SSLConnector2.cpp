@@ -25,16 +25,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include <iostream>
+
 #include "SSLConnector2.h"
 
 namespace Pt {
 namespace Ssl {
 
 SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID)
-: _in ( BIO_new(BIO_s_mem()) ),
-  _out( BIO_new(BIO_s_mem()) ),
-  _ssl( SSL_new(sslContext._ctx) ),
-  _iod( ioDevice )
+: _ssl      ( SSL_new(sslContext._ctx) ),
+  _connected( false ),
+  _in       ( BIO_new(BIO_s_mem()) ),
+  _out      ( BIO_new(BIO_s_mem()) ),
+  _iod      ( ioDevice )
 {
     // Connect the BIO
     BIO_set_nbio(_in, 1);
@@ -62,10 +66,14 @@ void SSLConnector2::connect()
 {
     SSL_set_connect_state(_ssl);
     SSL_do_handshake(_ssl);
+    _doSSL();
 }
 
 void SSLConnector2::disconnect()
-{ SSL_shutdown(_ssl); }
+{
+    SSL_shutdown(_ssl);
+    _doSSL();
+}
 
 void SSLConnector2::reset()
 {
@@ -88,6 +96,29 @@ const std::string SSLConnector2::getPeerCN() const
 
 int SSLConnector2::write(const char* buff, int len)
 {
+    _outBuff += std::string(buff, len);
+    _doSSL();
+    return len;
+}
+
+int SSLConnector2::readDecryptedData(char* buff, int size)
+{
+    const int avail = _decBuff.length();
+    if(!avail) return 0;
+
+    if(avail <= size) {
+        memcpy(buff, _decBuff.data(), avail);
+        _decBuff.clear();
+        return avail;
+    }
+
+    memcpy(buff, _decBuff.data(), size);
+    _decBuff.erase(0, size);
+    return size;
+}
+
+int SSLConnector2::_write(const char* buff, int len)
+{
     int bytesWritten = SSL_write(_ssl, buff, len);
 
     if(bytesWritten < 0) {
@@ -98,7 +129,7 @@ int SSLConnector2::write(const char* buff, int len)
     return bytesWritten;
 }
 
-int SSLConnector2::pullData(char* buff, int buffSize) const
+int SSLConnector2::_pullData(char* buff, int buffSize) const
 {
     const int bytesRead = BIO_read(_out, buff, buffSize);
 
@@ -110,7 +141,7 @@ int SSLConnector2::pullData(char* buff, int buffSize) const
     return bytesRead;
 }
 
-int SSLConnector2::pushData(const char* buff, int len)
+int SSLConnector2::_pushData(const char* buff, int len)
 {
     const int bytesWritten = BIO_write(_in, buff, len);
 
@@ -121,7 +152,7 @@ int SSLConnector2::pushData(const char* buff, int len)
         char rbuff[8192];
         const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
         if(bytesRead > 0) {
-            _ddb += std::string(rbuff, bytesRead);
+            _decBuff += std::string(rbuff, bytesRead);
             decryptedDataAvailable(*this);
         }
         else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
@@ -132,20 +163,33 @@ int SSLConnector2::pushData(const char* buff, int len)
     return bytesWritten;
 }
 
-int SSLConnector2::readDecryptedData(char* buff, int size)
+void SSLConnector2::_doSSL()
 {
-    const int avail = _ddb.length();
-    if(!avail) return 0;
+    int byteCount = 0;
 
-    if(avail <= size) {
-        memcpy(buff, _ddb.data(), avail);
-        _ddb.clear();
-        return avail;
+    if(_outBuff.length()) {
+        byteCount = _write(_outBuff.data(), _outBuff.length());
+        if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    memcpy(buff, _ddb.data(), size);
-    _ddb.erase(0, size);
-    return size;
+    if(!_inBuff.length()) {
+        byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
+        if(byteCount > 0) _iod.beginWrite(_sslBuff, byteCount);
+    }
+
+    while(_inBuff.length()) {
+        byteCount = _pushData(_inBuff.data(), _inBuff.length());
+        if(byteCount > 0) _inBuff.erase(0, byteCount);
+        std::cerr << "[SSLConnector2] Status = " << getStatusString() << std::endl;
+
+        byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
+        if(byteCount > 0) _iod.beginWrite(_sslBuff, byteCount);
+    }
+
+    if(!_connected && connectionEstablished()) {
+        _connected = true;
+        connected(*this);
+    }
 }
 
 } // namespace Pt

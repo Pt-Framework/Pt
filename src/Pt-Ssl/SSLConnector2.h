@@ -41,7 +41,7 @@ namespace Ssl {
 //! \brief SSL connector.
 //! By default this connector will act as an SSL connector server.
 //! Call \ref connect() to convert it to an SSL conenctor client and initiate a connection to an SSL connector server.
-class PT_SSL_API SSLConnector2 {
+class PT_SSL_API SSLConnector2 : public Connectable {
     public:
         //! \brief Construct an SSL connector that uses the given context.
         SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
@@ -75,15 +75,8 @@ class PT_SSL_API SSLConnector2 {
         //! A derivative class that override this class must always calls the original implementation before executing any other SSL operation.
         virtual int write(const char* buff, int len);
 
-        //! \brief Pull data from the output buffer of this SSL connector.
-        //! The pulled data must be send through the communication medium and written to the input buffer of the SSL conenctor at the other end.
-        //! This functions return the number of bytes actually read.
-        int pullData(char* buff, int buffSize) const;
-
-        //! \brief Push data to the input buffer of this SSL connector.
-        //! The pushed data must be the data received from the output buffer of the SSL conenctor at the other end through the communication medium.
-        //! This functions return the number of bytes actually written.
-        int pushData(const char* buff, int len);
+        //! \brief Signal that will be called when a client has successfully connected to the server.
+        Signal<SSLConnector2&> connected;
 
         //! \brief Signal that will be called when decrypted data is available.
         Signal<SSLConnector2&> decryptedDataAvailable;
@@ -92,11 +85,24 @@ class PT_SSL_API SSLConnector2 {
         int readDecryptedData(char* buff, int size);
 
     protected:
-        BIO*              _in;  // Input BIO
-        BIO*              _out; // Output BIO
-        SSL*              _ssl; // OpenSSL's SSL handle
-        std::string       _ddb; // Decrypted data buffer
-        System::IODevice& _iod; // IO Device
+        SSL*              _ssl;            // OpenSSL's SSL handle
+        bool              _connected;      // A flag to indicate if a client has successfully connected to the server
+        char              _sslBuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+
+        BIO*              _in;             // Input BIO
+        std::string       _inBuff;         // Input buffer
+
+        BIO*              _out;            // Output BIO
+        std::string       _outBuff;        // Output buffer
+        std::string       _decBuff;        // Decrypted data buffer
+
+        System::IODevice& _iod;            // IO Device
+        char              _iodBuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+
+        int _write(const char* buff, int len);
+        int _pullData(char* buff, int buffSize) const;
+        int _pushData(const char* buff, int len);
+        void _doSSL();
 };
 
 
