@@ -55,6 +55,7 @@ class Server : public Pt::Connectable {
         {
             std::cout << "[Server-TCP   ] Accepting client connection" << std::endl;
             _client.accept(server);
+            _loop.add(_client);
 
             _ssl = new Pt::Ssl::SSLConnector2(_client, _sslContext, 0);
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
@@ -92,6 +93,7 @@ class Client : public Pt::Connectable {
         {
             _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
             _socket.beginConnect(addr, port);
+            _loop.add(_socket);
         }
 
         ~Client()
