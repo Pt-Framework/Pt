@@ -73,7 +73,6 @@ void SSLConnector2::connect()
 {
     SSL_set_connect_state(_ssl);
     SSL_do_handshake(_ssl);
-    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
     _doSSL();
 }
 

@@ -59,9 +59,9 @@ class Server : public Pt::Connectable {
 
             std::cout << "[Server-SSL   ] Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2(_client, _sslContext, 0);
-            _ssl->accept();
-
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
+
+            _ssl->accept();
             std::cout << "[Server-SSL   ] Status = " << _ssl->getStatusString() << std::endl;
         }
 
@@ -78,7 +78,7 @@ class Server : public Pt::Connectable {
 
             std::cout << "[Server-SSL   ] " + cum << std::endl;
 
-            _ssl->write("Hello world from client!", 25);
+            _ssl->write("Hello world from server!", 25);
         }
 
     private:
@@ -109,10 +109,11 @@ class Client : public Pt::Connectable {
 
             std::cout << "[Client-SSL   ] Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2(_socket, _sslContext, 0);
-
             _ssl->connected              += Pt::slot(*this, &Client::onSSLConnect            );
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
+
             _ssl->connect();
+            std::cout << "[Client-SSL   ] Status = " << _ssl->getStatusString() << std::endl;
         }
 
         void onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
@@ -133,6 +134,9 @@ class Client : public Pt::Connectable {
             } while(len > 0);
 
             std::cout << "[Client-SSL   ] " + cum << std::endl;
+
+            _ssl->disconnect();
+            _loop.exit();
         }
 
     private:
@@ -144,8 +148,7 @@ class Client : public Pt::Connectable {
 
 int main(int argc, char** argv)
 {
-    try
-    {
+    try {
         std::cout << "[## MAIN ##] OpenSSL test progam started..." << std::endl;
 
         Pt::System::MainLoop loop;
