@@ -48,6 +48,9 @@ class Server : public Pt::Connectable {
             _loop.add(_server);
         }
 
+        ~Server()
+        { delete _ssl; }
+
         void onAccept(Pt::Net::TcpServer& server)
         {
             std::cout << "[Server-TCP   ] Accepting client connection" << std::endl;
@@ -55,7 +58,6 @@ class Server : public Pt::Connectable {
 
             _ssl = new Pt::Ssl::SSLConnector2(_client, _sslContext, 0);
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
-
             std::cout << "[Server-SSL   ] Status = " << _ssl->getStatusString() << std::endl;
         }
 
@@ -83,28 +85,33 @@ class Server : public Pt::Connectable {
         Pt::Net::TcpSocket      _client;
 };
 
-class Client : public Pt::Ssl::SSLConnector2 {
+class Client : public Pt::Connectable {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : SSLConnector2(_socket, sslClientContext, 0), _loop(loop)
+        : _sslContext(sslClientContext), _ssl(0), _loop(loop)
         {
             _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
             _socket.beginConnect(addr, port);
-
-            this->connected              += Pt::slot(*this, &Client::onSSLConnect            );
-            this->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
         }
+
+        ~Client()
+        { delete _ssl; }
 
         void _onTCPConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
-            connect();
+
+            _ssl = new Pt::Ssl::SSLConnector2(_socket, _sslContext, 0);
+
+            _ssl->connected              += Pt::slot(*this, &Client::onSSLConnect            );
+            _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
+            _ssl->connect();
         }
 
         void onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
         {
-            std::cout << "[Client-SSL   ] Peer CN = " + getPeerCN() << std::endl;
-            write("Hello world from client!", 25);
+            std::cout << "[Client-SSL   ] Peer CN = " + _ssl->getPeerCN() << std::endl;
+            _ssl->write("Hello world from client!", 25);
         }
 
         void onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
@@ -114,7 +121,7 @@ class Client : public Pt::Ssl::SSLConnector2 {
 
             int len = 0;
             do {
-                len = readDecryptedData(buff, sizeof(buff));
+                len = _ssl->readDecryptedData(buff, sizeof(buff));
                 cum += std::string(buff, len);
             } while(len > 0);
 
@@ -122,8 +129,8 @@ class Client : public Pt::Ssl::SSLConnector2 {
         }
 
     private:
-       //// Pt::Ssl::SSLContext&    _sslContext;
-        //Pt::Ssl::SSLConnector2* _ssl;
+        Pt::Ssl::SSLContext&    _sslContext;
+        Pt::Ssl::SSLConnector2* _ssl;
         Pt::System::EventLoop&  _loop;
         Pt::Net::TcpSocket      _socket;
 };
