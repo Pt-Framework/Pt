@@ -43,12 +43,13 @@ SSLConnector2Server::~SSLConnector2Server()
 void SSLConnector2Server::accept()
 {
     SSL_set_accept_state(_ssl);
-    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
 
     if(dynamic_cast<SSLConnector2Server*>(this))
         std::cerr << "[SSLConnector2] (Server) begin read from IO device" << std::endl;
     else
         std::cerr << "[SSLConnector2] (Client) begin read from IO device" << std::endl;
+
+    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
 }
 
 } // namespace Pt
