@@ -224,7 +224,7 @@ void SSLConnector2::_doSSL()
         }
     }
 
-    std::cerr << "[SSLConnector2] (" << _getType(this) << " _doSSL() ended" << std::endl;
+    std::cerr << "[SSLConnector2] " << _getType(this) << " _doSSL() ended" << std::endl;
 }
 
 void SSLConnector2::_onIODOutput(System::IODevice& iod)
