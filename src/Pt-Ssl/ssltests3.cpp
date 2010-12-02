@@ -42,7 +42,7 @@
 class Server : public Pt::Connectable {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
-        : _sslContext(sslServerContext), _ssl(0), _loop(loop)
+        : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0)
         {
             _server.listen(addr, port);
             _server.connectionPending += Pt::slot(*this, &Server::onAccept);
@@ -50,16 +50,20 @@ class Server : public Pt::Connectable {
         }
 
         ~Server()
-        { delete _ssl; }
+        {
+            delete _client;
+            delete _ssl;
+        }
 
         void onAccept(Pt::Net::TcpServer& server)
         {
             std::cout << "[Server-TCP   ] Accepting client connection" << std::endl;
-            _client.accept(server);
-            _loop.add(_client);
+            _client = new Pt::Net::TcpSocket;
+            _client->accept(server);
+            _loop.add(*_client);
 
             std::cout << "[Server-SSL   ] Initializing SSL" << std::endl;
-            _ssl = new Pt::Ssl::SSLConnector2Server(_client, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLConnector2Server(*_client, _sslContext, 0);
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
 
             _ssl->accept();
@@ -87,13 +91,13 @@ class Server : public Pt::Connectable {
         Pt::Ssl::SSLConnector2Server* _ssl;
         Pt::System::EventLoop&        _loop;
         Pt::Net::TcpServer            _server;
-        Pt::Net::TcpSocket            _client;
+        Pt::Net::TcpSocket*           _client;
 };
 
 class Client : public Pt::Connectable {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _loop(loop)
+        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)
         {
             std::cout << "[Client-TCP   ] Connecting to server" << std::endl;
             _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
@@ -136,8 +140,15 @@ class Client : public Pt::Connectable {
 
             std::cout << "[Client-SSL   ] " + cum << std::endl;
 
-            _ssl->disconnect();
-            _loop.exit();
+            if(_msgCnt < 3) {
+                std::cerr << "### WWWW" << std::endl;
+                _ssl->write("Hello world from client!", 25);
+                ++_msgCnt;
+            }
+            else {
+                _ssl->disconnect();
+                _loop.exit();
+            }
         }
 
     private:
@@ -145,6 +156,7 @@ class Client : public Pt::Connectable {
         Pt::Ssl::SSLConnector2Client* _ssl;
         Pt::System::EventLoop&        _loop;
         Pt::Net::TcpSocket            _socket;
+        int                           _msgCnt;
 };
 
 int main(int argc, char** argv)
