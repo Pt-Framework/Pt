@@ -36,7 +36,8 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
 
-#include "SSLConnector2.h"
+#include "SSLConnector2Client.h"
+#include "SSLConnector2Server.h"
 
 class Server : public Pt::Connectable {
     public:
@@ -58,7 +59,7 @@ class Server : public Pt::Connectable {
             _loop.add(_client);
 
             std::cout << "[Server-SSL   ] Initializing SSL" << std::endl;
-            _ssl = new Pt::Ssl::SSLConnector2(_client, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLConnector2Server(_client, _sslContext, 0);
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
 
             _ssl->accept();
@@ -82,11 +83,11 @@ class Server : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&    _sslContext;
-        Pt::Ssl::SSLConnector2* _ssl;
-        Pt::System::EventLoop&  _loop;
-        Pt::Net::TcpServer      _server;
-        Pt::Net::TcpSocket      _client;
+        Pt::Ssl::SSLContext&          _sslContext;
+        Pt::Ssl::SSLConnector2Server* _ssl;
+        Pt::System::EventLoop&        _loop;
+        Pt::Net::TcpServer            _server;
+        Pt::Net::TcpSocket            _client;
 };
 
 class Client : public Pt::Connectable {
@@ -108,7 +109,7 @@ class Client : public Pt::Connectable {
             _socket.endConnect();
 
             std::cout << "[Client-SSL   ] Initializing SSL" << std::endl;
-            _ssl = new Pt::Ssl::SSLConnector2(_socket, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLConnector2Client(_socket, _sslContext, 0);
             _ssl->connected              += Pt::slot(*this, &Client::onSSLConnect            );
             _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
 
@@ -140,10 +141,10 @@ class Client : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&    _sslContext;
-        Pt::Ssl::SSLConnector2* _ssl;
-        Pt::System::EventLoop&  _loop;
-        Pt::Net::TcpSocket      _socket;
+        Pt::Ssl::SSLContext&          _sslContext;
+        Pt::Ssl::SSLConnector2Client* _ssl;
+        Pt::System::EventLoop&        _loop;
+        Pt::Net::TcpSocket            _socket;
 };
 
 int main(int argc, char** argv)

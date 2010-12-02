@@ -18,7 +18,7 @@ LinkSharedLibraries ssltests2 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests2 : Pt-Ssl-openssl ;
 MakeLocate ssltests2 : $(OUTPUT_TARGET) ;
 
-Main ssltests3 : SSLContext.cpp SSLConnector2.cpp ssltests3.cpp ;
+Main ssltests3 : SSLContext.cpp SSLConnector2.cpp SSLConnector2Server.cpp SSLConnector2Client.cpp ssltests3.cpp ;
 LinkSharedLibraries ssltests3 : Pt Pt-Net Pt-System ;
 LinkLibraries ssltests3 : Pt-Ssl-openssl ;
 MakeLocate ssltests3 : $(OUTPUT_TARGET) ;

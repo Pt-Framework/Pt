@@ -57,48 +57,17 @@ SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext,
 SSLConnector2::~SSLConnector2()
 { SSL_free(_ssl); }
 
-const char* SSLConnector2::getStatusString() const
-{ return SSL_state_string_long(_ssl); }
-
 bool SSLConnector2::connectionEstablished() const
 { return SSL_get_state(_ssl) == SSL_ST_OK; }
 
-void SSLConnector2::accept()
-{
-    SSL_set_accept_state(_ssl);
-    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
-}
-
-void SSLConnector2::connect()
-{
-    SSL_set_connect_state(_ssl);
-    SSL_do_handshake(_ssl);
-    _doSSL();
-}
-
-void SSLConnector2::disconnect()
-{
-    SSL_shutdown(_ssl);
-    _doSSL();
-}
+const char* SSLConnector2::getStatusString() const
+{ return SSL_state_string_long(_ssl); }
 
 void SSLConnector2::reset()
 {
     BIO_reset(_in);
     BIO_reset(_out);
     SSL_clear(_ssl);
-}
-
-const std::string SSLConnector2::getPeerCN() const
-{
-    if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
-
-    X509* peer;
-    peer = SSL_get_peer_certificate(_ssl);
-
-    char peerCN[256];
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
-    return peerCN;
 }
 
 int SSLConnector2::write(const char* buff, int len)
