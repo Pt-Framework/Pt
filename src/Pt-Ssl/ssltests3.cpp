@@ -80,9 +80,9 @@ class Server : public Pt::Connectable {
                 len = _ssl->readDecryptedData(buff, sizeof(buff));
                 cum += std::string(buff, len);
             } while(len > 0);
+            std::cout << "[Server-SSL   ] Receiving message from client: " << cum << std::endl;
 
-            std::cout << "[Server-SSL   ] " + cum << std::endl;
-
+            std::cout << "[Server-SSL   ] Sending message to client" << std::endl;
             _ssl->write("Hello world from server!", 25);
         }
 
@@ -124,6 +124,7 @@ class Client : public Pt::Connectable {
         void onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
         {
             std::cout << "[Client-SSL   ] Peer CN = " + _ssl->getPeerCN() << std::endl;
+            std::cout << "[Client-SSL   ] Sending message to server" << std::endl;
             _ssl->write("Hello world from client!", 25);
         }
 
@@ -137,11 +138,10 @@ class Client : public Pt::Connectable {
                 len = _ssl->readDecryptedData(buff, sizeof(buff));
                 cum += std::string(buff, len);
             } while(len > 0);
-
-            std::cout << "[Client-SSL   ] " + cum << std::endl;
+            std::cout << "[Client-SSL   ] Receiving message from server: " << cum << std::endl;
 
             if(_msgCnt < 3) {
-                std::cerr << "### WWWW" << std::endl;
+                std::cout << "[Client-SSL   ] Sending message to server" << std::endl;
                 _ssl->write("Hello world from client!", 25);
                 ++_msgCnt;
             }
