@@ -92,6 +92,12 @@ int SSLConnector2::readDecryptedData(char* buff, int size)
     if(avail <= size) {
         memcpy(buff, _decBuff.data(), avail);
         _decBuff.clear();
+
+        if(dynamic_cast<SSLConnector2Server*>(this))
+            std::cerr << "[SSLConnector2] (Server) Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+        else
+            std::cerr << "[SSLConnector2] (Client) Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+
         return avail;
     }
 
@@ -110,7 +116,14 @@ int SSLConnector2::_write(const char* buff, int len)
 {
     int bytesWritten = SSL_write(_ssl, buff, len);
     if(bytesWritten < 0) {
-        if(!SSL_want_read(_ssl)) throw "Connection error!";
+        if(!SSL_want_read(_ssl))
+            throw "Connection error!";
+        else {
+            if(dynamic_cast<SSLConnector2Server*>(this))
+                std::cerr << "[SSLConnector2] (Server) SSL wants read" << std::endl;
+            else
+                std::cerr << "[SSLConnector2] (Client) SSL wants read" << std::endl;
+        }
         return 0;
     }
 
@@ -124,10 +137,21 @@ int SSLConnector2::_write(const char* buff, int len)
 
 int SSLConnector2::_pullData(char* buff, int buffSize) const
 {
-    const int bytesRead = BIO_read(_out, buff, buffSize);
-    if(bytesRead < 0) {
-        if(!BIO_should_retry(_out)) throw "Output buffer error!";
-        return 0;
+    int bytesRead = 0;
+
+    while(!bytesRead) {
+        bytesRead = BIO_read(_out, buff, buffSize);
+        if(bytesRead < 0) {
+            if(!BIO_should_retry(_out))
+                throw "Output buffer error!";
+            else {
+                if(dynamic_cast<const SSLConnector2Server*>(this))
+                    std::cerr << "[SSLConnector2] (Server) Output BIO should retry R=" << BIO_should_read(_out) << " W=" << BIO_should_write(_out) << std::endl;
+                else
+                    std::cerr << "[SSLConnector2] (Client) Output BIO should retry R=" << BIO_should_read(_out) << " W=" << BIO_should_write(_out) << std::endl;
+            }
+            continue;
+        }
     }
 
     if(dynamic_cast<const SSLConnector2Server*>(this))
@@ -140,7 +164,22 @@ int SSLConnector2::_pullData(char* buff, int buffSize) const
 
 int SSLConnector2::_pushData(const char* buff, int len)
 {
-    const int bytesWritten = BIO_write(_in, buff, len);
+    int bytesWritten = 0;
+
+    while(!bytesWritten) {
+        bytesWritten = BIO_write(_in, buff, len);
+        if(bytesWritten < 0) {
+            if(!BIO_should_retry(_in))
+                throw "Output buffer error!";
+            else {
+                if(dynamic_cast<const SSLConnector2Server*>(this))
+                    std::cerr << "[SSLConnector2] (Server) Input BIO should retry R=" << BIO_should_read(_in) << " W=" << BIO_should_write(_in) << std::endl;
+                else
+                    std::cerr << "[SSLConnector2] (Client) Input BIO should retry R=" << BIO_should_read(_in) << " W=" << BIO_should_write(_in) << std::endl;
+            }
+            continue;
+        }
+    }
 
     if(dynamic_cast<SSLConnector2Server*>(this))
         std::cerr << "[SSLConnector2] (Server) Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
@@ -151,8 +190,7 @@ int SSLConnector2::_pushData(const char* buff, int len)
         SSL_do_handshake(_ssl);
     }
     else {
-        char rbuff[8192];
-        const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
+        const int bytesRead = SSL_read(_ssl, _sslBuff, sizeof(_sslBuff));
 
         if(dynamic_cast<const SSLConnector2Server*>(this))
             std::cerr << "[SSLConnector2] (Server) Read " << bytesRead << " bytes from the SSL handle" << std::endl;
@@ -160,7 +198,7 @@ int SSLConnector2::_pushData(const char* buff, int len)
             std::cerr << "[SSLConnector2] (Client) Read " << bytesRead << " bytes from the SSL handle" << std::endl;
 
         if(bytesRead > 0) {
-            _decBuff += std::string(rbuff, bytesRead);
+            _decBuff += std::string(_sslBuff, bytesRead);
 
             if(dynamic_cast<SSLConnector2Server*>(this))
                 std::cerr << "[SSLConnector2] (Server) Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
@@ -179,6 +217,20 @@ int SSLConnector2::_pushData(const char* buff, int len)
 
 void SSLConnector2::_doSSL()
 {
+    if(!_iod.reading()) {
+        _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+
+        if(dynamic_cast<SSLConnector2Server*>(this))
+            std::cerr << "[SSLConnector2] (Server) begin read from IO device" << std::endl;
+        else
+            std::cerr << "[SSLConnector2] (Client) begin read from IO device" << std::endl;
+    }
+
+    if(dynamic_cast<SSLConnector2Server*>(this))
+        std::cerr << "[SSLConnector2] (Server) _doSSL() started" << std::endl;
+    else
+        std::cerr << "[SSLConnector2] (Client) _doSSL() started" << std::endl;
+
     int byteCount = 0;
 
     if(_outBuff.length()) {
@@ -198,7 +250,14 @@ void SSLConnector2::_doSSL()
             std::cerr << "[SSLConnector2] (Client) Trying to pull data from the output BIO" << std::endl;
 
         byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
-        if(byteCount > 0) _iod.beginWrite(_sslBuff, byteCount);
+        if(byteCount > 0) {
+            _iod.beginWrite(_sslBuff, byteCount);
+
+            if(dynamic_cast<SSLConnector2Server*>(this))
+                std::cerr << "[SSLConnector2] (Server) begin write to IO device" << std::endl;
+            else
+                std::cerr << "[SSLConnector2] (Client) begin write to IO device" << std::endl;
+        }
     }
 
     while(_inBuff.length()) {
@@ -216,7 +275,14 @@ void SSLConnector2::_doSSL()
             std::cerr << "[SSLConnector2] (Client) Trying to pull data from the output BIO" << std::endl;
 
         byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
-        if(byteCount > 0) _iod.beginWrite(_sslBuff, byteCount);
+        if(byteCount > 0) {
+            _iod.beginWrite(_sslBuff, byteCount);
+
+            if(dynamic_cast<SSLConnector2Server*>(this))
+                std::cerr << "[SSLConnector2] (Server) begin write to IO device" << std::endl;
+            else
+                std::cerr << "[SSLConnector2] (Client) begin write to IO device" << std::endl;
+        }
     }
 
     if(!_connected) {
@@ -231,7 +297,10 @@ void SSLConnector2::_doSSL()
         }
     }
 
-    if(!_iod.reading()) _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+    if(dynamic_cast<SSLConnector2Server*>(this))
+        std::cerr << "[SSLConnector2] (Server) _doSSL() ended" << std::endl;
+    else
+        std::cerr << "[SSLConnector2] (Client) _doSSL() ended" << std::endl;
 }
 
 void SSLConnector2::_onIODOutput(System::IODevice& iod)
@@ -243,7 +312,14 @@ void SSLConnector2::_onIODOutput(System::IODevice& iod)
     else
         std::cerr << "[SSLConnector2] (Client) Wrote " << byteCount << " bytes to the IO device" << std::endl;
 
-    if(!_iod.reading()) _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+    if(!_iod.reading()) {
+        _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+
+        if(dynamic_cast<SSLConnector2Server*>(this))
+            std::cerr << "[SSLConnector2] (Server) begin read from IO device" << std::endl;
+        else
+            std::cerr << "[SSLConnector2] (Client) begin read from IO device" << std::endl;
+    }
 }
 
 void SSLConnector2::_onIODInput(System::IODevice& iod)
