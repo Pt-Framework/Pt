@@ -196,28 +196,19 @@ void SSLConnector2::_doSSL()
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    if(!_inBuff.length()) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Trying to pull data from the output BIO" << std::endl;
-        byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
-
-        if(byteCount > 0) {
-            std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin write to IO device" << std::endl;
-            _iod.beginWrite(_sslBuff, byteCount);
-        }
-    }
-
     while(_inBuff.length()) {
         std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
 
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Trying to pull data from the output BIO" << std::endl;
-        byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
+    }
 
-        if(byteCount > 0) {
-            std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin write to IO device" << std::endl;
-            _iod.beginWrite(_sslBuff, byteCount);
-        }
+    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Trying to pull data from the output BIO" << std::endl;
+    byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
+
+    if(byteCount > 0) {
+        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin write to IO device" << std::endl;
+        _iod.beginWrite(_sslBuff, byteCount);
     }
 
     if(!_connected) {
