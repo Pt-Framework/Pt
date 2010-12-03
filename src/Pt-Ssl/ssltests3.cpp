@@ -32,9 +32,10 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <Pt/System/MainLoop.h>
-#include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
+#include <Pt/Net/TcpServer.h>
+#include <Pt/System/Thread.h>
+#include <Pt/System/MainLoop.h>
 
 #include "SSLConnector2Client.h"
 #include "SSLConnector2Server.h"
@@ -46,7 +47,7 @@ class Server : public Pt::Connectable {
         {
             std::cout << "[@@ Server-TCP] ####################### Waiting connection from client" << std::endl;
             _server.listen(addr, port);
-            _server.connectionPending += Pt::slot(*this, &Server::onAccept);
+            _server.connectionPending += Pt::slot(*this, &Server::_onAccept);
             _loop.add(_server);
         }
 
@@ -56,7 +57,8 @@ class Server : public Pt::Connectable {
             delete _ssl;
         }
 
-        void onAccept(Pt::Net::TcpServer& server)
+   private:
+        void _onAccept(Pt::Net::TcpServer& server)
         {
             std::cout << "[@@ Server-TCP] ####################### Accepting client connection" << std::endl;
             _client = new Pt::Net::TcpSocket;
@@ -65,13 +67,13 @@ class Server : public Pt::Connectable {
 
             std::cout << "[@@ Server-SSL] ####################### Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2Server(*_client, _sslContext, 0);
-            _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::onDecryptedDataAvailable);
+            _ssl->decryptedDataAvailable += Pt::slot(*this, &Server::_onDecryptedDataAvailable);
 
             _ssl->accept();
             std::cout << "[@@ Server-SSL] ####################### Status = " << _ssl->getStatusString() << std::endl;
         }
 
-        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
+        void _onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
         {
             std::string cum;
             char        buff[128];
@@ -98,7 +100,7 @@ class Server : public Pt::Connectable {
 class Client : public Pt::Connectable {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _loop(loop)//, _msgCnt(0)
+        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)//, _connected(false), _waitResponse(false)
         {
             std::cout << "[@@ Client-TCP] ####################### Connecting to server" << std::endl;
             _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
@@ -109,28 +111,44 @@ class Client : public Pt::Connectable {
         ~Client()
         { delete _ssl; }
 
+        void sendMessage(const char* buff, int len)
+        {
+            std::cout << "[@@ Client-SSL] ####################### Sending message to server" << std::endl;
+            _ssl->write(buff, len);
+
+            ++_msgCnt;
+            //_waitResponse = true;
+        }
+
+        //bool connected() const
+        //{ return _connected; }
+
+        //bool canSendMessage() const
+        //{ return !_waitResponse; }
+
+    private:
         void _onTCPConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
 
             std::cout << "[@@ Client-SSL] ####################### Initializing SSL" << std::endl;
             _ssl = new Pt::Ssl::SSLConnector2Client(_socket, _sslContext, 0);
-            _ssl->connected              += Pt::slot(*this, &Client::onSSLConnect            );
-            _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::onDecryptedDataAvailable);
+            _ssl->connected              += Pt::slot(*this, &Client::_onSSLConnect            );
+            _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::_onDecryptedDataAvailable);
 
             _ssl->connect();
             std::cout << "[@@ Client-SSL] ####################### Status = " << _ssl->getStatusString() << std::endl;
         }
 
-        void onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
+        void _onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
         {
             std::cout << "[@@ Client-SSL] ####################### Peer CN = " + _ssl->getPeerCN() << std::endl;
+            //_connected = true;
 
-            //std::cout << "[@@ Client-SSL] ####################### Sending message to server" << std::endl;
-            //_ssl->write("Hello world from client!", 25);
+            sendMessage("Hello world from client!", 25);
         }
 
-        void onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
+        void _onDecryptedDataAvailable(Pt::Ssl::SSLConnector2& ssl)
         {
             std::string cum;
             char        buff[128];
@@ -142,15 +160,9 @@ class Client : public Pt::Connectable {
             } while(len > 0);
             std::cout << "[@@ Client-SSL] ####################### Receiving message from server: " << cum << std::endl;
 
-            //if(_msgCnt < 3) {
-            //    std::cout << "[@@ Client-SSL] ####################### Sending message to server" << std::endl;
-            //    _ssl->write("Hello world from client!", 25);
-            //    ++_msgCnt;
-            //}
-            //else {
-            //    _ssl->disconnect();
-            //    _loop.exit();
-            //}
+            //_waitResponse = false;
+
+            sendMessage("Hello world from client!", 25);
         }
 
     private:
@@ -158,8 +170,31 @@ class Client : public Pt::Connectable {
         Pt::Ssl::SSLConnector2Client* _ssl;
         Pt::System::EventLoop&        _loop;
         Pt::Net::TcpSocket            _socket;
-      //int                           _msgCnt;
+        int                           _msgCnt;
+      //bool                          _connected;
+      //bool                          _waitResponse;
 };
+
+/*
+class TestThread : public Pt::System::DetachedThread
+{
+    public:
+        TestThread(Server& server, Client& client)
+        : _server(server), _client(client)
+        {}
+
+        virtual void run()
+        {
+            while(true) {
+                if(_client.connected() && _client.canSendMessage()) _client.sendMessage("Hello world from client!", 25);
+            }
+        }
+
+    private:
+        Server& _server;
+        Client& _client;
+};
+*/
 
 int main(int argc, char** argv)
 {
@@ -175,6 +210,9 @@ int main(int argc, char** argv)
 
         Server server(loop, addr, port, serverContext);
         Client client(loop, addr, port, clientContext);
+
+        //TestThread testThread(server, client);
+        //testThread.start();
 
         loop.setIdleTimeout(2000);
         loop.run();
