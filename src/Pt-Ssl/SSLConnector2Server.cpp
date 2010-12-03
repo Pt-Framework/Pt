@@ -33,15 +33,6 @@
 namespace Pt {
 namespace Ssl {
 
-static const std::string _getType(const SSLConnector2* ssl, const char* funcName)
-{
-    char buff[1024];
-    sprintf(buff, "%s [%12s] ", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", funcName);
-
-    return buff;
-}
-
-
 SSLConnector2Server::SSLConnector2Server(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID)
 : SSLConnector2(ioDevice, sslContext, sessionID)
 { }
@@ -52,13 +43,7 @@ SSLConnector2Server::~SSLConnector2Server()
 void SSLConnector2Server::accept()
 {
     SSL_set_accept_state(_ssl);
-
-    if(dynamic_cast<SSLConnector2Server*>(this))
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin read from IO device" << std::endl;
-    else
-        std::cerr << "[SSLConnector2] (Client) begin read from IO device" << std::endl;
-
-    _iod.beginRead(_iodBuff, sizeof(_iodBuff));
+    _doSSL();
 }
 
 } // namespace Pt
