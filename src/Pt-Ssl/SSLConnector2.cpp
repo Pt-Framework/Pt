@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+#include <Pt/SourceInfo.h>
 #include <iostream>
 
 #include "SSLConnector2Server.h"
@@ -82,7 +82,7 @@ void SSLConnector2::reset()
 int SSLConnector2::write(const char* buff, int len)
 {
     _outBuff += std::string(buff, len);
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Wrote " << len << " bytes to the output buffer" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Wrote " << len << " bytes to the output buffer" << std::endl;
 
     _doSSL();
     return len;
@@ -96,14 +96,14 @@ int SSLConnector2::readDecryptedData(char* buff, int size)
     if(avail <= size) {
         memcpy(buff, _decBuff.data(), avail);
         _decBuff.clear();
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
 
         return avail;
     }
 
     memcpy(buff, _decBuff.data(), size);
     _decBuff.erase(0, size);
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
 
     return size;
 }
@@ -115,10 +115,10 @@ int SSLConnector2::_write(const char* buff, int len)
         if(!SSL_want_read(_ssl))
             throw "Connection error!";
         else
-            std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " SSL wants read" << std::endl;
+            std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " SSL wants read" << std::endl;
         return 0;
     }
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
 
     return bytesWritten;
 }
@@ -133,11 +133,11 @@ int SSLConnector2::_pullData(char* buff, int buffSize) const
             if(!BIO_should_retry(_out))
                 throw "Output buffer error!";
             else
-                std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Output BIO should retry R=" << BIO_should_read(_out) << " W=" << BIO_should_write(_out) << std::endl;
+                std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Output BIO should retry R=" << BIO_should_read(_out) << " W=" << BIO_should_write(_out) << std::endl;
             continue;
         }
     }
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Pulled " << bytesRead << " bytes from the output BIO" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Pulled " << bytesRead << " bytes from the output BIO" << std::endl;
 
     return bytesRead;
 }
@@ -152,22 +152,22 @@ int SSLConnector2::_pushData(const char* buff, int len)
             if(!BIO_should_retry(_in))
                 throw "Output buffer error!";
             else
-                std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Input BIO should retry R=" << BIO_should_read(_in) << " W=" << BIO_should_write(_in) << std::endl;
+                std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Input BIO should retry R=" << BIO_should_read(_in) << " W=" << BIO_should_write(_in) << std::endl;
             continue;
         }
     }
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
 
     if(!SSL_is_init_finished(_ssl)) {
         SSL_do_handshake(_ssl);
     }
     else {
         const int bytesRead = SSL_read(_ssl, _sslBuff, sizeof(_sslBuff));
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
 
         if(bytesRead > 0) {
             _decBuff += std::string(_sslBuff, bytesRead);
-            std::cerr << "[SSLConnector2] " << _getType(this, __func__) << ") Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
+            std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << ") Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
 
             decryptedDataAvailable(*this);
         }
@@ -181,38 +181,38 @@ int SSLConnector2::_pushData(const char* buff, int len)
 
 void SSLConnector2::_doSSL()
 {
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " _doSSL() started" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " _doSSL() started" << std::endl;
 
     if(!_iod.reading()) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin read from IO device" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " begin read from IO device" << std::endl;
         _iod.beginRead(_iodBuff, sizeof(_iodBuff));
     }
 
     int byteCount = 0;
 
     if(_outBuff.length()) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Writing pending data in the output buffer to the SSL handle" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Writing pending data in the output buffer to the SSL handle" << std::endl;
         byteCount = _write(_outBuff.data(), _outBuff.length());
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
     while(_inBuff.length()) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Pushing pending data in the input buffer to the input BIO" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
 
     }
 
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Trying to pull data from the output BIO" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Trying to pull data from the output BIO" << std::endl;
     byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
 
     if(byteCount > 0) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin write to IO device" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " begin write to IO device" << std::endl;
         _iod.beginWrite(_sslBuff, byteCount);
     }
 
     if(!_connected) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " SSL status = " << getStatusString() << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " SSL status = " << getStatusString() << std::endl;
 
         if(connectionEstablished()) {
             _connected = true;
@@ -220,16 +220,16 @@ void SSLConnector2::_doSSL()
         }
     }
 
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " _doSSL() ended" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " _doSSL() ended" << std::endl;
 }
 
 void SSLConnector2::_onIODOutput(System::IODevice& iod)
 {
     const int byteCount = _iod.endWrite();
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Wrote " << byteCount << " bytes to the IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Wrote " << byteCount << " bytes to the IO device" << std::endl;
 
     if(!_iod.reading()) {
-        std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " begin read from IO device" << std::endl;
+        std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " begin read from IO device" << std::endl;
         _iod.beginRead(_iodBuff, sizeof(_iodBuff));
     }
 }
@@ -237,10 +237,10 @@ void SSLConnector2::_onIODOutput(System::IODevice& iod)
 void SSLConnector2::_onIODInput(System::IODevice& iod)
 {
     const int byteCount = _iod.endRead();
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Read " << byteCount << " bytes from the IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Read " << byteCount << " bytes from the IO device" << std::endl;
 
     if(byteCount > 0) _inBuff += std::string(_iodBuff, byteCount);
-    std::cerr << "[SSLConnector2] " << _getType(this, __func__) << " Wrote " << byteCount << " bytes to the input buffer" << std::endl;
+    std::cerr << "[SSLConnector2] " << PT_SOURCEINFO_STR << " Wrote " << byteCount << " bytes to the input buffer" << std::endl;
 
     _doSSL();
 }
