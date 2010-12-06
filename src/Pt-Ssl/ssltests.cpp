@@ -103,7 +103,8 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
 
             std::cout << "[CLIENT-SSL] " + cum << std::endl;
 
-            _loop.exit();
+            Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
+            //_loop.exit();
         }
 
     private:
