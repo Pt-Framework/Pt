@@ -58,11 +58,11 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
-            std::cout << "[CLIENT      ]                     Connected to server" << std::endl;
+            std::cout << "[CLIENT      ]                           Connected to server" << std::endl;
 
-            std::cout << "[CLIENT      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            std::cout << "[CLIENT      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
             Pt::Ssl::SSLConnector::connect();
-            std::cout << "[CLIENT      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            std::cout << "[CLIENT      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
             const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
             _socket.beginWrite(_sslbuff, bytesRead);
@@ -71,7 +71,7 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onOutput(Pt::System::IODevice& socket)
         {
             std::size_t n = _socket.endWrite();
-            std::cout << "[CLIENT      ]                     Wrote " << n << " bytes to the IO device" << std::endl;
+            std::cout << "[CLIENT      ]                           Wrote " << n << " bytes to the IO device" << std::endl;
 
             _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
@@ -79,10 +79,10 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onInput(Pt::System::IODevice& socket)
         {
             std::size_t n = _socket.endRead();
-            std::cout << "[CLIENT      ]                     Read " << n << " bytes from the IO device to the IO device" << std::endl;
+            std::cout << "[CLIENT      ]                           Read " << n << " bytes from the IO device to the IO device" << std::endl;
 
             Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
-            std::cout << "[CLIENT      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            std::cout << "[CLIENT      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
             if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
 
@@ -101,9 +101,9 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[CLIENT      ]                     " + cum << std::endl;
+            std::cout << "[CLIENT      ]                           " + cum << std::endl;
 
-            Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
+            //Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
             //_loop.exit();
         }
 
@@ -135,9 +135,9 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onAccept(Pt::Net::TcpServer& server)
         {
             _client.accept(server);
-            std::cout << "[SERVER      ]                     Accepting client connection" << std::endl;
+            std::cout << "[SERVER      ]                           Accepting client connection" << std::endl;
 
-            std::cout << "[SERVER      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            std::cout << "[SERVER      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
             _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
@@ -145,7 +145,7 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onOutput(Pt::System::IODevice& socket)
         {
             std::size_t n = _client.endWrite();
-            std::cout << "[SERVER      ]                     Wrote " << n << " bytes to the IO device" << std::endl;
+            std::cout << "[SERVER      ]                           Wrote " << n << " bytes to the IO device" << std::endl;
 
             _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
@@ -153,10 +153,10 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onInput(Pt::System::IODevice& socket)
         {
             std::size_t n = _client.endRead();
-            std::cout << "[SERVER      ]                     Read " << n << " bytes from the IO device" << std::endl;
+            std::cout << "[SERVER      ]                           Read " << n << " bytes from the IO device" << std::endl;
 
             Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
-            std::cout << "[SERVER      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+            std::cout << "[SERVER      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
             if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from server!", 25);
 
@@ -175,7 +175,7 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[SERVER      ]                     " + cum << std::endl;
+            std::cout << "[SERVER      ]                           " + cum << std::endl;
         }
 
     private:
@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 {
     try
     {
-        std::cout << "[## MAIN ##  ]                     OpenSSL test progam started..." << std::endl;
+        std::cout << "[## MAIN ##  ]                           OpenSSL test progam started..." << std::endl;
 
         Pt::Ssl::SSLContext serverContext("root.pem", "server.pem", "password", 0);
         Pt::Ssl::SSLContext clientContext("root.pem", "client.pem", "password", 0);
@@ -207,16 +207,16 @@ int main(int argc, char** argv)
         loop.setIdleTimeout(2000);
         loop.run();
 
-        std::cout << "[## MAIN ##  ]                     OpenSSL test progam finished..." << std::endl;
+        std::cout << "[## MAIN ##  ]                           OpenSSL test progam finished..." << std::endl;
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << "[## MAIN ##  ]                     Error: " << ex.what() << std::endl;
+        std::cerr << "[## MAIN ##  ]                           Error: " << ex.what() << std::endl;
     }
     catch(const char* ex)
     {
-        std::cerr << "[## MAIN ##  ]                     Error: " << ex << std::endl;
+        std::cerr << "[## MAIN ##  ]                           Error: " << ex << std::endl;
     }
     return 1;
 }

@@ -54,7 +54,7 @@ class Server : public Pt::Ssl::SSLSocketServer {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[SERVER      ]                     " + cum << std::endl;
+            std::cout << "[SERVER      ]                           " + cum << std::endl;
             write("Hello world from server!", 25);
         }
 };
@@ -70,7 +70,7 @@ class Client : public Pt::Ssl::SSLSocketClient {
 
         void onSSLConnect(Pt::Ssl::SSLConnector& ssl)
         {
-            std::cout << "[CLIENT      ]                     Peer CN = " + getPeerCN() << std::endl;
+            std::cout << "[CLIENT      ]                           Peer CN = " + getPeerCN() << std::endl;
             write("Hello world from client!", 25);
         }
 
@@ -85,7 +85,7 @@ class Client : public Pt::Ssl::SSLSocketClient {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            std::cout << "[CLIENT      ]                     " + cum << std::endl;
+            std::cout << "[CLIENT      ]                           " + cum << std::endl;
 
             write("Hello world from client!", 25);
             //disconnect();
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 {
     try
     {
-        std::cout << "[## MAIN ##  ]                     OpenSSL test progam started..." << std::endl;
+        std::cout << "[## MAIN ##  ]                           OpenSSL test progam started..." << std::endl;
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -111,16 +111,16 @@ int main(int argc, char** argv)
         loop.setIdleTimeout(2000);
         loop.run();
 
-        std::cout << "[## MAIN ##  ]                     OpenSSL test progam finished..." << std::endl;
+        std::cout << "[## MAIN ##  ]                           OpenSSL test progam finished..." << std::endl;
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << "[## MAIN ##  ]                     Error: " << ex.what() << std::endl;
+        std::cerr << "[## MAIN ##  ]                           Error: " << ex.what() << std::endl;
     }
     catch(const char* ex)
     {
-        std::cerr << "[## MAIN ##  ]                     Error: " << ex << std::endl;
+        std::cerr << "[## MAIN ##  ]                           Error: " << ex << std::endl;
     }
     return 1;
 }

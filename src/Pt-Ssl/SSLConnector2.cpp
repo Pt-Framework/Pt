@@ -39,13 +39,15 @@ namespace Ssl {
 
 static const std::string _getType(const SSLConnector2* ssl, const std::string& funcName)
 {
+    static int count = 0;
+
     size_t      a = funcName.find_first_of("(");
     std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
     a = f.find_last_of("::");
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "%s [%17s]", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, "%05d %s [%17s]", count++, (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
 
     return buff;
 }
@@ -106,7 +108,7 @@ int SSLConnector2::readDecryptedData(char* buff, int size)
     if(avail <= size) {
         memcpy(buff, _decBuff.data(), avail);
         _decBuff.clear();
-        std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+        std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Retrieved " << avail << " bytes from the decrypted data buffer" << std::endl;
 
         return avail;
     }
@@ -137,6 +139,8 @@ int SSLConnector2::_pullData(char* buff, int buffSize) const
 {
     int bytesRead = 0;
 
+    if(!BIO_pending(_out)) return 0;
+
     while(!bytesRead) {
         bytesRead = BIO_read(_out, buff, buffSize);
         if(bytesRead < 0) {
@@ -166,6 +170,7 @@ int SSLConnector2::_pushData(const char* buff, int len)
             continue;
         }
     }
+    BIO_flush(_in);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
 
     if(!SSL_is_init_finished(_ssl)) {

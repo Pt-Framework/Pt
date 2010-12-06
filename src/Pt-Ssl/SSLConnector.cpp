@@ -38,13 +38,15 @@ namespace Ssl {
 
 static const std::string _getFuncName(const std::string& funcName)
 {
+    static int count = 0;
+
     size_t      a = funcName.find_first_of("(");
     std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
     a = f.find_last_of("::");
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "[%17s]", f.c_str());
+    sprintf(buff, "%05d [%17s]", count++, f.c_str());
 
     return buff;
 }
