@@ -83,7 +83,7 @@ void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
 void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 {
     const int byteCount = _client.endWrite();
-    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Wrote " << byteCount << " bytes" << std::endl;
+    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Wrote " << byteCount << " bytes to the IO device" << std::endl;
 
     _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
@@ -91,7 +91,7 @@ void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 void SSLSocketServer::_onTCPInput(Pt::System::IODevice& socket)
 {
     const int byteCount = _client.endRead();
-    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Read " << byteCount << " bytes" << std::endl;
+    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Read " << byteCount << " bytes from the IO device" << std::endl;
 
     if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
     _doSSL();
@@ -102,23 +102,20 @@ void SSLSocketServer::_doSSL()
     int byteCount = 0;
 
     if(_outBuff.length()) {
+        std::cerr << "[Server-SSL  ] " << SSL_CALL_INFO << " Writing pending data in the output buffer to the SSL handle" << std::endl;
         byteCount = SSLConnector::write(_outBuff.data(), _outBuff.length());
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    if(!_inBuff.length()) {
-        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-        if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
-    }
-
     while(_inBuff.length()) {
+        std::cerr << "[Server-SSL  ] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-
-        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-        if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
     }
 
+    std::cerr << "[Server-SSL  ] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
+    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+    if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);
 }
 
 } // namespace Pt

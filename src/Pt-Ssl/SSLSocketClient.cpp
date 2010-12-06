@@ -92,7 +92,7 @@ void SSLSocketClient::_onTCPConnect(Pt::Net::TcpSocket& socket)
 void SSLSocketClient::_onTCPOutput(Pt::System::IODevice& socket)
 {
     const int byteCount = _socket.endWrite();
-    std::cout << "[Client-TCP  ] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes" << std::endl;
+    std::cout << "[Client-TCP  ] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the IO device" << std::endl;
 
     _socket.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
@@ -100,7 +100,7 @@ void SSLSocketClient::_onTCPOutput(Pt::System::IODevice& socket)
 void SSLSocketClient::_onTCPInput(Pt::System::IODevice& socket)
 {
     const int byteCount = _socket.endRead();
-    std::cout << "[Client-TCP  ] " << SSL_CALL_INFO << " Read " << byteCount << " bytes" << std::endl;
+    std::cout << "[Client-TCP  ] " << SSL_CALL_INFO << " Read " << byteCount << " bytes from the IO device" << std::endl;
 
     if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
     _doSSL();
@@ -111,32 +111,33 @@ void SSLSocketClient::_doSSL()
     int byteCount = 0;
 
     if(_outBuff.length()) {
+        std::cerr << "[Client-SSL  ] " << SSL_CALL_INFO << " Writing pending data in the output buffer to the SSL handle" << std::endl;
         byteCount = SSLConnector::write(_outBuff.data(), _outBuff.length());
         if(byteCount > 0) _outBuff.erase(0, byteCount);
     }
 
-    if(!_inBuff.length()) {
-        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-        if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
-    }
-
     while(_inBuff.length()) {
+        std::cerr << "[Client-SSL  ] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-        std::cout << "[Client-SSL  ] " << SSL_CALL_INFO << " Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
-
-        byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
-        if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
     }
 
-    if(!_connected && SSLConnector::connectionEstablished()) {
-        _connected = true;
-        connected(*this);
+    std::cerr << "[Client-SSL  ] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
+    byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
+    if(byteCount > 0) _socket.beginWrite(_sslbuff, byteCount);
 
-        //SSL_SESSION* sess = SSL_get1_session(_ssl);
-        //SSL_set_session(_ssl, sess);
-        //SSL_SESSION_free(sess);
+    if(!_connected) {
+        std::cerr << "[Client-SSL  ] " << SSL_CALL_INFO << " SSL status = " << getStatusString() << std::endl;
+
+        if(connectionEstablished()) {
+            _connected = true;
+            connected(*this);
+        }
     }
+
+    //SSL_SESSION* sess = SSL_get1_session(_ssl);
+    //SSL_set_session(_ssl, sess);
+    //SSL_SESSION_free(sess);
 }
 
 } // namespace Pt
