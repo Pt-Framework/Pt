@@ -145,7 +145,7 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onOutput(Pt::System::IODevice& socket)
         {
             std::size_t n = _client.endWrite();
-            std::cout << "[SERVER      ]                     Wrote " << n << " bytes" << std::endl;
+            std::cout << "[SERVER      ]                     Wrote " << n << " bytes to the IO device" << std::endl;
 
             _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
         }
@@ -153,7 +153,7 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
         void onInput(Pt::System::IODevice& socket)
         {
             std::size_t n = _client.endRead();
-            std::cout << "[SERVER      ]                     Read " << n << " bytes" << std::endl;
+            std::cout << "[SERVER      ]                     Read " << n << " bytes from the IO device" << std::endl;
 
             Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
             std::cout << "[SERVER      ]                     Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
