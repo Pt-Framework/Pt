@@ -25,10 +25,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include <Pt/SourceInfo.h>
+#include <iostream>
+
 #include "SSLConnector.h"
 
 namespace Pt {
 namespace Ssl {
+
+static const std::string _getType(const SSLConnector* ssl, const std::string& funcName)
+{
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
+
+    char buff[1024];
+    sprintf(buff, "%s [%17s]", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+
+    return buff;
+}
 
 SSLConnector::SSLConnector(SSLContext& sslContext, const char* sessionID)
 : _in ( BIO_new(BIO_s_mem()) ),
@@ -88,11 +105,14 @@ const std::string SSLConnector::getPeerCN() const
 int SSLConnector::write(const char* buff, int len)
 {
     int bytesWritten = SSL_write(_ssl, buff, len);
-
     if(bytesWritten < 0) {
-        if(!SSL_want_read(_ssl)) throw "Connection error!";
+        if(!SSL_want_read(_ssl))
+            throw "Connection error!";
+        else
+            std::cerr << "[SSLConnector] " << _getType(this, PT_FUNCTION) << " SSL wants read" << std::endl;
         return 0;
     }
+    std::cerr << "[SSLConnector] " << _getType(this, PT_FUNCTION) << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
 
     return bytesWritten;
 }

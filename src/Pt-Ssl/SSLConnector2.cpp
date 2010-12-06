@@ -37,11 +37,13 @@ namespace Ssl {
 
 static const std::string _getType(const SSLConnector2* ssl, const std::string& funcName)
 {
-    std::string fn = funcName.substr(0, funcName.find_first_of("("));
-                fn = fn.substr(fn.find_last_of("::") + 1);;
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "%s [%17s]", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", fn.c_str());
+    sprintf(buff, "%s [%17s]", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
 
     return buff;
 }
@@ -85,7 +87,7 @@ void SSLConnector2::reset()
 
 int SSLConnector2::write(const char* buff, int len)
 {
-    _outBuff += std::string(buff, len);
+    _outBuff.append(buff, len);
     std::cerr << "[SSLConnector2] " << _getType(this, PT_FUNCTION) << " Wrote " << len << " bytes to the output buffer" << std::endl;
 
     _doSSL();
@@ -94,8 +96,10 @@ int SSLConnector2::write(const char* buff, int len)
 
 int SSLConnector2::readDecryptedData(char* buff, int size)
 {
+    if(size <= 0) return 0;
+
     const int avail = _decBuff.length();
-    if(!avail) return 0;
+    if(avail <= 0) return 0;
 
     if(avail <= size) {
         memcpy(buff, _decBuff.data(), avail);
@@ -170,7 +174,7 @@ int SSLConnector2::_pushData(const char* buff, int len)
         std::cerr << "[SSLConnector2] " << _getType(this, PT_FUNCTION) << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
 
         if(bytesRead > 0) {
-            _decBuff += std::string(_sslBuff, bytesRead);
+            _decBuff.append(_sslBuff, bytesRead);
             std::cerr << "[SSLConnector2] " << _getType(this, PT_FUNCTION) << " Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
 
             decryptedDataAvailable(*this);
@@ -243,7 +247,7 @@ void SSLConnector2::_onIODInput(System::IODevice& iod)
     const int byteCount = _iod.endRead();
     std::cerr << "[SSLConnector2] " << _getType(this, PT_FUNCTION) << " Read " << byteCount << " bytes from the IO device" << std::endl;
 
-    if(byteCount > 0) _inBuff += std::string(_iodBuff, byteCount);
+    if(byteCount > 0) _inBuff.append(_iodBuff, byteCount);
     std::cerr << "[SSLConnector2] " << _getType(this, PT_FUNCTION) << " Wrote " << byteCount << " bytes to the input buffer" << std::endl;
 
     _doSSL();
