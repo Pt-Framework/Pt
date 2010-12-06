@@ -31,6 +31,7 @@
 
 #include "SSLConnector2Server.h"
 #include "SSLConnector2Client.h"
+#include "openssl/err.h"
 
 namespace Pt {
 namespace Ssl {
@@ -179,6 +180,13 @@ int SSLConnector2::_pushData(const char* buff, int len)
     else {
         const int bytesRead = SSL_read(_ssl, _sslBuff, sizeof(_sslBuff));
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
+
+        if(bytesRead < 0){
+            char buf[255];
+            long lerr = ERR_get_error();
+            ERR_error_string_n(lerr, buf, sizeof(buf));
+            std::cerr << "ERROR: " << lerr << ": " << buf << std::endl;
+        }
 
         if(bytesRead > 0) {
             _decBuff.append(_sslBuff, bytesRead);

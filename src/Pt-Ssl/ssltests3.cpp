@@ -182,6 +182,7 @@ int main(int argc, char** argv)
         Client client(loop, addr, port, clientContext);
 
         loop.setIdleTimeout(2000);
+        loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
         std::cout << "[@@ main() @@@] ################################## OpenSSL test progam ended" << std::endl;
