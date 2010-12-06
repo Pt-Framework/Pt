@@ -33,6 +33,21 @@
 namespace Pt {
 namespace Ssl {
 
+#define SSL_CALL_INFO _getFuncName(PT_FUNCTION)
+
+static const std::string _getFuncName(const std::string& funcName)
+{
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
+
+    char buff[1024];
+    sprintf(buff, "[%17s]", f.c_str());
+
+    return buff;
+}
+
 SSLSocketServer::SSLSocketServer(System::EventLoop& loop, const std::string& addr, unsigned short port, SSLContext& sslContext, const char* sessionID)
 : SSLConnector(sslContext, sessionID), _loop(loop)
 {
@@ -51,6 +66,8 @@ SSLSocketServer::~SSLSocketServer()
 int SSLSocketServer::write(const char* buff, int len)
 {
     _outBuff += std::string(buff, len);
+    std::cerr << "[Server-SSL  ] " << SSL_CALL_INFO << " Wrote " << len << " bytes to the output buffer" << std::endl;
+
     _doSSL();
     return len;
 }
@@ -58,7 +75,7 @@ int SSLSocketServer::write(const char* buff, int len)
 void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
 {
     _client.accept(server);
-    std::cout << "[SERVER-TCP] Accepting client connection" << std::endl;
+    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Accepting client connection" << std::endl;
 
     _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
@@ -66,7 +83,7 @@ void SSLSocketServer::_onTCPAccept(Pt::Net::TcpServer& server)
 void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 {
     const int byteCount = _client.endWrite();
-    std::cout << "[SERVER-TCP] Wrote " << byteCount << " bytes" << std::endl;
+    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Wrote " << byteCount << " bytes" << std::endl;
 
     _client.beginRead(_tcpbuff, sizeof(_tcpbuff));
 }
@@ -74,7 +91,7 @@ void SSLSocketServer::_onTCPOutput(Pt::System::IODevice& socket)
 void SSLSocketServer::_onTCPInput(Pt::System::IODevice& socket)
 {
     const int byteCount = _client.endRead();
-    std::cout << "[SERVER-TCP] Read " << byteCount << " bytes" << std::endl;
+    std::cout << "[Server-TCP  ] " << SSL_CALL_INFO << "Read " << byteCount << " bytes" << std::endl;
 
     if(byteCount > 0) _inBuff += std::string(_tcpbuff, byteCount);
     _doSSL();
@@ -97,7 +114,6 @@ void SSLSocketServer::_doSSL()
     while(_inBuff.length()) {
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-        std::cout << "[SERVER-SSL] Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
         byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
         if(byteCount > 0) _client.beginWrite(_sslbuff, byteCount);

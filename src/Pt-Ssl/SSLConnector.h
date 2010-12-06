@@ -91,10 +91,11 @@ class PT_SSL_API SSLConnector {
         int readDecryptedData(char* buff, int size);
 
     protected:
-        BIO*        _in;  // Input BIO
-        BIO*        _out; // Output BIO
-        SSL*        _ssl; // OpenSSL's SSL handle
-        std::string _ddb; // Decrypted data buffer
+        BIO*        _in;             // Input BIO
+        BIO*        _out;            // Output BIO
+        SSL*        _ssl;            // OpenSSL's SSL handle
+        char        _sslBuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+        std::string _decBuff;        // Decrypted data buffer
 };
 
 

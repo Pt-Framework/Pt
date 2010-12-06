@@ -34,7 +34,9 @@
 namespace Pt {
 namespace Ssl {
 
-static const std::string _getType(const SSLConnector* ssl, const std::string& funcName)
+#define SSL_CALL_INFO _getFuncName(PT_FUNCTION)
+
+static const std::string _getFuncName(const std::string& funcName)
 {
     size_t      a = funcName.find_first_of("(");
     std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
@@ -42,7 +44,7 @@ static const std::string _getType(const SSLConnector* ssl, const std::string& fu
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "%s [%17s]", (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, "[%17s]", f.c_str());
 
     return buff;
 }
@@ -109,38 +111,60 @@ int SSLConnector::write(const char* buff, int len)
         if(!SSL_want_read(_ssl))
             throw "Connection error!";
         else
-            std::cerr << "[SSLConnector] " << _getType(this, PT_FUNCTION) << " SSL wants read" << std::endl;
+            std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " SSL wants read" << std::endl;
         return 0;
     }
-    std::cerr << "[SSLConnector] " << _getType(this, PT_FUNCTION) << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
+    std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
 
     return bytesWritten;
 }
 
 int SSLConnector::pullData(char* buff, int buffSize) const
 {
-    const int bytesRead = BIO_read(_out, buff, buffSize);
+    int bytesRead = 0;
 
-    if(bytesRead < 0) {
-        if(!BIO_should_retry(_out)) throw "Output buffer error!";
-        return 0;
+    while(!bytesRead) {
+        bytesRead = BIO_read(_out, buff, buffSize);
+        if(bytesRead < 0) {
+            if(!BIO_should_retry(_out))
+                throw "Output buffer error!";
+            else
+                std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Output BIO should retry R=" << BIO_should_read(_out) << " W=" << BIO_should_write(_out) << std::endl;
+            continue;
+        }
     }
+    std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Pulled " << bytesRead << " bytes from the output BIO" << std::endl;
 
     return bytesRead;
 }
 
 int SSLConnector::pushData(const char* buff, int len)
 {
-    const int bytesWritten = BIO_write(_in, buff, len);
+    int bytesWritten = 0;
+
+    while(!bytesWritten) {
+        bytesWritten = BIO_write(_in, buff, len);
+        if(bytesWritten < 0) {
+            if(!BIO_should_retry(_in))
+                throw "Output buffer error!";
+            else
+                std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Input BIO should retry R=" << BIO_should_read(_in) << " W=" << BIO_should_write(_in) << std::endl;
+            continue;
+        }
+    }
+    std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
 
     if(!SSL_is_init_finished(_ssl)) {
         SSL_do_handshake(_ssl);
     }
     else {
-        char rbuff[8192];
-        const int bytesRead = SSL_read(_ssl, rbuff, sizeof(rbuff));
+        const int bytesRead = SSL_read(_ssl, _sslBuff, sizeof(_sslBuff));
+        std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
+
         if(bytesRead > 0) {
-            _ddb += std::string(rbuff, bytesRead);
+            _decBuff.append(_sslBuff, bytesRead);
+            std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
+
             decryptedDataAvailable(*this);
         }
         else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
@@ -153,17 +177,23 @@ int SSLConnector::pushData(const char* buff, int len)
 
 int SSLConnector::readDecryptedData(char* buff, int size)
 {
-    const int avail = _ddb.length();
-    if(!avail) return 0;
+    if(size <= 0) return 0;
+
+    const int avail = _decBuff.length();
+    if(avail <= 0) return 0;
 
     if(avail <= size) {
-        memcpy(buff, _ddb.data(), avail);
-        _ddb.clear();
+        memcpy(buff, _decBuff.data(), avail);
+        _decBuff.clear();
+        std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+
         return avail;
     }
 
-    memcpy(buff, _ddb.data(), size);
-    _ddb.erase(0, size);
+    memcpy(buff, _decBuff.data(), size);
+    _decBuff.erase(0, size);
+    std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
+
     return size;
 }
 
