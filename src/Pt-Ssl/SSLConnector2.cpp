@@ -228,8 +228,8 @@ void SSLConnector2::_doSSL()
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
+        _checkDecryption();
     }
-    _checkDecryption();
 
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
     byteCount = _pullData(_sslBuff, sizeof(_sslBuff));
