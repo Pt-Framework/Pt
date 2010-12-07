@@ -30,7 +30,7 @@
 
 #include <string>
 #include <Pt/Signal.h>
-#include <Pt/System/IODevice.h>
+#include <Pt/System/StreamBuffer.h>
 
 #include "SSLContext.h"
 
@@ -72,19 +72,18 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         int readDecryptedData(char* buff, int size);
 
     protected:
-        SSL*              _ssl;            // OpenSSL's SSL handle
-        bool              _connected;      // A flag to indicate if a client has successfully connected to the server
-        char              _sslBuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+        SSL*                 _ssl;            // OpenSSL's SSL handle
+        bool                 _connected;      // A flag to indicate if a client has successfully connected to the server
 
-        BIO*              _in;             // Input BIO
-        std::string       _inBuff;         // Input buffer
+        BIO*                 _in;             // Input BIO
+        std::string          _inBuff;         // Input buffer
 
-        BIO*              _out;            // Output BIO
-        std::string       _outBuff;        // Output buffer
-        std::string       _decBuff;        // Decrypted data buffer
+        BIO*                 _out;            // Output BIO
+        std::string          _outBuff;        // Output buffer
+        std::string          _decBuff;        // Decrypted data buffer
 
-        System::IODevice& _iod;            // IO Device
-        char              _iodBuff[32768]; // SSL records can be up to 16KB, so this is just for safety
+        System::StreamBuffer _iosb;            // IO stream buffer
+        char                 _readBuff[32768]; // Read buffer; SSL records can be up to 16KB, so this is just for safety
 
         int _write(const char* buff, int len);
         int _pullData(char* buff, int buffSize) const;
@@ -92,8 +91,8 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         void _checkDecryption();
         void _doSSL();
 
-        void _onIODOutput(System::IODevice& iod);
-        void _onIODInput(System::IODevice& iod);
+        void _onIOSBOutput(System::StreamBuffer&);
+        void _onIOSBInput(System::StreamBuffer&);
 };
 
 
