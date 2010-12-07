@@ -49,6 +49,7 @@ void SSLMemoryConnector::processMessage(SSLConnector& src, SSLConnector& dst)
         while(bytesLeft) {
             const int bytesWritten = dst.pushData(buff + bytesRead - bytesLeft, bytesLeft);
             if(bytesWritten > 0) bytesLeft -= bytesWritten;
+            dst.checkDecryption();
         }
     }
 }

@@ -84,6 +84,10 @@ class PT_SSL_API SSLConnector {
         //! This functions return the number of bytes actually written.
         int pushData(const char* buff, int len);
 
+        //! \brief Check if any decrypted data is available.
+        //! This functions needs to be called after pushing data to the input buffer of this SSL connector.
+        void checkDecryption();
+
         //! \brief Signal that will be called when decrypted data is available.
         Signal<SSLConnector&> decryptedDataAvailable;
 

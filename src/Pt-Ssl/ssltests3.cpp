@@ -136,7 +136,6 @@ class Client : public Pt::Connectable {
         void _onSSLConnect(Pt::Ssl::SSLConnector2& ssl)
         {
             std::cout << "[@@ Client-SSL] ################################## Peer CN = " + _ssl->getPeerCN() << std::endl;
-            //_connected = true;
 
             sendMessage("Hello world from client!", 25);
         }
@@ -152,8 +151,6 @@ class Client : public Pt::Connectable {
                 cum += std::string(buff, len);
             } while(len > 0);
             std::cout << "[@@ Client-SSL] ################################## Receiving message from server: " << cum << std::endl;
-
-            //_waitResponse = false;
 
             sendMessage("Hello world from client!", 25);
         }

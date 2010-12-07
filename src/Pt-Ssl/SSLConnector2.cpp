@@ -174,6 +174,11 @@ int SSLConnector2::_pushData(const char* buff, int len)
     BIO_flush(_in);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
 
+    return bytesWritten;
+}
+
+void SSLConnector2::_checkDecryption()
+{
     if(!SSL_is_init_finished(_ssl)) {
         SSL_do_handshake(_ssl);
     }
@@ -182,10 +187,12 @@ int SSLConnector2::_pushData(const char* buff, int len)
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Read " << bytesRead << " bytes from the SSL handle" << std::endl;
 
         if(bytesRead < 0){
-            char buf[255];
             long lerr = ERR_get_error();
-            ERR_error_string_n(lerr, buf, sizeof(buf));
-            std::cerr << "ERROR: " << lerr << ": " << buf << std::endl;
+            if(lerr) {
+                char buf[255];
+                ERR_error_string_n(lerr, buf, sizeof(buf));
+                std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " ERROR " << lerr << ": " << buf << std::endl;
+            }
         }
 
         if(bytesRead > 0) {
@@ -198,8 +205,6 @@ int SSLConnector2::_pushData(const char* buff, int len)
             SSL_shutdown(_ssl);
         }
     }
-
-    return bytesWritten;
 }
 
 void SSLConnector2::_doSSL()
@@ -223,8 +228,8 @@ void SSLConnector2::_doSSL()
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-
     }
+    _checkDecryption();
 
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
     byteCount = _pullData(_sslBuff, sizeof(_sslBuff));

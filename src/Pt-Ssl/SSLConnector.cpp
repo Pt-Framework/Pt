@@ -156,6 +156,11 @@ int SSLConnector::pushData(const char* buff, int len)
     }
     std::cerr << "[SSLConnector] " << SSL_CALL_INFO << " Pushed " << bytesWritten << " bytes to the input BIO" << std::endl;
 
+    return bytesWritten;
+}
+
+void SSLConnector::checkDecryption()
+{
     if(!SSL_is_init_finished(_ssl)) {
         SSL_do_handshake(_ssl);
     }
@@ -173,8 +178,6 @@ int SSLConnector::pushData(const char* buff, int len)
             SSL_shutdown(_ssl);
         }
     }
-
-    return bytesWritten;
 }
 
 int SSLConnector::readDecryptedData(char* buff, int size)

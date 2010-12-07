@@ -59,7 +59,7 @@ class MySSLMemoryServer : public SSLMemoryServer {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            cerr << "[SERVER] " + cum << endl;
+            cerr << "[SERVER      ]                           " + cum << endl;
         }
 };
 
@@ -86,7 +86,7 @@ class MySSLMemoryClient : public SSLMemoryClient {
                 cum += std::string(buff, len);
             } while(len > 0);
 
-            cerr << "[CLIENT] " + cum << endl;
+            cerr << "[CLIENT      ]                           " + cum << endl;
         }
 };
 
@@ -100,13 +100,13 @@ int main()
         cerr << "----- Initializing SSL server and client -----" << endl;
         MySSLMemoryServer server(serverContext, "session123");
         MySSLMemoryClient client(clientContext, "session123");
-        cerr << "[MAIN()] Server: " << server.getStatusString() << endl;
-        cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Server: " << server.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Client: " << client.getStatusString() << endl;
 
         cerr << "----- Connecting client & server -----" << endl;
         client.connect(server);
-        cerr << "[MAIN()] Server: " << server.getStatusString() << endl;
-        cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Server: " << server.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Client: " << client.getStatusString() << endl;
 
         cerr << "----- Sending messages -----" << endl;
         client.write("Hello world from client!", 25);
@@ -116,8 +116,8 @@ int main()
 
         cerr << "----- Disconnecting client & server -----" << endl;
         client.disconnect();
-        cerr << "[MAIN()] Server: " << server.getStatusString() << endl;
-        cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Server: " << server.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Client: " << client.getStatusString() << endl;
 
         cerr << "----- Resetting client & server -----" << endl;
         server.reset();
@@ -125,8 +125,8 @@ int main()
 
         cerr << "----- Connecting client & server -----" << endl;
         client.connect(server);
-        cerr << "[MAIN()] Server: " << server.getStatusString() << endl;
-        cerr << "[MAIN()] Client: " << client.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Server: " << server.getStatusString() << endl;
+        cerr << "[MAIN()      ]                           Client: " << client.getStatusString() << endl;
 
         cerr << "----- Sending messages -----" << endl;
         client.write("Hello world from client!", 25);

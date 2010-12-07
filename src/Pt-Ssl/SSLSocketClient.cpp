@@ -123,6 +123,7 @@ void SSLSocketClient::_doSSL()
         byteCount = SSLConnector::pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
     }
+    checkDecryption();
 
     std::cerr << "[Client-SSL  ] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
     byteCount = SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));

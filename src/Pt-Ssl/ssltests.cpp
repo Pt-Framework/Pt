@@ -84,6 +84,8 @@ class Client : public Pt::Connectable, public Pt::Ssl::SSLConnector {
             Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
             std::cout << "[CLIENT      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
 
+            Pt::Ssl::SSLConnector::checkDecryption();
+
             if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from client!", 25);
 
             const int bytesRead = Pt::Ssl::SSLConnector::pullData(_sslbuff, sizeof(_sslbuff));
@@ -157,6 +159,8 @@ class Server : public Pt::Connectable, public Pt::Ssl::SSLConnector {
 
             Pt::Ssl::SSLConnector::pushData(_tcpbuff, n);
             std::cout << "[SERVER      ]                           Status = " << Pt::Ssl::SSLConnector::getStatusString() << std::endl;
+
+            Pt::Ssl::SSLConnector::checkDecryption();
 
             if(Pt::Ssl::SSLConnector::connectionEstablished()) Pt::Ssl::SSLConnector::write("Hello world from server!", 25);
 
