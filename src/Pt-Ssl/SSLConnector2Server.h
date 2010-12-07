@@ -37,8 +37,11 @@ namespace Ssl {
 //! \brief SSL connector.
 class PT_SSL_API SSLConnector2Server : public SSLConnector2 {
     public:
-        //! \brief Construct an SSL connector that uses the given context.
+        //! \brief Construct an SSL connector server that uses the given IO device and context.
         SSLConnector2Server(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
+
+        //! \brief Construct an SSL connector server that uses the given stream buffer and context.
+        SSLConnector2Server(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID);
 
         //! \brief Standard dtor.
         virtual ~SSLConnector2Server();

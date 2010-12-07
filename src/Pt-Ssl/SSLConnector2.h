@@ -41,8 +41,11 @@ namespace Ssl {
 //! \brief SSL connector.
 class PT_SSL_API SSLConnector2 : public Connectable {
     public:
-        //! \brief Construct an SSL connector that uses the given context.
+        //! \brief Construct an SSL connector that uses the given IO device and context.
         SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
+
+        //! \brief Construct an SSL connector that uses the given stream buffer and context.
+        SSLConnector2(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID);
 
         //! \brief Standard dtor.
         virtual ~SSLConnector2();
@@ -72,27 +75,27 @@ class PT_SSL_API SSLConnector2 : public Connectable {
         int readDecryptedData(char* buff, int size);
 
     protected:
-        SSL*                 _ssl;            // OpenSSL's SSL handle
-        bool                 _connected;      // A flag to indicate if a client has successfully connected to the server
+        BIO*                  _in;              // Input BIO
+        BIO*                  _out;             // Output BIO
+        SSL*                  _ssl;             // OpenSSL SSL handle
+        std::string           _inBuff;          // Data to be written to the input BIO
+        std::string           _sslWriteBuff;    // User writes the plain-data to be sent to this buffer
+        std::string           _sslDDataBuff;    // User reads the received decrypted-data from this buffer
+        bool                  _connected;       // A flag to indicate if a client has successfully connected to the server
+        bool                  _ownIOSB;         // A flag to indicate if this class own the stream buffer
+        System::StreamBuffer* _iosb;            // IO stream buffer
+        char                  _readBuff[32768]; // Generic read buffer; SSL records can be up to 16KB, so this is just for safety
 
-        BIO*                 _in;             // Input BIO
-        std::string          _inBuff;         // Input buffer
+        void _init(SSLContext& sslContext, const char* sessionID, System::IODevice* ioDevice, System::StreamBuffer* streamBuffer);
 
-        BIO*                 _out;            // Output BIO
-        std::string          _outBuff;        // Output buffer
-        std::string          _decBuff;        // Decrypted data buffer
-
-        System::StreamBuffer _iosb;            // IO stream buffer
-        char                 _readBuff[32768]; // Read buffer; SSL records can be up to 16KB, so this is just for safety
-
-        int _write(const char* buff, int len);
-        int _pullData(char* buff, int buffSize) const;
-        int _pushData(const char* buff, int len);
-        void _checkDecryption();
-        void _doSSL();
+        int  _pullData (      char* buff, int buffSize) const;
+        int  _pushData (const char* buff, int len     ) const;
+        void _readSSL  ();
+        int  _writeSSL (const char* buff, int len     ) const;
+        void _doSSL    ();
 
         void _onIOSBOutput(System::StreamBuffer&);
-        void _onIOSBInput(System::StreamBuffer&);
+        void _onIOSBInput (System::StreamBuffer&);
 };
 
 

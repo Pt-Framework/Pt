@@ -54,12 +54,33 @@ static const std::string _getType(const SSLConnector2* ssl, const std::string& f
 }
 
 SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID)
-: _ssl      ( SSL_new(sslContext._ctx) ),
+: _in       ( 0 ),
+  _out      ( 0 ),
+  _ssl      ( 0 ),
   _connected( false ),
-  _in       ( BIO_new(BIO_s_mem()) ),
-  _out      ( BIO_new(BIO_s_mem()) ),
-  _iosb     ( ioDevice, 8192, true )
+  _ownIOSB  ( false ),
+  _iosb     ( 0 )
+{ this->_init(sslContext, sessionID, &ioDevice, 0); }
+
+SSLConnector2::SSLConnector2(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID)
+: _in       ( 0 ),
+  _out      ( 0 ),
+  _ssl      ( 0 ),
+  _connected( false ),
+  _ownIOSB  ( true ),
+  _iosb     ( 0 )
+{ this->_init(sslContext, sessionID, 0, &streamBuffer); }
+
+void SSLConnector2::_init(SSLContext& sslContext, const char* sessionID, System::IODevice* ioDevice, System::StreamBuffer* streamBuffer)
 {
+    // Create the SSL objects
+    _in  = BIO_new(BIO_s_mem());
+    _out = BIO_new(BIO_s_mem());
+    _ssl = SSL_new(sslContext._ctx);
+
+    // Create the stream buffer object
+    _iosb = streamBuffer ? streamBuffer : (new System::StreamBuffer(*ioDevice, 8192, true));
+
     // Connect the BIO
     BIO_set_nbio(_in, 1);
     BIO_set_nbio(_out, 1);
@@ -70,12 +91,15 @@ SSLConnector2::SSLConnector2(System::IODevice& ioDevice, SSLContext& sslContext,
     if(sessionID) SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 
     // Connect the signals
-    _iosb.inputReady  += Pt::slot(*this, &SSLConnector2::_onIOSBInput  );
-    _iosb.outputReady += Pt::slot(*this, &SSLConnector2::_onIOSBOutput );
+    _iosb->inputReady  += Pt::slot(*this, &SSLConnector2::_onIOSBInput  );
+    _iosb->outputReady += Pt::slot(*this, &SSLConnector2::_onIOSBOutput );
 }
 
 SSLConnector2::~SSLConnector2()
-{ SSL_free(_ssl); }
+{
+    SSL_free(_ssl);
+    if(_ownIOSB) delete _iosb;
+}
 
 bool SSLConnector2::connectionEstablished() const
 { return SSL_get_state(_ssl) == SSL_ST_OK; }
@@ -92,7 +116,7 @@ void SSLConnector2::reset()
 
 int SSLConnector2::write(const char* buff, int len)
 {
-    _outBuff.append(buff, len);
+    _sslWriteBuff.append(buff, len);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << len << " bytes to the output buffer" << std::endl;
 
     _doSSL();
@@ -103,37 +127,22 @@ int SSLConnector2::readDecryptedData(char* buff, int size)
 {
     if(size <= 0) return 0;
 
-    const int avail = _decBuff.length();
+    const int avail = _sslDDataBuff.length();
     if(avail <= 0) return 0;
 
     if(avail <= size) {
-        memcpy(buff, _decBuff.data(), avail);
-        _decBuff.clear();
+        memcpy(buff, _sslDDataBuff.data(), avail);
+        _sslDDataBuff.clear();
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Retrieved " << avail << " bytes from the decrypted data buffer" << std::endl;
 
         return avail;
     }
 
-    memcpy(buff, _decBuff.data(), size);
-    _decBuff.erase(0, size);
+    memcpy(buff, _sslDDataBuff.data(), size);
+    _sslDDataBuff.erase(0, size);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Retrieved " << size << " bytes from the decrypted data buffer" << std::endl;
 
     return size;
-}
-
-int SSLConnector2::_write(const char* buff, int len)
-{
-    int bytesWritten = SSL_write(_ssl, buff, len);
-    if(bytesWritten < 0) {
-        if(!SSL_want_read(_ssl))
-            throw "Connection error!";
-        else
-            std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " SSL wants read" << std::endl;
-        return 0;
-    }
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
-
-    return bytesWritten;
 }
 
 int SSLConnector2::_pullData(char* buff, int buffSize) const
@@ -157,7 +166,7 @@ int SSLConnector2::_pullData(char* buff, int buffSize) const
     return bytesRead;
 }
 
-int SSLConnector2::_pushData(const char* buff, int len)
+int SSLConnector2::_pushData(const char* buff, int len) const
 {
     int bytesWritten = 0;
 
@@ -177,7 +186,7 @@ int SSLConnector2::_pushData(const char* buff, int len)
     return bytesWritten;
 }
 
-void SSLConnector2::_checkDecryption()
+void SSLConnector2::_readSSL()
 {
     if(!SSL_is_init_finished(_ssl)) {
         SSL_do_handshake(_ssl);
@@ -194,9 +203,8 @@ void SSLConnector2::_checkDecryption()
                 std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " ERROR " << lerr << ": " << buf << std::endl;
             }
         }
-
-        if(bytesRead > 0) {
-            _decBuff.append(_readBuff, bytesRead);
+        else if(bytesRead > 0) {
+            _sslDDataBuff.append(_readBuff, bytesRead);
             std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Stored " << bytesRead << " bytes to the decrypted data buffer" << std::endl;
 
             decryptedDataAvailable(*this);
@@ -207,34 +215,49 @@ void SSLConnector2::_checkDecryption()
     }
 }
 
+int SSLConnector2::_writeSSL(const char* buff, int len) const
+{
+    int bytesWritten = SSL_write(_ssl, buff, len);
+    if(bytesWritten < 0) {
+        if(!SSL_want_read(_ssl))
+            throw "Connection error!";
+        else
+            std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " SSL wants read" << std::endl;
+        return 0;
+    }
+    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << bytesWritten << " bytes to the SSL handle" << std::endl;
+
+    return bytesWritten;
+}
+
 void SSLConnector2::_doSSL()
 {
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " _doSSL() started" << std::endl;
 
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from IO device" << std::endl;
-    _iosb.beginRead();
+    _iosb->beginRead();
 
     int byteCount = 0;
 
-    if(_outBuff.length()) {
+    if(_sslWriteBuff.length()) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Writing pending data in the output buffer to the SSL handle" << std::endl;
-        byteCount = _write(_outBuff.data(), _outBuff.length());
-        if(byteCount > 0) _outBuff.erase(0, byteCount);
+        byteCount = _writeSSL(_sslWriteBuff.data(), _sslWriteBuff.length());
+        if(byteCount > 0) _sslWriteBuff.erase(0, byteCount);
     }
 
     while(_inBuff.length()) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
         if(byteCount > 0) _inBuff.erase(0, byteCount);
-        _checkDecryption();
+        _readSSL();
     }
 
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
     byteCount = _pullData(_readBuff, sizeof(_readBuff));
     if(byteCount > 0) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin write to IO device" << std::endl;
-        _iosb.sputn(_readBuff, byteCount);
-        _iosb.beginWrite();
+        _iosb->sputn(_readBuff, byteCount);
+        _iosb->beginWrite();
     }
 
     if(!_connected) {
@@ -251,18 +274,18 @@ void SSLConnector2::_doSSL()
 
 void SSLConnector2::_onIOSBOutput(System::StreamBuffer&)
 {
-    const int byteCount = _iosb.endWrite();
+    const int byteCount = _iosb->endWrite();
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the IO device" << std::endl;
 
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from IO device" << std::endl;
-    _iosb.beginRead();
+    _iosb->beginRead();
 }
 
 void SSLConnector2::_onIOSBInput(System::StreamBuffer&)
 {
-    _iosb.endRead();
-    const int byteCount = std::min<size_t>(_iosb.in_avail(), sizeof(_readBuff));
-    _iosb.sgetn(_readBuff, byteCount);
+    _iosb->endRead();
+    const int byteCount = std::min<size_t>(_iosb->in_avail(), sizeof(_readBuff));
+    _iosb->sgetn(_readBuff, byteCount);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Read " << byteCount << " bytes from the IO device" << std::endl;
 
     if(byteCount > 0) _inBuff.append(_readBuff, byteCount);

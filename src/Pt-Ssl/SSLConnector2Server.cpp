@@ -37,6 +37,10 @@ SSLConnector2Server::SSLConnector2Server(System::IODevice& ioDevice, SSLContext&
 : SSLConnector2(ioDevice, sslContext, sessionID)
 { }
 
+SSLConnector2Server::SSLConnector2Server(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID)
+: SSLConnector2(streamBuffer, sslContext, sessionID)
+{ }
+
 SSLConnector2Server::~SSLConnector2Server()
 { }
 
