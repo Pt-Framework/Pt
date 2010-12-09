@@ -77,6 +77,8 @@ class PT_SSL_API SSLStreamBuffer : public Connectable, public std::streambuf {
 
         virtual std::streambuf::int_type overflow(std::streambuf::int_type ch);
         virtual std::streambuf::int_type underflow();
+        virtual std::streamsize showmanyc();
+
         virtual int sync();
 
         static const int SB_SIZE = 16;

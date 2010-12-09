@@ -327,6 +327,9 @@ std::streambuf::int_type SSLStreamBuffer::underflow()
     return traits_type::to_int_type(*gptr());
 }
 
+std::streamsize SSLStreamBuffer::showmanyc()
+{ return _sslDDataBuff.length(); }
+
 int SSLStreamBuffer::sync()
 {
     const int avail = _sslWriteBuff.length();
