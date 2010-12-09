@@ -234,7 +234,7 @@ void SSLConnector2::_doSSL()
 {
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " _doSSL() started" << std::endl;
 
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from stream buffer" << std::endl;
     _iosb->beginRead();
 
     int byteCount = 0;
@@ -257,7 +257,7 @@ void SSLConnector2::_doSSL()
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Trying to pull data from the output BIO" << std::endl;
     byteCount = _pullData(_readBuff, sizeof(_readBuff));
     if(byteCount > 0) {
-        std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin write to IO device" << std::endl;
+        std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin write to stream buffer" << std::endl;
         _iosb->sputn(_readBuff, byteCount);
         _iosb->beginWrite();
     }
@@ -277,9 +277,9 @@ void SSLConnector2::_doSSL()
 void SSLConnector2::_onIOSBOutput(System::StreamBuffer&)
 {
     const int byteCount = _iosb->endWrite();
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the stream buffer" << std::endl;
 
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from stream buffer" << std::endl;
     _iosb->beginRead();
 }
 
@@ -288,7 +288,7 @@ void SSLConnector2::_onIOSBInput(System::StreamBuffer&)
     _iosb->endRead();
     const int byteCount = std::min<size_t>(_iosb->in_avail(), sizeof(_readBuff));
     _iosb->sgetn(_readBuff, byteCount);
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Read " << byteCount << " bytes from the IO device" << std::endl;
+    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Read " << byteCount << " bytes from the stream buffer" << std::endl;
 
     if(byteCount > 0) _inBuff.append(_readBuff, byteCount);
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the input buffer" << std::endl;
