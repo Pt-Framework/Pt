@@ -48,7 +48,7 @@ static const std::string _getType(const SSLStreamBuffer* ssl, const std::string&
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "%05d %s [%17s]", count++, (dynamic_cast<const SSLStreamBufferServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, "%06d %s [%17s]", count++, (dynamic_cast<const SSLStreamBufferServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
 
     return buff;
 }
@@ -93,6 +93,10 @@ void SSLStreamBuffer::_init(SSLContext& sslContext, const char* sessionID, Syste
     // Connect the signals
     _iosb->inputReady  += Pt::slot(*this, &SSLStreamBuffer::_onIOSBInput  );
     _iosb->outputReady += Pt::slot(*this, &SSLStreamBuffer::_onIOSBOutput );
+
+
+    //
+    setg(_sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB);
 }
 
 SSLStreamBuffer::~SSLStreamBuffer()
@@ -306,12 +310,29 @@ std::streambuf::int_type SSLStreamBuffer::overflow(std::streambuf::int_type ch)
     return ch;
 }
 
+std::streambuf::int_type SSLStreamBuffer::underflow()
+{
+    if(gptr() < egptr()) return traits_type::to_int_type(*gptr());
+
+    int numPutBack = gptr() - eback();
+    if(numPutBack > SB_PUTB) numPutBack = SB_PUTB;
+
+    std::memmove(_sbBuffer + SB_PUTB - numPutBack, gptr() - numPutBack, numPutBack);
+
+    int num = readDecryptedData(_sbBuffer + SB_PUTB, SB_SIZE - SB_PUTB);
+    if(num <= 0) return EOF;
+
+    setg(_sbBuffer + SB_PUTB - numPutBack, _sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB + num);
+
+    return traits_type::to_int_type(*gptr());
+}
+
 int SSLStreamBuffer::sync()
 {
     const int avail = _sslWriteBuff.length();
     if(!avail) return 0;
 
-    std::cerr << "[SSLStreamBuffer] " << SSL_CALL_INFO << " Tryng to flush " << avail << " bytes from the output buffer" << std::endl;
+    std::cerr << "[SSLStreamBuffer] " << SSL_CALL_INFO << " Trying to flush " << avail << " bytes from the output buffer" << std::endl;
     _doSSL();
 
     return 0;

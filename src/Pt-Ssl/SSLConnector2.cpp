@@ -48,7 +48,7 @@ static const std::string _getType(const SSLConnector2* ssl, const std::string& f
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "%05d %s [%17s]", count++, (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, "%06d %s [%17s]", count++, (dynamic_cast<const SSLConnector2Server*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
 
     return buff;
 }
