@@ -39,7 +39,7 @@ namespace Ssl {
 
 //!
 //! \brief SSL connector.
-class PT_SSL_API SSLStreamBuffer : public Connectable {
+class PT_SSL_API SSLStreamBuffer : public Connectable, public std::streambuf {
     public:
         //! \brief Construct an SSL connector that uses the given IO device and context.
         SSLStreamBuffer(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
