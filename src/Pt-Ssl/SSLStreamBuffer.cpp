@@ -296,5 +296,28 @@ void SSLStreamBuffer::_onIOSBInput(System::StreamBuffer&)
     _doSSL();
 }
 
+
+
+
+
+std::streambuf::int_type SSLStreamBuffer::overflow(std::streambuf::int_type ch)
+{
+    _sslWriteBuff += ch;
+    return ch;
+}
+
+int SSLStreamBuffer::sync()
+{
+    const int avail = _sslWriteBuff.length();
+    if(!avail) return 0;
+
+    std::cerr << "[SSLStreamBuffer] " << SSL_CALL_INFO << " Tryng to flush " << avail << " bytes from the output buffer" << std::endl;
+    _doSSL();
+
+    return 0;
+}
+
+
+
 } // namespace Pt
 } // namespace Ssl

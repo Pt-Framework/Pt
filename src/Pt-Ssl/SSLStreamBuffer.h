@@ -74,6 +74,10 @@ class PT_SSL_API SSLStreamBuffer : public Connectable, public std::streambuf {
         //! \brief Call this function to get the decrypted data.
         int readDecryptedData(char* buff, int size);
 
+
+        virtual std::streambuf::int_type overflow(std::streambuf::int_type ch);
+        int sync();
+
     protected:
         BIO*                  _in;              // Input BIO
         BIO*                  _out;             // Output BIO
