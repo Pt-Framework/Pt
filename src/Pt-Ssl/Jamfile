@@ -3,15 +3,33 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
-Main SSLConnectorTest : SSLContext.cpp SSLConnector2.cpp SSLConnector2Server.cpp SSLConnector2Client.cpp SSLConnectorTest.cpp ;
-LinkSharedLibraries SSLConnectorTest : Pt Pt-Net Pt-System ;
-LinkLibraries SSLConnectorTest : Pt-Ssl-openssl ;
+SharedLibrary Pt-Ssl : SSLContext.cpp
+                       SSLConnector2.cpp
+                       SSLConnector2Server.cpp
+                       SSLConnector2Client.cpp
+                       SSLStreamBuffer.cpp
+                       SSLStreamBufferServer.cpp
+                       SSLStreamBufferClient.cpp
+                       ;
+
+SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
+SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
+SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+
+Main SSLConnectorTest : SSLConnectorTest.cpp ;
+LinkSharedLibraries SSLConnectorTest : Pt-Ssl ;
 MakeLocate SSLConnectorTest : $(OUTPUT_TARGET) ;
+
+Main SSLStreamBufferTest : SSLStreamBufferTest.cpp ;
+LinkSharedLibraries SSLStreamBufferTest : Pt-Ssl ;
+MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {
-    LinkFlags SSLConnectorTest : #crypt32.lib
-                                 user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags SSLConnectorTest    : #crypt32.lib
+                                    user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags SSLStreamBufferTest : #crypt32.lib
+                                    user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
 }
 
 File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;

@@ -25,39 +25,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCONTEXT_H
-#define PT_SSL_SSLCONTEXT_H
 
-#include "Api.h"
+#include <iostream>
 
-#include <string>
-#include <openssl/ssl.h>
+#include "SSLStreamBufferServer.h"
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief SSL context.
-class PT_SSL_API SSLContext {
-    public:
-        //! \brief Construct an SSL context that uses the given certificate-key file and password.
-        SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID);
+SSLStreamBufferServer::SSLStreamBufferServer(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID)
+: SSLStreamBuffer(ioDevice, sslContext, sessionID)
+{ }
 
-        //! \brief Standard dtor.
-        ~SSLContext();
+SSLStreamBufferServer::SSLStreamBufferServer(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID)
+: SSLStreamBuffer(streamBuffer, sslContext, sessionID)
+{ }
 
-        friend class SSLConnector2;
-        friend class SSLStreamBuffer;
+SSLStreamBufferServer::~SSLStreamBufferServer()
+{ }
 
-    private:
-        SSL_CTX*    _ctx;    // OpenSSL's SSL context
-        std::string _pswd;   // The password
-        static BIO* _bioErr; // Error BIO for OpenSSL
-
-        // Password callback to feed the password to OpenSSL
-        static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
-};
+void SSLStreamBufferServer::accept()
+{
+    SSL_set_accept_state(_ssl);
+    _doSSL();
+}
 
 } // namespace Pt
 } // namespace Ssl
-
-#endif

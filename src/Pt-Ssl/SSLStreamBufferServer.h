@@ -25,37 +25,31 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCONTEXT_H
-#define PT_SSL_SSLCONTEXT_H
+#ifndef PT_SSL_SSLSTREAMBUFFER_SERVER_H
+#define PT_SSL_SSLSTREAMBUFFER_SERVER_H
 
-#include "Api.h"
-
-#include <string>
-#include <openssl/ssl.h>
+#include "SSLStreamBuffer.h"
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief SSL context.
-class PT_SSL_API SSLContext {
+//!
+//! \brief SSL connector.
+class PT_SSL_API SSLStreamBufferServer : public SSLStreamBuffer {
     public:
-        //! \brief Construct an SSL context that uses the given certificate-key file and password.
-        SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID);
+        //! \brief Construct an SSL connector server that uses the given IO device and context.
+        SSLStreamBufferServer(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
+
+        //! \brief Construct an SSL connector server that uses the given stream buffer and context.
+        SSLStreamBufferServer(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID);
 
         //! \brief Standard dtor.
-        ~SSLContext();
+        virtual ~SSLStreamBufferServer();
 
-        friend class SSLConnector2;
-        friend class SSLStreamBuffer;
-
-    private:
-        SSL_CTX*    _ctx;    // OpenSSL's SSL context
-        std::string _pswd;   // The password
-        static BIO* _bioErr; // Error BIO for OpenSSL
-
-        // Password callback to feed the password to OpenSSL
-        static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
+        //! \brief Activate this SSL connector as an SSL connector server and wait for a connection from an SSL connector client.
+        void accept();
 };
+
 
 } // namespace Pt
 } // namespace Ssl
