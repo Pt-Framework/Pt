@@ -239,12 +239,14 @@ void SSLConnector2::_doSSL()
 
     int byteCount = 0;
 
+    // TODO: May need to add mechanism to 'redo' this so that a very long message will be sent automatically
     if(_sslWriteBuff.length()) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Writing pending data in the output buffer to the SSL handle" << std::endl;
         byteCount = _writeSSL(_sslWriteBuff.data(), _sslWriteBuff.length());
         if(byteCount > 0) _sslWriteBuff.erase(0, byteCount);
     }
 
+    // TODO: May need to defer the invocation of the 'decryptedDataAvailable' until at the end of this function
     while(_inBuff.length()) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Pushing pending data in the input buffer to the input BIO" << std::endl;
         byteCount = _pushData(_inBuff.data(), _inBuff.length());
