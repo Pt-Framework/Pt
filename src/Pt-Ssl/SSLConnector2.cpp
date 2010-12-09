@@ -239,7 +239,6 @@ void SSLConnector2::_doSSL()
 
     int byteCount = 0;
 
-    // TODO: May need to add mechanism to 'redo' this so that a very long message will be sent automatically
     if(_sslWriteBuff.length()) {
         std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Writing pending data in the output buffer to the SSL handle" << std::endl;
         byteCount = _writeSSL(_sslWriteBuff.data(), _sslWriteBuff.length());
@@ -279,8 +278,7 @@ void SSLConnector2::_onIOSBOutput(System::StreamBuffer&)
     const int byteCount = _iosb->endWrite();
     std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " Wrote " << byteCount << " bytes to the stream buffer" << std::endl;
 
-    std::cerr << "[SSLConnector2] " << SSL_CALL_INFO << " begin read from stream buffer" << std::endl;
-    _iosb->beginRead();
+    _doSSL();
 }
 
 void SSLConnector2::_onIOSBInput(System::StreamBuffer&)
