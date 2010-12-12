@@ -65,7 +65,7 @@ namespace Pt{
  * than blocksAvailable_.  Much of the allocator's time and space efficiency
  * comes from how these stealth indexes are implemented.
  */
-class Chunk
+class PT_API Chunk
 {
 	friend class ::AllocatorTest;
 public:
