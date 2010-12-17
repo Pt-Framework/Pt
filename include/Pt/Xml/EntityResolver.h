@@ -56,7 +56,7 @@ class PT_XML_API EntityResolver {
         /**
          * @brief Resets the entity list to the XML default entities.
          *
-         * The default entities are &amp;lt; &amp;gt; &amp;amp; &amp;apos; &amp;quot;
+         * The default entities are all entities from HTML4
          */
         void clear();
 
@@ -73,17 +73,19 @@ class PT_XML_API EntityResolver {
         /**
          * @brief Returns the resolved entity value (token) for the given entity.
          *
-         * If the entity is not in the list an empty String is returned.
+         * If the entity is not in the list or an dec or hex entity is invalid an exception is thrown.
          *
          * @param entity The resolved entity value for this entity is returned.
-         * @return The resolved entity or an empty String if the entity is not in the list.
+         * @return The resolved entity.
+         * @throws XmlError if the entity is not in the list.
+         *
          */
-        String resolveEntity(const String& entity);
+        String resolveEntity(const String& entity) const;
 
     private:
         //! Entity map containing entities which are associated to their resolved entity value.
         typedef std::map<String, String> EntityMap;
-        std::map<String, String> _entityMap;
+        EntityMap _entityMap;
 };
 
 }

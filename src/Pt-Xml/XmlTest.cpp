@@ -457,7 +457,7 @@ void XmlTest::AttributeWithSimpleText()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    input << "<a b=\"abcdefghijklmnopqrstuvwxyz\"/>";
+    input << "<a b=\"a bcdefghijklmnopqrstuvwxyz\"/>";
 
     Pt::Xml::XmlReader reader( input );
 
@@ -468,7 +468,7 @@ void XmlTest::AttributeWithSimpleText()
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&startNode);
 
     PT_UNIT_ASSERT(tag->hasAttribute(L"b"));
-    PT_UNIT_ASSERT(tag->attribute(L"b").narrow() == "abcdefghijklmnopqrstuvwxyz");
+    PT_UNIT_ASSERT(tag->attribute(L"b").narrow() == "a bcdefghijklmnopqrstuvwxyz");
 }
 
 
