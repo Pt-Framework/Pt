@@ -83,6 +83,8 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 namespace Pt {
 
     typedef std::basic_stringstream<Pt::Char> StringStream;
+    typedef std::basic_istringstream<Pt::Char> IStringStream;
+    typedef std::basic_ostringstream<Pt::Char> OStringStream;
 
 } // namespace Pt
 

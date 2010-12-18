@@ -67,7 +67,7 @@ StartElement::~StartElement()
 }
 
 
-const String& StartElement::attribute(const String attributeName) const
+const String& StartElement::attribute(const String& attributeName) const
 {
     static const String null;
     

@@ -131,7 +131,7 @@ void XmlTest::MissingXmlDeclaration()
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
 
-    PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement != 0);
+    PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
     PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().narrow() == "a");
     PT_UNIT_ASSERT( reader.depth() == 1)
 

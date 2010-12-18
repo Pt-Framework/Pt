@@ -25,6 +25,7 @@
  */
 #include "Pt/Xml/XmlWriter.h"
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/EntityResolver.h"
 #include "Pt/Utf8Codec.h"
 #include <iostream>
 
@@ -166,41 +167,11 @@ void XmlWriter::writeElement(const Pt::String& localName, const Attribute* attr,
 
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    static const Pt::Char lt[] = { '&', 'l', 't', ';', 0 };
-    static const Pt::Char gt[] = { '&', 'g', 't', ';', 0 };
-    static const Pt::Char amp[] = { '&', 'a', 'm', 'p', ';', 0 };
-    static const Pt::Char quot[] = { '&', 'q', 'u', 'o', 't', ';', 0 };
-    static const Pt::Char apos[] = { '&', 'a', 'p', 'o', 's', ';', 0 };
+    static EntityResolver resolver;
 
     Pt::String::const_iterator it;
     for(it = text.begin(); it != text.end(); ++it)
-    {
-        switch( it->value() )
-        {
-            case '<':
-                _tos << lt;
-                break;
-
-            case '>':
-                _tos << gt;
-                break;
-
-            case '&':
-                _tos << amp;
-                break;
-
-            case '"':
-                _tos << quot;
-                break;
-
-            case '\'':
-                _tos << apos;
-                break;
-
-            default:
-                _tos << *it;
-        }
-    }
+        resolver.getEntity(_tos, *it);
 }
 
 

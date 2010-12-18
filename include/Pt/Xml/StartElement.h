@@ -227,7 +227,7 @@ namespace Xml {
              * @return The value of the request attribute; or an empty string if there is no attribute
              * with this name.
              */
-            const String& attribute(const String attributeName) const;
+            const String& attribute(const String& attributeName) const;
 
             /**
              * @return Checks if the StartElement has an attribute with the given name.
