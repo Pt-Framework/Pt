@@ -102,7 +102,7 @@ class ClientImpl : public Pt::Connectable
         virtual std::ostream& prepareRequest() = 0;
 
     protected:
-        void prepareRequest(const std::string& name, IDecomposer** argv, unsigned argc);
+        void prepareRequest(const String& name, IDecomposer** argv, unsigned argc);
 
         void advance(const Xml::Node& node);
 

@@ -59,10 +59,10 @@ namespace Pt {
                  * @param name The name of the EndElement object. This is an optional parameter.
                  * Default is an empty string.
                  */
-                EndElement(const String& name = String());
-
-                //! Empty destructor
-                ~EndElement();
+                explicit EndElement(const String& name = String())
+                : Node(Node::EndElement),
+                  _name(name)
+                { }
 
                 /**
                  * @brief Clones this EndElement object by creating a duplicate on the heap and returning it.
@@ -83,7 +83,8 @@ namespace Pt {
                  *
                  * @return The tag name of the closing tag for which this EndElement object was created.
                  */
-                String& name();
+                String& name()
+                { return _name; }
 
                 /**
                  * @brief Returns the tag name of the closing tag for which this EndElement object was created.
@@ -94,13 +95,15 @@ namespace Pt {
                  *
                  * @return The tag name of the closing tag for which this EndElement object was created.
                  */
-                const String& name() const;
+                const String& name() const
+                { return _name; }
 
                 /**
                  * @brief Sets the tag name of the end tag for which this EndElement object was created.
                  * @param name The new name for this EndElement object.
                  */
-                void setName(const String name);
+                void setName(const String& name)
+                { _name = name; }
 
                 /**
                  * @brief Compares this EndElement object with the given node.

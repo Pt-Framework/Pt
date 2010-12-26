@@ -47,12 +47,8 @@ namespace Pt {
             public:
                 //! Creates an EndDocument object.
                 EndDocument()
-                : Node( Xml::Node::EndDocument )
-                {}
-
-                //! Destructs this EndDocument object.
-                ~EndDocument()
-                {}
+                : Node(Node::EndDocument)
+                { }
 
                 /**
                  * @brief Clones this EndDocument object by creating a duplicate on the heap and returning it.

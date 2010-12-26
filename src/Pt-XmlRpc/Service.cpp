@@ -38,10 +38,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-Service::Service()
-{
-}
-
 
 Service::~Service()
 {

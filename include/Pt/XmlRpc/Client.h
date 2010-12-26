@@ -52,7 +52,9 @@ class PT_XMLRPC_API Client : public NonCopyable
         void impl(ClientImpl* i) { _impl = i; }
 
     public:
-        Client();
+        Client()
+        : _impl(0)
+        { }
 
         virtual ~Client();
 

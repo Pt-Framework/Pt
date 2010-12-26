@@ -8,7 +8,6 @@ PT_XMLRPC_SOURCES = Client.cpp
                     Formatter.cpp
                     HttpClient.cpp
                     HttpClientImpl.cpp
-                    RemoteProcedure.cpp
                     Responder.cpp
                     Scanner.cpp
                     Service.cpp ;

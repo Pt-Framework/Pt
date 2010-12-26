@@ -42,11 +42,13 @@ namespace XmlRpc {
 class PT_XMLRPC_API Formatter : public Pt::Formatter
 {
     public:
-        Formatter(Xml::XmlWriter& writer);
+        Formatter(Xml::XmlWriter& writer)
+        : _writer(&writer)
+        { }
 
-        ~Formatter();
 
-        void attach(Xml::XmlWriter& writer);
+        void attach(Xml::XmlWriter& writer)
+        { _writer = &writer; }
 
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);

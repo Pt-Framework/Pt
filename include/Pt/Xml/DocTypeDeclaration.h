@@ -51,10 +51,9 @@ namespace Xml {
             /**
              * @brief Constructs a new DocTypeDeclaration object with the given string as content.
              */
-            DocTypeDeclaration();
-
-            //! Empty destructor
-            ~DocTypeDeclaration();
+            DocTypeDeclaration()
+            : Node(Node::DocType)
+            { }
 
             void clear()
             { _content.clear(); }
@@ -70,7 +69,8 @@ namespace Xml {
              * @brief Returns the content of this DocTypeDeclaration object.
              * @return The content of this DocTypeDeclaration object.
              */
-            const String& content() const;
+            const String& content() const
+            { return _content; }
 
             String& content()
             { return _content; }
@@ -79,7 +79,8 @@ namespace Xml {
              * @brief Sets the content of this DocTypeDeclaration object.
              * @param content The new content for this DocTypeDeclaration object.
              */
-            void setContent(const String& content);
+            void setContent(const String& content)
+            { _content = content; }
 
         private:
             //! The content of this DocTypeDeclaration object.

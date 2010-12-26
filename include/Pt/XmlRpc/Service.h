@@ -474,7 +474,8 @@ class BasicServiceProcedure<R, C, Pt::Void,
 class PT_XMLRPC_API Service : public Http::Service
 {
     public:
-        Service();
+        Service()
+        { }
 
         virtual ~Service();
 

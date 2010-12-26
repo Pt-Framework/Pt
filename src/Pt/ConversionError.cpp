@@ -29,9 +29,19 @@
 
 namespace Pt {
 
-ConversionError::ConversionError(const char* msg)
+ConversionError::ConversionError(const std::string& msg)
 : std::runtime_error(msg)
 {
+}
+
+void ConversionError::doThrow(const char* typeto, const char* typefrom)
+{
+    std::string msg = "conversion from ";
+    msg += typefrom;
+    msg += " to ";
+    msg += typeto;
+    msg += " failed";
+    throw ConversionError(msg);
 }
 
 }

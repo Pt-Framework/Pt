@@ -29,43 +29,6 @@ namespace Pt {
 
 namespace Xml {
 
-Attribute::Attribute()
-{
-}
-
-
-Attribute::Attribute(const String& name, const String& value) 
-: _name(name), _value(value)
-{
-}
-
-
-Attribute::~Attribute()
-{
-}
-
-
-
-
-
-StartElement::StartElement() 
-: Node(Node::StartElement)
-{
-
-}
-
-
-StartElement::StartElement(const String& name)
-: Node(Node::StartElement),
-  _name(name)
-{
-}
-
-
-StartElement::~StartElement()
-{
-}
-
 
 const String& StartElement::attribute(const String& attributeName) const
 {
@@ -81,7 +44,7 @@ const String& StartElement::attribute(const String& attributeName) const
 }
 
 
-bool StartElement::hasAttribute(const String attributeName) const
+bool StartElement::hasAttribute(const String& attributeName) const
 {
     for(std::list<Attribute>::const_iterator it = _attributes.begin(); it != _attributes.end(); ++it) {
         if(it->name() == attributeName) {

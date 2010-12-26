@@ -34,11 +34,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-Client::Client()
-: _impl(0)
-{
-}
-
 Client::~Client()
 {
 }

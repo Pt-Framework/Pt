@@ -35,21 +35,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-Formatter::Formatter(Xml::XmlWriter& writer)
-: _writer(&writer)
-{
-}
-
-
-Formatter::~Formatter()
-{
-}
-
-
-void Formatter::attach(Xml::XmlWriter& writer)
-{
-    _writer = &writer;
-}
 
 
 void Formatter::addValue(const std::string& name, const std::string& type,

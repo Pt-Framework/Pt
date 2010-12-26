@@ -32,18 +32,18 @@
 #include <Pt/SourceInfo.h>
 #include <stdexcept>
 
-#define PT_CONVERSIONERROR(to, from) \
-    PT_ERROR_MSG("conversion from " #from " to " #to " failed")
-
 namespace Pt {
 
 class PT_API ConversionError : public std::runtime_error
 {
     public:
-        ConversionError(const char* msg);
+        explicit ConversionError(const std::string& msg);
 
         ~ConversionError() throw()
         {}
+
+        static void doThrow(const char* typeto, const char* typefrom);
+
 };
 
 } // namespace Pt

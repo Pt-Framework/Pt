@@ -43,14 +43,6 @@ class PT_HTTP_API MessageHeader
     public:
         static const unsigned MAXHEADERSIZE = 4096;
 
-        class PT_HTTP_API StringLessIgnoreCase
-        {
-            public:
-                static int compare(const char* s1, const char* s2);
-                bool operator()(const char* s1, const char* s2) const
-                    { return compare(s1, s2) < 0; }
-        };
-
     private:
         char _rawdata[MAXHEADERSIZE];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
         unsigned _endOffset;
@@ -83,7 +75,7 @@ class PT_HTTP_API MessageHeader
 
           public:
             const_iterator()
-                : current_value((const char*)0,(const char*) 0)
+                : current_value(0, 0)
             { }
 
             explicit const_iterator(const char* p)

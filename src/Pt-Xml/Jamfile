@@ -3,13 +3,9 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 
 PT_XML_SOURCES = Characters.cpp
-                 Comment.cpp
-                 DocTypeDeclaration.cpp
                  EntityResolver.cpp
                  EndElement.cpp
-                 Namespace.cpp
                  NamespaceContext.cpp
-                 ProcessingInstruction.cpp
                  QName.cpp
                  StartElement.cpp
                  XmlDeserializer.cpp
@@ -17,7 +13,7 @@ PT_XML_SOURCES = Characters.cpp
                  XmlFormatter.cpp
                  XmlReader.cpp
                  XmlSerializer.cpp
-                XmlSerializationContext.cpp
+                 XmlSerializationContext.cpp
                  XmlWriter.cpp
                  ;
 

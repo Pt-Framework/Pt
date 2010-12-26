@@ -39,28 +39,27 @@
 #include <iomanip>
 #include <limits>
 #include <iostream>
+#include <typeinfo>
 
 namespace Pt {
 
 template <typename T>
-inline void convert(Pt::String& s, const T& value)
+inline void convert(String& s, const T& value)
 {
-    Pt::StringStream os;
+    OStringStream os;
     os << value;
     s = os.str();
 }
 
 
 template <typename T>
-inline void convert(T& t, const Pt::String& str)
+inline void convert(T& t, const String& str)
 {
-    Pt::StringStream is(str);
+    IStringStream is(str);
     is >> t;
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(T, Pt::String) );
-    }
+        ConversionError::doThrow(typeid(T).name(), "Pt::String");
 }
 
 
@@ -80,58 +79,31 @@ inline void convert(T& t, const std::string& str)
     is >> t;
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(T, std::string) );
-    }
+        ConversionError::doThrow(typeid(T).name(), "std::string");
 }
 
 
-inline void convert(Pt::String& s, const Pt::String& str)
+inline void convert(String& s, const String& str)
 {
     s = str;
 }
 
 
-inline void convert(Pt::String& s, bool value)
+inline void convert(String& s, bool value)
 {
-    s = value ?
-        Pt::String::widen("true") :
-        Pt::String::widen("false");
+    static const String trueValue = L"true";
+    static const String falseValue = L"false";
+    s = value ? trueValue : falseValue;
 }
 
-inline void convert(bool& n, const Pt::String& str)
+inline void convert(bool& n, const String& str)
 {
-    if( ( str.size() == 4 ) &&
-        ( str[0] == Pt::Char('t') ) &&
-        ( str[1] == Pt::Char('r') ) &&
-        ( str[2] == Pt::Char('u') ) &&
-        ( str[3] == Pt::Char('e') ) )
-    {
+    if (str == L"true" || str == L"1")
         n = true;
-    }
-    else if( ( str.size() == 5 ) &&
-        ( str[0] == Pt::Char('f') ) &&
-        ( str[1] == Pt::Char('a') ) &&
-        ( str[2] == Pt::Char('l') ) &&
-        ( str[3] == Pt::Char('s') ) &&
-        ( str[4] == Pt::Char('e') ) )
-    {
+    else if (str == L"false" || str == L"0")
         n = false;
-    }
-    else if( ( str.size() == 1 ) &&
-        ( str[0] == Pt::Char('1') ) )
-    {
-        n = true;
-    }
-    else if( ( str.size() == 1 ) &&
-        ( str[0] == Pt::Char('0') ) )
-    {
-        n = false;
-    }
     else
-    {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(bool, Pt::String) );
-    }
+        ConversionError::doThrow("bool", "Pt::String");
 }
 
 inline void convert(bool& n, const std::string& str)
@@ -141,91 +113,92 @@ inline void convert(bool& n, const std::string& str)
     else if (str == "false" || str == "0")
         n = false;
     else
-        throw Pt::ConversionError( PT_CONVERSIONERROR(bool, std::string) );
+        ConversionError::doThrow("bool", "std::string");
 }
 
-inline void convert(Pt::String& s, char value)
+inline void convert(String& s, char value)
 {
-    s = Pt::String( 1, Pt::Char(value) );
+    s = String( 1, Char(value) );
 }
 
 
-inline void convert(char& n, const Pt::String& str)
+inline void convert(char& n, const String& str)
 {
     if( str.empty() )
-        throw Pt::ConversionError( PT_CONVERSIONERROR(char, Pt::String) );
+        ConversionError::doThrow("char", "Pt::String");
 
     n = str[0].narrow('*');
 }
 
 
-inline void convert(Pt::String& s, unsigned char value)
+inline void convert(String& s, unsigned char value)
 {
-    Pt::StringStream ss;
+    OStringStream ss;
     unsigned int i = static_cast<unsigned int>(value);
     ss << i;
     s = ss.str();
 }
 
 
-inline void convert(unsigned char& n, const Pt::String& str)
+inline void convert(unsigned char& n, const String& str)
 {
     if( str.empty() )
-        throw Pt::ConversionError( PT_CONVERSIONERROR(unsigned char, Pt::String) );
+        ConversionError::doThrow("unsigned char", "Pt::String");
 
     // interpret as numeric value
-    Pt::StringStream ss(str);
+    IStringStream ss(str);
     unsigned int i = 0;
     ss >> i;
     const std::ios::iostate iostate = ss.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(unsigned char, Pt::String) );
+        ConversionError::doThrow("unsigned char", "Pt::String");
     }
+
     n = static_cast<unsigned char>(i);
 }
 
 
-inline void convert(Pt::String& s, signed char value)
+inline void convert(String& s, signed char value)
 {
-    Pt::StringStream ss;
+    OStringStream ss;
     int i = static_cast<signed int>(value);
     ss << i;
     s = ss.str();
 }
 
 
-inline void convert(signed char& n, const Pt::String& str)
+inline void convert(signed char& n, const String& str)
 {
     if( str.empty() )
-        throw Pt::ConversionError( PT_CONVERSIONERROR(signed char, Pt::String) );
+        ConversionError::doThrow("signed char", "Pt::String");
         
     // interpret as numeric value
-    Pt::StringStream ss(str);
+    IStringStream ss(str);
     int i = 0;
     ss >> i;
     const std::ios::iostate iostate = ss.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(signed char, Pt::String) );
+        ConversionError::doThrow("signed char", "Pt::String");
     }
     n = static_cast<signed char>(i);
 }
 
 
-inline void convert(Pt::String& s, const std::string& value)
+inline void convert(String& s, const std::string& value)
 {
-    s = Pt::String::widen(value);
+    s = String::widen(value);
 }
 
 
-inline void convert(std::string& s,const Pt::String& str)
+inline void convert(std::string& s,const String& str)
 {
     s = str.narrow();
 }
 
 
-inline void convert(Pt::String& s, float value)
+inline void convert(String& s, float value)
 {
     // not a number
     if(value != value)
@@ -234,13 +207,13 @@ inline void convert(Pt::String& s, float value)
         return;
     }
 
-    Pt::StringStream os;
+    OStringStream os;
     os << value;
     s = os.str();
 }
 
 
-inline void convert(float& n, const Pt::String& str)
+inline void convert(float& n, const String& str)
 {
     // not a number
     if(str == L"NAN")
@@ -249,18 +222,18 @@ inline void convert(float& n, const Pt::String& str)
         return;
     }
 
-    Pt::StringStream is(str);
+    IStringStream is(str);
     is >> n;
 
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(float, Pt::String) );
+        ConversionError::doThrow("float", "Pt::String");
     }
 }
 
 
-inline void convert(Pt::String& s, double value)
+inline void convert(String& s, double value)
 {
     // not a number
     if(value != value)
@@ -269,13 +242,13 @@ inline void convert(Pt::String& s, double value)
         return;
     }
 
-    Pt::StringStream os;
+    OStringStream os;
     os << std::fixed << std::setprecision(15) << value;
     s = os.str();
 }
 
 
-inline void convert(double& n, const Pt::String& str)
+inline void convert(double& n, const String& str)
 {
     // not a number
     if(str == L"NAN")
@@ -284,13 +257,13 @@ inline void convert(double& n, const Pt::String& str)
         return;
     }
 
-    Pt::StringStream is(str);
+    IStringStream is(str);
     is >> std::fixed >> std::setprecision(15) >> n;
 
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(double, Pt::String) );
+        ConversionError::doThrow("double", "Pt::String");
     }
 }
 
@@ -324,7 +297,7 @@ inline void convert(float& n, const std::string& str)
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(float, std::string) );
+        ConversionError::doThrow("float", "std::string");
     }
 }
 
@@ -358,16 +331,16 @@ inline void convert(double& n, const std::string& str)
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
     {
-        throw Pt::ConversionError( PT_CONVERSIONERROR(double, std::string) );
+        ConversionError::doThrow("double", "std::string");
     }
 }
 
 template<typename T, typename S>
 void convert(T& to, const S& from)
 {
-    Pt::StringStream ss;
+    StringStream ss;
     if( !(ss << from && ss >> to) )
-        throw Pt::ConversionError( PT_CONVERSIONERROR(streamable, streamable) );
+        ConversionError::doThrow(typeid(T).name(), typeid(S).name());
 }
 
 

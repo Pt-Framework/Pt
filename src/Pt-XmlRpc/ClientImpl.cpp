@@ -209,11 +209,11 @@ void ClientImpl::onReplyFinished()
 }
 
 
-void ClientImpl::prepareRequest(const std::string& name, IDecomposer** argv, unsigned argc)
+void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
     _writer.begin( prepareRequest() );
     _writer.writeStartElement( L"methodCall" );
-    _writer.writeElement( L"methodName", Pt::String::widen(name) );
+    _writer.writeElement( L"methodName", name );
     _writer.writeStartElement( L"params" );
 
     for(unsigned n = 0; n < argc; ++n)
