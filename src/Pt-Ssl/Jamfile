@@ -24,11 +24,17 @@ Main SSLStreamBufferTest : SSLStreamBufferTest.cpp ;
 LinkSharedLibraries SSLStreamBufferTest : Pt-Ssl ;
 MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
 
+Main SSLHTTPTest : SSLHTTPTest.cpp ;
+LinkSharedLibraries SSLHTTPTest : Pt-Ssl ;
+MakeLocate SSLHTTPTest : $(OUTPUT_TARGET) ;
+
 if $(TARGET_OS) = "nt"
 {
     LinkFlags SSLConnectorTest    : #crypt32.lib
                                     user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
     LinkFlags SSLStreamBufferTest : #crypt32.lib
+                                    user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    LinkFlags SSLHTTPTest         : #crypt32.lib
                                     user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
 }
 
