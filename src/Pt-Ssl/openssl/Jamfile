@@ -140,33 +140,33 @@ Library Pt-Ssl-openssl  :
     ssl/ssl_err.c
     ssl/kssl.c
     ssl/t1_reneg.c
-    engines/e_4758cca.c
-    engines/e_aep.c
-    engines/e_atalla.c
-    engines/e_cswift.c
-    engines/e_gmp.c
-    engines/e_chil.c
-    engines/e_nuron.c
-    engines/e_sureware.c
-    engines/e_ubsec.c
-    engines/e_padlock.c
-    engines/e_capi.c
-    engines/ccgost/gost2001.c
-    engines/ccgost/gost2001_keyx.c
-    engines/ccgost/gost89.c
-    engines/ccgost/gost94_keyx.c
-    engines/ccgost/gost_ameth.c
-    engines/ccgost/gost_asn1.c
-    engines/ccgost/gost_crypt.c
-    engines/ccgost/gost_ctl.c
-    engines/ccgost/gost_eng.c
-    engines/ccgost/gosthash.c
-    engines/ccgost/gost_keywrap.c
-    engines/ccgost/gost_md.c
-    engines/ccgost/gost_params.c
-    engines/ccgost/gost_pmeth.c
-    engines/ccgost/gost_sign.c
-    engines/ccgost/e_gost_err.c
+ #  engines/e_4758cca.c
+ #  engines/e_aep.c
+ #  engines/e_atalla.c
+ #  engines/e_cswift.c
+ #  engines/e_gmp.c
+ #  engines/e_chil.c
+ #  engines/e_nuron.c
+ #  engines/e_sureware.c
+ #  engines/e_ubsec.c
+ #  engines/e_padlock.c
+ #  engines/e_capi.c
+ #  engines/ccgost/gost2001.c
+ #  engines/ccgost/gost2001_keyx.c
+ #  engines/ccgost/gost89.c
+ #  engines/ccgost/gost94_keyx.c
+ #  engines/ccgost/gost_ameth.c
+ #  engines/ccgost/gost_asn1.c
+ #  engines/ccgost/gost_crypt.c
+ #  engines/ccgost/gost_ctl.c
+ #  engines/ccgost/gost_eng.c
+ #  engines/ccgost/gosthash.c
+ #  engines/ccgost/gost_keywrap.c
+ #  engines/ccgost/gost_md.c
+ #  engines/ccgost/gost_params.c
+ #  engines/ccgost/gost_pmeth.c
+ #  engines/ccgost/gost_sign.c
+ #  engines/ccgost/e_gost_err.c
     crypto/cryptlib.c
     crypto/mem.c
     crypto/mem_clr.c
@@ -200,8 +200,8 @@ Library Pt-Ssl-openssl  :
     crypto/mdc2/mdc2_one.c
     crypto/ripemd/rmd_dgst.c
     crypto/ripemd/rmd_one.c
-    crypto/whrlpool/wp_dgst.c
-    crypto/whrlpool/wp_block.c
+   # crypto/whrlpool/wp_dgst.c
+   # crypto/whrlpool/wp_block.c
     crypto/aes/aes_core.c
     crypto/aes/aes_misc.c
     crypto/aes/aes_ecb.c
@@ -254,11 +254,11 @@ Library Pt-Ssl-openssl  :
     crypto/bf/bf_enc.c
     crypto/bf/bf_cfb64.c
     crypto/bf/bf_ofb64.c
-    crypto/cast/c_skey.c
-    crypto/cast/c_ecb.c
-    crypto/cast/c_enc.c
-    crypto/cast/c_cfb64.c
-    crypto/cast/c_ofb64.c
+  #  crypto/cast/c_skey.c
+  #  crypto/cast/c_ecb.c
+  #  crypto/cast/c_enc.c
+  #  crypto/cast/c_cfb64.c
+  #  crypto/cast/c_ofb64.c
     crypto/camellia/camellia.c
     crypto/camellia/cmll_misc.c
     crypto/camellia/cmll_ecb.c

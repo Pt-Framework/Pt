@@ -88,7 +88,8 @@ class Client : public Pt::Connectable {
                 "User-Agent: Platinum\n"
                 "Accept: text/html\n"
                 "Accept-Language: en-us\n"
-                "Accept-Charset: utf-8\n\n"
+                "Accept-Charset: utf-8\n"
+                "Connection: close\n\n"
             );
         }
 
