@@ -148,3 +148,22 @@ int main(int argc, char** argv)
     }
     return 1;
 }
+
+/*
+OPENSSL_NO_SOCK
+OPENSSL_NO_FP_API
+OPENSSL_NO_STDIO
+#ifndef OPENSSL_NO_ENGINE
+
+OPENSSL_NO_COMP
+OPENSSL_NO_X509
+OPENSSL_NO_BIO
+OPENSSL_NO_DEPRECATED
+
+#if (defined(OPENSSL_NO_RSA) || defined(OPENSSL_NO_MD5)) && !defined(OPENSSL_NO_SSL2)
+#ifndef OPENSSL_NO_KRB5
+#ifndef OPENSSL_NO_PSK
+#ifndef OPENSSL_NO_TLSEXT
+
+rm -f build/debug/libPt-Ssl* && ./jam.sh --with-openssl -q
+*/
