@@ -190,6 +190,7 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
     if( _data->shared() ) 
     {
         Pt::StringData* newBuffer = new Pt::StringData( reserveSize );
+        newBuffer->reserve( reserveSize );
         newBuffer->assign( _data->str(), _data->length() );
 
         if( _data->unref() < 1)
