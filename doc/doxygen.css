@@ -30,6 +30,12 @@ H1 A {
     font-size: 24px;
     font-weight: normal;
 }
+H1 SMALL A {
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    font-weight: normal;
+}
 H2 {
 	font-size: 20px;
     color: #000000;
@@ -77,6 +83,7 @@ DIV.nav {
 	line-height: 140%;
 }
 
+/* class and namespace navigation */
 div.navpath {
     margin-top: -24px;
     margin-bottom: 5px;
@@ -85,15 +92,25 @@ div.navpath {
     color: #ffffff;
     float: right;
 }
-div.navpath ul { /* doxygen 1.7 */
+div.navpath ul {
+    list-style-type: none;
     margin-top: 1px;
-    list-style: none;
 }
 
-div.navpath li { /* doxygen 1.7 */
+div.navpath li {
+    background-image: url(navpath_arrow.gif);
+    background-repeat: no-repeat;
+    background-position: left center;
     font-size: 14px;
-    padding-right: 4px;
+    padding-right: 5px;
+    padding-left: 16px;
     float: left;
+}
+div.navpath li:first-child {
+    background-image: none;
+}
+div.navpath li:last-child {
+    padding-right: 0px;
 }
 div.navpath a {
     color: #ffffff;
@@ -270,6 +287,7 @@ SPAN.charliteral   { color: #008080 }
 
 table.memberdecls {
     margin: 0;
+    border-spacing: 0;
 }
 
 .mdescLeft {
@@ -331,52 +349,54 @@ TH.dirtab { background: #e8eef2;
 /* Style for detailed member documentation */
 
 .memtemplate {
-  font-size: 12px;
-  color: #000000;
-  font-weight: normal;
+     font-size: 12px;
+     color: #000000;
+     font-weight: normal;
 }
 .memnav {
-  background-color: #e8eef2;
-  border: 1px solid #84b0c7;
-  text-align: center;
-  margin: 2px;
-  margin-right: 15px;
-  padding: 2px;
+     background-color: #e8eef2;
+     border: 1px solid #84b0c7;
+     text-align: center;
+     margin: 2px;
+     margin-right: 15px;
+     padding: 2px;
 }
 .memitem {
     margin-top: 20px;
     margin-left: 20px;
 }
 .memproto {
-    font-weight: normal;
-    border-bottom: 0px solid #dddddd;
+    #font-weight: bold;
+}
+.memdoc{
+    padding-top: 5px;
 }
 .memname, .memname td {
-    color: #000000;
-    font-size: 22px;
-    font-weight: normal;
-    padding: 0px;
+    font-size: 18px;
+    font-weight: bold;
     white-space: nowrap;
 }
 .paramkey {
     text-align: right;
 }
 .paramtype {
-    color: #000000;
-    font-size: 22px;
     white-space: nowrap;
-    font-weight: normal;
 }
 .paramname {
-    color: #000000;
-    font-size: 22px;
-    font-weight: normal;
-    font-style: italic;
     white-space: nowrap;
 }
-.memdoc{
-    padding-top: 5px;
+.paramname em {
+    font-style: normal;
+    color: #000000;
 }
+.params, .retval, .exception, .tparams {
+    border-spacing: 10px 2px;
+}
+.params .paramname, .exception .paramname {
+    font-style: italic;
+    color: #000000;
+}
+
 
 /* for the tree view */
 
