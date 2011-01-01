@@ -34,6 +34,7 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
 #include <limits>
+#include <cstring>
 #include <cassert>
 
 namespace Pt {
@@ -44,7 +45,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _socket(socket)
 , _broadcast(false)
 , _sentry(0)
-, _connectResult(0)
+//, _connectResult(0)
 , _fd(INVALID_SOCKET)
 , _isConnected(false)
 , _isBound(false)
@@ -87,7 +88,6 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
     AddrInfo ai(ipaddr, port, true);
 
     BOOL reuseAddr = TRUE;
-    const int on = 1;
     bool addrInUse = false;
 
     for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
@@ -116,6 +116,8 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 		}
 
 #if defined(IPV6_V6ONLY)
+        const int on = 1;
+
         if( it->ai_family == AF_INET6 )
         {
             if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
@@ -148,7 +150,6 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 
 void UdpSocketImpl::connect(const AddrInfo& ai)
 {
-    static const int on = 1;
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
 

@@ -160,7 +160,7 @@ class UdpSocketImpl : public System::SelectableImpl
         long                         _eventFlags;
         WSAEVENT                     _waitEvent;
         HANDLE	                     _currentEventHandle;
-        const char*                  _connectResult;
+        //const char*                  _connectResult;
         std::size_t	                 _timeout;
         std::size_t		             _dataSends;
         WSABUF                       _sendBuffer;
