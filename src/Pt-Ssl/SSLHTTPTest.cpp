@@ -83,13 +83,13 @@ class Client : public Pt::Connectable {
             std::cout << "[@@ Client-SSL  ] ################################### Peer CN = " + _ssl->getPeerCN() << std::endl;
 
             sendMessage(
-                "GET https://localhost/not_exist.html HTTP/1.1\n"
-                "Host: localhost\n"
-                "User-Agent: Platinum\n"
-                "Accept: text/html\n"
-                "Accept-Language: en-us\n"
-                "Accept-Charset: utf-8\n"
-                "Connection: close\n\n"
+                "GET https://localhost/not_exist.html HTTP/1.1\r\n"
+                "Host: localhost\r\n"
+                "User-Agent: Platinum\r\n"
+                "Accept: text/html\r\n"
+                "Accept-Language: en-us\r\n"
+                "Accept-Charset: utf-8\r\n"
+                "Connection: close\r\n\r\n"
             );
         }
 
