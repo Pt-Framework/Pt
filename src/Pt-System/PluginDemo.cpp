@@ -43,10 +43,6 @@ int main(int argc, char** argv)
     */
         std::string  shlibName = "TestPlugin";
 
-        #ifndef NDEBUG
-            shlibName += "d";
-        #endif
-
         std::cerr << "Loading " << shlibName << std::endl;
 
         Pt::System::PluginManager<TestPlugin> pm;
