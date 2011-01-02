@@ -59,8 +59,8 @@ rule MainImpl
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
-    # linker flag -E: export global symbols from the executable
-    LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+    # linker flag -E is not supported by mingw
+    LINKFLAGS on $(_target) += $(LINKFLAGS) ; # -Wl,-E
 }
 
 
