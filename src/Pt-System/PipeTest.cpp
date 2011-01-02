@@ -58,7 +58,7 @@ class PipeTest : public Pt::Unit::TestSuite
             _result.clear();
 
             _loop = new Pt::System::MainLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
         }
 
@@ -76,8 +76,8 @@ class PipeTest : public Pt::Unit::TestSuite
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             pipe.in().write( _data.c_str(), _data.size() );
 
-            pipe.out().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.out().inputReady, *this, &PipeTest::onRead);
+            pipe.out().beginRead( _buffer, sizeof(_buffer) );
+            pipe.out().inputReady += Pt::slot(*this, &PipeTest::onRead);
 
             _loop->add( pipe.out() );
             _loop->run();
@@ -106,7 +106,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
             std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
             pipe.in().beginWrite(_buffer, sizeof(_buffer));
-            connect(pipe.in().outputReady, *this, &PipeTest::onWrite);
+            pipe.in().outputReady += Pt::slot( *this, &PipeTest::onWrite);
 
             _loop->add( pipe.in() );
             _loop->run();
@@ -140,7 +140,7 @@ class PipeTest : public Pt::Unit::TestSuite
             pipe.in().write( out.c_str(), out.size() );
 
             pipe.out().beginRead(_buffer, sizeof(_buffer));
-            connect(pipe.out().inputReady, *this, &PipeTest::onReadRemove);
+            pipe.out().inputReady += Pt::slot(*this, &PipeTest::onReadRemove);
 
             _loop->add( pipe.out() );
             _loop->run();
@@ -162,10 +162,10 @@ class PipeTest : public Pt::Unit::TestSuite
             _loop->add( pipe.out() );
 
             outbuf.attach( pipe.in() );
-            connect(outbuf.outputReady, *this, &PipeTest::onStreamOutput);
+            outbuf.outputReady += Pt::slot(*this, &PipeTest::onStreamOutput);
 
             inbuf.attach( pipe.out() );
-            connect(inbuf.inputReady, *this, &PipeTest::onStreamInput);
+            inbuf.inputReady += Pt::slot(*this, &PipeTest::onStreamInput);
 
             PT_UNIT_ASSERT( 0 == outbuf.out_avail() );
             outbuf.sputn(_data.c_str(), 12);
