@@ -560,10 +560,10 @@ namespace
 
 String EntityResolver::resolveEntity(const String& entity) const
 {
-    if (!entity.empty() && entity[0] == L'#')
+    if (!entity.empty() && entity[0] == '#')
     {
         int code = 0;
-        if (entity.size() > 2 && entity[1] == L'x')
+        if (entity.size() > 2 && entity[1] == 'x')
         {
             // hex notation: &#xABCD;
             for (String::const_iterator it = entity.begin() + 2; it != entity.end(); ++it)
