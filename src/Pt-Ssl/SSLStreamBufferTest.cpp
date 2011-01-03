@@ -118,7 +118,12 @@ class Client : public Pt::Connectable {
 
         void sendMessage(const char* msg)
         {
-            std::cout << "[@@ Client-SSL  ] ################################### Sending message to server" << std::endl;
+            if(_msgCnt >= 3) {
+                _loop.exit();
+                return;
+            }
+
+            std::cout << "[@@ Client-SSL  ] ################################### Sending message to server (" << _msgCnt << ")" << std::endl;
 
             std::ostream os(_ssl);
             os << msg;
