@@ -38,13 +38,6 @@ if $(TARGET_OS) = "nt"
     {
         LINKLIBS on $(PRELIB)Pt-Ssl$(SUFDLL) += user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
     }
-
-    #LinkFlags SSLConnectorTest    : #crypt32.lib
-    #                                user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    #LinkFlags SSLStreamBufferTest : #crypt32.lib
-    #                                user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    #LinkFlags SSLHTTPTest         : #crypt32.lib
-    #                                user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
 }
 
 File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;
