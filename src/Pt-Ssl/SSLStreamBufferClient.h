@@ -57,7 +57,32 @@ class PT_SSL_API SSLStreamBufferClient : public SSLStreamBuffer {
 };
 
 
+class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
+{
+    public:
+        SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const char* sessionID);
+
+        virtual ~SSLStreamBuffer2();
+
+        void writeHandshake();
+
+        bool readHandshake();
+
+        bool connectionEstablished() const;
+
+        void disconnect();
+
+        std::string getPeerCN() const;
+
+    private:
+        std::iostream* _ios;
+        BIO*           _in;
+        BIO*           _out;
+        SSL*           _ssl;
+};
+
 } // namespace Pt
+
 } // namespace Ssl
 
 #endif

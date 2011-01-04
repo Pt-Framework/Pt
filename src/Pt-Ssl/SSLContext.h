@@ -47,6 +47,7 @@ class PT_SSL_API SSLContext {
 
         friend class SSLConnector2;
         friend class SSLStreamBuffer;
+        friend class SSLStreamBuffer2;
 
     private:
         SSL_CTX*    _ctx;    // OpenSSL's SSL context

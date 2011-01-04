@@ -36,6 +36,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/System/IOStream.h>
 
 #include "SSLStreamBufferClient.h"
 #include "SSLStreamBufferServer.h"
@@ -178,6 +179,122 @@ class Client : public Pt::Connectable {
         int                             _msgCnt;
 };
 
+
+
+class Client2 : public Pt::Connectable {
+    public:
+        Client2(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
+                Pt::Ssl::SSLContext& sslClientContext)
+        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)
+        {
+            std::cout << "[@@ Client2 ] ### Connecting to server" << std::endl;
+
+            _socket.connected += Pt::slot(*this, &Client2::onTCPConnect);
+            _socket.beginConnect(addr, port);
+            _loop.add(_socket);
+        }
+
+        ~Client2()
+        { delete _ssl; }
+
+
+    private:
+        void onTCPConnect(Pt::Net::TcpSocket& socket)
+        {
+            _socket.endConnect();
+            _ios.attachDevice(socket);
+
+            std::cout << "[@@ Client2::onTCPConnect ] ### writing handshake" << std::endl;
+
+            _ssl = new Pt::Ssl::SSLStreamBuffer2(_ios, _sslContext, 0);
+            _ssl->writeHandshake();
+
+            std::cout << "[@@ Client2::onTCPConnect] ### out_avail:"
+                      << _ios.buffer().out_avail() << std::endl;
+
+            std::cout << "[@@ Client2::onTCPConnect] ### beginWrite" << std::endl;
+            _ios.buffer().beginWrite();
+            _ios.buffer().outputReady += Pt::slot(*this, &Client2::onWriteHandshake);
+            _ios.buffer().inputReady += Pt::slot(*this, &Client2::onReadHandshake);
+        }
+
+        void onWriteHandshake(Pt::System::StreamBuffer& sb)
+        {
+            _ios.buffer().endWrite();
+
+            std::cout << "[@@ Client2::onWriteHandshake] ### out_avail:"
+                      << _ios.buffer().out_avail() << std::endl;
+
+            std::cout << "[@@ Client2::onWriteHandshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
+
+            //
+            // write again if not all bytes were written to server
+            //
+            if(_ios.buffer().out_avail() > 0)
+            {
+                std::cout << "[@@ Client2::onWriteHandshake ] ### write more handshake bytes" << std::endl;
+                _ios.buffer().beginWrite();
+                return;
+            }
+
+            //
+            // all bytes written to server, we need to read the answer now
+            //
+            std::cout << "[@@ Client2::onWriteHandshake] ### beginRead" << std::endl;
+            _ios.buffer().beginRead();
+        }
+
+        void onReadHandshake(Pt::System::StreamBuffer& sb)
+        {
+            _ios.buffer().endRead();
+
+            std::cout << "[@@ Client2::onReadHandshake] ### in_avail:"
+                      << _ios.buffer().in_avail() << std::endl;
+
+            bool complete = _ssl->readHandshake();
+
+            //
+            // not all bytes of the answer read
+            //
+            if( ! complete )
+            {
+                std::cout << "[@@ Client2::onReadHandshake ] ### read more handshake bytes" << std::endl;
+                _ios.buffer().beginRead();
+                return;
+            }
+
+             std::cout << "[@@ Client2::onReadHandshake ] ### got answer from server" << std::endl;
+             std::cout << "[@@ Client2::onReadHandshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
+
+             if( ! _ssl->connectionEstablished() )
+             {
+                _ssl->writeHandshake();
+
+                std::cout << "[@@ Client2::onReadHandshake] ### out_avail:"
+                          << _ios.buffer().out_avail() << std::endl;
+
+                std::cout << "[@@ Client2::onReadHandshake] ### beginWrite" << std::endl;
+                _ios.buffer().beginWrite();
+             }
+        }
+
+        void onSSLConnect(Pt::Ssl::SSLStreamBuffer& ssl)
+        {
+            std::cout << "[@@ Client-SSL  ] ################################### Peer CN = " + _ssl->getPeerCN() << std::endl;
+
+        }
+
+    private:
+        Pt::Ssl::SSLContext&       _sslContext;
+        Pt::Ssl::SSLStreamBuffer2* _ssl;
+        Pt::System::IOStream       _ios;
+        Pt::System::EventLoop&     _loop;
+        Pt::Net::TcpSocket         _socket;
+        int                        _msgCnt;
+};
+
+
+
 int main(int argc, char** argv)
 {
     try {
@@ -191,7 +308,7 @@ int main(int argc, char** argv)
         Pt::Ssl::SSLContext clientContext("root.pem", "client.pem", "password", 0);
 
         Server server(loop, addr, port, serverContext);
-        Client client(loop, addr, port, clientContext);
+        Client2 client(loop, addr, port, clientContext);
 
         loop.setIdleTimeout(2000);
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
