@@ -40,7 +40,7 @@ if $(TARGET_OS) = "nt"
     }
 }
 
-File [ FDirName $(OUTPUT_TARGET) root.pem ] : root.pem ;
+File [ FDirName $(OUTPUT_TARGET) root.pem   ] : root.pem   ;
 File [ FDirName $(OUTPUT_TARGET) client.pem ] : client.pem ;
 File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
 File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
