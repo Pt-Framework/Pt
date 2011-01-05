@@ -97,7 +97,7 @@ SSLStreamBuffer2::SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const ch
     if(sessionID)
         SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 
-
+    SSL_set_connect_state(_ssl);
     //
     //setg(_sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB);
 }
@@ -120,8 +120,13 @@ void SSLStreamBuffer2::writeHandshake()
     // block, but extend as neccessary
     //
 
-    SSL_set_connect_state(_ssl);
-    SSL_do_handshake(_ssl);
+    int r = SSL_do_handshake(_ssl);
+    std::cerr << "handshake: " << r << std::endl;
+    if(r < 0)
+    {
+        long ec = SSL_get_error(_ssl, r);
+        std::cerr << "handshake err: " << ec << std::endl;
+    }
 
     int bytesRead = 1;
     char buff[255];
@@ -133,6 +138,7 @@ void SSLStreamBuffer2::writeHandshake()
     {
         bytesRead = BIO_read(_out, buff, sizeof(buff) );
 
+        if(bytesRead == 0) break;
         if(bytesRead < 0)
         {
             if( ! BIO_should_retry(_out) )
@@ -142,13 +148,21 @@ void SSLStreamBuffer2::writeHandshake()
                           << " Output BIO should retry R=" << BIO_should_read(_out)
                           << " W=" << BIO_should_write(_out) << std::endl;
 
-            return;
+            break;
         }
 
         std::cerr << "[SSLStreamBuffer2] " << " Pulled " << bytesRead
                   << " bytes from the output BIO" << std::endl;
 
         _ios->write(buff, bytesRead);
+    }
+
+    r = SSL_do_handshake(_ssl);
+    std::cerr << "handshake: " << r << std::endl;
+    if(r < 0)
+    {
+        long ec = SSL_get_error(_ssl, r);
+        std::cerr << "handshake err: " << ec << std::endl;
     }
 
     //
@@ -187,7 +201,9 @@ bool SSLStreamBuffer2::readHandshake()
             bytesWritten = BIO_write(_in, buff, len);
             std::cerr << "[SSLStreamBuffer2::readHandshake] written to BIO " << len << std::endl;
             len -= bytesWritten;
-
+            std::cerr << "[SSLStreamBuffer2] "
+                      << " Input BIO should retry R=" << BIO_should_read(_in)
+                      << " W=" << BIO_should_write(_in) << std::endl;
             if(bytesWritten < 0)
             {
                 if( ! BIO_should_retry(_in ))
@@ -199,15 +215,20 @@ bool SSLStreamBuffer2::readHandshake()
                 continue;
             }
 
-            BIO_flush(_in);
+            //std::cerr << "flush: " << BIO_flush(_in) << std::endl;
 
             //
             // ### ADDITION
             //
             std::cerr << "[Client2] " << " SSL status = " << SSL_state_string_long(_ssl) << std::endl;
-            if(!SSL_is_init_finished(_ssl)) {
-                SSL_do_handshake(_ssl);
-                std::cerr << "[Client2] re-calling SSL_do_handshake()" << std::endl;
+            if( ! SSL_is_init_finished(_ssl) ) {
+                int r = SSL_do_handshake(_ssl);
+                std::cerr << "[Client2] re-calling SSL_do_handshake() " << r << std::endl;
+                if( r < 0)
+                {
+                    long ec = SSL_get_error(_ssl, r);
+                    std::cerr << "[Client2] SSL_do_handshake() " << ec << " " << SSL_ERROR_WANT_READ << " " << SSL_ERROR_WANT_WRITE << std::endl;
+                }
             }
             else {
                 // NOTE: This will never be executed because this function 'return 0 == BIO_should_read(_in);'
@@ -242,6 +263,9 @@ bool SSLStreamBuffer2::readHandshake()
               << " done with BIO R=" << BIO_should_read(_in)
               << " W=" << BIO_should_write(_in) << std::endl;
 
+    std::cerr << "[Client2] " << " SSL finished = " << SSL_is_init_finished(_ssl) << std::endl;
+    std::cerr << "[Client2] " << " connected = " << connectionEstablished() << std::endl;
+
     //
     // indicate whether the complete handshake data was written or if we expect
     // more data from the server. If we didn't receive the complete answer we
@@ -249,7 +273,7 @@ bool SSLStreamBuffer2::readHandshake()
     // again. If we return true, the user has to call writeHandshake again...
     // After some iterations we should get in the connected state.
     //
-    return 0 == BIO_should_read(_in);
+    return 1 == BIO_should_read(_in);
 }
 
 
