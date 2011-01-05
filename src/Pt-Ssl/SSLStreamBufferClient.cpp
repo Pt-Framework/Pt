@@ -106,6 +106,7 @@ SSLStreamBuffer2::SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const ch
 SSLStreamBuffer2::~SSLStreamBuffer2()
 {
     // FIXME free the BIO's ???
+    // The do says that the atatched BIOs will be freed automatically.
 
     SSL_free(_ssl);
 }
@@ -199,6 +200,41 @@ bool SSLStreamBuffer2::readHandshake()
             }
 
             BIO_flush(_in);
+
+            //
+            // ### ADDITION
+            //
+            std::cerr << "[Client2] " << " SSL status = " << SSL_state_string_long(_ssl) << std::endl;
+            if(!SSL_is_init_finished(_ssl)) {
+                SSL_do_handshake(_ssl);
+                std::cerr << "[Client2] re-calling SSL_do_handshake()" << std::endl;
+            }
+            else {
+                // NOTE: This will never be executed because this function 'return 0 == BIO_should_read(_in);'
+                //       The fact is, when the handshaking complete the above statement will be 'true'
+
+                std::cerr << "[Client2] SSL_do_handshake() done" << std::endl;
+                 if(connectionEstablished()) std::cerr << "##### Connection established!" << std::endl;
+
+                char _readBuff[4096];
+                const int bytesRead = SSL_read(_ssl, _readBuff, sizeof(_readBuff));
+
+                if(bytesRead < 0){
+                    long lerr = ERR_get_error();
+                    if(lerr) {
+                        char buf[255];
+                        ERR_error_string_n(lerr, buf, sizeof(buf));
+                        // PRINT ERROR
+                    }
+                }
+                else if(bytesRead > 0) {
+                    // Use data in _readBuff
+                }
+                else if(SSL_get_shutdown(_ssl) & SSL_RECEIVED_SHUTDOWN) {
+                    SSL_shutdown(_ssl);
+                }
+            }
+
         }
     }
 
