@@ -64,6 +64,8 @@ class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
 
         virtual ~SSLStreamBuffer2();
 
+        void handshake();
+
         void writeHandshake();
 
         bool readHandshake();

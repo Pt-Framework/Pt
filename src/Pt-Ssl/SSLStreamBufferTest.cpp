@@ -204,10 +204,10 @@ class Client2 : public Pt::Connectable {
             _socket.endConnect();
             _ios.attachDevice(socket);
 
-            std::cout << "[@@ Client2::onTCPConnect ] ### writing handshake" << std::endl;
+            std::cout << "[@@ Client2::onTCPConnect ] ### starting handshake" << std::endl;
 
             _ssl = new Pt::Ssl::SSLStreamBuffer2(_ios, _sslContext, 0);
-            _ssl->writeHandshake();
+            _ssl->handshake();
 
             std::cout << "[@@ Client2::onTCPConnect] ### out_avail:"
                       << _ios.buffer().out_avail() << std::endl;
@@ -225,23 +225,7 @@ class Client2 : public Pt::Connectable {
             std::cout << "[@@ Client2::onWriteHandshake] ### out_avail:"
                       << _ios.buffer().out_avail() << std::endl;
 
-            std::cout << "[@@ Client2::onWriteHandshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
-
-            //
-            // write again if not all bytes were written to server
-            //
-            if(_ios.buffer().out_avail() > 0)
-            {
-                std::cout << "[@@ Client2::onWriteHandshake ] ### write more handshake bytes" << std::endl;
-                _ios.buffer().beginWrite();
-                return;
-            }
-
-            //
-            // all bytes written to server, we need to read the answer now
-            //
-            std::cout << "[@@ Client2::onWriteHandshake] ### beginRead" << std::endl;
-            _ios.buffer().beginRead();
+            this->handshake();
         }
 
         void onReadHandshake(Pt::System::StreamBuffer& sb)
@@ -251,37 +235,36 @@ class Client2 : public Pt::Connectable {
             std::cout << "[@@ Client2::onReadHandshake] ### in_avail:"
                       << _ios.buffer().in_avail() << std::endl;
 
-            bool complete = _ssl->readHandshake();
+            this->handshake();
+        }
 
-            //
-            // not all bytes of the answer read
-            //
-            if( ! complete )
+        void handshake()
+        {
+            _ssl->handshake();
+
+            // we have read all bytes, need to write now
+            if( _ios.buffer().out_avail() )
             {
-                std::cout << "[@@ Client2::onReadHandshake ] ### read more handshake bytes" << std::endl;
-                _ios.buffer().beginRead();
+                std::cout << "[@@ Client2::handshake] ### beginWrite" << std::endl;
+                _ios.buffer().beginWrite();
                 return;
             }
 
-             std::cout << "[@@ Client2::onReadHandshake ] ### got answer from server" << std::endl;
-             std::cout << "[@@ Client2::onReadHandshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
+            std::cout << "[@@ Client2::handshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
+            if( _ssl->connectionEstablished() )
+            {
+                std::cout << "[@@ Client2::handshake ] ### SUCCESS - CONNECTED" << std::endl;
+                return;
+            }
 
-             if( ! _ssl->connectionEstablished() )
-             {
-                _ssl->writeHandshake();
-
-                std::cout << "[@@ Client2::onReadHandshake] ### out_avail:"
-                          << _ios.buffer().out_avail() << std::endl;
-
-                std::cout << "[@@ Client2::onReadHandshake] ### beginWrite" << std::endl;
-                _ios.buffer().beginWrite();
-             }
+            // more to read
+            std::cout << "[@@ Client2::handshake ] ### read more handshake bytes" << std::endl;
+            _ios.buffer().beginRead();
         }
 
         void onSSLConnect(Pt::Ssl::SSLStreamBuffer& ssl)
         {
             std::cout << "[@@ Client-SSL  ] ################################### Peer CN = " + _ssl->getPeerCN() << std::endl;
-
         }
 
     private:
