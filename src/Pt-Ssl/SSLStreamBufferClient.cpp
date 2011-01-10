@@ -145,15 +145,12 @@ void SSLStreamBuffer2::handshake()
         }
     }
 
-    std::cerr << "[SSLStreamBuffer2::handshake] SSL_want_read=" << SSL_want_read(_ssl) << std::endl;
-    std::cerr << "[SSLStreamBuffer2::handshake] SSL_want_write=" << SSL_want_write(_ssl) << std::endl;
     int ret = SSL_do_handshake(_ssl);
     std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
               << SSL_get_error(_ssl, ret) << std::endl;
 
     if( ret <= 0 && SSL_get_error(_ssl, ret) != SSL_ERROR_WANT_READ )
         throw std::runtime_error("SSL_do_handshake failed");
-
 
     int pendingOut = BIO_pending(_out);
     if(pendingOut > 0)
