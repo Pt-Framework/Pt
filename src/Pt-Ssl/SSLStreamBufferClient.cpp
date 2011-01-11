@@ -30,6 +30,7 @@
 #include "SSLStreamBufferServer.h"
 #include <Pt/SourceInfo.h>
 #include <iostream>
+#include <cstring>
 #include <cassert>
 #include "openssl/err.h"
 
@@ -98,7 +99,6 @@ SSLStreamBuffer2::SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const ch
     if(sessionID)
         SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 
-    SSL_set_connect_state(_ssl);
     //
     //setg(_sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB, _sbBuffer + SB_PUTB);
 }
@@ -113,163 +113,108 @@ SSLStreamBuffer2::~SSLStreamBuffer2()
 }
 
 
-void SSLStreamBuffer2::handshake()
+void SSLStreamBuffer2::initHandshake()
 {
-    if( _ios->rdbuf() && _ios->rdbuf()->in_avail() > 0 )
+    SSL_set_connect_state(_ssl);
+
+    while(true)
     {
-        char buff[600];
+        int ret = SSL_do_handshake(_ssl);
+        std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
+                  << SSL_get_error(_ssl, ret) << std::endl;
 
-        while(true)
+        if( ret <= 0 )
         {
-            unsigned inavail = _ios->readsome( buff, sizeof(buff) );
-            std::cerr << "[SSLStreamBuffer2::handshake] inavail=" << inavail << std::endl;
-
-            if(inavail == 0)
-                break;
-
-            int n = BIO_write(_in, buff, inavail);
-            std::cerr << "[SSLStreamBuffer2::handshake] BIO_write=" << n << std::endl;
-
-            if(n <= 0)
-                throw std::runtime_error("BIO_write failed");
-
-            int ret = SSL_do_handshake(_ssl);
-            int err = SSL_get_error(_ssl, ret);
-
-            std::cerr << "[SSLStreamBuffer2::handshake] pending out=" << BIO_pending(_out) << std::endl;
-
-            if( ret == -1 && SSL_ERROR_WANT_READ != SSL_get_error(_ssl, ret) )
-            {
+            int sslerr = SSL_get_error(_ssl, ret);
+            if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
                 throw std::runtime_error("SSL_do_handshake failed");
-            }
         }
-    }
 
-    int ret = SSL_do_handshake(_ssl);
-    std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
-              << SSL_get_error(_ssl, ret) << std::endl;
+        if( BIO_pending(_out) <= 0 )
+            break;
 
-    if( ret <= 0 && SSL_get_error(_ssl, ret) != SSL_ERROR_WANT_READ )
-        throw std::runtime_error("SSL_do_handshake failed");
-
-    int pendingOut = BIO_pending(_out);
-    if(pendingOut > 0)
-    {
         char buff[100];
-        std::cerr << "[SSLStreamBuffer2::handshake] pending out=" << pendingOut << std::endl;
-        while(pendingOut > 0)
-        {
-            int n = BIO_read(_out, buff, sizeof(buff) );
+        int n = BIO_read(_out, buff, sizeof(buff) );
 
-            if( n <= 0)
-                throw std::runtime_error("BIO_read failed");
+        if( n <= 0)
+            throw std::runtime_error("BIO_read failed");
 
-            pendingOut -= n;
-            std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
-            _ios->write(buff, n);
-        }
-    }
-
-    std::cerr << "[SSLStreamBuffer2::handshake] return" << std::endl;
+        std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
+        _ios->write(buff, n);
+     }
 }
 
 
-void SSLStreamBuffer2::writeHandshake()
+bool SSLStreamBuffer2::handshake()
 {
-    //
-    // The idea is to write the complete first block of the handshake
-    // to the underlying iostream. If it has a StreamBuffer it will never
-    // block, but extend as neccessary
-    //
-    char buff[255];
+    char buf[600];
 
-    int ret = SSL_do_handshake(_ssl);
-
-    assert(ret == -1);
-    assert(SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
-
-    while( true )
+    unsigned inavail = _ios->rdbuf()->in_avail();
+    if( ! inavail )
     {
-        int n = BIO_read(_out, buff, sizeof(buff) );
+        _ios->rdbuf()->sgetc();
+        inavail = _ios->rdbuf()->in_avail();
+    }
+
+    std::cerr << "[SSLStreamBuffer2::handshake] inavail=" << inavail << std::endl;
+
+    while(true)
+    {
+        unsigned n = _ios->readsome( buf, sizeof(buf) );
+        std::cerr << "[SSLStreamBuffer2::handshake] readsome=" << n << std::endl;
 
         if(n == 0)
             break;
 
-        if(n < 0)
+        while(n)
         {
-            if( BIO_should_retry(_out) )
-                break;
+            int written = BIO_write(_in, buf, n);
+            std::cerr << "[SSLStreamBuffer2::handshake] BIO_write=" << written << std::endl;
 
-            throw std::runtime_error("BIO_read failed");
-        }
-
-        std::cerr << "[SSLStreamBuffer2::writeHandskake]"
-                  << " wrote " << n << " bytes" << std::endl;
-
-        _ios->write(buff, n);
-    }
-
-    //
-    // The user has data in the underlying iostream/StreamBuffer now
-    // and can use non-blocking i/o to write it to the server and
-    // receive the answer. Once data arrives the user can call
-    // readHandshake() to let openssl consume the handshake data
-    //
-}
-
-
-bool SSLStreamBuffer2::readHandshake()
-{
-    //
-    // After we sent handshake data and the server has answered we
-    // feed the bytes received from the server to openssl until
-    // either the complete answer was read or all bytes of the
-    // partial answer were consumed.
-    //
-
-    char buff[255];
-
-    while(true)
-    {
-        unsigned len = _ios->readsome( buff, sizeof(buff) );
-        std::cerr << "[SSLStreamBuffer2::readHandshake] read " << len << " bytes" << std::endl;
-        if( len == 0)
-            break;
-
-        while(len > 0)
-        {
-            int n = BIO_write(_in, buff, len);
-            std::cerr << "[SSLStreamBuffer2::readHandshake] BIO_write " << n << " bytes" << std::endl;
-            len -= n;
-
-            if(n <= 0)
+            if(written <= 0)
                 throw std::runtime_error("BIO_write failed");
 
-            int ret = SSL_do_handshake(_ssl);
-            int err = SSL_get_error(_ssl, ret);
+            n -= written;
+            if(n > 0)
+            {
+                std::memcpy(buf, buf + written, n);
+            }
 
-            if(ret <= 0 && err != SSL_ERROR_WANT_READ)
+            int ret = SSL_do_handshake(_ssl);
+
+            if( ret <= 0 )
+            {
+                int sslerr = SSL_get_error(_ssl, ret);
+                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
+                    throw std::runtime_error("SSL_do_handshake failed");
+            }
+        }
+    }
+
+    while(BIO_pending(_out) > 0)
+    {
+        char buff[100];
+        int n = BIO_read(_out, buff, sizeof(buff) );
+
+        if( n <= 0)
+            throw std::runtime_error("BIO_read failed");
+
+        std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
+        _ios->write(buff, n);
+
+        int ret = SSL_do_handshake(_ssl);
+        std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
+                  << SSL_get_error(_ssl, ret) << std::endl;
+
+        if( ret <= 0 )
+        {
+            int sslerr = SSL_get_error(_ssl, ret);
+            if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
                 throw std::runtime_error("SSL_do_handshake failed");
         }
     }
 
-    std::cerr << "[SSLStreamBuffer2::readHandshake] " << " SSL finished = " << SSL_is_init_finished(_ssl) << std::endl;
-    std::cerr << "[SSLStreamBuffer2::readHandshake] " << " connected = " << connectionEstablished() << std::endl;
-
-    if( connectionEstablished() )
-        return false;
-    //
-    // indicate whether the complete handshake data was written or if we expect
-    // more data from the server. If we didn't receive the complete answer we
-    // return false, so the user can wait for more data and call this method
-    // again. If we return true, the user has to call writeHandshake again...
-    // After some iterations we should get in the connected state.
-    //
-    // if SSL_do_handshake produced data in the out BIO we know we have to
-    // go to writing mode
-    //
-    std::cerr << "[SSLStreamBuffer2::readHandshake] BIO_pending: " << BIO_pending(_out) << std::endl;
-    return 0 < BIO_pending(_out);
+    return SSL_get_state(_ssl) == SSL_ST_OK;
 }
 
 
