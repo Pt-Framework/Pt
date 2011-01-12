@@ -60,15 +60,6 @@ class PT_SSL_API SSLStreamBufferClient : public SSLStreamBuffer {
 class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
 {
     public:
-
-        enum ConnectionState
-        {
-            Disconnected,
-            ReceiveHandshake,
-            SendHandshake,
-            Connected
-        };
-
         SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const char* sessionID);
 
         virtual ~SSLStreamBuffer2();
@@ -89,6 +80,16 @@ class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
 
         */
         void handshake();
+
+        void startClientHandshake();
+
+        void doHandshake();
+
+        bool writeHandshake();
+
+        std::streamsize out_avail();
+
+        bool readHandshake();
 
         bool connected() const;
 
