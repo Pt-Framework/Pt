@@ -243,10 +243,11 @@ class Client2 : public Pt::Connectable {
 
             std::cout << "[@@ Client2::onReadHandshake] ### in_avail:" << _ios.buffer().in_avail() << std::endl;
 
-            bool connected = _ssl->handshake();
-            if(connected)
+            _ssl->handshake();
+
+            if( _ssl->connected() )
             {
-                std::cout << "[@@ Client2::handshake ] ### connected " <<  _ssl->connectionEstablished() <<  std::endl;
+                std::cout << "[@@ Client2::handshake ] ### successfully connected " <<  std::endl;
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client2::onWriteHandshake);
                 _ios.buffer().inputReady  -= Pt::slot(*this, &Client2::onReadHandshake);
                 return;

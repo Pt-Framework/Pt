@@ -117,8 +117,28 @@ void SSLStreamBuffer2::initHandshake()
 {
     SSL_set_connect_state(_ssl);
 
-    while(true)
+    int ret = SSL_do_handshake(_ssl);
+    std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
+              << SSL_get_error(_ssl, ret) << std::endl;
+
+    if( ret <= 0 )
     {
+        int sslerr = SSL_get_error(_ssl, ret);
+        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
+            throw std::runtime_error("SSL_do_handshake failed");
+    }
+
+    while(BIO_pending(_out) > 0)
+    {
+        char buff[100];
+        int n = BIO_read(_out, buff, sizeof(buff) );
+
+        if( n <= 0)
+            throw std::runtime_error("BIO_read failed");
+
+        std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
+        _ios->write(buff, n);
+
         int ret = SSL_do_handshake(_ssl);
         std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
                   << SSL_get_error(_ssl, ret) << std::endl;
@@ -129,34 +149,59 @@ void SSLStreamBuffer2::initHandshake()
             if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
                 throw std::runtime_error("SSL_do_handshake failed");
         }
-
-        if( BIO_pending(_out) <= 0 )
-            break;
-
-        char buff[100];
-        int n = BIO_read(_out, buff, sizeof(buff) );
-
-        if( n <= 0)
-            throw std::runtime_error("BIO_read failed");
-
-        std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
-        _ios->write(buff, n);
-     }
+    }
 }
 
 
-bool SSLStreamBuffer2::handshake()
+void SSLStreamBuffer2::initServerHandshake()
+{
+    SSL_set_accept_state(_ssl);
+
+    // block until data can be read from the stream
+    _ios->rdbuf()->sgetc();
+
+    char buf[600];
+    while(true)
+    {
+        unsigned n = _ios->readsome( buf, sizeof(buf) );
+        std::cerr << "[SSLStreamBuffer2::handshake] readsome=" << n << std::endl;
+
+        if(n == 0)
+            break;
+
+        while(n)
+        {
+            int written = BIO_write(_in, buf, n);
+            std::cerr << "[SSLStreamBuffer2::handshake] BIO_write=" << written << std::endl;
+
+            if(written <= 0)
+                throw std::runtime_error("BIO_write failed");
+
+            n -= written;
+            if(n > 0)
+            {
+                std::memcpy(buf, buf + written, n);
+            }
+
+            int ret = SSL_do_handshake(_ssl);
+
+            if( ret <= 0 )
+            {
+                int sslerr = SSL_get_error(_ssl, ret);
+                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
+                    throw std::runtime_error("SSL_do_handshake failed");
+            }
+        }
+    }
+}
+
+
+void SSLStreamBuffer2::handshake()
 {
     char buf[600];
 
-    unsigned inavail = _ios->rdbuf()->in_avail();
-    if( ! inavail )
-    {
-        _ios->rdbuf()->sgetc();
-        inavail = _ios->rdbuf()->in_avail();
-    }
-
-    std::cerr << "[SSLStreamBuffer2::handshake] inavail=" << inavail << std::endl;
+    // block until data can be read from the stream
+    _ios->rdbuf()->sgetc();
 
     while(true)
     {
@@ -213,12 +258,10 @@ bool SSLStreamBuffer2::handshake()
                 throw std::runtime_error("SSL_do_handshake failed");
         }
     }
-
-    return SSL_get_state(_ssl) == SSL_ST_OK;
 }
 
 
-bool SSLStreamBuffer2::connectionEstablished() const
+bool SSLStreamBuffer2::connected() const
 {
     return SSL_get_state(_ssl) == SSL_ST_OK;
 }
@@ -227,7 +270,29 @@ bool SSLStreamBuffer2::connectionEstablished() const
 void SSLStreamBuffer2::disconnect()
 {
     SSL_shutdown(_ssl);
-    //_doSSL();
+
+    while(BIO_pending(_out) > 0)
+    {
+        char buff[100];
+        int n = BIO_read(_out, buff, sizeof(buff) );
+
+        if( n <= 0)
+            throw std::runtime_error("BIO_read failed");
+
+        std::cerr << "[SSLStreamBuffer2::handshake] BIO_read=" << n << std::endl;
+        _ios->write(buff, n);
+
+        int ret = SSL_do_handshake(_ssl);
+        std::cerr << "[SSLStreamBuffer2::handshake] SSL_do_handshake=" << ret << " "
+                  << SSL_get_error(_ssl, ret) << std::endl;
+
+        if( ret <= 0 )
+        {
+            int sslerr = SSL_get_error(_ssl, ret);
+            if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
+                throw std::runtime_error("SSL_do_handshake failed");
+        }
+    }
 }
 
 

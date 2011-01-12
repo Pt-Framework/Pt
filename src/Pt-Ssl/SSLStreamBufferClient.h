@@ -60,16 +60,37 @@ class PT_SSL_API SSLStreamBufferClient : public SSLStreamBuffer {
 class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
 {
     public:
+
+        enum ConnectionState
+        {
+            Disconnected,
+            ReceiveHandshake,
+            SendHandshake,
+            Connected
+        };
+
         SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const char* sessionID);
 
         virtual ~SSLStreamBuffer2();
 
-        //! brief Writes the complete first handshake message
+        /** @brief Initiates the handshake communication.
+
+            Writes the complete first handshake message to the underlying stream.
+        */
         void initHandshake();
+        void initServerHandshake();
 
-        bool handshake();
+        /** @brief Advances the handshake communication.
 
-        bool connectionEstablished() const;
+            If the underlying stream has input available, the available data is consumed,
+            otherwise this method blocks until data becomes available. If the received
+            handshake message is complete, the handshake reply is written to the underlying
+            stream.
+
+        */
+        void handshake();
+
+        bool connected() const;
 
         void disconnect();
 
