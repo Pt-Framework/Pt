@@ -14,10 +14,9 @@ PT_UNIT_SOURCES = Application.cpp
                  ;
 
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-System ;
-SharedLibrary_MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-Unit : Pt Pt-System ;
+MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
 
 # Define a pseudo target to call from projects
 NOTFILE Pt-Unit-all ;
-DEPENDS Pt-Unit-all : Pt-Unit
-                      ;
+DEPENDS Pt-Unit-all : Pt-Unit ;
