@@ -29,8 +29,10 @@
 #define PT_SSL_SSLSTREAMBUFFER_CLIENT_H
 
 #include "SSLStreamBuffer.h"
+#include <iostream>
 
 namespace Pt {
+
 namespace Ssl {
 
 //!
@@ -64,31 +66,32 @@ class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
 
         virtual ~SSLStreamBuffer2();
 
-        /** @brief Initiates the handshake communication.
+        /** @brief Starts the server handshake
 
-            Writes the complete first handshake message to the underlying stream.
+            After this method has been called, the first handshake message
+            can be read from the client.
         */
-        void initHandshake();
-        void initServerHandshake();
+        void startServerHandshake();
 
-        /** @brief Advances the handshake communication.
+        /** @brief Starts the client handshake
 
-            If the underlying stream has input available, the available data is consumed,
-            otherwise this method blocks until data becomes available. If the received
-            handshake message is complete, the handshake reply is written to the underlying
-            stream.
-
+            After this method has been called, the first handshake message
+            can be written to the server.
         */
-        void handshake();
-
         void startClientHandshake();
 
-        void doHandshake();
+        /** @brief Writes a handshake message to the underlying stream
 
+            Returns true if at least a part of the handshake message was
+            written, false if the handshake message is complete.
+        */
         bool writeHandshake();
 
-        std::streamsize out_avail();
+        /** @brief Reads handshake message from the underlying stream
 
+            Returns true if more handshake data needs to be read, false
+            if the handshake message is complete.
+        */
         bool readHandshake();
 
         bool connected() const;
