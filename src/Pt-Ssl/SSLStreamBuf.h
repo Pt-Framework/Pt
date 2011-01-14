@@ -52,6 +52,12 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
         /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. */
         bool connected() const;
 
+        /** \brief Get the current status string of this SSL stream buffer. */
+        const char* getStatusString() const;
+
+        /** \brief Reset this SSL stream buffer. */
+        void reset();
+
         /** @brief Writes a handshake message to the underlying stream
             Returns true if at least a part of the handshake message was
             written, false if the handshake message is complete.

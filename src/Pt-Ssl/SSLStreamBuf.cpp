@@ -82,8 +82,20 @@ SSLStreamBuf::~SSLStreamBuf()
 bool SSLStreamBuf::connected() const
 { return SSL_get_state(_ssl) == SSL_ST_OK; }
 
+const char* SSLStreamBuf::getStatusString() const
+{ return SSL_state_string_long(_ssl); }
+
+void SSLStreamBuf::reset()
+{
+    BIO_reset(_in);
+    BIO_reset(_out);
+    SSL_clear(_ssl);
+}
+
 bool SSLStreamBuf::writeHandshake()
 {
+    std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+
     if(!SSL_want_read(_ssl))
     {
         int ret = SSL_do_handshake(_ssl);
@@ -120,6 +132,8 @@ bool SSLStreamBuf::writeHandshake()
 
 bool SSLStreamBuf::readHandshake()
 {
+    std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+
     char buf[1000]; // Will be the steambufs buffer area later
 
     // Block until data can be read from the stream
