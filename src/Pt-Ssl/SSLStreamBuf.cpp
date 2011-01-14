@@ -92,6 +92,12 @@ void SSLStreamBuf::reset()
     SSL_clear(_ssl);
 }
 
+void SSLStreamBuf::startClientHandshake()
+{
+    SSL_set_connect_state(_ssl);
+    this->writeHandshake();
+}
+
 bool SSLStreamBuf::writeHandshake()
 {
     std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;

@@ -95,5 +95,35 @@ const std::string SSLStreamBufClient::getPeerCN() const
     return peerCN;
 }
 
+
+
+
+SslClient::SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
+: std::iostream()
+, _ios(&ios)
+, _sslbuf(ios, ctx, sessionID)
+{
+    std::iostream::init(&_sslbuf);
+}
+
+
+SslClient::~SslClient()
+{
+}
+
+
+void SslClient::startHandshake()
+{
+    _sslbuf.startClientHandshake();
+    std::cerr << "[@@ TestApp @@]" << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+
+    std::cerr << "[@@ TestApp @@]" << "Begin write" << std::endl;
+    _ios->buffer().beginWrite();
+    _ios->buffer().outputReady += Pt::slot(*this, &SslClient::onWriteHandshake);
+    _ios->buffer().inputReady  += Pt::slot(*this, &SslClient::onReadHandshake);
+
+}
+
 } // namespace Ssl
+  //
 } // namespace Pt

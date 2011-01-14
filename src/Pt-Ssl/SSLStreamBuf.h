@@ -58,6 +58,8 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
         /** \brief Reset this SSL stream buffer. */
         void reset();
 
+        void startClientHandshake();
+
         /** @brief Writes a handshake message to the underlying stream
             Returns true if at least a part of the handshake message was
             written, false if the handshake message is complete.
