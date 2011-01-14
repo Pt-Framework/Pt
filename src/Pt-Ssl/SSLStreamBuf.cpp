@@ -36,6 +36,24 @@
 namespace Pt {
 namespace Ssl {
 
+///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define SSL_CALL_INFO pt_ssl_stream_buf_get_class_type(this, PT_FUNCTION)
+const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, const std::string& funcName)
+{
+    static int count = 0;
+
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
+
+    char buff[1024];
+    sprintf(buff, " %06d %s [%17s] ", count++, (dynamic_cast<const SSLStreamBufServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+
+    return buff;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID)
 : _in (0),
   _out(0),
@@ -66,36 +84,32 @@ bool SSLStreamBuf::connected() const
 
 bool SSLStreamBuf::writeHandshake()
 {
-    if( ! SSL_want_read(_ssl) )
+    if(!SSL_want_read(_ssl))
     {
         int ret = SSL_do_handshake(_ssl);
-        std::cerr << "[SSLStreamBufClient::doHandshake] SSL_do_handshake=" << ret << std::endl;
+        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
 
-        if( ret <= 0 )
+        if(ret <= 0)
         {
             int sslerr = SSL_get_error(_ssl, ret);
             if( sslerr == SSL_ERROR_WANT_READ )
-            {
-                std::cerr << "[SSLStreamBufClient::doHandshake] wants read SSL_ERROR_WANT_READ"  << std::endl;
-            }
+                std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
             else if ( sslerr == SSL_ERROR_WANT_WRITE)
-            {
-                std::cerr << "[SSLStreamBufClient::doHandshake] wants write SSL_ERROR_WANT_WRITE"  << std::endl;
-            }
+                std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
             else
                 throw std::runtime_error("SSL_do_handshake failed");
         }
     }
 
-    if( BIO_pending(_out) )
+    if(BIO_pending(_out))
     {
-        char buff[1000]; // will be the steambufs buffer area later
-        int n = BIO_read(_out, buff, sizeof(buff) );
+        char buff[1000]; // Will be the steambufs buffer area later
+        const int n = BIO_read(_out, buff, sizeof(buff));
+        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
 
-        if( n <= 0)
+        if(n <= 0)
             throw std::runtime_error("BIO_read failed");
 
-        std::cerr << "[SSLStreamBufClient::handshake] BIO_read=" << n << std::endl;
         _ios->write(buff, n);
 
         return true;
@@ -106,35 +120,32 @@ bool SSLStreamBuf::writeHandshake()
 
 bool SSLStreamBuf::readHandshake()
 {
-    char buf[1000]; // will be the steambufs buffer area later
+    char buf[1000]; // Will be the steambufs buffer area later
 
-    // block until data can be read from the stream
+    // Block until data can be read from the stream
     _ios->rdbuf()->sgetc();
 
     while(true)
     {
-        unsigned n = _ios->readsome( buf, sizeof(buf) );
-        std::cerr << "[SSLStreamBufClient::handshake] readsome=" << n << std::endl;
+        unsigned n = _ios->readsome(buf, sizeof(buf));
+        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "readsome = " << n << std::endl;
 
         if(n == 0)
             break;
 
         while(n)
         {
-            int written = BIO_write(_in, buf, n);
-            std::cerr << "[SSLStreamBufClient::handshake] BIO_write=" << written << std::endl;
+            const int written = BIO_write(_in, buf, n);
+            std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
 
             if(written <= 0)
                 throw std::runtime_error("BIO_write failed");
 
             n -= written;
             if(n > 0)
-            {
                 std::memcpy(buf, buf + written, n);
-            }
 
             int ret = SSL_do_handshake(_ssl);
-
             if( ret <= 0 )
             {
                 int sslerr = SSL_get_error(_ssl, ret);

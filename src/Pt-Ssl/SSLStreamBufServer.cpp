@@ -36,8 +36,12 @@
 #include "SSLStreamBufServer.h"
 
 namespace Pt {
-
 namespace Ssl {
+
+///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define SSL_CALL_INFO pt_ssl_stream_buf_get_class_type(this, PT_FUNCTION)
+extern const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, const std::string& funcName);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLStreamBufServer::SSLStreamBufServer(std::iostream& ios, SSLContext& ctx, const char* sessionID)
 : SSLStreamBuf(ios, ctx, sessionID)
@@ -52,5 +56,4 @@ void SSLStreamBufServer::startServerHandshake()
 }
 
 } // namespace Ssl
-
 } // namespace Pt
