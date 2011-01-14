@@ -36,52 +36,29 @@ namespace Pt {
 
 namespace Ssl {
 
-class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
+/**
+ * \brief SSL stream buffer client.
+ */
+class PT_SSL_API SSLStreamBufClient : public SSLStreamBuf
 {
     public:
-        SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const char* sessionID);
+        /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
+        SSLStreamBufClient(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0);
 
-        virtual ~SSLStreamBuffer2();
-
-        /** @brief Starts the server handshake
-
-            After this method has been called, the first handshake message
-            can be read from the client.
-        */
-        void startServerHandshake();
+        /** \brief Standard dtor. */
+        virtual ~SSLStreamBufClient();
 
         /** @brief Starts the client handshake
-
             After this method has been called, the first handshake message
             can be written to the server.
         */
         void startClientHandshake();
 
-        /** @brief Writes a handshake message to the underlying stream
-
-            Returns true if at least a part of the handshake message was
-            written, false if the handshake message is complete.
-        */
-        bool writeHandshake();
-
-        /** @brief Reads handshake message from the underlying stream
-
-            Returns true if more handshake data needs to be read, false
-            if the handshake message is complete.
-        */
-        bool readHandshake();
-
-        bool connected() const;
-
+        /** \brief Disconnect the connection. */
         void disconnect();
 
-        std::string getPeerCN() const;
-
-    private:
-        std::iostream* _ios;
-        BIO*           _in;
-        BIO*           _out;
-        SSL*           _ssl;
+        /** \brief Get the peer CN (Common Name). */
+        const std::string getPeerCN() const;
 };
 
 } // namespace Pt

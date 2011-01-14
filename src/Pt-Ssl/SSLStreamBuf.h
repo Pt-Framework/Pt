@@ -38,12 +38,37 @@
 namespace Pt {
 namespace Ssl {
 
-//!
-//! \brief SSL connector.
+/**
+ * \brief SSL stream buffer.
+ */
 class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
     public:
-        //! \brief Standard dtor.
+        /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. */
+        SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0);
+
+        /** \brief Standard dtor. */
         virtual ~SSLStreamBuf();
+
+        /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. */
+        bool connected() const;
+
+        /** @brief Writes a handshake message to the underlying stream
+            Returns true if at least a part of the handshake message was
+            written, false if the handshake message is complete.
+        */
+        bool writeHandshake();
+
+        /** @brief Reads handshake message from the underlying stream
+            Returns true if more handshake data needs to be read, false
+            if the handshake message is complete.
+        */
+        bool readHandshake();
+
+    protected:
+        BIO*           _in;  // Input BIO
+        BIO*           _out; // Output BIO
+        SSL*           _ssl; // OpenSSL SSL handle
+        std::iostream* _ios; // IO
 };
 
 

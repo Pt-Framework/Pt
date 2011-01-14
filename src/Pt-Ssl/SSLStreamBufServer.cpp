@@ -36,7 +36,21 @@
 #include "SSLStreamBufServer.h"
 
 namespace Pt {
+
 namespace Ssl {
 
-} // namespace Pt
+SSLStreamBufServer::SSLStreamBufServer(std::iostream& ios, SSLContext& ctx, const char* sessionID)
+: SSLStreamBuf(ios, ctx, sessionID)
+{}
+
+SSLStreamBufServer::~SSLStreamBufServer()
+{}
+
+void SSLStreamBufServer::startServerHandshake()
+{
+    SSL_set_accept_state(_ssl);
+}
+
 } // namespace Ssl
+
+} // namespace Pt

@@ -129,7 +129,7 @@ class Client : public Pt::Connectable {
 
             std::cout << "[@@ Client::onTCPConnect ] ### starting handshake" << std::endl;
 
-            _ssl = new Pt::Ssl::SSLStreamBuffer2(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLStreamBufClient(_ios, _sslContext, 0);
 
             _ssl->startClientHandshake();
 
@@ -194,7 +194,7 @@ class Client : public Pt::Connectable {
 
     private:
         Pt::Ssl::SSLContext&       _sslContext;
-        Pt::Ssl::SSLStreamBuffer2* _ssl;
+        Pt::Ssl::SSLStreamBufClient* _ssl;
         Pt::System::IOStream       _ios;
         Pt::System::EventLoop&     _loop;
         Pt::Net::TcpSocket         _socket;

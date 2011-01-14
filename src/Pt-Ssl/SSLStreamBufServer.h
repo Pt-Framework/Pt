@@ -31,9 +31,28 @@
 
 #include "SSLStreamBuf.h"
 
+
 namespace Pt {
 namespace Ssl {
 
+    /**
+ * \brief SSL stream buffer server.
+ */
+class PT_SSL_API SSLStreamBufServer : public SSLStreamBuf
+{
+    public:
+        /** \brief Construct an SSL stream buffer server that uses the given IO stream and SSL context. */
+        SSLStreamBufServer(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0);
+
+        /** \brief Standard dtor. */
+        virtual ~SSLStreamBufServer();
+
+        /** @brief Starts the server handshake
+            After this method has been called, the first handshake message
+            can be read from the client.
+        */
+        void startServerHandshake();
+};
 
 } // namespace Pt
 } // namespace Ssl
