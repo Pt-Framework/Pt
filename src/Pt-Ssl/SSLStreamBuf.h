@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2010-2010 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -25,39 +26,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCONTEXT_H
-#define PT_SSL_SSLCONTEXT_H
-
-#include "Api.h"
+#ifndef PT_SSL_SSLSTREAMBUF_H
+#define PT_SSL_SSLSTREAMBUF_H
 
 #include <string>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include <Pt/Signal.h>
+#include <Pt/System/StreamBuffer.h>
+
+#include "SSLContext.h"
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief SSL context.
-class PT_SSL_API SSLContext {
+//!
+//! \brief SSL connector.
+class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
     public:
-        //! \brief Construct an SSL context that uses the given certificate-key file and password.
-        SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID);
-
         //! \brief Standard dtor.
-        ~SSLContext();
-
-        friend class SSLConnector2;
-        friend class SSLStreamBuffer;
-        friend class SSLStreamBuffer2;
-
-    private:
-        SSL_CTX*    _ctx;    // OpenSSL's SSL context
-        std::string _pswd;   // The password
-        static BIO* _bioErr; // Error BIO for OpenSSL
-
-        // Password callback to feed the password to OpenSSL
-        static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
+        virtual ~SSLStreamBuf();
 };
+
 
 } // namespace Pt
 } // namespace Ssl

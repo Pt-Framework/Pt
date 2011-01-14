@@ -38,7 +38,8 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
 
-#include "SSLStreamBufferClient.h"
+#include "SSLStreamBufClient.h"
+#include "SSLStreamBufServer.h"
 #include "SSLStreamBufferServer.h"
 
 class Server : public Pt::Connectable {
@@ -105,11 +106,13 @@ class Server : public Pt::Connectable {
 
 class Client : public Pt::Connectable {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
+        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
+                Pt::Ssl::SSLContext& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)
         {
-            std::cout << "[@@ Client-TCP  ] ################################### Connecting to server" << std::endl;
-            _socket.connected += Pt::slot(*this, &Client::_onTCPConnect);
+            std::cout << "[@@ Client ] ### Connecting to server" << std::endl;
+
+            _socket.connected += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
             _loop.add(_socket);
         }
@@ -117,67 +120,88 @@ class Client : public Pt::Connectable {
         ~Client()
         { delete _ssl; }
 
-        void sendMessage(const char* msg)
+
+    private:
+        void onTCPConnect(Pt::Net::TcpSocket& socket)
         {
-            if(_msgCnt >= 3) {
-                _loop.exit();
+            _socket.endConnect();
+            _ios.attachDevice(socket);
+
+            std::cout << "[@@ Client::onTCPConnect ] ### starting handshake" << std::endl;
+
+            _ssl = new Pt::Ssl::SSLStreamBuffer2(_ios, _sslContext, 0);
+
+            _ssl->startClientHandshake();
+
+            std::cout << "[@@ Client::onTCPConnect] ### out_avail:"
+                      << _ios.buffer().out_avail() << std::endl;
+
+            std::cout << "[@@ Client::onTCPConnect] ### beginWrite" << std::endl;
+            _ios.buffer().beginWrite();
+            _ios.buffer().outputReady += Pt::slot(*this, &Client::onWriteHandshake);
+            _ios.buffer().inputReady  += Pt::slot(*this, &Client::onReadHandshake);
+        }
+
+        void onWriteHandshake(Pt::System::StreamBuffer& sb)
+        {
+            _ios.buffer().endWrite();
+
+            std::cout << "[@@ Client::onWriteHandshake] ### out_avail:"
+                      << _ios.buffer().out_avail() << std::endl;
+
+            if( _ssl->writeHandshake() || _ios.buffer().out_avail() > 0 )
+            {
+                std::cout << "[@@ Client::onWriteHandshake] ### beginWrite" << std::endl;
+                _ios.buffer().beginWrite();
                 return;
             }
 
-            std::cout << "[@@ Client-SSL  ] ################################### Sending message to server (" << _msgCnt << ")" << std::endl;
-
-            std::ostream os(_ssl);
-            os << msg;
-            os.flush();
-
-            ++_msgCnt;
+            std::cout << "[@@ Client::onWriteHandshake ] ### beginRead" << std::endl;
+            _ios.buffer().beginRead();
         }
 
-    private:
-        void _onTCPConnect(Pt::Net::TcpSocket& socket)
+        void onReadHandshake(Pt::System::StreamBuffer& sb)
         {
-            _socket.endConnect();
+            _ios.buffer().endRead();
 
-            std::cout << "[@@ Client-SSL  ] ################################### Initializing SSL" << std::endl;
-            _ssl = new Pt::Ssl::SSLStreamBufferClient(_socket, _sslContext, 0);
-            _ssl->connected              += Pt::slot(*this, &Client::_onSSLConnect            );
-            _ssl->decryptedDataAvailable += Pt::slot(*this, &Client::_onDecryptedDataAvailable);
+            std::cout << "[@@ Client::onReadHandshake] ### in_avail:" << _ios.buffer().in_avail() << std::endl;
 
-            _ssl->connect();
-            std::cout << "[@@ Client-SSL  ] ################################### Status = " << _ssl->getStatusString() << std::endl;
+            if( _ssl->readHandshake() )
+            {
+                std::cout << "[@@ Client::handshake ] ### read more handshake bytes" << std::endl;
+                _ios.buffer().beginRead();
+                return;
+            }
+
+            if( _ssl->connected() )
+            {
+                std::cout << "[@@ Client::handshake ] ### successfully connected " <<  std::endl;
+                _ios.buffer().outputReady -= Pt::slot(*this, &Client::onWriteHandshake);
+                _ios.buffer().inputReady  -= Pt::slot(*this, &Client::onReadHandshake);
+                return;
+            }
+
+            _ssl->writeHandshake();
+
+            std::cout << "[@@ Client::handshake] ### beginWrite" << std::endl;
+            _ios.buffer().beginWrite();
         }
 
-        void _onSSLConnect(Pt::Ssl::SSLStreamBuffer& ssl)
+        void onSSLConnect(Pt::Ssl::SSLStreamBuffer& ssl)
         {
             std::cout << "[@@ Client-SSL  ] ################################### Peer CN = " + _ssl->getPeerCN() << std::endl;
-
-            sendMessage("Hello world from client!");
-        }
-
-        void _onDecryptedDataAvailable(Pt::Ssl::SSLStreamBuffer& ssl)
-        {
-            std::string cum;
-            char        buff[128];
-
-            std::istream is(_ssl);
-
-            int len = 0;
-            do {
-                len = is.readsome(buff, sizeof(buff));
-                cum += std::string(buff, len);
-            } while(len > 0);
-            std::cout << "[@@ Client-SSL  ] ################################### Receiving message from server: " << cum << std::endl;
-
-            sendMessage("Hello world from client!");
         }
 
     private:
-        Pt::Ssl::SSLContext&            _sslContext;
-        Pt::Ssl::SSLStreamBufferClient* _ssl;
-        Pt::System::EventLoop&          _loop;
-        Pt::Net::TcpSocket              _socket;
-        int                             _msgCnt;
+        Pt::Ssl::SSLContext&       _sslContext;
+        Pt::Ssl::SSLStreamBuffer2* _ssl;
+        Pt::System::IOStream       _ios;
+        Pt::System::EventLoop&     _loop;
+        Pt::Net::TcpSocket         _socket;
+        int                        _msgCnt;
 };
+
+
 
 int main(int argc, char** argv)
 {

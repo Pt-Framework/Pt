@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2010-2010 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -25,37 +26,62 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLSTREAMBUFFER_CLIENT_H
-#define PT_SSL_SSLSTREAMBUFFER_CLIENT_H
+#ifndef PT_SSL_SSLSTREAMBUF_CLIENT_H
+#define PT_SSL_SSLSTREAMBUF_CLIENT_H
 
-#include "SSLStreamBuffer.h"
+#include "SSLStreamBuf.h"
 #include <iostream>
 
 namespace Pt {
 
 namespace Ssl {
 
-//!
-//! \brief SSL connector.
-class PT_SSL_API SSLStreamBufferClient : public SSLStreamBuffer {
+class PT_SSL_API SSLStreamBuffer2 : public Connectable, public std::streambuf
+{
     public:
-        //! \brief Construct an SSL connector client that uses the given IO device and context.
-        SSLStreamBufferClient(System::IODevice& ioDevice, SSLContext& sslContext, const char* sessionID);
+        SSLStreamBuffer2(std::iostream& ios, SSLContext& ctx, const char* sessionID);
 
-        //! \brief Construct an SSL connector client that uses the given stream buffer and context.
-        SSLStreamBufferClient(System::StreamBuffer& streamBuffer, SSLContext& sslContext, const char* sessionID);
+        virtual ~SSLStreamBuffer2();
 
-        //! \brief Standard dtor.
-        virtual ~SSLStreamBufferClient();
+        /** @brief Starts the server handshake
 
-        //! \brief Activate this SSL connector as an SSL connector client and initiate a connection to an SSL connector server.
-        void connect();
+            After this method has been called, the first handshake message
+            can be read from the client.
+        */
+        void startServerHandshake();
 
-        //! \brief Disconnect the connection.
+        /** @brief Starts the client handshake
+
+            After this method has been called, the first handshake message
+            can be written to the server.
+        */
+        void startClientHandshake();
+
+        /** @brief Writes a handshake message to the underlying stream
+
+            Returns true if at least a part of the handshake message was
+            written, false if the handshake message is complete.
+        */
+        bool writeHandshake();
+
+        /** @brief Reads handshake message from the underlying stream
+
+            Returns true if more handshake data needs to be read, false
+            if the handshake message is complete.
+        */
+        bool readHandshake();
+
+        bool connected() const;
+
         void disconnect();
 
-        //! \brief Get the peer CN (Common Name).
-        const std::string getPeerCN() const;
+        std::string getPeerCN() const;
+
+    private:
+        std::iostream* _ios;
+        BIO*           _in;
+        BIO*           _out;
+        SSL*           _ssl;
 };
 
 } // namespace Pt

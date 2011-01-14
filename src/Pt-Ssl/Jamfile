@@ -10,6 +10,9 @@ SharedLibrary Pt-Ssl : SSLContext.cpp
                        SSLStreamBuffer.cpp
                        SSLStreamBufferServer.cpp
                        SSLStreamBufferClient.cpp
+                       SSLStreamBuf.cpp
+                       SSLStreamBufServer.cpp
+                       SSLStreamBufClient.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
@@ -27,6 +30,10 @@ MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
 Main SSLHTTPTest : SSLHTTPTest.cpp ;
 LinkSharedLibraries SSLHTTPTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPTest : $(OUTPUT_TARGET) ;
+
+Main SSLStreamBufTest : SSLStreamBufTest.cpp ;
+LinkSharedLibraries SSLStreamBufTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLStreamBufTest : $(OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {
