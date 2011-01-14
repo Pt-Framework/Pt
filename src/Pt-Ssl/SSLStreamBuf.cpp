@@ -48,7 +48,7 @@ const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, cons
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, " %06d %s [%17s] ", count++, (dynamic_cast<const SSLStreamBufServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, " %06d %s [%16s] ", count++, (dynamic_cast<const SSLStreamBufServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
 
     return buff;
 }

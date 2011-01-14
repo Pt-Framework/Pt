@@ -56,7 +56,7 @@ static const std::string _printInfo(const char* name, const std::string& funcNam
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, " %06d (%s) [%17s] ", count++, name, f.c_str());
+    sprintf(buff, " %06d (%s) [%16s] ", count++, name, f.c_str());
 
     return buff;
 }
