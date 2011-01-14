@@ -115,6 +115,14 @@ class Server : public Pt::Connectable {
                 return;
             }
 
+            if(_ssl->connected())
+            {
+                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Successfully connected to the client" << std::endl;
+                _ios.buffer().outputReady -= Pt::slot(*this, &Server::onWriteHandshake);
+                _ios.buffer().inputReady  -= Pt::slot(*this, &Server::onReadHandshake);
+                return;
+            }
+
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Begin read" << std::endl;
             _ios.buffer().beginRead();
         }
@@ -128,14 +136,6 @@ class Server : public Pt::Connectable {
             {
                 std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Read more handshake bytes" << std::endl;
                 _ios.buffer().beginRead();
-                return;
-            }
-
-            if(_ssl->connected())
-            {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Successfully connected to the client" << std::endl;
-                _ios.buffer().outputReady -= Pt::slot(*this, &Server::onWriteHandshake);
-                _ios.buffer().inputReady  -= Pt::slot(*this, &Server::onReadHandshake);
                 return;
             }
 
