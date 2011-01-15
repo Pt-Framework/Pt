@@ -79,52 +79,17 @@ class PT_SSL_API SslClient : public std::iostream, public Pt::Connectable
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void startHandshake();
+        void beginHandshake();
 
         SSLStreamBuf& buffer()
         { return _sslbuf; }
 
-        void onWriteHandshake(Pt::System::StreamBuffer& sb)
-        {
-            _ios->buffer().endWrite();
-            std::cerr << "[@@ TestApp @@]" << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+        Pt::Signal<SslClient&> handshakeFinished;
 
-            if( _sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0 )
-            {
-                std::cerr << "[@@ TestApp @@]"  << "Begin write" << std::endl;
-                _ios->buffer().beginWrite();
-                return;
-            }
+    private:
+        void onWriteHandshake(Pt::System::StreamBuffer& sb);
 
-            if(_sslbuf.connected())
-            {
-                std::cerr << "[@@ TestApp @@]" << "Successfully connected to the client" << std::endl;
-                _ios->buffer().outputReady -= Pt::slot(*this, &SslClient::onWriteHandshake);
-                _ios->buffer().inputReady  -= Pt::slot(*this, &SslClient::onReadHandshake);
-                return;
-            }
-
-            std::cerr << "[@@ TestApp @@]" << "Begin read" << std::endl;
-            _ios->buffer().beginRead();
-        }
-
-        void onReadHandshake(Pt::System::StreamBuffer& sb)
-        {
-            _ios->buffer().endRead();
-            std::cerr << "[@@ TestApp @@]" << "in_avail = " << _ios->buffer().in_avail() << std::endl;
-
-            if(_sslbuf.readHandshake())
-            {
-                std::cerr << "[@@ TestApp @@]" << "Read more handshake bytes" << std::endl;
-                _ios->buffer().beginRead();
-                return;
-            }
-
-            _sslbuf.writeHandshake();
-
-            std::cerr << "[@@ TestApp @@]" << "Begin write" << std::endl;
-            _ios->buffer().beginWrite();
-        }
+        void onReadHandshake(Pt::System::StreamBuffer& sb);
 
     private:
         System::IOStream* _ios;

@@ -41,10 +41,14 @@ namespace Ssl {
 /**
  * \brief SSL stream buffer.
  */
-class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
+class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf 
+{
+	public:
+	    typedef std::streambuf::int_type int_type;
+
     public:
         /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. */
-        SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0);
+        SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
 
         /** \brief Standard dtor. */
         virtual ~SSLStreamBuf();
@@ -73,10 +77,25 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf {
         bool readHandshake();
 
     protected:
+        virtual int sync();
+
+        virtual int_type underflow();
+
+        virtual int_type overflow(int_type ch);
+
+    protected:
         BIO*           _in;  // Input BIO
         BIO*           _out; // Output BIO
         SSL*           _ssl; // OpenSSL SSL handle
         std::iostream* _ios; // IO
+
+    private:
+        size_t _ibufferSize;
+        char* _ibuffer;
+        std::size_t _obufferSize;
+        char* _obuffer;
+        const size_t _pbmax;
+        bool _oextend;
 };
 
 

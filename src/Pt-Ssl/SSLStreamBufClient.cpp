@@ -112,7 +112,7 @@ SslClient::~SslClient()
 }
 
 
-void SslClient::startHandshake()
+void SslClient::beginHandshake()
 {
     _sslbuf.startClientHandshake();
     std::cerr << "[@@ TestApp @@]" << "out_avail = " << _ios->buffer().out_avail() << std::endl;
@@ -122,6 +122,52 @@ void SslClient::startHandshake()
     _ios->buffer().outputReady += Pt::slot(*this, &SslClient::onWriteHandshake);
     _ios->buffer().inputReady  += Pt::slot(*this, &SslClient::onReadHandshake);
 
+}
+
+
+void SslClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
+{
+    _ios->buffer().endWrite();
+    std::cerr << "[@@ TestApp @@]" << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+
+    if( _sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0 )
+    {
+        std::cerr << "[@@ TestApp @@]"  << "Begin write" << std::endl;
+        _ios->buffer().beginWrite();
+        return;
+    }
+
+    if(_sslbuf.connected())
+    {
+        std::cerr << "[@@ TestApp @@]" << "Successfully connected to the client" << std::endl;
+        _ios->buffer().outputReady -= Pt::slot(*this, &SslClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SslClient::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
+    }
+
+    std::cerr << "[@@ TestApp @@]" << "Begin read" << std::endl;
+    _ios->buffer().beginRead();
+}
+
+
+void SslClient::onReadHandshake(Pt::System::StreamBuffer& sb)
+{
+    _ios->buffer().endRead();
+    std::cerr << "[@@ TestApp @@]" << "in_avail = " << _ios->buffer().in_avail() << std::endl;
+
+    if(_sslbuf.readHandshake())
+    {
+        std::cerr << "[@@ TestApp @@]" << "Read more handshake bytes" << std::endl;
+        _ios->buffer().beginRead();
+        return;
+    }
+
+    std::cerr << "[@@ TestApp @@]" << " write Handshake" << std::endl;
+    _sslbuf.writeHandshake();
+
+    std::cerr << "[@@ TestApp @@]" << "Begin write" << std::endl;
+    _ios->buffer().beginWrite();
 }
 
 } // namespace Ssl

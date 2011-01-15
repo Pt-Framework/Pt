@@ -54,11 +54,16 @@ const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, cons
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID)
+SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)
 : _in (0),
   _out(0),
   _ssl(0),
-  _ios(&ios)
+  _ios(&ios),
+  _ibufferSize(bufferSize+4),
+  _ibuffer(0),
+  _obufferSize(bufferSize),
+  _obuffer(0),
+  _pbmax(4)
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -181,5 +186,80 @@ bool SSLStreamBuf::readHandshake()
     return true;
 }
 
+
+int SSLStreamBuf::sync()
+{
+    return 0;
+}
+
+
+SSLStreamBuf::int_type SSLStreamBuf::underflow()
+{
+    return 0;
+}
+
+
+SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
+{
+    //
+    // We are being called when _obuffer, the output buffer area of the 
+    // i/o stream is full, or needs to be flushed. In case of a flush,
+    // the eof character is passed to overflow(). When SSLStreamBuf is
+    // constructed no output buffer area exists, therefore when overflow
+    // is called for the first time, we need to set it up.
+    //
+
+    if( ! _ios )
+        return traits_type::eof();
+
+    if( ! _obuffer )
+    {
+        _obuffer = new char[_obufferSize];
+        this->setp(_obuffer, _obuffer + _obufferSize);
+    }
+    else if (traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        // normal blocking overflow case
+        size_t avail = this->pptr() - _obuffer;
+
+        // TODO: bytes in _obuffer are not encrypted we need to do that
+        //       before we write them to the underlying i/o stream
+
+        // feed _obuffer to openssl
+        int written = SSL_write(_ssl, _obuffer, avail);
+
+        // - move leftover in _obuffer to the front
+        size_t leftover = avail - written;
+        if(leftover > 0)
+        {
+            traits_type::move(_obuffer, _obuffer + written, leftover);
+        }
+        this->setp(_obuffer, _obuffer + _obufferSize);
+        this->pbump( leftover );
+
+        // write encoded bytes to _ios
+        while(true)
+        {
+            char buf[255];
+
+            int n = BIO_read( _out, buf, sizeof(buf) );
+            if(n < 0) 
+                break;
+
+            _ios->write(buf, n);
+        }
+    }
+
+    // if the overflow char is not EOF, so put it in buffer
+    if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
+    {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
+}
+
 } // namespace Pt
+
 } // namespace Ssl
