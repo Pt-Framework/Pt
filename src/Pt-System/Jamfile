@@ -48,6 +48,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ApplicationImpl.cpp ]
                           Thread.cpp
                           Timer.cpp
                           Url.cpp
+                          Uri.cpp
                           ConsoleChannel.cpp
                           FileChannel.cpp
                           SerialChannel.cpp
@@ -86,6 +87,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   #SerialDeviceTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
+                  UriTest.cpp
                   ;
 
 PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
