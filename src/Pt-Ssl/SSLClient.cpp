@@ -43,7 +43,6 @@ SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
   _sslbuf      (ios, ctx, sessionID)
 { std::iostream::init(&_sslbuf); }
 
-
 SSLClient::~SSLClient()
 {}
 
@@ -65,7 +64,7 @@ void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
 
     if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
     {
-        std::cerr << "[@@ TestApp @@]"  << "Begin write" << std::endl;
+        std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
         _ios->buffer().beginWrite();
         return;
     }

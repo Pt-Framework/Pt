@@ -37,5 +37,70 @@ namespace Ssl {
 #define SSL_CALL_INFO SSLStreamBuf::_call_info("SSLServer   ", PT_FUNCTION)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
+: std::iostream(),
+  _ios         (&ios),
+  _sslbuf      (ios, ctx, sessionID)
+{ std::iostream::init(&_sslbuf); }
+
+
+SSLServer::~SSLServer()
+{}
+
+void SSLServer::beginHandshake()
+{
+    _sslbuf.startServerHandshake();
+    std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+
+    std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;
+    _ios->buffer().beginRead();
+    _ios->buffer().outputReady += Pt::slot(*this, &SSLServer::onWriteHandshake);
+    _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadHandshake);
+}
+
+void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
+{
+    _ios->buffer().endWrite();
+    std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+
+    if( _sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0 )
+    {
+        std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
+        _ios->buffer().beginWrite();
+        return;
+    }
+
+    if(_sslbuf.connected())
+    {
+        std::cerr << SSL_CALL_INFO << "Successfully connected to the client" << std::endl;
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
+    }
+
+    std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;
+    _ios->buffer().beginRead();
+}
+
+
+void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
+{
+    _ios->buffer().endRead();
+    std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
+
+    if(_sslbuf.readHandshake())
+    {
+        std::cerr << SSL_CALL_INFO << "Read more handshake bytes" << std::endl;
+        _ios->buffer().beginRead();
+        return;
+    }
+
+    _sslbuf.writeHandshake();
+
+    std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
+    _ios->buffer().beginWrite();
+}
+
 } // namespace Ssl
 } // namespace Pt

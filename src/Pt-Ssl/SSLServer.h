@@ -36,6 +36,44 @@
 namespace Pt {
 namespace Ssl {
 
+/**
+ * \brief SSL stream buffer server.
+ */
+class PT_SSL_API SSLServer : public std::iostream, public Pt::Connectable
+{
+    public:
+        /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
+        SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID = 0);
+
+        /** \brief Standard dtor. */
+        virtual ~SSLServer();
+
+        /** \brief Return the internal SSLStreamBuf instance. */
+        inline SSLStreamBuf& buffer()
+        { return _sslbuf; }
+
+        /** \brief Return the internal SSLStreamBuf instance. */
+        inline const SSLStreamBuf& buffer() const
+        { return _sslbuf; }
+
+        /** @brief Starts the client handshake
+            After this method has been called, the first handshake message
+            can be written to the server.
+        */
+        void beginHandshake();
+
+        // Signals
+        Pt::Signal<SSLServer&> handshakeFinished;
+
+    private:
+        void onWriteHandshake(Pt::System::StreamBuffer& sb);
+        void onReadHandshake(Pt::System::StreamBuffer& sb);
+
+    private:
+        System::IOStream* _ios;
+        SSLStreamBuf      _sslbuf;
+};
+
 } // namespace Pt
 } // namespace Ssl
 

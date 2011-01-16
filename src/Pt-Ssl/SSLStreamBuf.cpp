@@ -95,12 +95,12 @@ const std::string SSLStreamBuf::getPeerCN() const
 {
     if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
 
-    X509* peer;
-    peer = SSL_get_peer_certificate(_ssl);
+    X509* peer = SSL_get_peer_certificate(_ssl);
+    if(!peer) return "";
 
     char peerCN[256];
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
-    return peerCN;
+    int  ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
+    return (ret > 0) ? peerCN : "";
 }
 
 void SSLStreamBuf::disconnect()
@@ -306,5 +306,4 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 }
 
 } // namespace Pt
-
 } // namespace Ssl

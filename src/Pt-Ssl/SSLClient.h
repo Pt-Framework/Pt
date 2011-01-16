@@ -34,7 +34,6 @@
 #include <iostream>
 
 namespace Pt {
-
 namespace Ssl {
 
 /**
@@ -76,7 +75,6 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
 };
 
 } // namespace Pt
-
 } // namespace Ssl
 
 #endif
