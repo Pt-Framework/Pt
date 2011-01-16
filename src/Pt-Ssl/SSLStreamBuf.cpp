@@ -280,6 +280,8 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         {
             char buf[255];
 
+            // TODO it would be cool if we could access the BIO
+            //         buffer area directly.
             int n = BIO_read( _out, buf, sizeof(buf) );
             if(n < 0)
                 break;
