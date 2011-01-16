@@ -1,4 +1,4 @@
-/*************************************************************************** 
+/***************************************************************************
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
  *                                                                         *
@@ -41,11 +41,11 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         ~PipeIODevice();
 
         void open(HANDLE handle, bool isAsync);
-        
+
         bool setWaitHandle(HANDLE h, bool& avail);
-		
+
         void getWaitHandles(HandleMap& handles, bool& avail);
-		
+
         bool checkEvent();
 
         virtual IODeviceImpl& ioimpl()
@@ -64,7 +64,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         size_t onEndWrite();
 
         bool onWait(std::size_t n);
-        
+
         //! @brief Closes the I/O device
         virtual void onClose();
 
@@ -76,12 +76,14 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void onSync() const;
 
-        void onAttach(SelectorBase& mon)
+        void onAttach(EventLoop& s)
         { }
 
-        void onDetach(SelectorBase& mon)
+        void onDetach(EventLoop& s)
         { }
-        
+
+        virtual void onCancel();
+
      protected:
         void writeMessage(const char* buffer, size_t count);
 
@@ -89,7 +91,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         Mode                        _mode;
         DWORD                       _msgSize;
         size_t                      _bufferSize;
-        std::vector<char>           _buffer;               
+        std::vector<char>           _buffer;
 };
 
 class PipeImpl

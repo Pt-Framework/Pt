@@ -59,7 +59,7 @@ inline void convert(T& t, const String& str)
     is >> t;
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-        ConversionError::doThrow(typeid(T).name(), "Pt::String");
+        ConversionError::doThrow("T", "Pt::String");
 }
 
 
@@ -79,7 +79,7 @@ inline void convert(T& t, const std::string& str)
     is >> t;
     const std::ios::iostate iostate = is.rdstate();
     if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-        ConversionError::doThrow(typeid(T).name(), "std::string");
+        ConversionError::doThrow("T", "std::string");
 }
 
 

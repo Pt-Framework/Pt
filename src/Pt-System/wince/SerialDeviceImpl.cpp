@@ -28,7 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "../win32/win32.h"
-#include "SelectorImpl.h"
+#include "MainLoopImpl.h"
 #include "SerialDeviceImpl.h"
 #include "Pt/System/Thread.h"
 #include <iostream>
@@ -141,12 +141,12 @@ void SerialDeviceImpl::close()
 }
 
 
-void SerialDeviceImpl::attach(SelectorBase& mon)
+void SerialDeviceImpl::attach(EventLoop& mon)
 { 
 }
 
 
-void SerialDeviceImpl::detach(SelectorBase& mon)
+void SerialDeviceImpl::detach(EventLoop& mon)
 { 
 }
 
@@ -319,6 +319,12 @@ size_t SerialDeviceImpl::endWrite()
 
     return len;
 }   
+
+
+void SerialDeviceImpl::cancel()
+{
+    throw std::logic_error("SerialDeviceImpl::cancel() not implemented");
+}
 
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )

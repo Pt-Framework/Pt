@@ -27,6 +27,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "PipeImpl.h"
+#include "MainLoopImpl.h"
+#include "Pt/System/EventLoop.h"
+#include "Pt/System/SystemError.h"
 #include <windows.h>
 #include <sstream>
 #include <Msgqueue.h>
@@ -277,6 +280,11 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 
 
 void PipeIODevice::onSync() const
+{
+}
+
+
+void PipeIODevice::onCancel()
 {
 }
 

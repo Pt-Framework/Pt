@@ -44,9 +44,9 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         //! @brief Closes the I/O device
         void close();
 
-        void attach(SelectorBase& mon);
+        void attach(EventLoop& mon);
 
-        void detach(SelectorBase& mon);
+        void detach(EventLoop& mon);
 
         bool wait(std::size_t msecs);
 
@@ -63,6 +63,8 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         size_t beginWrite(const char* buffer, size_t n);
 
         size_t endWrite();
+
+        void cancel();
 
         //! @brief Read bytes from device
         size_t read( char* buffer, size_t count, bool& eof );

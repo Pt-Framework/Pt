@@ -28,9 +28,9 @@
 
 #include "FileChannel.h"
 #include "Pt/System/Url.h"
+#include "Pt/System/File.h"
 #include <iostream>
 #include <sstream>
-#include <cstdio>
 
 namespace Pt {
 
@@ -110,12 +110,14 @@ void FileChannel::rotate()
     if(_numBackup > 0)
     {
         std::string to = makePath(_numBackup);
-        std::remove( to.c_str() );
+        Pt::System::File(to).remove();
+        //remove( to.c_str() );
 
         for(unsigned n = _numBackup; n > 0 ; --n)
         {
             std::string from = makePath(n-1);
-            std::rename( from.c_str(), to.c_str() );
+            //rename( from.c_str(), to.c_str() );
+            Pt::System::File(from).move(to);
             to = from;
         }
     }
