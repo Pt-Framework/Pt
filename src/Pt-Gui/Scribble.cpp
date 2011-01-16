@@ -38,6 +38,7 @@
 #include <Pt/Gui/Label.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Main.h>
 #include <Pt/Delegate.h>
 #include <string>
 #include <iostream>

@@ -39,6 +39,8 @@ int main( int argc, char* argv[])
     Pt::Arg<int> retcode(argc, argv, 'r', 0);
     Pt::Arg<bool> readRetcode(argc, argv, 'R');
 
+#ifndef _WIN32_WCE
+
     std::ostream& out = stderrMsg ? std::cerr : std::cout;
 
     for (int a = 1; a < argc; ++a)
@@ -48,6 +50,7 @@ int main( int argc, char* argv[])
     {
         //char* c = 0;
         //*c = 'a';
+
         abort();
     }
 
@@ -60,6 +63,8 @@ int main( int argc, char* argv[])
 
         return retcode;
     }
+
+#endif
 
     return retcode;
 }
