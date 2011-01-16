@@ -43,9 +43,9 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           SerialChannel.cpp
                           ;
 
-SharedLibrary_LinkSharedLibraries Pt-System : Pt ;
+LinkSharedLibraries Pt-System : Pt ;
 LINKLIBS on $(PRELIB)Pt-System$(SUFDLL) = $(LINKLIBS) $(SYSLIBS) ;
-SharedLibrary_MakeLocate Pt-System : $(OUTPUT_TARGET) ;
+MakeLocate Pt-System : $(OUTPUT_TARGET) ;
 
 SharedLibrary TestPlugin : TestPlugin.cpp ;
 SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-System ;
