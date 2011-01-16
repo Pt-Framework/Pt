@@ -43,8 +43,12 @@ namespace Ssl {
  */
 class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 {
-	public:
-	    typedef std::streambuf::int_type int_type;
+    public:
+        typedef std::streambuf::int_type int_type;
+
+        ////// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        static const std::string _call_info(const char* className, const std::string& funcName);
+        ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public:
         /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. */

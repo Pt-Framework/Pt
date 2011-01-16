@@ -30,15 +30,14 @@
 #include <Pt/SourceInfo.h>
 #include <iostream>
 
-#include "SSLStreamBufServer.h"
-#include "SSLStreamBufClient.h"
+#include "SSLStreamBuf.h"
 
 namespace Pt {
 namespace Ssl {
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO pt_ssl_call_info("SSLStreamBuf", PT_FUNCTION)
-const std::string pt_ssl_call_info(const char* className, const std::string& funcName)
+#define SSL_CALL_INFO SSLStreamBuf::_call_info("SSLStreamBuf", PT_FUNCTION)
+const std::string SSLStreamBuf::_call_info(const char* className, const std::string& funcName)
 {
     static int count = 0;
 
@@ -48,7 +47,7 @@ const std::string pt_ssl_call_info(const char* className, const std::string& fun
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, " %06d %s [%16s] ", count++, className, f.c_str());
+    sprintf(buff, "[%s] %06d [%16s] ", className, count++, f.c_str());
 
     return buff;
 }
@@ -110,7 +109,7 @@ void SSLStreamBuf::disconnect()
     {
         char buff[100];
         const int n = BIO_read(_out, buff, sizeof(buff) );
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+        std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
 
         if(n <= 0)
             throw std::runtime_error("BIO_read failed");
@@ -118,7 +117,7 @@ void SSLStreamBuf::disconnect()
         _ios->write(buff, n);
 
         const int ret = SSL_do_handshake(_ssl);
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
+        std::cerr << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
 
         if(ret <= 0)
         {
@@ -149,20 +148,20 @@ void SSLStreamBuf::startClientHandshake()
 
 bool SSLStreamBuf::writeHandshake()
 {
-    std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+    std::cerr << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
 
     if(!SSL_want_read(_ssl))
     {
         int ret = SSL_do_handshake(_ssl);
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
+        std::cerr << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
 
         if(ret <= 0)
         {
             int sslerr = SSL_get_error(_ssl, ret);
             if( sslerr == SSL_ERROR_WANT_READ )
-                std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
+                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
             else if ( sslerr == SSL_ERROR_WANT_WRITE)
-                std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
+                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
             else
                 throw std::runtime_error("SSL_do_handshake failed");
         }
@@ -172,7 +171,7 @@ bool SSLStreamBuf::writeHandshake()
     {
         char buff[1000]; // Will be the steambufs buffer area later
         const int n = BIO_read(_out, buff, sizeof(buff));
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+        std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
 
         if(n <= 0)
             throw std::runtime_error("BIO_read failed");
@@ -187,7 +186,7 @@ bool SSLStreamBuf::writeHandshake()
 
 bool SSLStreamBuf::readHandshake()
 {
-    std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+    std::cerr << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
 
     char buf[1000]; // Will be the steambufs buffer area later
 
@@ -197,7 +196,7 @@ bool SSLStreamBuf::readHandshake()
     while(true)
     {
         unsigned n = _ios->readsome(buf, sizeof(buf));
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "readsome = " << n << std::endl;
+        std::cerr << SSL_CALL_INFO << "readsome = " << n << std::endl;
 
         if(n == 0)
             break;
@@ -205,7 +204,7 @@ bool SSLStreamBuf::readHandshake()
         while(n)
         {
             const int written = BIO_write(_in, buf, n);
-            std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
+            std::cerr << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
 
             if(written <= 0)
                 throw std::runtime_error("BIO_write failed");

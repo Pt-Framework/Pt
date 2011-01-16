@@ -34,8 +34,7 @@ namespace Pt {
 namespace Ssl {
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO pt_ssl_call_info("SSLClient   ", PT_FUNCTION)
-extern const std::string pt_ssl_call_info(const char* className, const std::string& funcName);
+#define SSL_CALL_INFO SSLStreamBuf::_call_info("SSLClient   ", PT_FUNCTION)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SslClient::SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
@@ -60,9 +59,7 @@ void SslClient::beginHandshake()
     _ios->buffer().beginWrite();
     _ios->buffer().outputReady += Pt::slot(*this, &SslClient::onWriteHandshake);
     _ios->buffer().inputReady  += Pt::slot(*this, &SslClient::onReadHandshake);
-
 }
-
 
 void SslClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {

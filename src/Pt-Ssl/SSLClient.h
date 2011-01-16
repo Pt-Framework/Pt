@@ -49,25 +49,30 @@ class PT_SSL_API SslClient : public std::iostream, public Pt::Connectable
         /** \brief Standard dtor. */
         virtual ~SslClient();
 
+        /** \brief Return the internal SSLStreamBuf instance. */
+        inline SSLStreamBuf& buffer()
+        { return _sslbuf; }
+
+        /** \brief Return the internal SSLStreamBuf instance. */
+        inline const SSLStreamBuf& buffer() const
+        { return _sslbuf; }
+
         /** @brief Starts the client handshake
             After this method has been called, the first handshake message
             can be written to the server.
         */
         void beginHandshake();
 
-        SSLStreamBuf& buffer()
-        { return _sslbuf; }
-
+        // Signals
         Pt::Signal<SslClient&> handshakeFinished;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
-
         void onReadHandshake(Pt::System::StreamBuffer& sb);
 
     private:
         System::IOStream* _ios;
-        SSLStreamBuf _sslbuf;
+        SSLStreamBuf      _sslbuf;
 };
 
 } // namespace Pt

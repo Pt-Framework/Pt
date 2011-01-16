@@ -42,23 +42,9 @@
 #include "SSLClient.h"
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO_CLIENT pt_ssl_call_info("SSLClient   ", PT_FUNCTION)
-#define SSL_CALL_INFO_SERVER pt_ssl_call_info("SSLServer   ", PT_FUNCTION)
-#define SSL_CALL_INFO_MAIN   pt_ssl_call_info("main()      ", PT_FUNCTION)
-const std::string pt_ssl_call_info(const char* className, const std::string& funcName)
-{
-    static int count = 0;
-
-    size_t      a = funcName.find_first_of("(");
-    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
-    a = f.find_last_of("::");
-    if(a != std::string::npos) f = f.substr(a + 1);
-
-    char buff[1024];
-    sprintf(buff, " %06d %s [%16s] ", count++, className, f.c_str());
-
-    return buff;
-}
+#define SSL_CALL_INFO_CLIENT Pt::Ssl::SSLStreamBuf::_call_info("@@ Client @@", PT_FUNCTION)
+#define SSL_CALL_INFO_SERVER Pt::Ssl::SSLStreamBuf::_call_info("@@ Server @@", PT_FUNCTION)
+#define SSL_CALL_INFO_MAIN   Pt::Ssl::SSLStreamBuf::_call_info("@@ main() @@", PT_FUNCTION)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
@@ -66,7 +52,7 @@ class Server : public Pt::Connectable {
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0), _msgCnt(0)
         {
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
 
             _server.listen(addr, port);
             _server.connectionPending += Pt::slot(*this, &Server::_onTCPAccept);
@@ -83,20 +69,20 @@ class Server : public Pt::Connectable {
    private:
         void _onTCPAccept(Pt::Net::TcpServer& server)
         {
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Accepting connection from client" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Accepting connection from client" << std::endl;
             _client = new Pt::Net::TcpSocket;
             _client->accept(server);
 
             _loop.add(*_client);
             _ios.attachDevice(*_client);
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
             _ssl = new Pt::Ssl::SSLStreamBuf(_ios, _sslContext, 0);
             _ssl->startServerHandshake();
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "out_avail = " << _ios.buffer().out_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "out_avail = " << _ios.buffer().out_avail() << std::endl;
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Begin read" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Begin read" << std::endl;
             _ios.buffer().beginRead();
             _ios.buffer().outputReady += Pt::slot(*this, &Server::onWriteHandshake);
             _ios.buffer().inputReady  += Pt::slot(*this, &Server::onReadHandshake);
@@ -105,42 +91,42 @@ class Server : public Pt::Connectable {
         void onWriteHandshake(Pt::System::StreamBuffer& sb)
         {
             _ios.buffer().endWrite();
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "out_avail = " << _ios.buffer().out_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "out_avail = " << _ios.buffer().out_avail() << std::endl;
 
             if( _ssl->writeHandshake() || _ios.buffer().out_avail() > 0 )
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Begin write" << std::endl;
+                std::cerr << SSL_CALL_INFO_SERVER << "Begin write" << std::endl;
                 _ios.buffer().beginWrite();
                 return;
             }
 
             if(_ssl->connected())
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Successfully connected to the client" << std::endl;
+                std::cerr << SSL_CALL_INFO_SERVER << "Successfully connected to the client" << std::endl;
                 _ios.buffer().outputReady -= Pt::slot(*this, &Server::onWriteHandshake);
                 _ios.buffer().inputReady  -= Pt::slot(*this, &Server::onReadHandshake);
                 return;
             }
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Begin read" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Begin read" << std::endl;
             _ios.buffer().beginRead();
         }
 
         void onReadHandshake(Pt::System::StreamBuffer& sb)
         {
             _ios.buffer().endRead();
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "in_avail = " << _ios.buffer().in_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "in_avail = " << _ios.buffer().in_avail() << std::endl;
 
             if(_ssl->readHandshake())
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Read more handshake bytes" << std::endl;
+                std::cerr << SSL_CALL_INFO_SERVER << "Read more handshake bytes" << std::endl;
                 _ios.buffer().beginRead();
                 return;
             }
 
             _ssl->writeHandshake();
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Begin write" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Begin write" << std::endl;
             _ios.buffer().beginWrite();
         }
 
@@ -159,7 +145,7 @@ class Client : public Pt::Connectable {
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)
         {
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Connecting to server" << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Connecting to server" << std::endl;
 
             _socket.connected += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
@@ -176,13 +162,13 @@ class Client : public Pt::Connectable {
             _socket.endConnect();
             _ios.attachDevice(socket);
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
             _ssl = new Pt::Ssl::SSLStreamBuf(_ios, _sslContext, 0);
             _ssl->startClientHandshake();
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
             _ios.buffer().beginWrite();
             _ios.buffer().outputReady += Pt::slot(*this, &Client::onWriteHandshake);
             _ios.buffer().inputReady  += Pt::slot(*this, &Client::onReadHandshake);
@@ -191,34 +177,34 @@ class Client : public Pt::Connectable {
         void onWriteHandshake(Pt::System::StreamBuffer& sb)
         {
             _ios.buffer().endWrite();
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
 
             if( _ssl->writeHandshake() || _ios.buffer().out_avail() > 0 )
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
                 _ios.buffer().beginWrite();
                 return;
             }
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Begin read" << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Begin read" << std::endl;
             _ios.buffer().beginRead();
         }
 
         void onReadHandshake(Pt::System::StreamBuffer& sb)
         {
             _ios.buffer().endRead();
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "in_avail = " << _ios.buffer().in_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "in_avail = " << _ios.buffer().in_avail() << std::endl;
 
             if(_ssl->readHandshake())
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Read more handshake bytes" << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Read more handshake bytes" << std::endl;
                 _ios.buffer().beginRead();
                 return;
             }
 
             if(_ssl->connected())
             {
-                std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Successfully connected to the server" << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Successfully connected to the server" << std::endl;
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client::onWriteHandshake);
                 _ios.buffer().inputReady  -= Pt::slot(*this, &Client::onReadHandshake);
                 return;
@@ -226,13 +212,13 @@ class Client : public Pt::Connectable {
 
             _ssl->writeHandshake();
 
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
             _ios.buffer().beginWrite();
         }
 
         void onSSLConnect(Pt::Ssl::SSLStreamBuf& ssl)
         {
-            std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->getPeerCN() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->getPeerCN() << std::endl;
         }
 
     private:
@@ -249,7 +235,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_MAIN << "OpenSSL test progam started" << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam started" << std::endl;
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -265,16 +251,16 @@ int main(int argc, char** argv)
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
-        std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_MAIN << "OpenSSL test progam ended" << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam ended" << std::endl;
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_MAIN << "Error: " << ex.what() << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex.what() << std::endl;
     }
     catch(const char* ex)
     {
-        std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_MAIN << "Error: " << ex << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex << std::endl;
     }
     return 1;
 }
