@@ -29,6 +29,7 @@
 #include <Pt/System/Uri.h>
 #include <stdexcept>
 #include <sstream>
+#include <cctype>
 
 namespace Pt
 {
