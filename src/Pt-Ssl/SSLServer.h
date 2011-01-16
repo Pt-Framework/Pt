@@ -26,34 +26,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef PT_SSL_SERVER_H
+#define PT_SSL_SERVER_H
 
-#include <Pt/SourceInfo.h>
-
+#include "SSLStreamBuf.h"
+#include <Pt/System/IOStream.h>
 #include <iostream>
-#include <cstring>
-#include <cassert>
-
-#include "SSLStreamBufServer.h"
 
 namespace Pt {
 namespace Ssl {
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO pt_ssl_stream_buf_get_class_type(this, PT_FUNCTION)
-extern const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, const std::string& funcName);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLStreamBufServer::SSLStreamBufServer(std::iostream& ios, SSLContext& ctx, const char* sessionID)
-: SSLStreamBuf(ios, ctx, sessionID)
-{}
-
-SSLStreamBufServer::~SSLStreamBufServer()
-{}
-
-void SSLStreamBufServer::startServerHandshake()
-{
-    SSL_set_accept_state(_ssl);
-}
-
-} // namespace Ssl
 } // namespace Pt
+} // namespace Ssl
+
+#endif

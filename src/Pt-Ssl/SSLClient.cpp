@@ -28,75 +28,15 @@
  */
 
 #include <Pt/SourceInfo.h>
-
-#include <iostream>
-#include <cstring>
-#include <cassert>
-
-#include "SSLStreamBufClient.h"
+#include "SSLClient.h"
 
 namespace Pt {
 namespace Ssl {
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO pt_ssl_stream_buf_get_class_type(this, PT_FUNCTION)
-extern const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, const std::string& funcName);
+#define SSL_CALL_INFO pt_ssl_call_info("SSLClient   ", PT_FUNCTION)
+extern const std::string pt_ssl_call_info(const char* className, const std::string& funcName);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLStreamBufClient::SSLStreamBufClient(std::iostream& ios, SSLContext& ctx, const char* sessionID)
-: SSLStreamBuf(ios, ctx, sessionID)
-{}
-
-SSLStreamBufClient::~SSLStreamBufClient()
-{}
-
-void SSLStreamBufClient::startClientHandshake()
-{
-    SSL_set_connect_state(_ssl);
-    this->writeHandshake();
-}
-
-void SSLStreamBufClient::disconnect()
-{
-    SSL_shutdown(_ssl);
-
-    while(BIO_pending(_out) > 0)
-    {
-        char buff[100];
-        const int n = BIO_read(_out, buff, sizeof(buff) );
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
-
-        if(n <= 0)
-            throw std::runtime_error("BIO_read failed");
-
-        _ios->write(buff, n);
-
-        const int ret = SSL_do_handshake(_ssl);
-        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
-
-        if(ret <= 0)
-        {
-            const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
-                throw std::runtime_error("SSL_do_handshake failed");
-        }
-    }
-}
-
-const std::string SSLStreamBufClient::getPeerCN() const
-{
-    if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
-
-    X509* peer;
-    peer = SSL_get_peer_certificate(_ssl);
-
-    char peerCN[256];
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
-    return peerCN;
-}
-
-
-
 
 SslClient::SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream()
@@ -110,7 +50,6 @@ SslClient::SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
 SslClient::~SslClient()
 {
 }
-
 
 void SslClient::beginHandshake()
 {
@@ -171,5 +110,4 @@ void SslClient::onReadHandshake(Pt::System::StreamBuffer& sb)
 }
 
 } // namespace Ssl
-  //
 } // namespace Pt

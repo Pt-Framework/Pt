@@ -38,15 +38,14 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
 
-#include "SSLStreamBufClient.h"
-#include "SSLStreamBufServer.h"
-#include "SSLStreamBufferServer.h"
+#include "SSLServer.h"
+#include "SSLClient.h"
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO_CLIENT _printInfo("Client", PT_FUNCTION)
-#define SSL_CALL_INFO_SERVER _printInfo("Server", PT_FUNCTION)
-#define SSL_CALL_INFO_MAIN   _printInfo("main()", PT_FUNCTION)
-static const std::string _printInfo(const char* name, const std::string& funcName)
+#define SSL_CALL_INFO_CLIENT pt_ssl_call_info("SSLClient   ", PT_FUNCTION)
+#define SSL_CALL_INFO_SERVER pt_ssl_call_info("SSLServer   ", PT_FUNCTION)
+#define SSL_CALL_INFO_MAIN   pt_ssl_call_info("main()      ", PT_FUNCTION)
+const std::string pt_ssl_call_info(const char* className, const std::string& funcName)
 {
     static int count = 0;
 
@@ -56,7 +55,7 @@ static const std::string _printInfo(const char* name, const std::string& funcNam
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, " %06d (%s) [%16s] ", count++, name, f.c_str());
+    sprintf(buff, " %06d %s [%16s] ", count++, className, f.c_str());
 
     return buff;
 }
@@ -92,7 +91,7 @@ class Server : public Pt::Connectable {
             _ios.attachDevice(*_client);
 
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
-            _ssl = new Pt::Ssl::SSLStreamBufServer(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLStreamBuf(_ios, _sslContext, 0);
             _ssl->startServerHandshake();
 
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_SERVER << "out_avail = " << _ios.buffer().out_avail() << std::endl;
@@ -146,13 +145,13 @@ class Server : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&         _sslContext;
-        Pt::Ssl::SSLStreamBufServer* _ssl;
-        Pt::System::IOStream         _ios;
-        Pt::System::EventLoop&       _loop;
-        Pt::Net::TcpServer           _server;
-        Pt::Net::TcpSocket*          _client;
-        int                          _msgCnt;
+        Pt::Ssl::SSLContext&    _sslContext;
+        Pt::Ssl::SSLStreamBuf*  _ssl;
+        Pt::System::IOStream    _ios;
+        Pt::System::EventLoop&  _loop;
+        Pt::Net::TcpServer      _server;
+        Pt::Net::TcpSocket*     _client;
+        int                     _msgCnt;
 };
 
 class Client : public Pt::Connectable {
@@ -178,7 +177,7 @@ class Client : public Pt::Connectable {
             _ios.attachDevice(socket);
 
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
-            _ssl = new Pt::Ssl::SSLStreamBufClient(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLStreamBuf(_ios, _sslContext, 0);
             _ssl->startClientHandshake();
 
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
@@ -231,18 +230,18 @@ class Client : public Pt::Connectable {
             _ios.buffer().beginWrite();
         }
 
-        void onSSLConnect(Pt::Ssl::SSLStreamBuffer& ssl)
+        void onSSLConnect(Pt::Ssl::SSLStreamBuf& ssl)
         {
             std::cerr << "[@@ TestApp @@]" << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->getPeerCN() << std::endl;
         }
 
     private:
-        Pt::Ssl::SSLContext&         _sslContext;
-        Pt::Ssl::SSLStreamBufClient* _ssl;
-        Pt::System::IOStream         _ios;
-        Pt::System::EventLoop&       _loop;
-        Pt::Net::TcpSocket           _socket;
-        int                          _msgCnt;
+        Pt::Ssl::SSLContext&   _sslContext;
+        Pt::Ssl::SSLStreamBuf* _ssl;
+        Pt::System::IOStream   _ios;
+        Pt::System::EventLoop& _loop;
+        Pt::Net::TcpSocket     _socket;
+        int                    _msgCnt;
 };
 
 

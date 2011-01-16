@@ -26,35 +26,52 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLSTREAMBUF_SERVER_H
-#define PT_SSL_SSLSTREAMBUF_SERVER_H
+#ifndef PT_SSL_CLIENT_H
+#define PT_SSL_CLIENT_H
 
 #include "SSLStreamBuf.h"
-
+#include <Pt/System/IOStream.h>
+#include <iostream>
 
 namespace Pt {
+
 namespace Ssl {
 
-    /**
- * \brief SSL stream buffer server.
+/**
+ * \brief SSL stream buffer client.
  */
-class PT_SSL_API SSLStreamBufServer : public SSLStreamBuf
+class PT_SSL_API SslClient : public std::iostream, public Pt::Connectable
 {
     public:
-        /** \brief Construct an SSL stream buffer server that uses the given IO stream and SSL context. */
-        SSLStreamBufServer(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0);
+        /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
+        SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID = 0);
 
         /** \brief Standard dtor. */
-        virtual ~SSLStreamBufServer();
+        virtual ~SslClient();
 
-        /** @brief Starts the server handshake
+        /** @brief Starts the client handshake
             After this method has been called, the first handshake message
-            can be read from the client.
+            can be written to the server.
         */
-        void startServerHandshake();
+        void beginHandshake();
+
+        SSLStreamBuf& buffer()
+        { return _sslbuf; }
+
+        Pt::Signal<SslClient&> handshakeFinished;
+
+    private:
+        void onWriteHandshake(Pt::System::StreamBuffer& sb);
+
+        void onReadHandshake(Pt::System::StreamBuffer& sb);
+
+    private:
+        System::IOStream* _ios;
+        SSLStreamBuf _sslbuf;
 };
 
 } // namespace Pt
+
 } // namespace Ssl
 
 #endif

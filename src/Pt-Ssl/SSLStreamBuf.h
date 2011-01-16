@@ -41,7 +41,7 @@ namespace Ssl {
 /**
  * \brief SSL stream buffer.
  */
-class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf 
+class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 {
 	public:
 	    typedef std::streambuf::int_type int_type;
@@ -59,9 +59,25 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         /** \brief Get the current status string of this SSL stream buffer. */
         const char* getStatusString() const;
 
+        /** \brief Get the peer CN (Common Name). */
+        const std::string getPeerCN() const;
+
+        /** \brief Disconnect the connection. */
+        void disconnect();
+
         /** \brief Reset this SSL stream buffer. */
         void reset();
 
+        /** @brief Starts the server handshake
+            After this method has been called, the first handshake message
+            can be read from the client.
+        */
+        void startServerHandshake();
+
+        /** @brief Starts the client handshake
+            After this method has been called, the first handshake message
+            can be written to the server.
+        */
         void startClientHandshake();
 
         /** @brief Writes a handshake message to the underlying stream

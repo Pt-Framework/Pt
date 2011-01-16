@@ -37,8 +37,8 @@ namespace Pt {
 namespace Ssl {
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO pt_ssl_stream_buf_get_class_type(this, PT_FUNCTION)
-const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, const std::string& funcName)
+#define SSL_CALL_INFO pt_ssl_call_info("SSLStreamBuf", PT_FUNCTION)
+const std::string pt_ssl_call_info(const char* className, const std::string& funcName)
 {
     static int count = 0;
 
@@ -48,7 +48,7 @@ const std::string pt_ssl_stream_buf_get_class_type(const SSLStreamBuf* ssl, cons
     if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, " %06d %s [%16s] ", count++, (dynamic_cast<const SSLStreamBufServer*>(ssl)) ? "(Server)" : "(Client)", f.c_str());
+    sprintf(buff, " %06d %s [%16s] ", count++, className, f.c_str());
 
     return buff;
 }
@@ -90,11 +90,55 @@ bool SSLStreamBuf::connected() const
 const char* SSLStreamBuf::getStatusString() const
 { return SSL_state_string_long(_ssl); }
 
+const std::string SSLStreamBuf::getPeerCN() const
+{
+    if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
+
+    X509* peer;
+    peer = SSL_get_peer_certificate(_ssl);
+
+    char peerCN[256];
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
+    return peerCN;
+}
+
+void SSLStreamBuf::disconnect()
+{
+    SSL_shutdown(_ssl);
+
+    while(BIO_pending(_out) > 0)
+    {
+        char buff[100];
+        const int n = BIO_read(_out, buff, sizeof(buff) );
+        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+
+        if(n <= 0)
+            throw std::runtime_error("BIO_read failed");
+
+        _ios->write(buff, n);
+
+        const int ret = SSL_do_handshake(_ssl);
+        std::cerr << "[SSLStreamBuff]" << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
+
+        if(ret <= 0)
+        {
+            const int sslerr = SSL_get_error(_ssl, ret);
+            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
+                throw std::runtime_error("SSL_do_handshake failed");
+        }
+    }
+}
+
 void SSLStreamBuf::reset()
 {
     BIO_reset(_in);
     BIO_reset(_out);
     SSL_clear(_ssl);
+}
+
+void SSLStreamBuf::startServerHandshake()
+{
+    SSL_set_accept_state(_ssl);
 }
 
 void SSLStreamBuf::startClientHandshake()
@@ -202,7 +246,7 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 {
     //
-    // We are being called when _obuffer, the output buffer area of the 
+    // We are being called when _obuffer, the output buffer area of the
     // i/o stream is full, or needs to be flushed. In case of a flush,
     // the eof character is passed to overflow(). When SSLStreamBuf is
     // constructed no output buffer area exists, therefore when overflow
@@ -243,7 +287,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
             char buf[255];
 
             int n = BIO_read( _out, buf, sizeof(buf) );
-            if(n < 0) 
+            if(n < 0)
                 break;
 
             _ios->write(buf, n);
