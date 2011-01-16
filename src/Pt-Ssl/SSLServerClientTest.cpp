@@ -149,7 +149,6 @@ class Client : public Pt::Connectable {
 
             _socket.connected += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
-
             _loop.add(_socket);
         }
 
@@ -163,67 +162,17 @@ class Client : public Pt::Connectable {
             _ios.attachDevice(socket);
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
-            _ssl = new Pt::Ssl::SSLStreamBuf(_ios, _sslContext, 0);
-            _ssl->startClientHandshake();
-
-            std::cerr << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
-
-            std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
-            _ios.buffer().beginWrite();
-            _ios.buffer().outputReady += Pt::slot(*this, &Client::onWriteHandshake);
-            _ios.buffer().inputReady  += Pt::slot(*this, &Client::onReadHandshake);
+            _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
+            _ssl->beginHandshake();
+            _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
         }
 
-        void onWriteHandshake(Pt::System::StreamBuffer& sb)
-        {
-            _ios.buffer().endWrite();
-            std::cerr << SSL_CALL_INFO_CLIENT << "out_avail = " << _ios.buffer().out_avail() << std::endl;
-
-            if( _ssl->writeHandshake() || _ios.buffer().out_avail() > 0 )
-            {
-                std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
-                _ios.buffer().beginWrite();
-                return;
-            }
-
-            std::cerr << SSL_CALL_INFO_CLIENT << "Begin read" << std::endl;
-            _ios.buffer().beginRead();
-        }
-
-        void onReadHandshake(Pt::System::StreamBuffer& sb)
-        {
-            _ios.buffer().endRead();
-            std::cerr << SSL_CALL_INFO_CLIENT << "in_avail = " << _ios.buffer().in_avail() << std::endl;
-
-            if(_ssl->readHandshake())
-            {
-                std::cerr << SSL_CALL_INFO_CLIENT << "Read more handshake bytes" << std::endl;
-                _ios.buffer().beginRead();
-                return;
-            }
-
-            if(_ssl->connected())
-            {
-                std::cerr << SSL_CALL_INFO_CLIENT << "Successfully connected to the server" << std::endl;
-                _ios.buffer().outputReady -= Pt::slot(*this, &Client::onWriteHandshake);
-                _ios.buffer().inputReady  -= Pt::slot(*this, &Client::onReadHandshake);
-                return;
-            }
-
-            _ssl->writeHandshake();
-
-            std::cerr << SSL_CALL_INFO_CLIENT << "Begin write" << std::endl;
-            _ios.buffer().beginWrite();
-        }
-
-        void onSSLConnect(Pt::Ssl::SSLStreamBuf& ssl)
-        {
-            std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->getPeerCN() << std::endl;
-        }
+        void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
+        { std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl; }
 
     private:
         Pt::Ssl::SSLContext&   _sslContext;
-        Pt::Ssl::SSLStreamBuf* _ssl;
+        Pt::Ssl::SSLClient*    _ssl;
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket     _socket;

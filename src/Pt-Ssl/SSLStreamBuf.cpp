@@ -45,9 +45,11 @@ const std::string SSLStreamBuf::_call_info(const char* className, const std::str
     std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
     a = f.find_last_of("::");
     if(a != std::string::npos) f = f.substr(a + 1);
+    a = f.find_last_of(" ");
+    if(a != std::string::npos) f = f.substr(a + 1);
 
     char buff[1024];
-    sprintf(buff, "[%s] %06d [%16s] ", className, count++, f.c_str());
+    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
 
     return buff;
 }

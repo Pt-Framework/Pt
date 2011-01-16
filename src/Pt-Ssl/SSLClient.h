@@ -40,14 +40,14 @@ namespace Ssl {
 /**
  * \brief SSL stream buffer client.
  */
-class PT_SSL_API SslClient : public std::iostream, public Pt::Connectable
+class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
 {
     public:
         /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
-        SslClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID = 0);
+        SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID = 0);
 
         /** \brief Standard dtor. */
-        virtual ~SslClient();
+        virtual ~SSLClient();
 
         /** \brief Return the internal SSLStreamBuf instance. */
         inline SSLStreamBuf& buffer()
@@ -64,7 +64,7 @@ class PT_SSL_API SslClient : public std::iostream, public Pt::Connectable
         void beginHandshake();
 
         // Signals
-        Pt::Signal<SslClient&> handshakeFinished;
+        Pt::Signal<SSLClient&> handshakeFinished;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
