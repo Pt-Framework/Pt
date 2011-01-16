@@ -110,14 +110,17 @@ void FileChannel::rotate()
     if(_numBackup > 0)
     {
         std::string to = makePath(_numBackup);
-        Pt::System::File(to).remove();
+
+        if( Pt::System::File::exists(to) ) 
+            Pt::System::File(to).remove();
         //remove( to.c_str() );
 
         for(unsigned n = _numBackup; n > 0 ; --n)
         {
             std::string from = makePath(n-1);
-            //rename( from.c_str(), to.c_str() );
-            Pt::System::File(from).move(to);
+            //std::rename( from.c_str(), to.c_str() );
+            if( Pt::System::File::exists(from) ) 
+                Pt::System::File(from).move(to);
             to = from;
         }
     }
