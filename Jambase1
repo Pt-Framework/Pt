@@ -213,23 +213,16 @@ rule ConfigureChMod
 
     if ! $(CHMOD) && [ TryCommand "chmod 777 check.in" ]
     {
-	CHMOD = "chmod" ;
-
+        CHMOD = "chmod" ;
+        Configure CHMOD : $(CHMOD) ;
+        Configure CHGRP :  chgrp ;
+        Configure CHOWN :  chown ;
+        Echo "Checking for chmod command..." $(CHMOD) ;
+        Echo "Checking for chgrp command..." $(CHGRP) ;
+        Echo "Checking for chown command..." $(CHOWN) ;
     }
 
-    TryCommand $(CHMOD) "check.in" ;
-
-    if ! $(CHMOD)
-    {
-        Exit "Checking for rmdir command... FAILED!" ;
-    }
-
-    Configure CHMOD : $(CHMOD) ;
-    Configure CHGRP :  chgrp ;
-    Configure CHOWN :  chown ;
-    Echo "Checking for chmod command..." $(CHMOD) ;
-    Echo "Checking for chgrp command..." $(CHGRP) ;
-    Echo "Checking for chown command..." $(CHOWN) ;
+    TryCommand $(RM) "check.in" ;
 }
 
 ###############################################################################
