@@ -26,7 +26,7 @@ rule Configure
 {
     $(1) = $(2) ;
     local _val = [ Escape $(2) ] ;
-    WriteFile config.jam : $(1)" ?= "\"$(_val)\"" ;"  ;
+    WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" ;"  ;
 }
 
 
@@ -55,7 +55,7 @@ rule TryCommand
 
     if $(_result) = 0
     {
-        return 1 ;
+        return $(1) ;
     }
 }
 
@@ -167,25 +167,52 @@ rule ConfigureC++
     return $(_r) ;
 }
 
+
 ###############################################################################
 # Configure removal of files
 ###############################################################################
+
+#rule ConfigureRm222
+#{
+#    RM = ;
+#    WriteFile check.in : "delete me" ;
+#    if $(RM) ||
+#       [ CheckCommand RM : "del /f/q" : "del /f/q check.in" ] ||
+#       [ CheckCommand RM : "rm -f" : "rm -f check.in"  ]
+#    {
+#        Configure RM : $(RM) ;
+#        Echo "Checking for rm command..." $(RM) ;
+#    }
+#    else
+#    {
+#        Exit "Checking for rm command... FAILED!" ;
+#    }
+#    TryCommand $(RM) "check.in" "check.out" "check.log" ;
+#}
 
 rule ConfigureRm
 {
     RM = ;
     WriteFile check.in : "delete me" ;
-    if $(RM) ||
-       [ CheckCommand RM : "del /f/q" : "del /f/q check.in" ] ||
-       [ CheckCommand RM : "rm -f" : "rm -f check.in"  ]
+
+    if ! $(RM) && [ TryCommand "rm -f check.in"   ]
     {
-        Configure RM : $(RM) ;
-        Echo "Checking for rm command..." $(RM) ;
+        RM = "rm -f"  ;
     }
-    else
+
+    if ! $(RM) && [ TryCommand "del /f/q check.in"  ]
     {
-        Exit "Checking for rm command... FAILED!" ;
+        RM = "del /f/q" ;
     }
+
+    if ! $(RM)
+    {
+	Exit "Checking for rm command... FAILED!" ;
+    }
+
+    Configure RM : $(RM) ;
+    Echo "Checking for rm command..." $(RM) ;
+
     TryCommand $(RM) "check.in" "check.out" "check.log" ;
 }
 
@@ -375,32 +402,32 @@ rule ConfigureToolset
 
             if [ TryCommand "cl /nologo /Fo$(_obj) /Fe$(_out) check.c" ]
             {
-                WriteFile config.jam : "TOOLSET = msvc ;"  ;
+                WriteFile config.tmp : "TOOLSET = msvc ;"  ;
                 TOOLSET = msvc ;
                 Echo "Checking for toolset ...msvc" ;
             }
             else if [ TryCommand "xlC -o "$(_out)" check.c" ]
             {
-                WriteFile config.jam : "TOOLSET = xlc ;"  ;
+                WriteFile config.tmp : "TOOLSET = xlc ;"  ;
                 TOOLSET = xlc ;
                 Echo "Checking for toolset ...xlc" ;
                 Exit "NOT IMPLEMENTED" ;
             }
             else if [ TryCommand "gcc -o "$(_out)" check.c" ]
             {
-                WriteFile config.jam : "TOOLSET = gcc ;"  ;
+                WriteFile config.tmp : "TOOLSET = gcc ;"  ;
                 TOOLSET = gcc ;
                 Echo "Checking for toolset ...gcc" ;
             }
             else if [ TryCommand "CC -o "$(_out)" check.c" ]
             {
-                WriteFile config.jam : "TOOLSET = sunpro ;"  ;
+                WriteFile config.tmp : "TOOLSET = sunpro ;"  ;
                 TOOLSET = sunpro ;
                 Echo "Checking for toolset ...sunpro" ;
             }
             else if [ TryCommand "cc -o "$(_out)" check.c" ]
             {
-                WriteFile config.jam : "TOOLSET = cc ;"  ;
+                WriteFile config.tmp : "TOOLSET = cc ;"  ;
                 TOOLSET = cc ;
                 Echo "Checking for toolset ...cc" ;
             }
@@ -416,7 +443,7 @@ rule ConfigureToolset
         else
         {
             Echo "Using toolset "$(TOOLSET) ;
-            WriteFile config.jam : TOOLSET" = "$(TOOLSET)" ;"  ;
+            WriteFile config.tmp : TOOLSET" = "$(TOOLSET)" ;"  ;
         }
     }
 
@@ -428,6 +455,7 @@ rule ConfigureToolset
     # TODO: we only need to include the configure part
     JamInclude $(TOOLSET:LS=".jam") ;
 }
+
 
 ###############################################################################
 # Include main Jamfile and Jamconf
@@ -446,18 +474,15 @@ for _arg in $(ARGV)
     }
 }
 
-if ! [ CHECK_IF_FILE config.jam ] && 
-   ! $(CONFIGURE)
+if ! [ CHECK_IF_FILE config.jam ] || $(CONFIGURE)
 {
-    Exit "Run 'jam configure' to configure the build first." ;
-}
-
-if $(CONFIGURE)
-{
+    TryCommand "rm -f config.tmp" ;
+    TryCommand "del /f/q config.tmp" ;
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
 
     Echo "Checking for host platform ..."$(OS:L) ;
+
     ConfigureRm ;
     ConfigureMv ;
     ConfigureCp ;
@@ -466,12 +491,15 @@ if $(CONFIGURE)
     ConfigureLn ;
     ConfigureDotSlash ;
 
-	JamInclude $(TARGET_OS:LS=".jam") ;
+    JamInclude $(TARGET_OS:LS=".jam") ;
 
-    ConfigureToolset ;
-    include Jamconf ;
-    Exit "Run jam now to build targets." ;
+    #ConfigureToolset ;
+    #include Jamconf ;
+
+    TryCommand $(MV) config.tmp config.jam ;
+    Exit "configuration successful." ;
 }
+
 
 include config.jam ;
 JamInclude Jamrules.base ;

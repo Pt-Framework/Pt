@@ -13,21 +13,6 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # set directory to build library/binary files into
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
-Echo ;
-Echo "Project: Platinum C++ Framework" ;
-Echo "Host Operating System (OS)..." $(OS:L) ;
-Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
-Echo "Target OS (TARGET_OS)..." $(TARGET_OS:L) ;
-Echo "Target Platform (TARGET_OSPLAT)..." $(TARGET_OSPLAT:L) ;
-Echo "Configuration (CONFIG)..." $(CONFIG) ;
-Echo "Toolset (TOOLSET)..." $(TOOLSET) ;
-Echo "Graphic User Interface (GUI)..." $(GUI) ;
-Echo "System Interface (SYS)..." $(SYS) ;
-Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
-Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
-Echo "Optimisation (OPTIM)..." $(OPTIM) ;
-Echo "Warnings (WARN)..." $(WARN) ;
-
 #############################################################################
 # Platform settings
 #############################################################################
@@ -109,7 +94,7 @@ if $(TARGET_OS:L) = "symbian"
 #############################################################################
 # OpenSSL libraries and includes
 #############################################################################
-WITH_OPENSSL = "no" ;
+WITH_OPENSSL ?= "no" ;
 
 for local arg in $(ARGV)
 {
@@ -119,28 +104,29 @@ for local arg in $(ARGV)
     }
 }
 
-Echo "Use OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
-
 #############################################################################
 # Gfx libraries and includes
 #############################################################################
 JamInclude freetype.jam ;
 
-FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
-FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
-
 if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 {
-    FREETYPE_INCLUDES = $(TOP)/src/Pt-Gfx/freetype/include ;
-    FREETYPE_LINKFLAGS = "" ;
-    Echo "    INFO: freetype not found, using builtin version." ;
+	FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
+	FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
+	
+	if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
+	{
+	    FREETYPE_INCLUDES = $(TOP)/src/Pt-Gfx/freetype/include ;
+	    FREETYPE_LINKFLAGS = "" ;
+	    Echo "    INFO: freetype not found, using builtin version." ;
+	}
 }
 
 #############################################################################
 # GUI libraries and includes
 #############################################################################
 if $(GUI:L) = "gdi"
-    {
+{
     if $(TARGET_OS:L) = "nt"
     {
         GUILIBS = gdi32.lib user32.lib ;
@@ -155,39 +141,42 @@ if $(GUI:L) = "gdi"
 
 if $(GUI:L) = "x11"
 {
-    JamInclude x11.jam ;
-
-    local x11incl = [ X11Includes ] ;
-    if $(x11incl) = ""
+    if ! $(GUILIBS) 
     {
-        Echo "    ERROR: X11 includes are required!" ;
-    }
+        JamInclude x11.jam ;
 
-    local x11libs = [ X11Libs ] ;
-    if $(x11libs) = ""
-    {
-        Echo "    ERROR: X11 libraries are required!" ;
-    }
+        local x11incl = [ X11Includes ] ;
+        if $(x11incl) = ""
+        {
+            Echo "    ERROR: X11 includes are required!" ;
+        }
 
-    local xextlibs = [ XextLibs ] ;
-    if $(xextlibs) = ""
-    {
-        Echo "    ERROR: Xext libraries are required!" ;
-    }
+        local x11libs = [ X11Libs ] ;
+        if $(x11libs) = ""
+        {
+            Echo "    ERROR: X11 libraries are required!" ;
+        }
 
-    local xftincl = [ XftIncludes ] ;
-    if $(xftincl) = ""
-    {
-        Echo "    INFO: Xft includes not available!" ;
-    }
+       local xextlibs = [ XextLibs ] ;
+        if $(xextlibs) = ""
+       {
+            Echo "    ERROR: Xext libraries are required!" ;
+        }
 
-    local xftlibs = [ XftLibs ] ;
-    if $(xftlibs) = ""
-    {
-        Echo "    INFO: Xft libraries not available!" ;
-    }
+        local xftincl = [ XftIncludes ] ;
+        if $(xftincl) = ""
+        {
+            Echo "    INFO: Xft includes not available!" ;
+        }
 
-    GUILIBS += $(x11libs) $(xextlibs) $(xftlibs) ;
+        local xftlibs = [ XftLibs ] ;
+        if $(xftlibs) = ""
+        {
+            Echo "    INFO: Xft libraries not available!" ;
+        }
+
+        GUILIBS += $(x11libs) $(xextlibs) $(xftlibs) ;
+    }
 }
 
 if $(GUI:L) = "gf"
@@ -234,3 +223,19 @@ if $(GUI:L) = "uikit"
     GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
+
+Echo ;
+Echo "Project: Platinum C++ Framework" ;
+Echo "Host Operating System (OS)..." $(OS:L) ;
+Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
+Echo "Target OS (TARGET_OS)..." $(TARGET_OS:L) ;
+Echo "Target Platform (TARGET_OSPLAT)..." $(TARGET_OSPLAT:L) ;
+Echo "Configuration (CONFIG)..." $(CONFIG) ;
+Echo "Toolset (TOOLSET)..." $(TOOLSET) ;
+Echo "Use OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
+Echo "Graphic User Interface (GUI)..." $(GUI) ;
+Echo "System Interface (SYS)..." $(SYS) ;
+Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
+Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
+Echo "Optimisation (OPTIM)..." $(OPTIM) ;
+Echo "Warnings (WARN)..." $(WARN) ;

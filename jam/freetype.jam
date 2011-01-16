@@ -26,4 +26,22 @@ rule FreeTypeLinkFlags
     return -L$(libs[0]:P)" -lfreetype" ;
 }
 
+rule ConfigureFreetype
+{
+    FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
+    FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
+
+    if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
+    {
+        FREETYPE_INCLUDES = $(TOP)/src/Pt-Gfx/freetype/include ;
+        FREETYPE_LINKFLAGS = "" ;
+        Echo "    INFO: freetype not found, using builtin version." ;
+    }
+
+    Configure FREETYPE_INCLUDES : $(FREETYPE_INCLUDES) ;
+    Configure FREETYPE_LINKFLAGS : $(FREETYPE_LINKFLAGS) ;
+}
+
 } # FREETYPE_JAM
+
+

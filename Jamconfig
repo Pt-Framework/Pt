@@ -1,0 +1,63 @@
+
+ConfigureFreetype ;
+
+WITH_OPENSSL = "no" ;
+
+for local arg in $(ARGV)
+{
+    if $(arg) = "--with-openssl"
+    {
+        WITH_OPENSSL = "yes" ;
+    }
+}
+
+
+Configure WITH_OPENSSL : $(WITH_OPENSSL) ;
+Echo "Checking for OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
+
+
+if $(TARGET_OS:L) = "linux"
+{
+    SYS     ?= posix ;
+    GUI     ?= x11 ;
+    SYSLIBS = -ldl -lpthread -lrt ;
+    NETLIBS = -lnsl ;
+}
+
+if $(GUI:L) = "x11"
+{
+    JamInclude x11.jam ;
+
+    local x11incl = [ X11Includes ] ;
+    if $(x11incl) = ""
+    {
+        Exit "    ERROR: X11 includes are required!" ;
+    }
+
+    local x11libs = [ X11Libs ] ;
+    if $(x11libs) = ""
+    {
+        Exit "    ERROR: X11 libraries are required!" ;
+    }
+
+    local xextlibs = [ XextLibs ] ;
+    if $(xextlibs) = ""
+    {
+        Exit "    ERROR: Xext libraries are required!" ;
+    }
+
+    local xftincl = [ XftIncludes ] ;
+    if $(xftincl) = ""
+    {
+        Exit "    INFO: Xft includes not available!" ;
+    }
+
+    local xftlibs = [ XftLibs ] ;
+    if $(xftlibs) = ""
+    {
+        Exit "    INFO: Xft libraries not available!" ;
+    }
+
+    GUILIBS += $(x11libs) $(xextlibs) $(xftlibs) ;
+    Configure GUILIBS : $(GUILIBS:J=" ") ;
+}
