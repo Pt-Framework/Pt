@@ -1,0 +1,420 @@
+
+
+##########################################################################
+# Jam Environment
+##########################################################################
+
+JAMDIR ?= jam ;
+DOT = . ;
+
+rule JamInclude
+{
+    local _s = $(DOT) ;
+    _s = $(JAMDIR:R=$(_s)) ;
+    _s = $(<:R=$(_s)) ;
+    include $(_s) ;
+}
+
+##########################################################################
+# Basic Configuration Rules
+##########################################################################
+
+CONFIGJAM = config.jam ;
+CONFIGTMP = config.tmp ;
+
+TONULL = " 2>/dev/null 1>/dev/null" ;
+if $(OS:L) = "nt"
+{
+    TONULL = " 2>NUL 1>NUL" ;
+}
+
+rule Configure
+{
+    $(1) = $(2) ;
+    local _val = [ Escape $(2) ] ;
+
+    if $(2[2])
+    {
+	local _val2 = [ Escape $(2[2]) ] ;
+	WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" "\"$(_val2)\""  ;"  ;
+    }
+    else
+    {
+	WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" ;"  ;
+    }
+}
+
+rule TryCommand
+{
+    local _cmd  = $(1) $(TONULL) ;
+    
+    # Echo "command: " $(_cmd:J=" ") ;
+    # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
+    local _result = [ EXEC $(_cmd:J=" ") ] ;
+
+    # Echo result $(_result) ;
+
+    if [ CHECK_IF_FILE check.log ] && $(RM)
+    {
+        _cmd = $(RM) check.log ;
+        EXEC $(_cmd:J=" ") ;
+    }
+
+    if $(_result) = 0
+    {
+        return $(1) ;
+    }
+}
+
+###############################################################################
+# Configure remove files command
+###############################################################################
+
+rule ConfigureRm
+{
+    RM = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(RM) && [ TryCommand "rm -f check.in"   ]
+    {
+        RM = "rm -f"  ;
+    }
+
+    if ! $(RM) && [ TryCommand "del /f/q check.in"  ]
+    {
+        RM = "del /f/q" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" "check.log" ;
+
+    if ! $(RM)
+    {
+	Exit "Checking for rm command... FAILED!" ;
+    }
+
+    Configure RM : $(RM) ;
+    Echo "Checking for rm command..." $(RM) ;
+}
+
+###############################################################################
+# Configure move command
+###############################################################################
+
+rule ConfigureMv
+{
+    MV = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(MV) && [ TryCommand "move /y check.in check.out"   ]
+    {
+        MV = "move /y"  ;
+    }
+
+    if ! $(MV) && [ TryCommand "mv -f check.in check.out"  ]
+    {
+        MV = "mv -f" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+
+    if ! $(MV)
+    {
+	Exit "Checking for move command... FAILED!" ;
+    }
+
+    Configure MV : $(MV) ;
+    Echo "Checking for move command..." $(MV) ;
+}
+
+###############################################################################
+# Configure copy command
+###############################################################################
+
+rule ConfigureCp
+{
+    CP = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(CP) && [ TryCommand "copy check.in check.out"   ]
+    {
+        CP = "copy"  ;
+    }
+
+    if ! $(CP) && [ TryCommand "cp -f check.in check.out"  ]
+    {
+        CP = "cp -f" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+
+    if ! $(CP)
+    {
+	Exit "Checking for copy command... FAILED!" ;
+    }
+
+    Configure CP : $(CP) ;
+    Echo "Checking for copy command..." $(CP) ;
+}
+
+###############################################################################
+# Configure creation and removal of directories
+###############################################################################
+
+rule ConfigureMkDir
+{
+    MKDIR = ;
+    RMDIR = ;
+
+    if ! $(MKDIR) && [ TryCommand "mkdir check_dir" ]
+    {
+        MKDIR = "mkdir" ;
+    }
+    
+    if ! $(RMDIR) && [ TryCommand "rmdir /s/q check_dir" ]
+    {
+        RMDIR = "rmdir /s/q" ;
+    }
+
+    if ! $(RMDIR) && [ TryCommand "rmdir check_dir" ]
+    {
+        RMDIR = "rmdir" ;
+    }
+
+    if ! $(RMDIR) && [ TryCommand "rm -rf check_dir" ]
+    {
+        RMDIR = "rm -rf" ;
+    }
+
+    if ! $(MKDIR)
+    {
+        Exit "Checking for mkdir command... FAILED!" ;
+    }
+
+    if ! $(RMDIR)
+    {
+        Exit "Checking for rmdir command... FAILED!" ;
+    }
+
+    Configure MKDIR : $(MKDIR) ;
+    Echo "Checking for mkdir command..." $(MKDIR) ;
+
+    Configure RMDIR : $(RMDIR) ;
+    Echo "Checking for rmdir command..." $(RMDIR) ;
+}
+
+###############################################################################
+# Configure file access rights commands
+###############################################################################
+
+rule ConfigureChMod
+{
+    CHMOD = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(CHMOD) && [ TryCommand "chmod 777 check.in" ]
+    {
+	CHMOD = "chmod" ;
+
+    }
+
+    TryCommand $(CHMOD) "check.in" ;
+
+    if ! $(CHMOD)
+    {
+        Exit "Checking for rmdir command... FAILED!" ;
+    }
+
+    Configure CHMOD : $(CHMOD) ;
+    Configure CHGRP :  chgrp ;
+    Configure CHOWN :  chown ;
+    Echo "Checking for chmod command..." $(CHMOD) ;
+    Echo "Checking for chgrp command..." $(CHGRP) ;
+    Echo "Checking for chown command..." $(CHOWN) ;
+}
+
+###############################################################################
+# Configure file link command
+###############################################################################
+
+rule ConfigureLn
+{
+    LN = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(LN) && [ TryCommand "ln check.in check.out" ]
+    {
+	LN = "ln" ;
+
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+ 
+    if ! $(LN)
+    {
+        Echo "Checking for link command... not supported" ;
+    }
+    else
+    {
+        Configure LN : $(LN) ;
+        Echo "Checking for link command..." $(LN) ;
+    }
+}
+
+###############################################################################
+# Configure path separator and relative path symbols
+###############################################################################
+
+rule ConfigureDotSlash
+{
+    DOT = ;
+    if ! $(DOT) && [ TryCommand "cd ." ]
+    {
+	DOT = "." ;
+    }
+
+    if ! $(DOT)
+    {
+        Exit "Checking for directory dot... FAILED!" ;
+    }
+
+    DOTDOT = ;
+    if ! $(DOTDOT) && [ TryCommand "cd .." ]
+    {
+	DOTDOT = ".." ;
+    }
+
+    if ! $(DOTDOT)
+    {
+        Exit "Checking for directory dotdot... FAILED!" ;
+    }
+    
+    SLASH = ;   
+    if ! $(SLASH) && [ TryCommand "cd .\\" ]
+    {
+        SLASH = "\\" ;
+    }
+
+    if ! $(SLASH) &&  [ TryCommand "cd ./" ]
+    {
+        SLASH = "/" ;
+
+    }
+
+    if ! $(SLASH) 
+    {
+        Exit "Checking for directory separator... FAILED!" ;
+    }
+
+    Configure DOT : $(DOT) ;
+    Echo "Checking for directory dot..." $(DOT) ;
+
+    Configure DOTDOT : $(DOTDOT) ;
+    Echo "Checking for directory dotdot..." $(DOTDOT) ;
+
+    Configure SLASH : $(SLASH) ;
+    Echo "Checking for directory separator..." $(SLASH) ;
+}
+
+##########################################################################
+# Set Target OS to host OS if unset
+##########################################################################
+
+TARGET_OS ?= $(OS:L) ;
+
+##########################################################################
+# Set target platform to host platform if unset
+##########################################################################
+
+TARGET_OSPLAT ?= $(OSPLAT:L) ;
+
+##########################################################################
+# Set configuration
+#
+# Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
+##########################################################################
+CONFIG ?= debug ;
+CONFIG = $(CONFIG:L) ;
+
+
+# Include base rules
+#
+# This adds/sets basic rules and variables.
+#
+JamInclude Jamrules.base ;
+
+JamInclude freetype.jam ;
+
+##########################################################################
+# Configure
+##########################################################################
+
+for _arg in $(ARGV)
+{
+    if $(_arg) = configure
+    {
+        CONFIGURE = 1 ;
+    }
+}
+
+if ! [ CHECK_IF_FILE config.jam ] 
+{
+    CONFIGURE = 1 ;
+}
+
+if $(CONFIGURE)
+{
+    TryCommand "rm -f config.tmp" ;
+    TryCommand "del /f/q config.tmp" ;
+    TryCommand "rm -f config.jam" ;
+    TryCommand "del /f/q config.jam" ;
+
+    Echo "Checking for host platform ..."$(OS:L) ;
+
+    ConfigureRm ;
+    ConfigureMv ;
+    ConfigureCp ;
+    ConfigureMkDir ;
+    ConfigureChMod ;
+    ConfigureLn ;
+    ConfigureDotSlash ;
+
+    include Jamconfig ;
+
+    TryCommand $(MV) config.tmp config.jam ;
+    Exit "Configuration successful." ;
+}
+
+include config.jam ;
+
+##########################################################################
+# Include host platform specifics
+#
+# This adds/sets platform specific rules and variables. May override base 
+# rules and variables.
+##########################################################################
+
+# JamInclude Jamrules.host_$(OS:L) ;
+
+##########################################################################
+# Include target platform specifics
+#
+# This adds/sets platform specific rules and variables. May override base 
+# rules and variables.
+##########################################################################
+
+JamInclude Jamrules.target_$(TARGET_OS:L) ;
+
+##########################################################################
+# Include toolset specifics
+#
+# This adds/sets toolset specific rules and variables. May override platform
+# specific rules and variables.
+##########################################################################
+
+JamInclude Jamrules.$(TOOLSET:L) ;
+
+##########################################################################
+# include the project top level Jamfile
+##########################################################################
+
+include Jamfile ;
