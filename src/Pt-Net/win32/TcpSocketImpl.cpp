@@ -129,7 +129,8 @@ const char* TcpSocketImpl::tryConnect()
             break;
         }
 
-        if (errno == WSAEINPROGRESS)
+        DWORD lastError = WSAGetLastError();
+        if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
         {
             log_debug("connect in progress");
             break;

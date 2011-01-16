@@ -37,7 +37,7 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
-#include <Mswsock.h>
+//#include <Mswsock.h>
 
 #define log_debug(x)
 //#define log_debug(x) std::clog << x<< std::endl;
