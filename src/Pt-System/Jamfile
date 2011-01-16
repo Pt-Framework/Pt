@@ -7,22 +7,7 @@ SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 PT_SYSTEM_SUBDIR = [ FDirName $(TOP) src Pt-System $(SYS:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_SUBDIR) : *.cpp  ] ;
 
-SharedLibrary Pt-System : #[ FDirName $(SYS:L) ApplicationImpl.cpp ]
-                          #[ FDirName $(SYS:L) ClockImpl.cpp ]
-                          #[ FDirName $(SYS:L) ConditionImpl.cpp ]
-                          #[ FDirName $(SYS:L) DirectoryImpl.cpp ]
-                          #[ FDirName $(SYS:L) FileImpl.cpp ]
-                          #[ FDirName $(SYS:L) FileDeviceImpl.cpp ]
-                          #[ FDirName $(SYS:L) IODeviceImpl.cpp ]
-                          #[ FDirName $(SYS:L) LibraryImpl.cpp ]
-                          #[ FDirName $(SYS:L) MainLoopImpl.cpp ]
-                          #[ FDirName $(SYS:L) MutexImpl.cpp ]
-                          #[ FDirName $(SYS:L) SemaphoreImpl.cpp ]
-                          #[ FDirName $(SYS:L) ThreadImpl.cpp  ]
-                          #[ FDirName $(SYS:L) ProcessImpl.cpp ]
-                          #[ FDirName $(SYS:L) PipeImpl.cpp ]
-                          #[ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
-			  $(PT_SYSTEM_IMPL)
+SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           Application.cpp
                           Clock.cpp
                           Condition.cpp
