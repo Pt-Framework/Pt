@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+#include <Pt/System/Api.h>
 #include <string>
 
 namespace Pt
@@ -33,7 +33,7 @@ namespace Pt
 namespace System
 {
 
-  class Uri
+  class PT_SYSTEM_API Uri
   {
       bool _ipv6;
       std::string _protocol;
