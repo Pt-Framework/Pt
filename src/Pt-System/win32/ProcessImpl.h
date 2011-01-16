@@ -21,11 +21,9 @@
 
 #include "ProcessImplBase.h"
 #include "Pt/System/Process.h"
-
 #include <cstdlib>
 #include <sstream>
 #include <stdlib.h>
-
 #include <windows.h>
 
 namespace Pt {
@@ -40,9 +38,9 @@ namespace System {
 			ProcessImpl(const ProcessInfo& procInfo);
 
             static void setEnvVar(const std::string& name, const std::string& value);
-        
+
             static void unsetEnvVar(const std::string& name);
-        
+
             static std::string getEnvVar(const std::string& name);
     };
 
