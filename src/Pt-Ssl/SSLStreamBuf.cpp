@@ -231,18 +231,11 @@ bool SSLStreamBuf::readHandshake()
     return true;
 }
 
-
 int SSLStreamBuf::sync()
-{
-    return 0;
-}
-
+{ return 0; }
 
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
-{
-    return 0;
-}
-
+{ return 0; }
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 {

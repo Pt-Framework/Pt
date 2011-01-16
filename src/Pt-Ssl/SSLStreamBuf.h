@@ -98,9 +98,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
     protected:
         virtual int sync();
-
         virtual int_type underflow();
-
         virtual int_type overflow(int_type ch);
 
     protected:
