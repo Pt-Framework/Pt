@@ -1,4 +1,34 @@
 #############################################################################
+# General values and settings
+#############################################################################
+
+# include rules an actions to build unit tests
+JamInclude unittest.jam ;
+
+# set directory to build object files into
+ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
+
+ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
+
+# set directory to build library/binary files into
+OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
+
+Echo ;
+Echo "Project: Platinum C++ Framework" ;
+Echo "Host Operating System (OS)..." $(OS:L) ;
+Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
+Echo "Target OS (TARGET_OS)..." $(TARGET_OS:L) ;
+Echo "Target Platform (TARGET_OSPLAT)..." $(TARGET_OSPLAT:L) ;
+Echo "Configuration (CONFIG)..." $(CONFIG) ;
+Echo "Toolset (TOOLSET)..." $(TOOLSET) ;
+Echo "Graphic User Interface (GUI)..." $(GUI) ;
+Echo "System Interface (SYS)..." $(SYS) ;
+Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
+Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
+Echo "Optimisation (OPTIM)..." $(OPTIM) ;
+Echo "Warnings (WARN)..." $(WARN) ;
+
+#############################################################################
 # Platform settings
 #############################################################################
 if $(TARGET_OS:L) = "nt"
@@ -75,6 +105,21 @@ if $(TARGET_OS:L) = "symbian"
     SYSLIBS =  ;
     NETLIBS =  ;
 }
+
+#############################################################################
+# OpenSSL libraries and includes
+#############################################################################
+WITH_OPENSSL = "no" ;
+
+for local arg in $(ARGV)
+{
+    if $(arg) = "--with-openssl"
+    {
+        WITH_OPENSSL = "yes" ;
+    }
+}
+
+Echo "Use OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
 
 #############################################################################
 # Gfx libraries and includes
@@ -189,45 +234,3 @@ if $(GUI:L) = "uikit"
     GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
-#############################################################################
-# General values and settings
-#############################################################################
-
-# include rules an actions to build unit tests
-JamInclude unittest.jam ;
-
-# set directory to build object files into
-ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
-
-ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
-
-# set directory to build library/binary files into
-OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
-
-WITH_OPENSSL = "no" ;
-
-for local arg in $(ARGV)
-{
-    if $(arg) = "--with-openssl"
-    {
-        WITH_OPENSSL = "yes" ;
-    }
-}
-
-# Print project information
-Echo ;
-Echo "Project                         :" "Platinum C++ Framework" ;
-Echo "Configuration (CONFIG)          :" $(CONFIG) ;
-Echo "Toolset (TOOLSET)               :" $(TOOLSET) ;
-Echo "Host Operating System (OS)      :" $(OS:L) ;
-Echo "Host Platform (OSPLAT)          :" $(OSPLAT:L) ;
-Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
-Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
-Echo "Graphic User Interface (GUI)    :" $(GUI) ;
-Echo "System Interface (SYS)          :" $(SYS) ;
-Echo "Use OpenSSL (--with-openssl)    :" $(WITH_OPENSSL) ;
-Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
-Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
-Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
-Echo "Warnings (WARN)                 :" $(WARN) ;
-Echo ;

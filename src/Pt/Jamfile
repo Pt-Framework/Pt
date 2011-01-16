@@ -12,10 +12,10 @@ SharedLibrary Pt : Atomicity.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
-				   Page.cpp
-				   PageAllocator.cpp
-				   PoolAllocator.cpp
-				   PoolFactory.cpp
+                   Page.cpp
+                   PageAllocator.cpp
+                   PoolAllocator.cpp
+                   PoolFactory.cpp
                    Regex.cpp
                    regexp.cpp
                    SerializationError.cpp
@@ -38,7 +38,7 @@ MakeLocate Pt : $(OUTPUT_TARGET) ;
 
 PtUnitTest Pt-test : Pt-test.cpp
                      AllocatorTest.cpp
-		             AnyTest.cpp
+                     AnyTest.cpp
                      AtomicTest.cpp
                      ByteorderTest.cpp
                      CharTest.cpp
