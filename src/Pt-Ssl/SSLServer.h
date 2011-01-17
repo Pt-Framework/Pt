@@ -69,6 +69,8 @@ class PT_SSL_API SSLServer : public std::iostream, public Pt::Connectable
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
         void onReadHandshake(Pt::System::StreamBuffer& sb);
 
+        void onReadData(Pt::System::StreamBuffer& sb);
+
     private:
         System::IOStream* _ios;
         SSLStreamBuf      _sslbuf;

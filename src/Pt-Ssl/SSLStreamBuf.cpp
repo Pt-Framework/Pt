@@ -231,6 +231,42 @@ bool SSLStreamBuf::readHandshake()
     return true;
 }
 
+bool SSLStreamBuf::readData()
+{
+    char buf[1000];
+
+    // Block until data can be read from the stream
+    _ios->rdbuf()->sgetc();
+
+    while(true)
+    {
+        unsigned n = _ios->readsome(buf, sizeof(buf));
+        std::cerr << SSL_CALL_INFO << "readsome = " << n << std::endl;
+
+        if(n == 0)
+            break;
+
+        while(n)
+        {
+            const int written = BIO_write(_in, buf, n);
+            std::cerr << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
+
+            if(written <= 0)
+                throw std::runtime_error("BIO_write failed");
+
+            n -= written;
+            if(n > 0)
+                std::memcpy(buf, buf + written, n);
+
+            char sslbuf[1000];
+            const int bytesRead = SSL_read(_ssl, sslbuf, sizeof(sslbuf));
+            std::cerr << SSL_CALL_INFO << "SSL_read = " << bytesRead << std::endl;
+        }
+    }
+
+    return false;
+}
+
 int SSLStreamBuf::sync()
 { return 0; }
 
@@ -246,7 +282,6 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     // constructed no output buffer area exists, therefore when overflow
     // is called for the first time, we need to set it up.
     //
-
     if( ! _ios )
         return traits_type::eof();
 
@@ -254,9 +289,12 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     {
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
+        std::cerr << SSL_CALL_INFO << "XXX" << std::endl;
+
     }
     else if (traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
+        std::cerr << SSL_CALL_INFO << "YYY" << std::endl;
         // normal blocking overflow case
         size_t avail = this->pptr() - _obuffer;
 

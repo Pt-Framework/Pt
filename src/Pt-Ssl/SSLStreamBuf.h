@@ -96,6 +96,12 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
+        /** @brief Reads command or user message from the underlying stream
+            Returns true if more data needs to be read, false
+            if the message is complete.
+        */
+        bool readData();
+
     protected:
         virtual int sync();
         virtual int_type underflow();

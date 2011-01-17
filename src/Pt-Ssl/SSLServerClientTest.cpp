@@ -123,7 +123,15 @@ class Client : public Pt::Connectable {
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
-        { std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl; }
+        {
+            std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
+
+            std::ostream os(&_ssl->buffer());
+            os << "Hello world from client!";
+            os.flush();
+            os << "Hello world from client!";
+            os.flush();
+        }
 
     private:
         Pt::Ssl::SSLContext&   _sslContext;
