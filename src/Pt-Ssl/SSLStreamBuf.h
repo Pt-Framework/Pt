@@ -106,6 +106,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         virtual int sync();
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
+        std::streamsize do_underflow(std::streamsize size);
 
     protected:
         BIO*           _in;  // Input BIO

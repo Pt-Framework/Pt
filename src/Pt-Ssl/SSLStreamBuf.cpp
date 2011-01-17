@@ -287,8 +287,67 @@ int SSLStreamBuf::sync()
     return 0;
 }
 
+
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
-{ return 0; }
+{ 
+    if( ! _ios )
+        return traits_type::eof();
+    
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    this->do_underflow(_ibufferSize);
+
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    return traits_type::eof();
+}
+
+
+std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
+{
+    if( ! _ios )
+        return 0;
+
+    if( ! _ibuffer )
+    {
+        _ibuffer = new char[_ibufferSize];
+    }
+
+    // TODO: return 0 if full
+
+    size_t putback = _pbmax;
+    size_t leftover = 0;
+
+    // move unread bytes and putback to front
+    if( this->gptr() )
+    {
+        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+        char* to = _ibuffer + _pbmax - putback;
+        char* from = this->gptr() - putback;
+
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
+    }
+
+    size_t used = _pbmax + leftover;
+    size_t avail = _ibufferSize - used;
+    size = std::min<size_t>(avail, size);
+
+    _ios->read( _ibuffer + used, size );
+    std::streamsize readSize =_ios->gcount();
+
+    this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                _ibuffer + used, // gptr position
+                _ibuffer + used + readSize ); // end of get area
+
+
+    // TODO: do ssl decoding
+
+    return readSize;
+}
+
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 {
