@@ -268,7 +268,24 @@ bool SSLStreamBuf::readData()
 }
 
 int SSLStreamBuf::sync()
-{ return 0; }
+{
+    if( ! _ios )
+        return 0;
+
+    if( this->pptr() )
+    {
+        while( this->pptr() > this->pbase() )
+        {
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() )
+            {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
 
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
 { return 0; }
