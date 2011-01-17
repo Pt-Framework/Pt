@@ -19,20 +19,36 @@ SubDirCcFlags [ FDefines OPENSSL_NO_PSK ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC2 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC4 ] ;
 
-if $(TARGET_OS) = "nt"
-{
-    File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
-         [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win-x86.h ] ;
-}
-else if $(TARGET_OS) = "wince"
+if $(TARGET_OS) = "wince"
 {
     File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
          [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-wince.h ] ;
 }
+else if $(TARGET_OS) = "nt"
+{
+    if $(TARGET_OSPLAT) = "x86_64"
+    {
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win-x86_64.h ] ;
+    }
+    else
+    {
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-win-x86.h ] ;
+    }
+}
 else
 {
-    File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
-         [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-linux.h ] ;
+    if $(TARGET_OSPLAT) = "x86_64"
+    {
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-linux-x86_64.h ] ;
+    }
+    else
+    {
+        File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :
+             [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf-linux-x86.h ] ;
+    }
 }
 
 File [ FDirName $(TOP) src Pt-Ssl openssl include openssl aes.h         ] : [ FDirName $(TOP) src Pt-Ssl openssl crypto aes aes.h            ] ;
