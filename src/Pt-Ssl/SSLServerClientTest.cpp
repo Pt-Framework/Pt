@@ -129,8 +129,6 @@ class Client : public Pt::Connectable {
             std::ostream os(&_ssl->buffer());
             os << "Hello world from client!";
             os.flush();
-            os << "Hello world from client!";
-            os.flush();
         }
 
     private:

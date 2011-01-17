@@ -40,7 +40,7 @@ namespace Ssl {
 SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream(),
   _ios         (&ios),
-  _sslbuf      (ios, ctx, sessionID)
+  _sslbuf      (ios, ctx, sessionID, 16)
 { std::iostream::init(&_sslbuf); }
 
 SSLClient::~SSLClient()

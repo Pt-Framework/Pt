@@ -287,14 +287,16 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
     if( ! _obuffer )
     {
+        std::cerr << SSL_CALL_INFO << "AAA" << std::endl;
+
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
-        std::cerr << SSL_CALL_INFO << "XXX" << std::endl;
 
     }
     else if (traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
-        std::cerr << SSL_CALL_INFO << "YYY" << std::endl;
+        std::cerr << SSL_CALL_INFO << "BBB" << std::endl;
+
         // normal blocking overflow case
         size_t avail = this->pptr() - _obuffer;
 
@@ -328,12 +330,14 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         }
     }
 
+    std::cerr << SSL_CALL_INFO << "CCC" << std::endl;
     // if the overflow char is not EOF, so put it in buffer
     if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
     {
         *(this->pptr()) = traits_type::to_char_type(ch);
         this->pbump(1);
     }
+    std::cerr << SSL_CALL_INFO << "DDD" << std::endl;
 
     return traits_type::not_eof(ch);
 }
