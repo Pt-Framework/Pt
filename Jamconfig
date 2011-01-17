@@ -1,4 +1,6 @@
 
+JamInclude freetype.jam ;
+
 ConfigureFreetype ;
 
 WITH_OPENSSL = "no" ;

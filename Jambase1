@@ -325,17 +325,9 @@ TARGET_OSPLAT ?= $(OSPLAT:L) ;
 #
 # Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
 ##########################################################################
+
 CONFIG ?= debug ;
 CONFIG = $(CONFIG:L) ;
-
-
-# Include base rules
-#
-# This adds/sets basic rules and variables.
-#
-JamInclude Jamrules.base ;
-
-JamInclude freetype.jam ;
 
 ##########################################################################
 # Configure
@@ -380,9 +372,17 @@ if $(CONFIGURE)
 include config.jam ;
 
 ##########################################################################
+# Include base rules
+#
+# This adds/sets basic rules and variables.
+##########################################################################
+
+JamInclude Jamrules.base ;
+
+##########################################################################
 # Include host platform specifics
 #
-# This adds/sets platform specific rules and variables. May override base 
+# This adds/sets platform specific rules and variables. May override base
 # rules and variables.
 ##########################################################################
 
@@ -391,7 +391,7 @@ include config.jam ;
 ##########################################################################
 # Include target platform specifics
 #
-# This adds/sets platform specific rules and variables. May override base 
+# This adds/sets platform specific rules and variables. May override base
 # rules and variables.
 ##########################################################################
 
