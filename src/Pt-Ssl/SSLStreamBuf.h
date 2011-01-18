@@ -96,11 +96,9 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
-        /** @brief Reads command or user message from the underlying stream
-            Returns true if more data needs to be read, false
-            if the message is complete.
-        */
+        ///// JUST FOR TESTING USER MESSAGE SENDING
         bool readData();
+        ///// JUST FOR TESTING USER MESSAGE SENDING
 
     protected:
         virtual int sync();
@@ -115,12 +113,12 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         std::iostream* _ios; // IO
 
     private:
-        size_t _ibufferSize;
-        char* _ibuffer;
-        std::size_t _obufferSize;
-        char* _obuffer;
+        size_t       _ibufferSize;
+        char*        _ibuffer;
+        std::size_t  _obufferSize;
+        char*        _obuffer;
         const size_t _pbmax;
-        bool _oextend;
+        bool         _oextend;
 };
 
 

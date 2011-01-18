@@ -126,9 +126,11 @@ class Client : public Pt::Connectable {
         {
             std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
 
+            ///// JUST FOR TESTING USER MESSAGE SENDING
             std::ostream os(&_ssl->buffer());
             os << "Hello world from client!";
             os.flush();
+            ///// JUST FOR TESTING USER MESSAGE SENDING
         }
 
     private:

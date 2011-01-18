@@ -75,8 +75,13 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
         std::cerr << SSL_CALL_INFO << "Successfully connected to the client" << std::endl;
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
-        _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadData);
         handshakeFinished.send(*this);
+
+        ///// JUST FOR TESTING USER MESSAGE SENDING
+        _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadData);
+        _ios->buffer().beginRead();
+        ///// JUST FOR TESTING USER MESSAGE SENDING
+
         return;
     }
 

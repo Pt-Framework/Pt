@@ -40,7 +40,7 @@ namespace Ssl {
 SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream(),
   _ios         (&ios),
-  _sslbuf      (ios, ctx, sessionID, 16)
+  _sslbuf      (ios, ctx, sessionID/*, 16*/) // If the buffer size is small, we will get seg fault
 { std::iostream::init(&_sslbuf); }
 
 SSLClient::~SSLClient()
@@ -92,6 +92,11 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFinished.send(*this);
+
+        ///// JUST FOR TESTING USER MESSAGE SENDING
+        _ios->buffer().beginWrite();
+        ///// JUST FOR TESTING USER MESSAGE SENDING
+
         return;
     }
 
