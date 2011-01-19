@@ -38,7 +38,7 @@ namespace Ssl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
-: std::iostream(),
+: std::iostream(0),
   _ios         (&ios),
   _sslbuf      (ios, ctx, sessionID)
 { std::iostream::init(&_sslbuf); }
@@ -78,8 +78,8 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
         handshakeFinished.send(*this);
 
         ///// JUST FOR TESTING USER MESSAGE SENDING
-        _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadData);
-        _ios->buffer().beginRead();
+        //_ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadData);
+        //_ios->buffer().beginRead();
         ///// JUST FOR TESTING USER MESSAGE SENDING
 
         return;
@@ -113,7 +113,7 @@ void SSLServer::onReadData(Pt::System::StreamBuffer& sb)
     _ios->buffer().endRead();
     std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
 
-    _sslbuf.readData();
+    _sslbuf.import();
 }
 
 } // namespace Ssl

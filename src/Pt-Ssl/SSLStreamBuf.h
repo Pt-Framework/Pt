@@ -96,6 +96,8 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
+        std::streamsize import();
+
         ///// JUST FOR TESTING USER MESSAGE SENDING
         bool readData();
         ///// JUST FOR TESTING USER MESSAGE SENDING

@@ -38,7 +38,7 @@ namespace Ssl {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
-: std::iostream(),
+: std::iostream(0),
   _ios         (&ios),
   _sslbuf      (ios, ctx, sessionID/*, 16*/) // If the buffer size is small, we will get seg fault
 { std::iostream::init(&_sslbuf); }

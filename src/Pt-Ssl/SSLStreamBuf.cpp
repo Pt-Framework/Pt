@@ -249,9 +249,12 @@ bool SSLStreamBuf::readData()
 
         while(n)
         {
+            BUF_MEM* bm = 0;
+            BIO_get_mem_ptr(_in, &bm);
+            std::cerr << "XXXXXXXX" << bm->length << " of " << bm->max << std::endl;
             const int written = BIO_write(_in, buf, n);
             std::cerr << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
-
+            std::cerr << "XXXXXXXX" << bm->length << " of " << bm->max << std::endl;
             if(written <= 0)
                 throw std::runtime_error("BIO_write failed");
 
@@ -270,6 +273,19 @@ bool SSLStreamBuf::readData()
     return false;
 }
 ///// JUST FOR TESTING USER MESSAGE SENDING
+
+
+std::streamsize SSLStreamBuf::import()
+{
+    if( _ios )
+    {
+        std::streamsize n = _ios->rdbuf()->in_avail();
+        return do_underflow(n);
+    }
+
+    return this->in_avail();
+}
+
 
 int SSLStreamBuf::sync()
 {
@@ -318,10 +334,11 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     if( ! _ios )
         return 0;
 
-    std::cerr << SSL_CALL_INFO << "do_underflow" << std::endl;
+    std::cerr << SSL_CALL_INFO << "do_underflow " << size << std::endl;
 
     if( ! _ibuffer )
     {
+        std::cerr << SSL_CALL_INFO << "new ibuffer " << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
 
@@ -341,18 +358,32 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::memmove( to, from, putback + leftover );
     }
 
+    // We read as many bytes from the underlying stream as can fit
+    // in the _in BIO so we can always all of sslbuf to the BIO later
+    // and don't need to manage an extra buffer...
+    char sslbuf[1024];
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_in, &bm);
+    std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+
+    size_t bio_avail = std::min<size_t>( bm->max - bm->length, sizeof(sslbuf) );
+    size_t rsize = std::min<size_t>(size, bio_avail);
+    std::cerr << SSL_CALL_INFO << "rsize " << rsize << std::endl;
+
+    _ios->read(sslbuf,  rsize );
+
+    int bw = BIO_write(_in, sslbuf, _ios->gcount());
+    std::cerr << SSL_CALL_INFO << "BIO_write " << bw << std::endl;
+
+    // wedonot need to read all bytes from _ssl, but only make some progress
     size_t used = _pbmax + leftover;
     size_t avail = _ibufferSize - used;
-    size = std::min<size_t>(avail, size);
-
-    _ios->read( _ibuffer + used, size );
-    std::streamsize readSize =_ios->gcount();
+    int readSize = SSL_read(_ssl, _ibuffer + used, _ibufferSize - used);
+    std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
 
     this->setg( _ibuffer + (_pbmax - putback), // start of get area
                 _ibuffer + used, // gptr position
                 _ibuffer + used + readSize ); // end of get area
-
-    // TODO: Do ssl decoding
 
     return readSize;
 }

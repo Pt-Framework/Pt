@@ -55,7 +55,7 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
 
             _server.listen(addr, port);
-            _server.connectionPending += Pt::slot(*this, &Server::_onTCPAccept);
+            _server.connectionPending += Pt::slot(*this, &Server::onTCPAccept);
 
             _loop.add(_server);
         }
@@ -67,7 +67,7 @@ class Server : public Pt::Connectable {
         }
 
    private:
-        void _onTCPAccept(Pt::Net::TcpServer& server)
+        void onTCPAccept(Pt::Net::TcpServer& server)
         {
             std::cerr << SSL_CALL_INFO_SERVER << "Accepting connection from client" << std::endl;
             _client = new Pt::Net::TcpSocket;
@@ -83,7 +83,29 @@ class Server : public Pt::Connectable {
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
-        { std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl; }
+        {
+            std::cerr << SSL_CALL_INFO_SERVER << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
+
+            _ios.buffer().inputReady += Pt::slot(*this, &Server::onInput);
+            _ios.buffer().beginRead();
+        }
+
+        void onInput(Pt::System::StreamBuffer& sb)
+        {
+            sb.endRead();
+            std::cerr << SSL_CALL_INFO_SERVER << "received raw = " << sb.in_avail() << std::endl;
+
+            _ssl->buffer().import();
+            std::cerr << SSL_CALL_INFO_SERVER << "received decoded = " << _ssl->buffer().in_avail() << std::endl;
+
+            char buf[512];
+            unsigned n =_ssl->readsome(buf, 512);
+            std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: ";
+            std::cerr.write(buf, n) << std::endl;
+
+            // production code would call import() again until no further data
+            // can be imported...
+        }
 
     private:
         Pt::Ssl::SSLContext&    _sslContext;
