@@ -388,7 +388,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
         // Write encoded bytes to _ios
         std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
-        while(true)
+        while(true) // Can this be removed?
         {
             BUF_MEM* bm = 0;
             BIO_get_mem_ptr(_out, &bm);
