@@ -49,7 +49,7 @@ SSLServer::~SSLServer()
 
 void SSLServer::beginHandshake()
 {
-    _sslbuf.startServerHandshake();
+    _sslbuf.beginServerHandshake();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
     std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;

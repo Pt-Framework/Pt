@@ -48,7 +48,7 @@ SSLClient::~SSLClient()
 
 void SSLClient::beginHandshake()
 {
-    _sslbuf.startClientHandshake();
+    _sslbuf.beginClientHandshake();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
     std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
@@ -94,7 +94,7 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         handshakeFinished.send(*this);
 
         ///// JUST FOR TESTING USER MESSAGE SENDING
-        _ios->buffer().beginWrite();
+        // _ios->buffer().beginWrite();
         ///// JUST FOR TESTING USER MESSAGE SENDING
 
         return;

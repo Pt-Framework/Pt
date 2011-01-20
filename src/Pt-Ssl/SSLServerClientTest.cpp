@@ -148,11 +148,14 @@ class Client : public Pt::Connectable {
         {
             std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
 
-            ///// JUST FOR TESTING USER MESSAGE SENDING
-            std::ostream os(&_ssl->buffer());
-            os << "Hello world from client!";
-            os.flush();
-            ///// JUST FOR TESTING USER MESSAGE SENDING
+            *_ssl << "Hello world from client!" << std::flush;
+            _ios.buffer().beginWrite();
+            _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
+        }
+
+        void onOutput(Pt::System::StreamBuffer& sb)
+        {
+            sb.endWrite();
         }
 
     private:
