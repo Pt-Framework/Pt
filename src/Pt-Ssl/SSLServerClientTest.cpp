@@ -93,10 +93,10 @@ class Server : public Pt::Connectable {
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            std::cerr << SSL_CALL_INFO_SERVER << "received raw = " << sb.in_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Received raw = " << sb.in_avail() << std::endl;
 
             _ssl->buffer().import();
-            std::cerr << SSL_CALL_INFO_SERVER << "received decoded = " << _ssl->buffer().in_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);

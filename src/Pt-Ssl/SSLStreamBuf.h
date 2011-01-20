@@ -98,10 +98,6 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
         std::streamsize import();
 
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-        bool readData();
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-
     protected:
         virtual int sync();
         virtual int_type underflow();

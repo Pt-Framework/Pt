@@ -231,52 +231,10 @@ bool SSLStreamBuf::readHandshake()
     return true;
 }
 
-///// JUST FOR TESTING USER MESSAGE SENDING
-bool SSLStreamBuf::readData()
-{
-    char buf[1000];
-
-    // Block until data can be read from the stream
-    _ios->rdbuf()->sgetc();
-
-    while(true)
-    {
-        unsigned n = _ios->readsome(buf, sizeof(buf));
-        std::cerr << SSL_CALL_INFO << "readsome = " << n << std::endl;
-
-        if(n == 0)
-            break;
-
-        while(n)
-        {
-            BUF_MEM* bm = 0;
-            BIO_get_mem_ptr(_in, &bm);
-            std::cerr << "XXXXXXXX" << bm->length << " of " << bm->max << std::endl;
-            const int written = BIO_write(_in, buf, n);
-            std::cerr << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
-            std::cerr << "XXXXXXXX" << bm->length << " of " << bm->max << std::endl;
-            if(written <= 0)
-                throw std::runtime_error("BIO_write failed");
-
-            n -= written;
-            std::cerr << SSL_CALL_INFO << "remaining = " << n << std::endl;
-            if(n > 0)
-                std::memcpy(buf, buf + written, n);
-
-            char sslbuf[1000];
-            const int bytesRead = SSL_read(_ssl, sslbuf, sizeof(sslbuf));
-            std::cerr << SSL_CALL_INFO << "SSL_read = " << bytesRead << std::endl;
-            std::cerr << SSL_CALL_INFO << "SSL_read = " << std::string(sslbuf, bytesRead) << std::endl;
-        }
-    }
-
-    return false;
-}
-///// JUST FOR TESTING USER MESSAGE SENDING
-
-
 std::streamsize SSLStreamBuf::import()
 {
+    std::cerr << SSL_CALL_INFO << "in_avail = " << this->in_avail() << std::endl;
+
     if( _ios )
     {
         std::streamsize n = _ios->rdbuf()->in_avail();
@@ -309,7 +267,6 @@ int SSLStreamBuf::sync()
     return 0;
 }
 
-
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
 {
     if( ! _ios )
@@ -334,11 +291,11 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     if( ! _ios )
         return 0;
 
-    std::cerr << SSL_CALL_INFO << "do_underflow " << size << std::endl;
+    std::cerr << SSL_CALL_INFO << "size = " << size << std::endl;
 
     if( ! _ibuffer )
     {
-        std::cerr << SSL_CALL_INFO << "new ibuffer " << std::endl;
+        std::cerr << SSL_CALL_INFO << "Allocating ibuffer " << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
 
@@ -366,8 +323,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     BIO_get_mem_ptr(_in, &bm);
     std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
 
-    size_t bio_avail = std::min<size_t>( bm->max - bm->length, sizeof(sslbuf) );
-    size_t rsize = std::min<size_t>(size, bio_avail);
+    const size_t bio_avail = std::min<size_t>( bm->max - bm->length, sizeof(sslbuf) );
+    const size_t rsize = std::min<size_t>(size, bio_avail);
     std::cerr << SSL_CALL_INFO << "rsize " << rsize << std::endl;
 
     _ios->read(sslbuf,  rsize );
@@ -375,7 +332,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     int bw = BIO_write(_in, sslbuf, _ios->gcount());
     std::cerr << SSL_CALL_INFO << "BIO_write " << bw << std::endl;
 
-    // wedonot need to read all bytes from _ssl, but only make some progress
+    // We do not need to read all bytes from _ssl, but only make some progress
     size_t used = _pbmax + leftover;
     size_t avail = _ibufferSize - used;
     int readSize = SSL_read(_ssl, _ibuffer + used, _ibufferSize - used);
@@ -401,11 +358,11 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     if( ! _ios )
         return traits_type::eof();
 
-    std::cerr << SSL_CALL_INFO << "overflow; ch = " << ch << std::endl;
+    std::cerr << SSL_CALL_INFO << "ch = " << ch << std::endl;
 
     if( ! _obuffer )
     {
-        std::cerr << SSL_CALL_INFO << "overflow - allocating buffer " << ch << std::endl;
+        std::cerr << SSL_CALL_INFO << "Allocating buffer " << ch << std::endl;
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
@@ -417,12 +374,12 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         const size_t avail = this->pptr() - _obuffer;
 
         // Feed _obuffer to openssl
-        std::cerr << SSL_CALL_INFO << "overflow - feeding data to be encrypted to OpenSSL" << std::endl;
+        std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL" << std::endl;
         int written = SSL_write(_ssl, _obuffer, avail);
 
         // Move leftover in _obuffer to the front
         const size_t leftover = avail - written;
-        std::cerr << SSL_CALL_INFO << "overflow - shifting buffer; leftover = " << leftover << std::endl;
+        std::cerr << SSL_CALL_INFO << "Shifting buffer; leftover = " << leftover << std::endl;
         if(leftover > 0)
         {
             traits_type::move(_obuffer, _obuffer + written, leftover);
@@ -431,7 +388,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         this->pbump( leftover );
 
         // Write encoded bytes to _ios
-        std::cerr << SSL_CALL_INFO << "overflow - writing encrypted data to _ios" << std::endl;
+        std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
         while(true)
         {
             // TODO: It would be cool if we could access the BIO buffer area directly.
@@ -441,6 +398,15 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
             if(n < 0)
                 break;
 
+        //    BUF_MEM* bm = 0;
+      //      BIO_get_mem_ptr(_out, &bm);
+    //        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+
+  //          const size_t bio_avail = std::min<size_t>( bm->max - bm->length, sizeof(sslbuf) );
+//            const size_t rsize = std::min<size_t>(size, bio_avail);
+
+//    std::cerr << SSL_CALL_INFO << "rsize " << rsize << std::endl;
+
             _ios->write(buf, n);
         }
     }
@@ -448,12 +414,12 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     // If the overflow char is not EOF, so put it in buffer
     if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
     {
-        std::cerr << SSL_CALL_INFO << "overflow - ch is not EOF, putting it in buffer" << std::endl;
+        std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
         *(this->pptr()) = traits_type::to_char_type(ch);
         this->pbump(1);
     }
 
-    std::cerr << SSL_CALL_INFO << "overflow - done" << std::endl;
+    std::cerr << SSL_CALL_INFO << "Done" << std::endl;
 
     return traits_type::not_eof(ch);
 }

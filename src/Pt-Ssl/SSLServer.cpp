@@ -76,12 +76,6 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFinished.send(*this);
-
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-        //_ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadData);
-        //_ios->buffer().beginRead();
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-
         return;
     }
 
@@ -106,14 +100,6 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
 
     std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
     _ios->buffer().beginWrite();
-}
-
-void SSLServer::onReadData(Pt::System::StreamBuffer& sb)
-{
-    _ios->buffer().endRead();
-    std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
-
-    _sslbuf.import();
 }
 
 } // namespace Ssl

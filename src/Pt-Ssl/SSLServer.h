@@ -62,14 +62,12 @@ class PT_SSL_API SSLServer : public std::iostream, public Pt::Connectable
         */
         void beginHandshake();
 
-        // Signals
+        /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLServer&> handshakeFinished;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
         void onReadHandshake(Pt::System::StreamBuffer& sb);
-
-        void onReadData(Pt::System::StreamBuffer& sb);
 
     private:
         System::IOStream* _ios;

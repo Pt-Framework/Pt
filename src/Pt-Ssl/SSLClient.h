@@ -62,7 +62,7 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         */
         void beginHandshake();
 
-        // Signals
+        /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLClient&> handshakeFinished;
 
     private:
