@@ -315,6 +315,17 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::memmove( to, from, putback + leftover );
     }
 
+    // Transfer data from _in BIO to _ios
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_in, &bm);
+    std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+
+    const size_t bio_avail = bm->max - bm->length;
+    if(bio_avail > 0) {
+        const size_t got = _ios->readsome(bm->data + bm->length, bio_avail);
+        bm->length += got;
+    }
+/*
     // We read as many bytes from the underlying stream as can fit
     // in the _in BIO so we can always all of sslbuf to the BIO later
     // and don't need to manage an extra buffer...
@@ -331,6 +342,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
     int bw = BIO_write(_in, sslbuf, _ios->gcount());
     std::cerr << SSL_CALL_INFO << "BIO_write " << bw << std::endl;
+*/
 
     // We do not need to read all bytes from _ssl, but only make some progress
     size_t used = _pbmax + leftover;
@@ -391,23 +403,19 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
         while(true)
         {
-            // TODO: It would be cool if we could access the BIO buffer area directly.
-            // NOTE: AFAIK, it is not possible (at least not in a clean way)
+            BUF_MEM* bm = 0;
+            BIO_get_mem_ptr(_out, &bm);
+            std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+            if(bm->length <= 0) break;
+
+            _ios->write(bm->data, bm->length);
+            bm->length = 0;
+
+            /*
             char buf[255];
             const int n = BIO_read( _out, buf, sizeof(buf) );
-            if(n < 0)
-                break;
-
-        //    BUF_MEM* bm = 0;
-      //      BIO_get_mem_ptr(_out, &bm);
-    //        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
-
-  //          const size_t bio_avail = std::min<size_t>( bm->max - bm->length, sizeof(sslbuf) );
-//            const size_t rsize = std::min<size_t>(size, bio_avail);
-
-//    std::cerr << SSL_CALL_INFO << "rsize " << rsize << std::endl;
-
-            _ios->write(buf, n);
+            if(n < 0) break;
+            */
         }
     }
 
