@@ -92,11 +92,6 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFinished.send(*this);
-
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-        // _ios->buffer().beginWrite();
-        ///// JUST FOR TESTING USER MESSAGE SENDING
-
         return;
     }
 

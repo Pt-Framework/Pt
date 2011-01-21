@@ -250,7 +250,7 @@ int SSLStreamBuf::sync()
     if( ! _ios )
         return 0;
 
-    std::cerr << SSL_CALL_INFO << "sync; pptr = " << this->pptr() << std::endl;
+    std::cerr << SSL_CALL_INFO << "pptr is " << !!this->pptr() << std::endl;
 
     if( this->pptr() )
     {
@@ -299,7 +299,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         _ibuffer = new char[_ibufferSize];
     }
 
-    // return 0 if full
+    // Return 0 if full
     if( _ibuffer + _ibufferSize == this->egptr() )
     {
         return 0;
@@ -319,7 +319,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::memmove( to, from, putback + leftover );
     }
 
-    // refill the BIO with encoded bytes for decoding
+    // Refill the BIO with encoded bytes for decoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
     std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
@@ -388,21 +388,13 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
         // Write encoded bytes to _ios
         std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
-        while(true) // Can this be removed?
-        {
-            BUF_MEM* bm = 0;
-            BIO_get_mem_ptr(_out, &bm);
-            std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
-            if(bm->length <= 0) break;
 
+        BUF_MEM* bm = 0;
+        BIO_get_mem_ptr(_out, &bm);
+        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+        if(bm->length > 0) {
             _ios->write(bm->data, bm->length);
             bm->length = 0;
-
-            /*
-            char buf[255];
-            const int n = BIO_read( _out, buf, sizeof(buf) );
-            if(n < 0) break;
-            */
         }
     }
 

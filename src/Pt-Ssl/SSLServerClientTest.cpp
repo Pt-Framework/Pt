@@ -87,6 +87,8 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_SERVER << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
 
             _ios.buffer().inputReady += Pt::slot(*this, &Server::onInput);
+            _ios.buffer().outputReady += Pt::slot(*this, &Server::onOutput);
+
             _ios.buffer().beginRead();
         }
 
@@ -100,11 +102,23 @@ class Server : public Pt::Connectable {
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
+            if(n <= 0) return;
+
             std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: ";
             std::cerr.write(buf, n) << std::endl;
 
-            // production code would call import() again until no further data
-            // can be imported...
+            // NOTE: Production code would call import() again until no further data can be imported.
+
+            // Send reply
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the client ..." << std::endl;
+            *_ssl << "Hello world from server!" << std::flush;
+            _ios.buffer().beginWrite();
+        }
+
+        void onOutput(Pt::System::StreamBuffer& sb)
+        {
+            sb.endWrite();
+            _ios.buffer().beginRead();
         }
 
     private:
@@ -148,14 +162,41 @@ class Client : public Pt::Connectable {
         {
             std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
 
+            _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
+            _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
+
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ..." << std::endl;
             *_ssl << "Hello world from client!" << std::flush;
             _ios.buffer().beginWrite();
-            _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
+        }
+
+        void onInput(Pt::System::StreamBuffer& sb)
+        {
+            sb.endRead();
+            std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << sb.in_avail() << std::endl;
+
+            _ssl->buffer().import();
+            std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+
+            // TODO: Why this readsome() return 0 but the above in_avail() does not ???
+            char buf[512];
+            unsigned n =_ssl->readsome(buf, 512);
+            if(n <= 0) return;
+
+            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: ";
+            std::cerr.write(buf, n) << std::endl;
+
+            // NOTE: Production code would call import() again until no further data can be imported.
+
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sending another message to the server ..." << std::endl;
+            *_ssl << "Good morning from client!" << std::flush;
+            _ios.buffer().beginWrite();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
+            _ios.buffer().beginRead();
         }
 
     private:
