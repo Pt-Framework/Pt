@@ -177,11 +177,12 @@ class Client : public Pt::Connectable {
 
             _ssl->buffer().import();
             std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+            //if(_ssl->buffer().in_avail() <= 0) return;
 
             // TODO: Why this readsome() return 0 but the above in_avail() does not ???
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
-            if(n <= 0) return;
+            //if(n <= 0) return;
 
             std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: ";
             std::cerr.write(buf, n) << std::endl;
