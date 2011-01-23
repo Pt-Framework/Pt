@@ -237,10 +237,17 @@ std::streamsize SSLStreamBuf::import()
 
     if( _ios )
     {
+        std::cerr << SSL_CALL_INFO << "available in underlying = " << _ios->rdbuf()->in_avail() << std::endl;
         std::streamsize n = _ios->rdbuf()->in_avail();
-        return do_underflow(n);
+        std::streamsize m = do_underflow(n);
+        std::cerr << SSL_CALL_INFO << "underflow got = " << n << std::endl;
+        std::cerr << SSL_CALL_INFO << "in_avail now = " << this->in_avail() << std::endl;
+        std::cerr << SSL_CALL_INFO << "underlying state = " << _ios->good() 
+                  << " " << _ios->fail() << " " << _ios->eof() << std::endl;
+        return m;
     }
 
+    std::cerr << SSL_CALL_INFO << "in_avail now = " << this->in_avail() << std::endl;
     return this->in_avail();
 }
 
@@ -327,6 +334,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     if(bm->max > bm->length)
     {
         const size_t refill = std::min<size_t>(bm->max - bm->length, size);
+        std::cerr << SSL_CALL_INFO << "refill " << refill << std::endl;
         _ios->read(bm->data + bm->length, refill);
         bm->length += _ios->gcount();
     }
