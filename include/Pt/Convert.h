@@ -150,7 +150,10 @@ inline void convert(unsigned char& n, const String& str)
     unsigned int i = 0;
     ss >> i;
     const std::ios::iostate iostate = ss.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit)
+      || i > std::numeric_limits<unsigned char>::max()
+      || i < std::numeric_limits<unsigned char>::min()
+      )
     {
         ConversionError::doThrow("unsigned char", "Pt::String");
     }
@@ -253,7 +256,7 @@ inline void convert(double& n, const String& str)
     // not a number
     if(str == L"NAN")
     {
-        n = std::numeric_limits<float>::quiet_NaN();
+        n = std::numeric_limits<double>::quiet_NaN();
         return;
     }
 
@@ -321,7 +324,7 @@ inline void convert(double& n, const std::string& str)
     // not a number
     if(str == "NAN")
     {
-        n = std::numeric_limits<float>::quiet_NaN();
+        n = std::numeric_limits<double>::quiet_NaN();
         return;
     }
 
