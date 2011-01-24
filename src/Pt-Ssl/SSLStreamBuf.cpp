@@ -247,6 +247,9 @@ void SSLStreamBuf::shutdown()
     BIO_reset(_in);
     BIO_reset(_out);
     SSL_clear(_ssl);
+
+    delete [] _ibuffer; _ibuffer = 0;
+    delete [] _obuffer; _obuffer = 0;
 }
 
 int SSLStreamBuf::sync()

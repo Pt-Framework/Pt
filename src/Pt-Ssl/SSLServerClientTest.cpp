@@ -211,7 +211,7 @@ class Client : public Pt::Connectable {
             // NOTE: Production code would call import() again until no further data can be imported.
 
             // Send more messages
-            if(_msgCnt < 1) {
+            if(_msgCnt < 2) {
                 ++_msgCnt;
                 std::cerr << SSL_CALL_INFO_CLIENT << "Sending another message to the server ..." << std::endl;
                 *_ssl << "Good morning from client!" << std::flush;
