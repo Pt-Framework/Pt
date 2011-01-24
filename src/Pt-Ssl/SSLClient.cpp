@@ -73,7 +73,6 @@ void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().beginRead();
 }
 
-
 void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     _ios->buffer().endRead();
@@ -95,7 +94,7 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         return;
     }
 
-    std::cerr << SSL_CALL_INFO << "Write Handshake" << std::endl;
+    std::cerr << SSL_CALL_INFO << "Write handshake" << std::endl;
     _sslbuf.writeHandshake();
 
     std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;

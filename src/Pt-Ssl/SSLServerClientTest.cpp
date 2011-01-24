@@ -97,8 +97,15 @@ class Server : public Pt::Connectable {
             sb.endRead();
             std::cerr << SSL_CALL_INFO_SERVER << "Received raw = " << sb.in_avail() << std::endl;
 
-            _ssl->buffer().import();
+            if(_ssl->buffer().import() == -1) {
+                std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
+                _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
+                return;
+            }
+
             std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+            if(_ssl->buffer().in_avail() <= 0) return;
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
@@ -170,7 +177,7 @@ class Client : public Pt::Connectable {
 
             _ios.buffer().beginWrite();
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good() 
+            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good()
                       << " " << _ssl->fail() << " " << _ssl->eof() << std::endl;
         }
 
@@ -178,38 +185,54 @@ class Client : public Pt::Connectable {
         {
             sb.endRead();
             std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << sb.in_avail() << std::endl;
-            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good() 
+            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good()
                       << " " << _ssl->fail() << " " << _ssl->eof() << std::endl;
 
-            _ssl->buffer().import();
+            if(_ssl->buffer().import() == -1) {
+                std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
+                _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+                return;
+            }
+
             std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-            //if(_ssl->buffer().in_avail() <= 0) return;
+            if(_ssl->buffer().in_avail() <= 0) return;
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good() 
+            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good()
                       << " " << _ssl->fail() << " " << _ssl->eof() << std::endl;
 
-            // TODO: Why this readsome() return 0 but the above in_avail() does not ???
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
-            //if(n <= 0) return;
+            if(n <= 0) return;
 
             std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: ";
             std::cerr.write(buf, n) << std::endl;
 
             // NOTE: Production code would call import() again until no further data can be imported.
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Sending another message to the server ..." << std::endl;
-            *_ssl << "Good morning from client!" << std::flush;
-            _ios.buffer().beginWrite();
+            // Send more messages
+            if(_msgCnt < 1) {
+                ++_msgCnt;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Sending another message to the server ..." << std::endl;
+                *_ssl << "Good morning from client!" << std::flush;
+                _ios.buffer().beginWrite();
+            }
+            // Shutdown
+            else {
+                std::cerr << SSL_CALL_INFO_SERVER << "*** Shutting down the stream ***" << std::endl;
+                _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
+                _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+                _ssl->buffer().shutdown();
+            }
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
-            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good() 
+            std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good()
                       << " " << _ssl->fail() << " " << _ssl->eof() << std::endl;
             sb.endWrite();
 
-             std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good() 
+             std::cerr << SSL_CALL_INFO_CLIENT << "_ssl state = " << _ssl->good()
                       << " " << _ssl->fail() << " " << _ssl->eof() << std::endl;
             _ios.buffer().beginRead();
         }

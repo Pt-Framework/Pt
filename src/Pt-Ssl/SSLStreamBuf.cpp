@@ -103,40 +103,6 @@ const std::string SSLStreamBuf::getPeerCN() const
     return (ret > 0) ? peerCN : "";
 }
 
-void SSLStreamBuf::disconnect()
-{
-    SSL_shutdown(_ssl);
-
-    while(BIO_pending(_out) > 0)
-    {
-        char buff[100];
-        const int n = BIO_read(_out, buff, sizeof(buff) );
-        std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
-
-        if(n <= 0)
-            throw std::runtime_error("BIO_read failed");
-
-        _ios->write(buff, n);
-
-        const int ret = SSL_do_handshake(_ssl);
-        std::cerr << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
-
-        if(ret <= 0)
-        {
-            const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
-                throw std::runtime_error("SSL_do_handshake failed");
-        }
-    }
-}
-
-void SSLStreamBuf::reset()
-{
-    BIO_reset(_in);
-    BIO_reset(_out);
-    SSL_clear(_ssl);
-}
-
 void SSLStreamBuf::beginServerHandshake()
 {
     SSL_set_accept_state(_ssl);
@@ -233,24 +199,55 @@ bool SSLStreamBuf::readHandshake()
 
 std::streamsize SSLStreamBuf::import()
 {
-    std::cerr << SSL_CALL_INFO << "in_avail = " << this->in_avail() << std::endl;
+    std::cerr << SSL_CALL_INFO << "in_avail (on entry) = " << this->in_avail() << std::endl;
 
-    if( _ios )
+    if(_ios)
     {
-        std::cerr << SSL_CALL_INFO << "available in underlying = " << _ios->rdbuf()->in_avail() << std::endl;
-        std::streamsize n = _ios->rdbuf()->in_avail();
-        std::streamsize m = do_underflow(n);
-        std::cerr << SSL_CALL_INFO << "underflow got = " << n << std::endl;
-        std::cerr << SSL_CALL_INFO << "in_avail now = " << this->in_avail() << std::endl;
-        std::cerr << SSL_CALL_INFO << "underlying state = " << _ios->good() 
-                  << " " << _ios->fail() << " " << _ios->eof() << std::endl;
-        return m;
+        const std::streamsize avail = _ios->rdbuf()->in_avail();
+        std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
+
+        const std::streamsize got = do_underflow(avail);
+        std::cerr << SSL_CALL_INFO << "do_underflow = " << got << std::endl;
+        std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
+
+        std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+
+        // Shutdown?
+        const int shutdownState = SSL_get_shutdown(_ssl);
+        if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
+            std::cerr << SSL_CALL_INFO << "Received shutdown" << std::endl;
+            this->shutdown();
+            return -1;
+        }
+
+        return (got > 0) ? got : 0;
     }
 
-    std::cerr << SSL_CALL_INFO << "in_avail now = " << this->in_avail() << std::endl;
-    return this->in_avail();
+    std::cerr << SSL_CALL_INFO << "in_avail (on exit; no valid _ios) = " << this->in_avail() << std::endl;
+    return (this->in_avail() > 0) ? this->in_avail() : 0;
 }
 
+void SSLStreamBuf::shutdown()
+{
+    const int res = SSL_shutdown(_ssl);
+    std::cerr << SSL_CALL_INFO << "SSL_shutdown = " << res << std::endl;
+
+    // Send shutdown message to the other peer
+    char buff[1000];
+    const int n = BIO_read(_out, buff, sizeof(buff));
+    std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+
+    if(n <= 0)
+        throw std::runtime_error("BIO_read failed");
+
+    _ios->write(buff, n);
+    _ios->flush();
+
+    // Reset all
+    BIO_reset(_in);
+    BIO_reset(_out);
+    SSL_clear(_ssl);
+}
 
 int SSLStreamBuf::sync()
 {
@@ -291,7 +288,6 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 
     return traits_type::eof();
 }
-
 
 std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 {
@@ -334,7 +330,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     if(bm->max > bm->length)
     {
         const size_t refill = std::min<size_t>(bm->max - bm->length, size);
-        std::cerr << SSL_CALL_INFO << "refill " << refill << std::endl;
+        std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
         _ios->read(bm->data + bm->length, refill);
         bm->length += _ios->gcount();
     }
@@ -351,7 +347,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
     return readSize;
 }
-
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 {

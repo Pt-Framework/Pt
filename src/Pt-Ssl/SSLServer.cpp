@@ -43,7 +43,6 @@ SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
   _sslbuf      (ios, ctx, sessionID)
 { std::iostream::init(&_sslbuf); }
 
-
 SSLServer::~SSLServer()
 {}
 
@@ -63,7 +62,7 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().endWrite();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
-    if( _sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0 )
+    if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
     {
         std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
         _ios->buffer().beginWrite();

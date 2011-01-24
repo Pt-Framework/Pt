@@ -66,12 +66,6 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         /** \brief Get the peer CN (Common Name). */
         const std::string getPeerCN() const;
 
-        /** \brief Disconnect the connection. */
-        void disconnect();
-
-        /** \brief Reset this SSL stream buffer. */
-        void reset();
-
         /** @brief Starts the server handshake
             After this method has been called, the first handshake message
             can be read from the client.
@@ -96,7 +90,13 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
+        /** @brief Reads user message from the underlying stream
+            Returns the number bytes in the message or -1 if the other peer has shutdown the stream.
+        */
         std::streamsize import();
+
+        /** \brief Shutdown this SSL stream buffer. */
+        void shutdown();
 
     protected:
         virtual int sync();
