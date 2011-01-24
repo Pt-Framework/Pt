@@ -219,7 +219,7 @@ class Client : public Pt::Connectable {
             }
             // Shutdown
             else {
-                std::cerr << SSL_CALL_INFO_SERVER << "*** Shutting down the stream ***" << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "*** Shutting down the stream ***" << std::endl;
                 _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                 _ssl->buffer().shutdown();
