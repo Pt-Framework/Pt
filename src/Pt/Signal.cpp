@@ -234,6 +234,35 @@ Signal<const Pt::Event&>::~Signal()
 
 void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
 {
+    if(_routes.empty()) return;
+
+    // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+    // In the sending state, removing connection will leave invalid connections in the connection list
+    // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+    // will be removed by the Sentry when it destructs.
+    Signal::Sentry sentry(this);
+
+    std::pair<RouteMap::iterator, RouteMap::iterator> eqr = _routes.equal_range(0);
+    for(RouteMap::iterator it  = eqr.first; it != eqr.second; ++it) {
+        // The following scenarios must be considered when the slot is called:
+        // - The slot might get deleted and thus disconnected from this signal
+        // - The slot might delete this signal and we must end calling any slots immediately
+        // - A new Connection might get added to this Signal in the slot
+        IEventRoute* route = it->second;
+        if(route->valid()) route->route(ev);
+        // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+        if( !sentry ) return;
+    }
+
+    eqr = _routes.equal_range(&ev.typeInfo());
+    for(RouteMap::iterator it  = eqr.first; it != eqr.second; ++it) {
+        IEventRoute* route = it->second;
+        if(route->valid()) route->route(ev);
+
+        if(!sentry) return;
+    }
+
+/*
 	// The sentry will set the Signal to the sending state and
 	// reset it to not-sending upon destruction. In the sending
 	// state, removing connection will leave invalid connections
@@ -288,6 +317,7 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
 		if( !sentry )
 			return;
 	}
+*/
 }
 
 

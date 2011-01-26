@@ -44,38 +44,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -270,38 +263,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -415,38 +401,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -560,38 +539,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5,a6,a7);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5,a6,a7);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -705,38 +677,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5,a6);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5,a6);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -850,38 +815,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4,a5);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4,a5);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -995,38 +953,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3,a4);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3,a4);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -1140,38 +1091,31 @@
             */
             inline void send(A1 a1, A2 a2, A3 a3) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2,a3);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2,a3);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -1285,38 +1229,31 @@
             */
             inline void send(A1 a1, A2 a2) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1,a2);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1,a2);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -1430,38 +1367,31 @@
             */
             inline void send(A1 a1) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(a1);
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(a1);
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -1575,38 +1505,31 @@
             */
             inline void send() const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke();
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke();
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
