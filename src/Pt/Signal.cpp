@@ -242,8 +242,10 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
     // will be removed by the Sentry when it destructs.
     Signal::Sentry sentry(this);
 
-    std::pair<RouteMap::iterator, RouteMap::iterator> eqr = _routes.equal_range(0);
-    for(RouteMap::iterator it  = eqr.first; it != eqr.second; ++it) {
+    std::pair<RouteMap::iterator, RouteMap::iterator> eqr0 = _routes.equal_range(0);
+    std::pair<RouteMap::iterator, RouteMap::iterator> eqr1 = _routes.equal_range(&ev.typeInfo());
+
+    for(RouteMap::iterator it  = eqr0.first; it != eqr0.second; ++it) {
         // The following scenarios must be considered when the slot is called:
         // - The slot might get deleted and thus disconnected from this signal
         // - The slot might delete this signal and we must end calling any slots immediately
@@ -254,8 +256,7 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
         if( !sentry ) return;
     }
 
-    eqr = _routes.equal_range(&ev.typeInfo());
-    for(RouteMap::iterator it  = eqr.first; it != eqr.second; ++it) {
+    for(RouteMap::iterator it  = eqr1.first; it != eqr1.second; ++it) {
         IEventRoute* route = it->second;
         if(route->valid()) route->route(ev);
 
