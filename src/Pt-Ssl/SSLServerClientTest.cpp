@@ -105,7 +105,7 @@ class Server : public Pt::Connectable {
             }
 
             std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-            if(_ssl->buffer().in_avail() <= 0) return;
+            //if(_ssl->buffer().in_avail() <= 0) return;
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
@@ -195,7 +195,7 @@ class Client : public Pt::Connectable {
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
-            if(_ssl->buffer().in_avail() <= 0) return;
+            //if(_ssl->buffer().in_avail() <= 0) return;
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
