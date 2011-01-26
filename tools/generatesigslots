@@ -252,7 +252,7 @@ EOF
 ;
 
 ########################################################################
-# BasicSlot<> 
+# BasicSlot<>
 if( $main_inst ) {
 	print "// BEGIN_BasicSlot ${argc}\n";
 
@@ -404,38 +404,31 @@ print << "EOF" # Signal<>:
             */
             inline void send(${arg_type_list_named}) const
             {
-                // The sentry will set the Signal to the sending state and
-                // reset it to not-sending upon destruction. In the sending
-                // state, removing connection will leave invalid connections
-                // in the connection list to keep the iterator valid, but mark
-                // the Signal dirty. If the Signal is dirty, all invalid
-                // connections will be removed by the Sentry when it destructs..
+                if(Connectable::connections().empty()) return;
+
+                // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
+                // In the sending state, removing connection will leave invalid connections in the connection list
+                // to keep the iterator valid, but mark the Signal dirty. If the Signal is dirty, all invalid connections
+                // will be removed by the Sentry when it destructs.
                 SignalBase::Sentry sentry(this);
 
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                std::list<Connection>::const_iterator end = Connectable::connections().end();
-
-                for(; it != end; ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this  )
-                        continue;
-
-                    // The following scenarios must be considered when the
-                    // slot is called:
-                    // - The slot might get deleted and thus disconnected from
-                    //   this signal
-                    // - The slot might delete this signal and we must end
-                    //   calling any slots immediately
-                    // - A new Connection might get added to this Signal in
-                    //   the slot
-                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
-                    invokable->invoke(${arg_params_names});
-
-                    // if this signal gets deleted by the slot, the Sentry
-                    // will be detached. In this case we bail out immediately
-                    if( !sentry )
-                        return;
-                }
+                std::list<Connection>::const_iterator it   = Connectable::connections().begin();
+                std::list<Connection>::const_iterator last = --Connectable::connections().end();
+                while(true) {
+                    // The following scenarios must be considered when the slot is called:
+                    // - The slot might get deleted and thus disconnected from this signal
+                    // - The slot might delete this signal and we must end calling any slots immediately
+                    // - A new Connection might get added to this Signal in the slot
+                    if( it->valid() && ( &(it->sender()) == this ) ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                        invokable->invoke(${arg_params_names});
+                    }
+                    // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
+                    if(!sentry) return;
+                    // Break if this is the last handler
+                    if(it == last) break;
+                    ++it;
+                };
             }
 
             /** Same as send(...). */
@@ -786,7 +779,7 @@ print << "EOF"
         R operator()(${arg_type_list_named}) const
         { return (_object->*_method)(${arg_params_names}); }
 
-        /** Creates a copy of this object and returns it.  Caller owns the returned object. */ 
+        /** Creates a copy of this object and returns it.  Caller owns the returned object. */
         ConstMethod<R, ClassT${comma_arg_tmpl_types}>* clone() const
         { return new ConstMethod(*this); }
 
@@ -839,7 +832,7 @@ class ConstMethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
             return connectable.opened(c);
         }
 
-        virtual void closed(const Connection& c) 
+        virtual void closed(const Connection& c)
         {
             Connectable& connectable = _method.object();
             connectable.closed(c);
@@ -998,7 +991,7 @@ class MethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
             return connectable.opened(c);
         }
 
-        virtual void closed(const Connection& c) 
+        virtual void closed(const Connection& c)
         {
             Connectable& connectable = _method.object();
             connectable.closed(c);
