@@ -30,7 +30,7 @@
 #include <Pt/SourceInfo.h>
 #include <iostream>
 
-#include "SSLStreamBuf.h"
+#include <Pt/Ssl/SSLStreamBuf.h>
 
 namespace Pt {
 namespace Ssl {

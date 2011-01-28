@@ -28,7 +28,7 @@
  */
 
 #include <Pt/SourceInfo.h>
-#include "SSLServer.h"
+#include <Pt/Ssl/SSLServer.h>
 
 namespace Pt {
 namespace Ssl {

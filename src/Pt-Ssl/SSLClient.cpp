@@ -28,7 +28,7 @@
  */
 
 #include <Pt/SourceInfo.h>
-#include "SSLClient.h"
+#include <Pt/Ssl/SSLClient.h>
 
 namespace Pt {
 namespace Ssl {

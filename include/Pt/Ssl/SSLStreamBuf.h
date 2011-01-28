@@ -33,7 +33,7 @@
 #include <Pt/Signal.h>
 #include <Pt/System/StreamBuffer.h>
 
-#include "SSLContext.h"
+#include <Pt/Ssl/SSLContext.h>
 
 namespace Pt {
 namespace Ssl {

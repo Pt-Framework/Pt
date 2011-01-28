@@ -1,0 +1,56 @@
+SubDir TOP src Pt-Ssl ;
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
+SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
+
+SharedLibrary Pt-Ssl : SSLContext.cpp
+                       SSLConnector2.cpp
+                       SSLConnector2Server.cpp
+                       SSLConnector2Client.cpp
+                       SSLStreamBuffer.cpp
+                       SSLStreamBufferServer.cpp
+                       SSLStreamBufferClient.cpp
+                       SSLStreamBuf.cpp
+                       SSLServer.cpp
+                       SSLClient.cpp
+                       ;
+
+SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
+SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
+SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+
+Main SSLConnectorTest : SSLConnectorTest.cpp ;
+LinkSharedLibraries SSLConnectorTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLConnectorTest : $(OUTPUT_TARGET) ;
+
+Main SSLStreamBufferTest : SSLStreamBufferTest.cpp ;
+LinkSharedLibraries SSLStreamBufferTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPTest : SSLHTTPTest.cpp ;
+LinkSharedLibraries SSLHTTPTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPTest : $(OUTPUT_TARGET) ;
+
+Main SSLServerClientTest : SSLServerClientTest.cpp ;
+LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLServerClientTest : $(OUTPUT_TARGET) ;
+
+if $(TARGET_OS) = "nt"
+{
+    if $(MINGW) || $(TOOLSET) = "gcc"
+    {
+        LINKLIBS on $(PRELIB)Pt-Ssl$(SUFDLL) += -luser32 -lgdi32 -ladvapi32 -lws2_32 ;
+    }
+    else
+    {
+        LINKLIBS on $(PRELIB)Pt-Ssl$(SUFDLL) += user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+    }
+}
+
+File [ FDirName $(OUTPUT_TARGET) root.pem   ] : root.pem   ;
+File [ FDirName $(OUTPUT_TARGET) client.pem ] : client.pem ;
+File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
+File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
+
+SubInclude TOP src Pt-Ssl openssl ;
+

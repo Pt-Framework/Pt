@@ -34,12 +34,13 @@
 
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
+
+#include <Pt/Ssl/SSLServer.h>
+#include <Pt/Ssl/SSLClient.h>
+
 #include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
-
-#include "SSLServer.h"
-#include "SSLClient.h"
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define SSL_CALL_INFO_CLIENT Pt::Ssl::SSLStreamBuf::_call_info("@@ Client @@", PT_FUNCTION)
