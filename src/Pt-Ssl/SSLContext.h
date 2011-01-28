@@ -46,8 +46,6 @@ class PT_SSL_API SSLContext {
         //! \brief Standard dtor.
         ~SSLContext();
 
-        friend class SSLConnector2;
-        friend class SSLStreamBuffer;
         friend class SSLStreamBuf;
 
     private:

@@ -4,12 +4,6 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
 SharedLibrary Pt-Ssl : SSLContext.cpp
-                       SSLConnector2.cpp
-                       SSLConnector2Server.cpp
-                       SSLConnector2Client.cpp
-                       SSLStreamBuffer.cpp
-                       SSLStreamBufferServer.cpp
-                       SSLStreamBufferClient.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
@@ -18,18 +12,6 @@ SharedLibrary Pt-Ssl : SSLContext.cpp
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
-
-Main SSLConnectorTest : SSLConnectorTest.cpp ;
-LinkSharedLibraries SSLConnectorTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLConnectorTest : $(OUTPUT_TARGET) ;
-
-Main SSLStreamBufferTest : SSLStreamBufferTest.cpp ;
-LinkSharedLibraries SSLStreamBufferTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
-
-Main SSLHTTPTest : SSLHTTPTest.cpp ;
-LinkSharedLibraries SSLHTTPTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPTest : $(OUTPUT_TARGET) ;
 
 Main SSLServerClientTest : SSLServerClientTest.cpp ;
 LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
