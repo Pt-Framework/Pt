@@ -349,7 +349,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
         this->setg( _ibuffer + (_pbmax - putback), // start of get area
                     _ibuffer + _pbmax,             // gptr position
-                    _ibuffer + used + readSize );  // end of get area
+                    _ibuffer + used + readSize ); // end of get area
 
         // Accumulate the size
         totSize += readSize;
