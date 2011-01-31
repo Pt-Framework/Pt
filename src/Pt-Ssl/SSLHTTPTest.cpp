@@ -111,6 +111,7 @@ class Client : public Pt::Connectable {
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
                 }
+                if(!ret) break;
 
                 std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
                 std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;

@@ -311,20 +311,11 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         return 0;
     }
 
-    size_t putback = _pbmax;
+    size_t putback  = _pbmax;
     size_t leftover = 0;
 
-    // Move unread bytes and putback to front
-    if( this->gptr() )
-    {
-        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
-        char* to = _ibuffer + _pbmax - putback;
-        char* from = this->gptr() - putback;
-
-        leftover = this->egptr() - this->gptr();
-        std::memmove( to, from, putback + leftover );
-    }
-
+    // NOTE: This part works partially with HTTPS
+#if 1
     // Perform encoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
@@ -332,12 +323,26 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
     int totSize = 0;
     while(true) {
-        // Fill in the _in BIO
-        if(bm->max <= bm->length) break;
-        const size_t refill = std::min<size_t>(bm->max - bm->length, size);
-        std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
-        _ios->read(bm->data + bm->length, refill);
-        bm->length += _ios->gcount();
+        // Refill the BIO with encoded bytes for decoding
+        std::cerr << SSL_CALL_INFO << "Before = bm->max : " << bm->max << ", bm->length : " << bm->length << std::endl;
+        if(bm->max > bm->length) {
+            const size_t refill = std::min<size_t>(bm->max - bm->length, size);
+            std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
+            _ios->read(bm->data + bm->length, refill);
+            bm->length += _ios->gcount();
+        }
+        else
+            break;
+
+        // Move unread bytes and putback to front
+        if(this->gptr()) {
+            putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+            char* to = _ibuffer + _pbmax - putback;
+            char* from = this->gptr() - putback;
+
+            leftover = this->egptr() - this->gptr();
+            std::memmove( to, from, putback + leftover );
+        }
 
         // Check if we still have space in our streambuffer
         ssize_t used = _pbmax + leftover;
@@ -349,7 +354,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
         this->setg( _ibuffer + (_pbmax - putback), // start of get area
                     _ibuffer + _pbmax,             // gptr position
-                    _ibuffer + used + readSize ); // end of get area
+                    _ibuffer + used + readSize );  // end of get area
+        std::cerr << SSL_CALL_INFO << "After = bm->max : " << bm->max << ", bm->length : " << bm->length << std::endl;
 
         // Accumulate the size
         totSize += readSize;
@@ -357,7 +363,19 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
     return totSize;
 
-    /*
+    // NOTE: This part works partially with our SSLServerClientTest.cpp
+#else
+    // Move unread bytes and putback to front
+    if( this->gptr() )
+    {
+        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+        char* to = _ibuffer + _pbmax - putback;
+        char* from = this->gptr() - putback;
+
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
+    }
+
     // Refill the BIO with encoded bytes for decoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
@@ -374,15 +392,15 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     // We do not need to read all bytes from _ssl, but only make some progress
     size_t used = _pbmax + leftover;
     size_t avail = _ibufferSize - used;
-    int readSize = SSL_read(_ssl, _ibuffer + used, _ibufferSize - used);
+    int readSize = SSL_read(_ssl, _ibuffer + used, avail);
     std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
 
     this->setg( _ibuffer + (_pbmax - putback), // start of get area
-                _ibuffer + _pbmax, // gptr position
-                _ibuffer + used + readSize ); // end of get area
+                _ibuffer + _pbmax,             // gptr position
+                _ibuffer + used + readSize );  // end of get area
 
     return readSize;
-    */
+#endif
 }
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
