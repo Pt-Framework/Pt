@@ -29,9 +29,21 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Atomicity.h"
+#include "Pt/System/Thread.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+
+volatile Pt::atomic_t at(50);
+
+void AtomicUpDown()
+{
+    for(unsigned n = 0; n < 500 ; ++n)
+    {
+        Pt::atomicIncrement(at);
+        Pt::atomicDecrement(at);
+    }
+}
 
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
@@ -39,12 +51,43 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         AtomicTestSuite()
         : Pt::Unit::TestSuite("AtomicityTest")
         {
+            //Pt::Unit::TestSuite::registerMethod( "TestMT", *this, &AtomicTestSuite::TestMT );
             Pt::Unit::TestSuite::registerMethod( "GetSet", *this, &AtomicTestSuite::GetSet );
             Pt::Unit::TestSuite::registerMethod( "Integer", *this, &AtomicTestSuite::Integer );
             Pt::Unit::TestSuite::registerMethod( "Pointer", *this, &AtomicTestSuite::Pointer );
         }
 
     protected:
+
+        void TestMT()
+        {
+            for(unsigned n = 0; n < 50 ; ++n)
+            {
+                Pt::System::AttachedThread th1( Pt::callable(AtomicUpDown) );
+                Pt::System::AttachedThread th2( Pt::callable(AtomicUpDown) );
+                Pt::System::AttachedThread th3( Pt::callable(AtomicUpDown) );
+                Pt::System::AttachedThread th4( Pt::callable(AtomicUpDown) );
+
+                atomicSet(at, 50);
+                std::cerr << "\nstarting threads" << std::endl; 
+
+                th1.start();
+                th2.start();
+                th3.start();
+                th4.start();
+
+
+                th1.join();
+                th2.join();
+                th3.join();
+                th4.join();
+
+                std::cerr << "=> atomic count: " << atomicGet(at) << std::endl;
+            }
+
+            std::cerr << "finished." << std::endl;
+        }
+
         void GetSet()
         {
             volatile Pt::atomic_t my_value(0);
