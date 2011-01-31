@@ -325,6 +325,39 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::memmove( to, from, putback + leftover );
     }
 
+    // Perform encoding
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_in, &bm);
+    std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+
+    int totSize = 0;
+    while(true) {
+        // Fill in the _in BIO
+        if(bm->max <= bm->length) break;
+        const size_t refill = std::min<size_t>(bm->max - bm->length, size);
+        std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
+        _ios->read(bm->data + bm->length, refill);
+        bm->length += _ios->gcount();
+
+        // Check if we still have space in our streambuffer
+        ssize_t used = _pbmax + leftover;
+        ssize_t avail = _ibufferSize - used;
+        if(avail <= 0) break;
+
+        // Read from SSL and put the decoded data to our streambuffer
+        int readSize = SSL_read(_ssl, _ibuffer + used, _ibufferSize - used);
+        std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
+        this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                    _ibuffer + _pbmax,             // gptr position
+                    _ibuffer + used + readSize );  // end of get area
+
+        // Accumulate the size
+        totSize += readSize;
+    }
+
+    return totSize;
+
+    /*
     // Refill the BIO with encoded bytes for decoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
@@ -349,6 +382,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
                 _ibuffer + used + readSize ); // end of get area
 
     return readSize;
+    */
 }
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)

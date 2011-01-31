@@ -51,7 +51,7 @@
 class Server : public Pt::Connectable {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
-        : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0), _msgCnt(0)
+        : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0)
         {
             std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
 
@@ -136,7 +136,6 @@ class Server : public Pt::Connectable {
         Pt::System::EventLoop&  _loop;
         Pt::Net::TcpServer      _server;
         Pt::Net::TcpSocket*     _client;
-        int                     _msgCnt;
 };
 
 class Client : public Pt::Connectable {
@@ -188,7 +187,7 @@ class Client : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
             if(_ssl->buffer().import() == -1) {
-                std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                 _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                 return;
@@ -240,8 +239,6 @@ class Client : public Pt::Connectable {
         Pt::Net::TcpSocket     _socket;
         int                    _msgCnt;
 };
-
-
 
 int main(int argc, char** argv)
 {
