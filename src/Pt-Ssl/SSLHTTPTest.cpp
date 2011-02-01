@@ -99,29 +99,37 @@ class Client : public Pt::Connectable {
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << sb.in_avail() << std::endl;
-            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
             std::string cumResult;
-            while(true) {
-                const ssize_t ret = _ssl->buffer().import();
-                if(ret == -1) {
+
+            size_t in_avail = sb.in_avail();
+            while(in_avail > 0) {
+                std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << in_avail << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+
+                const ssize_t import_result = _ssl->buffer().import();
+                if(import_result == -1) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
                 }
-                if(!ret) break;
 
-                std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                while(_ssl->buffer().in_avail()) {
+                    std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+                    std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
-                char buf[512];
-                unsigned n =_ssl->readsome(buf, 512);
-                if(n <= 0) break;
-                std::cerr << SSL_CALL_INFO_CLIENT << "readsome = " << n << std::endl;
+                    char buf[512];
+                    unsigned n =_ssl->readsome(buf, 512);
+                    if(n <= 0) break;
+                    std::cerr << SSL_CALL_INFO_CLIENT << "readsome = " << n << std::endl;
 
-                cumResult += std::string(buf, n);
+                    cumResult += std::string(buf, n);
+                }
+
+                in_avail = sb.in_avail();
+
+                if(!import_result) break;
             }
 
             std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED:" << std::endl << cumResult << std::endl;
@@ -154,7 +162,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam started" << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL HTTP test progam started" << std::endl;
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -168,7 +176,7 @@ int main(int argc, char** argv)
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam ended" << std::endl;
+        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL HTTP test progam ended" << std::endl;
         return 0;
     }
     catch(const std::exception& ex)

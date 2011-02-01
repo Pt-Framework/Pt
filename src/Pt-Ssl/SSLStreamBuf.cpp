@@ -315,7 +315,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     size_t leftover = 0;
 
     // NOTE: This part works partially with HTTPS
-#if 1
+#if 0
     // Perform encoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
