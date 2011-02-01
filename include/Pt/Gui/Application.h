@@ -30,6 +30,7 @@
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Connectable.h>
+#include <Pt/Application.h>
 #include <Pt/Event.h>
 #include <Pt/Signal.h>
 
@@ -56,7 +57,7 @@ namespace Gui {
      * Events can be committed by calling commitEvent(). Long running operations
      * can call processEvents() to keep the application responsive.
      */
-    class PT_GUI_API Application : public Pt::Connectable
+    class PT_GUI_API Application : public Pt::Application
     {
         private:
             //! Pointer to the implementation of Application.
@@ -69,10 +70,12 @@ namespace Gui {
              * Creates the platform specific Application object and stores it in _impl.
              * Connects the event signal to dispatchEvent().
              */
-            Application();
+            Application(int argc = 0, char** argv = 0);
 
             //! @brief Deletes the platform specific Application object.
             ~Application();
+
+            static Application& instance();
 
             //! @brief Returns a reference to the platform specific Application object.
             ApplicationImpl& impl();

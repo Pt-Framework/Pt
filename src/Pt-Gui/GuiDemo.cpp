@@ -50,7 +50,7 @@ using namespace Pt;
 using namespace Pt::Gui;
 using namespace Pt::Gfx;
 
-class MyApplication : public Application {
+class MyApplication : public Pt::Gui::Application {
     public:
         MyApplication(ProgressBar& pbar)
         : _pbar(pbar)

@@ -39,14 +39,26 @@
 #include "Pt/Gui/KeyEvent.h"
 #include "Pt/Gui/Widget.h"
 
+namespace {
+
+Pt::Gui::Application*& getGuiAppPtr()
+{
+	static Pt::Gui::Application* _app = 0;
+	return _app;
+}
+
+}
 
 namespace Pt {
 
 namespace Gui {
 
-
-Application::Application()
+Application::Application(int argc, char** argv)
+: Pt::Application(argc, argv)
 {
+    // base class already throws if constructed twice
+    ::getGuiAppPtr() = this;
+
     _impl = new ApplicationImpl(*this);
     connect(event, *this, &Application::dispatchEvent);
 }
@@ -55,6 +67,16 @@ Application::Application()
 Application::~Application()
 {
     delete _impl;
+}
+
+
+Application& Application::instance()
+{
+    Application* app = ::getGuiAppPtr();
+    if( ! app )
+        throw std::logic_error("application not initialized");
+
+    return *app;
 }
 
 
