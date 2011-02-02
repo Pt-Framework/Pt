@@ -16,7 +16,7 @@
 				CaptureOutputWith="ProcessBuffer"
 				SaveOption="SaveWorkspaceFiles"
 				RunFromDir="%wp">
-				<Exec CmdLine="$JAMCMD -q -sCONFIG=debug"/>
+				<Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
 			</Target>
 			<Target
 				Name="Clean"
