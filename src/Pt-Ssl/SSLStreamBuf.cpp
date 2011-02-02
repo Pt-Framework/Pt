@@ -371,7 +371,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         // Refill the BIO with encoded bytes for decoding
         BUF_MEM* bm = 0;
         BIO_get_mem_ptr(_in, &bm);
-        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+        std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max << std::endl;
 
         if(bm->max > bm->length)
         {
@@ -380,6 +380,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
             _ios->readsome(bm->data + bm->length, refill);
             std::cerr << SSL_CALL_INFO << "gcount() = " << _ios->gcount() << std::endl;
             bm->length += _ios->gcount();
+            std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max << std::endl;
         }
 
         // Move unread bytes and putback to front
@@ -400,6 +401,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
         int readSize = SSL_read(_ssl, _ibuffer + used, avail);
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
+        std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max << std::endl;
 
         int sslerr = SSL_get_error(_ssl, readSize);
         std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
@@ -409,7 +411,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
             BUF_MEM* bmw = 0;
             BIO_get_mem_ptr(_out, &bmw);
-            std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bmw->length << " of " << bmw->max << std::endl;
+            std::cerr << SSL_CALL_INFO << "BUF_MEM (_out), used " << bmw->length << " of " << bmw->max << std::endl;
             //if(bmw->length > 0) {
             //    _ios->write(bmw->data, bmw->length);
             //    bmw->length = 0;
