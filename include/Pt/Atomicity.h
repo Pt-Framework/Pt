@@ -32,54 +32,6 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 
-#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
-    #define PT_ATOMICITY_WINDOWS
-
-#elif defined(__sun)
-    #define PT_ATOMICITY_SUN
-
-#elif defined(__GNUC__) || defined(__xlC__) || \
-      defined(__SUNPRO_CC) || defined(__SUNPRO_C)
-
-    #if defined (i386) || defined(__i386) || defined (__i386__) || \
-        defined(_X86_) || defined(sun386) || defined (_M_IX86)
-        #define PT_ATOMICITY_GCC_X86
-
-    #elif defined(__x86_64__) || defined(__amd64__)
-        #define PT_ATOMICITY_GCC_X86_64
-
-    #elif defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
-        #define PT_ATOMICITY_GCC_ARM
-
-    #elif defined (AVR) || defined(__AVR__)
-        #define PT_ATOMICITY_GCC_AVR32
-
-    #elif defined( _M_PPC  ) || defined( PPC         ) || \
-          defined( ppc     ) || defined( __powerpc__ ) || \
-          defined( __ppc__ )
-        #define PT_ATOMICITY_GCC_PPC
-
-    #elif defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
-          defined(MIPSEL) || defined(_MIPSEL)
-        #define PT_ATOMICITY_GCC_MIPS
-
-    #elif defined(__sparc__) || defined(sparc) || defined(__sparc) || \
-          defined(__sparcv8) || defined(__sparcv9)
-        #define PT_ATOMICITY_GCC_SPARC
-
-    #else
-        #define PT_ATOMICITY_PTHREAD
-
-    #endif
-
-#elif defined(__SYMBIAN32__)
-    #define PT_ATOMICITY_SYMBIAN
-
-#else
-    #define PT_ATOMICITY_PTHREAD
-
-#endif
-
 namespace Pt {
 
 /** @brief Atomic integers to be used with atomicity functions.
