@@ -363,43 +363,73 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 
     return totSize;
 
-    // NOTE: This part works partially with our SSLServerClientTest.cpp
+    // NOTE: This part works with our SSLServerClientTest.cpp
 #else
-    // Move unread bytes and putback to front
-    if( this->gptr() )
-    {
-        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
-        char* to = _ibuffer + _pbmax - putback;
-        char* from = this->gptr() - putback;
+    size_t cumSize = 0;
 
-        leftover = this->egptr() - this->gptr();
-        std::memmove( to, from, putback + leftover );
+    while(_ios->rdbuf()->in_avail() > 0) {
+        // Refill the BIO with encoded bytes for decoding
+        BUF_MEM* bm = 0;
+        BIO_get_mem_ptr(_in, &bm);
+        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+
+        if(bm->max > bm->length)
+        {
+            const size_t refill = std::min<size_t>(bm->max - bm->length, size);
+            std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
+            _ios->readsome(bm->data + bm->length, refill);
+            std::cerr << SSL_CALL_INFO << "gcount() = " << _ios->gcount() << std::endl;
+            bm->length += _ios->gcount();
+        }
+
+        // Move unread bytes and putback to front
+        if( this->gptr() )
+        {
+            putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+            char* to = _ibuffer + _pbmax - putback;
+            char* from = this->gptr() - putback;
+
+            leftover = this->egptr() - this->gptr();
+            std::memmove( to, from, putback + leftover );
+        }
+
+        // We do not need to read all bytes from _ssl, but only make some progress
+        size_t used = _pbmax + leftover;
+        size_t avail = _ibufferSize - used;
+        if(!avail) break;
+
+        int readSize = SSL_read(_ssl, _ibuffer + used, avail);
+        std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
+
+        int sslerr = SSL_get_error(_ssl, readSize);
+        std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
+
+        if( sslerr == SSL_ERROR_WANT_READ ) {
+            std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
+
+            BUF_MEM* bmw = 0;
+            BIO_get_mem_ptr(_out, &bmw);
+            std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bmw->length << " of " << bmw->max << std::endl;
+            //if(bmw->length > 0) {
+            //    _ios->write(bmw->data, bmw->length);
+            //    bmw->length = 0;
+            //}
+        }
+        else if ( sslerr == SSL_ERROR_WANT_WRITE) {
+            std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
+        }
+
+        this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                    _ibuffer + _pbmax,             // gptr position
+                    _ibuffer + used + readSize );  // end of get area
+
+        cumSize += readSize;
+
+        if(bm->max > bm->length) break;
     }
 
-    // Refill the BIO with encoded bytes for decoding
-    BUF_MEM* bm = 0;
-    BIO_get_mem_ptr(_in, &bm);
-    std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+    return cumSize;
 
-    if(bm->max > bm->length)
-    {
-        const size_t refill = std::min<size_t>(bm->max - bm->length, size);
-        std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
-        _ios->read(bm->data + bm->length, refill);
-        bm->length += _ios->gcount();
-    }
-
-    // We do not need to read all bytes from _ssl, but only make some progress
-    size_t used = _pbmax + leftover;
-    size_t avail = _ibufferSize - used;
-    int readSize = SSL_read(_ssl, _ibuffer + used, avail);
-    std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
-
-    this->setg( _ibuffer + (_pbmax - putback), // start of get area
-                _ibuffer + _pbmax,             // gptr position
-                _ibuffer + used + readSize );  // end of get area
-
-    return readSize;
 #endif
 }
 
