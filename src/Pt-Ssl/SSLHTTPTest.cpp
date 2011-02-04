@@ -148,6 +148,8 @@ class Client : public Pt::Connectable {
             //_ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
             //_ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
             //_ssl->buffer().shutdown();
+
+            // sb.beginRead();// NOTE: This would cause infinite loop
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
