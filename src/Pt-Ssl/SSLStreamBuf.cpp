@@ -208,7 +208,7 @@ std::streamsize SSLStreamBuf::import()
 
             std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
 
-            cum += (got > 0) ? got : 0;
+            if(got > 0) cum += got;
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
@@ -217,6 +217,8 @@ std::streamsize SSLStreamBuf::import()
                 this->shutdown();
                 return -1;
             }
+
+            if(got <= 0) break;
         }
 
         return cum;
@@ -385,21 +387,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
                 throw std::runtime_error("SSL_read failed");
         }
     }
-/*
-    while(_ios->rdbuf()->in_avail() > 0) {
 
-
-
-        if( sslerr == SSL_ERROR_WANT_READ ) {
-            std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
-
-            //if(bmw->length > 0) {
-            //    _ios->write(bmw->data, bmw->length);
-            //    bmw->length = 0;
-            //}
-        }
-    }
-    */
+    return 0;
 }
 
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
