@@ -105,9 +105,14 @@ class Client : public Pt::Connectable {
             size_t in_avail = sb.in_avail();
             while(in_avail > 0) {
                 std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << in_avail << std::endl;
-                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
+                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
                 const ssize_t import_result = _ssl->buffer().import();
+                // if(import_result == 0) { MARC: SSL drained sb, but could not decode yet, read again
+                //     sb.beginRead();
+                //     return;
+                // }
                 if(import_result == -1) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
@@ -117,7 +122,8 @@ class Client : public Pt::Connectable {
 
                 while(_ssl->buffer().in_avail()) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-                    std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                    std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
+                              << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
                     char buf[512];
                     unsigned n =_ssl->readsome(buf, 512);
