@@ -109,16 +109,20 @@ class Client : public Pt::Connectable {
                           << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
                 const ssize_t import_result = _ssl->buffer().import();
-                // if(import_result == 0) { MARC: SSL drained sb, but could not decode yet, read again
-                //     sb.beginRead();
-                //     return;
-                // }
+                std::cerr << SSL_CALL_INFO_CLIENT << "import_result = " << import_result << std::endl;
+
                 if(import_result == -1) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
                 }
+                else if(import_result == 0) {
+                    std::cerr << SSL_CALL_INFO_CLIENT << "Not enough data; trying to request for more ..." << std::endl;
+                    sb.beginRead();
+                    return;
+                }
+                std::cerr << SSL_CALL_INFO_CLIENT << "################################################################################" << std::endl;
 
                 while(_ssl->buffer().in_avail()) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
@@ -144,8 +148,6 @@ class Client : public Pt::Connectable {
             //_ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
             //_ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
             //_ssl->buffer().shutdown();
-
-            //_ios.buffer().beginRead();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
@@ -178,7 +180,7 @@ int main(int argc, char** argv)
 
         Client client(loop, addr, port, clientContext);
 
-        loop.setIdleTimeout(2000);
+        loop.setIdleTimeout(5000);
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
