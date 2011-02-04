@@ -59,6 +59,8 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     BIO_set_nbio(_in, 1);
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
+
+    // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
     // Set session ID
@@ -87,13 +89,20 @@ const std::string SSLStreamBuf::getPeerCN() const
     return (ret > 0) ? peerCN : "";
 }
 
-void SSLStreamBuf::beginServerHandshake()
+void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
+    if(verifyClientCert) {
+        if(requireCertBasedAuth) SSL_set_verify(_ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+        else                     SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
+    }
+
     SSL_set_accept_state(_ssl);
 }
 
-void SSLStreamBuf::beginClientHandshake()
+void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 {
+    if(verifyServerCert) SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
+
     SSL_set_connect_state(_ssl);
     this->writeHandshake();
 }
@@ -187,24 +196,30 @@ std::streamsize SSLStreamBuf::import()
 
     if(_ios)
     {
-        const std::streamsize avail = _ios->rdbuf()->in_avail();
-        std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
+        ssize_t cum = 0;
 
-        const std::streamsize got = do_underflow(avail);
-        std::cerr << SSL_CALL_INFO << "do_underflow = " << got << std::endl;
-        std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
+        while(_ios->rdbuf()->in_avail()) {
+            const std::streamsize avail = _ios->rdbuf()->in_avail();
+            std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
 
-        std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+            const std::streamsize got = do_underflow(avail);
+            std::cerr << SSL_CALL_INFO << "do_underflow = " << got << std::endl;
+            std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
 
-        // Shutdown?
-        const int shutdownState = SSL_get_shutdown(_ssl);
-        if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
-            std::cerr << SSL_CALL_INFO << "Received shutdown" << std::endl;
-            this->shutdown();
-            return -1;
+            std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+
+            cum += (got > 0) ? got : 0;
+
+            // Shutdown?
+            const int shutdownState = SSL_get_shutdown(_ssl);
+            if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
+                std::cerr << SSL_CALL_INFO << "Received shutdown" << std::endl;
+                this->shutdown();
+                return -1;
+            }
         }
 
-        return (got > 0) ? got : 0;
+        return cum;
     }
 
     std::cerr << SSL_CALL_INFO << "in_avail (on exit; no valid _ios) = " << this->in_avail() << std::endl;
@@ -278,27 +293,20 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 
 std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
 {
-    if( ! _ios )
-        return 0;
-
+    if(!_ios) return 0;
     std::cerr << SSL_CALL_INFO << "size = " << size << std::endl;
 
-    if( ! _ibuffer )
-    {
+    if(!_ibuffer) {
         std::cerr << SSL_CALL_INFO << "Allocating ibuffer " << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
 
     // Return 0 if full
-    if( _ibuffer + _ibufferSize == this->egptr() )
-    {
-        return 0;
-    }
-
-    size_t putback  = _pbmax;
-    size_t leftover = 0;
+    if(_ibuffer + _ibufferSize == this->egptr()) return 0;
 
     // Move unread bytes and putback to front
+    size_t putback  = _pbmax;
+    size_t leftover = 0;
     if(this->gptr()) {
         putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
         char* to = _ibuffer + _pbmax - putback;
@@ -346,26 +354,33 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
                             _ibuffer + used + readSize );  // end of get area
                 return readSize;
 
+            // This error may indicate that the other peer wants re-handshaking
+            case SSL_ERROR_WANT_READ:
+                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
+                if(true) {
+                    BUF_MEM* bmw = 0;
+                    BIO_get_mem_ptr(_out, &bmw);
+                    std::cerr << SSL_CALL_INFO << "BUF_MEM (_out), used " << bmw->length << " of " << bmw->max << std::endl;
+                }
+                return 0;
+
+            // This error should never happen in our case
+            case SSL_ERROR_WANT_WRITE:
+                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
+                return 0;
+
             // This error may indicate that the other peer has send shutdown message
             case SSL_ERROR_ZERO_RETURN:
                 std::cerr << SSL_CALL_INFO << "SSL_ERROR_ZERO_RETURN" << std::endl;
                 return 0;
 
             // This error may indicate that the other peer has somehow disconnected the stream
+            // TODO: Perhaps we should throw an exception here?
             case SSL_ERROR_SYSCALL:
                 std::cerr << SSL_CALL_INFO << "SSL_ERROR_SYSCALL" << std::endl;
-
-                return 0;
-            // This error should never happen in our case
-            case SSL_ERROR_WANT_WRITE:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
                 return 0;
 
-            // This error may indicate that the other peer wants re-handshaking
-            case SSL_ERROR_WANT_READ:
-                return 0;
-
-            // Opps - we got a big problem here
+            // Opps - we got a big problem here :(
             default:
                 throw std::runtime_error("SSL_read failed");
         }
@@ -378,9 +393,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         if( sslerr == SSL_ERROR_WANT_READ ) {
             std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
 
-            BUF_MEM* bmw = 0;
-            BIO_get_mem_ptr(_out, &bmw);
-            std::cerr << SSL_CALL_INFO << "BUF_MEM (_out), used " << bmw->length << " of " << bmw->max << std::endl;
             //if(bmw->length > 0) {
             //    _ios->write(bmw->data, bmw->length);
             //    bmw->length = 0;

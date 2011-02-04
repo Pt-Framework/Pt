@@ -46,9 +46,9 @@ SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
 SSLServer::~SSLServer()
 {}
 
-void SSLServer::beginHandshake()
+void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
-    _sslbuf.beginServerHandshake();
+    _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
     std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;

@@ -63,13 +63,13 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
             After this method has been called, the first handshake message
             can be read from the client.
         */
-        void beginServerHandshake();
+        void beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Starts the client handshake
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void beginClientHandshake();
+        void beginClientHandshake(bool verifyServerCert);
 
         /** @brief Writes a handshake message to the underlying stream
             Returns true if at least a part of the handshake message was

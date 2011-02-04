@@ -46,9 +46,9 @@ SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
 SSLClient::~SSLClient()
 {}
 
-void SSLClient::beginHandshake()
+void SSLClient::beginHandshake(bool verifyServerCert)
 {
-    _sslbuf.beginClientHandshake();
+    _sslbuf.beginClientHandshake(verifyServerCert);
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
     std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;

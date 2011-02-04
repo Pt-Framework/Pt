@@ -79,7 +79,7 @@ class Server : public Pt::Connectable {
 
             std::cerr << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
             _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
-            _ssl->beginHandshake();
+            _ssl->beginHandshake(true, true);
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
         }
 
@@ -161,7 +161,7 @@ class Client : public Pt::Connectable {
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
-            _ssl->beginHandshake();
+            _ssl->beginHandshake(true);
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
         }
 

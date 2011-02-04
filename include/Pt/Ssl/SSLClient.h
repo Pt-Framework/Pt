@@ -61,7 +61,7 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void beginHandshake();
+        void beginHandshake(bool verifyServerCert);
 
         /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLClient&> handshakeFinished;
