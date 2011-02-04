@@ -27,32 +27,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/SourceInfo.h>
 #include <iostream>
 
+#include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLStreamBuf.h>
 
 namespace Pt {
 namespace Ssl {
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO SSLStreamBuf::_call_info("SSLStreamBuf", PT_FUNCTION)
-const std::string SSLStreamBuf::_call_info(const char* className, const std::string& funcName)
-{
-    static int count = 0;
-
-    size_t      a = funcName.find_first_of("(");
-    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
-    a = f.find_last_of("::");
-    if(a != std::string::npos) f = f.substr(a + 1);
-    a = f.find_last_of(" ");
-    if(a != std::string::npos) f = f.substr(a + 1);
-
-    char buff[1024];
-    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
-
-    return buff;
-}
+#define SSL_CALL_INFO SSLContext::_call_info("SSLStreamBuf", PT_FUNCTION)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)

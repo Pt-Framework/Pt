@@ -26,10 +26,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <iostream>
+
+#include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLContext.h>
 
 namespace Pt {
 namespace Ssl {
+
+///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define SSL_CALL_INFO SSLContext::_call_info("SSLContext  ", PT_FUNCTION)
+const std::string SSLContext::_call_info(const char* className, const std::string& funcName)
+{
+    static int count = 0;
+
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
+    a = f.find_last_of(" ");
+    if(a != std::string::npos) f = f.substr(a + 1);
+
+    char buff[1024];
+    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
+
+    return buff;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BIO* SSLContext::_bioErr = 0;
 
@@ -46,7 +69,7 @@ int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* use
     return sslCtx._pswd.length();
 }
 
-SSLContext::SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID)
+SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID)
 : _pswd(password ? password : "")
 {
     // Only need to perform these once for every application
@@ -59,18 +82,25 @@ SSLContext::SSLContext(const char* caFile, const char* keyFile, const char* pass
     // Create a new SSL context that supports SSL version 2  and 3
     _ctx = SSL_CTX_new(SSLv23_method());
 
-    // If a certificate-key file is available, load it
+    // Load the certificate chain file (if available)
+    if(certFile) {
+        std::cerr << SSL_CALL_INFO << "Loading certificate chain file = " << certFile << std::endl;
+        if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile)) throw "Could not read certificate file!";
+    }
+
+    // Load the private key  file (if available)
     if(keyFile) {
-        // Load the certificate chain
-        if(!SSL_CTX_use_certificate_chain_file(_ctx, keyFile)) throw "Could not read certificate file!";
-        // Load the private key
+        std::cerr << SSL_CALL_INFO << "Loading private key file = " << keyFile << std::endl;
         SSL_CTX_set_default_passwd_cb(_ctx, _passwordCallback);
         SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
         if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM)) throw "Could not read key file!";
     }
 
-    // Load and verify CA list (if given)
-    if(caFile && !SSL_CTX_load_verify_locations(_ctx, caFile, 0)) throw "Could not read/verify CA list!";
+    // Load and verify CA list (if available)
+    if(caCertFile) {
+        std::cerr << SSL_CALL_INFO << "Loading CA certificate list file = " << caCertFile << std::endl;
+        if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0)) throw "Could not read/verify CA list!";
+    }
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx,1);
 #endif

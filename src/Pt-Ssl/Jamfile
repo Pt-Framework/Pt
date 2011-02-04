@@ -33,10 +33,16 @@ if $(TARGET_OS) = "nt"
     }
 }
 
-File [ FDirName $(OUTPUT_TARGET) root.pem   ] : root.pem   ;
-File [ FDirName $(OUTPUT_TARGET) client.pem ] : client.pem ;
-File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
-File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
+# openssl x509 -in ca.cer     -outform PEM -out ca.pem
+# openssl x509 -in server.cer -outform PEM -out server.pem
+# openssl x509 -in client.cer -outform PEM -out client.pem
+
+# openssl pkcs12 -in pkcs-12-certificate-and-key-file -out pem-certificate-and-key-file
+
+File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert/ca.pem     ;
+File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert/client.pem ;
+File [ FDirName $(OUTPUT_TARGET) client.key ] : cert/client.key ;
+File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert/server.pem ;
+File [ FDirName $(OUTPUT_TARGET) server.key ] : cert/server.key ;
 
 SubInclude TOP src Pt-Ssl openssl ;
-

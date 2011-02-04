@@ -42,8 +42,8 @@
 #include <Pt/System/IOStream.h>
 
 ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO_CLIENT Pt::Ssl::SSLStreamBuf::_call_info("@@ Client @@", PT_FUNCTION)
-#define SSL_CALL_INFO_MAIN   Pt::Ssl::SSLStreamBuf::_call_info("@@ main() @@", PT_FUNCTION)
+#define SSL_CALL_INFO_CLIENT Pt::Ssl::SSLContext::_call_info("@@ Client @@", PT_FUNCTION)
+#define SSL_CALL_INFO_MAIN   Pt::Ssl::SSLContext::_call_info("@@ main() @@", PT_FUNCTION)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Client : public Pt::Connectable {
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
         std::string          addr("127.0.0.1");
         unsigned short       port = 443;
 
-        Pt::Ssl::SSLContext clientContext("root.pem", "client.pem", "password", 0);
+        Pt::Ssl::SSLContext clientContext("ca.pem", "client.pem", "client.key", "password", 0);
 
         Client client(loop, addr, port, clientContext);
 
