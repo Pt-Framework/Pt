@@ -40,8 +40,15 @@ namespace Ssl {
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
+        typedef std::streambuf::int_type int_type;
+
+        ////// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        static const std::string _call_info(const char* className, const std::string& funcName);
+        ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public:
         //! \brief Construct an SSL context that uses the given certificate-key file and password.
-        SSLContext(const char* caFile, const char* keyFile, const char* password, const char* sessionID);
+        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID);
 
         //! \brief Standard dtor.
         ~SSLContext();
