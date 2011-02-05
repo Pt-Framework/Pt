@@ -49,7 +49,7 @@
 class Server : public Pt::Connectable {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
-        : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0)
+        : _sslContext(sslServerContext), _ssl(0), _ios(0), _loop(loop), _client(0)
         {
             std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
 
@@ -73,10 +73,12 @@ class Server : public Pt::Connectable {
             _client->accept(server);
 
             _loop.add(*_client);
-            _ios.attachDevice(*_client);
+
+            _ios = new Pt::System::IOStream;
+            _ios->attachDevice(*_client);
 
             std::cerr << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
-            _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::SSLServer(*_ios, _sslContext, 0);
             _ssl->beginHandshake(true, true);
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
         }
@@ -85,10 +87,10 @@ class Server : public Pt::Connectable {
         {
             std::cerr << SSL_CALL_INFO_SERVER << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
 
-            _ios.buffer().inputReady += Pt::slot(*this, &Server::onInput);
-            _ios.buffer().outputReady += Pt::slot(*this, &Server::onOutput);
+            _ios->buffer().inputReady += Pt::slot(*this, &Server::onInput);
+            _ios->buffer().outputReady += Pt::slot(*this, &Server::onOutput);
 
-            _ios.buffer().beginRead();
+            _ios->buffer().beginRead();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
@@ -98,8 +100,8 @@ class Server : public Pt::Connectable {
 
             if(_ssl->buffer().import() == -1) {
                 std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
-                _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
-                _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
+                _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
+                _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
                 return;
             }
 
@@ -127,18 +129,16 @@ class Server : public Pt::Connectable {
                 "    </body>\r\n"
                 "</html>\r\n"
             << std::flush;
-            _ios.buffer().beginWrite();
+            _ios->buffer().beginWrite();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
 
-            _ssl->buffer().shutdown();
-            _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
-            _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
-
+            _loop.remove(*_client);
             delete _client; _client = 0;
+            delete _ios; _ios = 0;
             delete _ssl; _ssl = 0;
 
             std::cerr << std::endl << std::endl;
@@ -148,7 +148,7 @@ class Server : public Pt::Connectable {
     private:
         Pt::Ssl::SSLContext&    _sslContext;
         Pt::Ssl::SSLServer*     _ssl;
-        Pt::System::IOStream    _ios;
+        Pt::System::IOStream*   _ios;
         Pt::System::EventLoop&  _loop;
         Pt::Net::TcpServer      _server;
         Pt::Net::TcpSocket*     _client;
