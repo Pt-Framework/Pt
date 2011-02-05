@@ -218,7 +218,7 @@ std::streamsize SSLStreamBuf::import()
                 return -1;
             }
 
-            if(got <= 0) break;
+            //if(got <= 0) break;
         }
 
         return cum;
