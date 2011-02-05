@@ -82,13 +82,14 @@ class Client : public Pt::Connectable {
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Sending request to the server ..." << std::endl;
             *_ssl <<
-                "GET https://localhost/long_html.html HTTP/1.1\r\n"
-                "Host: localhost\r\n"
+                "GET /long_html.html HTTP/1.1\r\n"
+                "Host: localhost:443\r\n"
                 "User-Agent: Platinum\r\n"
                 "Accept: text/html\r\n"
-                "Accept-Language: en-us\r\n"
-                "Accept-Charset: utf-8\r\n"
-                "Connection: close\r\n\r\n"
+                "Accept-Language: en-us,en;q=0.5\r\n"
+                "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+                "Connection: close\r\n"
+                "Cache-Control: max-age=0\r\n\r\n"
             << std::flush;
 
             _ios.buffer().beginWrite();
@@ -150,6 +151,9 @@ class Client : public Pt::Connectable {
             //_ssl->buffer().shutdown();
 
             //sb.beginRead();
+
+            //*_ssl << "\r\n" << std::flush;
+            //_ios.buffer().beginWrite();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)

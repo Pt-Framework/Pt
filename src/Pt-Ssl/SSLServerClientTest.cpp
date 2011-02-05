@@ -118,7 +118,10 @@ class Server : public Pt::Connectable {
             // NOTE: Production code would call import() again until no further data can be imported.
 
             // Send reply
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ..." << std::endl;
+            std::string lmsg;
+            for(int i = 0; i < 1024; ++i) lmsg += "##########";
+
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ..." << lmsg << std::endl;
             *_ssl << "Hello world from server!" << std::flush;
             _ios.buffer().beginWrite();
         }
