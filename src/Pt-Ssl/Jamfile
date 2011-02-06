@@ -43,10 +43,10 @@ if $(TARGET_OS) = "nt"
 
 # openssl pkcs12 -in pkcs-12-certificate-and-key-file -out pem-certificate-and-key-file
 
-File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert/ca.pem     ;
-File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert/client.pem ;
-File [ FDirName $(OUTPUT_TARGET) client.key ] : cert/client.key ;
-File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert/server.pem ;
-File [ FDirName $(OUTPUT_TARGET) server.key ] : cert/server.key ;
+File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
+File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
+File [ FDirName $(OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;
+File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
+File [ FDirName $(OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
 
 SubInclude TOP src Pt-Ssl openssl ;
