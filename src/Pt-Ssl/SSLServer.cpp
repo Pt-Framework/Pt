@@ -40,7 +40,7 @@ namespace Ssl {
 SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream(0),
   _ios         (&ios),
-  _sslbuf      (ios, ctx, sessionID)
+  _sslbuf      (ios, ctx, sessionID, 1 * 1024)
 { std::iostream::init(&_sslbuf); }
 
 SSLServer::~SSLServer()
