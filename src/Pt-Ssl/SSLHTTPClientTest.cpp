@@ -109,7 +109,7 @@ class Client : public Pt::Connectable {
                 std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                           << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
-                const ssize_t import_result = _ssl->buffer().import();
+                const std::streamsize import_result = _ssl->buffer().import();
                 std::cerr << SSL_CALL_INFO_CLIENT << "import_result = " << import_result << std::endl;
 
                 if(import_result == -1) {
