@@ -62,10 +62,19 @@ void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().endWrite();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
-    if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
-    {
-        std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
-        _ios->buffer().beginWrite();
+    // TODO: Is this a good way to report handshake has failed ???
+    try {
+        if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
+        {
+            std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
+            _ios->buffer().beginWrite();
+            return;
+        }
+    }
+    catch(...) {
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFailed.send(*this);
         return;
     }
 
@@ -78,10 +87,19 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().endRead();
     std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
 
-    if(_sslbuf.readHandshake())
-    {
-        std::cerr << SSL_CALL_INFO << "Read more handshake bytes" << std::endl;
-        _ios->buffer().beginRead();
+    // TODO: Is this a good way to report handshake has failed ???
+    try {    
+        if(_sslbuf.readHandshake())
+        {
+            std::cerr << SSL_CALL_INFO << "Read more handshake bytes" << std::endl;
+            _ios->buffer().beginRead();
+            return;
+        }
+    }
+    catch(...) {
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFailed.send(*this);
         return;
     }
 
@@ -94,8 +112,17 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         return;
     }
 
-    std::cerr << SSL_CALL_INFO << "Write handshake" << std::endl;
-    _sslbuf.writeHandshake();
+    // TODO: Is this a good way to report handshake has failed ???
+    try {    
+        std::cerr << SSL_CALL_INFO << "Write handshake" << std::endl;
+        _sslbuf.writeHandshake();
+    }
+    catch(...) {
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFailed.send(*this);
+        return;
+    }
 
     std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
     _ios->buffer().beginWrite();

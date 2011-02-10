@@ -66,6 +66,9 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLClient&> handshakeFinished;
 
+        /** @brief This signal will be fired if the SLL system could not finished the handshake */
+        Pt::Signal<SSLClient&> handshakeFailed;
+
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
         void onReadHandshake(Pt::System::StreamBuffer& sb);

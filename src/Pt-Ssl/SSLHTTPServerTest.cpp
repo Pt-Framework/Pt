@@ -81,6 +81,7 @@ class Server : public Pt::Connectable {
             _ssl = new Pt::Ssl::SSLServer(*_ios, _sslContext, 0);
             _ssl->beginHandshake(true, true);
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
+            _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
@@ -91,6 +92,20 @@ class Server : public Pt::Connectable {
             _ios->buffer().outputReady += Pt::slot(*this, &Server::onOutput);
 
             _ios->buffer().beginRead();
+        }
+
+        void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
+        {
+            std::cerr << SSL_CALL_INFO_SERVER << "Handshake failed!" << std::endl;
+
+            _loop.remove(*_client);
+            delete _client; _client = 0;
+            delete _ios; _ios = 0;
+            delete _ssl; _ssl = 0;
+
+            std::cerr << std::endl << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
+            
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
