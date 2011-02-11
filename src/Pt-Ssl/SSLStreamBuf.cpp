@@ -299,7 +299,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     std::cerr << SSL_CALL_INFO << "size = " << size << std::endl;
 
     if(!_ibuffer) {
-        std::cerr << SSL_CALL_INFO << "Allocating ibuffer " << std::endl;
+        std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
 
@@ -405,23 +405,23 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
     std::cerr << SSL_CALL_INFO << "ch = " << ch << std::endl;
 
-    if( ! _obuffer )
-    {
-        std::cerr << SSL_CALL_INFO << "Allocating buffer " << ch << std::endl;
+    if( ! _obuffer ) {
+        std::cerr << SSL_CALL_INFO << "Allocating buffer of size " << _obufferSize << std::endl;
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
 
     }
-    else if (traits_type::eq_int_type( ch, traits_type::eof() ) )
-    {
+    // The overflow char is EOF
+    else if( traits_type::eq_int_type( ch, traits_type::eof() ) ) {
         // Normal blocking overflow case
         const size_t avail = this->pptr() - _obuffer;
 
         // Feed _obuffer to openssl
-        std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL" << std::endl;
+        std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL; avail = " << avail << std::endl;
         int written = SSL_write(_ssl, _obuffer, avail);
-
+        std::cerr << SSL_CALL_INFO << "Done feeding data to be encrypted to OpenSSL; written = " << written << std::endl;
+        
         // Move leftover in _obuffer to the front
         const size_t leftover = avail - written;
         std::cerr << SSL_CALL_INFO << "Shifting buffer; leftover = " << leftover << std::endl;
@@ -443,13 +443,17 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
             bm->length = 0;
         }
     }
-
-    // If the overflow char is not EOF, so put it in buffer
-    if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
-    {
-        std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
-        *(this->pptr()) = traits_type::to_char_type(ch);
-        this->pbump(1);
+    
+    // The overflow char is not EOF, put it in buffer
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+        // NOTE - ALOYSIUS : This fix the seg-fault, but is this correct?
+        if(this->pptr() >= _obuffer + _obufferSize)  
+            return traits_type::eof();
+        else {
+            std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
+            *(this->pptr()) = traits_type::to_char_type(ch);
+            this->pbump(1);
+        }
     }
 
     std::cerr << SSL_CALL_INFO << "Done" << std::endl;

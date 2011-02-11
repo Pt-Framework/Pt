@@ -62,7 +62,7 @@ void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().endWrite();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
 
-    // TODO: Is this a good way to report handshake has failed ???
+    // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
         if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
         {
@@ -87,7 +87,7 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().endRead();
     std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
 
-    // TODO: Is this a good way to report handshake has failed ???
+    // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {    
         if(_sslbuf.readHandshake())
         {
@@ -112,7 +112,7 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         return;
     }
 
-    // TODO: Is this a good way to report handshake has failed ???
+    // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {    
         std::cerr << SSL_CALL_INFO << "Write handshake" << std::endl;
         _sslbuf.writeHandshake();
