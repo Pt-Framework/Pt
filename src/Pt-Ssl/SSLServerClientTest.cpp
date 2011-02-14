@@ -51,7 +51,7 @@
 class Server : public Pt::Connectable {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
-        : _sslContext(sslServerContext), _ssl(0), _loop(loop), _client(0)
+        : _sslContext(sslServerContext), _ssl(0), _ios(8192, true), _loop(loop), _client(0)
         {
             std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
 
@@ -100,8 +100,9 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_SERVER << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
-            std::string cumResult;
-            while(true) {
+            std::string msg;
+            while(true)
+            {
                 const int importResult = _ssl->buffer().import();
                 if(importResult == -1) {
                     std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
@@ -109,7 +110,8 @@ class Server : public Pt::Connectable {
                     _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
                     return;
                 }
-                if(!importResult) break;
+                if( ! importResult )
+                    break;
 
                 std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
                 std::cerr << SSL_CALL_INFO_SERVER << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : "
@@ -119,19 +121,21 @@ class Server : public Pt::Connectable {
                     char buf[512];
                     unsigned n =_ssl->readsome(buf, 512);
                     if(n <= 0) break;
-                    cumResult += std::string(buf, n);
+                    msg += std::string(buf, n);
                 }
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: " << cumResult << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: " << msg << std::endl;
 
             // Send reply
             std::string lmsg = "Hello world from server!";
-            for(int i = 0; i < 1024; ++i) lmsg += "##########";
+            for(int i = 0; i < 1024; ++i) lmsg += "_12345678X";
             lmsg += "!!!";
 
             std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... size = " << lmsg.length() << std::endl;
             *_ssl << lmsg << std::flush;
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... out_avail = " << _ios.buffer().out_avail() << std::endl;
+
             _ios.buffer().beginWrite();
             std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... done" << std::endl;
         }
@@ -156,7 +160,7 @@ class Server : public Pt::Connectable {
 class Client : public Pt::Connectable {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _msgCnt(0)
+        : _sslContext(sslClientContext), _ssl(0), _ios(8192, true), _loop(loop), _msgCnt(0)
         {
             std::cerr << SSL_CALL_INFO_CLIENT << "Connecting to server" << std::endl;
 
@@ -205,16 +209,20 @@ class Client : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
-            std::string cumResult;
-            while(true) {
-                const int importResult = _ssl->buffer().import();
-                if(importResult == -1) {
+            std::string result;
+            while(true)
+            {
+                std::streamsize avail = _ssl->buffer().import();
+
+                if(avail == -1) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
                 }
-                if(!importResult) break;
+
+                if( ! avail )
+                    break;
 
                 std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
                 std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
@@ -224,11 +232,18 @@ class Client : public Pt::Connectable {
                     char buf[512];
                     unsigned n =_ssl->readsome(buf, 512);
                     if(n <= 0) break;
-                    cumResult += std::string(buf, n);
+                    result += std::string(buf, n);
                 }
             }
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << cumResult << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << result << std::endl;
+
+            if( result.find("!!!") == std::string::npos )
+            {
+                std::cerr << SSL_CALL_INFO_CLIENT << "message not complete " << std::endl;
+                _ios.buffer().beginRead();
+                return;
+            }
 
             // Send more messages
             if(_msgCnt < 2) {
@@ -251,7 +266,7 @@ class Client : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
             sb.endWrite();
-            std::cerr << SSL_CALL_INFO_SERVER << "Sent raw; remaining = " << sb.out_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sent raw; remaining = " << sb.out_avail() << std::endl;
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;

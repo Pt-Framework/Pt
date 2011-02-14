@@ -196,19 +196,17 @@ std::streamsize SSLStreamBuf::import()
 
     if(_ios)
     {
-        ssize_t cum = 0;
-
-        while(_ios->rdbuf()->in_avail()) {
+        if( _ios->rdbuf()->in_avail() >= 0 )
+        {
             const std::streamsize avail = _ios->rdbuf()->in_avail();
             std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
 
-            const std::streamsize got = do_underflow(avail);
-            std::cerr << SSL_CALL_INFO << "do_underflow = " << got << std::endl;
+            int n = do_underflow(avail);
+            std::cerr << SSL_CALL_INFO << "do_underflow = " << n << std::endl;
             std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
 
-            std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
-
-            if(got > 0) cum += got;
+            std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good()
+                      << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
@@ -217,15 +215,48 @@ std::streamsize SSLStreamBuf::import()
                 this->shutdown();
                 return -1;
             }
-
-            //if(got <= 0) break;
         }
-
-        return cum;
     }
 
-    std::cerr << SSL_CALL_INFO << "in_avail (on exit; no valid _ios) = " << this->in_avail() << std::endl;
-    return (this->in_avail() > 0) ? this->in_avail() : 0;
+    std::cerr << SSL_CALL_INFO << "in_avail after underflow (on exit) = " << this->in_avail() << std::endl;
+    return this->in_avail();
+
+
+
+
+    // if(_ios)
+    // {
+    //     ssize_t cum = 0;
+
+    //     while(_ios->rdbuf()->in_avail()) {
+    //         const std::streamsize avail = _ios->rdbuf()->in_avail();
+    //         std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
+
+    //         const std::streamsize got = do_underflow(avail);
+    //         std::cerr << SSL_CALL_INFO << "do_underflow = " << got << std::endl;
+    //         std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
+
+    //         std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good()
+    //                   << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+
+    //         if(got > 0) cum += got;
+
+    //         // Shutdown?
+    //         const int shutdownState = SSL_get_shutdown(_ssl);
+    //         if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
+    //             std::cerr << SSL_CALL_INFO << "Received shutdown" << std::endl;
+    //             this->shutdown();
+    //             return -1;
+    //         }
+
+    //         //if(got <= 0) break;
+    //     }
+
+    //     return cum;
+    // }
+
+    // std::cerr << SSL_CALL_INFO << "in_avail (on exit; no valid _ios) = " << this->in_avail() << std::endl;
+    // return (this->in_avail() > 0) ? this->in_avail() : 0;
 }
 
 void SSLStreamBuf::shutdown()
@@ -293,23 +324,30 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
     return traits_type::eof();
 }
 
-std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
+std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 {
-    if(!_ios) return 0;
-    std::cerr << SSL_CALL_INFO << "size = " << size << std::endl;
+    if( ! _ios)
+        return 0;
 
-    if(!_ibuffer) {
+    std::cerr << SSL_CALL_INFO << "size = " << isize << std::endl;
+
+    if( ! _ibuffer )
+    {
         std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
 
     // Return 0 if full
-    if(_ibuffer + _ibufferSize == this->egptr()) return 0;
+    if(_ibufferSize == this->egptr() - this->gptr())
+    {
+        std::cerr << SSL_CALL_INFO << "buffer is full" << std::endl;
+        return 0;
+    }
 
     // Move unread bytes and putback to front
     size_t putback  = _pbmax;
     size_t leftover = 0;
-    if(this->gptr()) {
+    if( this->gptr() ) {
         putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
         char* to = _ibuffer + _pbmax - putback;
         char* from = this->gptr() - putback;
@@ -323,8 +361,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
     BIO_get_mem_ptr(_in, &bm);
     std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max << std::endl;
 
-    if(bm->max > bm->length) {
-        const size_t refill = std::min<size_t>(bm->max - bm->length, size);
+    if(bm->max > bm->length && isize > 0) {
+        const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
         std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
 
         _ios->readsome(bm->data + bm->length, refill);
@@ -334,11 +372,18 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize size)
         std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max << std::endl;
     }
 
+    if(bm->length == 0)
+    {
+        return 0;
+    }
+
     while(true) {
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
         size_t avail = _ibufferSize - used;
-        if(!avail) break;
+
+        if( ! avail )
+            break;
 
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
@@ -405,6 +450,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
     std::cerr << SSL_CALL_INFO << "ch = " << ch << std::endl;
 
+    // no buffer area etablished yet
     if( ! _obuffer ) {
         std::cerr << SSL_CALL_INFO << "Allocating buffer of size " << _obufferSize << std::endl;
 
@@ -412,8 +458,11 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         this->setp(_obuffer, _obuffer + _obufferSize);
 
     }
-    // The overflow char is EOF
-    else if( traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+
+
+    // write buffer to underlying stream
+    else
+    {
         // Normal blocking overflow case
         const size_t avail = this->pptr() - _obuffer;
 
@@ -421,7 +470,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL; avail = " << avail << std::endl;
         int written = SSL_write(_ssl, _obuffer, avail);
         std::cerr << SSL_CALL_INFO << "Done feeding data to be encrypted to OpenSSL; written = " << written << std::endl;
-        
+
         // Move leftover in _obuffer to the front
         const size_t leftover = avail - written;
         std::cerr << SSL_CALL_INFO << "Shifting buffer; leftover = " << leftover << std::endl;
@@ -438,27 +487,80 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         BUF_MEM* bm = 0;
         BIO_get_mem_ptr(_out, &bm);
         std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
-        if(bm->length > 0) {
+        if(bm->length > 0)
+        {
             _ios->write(bm->data, bm->length);
             bm->length = 0;
         }
     }
-    
-    // The overflow char is not EOF, put it in buffer
-    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
-        // NOTE - ALOYSIUS : This fix the seg-fault, but is this correct?
-        if(this->pptr() >= _obuffer + _obufferSize)  
-            return traits_type::eof();
-        else {
-            std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
-            *(this->pptr()) = traits_type::to_char_type(ch);
-            this->pbump(1);
-        }
+
+
+    // if the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
     }
 
     std::cerr << SSL_CALL_INFO << "Done" << std::endl;
 
     return traits_type::not_eof(ch);
+
+
+
+
+
+
+    
+
+    // // The overflow char is EOF
+    // else if( traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+    //     // Normal blocking overflow case
+    //     const size_t avail = this->pptr() - _obuffer;
+
+    //     // Feed _obuffer to openssl
+    //     std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL; avail = " << avail << std::endl;
+    //     int written = SSL_write(_ssl, _obuffer, avail);
+    //     std::cerr << SSL_CALL_INFO << "Done feeding data to be encrypted to OpenSSL; written = " << written << std::endl;
+
+    //     // Move leftover in _obuffer to the front
+    //     const size_t leftover = avail - written;
+    //     std::cerr << SSL_CALL_INFO << "Shifting buffer; leftover = " << leftover << std::endl;
+    //     if(leftover > 0)
+    //     {
+    //         traits_type::move(_obuffer, _obuffer + written, leftover);
+    //     }
+    //     this->setp(_obuffer, _obuffer + _obufferSize);
+    //     this->pbump( leftover );
+
+    //     // Write encoded bytes to _ios
+    //     std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
+
+    //     BUF_MEM* bm = 0;
+    //     BIO_get_mem_ptr(_out, &bm);
+    //     std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+    //     if(bm->length > 0) {
+    //         _ios->write(bm->data, bm->length);
+    //         bm->length = 0;
+    //     }
+    // }
+
+    // // The overflow char is not EOF, put it in buffer
+    // if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+    //     // NOTE - ALOYSIUS : This fix the seg-fault, but is this correct?
+    //     if(this->pptr() >= _obuffer + _obufferSize)  
+    //         return traits_type::eof();
+    //     else {
+    //         std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
+    //         *(this->pptr()) = traits_type::to_char_type(ch);
+    //         this->pbump(1);
+    //     }
+    // }
+
+    // std::cerr << SSL_CALL_INFO << "Done" << std::endl;
+
+    // return traits_type::not_eof(ch);
 }
 
 } // namespace Pt

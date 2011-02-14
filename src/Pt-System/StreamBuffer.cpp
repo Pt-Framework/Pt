@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>
+#include <iostream> // XXX
 
 namespace Pt {
 
@@ -277,6 +278,7 @@ StreamBufferBase::int_type StreamBufferBase::do_overflow(int_type ch)
     }
     else if (traits_type::eq_int_type( ch, traits_type::eof() ) || !_oextend)
     {
+        std::cerr << "StreamBuffer: blocking write on flush" << std::endl;
         // normal blocking overflow case
         size_t avail = _sb->pptr() - _obuffer;
         size_t written = _ioDevice->write(_obuffer, avail);
@@ -294,6 +296,7 @@ StreamBufferBase::int_type StreamBufferBase::do_overflow(int_type ch)
         // if the buffer area is extensible and overflow is not called by
         // sync/flush we copy the output buffer to a larger one
         size_t bufsize = _obufferSize + (_obufferSize/2);
+        std::cerr << "StreamBuffer: resize to "<< bufsize << std::endl;
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _obuffer, _obufferSize);
         std::swap(_obuffer, buf);
