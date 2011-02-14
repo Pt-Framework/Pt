@@ -124,12 +124,14 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_CLIENT << "SERVER RECEIVED: " << cumResult << std::endl;
 
             // Send reply
-            std::string lmsg;
+            std::string lmsg = "Hello world from server!";
             for(int i = 0; i < 1024; ++i) lmsg += "##########";
+            lmsg += "!!!";
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ..." << std::endl;
-            *_ssl << "Hello world from server!" << lmsg << "!!!" << std::flush;
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... size = " << lmsg.length() << std::endl;
+            *_ssl << lmsg << std::flush;
             _ios.buffer().beginWrite();
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... done" << std::endl;
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
@@ -183,10 +185,13 @@ class Client : public Pt::Connectable {
             _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ..." << std::endl;
-            *_ssl << "Hello world from client!" << std::flush;
-
+            
+            std::string lmsg = "Hello world from client!";
+            
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ... size = " << lmsg.length() << std::endl;
+            *_ssl << lmsg << std::flush;
             _ios.buffer().beginWrite();
+            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ... done" << std::endl;
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
         }
