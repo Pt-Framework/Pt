@@ -130,19 +130,24 @@ class Server : public Pt::Connectable {
             std::cerr.write(buf, n) << std::endl;
 
             // Send reply
+            std::string lmsg = "<html>\r\n"
+                               "    <head><title>Test HTTPS Server</title></head>\r\n"
+                               "    <body>\r\n"
+                               "        <p>Hello world from server!</p>\r\n"
+                               "        <p>\r\n            ";
+                                            for(int i = 0; i < 1024; ++i) lmsg += "_12345678X";
+                                                                          lmsg += "\r\n";
+                       lmsg += "        </p>\r\n"
+                               "    </body>\r\n"
+                               "</html>\r\n";
+
             std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ..." << std::endl;
             *_ssl <<
                 "HTTP/1.1 200 OK\r\n"
                 "Server: Platinum\r\n"
-                "Content-Length: 134\r\n"
+                "Content-Length: " << lmsg.length() << "\r\n"
                 "Connection: close\r\n"
-                "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-                "<html>\r\n"
-                "    <head><title>Test HTTPS Server</title></head>\r\n"
-                "    <body>\r\n"
-                "        <p>Hello world from server!</p>\r\n"
-                "    </body>\r\n"
-                "</html>\r\n"
+                "Content-Type: text/html; charset=UTF-8\r\n\r\n" << lmsg
             << std::flush;
             _ios->buffer().beginWrite();
         }
