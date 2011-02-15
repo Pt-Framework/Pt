@@ -240,7 +240,7 @@ class Client : public Pt::Connectable {
 
             if( result.find("!!!") == std::string::npos )
             {
-                std::cerr << SSL_CALL_INFO_CLIENT << "message not complete " << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Message not complete " << std::endl;
                 _ios.buffer().beginRead();
                 return;
             }

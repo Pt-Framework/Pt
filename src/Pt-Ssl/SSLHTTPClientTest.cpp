@@ -49,7 +49,7 @@
 class Client : public Pt::Connectable {
     public:
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _loop(loop)
+        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _header(""), _result(""), _httpSize(0)
         {
             std::cerr << SSL_CALL_INFO_CLIENT << "Connecting to server" << std::endl;
 
@@ -100,60 +100,67 @@ class Client : public Pt::Connectable {
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
+            std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << sb.in_avail() << std::endl;
+            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
-            std::string cumResult;
+            while(true)
+            {
+                std::streamsize avail = _ssl->buffer().import();
 
-            size_t in_avail = sb.in_avail();
-            while(in_avail > 0) {
-                std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << in_avail << std::endl;
-                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
-
-                const std::streamsize import_result = _ssl->buffer().import();
-                std::cerr << SSL_CALL_INFO_CLIENT << "import_result = " << import_result << std::endl;
-
-                if(import_result == -1) {
+                if(avail == -1) {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
                 }
-                else if(import_result == 0) {
-                    std::cerr << SSL_CALL_INFO_CLIENT << "Not enough data; trying to request for more ..." << std::endl;
-                    sb.beginRead();
-                    return;
-                }
-                std::cerr << SSL_CALL_INFO_CLIENT << "################################################################################" << std::endl;
 
-                while(_ssl->buffer().in_avail()) {
-                    std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-                    std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                              << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                if( ! avail )
+                    break;
 
+                std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
+                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+
+                while(true) {
                     char buf[512];
                     unsigned n =_ssl->readsome(buf, 512);
                     if(n <= 0) break;
-                    std::cerr << SSL_CALL_INFO_CLIENT << "readsome = " << n << std::endl;
-
-                    cumResult += std::string(buf, n);
+                    _result += std::string(buf, n);
                 }
-
-                in_avail = sb.in_avail();
-
-                if(!import_result) break;
             }
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED:" << std::endl << cumResult << std::endl;
+            if(_header.empty()) {
+                size_t pos = _result.find("\r\n\r\n");
+                if(pos != std::string::npos) {
+                    _header = _result.substr(0, pos);
+                    _result = _result.substr(pos);
+                }
+                std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED HEADER: " << _header << std::endl;
+                
+                pos = _header.find("Content-Length:");
+                if(pos != std::string::npos) {
+                    size_t start = _header.find(" ", pos);
+                    size_t end   = _header.find("\r\n", start);
+                    _httpSize = atol(_header.substr(start + 1, end - start - 1).c_str());
+                    std::cerr << SSL_CALL_INFO_CLIENT << "EXPECTED Content-Length = " << _httpSize << std::endl;
+                }
+            }
 
-            //std::cerr << SSL_CALL_INFO_CLIENT << "*** Shutting down the stream ***" << std::endl;
-            //_ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
-            //_ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
-            //_ssl->buffer().shutdown();
+            if(_httpSize && _result.length() < _httpSize) {
+                std::cerr << SSL_CALL_INFO_CLIENT << "Message not complete; current size = " << _result.length() << std::endl;
+                //*_ssl << "\r\n\r\n" << std::flush;
+                //_ios.buffer().beginWrite();
+                _ios.buffer().beginRead();
+                return;
+            }
 
-            //sb.beginRead();
+            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED CONTENT: " << _result << std::endl;
 
-            //*_ssl << "\r\n" << std::flush;
-            //_ios.buffer().beginWrite();
+            std::cerr << SSL_CALL_INFO_CLIENT << "*** Shutting down the stream ***" << std::endl;
+            _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
+            _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+            _ssl->buffer().shutdown();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
@@ -171,6 +178,9 @@ class Client : public Pt::Connectable {
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket     _socket;
+        std::string            _header;
+        std::string            _result;
+        size_t                 _httpSize;
 };
 
 int main(int argc, char** argv)
