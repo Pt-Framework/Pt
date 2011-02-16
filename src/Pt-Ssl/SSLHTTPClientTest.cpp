@@ -88,9 +88,10 @@ class Client : public Pt::Connectable {
                 "Accept: text/html\r\n"
                 "Accept-Language: en-us,en;q=0.5\r\n"
                 "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
-                "Connection: close\r\n"
                 "Cache-Control: max-age=0\r\n\r\n"
             << std::flush;
+
+// "Connection: close\r\n"
 
             _ios.buffer().beginWrite();
 
@@ -149,7 +150,7 @@ class Client : public Pt::Connectable {
 
             if(_httpSize && _result.length() < _httpSize) {
                 std::cerr << SSL_CALL_INFO_CLIENT << "Message not complete; current size = " << _result.length() << std::endl;
-                //*_ssl << "\r\n\r\n" << std::flush;
+                // *_ssl << "HTTP/1.1 100 Continue\r\n\r\n" << std::flush;
                 //_ios.buffer().beginWrite();
                 _ios.buffer().beginRead();
                 return;
