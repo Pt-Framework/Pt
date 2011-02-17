@@ -389,7 +389,10 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
         std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max << std::endl;
 
-        const int sslerr = SSL_get_error(_ssl, readSize);
+        std::cerr << SSL_CALL_INFO << "SSL_get_shutdown = " << SSL_get_shutdown(_ssl) << std::endl;
+        std::cerr << SSL_CALL_INFO << "_ios->eof() = " << _ios->eof() << std::endl;
+
+        long sslerr = SSL_get_error(_ssl, readSize);
         std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
 
         switch(sslerr) {
@@ -429,6 +432,9 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
             // Opps - we got a big problem here :(
             default:
+                while( ( sslerr = ERR_get_error() ) ) {
+                    std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
+                }
                 throw std::runtime_error("SSL_read failed");
         }
     }

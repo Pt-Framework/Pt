@@ -108,6 +108,7 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     // Set some options
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+    //SSL_CTX_set_verify(_ctx, SSL_VERIFY_NONE, NULL);
     if(sessionID) SSL_CTX_set_session_id_context(_ctx, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
 }
 

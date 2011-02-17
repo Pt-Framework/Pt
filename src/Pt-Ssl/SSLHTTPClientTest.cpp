@@ -130,7 +130,11 @@ class Client : public Pt::Connectable {
                     _result += std::string(buf, n);
                 }
             }
-
+#if 1
+                std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << _result << std::endl;
+                _result.clear();
+                _ios.buffer().beginRead();
+#else
             if(_header.empty()) {
                 size_t pos = _result.find("\r\n\r\n");
                 if(pos != std::string::npos) {
@@ -162,6 +166,7 @@ class Client : public Pt::Connectable {
             _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
             _ssl->buffer().shutdown();
+#endif            
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
