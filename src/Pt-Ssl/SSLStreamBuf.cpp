@@ -354,6 +354,10 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
         leftover = this->egptr() - this->gptr();
         std::memmove( to, from, putback + leftover );
+
+        this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                    _ibuffer + _pbmax,             // gptr position
+                    _ibuffer + _pbmax + leftover );  // end of get area
     }
 
     // Refill the BIO with encoded bytes for decoding
