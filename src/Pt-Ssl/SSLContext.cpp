@@ -79,9 +79,12 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         SSLContext::_bioErr = BIO_new_fp(stderr, BIO_NOCLOSE);
     }
 
-    // Create a new SSL context that supports SSL version 2  and 3
+    // Create a new SSL context that by default wants SSL version 3 but can fallback to SSL version 2
     _ctx = SSL_CTX_new(SSLv23_method());
-
+    //_ctx = SSL_CTX_new(SSLv3_method());
+    //_ctx = SSL_CTX_new(SSLv2_method());
+    //_ctx = SSL_CTX_new(TLSv1_method());
+  
     // Load the certificate chain file (if available)
     if(certFile) {
         std::cerr << SSL_CALL_INFO << "Loading certificate chain file = " << certFile << std::endl;
@@ -94,6 +97,11 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         SSL_CTX_set_default_passwd_cb(_ctx, _passwordCallback);
         SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
         if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM)) throw "Could not read key file!";
+    }
+
+    // Check the private key (if needed)
+    if(certFile && keyFile) {
+        if(!SSL_CTX_check_private_key(_ctx)) throw "The private key does not agree with the corresponding public key in the certificate!";
     }
 
     // Load and verify CA list (if available)
@@ -110,6 +118,34 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
     //SSL_CTX_set_verify(_ctx, SSL_VERIFY_NONE, NULL);
     if(sessionID) SSL_CTX_set_session_id_context(_ctx, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+
+//    SSL_CTX_set_cipher_list(_ctx, "DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:AES128-SHA:DHE-DSS-RC4-SHA:RC4-SHA:RC4-MD5:EXP1024-DHE-DSS-DES-CBC-SHA:EXP1024-DES-CBC-SHA:EXP1024-RC2-CBC-MD5:EDH-RSA-DES-CBC-SHA:EDH-DSS-DES-CBC-SHA:DES-CBC-SHA:EXP1024-DHE-DSS-RC4-SHA:EXP1024-RC4-SHA:EXP1024-RC4-MD5:EXP-EDH-RSA-DES-CBC-SHA:EXP-EDH-DSS-DES-CBC-SHA:EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC4-MD5");
+
+/*
+The default cipher list used by openssl is:
+$ openssl ciphers
+DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DES-CBC3-MD5:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:AES128-SHA:RC2-CBC-MD5:DHE-DSS-RC4-SHA:RC4-SHA:RC4-MD5:RC4-MD5:RC4-64-MD5:EXP1024-DHE-DSS-DES-CBC-SHA:EXP1024-DES-CBC-SHA:EXP1024-RC2-CBC-MD5:EDH-RSA-DES-CBC-SHA:EDH-DSS-DES-CBC-SHA:DES-CBC-SHA:DES-CBC-MD5:EXP1024-DHE-DSS-RC4-SHA:EXP1024-RC4-SHA:EXP1024-RC4-MD5:EXP-EDH-RSA-DES-CBC-SHA:EXP-EDH-DSS-DES-CBC-SHA:EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC2-CBC-MD5:EXP-RC4-MD5:EXP-RC4-MD5
+
+Or:
+$ openssl ciphers 'ALL:!ADH:+RC4:@STRENGTH'
+DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DES-CBC3-MD5:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:AES128-SHA:RC2-CBC-MD5:DHE-DSS-RC4-SHA:RC4-SHA:RC4-MD5:RC4-MD5:RC4-64-MD5:EXP1024-DHE-DSS-DES-CBC-SHA:EXP1024-DES-CBC-SHA:EXP1024-RC2-CBC-MD5:EDH-RSA-DES-CBC-SHA:EDH-DSS-DES-CBC-SHA:DES-CBC-SHA:DES-CBC-MD5:EXP1024-DHE-DSS-RC4-SHA:EXP1024-RC4-SHA:EXP1024-RC4-MD5:EXP-EDH-RSA-DES-CBC-SHA:EXP-EDH-DSS-DES-CBC-SHA:EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC2-CBC-MD5:EXP-RC4-MD5:EXP-RC4-MD5
+
+The suggested workaround by Yari gives:
+$ openssl ciphers 'SSLv2:-LOW:-EXPORT:RC4+RSA'
+DES-CBC3-MD5:RC2-CBC-MD5:RC4-MD5:EXP1024-RC4-SHA:EXP1024-RC4-MD5:RC4-SHA:RC4-MD5:EXP-RC4-MD5:RC4-64-MD5:EXP-RC4-MD5
+
+Order by stregth:
+$ openssl ciphers 'SSLv2:-LOW:-EXPORT:RC4+RSA:@STRENGTH'
+DES-CBC3-MD5:RC2-CBC-MD5:RC4-MD5:RC4-SHA:RC4-MD5:RC4-64-MD5:EXP1024-RC4-SHA:EXP1024-RC4-MD5:EXP-RC4-MD5:EXP-RC4-MD5
+
+Restricting it to only tls1:
+openssl ciphers -tls1 'SSLv2:-LOW:-EXPORT:RC4+RSA'
+EXP1024-RC4-SHA:EXP1024-RC4-MD5:RC4-SHA:RC4-MD5:EXP-RC4-MD5
+
+The default restricted to tls1:
+openssl ciphers -tls1
+DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:AES128-SHA:DHE-DSS-RC4-SHA:RC4-SHA:RC4-MD5:EXP1024-DHE-DSS-DES-CBC-SHA:EXP1024-DES-CBC-SHA:EXP1024-RC2-CBC-MD5:EDH-RSA-DES-CBC-SHA:EDH-DSS-DES-CBC-SHA:DES-CBC-SHA:EXP1024-DHE-DSS-RC4-SHA:EXP1024-RC4-SHA:EXP1024-RC4-MD5:EXP-EDH-RSA-DES-CBC-SHA:EXP-EDH-DSS-DES-CBC-SHA:EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC4-MD5
+*/
 }
 
 SSLContext::~SSLContext()

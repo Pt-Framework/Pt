@@ -81,6 +81,7 @@ class Server : public Pt::Connectable {
             _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
             _ssl->beginHandshake(true, true);
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
+            _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
@@ -93,6 +94,12 @@ class Server : public Pt::Connectable {
             _ios.buffer().beginRead();
         }
 
+        void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
+        {
+            std::cerr << SSL_CALL_INFO_SERVER << "Handshake failed!" << std::endl;
+            _loop.exit();
+        }
+        
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
@@ -182,6 +189,7 @@ class Client : public Pt::Connectable {
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
             _ssl->beginHandshake(true);
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
+            _ssl->handshakeFailed += Pt::slot(*this, &Client::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
@@ -200,6 +208,12 @@ class Client : public Pt::Connectable {
 
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+        }
+
+        void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
+        {
+            std::cerr << SSL_CALL_INFO_CLIENT << "Handshake failed!" << std::endl;
+            _loop.exit();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
