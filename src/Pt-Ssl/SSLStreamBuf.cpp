@@ -326,16 +326,17 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 
 std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 {
-    if( ! _ios)
-        return 0;
+    if(! _ios) return 0;
 
     std::cerr << SSL_CALL_INFO << "size = " << isize << std::endl;
+    if(isize <= 0) return 0;
 
-    if( ! _ibuffer )
-    {
+    if(!_ibuffer) {
         std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
+
+// NOTE - Aloysius: If this is not defined, the code from the book will be used
 #define ORIG_CODE
 
 #ifdef ORIG_CODE
@@ -378,14 +379,16 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     BIO_get_mem_ptr(_in, &bm);
     std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max << std::endl;
 
-    if(bm->max > bm->length && isize > 0) {
-        const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
+    //if(bm->max > bm->length && isize > 0) {
+        //const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
+    if(bm->max > bm->length) {
+        const size_t refill = bm->max - bm->length;
         std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
 
         _ios->readsome(bm->data + bm->length, refill);
         std::cerr << SSL_CALL_INFO << "gcount() = " << _ios->gcount() << std::endl;
 
-        bm->length += _ios->gcount();
+        if(_ios->gcount() > 0) bm->length += _ios->gcount();
         std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max << std::endl;
     }
 
