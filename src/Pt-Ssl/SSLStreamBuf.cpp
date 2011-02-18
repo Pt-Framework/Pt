@@ -306,6 +306,9 @@ int SSLStreamBuf::sync()
     return 0;
 }
 
+// NOTE - Aloysius: If this is not defined, the code from the book will be used
+#define ORIG_CODE
+
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
 {
     if( ! _ios )
@@ -316,12 +319,17 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
+#ifdef ORIG_CODE
     this->do_underflow(_ibufferSize);
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
     return traits_type::eof();
+#else
+    ssize_t ret = this->do_underflow(_ibufferSize);
+    return (!ret) ? EOF : ret;
+#endif
 }
 
 std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
@@ -329,15 +337,12 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     if(! _ios) return 0;
 
     std::cerr << SSL_CALL_INFO << "size = " << isize << std::endl;
-    if(isize <= 0) return 0;
+    //if(isize <= 0) return 0;
 
     if(!_ibuffer) {
         std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
-
-// NOTE - Aloysius: If this is not defined, the code from the book will be used
-#define ORIG_CODE
 
 #ifdef ORIG_CODE
     // Return 0 if full
@@ -348,7 +353,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     }
 
     // Move unread bytes and putback to front
-
     size_t putback  = _pbmax;
     size_t leftover = 0;
     if( this->gptr() ) {
@@ -364,11 +368,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                     _ibuffer + _pbmax + leftover );  // end of get area
     }
 #else
-    if(this->gptr() < this->egptr())
-    {
-        return traits_type::to_int_type(*this->gptr());
-    }
-
     size_t putback  = this->gptr() - this->eback();
     if(putback > _pbmax) putback = _pbmax;
     std::memmove(_ibuffer + (_pbmax - putback), this->gptr() - putback, putback);
@@ -379,10 +378,13 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     BIO_get_mem_ptr(_in, &bm);
     std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max << std::endl;
 
-    //if(bm->max > bm->length && isize > 0) {
-        //const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
+#ifdef ORIG_CODE
+    if(bm->max > bm->length && isize > 0) {
+        const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
+#else        
     if(bm->max > bm->length) {
         const size_t refill = bm->max - bm->length;
+#endif        
         std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
 
         _ios->readsome(bm->data + bm->length, refill);
@@ -490,7 +492,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
     std::cerr << SSL_CALL_INFO << "ch = " << ch << std::endl;
 
-    // no buffer area etablished yet
+    // No buffer area etablished yet
     if( ! _obuffer ) {
         std::cerr << SSL_CALL_INFO << "Allocating buffer of size " << _obufferSize << std::endl;
 
@@ -499,8 +501,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 
     }
 
-
-    // write buffer to underlying stream
+    // Write buffer to underlying stream
     else
     {
         // Normal blocking overflow case
@@ -535,7 +536,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     }
 
 
-    // if the overflow char is not EOF, put it in the buffer area
+    // If the overflow char is not EOF, put it in the buffer area
     if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
         std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
