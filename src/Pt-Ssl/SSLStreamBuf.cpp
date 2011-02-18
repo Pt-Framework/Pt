@@ -336,7 +336,9 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
         std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
         _ibuffer = new char[_ibufferSize];
     }
+#define ORIG_CODE
 
+#ifdef ORIG_CODE
     // Return 0 if full
     if(_ibufferSize == this->egptr() - this->gptr())
     {
@@ -345,6 +347,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     }
 
     // Move unread bytes and putback to front
+
     size_t putback  = _pbmax;
     size_t leftover = 0;
     if( this->gptr() ) {
@@ -359,6 +362,16 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                     _ibuffer + _pbmax,             // gptr position
                     _ibuffer + _pbmax + leftover );  // end of get area
     }
+#else
+    if(this->gptr() < this->egptr())
+    {
+        return traits_type::to_int_type(*this->gptr());
+    }
+
+    size_t putback  = this->gptr() - this->eback();
+    if(putback > _pbmax) putback = _pbmax;
+    std::memmove(_ibuffer + (_pbmax - putback), this->gptr() - putback, putback);
+#endif
 
     // Refill the BIO with encoded bytes for decoding
     BUF_MEM* bm = 0;
@@ -376,12 +389,14 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
         std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max << std::endl;
     }
 
-    if(bm->length == 0)
-    {
-        return 0;
-    }
+#ifdef ORIG_CODE
+    if(bm->length == 0) return 0;
+#else
+    if(bm->length == 0) return EOF;
+#endif
 
     while(true) {
+#ifdef ORIG_CODE
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
         size_t avail = _ibufferSize - used;
@@ -391,6 +406,9 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
         std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
+#else
+        const int readSize = SSL_read(_ssl, _ibuffer + _pbmax, _ibufferSize - _pbmax);
+#endif
         std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max << std::endl;
 
         std::cerr << SSL_CALL_INFO << "SSL_get_shutdown = " << SSL_get_shutdown(_ssl) << std::endl;
@@ -403,10 +421,19 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
             // No error - good :)
             case SSL_ERROR_NONE:
                 std::cerr << SSL_CALL_INFO << "SSL_ERROR_NONE" << std::endl;
+
+#ifdef ORIG_CODE
                 this->setg( _ibuffer + (_pbmax - putback), // start of get area
                             _ibuffer + _pbmax,             // gptr position
                             _ibuffer + used + readSize );  // end of get area
                 return readSize;
+#else
+                if(readSize <= 0) return EOF;
+                this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                            _ibuffer + _pbmax,             // gptr position
+                            _ibuffer + _pbmax + readSize );  // end of get area
+                return traits_type::to_int_type(*this->gptr());
+#endif
 
             // This error may indicate that the other peer wants re-handshaking
             case SSL_ERROR_WANT_READ:
