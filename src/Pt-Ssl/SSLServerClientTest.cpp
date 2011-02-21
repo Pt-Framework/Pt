@@ -480,6 +480,12 @@ class Server : public Pt::Connectable {
             sb.endWrite();
             std::cerr << SSL_CALL_INFO_SERVER << "Sent raw; remaining = " << sb.out_avail() << std::endl;
 
+            if( sb.out_avail() > 0 )
+            {
+                sb.beginWrite();
+                return;
+            }
+
             _ios.buffer().beginRead();
         }
 
