@@ -61,6 +61,7 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     _ios->buffer().endWrite();
     std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+    std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
