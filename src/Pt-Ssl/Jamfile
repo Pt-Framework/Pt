@@ -25,6 +25,10 @@ Main SSLHTTPServerTest : SSLHTTPServerTest.cpp ;
 LinkSharedLibraries SSLHTTPServerTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
 
+Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
+LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
+
 if $(TARGET_OS) = "nt"
 {
     if $(MINGW) || $(TOOLSET) = "gcc"
