@@ -96,6 +96,7 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     _ios->buffer().endRead();
     std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
+    std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
