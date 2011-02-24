@@ -140,12 +140,21 @@ class Server : public Pt::Connectable {
             std::string   lmsg;
             std::ifstream ifs;
             int           rcnt = 0;
-            ifs.open("../../src/Pt-Ssl/long_html.html");
-            while( ( rcnt = ifs.readsome(rbuf, sizeof(rbuf)) ) ) {
-                lmsg += std::string(rbuf, rcnt);
+
+#ifdef WIN32
+            ifs.open("..\\..\\src\\Pt-Ssl\\long_html.html", std::ios::binary);
+#else
+            ifs.open("../../src/Pt-Ssl/long_html.html", std::ios::binary);
+#endif
+
+            while(ifs)
+            {
+                ifs.read( rbuf, sizeof(rbuf) );
+                lmsg += std::string( rbuf, ifs.gcount() );
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ..." << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client... "
+                                              << lmsg.size() << " bytes" << std::endl;
             *_ssl <<
 "HTTP/1.1 200 OK\r\n"
 "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
