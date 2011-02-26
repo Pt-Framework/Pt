@@ -134,38 +134,55 @@ class Server : public Pt::Connectable {
             std::cerr.write(buf, n) << std::endl;
 
             // Send reply
-            char          rbuf[4096];
             std::string   lmsg;
             std::ifstream ifs;
-            int           rcnt = 0;
-            ifs.open("../../src/Pt-Ssl/long_html.html");
-            while( ( rcnt = ifs.readsome(rbuf, sizeof(rbuf)) ) ) {
-                lmsg += std::string(rbuf, rcnt);
+            char          rbuf[4096];
+#ifdef WIN32
+            ifs.open("..\\..\\src\\Pt-Ssl\\long_html.html", std::ios::binary);
+#else
+            ifs.open("../../src/Pt-Ssl/long_html.html", std::ios::binary);
+#endif
+            while(ifs) {
+                ifs.read( rbuf, sizeof(rbuf) );
+                lmsg += std::string( rbuf, ifs.gcount() );
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ..." << std::endl;
-            *_ssl <<
-"HTTP/1.1 200 OK\r\n"
-"Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
-"Server: Apache/2.2.13 (Fedora)\r\n"
-"Last-Modified: Wed, 09 Feb 2011 14:01:41 GMT\r\n"
-"ETag: \"c024e-1504a-49bd9e7805b40\"\r\n"
-"Accept-Ranges: bytes\r\n"
-"Content-Length: 86090\r\n"
-"Content-Type: text/html; charset=UTF-8\r\n\r\n" << lmsg
-            << std::flush;
-
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... size = " << lmsg.length() << std::endl;
-            *_ssl << lmsg << std::flush;
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... body size = " << lmsg.length() << std::endl;
+            *_ssl << "HTTP/1.1 200 OK\r\n"
+                     "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
+                     "Server: Apache/2.2.13 (Fedora)\r\n"
+                     "Last-Modified: Wed, 09 Feb 2011 14:01:41 GMT\r\n"
+                     "ETag: \"c024e-1504a-49bd9e7805b40\"\r\n"
+                     "Accept-Ranges: bytes\r\n"
+                     "Content-Length: " << lmsg.length() << "\r\n"
+                     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                  << lmsg
+                  << std::flush;
             std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... out_avail = " << _ios->buffer().out_avail() << std::endl;
 
             _ios->buffer().beginWrite();
             std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... done" << std::endl;
+            
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
+            std::cerr << SSL_CALL_INFO_SERVER << "Sent raw; remaining = " << sb.out_avail() << std::endl;
+
+            if(sb.out_avail() > 0) {
+                sb.beginWrite();
+                return;
+            }
+
+            std::cerr << SSL_CALL_INFO_SERVER << "*** Done sending response to the client ***" << std::endl;
+
+            _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
+            _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
+
+            // NOTE: If we uncomment this, the client will get the shutdown notification before receiving the full HTML body
+            //       that will cause the client to never get the full HTML body.
+            // _ssl->buffer().shutdown();
 
             _loop.remove(*_client);
             delete _client; _client = 0;

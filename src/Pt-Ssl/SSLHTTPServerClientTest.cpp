@@ -176,7 +176,8 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "*** Shutting down the stream ***" << std::endl;
+            std::cerr << SSL_CALL_INFO_SERVER << "*** Done sending response to the client ***" << std::endl;
+
             _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
 
