@@ -136,38 +136,30 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: " << msg << std::endl;
 
             // Send reply
-            char          rbuf[4096];
             std::string   lmsg;
             std::ifstream ifs;
-            int           rcnt = 0;
-
+            char          rbuf[4096];
 #ifdef WIN32
             ifs.open("..\\..\\src\\Pt-Ssl\\long_html.html", std::ios::binary);
 #else
             ifs.open("../../src/Pt-Ssl/long_html.html", std::ios::binary);
 #endif
-
-            while(ifs)
-            {
+            while(ifs) {
                 ifs.read( rbuf, sizeof(rbuf) );
                 lmsg += std::string( rbuf, ifs.gcount() );
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client... "
-                                              << lmsg.size() << " bytes" << std::endl;
-            *_ssl <<
-"HTTP/1.1 200 OK\r\n"
-"Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
-"Server: Apache/2.2.13 (Fedora)\r\n"
-"Last-Modified: Wed, 09 Feb 2011 14:01:41 GMT\r\n"
-"ETag: \"c024e-1504a-49bd9e7805b40\"\r\n"
-"Accept-Ranges: bytes\r\n"
-"Content-Length: 86090\r\n"
-"Content-Type: text/html; charset=UTF-8\r\n\r\n" << lmsg
-            << std::flush;
-
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... size = " << lmsg.length() << std::endl;
-            *_ssl << lmsg << std::flush;
+            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... body size = " << lmsg.length() << std::endl;
+            *_ssl << "HTTP/1.1 200 OK\r\n"
+                     "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
+                     "Server: Apache/2.2.13 (Fedora)\r\n"
+                     "Last-Modified: Wed, 09 Feb 2011 14:01:41 GMT\r\n"
+                     "ETag: \"c024e-1504a-49bd9e7805b40\"\r\n"
+                     "Accept-Ranges: bytes\r\n"
+                     "Content-Length: " << lmsg.length() << "\r\n"
+                     "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                  << lmsg
+                  << std::flush;
             std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... out_avail = " << _ios.buffer().out_avail() << std::endl;
 
             _ios.buffer().beginWrite();
@@ -187,7 +179,10 @@ class Server : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_SERVER << "*** Shutting down the stream ***" << std::endl;
             _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
-            _ssl->buffer().shutdown();
+
+            // NOTE: If we uncomment this, the client will get the shutdown notification before receiving the full HTML body
+            //       that will cause the client to never prints the full HTML body to the console.
+            // _ssl->buffer().shutdown();
         }
 
     private:
