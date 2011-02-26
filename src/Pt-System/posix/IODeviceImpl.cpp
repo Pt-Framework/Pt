@@ -26,6 +26,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+// NOTE: Aloysius - Just for temporary testing
+// #include <iostream>
+
+
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include <cerrno>
@@ -136,6 +141,8 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
     while(true)
     {
         ret = ::read( _fd, (void*)buffer, count);
+        // NOTE: Aloysius - Just for temporary testing
+        //std::cerr << "########################################## read() = " << ret << std::endl;
         if(ret > 0)
             break;
 

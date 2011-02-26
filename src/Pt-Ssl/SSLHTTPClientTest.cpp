@@ -148,7 +148,7 @@ class Client : public Pt::Connectable {
                     _result += std::string(buf, n);
                 }
             }
-#if 0
+#if 1
                 std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << _result << std::endl;
                 _result.clear();
                 _ios.buffer().beginRead();
