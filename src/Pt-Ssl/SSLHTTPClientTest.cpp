@@ -123,6 +123,9 @@ class Client : public Pt::Connectable {
             std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
+            if( sb.device()->eof() )
+                return;
+
             while(true)
             {
                 std::streamsize avail = _ssl->buffer().import();

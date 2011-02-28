@@ -181,6 +181,7 @@ class Server : public Pt::Connectable {
             _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
 
+            sleep(1);
             // NOTE: If we uncomment this, the client will get the shutdown notification before receiving the full HTML body
             //       that will cause the client to never prints the full HTML body to the console.
             // _ssl->buffer().shutdown();
@@ -268,6 +269,7 @@ class Client : public Pt::Connectable {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+                    std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED BEFORE SHUTDOWN: " << _result << std::endl;
                     return;
                 }
 
