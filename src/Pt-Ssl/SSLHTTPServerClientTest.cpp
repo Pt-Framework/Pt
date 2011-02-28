@@ -181,7 +181,6 @@ class Server : public Pt::Connectable {
             _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
 
-            sleep(1);
             // NOTE: If we uncomment this, the client will get the shutdown notification before receiving the full HTML body
             //       that will cause the client to never prints the full HTML body to the console.
             // _ssl->buffer().shutdown();

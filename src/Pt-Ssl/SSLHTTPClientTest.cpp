@@ -124,7 +124,10 @@ class Client : public Pt::Connectable {
                       << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
 
             if( sb.device()->eof() )
+            {
+                std::cerr << SSL_CALL_INFO_CLIENT << "Received EOF " << std::endl;
                 return;
+            }
 
             while(true)
             {
@@ -134,6 +137,7 @@ class Client : public Pt::Connectable {
                     std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+                    std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << _result << std::endl;
                     return;
                 }
 

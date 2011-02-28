@@ -373,6 +373,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     std::memmove(_ibuffer + (_pbmax - putback), this->gptr() - putback, putback);
 #endif
 
+    repeat:
+
     // Refill the BIO with encoded bytes for decoding
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
@@ -381,10 +383,11 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 #ifdef ORIG_CODE
     if(bm->max > bm->length && isize > 0) {
         const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
-#else        
+        isize -= refill;
+#else
     if(bm->max > bm->length) {
         const size_t refill = bm->max - bm->length;
-#endif        
+#endif
         std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
 
         _ios->readsome(bm->data + bm->length, refill);
@@ -421,6 +424,15 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
         long sslerr = SSL_get_error(_ssl, readSize);
         std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
+
+        // TODO: FIXME: NOTE: HACK: I am very very sorry for this. We need to rewrite this
+        //                          method I think. I don't understand it anymore... ;-)
+        //                          The fix is to refill the BIO and call SSL_read again,
+        //                          if the underlying iostream has more data.
+        if(readSize < 0 && sslerr == SSL_ERROR_WANT_READ && isize > 0)
+        {
+            goto repeat;
+        }
 
         switch(sslerr) {
             // No error - good :)
