@@ -28,7 +28,7 @@
  */
 
 // NOTE: Aloysius - Just for temporary testing
-// #include <iostream>
+#include <iostream>
 
 
 #include "IODeviceImpl.h"
@@ -142,12 +142,14 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
     {
         ret = ::read( _fd, (void*)buffer, count);
         // NOTE: Aloysius - Just for temporary testing
-        //std::cerr << "########################################## read() = " << ret << std::endl;
+        std::cerr << "########################################## read() = " << ret << std::endl;
         if(ret > 0)
             break;
 
         if(ret == 0 || errno == ECONNRESET)
         {
+            // NOTE: Aloysius - Just for temporary testing
+            std::cerr << "########################################## GOT EOF" << std::endl;
             eof = true;
             return 0;
         }
