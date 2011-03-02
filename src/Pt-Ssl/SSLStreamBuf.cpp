@@ -109,30 +109,25 @@ void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 
 bool SSLStreamBuf::writeHandshake()
 {
-    PT_SSL_LOG("getStatusString = " << getStatusString());
+    PT_SSL_LOG("getStatusString() = " << getStatusString());
 
     if(!SSL_want_read(_ssl))
     {
         int ret = SSL_do_handshake(_ssl);
-        PT_SSL_LOG("SSL_do_handshake = " << ret);
+        PT_SSL_LOG("SSL_do_handshake() = " << ret);
 
         if(ret <= 0)
         {
             int sslerr = SSL_get_error(_ssl, ret);
-            if( sslerr == SSL_ERROR_WANT_READ )
-                PT_SSL_LOG("SSL_ERROR_WANT_READ");
-            else if ( sslerr == SSL_ERROR_WANT_WRITE)
-                PT_SSL_LOG("SSL_ERROR_WANT_WRITE");
-            else
+            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
                 throw std::runtime_error("SSL_do_handshake failed");
         }
     }
 
     if(BIO_pending(_out))
     {
-        char buff[1000]; // Will be the steambufs buffer area later
+        char buff[1000];
         const int n = BIO_read(_out, buff, sizeof(buff));
-        PT_SSL_LOG("BIO_read = " << n);
 
         if(n <= 0)
             throw std::runtime_error("BIO_read failed");
@@ -380,20 +375,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                 }
                 return 0;
 
-            // This error should never happen in our case
-            case SSL_ERROR_WANT_WRITE:
-                PT_SSL_LOG("SSL_ERROR_WANT_WRITE");
-                return 0;
-
             // This error may indicate that the other peer has send shutdown message
             case SSL_ERROR_ZERO_RETURN:
-                PT_SSL_LOG("SSL_ERROR_ZERO_RETURN");
-                return 0;
-
-            // This error may indicate that the other peer has somehow disconnected the stream
-            // TODO: Perhaps we should throw an exception here?
-            case SSL_ERROR_SYSCALL:
-                PT_SSL_LOG("SSL_ERROR_SYSCALL");
                 return 0;
 
             // Opps - we got a big problem here :(
