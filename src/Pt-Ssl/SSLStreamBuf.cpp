@@ -374,29 +374,9 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
             // This error may indicate that the other peer wants re-handshaking, or, there is just not enough raw bytes to be decoded
             case SSL_ERROR_WANT_READ:
                 std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
-                if(readSize < 0 && isize > 0) {
-                    refill = true;
-                    continue;
-                }
                 return 0;
 
-            // This error should never happen in our case
-            case SSL_ERROR_WANT_WRITE:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
-                return 0;
-
-            // This error may indicate that the other peer has send shutdown message
-            case SSL_ERROR_ZERO_RETURN:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_ZERO_RETURN" << std::endl;
-                return 0;
-
-            // This error may indicate that the other peer has somehow disconnected the stream
-            // TODO: Perhaps we should throw an exception here?
-            case SSL_ERROR_SYSCALL:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_SYSCALL" << std::endl;
-                return 0;
-
-            // Opps - we got a big problem here :(
+            // Other errors are real errors, hence we throw exception
             default:
                 while( ( sslerr = ERR_get_error() ) ) {
                     std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
