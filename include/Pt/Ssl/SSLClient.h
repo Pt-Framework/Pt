@@ -63,11 +63,14 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         */
         void beginHandshake(bool verifyServerCert);
 
+        /** @brief Ends the client handshake
+            This function must be called after the handshake message is complete.
+            Returns true if the handshake was a success; false otherwise
+        */
+        bool endHandshake();
+
         /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLClient&> handshakeFinished;
-
-        /** @brief This signal will be fired if the SLL system could not finished the handshake */
-        Pt::Signal<SSLClient&> handshakeFailed;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);

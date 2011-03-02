@@ -52,7 +52,8 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
   _ibuffer(0),
   _obufferSize(bufferSize),
   _obuffer(0),
-  _pbmax(4)
+  _pbmax(4),
+  _handshakeError(false)
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -123,8 +124,10 @@ bool SSLStreamBuf::writeHandshake()
         if(ret <= 0)
         {
             const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
-                throw std::runtime_error("SSL_do_handshake failed");
+            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) {
+                _handshakeError = true;
+                return false;
+            }
         }
     }
 
@@ -175,8 +178,10 @@ bool SSLStreamBuf::readHandshake()
             if( ret <= 0 )
             {
                 int sslerr = SSL_get_error(_ssl, ret);
-                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
-                    throw std::runtime_error("SSL_do_handshake failed");
+                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) {
+                    _handshakeError = true;
+                    return false;
+                }
             }
         }
     }
@@ -235,6 +240,8 @@ void SSLStreamBuf::shutdown()
 
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
+
+    _handshakeError = false;
 }
 
 int SSLStreamBuf::sync()

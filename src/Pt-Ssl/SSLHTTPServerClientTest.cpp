@@ -89,22 +89,21 @@ class Server : public Pt::Connectable {
             _ssl->beginHandshake(true, true);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
-            _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
+            if(!ssl.endHandshake()) {
+                _loop.exit();
+                return;
+            }
+
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios.buffer().inputReady += Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady += Pt::slot(*this, &Server::onOutput);
 
             _ios.buffer().beginRead();
-        }
-
-        void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
-        {
-            _loop.exit();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
@@ -223,11 +222,15 @@ class Client : public Pt::Connectable {
             _ssl->beginHandshake(true);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
-            _ssl->handshakeFailed += Pt::slot(*this, &Client::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
         {
+            if(!ssl.endHandshake()) {
+                _loop.exit();
+                return;
+            }
+
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
@@ -246,11 +249,6 @@ class Client : public Pt::Connectable {
             << std::flush;
 
             _ios.buffer().beginWrite();
-        }
-
-        void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
-        {
-            _loop.exit();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)

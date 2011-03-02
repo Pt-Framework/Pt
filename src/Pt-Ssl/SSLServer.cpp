@@ -61,32 +61,25 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
     _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadHandshake);
 }
 
+bool SSLServer::endHandshake()
+{ return !_sslbuf.handshakeError(); }
+
 void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     PT_SSL_LOG("_ios->buffer().endWrite()");
     _ios->buffer().endWrite();
 
-    // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
-    try {
-        PT_SSL_LOG("_sslbuf.writeHandshake()");
-        if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
-        {
-            PT_SSL_LOG("_ios->buffer().beginWrite()");
-            _ios->buffer().beginWrite();
-            return;
-        }
-    }
-    catch(...) {
-        PT_SSL_LOG("Handshake failed");
-        _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
-        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
-        handshakeFailed.send(*this);
+    PT_SSL_LOG("_sslbuf.writeHandshake()");
+    if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
+    {
+        PT_SSL_LOG("_ios->buffer().beginWrite()");
+        _ios->buffer().beginWrite();
         return;
     }
 
-    if(_sslbuf.connected())
+    if(_sslbuf.handshakeError() || _sslbuf.connected())
     {
-        PT_SSL_LOG("Handshake finished");
+        PT_SSL_LOG((_sslbuf.handshakeError() ? "Handshake failed" : "Handshake finished"));
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFinished.send(*this);
@@ -103,30 +96,19 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
     PT_SSL_LOG("_ios->buffer().endRead()");
     _ios->buffer().endRead();
 
-    // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
-    try {
-        PT_SSL_LOG("_sslbuf.readHandshake()");
-        if(_sslbuf.readHandshake())
-        {
-            PT_SSL_LOG("_ios->buffer().beginRead()");
-            _ios->buffer().beginRead();
-            return;
-        }
-        
-        PT_SSL_LOG("_sslbuf.writeHandshake()");
-        _sslbuf.writeHandshake();
-    }
-    catch(...) {
-        PT_SSL_LOG("Handshake failed");
-        _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
-        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
-        handshakeFailed.send(*this);
+    PT_SSL_LOG("_sslbuf.readHandshake()");
+    if(_sslbuf.readHandshake())
+    {
+        PT_SSL_LOG("_ios->buffer().beginRead()");
+        _ios->buffer().beginRead();
         return;
     }
 
-
-    PT_SSL_LOG("_ios->buffer().beginWrite()");
-    _ios->buffer().beginWrite();
+    PT_SSL_LOG("_sslbuf.writeHandshake()");
+    if(_sslbuf.writeHandshake()) {
+        PT_SSL_LOG("_ios->buffer().beginWrite()");
+        _ios->buffer().beginWrite();
+    }
 }
 
 } // namespace Ssl

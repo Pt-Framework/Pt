@@ -78,11 +78,15 @@ class Client : public Pt::Connectable {
             _ssl->beginHandshake(false);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
-            _ssl->handshakeFailed += Pt::slot(*this, &Client::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
         {
+            if(!ssl.endHandshake()) {
+                _loop.exit();
+                return;
+            }
+            
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
@@ -112,11 +116,6 @@ class Client : public Pt::Connectable {
 */
 
             _ios.buffer().beginWrite();
-        }
-
-        void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
-        {
-            _loop.exit();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)

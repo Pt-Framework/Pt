@@ -89,27 +89,26 @@ class Server : public Pt::Connectable {
           //_ssl->beginHandshake(true, true);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
-            _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
+            if(!ssl.endHandshake()) {
+                _loop.remove(*_client);
+                delete _client; _client = 0;
+                delete _ios; _ios = 0;
+                delete _ssl; _ssl = 0;
+
+                PT_SSL_LOG_S("*** Waiting connection from client ***");
+                return;
+            }
+
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios->buffer().inputReady += Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady += Pt::slot(*this, &Server::onOutput);
 
             _ios->buffer().beginRead();
-        }
-
-        void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
-        {
-            _loop.remove(*_client);
-            delete _client; _client = 0;
-            delete _ios; _ios = 0;
-            delete _ssl; _ssl = 0;
-
-            PT_SSL_LOG_S("*** Waiting connection from client ***");
         }
 
         void onInput(Pt::System::StreamBuffer& sb)

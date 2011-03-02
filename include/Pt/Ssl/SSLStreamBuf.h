@@ -83,6 +83,12 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
+        /** @brief Reads the handshake status
+            Returns true if the handshake was a failure
+        */
+        inline bool handshakeError() const
+        { return _handshakeError; }
+
         /** @brief Reads user message from the underlying stream
             Returns the number bytes in the message or -1 if the other peer has shutdown the stream.
         */
@@ -110,6 +116,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         char*        _obuffer;
         const size_t _pbmax;
         bool         _oextend;
+        bool         _handshakeError;
 };
 
 
