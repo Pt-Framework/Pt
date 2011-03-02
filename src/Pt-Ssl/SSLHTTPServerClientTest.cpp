@@ -81,6 +81,7 @@ class Server : public Pt::Connectable {
             PT_SSL_LOG_S("Starting handshake");
             _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
             _ssl->beginHandshake(true, true);
+
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
             _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
         }
@@ -97,7 +98,6 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
         {
-            PT_SSL_LOG_S("Handshake failed!");
             _loop.exit();
         }
 
@@ -105,8 +105,6 @@ class Server : public Pt::Connectable {
         {
             sb.endRead();
             PT_SSL_LOG_S("Received raw = " << sb.in_avail());
-            PT_SSL_LOG_S("Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
             std::string msg;
             while(true)
@@ -122,8 +120,6 @@ class Server : public Pt::Connectable {
                     break;
 
                 PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
-                PT_SSL_LOG_S("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : "
-                          << _ssl->fail() << ", eof : " << _ssl->eof());
 
                 while(true) {
                     char buf[512];
@@ -160,7 +156,6 @@ class Server : public Pt::Connectable {
                      "Content-Type: text/html; charset=UTF-8\r\n\r\n"
                   << lmsg
                   << std::flush;
-            PT_SSL_LOG_S("Sending response to the client ... out_avail = " << _ios.buffer().out_avail());
 
             _ios.buffer().beginWrite();
             PT_SSL_LOG_S("Sending response to the client ... done");
@@ -176,7 +171,7 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            PT_SSL_LOG_S("*** Done sending response to the client ***");
+            PT_SSL_LOG_S("Done sending response to the client");
 
             _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
@@ -219,6 +214,7 @@ class Client : public Pt::Connectable {
             PT_SSL_LOG_C("Starting handshake");
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
             _ssl->beginHandshake(true);
+
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
             _ssl->handshakeFailed += Pt::slot(*this, &Client::onSSLHandshakeFailed);
         }
@@ -243,13 +239,10 @@ class Client : public Pt::Connectable {
             << std::flush;
 
             _ios.buffer().beginWrite();
-
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
         }
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
         {
-            PT_SSL_LOG_C("Handshake failed!");
             _loop.exit();
         }
 
@@ -257,8 +250,6 @@ class Client : public Pt::Connectable {
         {
             sb.endRead();
             PT_SSL_LOG_C("Received raw = " << sb.in_avail());
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
             while(true)
             {
@@ -276,8 +267,6 @@ class Client : public Pt::Connectable {
                     break;
 
                 PT_SSL_LOG_C("Received decoded = " << _ssl->buffer().in_avail());
-                PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
-                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
                 while(true) {
                     char buf[512];
@@ -322,6 +311,8 @@ class Client : public Pt::Connectable {
                 sb.beginWrite();
                 return;
             }
+
+            PT_SSL_LOG_C("Done sending request to the server");
 
             _ios.buffer().beginRead();
         }

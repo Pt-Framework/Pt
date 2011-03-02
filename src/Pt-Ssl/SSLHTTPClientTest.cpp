@@ -71,6 +71,7 @@ class Client : public Pt::Connectable {
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
           //_ssl->beginHandshake(true);
             _ssl->beginHandshake(false);
+
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
             _ssl->handshakeFailed += Pt::slot(*this, &Client::onSSLHandshakeFailed);
         }
@@ -106,13 +107,10 @@ class Client : public Pt::Connectable {
 */
 
             _ios.buffer().beginWrite();
-
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
         }
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
         {
-            PT_SSL_LOG_C("Handshake failed!");
             _loop.exit();
         }
 
@@ -120,8 +118,6 @@ class Client : public Pt::Connectable {
         {
             sb.endRead();
             PT_SSL_LOG_C("Received raw = " << sb.in_avail());
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
             if( sb.device()->eof() )
             {
@@ -137,7 +133,7 @@ class Client : public Pt::Connectable {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
-                    PT_SSL_LOG_C("CLIENT RECEIVED: " << _result);
+                    PT_SSL_LOG_C("CLIENT RECEIVED BEFORE SHUTDOWN: " << _result);
                     return;
                 }
 
@@ -145,8 +141,6 @@ class Client : public Pt::Connectable {
                     break;
 
                 PT_SSL_LOG_C("Received decoded = " << _ssl->buffer().in_avail());
-                PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
-                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
                 while(true) {
                     char buf[512];
@@ -175,15 +169,13 @@ class Client : public Pt::Connectable {
 
             if(_httpSize && _result.length() < _httpSize) {
                 PT_SSL_LOG_C("Message not complete; current size = " << _result.length());
-                // *_ssl << "HTTP/1.1 100 Continue\r\n\r\n" << std::flush;
-                //_ios.buffer().beginWrite();
                 _ios.buffer().beginRead();
                 return;
             }
 
             PT_SSL_LOG_C("CLIENT RECEIVED CONTENT: " << _result);
 
-            PT_SSL_LOG_C("*** Shutting down the stream ***");
+            PT_SSL_LOG_C("Shutting down the stream");
             _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
             _ssl->buffer().shutdown();
@@ -191,10 +183,16 @@ class Client : public Pt::Connectable {
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
             sb.endWrite();
+            PT_SSL_LOG_C("Sent raw; remaining = " << sb.out_avail());
 
-            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
+            if(sb.out_avail() > 0) {
+                sb.beginWrite();
+                return;
+            }
+
+            PT_SSL_LOG_C("Done sending request to the server");
+
             _ios.buffer().beginRead();
         }
 

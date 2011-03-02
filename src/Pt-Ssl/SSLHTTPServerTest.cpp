@@ -80,9 +80,8 @@ class Server : public Pt::Connectable {
 
             PT_SSL_LOG_S("Starting handshake");
             _ssl = new Pt::Ssl::SSLServer(*_ios, _sslContext, 0);
-
-            //_ssl->beginHandshake(true, true);
             _ssl->beginHandshake(true, false);
+          //_ssl->beginHandshake(true, true);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
             _ssl->handshakeFailed += Pt::slot(*this, &Server::onSSLHandshakeFailed);
@@ -100,8 +99,6 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
         {
-            PT_SSL_LOG_S("Handshake failed!");
-
             _loop.remove(*_client);
             delete _client; _client = 0;
             delete _ios; _ios = 0;
@@ -156,11 +153,9 @@ class Server : public Pt::Connectable {
                      "Content-Type: text/html; charset=UTF-8\r\n\r\n"
                   << lmsg
                   << std::flush;
-            PT_SSL_LOG_S("Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
 
+            PT_SSL_LOG_S("Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
             _ios->buffer().beginWrite();
-            PT_SSL_LOG_S("Sending response to the client ... done");
-            
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
@@ -173,7 +168,7 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            PT_SSL_LOG_S("*** Done sending response to the client ***");
+            PT_SSL_LOG_S("Done sending response to the client");
 
             _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);

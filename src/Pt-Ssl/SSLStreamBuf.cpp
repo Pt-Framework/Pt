@@ -406,8 +406,8 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         if(bm->length > 0)
         {
             _ios->write(bm->data, bm->length);
-            bm->length = 0;
             PT_SSL_LOG("Wrote " << bm->length << " bytes from _ios to _out BUF_MEM");
+            bm->length = 0;
         }
     }
 
