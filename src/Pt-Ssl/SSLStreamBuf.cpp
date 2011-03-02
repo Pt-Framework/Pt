@@ -35,8 +35,8 @@
 namespace Pt {
 namespace Ssl {
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO SSLContext::_call_info("SSLStreamBuf", PT_FUNCTION)
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) SSLContext::pt_ssl_logger().info() << SSLContext::pt_ssl_gen_call_info("SSLStreamBuf", PT_FUNCTION) << CODE << Pt::System::endlog
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)
@@ -109,20 +109,20 @@ void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 
 bool SSLStreamBuf::writeHandshake()
 {
-    std::cerr << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+    PT_SSL_LOG("getStatusString = " << getStatusString());
 
     if(!SSL_want_read(_ssl))
     {
         int ret = SSL_do_handshake(_ssl);
-        std::cerr << SSL_CALL_INFO << "SSL_do_handshake = " << ret << std::endl;
+        PT_SSL_LOG("SSL_do_handshake = " << ret);
 
         if(ret <= 0)
         {
             int sslerr = SSL_get_error(_ssl, ret);
             if( sslerr == SSL_ERROR_WANT_READ )
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
+                PT_SSL_LOG("SSL_ERROR_WANT_READ");
             else if ( sslerr == SSL_ERROR_WANT_WRITE)
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_WRITE" << std::endl;
+                PT_SSL_LOG("SSL_ERROR_WANT_WRITE");
             else
                 throw std::runtime_error("SSL_do_handshake failed");
         }
@@ -132,7 +132,7 @@ bool SSLStreamBuf::writeHandshake()
     {
         char buff[1000]; // Will be the steambufs buffer area later
         const int n = BIO_read(_out, buff, sizeof(buff));
-        std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+        PT_SSL_LOG("BIO_read = " << n);
 
         if(n <= 0)
             throw std::runtime_error("BIO_read failed");
@@ -147,7 +147,7 @@ bool SSLStreamBuf::writeHandshake()
 
 bool SSLStreamBuf::readHandshake()
 {
-    std::cerr << SSL_CALL_INFO << "getStatusString = " << getStatusString() << std::endl;
+    PT_SSL_LOG("getStatusString = " << getStatusString());
 
     char buf[1000]; // Will be the steambufs buffer area later
 
@@ -157,7 +157,7 @@ bool SSLStreamBuf::readHandshake()
     while(true)
     {
         unsigned n = _ios->readsome(buf, sizeof(buf));
-        std::cerr << SSL_CALL_INFO << "readsome = " << n << std::endl;
+        PT_SSL_LOG("readsome = " << n);
 
         if(n == 0)
             break;
@@ -165,7 +165,7 @@ bool SSLStreamBuf::readHandshake()
         while(n)
         {
             const int written = BIO_write(_in, buf, n);
-            std::cerr << SSL_CALL_INFO << "BIO_write = " << written << std::endl;
+            PT_SSL_LOG("BIO_write = " << written);
 
             if(written <= 0)
                 throw std::runtime_error("BIO_write failed");
@@ -192,45 +192,45 @@ bool SSLStreamBuf::readHandshake()
 
 std::streamsize SSLStreamBuf::import()
 {
-    std::cerr << SSL_CALL_INFO << "in_avail (on entry) = " << this->in_avail() << std::endl;
+    PT_SSL_LOG("in_avail (on entry) = " << this->in_avail());
 
     if(_ios)
     {
         if( _ios->rdbuf()->in_avail() >= 0 )
         {
             const std::streamsize avail = _ios->rdbuf()->in_avail();
-            std::cerr << SSL_CALL_INFO << "Available in underlying _ios = " << avail << std::endl;
+            PT_SSL_LOG("Available in underlying _ios = " << avail);
 
             int n = do_underflow(avail);
-            std::cerr << SSL_CALL_INFO << "do_underflow = " << n << std::endl;
-            std::cerr << SSL_CALL_INFO << "in_avail (after do_underflow) = " << this->in_avail() << std::endl;
+            PT_SSL_LOG("do_underflow = " << n);
+            PT_SSL_LOG("in_avail (after do_underflow) = " << this->in_avail());
 
-            std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good()
-                      << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+            PT_SSL_LOG("Underlying _ios state = good : " << _ios->good()
+                      << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
             if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
-                std::cerr << SSL_CALL_INFO << "Received shutdown" << std::endl;
+                PT_SSL_LOG("Received shutdown");
                 this->shutdown();
                 return -1;
             }
         }
     }
 
-    std::cerr << SSL_CALL_INFO << "in_avail after underflow (on exit) = " << this->in_avail() << std::endl;
+    PT_SSL_LOG("in_avail after underflow (on exit) = " << this->in_avail());
     return this->in_avail();
 }
 
 void SSLStreamBuf::shutdown()
 {
     const int res = SSL_shutdown(_ssl);
-    std::cerr << SSL_CALL_INFO << "SSL_shutdown = " << res << std::endl;
+    PT_SSL_LOG("SSL_shutdown = " << res);
 
     // Send shutdown message to the other peer
     char buff[1000];
     const int n = BIO_read(_out, buff, sizeof(buff));
-    std::cerr << SSL_CALL_INFO << "BIO_read = " << n << std::endl;
+    PT_SSL_LOG("BIO_read = " << n);
 
     if(n <= 0)
         throw std::runtime_error("BIO_read failed");
@@ -252,7 +252,7 @@ int SSLStreamBuf::sync()
     if( ! _ios )
         return 0;
 
-    std::cerr << SSL_CALL_INFO << "pptr is " << !!this->pptr() << std::endl;
+    PT_SSL_LOG("pptr is " << !!this->pptr());
 
     if( this->pptr() )
     {
@@ -274,7 +274,7 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
     if( ! _ios )
         return traits_type::eof();
 
-    std::cerr << SSL_CALL_INFO << "underflow" << std::endl;
+    PT_SSL_LOG("underflow");
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
@@ -291,17 +291,17 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 {
     if(! _ios) return 0;
 
-    std::cerr << SSL_CALL_INFO << "size = " << isize << std::endl;
+    PT_SSL_LOG("size = " << isize);
 
     if(!_ibuffer) {
-        std::cerr << SSL_CALL_INFO << "Allocating ibuffer of size " << _ibufferSize << std::endl;
+        PT_SSL_LOG("Allocating ibuffer of size " << _ibufferSize);
         _ibuffer = new char[_ibufferSize];
     }
 
     // Return 0 if full
     if(_ibufferSize == this->egptr() - this->gptr())
     {
-        std::cerr << SSL_CALL_INFO << "buffer is full" << std::endl;
+        PT_SSL_LOG("buffer is full");
         return 0;
     }
 
@@ -327,18 +327,18 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
         // Refill the BIO with encoded bytes for decoding
         if(refill) {
             BIO_get_mem_ptr(_in, &bm);
-            std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max << std::endl;
+            PT_SSL_LOG("BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max);
 
             if(bm->max > bm->length && isize > 0) {
                 const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
                 isize -= refill;
-                std::cerr << SSL_CALL_INFO << "refill = " << refill << std::endl;
+                PT_SSL_LOG("refill = " << refill);
 
                 _ios->readsome(bm->data + bm->length, refill);
-                std::cerr << SSL_CALL_INFO << "gcount() = " << _ios->gcount() << std::endl;
+                PT_SSL_LOG("gcount() = " << _ios->gcount());
 
                 if(_ios->gcount() > 0) bm->length += _ios->gcount();
-                std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max << std::endl;
+                PT_SSL_LOG("BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max);
             }
             if(bm->length == 0) return 0;
             refill = false;
@@ -352,19 +352,19 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
             break;
 
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
-        std::cerr << SSL_CALL_INFO << "SSL_read " << readSize << " of " << avail << std::endl;
-        std::cerr << SSL_CALL_INFO << "BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max << std::endl;
+        PT_SSL_LOG("SSL_read " << readSize << " of " << avail);
+        PT_SSL_LOG("BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max);
 
-        std::cerr << SSL_CALL_INFO << "SSL_get_shutdown = " << SSL_get_shutdown(_ssl) << std::endl;
-        std::cerr << SSL_CALL_INFO << "_ios->eof() = " << _ios->eof() << std::endl;
+        PT_SSL_LOG("SSL_get_shutdown = " << SSL_get_shutdown(_ssl));
+        PT_SSL_LOG("_ios->eof() = " << _ios->eof());
 
         long sslerr = SSL_get_error(_ssl, readSize);
-        std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
+        PT_SSL_LOG("ERR_reason_error_string = " << ERR_error_string(sslerr, 0));
 
         switch(sslerr) {
             // No error - good :)
             case SSL_ERROR_NONE:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_NONE" << std::endl;
+                PT_SSL_LOG("SSL_ERROR_NONE");
 
                 this->setg( _ibuffer + (_pbmax - putback), // start of get area
                             _ibuffer + _pbmax,             // gptr position
@@ -373,13 +373,13 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
             // This error may indicate that the other peer wants re-handshaking, or, there is just not enough raw bytes to be decoded
             case SSL_ERROR_WANT_READ:
-                std::cerr << SSL_CALL_INFO << "SSL_ERROR_WANT_READ" << std::endl;
+                PT_SSL_LOG("SSL_ERROR_WANT_READ");
                 return 0;
 
             // Other errors are real errors, hence we throw exception
             default:
                 while( ( sslerr = ERR_get_error() ) ) {
-                    std::cerr << SSL_CALL_INFO << "ERR_reason_error_string = " << ERR_error_string(sslerr, 0) << std::endl;
+                    PT_SSL_LOG("ERR_reason_error_string = " << ERR_error_string(sslerr, 0));
                 }
                 throw std::runtime_error("SSL_read failed");
         }
@@ -400,11 +400,11 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     if( ! _ios )
         return traits_type::eof();
 
-    std::cerr << SSL_CALL_INFO << "ch = " << ch << std::endl;
+    PT_SSL_LOG("ch = " << ch);
 
     // No buffer area etablished yet
     if( ! _obuffer ) {
-        std::cerr << SSL_CALL_INFO << "Allocating buffer of size " << _obufferSize << std::endl;
+        PT_SSL_LOG("Allocating buffer of size " << _obufferSize);
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
@@ -418,13 +418,13 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         const size_t avail = this->pptr() - _obuffer;
 
         // Feed _obuffer to openssl
-        std::cerr << SSL_CALL_INFO << "Feeding data to be encrypted to OpenSSL; avail = " << avail << std::endl;
+        PT_SSL_LOG("Feeding data to be encrypted to OpenSSL; avail = " << avail);
         int written = SSL_write(_ssl, _obuffer, avail);
-        std::cerr << SSL_CALL_INFO << "Done feeding data to be encrypted to OpenSSL; written = " << written << std::endl;
+        PT_SSL_LOG("Done feeding data to be encrypted to OpenSSL; written = " << written);
 
         // Move leftover in _obuffer to the front
         const size_t leftover = avail - written;
-        std::cerr << SSL_CALL_INFO << "Shifting buffer; leftover = " << leftover << std::endl;
+        PT_SSL_LOG("Shifting buffer; leftover = " << leftover);
         if(leftover > 0)
         {
             traits_type::move(_obuffer, _obuffer + written, leftover);
@@ -433,11 +433,11 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
         this->pbump( leftover );
 
         // Write encoded bytes to _ios
-        std::cerr << SSL_CALL_INFO << "Writing encrypted data to _ios" << std::endl;
+        PT_SSL_LOG("Writing encrypted data to _ios");
 
         BUF_MEM* bm = 0;
         BIO_get_mem_ptr(_out, &bm);
-        std::cerr << SSL_CALL_INFO << "BUF_MEM, used " << bm->length << " of " << bm->max << std::endl;
+        PT_SSL_LOG("BUF_MEM, used " << bm->length << " of " << bm->max);
         if(bm->length > 0)
         {
             _ios->write(bm->data, bm->length);
@@ -448,12 +448,12 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     // If the overflow char is not EOF, put it in the buffer area
     if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
-        std::cerr << SSL_CALL_INFO << "ch is not EOF, putting it in buffer" << std::endl;
+        PT_SSL_LOG("ch is not EOF, putting it in buffer");
         *(this->pptr()) = traits_type::to_char_type(ch);
         this->pbump(1);
     }
 
-    std::cerr << SSL_CALL_INFO << "Done" << std::endl;
+    PT_SSL_LOG("Done");
 
     return traits_type::not_eof(ch);
 }

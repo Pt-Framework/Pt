@@ -33,6 +33,7 @@
 #include <openssl/err.h>
 
 #include <Pt/Ssl/Api.h>
+#include <Pt/System/Logger.h>
 
 namespace Pt {
 namespace Ssl {
@@ -41,10 +42,6 @@ namespace Ssl {
 class PT_SSL_API SSLContext {
     public:
         typedef std::streambuf::int_type int_type;
-
-        ////// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        static const std::string _call_info(const char* className, const std::string& funcName);
-        ///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public:
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
@@ -68,7 +65,13 @@ class PT_SSL_API SSLContext {
 
         // Password callback to feed the password to OpenSSL
         static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
+
+    public:
+        // Logger for Pt-SSL
+        static Pt::System::Logger& pt_ssl_logger();
+        static const std::string pt_ssl_gen_call_info(const char* className, const std::string& funcName);
 };
+
 
 } // namespace Pt
 } // namespace Ssl

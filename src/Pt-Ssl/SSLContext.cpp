@@ -31,16 +31,16 @@
 #include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLContext.h>
 
-#include <Pt/System/Logger.h>
-#include <Pt/System/LogChannel.h>
-
 namespace Pt {
 namespace Ssl {
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO SSLContext::_call_info("SSLContext  ", PT_FUNCTION)
-
-const std::string SSLContext::_call_info(const char* className, const std::string& funcName)
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Pt::System::Logger& SSLContext::pt_ssl_logger()
+{
+    static Pt::System::Logger logger("Pt.SSL.Logger");
+    return logger;
+}
+const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const std::string& funcName)
 {
     static int count = 0;
 
@@ -56,32 +56,9 @@ const std::string SSLContext::_call_info(const char* className, const std::strin
 
     return buff;
 }
-// Logger for Pt-Ssl ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-PT_SSL_API void pt_ssl_log(const char* className, const std::string& funcName, const std::string& message)
-{
-    static Pt::System::Logger logger("Pt.SSL.Logger");
-    Pt::System::LogTarget::get("Pt.SSL.Logger").setChannel("console://");
-    Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
 
-    static int count = 0;
-
-    size_t      a = funcName.find_first_of("(");
-    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
-    a = f.find_last_of("::");
-    if(a != std::string::npos) f = f.substr(a + 1);
-    a = f.find_last_of(" ");
-    if(a != std::string::npos) f = f.substr(a + 1);
-
-    char buff[1024];
-    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
-    
-    logger.info() << buff << message << Pt::System::endlog;
-}
-
-#define SSL_LOG(msg) pt_ssl_log("SSLContext  ", PT_FUNCTION, msg)
+#define PT_SSL_LOG(CODE) SSLContext::pt_ssl_logger().info() << SSLContext::pt_ssl_gen_call_info("SSLContext  ", PT_FUNCTION) << CODE << Pt::System::endlog
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 BIO* SSLContext::_bioErr = 0;
 
@@ -106,6 +83,9 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         SSL_library_init();
         SSL_load_error_strings();
         SSLContext::_bioErr = BIO_new_fp(stderr, BIO_NOCLOSE);
+
+        Pt::System::LogTarget::get("Pt.SSL.Logger").setChannel("console://");
+        Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
     }
 
     // Create a new SSL context that by default wants SSL version 3 but can fallback to SSL version 2
@@ -116,13 +96,13 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
   
     // Load the certificate chain file (if available)
     if(certFile) {
-        SSL_LOG(std::string("Loading certificate chain file = ") + certFile);
+        PT_SSL_LOG("Loading certificate chain file = " << certFile);
         if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile)) throw "Could not read certificate file!";
     }
 
     // Load the private key  file (if available)
     if(keyFile) {
-        SSL_LOG(std::string("Loading private key file = ") + keyFile);
+        PT_SSL_LOG("Loading private key file = " << keyFile);
         SSL_CTX_set_default_passwd_cb(_ctx, _passwordCallback);
         SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
         if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM)) throw "Could not read key file!";
@@ -135,7 +115,7 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
 
     // Load and verify CA list (if available)
     if(caCertFile) {
-        SSL_LOG(std::string("Loading CA certificate list file = ") + caCertFile);
+        PT_SSL_LOG("Loading CA certificate list file = " << caCertFile);
         if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0)) throw "Could not read/verify CA list!";
     }
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)

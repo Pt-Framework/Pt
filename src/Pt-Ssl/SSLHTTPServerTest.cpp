@@ -42,9 +42,9 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO_SERVER Pt::Ssl::SSLContext::_call_info("@@ Server @@", PT_FUNCTION)
-#define SSL_CALL_INFO_MAIN   Pt::Ssl::SSLContext::_call_info("@@ main() @@", PT_FUNCTION)
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG_S(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE << Pt::System::endlog
+#define PT_SSL_LOG_M(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
@@ -52,7 +52,7 @@ class Server : public Pt::Connectable {
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _ios(0), _loop(loop), _client(0)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
+            PT_SSL_LOG_S("*** Waiting connection from client ***");
 
             _server.listen(addr, port);
             _server.connectionPending += Pt::slot(*this, &Server::onTCPAccept);
@@ -69,7 +69,7 @@ class Server : public Pt::Connectable {
    private:
         void onTCPAccept(Pt::Net::TcpServer& server)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Accepting connection from client" << std::endl;
+            PT_SSL_LOG_S("Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
             _client->accept(server);
 
@@ -78,7 +78,7 @@ class Server : public Pt::Connectable {
             _ios = new Pt::System::IOStream;
             _ios->attachDevice(*_client);
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
+            PT_SSL_LOG_S("Starting handshake");
             _ssl = new Pt::Ssl::SSLServer(*_ios, _sslContext, 0);
 
             //_ssl->beginHandshake(true, true);
@@ -90,7 +90,7 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
+            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios->buffer().inputReady += Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady += Pt::slot(*this, &Server::onOutput);
@@ -100,38 +100,36 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Handshake failed!" << std::endl;
+            PT_SSL_LOG_S("Handshake failed!");
 
             _loop.remove(*_client);
             delete _client; _client = 0;
             delete _ios; _ios = 0;
             delete _ssl; _ssl = 0;
 
-            std::cerr << std::endl << std::endl;
-            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
-            
+            PT_SSL_LOG_S("*** Waiting connection from client ***");
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            std::cerr << SSL_CALL_INFO_SERVER << "Received raw = " << sb.in_avail() << std::endl;
+            PT_SSL_LOG_S("Received raw = " << sb.in_avail());
 
             if(_ssl->buffer().import() == -1) {
-                std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
                 _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
                 _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
                 return;
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
+            PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
 
             char buf[512];
             unsigned n =_ssl->readsome(buf, 512);
             if(n <= 0) return;
 
-            std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: ";
-            std::cerr.write(buf, n) << std::endl;
+            PT_SSL_LOG_S("SERVER RECEIVED: ";
+            std::cerr.write(buf, n));
 
             // Send reply
             std::string   lmsg;
@@ -147,7 +145,7 @@ class Server : public Pt::Connectable {
                 lmsg += std::string( rbuf, ifs.gcount() );
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... body size = " << lmsg.length() << std::endl;
+            PT_SSL_LOG_S("Sending response to the client ... body size = " << lmsg.length());
             *_ssl << "HTTP/1.1 200 OK\r\n"
                      "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
                      "Server: Apache/2.2.13 (Fedora)\r\n"
@@ -158,24 +156,24 @@ class Server : public Pt::Connectable {
                      "Content-Type: text/html; charset=UTF-8\r\n\r\n"
                   << lmsg
                   << std::flush;
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... out_avail = " << _ios->buffer().out_avail() << std::endl;
+            PT_SSL_LOG_S("Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
 
             _ios->buffer().beginWrite();
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending response to the client ... done" << std::endl;
+            PT_SSL_LOG_S("Sending response to the client ... done");
             
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
-            std::cerr << SSL_CALL_INFO_SERVER << "Sent raw; remaining = " << sb.out_avail() << std::endl;
+            PT_SSL_LOG_S("Sent raw; remaining = " << sb.out_avail());
 
             if(sb.out_avail() > 0) {
                 sb.beginWrite();
                 return;
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "*** Done sending response to the client ***" << std::endl;
+            PT_SSL_LOG_S("*** Done sending response to the client ***");
 
             _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
@@ -189,8 +187,7 @@ class Server : public Pt::Connectable {
             delete _ios; _ios = 0;
             delete _ssl; _ssl = 0;
 
-            std::cerr << std::endl << std::endl;
-            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
+            PT_SSL_LOG_S("*** Waiting connection from client ***");
         }
 
     private:
@@ -205,7 +202,7 @@ class Server : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam started" << std::endl;
+        PT_SSL_LOG_M("OpenSSL test progam started");
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -218,16 +215,16 @@ int main(int argc, char** argv)
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam ended" << std::endl;
+        PT_SSL_LOG_M("OpenSSL test progam ended");
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex.what() << std::endl;
+        PT_SSL_LOG_M("Error: " << ex.what());
     }
     catch(const char* ex)
     {
-        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex << std::endl;
+        PT_SSL_LOG_M("Error: " << ex);
     }
     return 1;
 }

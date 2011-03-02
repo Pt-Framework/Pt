@@ -42,10 +42,10 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO_CLIENT Pt::Ssl::SSLContext::_call_info("@@ Client @@", PT_FUNCTION)
-#define SSL_CALL_INFO_SERVER Pt::Ssl::SSLContext::_call_info("@@ Server @@", PT_FUNCTION)
-#define SSL_CALL_INFO_MAIN   Pt::Ssl::SSLContext::_call_info("@@ main() @@", PT_FUNCTION)
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG_C(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE << Pt::System::endlog
+#define PT_SSL_LOG_S(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE << Pt::System::endlog
+#define PT_SSL_LOG_M(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
@@ -53,7 +53,7 @@ class Server : public Pt::Connectable {
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _ios(8192, true), _loop(loop), _client(0)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Waiting connection from client" << std::endl;
+            PT_SSL_LOG_S("Waiting connection from client");
 
             _server.listen(addr, port);
             _server.connectionPending += Pt::slot(*this, &Server::onTCPAccept);
@@ -70,14 +70,14 @@ class Server : public Pt::Connectable {
    private:
         void onTCPAccept(Pt::Net::TcpServer& server)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Accepting connection from client" << std::endl;
+            PT_SSL_LOG_S("Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
             _client->accept(server);
 
             _loop.add(*_client);
             _ios.attachDevice(*_client);
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Starting handshake" << std::endl;
+            PT_SSL_LOG_S("Starting handshake");
             _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
             _ssl->beginHandshake(true, true);
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
@@ -86,7 +86,7 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
+            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios.buffer().inputReady += Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady += Pt::slot(*this, &Server::onOutput);
@@ -96,23 +96,23 @@ class Server : public Pt::Connectable {
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLServer& ssl)
         {
-            std::cerr << SSL_CALL_INFO_SERVER << "Handshake failed!" << std::endl;
+            PT_SSL_LOG_S("Handshake failed!");
             _loop.exit();
         }
         
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            std::cerr << SSL_CALL_INFO_SERVER << "Received raw = " << sb.in_avail() << std::endl;
-            std::cerr << SSL_CALL_INFO_SERVER << "Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+            PT_SSL_LOG_S("Received raw = " << sb.in_avail());
+            PT_SSL_LOG_S("Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
             std::string msg;
             while(true)
             {
                 const int importResult = _ssl->buffer().import();
                 if(importResult == -1) {
-                    std::cerr << SSL_CALL_INFO_SERVER << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                    PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
                     _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
                     return;
@@ -120,9 +120,9 @@ class Server : public Pt::Connectable {
                 if( ! importResult )
                     break;
 
-                std::cerr << SSL_CALL_INFO_SERVER << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-                std::cerr << SSL_CALL_INFO_SERVER << "Underlying _ssl stream state = good : " << _ssl->good() << ", fail : "
-                          << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
+                PT_SSL_LOG_S("Underlying _ssl stream state = good : " << _ssl->good() << ", fail : "
+                          << _ssl->fail() << ", eof : " << _ssl->eof());
 
                 while(true) {
                     char buf[512];
@@ -132,28 +132,28 @@ class Server : public Pt::Connectable {
                 }
             }
 
-            std::cerr << SSL_CALL_INFO_SERVER << "SERVER RECEIVED: " << msg << std::endl;
+            PT_SSL_LOG_S("SERVER RECEIVED: " << msg);
 
             // Send reply
             std::string lmsg = "Hello world from server!";
             for(int i = 0; i < 1024; ++i) lmsg += "_12345678X";
             lmsg += "!!!";
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ..." << std::endl;
+            PT_SSL_LOG_S("Sending message to the client ...");
             *_ssl << lmsg << std::flush;
 
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... size = " << lmsg.length() << std::endl;
+            PT_SSL_LOG_S("Sending message to the client ... size = " << lmsg.length());
             *_ssl << lmsg << std::flush;
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... out_avail = " << _ios.buffer().out_avail() << std::endl;
+            PT_SSL_LOG_S("Sending message to the client ... out_avail = " << _ios.buffer().out_avail());
 
             _ios.buffer().beginWrite();
-            std::cerr << SSL_CALL_INFO_SERVER << "Sending message to the client ... done" << std::endl;
+            PT_SSL_LOG_S("Sending message to the client ... done");
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
-            std::cerr << SSL_CALL_INFO_SERVER << "Sent raw; remaining = " << sb.out_avail() << std::endl;
+            PT_SSL_LOG_S("Sent raw; remaining = " << sb.out_avail());
 
             if( sb.out_avail() > 0 )
             {
@@ -178,7 +178,7 @@ class Client : public Pt::Connectable {
         Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _ios(8192, true), _loop(loop), _msgCnt(0)
         {
-            std::cerr << SSL_CALL_INFO_CLIENT << "Connecting to server" << std::endl;
+            PT_SSL_LOG_C("Connecting to server");
 
             _socket.connected += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
@@ -194,7 +194,7 @@ class Client : public Pt::Connectable {
             _socket.endConnect();
             _ios.attachDevice(socket);
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Starting handshake" << std::endl;
+            PT_SSL_LOG_C("Starting handshake");
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
             _ssl->beginHandshake(true);
             _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
@@ -203,34 +203,34 @@ class Client : public Pt::Connectable {
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
         {
-            std::cerr << SSL_CALL_INFO_CLIENT << "Peer CN = " << _ssl->buffer().getPeerCN() << std::endl;
+            PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
 
             _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
 
             std::string lmsg = "Hello world from client!";
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ... size = " << lmsg.length() << std::endl;
+            PT_SSL_LOG_C("Sending message to the server ... size = " << lmsg.length());
             *_ssl << lmsg << std::flush;
             _ios.buffer().beginWrite();
-            std::cerr << SSL_CALL_INFO_CLIENT << "Sending message to the server ... done" << std::endl;
+            PT_SSL_LOG_C("Sending message to the server ... done");
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
         }
 
         void onSSLHandshakeFailed(Pt::Ssl::SSLClient& ssl)
         {
-            std::cerr << SSL_CALL_INFO_CLIENT << "Handshake failed!" << std::endl;
+            PT_SSL_LOG_C("Handshake failed!");
             _loop.exit();
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            std::cerr << SSL_CALL_INFO_CLIENT << "Received raw = " << sb.in_avail() << std::endl;
-            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+            PT_SSL_LOG_C("Received raw = " << sb.in_avail());
+            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
             std::string result;
             while(true)
@@ -238,7 +238,7 @@ class Client : public Pt::Connectable {
                 std::streamsize avail = _ssl->buffer().import();
 
                 if(avail == -1) {
-                    std::cerr << SSL_CALL_INFO_CLIENT << "*** The stream has been shutdown by the other peer ***" << std::endl;
+                    PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     return;
@@ -247,9 +247,9 @@ class Client : public Pt::Connectable {
                 if( ! avail )
                     break;
 
-                std::cerr << SSL_CALL_INFO_CLIENT << "Received decoded = " << _ssl->buffer().in_avail() << std::endl;
-                std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+                PT_SSL_LOG_C("Received decoded = " << _ssl->buffer().in_avail());
+                PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
+                          << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
 
                 while(true) {
                     char buf[512];
@@ -259,11 +259,11 @@ class Client : public Pt::Connectable {
                 }
             }
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "CLIENT RECEIVED: " << result << std::endl;
+            PT_SSL_LOG_C("CLIENT RECEIVED: " << result);
 
             if( result.find("!!!") == std::string::npos )
             {
-                std::cerr << SSL_CALL_INFO_CLIENT << "Message not complete " << std::endl;
+                PT_SSL_LOG_C("Message not complete ");
                 _ios.buffer().beginRead();
                 return;
             }
@@ -271,13 +271,13 @@ class Client : public Pt::Connectable {
             // Send more messages
             if(_msgCnt < 2) {
                 ++_msgCnt;
-                std::cerr << SSL_CALL_INFO_CLIENT << "Sending another message to the server ..." << std::endl;
+                PT_SSL_LOG_C("Sending another message to the server ...");
                 *_ssl << "Good morning from client!" << std::flush;
                 _ios.buffer().beginWrite();
             }
             // Shutdown
             else {
-                std::cerr << SSL_CALL_INFO_CLIENT << "*** Shutting down the stream ***" << std::endl;
+                PT_SSL_LOG_C("*** Shutting down the stream ***");
                 _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                 _ssl->buffer().shutdown();
@@ -286,13 +286,13 @@ class Client : public Pt::Connectable {
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
-            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
             sb.endWrite();
-            std::cerr << SSL_CALL_INFO_CLIENT << "Sent raw; remaining = " << sb.out_avail() << std::endl;
+            PT_SSL_LOG_C("Sent raw; remaining = " << sb.out_avail());
 
-            std::cerr << SSL_CALL_INFO_CLIENT << "Underlying _ssl stream state = good : " << _ssl->good()
-                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof() << std::endl;
+            PT_SSL_LOG_C("Underlying _ssl stream state = good : " << _ssl->good()
+                      << ", fail : " << _ssl->fail() << ", eof : " << _ssl->eof());
             _ios.buffer().beginRead();
         }
 
@@ -308,7 +308,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam started" << std::endl;
+        PT_SSL_LOG_M("OpenSSL test progam started");
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -324,16 +324,16 @@ int main(int argc, char** argv)
         loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
-        std::cerr << SSL_CALL_INFO_MAIN << "OpenSSL test progam ended" << std::endl;
+        PT_SSL_LOG_M("OpenSSL test progam ended");
         return 0;
     }
     catch(const std::exception& ex)
     {
-        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex.what() << std::endl;
+        PT_SSL_LOG_M("Error: " << ex.what());
     }
     catch(const char* ex)
     {
-        std::cerr << SSL_CALL_INFO_MAIN << "Error: " << ex << std::endl;
+        PT_SSL_LOG_M("Error: " << ex);
     }
     return 1;
 }

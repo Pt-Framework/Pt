@@ -33,8 +33,8 @@
 namespace Pt {
 namespace Ssl {
 
-///// JUST FOR TESTING /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define SSL_CALL_INFO SSLContext::_call_info("SSLServer   ", PT_FUNCTION)
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) SSLContext::pt_ssl_logger().info() << SSLContext::pt_ssl_gen_call_info("SSLServer   ", PT_FUNCTION) << CODE << Pt::System::endlog
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
@@ -49,9 +49,9 @@ SSLServer::~SSLServer()
 void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
     _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
-    std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
+    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
 
-    std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;
+    PT_SSL_LOG("Begin read");
     _ios->buffer().beginRead();
     _ios->buffer().outputReady += Pt::slot(*this, &SSLServer::onWriteHandshake);
     _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadHandshake);
@@ -60,14 +60,14 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     _ios->buffer().endWrite();
-    std::cerr << SSL_CALL_INFO << "out_avail = " << _ios->buffer().out_avail() << std::endl;
-    std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
+    PT_SSL_LOG("Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
         if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
         {
-            std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
+            PT_SSL_LOG("Begin write");
             _ios->buffer().beginWrite();
             return;
         }
@@ -81,14 +81,14 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 
     if(_sslbuf.connected())
     {
-        std::cerr << SSL_CALL_INFO << "Successfully connected to the client" << std::endl;
+        PT_SSL_LOG("Successfully connected to the client");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFinished.send(*this);
         return;
     }
 
-    std::cerr << SSL_CALL_INFO << "Begin read" << std::endl;
+    PT_SSL_LOG("Begin read");
     _ios->buffer().beginRead();
 }
 
@@ -96,19 +96,19 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     _ios->buffer().endRead();
-    std::cerr << SSL_CALL_INFO << "in_avail = " << _ios->buffer().in_avail() << std::endl;
-    std::cerr << SSL_CALL_INFO << "Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof() << std::endl;
+    PT_SSL_LOG("in_avail = " << _ios->buffer().in_avail());
+    PT_SSL_LOG("Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
         if(_sslbuf.readHandshake())
         {
-            std::cerr << SSL_CALL_INFO << "Read more handshake bytes" << std::endl;
+            PT_SSL_LOG("Read more handshake bytes");
             _ios->buffer().beginRead();
             return;
         }
         
-        std::cerr << SSL_CALL_INFO << "Write handshake" << std::endl;
+        PT_SSL_LOG("Write handshake");
         _sslbuf.writeHandshake();
     }
     catch(...) {
@@ -119,7 +119,7 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
     }
 
 
-    std::cerr << SSL_CALL_INFO << "Begin write" << std::endl;
+    PT_SSL_LOG("Begin write");
     _ios->buffer().beginWrite();
 }
 
