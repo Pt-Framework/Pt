@@ -220,43 +220,6 @@ std::streamsize SSLStreamBuf::import()
 
     PT_SSL_LOG("in_avail after underflow (on exit) = " << this->in_avail());
     return this->in_avail();
-
-
-
-
-    // if(_ios)
-    // {
-    //     ssize_t cum = 0;
-
-    //     while(_ios->rdbuf()->in_avail()) {
-    //         const std::streamsize avail = _ios->rdbuf()->in_avail();
-    //         PT_SSL_LOG("Available in underlying _ios = " << avail);
-
-    //         const std::streamsize got = do_underflow(avail);
-    //         PT_SSL_LOG("do_underflow = " << got);
-    //         PT_SSL_LOG("in_avail (after do_underflow) = " << this->in_avail());
-
-    //         PT_SSL_LOG("Underlying _ios state = good : " << _ios->good()
-    //                   << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
-
-    //         if(got > 0) cum += got;
-
-    //         // Shutdown?
-    //         const int shutdownState = SSL_get_shutdown(_ssl);
-    //         if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
-    //             PT_SSL_LOG("Received shutdown");
-    //             this->shutdown();
-    //             return -1;
-    //         }
-
-    //         //if(got <= 0) break;
-    //     }
-
-    //     return cum;
-    // }
-
-    // PT_SSL_LOG("in_avail (on exit; no valid _ios) = " << this->in_avail());
-    // return (this->in_avail() > 0) ? this->in_avail() : 0;
 }
 
 void SSLStreamBuf::shutdown()
@@ -329,7 +292,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     if(! _ios) return 0;
 
     PT_SSL_LOG("size = " << isize);
-    //if(isize <= 0) return 0;
 
     if(!_ibuffer) {
         PT_SSL_LOG("Allocating ibuffer of size " << _ibufferSize);
@@ -367,36 +329,21 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
             BIO_get_mem_ptr(_in, &bm);
             PT_SSL_LOG("BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max);
 
-    // Refill the BIO with encoded bytes for decoding
-    BUF_MEM* bm = 0;
-    BIO_get_mem_ptr(_in, &bm);
-    PT_SSL_LOG("BUF_MEM (_in; at start), used " << bm->length << " of " << bm->max);
+            if(bm->max > bm->length && isize > 0) {
+                const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
+                isize -= refill;
+                PT_SSL_LOG("refill = " << refill);
 
-#ifdef ORIG_CODE
-    if(bm->max > bm->length && isize > 0) {
-        const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
-        isize -= refill;
-#else
-    if(bm->max > bm->length) {
-        const size_t refill = bm->max - bm->length;
-#endif
-        PT_SSL_LOG("refill = " << refill);
+                _ios->readsome(bm->data + bm->length, refill);
+                PT_SSL_LOG("gcount() = " << _ios->gcount());
 
-        _ios->readsome(bm->data + bm->length, refill);
-        PT_SSL_LOG("gcount() = " << _ios->gcount());
+                if(_ios->gcount() > 0) bm->length += _ios->gcount();
+                PT_SSL_LOG("BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max);
+            }
+            if(bm->length == 0) return 0;
+            refill = false;
+        }
 
-        if(_ios->gcount() > 0) bm->length += _ios->gcount();
-        PT_SSL_LOG("BUF_MEM (_in; after refill), used " << bm->length << " of " << bm->max);
-    }
-
-#ifdef ORIG_CODE
-    if(bm->length == 0) return 0;
-#else
-    if(bm->length == 0) return EOF;
-#endif
-
-    while(true) {
-#ifdef ORIG_CODE
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
         size_t avail = _ibufferSize - used;
@@ -406,9 +353,6 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
         PT_SSL_LOG("SSL_read " << readSize << " of " << avail);
-#else
-        const int readSize = SSL_read(_ssl, _ibuffer + _pbmax, _ibufferSize - _pbmax);
-#endif
         PT_SSL_LOG("BUF_MEM (_in; after SSL_read), used " << bm->length << " of " << bm->max);
 
         PT_SSL_LOG("SSL_get_shutdown = " << SSL_get_shutdown(_ssl));
@@ -430,10 +374,9 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
             // This error may indicate that the other peer wants re-handshaking, or, there is just not enough raw bytes to be decoded
             case SSL_ERROR_WANT_READ:
                 PT_SSL_LOG("SSL_ERROR_WANT_READ");
-                if(true) {
-                    BUF_MEM* bmw = 0;
-                    BIO_get_mem_ptr(_out, &bmw);
-                    PT_SSL_LOG("BUF_MEM (_out), used " << bmw->length << " of " << bmw->max);
+                if(readSize < 0 && isize > 0) {
+                    refill = true;
+                    continue;
                 }
                 return 0;
 
@@ -533,61 +476,6 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     PT_SSL_LOG("Done");
 
     return traits_type::not_eof(ch);
-
-
-
-
-
-
-    
-
-    // // The overflow char is EOF
-    // else if( traits_type::eq_int_type( ch, traits_type::eof() ) ) {
-    //     // Normal blocking overflow case
-    //     const size_t avail = this->pptr() - _obuffer;
-
-    //     // Feed _obuffer to openssl
-    //     PT_SSL_LOG("Feeding data to be encrypted to OpenSSL; avail = " << avail);
-    //     int written = SSL_write(_ssl, _obuffer, avail);
-    //     PT_SSL_LOG("Done feeding data to be encrypted to OpenSSL; written = " << written);
-
-    //     // Move leftover in _obuffer to the front
-    //     const size_t leftover = avail - written;
-    //     PT_SSL_LOG("Shifting buffer; leftover = " << leftover);
-    //     if(leftover > 0)
-    //     {
-    //         traits_type::move(_obuffer, _obuffer + written, leftover);
-    //     }
-    //     this->setp(_obuffer, _obuffer + _obufferSize);
-    //     this->pbump( leftover );
-
-    //     // Write encoded bytes to _ios
-    //     PT_SSL_LOG("Writing encrypted data to _ios");
-
-    //     BUF_MEM* bm = 0;
-    //     BIO_get_mem_ptr(_out, &bm);
-    //     PT_SSL_LOG("BUF_MEM, used " << bm->length << " of " << bm->max);
-    //     if(bm->length > 0) {
-    //         _ios->write(bm->data, bm->length);
-    //         bm->length = 0;
-    //     }
-    // }
-
-    // // The overflow char is not EOF, put it in buffer
-    // if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
-    //     // NOTE - ALOYSIUS : This fix the seg-fault, but is this correct?
-    //     if(this->pptr() >= _obuffer + _obufferSize)  
-    //         return traits_type::eof();
-    //     else {
-    //         PT_SSL_LOG("ch is not EOF, putting it in buffer");
-    //         *(this->pptr()) = traits_type::to_char_type(ch);
-    //         this->pbump(1);
-    //     }
-    // }
-
-    // PT_SSL_LOG("Done");
-
-    // return traits_type::not_eof(ch);
 }
 
 } // namespace Pt
