@@ -42,8 +42,13 @@
 #include <Pt/System/IOStream.h>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef PT_SSL_DEBUG
 #define PT_SSL_LOG_C(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE << Pt::System::endlog
 #define PT_SSL_LOG_M(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog
+#else
+#define PT_SSL_LOG_C(CODE)
+#define PT_SSL_LOG_M(CODE)
+#endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Client : public Pt::Connectable {
@@ -133,7 +138,8 @@ class Client : public Pt::Connectable {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
-                    PT_SSL_LOG_C("CLIENT RECEIVED BEFORE SHUTDOWN: " << _result);
+                    std::cerr << "############################################################################################# CLIENT RECEIVED BEFORE SHUTDOWN: "
+                              << std::endl << _result << std::endl;
                     return;
                 }
 
@@ -156,8 +162,9 @@ class Client : public Pt::Connectable {
                     _header = _result.substr(0, pos);
                     _result = _result.substr(pos);
                 }
-                PT_SSL_LOG_C("CLIENT RECEIVED HEADER: " << _header);
-                
+                std::cerr << "############################################################################################# CLIENT RECEIVED HEADER: "
+                          << std::endl << _header << std::endl;
+
                 pos = _header.find("Content-Length:");
                 if(pos != std::string::npos) {
                     size_t start = _header.find(" ", pos);
@@ -173,7 +180,8 @@ class Client : public Pt::Connectable {
                 return;
             }
 
-            PT_SSL_LOG_C("CLIENT RECEIVED CONTENT: " << _result);
+            std::cerr << "############################################################################################# CLIENT RECEIVED CONTENT: "
+                      << std::endl << _result << std::endl;
 
             PT_SSL_LOG_C("Shutting down the stream");
             _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);

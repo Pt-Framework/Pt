@@ -35,6 +35,7 @@ namespace Pt {
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef PT_SSL_DEBUG
 Pt::System::Logger& SSLContext::pt_ssl_logger()
 {
     static Pt::System::Logger logger("Pt.SSL.Logger");
@@ -57,6 +58,9 @@ const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const 
     return buff;
 }
 #define PT_SSL_LOG(CODE) SSLContext::pt_ssl_logger().info() << SSLContext::pt_ssl_gen_call_info("SSLContext  ", PT_FUNCTION) << CODE << Pt::System::endlog
+#else
+#define PT_SSL_LOG(CODE)
+#endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BIO* SSLContext::_bioErr = 0;
@@ -82,10 +86,11 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         SSL_library_init();
         SSL_load_error_strings();
         SSLContext::_bioErr = BIO_new_fp(stderr, BIO_NOCLOSE);
-
+#ifdef PT_SSL_DEBUG
         // Initialize logger
         Pt::System::LogTarget::get("Pt.SSL.Logger").setChannel("console://");
         Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
+#endif        
     }
 
     // Create a new SSL context that by default wants SSL version 3 but can fallback to SSL version 2

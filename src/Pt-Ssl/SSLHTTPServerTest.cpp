@@ -43,8 +43,13 @@
 #include <Pt/System/IOStream.h>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef PT_SSL_DEBUG
 #define PT_SSL_LOG_S(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE << Pt::System::endlog
 #define PT_SSL_LOG_M(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog
+#else
+#define PT_SSL_LOG_S(CODE)
+#define PT_SSL_LOG_M(CODE)
+#endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
@@ -125,8 +130,8 @@ class Server : public Pt::Connectable {
             unsigned n =_ssl->readsome(buf, 512);
             if(n <= 0) return;
 
-            PT_SSL_LOG_S("SERVER RECEIVED: ";
-            std::cerr.write(buf, n));
+            std::cerr << "############################################################################################# SERVER RECEIVED: " << std::endl;
+            std::cerr.write(buf, n);
 
             // Send reply
             std::string   lmsg;

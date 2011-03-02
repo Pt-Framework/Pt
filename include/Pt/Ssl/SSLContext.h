@@ -28,12 +28,17 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
+#define PT_SSL_DEBUG
+
 #include <string>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 #include <Pt/Ssl/Api.h>
+
+#ifdef PT_SSL_DEBUG
 #include <Pt/System/Logger.h>
+#endif
 
 namespace Pt {
 namespace Ssl {
@@ -66,10 +71,12 @@ class PT_SSL_API SSLContext {
         // Password callback to feed the password to OpenSSL
         static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
 
+#ifdef PT_SSL_DEBUG
     public:
         // Logger for Pt-SSL
         static Pt::System::Logger& pt_ssl_logger();
         static const std::string pt_ssl_gen_call_info(const char* className, const std::string& funcName);
+#endif        
 };
 
 
