@@ -48,10 +48,10 @@ SSLClient::~SSLClient()
 
 void SSLClient::beginHandshake(bool verifyServerCert)
 {
+    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
     _sslbuf.beginClientHandshake(verifyServerCert);
-    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
 
-    PT_SSL_LOG("Begin write");
+    PT_SSL_LOG("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
     _ios->buffer().outputReady += Pt::slot(*this, &SSLClient::onWriteHandshake);
     _ios->buffer().inputReady  += Pt::slot(*this, &SSLClient::onReadHandshake);
@@ -59,44 +59,48 @@ void SSLClient::beginHandshake(bool verifyServerCert)
 
 void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
+    PT_SSL_LOG("_ios->buffer().endWrite()");
     _ios->buffer().endWrite();
-    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
+        PT_SSL_LOG("_sslbuf.writeHandshake()");
         if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
         {
-            PT_SSL_LOG("Begin write");
+            PT_SSL_LOG("_ios->buffer().beginWrite()");
             _ios->buffer().beginWrite();
             return;
         }
     }
     catch(...) {
+        PT_SSL_LOG("Handshake failed");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFailed.send(*this);
         return;
     }
 
-    PT_SSL_LOG("Begin read");
+    PT_SSL_LOG("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
 }
 
 void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
+    PT_SSL_LOG("_ios->buffer().endRead()");
     _ios->buffer().endRead();
-    PT_SSL_LOG("in_avail = " << _ios->buffer().in_avail());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {    
+        PT_SSL_LOG("_sslbuf.readHandshake()");
         if(_sslbuf.readHandshake())
         {
-            PT_SSL_LOG("Read more handshake bytes");
+            PT_SSL_LOG("_ios->buffer().beginRead()");
             _ios->buffer().beginRead();
             return;
         }
     }
     catch(...) {
+        PT_SSL_LOG("Handshake failed");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFailed.send(*this);
@@ -105,7 +109,7 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
 
     if(_sslbuf.connected())
     {
-        PT_SSL_LOG("Successfully connected to the server");
+        PT_SSL_LOG("Handshake finished");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFinished.send(*this);
@@ -114,17 +118,18 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {    
-        PT_SSL_LOG("Write handshake");
+        PT_SSL_LOG("_sslbuf.writeHandshake()");
         _sslbuf.writeHandshake();
     }
     catch(...) {
+        PT_SSL_LOG("Handshake failed");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFailed.send(*this);
         return;
     }
 
-    PT_SSL_LOG("Begin write");
+    PT_SSL_LOG("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
 }
 

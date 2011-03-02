@@ -23,7 +23,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with this library; if not, weriwrite to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
@@ -48,10 +48,10 @@ SSLServer::~SSLServer()
 
 void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
+    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
     _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
-    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
 
-    PT_SSL_LOG("Begin read");
+    PT_SSL_LOG("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
     _ios->buffer().outputReady += Pt::slot(*this, &SSLServer::onWriteHandshake);
     _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadHandshake);
@@ -59,20 +59,21 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 
 void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
+    PT_SSL_LOG("_ios->buffer().endWrite()");
     _ios->buffer().endWrite();
-    PT_SSL_LOG("out_avail = " << _ios->buffer().out_avail());
-    PT_SSL_LOG("Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
+        PT_SSL_LOG("_sslbuf.writeHandshake()");
         if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
         {
-            PT_SSL_LOG("Begin write");
+            PT_SSL_LOG("_ios->buffer().beginWrite()");
             _ios->buffer().beginWrite();
             return;
         }
     }
     catch(...) {
+        PT_SSL_LOG("Handshake failed");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFailed.send(*this);
@@ -81,37 +82,38 @@ void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 
     if(_sslbuf.connected())
     {
-        PT_SSL_LOG("Successfully connected to the client");
+        PT_SSL_LOG("Handshake finished");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFinished.send(*this);
         return;
     }
 
-    PT_SSL_LOG("Begin read");
+    PT_SSL_LOG("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
 }
 
 
 void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
+    PT_SSL_LOG("_ios->buffer().endRead()");
     _ios->buffer().endRead();
-    PT_SSL_LOG("in_avail = " << _ios->buffer().in_avail());
-    PT_SSL_LOG("Underlying _ios state = good : " << _ios->good() << ", fail : " << _ios->fail() << ", eof : " << _ios->eof());
 
     // NOTE - ALOYSIUS : Is this a good way to report handshake has failed ???
     try {
+        PT_SSL_LOG("_sslbuf.readHandshake()");
         if(_sslbuf.readHandshake())
         {
-            PT_SSL_LOG("Read more handshake bytes");
+            PT_SSL_LOG("_ios->buffer().beginRead()");
             _ios->buffer().beginRead();
             return;
         }
         
-        PT_SSL_LOG("Write handshake");
+        PT_SSL_LOG("_sslbuf.writeHandshake()");
         _sslbuf.writeHandshake();
     }
     catch(...) {
+        PT_SSL_LOG("Handshake failed");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLServer::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLServer::onReadHandshake);
         handshakeFailed.send(*this);
@@ -119,7 +121,7 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
     }
 
 
-    PT_SSL_LOG("Begin write");
+    PT_SSL_LOG("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
 }
 
