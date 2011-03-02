@@ -93,6 +93,7 @@ class Server : public Pt::Connectable {
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
             if(!ssl.endHandshake()) {
+                PT_SSL_LOG_S("*** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;
             }
@@ -201,6 +202,7 @@ class Client : public Pt::Connectable {
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
         {
             if(!ssl.endHandshake()) {
+                PT_SSL_LOG_C("*** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;
             }

@@ -94,6 +94,7 @@ class Server : public Pt::Connectable {
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
         {
             if(!ssl.endHandshake()) {
+                PT_SSL_LOG_S("*** HANDSHAKE FAILED ***");
                 _loop.remove(*_client);
                 delete _client; _client = 0;
                 delete _ios; _ios = 0;

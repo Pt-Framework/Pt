@@ -77,6 +77,15 @@ void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)
         return;
     }
 
+    if(_sslbuf.handshakeError())
+    {
+        PT_SSL_LOG("Handshake failed");
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
+    }
+
     PT_SSL_LOG("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
 }
@@ -94,9 +103,18 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
         return;
     }
 
-    if(_sslbuf.handshakeError() || _sslbuf.connected())
+    if(_sslbuf.handshakeError())
     {
-        PT_SSL_LOG((_sslbuf.handshakeError() ? "Handshake failed" : "Handshake finished"));
+        PT_SSL_LOG("Handshake failed");
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
+    }
+
+    if(_sslbuf.connected())
+    {
+        PT_SSL_LOG("Handshake finished");
         _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
         _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
         handshakeFinished.send(*this);
@@ -107,6 +125,16 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
     if(_sslbuf.writeHandshake()) {
         PT_SSL_LOG("_ios->buffer().beginWrite()");
         _ios->buffer().beginWrite();
+        return;
+    }
+
+    if(_sslbuf.handshakeError())
+    {
+        PT_SSL_LOG("Handshake failed");
+        _ios->buffer().outputReady -= Pt::slot(*this, &SSLClient::onWriteHandshake);
+        _ios->buffer().inputReady  -= Pt::slot(*this, &SSLClient::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
     }
 }
 
