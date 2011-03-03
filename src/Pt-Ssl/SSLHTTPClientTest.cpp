@@ -76,7 +76,10 @@ class Client : public Pt::Connectable {
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLClient& ssl)
         {
-            if(!ssl.endHandshake()) {
+            try {
+                ssl.endHandshake();
+            }
+            catch(...) {
                 PT_SSL_LOG_C("*** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;

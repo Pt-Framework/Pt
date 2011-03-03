@@ -131,7 +131,7 @@ bool SSLStreamBuf::writeHandshake()
         const int n = BIO_read(_out, buff, sizeof(buff));
 
         if(n <= 0)
-            throw SSLRuntimeError("Failed reading from the SSL ouput BIO failed!", PT_SOURCEINFO);
+            throw SSLRuntimeError("Failed reading from OpenSSL output BIO!", PT_SOURCEINFO);
 
         PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
         _ios->write(buff, n);
@@ -160,7 +160,7 @@ bool SSLStreamBuf::readHandshake()
         {
             const int written = BIO_write(_in, buf, n);
             if(written <= 0)
-                throw SSLRuntimeError("Failed writing to the SSL input BIO failed!", PT_SOURCEINFO);
+            throw SSLRuntimeError("Failed writing to OpenSSL input BIO!", PT_SOURCEINFO);
             
             n -= written;
             PT_SSL_LOG("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
@@ -221,7 +221,7 @@ void SSLStreamBuf::shutdown()
     char buff[1000];
     const int n = BIO_read(_out, buff, sizeof(buff));
     if(n <= 0)
-        throw std::runtime_error("BIO_read failed");
+        throw SSLRuntimeError("Failed reading from OpenSSL ouput BIO!", PT_SOURCEINFO);
     
     _ios->write(buff, n);
     _ios->flush();
@@ -362,7 +362,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                 while( ( sslerr = ERR_get_error() ) ) {
                     PT_SSL_LOG("ERR_error_string = " << ERR_error_string(sslerr, 0));
                 }
-                throw std::runtime_error("SSL_read failed");
+                throw SSLRuntimeError("Failed reading decrypted data from OpenSSL!", PT_SOURCEINFO);
         }
     }
 

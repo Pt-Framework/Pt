@@ -57,8 +57,11 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
     _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadHandshake);
 }
 
-bool SSLServer::endHandshake()
-{ return !_sslbuf.handshakeError(); }
+void SSLServer::endHandshake()
+{
+    if(_sslbuf.handshakeError())
+        throw SSLHandshakeFailedError("The server has failed to complete the handshaking process!", PT_SOURCEINFO);
+}
 
 void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
