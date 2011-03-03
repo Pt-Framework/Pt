@@ -43,15 +43,10 @@
 #include <Pt/System/IOStream.h>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef PT_SSL_DEBUG
-#define PT_SSL_LOG_C(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE << Pt::System::endlog
-#define PT_SSL_LOG_S(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE << Pt::System::endlog
-#define PT_SSL_LOG_M(CODE) Pt::Ssl::SSLContext::pt_ssl_logger().info() << Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog
-#else
-#define PT_SSL_LOG_C(CODE)
-#define PT_SSL_LOG_S(CODE)
-#define PT_SSL_LOG_M(CODE)
-#endif
+log_define("Pt.SSL.Logger");
+#define PT_SSL_LOG_S(CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE << Pt::System::endlog)
+#define PT_SSL_LOG_C(CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE << Pt::System::endlog)
+#define PT_SSL_LOG_M(CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE << Pt::System::endlog)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
