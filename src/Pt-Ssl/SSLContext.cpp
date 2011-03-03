@@ -26,9 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream>
-
-#include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLContext.h>
 
 namespace Pt {
@@ -96,26 +93,30 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     // Load the certificate chain file (if available)
     if(certFile) {
         PT_SSL_LOG("Loading certificate chain file = " << certFile);
-        if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile)) throw "Could not read certificate file!";
+        if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile))
+            throw SSLRuntimeError("Could not read certificate file!", PT_SOURCEINFO);
     }
-
+    
     // Load the private key  file (if available)
     if(keyFile) {
         PT_SSL_LOG("Loading private key file = " << keyFile);
         SSL_CTX_set_default_passwd_cb(_ctx, _passwordCallback);
         SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
-        if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM)) throw "Could not read key file!";
+        if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM))
+            throw SSLRuntimeError("Could not read key file!", PT_SOURCEINFO);
     }
 
     // Check the private key (if needed)
     if(certFile && keyFile) {
-        if(!SSL_CTX_check_private_key(_ctx)) throw "The private key does not agree with the corresponding public key in the certificate!";
+        if(!SSL_CTX_check_private_key(_ctx))
+            throw SSLRuntimeError("The private key does not agree with the corresponding public key in the certificate!", PT_SOURCEINFO);
     }
 
     // Load and verify CA list (if available)
     if(caCertFile) {
         PT_SSL_LOG("Loading CA certificate list file = " << caCertFile);
-        if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0)) throw "Could not read/verify CA list!";
+        if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0))
+            throw SSLRuntimeError("Could not read/verify CA list!", PT_SOURCEINFO);
     }
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx,1);

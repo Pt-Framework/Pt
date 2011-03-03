@@ -30,8 +30,6 @@
 // Build using: ./jam.sh -q --with-openssl
 
 #include <fstream>
-#include <iostream>
-#include <stdexcept>
 
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>

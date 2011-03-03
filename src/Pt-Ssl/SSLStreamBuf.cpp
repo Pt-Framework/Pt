@@ -27,9 +27,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream>
-
-#include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLStreamBuf.h>
 
 namespace Pt {
@@ -134,7 +131,7 @@ bool SSLStreamBuf::writeHandshake()
         const int n = BIO_read(_out, buff, sizeof(buff));
 
         if(n <= 0)
-            throw std::runtime_error("BIO_read failed");
+            throw SSLRuntimeError("Failed reading from the SSL ouput BIO failed!", PT_SOURCEINFO);
 
         PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
         _ios->write(buff, n);
@@ -163,7 +160,7 @@ bool SSLStreamBuf::readHandshake()
         {
             const int written = BIO_write(_in, buf, n);
             if(written <= 0)
-                throw std::runtime_error("BIO_write failed");
+                throw SSLRuntimeError("Failed writing to the SSL input BIO failed!", PT_SOURCEINFO);
             
             n -= written;
             PT_SSL_LOG("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");

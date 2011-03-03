@@ -34,7 +34,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include <Pt/Ssl/Api.h>
+#include <Pt/Ssl/Exception.h>
 #include <Pt/System/Logger.h>
 
 namespace Pt {

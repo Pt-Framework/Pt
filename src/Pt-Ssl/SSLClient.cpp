@@ -27,7 +27,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/SourceInfo.h>
 #include <Pt/Ssl/SSLClient.h>
 
 namespace Pt {
