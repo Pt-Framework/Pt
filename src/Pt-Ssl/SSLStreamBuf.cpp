@@ -228,8 +228,8 @@ void SSLStreamBuf::shutdown()
     PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
 
     // Reset all
-    BIO_reset(_in);
-    BIO_reset(_out);
+    (void) BIO_reset(_in);
+    (void) BIO_reset(_out);
     SSL_clear(_ssl);
 
     delete [] _ibuffer; _ibuffer = 0;
@@ -283,7 +283,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     }
 
     // Return 0 if full
-    if(_ibufferSize == this->egptr() - this->gptr())
+    if(_ibufferSize == (size_t)(this->egptr() - this->gptr()))
     {
         PT_SSL_LOG("_ibuffer is full");
         return 0;
@@ -305,24 +305,21 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                     _ibuffer + _pbmax + leftover ); // end of get area
     }
 
-    BUF_MEM* bm     = 0;
-    bool     refill = true;
+    BUF_MEM* bm = 0;
     while(true) {
         // Refill the BIO with encoded bytes for decoding
-        if(refill) {
-            BIO_get_mem_ptr(_in, &bm);
-            if(bm->max > bm->length && isize > 0) {
-                const size_t refill = std::min<size_t>(bm->max - bm->length, isize);
-                isize -= refill;
+        BIO_get_mem_ptr(_in, &bm);
+        if(bm->max > bm->length && isize > 0) {
+            const size_t avail  = std::min<size_t>(_ios->rdbuf()->in_avail(), isize);
+            const size_t refill = std::min<size_t>(bm->max - bm->length, avail);
+            isize -= refill;
 
-                _ios->readsome(bm->data + bm->length, refill);
-                if(_ios->gcount() > 0) bm->length += _ios->gcount();
+            _ios->read(bm->data + bm->length, refill);
+            if(_ios->gcount() > 0) bm->length += _ios->gcount();
 
-                PT_SSL_LOG("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
-            }
-            if(bm->length == 0) return 0;
-            refill = false;
+            PT_SSL_LOG("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
         }
+        if(bm->length == 0) return 0;
 
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
@@ -347,10 +344,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 
             // This error may indicate that the other peer wants re-handshaking, or, there is just not enough raw bytes to be decoded
             case SSL_ERROR_WANT_READ:
-                if(readSize < 0 && isize > 0) {
-                    refill = true;
-                    continue;
-                }
+                if(readSize < 0 && isize > 0) continue;
                 return 0;
 
             // This error may indicate that the other peer has send shutdown message
