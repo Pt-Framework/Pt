@@ -34,7 +34,7 @@ namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 log_define("Pt.SSL.Logger");
-#define PT_SSL_LOG(CODE) log_info(SSLContext::pt_ssl_gen_call_info("SSLServer   ", PT_FUNCTION) << CODE << Pt::System::endlog)
+#define PT_SSL_LOG(CODE) log_info(SSLContext::pt_ssl_gen_call_info("SSLServer   ", PT_FUNCTION) << CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
