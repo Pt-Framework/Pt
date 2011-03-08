@@ -937,17 +937,20 @@ rule MkDir
 
     NOUPDATE $(<) ;
 
-    if $(<) != $(DOT) && ! $($(<)-mkdir) 
+    if $(<) != $(DOT) && ! $($(<)-mkdir)
     {
         local s ;
 
-        # Cheesy gate to prevent multiple invocations on same dir
-        # MkDir1 has the actions 
-        # Arrange for jam dirs
+        if $(<:B) # skip path ending with SLASH or DOT
+	    {
+            # Cheesy gate to prevent multiple invocations on same dir
+            # MkDir1 has the actions
+            # Arrange for jam dirs
 
-        $(<)-mkdir = true ;
-        MkDir1 $(<) ;
-        Depends dirs : $(<) ;
+            $(<)-mkdir = true ;
+            MkDir1 $(<) ;
+            Depends dirs : $(<) ;
+	    }
 
         # Recursively make parent directories.
         # $(<:P) = $(<)'s parent, & we recurse until root
@@ -957,16 +960,16 @@ rule MkDir
         if $(NT)
         {
             switch $(s)
-        {
-        case *:   : s = ;
-        case *:\\ : s = ;
-        }
+            {
+            case *:   : s = ;
+            case *:\\ : s = ;
+            }
         }
 
         if $(s) && $(s) != $(<)
         {
-        Depends $(<) : $(s) ;
-        MkDir $(s) ;
+            Depends $(<) : $(s) ;
+            MkDir $(s) ;
         }
         else if $(s)
         {
@@ -1311,11 +1314,21 @@ rule SubDir
     # subsequently be redefined.
 
     SEARCH_SOURCE = $(SUBDIR) ;
+    SOURCE_GRIST = [ FGrist $(<[2-]) ] ;
     LOCATE_SOURCE = $(ALL_LOCATE_TARGET) $(SUBDIR) ; # no subdirs
     LOCATE_TARGET = $(ALL_LOCATE_TARGET) $(SUBDIR) ; # no subdirs
     LOCATE_OBJECTS = [ FDirName $(ALL_LOCATE_OBJECTS) $(SUBDIR) ] ; # with subdirs
 
-    SOURCE_GRIST = [ FGrist $(<[2-]) ] ;
+    if $(SUBDIR) = $(DOT) && $(ALL_LOCATE_TARGET)
+    {
+	    LOCATE_SOURCE = $(ALL_LOCATE_TARGET) ; # no subdirs
+        LOCATE_TARGET = $(ALL_LOCATE_TARGET) ; # no subdirs
+    }
+
+    if $(SUBDIR) = $(DOT) && $(ALL_LOCATE_OBJECTS)
+    {
+       LOCATE_OBJECTS = [ FDirName $(ALL_LOCATE_OBJECTS) ] ; # with subdirs
+    }
 
     # Reset per-directory ccflags, hdrs
 
