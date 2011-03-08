@@ -941,7 +941,8 @@ rule MkDir
     {
         local s ;
 
-        if $(<:B) # skip path ending with SLASH or DOT
+        # skip . and ..
+        if $(<:BS) != $(DOT) && $(<:BS) != $(DOTDOT)
 	    {
             # Cheesy gate to prevent multiple invocations on same dir
             # MkDir1 has the actions
@@ -961,8 +962,8 @@ rule MkDir
         {
             switch $(s)
             {
-            case *:   : s = ;
-            case *:\\ : s = ;
+                case *:   : s = ;
+                case *:\\ : s = ;
             }
         }
 
