@@ -1,0 +1,351 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+
+
+ <title>Certificate Management with OpenSSL - General Stuff</title>
+</head><body>
+<h1 align="center">Certificate Management with OpenSSL - General Stuff</h1>
+
+<h3 align="right"><a href="http://gagravarr.org/writing/openssl-certs/index.shtml">Back to the guides 
+ index</a></h3>
+
+<h3>Guides In This Section</h3>
+<ul>
+ <li><a href="#cert-formats">Certificate And Key Formats</a>
+ </li><li><a href="#cert-convert">Converting Certificate Formats</a>
+ </li><li><a href="#multi">Multiple Certificates In One File</a>
+ </li><li><a href="#get-ca-cert">Using OpenSSL to get a CA Certificate</a>
+ </li><li><a href="#get-serv-cert">Using OpenSSL to get a Server 
+  Certificate</a>
+ </li><li><a href="#wot-ca">Alternatives to running your own CA</a>
+ </li><li><a href="#links">Links to other documents etc</a>
+</li></ul>
+ 
+<hr>
+
+<h3><a name="cert-formats">Certificate And Key Formats</a></h3>
+
+<h4>PEM</h4>
+<p>
+ Can contain all of private keys (RSA and DSA), public keys (RSA and DSA) 
+ and (x509) certificates. It is the default format for OpenSSL. It stores 
+ data Base64 encoded DER format, surrounded by ascii headers, so is 
+ suitable for text mode transfers between systems.
+</p>
+ 
+<h4>DER</h4>
+<p>
+ Can contain all of private keys, public keys and certificates. It stored 
+ according to the ASN1 DER format. It is headerless - PEM is text
+ header wrapped DER. It is the default format for most browsers.
+</p>
+
+<h4>PKCS#12</h4>
+<p>
+ Also known as PFX files. Can contain all of private keys, public keys
+ and certificates. It stores in a binary format.<br>
+ See 
+ <a href="http://www.drh-consultancy.demon.co.uk/pkcs12faq.html">here</a>
+ for more information on the format, and its support in OpenSSL
+</p>
+
+<hr>
+
+<h3><a name="cert-convert">Converting Certificate Formats</a></h3>
+
+<p>
+ Converting certificate formats is usually very straightforward with 
+ the OpenSSL tools. Check out the 
+ <a href="http://www.openssl.org/docs/apps/openssl.html">OpenSSL 
+ documentation</a> for the specifics, but here is a whistle-stop guide.
+</p>
+
+<h4>To PKCS#12 (Netscape, IE etc) from PEM</h4>
+<p>
+ openssl pkcs12 -export -in <i>pem-certificate-and-key-file</i> -out 
+  <i>pkcs-12-certificate-and-key-file</i>
+<br>
+ openssl pkcs12 -export -in <i>pem-certificate-file</i> -inkey 
+  <i>pem-key-file</i> -out <i>pkcs-12-certificate-and-key-file</i>
+<br>
+ openssl pkcs12 -export -in <i>pem-certificate-file</i> -nokeys -nodes 
+  -out <i>pkcs-12-certificate-file</i>
+</p>
+
+<h4>From PKCS#12 to PEM</h4>
+<p>
+ openssl pkcs12 -in <i>pkcs-12-certificate-file</i> -out 
+  <i>pem-certificate-file</i><br>
+ openssl pkcs12 -in <i>pkcs-12-certificate-and-key-file</i> -out 
+  <i>pem-certificate-and-key-file</i>
+</p>
+
+<h4>From PEM/DER to DER/PEM - DSA Keys</h4>
+<p>
+ openssl dsa -inform <i>PEM|DER</i> -outform <i>DER|PEM</i> -in
+  <i>pem-file|der-file</i> -out <i>der-file|pem-file</i>
+</p>
+
+<h4>From PEM/DER to DER/PEM - RSA Keys</h4>
+<p>
+ openssl rsa -inform <i>PEM|DER</i> -outform <i>DER|PEM</i> -in
+  <i>pem-file|der-file</i> -out <i>der-file|pem-file</i>
+</p>
+
+<hr>
+
+<h3><a name="multi">Multiple Certificates In One File</a></h3>
+
+<p>
+ In almost all cases, OpenSSL will assume that there's only one
+ certificate in a given file. As such, it will generally only use
+ the first certificate that it finds, and will ignore all others.
+</p>
+
+<p>
+ Normally, you will only have one certificate in a file, so that'll be
+ OK. However, you may ocassionally come across files with several 
+ certificates in them. Unless you're going to be using this file as
+ a CA bundle (where you list all the CA certificates you trust in one
+ single file), you'll probably need to split your file into one per
+ certificate.
+</p>
+
+<p>
+ First up, you'll want to check how many certificates a file holds. The
+ simplest way to do that is with:
+</p>
+
+<div align="center">
+ cat <i>ca-certificate-file</i> | grep -E 'BEGIN.* CERTIFICATE' | wc -l 
+</div>
+
+<p>
+ If you get a number that's greater than 1, then you have multiple
+ certificates in the file. Your best bet is to split the files after
+ the "--END ... CERTIFICATE--" line (you may or may not have anything
+ for "....")
+</p>
+
+<p>
+ One way to split it is using <a href="http://gagravarr.org/code/cert-split.pl">this
+ perl program</a>,
+ which will handle finding the file ends for you, and prompt you for files
+ to save certificates into.
+</p>
+
+<p>
+ Note that the format of a X509 PEM certificate is:
+</p>
+
+<div align="center">
+ (Header Info)<br>
+ ------BEGIN (TRUSTED|X509) CERTIFICATE-----<br>
+ (Certificate Data)<br>
+ ------END (TRUSTED|X509) CERTIFICATE-----
+</div>
+
+<hr>
+
+<h3><a name="get-ca-cert">Using OpenSSL to get a CA Certificate</a></h3>
+
+<p>
+ This will use the <i>s_client</i> function of OpenSSL
+</p>
+
+<p>
+ You will need to connect to a SSL service on a server which has a 
+ certificate signed by the required CA.
+</p>
+
+<div>
+ Run the following:
+</div>
+<div align="center">
+ <i>openssl s_client -showcerts -connect 
+  &lt;myserver&gt;:&lt;ssl_port&gt;</i>
+</div>
+<div>
+ The server certificate is the first certificate returned, and will be
+ PEM formatted. The CA certificate is the final certificate returned, and
+ is also PEM formatted.
+</div>
+<div>
+ Send ^D to exit the session with the server.
+</div>
+
+<hr>
+
+<h3><a name="get-serv-cert">Using OpenSSL to get a Server Certificate</a></h3>
+
+<p>
+ This will use the <i>s_client</i> function of OpenSSL
+</p>
+
+<p>
+ You will obviously need to connect to a SSL service on the server to get
+ its certificate.
+</p>
+
+<div>
+ Run the following:
+</div>
+<div align="center">
+ <i>openssl s_client -showcerts -connect 
+  &lt;myserver&gt;:&lt;ssl_port&gt;</i>
+</div>
+<div>
+ The server certificate is the first certificate returned, and will be
+ PEM formatted.
+</div>
+<div>
+ Send ^D to exit the session with the server.
+</div>
+
+<p>
+ Note that the s_client function doesn't check the default OpenSSL 
+ CA certificate store, so you would see verification errors with the
+ above. You can get around this by passing it the argumnet <i>-CApath
+ &lt;ssl-base-dir&gt;certs/</i> (see <a href="http://gagravarr.org/writing/openssl-certs/others.shtml#ca-openssl">here</a>
+ for a guide to &lt;ssl-base-dir&gt;).
+</p>
+
+<hr width="50%">
+
+<p>
+ For those of you using KDE, Konqueror also gives you an easy way to get 
+ at the server certificates. Go to 
+ "Settings-&gt;Configure Konqueror-&gt;Crypto", then select the cert, and
+ then save.
+</p>
+
+<hr>
+
+<h3><a name="wot-ca">Alternatives to running your own CA</a></h3>
+
+<p>
+ If you don't wish to run your own Certificate Authority, but do wish
+ to have certificates, there are serveral options. You could, of course,
+ go to a commercial CA, and pay for email and server certificates as
+ you need them.
+</p>
+
+<p>
+ Assuming you don't wish to pay for the certificates, you have two choices.
+ Both are based on the Web Of Trust model - to be issued with certificates,
+ you will have to get existing people in the web to certify your identity.
+ Only once known to the web (by being notaried), will you get a certificate.
+</p>
+
+<p>
+ Choice number one for this is the <a href="https://www.thawte.com/wot/">Thawte
+ Web Of Trust</a>. Once in the web, you will be able to get a personal
+ certificate suitable for use with email. The Thawte CA certificate is
+ installed by default in most SSL and TLS enabled devices.
+</p>
+
+<p>
+ Choice number two is <a href="https://www.cacert.org/">CA Cert</a>. It is
+ possible to get both personal certificates and server certificates, 
+ using similar notarisation methods to Thawte. Also, CA Cert is run
+ by a not-for-profit group (Thate is owned by Verisign), who are keen to
+ help. The disadvantage is that their CA certificate is installed in a much
+ smaller range of software by default. (Their certificate may be easily
+ installed, as other parts of this guide show).
+</p>
+
+<hr>
+
+<h3><a name="links">Links</a></h3>
+<ul>
+ <li><a href="http://www.openssl.org/">OpenSSL</a> - The toolkit and
+  libraries we're talking about using in this document
+ </li><li><a href="http://www.apache.org/">Apache</a> - Supports SSL / TLS
+  via mod_ssl, which calls into OpenSSL
+ </li><li><a href="http://www.washington.edu/pine/">Pine</a> - A SSL / TLS 
+  enabled email client, using OpenSSL for this functionality
+ </li><li><a href="http://www.mutt.org/">Mutt</a> - Another SSL / TLS
+  enabled email client, again using OpenSSL
+ </li><li><a href="http://www.madboa.com/geek/pine-ssl/">Another Pine
+  OpenSSL configuration guide</a>
+ </li><li><a href="http://www.pseudonym.org/ssl/ssl_cook.html">The OpenSSL
+  Certificate Cookbook</a> - A guide to running your own CA using
+  OpenSSL, and installing the certificates from it in Apache.
+ </li><li><a href="http://www.eclectica.ca/howto/ssl-cert-howto.php">Another
+ guide to creating and using certificate</a>
+ </li><li><a href="http://ospkibook.sourceforge.net/docs/OSPKI-2.4.7/OSPKI-html/ospki-book.htm">The Open-source PKI Book</a> - An in-depth look at PKI
+ standards, software and APIs, which also has some good overviews
+ and guides.
+ </li><li><a href="http://www.pseudonym.org/ssl/ssl_env.html">A guide to
+  setting up and customising openssl.cnf files</a>
+ </li><li><a href="http://bsdvault.net/sections.php?op=viewarticle&amp;artid=97">
+  BSD Vault - Self-signed X.509 Certificate Generation with OpenSSL</a>
+ </li><li><a href="http://developer.netscape.com/tech/security/ssl/howitworks.html">How
+  SSL Works</a> - An introduction to public/private key cryptography
+ </li><li><a href="http://developer.netscape.com/docs/manuals/security/pkin/contents.htm">Introduction 
+  to Public-Key Cryptography</a> - A good introduction to PKI
+ </li><li><a href="http://www.pkiguru.com/">http://www.pkiguru.com/</a> - A
+  good starting point for information on PKI, public/private key
+  cryptography etc
+ </li><li><a href="http://www.counterpane.com/applied.html">Applied
+  Cryptography by Bruce Schneier</a> - One of the best introductions to 
+  cryptography out there
+ </li><li><a href="http://www.cacert.org/">CAcert.org</a> - A community, not
+  for profit CA. Handy for those of you who just "want something that 
+  works", without having the hassle of running your own CA
+ </li><li><a href="http://www.jsiinc.com/SUBJ/tip4600/rh4617.htm">Guide to
+  using the Microsoft CA</a> - well, some people are forced to use it...
+</li></ul>
+
+
+<hr>
+
+<div width="100%" align="center">
+ <div style="float: right; font-weight: bold; font-size: 120%;">
+	<a href="http://gagravarr.org/writing/openssl-certs/index.shtml">Guides Index</a>
+ </div>
+
+ <div style="font-size: 80%; line-height: 150%;">
+	Written By:
+	<a href="mailto:writings@gagravarr.org">Nick Burch</a>&nbsp; &nbsp;
+	<i>Last modified: Friday, 02-Nov-2007 17:13:47 GMT</i>
+	<br>
+	These pages are from http://www.gagravarr.org/writing/openssl-certs/
+	<br>
+<span>
+ <!-- Creative Commons License -->
+ <a href="http://creativecommons.org/licenses/by-nc-sa/2.5"><img alt="Creative Commons License" src="certificate-management-with-openssl-general-stuff_files/somerights.gif" border="0"></a>
+ This work is licensed under a
+ <a href="http://creativecommons.org/licenses/by-nc-sa/2.5">Creative 
+  Commons License</a>.
+ <!-- /Creative Commons License -->
+</span>
+
+<!--
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+<license rdf:resource="http://creativecommons.org/licenses/by-nc-sa/2.5" 
+/>
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-nc-sa/2.5/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction"/>
+   <permits rdf:resource="http://web.resource.org/cc/Distribution"/>
+   <requires rdf:resource="http://web.resource.org/cc/Notice"/>
+   <requires rdf:resource="http://web.resource.org/cc/Attribution"/>
+   <prohibits rdf:resource="http://web.resource.org/cc/CommercialUse"/>
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks"/>
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike"/>
+</License>
+
+</rdf:RDF>
+-->
+
+ </div>
+</div>
+
+</body></html>

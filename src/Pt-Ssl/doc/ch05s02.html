@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us"><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script language="JavaScript" src="ch05s02_files/bread.js"></script>
+  <title>
+   Template for Creating Certificates and Keys for the Example Programs
+  </title>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="hp_design_version" content="hpweb.1.2a">
+  <meta name="web_section_id" content="R307">
+<meta name="document_title" content="HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS">
+<meta name="mpn" content="">
+<meta name="pub_date" content="July 2006">
+<meta name="description" content="Example Programs -- HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS, HP Part Number '', Publication Date 'July 2006'">
+<meta name="keywords" content="Certificate, SSL$EXAMPLES_SETUP.TEMPLATE, ">
+<meta name="collection" content="">
+<meta name="ct" content="">
+<meta name="rt" content="">
+<meta name="ROBOTS" content="ALL">
+
+  <script type="text/javascript" language="JavaScript"><!--
+        var theme = '#EB5F01';
+
+          var stylePath = "style/5_0/";
+
+      //--></script>
+  <script type="text/javascript" language="JavaScript" src="ch05s02_files/hpweb_utilities.js"></script><link rel="stylesheet" type="text/css" href="ch05s02_files/hpweb_styles_mac.css"><style type="text/css">
+.themeheader {color:#FFFFFF; font-weight:bold;}
+
+.themeheaderA {color:#FFFFFF; font-weight:bold; font-size: 140%;}
+
+.leveld {font-weight: bold; border-bottom: solid 2px #EB5F01; margin: 0px 0px 0px 0px; padding:1px;}
+.themebody {color:#FFFFFF;}
+
+a.themeheaderlink {font-weight: bold; color:#FFFFFF; text-decoration: none;}
+a.themeheaderlink:active {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:link {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:visited {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:hover {text-decoration: underline;}
+
+a.themelink {color:#FFFFFF; text-decoration: none;}
+a.themelink:active {color:#FFFFFF;}
+a.themelink:link {color:#FFFFFF;}
+a.themelink:visited {color:#FFFFFF;}
+a.themelink:hover {text-decoration: underline;}
+
+a.themebodylink {color:#FFFFFF; text-decoration: underline;}
+a.themebodylink:active {color:#FFFFFF;}
+a.themebodylink:link {color:#FFFFFF;}
+a.themebodylink:visited {color:#FFFFFF;}
+
+.theme {background: #EB5F01}
+</style>
+  <link rel="stylesheet" type="text/css" href="ch05s02_files/hpweb_doc.css">
+<link rel="stylesheet" type="text/css" href="ch05s02_files/hpweb_locale_overrides.css">
+
+<script language="JavaScript" src="ch05s02_files/openvms10.js"></script></head>
+        
+
+		
+
+        
+<body class="colorFFFFFFbg" leftmargin="0" topmargin="0" link="#003366" marginheight="0" marginwidth="0" text="#000000" vlink="#660066" alink="#003366">
+<!--stopindex-->
+<!-- Begin Top Navigation Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td width="10"><a href="#jumptocontent"><img src="ch05s02_files/s.gif" alt="Jump to content" width="10" height="1" border="0"></a><noscript>
+<a href="http://welcome.hp.com/country/us/en/noscript.html">summary of site-wide JavaScript functionality</a></noscript></td>
+		<td class="smallbold" width="260" align="left"><!-- Welcome, 123456789012345678901234567890... --></td>
+		<td><img src="ch05s02_files/s.gif" alt="" width="10" height="24" border="0"></td>
+		<td class="color003366" width="155" align="left">
+</td>
+		<td class="countryInd" width="285" align="right">United States-English</td>
+		<td><img src="ch05s02_files/s.gif" alt="" width="20" height="1"></td>
+	</tr>
+</tbody></table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#666666">
+			<table width="720" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch05s02_files/hpweb_1-2_topnav_home.gif" alt="HP.com Home" width="100" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/prodserv.html"><img src="ch05s02_files/hpweb_1-2_topnav_prdsrv.gif" alt="Products and Services" width="166" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/support.html"><img src="ch05s02_files/hpweb_1-2_topnav_supprt.gif" alt="Support and Drivers" width="163" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/solutions.html"><img src="ch05s02_files/hpweb_1-2_topnav_slutns.gif" alt="Solutions" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/howtobuy.html"><img src="ch05s02_files/hpweb_1-2_topnav_buy.gif" alt="How to Buy" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="1"></td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Top Navigation Area -->
+<!-- Begin Search Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#E7E7E7">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr>
+					<td valign="top" width="20"><img src="ch05s02_files/s.gif" alt="" class="decoration" width="20" height="48"></td>
+					<td class="color003366bld" valign="middle" width="150" align="left">»&nbsp;<a href="http://www.hp.com/country/us/en/contact_us.html" class="smallbld">Contact HP</a></td>
+					<td width="570" align="right"><form action="http://www.hp.com/search/" method="GET" name="hpsearch" id="hpsearch">
+<input name="ctry" value="us" type="hidden">
+<input name="lk" value="1" type="hidden">
+<input name="uf" value="0" type="hidden">
+<input name="lang" value="eng" type="hidden">
+<input name="hps" value="HP OpenVMS systems" type="hidden">
+<input name="hpn" value="Return to the HP OpenVMS systems site" type="hidden">
+<input name="qp" value="site:h71000.www7.hp.com url:h71028.www7.hp.com/ERC -wizard" type="hidden">
+<input name="hpr" value="http://h71000.www7.hp.com/" type="hidden">
+<input name="hpa" value="http://welcome.hp.com/country/us/en/contact_us.html" type="hidden">
+<input name="hpo" value="hphqglobal,hphqWWesg,hphqbcs,hphqopenvms" type="hidden">
+<input name="hpc" value="1" type="hidden">
+						<table align="right" border="0" cellpadding="0" cellspacing="0">
+							<tbody><tr class="decoration">
+								<td colspan="4"><img src="ch05s02_files/s.gif" alt="" width="1" height="2" border="0"></td>
+							</tr>
+							<tr>
+								<td class="bold" align="left"><label for="textbox1">Search:</label></td>
+								<td valign="top"><img src="ch05s02_files/s.gif" alt="" class="decoration" width="4" height="1"></td>
+								<td valign="top" align="left">
+<input name="qt" size="26" maxlength="1991" id="textbox1" alt="Enter search criteria here" type="text"><img src="ch05s02_files/s.gif" alt="" width="4" height="1">
+<a id="country" onmouseover="status='search using the specified criteria';return true;" onmouseout="status='';return true;" onfocus="status='search using the specified criteria';return true;" onblur="status='';return true;">
+
+
+<input name="submit" src="ch05s02_files/hpweb_1-2_arrw_sbmt.gif" alt="Begin your search" onclick='s_linkType="o";s_linkName="OpenVMS-Search-"+document.location+"-("+hpsearch.qt.value+")";s_lnk=s_co(this);s_gs("hphqopenvms");' type="Image" border="0"></a></td>
+								<td align="left"><img src="ch05s02_files/s.gif" alt="" class="decoration" width="20" height="1"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td colspan="3" class="small" align="left"><div><!--BEGIN SEARCH HPL TAG -->
+<input value="1" name="hpl" checked="checked" class="srchradbtn" id="sectionRadio" type="radio"><label for="sectionRadio"><span class="bold">HP OpenVMS Systems</span></label>
+<input value="0" name="hpl" id="countryRadio" class="srchradbtn" type="radio"><label for="countryRadio">All of HP</label><!-- END SEARCH HPL TAG --></div></td>
+							</tr>
+						</tbody></table></form>
+					</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Search Area -->
+<!--startindex-->
+<!-- Begin Page Title Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="middle" width="170" align="center"><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch05s02_files/hpweb_1-2_topnav_hp_logo.gif" alt="HP.com home" width="64" height="55" border="0"></a><br></td>
+		<td width="10"><img src="ch05s02_files/s.gif" alt="" width="10" height="93"></td>
+		<td valign="top" width="560" align="left">
+		<script language="JavaScript">breadcrumbs()</script><a href="http://welcome.hp.com/country/us/eng/prodserv/software.html" class="udrlinesmall">Software</a>&nbsp; <span class="color666666">&gt;</span> &nbsp;<a href="http://h71000.www7.hp.com/" class="udrlinesmall">OpenVMS Systems</a>  &gt; <a href="http://h71000.www7.hp.com/doc/" class="udrlinesmall">Documentation</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/" class="udrlinesmall">83final</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/" class="udrlinesmall">ba554_90007</a> <br>
+
+
+<img src="ch05s02_files/s_002.gif" alt="" width="1" height="6"><h1>HP OpenVMS Systems Documentation</h1></td>
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Page Title Area -->
+<!-- Begin Left Navigation and Content Area.  To increase width of content area modify width of table below. -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+<!-- Begin Gutter Cell 10px Wide -->
+		<td valign="top" width="10"><a name="jumptocontent"><img src="ch05s02_files/s_002.gif" alt="Content starts here" width="10" height="1"></a></td>
+<!-- End Gutter Cell 10px Wide -->
+<!--startindex-->
+<!-- Start Content Area.  To increase width of content area, modify width of table cell below. -->
+		<td valign="top" width="730" align="left">
+<!-----hpOpenVMSContentStart----->
+ 
+<table><!-- Start Content Area.  To increase width of content area, modify width of table cell below. --><tbody><tr>
+    <td valign="top" width="560" align="left">
+      <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="udrlinesmall">HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS</a>&nbsp;<span class="color666666">&gt;</span>&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch05.html" class="udrlinesmall">Chapter&nbsp;5&nbsp;Example Programs</a><br>
+      <img src="ch05s02_files/s_003.gif" alt="" width="1" height="6">
+      <h1>
+      Template for Creating Certificates and Keys for the Example Programs
+      </h1>
+      <table width="560" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Table of Contents">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="colorFFFFFFbld">Table of Contents</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch05s02_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td width="2"><img src="ch05s02_files/s_003.gif" alt="" class="decoration" width="2" height="1"></td><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Index">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ix01.html" class="colorFFFFFFbld">Index</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch05s02_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td><img src="ch05s02_files/s_003.gif" alt="" class="decoration" width="10" height="1"></td></tr></tbody></table>
+      <div class="navheader"><table summary="Navigation header" width="540" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="ch05s02_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch05s02_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch05s02_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="1" bgcolor="#cccccc"><img src="ch05s02_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="4" bgcolor="#ffffff"><img src="ch05s02_files/s_003.gif" alt="spacer" width="1" height="4"></td></tr><tr><td valign="top" width="40%" align="left"><form action="ch05s01.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"></form>
+          &nbsp;
+        </td><th width="20%" align="center">
+          &nbsp;
+        </th><td valign="top" width="40%" align="right"><form action="ch05s03.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"></form>
+          &nbsp;
+        </td></tr></tbody></table></div>
+      <div class="section" lang="en"><div class="titlepage"><div><div></div></div><div></div></div><p>The command procedure SSL$EXAMPLES_SETUP.TEMPLATE (located
+in SYS$COMMON:[SYSHLP.EXAMPLES.SSL]) is a template that sets up
+the certificate and keys so you can run the example programs included
+with HP SSL. SSL$EXAMPLES_SETUP.TEMPLATE does the following:<a class="indexterm" name="d0e4636"></a><a class="indexterm" name="d0e4641"></a> </p><div><ul class="primarybullet"><li><div class="listitembody"><p class="list-initial">Creates a Certificate Authority (CA) certificate</p></div></li><li><div class="listitembody"><p class="list-initial">Creates server and client certificate requests</p></div></li><li><div class="listitembody"><p class="list-initial">The CA signs the two certificate requests</p></div></li><li><div class="listitembody"><p class="list-initial">Creates server and client certificates</p></div></li></ul></div><p>To execute this command procedure, be sure that SSL$STARTUP.COM
+and SSL$UTILS.COM have been run, then remove the comment characters
+from the commands. </p><p>The following program listing shows SSL$EXAMPLES_SETUP.TEMPLATE.</p><table><tbody><tr><td><img src="ch05s02_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table width="100%" bgcolor="#E0E0E0" border="0"><tbody><tr><td><code><pre class="programlisting">$!<br>$!  SSL$EXAMPLES_SETUP.COM --<br>$! <br>$! This command procedure is actually a template that will show <br>$! the commands necessary to create certificates and keys for the example <br>$! programs.  <br>$!<br>$! Also included in this file are the necessary options to enter into the <br>$! SSL$CERT_TOOL.COM to create the necessary certificates and keys to the <br>$! example programs.  The SSL$CERT_TOOL.COM is found in SSL$COM.  See the <br>$! documenation for more information about the SSL$CERT_TOOL.COM.<br>$!<br>$! 1. Create CA certificate - option 5 in SSL$CERT_TOOL.COM.<br>$!    This will create a key in one file, named SSL$KEY:SERVER_CA.KEY<br>$!    by default, and a certificate in another file, named <br>$!    SSL$CERT:SERVER_CA.CRT by default.<br>$!<br>$! 2. Make 2 copies of CA certificate created in step #1.<br>$!    One should be called server_ca.crt and the other called <br>$!    client_ca.crt as these are the filenames defined in the<br>$!    example programs.  You will have to exit the SSL$CERT_TOOL.COM <br>$!    procedure to do this operation from the DCL command line.<br>$!    For example:<br>$!        $ COPY SSL$KEY:SERVER_CA.KEY SSL$KEY:CLIENT_CA.KEY<br>$!        $ COPY SSL$CERT:SERVER_CA.CRT SSL$CERT:CLIENT_CA.CRT<br>$!<br>$! 3. Create a server certificate signing request - option 3 in SSL$CERT_TOOL.COM.<br>$!    The Common Name should be the TCP/IP hostname of the server system.<br>$!    The default name of the request is SERVER.CSR.  The corresponding private<br>$!    key is named SERVER.KEY.<br>$!<br>$! 4. Sign server certificate signing request - option 6 in SSL$CERT_TOOL.COM<br>$!    Use the CA certificate, SERVER_CA.CRT, created in step #1 to sign the request <br>$!    created in step #3.  This will create a certificate file, which should be <br>$!    named SERVER.CRT.  This is the name as it is defined in example programs.<br>$!<br>$! 5. Create a client certificate signing request - option 3 in SSL$CERT_TOOL.COM.<br>$!<br>$! 6. Sign client certificate signing request - option 6 in SSL$CERT_TOOL.COM<br>$!    Use the CA certificate, CLIENT_CA.CRT, created in step #1 to sign the request <br>$!    created in step #5.  This will create a certificate file, which should be <br>$!    named CLIENT.CRT.  This is the name as it is defined in example programs.<br>$!<br>$! 7. These certificates and keys should reside in the same directory as<br>$!    the example programs.<br>$!<br>$!<br>$!<br>$!<br>$! The commands have been changed to use generic data as <br>$! input.  To use these commands, one will have to substitute <br>$! the generic data with data specific to their site.  <br>$! For example, yourcountry could be change to US.  It is <br>$! assumed that the SSL startup file, SYS$STARTUP:SSL$STARTUP.COM, <br>$! and the SSL$COM:SSL$UTILS.COM procedures have been executed.<br>$!<br>$!<br>$! Check to make sure SSL has been started, so <br>$! we can use the logicals that it defines.<br>$!<br>$! $ if f$trnlnm(&#8220;SSL$ROOT&#8221;) .eqs. &#8220;&#8220;<br>$! $ then<br>$! $    write sys$output &#8220;SSL needs to be started.  Execute SYS$STARTUP:SSL$STARTUP,&#8221;<br>$! $    write sys$output &#8220;then try this procedure again.&#8221;<br>$! $ endif<br>$!<br>$! Check to make sure SSL$UTILS has been executed, so <br>$! we can use the foreign commands that it sets up.<br>$!<br>$! $ if f$type(OPENSSL) .eqs. &#8220;&#8220;<br>$! $ then<br>$! $    @SSL$COM:SSL$UTILS<br>$! $ endif<br>$! <br>$! Check to make sure the SERIAL and INDEX files exist.<br>$! If they don&#8217;t, create them.<br>$!<br>$! $ if f$search (&#8220;SSL$ROOT:[DEMOCA]SERIAL.TXT&#8221;) .eqs. &#8220;&#8220;<br>$! $ then<br>$! $   CREATE SSL$ROOT:[DEMOCA]SERIAL.TXT<br>$! 01<br>$! $ endif<br>$!<br>$! $ if f$search (&#8220;SSL$ROOT:[DEMOCA]INDEX.TXT&#8221;) .eqs. &#8220;&#8220;<br>$! $ then<br>$! $   CREATE SSL$ROOT:[DEMOCA]INDEX.TXT<br>$! $ endif<br>$!<br>$! Create the CA certificate.<br>$!<br>$! $ define/user sys$command sys$input<br>$! $ openssl req -config ssl$root:[000000]openssl-vms.cnf -new -x509 -days 1825 -<br>$!               -keyout ssl$key:server_ca.key -out ssl$certs:server_ca.crt<br>$! yourpassword<br>$! yourpassword<br>$! yourcountry<br>$! yourstate<br>$! yourcity<br>$! yourcompany<br>$! yourdepartment<br>$! your Certificate Authority certificate $! firstname.lastname@yourcompany.com<br>$!<br>$! Copy the server_ca.* to client_ca.* so that the CA can $! be loaded on each side.<br>$!<br>$! $ copy ssl$key:server_ca.key ssl$key:client_ca.key <br>$! $ copy ssl$certs:server_ca.crt ssl$certs:client_ca.crt <br>$!<br>$! $!<br>$! $!<br>$! $! Create the server certificate request.<br>$! $!<br>$! $!   Note : There is no way to use the value of a<br>$! $!          symbol when you are using the value of<br>$! $!          symbol as input, as we do below.  To get<br>$! $!          around, we create a .COM on the fly and<br>$! $!          execute the created .COm file to create<br>$! $!          the server certificate.<br>$! $!<br>$! $ hostname = f$trnlnm(&#8220;tcpip$inet_host&#8221;) <br>$! $ domain = f$trnlnm(&#8220;tcpip$inet_domain&#8221;) <br>$! $ server_name = hostname + &#8220;.&#8221; + domain $! $!<br>$! $ open/write s_com create_s_cert.com<br>$! $! <br>$! $ write s_com &#8220;$!&#8221;<br>$! $ write s_com &#8220;$ define/user sys$command sys$input&#8221;<br>$! $ write s_com &#8220;$ openssl req -new -nodes -config ssl$root:[000000]openssl-vms.cnf&#8221; -<br>$!                            + &#8220;-keyout ssl$key:server.key -out ssl$certs:server.csr&#8221;<br>$! $ write s_com &#8220;yourcountry&#8221;<br>$! $ write s_com &#8220;yourstate&#8221;<br>$! $ write s_com &#8220;yourcity&#8221;<br>$! $ write s_com &#8220;yourcompany&#8221;<br>$! $ write s_com &#8220;yourdepartment&#8221;<br>$! $ write s_com &#8220;&#8216;&#8217;server_name&#8217;&#8221;<br>$! $ write s_com &#8220;firstname.lastname@yourcompany.com&#8221;<br>$! $ write s_com &#8220;&#8220;<br>$! $ write s_com &#8220;&#8220;<br>$! $!<br>$! $ close s_com<br>$! $ @create_s_cert<br>$! $ delete create_s_cert.com;<br>$! $!<br>$! $!<br>$! $! Now, sign the server certificate ...<br>$! $!<br>$! $ define/user sys$command sys$input<br>$! $ openssl ca -config ssl$root:[000000]openssl-vms.cnf -cert ssl$certs:server_ca.crt -keyfile ssl$key:server_ca.key -<br>$!           -out ssl$certs:server.crt -infiles ssl$certs:server.csr<br>$! yourpassword<br>$! Y<br>$! Y<br>$! $!<br>$! $!<br>$! $! Create the client certificate request.<br>$! $!<br>$! $ define/user sys$command sys$input<br>$! $ openssl req -new -nodes -config ssl$root:[000000]openssl-vms.cnf -<br>$!                 -keyout ssl$key:client.key -out ssl$certs:client.csr<br>$! yourcountry<br>$! yourstate<br>$! yourcity<br>$! yourcompany<br>$! yourdepartment<br>$! yourname<br>$! firstname.lastname@yourcompany.com<br>$! <br>$! <br>$! $!<br>$! $!<br>$! $! Now, sign the client certificate ...<br>$! $!<br>$! $ define/user sys$command sys$input<br>$! $ openssl ca -config ssl$root:[000000]openssl-vms.cnf -cert ssl$certs:client_ca.crt -keyfile ssl$key:client_ca.key -<br>$! -out ssl$certs:client.crt -infiles ssl$certs:client.csr<br>$! yourpassword<br>$! Y<br>$! Y<br>$! $!<br>$! $! Let&#8217;s view the CA certificate.<br>$! $!<br>$! $ openssl x509 -noout -text -in ssl$certs:server_ca.crt <br>$! $!<br>$! $!<br>$! $! Let&#8217;s view the Server Certificate Request.<br>$! $!<br>$! $ openssl req -noout -text -in ssl$certs:server.csr <br>$! $!<br>$! $! Let&#8217;s view the Server Certificate.<br>$! $!<br>$! $ openssl x509 -noout -text -in ssl$certs:server.crt <br>$! $!<br>$! $! Let&#8217;s view the Client Certificate Request.<br>$! $!<br>$! $ openssl req -noout -text -in ssl$certs:client.csr <br>$! $!<br>$! $! Let&#8217;s view the Client Certificate.<br>$! $!<br>$! $ openssl x509 -noout -text -in ssl$certs:client.crt <br>$! $!<br>$! $!<br>$! $! Lastly, move the certificates and keys to the directory <br>$! $! in which you are building/running the examples.<br>$!<br>$! $exit</pre></code></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s02_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table></div>
+      <div class="navfooter"><hr><table summary="Navigation footer" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td valign="top" width="40%" align="left"><form action="ch05s01.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"><br><br>Example Programs Included in HP SSL Kit</form>
+                &nbsp;
+              </td><td valign="top" width="20%" align="center">
+                &nbsp;
+              </td><td valign="top" width="40%" align="right"><form action="ch05s03.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"><br><br>Simple SSL Client Program
+                    &nbsp;
+                  </form></td></tr></tbody></table></div>
+    </td>
+    <!-- End Content Area -->
+    <!--stopindex-->
+   </tr></tbody></table>
+<p>&nbsp;</p>
+<!-----hpOpenVMSContentFinish----->
+
+		</td>
+<!-- End Content Area -->
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Left Navigation and Content Area -->
+
+<!-- Begin Footer Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td class="color666666bg"><img src="ch05s02_files/s.gif" alt="" width="1" height="4" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td colspan="4"><img src="ch05s02_files/s.gif" alt="" width="1" height="4" border="0"></td>
+				</tr>
+				<tr>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/privacy.html" class="udrlinesmall">Privacy statement</a></td>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/termsofuse.html" class="udrlinesmall">Using this site means you accept its terms</a></td>
+					<td width="33%" align="center"><!-- Activate Feedback Link Here --><a href="http://h71000.www7.hp.com/fb_web.html" class="udrlinesmall">Feedback to webmaster</a><!-- End Activate Feedback Link Here --></td>
+				</tr>
+				<tr class="decoration">
+					<td colspan="4"><img src="ch05s02_files/s.gif" alt="" width="1" height="4"></td>
+				</tr>
+				<tr>
+					<td colspan="4" class="small" align="center">© 2011 Hewlett-Packard Development Company, L.P.</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Footer Area -->
+
+
+
+
+
+
+</body></html>

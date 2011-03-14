@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us"><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script language="JavaScript" src="ch05s04_files/bread.js"></script>
+  <title>
+   Simple SSL Server Program
+  </title>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="hp_design_version" content="hpweb.1.2a">
+  <meta name="web_section_id" content="R307">
+<meta name="document_title" content="HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS">
+<meta name="mpn" content="">
+<meta name="pub_date" content="July 2006">
+<meta name="description" content="Example Programs -- HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS, HP Part Number '', Publication Date 'July 2006'">
+<meta name="keywords" content="">
+<meta name="collection" content="">
+<meta name="ct" content="">
+<meta name="rt" content="">
+<meta name="ROBOTS" content="ALL">
+
+  <script type="text/javascript" language="JavaScript"><!--
+        var theme = '#EB5F01';
+
+          var stylePath = "style/5_0/";
+
+      //--></script>
+  <script type="text/javascript" language="JavaScript" src="ch05s04_files/hpweb_utilities.js"></script><link rel="stylesheet" type="text/css" href="ch05s04_files/hpweb_styles_mac.css"><style type="text/css">
+.themeheader {color:#FFFFFF; font-weight:bold;}
+
+.themeheaderA {color:#FFFFFF; font-weight:bold; font-size: 140%;}
+
+.leveld {font-weight: bold; border-bottom: solid 2px #EB5F01; margin: 0px 0px 0px 0px; padding:1px;}
+.themebody {color:#FFFFFF;}
+
+a.themeheaderlink {font-weight: bold; color:#FFFFFF; text-decoration: none;}
+a.themeheaderlink:active {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:link {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:visited {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:hover {text-decoration: underline;}
+
+a.themelink {color:#FFFFFF; text-decoration: none;}
+a.themelink:active {color:#FFFFFF;}
+a.themelink:link {color:#FFFFFF;}
+a.themelink:visited {color:#FFFFFF;}
+a.themelink:hover {text-decoration: underline;}
+
+a.themebodylink {color:#FFFFFF; text-decoration: underline;}
+a.themebodylink:active {color:#FFFFFF;}
+a.themebodylink:link {color:#FFFFFF;}
+a.themebodylink:visited {color:#FFFFFF;}
+
+.theme {background: #EB5F01}
+</style>
+  <link rel="stylesheet" type="text/css" href="ch05s04_files/hpweb_doc.css">
+<link rel="stylesheet" type="text/css" href="ch05s04_files/hpweb_locale_overrides.css">
+
+<script language="JavaScript" src="ch05s04_files/openvms10.js"></script></head>
+        
+
+		
+
+        
+<body class="colorFFFFFFbg" leftmargin="0" topmargin="0" link="#003366" marginheight="0" marginwidth="0" text="#000000" vlink="#660066" alink="#003366">
+<!--stopindex-->
+<!-- Begin Top Navigation Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td width="10"><a href="#jumptocontent"><img src="ch05s04_files/s.gif" alt="Jump to content" width="10" height="1" border="0"></a><noscript>
+<a href="http://welcome.hp.com/country/us/en/noscript.html">summary of site-wide JavaScript functionality</a></noscript></td>
+		<td class="smallbold" width="260" align="left"><!-- Welcome, 123456789012345678901234567890... --></td>
+		<td><img src="ch05s04_files/s.gif" alt="" width="10" height="24" border="0"></td>
+		<td class="color003366" width="155" align="left">
+</td>
+		<td class="countryInd" width="285" align="right">United States-English</td>
+		<td><img src="ch05s04_files/s.gif" alt="" width="20" height="1"></td>
+	</tr>
+</tbody></table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#666666">
+			<table width="720" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch05s04_files/hpweb_1-2_topnav_home.gif" alt="HP.com Home" width="100" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/prodserv.html"><img src="ch05s04_files/hpweb_1-2_topnav_prdsrv.gif" alt="Products and Services" width="166" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/support.html"><img src="ch05s04_files/hpweb_1-2_topnav_supprt.gif" alt="Support and Drivers" width="163" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/solutions.html"><img src="ch05s04_files/hpweb_1-2_topnav_slutns.gif" alt="Solutions" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/howtobuy.html"><img src="ch05s04_files/hpweb_1-2_topnav_buy.gif" alt="How to Buy" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="1"></td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Top Navigation Area -->
+<!-- Begin Search Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#E7E7E7">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr>
+					<td valign="top" width="20"><img src="ch05s04_files/s.gif" alt="" class="decoration" width="20" height="48"></td>
+					<td class="color003366bld" valign="middle" width="150" align="left">»&nbsp;<a href="http://www.hp.com/country/us/en/contact_us.html" class="smallbld">Contact HP</a></td>
+					<td width="570" align="right"><form action="http://www.hp.com/search/" method="GET" name="hpsearch" id="hpsearch">
+<input name="ctry" value="us" type="hidden">
+<input name="lk" value="1" type="hidden">
+<input name="uf" value="0" type="hidden">
+<input name="lang" value="eng" type="hidden">
+<input name="hps" value="HP OpenVMS systems" type="hidden">
+<input name="hpn" value="Return to the HP OpenVMS systems site" type="hidden">
+<input name="qp" value="site:h71000.www7.hp.com url:h71028.www7.hp.com/ERC -wizard" type="hidden">
+<input name="hpr" value="http://h71000.www7.hp.com/" type="hidden">
+<input name="hpa" value="http://welcome.hp.com/country/us/en/contact_us.html" type="hidden">
+<input name="hpo" value="hphqglobal,hphqWWesg,hphqbcs,hphqopenvms" type="hidden">
+<input name="hpc" value="1" type="hidden">
+						<table align="right" border="0" cellpadding="0" cellspacing="0">
+							<tbody><tr class="decoration">
+								<td colspan="4"><img src="ch05s04_files/s.gif" alt="" width="1" height="2" border="0"></td>
+							</tr>
+							<tr>
+								<td class="bold" align="left"><label for="textbox1">Search:</label></td>
+								<td valign="top"><img src="ch05s04_files/s.gif" alt="" class="decoration" width="4" height="1"></td>
+								<td valign="top" align="left">
+<input name="qt" size="26" maxlength="1991" id="textbox1" alt="Enter search criteria here" type="text"><img src="ch05s04_files/s.gif" alt="" width="4" height="1">
+<a id="country" onmouseover="status='search using the specified criteria';return true;" onmouseout="status='';return true;" onfocus="status='search using the specified criteria';return true;" onblur="status='';return true;">
+
+
+<input name="submit" src="ch05s04_files/hpweb_1-2_arrw_sbmt.gif" alt="Begin your search" onclick='s_linkType="o";s_linkName="OpenVMS-Search-"+document.location+"-("+hpsearch.qt.value+")";s_lnk=s_co(this);s_gs("hphqopenvms");' type="Image" border="0"></a></td>
+								<td align="left"><img src="ch05s04_files/s.gif" alt="" class="decoration" width="20" height="1"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td colspan="3" class="small" align="left"><div><!--BEGIN SEARCH HPL TAG -->
+<input value="1" name="hpl" checked="checked" class="srchradbtn" id="sectionRadio" type="radio"><label for="sectionRadio"><span class="bold">HP OpenVMS Systems</span></label>
+<input value="0" name="hpl" id="countryRadio" class="srchradbtn" type="radio"><label for="countryRadio">All of HP</label><!-- END SEARCH HPL TAG --></div></td>
+							</tr>
+						</tbody></table></form>
+					</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Search Area -->
+<!--startindex-->
+<!-- Begin Page Title Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="middle" width="170" align="center"><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch05s04_files/hpweb_1-2_topnav_hp_logo.gif" alt="HP.com home" width="64" height="55" border="0"></a><br></td>
+		<td width="10"><img src="ch05s04_files/s.gif" alt="" width="10" height="93"></td>
+		<td valign="top" width="560" align="left">
+		<script language="JavaScript">breadcrumbs()</script><a href="http://welcome.hp.com/country/us/eng/prodserv/software.html" class="udrlinesmall">Software</a>&nbsp; <span class="color666666">&gt;</span> &nbsp;<a href="http://h71000.www7.hp.com/" class="udrlinesmall">OpenVMS Systems</a>  &gt; <a href="http://h71000.www7.hp.com/doc/" class="udrlinesmall">Documentation</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/" class="udrlinesmall">83final</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/" class="udrlinesmall">ba554_90007</a> <br>
+
+
+<img src="ch05s04_files/s_002.gif" alt="" width="1" height="6"><h1>HP OpenVMS Systems Documentation</h1></td>
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Page Title Area -->
+<!-- Begin Left Navigation and Content Area.  To increase width of content area modify width of table below. -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+<!-- Begin Gutter Cell 10px Wide -->
+		<td valign="top" width="10"><a name="jumptocontent"><img src="ch05s04_files/s_002.gif" alt="Content starts here" width="10" height="1"></a></td>
+<!-- End Gutter Cell 10px Wide -->
+<!--startindex-->
+<!-- Start Content Area.  To increase width of content area, modify width of table cell below. -->
+		<td valign="top" width="730" align="left">
+<!-----hpOpenVMSContentStart----->
+ 
+<table><!-- Start Content Area.  To increase width of content area, modify width of table cell below. --><tbody><tr>
+    <td valign="top" width="560" align="left">
+      <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="udrlinesmall">HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS</a>&nbsp;<span class="color666666">&gt;</span>&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch05.html" class="udrlinesmall">Chapter&nbsp;5&nbsp;Example Programs</a><br>
+      <img src="ch05s04_files/s_003.gif" alt="" width="1" height="6">
+      <h1>
+      Simple SSL Server Program
+      </h1>
+      <table width="560" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Table of Contents">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="colorFFFFFFbld">Table of Contents</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch05s04_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td width="2"><img src="ch05s04_files/s_003.gif" alt="" class="decoration" width="2" height="1"></td><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Index">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ix01.html" class="colorFFFFFFbld">Index</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch05s04_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td><img src="ch05s04_files/s_003.gif" alt="" class="decoration" width="10" height="1"></td></tr></tbody></table>
+      <div class="navheader"><table summary="Navigation header" width="540" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch05s04_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch05s04_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="1" bgcolor="#cccccc"><img src="ch05s04_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="4" bgcolor="#ffffff"><img src="ch05s04_files/s_003.gif" alt="spacer" width="1" height="4"></td></tr><tr><td valign="top" width="40%" align="left"><form action="ch05s03.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"></form>
+          &nbsp;
+        </td><th width="20%" align="center">
+          &nbsp;
+        </th><td valign="top" width="40%" align="right"><form action="ch06.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"></form>
+          &nbsp;
+        </td></tr></tbody></table></div>
+      <div class="section" lang="en"><div class="titlepage"><div><div></div></div><div></div></div><p>The following is the program listing of the SSL$SIMPLE_SERV.C
+example program.</p><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table width="100%" bgcolor="#E0E0E0" border="0"><tbody><tr><td><code><pre class="programlisting">/*<br> * ++<br> * FACILITY:<br> *<br> *      Simplest SSL Server<br> *<br> * ABSTRACT:<br> *<br> *   This is an example of a SSL server with minimum functionality.<br> *    The socket APIs are used to handle TCP/IP operations. This SSL<br> *    server loads its own certificate and key, but it does not verify<br> *  the certificate of the SSL client.<br> *</pre></code></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table width="100%" bgcolor="#E0E0E0" border="0"><tbody><tr><td><code><pre class="programlisting"> */<br>/* Assumptions, Build, Configuration, and Execution Instructions */<br>/*<br> *  ASSUMPTIONS:<br> *<br> *    The following are assumed to be true for the<br> *    execution of this program to succeed:<br> *<br> *    - SSL is installed and started on this system.<br> *<br> *    - this server program, and its accompanying client<br> *      program are run on the same system, but in different<br> *      processes.<br> *<br> *    - the certificate and keys referenced by this program<br> *      reside in the same directory as this program.  There <br> *      is a command procedure, SSL$EXAMPLES_SETUP.COM, to <br> *      help set up the certificates and keys.<br> *<br> *<br> *  BUILD INSTRUCTIONS:<br> *<br> *    To build this example program use commands of the form,<br> *<br> *      For a 32-bit application using only SSL APIs needs to run the <br> *      following commands for SSL_APP.C .<br> *       -----------------------------------------------------------------<br> *       $CC/POINTER_SIZE=32/PREFIX_LIBRARY_ENTRIES=ALL_ENTRIES SSL_APP.C<br> *       $LINK SSL_APP.OBJ, VMS_DECC_OPTIONS.OPT/OPT<br> *       -----------------------------------------------------------------<br> *       VMS_DECC_OPTIONS.OPT should include the following lines.<br> *       -------------------------------------------------<br> *       SYS$LIBRARY:SSL$LIBCRYPTO_SHR32.EXE/SHARE<br> *       SYS$LIBRARY:SSL$LIBSSL_SHR32.EXE/SHARE<br> *       -------------------------------------------------<br> *<br> *       Creating a 64-bit application of SSL_APP.C should run the <br> *       following commands.<br> *       -----------------------------------------------------------------<br> *       $CC/POINTER_SIZE=64/PREFIX_LIBRARY_ENTRIES=ALL_ENTRIES SSL_APP.C<br> *       $LINK SSL_APP.OBJ, VMS_DECC_OPTIONS.OPT/OPT<br> *       -----------------------------------------------------------------<br> *       VMS_DECC_OPTIONS.OPT should include the following lines.<br> *       -------------------------------------------------<br> *       SYS$LIBRARY:SSL$LIBCRYPTO_SHR.EXE/SHARE<br> *       SYS$LIBRARY:SSL$LIBSSL_SHR.EXE/SHARE<br> *       -------------------------------------------------<br> *<br> *<br> * CONFIGURATION INSTRUCTIONS:<br> *<br> *<br> * RUN INSTRUCTIONS:<br> *<br> *    To run this example program:<br> *<br> *    1) Start the server program,<br> *<br> *       $ run server<br> *<br> *    2) Start the client program on this same system,<br> *<br> *       $ run client<br> *<br> */<br>#include &lt;stdio.h&gt;<br>#include &lt;stdlib.h&gt;<br>#include &lt;string.h&gt;<br>#include &lt;errno.h&gt;<br>#include &lt;netdb.h&gt;<br>#include &lt;unistd.h&gt;<br> <br>#ifdef __VMS<br>#include &lt;types.h&gt;<br>#include &lt;socket.h&gt;<br>#include &lt;in.h&gt;<br>#include &lt;inet.h&gt;<br> <br>#else<br>#include &lt;sys/types.h&gt;<br>#include &lt;sys/socket.h&gt;<br>#include &lt;netinet/in.h&gt;<br>#include &lt;arpa/inet.h&gt;<br>#endif<br> <br>#include &lt;openssl/crypto.h&gt;<br>#include &lt;openssl/ssl.h&gt;<br>#include &lt;openssl/err.h&gt;<br> <br>#define RSA_SERVER_CERT     "server.crt"<br>#define RSA_SERVER_KEY          "server.key"<br> <br>#define RSA_SERVER_CA_CERT "server_ca.crt"<br>#define RSA_SERVER_CA_PATH   "sys$common:[syshlp.examples.ssl]"<br> <br>#define ON   1<br>#define OFF        0<br> <br>#define RETURN_NULL(x) if ((x)==NULL) exit(1)<br>#define RETURN_ERR(err,s) if ((err)==-1) { perror(s); exit(1); }<br>#define RETURN_SSL(err) if ((err)==-1) { ERR_print_errors_fp(stderr); exit(1); }<br> <br>void main()<br>{<br>    int     err;<br>        int     verify_client = OFF; /* To verify a client certificate, set ON */<br> <br>      int     listen_sock;<br>        int     sock;<br>       struct sockaddr_in sa_serv;<br>         struct sockaddr_in sa_cli;<br>          size_t client_len;<br>          char    *str;<br>       char     buf[4096];<br> <br>    SSL_CTX         *ctx;<br>        SSL            *ssl;<br>       SSL_METHOD      *meth;</pre></code></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><table width="100%" bgcolor="#E0E0E0" border="0"><tbody><tr><td><code><pre class="programlisting">        X509            *client_cert = NULL;<br> <br>   short int       s_port = 5555;<br>/*----------------------------------------------------------------*/<br>      /* Load encryption &amp; hashing algorithms for the SSL program */<br>  SSL_library_init();<br> <br>    /* Load the error strings for SSL &amp; CRYPTO APIs */<br>      SSL_load_error_strings();<br> <br>      /* Create a SSL_METHOD structure (choose a SSL/TLS protocol version) */<br>     meth = SSLv3_method();<br> <br> /* Create a SSL_CTX structure */<br>    ctx = SSL_CTX_new(meth);<br> <br>       if (!ctx) {<br> <br>            ERR_print_errors_fp(stderr);<br> <br>           exit(1);<br> <br>       }<br> <br>      /* Load the server certificate into the SSL_CTX structure */<br>        if (SSL_CTX_use_certificate_file(ctx, RSA_SERVER_CERT, SSL_FILETYPE_PEM) &lt;= 0) {<br> <br>                    ERR_print_errors_fp(stderr);<br> <br>                   exit(1);<br> <br>       }<br> <br>      /* Load the private-key corresponding to the server certificate */<br>          if (SSL_CTX_use_PrivateKey_file(ctx, RSA_SERVER_KEY, SSL_FILETYPE_PEM) &lt;= 0) {<br> <br>              ERR_print_errors_fp(stderr);<br>                exit(1);<br>    }<br> <br>      /* Check if the server certificate and private-key matches */<br>       if (!SSL_CTX_check_private_key(ctx)) {<br> <br>                 fprintf(stderr,"Private key does not match the certificate public key\n");<br>                  exit(1);<br>    }<br> <br>      if(verify_client == ON)<br> <br>        {<br> <br>              /* Load the RSA CA certificate into the SSL_CTX structure */<br>                if (!SSL_CTX_load_verify_locations(ctx, RSA_SERVER_CA_CERT, NULL)) {<br> <br>                   ERR_print_errors_fp(stderr);<br>                        exit(1);<br>            }<br> <br>              /* Set to require peer (client) certificate verification */<br>         SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,NULL);<br> <br>          /* Set the verification depth to 1 */<br>               SSL_CTX_set_verify_depth(ctx,1);<br> <br>       }<br>   /* ----------------------------------------------- */<br>       /* Set up a TCP socket */<br> <br>      listen_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);   <br> <br>    RETURN_ERR(listen_sock, "socket");<br>          memset (&amp;sa_serv, '\0', sizeof(sa_serv));<br>       sa_serv.sin_family      = AF_INET;<br>          sa_serv.sin_addr.s_addr = INADDR_ANY;<br>       sa_serv.sin_port        = htons (s_port);          /* Server Port number */<br>         err = bind(listen_sock, (struct sockaddr*)&amp;sa_serv,sizeof(sa_serv));<br> <br>       RETURN_ERR(err, "bind");<br>     <br>   /* Wait for an incoming TCP connection. */<br>          err = listen(listen_sock, 5);                    <br> <br>      RETURN_ERR(err, "listen");<br>          client_len = sizeof(sa_cli);<br> <br>   /* Socket for a TCP/IP connection is created */<br>     sock = accept(listen_sock, (struct sockaddr*)&amp;sa_cli, &amp;client_len);<br> <br>    RETURN_ERR(sock, "accept");<br>         close (listen_sock);<br> <br>   printf ("Connection from %lx, port %x\n", sa_cli.sin_addr.s_addr, <br>   sa_cli.sin_port);<br> <br>     /* ----------------------------------------------- */<br>       /* TCP connection is ready. */<br>      /* A SSL structure is created */<br>    ssl = SSL_new(ctx);<br> <br>    RETURN_NULL(ssl);<br> <br>      /* Assign the socket into the SSL structure (SSL and socket without BIO) */<br> SSL_set_fd(ssl, sock);<br> <br> /* Perform SSL Handshake on the SSL server */<br>       err = SSL_accept(ssl);<br> <br> RETURN_SSL(err);<br> <br>       /* Informational output (optional) */<br>       printf("SSL connection using %s\n", SSL_get_cipher (ssl));<br> <br>     if (verify_client == ON)<br>    {<br> <br>          /* Get the client's certificate (optional) */<br>       client_cert = SSL_get_peer_certificate(ssl);<br>        if (client_cert != NULL) <br>           {<br> <br>              printf ("Client certificate:\n");     <br>              str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);<br>                  RETURN_NULL(str);<br>                   printf ("\t subject: %s\n", str);<br>                   free (str);<br>                 str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);<br>                   RETURN_NULL(str);<br>                   printf ("\t issuer: %s\n", str);<br>                    free (str);<br>                 X509_free(client_cert);<br>     } <br> <br>     else<br> <br>                   printf("The SSL client does not have certificate.\n");<br>  }<br> <br>      /*------- DATA EXCHANGE - Receive message and send reply. -------*/<br> /* Receive data from the SSL client */<br>      err = SSL_read(ssl, buf, sizeof(buf) - 1);<br> <br>     RETURN_SSL(err);<br> <br>       buf[err] = '\0';<br> <br>       printf ("Received %d chars:'%s'\n", err, buf);<br> <br> /* Send data to the SSL client */<br>   err = SSL_write(ssl, "This message is from the SSL server", <br> <br>   strlen("This message is from the SSL server"));<br> <br>        RETURN_SSL(err);<br> <br>       /*--------------- SSL closure ---------------*/<br>     /* Shutdown this side (server) of the connection. */<br> <br>   err = SSL_shutdown(ssl);<br> <br>       RETURN_SSL(err);<br> <br>       /* Terminate communication on a socket */<br>   err = close(sock);<br> <br>     RETURN_ERR(err, "close");<br> <br>      /* Free the SSL structure */<br>        SSL_free(ssl);<br> <br> /* Free the SSL_CTX structure */<br>    SSL_CTX_free(ctx);<br> <br>}</pre></code></td></tr></tbody></table><table><tbody><tr><td><img src="ch05s04_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table></div>
+      <div class="navfooter"><hr><table summary="Navigation footer" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td valign="top" width="40%" align="left"><form action="ch05s03.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"><br><br>Simple SSL Client Program</form>
+                &nbsp;
+              </td><td valign="top" width="20%" align="center">
+                &nbsp;
+              </td><td valign="top" width="40%" align="right"><form action="ch06.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"><br><br>Chapter&nbsp;6&nbsp;OpenSSL Command Line Interface
+                    &nbsp;
+                  </form></td></tr></tbody></table></div>
+    </td>
+    <!-- End Content Area -->
+    <!--stopindex-->
+   </tr></tbody></table>
+<p>&nbsp;</p>
+<!-----hpOpenVMSContentFinish----->
+
+		</td>
+<!-- End Content Area -->
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Left Navigation and Content Area -->
+
+<!-- Begin Footer Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td class="color666666bg"><img src="ch05s04_files/s.gif" alt="" width="1" height="4" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td colspan="4"><img src="ch05s04_files/s.gif" alt="" width="1" height="4" border="0"></td>
+				</tr>
+				<tr>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/privacy.html" class="udrlinesmall">Privacy statement</a></td>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/termsofuse.html" class="udrlinesmall">Using this site means you accept its terms</a></td>
+					<td width="33%" align="center"><!-- Activate Feedback Link Here --><a href="http://h71000.www7.hp.com/fb_web.html" class="udrlinesmall">Feedback to webmaster</a><!-- End Activate Feedback Link Here --></td>
+				</tr>
+				<tr class="decoration">
+					<td colspan="4"><img src="ch05s04_files/s.gif" alt="" width="1" height="4"></td>
+				</tr>
+				<tr>
+					<td colspan="4" class="small" align="center">© 2011 Hewlett-Packard Development Company, L.P.</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Footer Area -->
+
+
+
+
+
+
+</body></html>

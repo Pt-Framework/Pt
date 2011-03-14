@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us"><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script language="JavaScript" src="ch04s01_files/bread.js"></script>
+  <title>
+   HP SSL Data Structures
+  </title>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="hp_design_version" content="hpweb.1.2a">
+  <meta name="web_section_id" content="R307">
+<meta name="document_title" content="HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS">
+<meta name="mpn" content="">
+<meta name="pub_date" content="July 2006">
+<meta name="description" content="SSL Programming Concepts -- HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS, HP Part Number '', Publication Date 'July 2006'">
+<meta name="keywords" content="Data structures, Data structures, ">
+<meta name="collection" content="">
+<meta name="ct" content="">
+<meta name="rt" content="">
+<meta name="ROBOTS" content="ALL">
+
+  <script type="text/javascript" language="JavaScript"><!--
+        var theme = '#EB5F01';
+
+          var stylePath = "style/5_0/";
+
+      //--></script>
+  <script type="text/javascript" language="JavaScript" src="ch04s01_files/hpweb_utilities.js"></script><link rel="stylesheet" type="text/css" href="ch04s01_files/hpweb_styles_mac.css"><style type="text/css">
+.themeheader {color:#FFFFFF; font-weight:bold;}
+
+.themeheaderA {color:#FFFFFF; font-weight:bold; font-size: 140%;}
+
+.leveld {font-weight: bold; border-bottom: solid 2px #EB5F01; margin: 0px 0px 0px 0px; padding:1px;}
+.themebody {color:#FFFFFF;}
+
+a.themeheaderlink {font-weight: bold; color:#FFFFFF; text-decoration: none;}
+a.themeheaderlink:active {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:link {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:visited {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:hover {text-decoration: underline;}
+
+a.themelink {color:#FFFFFF; text-decoration: none;}
+a.themelink:active {color:#FFFFFF;}
+a.themelink:link {color:#FFFFFF;}
+a.themelink:visited {color:#FFFFFF;}
+a.themelink:hover {text-decoration: underline;}
+
+a.themebodylink {color:#FFFFFF; text-decoration: underline;}
+a.themebodylink:active {color:#FFFFFF;}
+a.themebodylink:link {color:#FFFFFF;}
+a.themebodylink:visited {color:#FFFFFF;}
+
+.theme {background: #EB5F01}
+</style>
+  <link rel="stylesheet" type="text/css" href="ch04s01_files/hpweb_doc.css">
+<link rel="stylesheet" type="text/css" href="ch04s01_files/hpweb_locale_overrides.css">
+
+<script language="JavaScript" src="ch04s01_files/openvms10.js"></script></head>
+        
+
+		
+
+        
+<body class="colorFFFFFFbg" leftmargin="0" topmargin="0" link="#003366" marginheight="0" marginwidth="0" text="#000000" vlink="#660066" alink="#003366">
+<!--stopindex-->
+<!-- Begin Top Navigation Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td width="10"><a href="#jumptocontent"><img src="ch04s01_files/s.gif" alt="Jump to content" width="10" height="1" border="0"></a><noscript>
+<a href="http://welcome.hp.com/country/us/en/noscript.html">summary of site-wide JavaScript functionality</a></noscript></td>
+		<td class="smallbold" width="260" align="left"><!-- Welcome, 123456789012345678901234567890... --></td>
+		<td><img src="ch04s01_files/s.gif" alt="" width="10" height="24" border="0"></td>
+		<td class="color003366" width="155" align="left">
+</td>
+		<td class="countryInd" width="285" align="right">United States-English</td>
+		<td><img src="ch04s01_files/s.gif" alt="" width="20" height="1"></td>
+	</tr>
+</tbody></table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#666666">
+			<table width="720" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch04s01_files/hpweb_1-2_topnav_home.gif" alt="HP.com Home" width="100" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/prodserv.html"><img src="ch04s01_files/hpweb_1-2_topnav_prdsrv.gif" alt="Products and Services" width="166" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/support.html"><img src="ch04s01_files/hpweb_1-2_topnav_supprt.gif" alt="Support and Drivers" width="163" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/solutions.html"><img src="ch04s01_files/hpweb_1-2_topnav_slutns.gif" alt="Solutions" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/howtobuy.html"><img src="ch04s01_files/hpweb_1-2_topnav_buy.gif" alt="How to Buy" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="1"></td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Top Navigation Area -->
+<!-- Begin Search Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#E7E7E7">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr>
+					<td valign="top" width="20"><img src="ch04s01_files/s.gif" alt="" class="decoration" width="20" height="48"></td>
+					<td class="color003366bld" valign="middle" width="150" align="left">»&nbsp;<a href="http://www.hp.com/country/us/en/contact_us.html" class="smallbld">Contact HP</a></td>
+					<td width="570" align="right"><form action="http://www.hp.com/search/" method="GET" name="hpsearch" id="hpsearch">
+<input name="ctry" value="us" type="hidden">
+<input name="lk" value="1" type="hidden">
+<input name="uf" value="0" type="hidden">
+<input name="lang" value="eng" type="hidden">
+<input name="hps" value="HP OpenVMS systems" type="hidden">
+<input name="hpn" value="Return to the HP OpenVMS systems site" type="hidden">
+<input name="qp" value="site:h71000.www7.hp.com url:h71028.www7.hp.com/ERC -wizard" type="hidden">
+<input name="hpr" value="http://h71000.www7.hp.com/" type="hidden">
+<input name="hpa" value="http://welcome.hp.com/country/us/en/contact_us.html" type="hidden">
+<input name="hpo" value="hphqglobal,hphqWWesg,hphqbcs,hphqopenvms" type="hidden">
+<input name="hpc" value="1" type="hidden">
+						<table align="right" border="0" cellpadding="0" cellspacing="0">
+							<tbody><tr class="decoration">
+								<td colspan="4"><img src="ch04s01_files/s.gif" alt="" width="1" height="2" border="0"></td>
+							</tr>
+							<tr>
+								<td class="bold" align="left"><label for="textbox1">Search:</label></td>
+								<td valign="top"><img src="ch04s01_files/s.gif" alt="" class="decoration" width="4" height="1"></td>
+								<td valign="top" align="left">
+<input name="qt" size="26" maxlength="1991" id="textbox1" alt="Enter search criteria here" type="text"><img src="ch04s01_files/s.gif" alt="" width="4" height="1">
+<a id="country" onmouseover="status='search using the specified criteria';return true;" onmouseout="status='';return true;" onfocus="status='search using the specified criteria';return true;" onblur="status='';return true;">
+
+
+<input name="submit" src="ch04s01_files/hpweb_1-2_arrw_sbmt.gif" alt="Begin your search" onclick='s_linkType="o";s_linkName="OpenVMS-Search-"+document.location+"-("+hpsearch.qt.value+")";s_lnk=s_co(this);s_gs("hphqopenvms");' type="Image" border="0"></a></td>
+								<td align="left"><img src="ch04s01_files/s.gif" alt="" class="decoration" width="20" height="1"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td colspan="3" class="small" align="left"><div><!--BEGIN SEARCH HPL TAG -->
+<input value="1" name="hpl" checked="checked" class="srchradbtn" id="sectionRadio" type="radio"><label for="sectionRadio"><span class="bold">HP OpenVMS Systems</span></label>
+<input value="0" name="hpl" id="countryRadio" class="srchradbtn" type="radio"><label for="countryRadio">All of HP</label><!-- END SEARCH HPL TAG --></div></td>
+							</tr>
+						</tbody></table></form>
+					</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Search Area -->
+<!--startindex-->
+<!-- Begin Page Title Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="middle" width="170" align="center"><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch04s01_files/hpweb_1-2_topnav_hp_logo.gif" alt="HP.com home" width="64" height="55" border="0"></a><br></td>
+		<td width="10"><img src="ch04s01_files/s.gif" alt="" width="10" height="93"></td>
+		<td valign="top" width="560" align="left">
+		<script language="JavaScript">breadcrumbs()</script><a href="http://welcome.hp.com/country/us/eng/prodserv/software.html" class="udrlinesmall">Software</a>&nbsp; <span class="color666666">&gt;</span> &nbsp;<a href="http://h71000.www7.hp.com/" class="udrlinesmall">OpenVMS Systems</a>  &gt; <a href="http://h71000.www7.hp.com/doc/" class="udrlinesmall">Documentation</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/" class="udrlinesmall">83final</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/" class="udrlinesmall">ba554_90007</a> <br>
+
+
+<img src="ch04s01_files/s_002.gif" alt="" width="1" height="6"><h1>HP OpenVMS Systems Documentation</h1></td>
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Page Title Area -->
+<!-- Begin Left Navigation and Content Area.  To increase width of content area modify width of table below. -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+<!-- Begin Gutter Cell 10px Wide -->
+		<td valign="top" width="10"><a name="jumptocontent"><img src="ch04s01_files/s_002.gif" alt="Content starts here" width="10" height="1"></a></td>
+<!-- End Gutter Cell 10px Wide -->
+<!--startindex-->
+<!-- Start Content Area.  To increase width of content area, modify width of table cell below. -->
+		<td valign="top" width="730" align="left">
+<!-----hpOpenVMSContentStart----->
+ 
+<table><!-- Start Content Area.  To increase width of content area, modify width of table cell below. --><tbody><tr>
+    <td valign="top" width="560" align="left">
+      <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="udrlinesmall">HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS</a>&nbsp;<span class="color666666">&gt;</span>&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04.html" class="udrlinesmall">Chapter&nbsp;4&nbsp;SSL Programming Concepts</a><br>
+      <img src="ch04s01_files/s_003.gif" alt="" width="1" height="6">
+      <h1>
+      HP SSL Data Structures
+      </h1>
+      <table width="560" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Table of Contents">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="colorFFFFFFbld">Table of Contents</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch04s01_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td width="2"><img src="ch04s01_files/s_003.gif" alt="" class="decoration" width="2" height="1"></td><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Index">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ix01.html" class="colorFFFFFFbld">Index</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch04s01_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td><img src="ch04s01_files/s_003.gif" alt="" class="decoration" width="10" height="1"></td></tr></tbody></table>
+      <div class="navheader"><table summary="Navigation header" width="540" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="ch04s01_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch04s01_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch04s01_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="1" bgcolor="#cccccc"><img src="ch04s01_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="4" bgcolor="#ffffff"><img src="ch04s01_files/s_003.gif" alt="spacer" width="1" height="4"></td></tr><tr><td valign="top" width="40%" align="left"><form action="ch04.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"></form>
+          &nbsp;
+        </td><th width="20%" align="center">
+          &nbsp;
+        </th><td valign="top" width="40%" align="right"><form action="ch04s02.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"></form>
+          &nbsp;
+        </td></tr></tbody></table></div>
+      <div class="section" lang="en"><div class="titlepage"><div><div></div></div><div></div></div><p>Before you start SSL application development, you should understand
+the data structures used for SSL APIs, and the relationships between
+the data structures. <a class="indexterm" name="d0e2533"></a></p><p>SSL APIs use data structures to hold various types of information
+about SSL sessions and connections. The most important structures
+are <tt class="literal">SSL_CTX</tt> and <tt class="literal">SSL</tt>. Usually,
+one <tt class="literal">SSL_CTX</tt> structure exists per SSL application program,
+and an <tt class="literal">SSL</tt> structure is created every time a
+new SSL connection is created. An <tt class="literal">SSL</tt> structure inherits
+configuration information from the <tt class="literal">SSL_CTX</tt> structure
+when it is created. </p><p><a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s01.html#tab1" title="Table&nbsp;4-1&nbsp;APIs for Data Structure Creation and Deallocation">Table&nbsp;4-1&nbsp;&#8220;APIs for Data Structure Creation and Deallocation&#8221;</a> shows the APIs commonly
+used for creating and deallocating data structures.<a class="indexterm" name="d0e2559"></a></p><div class="topbottom"><a name="tab1"></a><p class="title"><b>Table&nbsp;4-1&nbsp;APIs for Data Structure Creation and Deallocation</b></p><table summary="APIs for Data Structure Creation and Deallocation" style="border-collapse: collapse; border-top: 0.5pt solid rgb(153, 153, 153); border-bottom: 0.5pt solid rgb(153, 153, 153);" border="0" cellpadding="4" cellspacing="1"><colgroup><col width="224"><col width="224"><col width="224"></colgroup><tbody><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><em class="firstterm-docmaker">Data Structure</em></td><td style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><em class="firstterm-docmaker">API for Creation</em></td><td style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><em class="firstterm-docmaker">API for Deallocation </em></td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">SSL_CTX</td><td style=""><tt class="function">SSL_CTX_new</tt>()</td><td style=""><tt class="function">SSL_CTX_free</tt>()</td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">SSL</td><td style=""><tt class="function">SSL_new</tt>()</td><td style=""><tt class="function">SSL_free</tt>()</td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">SSL_SESSION</td><td style=""><tt class="function">SSL_SESSION_new</tt>()</td><td style=""><tt class="function">SSL_SESSION_free</tt>()</td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">BIO</td><td style=""><tt class="function">BIO_new</tt>()</td><td style=""><tt class="function">BIO_free</tt>()</td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">X509</td><td style=""><tt class="function">X509_new</tt>()</td><td style=""><tt class="function">X509_free</tt>()</td></tr><tr style="border-bottom: 0.5pt solid rgb(153, 153, 153);"><td style="">RSA</td><td style=""><tt class="function">RSA_new</tt>()</td><td style=""><tt class="function">RSA_free</tt>()</td></tr><tr><td style="">DH</td><td style=""><tt class="function">DH_new</tt>()</td><td style=""><tt class="function">DH_free</tt>()</td></tr></tbody></table></div><para>&nbsp;</para><p><a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s01.html#ssl-ctx-fig" title="Figure&nbsp;4-1&nbsp; Relationship Between SSL_CTX and SSL">Figure&nbsp;4-1&nbsp;&#8220; Relationship Between SSL_CTX and SSL&#8221;</a> shows the relationship
+between the <tt class="literal">SSL_CTX</tt> and <tt class="literal">SSL</tt> data
+structures.
+</p><div class="figure"><a name="ssl-ctx-fig"></a><p class="title"><b>Figure&nbsp;4-1&nbsp; Relationship Between SSL_CTX and SSL</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s01_files/gfx5.gif" alt="Relationship Between SSL_CTX and SSL" align="middle" border="0"></td></tr></tbody></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2658"></a><h3 class="bold"><span class="levelc">SSL_CTX Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>The <tt class="literal">SSL_CTX</tt> structure is defined in <tt class="literal">ssl.h</tt>.
+An <tt class="literal">SSL_CTX</tt> structure stores default values for <tt class="literal">SSL</tt> structures. (The <tt class="literal">SSL</tt> structures
+are created after the <tt class="literal">SSL_CTX</tt> structure is created
+and configured.) The <tt class="literal">SSL_CTX</tt> structure also holds
+information about SSL connections and sessions (the numbers of new
+SSL connections, renegotiations, session resumptions, and so on). </p><p>Each SSL client or server program creates and keeps only one <tt class="literal">SSL_CTX</tt> structure.
+The <tt class="literal">SSL_CTX</tt> structure is created at the beginning
+of the SSL application program. The <tt class="literal">SSL_CTX</tt> structure
+is configured with the default values that will be inherited by
+the <tt class="literal">SSL</tt> structures. For example, a CA certificate
+loaded in the <tt class="literal">SSL_CTX</tt> structure is also loaded
+into an <tt class="literal">SSL</tt> structure when that <tt class="literal">SSL</tt> structure
+is created. </p><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td><img src="ch04s01_files/s_003.gif" alt="" width="1" height="2"></td></tr><tr class="decoration"><td nowrap="nowrap" height="3" bgcolor="#ffffff"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="3"></td><td nowrap="nowrap" height="3" bgcolor="#CCCCCC"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="3"></td></tr><tr><td colspan="2" height="1"><img src="ch04s01_files/s_003.gif" alt="" height="1"></td></tr><tr><td nowrap="nowrap" valign="top" width="50" align="center"><img src="ch04s01_files/note.png" alt="" width="32" height="32" border="0"></td><td width="100%"><b>NOTE: </b>Data structure definitions are subject to change in
+future releases of HP SSL for OpenVMS.</td></tr><tr><td colspan="2" height="1"><img src="ch04s01_files/s_003.gif" alt="" height="1"></td></tr><tr class="decoration"><td nowrap="nowrap" height="1" bgcolor="#ffffff"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="1"></td><td nowrap="nowrap" height="1" bgcolor="#CCCCCC"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="1"></td></tr><tr><td><img src="ch04s01_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2710"></a><h3 class="bold"><span class="levelc">SSL Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>An <tt class="literal">SSL</tt> structure is created for every SSL
+connection in the SSL client or server program. You create the <tt class="literal">SSL</tt> structure
+after creating and configuring the <tt class="literal">SSL_CTX</tt> structure
+because the <tt class="literal">SSL</tt> structure inherits default values
+from the <tt class="literal">SSL_CTX</tt> structure. The inheritance of
+the default values enables the <tt class="literal">SSL</tt> structure
+to be used without explicit configuration. However, it is possible
+to change the inherited values in a specific <tt class="literal">SSL</tt> structure.</p><p>An <tt class="literal">SSL</tt> structure saves the addresses of
+data structures that store information about SSL connections and sessions.
+These data structures are as follows: </p><div><ul class="primarybullet"><li><div class="listitembody"><p class="list-initial">The <tt class="literal">SSL_CTX</tt> structure
+from which the <tt class="literal">SSL</tt> structure is created</p></div></li><li><div class="listitembody"><p class="list-initial"><tt class="literal">SSL_METHOD</tt> (SSL protocol version)</p></div></li><li><div class="listitembody"><p class="list-initial"><tt class="literal">SSL_SESSION</tt></p></div></li><li><div class="listitembody"><p class="list-initial"><tt class="literal">SSL_CIPHER</tt></p></div></li><li><div class="listitembody"><p class="list-initial"><tt class="literal">CERT</tt> (certificate information
+extracted from an X.509 structure)</p></div></li><li><div class="listitembody"><p class="list-initial"><tt class="literal">BIO</tt> (an SSL connection is performed
+via BIO)</p></div></li></ul></div><p> The SSL information (protocol
+version, connection status values, and so on) in the <tt class="literal">SSL</tt> structure
+is used for the SSL connection. <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s01.html#ssl-fig" title="Figure&nbsp;4-2&nbsp; Structures
+Associated with SSL Structure">Figure&nbsp;4-2&nbsp;&#8220; Structures
+Associated with SSL Structure&#8221;</a> shows the structures associated with the <tt class="literal">SSL</tt> structure. </p><div class="figure"><a name="ssl-fig"></a><p class="title"><b>Figure&nbsp;4-2&nbsp; Structures
+Associated with SSL Structure</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s01_files/gfx6.gif" alt="Structures Associated with SSL Structure" align="middle" border="0"></td></tr></tbody></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2787"></a><h3 class="bold"><span class="levelc">SSL_METHOD Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>The <tt class="literal">SSL_METHOD</tt> structure is defined in <em class="firstterm-docmaker"> ssl.h</em>.
+An <tt class="literal">SSL_METHOD</tt> structure contains pointers to
+the functions that implement the SSL protocol version specified.
+This structure must be created before creation of the <tt class="literal">SSL_CTX</tt> structure. </p></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2804"></a><h3 class="bold"><span class="levelc">SSL_CIPHER Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>The <tt class="literal">SSL_CIPHER</tt> structure is defined in
+the <tt class="literal">ssl.h</tt> header file. An <tt class="literal">SSL_CIPHER</tt> structure
+holds information about the cipher suite used for SSL connections
+and sessions. </p></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2818"></a><h3 class="bold"><span class="levelc">CERT/X509 Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>In OpenSSL application programs, an X.509 certificate is stored
+as an <tt class="literal">X509</tt> structure. However, after loading an <tt class="literal">X509</tt> structure
+into an <tt class="literal">SSL_CTX</tt> or <tt class="literal">SSL</tt> structure,
+the X.509 certificate information is extracted from the <tt class="literal">X509</tt> structure
+and stored in a <tt class="literal">CERT</tt> structure associated with
+the <tt class="literal">SSL_CTX</tt> or <tt class="literal">SSL</tt> structure.
+The <tt class="literal">X509</tt> and <tt class="literal">CERT</tt> structures
+are defined in <tt class="literal">x509.h</tt> and <tt class="literal">ssl_locl.h</tt>,
+respectively. </p><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td><img src="ch04s01_files/s_003.gif" alt="" width="1" height="2"></td></tr><tr class="decoration"><td nowrap="nowrap" height="3" bgcolor="#ffffff"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="3"></td><td nowrap="nowrap" height="3" bgcolor="#CCCCCC"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="3"></td></tr><tr><td colspan="2" height="1"><img src="ch04s01_files/s_003.gif" alt="" height="1"></td></tr><tr><td nowrap="nowrap" valign="top" width="50" align="center"><img src="ch04s01_files/note.png" alt="" width="32" height="32" border="0"></td><td width="100%"><b>NOTE: </b>The <tt class="literal">ssl_locl.h</tt> header file is not
+used for SSL application programs because it defines only internal
+functions and structures, such as the <tt class="literal">CERT</tt> structure.
+In SSL application programs, a certificate is stored in an <tt class="literal">X509</tt> structure,
+not in a <tt class="literal">CERT</tt> structure. An SSL application developer does
+not need to know the definition of the <tt class="literal">CERT</tt> structure
+and <tt class="literal">ssl_locl.h</tt>. </td></tr><tr><td colspan="2" height="1"><img src="ch04s01_files/s_003.gif" alt="" height="1"></td></tr><tr class="decoration"><td nowrap="nowrap" height="1" bgcolor="#ffffff"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="1"></td><td nowrap="nowrap" height="1" bgcolor="#CCCCCC"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="1"></td></tr><tr><td><img src="ch04s01_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2880"></a><h3 class="bold"><span class="levelc">BIO Structure</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s01_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>A <tt class="literal">BIO</tt> structure is an I/O abstraction in
+an SSL application with SSL APIs. The <tt class="literal">BIO</tt> structure
+encapsulates an underlying I/O secured by SSL, and all the communication
+between the client and server is conducted through this structure.
+The <tt class="literal">BIO</tt> structure is defined in <tt class="literal">bio.h</tt>.</p></div></div>
+      <div class="navfooter"><hr><table summary="Navigation footer" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td valign="top" width="40%" align="left"><form action="ch04.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"><br><br>Chapter&nbsp;4&nbsp;SSL Programming Concepts</form>
+                &nbsp;
+              </td><td valign="top" width="20%" align="center">
+                &nbsp;
+              </td><td valign="top" width="40%" align="right"><form action="ch04s02.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"><br><br>Certificates for
+SSL Applications
+                    &nbsp;
+                  </form></td></tr></tbody></table></div>
+    </td>
+    <!-- End Content Area -->
+    <!--stopindex-->
+   </tr></tbody></table>
+<p>&nbsp;</p>
+<!-----hpOpenVMSContentFinish----->
+
+		</td>
+<!-- End Content Area -->
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Left Navigation and Content Area -->
+
+<!-- Begin Footer Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td class="color666666bg"><img src="ch04s01_files/s.gif" alt="" width="1" height="4" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td colspan="4"><img src="ch04s01_files/s.gif" alt="" width="1" height="4" border="0"></td>
+				</tr>
+				<tr>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/privacy.html" class="udrlinesmall">Privacy statement</a></td>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/termsofuse.html" class="udrlinesmall">Using this site means you accept its terms</a></td>
+					<td width="33%" align="center"><!-- Activate Feedback Link Here --><a href="http://h71000.www7.hp.com/fb_web.html" class="udrlinesmall">Feedback to webmaster</a><!-- End Activate Feedback Link Here --></td>
+				</tr>
+				<tr class="decoration">
+					<td colspan="4"><img src="ch04s01_files/s.gif" alt="" width="1" height="4"></td>
+				</tr>
+				<tr>
+					<td colspan="4" class="small" align="center">© 2011 Hewlett-Packard Development Company, L.P.</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Footer Area -->
+
+
+
+
+
+
+</body></html>

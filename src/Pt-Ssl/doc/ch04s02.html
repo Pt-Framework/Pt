@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us"><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script language="JavaScript" src="ch04s02_files/bread.js"></script>
+  <title>
+   Certificates for SSL Applications
+  </title>
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="hp_design_version" content="hpweb.1.2a">
+  <meta name="web_section_id" content="R307">
+<meta name="document_title" content="HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS">
+<meta name="mpn" content="">
+<meta name="pub_date" content="July 2006">
+<meta name="description" content="SSL Programming Concepts -- HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS, HP Part Number '', Publication Date 'July 2006'">
+<meta name="keywords" content="Certificate, Root CA, Certificate, DER certificate format, PEM certificate format, NET certificate format, ">
+<meta name="collection" content="">
+<meta name="ct" content="">
+<meta name="rt" content="">
+<meta name="ROBOTS" content="ALL">
+
+  <script type="text/javascript" language="JavaScript"><!--
+        var theme = '#EB5F01';
+
+          var stylePath = "style/5_0/";
+
+      //--></script>
+  <script type="text/javascript" language="JavaScript" src="ch04s02_files/hpweb_utilities.js"></script><link rel="stylesheet" type="text/css" href="ch04s02_files/hpweb_styles_mac.css"><style type="text/css">
+.themeheader {color:#FFFFFF; font-weight:bold;}
+
+.themeheaderA {color:#FFFFFF; font-weight:bold; font-size: 140%;}
+
+.leveld {font-weight: bold; border-bottom: solid 2px #EB5F01; margin: 0px 0px 0px 0px; padding:1px;}
+.themebody {color:#FFFFFF;}
+
+a.themeheaderlink {font-weight: bold; color:#FFFFFF; text-decoration: none;}
+a.themeheaderlink:active {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:link {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:visited {font-weight: bold; color:#FFFFFF;}
+a.themeheaderlink:hover {text-decoration: underline;}
+
+a.themelink {color:#FFFFFF; text-decoration: none;}
+a.themelink:active {color:#FFFFFF;}
+a.themelink:link {color:#FFFFFF;}
+a.themelink:visited {color:#FFFFFF;}
+a.themelink:hover {text-decoration: underline;}
+
+a.themebodylink {color:#FFFFFF; text-decoration: underline;}
+a.themebodylink:active {color:#FFFFFF;}
+a.themebodylink:link {color:#FFFFFF;}
+a.themebodylink:visited {color:#FFFFFF;}
+
+.theme {background: #EB5F01}
+</style>
+  <link rel="stylesheet" type="text/css" href="ch04s02_files/hpweb_doc.css">
+<link rel="stylesheet" type="text/css" href="ch04s02_files/hpweb_locale_overrides.css">
+
+<script language="JavaScript" src="ch04s02_files/openvms10.js"></script></head>
+        
+
+		
+
+        
+<body class="colorFFFFFFbg" leftmargin="0" topmargin="0" link="#003366" marginheight="0" marginwidth="0" text="#000000" vlink="#660066" alink="#003366">
+<!--stopindex-->
+<!-- Begin Top Navigation Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td width="10"><a href="#jumptocontent"><img src="ch04s02_files/s.gif" alt="Jump to content" width="10" height="1" border="0"></a><noscript>
+<a href="http://welcome.hp.com/country/us/en/noscript.html">summary of site-wide JavaScript functionality</a></noscript></td>
+		<td class="smallbold" width="260" align="left"><!-- Welcome, 123456789012345678901234567890... --></td>
+		<td><img src="ch04s02_files/s.gif" alt="" width="10" height="24" border="0"></td>
+		<td class="color003366" width="155" align="left">
+</td>
+		<td class="countryInd" width="285" align="right">United States-English</td>
+		<td><img src="ch04s02_files/s.gif" alt="" width="20" height="1"></td>
+	</tr>
+</tbody></table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#666666">
+			<table width="720" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch04s02_files/hpweb_1-2_topnav_home.gif" alt="HP.com Home" width="100" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/prodserv.html"><img src="ch04s02_files/hpweb_1-2_topnav_prdsrv.gif" alt="Products and Services" width="166" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/support.html"><img src="ch04s02_files/hpweb_1-2_topnav_supprt.gif" alt="Support and Drivers" width="163" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/solutions.html"><img src="ch04s02_files/hpweb_1-2_topnav_slutns.gif" alt="Solutions" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="1"></td>
+					<td><a href="http://welcome.hp.com/country/us/en/howtobuy.html"><img src="ch04s02_files/hpweb_1-2_topnav_buy.gif" alt="How to Buy" width="143" height="24" border="0"></a></td>
+					<td class="colorE7E7E7bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="1"></td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Top Navigation Area -->
+<!-- Begin Search Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="top" align="left" bgcolor="#E7E7E7">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr>
+					<td valign="top" width="20"><img src="ch04s02_files/s.gif" alt="" class="decoration" width="20" height="48"></td>
+					<td class="color003366bld" valign="middle" width="150" align="left">»&nbsp;<a href="http://www.hp.com/country/us/en/contact_us.html" class="smallbld">Contact HP</a></td>
+					<td width="570" align="right"><form action="http://www.hp.com/search/" method="GET" name="hpsearch" id="hpsearch">
+<input name="ctry" value="us" type="hidden">
+<input name="lk" value="1" type="hidden">
+<input name="uf" value="0" type="hidden">
+<input name="lang" value="eng" type="hidden">
+<input name="hps" value="HP OpenVMS systems" type="hidden">
+<input name="hpn" value="Return to the HP OpenVMS systems site" type="hidden">
+<input name="qp" value="site:h71000.www7.hp.com url:h71028.www7.hp.com/ERC -wizard" type="hidden">
+<input name="hpr" value="http://h71000.www7.hp.com/" type="hidden">
+<input name="hpa" value="http://welcome.hp.com/country/us/en/contact_us.html" type="hidden">
+<input name="hpo" value="hphqglobal,hphqWWesg,hphqbcs,hphqopenvms" type="hidden">
+<input name="hpc" value="1" type="hidden">
+						<table align="right" border="0" cellpadding="0" cellspacing="0">
+							<tbody><tr class="decoration">
+								<td colspan="4"><img src="ch04s02_files/s.gif" alt="" width="1" height="2" border="0"></td>
+							</tr>
+							<tr>
+								<td class="bold" align="left"><label for="textbox1">Search:</label></td>
+								<td valign="top"><img src="ch04s02_files/s.gif" alt="" class="decoration" width="4" height="1"></td>
+								<td valign="top" align="left">
+<input name="qt" size="26" maxlength="1991" id="textbox1" alt="Enter search criteria here" type="text"><img src="ch04s02_files/s.gif" alt="" width="4" height="1">
+<a id="country" onmouseover="status='search using the specified criteria';return true;" onmouseout="status='';return true;" onfocus="status='search using the specified criteria';return true;" onblur="status='';return true;">
+
+
+<input name="submit" src="ch04s02_files/hpweb_1-2_arrw_sbmt.gif" alt="Begin your search" onclick='s_linkType="o";s_linkName="OpenVMS-Search-"+document.location+"-("+hpsearch.qt.value+")";s_lnk=s_co(this);s_gs("hphqopenvms");' type="Image" border="0"></a></td>
+								<td align="left"><img src="ch04s02_files/s.gif" alt="" class="decoration" width="20" height="1"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td colspan="3" class="small" align="left"><div><!--BEGIN SEARCH HPL TAG -->
+<input value="1" name="hpl" checked="checked" class="srchradbtn" id="sectionRadio" type="radio"><label for="sectionRadio"><span class="bold">HP OpenVMS Systems</span></label>
+<input value="0" name="hpl" id="countryRadio" class="srchradbtn" type="radio"><label for="countryRadio">All of HP</label><!-- END SEARCH HPL TAG --></div></td>
+							</tr>
+						</tbody></table></form>
+					</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Search Area -->
+<!--startindex-->
+<!-- Begin Page Title Area -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="middle" width="170" align="center"><a href="http://welcome.hp.com/country/us/en/welcome.html"><img src="ch04s02_files/hpweb_1-2_topnav_hp_logo.gif" alt="HP.com home" width="64" height="55" border="0"></a><br></td>
+		<td width="10"><img src="ch04s02_files/s.gif" alt="" width="10" height="93"></td>
+		<td valign="top" width="560" align="left">
+		<script language="JavaScript">breadcrumbs()</script><a href="http://welcome.hp.com/country/us/eng/prodserv/software.html" class="udrlinesmall">Software</a>&nbsp; <span class="color666666">&gt;</span> &nbsp;<a href="http://h71000.www7.hp.com/" class="udrlinesmall">OpenVMS Systems</a>  &gt; <a href="http://h71000.www7.hp.com/doc/" class="udrlinesmall">Documentation</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/" class="udrlinesmall">83final</a> &gt; <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/" class="udrlinesmall">ba554_90007</a> <br>
+
+
+<img src="ch04s02_files/s_002.gif" alt="" width="1" height="6"><h1>HP OpenVMS Systems Documentation</h1></td>
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Page Title Area -->
+<!-- Begin Left Navigation and Content Area.  To increase width of content area modify width of table below. -->
+<table width="740" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+<!-- Begin Gutter Cell 10px Wide -->
+		<td valign="top" width="10"><a name="jumptocontent"><img src="ch04s02_files/s_002.gif" alt="Content starts here" width="10" height="1"></a></td>
+<!-- End Gutter Cell 10px Wide -->
+<!--startindex-->
+<!-- Start Content Area.  To increase width of content area, modify width of table cell below. -->
+		<td valign="top" width="730" align="left">
+<!-----hpOpenVMSContentStart----->
+ 
+<table><!-- Start Content Area.  To increase width of content area, modify width of table cell below. --><tbody><tr>
+    <td valign="top" width="560" align="left">
+      <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="udrlinesmall">HP Open Source Security for OpenVMS Volume 2: HP SSL for OpenVMS</a>&nbsp;<span class="color666666">&gt;</span>&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04.html" class="udrlinesmall">Chapter&nbsp;4&nbsp;SSL Programming Concepts</a><br>
+      <img src="ch04s02_files/s_003.gif" alt="" width="1" height="6">
+      <h1>
+      Certificates for SSL Applications
+      </h1>
+      <table width="560" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Table of Contents">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/index.html" class="colorFFFFFFbld">Table of Contents</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch04s02_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td width="2"><img src="ch04s02_files/s_003.gif" alt="" class="decoration" width="2" height="1"></td><td class="color666666bg" align="center"><h2 class="colorFFFFFFbld" title="Index">&nbsp;»&nbsp;<a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ix01.html" class="colorFFFFFFbld">Index</a></h2></td><td class="color666666bg" valign="top" width="5"><img src="ch04s02_files/hpweb_1_2_tab_right.gif" alt="" width="5" height="23" border="0"></td><td><img src="ch04s02_files/s_003.gif" alt="" class="decoration" width="10" height="1"></td></tr></tbody></table>
+      <div class="navheader"><table summary="Navigation header" width="540" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="ch04s02_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch04s02_files/s_003.gif" alt="spacer" width="1" height="1"></td><td><img src="ch04s02_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="1" bgcolor="#cccccc"><img src="ch04s02_files/s_003.gif" alt="spacer" width="1" height="1"></td></tr><tr class="decoration"><td colspan="3" height="4" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="spacer" width="1" height="4"></td></tr><tr><td valign="top" width="40%" align="left"><form action="ch04s01.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"></form>
+          &nbsp;
+        </td><th width="20%" align="center">
+          &nbsp;
+        </th><td valign="top" width="40%" align="right"><form action="ch04s03.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"></form>
+          &nbsp;
+        </td></tr></tbody></table></div>
+      <div class="section" lang="en"><div class="titlepage"><div><div></div></div><div></div></div><p>To establish an SSL connection successfully, you must load
+proper certificates into the SSL client and server. In this section,
+a few common uses of certificates are described. For general information
+about certificates, see Chapter 3. </p><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2902"></a><h3 class="bold"><span class="levelc">Configuring Certificates in the SSL Client
+and Server</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>SSL client and server applications might require four certificates:<a class="indexterm" name="d0e2907"></a> </p><div><ul class="primarybullet"><li><div class="listitembody"><p class="list-initial">Server-s CA certificate</p></div></li><li><div class="listitembody"><p class="list-initial">Client-s CA certificate</p></div></li><li><div class="listitembody"><p class="list-initial">Client certificate</p></div></li><li><div class="listitembody"><p class="list-initial">Server certificate</p></div></li></ul></div><p>A <em class="firstterm-docmaker">root CA</em> is a CA certificate that
+is located as a root in a certificate signing hierarchy. A root
+CA is not signed by any other CA - it is signed by itself. In <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert1-fig" title="Figure&nbsp;4-3&nbsp; Client and Server Certificates Directly
+Signed by CAs">Figure&nbsp;4-3&nbsp;&#8220; Client and Server Certificates Directly
+Signed by CAs&#8221;</a> and <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert2-fig" title="Figure&nbsp;4-4&nbsp; Client and Server Certificates Indirectly
+Signed by CAs">Figure&nbsp;4-4&nbsp;&#8220; Client and Server Certificates Indirectly
+Signed by CAs&#8221;</a>, the CA certificates correspond to root CAs. <a class="indexterm" name="d0e2935"></a></p><p>For successful certificate verification, the certificates
+must have the proper signing relationships, as shown in <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert1-fig" title="Figure&nbsp;4-3&nbsp; Client and Server Certificates Directly
+Signed by CAs">Figure&nbsp;4-3&nbsp;&#8220; Client and Server Certificates Directly
+Signed by CAs&#8221;</a> and <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert2-fig" title="Figure&nbsp;4-4&nbsp; Client and Server Certificates Indirectly
+Signed by CAs">Figure&nbsp;4-4&nbsp;&#8220; Client and Server Certificates Indirectly
+Signed by CAs&#8221;</a>. In <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert1-fig" title="Figure&nbsp;4-3&nbsp; Client and Server Certificates Directly
+Signed by CAs">Figure&nbsp;4-3&nbsp;&#8220; Client and Server Certificates Directly
+Signed by CAs&#8221;</a>, the
+client and server certificates are directly signed by their peers- CAs. </p><div class="figure"><a name="cert1-fig"></a><p class="title"><b>Figure&nbsp;4-3&nbsp; Client and Server Certificates Directly
+Signed by CAs</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s02_files/gfx7.gif" alt="Client and Server Certificates Directly Signed by CAs" align="middle" border="0"></td></tr></tbody></table></div></div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr><tr class="decoration"><td nowrap="nowrap" height="3" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td><td nowrap="nowrap" height="3" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr><td nowrap="nowrap" valign="top" width="50" align="center"><img src="ch04s02_files/note.png" alt="" width="32" height="32" border="0"></td><td width="100%"><b>NOTE: </b>The client and server certificates are not necessarily
+directly signed by the CAs (see <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert1-fig" title="Figure&nbsp;4-3&nbsp; Client and Server Certificates Directly
+Signed by CAs">Figure&nbsp;4-3&nbsp;&#8220; Client and Server Certificates Directly
+Signed by CAs&#8221;</a>). In some cases, the certificate is signed by an RA
+(registration authority) or an intermediate CA whose certificate
+is signed by the CA that is trusted by the peer. (The client certificate
+in <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert2-fig" title="Figure&nbsp;4-4&nbsp; Client and Server Certificates Indirectly
+Signed by CAs">Figure&nbsp;4-4&nbsp;&#8220; Client and Server Certificates Indirectly
+Signed by CAs&#8221;</a> is an example of
+this situation.) In other cases, the certificate's signing chain
+may involve more RAs or intermediate CAs. (The server certificate
+in <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert2-fig" title="Figure&nbsp;4-4&nbsp; Client and Server Certificates Indirectly
+Signed by CAs">Figure&nbsp;4-4&nbsp;&#8220; Client and Server Certificates Indirectly
+Signed by CAs&#8221;</a> is an example of
+this situation.) </td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr class="decoration"><td nowrap="nowrap" height="1" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td><td nowrap="nowrap" height="1" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td></tr><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><p>As long as the chain depth setting is appropriate (that is,
+the certificate chain depth for verification is longer than the
+depth from the CA to the certificate being verified), the certificate
+verification succeeds.</p><div class="figure"><a name="cert2-fig"></a><p class="title"><b>Figure&nbsp;4-4&nbsp; Client and Server Certificates Indirectly
+Signed by CAs</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s02_files/gfx8.gif" alt="Client and Server Certificates Indirectly Signed by CAs" align="middle" border="0"></td></tr></tbody></table></div></div><p><a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert3-fig" title="Figure&nbsp;4-5&nbsp; Certificates on SSL Client and Server (Case
+1)">Figure&nbsp;4-5&nbsp;&#8220; Certificates on SSL Client and Server (Case
+1)&#8221;</a> depicts the most
+common deployment of certificates. This deployment is often used
+when establishing SSL connections between web browsers and a web
+server. As part of its initialization, the SSL server loads a certificate
+(server certificate) signed by a CA. This CA is trusted by the SSL
+clients. When a client verifies the server, the server certificate
+is sent to the client and then is verified against the CA certificate.
+The fact that the server has a certificate signed by a trustworthy
+CA means that the server can be trusted by the client, because the
+client trusts the CA. This certificate setup prevents the SSL client
+from establishing an SSL connection with an untrustworthy SSL server.</p><div class="figure"><a name="cert3-fig"></a><p class="title"><b>Figure&nbsp;4-5&nbsp; Certificates on SSL Client and Server (Case
+1)</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s02_files/gfx9.gif" alt="Certificates on SSL Client and Server (Case 1)" align="middle" border="0"></td></tr></tbody></table></div></div><p>In addition to server certificate verification on the SSL
+client, you can perform client certificate verification on the SSL
+server. This is shown in <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert4-fig" title="Figure&nbsp;4-6&nbsp; Certificates on SSL Client and Server (Case
+2)">Figure&nbsp;4-6&nbsp;&#8220; Certificates on SSL Client and Server (Case
+2)&#8221;</a>.
+Web sites that require higher security, such as banks and online brokers,
+deploy this model. The SSL client connecting to this type of SSL
+server is requested to send its certificate (client certificate)
+to the server. The SSL server then performs client authentication
+based on the client certificate verification. </p><p>This method is the same as the one used in <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert3-fig" title="Figure&nbsp;4-5&nbsp; Certificates on SSL Client and Server (Case
+1)">Figure&nbsp;4-5&nbsp;&#8220; Certificates on SSL Client and Server (Case
+1)&#8221;</a>, but in this case the server checks
+the client certificate against the server-s CA certificate to establish
+the level of trust. Using this implementation, the SSL server can
+achieve enhanced client authentication by combining with another
+authentication method, such as requiring a user name and password. </p><div class="figure"><a name="cert4-fig"></a><p class="title"><b>Figure&nbsp;4-6&nbsp; Certificates on SSL Client and Server (Case
+2)</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s02_files/gfx10.gif" alt="Certificates on SSL Client and Server (Case 2)" align="middle" border="0"></td></tr></tbody></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td valign="top" align="left"><a name="d0e2984"></a><h3 class="bold"><span class="levelc">Obtaining and Creating Certificates</span></h3></td></tr><tr class="decoration"><td class="theme"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="4"></td></tr></tbody></table></div></div><div></div></div><p>If the proper certificates are not in place, the SSL application
+user or developer must either create them or obtain them from a
+trustworthy organization such as a CA or RA. The SSL command line
+interface (described in Chapter 5) and Certificate Tool (described
+in Chapter 3) allow you to create X.509 certificates. <a href="http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html#cert5-fig" title="Figure&nbsp;4-7&nbsp; Certificate Creation Process">Figure&nbsp;4-7&nbsp;&#8220; Certificate Creation Process&#8221;</a> shows the process for creating an
+X.509 certificate.</p><div class="figure"><a name="cert5-fig"></a><p class="title"><b>Figure&nbsp;4-7&nbsp; Certificate Creation Process</b></p><div><table width="100%"><tbody><tr><td><img src="ch04s02_files/gfx11.gif" alt="Certificate Creation Process" align="middle" border="0"></td></tr></tbody></table></div></div><p>When you obtain or create a certificate, consider the following: </p><div><ul class="primarybullet"><li><div class="listitembody"><p class="list-initial">Algorithms</p></div></li><li><div class="listitembody"><p class="list-initial">Key size</p></div></li><li><div class="listitembody"><p class="list-initial">Certificate/key format</p></div></li><li><div class="listitembody"><p class="list-initial">Security policies</p></div></li></ul></div><h4><a name="d0e3010"></a>Algorithms: RSA certificate with RSA keys or DSA certificate
+with DH keys</h4><p>Although RSA certificates are commonly used for SSL, DSA certificates
+can be loaded in the SSL structure as well. (Most SSL servers load
+only RSA certificates. SSL servers that use DSA certificates are
+rare.)</p><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr><tr class="decoration"><td nowrap="nowrap" height="3" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td><td nowrap="nowrap" height="3" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr><td nowrap="nowrap" valign="top" width="50" align="center"><img src="ch04s02_files/note.png" alt="" width="32" height="32" border="0"></td><td width="100%"><b>NOTE: </b>RSA and DSA certificates and keys are incompatible.
+An SSL client that has only an RSA certificate and key cannot establish
+a connection with an SSL server that has only a DSA certificate
+and key. </td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr class="decoration"><td nowrap="nowrap" height="1" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td><td nowrap="nowrap" height="1" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td></tr><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><p>To avoid this problem, you can load both RSA and DSA certificates
+and key pairs in the <tt class="literal">SSL_CTX</tt> and SSL structure.
+(For more information, see the description of the <tt class="function">SSL_CTX_use_certificate</tt>() and <tt class="function">SSL_CTX_set_cipher_list</tt>() APIs in this manual.)</p><p>If you use a DSA certificate, you must load DH keys. Although
+the RSA algorithm is used for both key exchange and signing operations,
+DSA can be used only for signing. Therefore, DH is used as the key agreement
+algorithm with a DSA certificate in an SSL application. </p><table width="100%" border="0" cellpadding="0" cellspacing="1"><tbody><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr><tr class="decoration"><td nowrap="nowrap" height="3" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td><td nowrap="nowrap" height="3" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="3"></td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr><td nowrap="nowrap" valign="top" width="50" align="center"><img src="ch04s02_files/note.png" alt="" width="32" height="32" border="0"></td><td width="100%"><b>NOTE: </b>DSA
+certificates and DH keys cannot be created with the OpenVMS SSL
+Certificate Tool (described in Chapter 3). Use the SSL command line
+interface, described in Chapter 5, instead. </td></tr><tr><td colspan="2" height="1"><img src="ch04s02_files/s_003.gif" alt="" height="1"></td></tr><tr class="decoration"><td nowrap="nowrap" height="1" bgcolor="#ffffff"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td><td nowrap="nowrap" height="1" bgcolor="#CCCCCC"><img src="ch04s02_files/s_003.gif" alt="" width="1" height="1"></td></tr><tr><td><img src="ch04s02_files/s_003.gif" alt="" width="1" height="2"></td></tr></tbody></table><h4><a name="d0e3034"></a>Key size: 512-bit, 1024-bit, or others</h4><p>You must specify the key size of the algorithms when you create
+a certificate. The key size affects security and performance of
+the SSL application. A longer key makes the application more secure,
+but it can slow performance. A shorter key makes encryption and
+decryption faster, but lowers security. </p><p>Usually RSA and DSA keys are 512-bit, 1024-bit or 2048-bit.
+(1024-bit keys are the most commonly used.) In some cases, you must
+decide the key size based on the application-s requirement or corporate
+or national security policy.</p><h4><a name="d0e3040"></a>Certificate and key formats: PEM, DER or others</h4><p>The OpenSSL command line interface supports the following
+three certificate formats:<a class="indexterm" name="d0e3044"></a> </p><table class="simplelist" summary="Simple list" border="0"><tbody><tr><td>DER
+- Encodes the certificate using Distinguished Encoding Rules. </td></tr><tr><td>PEM - The Base64 encoding of the DER encoding, with header
+and footer lines added.</td></tr><tr><td>NET - An obsolete Netscape server format.</td></tr></tbody></table><a class="indexterm" name="d0e3057"></a><a class="indexterm" name="d0e3060"></a><a class="indexterm" name="d0e3063"></a><p>The most common certificate format for SSL applications is
+PEM. The SSL Certificate Tool, described in Chapter 3, supports
+only the PEM format. If a DER certificate is necessary, use the
+SSL command line interface, described in Chapter 5.</p><h4><a name="d0e3068"></a>Security policy of the application using the certificates</h4><p>Check the application-s security policy or requirements when
+you issue certificates. Some applications require certain attributes
+or values in the X.509 certificates. For example, SSL applications
+for financial transactions might have a security policy to use 1024-bit
+or longer RSA keys, or certain extensions in an X.509 certificates
+might be mandatory. </p><p>Many countries have national policies regarding encryption.
+Using and exporting strong encryption algorithms and keys might
+be affected by these policies. Also, some organizations might have
+policies that disallow their employees using strong encryption.</p></div></div>
+      <div class="navfooter"><hr><table summary="Navigation footer" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td valign="top" width="40%" align="left"><form action="ch04s01.html" method="get" name="prev"><input class="primButton" value="«&nbsp;prev" name="btnPrev" type="submit"><br><br>HP SSL Data Structures</form>
+                &nbsp;
+              </td><td valign="top" width="20%" align="center">
+                &nbsp;
+              </td><td valign="top" width="40%" align="right"><form action="ch04s03.html" method="get" name="next"><input class="primButton" value="next&nbsp;»" name="btnNext" type="submit"><br><br>SSL Programming Tutorial
+                    &nbsp;
+                  </form></td></tr></tbody></table></div>
+    </td>
+    <!-- End Content Area -->
+    <!--stopindex-->
+   </tr></tbody></table>
+<p>&nbsp;</p>
+<!-----hpOpenVMSContentFinish----->
+
+		</td>
+<!-- End Content Area -->
+<!--stopindex-->
+	</tr>
+</tbody></table>
+<!-- End Left Navigation and Content Area -->
+
+<!-- Begin Footer Area -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr class="decoration">
+		<td class="color666666bg"><img src="ch04s02_files/s.gif" alt="" width="1" height="4" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left">
+			<table width="740" border="0" cellpadding="0" cellspacing="0">
+				<tbody><tr class="decoration">
+					<td colspan="4"><img src="ch04s02_files/s.gif" alt="" width="1" height="4" border="0"></td>
+				</tr>
+				<tr>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/privacy.html" class="udrlinesmall">Privacy statement</a></td>
+					<td width="33%" align="center"><a href="http://welcome.hp.com/country/us/en/termsofuse.html" class="udrlinesmall">Using this site means you accept its terms</a></td>
+					<td width="33%" align="center"><!-- Activate Feedback Link Here --><a href="http://h71000.www7.hp.com/fb_web.html" class="udrlinesmall">Feedback to webmaster</a><!-- End Activate Feedback Link Here --></td>
+				</tr>
+				<tr class="decoration">
+					<td colspan="4"><img src="ch04s02_files/s.gif" alt="" width="1" height="4"></td>
+				</tr>
+				<tr>
+					<td colspan="4" class="small" align="center">© 2011 Hewlett-Packard Development Company, L.P.</td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+</tbody></table>
+<!-- End Footer Area -->
+
+
+
+
+
+
+</body></html>
