@@ -1,0 +1,122 @@
+/* -- HPWEB STYLE SHEET hpweb_styles_mac.css VERSION hpweb.1.2d --*/
+
+body,td,th {font-family: Arial, Verdana, Helvetica, Sans-serif; font-size: 12px;}
+
+td img.decoration {display: block;}
+tr.decoration img {display: block;}
+
+a {color: #003366; text-decoration: none;}
+a:active {color: #003366;}
+a:link {color: #003366;}
+a:visited {color: #660066;}
+a:hover {text-decoration: underline;}
+
+a.bold {font-weight: bold;}
+a.small {font-size: 11px;}
+a.udrline {text-decoration: underline;}
+a.udrlinebold {font-weight: bold; text-decoration: underline;}
+a.udrlinesmall {text-decoration: underline; font-size: 11px;}
+
+a.lftnavhdr {font-weight: bold;}
+a.lftnavhdr:visited {font-weight: bold; color: #003366;}
+
+h1 {font-size: 25px; font-weight: normal; margin-bottom: 2px; margin-top: 2px;}
+h2 {font-size: 12px; margin-bottom: 1px; margin-top: 1px; font-weight: normal;}
+h3 {font-size: 12px; margin-bottom: 1px; margin-top: 1px; font-weight: normal;}
+h4 {font-size: 12px; margin-bottom: 1px; margin-top: 1px; font-weight: normal;}
+h5 {font-size: 12px; margin-bottom: 1px; margin-top: 1px; font-weight: normal;}
+h6 {font-size: 12px; margin-bottom: 1px; margin-top: 1px; font-weight: normal;}
+
+.bold {font-weight: bold;}
+.small {font-size: 11px;}
+.smallbold {font-size: 11px; font-weight: bold;}
+.srchopt {color: #333333; font-size: 11px;}
+.copyright {color: #666666; font-size: 11px;}
+.color333333 {color: #333333;}
+.color666666 {color: #666666;}
+.color003366 {color: #003366;}
+.color003366bld {color: #003366; font-weight: bold;}
+.colorFFFFFF {color:#FFFFFF;} /*-- NEW Addition - January 2003 --*/
+.colorFFFFFFbld {color:#FFFFFF; font-weight:bold;} /*-- NEW Addition - January 2003 --*/
+.countryInd {color:#333333;} /*-- NEW Addition - January 2003 --*/
+.srchradbtn {background-color:#E7E7E7;}
+
+/*-- COMPAQ STYLE ADDITIONS - dgarcia@hp.com - January 2003 --*/
+.color990000 {color:#990000;}
+.color990000bld {color:#990000; font-weight:bold;}
+.colorCCCCCCbg {background-color:#CCCCCC;}
+.colorE7E7E7bg {background-color:#E7E7E7;}
+    
+a.cpqRed {color:#990000;  text-decoration: none;}
+a.cpqRed:active {color:#990000;}
+a.cpqRed:link {color:#990000;}
+a.cpqRed:visited {color:#660066;}
+a.cpqRed:hover {text-decoration: underline;}
+
+a.cpqRedbold {color:#990000; text-decoration: none; font-weight:bold;}
+a.cpqRedbold:active {color:#990000; font-weight:bold;}
+a.cpqRedbold:link {color:#990000; font-weight:bold;}
+a.cpqRedbold:visited {color:#660066; font-weight:bold;}
+a.cpqRedbold:hover {text-decoration: underline;}
+   
+a.cpqBreadcrumb {font-size: 11px; color: #990000; text-decoration:underline;}
+a.cpqBreadcrumb:active {font-size: 11px; color: #990000; text-decoration:underline;}
+a.cpqBreadcrumb:link {font-size: 11px; color: #990000; text-decoration:underline;} 
+a.cpqBreadcrumb:visited {font-size: 11px; color: #660066; text-decoration:underline;}
+
+a.cpqNavWhite {color:#FFFFFF; text-decoration: none;}
+a.cpqNavWhite:active {color:#FFFFFF;}
+a.cpqNavWhite:link {color:#FFFFFF;}
+a.cpqNavWhite:visited {color:#FFFFFF;}
+a.cpqNavWhite:hover {text-decoration: underline;}
+
+a.cpqUdrline {color:#990000; text-decoration:underline;}
+a.cpqUdrline:active {color:#990000;}
+a.cpqUdrline:link {color:#990000;} 
+a.cpqUdrline:visited {color:#660066;}  
+ 
+a.cpqUdrlinebold {color:#990000; text-decoration:underline; font-weight:bold;}
+a.cpqUdrlinebold:active {color:#990000;}
+a.cpqUdrlinebold:link {color:#990000;} 
+a.cpqUdrlinebold:visited {color:#660066;} 
+ 
+.cpqsrchopt {color: #990000; text-decoration: underline;}
+
+/*-- NEW Addition - 2003 HPWEB_1-2 --*/
+a.smallbld {font-weight: bold; font-size: 11px;}
+
+a.cpqsmall {font-size: 11px; color:#990000;}
+a.cpqsmall:active {font-size: 11px; color:#990000;}
+a.cpqsmall:link {font-size: 11px; color:#990000;}
+a.cpqsmall:visited {font-size: 11px; color:#660066;}
+
+a.cpqsmallbld {font-weight: bold; font-size: 11px; color:#990000;}
+a.cpqsmallbld:active {font-weight: bold; font-size: 11px; color:#990000;}
+a.cpqsmallbld:link {font-weight: bold; font-size: 11px; color:#990000;}
+a.cpqsmallbld:visited {font-weight: bold; font-size: 11px; color:#660066;}
+
+a.colorFFFFFFbld {font-weight: bold; color: #FFFFFF;}
+a.colorFFFFFFbld:active {font-weight: bold; color: #FFFFFF;}
+a.colorFFFFFFbld:link {font-weight: bold; color: #FFFFFF;} 
+a.colorFFFFFFbld:visited {font-weight: bold; color: #FFFFFF;}
+
+.large {font-size: 15px;}
+
+.color333333bg {background-color:#333333;}
+.colorDCDCDCbg {background-color:#DCDCDC;}
+.color666666bg {background-color:#666666;}
+.color999999bg {background-color:#999999;}
+.colorFFFFFFbg {background-color:#FFFFFF;}
+.color000000bg {background-color:#000000;}
+
+.commButton {border-right: #CC0000 2px solid; border-top: #FF9899 2px solid; border-left: #FF9899 2px solid; border-bottom: #CC0000 2px solid; font-size: 11px; font-weight: bold; color: white; font-family: Arial, Verdana, Helvetica, Sans-serif; background-color: #FF0000; text-align: center; padding-right: 0px; padding-left:6px; margin-right: 0px; cursor: pointer; cursor: hand;}
+.primButton {border-right: #000000 2px solid; border-top: #999999 2px solid; border-left: #999999 2px solid; border-bottom: #000000 2px solid; font-size: 11px; font-weight: bold; color: white; font-family: Arial, Verdana, Helvetica, Sans-serif; background-color: #333333; text-align: center; padding-right: 0px; padding-left:6px; margin-right: 0px; cursor: pointer; cursor: hand;}
+.secButton {border-right: #333333 2px solid; border-top: #CCCCCC 2px solid; border-left: #CCCCCC 2px solid; border-bottom: #333333 2px solid; font-size: 11px; font-weight: bold; color: white; font-family: Arial, Verdana, Helvetica, Sans-serif; background-color: #666666; text-align: center; padding-right: 0px; padding-left:6px; margin-right: 0px; cursor: pointer; cursor: hand;}
+
+.newmarker {font-size:11px; color:#ff0000; font-weight:bold;}
+.strike {text-decoration: line-through}
+.tertnavdiv {position:relative; margin-top:4px; margin-bottom:4px; width:1px; height:20px; background-color:#CECECE; layer-background-color:#CECECE; visibility:visible;}
+.bulletlist {padding:0; margin-top:0px; margin-bottom:0px; margin-right:0px; margin-left:16px;}
+.numberedlist {list-style-type:decimal; padding-left:5px; margin-top:0px; margin-bottom:0px; margin-right:0px; margin-left:20px;}
+.callout {margin: 0px 0px 10px 10px; width:160px; padding:10px; float:right; background-color: #E7E7E7;}
+.error {font-weight: bold; color: #ff0000;}

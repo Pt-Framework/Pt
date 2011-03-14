@@ -1,0 +1,70 @@
+/* Stylesheet for technical documentation on HP Web sites  */
+a {text-decoration: underline;}
+a.anchorName {text-decoration: none;}
+a.linkLine {text-decoration: none;}
+a.linkLine:hover {text-decoration: underline;}
+a.linkLineBold {text-decoration: none;
+                font-weight: bold;}
+a.linkLineBold:hover {text-decoration: underline;}
+a.smallbld {text-decoration: none;}
+a.smallbld:hover {text-decoration: underline;}
+dfn.glossdef {font-style: normal;}
+em.firstterm-docmaker {font-style: normal; font-weight: bold;}
+em.firstterm {font-style: normal; font-weight: bold;}
+div.msgexplan {margin-left: +2ex;}
+div.msginfo {margin-left: +2ex;}
+div.variablelist {margin-left: +2ex;}
+div.example, div.informalexample {margin-left: +2ex;}
+div.refsynopsisdiv-wide-spacing {letter-spacing: .1em}
+div.refsynopsisdiv-normal-spacing {letter-spacing: 0em}
+pre.programlisting,  pre.screen
+  {font-family: courier new, courier, monospace;}
+pre.small {font-family: courier new, courier, monospace;
+          font-size: smaller;}
+pre.synopsis
+  {font-family: courier new, courier, monospace;
+   letter-spacing: .1em;}
+tt, .computeroutput, .userinput
+  {font-family: courier new, courier, monospace;}
+.cmdsynopsis
+  {font-family: courier new, courier, monospace;
+   letter-spacing: .1em;}
+p.list-compact {margin-top: 0; margin-bottom: 1ex;}
+p.list-initial {margin-top: 0.5ex; margin-bottom: 1.5ex;
+               color: black;}
+p.list-internal {margin-top: 0; margin-bottom: 1.5ex;
+                color: black;}
+p.list-last {margin-top: 0; margin-bottom: 2ex;
+            color: black;}
+span.markup {font-family:  courier new, courier, monospace;}
+.title {
+  font-size: 100%;
+  margin-bottom: 1px;
+  margin-top: 1px;
+  font-weight: bold;
+}
+.oddrow {background-color:#E7E7E7;}
+ul.secondarybullet {list-style-type: disc; color: black;}
+div.listitembody {color:black}
+div.remark {color:red;}
+span.nowrap {white-space: nowrap;}
+.keycap {font-family: Arial, Verdana, Helvetica,
+         Sans-serif;
+         font-weight: bold;}
+.levele {font-weight: bold;
+         font-style: normal;
+         margin: 0px 0px 0px 0px;
+         padding:1px;
+}
+.levelf {font-style: italic; margin: 0px 0px 0px 0px;
+        padding:1px;}
+ul.primarybullet,  .singleitemlist
+   {list-style-type: disc; color: #000000 ;}
+.callout-bug {background-color: #000000 ;
+              color: #FFFFFF ;
+              font-size: x-small;
+              font-weight: bold ;
+              padding: 1px 3px; 1px 3px;
+              border-width: thin;
+              border-style: groove;
+             }
