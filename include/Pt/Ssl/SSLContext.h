@@ -53,7 +53,7 @@ class PT_SSL_API SSLContext {
          * A client context will only need 'certFile' and 'keyFile' if it is to be used for certificate-based client authentication.
          * The 'password' is only needed if the 'keyFile' is encrypted.
          */
-        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID);
+        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0);
 
         //! \brief Standard dtor.
         ~SSLContext();

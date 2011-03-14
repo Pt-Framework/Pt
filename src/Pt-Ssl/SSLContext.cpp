@@ -119,13 +119,20 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
             throw SSLRuntimeError("Could not read/verify CA list!", PT_SOURCEINFO);
     }
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
-    SSL_CTX_set_verify_depth(_ctx,1);
+    SSL_CTX_set_verify_depth(_ctx, 1);
 #endif
+
 
     // Set some options
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+  //SSL_CTX_set_read_ahead(_ctx, 1);
     if(sessionID) SSL_CTX_set_session_id_context(_ctx, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+
+    //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
+    //int SSL_set_session(SSL *to, SSL_SESSION *session);
+
+    // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }
 
 SSLContext::~SSLContext()
