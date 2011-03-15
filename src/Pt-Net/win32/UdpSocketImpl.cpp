@@ -50,7 +50,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _isConnected(false)
 , _isBound(false)
 , _eventFlags(FD_CLOSE)
-, _waitEvent( WSACreateEvent() )
+, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
 , _currentEventHandle(INVALID_HANDLE_VALUE)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
 , _dataSends(0)
@@ -504,7 +504,7 @@ bool UdpSocketImpl::checkEvent()
 
     WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
         throw System::SystemError("WSAEnumNetworkEvents failed");
 
     bool ev = false;

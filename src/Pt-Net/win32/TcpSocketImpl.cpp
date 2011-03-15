@@ -37,6 +37,7 @@
 #include <cstring>
 #include <cassert>
 
+//#include <iostream>
 #define log_debug(x)
 //#define log_debug(x) std::cerr << x << std::endl;
 
@@ -49,7 +50,7 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _sentry(0)
 , _socket(socket)
 , _fd(INVALID_SOCKET)
-, _waitEvent(WSACreateEvent())
+, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
@@ -308,11 +309,11 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     {
         msecs = std::numeric_limits<int>::max();
     }
-
-	if( _dataSends != 0 ||
-        WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
-	{
-		checkEvent();
+DWORD www = 0;
+	if( _dataSends != 0 || (www =
+        WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE)) != WSA_WAIT_TIMEOUT)
+	{      
+		bool av = checkEvent();
 		return true;
 	}
 
@@ -403,7 +404,28 @@ size_t TcpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
     _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n;
 
+    // u_long argp = 0;
+    // ::ioctlsocket(_fd, FIONREAD, &argp);
+    // std::cerr << _fd << " FIONREAD: " << argp << std::endl;
+    // if( argp == 2878)
+    // {
+    //     DWORD wr = WaitForSingleObject(_currentEventHandle, 0);
+    //     std::cerr << _fd << " WAIT:  " << (wr == WAIT_OBJECT_0) << std::endl;
+    // }
+
     attachEvent(_currentEventHandle, _eventFlags);
+
+    // if( argp == 2878)
+    // {
+    //     DWORD wr = WaitForSingleObject(_currentEventHandle, 0);
+    //     std::cerr << _fd << " WAIT2: " << (wr == WAIT_OBJECT_0) << std::endl;
+
+    //     if(wr == WAIT_OBJECT_0)
+    //     {
+    //         std::cerr << _fd << " RESET" << std::endl;
+    //         SetEvent(_currentEventHandle);
+    //     }
+    // }
     return 0;
 }
 
@@ -521,13 +543,14 @@ bool TcpSocketImpl::checkEvent()
 
     WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd,_currentEventHandle, &events) == SOCKET_ERROR)
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
         throw System::SystemError("WSAEnumNetworkEvents failed");
 
     bool ev = false;
 
     if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
     {
+        //ResetEvent(_currentEventHandle);
 		int s = FD_CONNECT_BIT;
 		if(events.iErrorCode[s] != 0)
 		{
@@ -559,6 +582,7 @@ bool TcpSocketImpl::checkEvent()
 
     if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
     {
+       //ResetEvent(_currentEventHandle);
        ev = true;
        _socket.outputReady.send(_socket);
 
@@ -568,6 +592,7 @@ bool TcpSocketImpl::checkEvent()
 
     if((events.lNetworkEvents & FD_READ) == FD_READ)
     {
+        //ResetEvent(_currentEventHandle);
         ev = true;
         _socket.inputReady.send(_socket);
 
@@ -577,6 +602,7 @@ bool TcpSocketImpl::checkEvent()
 
     if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
     {
+        //ResetEvent(_currentEventHandle);
          ev = true;
        _isConnected = false;
 

@@ -40,7 +40,6 @@
 //#include <Mswsock.h>
 
 #define log_debug(x)
-//#define log_debug(x) std::clog << x<< std::endl;
 
 namespace Pt {
 
@@ -63,7 +62,7 @@ static struct WsaInit
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _fd(INVALID_SOCKET)
-, _waitEvent(WSACreateEvent())
+, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
 , _currentHandle(_waitEvent)
 {
     WSAResetEvent(_currentHandle);
@@ -300,25 +299,26 @@ HANDLE TcpServerImpl::waitHandle() const
 
 bool TcpServerImpl::checkEvent()
 {
-	log_debug("checkEvent");
+	log_debug("TcpServerImpl::checkEvent");
 
     if (_fd == INVALID_SOCKET)
         return false;
 
 	if(_server.avail())
 	{
-		_server.connectionPending.send(_server);		
+		_server.connectionPending.send(_server);
 		return true;
 	}
 
     WSANETWORKEVENTS events;
 
-    if(WSAEnumNetworkEvents(_fd, _currentHandle, &events) == SOCKET_ERROR)
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
         throw System::SystemError("ask network events failed");
 
     if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
         return false;
 
+    ResetEvent(_currentHandle);
     _server.connectionPending.send(_server);
     return true;
 }
