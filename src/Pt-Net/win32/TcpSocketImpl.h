@@ -92,7 +92,7 @@ class TcpSocketImpl : public System::SelectableImpl
 		AddrInfoImpl::const_iterator _addrInfoPtr;
         DestructionSentry* _sentry;
         SOCKET	      _fd;
-		SOCKADDR      _peeraddr;
+		sockaddr_storage  _peeraddr;
 		TcpSocket&    _socket;
 		WSAEVENT      _waitEvent;
 		std::size_t	  _timeout;

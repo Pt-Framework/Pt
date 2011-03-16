@@ -155,8 +155,8 @@ class UdpSocketImpl : public System::SelectableImpl
         AddrInfoImpl::const_iterator _addrInfoPtr;
         bool                         _isConnected;
         bool                         _isBound;
-        SOCKADDR                     _peeraddr;
-        SOCKADDR			         _servaddr;
+        sockaddr_storage             _peeraddr;
+        sockaddr_storage	         _servaddr;
         long                         _eventFlags;
         WSAEVENT                     _waitEvent;
         HANDLE	                     _currentEventHandle;

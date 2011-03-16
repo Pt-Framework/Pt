@@ -56,7 +56,7 @@ class TcpServerImpl : public System::SelectableImpl
     private:
         TcpServer&			_server;
         SOCKET				_fd;
-        SOCKADDR			_servaddr;
+        sockaddr_storage    _servaddr;
         WSAEVENT			_waitEvent;
 		HANDLE				_currentHandle;
 

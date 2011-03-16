@@ -94,14 +94,17 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
     {
         if( _isConnected )
         {
-            if(it->ai_family != _peeraddr.sa_family)
+            if(it->ai_family != _peeraddr.ss_family)
                 continue;
         }
         else if( _isBound )
         {
-            if(it->ai_family != _servaddr.sa_family)
+            if(it->ai_family != _servaddr.ss_family)
                 this->close();
         }
+
+		if( it->ai_family == AF_INET6 )
+			continue; //This is a workaround!!!! TODO: Broadcast for IPV6 
 
         if( _fd == INVALID_SOCKET )
             _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
@@ -157,12 +160,12 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
     {
         if( _isBound )
         {
-            if(_addrInfoPtr->ai_family != _servaddr.sa_family)
+            if(_addrInfoPtr->ai_family != _servaddr.ss_family)
                 continue;
         }
         else if( _isConnected )
         {
-            if(_addrInfoPtr->ai_family != _peeraddr.sa_family)
+            if(_addrInfoPtr->ai_family != _peeraddr.ss_family)
                 this->close();
         }
 
@@ -401,7 +404,7 @@ size_t UdpSocketImpl::endRead(bool& eof)
     int addrlen = sizeof(_peeraddr);
     //int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
     int len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
-                        &_peeraddr, &addrlen );
+                        (sockaddr*) &_peeraddr, &addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
     {
@@ -413,7 +416,7 @@ size_t UdpSocketImpl::endRead(bool& eof)
 
         //len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
         len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
-                        &_peeraddr,  &addrlen );
+                        (sockaddr*) &_peeraddr,  &addrlen );
         //Set socket to non-blocking mode
         argp = 1;
         ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -440,7 +443,7 @@ size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
 
     //int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
     int rc = WSASendTo( _fd, &_sendBuffer, 1, &numberOfBytesSent, 0,
-                        &_peeraddr, sizeof(_peeraddr), NULL, NULL);
+                        (sockaddr*)&_peeraddr, sizeof(_peeraddr), NULL, NULL);
 
     if(rc == SOCKET_ERROR)
     {
