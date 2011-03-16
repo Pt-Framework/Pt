@@ -89,6 +89,8 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     //_ctx = SSL_CTX_new(SSLv3_method());
     //_ctx = SSL_CTX_new(SSLv2_method());
     //_ctx = SSL_CTX_new(TLSv1_method());
+
+    //int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth);
   
     // Load the certificate chain file (if available)
     if(certFile) {
@@ -131,6 +133,8 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
 
     //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
     //int SSL_set_session(SSL *to, SSL_SESSION *session);
+
+    //int SSL_CTX_set_cipher_list(SSL_CTX *ctx, const char *str);
 
     // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }

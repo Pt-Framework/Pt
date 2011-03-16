@@ -65,6 +65,10 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     // Set session ID
     if(sessionID)
         SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+
+   //STACK_OF(SSL_CIPHER) *SSL_get_ciphers(const SSL *ssl);
+   //const char *SSL_get_cipher_list(const SSL *ssl, int priority);
+   //int SSL_set_cipher_list(SSL *ssl, const char *str);
 }
 
 SSLStreamBuf::~SSLStreamBuf()
