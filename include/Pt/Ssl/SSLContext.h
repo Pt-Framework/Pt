@@ -61,9 +61,8 @@ class PT_SSL_API SSLContext {
         friend class SSLStreamBuf;
 
     private:
-        SSL_CTX*    _ctx;    // OpenSSL's SSL context
-        std::string _pswd;   // The password
-        static BIO* _bioErr; // Error BIO for OpenSSL
+        SSL_CTX*    _ctx;  // OpenSSL's SSL context
+        std::string _pswd; // The password
 
         // Password callback to feed the password to OpenSSL
         static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);

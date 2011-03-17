@@ -26,6 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <vector>
+#include <cstring>
+
+#include <Pt/Singleton.h>
 #include <Pt/Ssl/SSLContext.h>
 
 namespace Pt {
@@ -55,7 +59,107 @@ const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const 
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BIO* SSLContext::_bioErr = 0;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class ChiperList : public Singleton<ChiperList> {
+    public:
+        struct CipherInfo {
+            unsigned long id;
+            std::string   strid;
+            std::string   name;
+            std::string   desc;
+
+            inline CipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
+            : id(id_), strid(strid_), name(name_), desc(desc_)
+            {}
+        };
+
+        friend class Singleton<ChiperList>;
+        
+    private:
+        ChiperList();
+        void _getCiphers(std::vector<CipherInfo>& dst, const SSL_METHOD* sslMethod);
+        
+        BIO*                    _bioErr;
+        std::vector<CipherInfo> _sslV2Chipers;
+        std::vector<CipherInfo> _sslV3Chipers;
+        std::vector<CipherInfo> _tlsV1Chipers;
+};
+
+ChiperList::ChiperList()
+: _bioErr(0)
+{
+    // Initialize logger
+    Pt::System::LogTarget::get("Pt.SSL.Logger").setChannel("console://");
+    Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
+
+    // Initialize OpenSSL
+    SSL_library_init();
+    SSL_load_error_strings();
+    _bioErr = BIO_new_fp(stderr, BIO_NOCLOSE | BIO_FP_TEXT);
+
+    // Get the list of ciphers for all the supported protocols
+    _getCiphers(_sslV2Chipers, SSLv2_method());
+    _getCiphers(_sslV3Chipers, SSLv3_method());
+    _getCiphers(_tlsV1Chipers, TLSv1_method());
+
+    std::cerr << "########## Supported SSLv2 Ciphers ##########" << std::endl;
+    for(uint i = 0; i < _sslV2Chipers.size(); ++i) {
+        std::cerr << _sslV2Chipers[i].id << " " << _sslV2Chipers[i].strid << " " << _sslV2Chipers[i].name << " | " << _sslV2Chipers[i].desc << std::endl;
+    }
+    std::cerr << std::endl;
+
+    std::cerr << "########## Supported SSLv3 Ciphers ##########" << std::endl;
+    for(uint i = 0; i < _sslV3Chipers.size(); ++i) {
+        std::cerr << _sslV3Chipers[i].id << " " << _sslV3Chipers[i].strid << " " << _sslV3Chipers[i].name << " | " << _sslV3Chipers[i].desc << std::endl;
+    }
+    std::cerr << std::endl;
+
+    std::cerr << "########## Supported TLSv1 Ciphers ##########" << std::endl;
+    for(uint i = 0; i < _tlsV1Chipers.size(); ++i) {
+        std::cerr << _tlsV1Chipers[i].id << " " << _tlsV1Chipers[i].strid << " " << _tlsV1Chipers[i].name << " | " << _tlsV1Chipers[i].desc << std::endl;
+    }
+    std::cerr << std::endl;
+}
+
+void ChiperList::_getCiphers(std::vector<CipherInfo>& dst, const SSL_METHOD* sslMethod)
+{
+    // Get the available ciphers
+    SSL_CTX*              ctx = SSL_CTX_new(sslMethod);
+    SSL*                  ssl = SSL_new(ctx);
+    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(ssl);
+
+    // Walk trough the ciphers
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i) {
+        // Skip if not valid
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+        if(!c->valid) continue;
+        // Get the ID and split it
+        const unsigned long id  = c->id;
+        const int           id0 = (int) (  id >> 24);
+        const int           id1 = (int) ( (id >> 16) & 0xFFL );
+        const int           id2 = (int) ( (id >>  8) & 0xFFL );
+        const int           id3 = (int) (  id        & 0xFFL );
+        // Convert the ID to a readable string
+        char strid[64];
+             if((id & 0xFF000000L) == 0x02000000L) sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+        else if((id & 0xFF000000L) == 0x03000000L) sprintf(strid, "0x%02X,0x%02X", id2, id3);
+        else                                       sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+        // Get some information
+        char desc[512];
+        SSL_CIPHER_description(c, desc, sizeof(desc));
+        const int dlen = strlen(desc);
+        if(desc[dlen - 1] == '\n') desc[dlen - 1] = 0;
+        // Store the chiper
+        dst.push_back(CipherInfo(id, strid, c->name, desc));
+    }
+
+    // Clear all
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+}
+
+static ChiperList& chiperList = ChiperList::instance();
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
@@ -73,17 +177,6 @@ int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* use
 SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID)
 : _pswd(password ? password : "")
 {
-    // Only need to perform these once for every application
-    if(!SSLContext::_bioErr) {
-        // Initialize OpenSSL
-        SSL_library_init();
-        SSL_load_error_strings();
-        SSLContext::_bioErr = BIO_new_fp(stderr, BIO_NOCLOSE);
-        // Initialize logger
-        Pt::System::LogTarget::get("Pt.SSL.Logger").setChannel("console://");
-        Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
-    }
-
     // Create a new SSL context that by default wants SSL version 3 but can fallback to SSL version 2
     _ctx = SSL_CTX_new(SSLv23_method());
     //_ctx = SSL_CTX_new(SSLv3_method());
