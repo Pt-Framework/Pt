@@ -102,21 +102,25 @@ ChiperList::ChiperList()
     _getCiphers(_sslV3Chipers, SSLv3_method());
     _getCiphers(_tlsV1Chipers, TLSv1_method());
 
+    char buff[1024];
     std::cerr << "########## Supported SSLv2 Ciphers ##########" << std::endl;
     for(uint i = 0; i < _sslV2Chipers.size(); ++i) {
-        std::cerr << _sslV2Chipers[i].id << " " << _sslV2Chipers[i].strid << " " << _sslV2Chipers[i].name << " | " << _sslV2Chipers[i].desc << std::endl;
+        sprintf(buff, "%lu %-14s %-25s | %s", _sslV2Chipers[i].id, _sslV2Chipers[i].strid.c_str(), _sslV2Chipers[i].name.c_str(), _sslV2Chipers[i].desc.c_str());
+        std::cerr << buff << std::endl;
     }
     std::cerr << std::endl;
 
     std::cerr << "########## Supported SSLv3 Ciphers ##########" << std::endl;
     for(uint i = 0; i < _sslV3Chipers.size(); ++i) {
-        std::cerr << _sslV3Chipers[i].id << " " << _sslV3Chipers[i].strid << " " << _sslV3Chipers[i].name << " | " << _sslV3Chipers[i].desc << std::endl;
+        sprintf(buff, "%lu %-14s %-25s | %s", _sslV3Chipers[i].id, _sslV3Chipers[i].strid.c_str(), _sslV3Chipers[i].name.c_str(), _sslV3Chipers[i].desc.c_str());
+        std::cerr << buff << std::endl;
     }
     std::cerr << std::endl;
 
     std::cerr << "########## Supported TLSv1 Ciphers ##########" << std::endl;
     for(uint i = 0; i < _tlsV1Chipers.size(); ++i) {
-        std::cerr << _tlsV1Chipers[i].id << " " << _tlsV1Chipers[i].strid << " " << _tlsV1Chipers[i].name << " | " << _tlsV1Chipers[i].desc << std::endl;
+        sprintf(buff, "%lu %-14s %-25s | %s", _tlsV1Chipers[i].id, _tlsV1Chipers[i].strid.c_str(), _tlsV1Chipers[i].name.c_str(), _tlsV1Chipers[i].desc.c_str());
+        std::cerr << buff << std::endl;
     }
     std::cerr << std::endl;
 }
