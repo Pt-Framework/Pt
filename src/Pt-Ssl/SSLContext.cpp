@@ -112,8 +112,6 @@ ChiperList::ChiperList()
     Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
 
     // Initialize OpenSSL
-    //SSL_library_init();
-    //SSL_load_error_strings();
     _bioErr = BIO_new_fp(stderr, BIO_NOCLOSE | BIO_FP_TEXT);
 
     // Get the list of ciphers for all the supported protocols
