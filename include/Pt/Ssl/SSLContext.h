@@ -40,6 +40,13 @@
 namespace Pt {
 namespace Ssl {
 
+//! @internal Library initialization.
+static struct Init
+{
+    Init();
+    ~Init();
+} ssl_init;
+
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:

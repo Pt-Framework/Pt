@@ -59,6 +59,25 @@ const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const 
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static int ssl_init_counter = 0;
+
+Init::Init()
+{
+    if (0 == ssl_init_counter++)
+    {
+        SSL_library_init();
+        SSL_load_error_strings();
+    }
+}
+
+Init::~Init()
+{
+    if (0 == --ssl_init_counter)
+    {
+        // clean-up
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class ChiperList : public Singleton<ChiperList> {
     public:
@@ -93,8 +112,8 @@ ChiperList::ChiperList()
     Pt::System::LogTarget::get("Pt.SSL.Logger").setLogLevel(Pt::System::Trace);
 
     // Initialize OpenSSL
-    SSL_library_init();
-    SSL_load_error_strings();
+    //SSL_library_init();
+    //SSL_load_error_strings();
     _bioErr = BIO_new_fp(stderr, BIO_NOCLOSE | BIO_FP_TEXT);
 
     // Get the list of ciphers for all the supported protocols
