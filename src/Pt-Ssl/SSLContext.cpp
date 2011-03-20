@@ -81,17 +81,6 @@ Init::~Init()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class ChiperList : public Singleton<ChiperList> {
     public:
-        struct CipherInfo {
-            unsigned long id;
-            std::string   strid;
-            std::string   name;
-            std::string   desc;
-
-            inline CipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
-            : id(id_), strid(strid_), name(name_), desc(desc_)
-            {}
-        };
-
         friend class Singleton<ChiperList>;
         
     private:
@@ -194,6 +183,77 @@ int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* use
     strcpy(buff, &sslCtx._pswd[0]);
     return sslCtx._pswd.length();
 }
+
+
+SSLContext::SSLContext(int protocol)
+: _pswd("")
+{
+    // TODO use protocol as enum
+    _ctx = SSL_CTX_new( SSLv23_method() );
+
+    //int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth);
+  
+#if (OPENSSL_VERSION_NUMBER < 0x00905100L)
+    SSL_CTX_set_verify_depth(_ctx, 1);
+#endif
+
+    // Set some options
+    SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
+    SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+    //SSL_CTX_set_read_ahead(_ctx, 1);
+}
+
+
+std::vector<CipherInfo> SSLContext::ciphers()
+{
+    // TODO: may also be a member variable that we only fill when
+    //       something has changed...
+    std::vector<CipherInfo> ret;
+
+    // Get the available ciphers
+    SSL*                  ssl = SSL_new(_ctx);
+    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(ssl);
+
+    // Walk trough the ciphers
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i) 
+    {
+        // Skip if not valid
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+        if( ! c->valid ) 
+            continue;
+
+        // Get the ID and split it
+        const unsigned long id  = c->id;
+        const int           id0 = (int) (  id >> 24);
+        const int           id1 = (int) ( (id >> 16) & 0xFFL );
+        const int           id2 = (int) ( (id >>  8) & 0xFFL );
+        const int           id3 = (int) (  id        & 0xFFL );
+
+        // Convert the ID to a readable string
+        char strid[64];
+        if((id & 0xFF000000L) == 0x02000000L) 
+            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+        else if((id & 0xFF000000L) == 0x03000000L) 
+            sprintf(strid, "0x%02X,0x%02X", id2, id3);
+        else                                       
+            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+        // Get some information
+        char desc[512];
+        SSL_CIPHER_description(c, desc, sizeof(desc));
+        const int dlen = strlen(desc);
+        if(desc[dlen - 1] == '\n') 
+            desc[dlen - 1] = 0;
+
+        // Store the chiper
+        ret.push_back(CipherInfo(id, strid, c->name, desc));
+    }
+
+    // Clear all
+    SSL_free(ssl);
+    return ret;
+}
+
 
 SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID)
 : _pswd(password ? password : "")

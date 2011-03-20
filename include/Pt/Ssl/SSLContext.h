@@ -30,12 +30,12 @@
 
 //#undef NLOG
 
-#include <string>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 #include <Pt/Ssl/Exception.h>
 #include <Pt/System/Logger.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <string>
+#include <vector>
 
 namespace Pt {
 namespace Ssl {
@@ -47,12 +47,25 @@ static struct Init
     ~Init();
 } ssl_init;
 
+struct CipherInfo {
+    unsigned long id;
+    std::string   strid;
+    std::string   name;
+    std::string   desc;
+
+    inline CipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
+    : id(id_), strid(strid_), name(name_), desc(desc_)
+    {}
+};
+
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
         typedef std::streambuf::int_type int_type;
 
     public:
+        SSLContext(int protocol);
+
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
          *
          * The 'caCertFile' is needed if you would like to check if the other peer's certificate is signed by a valid Certificate Authority.
@@ -64,6 +77,8 @@ class PT_SSL_API SSLContext {
 
         //! \brief Standard dtor.
         ~SSLContext();
+
+        std::vector<CipherInfo> ciphers();
 
         friend class SSLStreamBuf;
 
