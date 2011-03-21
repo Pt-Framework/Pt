@@ -73,8 +73,10 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
         default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
     }
+    
     _getAvailableCiphers();
-  
+    _enabledCiphers = _availCiphers;
+
     // Load the certificate chain file (if available)
     if(certFile) {
         PT_SSL_LOG("Loading certificate chain file = " << certFile);
@@ -135,8 +137,27 @@ void SSLContext::setProtocol(Protocol protocol)
     }
 
     if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
+
     
+    if(!SSL_CTX_set_cipher_list(_ctx, "DEFAULT"))
+        throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
+        
     _getAvailableCiphers();
+    _enabledCiphers = _availCiphers;
+}
+
+void SSLContext::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
+{
+    std::string str;
+    for(size_t i = 0; i < ciphers.size(); ++i) {
+        if(!str.empty()) str += ":";
+        str += ciphers[i].name;
+    }
+    
+    if(!SSL_CTX_set_cipher_list(_ctx, str.c_str()))
+        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
+
+    _enabledCiphers = ciphers;
 }
 
 SSLContext::~SSLContext()
