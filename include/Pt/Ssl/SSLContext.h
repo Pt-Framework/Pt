@@ -51,15 +51,26 @@ static struct SSLInit {
 
 //! \brief Chipher information.
 struct SSLCipherInfo {
-    unsigned long id;    //!< Numerical ID of the cipher.
-    std::string   strid; //!< Sring ID of the cipher.
-    std::string   name;  //!< Name of the cipher.
-    std::string   desc;  //!< Description of the cipher.
+    unsigned long id;       //!< Numerical ID of the cipher.
+    std::string   strid;    //!< Sring ID of the cipher.
+    std::string   name;     //!< Name of the cipher.
+    int           bits;     //!< Number of bits supported by the cipher.
+    int           usedBits; //!< Number of bits actually used by the cipher.
+    std::string   version;  //!< Version of the cipher.
+    std::string   desc;     //!< Description of the cipher.
 
     //! @internal There would be no need for end-user to instantiate this structure directly.
-    inline SSLCipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
-    : id(id_), strid(strid_), name(name_), desc(desc_)
+    inline SSLCipherInfo()
+    : id(0), bits(0)
     {}
+
+    //! @internal There would be no need for end-user to instantiate this structure directly.
+    inline SSLCipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, int bits_, const std::string& version_, const std::string& desc_)
+    : id(id_), strid(strid_), name(name_), bits(bits_), version(version_), desc(desc_)
+    {}
+
+    //! \brief Convert the cipher information into a string.
+    const std::string dump() const;
 };
 
 

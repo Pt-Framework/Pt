@@ -93,10 +93,12 @@ void SSLStreamBuf::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
     _enabledCiphers = ciphers;
 }
 
-const std::vector<SSLCipherInfo>& SSLStreamBuf::currentCiphers() const
+const SSLCipherInfo& SSLStreamBuf::currentCipher() const
 {
-    if(_currentCiphers.empty())
-        throw SSLRuntimeError("Cannot get the list of current cipher before completing a handshaking process!", PT_SOURCEINFO);
+    if(!_currentCipher.id)
+        throw SSLRuntimeError("Cannot get the currently used cipher before completing a handshaking process!", PT_SOURCEINFO);
+
+    return _currentCipher;
 }
 
 bool SSLStreamBuf::connected() const
@@ -172,6 +174,7 @@ bool SSLStreamBuf::writeHandshake()
         return true;
     }
 
+    if(connected()) _getCurrentCipher();
     return false;
 }
 
@@ -213,8 +216,10 @@ bool SSLStreamBuf::readHandshake()
         }
     }
 
-    if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK )
+    if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK ) {
+        if(connected()) _getCurrentCipher();
         return false;
+    }
 
     return true;
 }
@@ -271,7 +276,7 @@ void SSLStreamBuf::shutdown()
     _handshakeStarted = false;
     _handshakeError   = false;
 
-    _currentCiphers.clear();
+    _currentCipher.id = 0;
 }
 
 int SSLStreamBuf::sync()
@@ -454,6 +459,45 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);
+}
+
+void SSLStreamBuf::_getCurrentCipher()
+{
+    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
+    if(!c) throw SSLRuntimeError("Failed inquiring the currently used SSL cipher!", PT_SOURCEINFO);
+
+    // Get the ID and split it
+    const unsigned long id  = c->id;
+    const int           id0 = (int) (  id >> 24);
+    const int           id1 = (int) ( (id >> 16) & 0xFFL );
+    const int           id2 = (int) ( (id >>  8) & 0xFFL );
+    const int           id3 = (int) (  id        & 0xFFL );
+
+    // Convert the ID to a readable string
+    char strid[64];
+    if((id & 0xFF000000L) == 0x02000000L)
+        sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+    else if((id & 0xFF000000L) == 0x03000000L)
+        sprintf(strid, "0x%02X,0x%02X", id2, id3);
+    else
+        sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+    // Get some information
+    char desc[512];
+    SSL_CIPHER_description(c, desc, sizeof(desc));
+    const int dlen = strlen(desc);
+    if(desc[dlen - 1] == '\n')
+        desc[dlen - 1] = 0;
+
+    // Store the chiper information
+    int np;
+    _currentCipher.id       = id;
+    _currentCipher.strid    = strid;
+    _currentCipher.name     = SSL_CIPHER_get_name(c);
+    _currentCipher.bits     = SSL_CIPHER_get_bits(c, &np);
+    _currentCipher.usedBits = np;
+    _currentCipher.version  = SSL_CIPHER_get_version(c);
+    _currentCipher.desc     = desc;
 }
 
 } // namespace Pt

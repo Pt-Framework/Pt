@@ -62,6 +62,31 @@ SSLInit::~SSLInit()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const std::string SSLCipherInfo::dump() const
+{
+    std::string str;
+
+    char tmp[64];
+    sprintf(tmp, "%lu", id);
+
+    str += "ID          = " + std::string(tmp);
+    str += "\nString ID   = " + strid;
+    str += "\nName        = " + name;
+
+    sprintf(tmp, "%d", bits);
+    str += "\nBits        = " + std::string(tmp);
+
+    sprintf(tmp, "%d", usedBits);
+    str += "\nUsed bits   = " + std::string(tmp);
+
+    str += "\nVersion     = " + version;
+    str += "\nDescription = " + desc;
+
+    return str;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID, Protocol protocol)
 : _pswd(password ? password : ""), _protocol(protocol)
 {
@@ -119,27 +144,28 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
     //int SSL_set_session(SSL *to, SSL_SESSION *session);
 
-    //int SSL_CTX_set_cipher_list(SSL_CTX *ctx, const char *str);
-
     // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }
 
 void SSLContext::setProtocol(Protocol protocol)
 {
-    int ret = 0;
+    int  ret = 0;
+    bool v2  = false;
     
     switch(_protocol) {
-        case TLSv1    : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () ); break;
-        case SSLv3    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () ); break;
-        case SSLv3or2 : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); break;
-        case SSLv2    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); break;
+        case TLSv1    : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () );            break;
+        case SSLv3    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );            break;
+        case SSLv3or2 : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
+        case SSLv2    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
         default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
     }
 
     if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
 
+    #define SSL_DEFAULT_CIPHER_LIST "ALL:!aNULL:!eNULL:!SSLv2"
+
     
-    if(!SSL_CTX_set_cipher_list(_ctx, "DEFAULT"))
+    if(!SSL_CTX_set_cipher_list(_ctx, v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2"))
         throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
         
     _getAvailableCiphers();
@@ -217,7 +243,16 @@ void SSLContext::_getAvailableCiphers()
             desc[dlen - 1] = 0;
 
         // Store the chiper information
-        _availCiphers.push_back(SSLCipherInfo(id, strid, c->name, desc));
+        int np;
+        _availCiphers.push_back(SSLCipherInfo(
+            id,
+            strid,
+            SSL_CIPHER_get_name(c),
+            SSL_CIPHER_get_bits(c, &np),
+            SSL_CIPHER_get_version(c),
+            desc
+        ));
+        _availCiphers.back().usedBits = np;
     }
 
     // Clear all
