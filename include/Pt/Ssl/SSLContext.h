@@ -41,22 +41,25 @@ namespace Pt {
 namespace Ssl {
 
 //! @internal Library initialization.
-static struct Init
-{
-    Init();
-    ~Init();
+static struct SSLInit {
+    SSLInit();
+    ~SSLInit();
 } ssl_init;
 
-struct CipherInfo {
-    unsigned long id;
-    std::string   strid;
-    std::string   name;
-    std::string   desc;
 
-    inline CipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
+//! \brief Chipher information.
+struct SSLCipherInfo {
+    unsigned long id;    //!< Numerical ID of the cipher.
+    std::string   strid; //!< Sring ID of the cipher.
+    std::string   name;  //!< Name of the cipher.
+    std::string   desc;  //!< Description of the cipher.
+
+    //! @internal There would be no need for end-user to instantiate this structure directly.
+    inline SSLCipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, const std::string& desc_)
     : id(id_), strid(strid_), name(name_), desc(desc_)
     {}
 };
+
 
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
@@ -78,7 +81,7 @@ class PT_SSL_API SSLContext {
         //! \brief Standard dtor.
         ~SSLContext();
 
-        std::vector<CipherInfo> ciphers();
+        std::vector<SSLCipherInfo> ciphers();
 
         friend class SSLStreamBuf;
 
