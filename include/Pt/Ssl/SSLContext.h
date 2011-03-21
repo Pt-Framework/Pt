@@ -43,14 +43,14 @@ namespace Pt {
 namespace Ssl {
 
 //! @internal Library initialization.
-static struct SSLInit {
+static struct PT_SSL_API SSLInit {
     SSLInit();
     ~SSLInit();
 } ssl_init;
 
 
 //! \brief Chipher information.
-struct SSLCipherInfo {
+struct PT_SSL_API SSLCipherInfo {
     unsigned long id;       //!< Numerical ID of the cipher.
     std::string   strid;    //!< Sring ID of the cipher.
     std::string   name;     //!< Name of the cipher.
