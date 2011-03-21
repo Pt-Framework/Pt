@@ -1,0 +1,11 @@
+SubDir TOP src Pt-Ssl tests ;
+SubDirHdrs $(TOP)/include ;
+
+PtUnitTest Pt-Ssl-test : Pt-Ssl-test.cpp
+                         ContextTest.cpp
+                         ;
+LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
+MakeLocate Pt-Ssl-test : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+DEPENDS Pt-Ssl-all : Pt-Ssl-test ;

@@ -26,12 +26,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <cstring>
-
 #include <Pt/Singleton.h>
 #include <Pt/Ssl/SSLContext.h>
+#include <cstring>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +98,8 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
         case SSLv3    : _ctx = SSL_CTX_new( SSLv3_method () ); break;
         case SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
         case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
+
+        // TODO: we can just use logic_error here or make one of the above the default case
         default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
     }
     
@@ -157,6 +161,8 @@ void SSLContext::setProtocol(Protocol protocol)
         case SSLv3    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );            break;
         case SSLv3or2 : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
         case SSLv2    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
+
+        // TODO: we can just use logic_error here or make one of the above the default case
         default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
     }
 
@@ -172,7 +178,7 @@ void SSLContext::setProtocol(Protocol protocol)
     _enabledCiphers = _availCiphers;
 }
 
-void SSLContext::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
+void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     std::string str;
     for(size_t i = 0; i < ciphers.size(); ++i) {

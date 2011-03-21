@@ -29,13 +29,15 @@
 #ifndef PT_SSL_SSLSTREAMBUF_H
 #define PT_SSL_SSLSTREAMBUF_H
 
-#include <string>
-#include <Pt/Signal.h>
-#include <Pt/System/StreamBuffer.h>
-
 #include <Pt/Ssl/SSLContext.h>
+#include <Pt/System/StreamBuffer.h>
+#include <Pt/Signal.h>
+#include <string>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 /**

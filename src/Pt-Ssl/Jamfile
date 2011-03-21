@@ -55,3 +55,4 @@ File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
 File [ FDirName $(OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
 
 SubInclude TOP src Pt-Ssl openssl ;
+SubInclude TOP src Pt-Ssl tests ;

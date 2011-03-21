@@ -28,18 +28,19 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
-#include <string>
-#include <vector>
-
 //#undef NLOG
 #define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
 
 #include <Pt/Ssl/Exception.h>
 #include <Pt/System/Logger.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include <string>
+#include <vector>
+
+// TODO: how do we forward declare this correctly?
+struct ssl_ctx_st;
 
 namespace Pt {
+
 namespace Ssl {
 
 //! @internal Library initialization.
@@ -48,6 +49,11 @@ static struct PT_SSL_API SSLInit {
     ~SSLInit();
 } ssl_init;
 
+
+// TODO: We can make this a real class and move it to a separate header
+// I have to think about it, but possibly we can have a class CipherList
+// that wraps openssl's STACK of ciphers...
+// For now this is good enough though :-)
 
 //! \brief Chipher information.
 struct PT_SSL_API SSLCipherInfo {
@@ -73,10 +79,17 @@ struct PT_SSL_API SSLCipherInfo {
     const std::string dump() const;
 };
 
+inline bool operator==(const SSLCipherInfo& a, const SSLCipherInfo& b)
+{
+    return a.id == b.id;
+}
+
+// TODO: some more constructors would be nice ;-)
 
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
+        //TODO: do we need something like AnyProtocol?
         //! \brief Available protocol.
         enum Protocol { TLSv1, SSLv3, SSLv3or2, SSLv2 };
 
@@ -109,12 +122,12 @@ class PT_SSL_API SSLContext {
         { return _enabledCiphers; }
 
         /** \brief Set the list of enabled ciphers. */
-        void setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers);
+        void setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers);
 
         friend class SSLStreamBuf;
 
     private:
-        SSL_CTX*                   _ctx;            // OpenSSL's SSL context
+        ssl_ctx_st*                   _ctx;            // OpenSSL's SSL context
         std::string                _pswd;           // The password
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
