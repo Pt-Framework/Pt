@@ -50,6 +50,24 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         /** \brief Standard dtor. */
         virtual ~SSLStreamBuf();
 
+        /** \brief Return the current protocol. */
+        inline SSLContext::Protocol protocol() const
+        { return _protocol; }
+
+        /** \brief Return a list of available ciphers for the current protocol. */
+        inline const std::vector<SSLCipherInfo>& availableCiphers() const
+        { return _availCiphers; }
+
+        /** \brief Return a list of enabled ciphers. */
+        inline const std::vector<SSLCipherInfo>& enabledCiphers() const
+        { return _enabledCiphers; }
+
+        /** \brief Set the list of enabled ciphers. */
+        void setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers);
+        
+        /** \brief Return a list of current ciphers (the cipher that are actually used to form the SSL channel. */
+        const std::vector<SSLCipherInfo>& currentCiphers() const;
+
         /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. */
         bool connected() const;
 
@@ -116,7 +134,13 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         char*        _obuffer;
         const size_t _pbmax;
         bool         _oextend;
+        bool         _handshakeStarted;
         bool         _handshakeError;
+
+        SSLContext::Protocol       _protocol;       // Selected SSL protocol
+        std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
+        std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
+        std::vector<SSLCipherInfo> _currentCiphers; // List of current ciphers
 };
 
 

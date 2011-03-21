@@ -84,22 +84,22 @@ class PT_SSL_API SSLContext {
         //! \brief Standard dtor.
         ~SSLContext();
 
-        //! \brief Return the current protocol.
+        /** \brief Return the current protocol. */
         inline Protocol protocol() const
         { return _protocol; }
-        
-        //! \brief Set the current protocol.
+
+        /** \brief Set the current protocol. */
         void setProtocol(Protocol protocol);
 
-        //! \brief Return a list of available ciphers for the current protocol.
+        /** \brief Return a list of available ciphers for the current protocol. */
         inline const std::vector<SSLCipherInfo>& availableCiphers() const
         { return _availCiphers; }
 
-        //! \brief Return a list of enabled ciphers.
+        /** \brief Return a list of enabled ciphers. */
         inline const std::vector<SSLCipherInfo>& enabledCiphers() const
         { return _enabledCiphers; }
 
-        //! \brief Set the list of enabled ciphers.
+        /** \brief Set the list of enabled ciphers. */
         void setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers);
 
         friend class SSLStreamBuf;

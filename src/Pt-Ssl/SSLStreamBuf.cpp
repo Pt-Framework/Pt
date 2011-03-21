@@ -47,7 +47,10 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
   _obufferSize(bufferSize),
   _obuffer(0),
   _pbmax(4),
-  _handshakeError(false)
+  _handshakeStarted(false),
+  _handshakeError(false),
+  _protocol(ctx._protocol),
+  _availCiphers(ctx._availCiphers)
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -59,20 +62,42 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
 
+    // Set enabled ciphers
+    setEnabledCiphers(ctx._enabledCiphers);
+
     // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
     // Set session ID
     if(sessionID)
         SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
-
-   //STACK_OF(SSL_CIPHER) *SSL_get_ciphers(const SSL *ssl);
-   //const char *SSL_get_cipher_list(const SSL *ssl, int priority);
-   //int SSL_set_cipher_list(SSL *ssl, const char *str);
 }
 
 SSLStreamBuf::~SSLStreamBuf()
 { SSL_free(_ssl); }
+
+void SSLStreamBuf::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
+{
+    if(_handshakeStarted)
+        throw SSLRuntimeError("Cannot set the list of enabled cipher when a handshaking process is already started!", PT_SOURCEINFO);
+
+    std::string str;
+    for(size_t i = 0; i < ciphers.size(); ++i) {
+        if(!str.empty()) str += ":";
+        str += ciphers[i].name;
+    }
+
+    if(!SSL_set_cipher_list(_ssl, str.c_str()))
+        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
+
+    _enabledCiphers = ciphers;
+}
+
+const std::vector<SSLCipherInfo>& SSLStreamBuf::currentCiphers() const
+{
+    if(_currentCiphers.empty())
+        throw SSLRuntimeError("Cannot get the list of current cipher before completing a handshaking process!", PT_SOURCEINFO);
+}
 
 bool SSLStreamBuf::connected() const
 { return SSL_get_state(_ssl) == SSL_ST_OK; }
@@ -94,6 +119,8 @@ const std::string SSLStreamBuf::getPeerCN() const
 
 void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
+    _handshakeStarted = true;
+
     if(verifyClientCert) {
         if(requireCertBasedAuth) SSL_set_verify(_ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
         else                     SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
@@ -104,6 +131,8 @@ void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertB
 
 void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 {
+    _handshakeStarted = true;
+
     if(verifyServerCert) SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
 
     SSL_set_connect_state(_ssl);
@@ -239,7 +268,10 @@ void SSLStreamBuf::shutdown()
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
 
-    _handshakeError = false;
+    _handshakeStarted = false;
+    _handshakeError   = false;
+
+    _currentCiphers.clear();
 }
 
 int SSLStreamBuf::sync()
