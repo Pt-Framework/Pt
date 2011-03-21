@@ -103,6 +103,7 @@ class Server : public Pt::Connectable {
             }
 
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
+            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
 
             _ios->buffer().inputReady += Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady += Pt::slot(*this, &Server::onOutput);
