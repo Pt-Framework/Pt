@@ -77,8 +77,6 @@ struct SSLCipherInfo {
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
-        typedef std::streambuf::int_type int_type;
-
         //! \brief Available protocol.
         enum Protocol { TLSv1, SSLv3, SSLv3or2, SSLv2 };
 
