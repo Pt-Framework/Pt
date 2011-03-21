@@ -33,8 +33,8 @@ namespace Pt {
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-log_define("Pt.SSL.Logger");
-#define PT_SSL_LOG(CODE) log_info(SSLContext::pt_ssl_gen_call_info("SSLClient   ", PT_FUNCTION) << CODE)
+log_define(PT_SSL_LOGGER_CATEGORY);
+#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLClient   ", PT_FUNCTION) << CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)

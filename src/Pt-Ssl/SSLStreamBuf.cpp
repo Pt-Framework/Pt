@@ -33,8 +33,8 @@ namespace Pt {
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-log_define("Pt.SSL.Logger");
-#define PT_SSL_LOG(CODE) log_info(SSLContext::pt_ssl_gen_call_info("SSLStreamBuf", PT_FUNCTION) << CODE)
+log_define(PT_SSL_LOGGER_CATEGORY);
+#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLStreamBuf", PT_FUNCTION) << CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)

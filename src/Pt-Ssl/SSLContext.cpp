@@ -26,7 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <vector>
 #include <cstring>
 
 #include <Pt/Singleton.h>
@@ -36,27 +35,8 @@ namespace Pt {
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-log_define("Pt.SSL.Logger");
-#define PT_SSL_LOG(CODE) log_info(SSLContext::pt_ssl_gen_call_info("SSLContext  ", PT_FUNCTION) << CODE)
-
-#ifndef NLOG
-const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const std::string& funcName)
-{
-    static int count = 0;
-
-    size_t      a = funcName.find_first_of("(");
-    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
-    a = f.find_last_of("::");
-    if(a != std::string::npos) f = f.substr(a + 1);
-    a = f.find_last_of(" ");
-    if(a != std::string::npos) f = f.substr(a + 1);
-
-    char buff[1024];
-    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
-
-    return buff;
-}
-#endif
+log_define(PT_SSL_LOGGER_CATEGORY);
+#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLContext  ", PT_FUNCTION) << CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static int ssl_init_counter = 0;
@@ -66,109 +46,34 @@ SSLInit::SSLInit()
     if(0 == ssl_init_counter++) {
         SSL_library_init();
         SSL_load_error_strings();
+
+        Pt::System::LogTarget& target = Pt::System::LogTarget::get(PT_SSL_LOGGER_CATEGORY);
+        target.setLogLevel(Pt::System::Info);
+        target.setChannel("console://");
     }
 }
 
 SSLInit::~SSLInit()
 {
     if(0 == --ssl_init_counter) {
-        // Nothing to do
+        log_info(Pt::System::endlog);
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID, Protocol protocol)
+: _pswd(password ? password : ""), _protocol(protocol)
 {
-    // Get the SSLContext instance
-    SSLContext& sslCtx = *reinterpret_cast<SSLContext*>(userdata);
-
-    // If the wanted length is not the same with the given password length, just return 0
-    if((unsigned) num < sslCtx._pswd.length() + 1) return 0;
-
-    // Copy the password to the buffer and return the length
-    strcpy(buff, &sslCtx._pswd[0]);
-    return sslCtx._pswd.length();
-}
-
-SSLContext::SSLContext(int protocol)
-: _pswd("")
-{
-    // TODO use protocol as enum
-    _ctx = SSL_CTX_new( SSLv23_method() );
-
-    //int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth);
-  
-#if (OPENSSL_VERSION_NUMBER < 0x00905100L)
-    SSL_CTX_set_verify_depth(_ctx, 1);
-#endif
-
-    // Set some options
-    SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
-    SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
-    //SSL_CTX_set_read_ahead(_ctx, 1);
-}
-
-std::vector<SSLCipherInfo> SSLContext::ciphers()
-{
-    // TODO: may also be a member variable that we only fill when
-    //       something has changed...
-    std::vector<SSLCipherInfo> ret;
-
-    // Get the available ciphers
-    SSL*                  ssl = SSL_new(_ctx);
-    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(ssl);
-
-    // Walk trough the ciphers
-    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i) 
-    {
-        // Skip if not valid
-        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
-        if( ! c->valid ) 
-            continue;
-
-        // Get the ID and split it
-        const unsigned long id  = c->id;
-        const int           id0 = (int) (  id >> 24);
-        const int           id1 = (int) ( (id >> 16) & 0xFFL );
-        const int           id2 = (int) ( (id >>  8) & 0xFFL );
-        const int           id3 = (int) (  id        & 0xFFL );
-
-        // Convert the ID to a readable string
-        char strid[64];
-        if((id & 0xFF000000L) == 0x02000000L) 
-            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-        else if((id & 0xFF000000L) == 0x03000000L) 
-            sprintf(strid, "0x%02X,0x%02X", id2, id3);
-        else                                       
-            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
-
-        // Get some information
-        char desc[512];
-        SSL_CIPHER_description(c, desc, sizeof(desc));
-        const int dlen = strlen(desc);
-        if(desc[dlen - 1] == '\n') 
-            desc[dlen - 1] = 0;
-
-        // Store the chiper
-        ret.push_back(SSLCipherInfo(id, strid, c->name, desc));
+    // Create the context
+    switch(_protocol) {
+        case TLSv1    : _ctx = SSL_CTX_new( TLSv1_method () ); break;
+        case SSLv3    : _ctx = SSL_CTX_new( SSLv3_method () ); break;
+        case SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
+        case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
+        default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
     }
-
-    // Clear all
-    SSL_free(ssl);
-    return ret;
-}
-
-SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID)
-: _pswd(password ? password : "")
-{
-    // Create a new SSL context that by default wants SSL version 3 but can fallback to SSL version 2
-    _ctx = SSL_CTX_new(SSLv23_method());
-    //_ctx = SSL_CTX_new(SSLv3_method());
-    //_ctx = SSL_CTX_new(SSLv2_method());
-    //_ctx = SSL_CTX_new(TLSv1_method());
-
-    //int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth);
+    _getAvailableCiphers();
   
     // Load the certificate chain file (if available)
     if(certFile) {
@@ -217,8 +122,105 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }
 
+void SSLContext::setProtocol(Protocol protocol)
+{
+    int ret = 0;
+    
+    switch(_protocol) {
+        case TLSv1    : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () ); break;
+        case SSLv3    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () ); break;
+        case SSLv3or2 : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); break;
+        case SSLv2    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); break;
+        default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
+    }
+
+    if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
+    
+    _getAvailableCiphers();
+}
+
 SSLContext::~SSLContext()
 { SSL_CTX_free(_ctx); }
+
+int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+{
+    // Get the SSLContext instance
+    SSLContext& sslCtx = *reinterpret_cast<SSLContext*>(userdata);
+
+    // If the wanted length is not the same with the given password length, just return 0
+    if((unsigned) num < sslCtx._pswd.length() + 1) return 0;
+
+    // Copy the password to the buffer and return the length
+    strcpy(buff, &sslCtx._pswd[0]);
+    return sslCtx._pswd.length();
+}
+
+void SSLContext::_getAvailableCiphers()
+{
+    // Clear the list
+    _availCiphers.clear();
+
+    // Get the available ciphers
+    SSL*                  ssl = SSL_new(_ctx);
+    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(ssl);
+
+    // Walk trough the ciphers
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
+    {
+        // Skip if not valid
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+        if( ! c->valid )
+            continue;
+
+        // Get the ID and split it
+        const unsigned long id  = c->id;
+        const int           id0 = (int) (  id >> 24);
+        const int           id1 = (int) ( (id >> 16) & 0xFFL );
+        const int           id2 = (int) ( (id >>  8) & 0xFFL );
+        const int           id3 = (int) (  id        & 0xFFL );
+
+        // Convert the ID to a readable string
+        char strid[64];
+        if((id & 0xFF000000L) == 0x02000000L)
+            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+        else if((id & 0xFF000000L) == 0x03000000L)
+            sprintf(strid, "0x%02X,0x%02X", id2, id3);
+        else
+            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+        // Get some information
+        char desc[512];
+        SSL_CIPHER_description(c, desc, sizeof(desc));
+        const int dlen = strlen(desc);
+        if(desc[dlen - 1] == '\n')
+            desc[dlen - 1] = 0;
+
+        // Store the chiper information
+        _availCiphers.push_back(SSLCipherInfo(id, strid, c->name, desc));
+    }
+
+    // Clear all
+    SSL_free(ssl);
+}
+
+#ifndef NLOG
+const std::string SSLContext::_pt_ssl_gen_call_info(const char* className, const std::string& funcName)
+{
+    static int count = 0;
+
+    size_t      a = funcName.find_first_of("(");
+    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
+    a = f.find_last_of("::");
+    if(a != std::string::npos) f = f.substr(a + 1);
+    a = f.find_last_of(" ");
+    if(a != std::string::npos) f = f.substr(a + 1);
+
+    char buff[1024];
+    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
+
+    return buff;
+}
+#endif
 
 } // namespace Pt
 } // namespace Ssl

@@ -39,12 +39,19 @@ SSLRuntimeError::~SSLRuntimeError() throw()
 {}
 
 
-
 SSLHandshakeFailedError::SSLHandshakeFailedError(const std::string& what, const SourceInfo& si) throw()
 : SSLRuntimeError(what, si)
 {}
 
 SSLHandshakeFailedError::~SSLHandshakeFailedError() throw()
+{}
+
+
+SSLInvalidParameterError::SSLInvalidParameterError(const std::string& what, const SourceInfo& si) throw()
+: SSLRuntimeError(what, si)
+{}
+
+SSLInvalidParameterError::~SSLInvalidParameterError() throw()
 {}
 
 } // namespace Ssl

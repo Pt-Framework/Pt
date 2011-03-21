@@ -28,14 +28,16 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
+#include <string>
+#include <vector>
+
 //#undef NLOG
+#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
 
 #include <Pt/Ssl/Exception.h>
 #include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <string>
-#include <vector>
 
 namespace Pt {
 namespace Ssl {
@@ -66,9 +68,10 @@ class PT_SSL_API SSLContext {
     public:
         typedef std::streambuf::int_type int_type;
 
-    public:
-        SSLContext(int protocol);
+        //! \brief Available protocol.
+        enum Protocol { TLSv1, SSLv3, SSLv3or2, SSLv2 };
 
+    public:
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
          *
          * The 'caCertFile' is needed if you would like to check if the other peer's certificate is signed by a valid Certificate Authority.
@@ -76,25 +79,40 @@ class PT_SSL_API SSLContext {
          * A client context will only need 'certFile' and 'keyFile' if it is to be used for certificate-based client authentication.
          * The 'password' is only needed if the 'keyFile' is encrypted.
          */
-        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0);
+        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0, Protocol protocol = SSLv3);
 
         //! \brief Standard dtor.
         ~SSLContext();
 
-        std::vector<SSLCipherInfo> ciphers();
+        //! \brief Return the current protocol.
+        inline Protocol protocol() const
+        { return _protocol; }
+        
+        //! \brief Set the current protocol.
+        void setProtocol(Protocol protocol);
+
+        //! \brief Return a list of available ciphers for the current protocol.
+        inline const std::vector<SSLCipherInfo>& availableCiphers()
+        { return _availCiphers; }
 
         friend class SSLStreamBuf;
 
     private:
-        SSL_CTX*    _ctx;  // OpenSSL's SSL context
-        std::string _pswd; // The password
+        SSL_CTX*                   _ctx;          // OpenSSL's SSL context
+        std::string                _pswd;         // The password
+        Protocol                   _protocol;     // Selected SSL protocol
+        std::vector<SSLCipherInfo> _availCiphers; // List of all available ciphers for the current protocol
 
         // Password callback to feed the password to OpenSSL
         static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
 
+        // Helper functions
+        void _getAvailableCiphers();
+
 #ifndef NLOG
     public:
-        static const std::string pt_ssl_gen_call_info(const char* className, const std::string& funcName);
+        // Generate call information for logging purposes
+        static const std::string _pt_ssl_gen_call_info(const char* className, const std::string& funcName);
 #endif
 };
 
