@@ -35,10 +35,10 @@
 namespace Pt {
 namespace Ssl {
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLStreamBuf", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLStreamBuf", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)
 : _in (0),
@@ -82,7 +82,9 @@ SSLStreamBuf::~SSLStreamBuf()
 void SSLStreamBuf::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
 {
     if(_handshakeStarted)
-        throw SSLRuntimeError("Cannot set the list of enabled cipher when a handshaking process is already started!", PT_SOURCEINFO);
+        throw SSLRuntimeError(
+            "Cannot set the list of enabled cipher when a handshaking process is already started!",
+            PT_SOURCEINFO );
 
     std::string str;
     for(size_t i = 0; i < ciphers.size(); ++i) {
@@ -98,8 +100,11 @@ void SSLStreamBuf::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
 
 const SSLCipherInfo& SSLStreamBuf::currentCipher() const
 {
-    if(!_currentCipher.id)
-        throw SSLRuntimeError("Cannot get the currently used cipher before completing a handshaking process!", PT_SOURCEINFO);
+    if(!_currentCipher.id) {
+        throw SSLRuntimeError(
+            "Cannot get the currently used cipher before completing a handshaking process!",
+            PT_SOURCEINFO );
+    }
 
     return _currentCipher;
 }
@@ -386,7 +391,8 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
                             _ibuffer + used + readSize );  // end of get area
                 return readSize;
 
-            // This error may indicate that the other peer wants re-handshaking, or, there is just not enough raw bytes to be decoded
+            // This error may indicate that the other peer wants re-handshaking,
+            // or, there is just not enough raw bytes to be decoded
             case SSL_ERROR_WANT_READ:
                 if(readSize < 0 && isize > 0) continue;
                 return 0;

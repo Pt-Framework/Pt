@@ -57,12 +57,20 @@ class PT_SSL_API SSLContext {
     public:
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
          *
-         * The 'caCertFile' is needed if you would like to check if the other peer's certificate is signed by a valid Certificate Authority.
+         * The 'caCertFile' is needed if you would like to check if the other peer's certificate
+         * is signed by a valid Certificate Authority.
+         * \n
          * The 'certFile' and 'keyFile' is mandatory for a server context.
-         * A client context will only need 'certFile' and 'keyFile' if it is to be used for certificate-based client authentication.
+         * \n
+         * A client context will only need 'certFile' and 'keyFile' if it is to be used for 
+         * certificate-based client authentication.
+         * \n
          * The 'password' is only needed if the 'keyFile' is encrypted.
          */
-        SSLContext(const char* caCertFile = 0, const char* certFile = 0, const char* keyFile = 0, const char* password = 0, const char* sessionID = 0, Protocol protocol = DefaultProtocol);
+        SSLContext(const char* caCertFile = 0,
+                   const char* certFile   = 0, const char* keyFile = 0, const char* password = 0,
+                   const char* sessionID  = 0,
+                   Protocol    protocol   = DefaultProtocol);
 
         //! \brief Standard dtor.
         ~SSLContext();

@@ -50,17 +50,7 @@ namespace Ssl {
             ~SSLRuntimeError() throw();
     };
 
-    /** @brief Generic SSL invalid-parameter error.
-     */
-    class PT_SSL_API SSLInvalidParameterError : public SSLRuntimeError {
-        public:
-            //! @see Exception()
-            SSLInvalidParameterError(const std::string& what, const SourceInfo& si) throw();
 
-            //! @brief Destructor.
-            ~SSLInvalidParameterError() throw();
-    };
-    
     /** @brief SSL handshake-failed error.
      */
     class PT_SSL_API SSLHandshakeFailedError : public SSLRuntimeError {

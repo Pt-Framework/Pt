@@ -30,6 +30,7 @@
 
 //#undef NLOG
 #define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
+#define PT_SSL_LOG_INFO(NAME, CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info(NAME, PT_FUNCTION) << CODE)
 
 #include <Pt/Ssl/Exception.h>
 
@@ -63,7 +64,12 @@ class PT_SSL_API SSLCipherInfo {
         : id(0), bits(0)
         {}
 
-        inline SSLCipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, int bits_, const std::string& version_, const std::string& desc_)
+        inline SSLCipherInfo(unsigned long      id_,
+                             const std::string& strid_,
+                             const std::string& name_,
+                             int                bits_,
+                             const std::string& version_,
+                             const std::string& desc_)
         : id(id_), strid(strid_), name(name_), bits(bits_), version(version_), desc(desc_)
         {}
 };

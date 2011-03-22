@@ -27,25 +27,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Build using: ./jam.sh -q --with-openssl
-
-#include <fstream>
-
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-
 #include <Pt/Ssl/SSLServer.h>
-
 #include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
+#include <fstream>
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG_S(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE)
-#define PT_SSL_LOG_C(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE)
-#define PT_SSL_LOG_M(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG_S(CODE) PT_SSL_LOG_INFO("@@ Server @@", CODE)
+#define PT_SSL_LOG_C(CODE) PT_SSL_LOG_INFO("@@ Client @@", CODE)
+#define PT_SSL_LOG_M(CODE) PT_SSL_LOG_INFO("@@ main() @@", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
     public:
@@ -129,7 +124,9 @@ class Server : public Pt::Connectable {
             unsigned n =_ssl->readsome(buf, 512);
             if(n <= 0) return;
 
-            std::cerr << "############################################################################################# SERVER RECEIVED: " << std::endl;
+            std::cerr
+                << "############################################################################################# SERVER RECEIVED: "
+                << std::endl;
             std::cerr.write(buf, n);
 
             // Send reply
@@ -177,8 +174,8 @@ class Server : public Pt::Connectable {
             _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
 
-            // NOTE: If we uncomment this, the client will get the shutdown notification before receiving the full HTML body
-            //       that will cause the client to never get the full HTML body.
+            // NOTE: If we uncomment this, the client will get the shutdown notification before receiving
+            //       the full HTML body that will cause the client to never get the full HTML body.
             // _ssl->buffer().shutdown();
 
             _loop.remove(*_client);

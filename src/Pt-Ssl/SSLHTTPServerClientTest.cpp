@@ -27,26 +27,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Build using: ./jam.sh -q --with-openssl
-
-#include <fstream>
-
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-
 #include <Pt/Ssl/SSLServer.h>
 #include <Pt/Ssl/SSLClient.h>
-
 #include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/IOStream.h>
+#include <fstream>
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG_S(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ Server @@", PT_FUNCTION) << CODE)
-#define PT_SSL_LOG_C(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ Client @@", PT_FUNCTION) << CODE)
-#define PT_SSL_LOG_M(CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info("@@ main() @@", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG_S(CODE) PT_SSL_LOG_INFO("@@ Server @@", CODE)
+#define PT_SSL_LOG_C(CODE) PT_SSL_LOG_INFO("@@ Client @@", CODE)
+#define PT_SSL_LOG_M(CODE) PT_SSL_LOG_INFO("@@ main() @@", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Server : public Pt::Connectable {
     public:
@@ -132,8 +127,9 @@ class Server : public Pt::Connectable {
                 }
             }
 
-            std::cerr << "############################################################################################# SERVER RECEIVED: "
-                      << std::endl << msg << std::endl;
+            std::cerr
+                << "############################################################################################# SERVER RECEIVED: "
+                << std::endl << msg << std::endl;
 
             // Send reply
             std::string   lmsg;
@@ -267,8 +263,9 @@ class Client : public Pt::Connectable {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
-                    std::cerr << "############################################################################################# CLIENT RECEIVED BEFORE SHUTDOWN: "
-                              << std::endl << _result << std::endl;
+                    std::cerr
+                        << "############################################################################################# CLIENT RECEIVED BEFORE SHUTDOWN: "
+                        << std::endl << _result << std::endl;
                     return;
                 }
 
@@ -291,8 +288,9 @@ class Client : public Pt::Connectable {
                     _header = _result.substr(0, pos);
                     _result = _result.substr(pos);
                 }
-                std::cerr << "############################################################################################# CLIENT RECEIVED HEADER: "
-                          << std::endl << _header << std::endl;
+                std::cerr
+                    << "############################################################################################# CLIENT RECEIVED HEADER: "
+                    << std::endl << _header << std::endl;
 
                 pos = _header.find("Content-Length:");
                 if(pos != std::string::npos) {
@@ -309,8 +307,9 @@ class Client : public Pt::Connectable {
                 return;
             }
 
-            std::cerr << "############################################################################################# CLIENT RECEIVED CONTENT: "
-                      << std::endl << _result << std::endl;
+            std::cerr
+                << "############################################################################################# CLIENT RECEIVED CONTENT: "
+                << std::endl << _result << std::endl;
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)

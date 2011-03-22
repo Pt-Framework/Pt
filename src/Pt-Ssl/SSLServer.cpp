@@ -32,10 +32,10 @@
 namespace Pt {
 namespace Ssl {
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLServer   ", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLServer   ", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLServer::SSLServer(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream(0),
@@ -48,7 +48,8 @@ SSLServer::~SSLServer()
 
 void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
-    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
+    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = "
+               << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
     _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
 
     PT_SSL_LOG("_ios->buffer().beginRead()");
@@ -59,8 +60,11 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 
 void SSLServer::endHandshake()
 {
-    if(_sslbuf.handshakeError())
-        throw SSLHandshakeFailedError("The server has failed to complete the handshaking process!", PT_SOURCEINFO);
+    if(_sslbuf.handshakeError()) {
+        throw SSLHandshakeFailedError(
+            "The server has failed to complete the handshaking process!",
+            PT_SOURCEINFO );
+    }
 }
 
 void SSLServer::onWriteHandshake(Pt::System::StreamBuffer& sb)

@@ -32,10 +32,10 @@
 namespace Pt {
 namespace Ssl {
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLClient   ", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLClient   ", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
 : std::iostream(0),
@@ -59,8 +59,11 @@ void SSLClient::beginHandshake(bool verifyServerCert)
 
 void SSLClient::endHandshake()
 {
-    if(_sslbuf.handshakeError())
-        throw SSLHandshakeFailedError("The client has failed to complete the handshaking process!", PT_SOURCEINFO);
+    if(_sslbuf.handshakeError()) {
+        throw SSLHandshakeFailedError(
+            "The client has failed to complete the handshaking process!",
+            PT_SOURCEINFO );
+    }
 }
 
 void SSLClient::onWriteHandshake(Pt::System::StreamBuffer& sb)

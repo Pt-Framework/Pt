@@ -36,10 +36,10 @@ namespace Pt {
 
 namespace Ssl {
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) log_info(SSLContext::_pt_ssl_gen_call_info("SSLContext  ", PT_FUNCTION) << CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static int ssl_init_counter = 0;
 
@@ -62,9 +62,12 @@ SSLInit::~SSLInit()
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID, Protocol protocol)
+SSLContext::SSLContext(const char* caCertFile,
+                       const char* certFile, const char* keyFile, const char* password,
+                       const char* sessionID,
+                       Protocol    protocol)
 : _pswd(password ? password : ""), _protocol(protocol)
 {
     // Create the context
@@ -99,7 +102,9 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     // Check the private key (if needed)
     if(certFile && keyFile) {
         if(!SSL_CTX_check_private_key(_ctx))
-            throw SSLRuntimeError("The private key does not agree with the corresponding public key in the certificate!", PT_SOURCEINFO);
+            throw SSLRuntimeError(
+                "The private key does not agree with the corresponding public key in the certificate!",
+                PT_SOURCEINFO );
     }
 
     // Load and verify CA list (if available)
@@ -117,7 +122,9 @@ SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char*
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
   //SSL_CTX_set_read_ahead(_ctx, 1);
-    if(sessionID) SSL_CTX_set_session_id_context(_ctx, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+    if(sessionID) SSL_CTX_set_session_id_context(
+        _ctx,
+        reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID) );
 
     //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
     //int SSL_set_session(SSL *to, SSL_SESSION *session);
