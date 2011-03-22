@@ -79,7 +79,7 @@ SSLContext::SSLContext(const char* caCertFile,
         case SSLv3           : /* Fall through */
         default              :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
     }
-    
+
     getAvailableCiphers();
     _enabledCiphers = _availCiphers;
 
@@ -89,7 +89,7 @@ SSLContext::SSLContext(const char* caCertFile,
         if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile))
             throw SSLRuntimeError("Could not read certificate file!", PT_SOURCEINFO);
     }
-    
+
     // Load the private key  file (if available)
     if(keyFile) {
         PT_SSL_LOG("Loading private key file = " << keyFile);
@@ -136,21 +136,21 @@ void SSLContext::setProtocol(Protocol protocol)
 {
     int  ret = 0;
     bool v2  = false;
-    
+
     switch(_protocol) {
         case SSLv2           : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
         case SSLv3or2        : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
         case TLSv1           : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () );            break;
         case SSLv3           : /* Fall through */
         case DefaultProtocol : /* Fall through */
-        default              : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );            
+        default              : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );
     }
 
     if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
 
     if(!SSL_CTX_set_cipher_list(_ctx, v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2"))
         throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
-        
+
     getAvailableCiphers();
     _enabledCiphers = _availCiphers;
 }
@@ -162,7 +162,7 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
         if(!str.empty()) str += ":";
         str += ciphers[i].name;
     }
-    
+
     if(!SSL_CTX_set_cipher_list(_ctx, str.c_str()))
         throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
 

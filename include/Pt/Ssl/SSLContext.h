@@ -70,7 +70,7 @@ class PT_SSL_API SSLContext {
          * \n
          * The 'certFile' and 'keyFile' is mandatory for a server context.
          * \n
-         * A client context will only need 'certFile' and 'keyFile' if it is to be used for 
+         * A client context will only need 'certFile' and 'keyFile' if it is to be used for
          * certificate-based client authentication.
          * \n
          * The 'password' is only needed if the 'keyFile' is encrypted.
