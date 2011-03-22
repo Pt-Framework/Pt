@@ -29,8 +29,6 @@
 #define PT_SSL_SSLCIPHERINFO_H
 
 //#undef NLOG
-#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
-#define PT_SSL_LOG_INFO(NAME, CODE) log_info(Pt::Ssl::SSLContext::_pt_ssl_gen_call_info(NAME, PT_FUNCTION) << CODE)
 
 #include <Pt/Ssl/Exception.h>
 

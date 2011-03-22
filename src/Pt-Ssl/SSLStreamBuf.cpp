@@ -182,7 +182,7 @@ bool SSLStreamBuf::writeHandshake()
         return true;
     }
 
-    if(connected()) _getCurrentCipher();
+    if(connected()) getCurrentCipher();
     return false;
 }
 
@@ -225,7 +225,7 @@ bool SSLStreamBuf::readHandshake()
     }
 
     if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK ) {
-        if(connected()) _getCurrentCipher();
+        if(connected()) getCurrentCipher();
         return false;
     }
 
@@ -470,7 +470,7 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     return traits_type::not_eof(ch);
 }
 
-void SSLStreamBuf::_getCurrentCipher()
+void SSLStreamBuf::getCurrentCipher()
 {
     const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
     if(!c) throw SSLRuntimeError("Failed inquiring the currently used SSL cipher!", PT_SOURCEINFO);

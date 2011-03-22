@@ -33,6 +33,14 @@
 #include <string>
 #include <vector>
 
+#ifndef NLOG
+#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
+#define PT_SSL_LOG_INFO(NAME, CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info(NAME, PT_FUNCTION) << CODE)
+#else
+#define PT_SSL_LOGGER_CATEGORY
+#define PT_SSL_LOG_INFO(NAME, CODE)
+#endif
+
 namespace Pt {
 namespace Ssl {
 
@@ -96,22 +104,23 @@ class PT_SSL_API SSLContext {
         friend class SSLStreamBuf;
 
     private:
+        // Password callback to feed the password to OpenSSL
+        static int passwordCallback(char* buf, int num, int rwflag, void* userdata);
+
+        // Get available ciphers
+        void getAvailableCiphers();
+
+    private:
         ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
         std::string                _pswd;           // The password
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
 
-        // Password callback to feed the password to OpenSSL
-        static int _passwordCallback(char* buf, int num, int rwflag, void* userdata);
-
-        // Helper functions
-        void _getAvailableCiphers();
-
 #ifndef NLOG
     public:
         // Generate call information for logging purposes
-        static const std::string _pt_ssl_gen_call_info(const char* className, const std::string& funcName);
+        static const std::string pt_ssl_gen_call_info(const char* className, const std::string& funcName);
 #endif
 };
 

@@ -80,7 +80,7 @@ SSLContext::SSLContext(const char* caCertFile,
         default              :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
     }
     
-    _getAvailableCiphers();
+    getAvailableCiphers();
     _enabledCiphers = _availCiphers;
 
     // Load the certificate chain file (if available)
@@ -93,7 +93,7 @@ SSLContext::SSLContext(const char* caCertFile,
     // Load the private key  file (if available)
     if(keyFile) {
         PT_SSL_LOG("Loading private key file = " << keyFile);
-        SSL_CTX_set_default_passwd_cb(_ctx, _passwordCallback);
+        SSL_CTX_set_default_passwd_cb(_ctx, passwordCallback);
         SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
         if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM))
             throw SSLRuntimeError("Could not read key file!", PT_SOURCEINFO);
@@ -151,7 +151,7 @@ void SSLContext::setProtocol(Protocol protocol)
     if(!SSL_CTX_set_cipher_list(_ctx, v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2"))
         throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
         
-    _getAvailableCiphers();
+    getAvailableCiphers();
     _enabledCiphers = _availCiphers;
 }
 
@@ -172,7 +172,7 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 SSLContext::~SSLContext()
 { SSL_CTX_free(_ctx); }
 
-int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+int SSLContext::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
     // Get the SSLContext instance
     SSLContext& sslCtx = *reinterpret_cast<SSLContext*>(userdata);
@@ -185,7 +185,7 @@ int SSLContext::_passwordCallback(char* buff, int num, int /*rwflag*/, void* use
     return sslCtx._pswd.length();
 }
 
-void SSLContext::_getAvailableCiphers()
+void SSLContext::getAvailableCiphers()
 {
     // Clear the list
     _availCiphers.clear();
@@ -243,7 +243,7 @@ void SSLContext::_getAvailableCiphers()
 }
 
 #ifndef NLOG
-const std::string SSLContext::_pt_ssl_gen_call_info(const char* className, const std::string& funcName)
+const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const std::string& funcName)
 {
     static int count = 0;
 

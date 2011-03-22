@@ -128,6 +128,11 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         std::iostream* _ios; // IO
 
     private:
+
+        // Get current cipher
+        void getCurrentCipher();
+
+    private:
         size_t       _ibufferSize;
         char*        _ibuffer;
         std::size_t  _obufferSize;
@@ -141,9 +146,6 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
         SSLCipherInfo              _currentCipher;  // Currently used cipher
-
-        // Helper functions
-        void _getCurrentCipher();
 };
 
 
