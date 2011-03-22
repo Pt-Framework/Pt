@@ -26,9 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Singleton.h>
 #include <Pt/Ssl/SSLContext.h>
-#include <cstring>
+#include <cstdio>
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -65,43 +64,17 @@ SSLInit::~SSLInit()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string SSLCipherInfo::dump() const
-{
-    std::string str;
-
-    char tmp[64];
-    sprintf(tmp, "%lu", id);
-
-    str += "ID          = " + std::string(tmp);
-    str += "\nString ID   = " + strid;
-    str += "\nName        = " + name;
-
-    sprintf(tmp, "%d", bits);
-    str += "\nBits        = " + std::string(tmp);
-
-    sprintf(tmp, "%d", usedBits);
-    str += "\nUsed bits   = " + std::string(tmp);
-
-    str += "\nVersion     = " + version;
-    str += "\nDescription = " + desc;
-
-    return str;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 SSLContext::SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID, Protocol protocol)
 : _pswd(password ? password : ""), _protocol(protocol)
 {
     // Create the context
     switch(_protocol) {
-        case TLSv1    : _ctx = SSL_CTX_new( TLSv1_method () ); break;
-        case SSLv3    : _ctx = SSL_CTX_new( SSLv3_method () ); break;
-        case SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
-        case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
-
-        // TODO: we can just use logic_error here or make one of the above the default case
-        default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
+        case SSLv2           : _ctx = SSL_CTX_new( SSLv2_method () ); break;
+        case SSLv3or2        : _ctx = SSL_CTX_new( SSLv23_method() ); break;
+        case TLSv1           : _ctx = SSL_CTX_new( TLSv1_method () ); break;
+        case DefaultProtocol : /* Fall through */
+        case SSLv3           : /* Fall through */
+        default              :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
     }
     
     _getAvailableCiphers();
@@ -158,20 +131,16 @@ void SSLContext::setProtocol(Protocol protocol)
     bool v2  = false;
     
     switch(_protocol) {
-        case TLSv1    : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () );            break;
-        case SSLv3    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );            break;
-        case SSLv3or2 : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
-        case SSLv2    : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
-
-        // TODO: we can just use logic_error here or make one of the above the default case
-        default       : throw SSLInvalidParameterError("Invalid SSL protocol!", PT_SOURCEINFO);
+        case SSLv2           : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
+        case SSLv3or2        : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
+        case TLSv1           : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () );            break;
+        case SSLv3           : /* Fall through */
+        case DefaultProtocol : /* Fall through */
+        default              : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );            
     }
 
     if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
 
-    #define SSL_DEFAULT_CIPHER_LIST "ALL:!aNULL:!eNULL:!SSLv2"
-
-    
     if(!SSL_CTX_set_cipher_list(_ctx, v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2"))
         throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
         

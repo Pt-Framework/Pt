@@ -42,14 +42,17 @@ static struct PT_SSL_API SSLInit {
     ~SSLInit();
 } ssl_init;
 
-
-// TODO: some more constructors would be nice ;-)
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
-        //TODO: do we need something like AnyProtocol?
         //! \brief Available protocol.
-        enum Protocol { TLSv1, SSLv3, SSLv3or2, SSLv2 };
+        enum Protocol {
+            DefaultProtocol, //!< Select the default protocol (for now it is SSL version 3).
+            TLSv1,           //!< Select TLS version 1.
+            SSLv3,           //!< Select SSL version 3 (recommended for modern system).
+            SSLv3or2,        //!< Select SSL version 3 if available, if not, fallback to version 2 (recommended for the most compatibility).
+            SSLv2            //!< Select SSL version 2 (unsecure, not recommended).
+        };
 
     public:
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
@@ -59,7 +62,7 @@ class PT_SSL_API SSLContext {
          * A client context will only need 'certFile' and 'keyFile' if it is to be used for certificate-based client authentication.
          * The 'password' is only needed if the 'keyFile' is encrypted.
          */
-        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0, Protocol protocol = SSLv3);
+        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0, Protocol protocol = DefaultProtocol);
 
         //! \brief Standard dtor.
         ~SSLContext();
