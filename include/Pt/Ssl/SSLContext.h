@@ -48,7 +48,7 @@ class PT_SSL_API SSLContext {
         //! \brief Available protocol.
         enum Protocol {
             DefaultProtocol, //!< Select the default protocol (for now it is SSL version 3).
-            TLSv1,           //!< Select TLS version 1.
+            TLSv1,           //!< Select TLS version 1 (it is the latest standard for secure TCP communication).
             SSLv3,           //!< Select SSL version 3 (recommended for modern system).
             SSLv3or2,        //!< Select SSL version 3 if available, if not, fallback to version 2 (recommended for the most compatibility).
             SSLv2            //!< Select SSL version 2 (unsecure, not recommended).
@@ -62,7 +62,7 @@ class PT_SSL_API SSLContext {
          * A client context will only need 'certFile' and 'keyFile' if it is to be used for certificate-based client authentication.
          * The 'password' is only needed if the 'keyFile' is encrypted.
          */
-        SSLContext(const char* caCertFile, const char* certFile, const char* keyFile, const char* password, const char* sessionID = 0, Protocol protocol = DefaultProtocol);
+        SSLContext(const char* caCertFile = 0, const char* certFile = 0, const char* keyFile = 0, const char* password = 0, const char* sessionID = 0, Protocol protocol = DefaultProtocol);
 
         //! \brief Standard dtor.
         ~SSLContext();
