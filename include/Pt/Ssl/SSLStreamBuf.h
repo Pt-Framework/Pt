@@ -63,8 +63,8 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         { return _enabledCiphers; }
 
         /** \brief Set the list of enabled ciphers. */
-        void setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers);
-        
+        void setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers);
+
         /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). */
         const SSLCipherInfo& currentCipher() const;
 

@@ -101,7 +101,8 @@ class PT_SSL_API SSLContext {
         /** \brief Set the list of enabled ciphers. */
         void setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers);
 
-        friend class SSLStreamBuf;
+        ssl_ctx_st* impl()
+        { return _ctx; }
 
     private:
         // Password callback to feed the password to OpenSSL

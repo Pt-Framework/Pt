@@ -52,13 +52,13 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
   _pbmax(4),
   _handshakeStarted(false),
   _handshakeError(false),
-  _protocol(ctx._protocol),
-  _availCiphers(ctx._availCiphers)
+  _protocol( ctx.protocol() ),
+  _availCiphers( ctx.availableCiphers() )
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
     _out = BIO_new (BIO_s_mem() );
-    _ssl = SSL_new( ctx._ctx );
+    _ssl = SSL_new( ctx.impl() );
 
     // Connect the BIO
     BIO_set_nbio(_in, 1);
@@ -66,7 +66,7 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     SSL_set_bio(_ssl, _in, _out);
 
     // Set enabled ciphers
-    setEnabledCiphers(ctx._enabledCiphers);
+    setEnabledCiphers( ctx.enabledCiphers() );
 
     // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
@@ -79,7 +79,7 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
 SSLStreamBuf::~SSLStreamBuf()
 { SSL_free(_ssl); }
 
-void SSLStreamBuf::setEnabledCiphers(std::vector<SSLCipherInfo>& ciphers)
+void SSLStreamBuf::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     if(_handshakeStarted)
         throw SSLRuntimeError(
@@ -205,7 +205,7 @@ bool SSLStreamBuf::readHandshake()
             const int written = BIO_write(_in, buf, n);
             if(written <= 0)
             throw SSLRuntimeError("Failed writing to OpenSSL input BIO!", PT_SOURCEINFO);
-            
+
             n -= written;
             PT_SSL_LOG("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
 
@@ -244,7 +244,7 @@ std::streamsize SSLStreamBuf::import()
             const int n = do_underflow(avail);
             PT_SSL_LOG("do_underflow() = " << n << " bytes");
             PT_SSL_LOG("_ios->rdbuf()->in_avail() = " << _ios->rdbuf()->in_avail() << " bytes");
-            
+
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
             if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
@@ -268,7 +268,7 @@ void SSLStreamBuf::shutdown()
     const int n = BIO_read(_out, buff, sizeof(buff));
     if(n <= 0)
         throw SSLRuntimeError("Failed reading from OpenSSL ouput BIO!", PT_SOURCEINFO);
-    
+
     _ios->write(buff, n);
     _ios->flush();
     PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
