@@ -29,6 +29,9 @@
 
 #include <Pt/Ssl/SSLStreamBuf.h>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 namespace Pt {
 namespace Ssl {
 

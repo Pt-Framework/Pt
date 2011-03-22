@@ -29,12 +29,10 @@
 #ifndef PT_SSL_SSLSTREAMBUF_H
 #define PT_SSL_SSLSTREAMBUF_H
 
+#include <Pt/Signal.h>
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/System/StreamBuffer.h>
-#include <Pt/Signal.h>
 #include <string>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 
 namespace Pt {
 
@@ -124,9 +122,9 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         std::streamsize do_underflow(std::streamsize size);
 
     protected:
-        BIO*           _in;  // Input BIO
-        BIO*           _out; // Output BIO
-        SSL*           _ssl; // OpenSSL SSL handle
+        bio_st*        _in;  // Input BIO
+        bio_st*        _out; // Output BIO
+        ssl_st*        _ssl; // OpenSSL SSL handle
         std::iostream* _ios; // IO
 
     private:

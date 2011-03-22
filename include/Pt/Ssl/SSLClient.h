@@ -29,8 +29,6 @@
 #ifndef PT_SSL_CLIENT_H
 #define PT_SSL_CLIENT_H
 
-#include <iostream>
-
 #include <Pt/Ssl/SSLStreamBuf.h>
 #include <Pt/System/IOStream.h>
 

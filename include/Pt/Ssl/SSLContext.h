@@ -28,19 +28,12 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
-//#undef NLOG
-#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
-
-#include <Pt/Ssl/Exception.h>
+#include <Pt/Ssl/SSLCipherInfo.h>
 #include <Pt/System/Logger.h>
 #include <string>
 #include <vector>
 
-// TODO: how do we forward declare this correctly?
-struct ssl_ctx_st;
-
 namespace Pt {
-
 namespace Ssl {
 
 //! @internal Library initialization.
@@ -50,42 +43,7 @@ static struct PT_SSL_API SSLInit {
 } ssl_init;
 
 
-// TODO: We can make this a real class and move it to a separate header
-// I have to think about it, but possibly we can have a class CipherList
-// that wraps openssl's STACK of ciphers...
-// For now this is good enough though :-)
-
-//! \brief Chipher information.
-struct PT_SSL_API SSLCipherInfo {
-    unsigned long id;       //!< Numerical ID of the cipher.
-    std::string   strid;    //!< Sring ID of the cipher.
-    std::string   name;     //!< Name of the cipher.
-    int           bits;     //!< Number of bits supported by the cipher.
-    int           usedBits; //!< Number of bits actually used by the cipher.
-    std::string   version;  //!< Version of the cipher.
-    std::string   desc;     //!< Description of the cipher.
-
-    //! @internal There would be no need for end-user to instantiate this structure directly.
-    inline SSLCipherInfo()
-    : id(0), bits(0)
-    {}
-
-    //! @internal There would be no need for end-user to instantiate this structure directly.
-    inline SSLCipherInfo(unsigned long id_, const std::string& strid_, const std::string& name_, int bits_, const std::string& version_, const std::string& desc_)
-    : id(id_), strid(strid_), name(name_), bits(bits_), version(version_), desc(desc_)
-    {}
-
-    //! \brief Convert the cipher information into a string.
-    const std::string dump() const;
-};
-
-inline bool operator==(const SSLCipherInfo& a, const SSLCipherInfo& b)
-{
-    return a.id == b.id;
-}
-
 // TODO: some more constructors would be nice ;-)
-
 //! \brief SSL context.
 class PT_SSL_API SSLContext {
     public:
@@ -127,7 +85,7 @@ class PT_SSL_API SSLContext {
         friend class SSLStreamBuf;
 
     private:
-        ssl_ctx_st*                   _ctx;            // OpenSSL's SSL context
+        ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
         std::string                _pswd;           // The password
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
