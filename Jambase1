@@ -354,6 +354,8 @@ if $(CONFIGURE)
     TryCommand "del /f/q config.jam" ;
 
     Echo "Checking for host platform ..."$(OS:L) ;
+    Echo "Checking for target OS ..."$(TARGET_OS:L) ;
+    Echo "Checking for target platform ..."$(TARGET_OSPLAT:L) ;
 
     ConfigureRm ;
     ConfigureMv ;
@@ -362,14 +364,7 @@ if $(CONFIGURE)
     ConfigureChMod ;
     ConfigureLn ;
     ConfigureDotSlash ;
-
-    include Jamconfig ;
-
-    TryCommand $(MV) config.tmp config.jam ;
-    Exit "Configuration successful." ;
 }
-
-include config.jam ;
 
 ##########################################################################
 # Include base rules
@@ -405,6 +400,18 @@ JamInclude Jamrules.target_$(TARGET_OS:L) ;
 ##########################################################################
 
 JamInclude Jamrules.$(TOOLSET:L) ;
+
+if $(CONFIGURE)
+{
+    Echo "Checking for toolset..."$(TOOLSET:L) ;
+
+    include Jamconfig ;
+
+    TryCommand $(MV) config.tmp config.jam ;
+    Exit "Configuration successful." ;
+}
+
+include config.jam ;
 
 ##########################################################################
 # include the project top level Jamfile
