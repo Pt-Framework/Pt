@@ -25,58 +25,24 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCIPHERINFO_H
-#define PT_SSL_SSLCIPHERINFO_H
+#ifndef PT_SSL_SSLUTILEXP_H
+#define PT_SSL_SSLUTILEXP_H
 
 //#undef NLOG
 
 #include <Pt/Ssl/Exception.h>
-#include <Pt/Ssl/_SSLUtilExp.h>
 
 // Forward declaration of some OpenSSL structures
 struct ssl_ctx_st;
-struct bio_st;
 struct ssl_st;
+struct bio_st;
+struct x509_st;
 
 namespace Pt {
 namespace Ssl {
-
-//! \brief Chipher information.
-class PT_SSL_API SSLCipherInfo {
-    public:
-        unsigned long id;       //!< Numerical ID of the cipher.
-        std::string   strid;    //!< Sring ID of the cipher.
-        std::string   name;     //!< Name of the cipher.
-        int           bits;     //!< Number of bits supported by the cipher.
-        int           usedBits; //!< Number of bits actually used by the cipher.
-        std::string   version;  //!< Version of the cipher.
-        std::string   desc;     //!< Description of the cipher.
-
-        //! \brief Convert the cipher information into a string.
-        const std::string dump() const;
-
-        friend class SSLContext;
-        friend class SSLStreamBuf;
-
-    private:
-        inline SSLCipherInfo()
-        : id(0), bits(0)
-        {}
-
-        inline SSLCipherInfo(unsigned long      id_,
-                             const std::string& strid_,
-                             const std::string& name_,
-                             int                bits_,
-                             const std::string& version_,
-                             const std::string& desc_)
-        : id(id_), strid(strid_), name(name_), bits(bits_), version(version_), desc(desc_)
-        {}
-};
-
-inline bool operator==(const SSLCipherInfo& a, const SSLCipherInfo& b)
-{
-    return a.id == b.id;
-}
+   
+    extern void PT_SSL_API pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file);
+    extern void PT_SSL_API pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData);
 
 } // namespace Pt
 } // namespace Ssl

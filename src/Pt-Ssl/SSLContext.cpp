@@ -84,11 +84,15 @@ SSLContext::SSLContext(const char* caCertFile,
     _enabledCiphers = _availCiphers;
 
     // Load the certificate chain file (if available)
+#if 1    
     if(certFile) {
         PT_SSL_LOG("Loading certificate chain file = " << certFile);
         if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile))
             throw SSLRuntimeError("Could not read certificate file!", PT_SOURCEINFO);
     }
+#else    
+    pt_ssl_load_certificate_chain_file(_ctx, certFile);
+#endif
 
     // Load the private key  file (if available)
     if(keyFile) {
