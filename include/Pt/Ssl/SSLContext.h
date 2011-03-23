@@ -66,7 +66,8 @@ class PT_SSL_API SSLContext {
         /** \brief Construct an SSL context that uses the given certificate-key file and password.
          *
          * The 'caCertFile' is needed if you would like to check if the other peer's certificate
-         * is signed by a valid Certificate Authority.
+         * is signed by a valid Certificate Authority. In this case the 'caCertFile' must contain
+         * the certificates of all trusted CA.
          * \n
          * The 'certFile' and 'keyFile' is mandatory for a server context.
          * \n

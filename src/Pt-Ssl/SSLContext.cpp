@@ -84,7 +84,7 @@ SSLContext::SSLContext(const char* caCertFile,
     _enabledCiphers = _availCiphers;
 
     // Load the certificate chain file (if available)
-#if 1    
+#if 0
     if(certFile) {
         PT_SSL_LOG("Loading certificate chain file = " << certFile);
         if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile))

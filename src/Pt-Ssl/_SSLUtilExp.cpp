@@ -35,21 +35,6 @@
 namespace Pt {
 namespace Ssl {
 
-static BIO* pt_ssl_new_string_bio()
-{
-    BIO_METHOD method;
-    method.type          = BIO_TYPE_NONE;
-    method.name          = "std::string";
-    method.bwrite        = 0;
-    method.bread         = 0;
-    method.bputs         = 0;
-    method.bgets         = 0;
-    method.ctrl          = 0;
-    method.create        = 0;
-    method.destroy       = 0;
-    method.callback_ctrl = 0;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file)
@@ -69,86 +54,53 @@ void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file)
 
 void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData)
 {
+    // Create a read-only memory BIO from the given string
+    BIO* in = BIO_new_mem_buf((void*) certData.c_str(), certData.length());
+
+    // Try to read/parse the X509 certificate
+    X509* x509 = PEM_read_bio_X509_AUX(in, 0,0, 0);
+    if(!x509) {
+        // TODO: How to prevent writing these freeing code multiple times?
+        BIO_free(in);
+        throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
+    }
+    
+    // Try to use the X509 certificate
+    ERR_clear_error();
+    if(!SSL_CTX_use_certificate(ctx, x509) || ERR_peek_error()) {
+        // TODO: How to prevent writing these freeing code multiple times?
+        BIO_free(in);
+        X509_free(x509);
+        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+    }
+
+    // Clear the previous CA certificates (if any)
+    // TODO: Accessing a structure member!
+    //           1. Can we sure that extra_certs will always exist
+    //           2. Is there any public API that can work directly on the SSL_CTX object?
+    if(ctx->extra_certs) {
+        sk_X509_pop_free(ctx->extra_certs, X509_free);
+        ctx->extra_certs = 0;
+    }
+
+    // Load CA certificates (if any)
+    X509* ca = 0;
+    while( ( ca = PEM_read_bio_X509(in, 0, 0, 0) ) ) {
+        if(!SSL_CTX_add_extra_chain_cert(ctx, ca)) {
+            // TODO: How to prevent writing these freeing code multiple times?
+            BIO_free(in);
+            X509_free(x509);
+            X509_free(ca);
+            throw SSLRuntimeError("Could not read/parse CA certificate data!", PT_SOURCEINFO);
+            break;
+        }
+    }
+
+    // Done
+    // TODO: How to prevent writing these freeing code multiple times?
+    BIO_free(in);
+    X509_free(x509);
 }
-
-
-#if 0
-int SSL_CTX_use_certificate_chain_file(SSL_CTX *ctx, const char *file)
-{
-    BIO *in;
-    int ret=0;
-    X509 *x=NULL;
-
-    ERR_clear_error(); /* clear error stack for SSL_CTX_use_certificate() */
-
-    in=BIO_new(BIO_s_file_internal());
-    if (in == NULL)
-        {
-        SSLerr(SSL_F_SSL_CTX_USE_CERTIFICATE_CHAIN_FILE,ERR_R_BUF_LIB);
-        goto end;
-        }
-
-    if (BIO_read_filename(in,file) <= 0)
-        {
-        SSLerr(SSL_F_SSL_CTX_USE_CERTIFICATE_CHAIN_FILE,ERR_R_SYS_LIB);
-        goto end;
-        }
-
-    x=PEM_read_bio_X509_AUX(in,NULL,ctx->default_passwd_callback,ctx->default_passwd_callback_userdata);
-    if (x == NULL)
-        {
-        SSLerr(SSL_F_SSL_CTX_USE_CERTIFICATE_CHAIN_FILE,ERR_R_PEM_LIB);
-        goto end;
-        }
-
-    ret=SSL_CTX_use_certificate(ctx,x);
-    if (ERR_peek_error() != 0)
-        ret = 0;  /* Key/certificate mismatch doesn't imply ret==0 ... */
-    if (ret)
-        {
-        /* If we could set up our certificate, now proceed to
-         * the CA certificates.
-         */
-        X509 *ca;
-        int r;
-        unsigned long err;
-
-        if (ctx->extra_certs != NULL)
-            {
-            sk_X509_pop_free(ctx->extra_certs, X509_free);
-            ctx->extra_certs = NULL;
-            }
-
-        while ((ca = PEM_read_bio_X509(in,NULL,ctx->default_passwd_callback,ctx->default_passwd_callback_userdata))
-            != NULL)
-            {
-            r = SSL_CTX_add_extra_chain_cert(ctx, ca);
-            if (!r)
-                {
-                X509_free(ca);
-                ret = 0;
-                goto end;
-                }
-            /* Note that we must not free r if it was successfully
-             * added to the chain (while we must free the main
-             * certificate, since its reference count is increased
-             * by SSL_CTX_use_certificate). */
-            }
-        /* When the while loop ends, it's usually just EOF. */
-        err = ERR_peek_last_error();
-        if (ERR_GET_LIB(err) == ERR_LIB_PEM && ERR_GET_REASON(err) == PEM_R_NO_START_LINE)
-            ERR_clear_error();
-        else
-            ret = 0; /* some real error */
-        }
-
-end:
-    if (x != NULL) X509_free(x);
-    if (in != NULL) BIO_free(in);
-    return(ret);
-}
-#endif
-
 
 } // namespace Pt
 } // namespace Ssl
