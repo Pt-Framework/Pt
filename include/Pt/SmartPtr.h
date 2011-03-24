@@ -264,6 +264,117 @@ namespace Pt {
     };
 
 
+    // auxiliary type to enable copies and assignments (now global)
+    template<typename T>
+    struct AutoPtrRef {
+        T* ptr;
+        AutoPtrRef(T* rhs)
+        : ptr(rhs)
+        { }
+    };
+
+
+    template<typename T,
+             typename Destroy = DeletePolicy<T> >
+    /** @brief Policy based Auto pointer.
+
+        The DestroyPolicy implements the method for destroying the object once
+        the auto pointer runs out of scope. By default, the object is destroyed
+        by deleting it, but this can be overridden by implementing a different
+        DestroyPolicy. The DestroyPolicy needs to implement a method
+        destroy(T*), which releases the underlying pointer.
+
+        \param T Contained type.
+        \param DestroyPolicy policy, to destroy the object.
+    */
+    class AutoPtr : public Destroy
+    {
+        private:
+            T* ap;    // refers to the actual owned object (if any)
+
+        public:
+            typedef T element_type;
+
+            // constructor
+            explicit AutoPtr(T* ptr = 0) throw()
+            : ap(ptr)
+            { }
+
+            // copy constructors (with implicit conversion)
+            // - note: nonconstant parameter
+            AutoPtr (AutoPtr& rhs) throw()
+             : ap(rhs.release()) {
+            }
+
+            template<class Y>
+            AutoPtr (AutoPtr<Y>& rhs) throw()
+             : ap(rhs.release()) {
+            }
+
+            // assignments (with implicit conversion)
+            // - note: nonconstant parameter
+            AutoPtr& operator= (AutoPtr& rhs) throw() {
+                reset(rhs.release());
+                return *this;
+            }
+
+            template<class Y>
+            AutoPtr& operator= (AutoPtr<Y>& rhs) throw()
+            {
+                reset(rhs.release());
+                return *this;
+            }
+
+            // destructor
+            ~AutoPtr() throw()
+            { this->destroy(ap); }
+
+            // value access
+            T* get() const throw() {
+                return ap;
+            }
+            T& operator*() const throw() {
+                return *ap;
+            }
+            T* operator->() const throw() {
+                return ap;
+            }
+
+            // release ownership
+            T* release() throw() {
+                T* tmp(ap);
+                ap = 0;
+                return tmp;
+            }
+
+            // reset value
+            void reset (T* ptr=0) throw() {
+                if (ap != ptr) {
+                    this->destroy(ap);
+                    ap = ptr;
+                }
+            }
+
+            /* special conversions with auxiliary type to enable copies and assignments
+             */
+            AutoPtr(AutoPtrRef<T> rhs) throw()
+             : ap(rhs.yp) {
+            }
+            AutoPtr& operator= (AutoPtrRef<T> rhs) throw() {  // new
+                 reset(rhs.yp);
+                 return *this;
+            }
+            template<class Y>
+            operator AutoPtrRef<Y>() throw() {
+                return AutoPtrRef<Y>(release());
+            }
+            template<class Y>
+            operator AutoPtr<Y>() throw() {
+                return AutoPtr<Y>(release());
+            }
+    };
+
+
     template <typename T,
               typename Model = ExternalRefCounted<T>,
               typename Destroy = DeletePolicy<T> >

@@ -67,6 +67,7 @@ class SmartPtrTest : public Pt::Unit::TestSuite
         SmartPtrTest()
         : Pt::Unit::TestSuite( "SmartPtrTest" )
         {
+            Pt::Unit::TestSuite::registerMethod( "AutpPtr", *this, &SmartPtrTest::AutoPtr );
             Pt::Unit::TestSuite::registerMethod( "RefCounted", *this, &SmartPtrTest::RefCounted );
             Pt::Unit::TestSuite::registerMethod( "InternalRefCounted", *this, &SmartPtrTest::InternalRefCounted );
             Pt::Unit::TestSuite::registerMethod( "RefLinked", *this, &SmartPtrTest::RefLinked );
@@ -77,6 +78,7 @@ class SmartPtrTest : public Pt::Unit::TestSuite
         void setUp();
 
     protected:
+        void AutoPtr();
         void RefCounted();
         void InternalRefCounted();
         void RefLinked();
@@ -89,6 +91,25 @@ Pt::Unit::RegisterTest<SmartPtrTest> register_SmartPtrTest;
 void SmartPtrTest::setUp()
 {
     Object::objectRefs = 0;
+}
+
+
+void SmartPtrTest::AutoPtr()
+{
+    Object* obj = new Object();
+
+    {
+        Pt::AutoPtr<Object> ap(obj);
+        PT_UNIT_ASSERT(ap.get() == obj);
+
+        Pt::AutoPtr<Object> ap2(ap);
+        PT_UNIT_ASSERT(ap.get() == 0);
+        PT_UNIT_ASSERT(ap2.get() == obj);
+
+        PT_UNIT_ASSERT(Object::objectRefs == 1);
+    }
+
+    PT_UNIT_ASSERT(Object::objectRefs == 0);
 }
 
 
