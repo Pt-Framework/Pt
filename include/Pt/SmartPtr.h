@@ -339,6 +339,18 @@ namespace Pt {
             T* operator->() const throw() {
                 return ap;
             }
+            bool operator!() const throw() {
+                return ap == 0;
+            }
+            /** @brief Bool conversion operator
+
+                An AutoPtr can be implicitly converted to bool. True is returned
+                when the raw pointer is not null, false if it is null
+
+                @return false if the raw pointer is null.
+            */
+            operator bool () const
+            { return ap != 0; }
 
             // release ownership
             T* release() throw() {
@@ -358,10 +370,10 @@ namespace Pt {
             /* special conversions with auxiliary type to enable copies and assignments
              */
             AutoPtr(AutoPtrRef<T> rhs) throw()
-             : ap(rhs.yp) {
+             : ap(rhs.ptr) {
             }
             AutoPtr& operator= (AutoPtrRef<T> rhs) throw() {  // new
-                 reset(rhs.yp);
+                 reset(rhs.ptr);
                  return *this;
             }
             template<class Y>
