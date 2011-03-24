@@ -54,8 +54,22 @@ void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file)
 }
 
 
-typedef Pt::AutoPtr<BIO> BioAutoPtr;
-typedef Pt::AutoPtr<X509> X509AutoPtr;
+class FreeBIO
+{
+    protected:
+        void destroy(BIO* ptr)
+        { BIO_free(ptr); }
+};
+
+class FreeX509
+{
+    protected:
+        void destroy(X509* ptr)
+        { X509_free(ptr); }
+};
+
+typedef Pt::AutoPtr<BIO, FreeBIO> BioAutoPtr;
+typedef Pt::AutoPtr<X509, FreeX509> X509AutoPtr;
 
 void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData)
 {
