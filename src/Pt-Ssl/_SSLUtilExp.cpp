@@ -52,25 +52,100 @@ void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file)
     pt_ssl_load_certificate_chain_string(ctx, data);
 }
 
+struct BioAutoPtr
+{
+    BioAutoPtr(BIO* bio = 0)
+    : _bio(bio)
+    {}
+
+    BioAutoPtr& operator=(BIO* bio)
+    {
+        if(_bio)
+            BIO_free(_bio);
+
+        _bio = bio;
+        return *this;
+    }
+
+    BIO* get()
+    { return _bio; }
+
+    BIO* operator->()
+    { return _bio; }
+
+    bool operator!() const
+    { return _bio == 0; }
+
+    operator void*() const
+    { return _bio; }
+
+    ~BioAutoPtr()
+    { BIO_free(_bio); }
+
+    BIO* _bio;
+};
+
+
+struct X509AutoPtr
+{
+    X509AutoPtr(X509* x509 = 0)
+    : _x509(x509)
+    {}
+
+    X509AutoPtr& operator=(X509* x509)
+    {
+        if(_x509)
+            X509_free(_x509);
+
+        _x509 = x509;
+        return *this;
+    }
+
+    X509* get()
+    { return _x509; }
+
+    X509* release()
+    {
+        X509* x509 = _x509;
+        _x509 = 0;
+        return x509;
+    }
+
+    X509* operator->()
+    { return _x509; }
+
+    bool operator!() const
+    { return _x509 == 0; }
+
+    operator void*() const
+    { return _x509; }
+
+    ~X509AutoPtr()
+    { X509_free(_x509); }
+
+    X509* _x509;
+};
+
+
 void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData)
 {
     // Create a read-only memory BIO from the given string
-    BIO* in = BIO_new_mem_buf((void*) certData.c_str(), certData.length());
+    BioAutoPtr in = BIO_new_mem_buf((void*) certData.c_str(), certData.length());
 
     // Try to read/parse the X509 certificate
-    X509* x509 = PEM_read_bio_X509_AUX(in, 0,0, 0);
-    if(!x509) {
+    X509AutoPtr x509 = PEM_read_bio_X509_AUX(in.get(), 0,0, 0);
+    if( ! x509 ) {
         // TODO: How to prevent writing these freeing code multiple times?
-        BIO_free(in);
+        //BIO_free(in);
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
     }
-    
+
     // Try to use the X509 certificate
     ERR_clear_error();
-    if(!SSL_CTX_use_certificate(ctx, x509) || ERR_peek_error()) {
+    if( ! SSL_CTX_use_certificate( ctx, x509.get() ) || ERR_peek_error() ) {
         // TODO: How to prevent writing these freeing code multiple times?
-        BIO_free(in);
-        X509_free(x509);
+        /// BIO_free(in);
+        //X509_free(x509);
         throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
     }
 
@@ -84,22 +159,23 @@ void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& ce
     }
 
     // Load CA certificates (if any)
-    X509* ca = 0;
-    while( ( ca = PEM_read_bio_X509(in, 0, 0, 0) ) ) {
-        if(!SSL_CTX_add_extra_chain_cert(ctx, ca)) {
+    X509AutoPtr ca = 0;
+    while( ca = PEM_read_bio_X509(in.get(), 0, 0, 0) ) {
+        if( ! SSL_CTX_add_extra_chain_cert( ctx, ca.get() ) ) {
             // TODO: How to prevent writing these freeing code multiple times?
-            BIO_free(in);
-            X509_free(x509);
-            X509_free(ca);
+            ///BIO_free(in);
+            //X509_free(x509);
+            //X509_free(ca);
             throw SSLRuntimeError("Could not read/parse CA certificate data!", PT_SOURCEINFO);
             break;
         }
+        ca.release();
     }
 
     // Done
     // TODO: How to prevent writing these freeing code multiple times?
-    BIO_free(in);
-    X509_free(x509);
+    ///BIO_free(in);
+    //X509_free(x509);
 }
 
 } // namespace Pt
