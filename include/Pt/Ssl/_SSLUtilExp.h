@@ -37,12 +37,16 @@ struct ssl_ctx_st;
 struct ssl_st;
 struct bio_st;
 struct x509_st;
+struct evp_pkey_st;
 
 namespace Pt {
 namespace Ssl {
    
-    extern void PT_SSL_API pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file);
+    extern void PT_SSL_API pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char* file);
     extern void PT_SSL_API pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData);
+
+    extern void PT_SSL_API pt_ssl_load_private_key_file(ssl_ctx_st* ctx, const char* file, const char* password);
+    extern void PT_SSL_API pt_ssl_load_private_key_string(ssl_ctx_st* ctx, const std::string& keyData, const std::string& password);
 
 } // namespace Pt
 } // namespace Ssl

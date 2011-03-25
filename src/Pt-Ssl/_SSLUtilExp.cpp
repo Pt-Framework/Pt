@@ -38,67 +38,83 @@ namespace Ssl {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char *file)
-{
-    std::ifstream ifs;
-    char          rbuf[4096];
-    std::string   data;
-
-    ifs.open(file, std::ios::binary);
-    while(ifs) {
-        ifs.read( rbuf, sizeof(rbuf) );
-        data += std::string( rbuf, ifs.gcount() );
-    }
-
-    pt_ssl_load_certificate_chain_string(ctx, data);
-}
-
-
-class FreeBIO
-{
+class FreeBIO {
     protected:
         void destroy(BIO* ptr)
         { BIO_free(ptr); }
 };
 
-class FreeX509
-{
+class FreeX509 {
     protected:
         void destroy(X509* ptr)
         { X509_free(ptr); }
 };
 
-typedef Pt::AutoPtr<BIO, FreeBIO> BioAutoPtr;
-typedef Pt::AutoPtr<X509, FreeX509> X509AutoPtr;
+class FreeEVP_PKEY {
+    protected:
+        void destroy(EVP_PKEY* ptr)
+        { EVP_PKEY_free(ptr); }
+};
+
+typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
+typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
+typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void readFileToString(const char *file, std::string& dst)
+{
+    dst.clear();
+
+    std::ifstream ifs;
+    char          rbuf[4096];
+
+    ifs.open(file, std::ios::binary);
+    while(ifs) {
+        ifs.read( rbuf, sizeof(rbuf) );
+        dst += std::string( rbuf, ifs.gcount() );
+    }
+}
+
+static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+{
+    // Get the password
+    const std::string& password = *((std::string*) userdata);
+
+    // If the wanted length is not the same with the given password length, just return 0
+    if((unsigned) num < password.length() + 1) return 0;
+
+    // Copy the password to the buffer and return the length
+    strcpy(buff, &password[0]);
+    return password.length();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char* file)
+{
+    std::string data;
+    readFileToString(file, data);
+    pt_ssl_load_certificate_chain_string(ctx, data);
+}
 
 void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData)
 {
     // Create a read-only memory BIO from the given string
-    BioAutoPtr in;
-    in = BIO_new_mem_buf( (void*) certData.c_str(), certData.length() );
+    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
 
     // Try to read/parse the X509 certificate
-    X509AutoPtr x509;
-    x509 = PEM_read_bio_X509_AUX(in.get(), 0,0, 0);
-    if( ! x509 ) {
-        // TODO: How to prevent writing these freeing code multiple times?
-        //BIO_free(in);
+    X509AutoPtr x509( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
+    if( ! x509 )
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
-    }
 
     // Try to use the X509 certificate
     ERR_clear_error();
-    if( ! SSL_CTX_use_certificate( ctx, x509.get() ) || ERR_peek_error() ) {
-        // TODO: How to prevent writing these freeing code multiple times?
-        /// BIO_free(in);
-        //X509_free(x509);
+    if( ! SSL_CTX_use_certificate( ctx, x509.get() ) || ERR_peek_error() )
         throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
-    }
 
     // Clear the previous CA certificates (if any)
-    // TODO: Accessing a structure member!
-    //           1. Can we sure that extra_certs will always exist
-    //           2. Is there any public API that can work directly on the SSL_CTX object?
     if(ctx->extra_certs) {
         sk_X509_pop_free(ctx->extra_certs, X509_free);
         ctx->extra_certs = 0;
@@ -107,21 +123,34 @@ void pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& ce
     // Load CA certificates (if any)
     X509AutoPtr ca;
     while( ca = PEM_read_bio_X509(in.get(), 0, 0, 0) ) {
-        if( ! SSL_CTX_add_extra_chain_cert( ctx, ca.get() ) ) {
-            // TODO: How to prevent writing these freeing code multiple times?
-            ///BIO_free(in);
-            //X509_free(x509);
-            //X509_free(ca);
+        if( ! SSL_CTX_add_extra_chain_cert( ctx, ca.get() ) )
             throw SSLRuntimeError("Could not read/parse CA certificate data!", PT_SOURCEINFO);
-            break;
-        }
         ca.release();
     }
+}
 
-    // Done
-    // TODO: How to prevent writing these freeing code multiple times?
-    ///BIO_free(in);
-    //X509_free(x509);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void pt_ssl_load_private_key_file(ssl_ctx_st* ctx, const char* file, const char* password)
+{
+    std::string data;
+    readFileToString(file, data);
+    pt_ssl_load_private_key_string(ctx, data, password ? password : "");
+}
+
+void pt_ssl_load_private_key_string(ssl_ctx_st* ctx, const std::string& keyData, const std::string& password)
+{
+    // Create a read-only memory BIO from the given string
+    BioAutoPtr in( BIO_new_mem_buf( (void*) keyData.c_str(), keyData.length() ) );
+
+    // Try to read/parse the private key
+    EvpPKeyAutoPtr pkey( PEM_read_bio_PrivateKey(in.get(), 0, passwordCallback, (void*) &password) );
+    if( ! pkey )
+        throw SSLRuntimeError("Could not read/parse/decode private-key data!", PT_SOURCEINFO);
+
+    // Try to use the private key
+    if( ! SSL_CTX_use_PrivateKey( ctx, pkey.get() ) )
+        throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 }
 
 } // namespace Pt
