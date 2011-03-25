@@ -155,6 +155,17 @@ void pt_ssl_load_private_key_string(ssl_ctx_st* ctx, const std::string& keyData,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void pt_ssl_load_trusted_ca_list_file(ssl_ctx_st* ctx, const char* file)
+{
+    std::string data;
+    readFileToString(file, data);
+    pt_ssl_load_trusted_ca_list_string(ctx, data);
+}
+
+void pt_ssl_load_trusted_ca_list_string(ssl_ctx_st* ctx, const std::string& certData)
+{
+}
+
 /*
 #define X509_LOOKUP_load_file(x,name,type) X509_LOOKUP_ctrl((x),X509_L_FILE_LOAD,(name),(long)(type),NULL)
 

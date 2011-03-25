@@ -91,7 +91,7 @@ SSLContext::SSLContext(const char* caCertFile,
             throw SSLRuntimeError("Could not read certificate file!", PT_SOURCEINFO);
     }
 #else    
-    pt_ssl_load_certificate_chain_file(_ctx, certFile);
+    if(certFile) pt_ssl_load_certificate_chain_file(_ctx, certFile);
 #endif
 
     // Load the private key  file (if available)
@@ -104,7 +104,7 @@ SSLContext::SSLContext(const char* caCertFile,
             throw SSLRuntimeError("Could not read key file!", PT_SOURCEINFO);
     }
 #else
-    pt_ssl_load_private_key_file(_ctx, keyFile, password);
+    if(keyFile) pt_ssl_load_private_key_file(_ctx, keyFile, password);
 #endif
 
     // Check the private key (if needed)
@@ -116,28 +116,31 @@ SSLContext::SSLContext(const char* caCertFile,
     }
 
     // Load and verify CA list (if available)
+#if 0
     if(caCertFile) {
         PT_SSL_LOG("Loading trusted CA certificate list file = " << caCertFile);
         if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0))
             throw SSLRuntimeError("Could not read/verify trusted CA list!", PT_SOURCEINFO);
     }
+#else
+    if(caCertFile) pt_ssl_load_trusted_ca_list_file(_ctx, caCertFile);
+#endif
+
+    // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx, 1);
 #endif
-
-
-    // Set some options
-    SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+    SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
   //SSL_CTX_set_read_ahead(_ctx, 1);
-    if(sessionID) SSL_CTX_set_session_id_context(
-        _ctx,
-        reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID) );
 
-    //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
-    //int SSL_set_session(SSL *to, SSL_SESSION *session);
-
-    // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
+    // Set session ID
+    if(sessionID) {
+        SSL_CTX_set_session_id_context(
+            _ctx,
+            reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID)
+        );
+    }
 }
 
 void SSLContext::setProtocol(Protocol protocol)

@@ -48,6 +48,9 @@ namespace Ssl {
     extern void PT_SSL_API pt_ssl_load_private_key_file(ssl_ctx_st* ctx, const char* file, const char* password);
     extern void PT_SSL_API pt_ssl_load_private_key_string(ssl_ctx_st* ctx, const std::string& keyData, const std::string& password);
 
+    extern void PT_SSL_API pt_ssl_load_trusted_ca_list_file(ssl_ctx_st* ctx, const char* file);
+    extern void PT_SSL_API pt_ssl_load_trusted_ca_list_string(ssl_ctx_st* ctx, const std::string& certData);
+    
 } // namespace Pt
 } // namespace Ssl
 

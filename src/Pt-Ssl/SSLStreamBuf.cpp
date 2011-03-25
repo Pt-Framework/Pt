@@ -72,8 +72,16 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
     // Set session ID
-    if(sessionID)
-        SSL_set_session_id_context(_ssl, reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID));
+    if(sessionID) {
+        SSL_set_session_id_context(
+            _ssl,
+            reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID)
+        );
+    }
+
+    //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
+    //int SSL_set_session(SSL *to, SSL_SESSION *session);
+    // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }
 
 SSLStreamBuf::~SSLStreamBuf()
