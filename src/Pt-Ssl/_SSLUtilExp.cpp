@@ -164,117 +164,28 @@ void pt_ssl_load_trusted_ca_list_file(ssl_ctx_st* ctx, const char* file)
 
 void pt_ssl_load_trusted_ca_list_string(ssl_ctx_st* ctx, const std::string& certData)
 {
-}
+    // Create a read-only memory BIO from the given string
+    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
 
-/*
-#define X509_LOOKUP_load_file(x,name,type) X509_LOOKUP_ctrl((x),X509_L_FILE_LOAD,(name),(long)(type),NULL)
+    // Try to read/parse the X509 certificate
+    X509AutoPtr x509;
 
-int X509_LOOKUP_ctrl(X509_LOOKUP *ctx, int cmd, const char *argc, long argl, char **ret)
-{
-    if (ctx->method == NULL) return -1;
-    if (ctx->method->ctrl != NULL)
-        return ctx->method->ctrl(ctx,cmd,argc,argl,ret);
-    else
-        return 1;
-}
-
-int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile, const char *CApath)
-{
-    return(X509_STORE_load_locations(ctx->cert_store,CAfile,CApath));
-}
-
-int X509_STORE_load_locations(X509_STORE *ctx, const char *file, const char *path)
-{
-    X509_LOOKUP *lookup;
-
-    if (file != NULL) {
-        lookup=X509_STORE_add_lookup(ctx,X509_LOOKUP_file());
-        if (lookup == NULL) return(0);
-        if (X509_LOOKUP_load_file(lookup,file,X509_FILETYPE_PEM) != 1)
-            return(0);
-    }
-
-    if (path != NULL) {
-        lookup=X509_STORE_add_lookup(ctx,X509_LOOKUP_hash_dir());
-        if (lookup == NULL) return(0);
-        if (X509_LOOKUP_add_dir(lookup,path,X509_FILETYPE_PEM) != 1)
-            return(0);
-    }
-
-    if ((path == NULL) && (file == NULL)) return(0);
-
-    return(1);
-}
-
-X509_LOOKUP *X509_STORE_add_lookup(X509_STORE *v, X509_LOOKUP_METHOD *m)
-{
-    int i;
-    STACK_OF(X509_LOOKUP) *sk;
-    X509_LOOKUP *lu;
-
-    sk=v->get_cert_methods;
-    for (i=0; i<sk_X509_LOOKUP_num(sk); i++) {
-        lu=sk_X509_LOOKUP_value(sk,i);
-        if (m == lu->method) return lu;
-    }
-
-    // a new one
-    lu=X509_LOOKUP_new(m);
-    if (lu == NULL)
-        return NULL;
-    else {
-        lu->store_ctx=v;
-        if (sk_X509_LOOKUP_push(v->get_cert_methods,lu))
-            return lu;
-        else {
-            X509_LOOKUP_free(lu);
-            return NULL;
+    int count = 0;
+    while(true) {
+        x509 = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
+        if( ! x509 ) {
+            if((ERR_GET_REASON(ERR_peek_last_error()) != PEM_R_NO_START_LINE) && (count > 0))
+                throw SSLRuntimeError("Could not read/parse CA certificate data!", PT_SOURCEINFO);
+            ERR_clear_error();
+            break;
         }
+
+        if( ! X509_STORE_add_cert(ctx->cert_store, x509.get()) )
+            throw SSLRuntimeError("Could not store the CA certificate!", PT_SOURCEINFO);
+
+        ++count;
     }
 }
 
-int X509_load_cert_file(X509_LOOKUP *ctx, const char *file, int type) // crypto/x509/by_file.c
-    {
-    int ret=0;
-    BIO *in=NULL;
-    int i,count=0;
-    X509 *x=NULL;
-
-    if (file == NULL) return(1);
-    in=BIO_new(BIO_s_file_internal());
-
-    if ((in == NULL) || (BIO_read_filename(in,file) <= 0)) {
-        X509err(X509_F_X509_LOAD_CERT_FILE,ERR_R_SYS_LIB);
-        goto err;
-    }
-
-    if (type == X509_FILETYPE_PEM) {
-        for (;;) {
-            x=PEM_read_bio_X509_AUX(in,NULL,NULL,NULL);
-            if (x == NULL)
-                {
-                if ((ERR_GET_REASON(ERR_peek_last_error()) ==
-                    PEM_R_NO_START_LINE) && (count > 0))
-                    {
-                    ERR_clear_error();
-                    break;
-                    }
-                else
-                    {
-                    X509err(X509_F_X509_LOAD_CERT_FILE,
-                        ERR_R_PEM_LIB);
-                    goto err;
-                    }
-                }
-            i=X509_STORE_add_cert(ctx->store_ctx,x);
-            if (!i) goto err;
-            count++;
-            X509_free(x);
-            x=NULL;
-        }
-        ret=count;
-    }
-    ...
-*/
 } // namespace Pt
 } // namespace Ssl
