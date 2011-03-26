@@ -71,7 +71,6 @@ namespace Pt {
                     if (next == this)
                     {
                         ret = true;
-                        object = 0;
                     }
                     else
                     {
@@ -243,7 +242,7 @@ namespace Pt {
     class DeletePolicy
     {
         protected:
-            void destroy(T* ptr)
+            static void destroy(T* ptr)
             { delete ptr; }
     };
 
@@ -255,11 +254,11 @@ namespace Pt {
             { free(ptr); }
     };
 
-    template <typename objectType>
+    template <typename ObjectType>
     class ArrayDestroyPolicy
     {
         protected:
-            static void destroy(objectType* ptr)
+            static void destroy(ObjectType* ptr)
             { delete[] ptr; }
     };
 

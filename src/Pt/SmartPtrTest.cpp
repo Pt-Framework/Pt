@@ -98,18 +98,20 @@ void SmartPtrTest::AutoPtr()
 {
     Object* obj = new Object();
 
+    typedef Pt::AutoPtr<Object> Ptr;
+
     {
-        Pt::AutoPtr<Object> ap(obj);
-        PT_UNIT_ASSERT(ap.get() == obj);
+        Ptr ap(obj);
+        PT_UNIT_ASSERT_EQUALS(ap.get(), obj);
 
-        Pt::AutoPtr<Object> ap2(ap);
-        PT_UNIT_ASSERT(ap.get() == 0);
-        PT_UNIT_ASSERT(ap2.get() == obj);
+        Ptr ap2(ap);
+        PT_UNIT_ASSERT_EQUALS(ap.get(), 0);
+        PT_UNIT_ASSERT_EQUALS(ap2.get(), obj);
 
-        PT_UNIT_ASSERT(Object::objectRefs == 1);
+        PT_UNIT_ASSERT_EQUALS(Object::objectRefs, 1);
     }
 
-    PT_UNIT_ASSERT(Object::objectRefs == 0);
+    PT_UNIT_ASSERT_EQUALS(Object::objectRefs, 0);
 }
 
 
@@ -117,22 +119,24 @@ void SmartPtrTest::RefCounted()
 {
     Object* obj = new Object();
 
+    typedef Pt::SmartPtr< Object, Pt::ExternalRefCounted<Object> > Ptr;
+
     {
-        Pt::SmartPtr< Object, Pt::ExternalRefCounted<Object> > smartPtr(obj);
-        PT_UNIT_ASSERT( static_cast< Pt::ExternalRefCounted<Object>* >(&smartPtr)->refs() == 1 );
+        Ptr smartPtr(obj);
+        PT_UNIT_ASSERT_EQUALS( smartPtr.refs(), 1 );
 
-        Pt::SmartPtr< Object, Pt::ExternalRefCounted<Object> > second(smartPtr);
-        PT_UNIT_ASSERT(static_cast< Pt::ExternalRefCounted<Object>* >(&second)->refs() == 2);
+        Ptr second(smartPtr);
+        PT_UNIT_ASSERT_EQUALS( second.refs(), 2);
 
-        Pt::SmartPtr< Object, Pt::ExternalRefCounted<Object> > third;
+        Ptr third;
         third = second;
-        PT_UNIT_ASSERT(static_cast< Pt::ExternalRefCounted<Object>* >(&third)->refs() == 3);
+        PT_UNIT_ASSERT_EQUALS( third.refs(), 3);
 
         third = third;
-        PT_UNIT_ASSERT(static_cast< Pt::ExternalRefCounted<Object>* >(&third)->refs() == 3);
+        PT_UNIT_ASSERT_EQUALS( third.refs(), 3);
     }
 
-    PT_UNIT_ASSERT(Object::objectRefs == 0);
+    PT_UNIT_ASSERT_EQUALS(Object::objectRefs, 0);
 }
 
 
@@ -140,20 +144,22 @@ void SmartPtrTest::InternalRefCounted()
 {
     Object* obj = new Object();
 
+    typedef Pt::SmartPtr<Object, Pt::InternalRefCounted<Object> > Ptr;
+
     {
-        Pt::SmartPtr<Object, Pt::InternalRefCounted<Object> > smartPtr(obj);
-        PT_UNIT_ASSERT(obj->refs() == 1);
+        Ptr smartPtr(obj);
+        PT_UNIT_ASSERT_EQUALS(obj->refs(), 1);
 
-        Pt::SmartPtr<Object, Pt::InternalRefCounted<Object> > second(smartPtr);
-        PT_UNIT_ASSERT(obj->refs() == 2);
+        Ptr second(smartPtr);
+        PT_UNIT_ASSERT_EQUALS(obj->refs(), 2);
 
-        Pt::SmartPtr< Object, Pt::InternalRefCounted<Object> > third;
+        Ptr third;
         third = second;
 
-        PT_UNIT_ASSERT(obj->refs() == 3);
+        PT_UNIT_ASSERT_EQUALS(obj->refs(), 3);
     }
 
-    PT_UNIT_ASSERT(Object::objectRefs == 0);
+    PT_UNIT_ASSERT_EQUALS(Object::objectRefs, 0);
 }
 
 
@@ -161,16 +167,18 @@ void SmartPtrTest::RefLinked()
 {
     Object* obj = new Object();
 
+    typedef Pt::SmartPtr<Object, Pt::RefLinked<Object> > Ptr;
+
     {
-        Pt::SmartPtr<Object, Pt::RefLinked<Object> > smartPtr(obj);
-        Pt::SmartPtr<Object, Pt::RefLinked<Object> > second(smartPtr);
-        Pt::SmartPtr<Object, Pt::RefLinked<Object> > third;
-        Pt::SmartPtr<Object, Pt::RefLinked<Object> > fourth(third);
+        Ptr smartPtr(obj);
+        Ptr second(smartPtr);
+        Ptr third;
+        Ptr fourth(third);
 
         third = second;
     }
 
-    PT_UNIT_ASSERT(Object::objectRefs == 0);
+    PT_UNIT_ASSERT_EQUALS(Object::objectRefs, 0);
 }
 
 
