@@ -27,10 +27,71 @@
  */
 
 #include <Pt/Ssl/SSLCertificateChain.h>
+#include <fstream>
+
+#include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
 
+SSLCertificateChain::SSLCertificateChain()
+: _cert(0)
+{}
+
+SSLCertificateChain::SSLCertificateChain(const std::string& certData)
+: _cert(0)
+{ loadFromString(certData); }
+
+SSLCertificateChain::~SSLCertificateChain()
+{ clear(); }
+
+void SSLCertificateChain::loadFromString(const std::string& certData)
+{
+    clear();
+
+    // Create a read-only memory BIO from the given string
+    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
+
+    // Try to read/parse the X509 certificate
+    _cert = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
+    if(!_cert)
+        throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
+
+    // Load CA certificates (if any)
+    while(true) {
+        X509* ca = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
+        if(!ca) break;
+        _caCert.push_back(ca);
+    }
+}
+
+void SSLCertificateChain::loadFromFile(const std::string& fileName)
+{
+    std::string   data;
+    std::ifstream ifs;
+    char          rbuf[4096];
+
+    ifs.open(fileName.c_str(), std::ios::binary);
+    while(ifs) {
+        ifs.read( rbuf, sizeof(rbuf) );
+        data += std::string( rbuf, ifs.gcount() );
+    }
+
+    loadFromString(data);
+}
+
+void SSLCertificateChain::clear()
+{
+    if(_cert) {
+        X509_free(_cert);
+        _cert = 0;
+    }
+
+    for(std::vector<x509_st*>::const_iterator it = _caCert.begin(); it != _caCert.end(); ++it) {
+        X509_free(*it);
+    }
+    _caCert.clear();
+}
 
 } // namespace Pt
 } // namespace Ssl

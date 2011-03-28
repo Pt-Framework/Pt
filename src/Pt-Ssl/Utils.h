@@ -25,41 +25,38 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCERTIFICATECHAIN_H
-#define PT_SSL_SSLCERTIFICATECHAIN_H
+#ifndef PT_SSL_UTILS_H
+#define PT_SSL_UTILS_H
 
-#include <Pt/Ssl/SSLCipherInfo.h>
-#include <vector>
+#include <Pt/SmartPtr.h>
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief Chipher information.
-class PT_SSL_API SSLCertificateChain {
-    public:
-        //! \brief Instantiate an empty certificate-chain.
-        SSLCertificateChain();
-
-        //! \brief Instantiate a certificate-chain using the given certificate data.
-        SSLCertificateChain(const std::string& certData);
-
-        //! \brief Stanndard dtor.
-        ~SSLCertificateChain();
-
-        //! \brief Load certificate from the given data.
-        void loadFromString(const std::string& certData);
-
-        //! \brief Load certificate from the given file.
-        void loadFromFile(const std::string& fileName);
-
-    private:
-        // Data
-        x509_st*              _cert;
-        std::vector<x509_st*> _caCert;
-
-        // Helper functions
-        void clear();
+class FreeBIO {
+    protected:
+        void destroy(BIO* ptr)
+        { BIO_free(ptr); }
 };
+
+class FreeX509 {
+    protected:
+        void destroy(X509* ptr)
+        { X509_free(ptr); }
+};
+
+class FreeEVP_PKEY {
+    protected:
+        void destroy(EVP_PKEY* ptr)
+        { EVP_PKEY_free(ptr); }
+};
+
+typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
+typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
+typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
 
 } // namespace Pt
 } // namespace Ssl

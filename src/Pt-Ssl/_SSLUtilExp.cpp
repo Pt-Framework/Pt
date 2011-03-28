@@ -27,41 +27,12 @@
  */
 
 #include <Pt/Ssl/_SSLUtilExp.h>
-#include <Pt/SmartPtr.h>
 #include <fstream>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class FreeBIO {
-    protected:
-        void destroy(BIO* ptr)
-        { BIO_free(ptr); }
-};
-
-class FreeX509 {
-    protected:
-        void destroy(X509* ptr)
-        { X509_free(ptr); }
-};
-
-class FreeEVP_PKEY {
-    protected:
-        void destroy(EVP_PKEY* ptr)
-        { EVP_PKEY_free(ptr); }
-};
-
-typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
-typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
-typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void readFileToString(const char *file, std::string& dst)
 {
