@@ -48,6 +48,7 @@ SSLInit::SSLInit()
     if(0 == ssl_init_counter++) {
         SSL_library_init();
         SSL_load_error_strings();
+        ERR_load_crypto_strings();
 
         Pt::System::LogTarget& target = Pt::System::LogTarget::get(PT_SSL_LOGGER_CATEGORY);
         target.setLogLevel(Pt::System::Info);

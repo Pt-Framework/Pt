@@ -31,6 +31,7 @@
 #include <Pt/SmartPtr.h>
 
 #include <openssl/ssl.h>
+#include <openssl/pem.h>
 #include <openssl/err.h>
 
 namespace Pt {
@@ -50,6 +51,18 @@ class FreeX509 {
         { X509_free(ptr); }
 };
 
+class FreeX509_REQ {
+    protected:
+        void destroy(X509_REQ* ptr)
+        { X509_REQ_free(ptr); }
+};
+
+class FreeX509_CRL {
+    protected:
+        void destroy(X509_CRL* ptr)
+        { X509_CRL_free(ptr); }
+};
+
 class FreeEVP_PKEY {
     protected:
         void destroy(EVP_PKEY* ptr)
@@ -58,12 +71,15 @@ class FreeEVP_PKEY {
 
 typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
 typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
+typedef Pt::AutoPtr<X509_REQ, FreeX509_REQ> X509ReqAutoPtr;
+typedef Pt::AutoPtr<X509_CRL, FreeX509_CRL> X509CrlAutoPtr;
 typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
 
 extern const std::string i2s(const ASN1_INTEGER* asn1Val);
-extern const std::string s2s(const ASN1_STRING*  asn1Val);
-extern const std::string t2s(const ASN1_TIME*    asn1Val);
-extern const std::string n2s(const X509_NAME*    x509Val);
+extern const std::string s2s(const ASN1_STRING* asn1Val);
+extern const std::string t2s(const ASN1_TIME* asn1Val);
+extern const std::string n2s(const X509_NAME* x509Val);
+extern const std::string h2s(unsigned char* md, unsigned int n);
 
 } // namespace Pt
 } // namespace Ssl

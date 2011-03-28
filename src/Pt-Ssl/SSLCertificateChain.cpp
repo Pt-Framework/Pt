@@ -53,35 +53,28 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     // Create a read-only memory BIO from the given string
     BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
 
+
     // Try to read/parse the X509 certificate
     _cert = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
     if(!_cert)
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
+   
+    const EVP_MD* fdig = EVP_sha1();
+    unsigned char md[EVP_MAX_MD_SIZE];
+    unsigned int  n;
+    if(!X509_digest(_cert, fdig, md, &n))
+        throw SSLRuntimeError("Not enough memory to calculate the fingerprint digest!", PT_SOURCEINFO);
 
-    std::cerr << "################################################## Version       : " <<     X509_get_version     (_cert)  << std::endl;
-    std::cerr << "################################################## Serial number : " << i2s(X509_get_serialNumber(_cert)) << std::endl;
-    std::cerr << "################################################## Not before    : " << t2s(X509_get_notBefore   (_cert)) << std::endl;
-    std::cerr << "################################################## Not after     : " << t2s(X509_get_notAfter    (_cert)) << std::endl;
-    std::cerr << "################################################## Issuer name   : " << n2s(X509_get_issuer_name (_cert)) << std::endl;
-    std::cerr << "################################################## Subject name  : " << n2s(X509_get_subject_name(_cert)) << std::endl;
-    std::cerr << "################################################## Subject name  : " << n2s(X509_get_subject_name(_cert)) << std::endl;
+    std::cerr << "################################################## Version          : " <<     X509_get_version      (_cert)  << std::endl;
+    std::cerr << "################################################## Serial number    : " << i2s(X509_get_serialNumber (_cert)) << std::endl;
+    std::cerr << "################################################## Issuer name      : " << n2s(X509_get_issuer_name  (_cert)) << std::endl;
+    std::cerr << "################################################## Subject name     : " << n2s(X509_get_subject_name (_cert)) << std::endl;
+    std::cerr << "################################################## Not before       : " << t2s(X509_get_notBefore    (_cert)) << std::endl;
+    std::cerr << "################################################## Not after        : " << t2s(X509_get_notAfter     (_cert)) << std::endl;
+    std::cerr << "################################################## Fingerprint type : " <<     OBJ_nid2sn(EVP_MD_type(fdig))  << std::endl;
+    std::cerr << "################################################## Fingerprint      : " << h2s(md, n)                         << std::endl;
 
-    
-    /*
-    std::cerr << "################################################## CRL version     : " <<     X509_get_pubkey   (_cert)  << std::endl;
-#define     (x) ((x)->crl->lastUpdate)
-#define     X509_CRL_get_nextUpdate(x) ((x)->crl->nextUpdate)
-#define     X509_CRL_get_issuer(x) ((x)->crl->issuer)
-#define     X509_CRL_get_REVOKED(x) ((x)->crl->revoked)
-
-EVP_PKEY *  X509_get_pubkey(X509 *x);
-
-    (x)
-#define     (x) ASN1_INTEGER_get((x)->cert_info->version)
-ASN1_INTEGER *  (X509 *x);
-X509_NAME * (X509 *a);
-X509_NAME * (X509 *a);
-    */
+    // BIO_printf(STDout,"%08lx\n",X509_subject_name_hash(x));
 
     // Try to read/parse the CA X509 certificates (if any)
     while(true) {

@@ -75,5 +75,19 @@ const std::string n2s(const X509_NAME* x509Val)
     return len ? std::string(buf, len) : "";
 }
 
+const std::string h2s(unsigned char* md, unsigned int n)
+{
+    std::string hash;
+
+    char buf[1024];
+    for(unsigned int i = 0; i < n; ++i) {
+        sprintf(buf, "%02X", md[i]);
+        if(!hash.empty()) hash += ':';
+        hash += buf;
+    }
+
+    return hash;
+}
+
 } // namespace Pt
 } // namespace Ssl
