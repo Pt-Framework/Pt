@@ -31,8 +31,8 @@
 
 #include <Pt/Http/Api.h>
 #include <string>
-#include <map>
 #include <cstring>
+#include <utility>
 
 namespace Pt {
 
