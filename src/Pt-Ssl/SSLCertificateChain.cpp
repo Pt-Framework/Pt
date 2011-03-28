@@ -47,6 +47,7 @@ SSLCertificateChain::~SSLCertificateChain()
 
 void SSLCertificateChain::loadFromString(const std::string& certData)
 {
+    // Clear previous certificates (if any)
     clear();
 
     // Create a read-only memory BIO from the given string
@@ -57,7 +58,7 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     if(!_cert)
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
 
-    // Load CA certificates (if any)
+    // Try to read/parse the CA X509 certificates (if any)
     while(true) {
         X509* ca = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
         if(!ca) break;
@@ -87,10 +88,34 @@ void SSLCertificateChain::clear()
         _cert = 0;
     }
 
-    for(std::vector<x509_st*>::const_iterator it = _caCert.begin(); it != _caCert.end(); ++it) {
+    for(std::vector<X509*>::const_iterator it = _caCert.begin(); it != _caCert.end(); ++it) {
         X509_free(*it);
     }
     _caCert.clear();
+}
+
+void SSLCertificateChain::apply(SSL_CTX* ctx)
+{
+    if(!_cert) 
+        throw SSLRuntimeError("Trying to use an empty certificate chain!", PT_SOURCEINFO);
+
+    // Try to use the X509 certificate
+    ERR_clear_error();
+    if( ! SSL_CTX_use_certificate( ctx, _cert ) || ERR_peek_error() )
+        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+
+    // Clear the previous CA certificates (if any)
+    if(ctx->extra_certs) {
+        sk_X509_pop_free(ctx->extra_certs, X509_free);
+        ctx->extra_certs = 0;
+    }
+
+    // Try to add the CA X509 certificates (if any)
+    for(std::vector<X509*>::const_iterator it = _caCert.begin(); it != _caCert.end(); ++it) {
+        if( ! SSL_CTX_add_extra_chain_cert( ctx, *it ) )
+            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+    }
+
 }
 
 } // namespace Pt

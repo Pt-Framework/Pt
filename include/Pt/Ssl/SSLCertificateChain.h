@@ -52,6 +52,8 @@ class PT_SSL_API SSLCertificateChain {
         //! \brief Load certificate from the given file.
         void loadFromFile(const std::string& fileName);
 
+        friend class SSLContext;
+
     private:
         // Data
         x509_st*              _cert;
@@ -59,6 +61,7 @@ class PT_SSL_API SSLCertificateChain {
 
         // Helper functions
         void clear();
+        void apply(ssl_ctx_st* ctx);
 };
 
 } // namespace Pt
