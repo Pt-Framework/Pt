@@ -58,6 +58,31 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     if(!_cert)
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
 
+    std::cerr << "################################################## Version       : " <<     X509_get_version     (_cert)  << std::endl;
+    std::cerr << "################################################## Serial number : " << i2s(X509_get_serialNumber(_cert)) << std::endl;
+    std::cerr << "################################################## Not before    : " << t2s(X509_get_notBefore   (_cert)) << std::endl;
+    std::cerr << "################################################## Not after     : " << t2s(X509_get_notAfter    (_cert)) << std::endl;
+    std::cerr << "################################################## Issuer name   : " << n2s(X509_get_issuer_name (_cert)) << std::endl;
+    std::cerr << "################################################## Subject name  : " << n2s(X509_get_subject_name(_cert)) << std::endl;
+    std::cerr << "################################################## Subject name  : " << n2s(X509_get_subject_name(_cert)) << std::endl;
+
+    
+    /*
+    std::cerr << "################################################## CRL version     : " <<     X509_get_pubkey   (_cert)  << std::endl;
+#define     (x) ((x)->crl->lastUpdate)
+#define     X509_CRL_get_nextUpdate(x) ((x)->crl->nextUpdate)
+#define     X509_CRL_get_issuer(x) ((x)->crl->issuer)
+#define     X509_CRL_get_REVOKED(x) ((x)->crl->revoked)
+
+EVP_PKEY *  X509_get_pubkey(X509 *x);
+
+    (x)
+#define     (x) ASN1_INTEGER_get((x)->cert_info->version)
+ASN1_INTEGER *  (X509 *x);
+X509_NAME * (X509 *a);
+X509_NAME * (X509 *a);
+    */
+
     // Try to read/parse the CA X509 certificates (if any)
     while(true) {
         X509* ca = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);

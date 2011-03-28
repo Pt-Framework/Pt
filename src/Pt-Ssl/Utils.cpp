@@ -25,47 +25,55 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_UTILS_H
-#define PT_SSL_UTILS_H
 
-#include <Pt/SmartPtr.h>
-
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "Utils.h"
+#include <cstdio>
 
 namespace Pt {
 namespace Ssl {
 
-// Internal SSL utilities
-    
-class FreeBIO {
-    protected:
-        void destroy(BIO* ptr)
-        { BIO_free(ptr); }
-};
+const std::string i2s(const ASN1_INTEGER* asn1Val)
+{
+    long a = ASN1_INTEGER_get(asn1Val);
+    char buf[1024];
 
-class FreeX509 {
-    protected:
-        void destroy(X509* ptr)
-        { X509_free(ptr); }
-};
+    sprintf(buf, "%ld", a);
 
-class FreeEVP_PKEY {
-    protected:
-        void destroy(EVP_PKEY* ptr)
-        { EVP_PKEY_free(ptr); }
-};
+    return buf;
+}
 
-typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
-typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
-typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
+const std::string s2s(const ASN1_STRING* asn1Val)
+{
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
 
-extern const std::string i2s(const ASN1_INTEGER* asn1Val);
-extern const std::string s2s(const ASN1_STRING*  asn1Val);
-extern const std::string t2s(const ASN1_TIME*    asn1Val);
-extern const std::string n2s(const X509_NAME*    x509Val);
+    char      buf[1024];
+    const int len = BIO_read(out.get(), buf, sizeof(buf));
+
+    return len ? std::string(buf, len) : "";
+}
+
+const std::string t2s(const ASN1_TIME* asn1Val)
+{
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if(!ASN1_TIME_print(out.get(), asn1Val)) return "";
+
+    char      buf[1024];
+    const int len = BIO_read(out.get(), buf, sizeof(buf));
+
+    return len ? std::string(buf, len) : "";
+}
+
+const std::string n2s(const X509_NAME* x509Val)
+{
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if(!X509_NAME_print(out.get(), (X509_NAME*) x509Val, 0)) return "";
+
+    char      buf[1024];
+    const int len = BIO_read(out.get(), buf, sizeof(buf));
+
+    return len ? std::string(buf, len) : "";
+}
 
 } // namespace Pt
 } // namespace Ssl
-
-#endif

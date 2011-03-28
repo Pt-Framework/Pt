@@ -57,7 +57,7 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
-    _out = BIO_new (BIO_s_mem() );
+    _out = BIO_new( BIO_s_mem() );
     _ssl = SSL_new( ctx.impl() );
 
     // Connect the BIO

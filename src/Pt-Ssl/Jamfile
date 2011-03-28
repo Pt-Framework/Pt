@@ -10,6 +10,7 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
+                       Utils.cpp
                        _SSLUtilExp.cpp
                        ;
 
