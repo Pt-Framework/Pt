@@ -35,7 +35,6 @@
 #include <exception>
 #include <stdexcept>
 
-
 namespace Pt {
 namespace Ssl {
 

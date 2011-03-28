@@ -25,31 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLUTILEXP_H
-#define PT_SSL_SSLUTILEXP_H
 
-#include <Pt/Ssl/Exception.h>
-
-// Forward declaration of some OpenSSL structures
-struct ssl_ctx_st;
-struct ssl_st;
-struct bio_st;
-struct x509_st;
-struct evp_pkey_st;
+#include <Pt/Ssl/SSLCertificateChain.h>
 
 namespace Pt {
 namespace Ssl {
-   
-    extern void PT_SSL_API pt_ssl_load_certificate_chain_file(ssl_ctx_st* ctx, const char* file);
-    extern void PT_SSL_API pt_ssl_load_certificate_chain_string(ssl_ctx_st* ctx, const std::string& certData);
 
-    extern void PT_SSL_API pt_ssl_load_private_key_file(ssl_ctx_st* ctx, const char* file, const char* password);
-    extern void PT_SSL_API pt_ssl_load_private_key_string(ssl_ctx_st* ctx, const std::string& keyData, const std::string& password);
 
-    extern void PT_SSL_API pt_ssl_load_trusted_ca_list_file(ssl_ctx_st* ctx, const char* file);
-    extern void PT_SSL_API pt_ssl_load_trusted_ca_list_string(ssl_ctx_st* ctx, const std::string& certData);
-    
 } // namespace Pt
 } // namespace Ssl
-
-#endif

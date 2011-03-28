@@ -31,12 +31,13 @@
 //#undef NLOG
 
 #include <Pt/Ssl/Exception.h>
-#include <Pt/Ssl/_SSLUtilExp.h>
 
 // Forward declaration of some OpenSSL structures
 struct ssl_ctx_st;
-struct bio_st;
 struct ssl_st;
+struct bio_st;
+struct x509_st;
+struct evp_pkey_st;
 
 namespace Pt {
 namespace Ssl {

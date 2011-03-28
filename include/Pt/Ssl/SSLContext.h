@@ -28,7 +28,7 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
-#include <Pt/Ssl/SSLCipherInfo.h>
+#include <Pt/Ssl/SSLCertificateChain.h>
 #include <Pt/System/Logger.h>
 #include <string>
 #include <vector>

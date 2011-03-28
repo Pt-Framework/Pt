@@ -5,6 +5,7 @@ SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
 SharedLibrary Pt-Ssl : Exception.cpp
                        SSLCipherInfo.cpp
+                       SSLCertificateChain.cpp
                        SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp

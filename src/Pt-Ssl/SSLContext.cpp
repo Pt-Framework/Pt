@@ -84,7 +84,7 @@ SSLContext::SSLContext(const char* caCertFile,
     _enabledCiphers = _availCiphers;
 
     // Load the certificate chain file (if available)
-#if 0
+#if 1
     if(certFile) {
         PT_SSL_LOG("Loading certificate chain file = " << certFile);
         if(!SSL_CTX_use_certificate_chain_file(_ctx, certFile))
@@ -95,7 +95,7 @@ SSLContext::SSLContext(const char* caCertFile,
 #endif
 
     // Load the private key  file (if available)
-#if 0
+#if 1
     if(keyFile) {
         PT_SSL_LOG("Loading private key file = " << keyFile);
         SSL_CTX_set_default_passwd_cb(_ctx, passwordCallback);
@@ -116,7 +116,7 @@ SSLContext::SSLContext(const char* caCertFile,
     }
 
     // Load and verify CA list (if available)
-#if 0
+#if 1
     if(caCertFile) {
         PT_SSL_LOG("Loading trusted CA certificate list file = " << caCertFile);
         if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0))
