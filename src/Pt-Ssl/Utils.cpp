@@ -32,7 +32,9 @@
 namespace Pt {
 namespace Ssl {
 
-const std::string i2s(const ASN1_INTEGER* asn1Val)
+// Internal SSL utilities
+
+const std::string asn1int2string(const ASN1_INTEGER* asn1Val)
 {
     long a = ASN1_INTEGER_get(asn1Val);
     char buf[1024];
@@ -42,7 +44,7 @@ const std::string i2s(const ASN1_INTEGER* asn1Val)
     return buf;
 }
 
-const std::string s2s(const ASN1_STRING* asn1Val)
+const std::string asn1str2string(const ASN1_STRING* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
@@ -53,7 +55,7 @@ const std::string s2s(const ASN1_STRING* asn1Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string t2s(const ASN1_TIME* asn1Val)
+const std::string asn1tim2string(const ASN1_TIME* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_TIME_print(out.get(), asn1Val)) return "";
@@ -64,7 +66,7 @@ const std::string t2s(const ASN1_TIME* asn1Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string n2s(const X509_NAME* x509Val)
+const std::string x509nam2string(const X509_NAME* x509Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!X509_NAME_print(out.get(), (X509_NAME*) x509Val, 0)) return "";
@@ -75,7 +77,15 @@ const std::string n2s(const X509_NAME* x509Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string h2s(unsigned char* md, unsigned int n)
+const std::string sslhash2string(long md)
+{
+    char buf[1024];
+    sprintf(buf, "%08lx", md);
+
+    return buf;
+}
+
+const std::string sslhash2string(unsigned char* md, unsigned int n)
 {
     std::string hash;
 

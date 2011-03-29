@@ -90,7 +90,27 @@ SSLContext::SSLContext(const char* caCertFile,
         SSLCertificateChain sslcc;
         sslcc.loadFromFile(certFile);
         sslcc.apply(_ctx);
+        PT_SSL_LOG("> Version           = " << sslcc.version());
+        PT_SSL_LOG("> Serial number     = " << sslcc.serialNumber());
+        PT_SSL_LOG("> Issuer name       = " << sslcc.issuerName());
+        PT_SSL_LOG("> Issuer name hash  = " << sslcc.issuerNameHash());
+        PT_SSL_LOG("> Subject name      = " << sslcc.subjectName());
+        PT_SSL_LOG("> Subject name hash = " << sslcc.subjectNameHash());
+        PT_SSL_LOG("> Not before        = " << sslcc.notBefore());
+        PT_SSL_LOG("> Not after         = " << sslcc.notAfter());
+        PT_SSL_LOG("> Fingerprint       = " << sslcc.fingerprintType() << " " << sslcc.fingerprintHash());
     }
+    /*
+        $ openssl x509 -noout -in server.pem -serial -issuer -issuer_hash -subject -subject_hash -dates -fingerprint
+        serial=64 (in HEX)
+        issuer= /C=US/L=Cheyenne Mountain/O=Stargate Command/CN=SGC Certificate Authority
+        b3df35fa
+        subject= /C=US/L=Cheyenne Mountain/O=Stargate Command/CN=SGC Mainframe
+        e2be0436
+        notBefore=Feb  4 01:59:34 2011 GMT
+        notAfter=Feb  4 01:59:34 2012 GMT
+        SHA1 Fingerprint=2C:08:AD:74:3C:BE:30:B6:73:5C:36:57:3C:2D:7C:CD:50:CC:CF:8B
+    */
 
     // Load the private key  file (if available)
 #if 1

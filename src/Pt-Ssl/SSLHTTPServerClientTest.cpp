@@ -231,7 +231,7 @@ class Client : public Pt::Connectable {
 
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
             PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
-
+            
             _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
 

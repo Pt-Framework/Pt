@@ -75,11 +75,12 @@ typedef Pt::AutoPtr<X509_REQ, FreeX509_REQ> X509ReqAutoPtr;
 typedef Pt::AutoPtr<X509_CRL, FreeX509_CRL> X509CrlAutoPtr;
 typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
 
-extern const std::string i2s(const ASN1_INTEGER* asn1Val);
-extern const std::string s2s(const ASN1_STRING* asn1Val);
-extern const std::string t2s(const ASN1_TIME* asn1Val);
-extern const std::string n2s(const X509_NAME* x509Val);
-extern const std::string h2s(unsigned char* md, unsigned int n);
+extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
+extern const std::string asn1str2string(const ASN1_STRING* asn1Val);
+extern const std::string asn1tim2string(const ASN1_TIME* asn1Val);
+extern const std::string x509nam2string(const X509_NAME* x509Val);
+extern const std::string sslhash2string(long md);
+extern const std::string sslhash2string(unsigned char* md, unsigned int n);
 
 } // namespace Pt
 } // namespace Ssl

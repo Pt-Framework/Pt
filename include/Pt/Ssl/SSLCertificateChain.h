@@ -52,12 +52,64 @@ class PT_SSL_API SSLCertificateChain {
         //! \brief Load certificate from the given file.
         void loadFromFile(const std::string& fileName);
 
+        //! \brief Returns the version of the certificate.
+        inline long version() const
+        { return _version; }
+
+        //! \brief Returns the serial number of the certificate.
+        inline long serialNumber() const
+        { return _serialNumber; }
+
+        //! \brief Returns the issuer name of the certificate.
+        inline const std::string& issuerName() const
+        { return _issuerName; }
+
+        //! \brief Returns the hash of the issuer name of the certificate.
+        inline const std::string& issuerNameHash() const
+        { return _issuerNameHash; }
+
+        //! \brief Returns the subject name of the certificate.
+        inline const std::string& subjectName() const
+        { return _subjectName; }
+
+        //! \brief Returns the hash of the subject  name of the certificate.
+        inline const std::string& subjectNameHash() const
+        { return _subjectNameHash; }
+
+        //! \brief Returns the minimum validity date of the certificate.
+        inline const std::string& notBefore() const
+        { return _notBefore; }
+
+        //! \brief Returns the maximum validity date of the certificate.
+        inline const std::string& notAfter() const
+        { return _notAfter; }
+
+        //! \brief Returns the fingerprint type of the certificate.
+        inline const std::string& fingerprintType() const
+        { return _fingerprintType; }
+
+        //! \brief Returns the fingerprint hash of the certificate.
+        inline const std::string& fingerprintHash() const
+        { return _fingerprintHash; }
+        
         friend class SSLContext;
 
     private:
         // Data
         x509_st*              _cert;
         std::vector<x509_st*> _caCert;
+
+        // Certificate information
+        long        _version;
+        long        _serialNumber;
+        std::string _issuerName;
+        std::string _issuerNameHash;
+        std::string _subjectName;
+        std::string _subjectNameHash;
+        std::string _notBefore;
+        std::string _notAfter;
+        std::string _fingerprintType;
+        std::string _fingerprintHash;
 
         // Helper functions
         void clear();

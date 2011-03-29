@@ -58,23 +58,25 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     _cert = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
     if(!_cert)
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
-   
+
+    // Calculate the fingerprint hash of the certificate
     const EVP_MD* fdig = EVP_sha1();
     unsigned char md[EVP_MAX_MD_SIZE];
     unsigned int  n;
     if(!X509_digest(_cert, fdig, md, &n))
-        throw SSLRuntimeError("Not enough memory to calculate the fingerprint digest!", PT_SOURCEINFO);
+        throw SSLRuntimeError("Could not calculate the certificate's fingerprint hash!", PT_SOURCEINFO);
 
-    std::cerr << "################################################## Version          : " <<     X509_get_version      (_cert)  << std::endl;
-    std::cerr << "################################################## Serial number    : " << i2s(X509_get_serialNumber (_cert)) << std::endl;
-    std::cerr << "################################################## Issuer name      : " << n2s(X509_get_issuer_name  (_cert)) << std::endl;
-    std::cerr << "################################################## Subject name     : " << n2s(X509_get_subject_name (_cert)) << std::endl;
-    std::cerr << "################################################## Not before       : " << t2s(X509_get_notBefore    (_cert)) << std::endl;
-    std::cerr << "################################################## Not after        : " << t2s(X509_get_notAfter     (_cert)) << std::endl;
-    std::cerr << "################################################## Fingerprint type : " <<     OBJ_nid2sn(EVP_MD_type(fdig))  << std::endl;
-    std::cerr << "################################################## Fingerprint      : " << h2s(md, n)                         << std::endl;
-
-    // BIO_printf(STDout,"%08lx\n",X509_subject_name_hash(x));
+    // Store some information about the certificate
+    _version         =                   X509_get_version      (_cert) ;
+    _serialNumber    = ASN1_INTEGER_get( X509_get_serialNumber (_cert) );
+    _issuerName      = x509nam2string  ( X509_get_issuer_name  (_cert) );
+    _issuerNameHash  = sslhash2string  ( X509_issuer_name_hash (_cert) );
+    _subjectName     = x509nam2string  ( X509_get_subject_name (_cert) );
+    _subjectNameHash = sslhash2string  ( X509_subject_name_hash(_cert) );
+    _notBefore       = asn1tim2string  ( X509_get_notBefore    (_cert) );
+    _notAfter        = asn1tim2string  ( X509_get_notAfter     (_cert) );
+    _fingerprintType = OBJ_nid2sn(EVP_MD_type(fdig));
+    _fingerprintHash = sslhash2string(md, n);
 
     // Try to read/parse the CA X509 certificates (if any)
     while(true) {
