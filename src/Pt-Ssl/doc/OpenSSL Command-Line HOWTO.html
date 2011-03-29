@@ -1,0 +1,1733 @@
+<!--?xml version="1.0" encoding="utf-8"?-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.3), see www.w3.org">
+
+  <title>OpenSSL Command-Line HOWTO</title>
+  <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+  <meta name="description" content="The openssl application that ships with the OpenSSL libraries can perform a wide range of crypto operations. This HOWTO provides some cookbook-style recipes for using it.">
+  <meta name="generator" content="libxslt (http://xmlsoft.org/XSLT/)">
+  <meta name="MSSmartTagsPreventParsing" content="TRUE">
+  <link href="OpenSSL%20Command-Line%20HOWTO_files/madboa.css" rel="stylesheet" title="Default" type="text/css">
+  <link href="OpenSSL%20Command-Line%20HOWTO_files/print.css" rel="alternate stylesheet" title="Print-friendly" type="text/css">
+  <link rel="shortcut icon" href="http://www.madboa.com/favicon.ico">
+  <script src="OpenSSL%20Command-Line%20HOWTO_files/madboa.js" type="text/javascript">
+</script>
+</head>
+
+<body>
+  <div class="topspace">
+    <div class="pageheader">
+      <span class="moniker">madboa.com</span>
+    </div>
+  </div>
+
+  <div class="menu">
+    <p><a href="http://www.madboa.com/" title="madboa.com home page">Home</a></p>
+
+    <p><a href="http://www.madboa.com/geek/" title="technical writings">Geek stuff</a></p>
+
+    <p><a href="http://www.madboa.com/praise/" title="lyrics and chords for praise songs">Praise songs</a></p>
+
+    <p><a href="http://www.madboa.com/people/paul/" title="who is this paul heinlein anyway?">Paul's page</a></p>
+
+    <p><a href="http://www.madboa.com/people/paul/books/" title="what's paul been reading?">Book notes</a></p>
+
+    <p><a href="http://www.madboa.com/about/" title="some info about madboa.com">This site</a></p>
+  </div>
+
+  <div class="article" title="OpenSSL Command-Line HOWTO">
+    <div class="titlepage">
+      <div>
+        <div>
+          <h2 class="title"><a id="openssl"></a>OpenSSL Command-Line HOWTO</h2>
+        </div>
+
+        <div>
+          <div class="author">
+            <p class="author"><span class="authorname"><span class="firstname">Paul</span> <span class="surname">Heinlein</span></span> <em class="email">&lt;<a href="mailto:heinlein@madboa.com">heinlein@madboa.com</a>&gt;</em></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="revhistory">
+            <div class="revision">
+              Initial publication: June 13, 2004
+            </div>
+
+            <div class="revision">
+              Most recent revision: July 16, 2010
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="abstract">
+            <p>The <span class="command"><strong>openssl</strong></span> application that ships with the OpenSSL libraries can
+            perform a wide range of crypto operations. This HOWTO provides some cookbook-style recipes for using it.</p>
+          </div>
+        </div>
+      </div>
+      <hr class="pageinfo">
+    </div>
+
+    <div class="toc">
+      <p><b>Table of Contents</b></p>
+
+      <dl>
+        <dt><span class="section"><a href="#intro">Introduction</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#intro-version">How do I find out what OpenSSL version I’m running?</a></span></dt>
+
+            <dt><span class="section"><a href="#intro-commands">How do I get a list of the available commands?</a></span></dt>
+
+            <dt><span class="section"><a href="#intro-ciphers">How do I get a list of available ciphers?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#benchmark">Benchmarking</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#benchmark-speed">How do I benchmark my system’s performance?</a></span></dt>
+
+            <dt><span class="section"><a href="#benchmark-connection">How do I benchmark remote connections?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#cert">Certificates</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#cert-self">How do I generate a self-signed certificate?</a></span></dt>
+
+            <dt><span class="section"><a href="#cert-request">How do I generate a certificate request for VeriSign?</a></span></dt>
+
+            <dt><span class="section"><a href="#cert-test">How do I test a new certificate?</a></span></dt>
+
+            <dt><span class="section"><a href="#cert-retrieve">How do I retrieve a remote certificate?</a></span></dt>
+
+            <dt><span class="section"><a href="#cert-exam">How do I extract information from a certificate?</a></span></dt>
+
+            <dt><span class="section"><a href="#cert-pkcs12">How do I export or import a PKCS#12 certificate?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#verify">Certificate Verification</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#verify-standard">How do I verify a certificate?</a></span></dt>
+
+            <dt><span class="section"><a href="#verify-system">What certificate authorities does OpenSSL recognize?</a></span></dt>
+
+            <dt><span class="section"><a href="#verify-new">How do I get OpenSSL to recognize/verify a certificate?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#cs">Command-line clients and servers</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#cs-smtp">How do I connect to a secure SMTP server?</a></span></dt>
+
+            <dt><span class="section"><a href="#cs-www">How do I connect to a secure [whatever] server?</a></span></dt>
+
+            <dt><span class="section"><a href="#cs-server">How do I set up an SSL server from the command line?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#digest">Digests</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#digest-file">How do I create an MD5 or SHA1 digest of a file?</a></span></dt>
+
+            <dt><span class="section"><a href="#digest-sign">How do I sign a digest?</a></span></dt>
+
+            <dt><span class="section"><a href="#digest-verify">How do I verify a signed digest?</a></span></dt>
+
+            <dt><span class="section"><a href="#digest-apache">How do I create an Apache digest password entry?</a></span></dt>
+
+            <dt><span class="section"><a href="#digest-commands">What other kinds of digests are available?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#encrypt">Encryption/Decryption</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#encrypt-base64">How do I base64-encode something?</a></span></dt>
+
+            <dt><span class="section"><a href="#encrypt-simple">How do I simply encrypt a file?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#error">Errors</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#error-interp">How do I interpret SSL error messages?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#key">Keys</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#key-rsa">How do I generate an RSA key?</a></span></dt>
+
+            <dt><span class="section"><a href="#key-rsapublic">How do I generate a public RSA key?</a></span></dt>
+
+            <dt><span class="section"><a href="#key-dsa">How do I generate a DSA key?</a></span></dt>
+
+            <dt><span class="section"><a href="#key-ec">How do I create an elliptic curve key?</a></span></dt>
+
+            <dt><span class="section"><a href="#key-removepass">How do I remove a passphrase from a key?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#passwd">Password hashes</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#passwd-crypt">How do I generate a crypt-style password hash?</a></span></dt>
+
+            <dt><span class="section"><a href="#passwd-md5">How do I generate a shadow-style password hash?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#prime">Prime numbers</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#prime-test">How do I test whether a number is prime?</a></span></dt>
+
+            <dt><span class="section"><a href="#prime-generate">How do I generate a set of prime numbers?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#random">Random data</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#random-generate">How do I generate random data?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#smime">S/MIME</a></span></dt>
+
+        <dd>
+          <dl>
+            <dt><span class="section"><a href="#smime-verify">How do I verify a signed S/MIME message?</a></span></dt>
+
+            <dt><span class="section"><a href="#smime-encrypt">How do I encrypt a S/MIME message?</a></span></dt>
+
+            <dt><span class="section"><a href="#smime-sign">How do I sign a S/MIME message?</a></span></dt>
+          </dl>
+        </dd>
+
+        <dt><span class="section"><a href="#links">For further reading</a></span></dt>
+
+        <dt><span class="section"><a href="#comments">Comments welcome</a></span></dt>
+      </dl>
+    </div>
+
+    <div class="section" title="Introduction">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="intro"></a>Introduction</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>The <span class="command"><strong>openssl</strong></span> command-line binary that ships with the <a class="ulink" href="http://www.openssl.org/">OpenSSL</a> libraries can perform a wide range of cryptographic operations. It can come in handy in
+      scripts or for accomplishing one-time command-line tasks.</p>
+
+      <p>Documentation for using the <span class="command"><strong>openssl</strong></span> application is somewhat scattered,
+      however, so this article aims to provide some practical examples of its use. I assume that you’ve already got a functional
+      OpenSSL installation and that the <span class="command"><strong>openssl</strong></span> binary is in your shell’s
+      <code class="envar">PATH</code>.</p>
+
+      <p>Just to be clear, this article is strictly practical; it does not concern cryptographic theory and concepts. If you don’t
+      know what an MD5 sum is, this article won’t enlighten you one bit—but if all you need to know is how to use <span class="command"><strong>openssl</strong></span> to generate a file sum, <a class="link" href="#digest-file" title="How do I create an MD5 or SHA1 digest of a file?">you’re in luck</a>.</p>
+
+      <p>The nature of this article is that I’ll be adding new examples incrementally. Check back at a later date if I haven’t
+      gotten to the information you need.</p>
+
+      <div class="section" title="How do I find out what OpenSSL version I’m running?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="intro-version"></a>How do I find out what OpenSSL version I’m running?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">version</code> option.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl version</code></strong>
+OpenSSL 0.9.8b 04 May 2006
+</pre>
+
+        <p>You can get much more information with the <code class="option">version -a</code> option.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl version -a</code></strong>
+OpenSSL 0.9.8b 04 May 2006
+built on: Fri Sep 29 18:45:58 UTC 2006
+platform: debian-i386-i686/cmov
+options:  bn(64,32) md2(int) rc4(idx,int) des(ptr,risc1,16,long) blowfish(idx) 
+compiler: gcc -fPIC -DOPENSSL_PIC -DZLIB -DOPENSSL_THREADS -D_REENTRANT
+-DDSO_DLFCN -DHAVE_DLFCN_H -DL_ENDIAN -DTERMIO -O3 -march=i686
+-Wa,--noexecstack -g -Wall -DOPENSSL_BN_ASM_PART_WORDS -DOPENSSL_IA32_SSE2
+-DSHA1_ASM -DMD5_ASM -DRMD160_ASM -DAES_ASM
+OPENSSLDIR: "/usr/lib/ssl"
+</pre>
+      </div>
+
+      <div class="section" title="How do I get a list of the available commands?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="intro-commands"></a>How do I get a list of the available commands?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>There are three built-in options for getting lists of available commands, but none of them provide what I consider
+        useful output. The best thing to do is provide an invalid command (<strong class="userinput"><code>help</code></strong> or
+        <strong class="userinput"><code>-h</code></strong> will do nicely) to get a readable answer.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl help</code></strong>
+openssl:Error: 'help' is an invalid command.
+
+Standard commands
+asn1parse      ca             ciphers        crl            crl2pkcs7      
+dgst           dh             dhparam        dsa            dsaparam       
+ec             ecparam        enc            engine         errstr         
+gendh          gendsa         genrsa         nseq           ocsp           
+passwd         pkcs12         pkcs7          pkcs8          prime          
+rand           req            rsa            rsautl         s_client       
+s_server       s_time         sess_id        smime          speed          
+spkac          verify         version        x509           
+
+Message Digest commands (see the `dgst' command for more details)
+md2            md4            md5            rmd160         sha            
+sha1           
+
+Cipher commands (see the `enc' command for more details)
+aes-128-cbc    aes-128-ecb    aes-192-cbc    aes-192-ecb    aes-256-cbc    
+aes-256-ecb    base64         bf             bf-cbc         bf-cfb         
+bf-ecb         bf-ofb         cast           cast-cbc       cast5-cbc      
+cast5-cfb      cast5-ecb      cast5-ofb      des            des-cbc        
+des-cfb        des-ecb        des-ede        des-ede-cbc    des-ede-cfb    
+des-ede-ofb    des-ede3       des-ede3-cbc   des-ede3-cfb   des-ede3-ofb   
+des-ofb        des3           desx           rc2            rc2-40-cbc     
+rc2-64-cbc     rc2-cbc        rc2-cfb        rc2-ecb        rc2-ofb        
+rc4            rc4-40
+</pre>
+
+        <p>What the shell calls <span class="quote">“<span class="quote">Standard commands</span>”</span> are the main top-level
+        options.</p>
+
+        <p>You can use the same trick with any of the subcommands.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl dgst -h</code></strong>
+unknown option '-h'
+options are
+-c              to output the digest with separating colons
+-d              to output debug info
+-hex            output as hex dump
+-binary         output in binary form
+-sign   file    sign digest using private key in file
+-verify file    verify a signature using public key in file
+-prverify file  verify a signature using private key in file
+-keyform arg    key file format (PEM or ENGINE)
+-signature file signature to verify
+-binary         output in binary form
+-engine e       use engine e, possibly a hardware device.
+-md5 to use the md5 message digest algorithm (default)
+-md4 to use the md4 message digest algorithm
+-md2 to use the md2 message digest algorithm
+-sha1 to use the sha1 message digest algorithm
+-sha to use the sha message digest algorithm
+-sha256 to use the sha256 message digest algorithm
+-sha512 to use the sha512 message digest algorithm
+-mdc2 to use the mdc2 message digest algorithm
+-ripemd160 to use the ripemd160 message digest algorithm
+</pre>
+
+        <p>In more boring fashion, you can consult the <a class="link" href="#links" title="For further reading">OpenSSL man
+        pages</a>.</p>
+      </div>
+
+      <div class="section" title="How do I get a list of available ciphers?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="intro-ciphers"></a>How do I get a list of available ciphers?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">ciphers</code> option. The <a class="ulink" href="http://www.openssl.org/docs/apps/ciphers.html">ciphers(1)</a> man page is quite helpful.</p>
+        <pre class="programlisting"># list all available ciphers
+openssl ciphers -v
+
+# list only TLSv1 ciphers
+openssl ciphers -v -tls1
+
+# list only high encryption ciphers (keys larger than 128 bits)
+openssl ciphers -v 'HIGH'
+
+# list only high encryption ciphers using the AES algorithm
+openssl ciphers -v 'AES+HIGH'
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Benchmarking">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="benchmark"></a>Benchmarking</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I benchmark my system’s performance?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="benchmark-speed"></a>How do I benchmark my system’s performance?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>The OpenSSL developers have built a benchmarking suite directly into the <span class="command"><strong>openssl</strong></span> binary. It’s accessible via the <code class="option">speed</code> option. It
+        tests how many operations it can perform in a given time, rather than how long it takes to perform a given number of
+        operations. This strikes me a quite sane, because the benchmarks don’t take significantly longer to run on a slow system
+        than on a fast one.</p>
+
+        <p>To run a catchall benchmark, run it without any further options.</p>
+        <pre class="programlisting">openssl speed
+</pre>
+
+        <p>There are two sets of results. The first reports how many bytes per second can be processed for each algorithm, the
+        second the times needed for sign/verify cycles. Here are the results on an 2.16GHz Intel Core 2.</p>
+        <pre class="screen">The 'numbers' are in 1000s of bytes per second processed.
+type             16 bytes     64 bytes    256 bytes   1024 bytes   8192 bytes
+md2               1736.10k     3726.08k     5165.04k     5692.28k     5917.35k
+mdc2                 0.00         0.00         0.00         0.00         0.00 
+md4              18799.87k    65848.23k   187776.43k   352258.73k   474622.63k
+md5              16807.01k    58256.45k   160439.13k   287183.53k   375220.91k
+hmac(md5)        23601.24k    74405.08k   189993.05k   309777.75k   379431.59k
+sha1             16774.59k    55500.39k   142628.69k   233247.74k   288382.98k
+rmd160           13854.71k    40271.23k    87613.95k   124333.06k   141781.67k
+rc4             227935.60k   253366.06k   261236.94k   259858.09k   194928.50k
+des cbc          48478.10k    49616.16k    49765.21k    50106.71k    50034.01k
+des ede3         18387.39k    18631.02k    18699.26k    18738.18k    18718.72k
+idea cbc             0.00         0.00         0.00         0.00         0.00 
+rc2 cbc          19247.24k    19838.12k    19904.51k    19925.33k    19834.98k
+rc5-32/12 cbc        0.00         0.00         0.00         0.00         0.00 
+blowfish cbc     79577.50k    83067.03k    84676.78k    84850.01k    85063.00k
+cast cbc         45362.14k    48343.34k    49007.36k    49202.52k    49225.73k
+aes-128 cbc      58751.94k    94443.86k   111424.09k   116704.26k   117997.57k
+aes-192 cbc      53451.79k    82076.22k    94609.83k    98496.85k    99150.51k
+aes-256 cbc      49225.21k    72779.84k    82266.88k    85054.81k    85762.05k
+sha256            9359.24k    22510.83k    40963.75k    51710.29k    56014.17k
+sha512            7026.78k    28121.32k    54330.79k    86190.76k   104270.51k
+                  sign    verify    sign/s verify/s
+rsa  512 bits 0.000522s 0.000042s   1915.8  23969.9
+rsa 1024 bits 0.002321s 0.000109s    430.8   9191.1
+rsa 2048 bits 0.012883s 0.000329s     77.6   3039.6
+rsa 4096 bits 0.079055s 0.001074s     12.6    931.3
+                  sign    verify    sign/s verify/s
+dsa  512 bits 0.000380s 0.000472s   2629.3   2117.9
+dsa 1024 bits 0.001031s 0.001240s    969.6    806.2
+dsa 2048 bits 0.003175s 0.003744s    314.9    267.1
+</pre>
+
+        <p>You can run any of the algorithm-specific subtests directly.</p>
+        <pre class="programlisting"># test rsa speeds
+openssl speed rsa
+
+# do the same test on a two-way SMP system
+openssl speed rsa -multi 2
+</pre>
+      </div>
+
+      <div class="section" title="How do I benchmark remote connections?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="benchmark-connection"></a>How do I benchmark remote connections?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>The <code class="option">s_time</code> option lets you test 
+connection performance. The most simple invocation will run
+        for 30 seconds, use any cipher, and use SSL handshaking to 
+determine number of connections per second, using both new and
+        reused sessions:</p>
+        <pre class="programlisting">openssl s_time -connect remote.host:443
+</pre>
+
+        <p>Beyond that most simple invocation, <code class="option">s_time</code> gives you a wide variety of testing options.</p>
+        <pre class="programlisting"># retrieve remote test.html page using only new sessions
+openssl s_time -connect remote.host:443 -www /test.html -new
+
+# similar, using only SSL v3 and high encryption (see
+# ciphers(1) man page for cipher strings)
+openssl s_time \
+  -connect remote.host:443 -www /test.html -new \
+  -ssl3 -cipher HIGH
+
+# compare relative performance of various ciphers in
+# 10-second tests
+IFS=":"
+for c in $(openssl ciphers -ssl3 RSA); do
+  echo $c
+  openssl s_time -connect remote.host:443 \
+    -www / -new -time 10 -cipher $c 2&gt;&amp;1 | \
+    grep bytes
+  echo
+done
+</pre>
+
+        <p>If you don’t have an SSL-enabled web server available for your use, you can emulate one using the <code class="option">s_server</code> option.</p>
+        <pre class="programlisting"># on one host, set up the server (using default port 4433)
+openssl s_server -cert mycert.pem -www
+
+# on second host (or even the same one), run s_time
+openssl s_time -connect myhost:4433 -www / -new -ssl3
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Certificates">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="cert"></a>Certificates</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I generate a self-signed certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-self"></a>How do I generate a self-signed certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>You’ll first need to decide whether or not you want to encrypt your key. Doing so means that the key is protected by a
+        passphrase.</p>
+
+        <p>On the plus side, adding a passphrase to a key makes it more secure, so the key is less likely to be useful to someone
+        who steals it. The downside, however, is that you’ll have to either store the passphrase in a file or type it manually
+        every time you want to start your web or ldap server.</p>
+
+        <p>It violates my normally paranoid nature to say it, but I prefer unencrypted keys, so I don’t have to manually type a
+        passphrase each time a secure daemon is started. (It’s not terribly difficult <a class="link" href="#key-removepass" title="How do I remove a passphrase from a key?">to decrypt your key</a> if you later tire of typing a passphrase.)</p>
+
+        <p>This example will produce a file called <code class="filename">mycert.pem</code> which will contain both the private key
+        and the public certificate based on it. The certificate will be valid for 365 days, and the key (thanks to the <code class="option">-nodes</code> option) is unencrypted.</p>
+        <pre class="programlisting">openssl req \
+  -x509 -nodes -days 365 \
+  -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
+</pre>
+
+        <p>Using this command-line invocation, you’ll have to answer a lot of questions: Country Name, State, City, and so on. The
+        tricky question is <span class="quote">“<span class="quote">Common Name.</span>”</span> You’ll want to answer with the
+        <span class="emphasis"><em>hostname or CNAME by which people will address the server</em></span>. This is very important.
+        If your web server’s real hostname is <code class="systemitem">mybox.mydomain.com</code> but people will be using
+        <code class="systemitem">www.mydomain.com</code> to address the box, then use the latter name to answer the <span class="quote">“<span class="quote">Common Name</span>”</span> question.</p>
+
+        <p>Once you’re comfortable with the answers you provide to those questions, you can script the whole thing by adding the
+        <code class="option">-subj</code> option. I’ve included some information about location into the example that follows, but
+        the only thing you really need to include for the certificate to be useful is the hostname (CN).</p>
+        <pre class="programlisting">openssl req \
+  -x509 -nodes -days 365 \
+  -subj '/C=US/ST=Oregon/L=Portland/CN=www.madboa.com' \
+  -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
+</pre>
+      </div>
+
+      <div class="section" title="How do I generate a certificate request for VeriSign?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-request"></a>How do I generate a certificate request for VeriSign?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Applying for a certificate signed by a recognized certificate authority like VeriSign is a complex bureaucratic process.
+        You’ve got to perform all the requisite paperwork before creating a certificate request.</p>
+
+        <p>As in the recipe for <a class="link" href="#cert-self" title="How do I generate a self-signed certificate?">creating a
+        self-signed certificate</a>, you’ll have to decide whether or not you want a passphrase on your private key. The recipe
+        below assumes you don’t. You’ll end up with two files: a new private key called <code class="filename">mykey.pem</code> and
+        a certificate request called <code class="filename">myreq.pem</code>.</p>
+        <pre class="programlisting">openssl req \
+  -new -newkey rsa:1024 -nodes \
+  -keyout mykey.pem -out myreq.pem
+</pre>
+
+        <p>If you’ve already <a class="link" href="#key-rsa" title="How do I generate an RSA key?">got a key</a> and would like to
+        use it for generating the request, the syntax is a bit simpler.</p>
+        <pre class="programlisting">openssl req -new -key mykey.pem -out myreq.pem
+</pre>
+
+        <p>Similarly, you can also provide subject information on the command line.</p>
+        <pre class="programlisting">openssl req \
+  -new -newkey rsa:1024 -nodes \
+  -subj '/CN=www.mydom.com/O=My Dom, Inc./C=US/ST=Oregon/L=Portland' \
+  -keyout mykey.pem -out myreq.pem
+</pre>
+
+        <p>When dealing with an institution like VeriSign, you need to take special care to make sure that the information you
+        provide during the creation of the certificate request is <span class="emphasis"><em>exactly</em></span> correct. I know
+        from personal experience that even a difference as trivial as substituting <span class="quote">“<span class="quote">and</span>”</span> for <span class="quote">“<span class="quote">&amp;</span>”</span> in the Organization Name will
+        stall the process.</p>
+
+        <p>If you’d like, you can double check the signature and information provided in the certificate request.</p>
+        <pre class="programlisting"># verify signature
+openssl req -in myreq.pem -noout -verify -key mykey.pem
+
+# check info
+openssl req -in myreq.pem -noout -text
+</pre>
+
+        <p>Save the key file in a secure location. You’ll need it in order to use the certificate VeriSign sends you. The
+        certificate request will typically be pasted into VeriSign’s online application form.</p>
+      </div>
+
+      <div class="section" title="How do I test a new certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-test"></a>How do I test a new certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>The <code class="option">s_server</code> option provides a simple but effective testing method. The example below
+        assumes you’ve combined your key and certificate into one file called <code class="filename">mycert.pem</code>.</p>
+
+        <p>First, launch the test server on the machine on which the certificate will be used. By default, the server will listen
+        on port 4433; you can alter that using the <code class="option">-accept</code> option.</p>
+        <pre class="programlisting">openssl s_server -cert mycert.pem -www
+</pre>
+
+        <p>If the server launches without complaint, then chances are good that the certificate is ready for production use.</p>
+
+        <p>You can also point your web browser at the test server, <span class="foreignphrase"><em class="foreignphrase">e.g.</em></span>, <strong class="userinput"><code>https://yourserver:4433/</code></strong>. Don’t forget to
+        specify the <span class="quote">“<span class="quote">https</span>”</span> protocol; plain-old <span class="quote">“<span class="quote">http</span>”</span> won’t work. You should see a page listing the various ciphers available
+        and some statistics about your connection. Most modern browsers allow you to examine the certificate as well.</p>
+      </div>
+
+      <div class="section" title="How do I retrieve a remote certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-retrieve"></a>How do I retrieve a remote certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>If you combine <span class="command"><strong>openssl</strong></span> and <span class="command"><strong>sed</strong></span>, you can retrieve remote certificates via a shell one-liner or a simple script.</p>
+        <pre class="programlisting">#!/bin/sh
+#
+# usage: retrieve-cert.sh remote.host.name [port]
+#
+REMHOST=$1
+REMPORT=${2:-443}
+
+echo |\
+openssl s_client -connect ${REMHOST}:${REMPORT} 2&gt;&amp;1 |\
+sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+</pre>
+
+        <p>You can, in turn, pipe that information back to <span class="command"><strong>openssl</strong></span> to do things like
+        check the dates on all your active certificates.</p>
+        <pre class="programlisting">#!/bin/sh
+#
+for CERT in \
+  www.yourdomain.com:443 \
+  ldap.yourdomain.com:636 \
+  imap.yourdomain.com:993 \
+do
+  echo |\
+  openssl s_client -connect ${CERT} 2&gt;/dev/null |\
+  sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' |\
+  openssl x509 -noout -subject -dates
+done
+</pre>
+      </div>
+
+      <div class="section" title="How do I extract information from a certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-exam"></a>How do I extract information from a certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>An SSL certificate contains a wide range of information: issuer, valid dates, subject, and some hardcore crypto stuff.
+        The <code class="option">x509</code> subcommand is the entry point for retrieving this information. The examples below all
+        assume that the certificate you want to examine is stored in a file named <code class="filename">cert.pem</code>.</p>
+
+        <p>Using the <code class="option">-text</code> option will give you the full breadth of information.</p>
+        <pre class="programlisting">openssl x509 -text -in cert.pem
+</pre>
+
+        <p>Other options will provide more targeted sets of data.</p>
+        <pre class="programlisting"># who issued the cert?
+openssl x509 -noout -in cert.pem -issuer
+
+# to whom was it issued?
+openssl x509 -noout -in cert.pem -subject
+
+# for what dates is it valid?
+openssl x509 -noout -in cert.pem -dates
+
+# the above, all at once
+openssl x509 -noout -in cert.pem -issuer -subject -dates
+
+# what is its hash value?
+openssl x509 -noout -in cert.pem -hash
+
+# what is its MD5 fingerprint?
+openssl x509 -noout -in cert.pem -fingerprint
+</pre>
+      </div>
+
+      <div class="section" title="How do I export or import a PKCS#12 certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cert-pkcs12"></a>How do I export or import a PKCS#12 certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>PKCS#12 files can be imported and exported by a number of applications, including Microsoft IIS. They are often
+        associated with the file extension <code class="filename">.pfx</code>.</p>
+
+        <p>To create a PKCS#12 certificate, you’ll need a private key and a certificate. During the conversion process, you’ll be
+        given an opportunity to put an <span class="quote">“<span class="quote">Export Password</span>”</span> (which can be empty,
+        if you choose) on the certificate.</p>
+        <pre class="programlisting"># create a file containing key and self-signed certificate
+openssl req \
+  -x509 -nodes -days 365 \
+  -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
+
+# export mycert.pem as PKCS#12 file, mycert.pfx
+openssl pkcs12 -export \
+  -out mycert.pfx -in mycert.pem \
+  -name "My Certificate"
+</pre>
+
+        <p>If someone sends you a PKCS#12 and any passwords needed to work with it, you can export it into standard PEM format.</p>
+        <pre class="programlisting"># export certificate and passphrase-less key
+openssl pkcs12 -in mycert.pfx -out mycert.pem -nodes
+
+# same as above, but you’ll be prompted for a passphrase for
+# the private key
+openssl pkcs12 -in mycert.pfx -out mycert.pem
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Certificate Verification">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="verify"></a>Certificate Verification</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Applications linked against the OpenSSL libraries can verify certificates signed by a recognized certificate authority
+      (CA).</p>
+
+      <div class="section" title="How do I verify a certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="verify-standard"></a>How do I verify a certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">verify</code> option to verify certificates.</p>
+        <pre class="programlisting">openssl verify cert.pem
+</pre>
+
+        <p>If your local OpenSSL installation recognizes the certificate or its signing authority and everything else (dates,
+        signing chain, etc.) checks out, you’ll get a simple OK message.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl verify remote.site.pem</code></strong>
+remote.site.pem: OK
+</pre>
+
+        <p>If anything is amiss, you’ll see some error messages with short descriptions of the problem, <span class="foreignphrase"><em class="foreignphrase">e.g.</em></span>,</p>
+
+        <div class="itemizedlist">
+          <ul class="itemizedlist">
+            <li class="listitem">
+              <p><code class="computeroutput">error 10 at 0 depth lookup:certificate has expired</code>. Certificates are typically
+              issued for a limited period of time—usually just one year—and <span class="command"><strong>openssl</strong></span>
+              will complain if a certificate has expired.</p>
+            </li>
+
+            <li class="listitem">
+              <p><code class="computeroutput">error 18 at 0 depth lookup:self signed certificate</code>. Unless you <a class="link" href="#verify-new" title="How do I get OpenSSL to recognize/verify a certificate?">make an exception</a>, OpenSSL
+              won’t verify a self-signed certificate.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section" title="What certificate authorities does OpenSSL recognize?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="verify-system"></a>What certificate authorities does OpenSSL recognize?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>When OpenSSL was built for your system, it was configured with a <span class="quote">“<span class="quote">Directory for
+        OpenSSL files.</span>”</span> (That’s the <code class="option">--openssldir</code>
+ option passed to the configure script,
+        for you hands-on types.) This is the directory that typically 
+holds information about certificate authorities your system
+        trusts.</p>
+
+        <p>The default location for this directory is <code class="filename">/usr/local/ssl</code>, but most vendors put it
+        elsewhere, <span class="foreignphrase"><em class="foreignphrase">e.g.</em></span>, <code class="filename">/usr/share/ssl</code> (Red Hat/Fedora), <code class="filename">/etc/ssl</code> (Gentoo), <code class="filename">/usr/lib/ssl</code> (Debian), or <code class="filename">/System/Library/OpenSSL</code> (Macintosh OS X).</p>
+
+        <p>Use the <code class="option">version</code> option to identify which directory (labeled <code class="envar">OPENSSLDIR</code>) your installation uses.</p>
+        <pre class="programlisting">openssl version -d
+</pre>
+
+        <p>Within that directory and a subdirectory called <code class="filename">certs</code>, you’re likely to find one or more
+        of three different kinds of files.</p>
+
+        <div class="orderedlist">
+          <ol class="orderedlist">
+            <li class="listitem">
+              <p>A large file called <code class="filename">cert.pem</code>, an omnibus collection of many certificates from
+              recognized certificate authorities like VeriSign and Thawte.</p>
+            </li>
+
+            <li class="listitem">
+              <p>Some small files in the <code class="filename">certs</code> subdirectory named with a <code class="filename">.pem</code> file extension, each of which contains a certificate from a single CA.</p>
+            </li>
+
+            <li class="listitem">
+              <p>Some symlinks in the <code class="filename">certs</code> subdirectory with obscure filenames like <code class="filename">052eae11.0</code>. There is typically one of these links for each <code class="filename">.pem</code>
+              file.</p>
+
+              <p>The first part of obscure filename is actually a hash value based on the certificate within the <code class="filename">.pem</code> file to which it points. The file extension is just an iterator, since it’s theoretically
+              possible that multiple certificates can generate identical hashes.</p>
+
+              <p>On my Gentoo system, for example, there’s a symlink named <code class="filename">f73e89fd.0</code> that points to
+              a file named <code class="filename">vsignss.pem</code>. Sure enough, the certificate in that file generates a hash
+              the equates to the name of the symlink:</p>
+              <pre class="screen">$ <strong class="userinput"><code>openssl x509 -noout -hash -in vsignss.pem</code></strong>
+f73e89fd
+</pre>
+            </li>
+          </ol>
+        </div>
+
+        <p>When an application encounters a remote certificate, it will typically check to see if the cert can be found in
+        <code class="filename">cert.pem</code> or, if not, in a file named after the certificate’s hash value. If found, the
+        certificate is considered verified.</p>
+
+        <p>It’s interesting to note that some applications, like Sendmail, allow you to specify at runtime the location of the
+        certificates you trust, while others, like Pine, do not.</p>
+      </div>
+
+      <div class="section" title="How do I get OpenSSL to recognize/verify a certificate?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="verify-new"></a>How do I get OpenSSL to recognize/verify a certificate?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Put the file that contains the certificate you’d like to trust into the <code class="filename">certs</code> directory
+        discussed <a class="link" href="#verify-system" title="What certificate authorities does OpenSSL recognize?">above</a>.
+        Then create the hash-based symlink. Here’s a little script that’ll do just that.</p>
+        <pre class="programlisting">#!/bin/sh
+#
+# usage: certlink.sh filename [filename ...]
+
+for CERTFILE in $*; do
+  # make sure file exists and is a valid cert
+  test -f "$CERTFILE" || continue
+  HASH=$(openssl x509 -noout -hash -in "$CERTFILE")
+  test -n "$HASH" || continue
+
+  # use lowest available iterator for symlink
+  for ITER in 0 1 2 3 4 5 6 7 8 9; do
+    test -f "${HASH}.${ITER}" &amp;&amp; continue
+    ln -s "$CERTFILE" "${HASH}.${ITER}"
+    test -L "${HASH}.${ITER}" &amp;&amp; break
+  done
+done
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Command-line clients and servers">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="cs"></a>Command-line clients and servers</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>The <code class="option">s_client</code> and <code class="option">s_server</code>
+ options provide a way to launch
+      SSL-enabled command-line clients and servers. There are other 
+examples of their use scattered around this document, but this
+      section is dedicated solely to them.</p>
+
+      <p>In this section, I assume you are familiar with the specific protocols at issue: SMTP, HTTP, etc. Explaining them is out
+      of the scope of this article.</p>
+
+      <div class="section" title="How do I connect to a secure SMTP server?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cs-smtp"></a>How do I connect to a secure SMTP server?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>You can test, or even use, an SSL-enabled SMTP server from the command line using the <code class="option">s_client
+        option</code>.</p>
+
+        <p>Secure SMTP servers offer secure connections on up to three ports: 25 (TLS), 465 (SSL), and 587 (TLS). Some time around
+        the 0.9.7 release, the <span class="command"><strong>openssl</strong></span> binary was given the ability to use STARTTLS
+        when talking to SMTP servers.</p>
+        <pre class="programlisting"># port 25/TLS; use same syntax for port 587
+openssl s_client -connect remote.host:25 -starttls smtp
+
+# port 465/SSL
+openssl s_client -connect remote.host:465
+</pre>
+
+        <p><a class="ulink" href="http://www.ietf.org/rfc/rfc0821.txt">RFC821</a>
+ suggests (although it falls short of explicitly
+        specifying) the two characters "&lt;CRLF&gt;" as 
+line-terminator. Most mail agents do not care about this and accept 
+either
+        "&lt;LF&gt;" or "&lt;CRLF&gt;" as line-terminators, but Qmail 
+does not. If you want to comply to the letter with RFC821
+        and/or communicate with Qmail, use also the <code class="option">-crlf</code> option:</p>
+        <pre class="programlisting">openssl s_client -connect remote.host:25 -crlf -starttls smtp
+</pre>
+      </div>
+
+      <div class="section" title="How do I connect to a secure [whatever] server?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cs-www"></a>How do I connect to a secure [whatever] server?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Connecting to a different type of SSL-enabled server is essentially the same operation as outlined above. As of the date
+        of this writing, <span class="command"><strong>openssl</strong></span> only supports command-line TLS with SMTP servers, so
+        you have to use straightforward SSL connections with any other protocol.</p>
+        <pre class="programlisting"># https: HTTP over SSL
+openssl s_client -connect remote.host:443
+
+# ldaps: LDAP over SSL
+openssl s_client -connect remote.host:636
+
+# imaps: IMAP over SSL
+openssl s_client -connect remote.host:993
+
+# pop3s: POP-3 over SSL
+openssl s_client -connect remote.host:995
+</pre>
+      </div>
+
+      <div class="section" title="How do I set up an SSL server from the command line?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="cs-server"></a>How do I set up an SSL server from the command line?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>The <code class="option">s_server</code> option allows you to
+ set up an SSL-enabled server from the command line, but
+        it’s I wouldn’t recommend using it for anything other than 
+testing or debugging. If you need a production-quality wrapper
+        around an otherwise insecure server, check out <a class="ulink" href="http://www.stunnel.org/">Stunnel</a> instead.</p>
+
+        <p>The <code class="option">s_server</code> option works best when you have a certificate; it’s fairly limited without
+        one.</p>
+        <pre class="programlisting"># the -www option will sent back an HTML-formatted status page
+# to any HTTP clients that request a page
+openssl s_server -cert mycert.pem -www
+
+# the -WWW option "emulates a simple web server. Pages will be
+# resolved relative to the current directory." This example
+# is listening on the https port, rather than the default
+# port 4433
+openssl s_server -accept 443 -cert mycert.pem -WWW
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Digests">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="digest"></a>Digests</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Generating digests with the <code class="option">dgst</code> option is one of the more straightforward tasks you can
+      accomplish with the <span class="command"><strong>openssl</strong></span> binary. Producing digests is done so often, as a
+      matter of fact, that you can find special-use binaries for doing the same thing.</p>
+
+      <div class="section" title="How do I create an MD5 or SHA1 digest of a file?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="digest-file"></a>How do I create an MD5 or SHA1 digest of a file?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Digests are created using the <code class="option">dgst</code> option.</p>
+        <pre class="programlisting"># MD5 digest
+openssl dgst -md5 filename
+
+# SHA1 digest
+openssl dgst -sha1 filename
+</pre>
+
+        <p>The MD5 digests are identical to those created with the widely available <span class="command"><strong>md5sum</strong></span> command, though the output formats differ.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl dgst -md5 foo-2.23.tar.gz</code></strong>
+MD5(foo-2.23.tar.gz)= 81eda7985e99d28acd6d286aa0e13e07
+$ <strong class="userinput"><code>md5sum foo-2.23.tar.gz</code></strong>
+81eda7985e99d28acd6d286aa0e13e07  foo-2.23.tar.gz
+</pre>
+
+        <p>The same is true for SHA1 digests and the output of the <span class="command"><strong>sha1sum</strong></span>
+        application.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl dgst -sha1 foo-2.23.tar.gz</code></strong>
+SHA1(foo-2.23.tar.gz)= e4eabc78894e2c204d788521812497e021f45c08
+$ <strong class="userinput"><code>sha1sum foo-2.23.tar.gz</code></strong>
+e4eabc78894e2c204d788521812497e021f45c08  foo-2.23.tar.gz
+</pre>
+      </div>
+
+      <div class="section" title="How do I sign a digest?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="digest-sign"></a>How do I sign a digest?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>If you want to ensure that the digest you create doesn’t get modified without your permission, you can sign it using
+        your <a class="link" href="#key-rsa" title="How do I generate an RSA key?">private key</a>. The following example assumes
+        that you want to sign the SHA1 sum of a file called <code class="filename">foo-1.23.tar.gz</code>.</p>
+        <pre class="programlisting"># signed digest will be foo-1.23.tar.gz.sha1
+openssl dgst -sha1 \
+  -sign mykey.pem
+  -out foo-1.23.tar.gz.sha1 \
+  foo-1.23.tar.gz
+</pre>
+      </div>
+
+      <div class="section" title="How do I verify a signed digest?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="digest-verify"></a>How do I verify a signed digest?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>To verify a signed digest you’ll need the file from which the digest was derived, the signed digest, and the signer’s
+        <a class="link" href="#key-rsapublic" title="How do I generate a public RSA key?">public key</a>.</p>
+        <pre class="programlisting"># to verify foo-1.23.tar.gz using foo-1.23.tar.gz.sha1
+# and pubkey.pem
+openssl dgst -sha1 \
+  -verify pubkey.pem \
+  -signature foo-1.23.tar.gz.sha1 \
+  foo-1.23.tar.gz
+</pre>
+      </div>
+
+      <div class="section" title="How do I create an Apache digest password entry?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="digest-apache"></a>How do I create an Apache digest password entry?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Apache’s HTTP digest authentication feature requires a special password format. Apache ships with the <span class="command"><strong>htdigest</strong></span> utility, but it will only write to a file, not to standard output. When working
+        with remote users, it’s sometimes nice for them to be able to generate a password hash on a machine they trust and then
+        mail it for inclusion in your local password database.</p>
+
+        <p>The format of the password database is relatively simple: a 
+colon-separated list of the username, authorization realm
+        (specified by the Apache AuthName directive), and an MD5 digest 
+of those two items and the password. Below is a script that
+        duplicates the output of <span class="command"><strong>htdigest</strong></span>, except that the output is written to
+        standard output. It takes advantage of the <code class="option">dgst</code> option’s ability to read from standard
+        input.</p>
+        <pre class="programlisting">#!/bin/bash
+
+echo "Create an Apache-friendly Digest Password Entry"
+echo "-----------------------------------------------"
+
+# get user input, disabling tty echoing for password
+read -p "Enter username: " UNAME
+read -p "Enter Apache AuthName: " AUTHNAME
+read -s -p "Enter password: " PWORD; echo
+
+printf "\n%s:%s:%s\n" \
+  "$UNAME" \
+  "$AUTHNAME" \
+  $(printf "${UNAME}:${AUTHNAME}:${PWORD}" | openssl dgst -md5)
+</pre>
+      </div>
+
+      <div class="section" title="What other kinds of digests are available?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="digest-commands"></a>What other kinds of digests are available?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the built-in <code class="option">list-message-digest-commands</code> option to get a list of the digest types
+        available to your local OpenSSL installation.</p>
+        <pre class="programlisting">openssl list-message-digest-commands
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Encryption/Decryption">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="encrypt"></a>Encryption/Decryption</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I base64-encode something?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="encrypt-base64"></a>How do I base64-encode something?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">enc -base64</code> option.</p>
+        <pre class="programlisting"># send encoded contents of file.txt to stdout
+openssl enc -base64 -in file.txt
+
+# same, but write contents to file.txt.enc
+openssl enc -base64 -in file.txt -out file.txt.enc
+</pre>
+
+        <p>It’s also possible to do a quick command-line encoding of a string value:</p>
+        <pre class="screen">$ <strong class="userinput"><code>echo "encode me" | openssl enc -base64</code></strong>
+ZW5jb2RlIG1lCg==
+</pre>
+
+        <p>Note that <span class="command"><strong>echo</strong></span> will silently attach a newline character to your string.
+        Consider using its <code class="option">-n</code> option if you want to avoid that situation, which could be important if
+        you’re trying to encode a password or authentication string.</p>
+        <pre class="screen">$ <strong class="userinput"><code>echo -n "encode me" | openssl enc -base64</code></strong>
+ZW5jb2RlIG1l
+</pre>
+
+        <p>Use the <code class="option">-d</code> (decode) option to reverse the process.</p>
+        <pre class="screen">$ <strong class="userinput"><code>echo "ZW5jb2RlIG1lCg==" | openssl enc -base64 -d</code></strong>
+encode me
+</pre>
+      </div>
+
+      <div class="section" title="How do I simply encrypt a file?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="encrypt-simple"></a>How do I simply encrypt a file?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Simple file encryption is probably better done using a <a class="ulink" href="http://www.madboa.com/geek/gpg-quickstart/">tool like GPG</a>.
+        Still, you may have occasion to want to encrypt a file without 
+having to build or use a key/certificate structure. All you
+        want to have to remember is a password. It can nearly be that 
+simple—if you can also remember the cipher you employed for
+        encryption.</p>
+
+        <p>To choose a cipher, consult the <a class="ulink" href="http://www.openssl.org/docs/apps/enc.html">enc(1) man page</a>.
+        More simply (and perhaps more accurately), you can ask <span class="command"><strong>openssl</strong></span> for a list in
+        one of two ways.</p>
+        <pre class="programlisting"># see the list under the 'Cipher commands' heading
+openssl -h
+
+# or get a long list, one cipher per line
+openssl list-cipher-commands
+</pre>
+
+        <p>After you choose a cipher, you’ll also have to decide if you want to base64-encode the data. Doing so will mean the
+        encrypted data can be, say, pasted into an email message. Otherwise, the output will be a binary file.</p>
+        <pre class="programlisting"># encrypt file.txt to file.enc using 256-bit AES in CBC mode
+openssl enc -aes-256-cbc -salt -in file.txt -out file.enc
+
+# the same, only the output is base64 encoded for, e.g., e-mail
+openssl enc -aes-256-cbc -a -salt -in file.txt -out file.enc
+</pre>
+
+        <p>To decrypt <code class="filename">file.enc</code> you or the file’s recipient will need to remember the cipher and the
+        passphrase.</p>
+        <pre class="programlisting"># decrypt binary file.enc
+openssl enc -d -aes-256-cbc -in file.enc
+
+# decrypt base64-encoded version
+openssl enc -d -aes-256-cbc -a -in file.enc
+</pre>
+
+        <p>If you’d like to avoid typing a passphrase every time you encrypt or decrypt a file, the <em class="citetitle">openssl(1)</em> man page provides the details under the heading <span class="quote">“<span class="quote">PASS
+        PHRASE ARGUMENTS.</span>”</span> The format of the password argument is fairly simple.</p>
+        <pre class="programlisting"># provide password on command line
+openssl enc -aes-256-cbc -salt -in file.txt \
+  -out file.enc -pass pass:mySillyPassword
+
+# provide password in a file
+openssl enc -aes-256-cbc -salt -in file.txt \
+  -out file.enc -pass file:/path/to/secret/password.txt
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Errors">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="error"></a>Errors</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I interpret SSL error messages?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="error-interp"></a>How do I interpret SSL error messages?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Poking through your system logs, you see some error messages that are evidently related to OpenSSL or crypto:</p>
+        <pre class="programlisting">sshd[31784]: error: RSA_public_decrypt failed: error:0407006A:lib(4):func(112):reason(106)
+sshd[770]: error: RSA_public_decrypt failed: error:0407006A:lib(4):func(112):reason(106)
+</pre>
+
+        <p>The first step to figure out what’s going wrong is to use the <code class="option">errstr</code> option to intrepret the
+        error code. The code number is found between <span class="quote">“<span class="quote">error:</span>”</span> and
+        <span class="quote">“<span class="quote">:lib</span>”</span>. In this case, it’s 0407006A.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl errstr 0407006A</code></strong>
+error:0407006A:rsa routines:RSA_padding_check_PKCS1_type_1:block type is not 01
+</pre>
+
+        <p>If you’ve got a full OpenSSL installation, including all the development documentation, you can start your investigation
+        there. In this example, the <em class="citetitle">RSA_padding_add_PKCS1_type_1(3)</em>
+ man page will inform you that PKCS
+        #1 involves block methods for signatures. After that, of course,
+ you’d need to pore through your application’s source code
+        to identify when it would expect be receiving those sorts of 
+packets.</p>
+      </div>
+    </div>
+
+    <div class="section" title="Keys">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="key"></a>Keys</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I generate an RSA key?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="key-rsa"></a>How do I generate an RSA key?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">genrsa</code> option.</p>
+        <pre class="programlisting"># default 512-bit key, sent to standard output
+openssl genrsa
+
+# 1024-bit key, saved to file named mykey.pem
+openssl genrsa -out mykey.pem 1024
+
+# same as above, but encrypted with a passphrase
+openssl genrsa -des3 -out mykey.pem 1024
+</pre>
+      </div>
+
+      <div class="section" title="How do I generate a public RSA key?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="key-rsapublic"></a>How do I generate a public RSA key?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">rsa</code> option to produce a public version of your private RSA key.</p>
+        <pre class="programlisting">openssl rsa -in mykey.pem -pubout
+</pre>
+      </div>
+
+      <div class="section" title="How do I generate a DSA key?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="key-dsa"></a>How do I generate a DSA key?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Building DSA keys requires a parameter file, and DSA verify operations are slower than their RSA counterparts, so they
+        aren’t as widely used as RSA keys.</p>
+
+        <p>If you’re only going to build a single DSA key, you can do so in just one step using the <code class="option">dsaparam</code> subcommand.</p>
+        <pre class="programlisting"># key will be called dsakey.pem
+openssl dsaparam -noout -out dsakey.pem -genkey 1024
+</pre>
+
+        <p>If, on the other hand, you’ll be creating several DSA keys, you’ll probably want to build a shared parameter file before
+        generating the keys. It can take a while to build the parameters, but once built, key generation is done quickly.</p>
+        <pre class="programlisting"># create parameters in dsaparam.pem
+openssl dsaparam -out dsaparam.pem 1024
+
+# create first key
+openssl gendsa -out key1.pem dsaparam.pem
+
+# and second ...
+openssl gendsa -out key2.pem dsaparam.pem
+</pre>
+      </div>
+
+      <div class="section" title="How do I create an elliptic curve key?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="key-ec"></a>How do I create an elliptic curve key?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Routines for working with <a class="ulink" href="http://www.secg.org/">elliptic curve cryptography</a> were added to
+        OpenSSL in version 0.9.8. Generating an EC key involves the <code class="option">ecparam</code> option.</p>
+        <pre class="programlisting">openssl ecparam -out key.pem -name prime256v1 -genkey
+
+# openssl can provide full list of EC parameter names suitable for
+# passing to the -name option above:
+openssl ecparam -list_curves
+</pre>
+      </div>
+
+      <div class="section" title="How do I remove a passphrase from a key?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="key-removepass"></a>How do I remove a passphrase from a key?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Perhaps you’ve grown tired of typing your passphrase every time your secure daemon starts. You can decrypt your key,
+        removing the passphrase requirement, using the <code class="option">rsa</code> or <code class="option">dsa</code> option,
+        depending on the signature algorithm you chose when creating your private key.</p>
+
+        <p>If you created an RSA key and it is stored in a standalone file called <code class="filename">key.pem</code>, then
+        here’s how to output a decrypted version of the same key to a file called <code class="filename">newkey.pem</code>.</p>
+        <pre class="programlisting"># you'll be prompted for your passphrase one last time
+openssl rsa -in key.pem -out newkey.pem
+</pre>
+
+        <p>Often, you’ll have your private key and public certificate stored in the same file. If they are stored in a file called
+        <code class="filename">mycert.pem</code>, you can construct a decrypted version called <code class="filename">newcert.pem</code> in two steps.</p>
+        <pre class="programlisting"># you'll need to type your passphrase once more
+openssl rsa -in mycert.pem -out newcert.pem
+openssl x509 -in mycert.pem &gt;&gt;newcert.pem
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Password hashes">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="passwd"></a>Password hashes</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Using the <code class="option">passwd</code> option, you can generate password hashes that interoperate with traditional
+      <code class="filename">/etc/passwd</code> files, newer-style <code class="filename">/etc/shadow</code> files, and Apache
+      password files.</p>
+
+      <div class="section" title="How do I generate a crypt-style password hash?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="passwd-crypt"></a>How do I generate a crypt-style password hash?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>You can generate a new hash quite simply:</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl passwd MySecret</code></strong>
+8E4vqBR4UOYF.
+</pre>
+
+        <p>If you know an existing password’s <span class="quote">“<span class="quote">salt,</span>”</span> you can duplicate the
+        hash.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl passwd -salt 8E MySecret</code></strong>
+8E4vqBR4UOYF.
+</pre>
+      </div>
+
+      <div class="section" title="How do I generate a shadow-style password hash?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="passwd-md5"></a>How do I generate a shadow-style password hash?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Newer Unix systems use a more secure MD5-based hashing mechanism that uses an eight-character salt (as compared to the
+        two-character salt in traditional crypt()-style hashes). Generating them is still straightforward using the <code class="option">-1</code> option:</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl passwd -1 MySecret</code></strong>
+$1$sXiKzkus$haDZ9JpVrRHBznY5OxB82.
+</pre>
+
+        <p>The salt in this format consists of the eight characters between the second and third dollar signs, in this case
+        <code class="computeroutput">sXiKzkus</code>. So you can also duplicate a hash with a known salt and password.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl passwd -1 -salt sXiKzkus MySecret</code></strong>
+$1$sXiKzkus$haDZ9JpVrRHBznY5OxB82.
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Prime numbers">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="prime"></a>Prime numbers</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Current cryptographic techniques rely heavily on the generation and testing of prime numbers, so it’s no surprise that the
+      OpenSSL libraries contain several routines dealing with primes. Beginning with version 0.9.7e (or so), the <code class="option">prime</code> option was added to the openssl binary.</p>
+
+      <div class="section" title="How do I test whether a number is prime?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="prime-test"></a>How do I test whether a number is prime?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Pass the number to the <code class="option">prime</code> option. Note that the number returned by openssl will be in
+        hex, not decimal, format.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl prime 119054759245460753</code></strong>
+1A6F7AC39A53511 is not prime
+</pre>
+
+        <p>You can also pass hex numbers directly.</p>
+        <pre class="screen">$ <strong class="userinput"><code>openssl prime -hex 2f</code></strong>
+2F is prime
+</pre>
+      </div>
+
+      <div class="section" title="How do I generate a set of prime numbers?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="prime-generate"></a>How do I generate a set of prime numbers?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Pass a bunch of numbers to openssl and see what sticks. The <span class="command"><strong>seq</strong></span> utility is
+        useful in this capacity.</p>
+        <pre class="programlisting"># define start and ending points
+AQUO=10000
+ADQUEM=10100
+for N in $(seq $AQUO $ADQUEM); do
+  # use bc to convert hex to decimal
+  openssl prime $N | awk '/is prime/ {print "ibase=16;"$1}' | bc
+done
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="Random data">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="random"></a>Random data</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" title="How do I generate random data?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="random-generate"></a>How do I generate random data?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Use the <code class="option">rand</code> option to generate binary or base64-encoded data.</p>
+        <pre class="programlisting"># write 128 random bytes of base64-encoded data to stdout
+openssl rand -base64 128
+
+# write 1024 bytes of binary random data to a file
+openssl rand -out random-data.bin 1024
+
+# seed openssl with semi-random bytes from browser cache
+cd $(find ~/.mozilla/firefox -type d -name Cache)
+openssl rand -rand $(find . -type f -printf '%f:') -base64 1024
+</pre>
+
+        <p>On a Unix box with a <code class="filename">/dev/urandom</code> device and a copy of GNU <span class="command"><strong>head</strong></span>, or a recent version of BSD <span class="command"><strong>head</strong></span>, you
+        can achieve a similar effect, often with better entropy:</p>
+        <pre class="programlisting"># get 32 bytes from /dev/urandom and base64 encode them
+head -c 32 /dev/urandom | openssl enc -base64
+</pre>
+
+        <p>You can get a wider variety of characters than what's offered using Base64 encoding by using <span class="command"><strong>strings</strong></span>:</p>
+        <pre class="programlisting"># get 32 bytes from /dev/random, grab printable characters, and
+# strip whitespace. using echo and the shell's command substitution
+# will nicely strip out newlines.
+echo $(head -c 32 /dev/random | strings -1) | sed 's/[[:space:]]//g'
+</pre>
+
+        <p>Make sure you know the trade-offs between the <code class="filename">random</code> and <code class="filename">urandom</code> devices before relying on them for truly critical entropy. Consult the <em class="citetitle">random(4)</em> man page on Linux and BSD systems, or <em class="citetitle">random(7D)</em> on Solaris, for
+        further information.</p>
+      </div>
+    </div>
+
+    <div class="section" title="S/MIME">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="smime"></a>S/MIME</h2>
+          </div>
+        </div>
+      </div>
+
+      <p><a class="ulink" href="http://www.ietf.org/html.charters/smime-charter.html">S/MIME</a> is a standard for sending and
+      receiving secure MIME data, especially in e-mail messages. Automated S/MIME capabilities have been added to quite a few
+      e-mail clients, though <span class="command"><strong>openssl</strong></span> can provide command-line S/MIME services using
+      the <code class="option">smime</code> option.</p>
+
+      <p>Note that the documentation in the <a class="ulink" href="http://www.openssl.org/docs/apps/smime.html">smime(1)</a> man
+      page includes a number of good examples.</p>
+
+      <div class="section" title="How do I verify a signed S/MIME message?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="smime-verify"></a>How do I verify a signed S/MIME message?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>It’s pretty easy to verify a signed message. Use your mail client to save the signed message to a file. In this example,
+        I assume that the file is named <code class="filename">msg.txt</code>.</p>
+        <pre class="programlisting">openssl smime -verify -in msg.txt
+</pre>
+
+        <p>If the sender’s certificate is signed by a certificate authority trusted by your OpenSSL infrastructure, you’ll see some
+        mail headers, a copy of the message, and a concluding line that says <code class="computeroutput">Verification
+        successful</code>.</p>
+
+        <p>If the messages has been modified by an unauthorized party, the output will conclude with a failure message indicating
+        that the digest and/or the signature doesn’t match what you received:</p>
+        <pre class="screen">Verification failure
+23016:error:21071065:PKCS7 routines:PKCS7_signatureVerify:digest
+failure:pk7_doit.c:804:
+23016:error:21075069:PKCS7 routines:PKCS7_verify:signature
+failure:pk7_smime.c:265:
+</pre>
+
+        <p>Likewise, if the sender’s certificate isn’t recognized by your OpenSSL infrastructure, you’ll get a similar error:</p>
+        <pre class="screen">Verification failure
+9544:error:21075075:PKCS7 routines:PKCS7_verify:certificate verify
+error:pk7_smime.c:222:Verify error:self signed certificate
+</pre>
+
+        <p>Most e-mail clients send a copy of the public certificate in the signature attached to the message. From the command
+        line, you can view the certificate data yourself. You’ll use the <code class="option">smime -pk7out</code> option to pipe a
+        copy of the PKCS#7 certificate back into the <code class="option">pkcs7</code> option. It’s oddly cumbersome but it
+        works.</p>
+        <pre class="programlisting">openssl smime -pk7out -in msg.txt | \
+openssl pkcs7 -text -noout -print_certs
+</pre>
+
+        <p>If you’d like to extract a copy of your correspondent’s certificate for long-term use, use just the first part of that
+        pipe.</p>
+        <pre class="programlisting">openssl smime -pk7out -in msg.txt -out her-cert.pem
+</pre>
+
+        <p>At that point, you can either <a class="link" href="#verify-new" title="How do I get OpenSSL to recognize/verify a certificate?">integrate it into your OpenSSL infrastructure</a> or you can save
+        it off somewhere for special use.</p>
+        <pre class="programlisting">openssl smime -verify -in msg.txt -CAfile /path/to/her-cert.pem
+</pre>
+      </div>
+
+      <div class="section" title="How do I encrypt a S/MIME message?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="smime-encrypt"></a>How do I encrypt a S/MIME message?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>Let’s say that someone sends you her public certificate and asks that you encrypt some message to her. You’ve saved her
+        certificate as <code class="filename">her-cert.pem</code>. You’ve saved your reply as <code class="filename">my-message.txt</code>.</p>
+
+        <p>To get the default—though fairly weak—RC2-40 encryption, you just tell <span class="command"><strong>openssl</strong></span> where the message and the certificate are located.</p>
+        <pre class="programlisting">openssl smime her-cert.pem -encrypt -in my-message.txt
+</pre>
+
+        <p>If you’re pretty sure your remote correspondent has a robust SSL toolkit, you can specify a stronger encryption
+        algorithm like triple DES:</p>
+        <pre class="programlisting">openssl smime her-cert.pem -encrypt -des3 -in my-message.txt
+</pre>
+
+        <p>By default, the encrypted message, including the mail headers, is sent to standard output. Use the <code class="option">-out</code> option or your shell to redirect it to a file. Or, much trickier, pipe the output directly to
+        <span class="command"><strong>sendmail</strong></span>.</p>
+        <pre class="programlisting">openssl smime her-cert.pem \
+  -encrypt \
+  -des3 \
+  -in my-message.txt \
+  -from 'Your Fullname &lt;you@youraddress.com&gt;' \
+  -to 'Her Fullname &lt;her@heraddress.com&gt;' \
+  -subject 'My encrypted reply' |\
+sendmail her@heraddress.com
+</pre>
+      </div>
+
+      <div class="section" title="How do I sign a S/MIME message?">
+        <div class="titlepage">
+          <div>
+            <div>
+              <h3 class="title"><a id="smime-sign"></a>How do I sign a S/MIME message?</h3>
+            </div>
+          </div>
+        </div>
+
+        <p>If you don’t need to encrypt the entire message, but you do want to sign it so that your recipient can be assured of the
+        message’s integrity, the recipe is similar to that for <a class="link" href="#smime-encrypt" title="How do I encrypt a S/MIME message?">encryption</a>. The main difference is that you need to have your own key and
+        certificate, since you can’t sign anything with the recipient’s cert.</p>
+        <pre class="programlisting">openssl smime \
+  -sign \
+  -signer /path/to/your-cert.pem \
+  -in my-message.txt \
+  -from 'Your Fullname &lt;you@youraddress.com&gt;' \
+  -to 'Her Fullname &lt;her@heraddress.com&gt;' \
+  -subject 'My signed reply' |\
+sendmail her@heraddress.com
+</pre>
+      </div>
+    </div>
+
+    <div class="section" title="For further reading">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="links"></a>For further reading</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Though it takes time to read them all and figure out how they relate to one another, the OpenSSL man pages are the best
+      place to start: <a class="ulink" href="http://www.openssl.org/docs/apps/asn1parse.html">asn1parse(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ca.html">ca(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ciphers.html">ciphers(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/config.html">config(5)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/crl.html">crl(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/crl2pkcs7.html">crl2pkcs7(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/dgst.html">dgst(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/dhparam.html">dhparam(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/dsa.html">dsa(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/dsaparam.html">dsaparam(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ec.html">ec(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ecparam.html">ecparam(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/enc.html">enc(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/errstr.html">errstr(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/gendsa.html">gendsa(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/genpkey.html">genpkey(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/genrsa.html">genrsa(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/nseq.html">nseq(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ocsp.html">ocsp(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/openssl.html">openssl(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/passwd.html">passwd(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkcs12.html">pkcs12(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkcs7.html">pkcs7(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkcs8.html">pkcs8(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkey.html">pkey(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkeyparam.html">pkeyparam(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/pkeyutl.html">pkeyutl(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/rand.html">rand(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/req.html">req(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/rsa.html">rsa(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/rsautl.html">rsautl(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/s_client.html">s_client(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/s_server.html">s_server(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/s_time.html">s_time(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/sess_id.html">sess_id(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/smime.html">smime(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/speed.html">speed(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/spkac.html">spkac(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/ts.html">ts(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/tsget.html">tsget(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/verify.html">verify(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/version.html">version(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/x509.html">x509(1)</a>, <a class="ulink" href="http://www.openssl.org/docs/apps/x509v3_config.html">x509v3_config(5)</a>.</p>
+    </div>
+
+    <div class="section" title="Comments welcome">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="comments"></a>Comments welcome</h2>
+          </div>
+        </div>
+      </div>
+
+      <p>Comments and suggestions about this document are appreciated and can be addressed to the author at <code class="email">&lt;<a class="email" href="mailto:heinlein@madboa.com">heinlein@madboa.com</a>&gt;</code>.</p>
+    </div>
+  </div>
+
+  <div class="license">
+    <p>This article is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons
+    License</a>.</p>
+  </div>
+
+  <div class="bottommenu">
+    <p><a href="http://www.madboa.com/geek/">Return to Technical Writings</a></p>
+
+    <p><a href="http://www.madboa.com/" title="madboa.com home page">Home</a> - <a href="http://www.madboa.com/geek/" title="technical writings">Tech</a> - <a href="http://www.madboa.com/praise/" title="lyrics and chords for praise songs">Praise</a> - <a href="http://www.madboa.com/people/paul/" title="who is this paul heinlein anyway?">Paul</a> - <a href="http://www.madboa.com/people/paul/books/" title="what's paul been reading?">Books</a> -
+    <a href="http://www.madboa.com/about/" title="some info about madboa.com">About</a></p>
+
+    <p><a href="#" onclick="  setStylesheet('Print-friendly'); return false;">printer-friendly layout</a></p>
+  </div>
+
+  <div class="footer">
+    <p class="centered"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/"><img class="w3cimg" alt="Creative Commons License" title="Creative Commons License" src="OpenSSL%20Command-Line%20HOWTO_files/cc-by-nc-sa.png"></a> <a href="http://validator.w3.org/check/referer"><img class="w3cimg" src="OpenSSL%20Command-Line%20HOWTO_files/valid-xhtml10.png" alt="Valid XHTML" title="Valid XHTML"></a> <a href="http://jigsaw.w3.org/css-validator/check/referer"><img class="w3cimg" src="OpenSSL%20Command-Line%20HOWTO_files/vcss.png" alt="Valid CSS" title="Valid CSS"></a></p>
+  </div>
+
+
+</body></html>

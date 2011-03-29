@@ -1,0 +1,179 @@
+/*
+ * CSS print-friendly stylesheet for madboa.com
+ */
+
+/* body */
+
+body {
+  background-color: white;
+  color: black;
+  padding: 0;
+  }
+
+/* main div's */
+
+div.article, div.bibliography, div.chordpro {
+  font-family: optima, utopia, georgia, "dejavu serif", "bitstream charter", serif;
+  font-size: 11pt;
+  }
+
+div.bottommenu, div.footer, div.menu, div.pageheader, div.topspace {
+  display: none;
+  }
+
+div.license {
+  font-family: verdana, arial, helvetica, "dejavu sans", sans-serif;
+  font-size: 8pt;
+  text-align: center;
+  }
+
+/* tag-specific styles */
+
+a { text-decoration: none; }
+a:link, a:visited, a:hover { color: black; }
+
+div.fivepix {
+  height: 5px;
+  margin: 0;
+  padding: 0;
+  }
+
+div.informaltable th {
+  border-bottom: 1px solid black;
+  padding-right: 15px;
+  }
+div.informaltable td {
+  padding-right: 15px;
+  }
+div.toc { font-size: 10pt; }
+
+h1, h2, h3, h4 {
+  font-family: verdana, arial, helvetica, "dejavu sans", sans-serif;
+  }
+h1.title { font-size: 16pt; }
+h2.title { font-size: 14pt; }
+h3.title { font-size: 12pt; }
+h3.author { font-size: 100%; color: black; }
+
+hr.pageinfo {
+  border: 0;
+  color: black;
+  background-color: black;
+  height: 1px;
+  }
+
+img { border: 0; }
+
+p.arttitle { 
+  margin-bottom: 0;
+  margin-top: 10px;
+  }
+
+p.updated {
+  font-size: 10pt;
+  }
+
+pre, tt, code {
+  font-family: monaco, "dejavu sans mono", "luxi mono", monospace;
+  }
+
+pre.programlisting {
+  border-top: 1px solid black;
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
+  border-left: 1px solid black;
+  background-color: white;
+  padding: 5px;
+  }
+
+span.symbol { font-family: monospace; }
+
+/* general styles */
+
+.rightward { text-align: right; }
+
+.w3cimg { width: 88px; height: 31px; }
+
+/* cascades */
+
+div.artabstract p {
+  font-size: 10pt;
+  margin-bottom: 0;
+  margin-top: 0;
+  }
+
+div.article pre { font-size: 10pt; }
+div.article div.toc {
+  border-bottom: 1px solid black; 
+  font-size: 10pt;
+  }
+div.article div.titlepage { font-size: 10pt; }
+
+div.pageheader .moniker {
+  font-family: "times new roman", times, serif;
+  font-size: 20pt;
+  letter-spacing: 1ex;
+  margin: 10px 0px 0px 10px;
+  text-transform: lowercase;
+  }
+
+div.titlepage .releaseinfo, div.titlepage .copyright, div.titlepage .pubdate, div.titlepage .author {
+  margin-top: 0;
+  margin-bottom: 0;
+  }
+
+table.simplelist tr, table.simplelist td {
+  margin-top: 0;
+  margin-bottom: 0;
+  }
+
+/* just for bibliographies */
+
+div.biblioentry div.abstract { border-top: 1px solid black; }
+div.biblioentry div.reviewdate {
+  margin-left: 1cm;
+  font-size: 10pt;
+  font-style: italic;
+  }
+div.biblioentry span.subtitle { font-style: italic; }
+
+p.booklist {
+  margin-top: 0;
+  margin-bottom: 6pt;
+  }
+
+/* just for chordpro */
+
+div.chordpro td.chords {
+  color: black;
+  font-family: verdana, arial, helvetica, "dejavu sans", sans-serif;
+  font-size: 10pt;
+  text-align: left;
+  }
+
+div.chordpro .lyrics {
+  color: black;
+  font-size: 12pt;
+  text-align: left;
+  }
+
+div.chordpro p.lyrics {
+  margin-bottom: 0;
+  margin-top: 0;
+  }
+
+div.chordpro p.comment, div.chordpro p.spacer {
+  font-size: 10pt;
+  font-style: italic;
+  margin-bottom: 0;
+  margin-top: 0;
+  }
+
+div.chordpro div.chorus { margin-left: 1cm; }
+div.chordpro div.chorus .lyrics { font-style: italic; }
+
+td.t1, td.t2 { padding-right: 25px; }
+
+/* vim: set filetype=css : */
+/* eof */
+
