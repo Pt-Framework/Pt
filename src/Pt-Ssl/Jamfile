@@ -4,15 +4,15 @@ SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
 SharedLibrary Pt-Ssl : Exception.cpp
+                       Utils.cpp
                        SSLCipherInfo.cpp
+                       SSLPrivateKey.cpp
                        SSLCertificateChain.cpp
                        SSLTrustedCertificate.cpp
                        SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
-                       Utils.cpp
-                       _SSLUtilExp.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;

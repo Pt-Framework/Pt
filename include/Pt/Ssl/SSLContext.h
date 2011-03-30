@@ -28,6 +28,7 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
+#include <Pt/Ssl/SSLPrivateKey.h>
 #include <Pt/Ssl/SSLCertificateChain.h>
 #include <Pt/Ssl/SSLTrustedCertificate.h>
 #include <Pt/System/Logger.h>

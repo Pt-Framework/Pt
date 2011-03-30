@@ -113,17 +113,12 @@ SSLContext::SSLContext(const char* caCertFile,
     */
 
     // Load the private key  file (if available)
-#if 1
     if(keyFile) {
         PT_SSL_LOG("Loading private key file = " << keyFile);
-        SSL_CTX_set_default_passwd_cb(_ctx, passwordCallback);
-        SSL_CTX_set_default_passwd_cb_userdata(_ctx, this);
-        if(!SSL_CTX_use_PrivateKey_file(_ctx, keyFile, SSL_FILETYPE_PEM))
-            throw SSLRuntimeError("Could not read key file!", PT_SOURCEINFO);
+        SSLPrivateKey sslpk(password);
+        sslpk.loadFromFile(keyFile);
+        sslpk.apply(_ctx);
     }
-#else
-    if(keyFile) pt_ssl_load_private_key_file(_ctx, keyFile, password);
-#endif
 
     // Check the private key (if needed)
     if(certFile && keyFile) {

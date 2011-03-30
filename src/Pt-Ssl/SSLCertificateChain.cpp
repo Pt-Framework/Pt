@@ -53,7 +53,6 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     // Create a read-only memory BIO from the given string
     BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
 
-
     // Try to read/parse the X509 certificate
     _cert = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
     if(!_cert)
@@ -146,7 +145,6 @@ void SSLCertificateChain::apply(SSL_CTX* ctx)
         if( ! SSL_CTX_add_extra_chain_cert( ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
     }
-
 }
 
 } // namespace Pt
