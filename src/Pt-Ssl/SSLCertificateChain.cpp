@@ -35,11 +35,11 @@ namespace Pt {
 namespace Ssl {
 
 SSLCertificateChain::SSLCertificateChain()
-: _cert(0)
+: _cert(0), _version(0), _serialNumber(0)
 {}
 
 SSLCertificateChain::SSLCertificateChain(const std::string& certData)
-: _cert(0)
+: _cert(0), _version(0), _serialNumber(0)
 { loadFromString(certData); }
 
 SSLCertificateChain::~SSLCertificateChain()
@@ -112,6 +112,17 @@ void SSLCertificateChain::clear()
         X509_free(*it);
     }
     _caCert.clear();
+
+    _version         = 0;
+    _serialNumber    = 0;
+    _issuerName      = "";
+    _issuerNameHash  = "";
+    _subjectName     = "";
+    _subjectNameHash = "";
+    _notBefore       = "";
+    _notAfter        = "";
+    _fingerprintType = "";
+    _fingerprintHash = "";
 }
 
 void SSLCertificateChain::apply(SSL_CTX* ctx)

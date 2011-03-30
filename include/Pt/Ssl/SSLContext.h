@@ -29,6 +29,7 @@
 #define PT_SSL_SSLCONTEXT_H
 
 #include <Pt/Ssl/SSLCertificateChain.h>
+#include <Pt/Ssl/SSLTrustedCertificate.h>
 #include <Pt/System/Logger.h>
 #include <string>
 #include <vector>

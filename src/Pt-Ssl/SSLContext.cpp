@@ -134,15 +134,12 @@ SSLContext::SSLContext(const char* caCertFile,
     }
 
     // Load and verify CA list (if available)
-#if 1
     if(caCertFile) {
         PT_SSL_LOG("Loading trusted CA certificate list file = " << caCertFile);
-        if(!SSL_CTX_load_verify_locations(_ctx, caCertFile, 0))
-            throw SSLRuntimeError("Could not read/verify trusted CA list!", PT_SOURCEINFO);
+        SSLTrustedCertificate slltc;
+        slltc.addFromFile(caCertFile);
+        slltc.apply(_ctx);
     }
-#else
-    if(caCertFile) pt_ssl_load_trusted_ca_list_file(_ctx, caCertFile);
-#endif
 
     // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)

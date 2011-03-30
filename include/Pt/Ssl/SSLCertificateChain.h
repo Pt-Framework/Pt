@@ -34,7 +34,7 @@
 namespace Pt {
 namespace Ssl {
 
-//! \brief Chipher information.
+//! \brief Certificate chain.
 class PT_SSL_API SSLCertificateChain {
     public:
         //! \brief Instantiate an empty certificate-chain.
@@ -51,6 +51,9 @@ class PT_SSL_API SSLCertificateChain {
 
         //! \brief Load certificate from the given file.
         void loadFromFile(const std::string& fileName);
+        
+        //! \brief Clear (delete) any loaded certificate.
+        void clear();
 
         //! \brief Returns the version of the certificate.
         inline long version() const
@@ -112,7 +115,6 @@ class PT_SSL_API SSLCertificateChain {
         std::string _fingerprintHash;
 
         // Helper functions
-        void clear();
         void apply(ssl_ctx_st* ctx);
 };
 
