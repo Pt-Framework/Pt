@@ -35,10 +35,6 @@
 #include <Pt/StringStream.h>
 #include <sstream>
 #include <string>
-#include <stdexcept>
-#include <iomanip>
-#include <limits>
-#include <iostream>
 #include <typeinfo>
 
 namespace Pt {
@@ -51,17 +47,15 @@ inline void convert(String& s, const T& value)
     s = os.str();
 }
 
-
 template <typename T>
 inline void convert(T& t, const String& str)
 {
     IStringStream is(str);
+    Char ch;
     is >> t;
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    if (is.fail() || !(is >> ch).eof())
         ConversionError::doThrow("T", "Pt::String");
 }
-
 
 template <typename T>
 inline void convert(std::string& s, const T& value)
@@ -71,272 +65,76 @@ inline void convert(std::string& s, const T& value)
     s = os.str();
 }
 
-
 template <typename T>
 inline void convert(T& t, const std::string& str)
 {
     std::istringstream is(str);
+    char ch;
     is >> t;
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
+    if (is.fail() || !(is >> ch).eof())
         ConversionError::doThrow("T", "std::string");
 }
-
 
 inline void convert(String& s, const String& str)
 {
     s = str;
 }
 
+PT_API void convert(String& s, bool value);
 
-inline void convert(String& s, bool value)
-{
-    static const String trueValue = L"true";
-    static const String falseValue = L"false";
-    s = value ? trueValue : falseValue;
-}
+PT_API void convert(bool& n, const String& str);
 
-inline void convert(bool& n, const String& str)
-{
-    if (str == L"true" || str == L"1")
-        n = true;
-    else if (str == L"false" || str == L"0")
-        n = false;
-    else
-        ConversionError::doThrow("bool", "Pt::String");
-}
+PT_API void convert(bool& n, const std::string& str);
 
-inline void convert(bool& n, const std::string& str)
-{
-    if (str == "true" || str == "1")
-        n = true;
-    else if (str == "false" || str == "0")
-        n = false;
-    else
-        ConversionError::doThrow("bool", "std::string");
-}
+PT_API void convert(String& s, char value);
 
-inline void convert(String& s, char value)
-{
-    s = String( 1, Char(value) );
-}
+PT_API void convert(char& n, const String& str);
 
+PT_API void convert(String& s, unsigned char value);
 
-inline void convert(char& n, const String& str)
-{
-    if( str.empty() )
-        ConversionError::doThrow("char", "Pt::String");
+PT_API void convert(unsigned char& n, const String& str);
 
-    n = str[0].narrow('*');
-}
+PT_API void convert(String& s, signed char value);
 
-
-inline void convert(String& s, unsigned char value)
-{
-    OStringStream ss;
-    unsigned int i = static_cast<unsigned int>(value);
-    ss << i;
-    s = ss.str();
-}
-
-
-inline void convert(unsigned char& n, const String& str)
-{
-    if( str.empty() )
-        ConversionError::doThrow("unsigned char", "Pt::String");
-
-    // interpret as numeric value
-    IStringStream ss(str);
-    unsigned int i = 0;
-    ss >> i;
-    const std::ios::iostate iostate = ss.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit)
-      || i > std::numeric_limits<unsigned char>::max()
-      || i < std::numeric_limits<unsigned char>::min()
-      )
-    {
-        ConversionError::doThrow("unsigned char", "Pt::String");
-    }
-
-    n = static_cast<unsigned char>(i);
-}
-
-
-inline void convert(String& s, signed char value)
-{
-    OStringStream ss;
-    int i = static_cast<signed int>(value);
-    ss << i;
-    s = ss.str();
-}
-
-
-inline void convert(signed char& n, const String& str)
-{
-    if( str.empty() )
-        ConversionError::doThrow("signed char", "Pt::String");
-        
-    // interpret as numeric value
-    IStringStream ss(str);
-    int i = 0;
-    ss >> i;
-    const std::ios::iostate iostate = ss.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        ConversionError::doThrow("signed char", "Pt::String");
-    }
-    n = static_cast<signed char>(i);
-}
-
+PT_API void convert(signed char& n, const String& str);
 
 inline void convert(String& s, const std::string& value)
 {
     s = String::widen(value);
 }
 
-
 inline void convert(std::string& s,const String& str)
 {
     s = str.narrow();
 }
 
+PT_API void convert(String& s, float value);
 
-inline void convert(String& s, float value)
-{
-    // not a number
-    if(value != value)
-    {
-        s = L"NAN";
-        return;
-    }
+PT_API void convert(float& n, const String& str);
 
-    OStringStream os;
-    os << value;
-    s = os.str();
-}
+PT_API void convert(String& s, double value);
 
+PT_API void convert(double& n, const String& str);
 
-inline void convert(float& n, const String& str)
-{
-    // not a number
-    if(str == L"NAN")
-    {
-        n = std::numeric_limits<float>::quiet_NaN();
-        return;
-    }
+PT_API void convert(std::string& s, float value);
 
-    IStringStream is(str);
-    is >> n;
+PT_API void convert(float& n, const std::string& str);
 
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        ConversionError::doThrow("float", "Pt::String");
-    }
-}
+PT_API void convert(std::string& s, double value);
 
+PT_API void convert(double& n, const std::string& str);
 
-inline void convert(String& s, double value)
-{
-    // not a number
-    if(value != value)
-    {
-        s = L"NAN";
-        return;
-    }
+inline void convert(float& n, const wchar_t* str)
+{ convert(n, String(str)); }
 
-    OStringStream os;
-    os << std::fixed << std::setprecision(15) << value;
-    s = os.str();
-}
+inline void convert(float& n, const char* str)
+{ convert(n, std::string(str)); }
 
+inline void convert(double& n, const char* str)
+{ convert(n, std::string(str)); }
 
-inline void convert(double& n, const String& str)
-{
-    // not a number
-    if(str == L"NAN")
-    {
-        n = std::numeric_limits<double>::quiet_NaN();
-        return;
-    }
-
-    IStringStream is(str);
-    is >> std::fixed >> std::setprecision(15) >> n;
-
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        ConversionError::doThrow("double", "Pt::String");
-    }
-}
-
-inline void convert(std::string& s, float value)
-{
-    // not a number
-    if(value != value)
-    {
-        s = "NAN";
-        return;
-    }
-
-    std::ostringstream os;
-    os << value;
-    s = os.str();
-}
-
-
-inline void convert(float& n, const std::string& str)
-{
-    // not a number
-    if(str == "NAN")
-    {
-        n = std::numeric_limits<float>::quiet_NaN();
-        return;
-    }
-
-    std::istringstream is(str);
-    is >> n;
-
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        ConversionError::doThrow("float", "std::string");
-    }
-}
-
-
-inline void convert(std::string& s, double value)
-{
-    // not a number
-    if(value != value)
-    {
-        s = "NAN";
-        return;
-    }
-
-    std::ostringstream os;
-    os << std::fixed << std::setprecision(15) << value;
-    s = os.str();
-}
-
-inline void convert(double& n, const std::string& str)
-{
-    // not a number
-    if(str == "NAN")
-    {
-        n = std::numeric_limits<double>::quiet_NaN();
-        return;
-    }
-
-    std::stringstream is(str);
-    is >> std::fixed >> std::setprecision(15) >> n;
-
-    const std::ios::iostate iostate = is.rdstate();
-    if((iostate&std::ios::failbit) || (iostate&std::ios::badbit) || !(iostate&std::ios::eofbit))
-    {
-        ConversionError::doThrow("double", "std::string");
-    }
-}
+inline void convert(double& n, const wchar_t* str)
+{ convert(n, String(str)); }
 
 template<typename T, typename S>
 void convert(T& to, const S& from)

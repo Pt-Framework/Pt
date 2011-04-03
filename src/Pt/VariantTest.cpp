@@ -35,6 +35,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <iostream>
+#include <limits>
 
 
 class VariantTest : public Pt::Unit::TestSuite
@@ -76,7 +77,7 @@ void VariantTest::AssignInt()
 void VariantTest::Float()
 {
     Pt::Variant v( std::numeric_limits<float>::quiet_NaN() );
-    PT_UNIT_ASSERT( v.str() == L"NAN" );
+    PT_UNIT_ASSERT_EQUALS( v.str(), L"nan" );
 }
 
 
