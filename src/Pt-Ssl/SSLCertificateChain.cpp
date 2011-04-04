@@ -90,27 +90,27 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
         if(!ca) break;
 
         // Calculate the fingerprint hash of the certificate
-        if(!X509_digest(ca.get(), fdig, md, &n)) break;
+        X509* ptrCA = ca.get();
+        if(!X509_digest(ptrCA, fdig, md, &n))
+            throw SSLRuntimeError("Could not calculate the certificate's fingerprint hash!", PT_SOURCEINFO);
 
         // Store the certificate
-        _caCert.push_back(ca.get());
+        _caCert.push_back(ptrCA);
         ca.release();
-        
+
         // Store some information about the certificate
         _caCertInfo.push_back(SSLCertificateInfo(
-                              X509_get_version      (ca.get()),
-            ASN1_INTEGER_get( X509_get_serialNumber (ca.get()) ),
-            x509nam2string  ( X509_get_issuer_name  (ca.get()) ),
-            sslhash2string  ( X509_issuer_name_hash (ca.get()) ),
-            x509nam2string  ( X509_get_subject_name (ca.get()) ),
-            sslhash2string  ( X509_subject_name_hash(ca.get()) ),
-            asn1tim2string  ( X509_get_notBefore    (ca.get()) ),
-            asn1tim2string  ( X509_get_notAfter     (ca.get()) ),
+                              X509_get_version      (ptrCA),
+            ASN1_INTEGER_get( X509_get_serialNumber (ptrCA) ),
+            x509nam2string  ( X509_get_issuer_name  (ptrCA) ),
+            sslhash2string  ( X509_issuer_name_hash (ptrCA) ),
+            x509nam2string  ( X509_get_subject_name (ptrCA) ),
+            sslhash2string  ( X509_subject_name_hash(ptrCA) ),
+            asn1tim2string  ( X509_get_notBefore    (ptrCA) ),
+            asn1tim2string  ( X509_get_notAfter     (ptrCA) ),
             OBJ_nid2sn(EVP_MD_type(fdig)),
             sslhash2string(md, n)
         ));
-
-        
     }
 }
 

@@ -54,12 +54,17 @@ class PT_SSL_API SSLTrustedCertificate {
 
         //! \brief Clear (delete) the list.
         void clear();
+
+        //! \brief Returns the trusted CA certificates information.
+        inline const std::vector<SSLCertificateInfo>& caCertInfo() const
+        { return _caCertInfo; }
         
         friend class SSLContext;
 
     private:
         // Data
-        std::vector<x509_st*> _trustedCert;
+        std::vector<x509_st*>           _trustedCert;
+        std::vector<SSLCertificateInfo> _caCertInfo;
 
         // Helper functions
         void apply(ssl_ctx_st* ctx);
