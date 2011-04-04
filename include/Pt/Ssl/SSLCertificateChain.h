@@ -54,7 +54,29 @@ class PT_SSL_API SSLCertificateChain {
         
         //! \brief Clear (delete) any loaded certificate.
         void clear();
+        
+        //! \brief Returns the certificate information.
+        inline const SSLCertificateInfo& certInfo() const
+        { return _certInfo; }
 
+        
+        friend class SSLContext;
+
+    private:
+        // Data
+        x509_st*              _cert;
+        std::vector<x509_st*> _caCert;
+        SSLCertificateInfo    _certInfo;
+
+        // Helper functions
+        void apply(ssl_ctx_st* ctx);
+};
+} // namespace Pt
+} // namespace Ssl
+
+#endif
+
+/*
         //! \brief Returns the version of the certificate.
         inline long version() const
         { return _version; }
@@ -94,13 +116,6 @@ class PT_SSL_API SSLCertificateChain {
         //! \brief Returns the fingerprint hash of the certificate.
         inline const std::string& fingerprintHash() const
         { return _fingerprintHash; }
-        
-        friend class SSLContext;
-
-    private:
-        // Data
-        x509_st*              _cert;
-        std::vector<x509_st*> _caCert;
 
         // Certificate information
         long        _version;
@@ -113,12 +128,4 @@ class PT_SSL_API SSLCertificateChain {
         std::string _notAfter;
         std::string _fingerprintType;
         std::string _fingerprintHash;
-
-        // Helper functions
-        void apply(ssl_ctx_st* ctx);
-};
-
-} // namespace Pt
-} // namespace Ssl
-
-#endif
+*/

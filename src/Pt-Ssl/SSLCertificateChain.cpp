@@ -35,11 +35,11 @@ namespace Pt {
 namespace Ssl {
 
 SSLCertificateChain::SSLCertificateChain()
-: _cert(0), _version(0), _serialNumber(0)
+: _cert(0)
 {}
 
 SSLCertificateChain::SSLCertificateChain(const std::string& certData)
-: _cert(0), _version(0), _serialNumber(0)
+: _cert(0)
 { loadFromString(certData); }
 
 SSLCertificateChain::~SSLCertificateChain()
@@ -66,16 +66,18 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
         throw SSLRuntimeError("Could not calculate the certificate's fingerprint hash!", PT_SOURCEINFO);
 
     // Store some information about the certificate
-    _version         =                   X509_get_version      (_cert) ;
-    _serialNumber    = ASN1_INTEGER_get( X509_get_serialNumber (_cert) );
-    _issuerName      = x509nam2string  ( X509_get_issuer_name  (_cert) );
-    _issuerNameHash  = sslhash2string  ( X509_issuer_name_hash (_cert) );
-    _subjectName     = x509nam2string  ( X509_get_subject_name (_cert) );
-    _subjectNameHash = sslhash2string  ( X509_subject_name_hash(_cert) );
-    _notBefore       = asn1tim2string  ( X509_get_notBefore    (_cert) );
-    _notAfter        = asn1tim2string  ( X509_get_notAfter     (_cert) );
-    _fingerprintType = OBJ_nid2sn(EVP_MD_type(fdig));
-    _fingerprintHash = sslhash2string(md, n);
+    _certInfo.set(
+                          X509_get_version      (_cert),
+        ASN1_INTEGER_get( X509_get_serialNumber (_cert) ),
+        x509nam2string  ( X509_get_issuer_name  (_cert) ),
+        sslhash2string  ( X509_issuer_name_hash (_cert) ),
+        x509nam2string  ( X509_get_subject_name (_cert) ),
+        sslhash2string  ( X509_subject_name_hash(_cert) ),
+        asn1tim2string  ( X509_get_notBefore    (_cert) ),
+        asn1tim2string  ( X509_get_notAfter     (_cert) ),
+        OBJ_nid2sn(EVP_MD_type(fdig)),
+        sslhash2string(md, n)
+    );
 
     // Try to read/parse the CA X509 certificates (if any)
     while(true) {
@@ -112,16 +114,7 @@ void SSLCertificateChain::clear()
     }
     _caCert.clear();
 
-    _version         = 0;
-    _serialNumber    = 0;
-    _issuerName      = "";
-    _issuerNameHash  = "";
-    _subjectName     = "";
-    _subjectNameHash = "";
-    _notBefore       = "";
-    _notAfter        = "";
-    _fingerprintType = "";
-    _fingerprintHash = "";
+    _certInfo.clear();
 }
 
 void SSLCertificateChain::apply(SSL_CTX* ctx)

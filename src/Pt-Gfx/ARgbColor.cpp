@@ -32,6 +32,7 @@
 #include <Pt/StringStream.h>
 #include <Pt/ConversionError.h>
 
+#include <iomanip>
 
 namespace Pt {
 

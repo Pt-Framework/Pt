@@ -90,15 +90,16 @@ SSLContext::SSLContext(const char* caCertFile,
         SSLCertificateChain sslcc;
         sslcc.loadFromFile(certFile);
         sslcc.apply(_ctx);
-        PT_SSL_LOG("> Version           = " << sslcc.version());
-        PT_SSL_LOG("> Serial number     = " << sslcc.serialNumber());
-        PT_SSL_LOG("> Issuer name       = " << sslcc.issuerName());
-        PT_SSL_LOG("> Issuer name hash  = " << sslcc.issuerNameHash());
-        PT_SSL_LOG("> Subject name      = " << sslcc.subjectName());
-        PT_SSL_LOG("> Subject name hash = " << sslcc.subjectNameHash());
-        PT_SSL_LOG("> Not before        = " << sslcc.notBefore());
-        PT_SSL_LOG("> Not after         = " << sslcc.notAfter());
-        PT_SSL_LOG("> Fingerprint       = " << sslcc.fingerprintType() << " " << sslcc.fingerprintHash());
+        PT_SSL_LOG("> Version           = " << sslcc.certInfo().version);
+        PT_SSL_LOG("> Serial number     = " << sslcc.certInfo().serialNumber);
+        PT_SSL_LOG("> Issuer name       = " << sslcc.certInfo().issuerName);
+        PT_SSL_LOG("> Issuer name hash  = " << sslcc.certInfo().issuerNameHash);
+        PT_SSL_LOG("> Subject name      = " << sslcc.certInfo().subjectName);
+        PT_SSL_LOG("> Subject name hash = " << sslcc.certInfo().subjectNameHash);
+        PT_SSL_LOG("> Not before        = " << sslcc.certInfo().notBefore);
+        PT_SSL_LOG("> Not after         = " << sslcc.certInfo().notAfter);
+        PT_SSL_LOG("> Fingerprint       = " << sslcc.certInfo().fingerprintType
+                                            << " " << sslcc.certInfo().fingerprintHash);
     }
     /*
         $ openssl x509 -noout -in server.pem -serial -issuer -issuer_hash -subject -subject_hash -dates -fingerprint
