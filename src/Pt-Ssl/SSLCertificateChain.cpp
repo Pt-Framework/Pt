@@ -54,16 +54,20 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
     BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
 
     // Try to read/parse the X509 certificate
-    _cert = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
-    if(!_cert)
+    X509AutoPtr cert ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
+    if(!cert)
         throw SSLRuntimeError("Could not read/parse certificate data!", PT_SOURCEINFO);
 
     // Calculate the fingerprint hash of the certificate
     const EVP_MD* fdig = EVP_sha1();
     unsigned char md[EVP_MAX_MD_SIZE];
     unsigned int  n;
-    if(!X509_digest(_cert, fdig, md, &n))
+    if(!X509_digest(cert.get(), fdig, md, &n))
         throw SSLRuntimeError("Could not calculate the certificate's fingerprint hash!", PT_SOURCEINFO);
+
+    // Store the certificate
+    _cert = cert.get();
+    cert.release();
 
     // Store some information about the certificate
     _certInfo.set(
@@ -81,9 +85,32 @@ void SSLCertificateChain::loadFromString(const std::string& certData)
 
     // Try to read/parse the CA X509 certificates (if any)
     while(true) {
-        X509* ca = PEM_read_bio_X509_AUX(in.get(), 0, 0, 0);
+        // Read the certificate
+        X509AutoPtr ca ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
         if(!ca) break;
-        _caCert.push_back(ca);
+
+        // Calculate the fingerprint hash of the certificate
+        if(!X509_digest(ca.get(), fdig, md, &n)) break;
+
+        // Store the certificate
+        _caCert.push_back(ca.get());
+        ca.release();
+        
+        // Store some information about the certificate
+        _caCertInfo.push_back(SSLCertificateInfo(
+                              X509_get_version      (ca.get()),
+            ASN1_INTEGER_get( X509_get_serialNumber (ca.get()) ),
+            x509nam2string  ( X509_get_issuer_name  (ca.get()) ),
+            sslhash2string  ( X509_issuer_name_hash (ca.get()) ),
+            x509nam2string  ( X509_get_subject_name (ca.get()) ),
+            sslhash2string  ( X509_subject_name_hash(ca.get()) ),
+            asn1tim2string  ( X509_get_notBefore    (ca.get()) ),
+            asn1tim2string  ( X509_get_notAfter     (ca.get()) ),
+            OBJ_nid2sn(EVP_MD_type(fdig)),
+            sslhash2string(md, n)
+        ));
+
+        
     }
 }
 
@@ -115,6 +142,7 @@ void SSLCertificateChain::clear()
     _caCert.clear();
 
     _certInfo.clear();
+    _caCertInfo.clear();
 }
 
 void SSLCertificateChain::apply(SSL_CTX* ctx)

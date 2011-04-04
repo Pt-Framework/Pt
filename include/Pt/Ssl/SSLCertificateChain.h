@@ -59,14 +59,19 @@ class PT_SSL_API SSLCertificateChain {
         inline const SSLCertificateInfo& certInfo() const
         { return _certInfo; }
 
+        //! \brief Returns the CA certificates information (if any).
+        inline const std::vector<SSLCertificateInfo>& caCertInfo() const
+        { return _caCertInfo; }
         
         friend class SSLContext;
 
     private:
         // Data
-        x509_st*              _cert;
-        std::vector<x509_st*> _caCert;
-        SSLCertificateInfo    _certInfo;
+        x509_st*                        _cert;
+        SSLCertificateInfo              _certInfo;
+
+        std::vector<x509_st*>           _caCert;
+        std::vector<SSLCertificateInfo> _caCertInfo;
 
         // Helper functions
         void apply(ssl_ctx_st* ctx);
