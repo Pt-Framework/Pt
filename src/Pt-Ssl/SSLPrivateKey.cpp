@@ -97,6 +97,7 @@ void SSLPrivateKey::clear()
     }
 }
 
+/*
 void SSLPrivateKey::apply(SSL_CTX* ctx)
 {
     if(!_pkey)
@@ -106,6 +107,7 @@ void SSLPrivateKey::apply(SSL_CTX* ctx)
     if( ! SSL_CTX_use_PrivateKey( ctx, _pkey ) )
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 }
+*/
 
 } // namespace Pt
 } // namespace Ssl

@@ -28,9 +28,18 @@
 #ifndef PT_SSL_SSLCERTIFICATEINFO_H
 #define PT_SSL_SSLCERTIFICATEINFO_H
 
+#include <Pt/Ssl/Exception.h>
+#include <Pt/System/Logger.h>
+
 //#undef NLOG
 
-#include <Pt/Ssl/Exception.h>
+#ifndef NLOG
+#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
+#define PT_SSL_LOG_INFO(NAME, CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info(NAME, PT_FUNCTION) << CODE)
+#else
+#define PT_SSL_LOGGER_CATEGORY
+#define PT_SSL_LOG_INFO(NAME, CODE)
+#endif
 
 // Forward declaration of some OpenSSL structures
 struct ssl_ctx_st;
@@ -56,6 +65,7 @@ class PT_SSL_API SSLCertificateInfo {
         std::string fingerprintType;
         std::string fingerprintHash;
 
+        friend class SSLCertificateList;
         friend class SSLCertificateChain;
         friend class SSLTrustedCertificate;
 

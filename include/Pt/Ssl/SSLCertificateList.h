@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLPRIVATEKEY_H
-#define PT_SSL_SSLPRIVATEKEY_H
+#ifndef PT_SSL_SSLCERTIFICATELIST_H
+#define PT_SSL_SSLCERTIFICATELIST_H
 
 #include <Pt/Ssl/SSLCipherInfo.h>
 #include <vector>
@@ -34,36 +34,37 @@
 namespace Pt {
 namespace Ssl {
 
-//! \brief Private key.
-class PT_SSL_API SSLPrivateKey {
+//! \brief Certificate list.
+class PT_SSL_API SSLCertificateList {
     public:
-        //! \brief Instantiate an empty private-key.
-        SSLPrivateKey(const std::string& password);
+        //! \brief Instantiate an empty certificate-list.
+        SSLCertificateList();
 
-        //! \brief Instantiate a private-key using the given key data.
-        SSLPrivateKey(const std::string& keyData, const std::string& password);
+        //! \brief Instantiate a certificate-list using the given certificate data.
+        SSLCertificateList(const std::string& certData);
 
         //! \brief Stanndard dtor.
-        ~SSLPrivateKey();
+        ~SSLCertificateList();
 
-        //! \brief Load private-key from the given data.
-        void loadFromString(const std::string& keyData);
+        //! \brief Load certificate from the given data.
+        void loadFromString(const std::string& certData);
 
-        //! \brief Load private-key from the given file.
+        //! \brief Load certificate from the given file.
         void loadFromFile(const std::string& fileName);
 
-        //! \brief Clear (delete) any loaded key.
+        //! \brief Clear (delete) any loaded certificate.
         void clear();
+
+        //! \brief Returns a list of certificates' informations.
+        inline const std::vector<SSLCertificateInfo>& certInfo() const
+        { return _certInfo; }
 
         friend class SSLContext;
 
     private:
         // Data
-        std::string  _pswd;
-        evp_pkey_st* _pkey;
-
-        // Helper functions
-        //void apply(ssl_ctx_st* ctx);
+        std::vector<x509_st*>           _cert;
+        std::vector<SSLCertificateInfo> _certInfo;
 };
 
 } // namespace Pt

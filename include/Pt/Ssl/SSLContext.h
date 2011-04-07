@@ -29,19 +29,9 @@
 #define PT_SSL_SSLCONTEXT_H
 
 #include <Pt/Ssl/SSLPrivateKey.h>
-#include <Pt/Ssl/SSLCertificateChain.h>
-#include <Pt/Ssl/SSLTrustedCertificate.h>
-#include <Pt/System/Logger.h>
+#include <Pt/Ssl/SSLCertificateList.h>
 #include <string>
 #include <vector>
-
-#ifndef NLOG
-#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
-#define PT_SSL_LOG_INFO(NAME, CODE) log_info(Pt::Ssl::SSLContext::pt_ssl_gen_call_info(NAME, PT_FUNCTION) << CODE)
-#else
-#define PT_SSL_LOGGER_CATEGORY
-#define PT_SSL_LOG_INFO(NAME, CODE)
-#endif
 
 namespace Pt {
 namespace Ssl {
@@ -65,23 +55,8 @@ class PT_SSL_API SSLContext {
         };
 
     public:
-        /** \brief Construct an SSL context that uses the given certificate-key file and password.
-         *
-         * The 'caCertFile' is needed if you would like to check if the other peer's certificate
-         * is signed by a valid Certificate Authority. In this case the 'caCertFile' must contain
-         * the certificates of all trusted CA.
-         * \n
-         * The 'certFile' and 'keyFile' is mandatory for a server context.
-         * \n
-         * A client context will only need 'certFile' and 'keyFile' if it is to be used for
-         * certificate-based client authentication.
-         * \n
-         * The 'password' is only needed if the 'keyFile' is encrypted.
-         */
-        SSLContext(const char* caCertFile = 0,
-                   const char* certFile   = 0, const char* keyFile = 0, const char* password = 0,
-                   const char* sessionID  = 0,
-                   Protocol    protocol   = DefaultProtocol);
+        /** \brief Construct an SSL context that uses the given certificate-key file and password. */
+        SSLContext(const char* sessionID = 0, Protocol protocol = DefaultProtocol);
 
         //! \brief Standard dtor.
         ~SSLContext();
@@ -104,22 +79,49 @@ class PT_SSL_API SSLContext {
         /** \brief Set the list of enabled ciphers. */
         void setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers);
 
+        /** \brief Set the list of trusted CA certificates for this context.
+         * Setting the list of trusted CA certificates is needed if you would like to check if
+         * the other peer's certificate is signed by a trusted Certificate Authority. In this case
+         * the 'trustedCert' parameter must contain the certificates of all CA that you trust.
+         */
+        void setTrustedCACertificate(const SSLCertificateList& trustedCert);
+
+        /** \brief Set the certificate-chain to be attached to this context.
+         * Setting a certificate chain is mandatory for a server context.  In this case
+         * the first certificate in the 'certChain' parameter must be the server certificate.
+         * The remaining certificates are assumed to be the certificates of intermediate CAs.
+         * \n
+         * Setting a certificate chain for a client context is only needed for certificate-based
+         * client authentication.  In this case the first certificate in the 'certChain' parameter
+         * must be the client certificate. The remaining certificates are assumed to be the certificates
+         * of intermediate CAs.
+         */
+        void setCertificateChain(const SSLCertificateList& certChain);
+        
+        /** \brief Set the private key to be attached to this context.
+         * Setting a private key is mandatory for a server context.
+         * \n
+         * Setting a private key is for a client context is only needed for certificate-based
+         * client authentication.
+         */
+        void setPrivateKey(const SSLPrivateKey& privKey);
+        
         ssl_ctx_st* impl()
         { return _ctx; }
 
     private:
-        // Password callback to feed the password to OpenSSL
-        static int passwordCallback(char* buf, int num, int rwflag, void* userdata);
-
         // Get available ciphers
         void getAvailableCiphers();
 
     private:
         ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
-        std::string                _pswd;           // The password
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
+
+        const SSLCertificateList*  _trustedCACert; // List of trusted CA certificates
+        const SSLCertificateList*  _certChain;     // Certificate chain
+        const SSLPrivateKey*       _privKey;       // Private key
 
 #ifndef NLOG
     public:

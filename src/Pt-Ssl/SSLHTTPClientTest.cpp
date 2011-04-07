@@ -222,7 +222,16 @@ int main(int argc, char** argv)
         std::string          addr("www.pt-framework.org");
         unsigned short       port = 443;
 
-        Pt::Ssl::SSLContext clientContext("ca.pem", "client.pem", "client.key", "password", 0);
+        Pt::Ssl::SSLCertificateList trustedCACert;
+        Pt::Ssl::SSLCertificateList clientCertChain;
+        Pt::Ssl::SSLPrivateKey      clientPrivKey("password");
+        Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
+        trustedCACert  .loadFromFile           ("ca.pem");
+        clientCertChain.loadFromFile           ("client.pem");
+        clientPrivKey  .loadFromFile           ("client.key");
+        clientContext  .setTrustedCACertificate(trustedCACert);
+        clientContext  .setCertificateChain    (clientCertChain);
+        clientContext  .setPrivateKey          (clientPrivKey);
 
         Client client(loop, addr, port, clientContext);
 

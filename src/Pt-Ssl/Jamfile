@@ -7,8 +7,7 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        Utils.cpp
                        SSLCipherInfo.cpp
                        SSLPrivateKey.cpp
-                       SSLCertificateChain.cpp
-                       SSLTrustedCertificate.cpp
+                       SSLCertificateList.cpp
                        SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp

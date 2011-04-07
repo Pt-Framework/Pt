@@ -65,11 +65,11 @@ SSLInit::~SSLInit()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLContext::SSLContext(const char* caCertFile,
-                       const char* certFile, const char* keyFile, const char* password,
-                       const char* sessionID,
-                       Protocol    protocol)
-: _pswd(password ? password : ""), _protocol(protocol)
+SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
+: _protocol     (protocol),
+  _trustedCACert(0),
+  _certChain    (0),
+  _privKey      (0)
 {
     // Create the context
     switch(_protocol) {
@@ -83,44 +83,7 @@ SSLContext::SSLContext(const char* caCertFile,
 
     getAvailableCiphers();
     _enabledCiphers = _availCiphers;
-
-    // Load the certificate chain file (if available)
-    if(certFile) {
-        PT_SSL_LOG("Loading certificate chain file = " << certFile);
-        SSLCertificateChain sslcc;
-        sslcc.loadFromFile(certFile);
-        sslcc.apply(_ctx);
-        PT_SSL_LOG("> Version           = " << sslcc.certInfo().version);
-        PT_SSL_LOG("> Serial number     = " << sslcc.certInfo().serialNumber);
-        PT_SSL_LOG("> Issuer name       = " << sslcc.certInfo().issuerName);
-        PT_SSL_LOG("> Issuer name hash  = " << sslcc.certInfo().issuerNameHash);
-        PT_SSL_LOG("> Subject name      = " << sslcc.certInfo().subjectName);
-        PT_SSL_LOG("> Subject name hash = " << sslcc.certInfo().subjectNameHash);
-        PT_SSL_LOG("> Not before        = " << sslcc.certInfo().notBefore);
-        PT_SSL_LOG("> Not after         = " << sslcc.certInfo().notAfter);
-        PT_SSL_LOG("> Fingerprint       = " << sslcc.certInfo().fingerprintType
-                                            << " " << sslcc.certInfo().fingerprintHash);
-    }
-    /*
-        $ openssl x509 -noout -in server.pem -serial -issuer -issuer_hash -subject -subject_hash -dates -fingerprint
-        serial=64 (in HEX)
-        issuer= /C=US/L=Cheyenne Mountain/O=Stargate Command/CN=SGC Certificate Authority
-        b3df35fa
-        subject= /C=US/L=Cheyenne Mountain/O=Stargate Command/CN=SGC Mainframe
-        e2be0436
-        notBefore=Feb  4 01:59:34 2011 GMT
-        notAfter=Feb  4 01:59:34 2012 GMT
-        SHA1 Fingerprint=2C:08:AD:74:3C:BE:30:B6:73:5C:36:57:3C:2D:7C:CD:50:CC:CF:8B
-    */
-
-    // Load the private key  file (if available)
-    if(keyFile) {
-        PT_SSL_LOG("Loading private key file = " << keyFile);
-        SSLPrivateKey sslpk(password);
-        sslpk.loadFromFile(keyFile);
-        sslpk.apply(_ctx);
-    }
-
+/*
     // Check the private key (if needed)
     if(certFile && keyFile) {
         if(!SSL_CTX_check_private_key(_ctx))
@@ -128,14 +91,7 @@ SSLContext::SSLContext(const char* caCertFile,
                 "The private key does not agree with the corresponding public key in the certificate!",
                 PT_SOURCEINFO );
     }
-
-    // Load and verify CA list (if available)
-    if(caCertFile) {
-        PT_SSL_LOG("Loading trusted CA certificate list file = " << caCertFile);
-        SSLTrustedCertificate slltc;
-        slltc.addFromFile(caCertFile);
-        slltc.apply(_ctx);
-    }
+*/
 
     // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
@@ -153,6 +109,9 @@ SSLContext::SSLContext(const char* caCertFile,
         );
     }
 }
+
+SSLContext::~SSLContext()
+{ SSL_CTX_free(_ctx); }
 
 void SSLContext::setProtocol(Protocol protocol)
 {
@@ -191,20 +150,66 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
     _enabledCiphers = ciphers;
 }
 
-SSLContext::~SSLContext()
-{ SSL_CTX_free(_ctx); }
-
-int SSLContext::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
 {
-    // Get the SSLContext instance
-    SSLContext& sslCtx = *reinterpret_cast<SSLContext*>(userdata);
+    // Clear the previous trusted CA certificates (if any)
+    X509_STORE_free(_ctx->cert_store);
+    _ctx->cert_store = X509_STORE_new();
 
-    // If the wanted length is not the same with the given password length, just return 0
-    if((unsigned) num < sslCtx._pswd.length() + 1) return 0;
+    // Try to add the CA X509 certificates (if any)
+    for(std::vector<X509*>::const_iterator it = trustedCert._cert.begin(); it != trustedCert._cert.end(); ++it) {
+        if( ! X509_STORE_add_cert(_ctx->cert_store, *it) )
+            throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
+    }
 
-    // Copy the password to the buffer and return the length
-    strcpy(buff, &sslCtx._pswd[0]);
-    return sslCtx._pswd.length();
+    // Store a reference to the certificate list
+    // TODO: * Currently, this is only used to indicate that a list of trusted certificates
+    //         has been set.
+    //       * We cannot really use the class pointer because the original class instance could
+    //         be deleted without warning.
+    _trustedCACert = &trustedCert;
+}
+
+void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
+{
+    // Set the first certificate as this context's certificate
+    std::vector<X509*>::const_iterator it = certChain._cert.begin();
+    
+    // Try to use the X509 certificate
+    ERR_clear_error();
+    if( ! SSL_CTX_use_certificate( _ctx, *it ) || ERR_peek_error() )
+        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+
+    // Clear any previous CA certificates
+    if(_ctx->extra_certs) {
+        sk_X509_pop_free(_ctx->extra_certs, X509_free);
+        _ctx->extra_certs = 0;
+    }
+
+    // Try to add the CA X509 certificates (if any)
+    for(; it != certChain._cert.end(); ++it) {
+        if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
+            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+    }
+
+    // Store a reference to the certificate chain
+    // TODO: * Currently, this is only used to indicate that a certificate chain has been set.
+    //       * We cannot really use the class pointer because the original class instance could
+    //         be deleted without warning.
+    _certChain = &certChain;
+}
+
+void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
+{
+    // Try to use the private key
+    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey._pkey ) )
+        throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
+
+    // Store a reference to the certificate chain
+    // TODO: * Currently, this is only used to indicate that a private key has been set.
+    //       * We cannot really use the class pointer because the original class instance could
+    //         be deleted without warning.
+    _privKey = &privKey;
 }
 
 void SSLContext::getAvailableCiphers()
