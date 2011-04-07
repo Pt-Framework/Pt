@@ -83,15 +83,6 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
 
     getAvailableCiphers();
     _enabledCiphers = _availCiphers;
-/*
-    // Check the private key (if needed)
-    if(certFile && keyFile) {
-        if(!SSL_CTX_check_private_key(_ctx))
-            throw SSLRuntimeError(
-                "The private key does not agree with the corresponding public key in the certificate!",
-                PT_SOURCEINFO );
-    }
-*/
 
     // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
@@ -187,6 +178,11 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     }
 
     // Try to add the CA X509 certificates (if any)
+    // TODO: * OpenSSL do not copy the X509* data, this will cause segmentation fault when
+    //         the OpenSSL _ctx is destroyed because it will free the cert while our own
+    //         SSLCertificateList still holds a reference on them.
+    //       * We need to find a way to clone the X509* data or to prevent OpenSSL
+    //         from freeing the cert when _ctx is destroyed.
     for(; it != certChain._cert.end(); ++it) {
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
@@ -205,6 +201,14 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
     if( ! SSL_CTX_use_PrivateKey( _ctx, privKey._pkey ) )
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 
+    // Check the private key (if needed)
+    if(_certChain) {
+        if(!SSL_CTX_check_private_key(_ctx))
+            throw SSLRuntimeError(
+                "The private key does not agree with the corresponding public key in the certificate!",
+                PT_SOURCEINFO );
+    }
+    
     // Store a reference to the certificate chain
     // TODO: * Currently, this is only used to indicate that a private key has been set.
     //       * We cannot really use the class pointer because the original class instance could
