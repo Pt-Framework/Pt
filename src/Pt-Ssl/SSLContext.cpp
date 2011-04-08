@@ -102,7 +102,17 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
 }
 
 SSLContext::~SSLContext()
-{ SSL_CTX_free(_ctx); }
+{
+    // Clear any loaded CA certificates
+    // NOTE: If we do not do this, we will get segmentation fault.
+    if(_ctx->extra_certs) {
+        sk_X509_pop(_ctx->extra_certs);
+        _ctx->extra_certs = 0;
+    }
+
+    // Free the context
+    SSL_CTX_free(_ctx);
+}
 
 void SSLContext::setProtocol(Protocol protocol)
 {
@@ -154,7 +164,7 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     }
 
     // Store a reference to the certificate list
-    // TODO: * Currently, this is only used to indicate that a list of trusted certificates
+    // NOTE: * Currently, this is only used to indicate that a list of trusted certificates
     //         has been set.
     //       * We cannot really use the class pointer because the original class instance could
     //         be deleted without warning.
@@ -178,18 +188,16 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     }
 
     // Try to add the CA X509 certificates (if any)
-    // TODO: * OpenSSL do not copy the X509* data, this will cause segmentation fault when
-    //         the OpenSSL _ctx is destroyed because it will free the cert while our own
-    //         SSLCertificateList still holds a reference on them.
-    //       * We need to find a way to clone the X509* data or to prevent OpenSSL
-    //         from freeing the cert when _ctx is destroyed.
+    // NOTE: * OpenSSL do not copy the X509* data, so we must make sure that OpenSSL do not
+    //         free the X509 certificate when the context is destroyed. Please check the code
+    //         in ~SSLContext().
     for(; it != certChain._cert.end(); ++it) {
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
     }
 
     // Store a reference to the certificate chain
-    // TODO: * Currently, this is only used to indicate that a certificate chain has been set.
+    // NOTE: * Currently, this is only used to indicate that a certificate chain has been set.
     //       * We cannot really use the class pointer because the original class instance could
     //         be deleted without warning.
     _certChain = &certChain;
@@ -210,7 +218,7 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
     }
     
     // Store a reference to the certificate chain
-    // TODO: * Currently, this is only used to indicate that a private key has been set.
+    // NOTE: * Currently, this is only used to indicate that a private key has been set.
     //       * We cannot really use the class pointer because the original class instance could
     //         be deleted without warning.
     _privKey = &privKey;
