@@ -104,7 +104,12 @@ class PT_SSL_API SSLContext {
          * Setting a private key is for a client context is only needed for certificate-based
          * client authentication.
          */
-        void setPrivateKey(const SSLPrivateKey& privKey);
+        void setPrivateKey(const SmartPtr<SSLPrivateKey>& privKey);
+
+        /** \brief Return the private key that is currently attached to this context.
+         */
+        const SmartPtr<SSLPrivateKey>& privateKey()
+        { return _privKey; }
         
         ssl_ctx_st* impl()
         { return _ctx; }
@@ -119,9 +124,9 @@ class PT_SSL_API SSLContext {
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
 
-        const SSLCertificateList*  _trustedCACert; // List of trusted CA certificates
-        const SSLCertificateList*  _certChain;     // Certificate chain
-        const SSLPrivateKey*       _privKey;       // Private key
+        const SSLCertificateList* _trustedCACert; // List of trusted CA certificates
+        const SSLCertificateList* _certChain;     // Certificate chain
+        SmartPtr<SSLPrivateKey>   _privKey;       // Private key
 
 #ifndef NLOG
     public:

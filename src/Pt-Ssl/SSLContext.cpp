@@ -203,17 +203,14 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     _certChain = &certChain;
 }
 
-void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
+void SSLContext::setPrivateKey(const SmartPtr<SSLPrivateKey>& privKey)
 {
     // Try to use the private key
-    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey._pkey ) )
+    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey->_pkey ) )
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 
-    // Store a reference to the certificate chain
-    // NOTE: * Currently, this is only used to indicate that a private key has been set.
-    //       * We cannot really use the class pointer because the original class instance could
-    //         be deleted without warning.
-    _privKey = &privKey;
+    // Store a reference to the private key
+    _privKey = privKey;
     
     // Check the private key (if needed)
     if(_certChain) {

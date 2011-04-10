@@ -224,11 +224,11 @@ int main(int argc, char** argv)
 
         Pt::Ssl::SSLCertificateList trustedCACert;
         Pt::Ssl::SSLCertificateList clientCertChain;
-        Pt::Ssl::SSLPrivateKey      clientPrivKey("password");
+        Pt::Ssl::SSLPrivateKeyPtr   clientPrivKey(Pt::Ssl::SSLPrivateKey::newPrivateKey("password"));
         Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         trustedCACert  .loadFromFile           ("ca.pem");
         clientCertChain.loadFromFile           ("client.pem");
-        clientPrivKey  .loadFromFile           ("client.key");
+        clientPrivKey ->loadFromFile           ("client.key");
         clientContext  .setTrustedCACertificate(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);

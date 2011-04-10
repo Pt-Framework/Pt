@@ -28,6 +28,7 @@
 #ifndef PT_SSL_SSLPRIVATEKEY_H
 #define PT_SSL_SSLPRIVATEKEY_H
 
+#include <Pt/SmartPtr.h>
 #include <Pt/Ssl/SSLCipherInfo.h>
 #include <vector>
 
@@ -38,12 +39,14 @@ namespace Ssl {
 class PT_SSL_API SSLPrivateKey {
     public:
         //! \brief Instantiate an empty private-key.
-        SSLPrivateKey(const std::string& password);
+        inline static SmartPtr<SSLPrivateKey> newPrivateKey(const std::string& password = "")
+        { return SmartPtr<SSLPrivateKey>(new SSLPrivateKey(password)); }
 
         //! \brief Instantiate a private-key using the given key data.
-        SSLPrivateKey(const std::string& keyData, const std::string& password);
+        inline static SmartPtr<SSLPrivateKey> newPrivateKey(const std::string& keyData, const std::string& password)
+        { return SmartPtr<SSLPrivateKey>(new SSLPrivateKey(keyData, password)); }
 
-        //! \brief Stanndard dtor.
+        //! \brief Standard dtor.
         ~SSLPrivateKey();
 
         //! \brief Load private-key from the given data.
@@ -58,13 +61,18 @@ class PT_SSL_API SSLPrivateKey {
         friend class SSLContext;
 
     private:
+        // Instantiate an empty private-key.
+        SSLPrivateKey(const std::string& password);
+
+        // Instantiate a private-key using the given key data.
+        SSLPrivateKey(const std::string& keyData, const std::string& password);
+
         // Data
         std::string  _pswd;
         evp_pkey_st* _pkey;
-
-        // Helper functions
-        //void apply(ssl_ctx_st* ctx);
 };
+
+typedef SmartPtr<SSLPrivateKey> SSLPrivateKeyPtr;
 
 } // namespace Pt
 } // namespace Ssl

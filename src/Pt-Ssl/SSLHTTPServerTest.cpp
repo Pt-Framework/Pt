@@ -206,11 +206,11 @@ int main(int argc, char** argv)
 
         Pt::Ssl::SSLCertificateList trustedCACert;
         Pt::Ssl::SSLCertificateList serverCertChain;
-        Pt::Ssl::SSLPrivateKey      serverPrivKey("password");
+        Pt::Ssl::SSLPrivateKeyPtr   serverPrivKey(Pt::Ssl::SSLPrivateKey::newPrivateKey("password"));
         Pt::Ssl::SSLContext         serverContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         trustedCACert  .loadFromFile           ("ca.pem");
         serverCertChain.loadFromFile           ("server.pem");
-        serverPrivKey  .loadFromFile           ("server.key");
+        serverPrivKey ->loadFromFile           ("server.key");
         serverContext  .setTrustedCACertificate(trustedCACert);
         serverContext  .setCertificateChain    (serverCertChain);
         serverContext  .setPrivateKey          (serverPrivKey);

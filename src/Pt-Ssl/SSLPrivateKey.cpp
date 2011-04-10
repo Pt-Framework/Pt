@@ -97,17 +97,5 @@ void SSLPrivateKey::clear()
     }
 }
 
-/*
-void SSLPrivateKey::apply(SSL_CTX* ctx)
-{
-    if(!_pkey)
-        throw SSLRuntimeError("Trying to use an empty private key!", PT_SOURCEINFO);
-
-    // Try to use the private key
-    if( ! SSL_CTX_use_PrivateKey( ctx, _pkey ) )
-        throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
-}
-*/
-
 } // namespace Pt
 } // namespace Ssl
