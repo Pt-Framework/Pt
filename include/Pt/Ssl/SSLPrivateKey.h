@@ -30,7 +30,6 @@
 
 #include <Pt/SmartPtr.h>
 #include <Pt/Ssl/SSLCipherInfo.h>
-#include <vector>
 
 namespace Pt {
 namespace Ssl {
@@ -57,6 +56,9 @@ class PT_SSL_API SSLPrivateKey {
 
         //! \brief Clear (delete) any loaded key.
         void clear();
+
+        //
+        const std::string signString(const std::string& str) const;
 
         friend class SSLContext;
 

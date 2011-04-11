@@ -34,7 +34,7 @@
 namespace Pt {
 namespace Ssl {
 
-    static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
     // Get the password
     const std::string& password = *((std::string*) userdata);
@@ -95,6 +95,50 @@ void SSLPrivateKey::clear()
         EVP_PKEY_free(_pkey);
         _pkey = 0;
     }
+}
+
+const std::string SSLPrivateKey::signString(const std::string& str) const
+{
+    //OpenSSL_add_all_digests()
+
+    // Initialize the message-digest BIO
+    BioAutoPtr bmd( BIO_new(BIO_f_md()) );
+    if(!bmd) {
+        throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
+    }
+
+    // Initialize the message-digest context
+    EVP_MD_CTX* mctx = 0;
+    if(!BIO_get_md_ctx(bmd.get(), &mctx)) {
+        throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
+    }
+
+    // Initialize signing the context
+    EVP_PKEY_CTX* pctx = 0;
+    if(!EVP_DigestSignInit(mctx, &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
+        throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
+    }
+
+    // Add data to the signing context
+    if(!EVP_DigestSignUpdate(mctx, (void*) str.c_str(), str.length())) {
+        throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
+    }
+
+    // Get the maximum length of the digest
+    size_t siglen = 0;
+    EVP_DigestSignFinal(mctx, 0, &siglen);
+
+    // Allocate buffer for the digest
+    std::vector<unsigned char> sig;
+    sig.resize(siglen);
+
+    // Finalize the signing process
+    if(!EVP_DigestSignFinal(mctx, &sig[0], &siglen)) {
+        throw SSLRuntimeError("Could not finalize the signing process!", PT_SOURCEINFO);
+    }
+
+    // Return the signature
+    return sslhash2string(&sig[0], siglen);
 }
 
 } // namespace Pt
