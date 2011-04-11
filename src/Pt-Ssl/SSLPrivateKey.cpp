@@ -99,45 +99,45 @@ void SSLPrivateKey::clear()
 
 const std::string SSLPrivateKey::signString(const std::string& str) const
 {
-    //OpenSSL_add_all_digests()
-
-    // Initialize the message-digest BIO
+    // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
     if(!bmd) {
         throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
     }
 
-    // Initialize the message-digest context
-    EVP_MD_CTX* mctx = 0;
-    if(!BIO_get_md_ctx(bmd.get(), &mctx)) {
+    // Initialize a message-digest context
+    EVP_MD_CTX* pmctx = 0;
+    if(!BIO_get_md_ctx(bmd.get(), &pmctx)) {
         throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
     }
+    EvpMdCtxAutoPtr mctx(pmctx);
 
-    // Initialize signing the context
+    // Initialize a signing sb-context
+    // (there is no need to free this sub-context because it is owned by the message-digest context)
     EVP_PKEY_CTX* pctx = 0;
-    if(!EVP_DigestSignInit(mctx, &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
+    if(!EVP_DigestSignInit(mctx.get(), &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
         throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
     }
-
-    // Add data to the signing context
-    if(!EVP_DigestSignUpdate(mctx, (void*) str.c_str(), str.length())) {
+    
+    // Add data to the message-digest context
+    if(!EVP_DigestSignUpdate(mctx.get(), (void*) str.c_str(), str.length())) {
         throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
     }
 
-    // Get the maximum length of the digest
+    // Get the maximum length of the signature string
     size_t siglen = 0;
-    EVP_DigestSignFinal(mctx, 0, &siglen);
+    EVP_DigestSignFinal(mctx.get(), 0, &siglen);
 
-    // Allocate buffer for the digest
+    // Allocate buffer for the signature string
     std::vector<unsigned char> sig;
     sig.resize(siglen);
 
     // Finalize the signing process
-    if(!EVP_DigestSignFinal(mctx, &sig[0], &siglen)) {
+    if(!EVP_DigestSignFinal(mctx.get(), &sig[0], &siglen)) {
         throw SSLRuntimeError("Could not finalize the signing process!", PT_SOURCEINFO);
     }
 
-    // Return the signature
+    // Return the signature string
     return sslhash2string(&sig[0], siglen);
 }
 

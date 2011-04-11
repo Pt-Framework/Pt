@@ -37,44 +37,43 @@
 namespace Pt {
 namespace Ssl {
 
-// Internal SSL utilities
-    
+//
+// Internal SSL classes, typedefs, and functions
+//
+
+// Used to automatically free a BIO*
 class FreeBIO {
     protected:
         void destroy(BIO* ptr)
         { BIO_free(ptr); }
 };
+typedef Pt::AutoPtr<BIO, FreeBIO> BioAutoPtr;
 
+// Used to automatically free an X509*
 class FreeX509 {
     protected:
         void destroy(X509* ptr)
         { X509_free(ptr); }
 };
+typedef Pt::AutoPtr<X509, FreeX509> X509AutoPtr;
 
-class FreeX509_REQ {
-    protected:
-        void destroy(X509_REQ* ptr)
-        { X509_REQ_free(ptr); }
-};
-
-class FreeX509_CRL {
-    protected:
-        void destroy(X509_CRL* ptr)
-        { X509_CRL_free(ptr); }
-};
-
+// Used to automatically free an EVP_PKEY*
 class FreeEVP_PKEY {
     protected:
         void destroy(EVP_PKEY* ptr)
         { EVP_PKEY_free(ptr); }
 };
-
-typedef Pt::AutoPtr<BIO,      FreeBIO     > BioAutoPtr;
-typedef Pt::AutoPtr<X509,     FreeX509    > X509AutoPtr;
-typedef Pt::AutoPtr<X509_REQ, FreeX509_REQ> X509ReqAutoPtr;
-typedef Pt::AutoPtr<X509_CRL, FreeX509_CRL> X509CrlAutoPtr;
 typedef Pt::AutoPtr<EVP_PKEY, FreeEVP_PKEY> EvpPKeyAutoPtr;
 
+// Used to automatically free an EVP_MD_CTX*
+class FreeEVP_MD_CTX {
+    protected:
+        void destroy(EVP_MD_CTX* mctx)
+        { EVP_MD_CTX_cleanup(mctx); }
+};
+typedef Pt::AutoPtr<EVP_MD_CTX, FreeEVP_MD_CTX > EvpMdCtxAutoPtr;
+
+// Converter functions for converting OpenSSL values into STL strings
 extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
 extern const std::string asn1str2string(const ASN1_STRING* asn1Val);
 extern const std::string asn1tim2string(const ASN1_TIME* asn1Val);
