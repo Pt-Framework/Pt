@@ -30,15 +30,12 @@
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Ssl/SSLServer.h>
-#include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
-#include <Pt/System/IOStream.h>
 #include <fstream>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG_S(CODE) PT_SSL_LOG_INFO("@@ Server @@", CODE)
-#define PT_SSL_LOG_C(CODE) PT_SSL_LOG_INFO("@@ Client @@", CODE)
 #define PT_SSL_LOG_M(CODE) PT_SSL_LOG_INFO("@@ main() @@", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

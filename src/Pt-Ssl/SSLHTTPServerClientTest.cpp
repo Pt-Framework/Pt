@@ -31,9 +31,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Ssl/SSLServer.h>
 #include <Pt/Ssl/SSLClient.h>
-#include <Pt/System/Thread.h>
 #include <Pt/System/MainLoop.h>
-#include <Pt/System/IOStream.h>
 #include <fstream>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
