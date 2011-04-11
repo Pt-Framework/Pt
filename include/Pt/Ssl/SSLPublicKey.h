@@ -25,50 +25,32 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCERTIFICATELIST_H
-#define PT_SSL_SSLCERTIFICATELIST_H
+#ifndef PT_SSL_SSLPUBLICKEY_H
+#define PT_SSL_SSLPUBLICKEY_H
 
-#include <Pt/Ssl/SSLPublicKey.h>
-#include <vector>
+#include <Pt/SmartPtr.h>
+#include <Pt/Ssl/SSLCipherInfo.h>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief Certificate list.
-class PT_SSL_API SSLCertificateList {
+//! \brief Public key.
+class PT_SSL_API SSLPublicKey {
     public:
-        //! \brief Instantiate an empty certificate-list.
-        SSLCertificateList();
+        //! \brief Standard dtor.
+        ~SSLPublicKey();
 
-        //! \brief Instantiate a certificate-list using the given certificate data.
-        SSLCertificateList(const std::string& certData);
+        friend class SSLCertificateList;
 
-        //! \brief Stanndard dtor.
-        ~SSLCertificateList();
+    public:
+        // Instantiate a public-key.
+        SSLPublicKey(evp_pkey_st* pkey);
 
-        //! \brief Load certificate from the given data.
-        void loadFromString(const std::string& certData);
-
-        //! \brief Load certificate from the given file.
-        void loadFromFile(const std::string& fileName);
-
-        //! \brief Clear (delete) any loaded certificate.
-        void clear();
-
-        //! \brief Returns a list of certificates' informations.
-        inline const std::vector<SSLCertificateInfo>& certInfo() const
-        { return _certInfo; }
-
-        //! \brief Get the public key of the main (first) certificate.
-        SmartPtr<SSLPublicKey> getPublicKey() const;
-
-        friend class SSLContext;
-
-    private:
         // Data
-        std::vector<x509_st*>           _cert;
-        std::vector<SSLCertificateInfo> _certInfo;
+        evp_pkey_st* _pkey;
 };
+
+typedef SmartPtr<SSLPublicKey> SSLPublicKeyPtr;
 
 } // namespace Pt
 } // namespace Ssl

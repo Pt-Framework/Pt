@@ -57,7 +57,7 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Clear (delete) any loaded key.
         void clear();
 
-        //
+        //! \brief Sign the given string with this private key.
         const std::string signString(const std::string& str) const;
 
         friend class SSLContext;

@@ -132,5 +132,15 @@ void SSLCertificateList::clear()
     _certInfo.clear();
 }
 
+SmartPtr<SSLPublicKey> SSLCertificateList::getPublicKey() const
+{
+    EVP_PKEY* pkey = X509_get_pubkey(*_cert.begin());
+    if(!pkey) {
+        throw SSLRuntimeError("Could not extract the main certificate's public key!", PT_SOURCEINFO);
+    }
+
+    return SmartPtr<SSLPublicKey>(new SSLPublicKey(pkey));
+}
+
 } // namespace Pt
 } // namespace Ssl

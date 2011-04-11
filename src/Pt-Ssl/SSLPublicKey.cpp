@@ -25,52 +25,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCERTIFICATELIST_H
-#define PT_SSL_SSLCERTIFICATELIST_H
 
 #include <Pt/Ssl/SSLPublicKey.h>
-#include <vector>
+
+#include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief Certificate list.
-class PT_SSL_API SSLCertificateList {
-    public:
-        //! \brief Instantiate an empty certificate-list.
-        SSLCertificateList();
+SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
+: _pkey(pkey)
+{}
 
-        //! \brief Instantiate a certificate-list using the given certificate data.
-        SSLCertificateList(const std::string& certData);
-
-        //! \brief Stanndard dtor.
-        ~SSLCertificateList();
-
-        //! \brief Load certificate from the given data.
-        void loadFromString(const std::string& certData);
-
-        //! \brief Load certificate from the given file.
-        void loadFromFile(const std::string& fileName);
-
-        //! \brief Clear (delete) any loaded certificate.
-        void clear();
-
-        //! \brief Returns a list of certificates' informations.
-        inline const std::vector<SSLCertificateInfo>& certInfo() const
-        { return _certInfo; }
-
-        //! \brief Get the public key of the main (first) certificate.
-        SmartPtr<SSLPublicKey> getPublicKey() const;
-
-        friend class SSLContext;
-
-    private:
-        // Data
-        std::vector<x509_st*>           _cert;
-        std::vector<SSLCertificateInfo> _certInfo;
-};
+SSLPublicKey::~SSLPublicKey()
+{
+    if(_pkey) EVP_PKEY_free(_pkey);
+}
 
 } // namespace Pt
 } // namespace Ssl
-
-#endif
