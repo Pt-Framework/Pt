@@ -40,6 +40,9 @@ class PT_SSL_API SSLPublicKey {
         //! \brief Standard dtor.
         ~SSLPublicKey();
 
+        //! \brief Check the signature of the given string with this public key.
+        bool checkStringSignature(const std::string& str, const std::string& sig) const;
+        
         friend class SSLCertificateList;
 
     public:

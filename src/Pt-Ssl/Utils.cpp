@@ -85,7 +85,7 @@ const std::string sslhash2string(long md)
     return buf;
 }
 
-const std::string sslhash2string(unsigned char* md, unsigned int n)
+const std::string sslhash2string(const unsigned char* md, unsigned int n)
 {
     std::string hash;
 

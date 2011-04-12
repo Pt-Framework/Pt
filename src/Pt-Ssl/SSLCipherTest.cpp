@@ -54,7 +54,10 @@ int main(int argc, char** argv)
 
         const std::string& text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string& tsig = serverPrivKey->signString(text);
-        PT_SSL_LOG_M("\n\nSIGNING TEXT:\n" << text << "\n\nRESULTING SIGNATURE:\n" << tsig << "\n\n");
+        const bool         vres = serverPubKey->checkStringSignature(text, tsig);
+        PT_SSL_LOG_M("\n\nSIGNING TEXT:\n" << text
+                     << "\n\nRESULTING SIGNATURE:\n" << tsig
+                     << "\n\nVERIFICATION RESULT:\n" << (vres ? "OK" : "FAILED") << "\n");
 
         PT_SSL_LOG_M("################################################################################");
 

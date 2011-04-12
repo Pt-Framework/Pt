@@ -124,11 +124,11 @@ const std::string SSLPrivateKey::signString(const std::string& str) const
         throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
     }
 
-    // Get the maximum length of the signature string
+    // Get the maximum length of the signature binary data
     size_t siglen = 0;
     EVP_DigestSignFinal(mctx.get(), 0, &siglen);
 
-    // Allocate buffer for the signature string
+    // Allocate buffer for the signature binary data
     std::vector<unsigned char> sig;
     sig.resize(siglen);
 

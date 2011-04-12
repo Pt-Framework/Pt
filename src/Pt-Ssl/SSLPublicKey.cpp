@@ -42,5 +42,57 @@ SSLPublicKey::~SSLPublicKey()
     if(_pkey) EVP_PKEY_free(_pkey);
 }
 
+bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig) const
+{
+    // Initialize a message-digest BIO
+    BioAutoPtr bmd( BIO_new(BIO_f_md()) );
+    if(!bmd) {
+        throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
+    }
+
+    // Initialize a message-digest context
+    EVP_MD_CTX* pmctx = 0;
+    if(!BIO_get_md_ctx(bmd.get(), &pmctx)) {
+        throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
+    }
+    EvpMdCtxAutoPtr mctx(pmctx);
+
+    // Initialize a verification sb-context
+    // (there is no need to free this sub-context because it is owned by the message-digest context)
+    EVP_PKEY_CTX* pctx = 0;
+    if(!EVP_DigestVerifyInit(mctx.get(), &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
+        throw SSLRuntimeError("Could not initialize the verification context!", PT_SOURCEINFO);
+    }
+
+    // Add data to the message-digest context
+    if(!EVP_DigestSignUpdate(mctx.get(), (void*) str.c_str(), str.length())) {
+        throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
+    }
+
+    // Allocate buffer for the signature binary data
+    const size_t               binlen = EVP_PKEY_size(_pkey);
+    std::vector<unsigned char> bin;
+    bin.resize(binlen);
+
+    // Convert the signature string to binary data
+    // TODO: BETTER METHOD!!!
+    const char* ptr = sig.c_str();
+    size_t      i   = 0;
+    while(*ptr) {
+        char dta[3] = { *ptr, *(ptr + 1), 0 };
+        ptr += 3; // Skip the ':'
+        bin[i++] = strtoul(dta, 0, 16);
+    }
+
+    // Finalize the verification process
+    const int ret = EVP_DigestVerifyFinal(mctx.get(), &bin[0], binlen);
+    if(ret < 0) {
+        throw SSLRuntimeError("Could not finalize the verification process!", PT_SOURCEINFO);
+    }
+
+    // Return the result
+    return ret > 0;
+}
+
 } // namespace Pt
 } // namespace Ssl
