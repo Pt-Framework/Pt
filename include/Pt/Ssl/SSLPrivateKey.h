@@ -77,7 +77,6 @@ class PT_SSL_API SSLPrivateKey {
 class PT_SSL_API SSLPrivateKey::Impl {
     public:
         Impl(const std::string& password);
-        Impl(const std::string& keyData, const std::string& password);
         ~Impl();
 
         void loadFromString(const std::string& keyData);

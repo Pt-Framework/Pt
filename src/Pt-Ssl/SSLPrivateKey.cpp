@@ -78,10 +78,6 @@ SSLPrivateKey::Impl::Impl(const std::string& password)
 : _pswd(password), _pkey(0)
 {}
 
-SSLPrivateKey::Impl::Impl(const std::string& keyData, const std::string& password)
-: _pswd(password), _pkey(0)
-{ loadFromString(keyData); }
-
 SSLPrivateKey::Impl::~Impl()
 { clear(); }
 

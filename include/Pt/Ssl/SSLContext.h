@@ -86,6 +86,10 @@ class PT_SSL_API SSLContext {
          */
         void setTrustedCACertificate(const SSLCertificateList& trustedCert);
 
+        /** \brief Return the list of trusted CA certificates that is currently attached to this context. */
+        const SSLCertificateList trustedCACertificate() const
+        { return SSLCertificateList(_trustedCACert); }
+        
         /** \brief Set the certificate-chain to be attached to this context.
          * Setting a certificate chain is mandatory for a server context.  In this case
          * the first certificate in the 'certChain' parameter must be the server certificate.
@@ -97,6 +101,10 @@ class PT_SSL_API SSLContext {
          * of intermediate CAs.
          */
         void setCertificateChain(const SSLCertificateList& certChain);
+
+        /** \brief Return the certificate-chain that is currently attached to this context. */
+        const SSLCertificateList certificateChain() const
+        { return SSLCertificateList(_certChain); }
         
         /** \brief Set the private key to be attached to this context.
          * Setting a private key is mandatory for a server context.
@@ -106,8 +114,7 @@ class PT_SSL_API SSLContext {
          */
         void setPrivateKey(const SSLPrivateKey& privKey);
 
-        /** \brief Return the private key that is currently attached to this context.
-         */
+        /** \brief Return the private key that is currently attached to this context. */
         const SSLPrivateKey privateKey() const
         { return SSLPrivateKey(_privKey); }
         
@@ -124,9 +131,9 @@ class PT_SSL_API SSLContext {
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
 
-        const SSLCertificateList* _trustedCACert; // List of trusted CA certificates
-        const SSLCertificateList* _certChain;     // Certificate chain
-        SSLPrivateKey::ImplPtr    _privKey;       // Private key
+        SSLCertificateList::ImplPtr _trustedCACert; // List of trusted CA certificates
+        SSLCertificateList::ImplPtr _certChain;     // Certificate chain
+        SSLPrivateKey     ::ImplPtr _privKey;       // Private key
 
 #ifndef NLOG
     public:

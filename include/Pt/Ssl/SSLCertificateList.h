@@ -56,8 +56,7 @@ class PT_SSL_API SSLCertificateList {
         void clear();
 
         //! \brief Returns a list of certificates' informations.
-        inline const std::vector<SSLCertificateInfo>& certInfo() const
-        { return _certInfo; }
+        const std::vector<SSLCertificateInfo>& certInfo() const;
 
         //! \brief Get the public key of the main (first) certificate.
         const SSLPublicKey getPublicKey() const;
@@ -65,7 +64,35 @@ class PT_SSL_API SSLCertificateList {
         friend class SSLContext;
 
     private:
-        // Data
+        class Impl;
+        typedef SmartPtr<Impl> ImplPtr;
+
+        // Copy ctor
+        inline SSLCertificateList(ImplPtr ptr)
+        : _impl(ptr)
+        {}
+
+    private:
+        ImplPtr _impl;
+};
+
+//! \internal
+class PT_SSL_API SSLCertificateList::Impl {
+    public:
+        Impl();
+        ~Impl();
+
+        void loadFromString(const std::string& certData);
+        void loadFromFile(const std::string& fileName);
+        void clear();
+
+        inline const std::vector<SSLCertificateInfo>& certInfo() const
+        { return _certInfo; }
+        const SSLPublicKey getPublicKey() const;
+
+        friend class SSLContext;
+
+    private:
         std::vector<x509_st*>           _cert;
         std::vector<SSLCertificateInfo> _certInfo;
 };

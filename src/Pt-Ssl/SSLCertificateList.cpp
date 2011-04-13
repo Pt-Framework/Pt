@@ -34,23 +34,44 @@
 namespace Pt {
 namespace Ssl {
 
-    ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
+///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLCertList ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLCertificateList::SSLCertificateList()
-: _cert(0)
+: _impl(new Impl())
 {}
 
 SSLCertificateList::SSLCertificateList(const std::string& certData)
-: _cert(0)
-{ loadFromString(certData); }
+: _impl(new Impl())
+{ _impl->loadFromString(certData); }
 
 SSLCertificateList::~SSLCertificateList()
-{ clear(); }
+{}
 
 void SSLCertificateList::loadFromString(const std::string& certData)
+{ _impl->loadFromString(certData);  }
+
+void SSLCertificateList::loadFromFile(const std::string& fileName)
+{ _impl->loadFromFile(fileName);  }
+
+void SSLCertificateList::clear()
+{ _impl->clear();  }
+
+const SSLPublicKey SSLCertificateList::getPublicKey() const
+{ return _impl->getPublicKey(); }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLCertificateList::Impl::Impl()
+: _cert(0)
+{}
+
+SSLCertificateList::Impl::~Impl()
+{ clear(); }
+
+void SSLCertificateList::Impl::loadFromString(const std::string& certData)
 {
     // Clear previous certificates
     clear();
@@ -105,7 +126,7 @@ void SSLCertificateList::loadFromString(const std::string& certData)
     PT_SSL_LOG("> Fingerprint       = " << _certInfo[0].fingerprintType << " " << _certInfo[0].fingerprintHash);
 }
 
-void SSLCertificateList::loadFromFile(const std::string& fileName)
+void SSLCertificateList::Impl::loadFromFile(const std::string& fileName)
 {
     PT_SSL_LOG("Loading certificate file = " << fileName);
     
@@ -122,7 +143,7 @@ void SSLCertificateList::loadFromFile(const std::string& fileName)
     loadFromString(data);
 }
 
-void SSLCertificateList::clear()
+void SSLCertificateList::Impl::clear()
 {
     for(std::vector<X509*>::const_iterator it = _cert.begin(); it != _cert.end(); ++it) {
         X509_free(*it);
@@ -132,7 +153,7 @@ void SSLCertificateList::clear()
     _certInfo.clear();
 }
 
-const SSLPublicKey SSLCertificateList::getPublicKey() const
+const SSLPublicKey SSLCertificateList::Impl::getPublicKey() const
 {
     EVP_PKEY* pkey = X509_get_pubkey(*_cert.begin());
     if(!pkey) {

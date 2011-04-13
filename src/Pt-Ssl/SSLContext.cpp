@@ -158,23 +158,19 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     _ctx->cert_store = X509_STORE_new();
 
     // Try to add the CA X509 certificates (if any)
-    for(std::vector<X509*>::const_iterator it = trustedCert._cert.begin(); it != trustedCert._cert.end(); ++it) {
+    for(std::vector<X509*>::const_iterator it = trustedCert._impl->_cert.begin(); it != trustedCert._impl->_cert.end(); ++it) {
         if( ! X509_STORE_add_cert(_ctx->cert_store, *it) )
             throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
     }
 
     // Store a reference to the certificate list
-    // NOTE: * Currently, this is only used to indicate that a list of trusted certificates
-    //         has been set.
-    //       * We cannot really use the class pointer because the original class instance could
-    //         be deleted without warning.
-    _trustedCACert = &trustedCert;
+    _trustedCACert = trustedCert._impl;
 }
 
 void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
 {
     // Set the first certificate as this context's certificate
-    std::vector<X509*>::const_iterator it = certChain._cert.begin();
+    std::vector<X509*>::const_iterator it = certChain._impl->_cert.begin();
     
     // Try to use the X509 certificate
     ERR_clear_error();
@@ -188,19 +184,16 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     }
 
     // Try to add the CA X509 certificates (if any)
-    // NOTE: * OpenSSL do not copy the X509* data, so we must make sure that OpenSSL do not
-    //         free the X509 certificate when the context is destroyed. Please check the code
-    //         in ~SSLContext().
-    for(; it != certChain._cert.end(); ++it) {
+    // NOTE: OpenSSL do not copy the X509* data, so we must make sure that OpenSSL do not
+    //       free the X509 certificate when the context is destroyed. Please check the code
+    //       in ~SSLContext().
+    for(; it != certChain._impl->_cert.end(); ++it) {
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
     }
 
     // Store a reference to the certificate chain
-    // NOTE: * Currently, this is only used to indicate that a certificate chain has been set.
-    //       * We cannot really use the class pointer because the original class instance could
-    //         be deleted without warning.
-    _certChain = &certChain;
+    _certChain = certChain._impl;
 }
 
 void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
