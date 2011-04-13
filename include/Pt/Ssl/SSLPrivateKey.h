@@ -64,6 +64,7 @@ class PT_SSL_API SSLPrivateKey {
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
 
+        // Copy ctor
         inline SSLPrivateKey(ImplPtr ptr)
         : _impl(ptr)
         {}
@@ -72,6 +73,7 @@ class PT_SSL_API SSLPrivateKey {
         ImplPtr _impl;
 };
 
+//! \internal
 class PT_SSL_API SSLPrivateKey::Impl {
     public:
         Impl(const std::string& password);

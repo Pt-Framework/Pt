@@ -60,7 +60,7 @@ class PT_SSL_API SSLCertificateList {
         { return _certInfo; }
 
         //! \brief Get the public key of the main (first) certificate.
-        SmartPtr<SSLPublicKey> getPublicKey() const;
+        const SSLPublicKey getPublicKey() const;
 
         friend class SSLContext;
 

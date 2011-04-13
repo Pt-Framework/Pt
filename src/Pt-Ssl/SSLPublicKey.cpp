@@ -34,15 +34,25 @@ namespace Pt {
 namespace Ssl {
 
 SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
-: _pkey(pkey)
+: _impl(new Impl(pkey))
 {}
 
 SSLPublicKey::~SSLPublicKey()
-{
-    if(_pkey) EVP_PKEY_free(_pkey);
-}
+{}
 
 bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig) const
+{ return _impl->checkStringSignature(str, sig); }
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
+: _pkey(pkey)
+{}
+
+SSLPublicKey::Impl::~Impl()
+{ if(_pkey) EVP_PKEY_free(_pkey); }
+
+bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std::string& sig) const
 {
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );

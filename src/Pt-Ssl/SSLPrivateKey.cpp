@@ -49,6 +49,31 @@ static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+SSLPrivateKey::SSLPrivateKey(const std::string& password)
+: _impl(new Impl(password))
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
+: _impl(new Impl(password))
+{ _impl->loadFromString(keyData); }
+
+SSLPrivateKey::~SSLPrivateKey()
+{}
+
+void SSLPrivateKey::loadFromString(const std::string& keyData)
+{ _impl->loadFromString(keyData); }
+
+void SSLPrivateKey::loadFromFile(const std::string& fileName)
+{ _impl->loadFromFile(fileName); }
+
+void SSLPrivateKey::clear()
+{ _impl->clear(); }
+
+const std::string SSLPrivateKey::signString(const std::string& str) const
+{ return _impl->signString(str); }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 SSLPrivateKey::Impl::Impl(const std::string& password)
 : _pswd(password), _pkey(0)
 {}
@@ -140,31 +165,6 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
     // Return the signature string
     return sslhash2string(&sig[0], siglen);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLPrivateKey::SSLPrivateKey(const std::string& password)
-: _impl(new Impl(password))
-{}
-
-SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
-: _impl(new Impl(password))
-{ _impl->loadFromString(keyData); }
-
-SSLPrivateKey::~SSLPrivateKey()
-{ }
-
-void SSLPrivateKey::loadFromString(const std::string& keyData)
-{ _impl->loadFromString(keyData); }
-
-void SSLPrivateKey::loadFromFile(const std::string& fileName)
-{ _impl->loadFromFile(fileName); }
-
-void SSLPrivateKey::clear()
-{ _impl->clear(); }
-
-const std::string SSLPrivateKey::signString(const std::string& str) const
-{ return _impl->signString(str); }
 
 } // namespace Pt
 } // namespace Ssl

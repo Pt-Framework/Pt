@@ -45,15 +45,35 @@ class PT_SSL_API SSLPublicKey {
         
         friend class SSLCertificateList;
 
-    public:
-        // Instantiate a public-key.
+    private:
+        class Impl;
+        typedef SmartPtr<Impl> ImplPtr;
+
+        // Instantiate a public-key from the given OpenSSL raw key struct.
         SSLPublicKey(evp_pkey_st* pkey);
 
-        // Data
-        evp_pkey_st* _pkey;
+        // Copy ctor
+        inline SSLPublicKey(ImplPtr ptr)
+        : _impl(ptr)
+        {}
+
+    private:
+        ImplPtr _impl;
 };
 
-typedef SmartPtr<SSLPublicKey> SSLPublicKeyPtr;
+//! \internal
+class PT_SSL_API SSLPublicKey::Impl {
+    public:
+        Impl(evp_pkey_st* pkey);
+        ~Impl();
+
+        bool checkStringSignature(const std::string& str, const std::string& sig) const;
+
+        friend class SSLCertificateList;
+
+    private:
+        evp_pkey_st* _pkey;
+};
 
 } // namespace Pt
 } // namespace Ssl
