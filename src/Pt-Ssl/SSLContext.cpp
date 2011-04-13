@@ -203,14 +203,14 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     _certChain = &certChain;
 }
 
-void SSLContext::setPrivateKey(const SmartPtr<SSLPrivateKey>& privKey)
+void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
 {
     // Try to use the private key
-    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey->_pkey ) )
+    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey._impl->_pkey ) )
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 
     // Store a reference to the private key
-    _privKey = privKey;
+    _privKey = privKey._impl;
     
     // Check the private key (if needed)
     if(_certChain) {

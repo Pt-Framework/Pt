@@ -45,15 +45,15 @@ int main(int argc, char** argv)
         Pt::Ssl::SSLCertificateList serverCertChain;
         serverCertChain.loadFromFile("server.pem");
         
-        Pt::Ssl::SSLPrivateKeyPtr serverPrivKey(Pt::Ssl::SSLPrivateKey::newPrivateKey("password"));
-        serverPrivKey->loadFromFile("server.key");
+        Pt::Ssl::SSLPrivateKey serverPrivKey("password");
+        serverPrivKey.loadFromFile("server.key");
 
         Pt::Ssl::SSLPublicKeyPtr serverPubKey = serverCertChain.getPublicKey();
         
         PT_SSL_LOG_M("################################################################################");
 
         const std::string& text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
-        const std::string& tsig = serverPrivKey->signString(text);
+        const std::string& tsig = serverPrivKey.signString(text);
         const bool         vres = serverPubKey->checkStringSignature(text, tsig);
         PT_SSL_LOG_M("\n\nSIGNING TEXT:\n" << text
                      << "\n\nRESULTING SIGNATURE:\n" << tsig

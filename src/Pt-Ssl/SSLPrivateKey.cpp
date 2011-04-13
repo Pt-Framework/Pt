@@ -49,18 +49,18 @@ static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLPrivateKey::SSLPrivateKey(const std::string& password)
+SSLPrivateKey::Impl::Impl(const std::string& password)
 : _pswd(password), _pkey(0)
 {}
 
-SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
+SSLPrivateKey::Impl::Impl(const std::string& keyData, const std::string& password)
 : _pswd(password), _pkey(0)
 { loadFromString(keyData); }
 
-SSLPrivateKey::~SSLPrivateKey()
+SSLPrivateKey::Impl::~Impl()
 { clear(); }
 
-void SSLPrivateKey::loadFromString(const std::string& keyData)
+void SSLPrivateKey::Impl::loadFromString(const std::string& keyData)
 {
     // Clear previous key (if any)
     clear();
@@ -74,7 +74,7 @@ void SSLPrivateKey::loadFromString(const std::string& keyData)
         throw SSLRuntimeError("Could not read/parse/decode private-key data!", PT_SOURCEINFO);
 }
 
-void SSLPrivateKey::loadFromFile(const std::string& fileName)
+void SSLPrivateKey::Impl::loadFromFile(const std::string& fileName)
 {
     std::string   data;
     std::ifstream ifs;
@@ -89,7 +89,7 @@ void SSLPrivateKey::loadFromFile(const std::string& fileName)
     loadFromString(data);
 }
 
-void SSLPrivateKey::clear()
+void SSLPrivateKey::Impl::clear()
 {
     if(_pkey) {
         EVP_PKEY_free(_pkey);
@@ -97,7 +97,7 @@ void SSLPrivateKey::clear()
     }
 }
 
-const std::string SSLPrivateKey::signString(const std::string& str) const
+const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
 {
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
@@ -140,6 +140,31 @@ const std::string SSLPrivateKey::signString(const std::string& str) const
     // Return the signature string
     return sslhash2string(&sig[0], siglen);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLPrivateKey::SSLPrivateKey(const std::string& password)
+: _impl(new Impl(password))
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
+: _impl(new Impl(password))
+{ _impl->loadFromString(keyData); }
+
+SSLPrivateKey::~SSLPrivateKey()
+{ }
+
+void SSLPrivateKey::loadFromString(const std::string& keyData)
+{ _impl->loadFromString(keyData); }
+
+void SSLPrivateKey::loadFromFile(const std::string& fileName)
+{ _impl->loadFromFile(fileName); }
+
+void SSLPrivateKey::clear()
+{ _impl->clear(); }
+
+const std::string SSLPrivateKey::signString(const std::string& str) const
+{ return _impl->signString(str); }
 
 } // namespace Pt
 } // namespace Ssl

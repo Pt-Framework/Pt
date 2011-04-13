@@ -38,12 +38,10 @@ namespace Ssl {
 class PT_SSL_API SSLPrivateKey {
     public:
         //! \brief Instantiate an empty private-key.
-        inline static SmartPtr<SSLPrivateKey> newPrivateKey(const std::string& password = "")
-        { return SmartPtr<SSLPrivateKey>(new SSLPrivateKey(password)); }
+        SSLPrivateKey(const std::string& password);
 
         //! \brief Instantiate a private-key using the given key data.
-        inline static SmartPtr<SSLPrivateKey> newPrivateKey(const std::string& keyData, const std::string& password)
-        { return SmartPtr<SSLPrivateKey>(new SSLPrivateKey(keyData, password)); }
+        SSLPrivateKey(const std::string& keyData, const std::string& password);
 
         //! \brief Standard dtor.
         ~SSLPrivateKey();
@@ -63,18 +61,36 @@ class PT_SSL_API SSLPrivateKey {
         friend class SSLContext;
 
     private:
-        // Instantiate an empty private-key.
-        SSLPrivateKey(const std::string& password);
+        class Impl;
+        typedef SmartPtr<Impl> ImplPtr;
 
-        // Instantiate a private-key using the given key data.
-        SSLPrivateKey(const std::string& keyData, const std::string& password);
+        inline SSLPrivateKey(ImplPtr ptr)
+        : _impl(ptr)
+        {}
 
-        // Data
+    private:
+        ImplPtr _impl;
+};
+
+class PT_SSL_API SSLPrivateKey::Impl {
+    public:
+        Impl(const std::string& password);
+        Impl(const std::string& keyData, const std::string& password);
+        ~Impl();
+
+        void loadFromString(const std::string& keyData);
+        void loadFromFile(const std::string& fileName);
+        void clear();
+
+        const std::string signString(const std::string& str) const;
+
+        friend class SSLContext;
+
+    private:
         std::string  _pswd;
         evp_pkey_st* _pkey;
 };
 
-typedef SmartPtr<SSLPrivateKey> SSLPrivateKeyPtr;
 
 } // namespace Pt
 } // namespace Ssl
