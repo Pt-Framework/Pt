@@ -133,7 +133,7 @@ class PT_SSL_API SSLContext {
 
         SSLCertificateList::ImplPtr _trustedCACert; // List of trusted CA certificates
         SSLCertificateList::ImplPtr _certChain;     // Certificate chain
-        SSLPrivateKey     ::ImplPtr _privKey;       // Private key
+        SSLPrivateKey               _privKey;       // Private key
 
 #ifndef NLOG
     public:

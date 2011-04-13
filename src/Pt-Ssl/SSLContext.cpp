@@ -68,8 +68,7 @@ SSLInit::~SSLInit()
 SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
 : _protocol     (protocol),
   _trustedCACert(0),
-  _certChain    (0),
-  _privKey      (0)
+  _certChain    (0)
 {
     // Create the context
     switch(_protocol) {
@@ -203,7 +202,7 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 
     // Store a reference to the private key
-    _privKey = privKey._impl;
+    _privKey = privKey;
     
     // Check the private key (if needed)
     if(_certChain) {

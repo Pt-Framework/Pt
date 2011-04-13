@@ -48,31 +48,47 @@ static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SSLPrivateKey::SSLPrivateKey()
+: _impl( new Impl() )
+{}
 
 SSLPrivateKey::SSLPrivateKey(const std::string& password)
-: _impl(new Impl(password))
+: _impl( new Impl(password) )
 {}
 
 SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
-: _impl(new Impl(password))
+: _impl( new Impl(password) )
 { _impl->loadFromString(keyData); }
 
 SSLPrivateKey::~SSLPrivateKey()
 {}
 
 void SSLPrivateKey::loadFromString(const std::string& keyData)
-{ _impl->loadFromString(keyData); }
+{
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromString(keyData);
+}
 
 void SSLPrivateKey::loadFromFile(const std::string& fileName)
-{ _impl->loadFromFile(fileName); }
+{
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromFile(fileName);
+}
 
 void SSLPrivateKey::clear()
-{ _impl->clear(); }
+{
+    _impl = new Impl();
+}
 
 const std::string SSLPrivateKey::signString(const std::string& str) const
-{ return _impl->signString(str); }
+{
+    return _impl->signString(str);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SSLPrivateKey::Impl::Impl()
+: _pswd(), _pkey(0)
+{}
 
 SSLPrivateKey::Impl::Impl(const std::string& password)
 : _pswd(password), _pkey(0)
@@ -120,6 +136,9 @@ void SSLPrivateKey::Impl::clear()
 
 const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
 {
+    if( ! _pkey )
+        throw SSLRuntimeError("Failed to sign", PT_SOURCEINFO);
+
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
     if(!bmd) {
@@ -139,7 +158,7 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
     if(!EVP_DigestSignInit(mctx.get(), &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
         throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
     }
-    
+
     // Add data to the message-digest context
     if(!EVP_DigestSignUpdate(mctx.get(), (void*) str.c_str(), str.length())) {
         throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);

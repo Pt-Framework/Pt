@@ -38,6 +38,9 @@ namespace Ssl {
 class PT_SSL_API SSLPrivateKey {
     public:
         //! \brief Instantiate an empty private-key.
+        SSLPrivateKey();
+
+        //! \brief Instantiate an empty private-key.
         SSLPrivateKey(const std::string& password);
 
         //! \brief Instantiate a private-key using the given key data.
@@ -76,6 +79,7 @@ class PT_SSL_API SSLPrivateKey {
 //! \internal
 class PT_SSL_API SSLPrivateKey::Impl {
     public:
+        Impl();
         Impl(const std::string& password);
         ~Impl();
 
@@ -86,6 +90,7 @@ class PT_SSL_API SSLPrivateKey::Impl {
         const std::string signString(const std::string& str) const;
 
         friend class SSLContext;
+        friend class SSLPrivateKey;
 
     private:
         std::string  _pswd;
