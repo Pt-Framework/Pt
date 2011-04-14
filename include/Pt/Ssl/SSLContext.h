@@ -104,7 +104,7 @@ class PT_SSL_API SSLContext {
 
         /** \brief Return the certificate-chain that is currently attached to this context. */
         const SSLCertificateList certificateChain() const
-        { return SSLCertificateList(_certChain); }
+        { return _certChain; }
         
         /** \brief Set the private key to be attached to this context.
          * Setting a private key is mandatory for a server context.
@@ -116,23 +116,26 @@ class PT_SSL_API SSLContext {
 
         /** \brief Return the private key that is currently attached to this context. */
         const SSLPrivateKey privateKey() const
-        { return SSLPrivateKey(_privKey); }
-        
-        ssl_ctx_st* impl()
-        { return _ctx; }
+        { return _privKey; }
+
+        friend class SSLStreamBuff;
 
     private:
         // Get available ciphers
         void getAvailableCiphers();
 
     private:
+        // Return a raw pointer to the OpenSSL context struct
+        ssl_ctx_st* impl()
+        { return _ctx; }
+        
         ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
         std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
 
-        SSLCertificateList::ImplPtr _trustedCACert; // List of trusted CA certificates
-        SSLCertificateList::ImplPtr _certChain;     // Certificate chain
+        SSLCertificateList          _trustedCACert; // List of trusted CA certificates
+        SSLCertificateList          _certChain;     // Certificate chain
         SSLPrivateKey               _privKey;       // Private key
 
 #ifndef NLOG

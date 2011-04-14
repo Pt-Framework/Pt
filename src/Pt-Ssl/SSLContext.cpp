@@ -66,9 +66,7 @@ SSLInit::~SSLInit()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
-: _protocol     (protocol),
-  _trustedCACert(0),
-  _certChain    (0)
+: _protocol(protocol)
 {
     // Create the context
     switch(_protocol) {
@@ -163,7 +161,7 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     }
 
     // Store a reference to the certificate list
-    _trustedCACert = trustedCert._impl;
+    _trustedCACert = trustedCert;
 }
 
 void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
@@ -192,7 +190,7 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     }
 
     // Store a reference to the certificate chain
-    _certChain = certChain._impl;
+    _certChain = certChain;
 }
 
 void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
@@ -205,7 +203,7 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
     _privKey = privKey;
     
     // Check the private key (if needed)
-    if(_certChain) {
+    if(_certChain._impl) {
         if(!SSL_CTX_check_private_key(_ctx))
             throw SSLRuntimeError(
                 "The private key does not agree with the corresponding public key in the certificate!",
