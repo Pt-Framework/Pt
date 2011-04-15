@@ -73,6 +73,15 @@ class FreeEVP_MD_CTX {
 };
 typedef Pt::AutoPtr<EVP_MD_CTX, FreeEVP_MD_CTX > EvpMdCtxAutoPtr;
 
+
+// Used to automatically free an EVP_CIPHER_CTX*
+class FreeEVP_CIPHER_CTX {
+    protected:
+        void destroy(EVP_CIPHER_CTX* cctx)
+        { EVP_CIPHER_CTX_cleanup(cctx); }
+};
+typedef Pt::AutoPtr<EVP_CIPHER_CTX, FreeEVP_CIPHER_CTX> EvpCipherCtxAutoPtr;
+
 // Converter functions for converting OpenSSL values into STL strings
 extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
 extern const std::string asn1str2string(const ASN1_STRING* asn1Val);

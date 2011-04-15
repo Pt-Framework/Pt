@@ -111,6 +111,19 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     if( ! _pkey )
         throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
 
+    // Initialize a cipher BIO
+    BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
+    if(!benc) {
+        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+    }
+
+    // Initialize a cipher context
+    EVP_CIPHER_CTX* pcctx = 0;
+    if(!BIO_get_cipher_ctx(benc.get(), &pcctx)) {
+        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+    }
+    EvpCipherCtxAutoPtr cctx(pcctx);
+
     return "NOT IMPLEMENTED YET!";
 }
 
