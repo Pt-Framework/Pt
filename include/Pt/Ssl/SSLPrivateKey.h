@@ -61,8 +61,9 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Sign the given string with this private key.
         const std::string signString(const std::string& str) const;
 
-        friend class SSLContext;
-
+        /// \internal Return the raw OpenSSL private key handle.
+        evp_pkey_st* impl() const;
+        
     private:
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;

@@ -155,7 +155,7 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     _ctx->cert_store = X509_STORE_new();
 
     // Try to add the CA X509 certificates (if any)
-    for(std::vector<X509*>::const_iterator it = trustedCert._impl->_cert.begin(); it != trustedCert._impl->_cert.end(); ++it) {
+    for(std::vector<X509*>::const_iterator it = trustedCert.impl().begin(); it != trustedCert.impl().end(); ++it) {
         if( ! X509_STORE_add_cert(_ctx->cert_store, *it) )
             throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
     }
@@ -167,7 +167,7 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
 void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
 {
     // Set the first certificate as this context's certificate
-    std::vector<X509*>::const_iterator it = certChain._impl->_cert.begin();
+    std::vector<X509*>::const_iterator it = certChain.impl().begin();
     
     // Try to use the X509 certificate
     ERR_clear_error();
@@ -184,7 +184,7 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     // NOTE: OpenSSL do not copy the X509* data, so we must make sure that OpenSSL do not
     //       free the X509 certificate when the context is destroyed. Please check the code
     //       in ~SSLContext().
-    for(; it != certChain._impl->_cert.end(); ++it) {
+    for(; it != certChain.impl().end(); ++it) {
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
     }
@@ -196,14 +196,14 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
 void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
 {
     // Try to use the private key
-    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey._impl->_pkey ) )
+    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey.impl() ) )
         throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
 
     // Store a reference to the private key
     _privKey = privKey;
     
     // Check the private key (if needed)
-    if(_certChain._impl) {
+    if(!_certChain.impl().empty()) {
         if(!SSL_CTX_check_private_key(_ctx))
             throw SSLRuntimeError(
                 "The private key does not agree with the corresponding public key in the certificate!",

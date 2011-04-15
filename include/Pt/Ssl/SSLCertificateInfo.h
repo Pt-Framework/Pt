@@ -65,16 +65,13 @@ class PT_SSL_API SSLCertificateInfo {
         std::string fingerprintType;
         std::string fingerprintHash;
 
-        friend class SSLCertificateList;
-        friend class SSLCertificateChain;
-        friend class SSLTrustedCertificate;
-
-    private:
+        /// \internal Construct an empty certificate information.
         inline SSLCertificateInfo()
         : version     (0),
           serialNumber(0)
         {}
 
+        /// \internal Construct a certificate information based on the given information.
         inline SSLCertificateInfo(long               version_,
                                   long               serialNumber_,
                                   const std::string& issuerName_,
@@ -97,6 +94,7 @@ class PT_SSL_API SSLCertificateInfo {
           fingerprintHash(fingerprintHash_)
         {}
 
+        /// \internal Set the certificate information based on the given information.
         inline void set(long               version_,
                         long               serialNumber_,
                         const std::string& issuerName_,
@@ -120,6 +118,7 @@ class PT_SSL_API SSLCertificateInfo {
             fingerprintHash = fingerprintHash_;
         }
 
+        /// \internal Clear the certificate information (make it empty).
         inline void clear()
         {
             version         = 0;

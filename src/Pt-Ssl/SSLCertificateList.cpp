@@ -62,6 +62,9 @@ void SSLCertificateList::clear()
 const SSLPublicKey SSLCertificateList::getPublicKey() const
 { return _impl->getPublicKey(); }
 
+const std::vector<x509_st*>& SSLCertificateList::impl() const
+{ return _impl->_cert; }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLCertificateList::Impl::Impl()

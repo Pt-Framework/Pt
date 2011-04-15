@@ -61,8 +61,9 @@ class PT_SSL_API SSLCertificateList {
         //! \brief Get the public key of the main (first) certificate.
         const SSLPublicKey getPublicKey() const;
 
-        friend class SSLContext;
-
+        /// \internal Return a list of raw OpenSSL X509 certificate handle.
+        const std::vector<x509_st*>& impl() const;
+        
     private:
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
@@ -90,7 +91,7 @@ class PT_SSL_API SSLCertificateList::Impl {
         { return _certInfo; }
         const SSLPublicKey getPublicKey() const;
 
-        friend class SSLContext;
+        friend class SSLCertificateList;
 
     private:
         std::vector<x509_st*>           _cert;

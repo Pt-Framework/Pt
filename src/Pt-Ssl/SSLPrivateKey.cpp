@@ -76,14 +76,13 @@ void SSLPrivateKey::loadFromFile(const std::string& fileName)
 }
 
 void SSLPrivateKey::clear()
-{
-    _impl = new Impl();
-}
+{ _impl = new Impl(); }
 
 const std::string SSLPrivateKey::signString(const std::string& str) const
-{
-    return _impl->signString(str);
-}
+{ return _impl->signString(str); }
+
+evp_pkey_st* SSLPrivateKey::impl() const
+{ return _impl->_pkey; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 SSLPrivateKey::Impl::Impl()

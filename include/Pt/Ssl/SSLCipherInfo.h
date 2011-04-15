@@ -47,14 +47,12 @@ class PT_SSL_API SSLCipherInfo {
         //! \brief Convert the cipher information into a string.
         const std::string dump() const;
 
-        friend class SSLContext;
-        friend class SSLStreamBuf;
-
-    private:
+        /// \internal
         inline SSLCipherInfo()
         : id(0), bits(0)
         {}
 
+        /// \internal
         inline SSLCipherInfo(unsigned long      id_,
                              const std::string& strid_,
                              const std::string& name_,

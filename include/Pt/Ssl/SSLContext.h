@@ -117,18 +117,16 @@ class PT_SSL_API SSLContext {
         /** \brief Return the private key that is currently attached to this context. */
         const SSLPrivateKey privateKey() const
         { return _privKey; }
-
-        friend class SSLStreamBuff;
+        
+        /// \internal Return the raw OpenSSL context handle.
+        inline ssl_ctx_st* impl() const
+        { return _ctx; }
 
     private:
         // Get available ciphers
         void getAvailableCiphers();
 
     private:
-        // Return a raw pointer to the OpenSSL context struct
-        ssl_ctx_st* impl()
-        { return _ctx; }
-        
         ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
         Protocol                   _protocol;       // Selected SSL protocol
         std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol

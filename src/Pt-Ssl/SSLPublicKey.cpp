@@ -42,6 +42,9 @@ SSLPublicKey::~SSLPublicKey()
 
 bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig) const
 { return _impl->checkStringSignature(str, sig); }
+
+evp_pkey_st* SSLPublicKey::impl() const
+{ return _impl->_pkey; }
     
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

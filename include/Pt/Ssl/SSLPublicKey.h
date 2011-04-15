@@ -36,26 +36,27 @@ namespace Ssl {
 
 //! \brief Public key.
 class PT_SSL_API SSLPublicKey {
+    private:
+        class Impl;
+        typedef SmartPtr<Impl> ImplPtr;
+
     public:
         //! \brief Standard dtor.
         ~SSLPublicKey();
 
         //! \brief Check the signature of the given string with this public key.
         bool checkStringSignature(const std::string& str, const std::string& sig) const;
-        
-        friend class SSLCertificateList;
 
-    private:
-        class Impl;
-        typedef SmartPtr<Impl> ImplPtr;
-
-        // Instantiate a public-key from the given OpenSSL raw key struct.
+        /// \internal Instantiate a public-key from the given OpenSSL raw key struct.
         SSLPublicKey(evp_pkey_st* pkey);
 
-        // Copy ctor
+        /// \internal Copy ctor
         inline SSLPublicKey(ImplPtr ptr)
         : _impl(ptr)
         {}
+        
+        /// \internal Return the raw OpenSSL public key handle.
+        evp_pkey_st* impl() const;
 
     private:
         ImplPtr _impl;
@@ -69,7 +70,7 @@ class PT_SSL_API SSLPublicKey::Impl {
 
         bool checkStringSignature(const std::string& str, const std::string& sig) const;
 
-        friend class SSLCertificateList;
+        friend class SSLPublicKey;
 
     private:
         evp_pkey_st* _pkey;
