@@ -1,0 +1,611 @@
+/*
+Theme Name: F2
+Theme URI: http://srinig.com/wordpress/themes/f2/
+Description: F2 is a fast loading flexible width theme for WordPress. Customizable header, any of the two sidebars can be optionally turned off, and much more options in the settings page. Compatible with WordPress 2.8 and above. Valid XHTML, CSS.
+Version: 1.0.10
+Author: Srini G
+Author URI: http://srinig.com/wordpress
+Tags: blue, light, flexible-width, two-columns, three-columns, right-sidebar, left-sidebar, theme-options, custom-header, threaded-comments, translation-ready
+
+	The CSS, XHTML and design is released under GPL:
+	http://wordpress.org/about/gpl/
+
+*/
+
+/*
+	You are encouraged to customize the theme any whichever way you want, but if
+	you modify this and other template files directly, you will lose your
+	customizations when you upgrade the theme to a newer version. For this
+	reason, it is advised that you use the theme inheritence method to customize
+	the theme. View readme.html for details.
+*/ 
+
+body {
+	margin:0;
+	padding:20px;
+	background:#888;
+	color:#444;
+	font-size: 62.5%; /* Resets 1em to 10px */
+	font-family: 'Lucida Grande', Sans-Serif;
+	text-align:left;
+}
+
+a { 
+	color:#258;
+	text-decoration:none;
+}
+
+a:hover {
+	text-decoration:underline; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color:#555;
+	font-family:'Times New Roman', Times, serif;
+	text-align:left;
+}
+
+h1 {font-size:2.6em;}
+h2 {font-size:2.4em;}
+h3 {font-size:1.8em;}
+h4 {font-size:1.4em;}
+h5 {font-size:1.2em;}
+h6 {font-size:1em;}
+
+
+img {
+	border:0;
+}
+
+input, textarea {
+	font-size:12px;
+}
+
+input[type=text], textarea{
+	border:1px inset #aaa;
+	background:#fff;
+}
+input[type=submit] {
+	border:1px outset #aaa;
+	background:#ddd;
+}
+
+pre {
+	overflow:auto;
+	border:1px solid #ccc;
+	padding:5px 10px;
+	background: #f8f8f8;
+	font-size: 12px;
+}
+code {
+	background-color:#f8f8f8;
+	color:#111;
+}
+	
+
+
+/* Layout */
+#page {
+	min-width:740px;
+	max-width:1240px;
+	margin:0 auto;
+}
+#container{
+  margin:0;
+  padding:0 240px 0 240px;
+}
+#wrapper{
+  float:left;
+  width:100%;
+  border-left:240px solid #eee; /* Sidebar left background color */
+  border-right:240px solid #eee; /* Siderab right background color */
+  margin-left:-240px;
+  margin-right:-240px;
+  background-color:#fff;
+  display:inline;
+}
+.sidebar {
+	padding:20px;
+}
+#sidebar_left{
+	float:left;
+	width:200px;
+	margin:0 0 0 -240px;
+	position:relative;
+}
+#content{
+	float:left;
+	width:92%;
+	margin-right:-100%;
+	padding:20px 4%;
+	overflow:hidden;
+	background:#fff;
+}
+#sidebar_right{
+	float:right;
+	width:200px;
+	margin:0 -240px 0 0;
+	position:relative;
+}
+#footer {
+	clear:both;
+	padding:10px;
+}
+
+/* Header */
+
+#header {
+	margin:0;
+	height:90px;
+	border:1px solid #aaa; 
+	background:#6d97b7;
+}
+
+#headerlogo {
+	position:relative;
+	top:50%;
+	left:20px;
+}
+#headerlogo h1, #headerlogo div.description {
+	position:relative;
+	bottom:26px;
+}
+#headerlogo h1 {
+	margin:0;
+	font-size:3em;
+}
+#headerlogo h1 a {
+	background:transparent;
+	color:#d0e0f0;
+}
+#headerlogo h1 a:hover {
+	text-decoration:none;
+}
+
+#headerlogo div.description {
+	margin:0;
+	background:transparent;
+	color:#fff;
+	font-size:1.2em;
+}
+
+
+/* Top navigation */
+#hmenu {
+	float:right;
+	width:auto;
+	border:0;
+	padding:0;
+	position:relative;
+	bottom:25px;
+	right:2px;
+	height:0;
+	margin-bottom:-23px;
+}
+#hmenu ul {
+	width:auto;
+	float:right;
+	list-style:none;
+	padding:0;
+	margin:0;
+}
+#hmenu ul li {
+	display:inline;
+	float:left;
+	width:auto;
+	padding:0;
+	margin:0;
+}
+#hmenu ul li a {
+	display:block;
+	background:#27567a;
+	color:#c6c8c9;
+	padding:4px 20px;
+	margin:0 1px;
+	text-decoration:none;
+	text-transform:uppercase;
+	font-weight:bold;
+	font-size:1.2em;
+}
+
+#hmenu ul li a:hover, #hmenu ul li.hmenu_rss a:hover {
+	background-color: #417196;
+	color: #fff;
+}
+#hmenu ul li ul {
+	padding:0.5px 0 0 0;
+	position:absolute;
+	display:block;
+	visibility:hidden;
+	z-index:599;
+}
+#hmenu ul li.hmenu_rss ul {
+	right:0;
+}
+#hmenu ul li:hover ul {
+	visibility:visible;
+}
+#hmenu ul ul li {
+	display:block;
+	float:none;
+	width:auto;
+}
+#hmenu ul ul a {
+	margin:1px;
+}
+#hmenu ul li.hmenu_rss a {
+	background:#27567a url('images/feed.png') no-repeat 95% 50%;
+	padding:4px 30px 4px 20px;
+}
+/* Sidebar */
+
+.sidebar {
+	color:#222;
+}
+.sidebar ul {
+	padding:0;
+	margin:0;
+	list-style: none;
+	font-size:1.2em;
+}
+.sidebar ul ul {
+	font-size:1em;
+}
+
+.sidebar ul li {
+	margin:0 0 2em 0;
+}
+
+.sidebar ul ul {
+	margin:0;
+	padding:0;
+}
+
+.sidebar li li {
+	margin:0.1em 0;
+}
+
+.sidebar li li:before {
+	content: "\203A \0020";
+	font-size:1.2em;
+}
+
+.sidebar li li li {
+	padding-left:10px;
+}
+
+.sidebar ul h2 {
+	margin:0;
+	padding:0;
+	font-size:1.2em;
+	text-transform:uppercase;
+}
+
+
+.sidebar a.rsswidget img {
+	border:0;
+	float:right;
+}
+
+
+/* Footer */
+#footer { 
+	text-align:center;
+	font-size:1em;
+	background:#27567a;
+	color:#eee;
+	border:1px solid #999;
+}
+
+#footer a {
+	color:#aac;
+}
+
+/* Post */
+
+.post, .page {
+	clear:both;
+}
+
+.blog .post, .archive .post, .search-results .post, .search-results .page {
+	margin:0 0 4em 0;
+}
+
+.postentry {
+	font-size:1.4em;
+	line-height:1.4em;
+}
+.postentry p, .postentry blockquote, .postentry ul, .postentry ol {
+	text-align:justify;
+}
+.postentry blockquote {
+	margin:10px 20px;
+	padding:0 0 0 10px;
+	border-left:0.4em solid #ddd;
+	font-size:0.8em;
+	line-height:1.2em;
+}
+.postentry blockquote blockquote {
+	margin-left:0;
+	font-size:1em;
+}
+
+.postentry a {
+	border-bottom:1px solid #ddd;
+}
+.postentry a:hover {
+	border-bottom:1px solid #258;
+	text-decoration:none;
+}
+
+
+div.navigation {
+	font-size:1.1em;
+}
+
+.postentry table {
+	border-width:0 1px 1px 0;
+	border-style:solid;
+	border-color:#ccc;
+	font-size:0.9em;
+}
+
+
+.postentry table tr td {
+	padding:5px 10px;
+	border-width:1px 0 0 1px;
+	border-style:solid;
+	border-color:#ccc;
+
+}
+
+.postentry table tr th {
+	border-width:1px 0 0 1px;
+	border-style:solid;
+	border-color:#ccc;
+	padding:5px 10px;
+	background:#f4f4f4;
+	color:#666;
+	font-weight:bold;
+	text-transform:uppercase;
+	text-align:center;
+}
+h2.posttitle {
+	margin:0 0 5px 0;
+	padding:0;
+}
+.postmetadata {
+	clear:both;
+	margin:1em 0;
+	font-size:1.1em;
+	background-color:#fff;
+	color:#888;
+	text-align:left;
+}
+.posttagscat {
+	margin:0 0 10px 0;
+}
+.postcat {
+	margin:0 10px 0 0;
+}
+.postcomment {
+	font-size:1.1em;
+}
+.postedit:before {
+	content:' | ';
+}
+.poststicky {
+	margin:0 0 0 10px;
+}
+.poststicky:before {
+	content:'\2022 \0020';
+}
+div.archive-desc {
+	border:1px solid #ccc;
+	background-color:#f8f8f8;
+	padding:5px 10px;
+	margin:0 0 10px 0;
+	font-size:1.4em;
+}
+
+.wp-caption {
+   border: 1px solid #ddd;
+   text-align: center;
+   background-color: #f3f3f3;
+   padding-top: 4px;
+}
+.wp-caption a, .wp-caption a:hover, .gallery a, .gallery a:hover, .attachment a, .attachment a:hover {
+	border:none;
+}
+.wp-caption img {
+   margin: 0;
+   padding: 0;
+   border: 0 none;
+}
+.wp-caption p.wp-caption-text {
+   font-size: 0.8em;
+   margin:4px 0 0 0;
+   padding:0 4px;
+}
+.gallery {
+	border:1px solid #ddd;
+	background-color: #f3f3f3;
+}
+.gallery-item {
+	margin:10px;
+}
+.gallery-caption {
+	font-size:0.8em;
+}
+.attachment img {
+	border:1px solid #ddd;
+	background-color:#f3f3f3;
+	padding:4px;
+}
+/* Comments */
+
+textarea#comment {
+	width:100%;
+
+}
+.commentlist {
+	margin:0;
+	padding:0;
+}
+.children {
+	margin: 0 -21px -21px 0;
+	padding:0;
+}
+li.comment, li.trackback, li.pingback {
+	list-style:none;
+	border:1px solid #eee;
+	padding:20px;
+	margin:10px 0;
+}
+ul.children li.comment {
+	margin: 10px 0 -11px 0;
+}
+	
+.comment-body {
+	overflow:auto;
+}
+.commentlist li.even {
+	background-color:#fafafa;
+}
+
+.commentlist li.odd {
+	background-color:#f6f6f6;
+}
+.commentlist li.bypostauthor {
+	background-color:#fffff8;
+}
+.commentlist li.bypostauthor > .comment-body > .comment-author > cite {
+	border-bottom:1px solid #aaa;
+}
+.comment-body p {
+	font-size:1.3em;
+}
+.comment-body blockquote {
+	margin:5px 10px;
+	padding:0 0 0 5px;
+	border-left:0.4em solid #ddd;
+	font-size:0.9em;
+}
+.comment-body blockquote blockquote {
+	font-size:1em;
+}
+.comment-body img.avatar {
+	float:right;
+	border:1px solid #eee;
+	margin:0;
+	background:#fff;
+}
+
+.comment-author cite {
+	font-style:normal;
+	font-weight:bold;
+	color:#555;
+	font-size:1.4em;
+}
+.comment-meta {
+	margin:4px 0 0 0;
+}
+.reply {
+	margin:5px 0;
+	padding:0;
+	font-size:1.1em;
+}
+
+/* Comment ends */
+
+
+/* Calendar */
+#wp-calendar {
+	text-align:center;
+	width:100%;
+}
+#wp-calendar caption, #wp-calendar thead th{
+	font-weight:bold;
+	text-transform:uppercase;
+	color:#555;
+}
+#wp-calendar tbody td {
+	border:1px solid #ccc;
+	background:#f2f2f2;
+}
+#wp-calendar tbody td a {
+	font-weight:bold;
+}
+#wp-calendar td#today {
+	background:#e4e4e4;
+}
+#wp-calendar tbody td.pad {
+	border:none;
+	background:transparent;
+}
+/* Calendar ends */
+
+#searchform {
+	margin: 10px auto;
+	padding: 5px 3px;
+	}
+
+.sidebar #searchform #s {
+	width: 120px;
+	padding: 2px;
+	}
+
+.sidebar #searchsubmit {
+	padding: 1px;
+	}
+.screen-reader-text {
+     position: absolute;
+     left: -1000em;
+}
+
+
+abbr {
+	cursor:help;
+	border-bottom: 0.1em dotted;
+}
+
+.aligncenter,
+div.aligncenter {
+   display: block;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+.alignleft {
+   float: left;
+   margin: 0 10px 0 0;
+   width:auto;
+}
+
+.alignright {
+   float: right;
+   width:auto;
+   margin: 0 0 0 10px;
+}
+
+/*	
+	By default, the horizontal navigation menu displays inside the header area.
+	If for some reason you don't like this behaviour, you can make it display
+	below the header area by including the code below into your custom.css.
+*/
+/*
+
+#hmenu {
+	background-color:#27567a;
+	float:none;
+	position:static;
+	height:24px;
+	border:1px solid #aaa;
+	border-top:none;
+	margin:0;
+}
+#hmenu ul {
+	float:none;
+}
+
+*/

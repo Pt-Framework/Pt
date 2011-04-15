@@ -111,6 +111,26 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     if( ! _pkey )
         throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
 
+    RSA* rsa = EVP_PKEY_get1_RSA(_pkey);
+    if(!rsa) {
+        throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
+    }
+;
+
+   // int RSA_public_encrypt(int flen, const unsigned char *from, unsigned char *to, RSA *rsa,int padding);
+
+//            rsa_outlen  = RSA_public_encrypt(rsa_inlen, rsa_in, rsa_out, rsa, pad);
+//
+
+
+    
+    return "NOT IMPLEMENTED YET!";
+}
+
+} // namespace Pt
+} // namespace Ssl
+
+/*
     // Initialize a cipher BIO
     BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
     if(!benc) {
@@ -124,8 +144,13 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     }
     EvpCipherCtxAutoPtr cctx(pcctx);
 
-    return "NOT IMPLEMENTED YET!";
-}
+    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
+    if(!cipher) {
+        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+    }
 
-} // namespace Pt
-} // namespace Ssl
+    if(!EVP_CipherInit_ex(cctx.get(), cipher, 0, 0, 0, 1)) {
+        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+    }
+*/
+
