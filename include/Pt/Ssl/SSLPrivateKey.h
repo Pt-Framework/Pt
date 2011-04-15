@@ -86,7 +86,6 @@ class PT_SSL_API SSLPrivateKey::Impl {
 
         void loadFromString(const std::string& keyData);
         void loadFromFile(const std::string& fileName);
-        void clear();
 
         const std::string signString(const std::string& str) const;
 
@@ -94,6 +93,8 @@ class PT_SSL_API SSLPrivateKey::Impl {
         friend class SSLPrivateKey;
 
     private:
+        void clear();
+
         std::string  _pswd;
         evp_pkey_st* _pkey;
 };
