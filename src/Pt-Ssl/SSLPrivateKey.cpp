@@ -81,6 +81,9 @@ void SSLPrivateKey::clear()
 const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
 { return _impl->signString(str, digest); }
 
+const std::string SSLPrivateKey::decryptString(const std::string& str) const
+{ return _impl->decryptString(str); }
+
 evp_pkey_st* SSLPrivateKey::impl() const
 { return _impl->_pkey; }
 
@@ -136,7 +139,7 @@ void SSLPrivateKey::Impl::clear()
 const std::string SSLPrivateKey::Impl::signString(const std::string& str, const char* digest) const
 {
     if( ! _pkey )
-        throw SSLRuntimeError("Failed to sign", PT_SOURCEINFO);
+        throw SSLRuntimeError("Attempting to sign string using an empty private key!", PT_SOURCEINFO);
 
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
@@ -178,6 +181,14 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str, const 
 
     // Return the signature string
     return ssldata2string(&sig[0], siglen);
+}
+
+const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) const
+{
+    if( ! _pkey )
+        throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
+
+    return "NOT IMPLEMENTED YET!";
 }
 
 } // namespace Pt

@@ -53,12 +53,21 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("################################################################################");
 
         const std::string& text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
-        const std::string& tsig = serverPrivKey.signString(text);
-        const bool         vres = serverPubKey.checkStringSignature(text, tsig);
-        PT_SSL_LOG_M("\n\nSIGNING TEXT:\n" << text
-                     << "\n\nRESULTING SIGNATURE:\n" << tsig
-                     << "\n\nVERIFICATION RESULT:\n" << (vres ? "OK" : "FAILED") << "\n");
 
+        const std::string& tsig = serverPrivKey.signString(text);
+        const bool         vres = serverPubKey.verifyStringSignature(text, tsig);
+        PT_SSL_LOG_M("\n\n##### SIGNING TEXT #####"
+                     << "\n\nInput text:\n" << text
+                     << "\n\nResulting signature:\n" << tsig
+                     << "\n\nVerification result:\n" << (vres ? "OK" : "FAILED") << "\n");
+
+        const std::string& tenc = serverPubKey.encryptString(text);
+        const std::string& tdec = serverPrivKey.decryptString(tenc);
+        PT_SSL_LOG_M("\n\n##### ENCRYPTING TEXT #####"
+                     << "\n\nInput text:\n" << text
+                     << "\n\nEncryption result:\n" << tenc
+                     << "\n\nDecryption result:\n" << tdec << "\n");
+                     
         PT_SSL_LOG_M("################################################################################");
 
         PT_SSL_LOG_M("OpenSSL test progam ended");

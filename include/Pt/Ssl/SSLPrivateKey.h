@@ -61,6 +61,9 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Sign the given string with this private key.
         const std::string signString(const std::string& str, const char* digest = "SHA1") const;
 
+        //! \brief Decrypt the given string with this private key.
+        const std::string decryptString(const std::string& str) const;
+        
         /// \internal Return the raw OpenSSL private key handle.
         evp_pkey_st* impl() const;
         
@@ -88,6 +91,7 @@ class PT_SSL_API SSLPrivateKey::Impl {
         void loadFromFile(const std::string& fileName);
 
         const std::string signString(const std::string& str, const char* digest) const;
+        const std::string decryptString(const std::string& str) const;
 
         friend class SSLContext;
         friend class SSLPrivateKey;

@@ -40,8 +40,11 @@ SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
 SSLPublicKey::~SSLPublicKey()
 {}
 
-bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig, const char* digest) const
-{ return _impl->checkStringSignature(str, sig, digest); }
+bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
+{ return _impl->verifyStringSignature(str, sig, digest); }
+
+const std::string SSLPublicKey::encryptString(const std::string& str) const
+{ return _impl->encryptString(str); }
 
 evp_pkey_st* SSLPublicKey::impl() const
 { return _impl->_pkey; }
@@ -55,8 +58,11 @@ SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 SSLPublicKey::Impl::~Impl()
 { if(_pkey) EVP_PKEY_free(_pkey); }
 
-bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std::string& sig, const char* digest) const
+bool SSLPublicKey::Impl::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
 {
+    if( ! _pkey )
+        throw SSLRuntimeError("Attempting to verify signature using an empty public key!", PT_SOURCEINFO);
+
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
     if(!bmd) {
@@ -98,6 +104,14 @@ bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std:
 
     // Return the result
     return ret > 0;
+}
+
+const std::string SSLPublicKey::Impl::encryptString(const std::string& str) const
+{
+    if( ! _pkey )
+        throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
+
+    return "NOT IMPLEMENTED YET!";
 }
 
 } // namespace Pt

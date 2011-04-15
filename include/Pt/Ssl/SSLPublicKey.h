@@ -41,8 +41,11 @@ class PT_SSL_API SSLPublicKey {
         ~SSLPublicKey();
 
         //! \brief Check the signature of the given string with this public key.
-        bool checkStringSignature(const std::string& str, const std::string& sig, const char* digest = "SHA1") const;
+        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest = "SHA1") const;
 
+        //! \brief Encrypt the given string with this public key.
+        const std::string encryptString(const std::string& str) const;
+        
         /// \internal Instantiate a public-key from the given OpenSSL raw private key handle.
         SSLPublicKey(evp_pkey_st* pkey);
 
@@ -68,7 +71,8 @@ class PT_SSL_API SSLPublicKey::Impl {
         Impl(evp_pkey_st* pkey);
         ~Impl();
 
-        bool checkStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
+        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
+        const std::string encryptString(const std::string& str) const;
 
         friend class SSLPublicKey;
 
