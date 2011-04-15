@@ -88,14 +88,7 @@ bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std:
     bin.resize(binlen);
 
     // Convert the signature string to binary data
-    // TODO: BETTER METHOD!!!
-    const char* ptr = sig.c_str();
-    size_t      i   = 0;
-    while(*ptr) {
-        char dta[3] = { *ptr, *(ptr + 1), 0 };
-        ptr += 3; // Skip the ':'
-        bin[i++] = strtoul(dta, 0, 16);
-    }
+    string2ssldata(sig, &bin[0], binlen);
 
     // Finalize the verification process
     const int ret = EVP_DigestVerifyFinal(mctx.get(), &bin[0], binlen);

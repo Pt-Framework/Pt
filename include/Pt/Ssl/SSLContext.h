@@ -135,12 +135,6 @@ class PT_SSL_API SSLContext {
         SSLCertificateList          _trustedCACert; // List of trusted CA certificates
         SSLCertificateList          _certChain;     // Certificate chain
         SSLPrivateKey               _privKey;       // Private key
-
-#ifndef NLOG
-    public:
-        // Generate call information for logging purposes
-        static const std::string pt_ssl_gen_call_info(const char* className, const std::string& funcName);
-#endif
 };
 
 

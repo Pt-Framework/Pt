@@ -268,24 +268,5 @@ void SSLContext::getAvailableCiphers()
     SSL_free(ssl);
 }
 
-#ifndef NLOG
-const std::string SSLContext::pt_ssl_gen_call_info(const char* className, const std::string& funcName)
-{
-    static int count = 0;
-
-    size_t      a = funcName.find_first_of("(");
-    std::string f = (a == std::string::npos) ? funcName : funcName.substr(0, a);
-    a = f.find_last_of("::");
-    if(a != std::string::npos) f = f.substr(a + 1);
-    a = f.find_last_of(" ");
-    if(a != std::string::npos) f = f.substr(a + 1);
-
-    char buff[1024];
-    sprintf(buff, "[%s] %06d [%22s] ", className, count++, f.c_str());
-
-    return buff;
-}
-#endif
-
 } // namespace Pt
 } // namespace Ssl

@@ -177,7 +177,7 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
     }
 
     // Return the signature string
-    return sslhash2string(&sig[0], siglen);
+    return ssldata2string(&sig[0], siglen);
 }
 
 } // namespace Pt

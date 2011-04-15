@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/SSLContext.h>
+#include <Pt/Ssl/SSLCertificateList.h>
 #include <fstream>
 
 #include "Utils.h"

@@ -78,8 +78,12 @@ extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
 extern const std::string asn1str2string(const ASN1_STRING* asn1Val);
 extern const std::string asn1tim2string(const ASN1_TIME* asn1Val);
 extern const std::string x509nam2string(const X509_NAME* x509Val);
+
 extern const std::string sslhash2string(long md);
 extern const std::string sslhash2string(const unsigned char* md, unsigned int n);
+
+extern const std::string ssldata2string(const unsigned char* md, unsigned int n);
+extern       void        string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
 
 } // namespace Pt
 } // namespace Ssl

@@ -99,5 +99,37 @@ const std::string sslhash2string(const unsigned char* md, unsigned int n)
     return hash;
 }
 
+const std::string ssldata2string(const unsigned char* md, unsigned int n)
+{
+    std::string hash;
+
+    char buf[1024];
+    for(unsigned int i = 0; i < n; ++i) {
+        sprintf(buf, "%02X", md[i]);
+        hash += buf;
+    }
+
+    return hash;
+}
+
+void string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax)
+{
+    const char*          ptr    = str.c_str();
+    const char*          ptrmax = ptr + str.length();
+    const unsigned char* mdmax  = md + nmax;
+    char                 cnv[3] = { 0, 0, 0 };
+
+    for(;;) {
+        if(ptr >= ptrmax || md >= mdmax) break;
+
+        cnv[0] = *ptr++;
+        if(ptr >= ptrmax) break;
+
+        cnv[1] = *ptr++;
+        
+        *md++ = strtoul(cnv, 0, 16);
+    }
+}
+
 } // namespace Pt
 } // namespace Ssl

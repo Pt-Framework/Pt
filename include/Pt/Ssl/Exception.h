@@ -30,6 +30,17 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/System/Logger.h>
+
+//#undef NLOG
+
+#ifndef NLOG
+#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
+#define PT_SSL_LOG_INFO(NAME, CODE) log_info("[" << NAME << "] " << CODE)
+#else
+#define PT_SSL_LOGGER_CATEGORY
+#define PT_SSL_LOG_INFO(NAME, CODE)
+#endif
 
 #include <string>
 #include <exception>
