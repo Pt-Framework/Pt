@@ -122,23 +122,24 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     size_t               leftOver = str.length();
     const unsigned char* src      = (const unsigned char*) str.c_str();
 
-    // Preparethe destination buffer
+    // Prepare the destination buffer
     std::string                dstBuff;
     const int                  rsaSize = RSA_size(rsa.get());
     std::vector<unsigned char> tmpBuff;
     tmpBuff.resize(rsaSize);
 
     // Encrypt the string
-    while(leftOver) {
+    while(leftOver > 0) {
         const int slen = std::min<size_t>(leftOver, rsaSize - 11);
         const int dlen = RSA_public_encrypt(slen, src, &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
         if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string block!", PT_SOURCEINFO);
-        dstBuff += std::string((const char*) &tmpBuff[0], dlen);
+        dstBuff += ssldata2string(&tmpBuff[0], dlen);
+        dstBuff += '\n';
         leftOver -= slen;
     }
 
     // Return the encrypted string
-    return ssldata2string((const unsigned char*) &dstBuff[0], dstBuff.length());
+    return dstBuff;
 }
 
 } // namespace Pt

@@ -61,6 +61,7 @@ int main(int argc, char** argv)
                      << "\n\nResulting signature:\n" << tsig
                      << "\n\nVerification result:\n" << (vres ? "OK" : "FAILED") << "\n");
 
+        text += text; text += text; text += text;
         const std::string& tenc = serverPubKey.encryptString(text);
         const std::string& tdec = serverPrivKey.decryptString(tenc);
         PT_SSL_LOG_M("\n\n##### ENCRYPTING TEXT #####"
