@@ -78,8 +78,8 @@ void SSLPrivateKey::loadFromFile(const std::string& fileName)
 void SSLPrivateKey::clear()
 { _impl = new Impl(); }
 
-const std::string SSLPrivateKey::signString(const std::string& str) const
-{ return _impl->signString(str); }
+const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
+{ return _impl->signString(str, digest); }
 
 evp_pkey_st* SSLPrivateKey::impl() const
 { return _impl->_pkey; }
@@ -133,7 +133,7 @@ void SSLPrivateKey::Impl::clear()
     }
 }
 
-const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
+const std::string SSLPrivateKey::Impl::signString(const std::string& str, const char* digest) const
 {
     if( ! _pkey )
         throw SSLRuntimeError("Failed to sign", PT_SOURCEINFO);
@@ -154,7 +154,7 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str) const
     // Initialize a signing sb-context
     // (there is no need to free this sub-context because it is owned by the message-digest context)
     EVP_PKEY_CTX* pctx = 0;
-    if(!EVP_DigestSignInit(mctx.get(), &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
+    if(!EVP_DigestSignInit(mctx.get(), &pctx, EVP_get_digestbyname(digest), 0, _pkey)) {
         throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
     }
 

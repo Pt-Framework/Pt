@@ -40,8 +40,8 @@ SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
 SSLPublicKey::~SSLPublicKey()
 {}
 
-bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig) const
-{ return _impl->checkStringSignature(str, sig); }
+bool SSLPublicKey::checkStringSignature(const std::string& str, const std::string& sig, const char* digest) const
+{ return _impl->checkStringSignature(str, sig, digest); }
 
 evp_pkey_st* SSLPublicKey::impl() const
 { return _impl->_pkey; }
@@ -55,7 +55,7 @@ SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 SSLPublicKey::Impl::~Impl()
 { if(_pkey) EVP_PKEY_free(_pkey); }
 
-bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std::string& sig) const
+bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std::string& sig, const char* digest) const
 {
     // Initialize a message-digest BIO
     BioAutoPtr bmd( BIO_new(BIO_f_md()) );
@@ -73,7 +73,7 @@ bool SSLPublicKey::Impl::checkStringSignature(const std::string& str, const std:
     // Initialize a verification sb-context
     // (there is no need to free this sub-context because it is owned by the message-digest context)
     EVP_PKEY_CTX* pctx = 0;
-    if(!EVP_DigestVerifyInit(mctx.get(), &pctx, EVP_get_digestbyname("Platinum"), 0, _pkey)) {
+    if(!EVP_DigestVerifyInit(mctx.get(), &pctx, EVP_get_digestbyname(digest), 0, _pkey)) {
         throw SSLRuntimeError("Could not initialize the verification context!", PT_SOURCEINFO);
     }
 

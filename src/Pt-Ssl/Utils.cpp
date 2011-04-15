@@ -123,9 +123,7 @@ void string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax
         if(ptr >= ptrmax || md >= mdmax) break;
 
         cnv[0] = *ptr++;
-        if(ptr >= ptrmax) break;
-
-        cnv[1] = *ptr++;
+        cnv[1] = (ptr < ptrmax) ? (*ptr++) : 0;
         
         *md++ = strtoul(cnv, 0, 16);
     }
