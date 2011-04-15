@@ -85,7 +85,6 @@ class PT_SSL_API SSLCertificateList::Impl {
 
         void loadFromString(const std::string& certData);
         void loadFromFile(const std::string& fileName);
-        void clear();
 
         inline const std::vector<SSLCertificateInfo>& certInfo() const
         { return _certInfo; }
@@ -94,6 +93,8 @@ class PT_SSL_API SSLCertificateList::Impl {
         friend class SSLCertificateList;
 
     private:
+        void clear();
+
         std::vector<x509_st*>           _cert;
         std::vector<SSLCertificateInfo> _certInfo;
 };

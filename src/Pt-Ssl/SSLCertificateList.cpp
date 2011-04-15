@@ -51,13 +51,19 @@ SSLCertificateList::~SSLCertificateList()
 {}
 
 void SSLCertificateList::loadFromString(const std::string& certData)
-{ _impl->loadFromString(certData);  }
+{
+    _impl = new Impl();
+    _impl->loadFromString(certData);
+}
 
 void SSLCertificateList::loadFromFile(const std::string& fileName)
-{ _impl->loadFromFile(fileName);  }
+{
+    _impl = new Impl();
+    _impl->loadFromFile(fileName);
+}
 
 void SSLCertificateList::clear()
-{ _impl->clear();  }
+{ _impl = new Impl(); }
 
 const SSLPublicKey SSLCertificateList::getPublicKey() const
 { return _impl->getPublicKey(); }
