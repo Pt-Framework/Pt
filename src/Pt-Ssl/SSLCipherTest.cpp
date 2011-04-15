@@ -52,7 +52,7 @@ int main(int argc, char** argv)
         
         PT_SSL_LOG_M("################################################################################");
 
-        const std::string& text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
+        std::string text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
 
         const std::string& tsig = serverPrivKey.signString(text);
         const bool         vres = serverPubKey.verifyStringSignature(text, tsig);

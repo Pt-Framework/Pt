@@ -73,6 +73,13 @@ class FreeEVP_MD_CTX {
 };
 typedef Pt::AutoPtr<EVP_MD_CTX, FreeEVP_MD_CTX > EvpMdCtxAutoPtr;
 
+// Used to automatically free an RSA*
+class FreeRSA {
+    protected:
+        void destroy(RSA* rsa)
+        { RSA_free(rsa); }
+};
+typedef Pt::AutoPtr<RSA, FreeRSA > RsaAutoPtr;
 
 // Used to automatically free an EVP_CIPHER_CTX*
 class FreeEVP_CIPHER_CTX {

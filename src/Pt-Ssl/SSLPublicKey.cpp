@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Ssl/SSLPublicKey.h>
+#include <iostream>
 
 #include "Utils.h"
 
@@ -111,24 +112,38 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     if( ! _pkey )
         throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
 
-    RSA* rsa = EVP_PKEY_get1_RSA(_pkey);
-    if(!rsa) {
+    // Get the RSA key from the public key
+    RSA* prsa = EVP_PKEY_get1_RSA(_pkey);
+    if(!prsa)
         throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
-    }
-;
-
-   // int RSA_public_encrypt(int flen, const unsigned char *from, unsigned char *to, RSA *rsa,int padding);
-
-//            rsa_outlen  = RSA_public_encrypt(rsa_inlen, rsa_in, rsa_out, rsa, pad);
-//
-
-
+    RsaAutoPtr rsa(prsa);
     
-    return "NOT IMPLEMENTED YET!";
+    // Get some information about the source string
+    size_t               leftOver = str.length();
+    const unsigned char* src      = (const unsigned char*) str.c_str();
+
+    // Preparethe destination buffer
+    std::string                dstBuff;
+    const int                  rsaSize = RSA_size(rsa.get());
+    std::vector<unsigned char> tmpBuff;
+    tmpBuff.resize(rsaSize);
+
+    // Encrypt the string
+    while(leftOver) {
+        const int slen = std::min<size_t>(leftOver, rsaSize - 11);
+        const int dlen = RSA_public_encrypt(slen, src, &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
+        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string block!", PT_SOURCEINFO);
+        dstBuff += std::string((const char*) &tmpBuff[0], dlen);
+        leftOver -= slen;
+    }
+
+    // Return the encrypted string
+    return ssldata2string((const unsigned char*) &dstBuff[0], dstBuff.length());
 }
 
 } // namespace Pt
 } // namespace Ssl
+
 
 /*
     // Initialize a cipher BIO
