@@ -99,7 +99,7 @@ extern const std::string sslhash2string(long md);
 extern const std::string sslhash2string(const unsigned char* md, unsigned int n);
 
 extern const std::string ssldata2string(const unsigned char* md, unsigned int n);
-extern       void        string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
+extern unsigned int      string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
 
 } // namespace Pt
 } // namespace Ssl

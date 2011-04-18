@@ -234,8 +234,8 @@ const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) con
 
     // Walk torugh the tokens
     for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-        string2ssldata(*it, &srcBuff[0], rsaSize);
-        const int dlen = RSA_private_decrypt(it->length() / 2, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
+        const int slen = string2ssldata(*it, &srcBuff[0], rsaSize);
+        const int dlen = RSA_private_decrypt(slen, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
         if(dlen < 0) throw SSLRuntimeError("Failed decrypting a string block!", PT_SOURCEINFO);
         dstBuff += std::string((const char*) &tmpBuff[0], dlen);
     }

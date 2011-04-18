@@ -112,21 +112,24 @@ const std::string ssldata2string(const unsigned char* md, unsigned int n)
     return hash;
 }
 
-void string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax)
+unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax)
 {
-    const char*          ptr    = str.c_str();
-    const char*          ptrmax = ptr + str.length();
-    const unsigned char* mdmax  = md + nmax;
+    const char*          ptrcur = str.c_str();
+    const char*          ptrmax = ptrcur + str.length();
+          unsigned char* mdcur  = md;
+    const unsigned char* mdmax  = mdcur + nmax;
     char                 cnv[3] = { 0, 0, 0 };
 
     for(;;) {
-        if(ptr >= ptrmax || md >= mdmax) break;
+        if(ptrcur >= ptrmax || md >= mdmax) break;
 
-        cnv[0] = *ptr++;
-        cnv[1] = (ptr < ptrmax) ? (*ptr++) : 0;
+        cnv[0] = *ptrcur++;
+        cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
         
-        *md++ = strtoul(cnv, 0, 16);
+        *mdcur++ = strtoul(cnv, 0, 16);
     }
+
+    return mdcur - md;
 }
 
 } // namespace Pt
