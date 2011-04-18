@@ -123,8 +123,8 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     const unsigned char* src      = (const unsigned char*) str.c_str();
 
     // Prepare the destination buffer
-    std::string                dstBuff;
     const int                  rsaSize = RSA_size(rsa.get());
+    std::string                dstBuff;
     std::vector<unsigned char> tmpBuff;
     tmpBuff.resize(rsaSize);
 
@@ -136,6 +136,7 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
         dstBuff += ssldata2string(&tmpBuff[0], dlen);
         dstBuff += '\n';
         leftOver -= slen;
+        src      += slen;
     }
 
     // Return the encrypted string
