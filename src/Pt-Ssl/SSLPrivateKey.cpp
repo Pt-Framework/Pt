@@ -183,12 +183,65 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str, const 
     return ssldata2string(&sig[0], siglen);
 }
 
+static void tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters)
+{
+    // Clear the destination vector
+    tokens.clear();
+
+    // Check if the given string is empty
+    if(source.empty()) return;
+
+    // Skip delimiters at beginning
+    std::string::size_type lastPos = source.find_first_not_of(delimiters, 0);
+
+    // Find first "non-delimiter"
+    std::string::size_type pos = source.find_first_of(delimiters, lastPos);
+
+    // Tokenize it
+    while((pos != std::string::npos) || (lastPos != std::string::npos)) {
+        // Found a token, add it to the vector
+        tokens.push_back(source.substr(lastPos, pos - lastPos));
+        // Skip delimiters
+        lastPos = source.find_first_not_of(delimiters, pos);
+        // Find next "non-delimiter"
+        pos = source.find_first_of(delimiters, lastPos);
+    }
+}
+
+
 const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) const
 {
     if( ! _pkey )
         throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
 
-    return "NOT IMPLEMENTED YET!";
+    // Get the RSA key from the private key
+    RSA* prsa = EVP_PKEY_get1_RSA(_pkey);
+    if(!prsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
+    RsaAutoPtr rsa(prsa);
+
+    // Tokenize the source by the '\n' character
+    std::vector<std::string> tokens;
+    tokenize(tokens, str, "\n");
+
+    // Prepare the buffers
+    const int                  rsaSize = RSA_size(rsa.get());
+    std::string                dstBuff;
+    std::vector<unsigned char> srcBuff;
+    std::vector<unsigned char> tmpBuff;
+    srcBuff.resize(rsaSize);
+    tmpBuff.resize(rsaSize);
+
+    // Walk torugh the tokens
+    for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+        string2ssldata(*it, &srcBuff[0], rsaSize);
+        const int dlen = RSA_private_decrypt(it->length() / 2, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
+        if(dlen < 0) throw SSLRuntimeError("Failed decrypting a string block!", PT_SOURCEINFO);
+        dstBuff += std::string((const char*) &tmpBuff[0], dlen);
+    }
+
+    // Return the decrypted string
+    return dstBuff;
 }
 
 } // namespace Pt
