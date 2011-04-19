@@ -65,13 +65,13 @@ int main(int argc, char** argv)
         text += ' ' + text;
         text += ' ' + text;
 
-        const std::string& tenc = serverPubKey.encryptString(text);
+        const std::string& tenc = serverPubKey.encryptString(text) + serverPubKey.encryptString(text);
         const std::string& tdec = serverPrivKey.decryptString(tenc);
         PT_SSL_LOG_M("\n\n##### ENCRYPTING TEXT #####"
                      << "\n\nInput text:\n" << text
                      << "\n\nEncryption result:\n" << tenc
                      << "\n\nDecryption result:\n" << tdec
-                     << "\n\nDecryption status:\n" << ((text == tdec) ? "OK" : "FAILED")<< "\n");
+                     << "\n\nDecryption status:\n" << ((text + text == tdec) ? "OK" : "FAILED")<< "\n");
                      
         PT_SSL_LOG_M("################################################################################");
 
