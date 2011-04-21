@@ -89,42 +89,6 @@ bool SSLPublicKey::Impl::verifyStringSignature(const std::string& str, const std
     return ret > 0;
 }
 
-const std::string SSLPublicKey::Impl::encryptString(const std::string& str) const
-{
-    if( ! _pkey )
-        throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
-
-    // Get the RSA key from the public key
-    RSA* prsa = EVP_PKEY_get1_RSA(_pkey);
-    if(!prsa)
-        throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
-    RsaAutoPtr rsa(prsa);
-
-    // Get some information about the source string
-    size_t               leftOver = str.length();
-    const unsigned char* src      = (const unsigned char*) str.c_str();
-
-    // Prepare the destination buffer
-    const int                  rsaSize = RSA_size(rsa.get());
-    std::string                dstBuff;
-    std::vector<unsigned char> tmpBuff;
-    tmpBuff.resize(rsaSize);
-
-    // Encrypt the string
-    while(leftOver > 0) {
-        const int slen = std::min<size_t>(leftOver, rsaSize - 11);
-        const int dlen = RSA_public_encrypt(slen, src, &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
-        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string block!", PT_SOURCEINFO);
-        dstBuff += ssldata2string(&tmpBuff[0], dlen);
-        dstBuff += '\n';
-        leftOver -= slen;
-        src      += slen;
-    }
-
-    // Return the encrypted string
-    return dstBuff;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,9 +113,6 @@ SSLPublicKey::~SSLPublicKey()
 
 bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
 { return _impl->verifyStringSignature(str, sig, digest); }
-
-const std::string SSLPublicKey::encryptString(const std::string& str) const
-{ return _impl->encryptString(str); }
 
 void SSLPublicKey::beginEncryptString(PaddingMode pmode)
 {
@@ -197,8 +158,10 @@ const std::string SSLPublicKey::tryEncryptString(const std::string& str)
         const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_eobuf[0], _rsa, _epmode);
         if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
         // Append the result to the output buffer
-        dstBuff += ssldata2string(&_eobuf[0], dlen);
-        dstBuff += '\n';
+        if(dlen > 0) {
+            dstBuff += ssldata2string(&_eobuf[0], dlen);
+            dstBuff += '\n';
+        }
         // Adjust the state of the source string
         leftOver -= _maxChunkSize;
         srcBuf   += _maxChunkSize;
@@ -222,7 +185,7 @@ const std::string SSLPublicKey::endEncryptString()
     if(!_eibuf.empty()) {
         const int dlen = RSA_public_encrypt(_eibuf.length(), (const unsigned char*) _eibuf.c_str(), &_eobuf[0], _rsa, _epmode);
         if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-        dstBuff = ssldata2string(&_eobuf[0], dlen);
+        if(dlen > 0) dstBuff = ssldata2string(&_eobuf[0], dlen);
     }
 
     // Free the RSA

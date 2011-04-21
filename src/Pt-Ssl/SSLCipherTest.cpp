@@ -40,8 +40,11 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 int main(int argc, char** argv)
 {
     try {
+        // Start the test
         PT_SSL_LOG_M("OpenSSL test progam started");
+        PT_SSL_LOG_M("################################################################################");
 
+        // Load certificate and private key
         Pt::Ssl::SSLCertificateList serverCertChain;
         serverCertChain.loadFromFile("server.pem");
         
@@ -50,7 +53,6 @@ int main(int argc, char** argv)
 
         Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
         
-        PT_SSL_LOG_M("################################################################################");
 
         const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
@@ -72,39 +74,26 @@ int main(int argc, char** argv)
         // Start encryption test #2
         Pt::Ssl::SSLPublicKey serverPubKey2(serverPubKey);
         std::string           tenc2;
-        serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
-        tenc2 += serverPubKey.tryEncryptString(text);
-        tenc2 += serverPubKey.tryEncryptString(" ");
-        tenc2 += serverPubKey.tryEncryptString(text2);
+        serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1); // Later we can use RSA_PKCS1_OAEP too!
+        tenc2 += serverPubKey2.tryEncryptString(text);
+        tenc2 += serverPubKey2.tryEncryptString(" ");
+        tenc2 += serverPubKey2.tryEncryptString(text2);
 
         // End the encryption tests
         tenc1 += serverPubKey .endEncryptString();
         tenc2 += serverPubKey2.endEncryptString();
 
-        //
+        // Check if the decrypted texts are the same with the source texts
         const std::string& tdec1 = serverPrivKey.decryptString(tenc1);
         const std::string& tdec2 = serverPrivKey.decryptString(tenc2);
-PT_SSL_LOG_M(tdec1);
-throw;
+     
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
-                     << "\n\nDecryption #1 status:\n" << ( ( (text + ' '        ) == tdec1 ) ? "OK" : "FAILED") << "\n"
-                     << "\n\nDecryption #2 status:\n" << ( ( (text + ' ' + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"
-                     );
-        
-        /*const std::string ()
-        
+                     << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
+                     << "\nDecryption #2 status: " << ( ( (text + " " + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"
+                    );
 
-        const std::string& tenc = serverPubKey.encryptString(text) + serverPubKey.encryptString(text);
-        const std::string& tdec = serverPrivKey.decryptString(tenc);
-        PT_SSL_LOG_M("\n\n##### ENCRYPTING TEXT #####"
-                     << "\n\nInput text:\n" << text
-                     << "\n\nEncryption result:\n" << tenc
-                     << "\n\nDecryption result:\n" << tdec
-                     << "\n\nDecryption status:\n" << ((text + text == tdec) ? "OK" : "FAILED")<< "\n");
-          */
-        
+        // Done
         PT_SSL_LOG_M("################################################################################");
-
         PT_SSL_LOG_M("OpenSSL test progam ended");
         return 0;
     }

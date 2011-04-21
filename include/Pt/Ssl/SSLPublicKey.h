@@ -53,9 +53,6 @@ class PT_SSL_API SSLPublicKey {
         //! \brief Check the signature of the given string with this public key.
         bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest = "SHA1") const;
 
-        //! \brief Encrypt the given string with this public key.
-        const std::string encryptString(const std::string& str) const;
-        
         //! \brief Begin string encryption.
         void beginEncryptString(PaddingMode pmode);
 
@@ -96,7 +93,6 @@ class PT_SSL_API SSLPublicKey::Impl {
         ~Impl();
 
         bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
-        const std::string encryptString(const std::string& str) const;
 
         friend class SSLPublicKey;
 
