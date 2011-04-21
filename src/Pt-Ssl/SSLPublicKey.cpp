@@ -34,23 +34,19 @@
 namespace Pt {
 namespace Ssl {
 
-SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
-: _impl(new Impl(pkey))
-{}
+class SSLPublicKey::Impl {
+    public:
+        Impl(evp_pkey_st* pkey);
+        ~Impl();
 
-SSLPublicKey::~SSLPublicKey()
-{}
+        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
+        const std::string encryptString(const std::string& str) const;
 
-bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
-{ return _impl->verifyStringSignature(str, sig, digest); }
+        friend class SSLPublicKey;
 
-const std::string SSLPublicKey::encryptString(const std::string& str) const
-{ return _impl->encryptString(str); }
-
-evp_pkey_st* SSLPublicKey::impl() const
-{ return _impl->_pkey; }
-    
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    private:
+        evp_pkey_st* _pkey;
+};
 
 SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 : _pkey(pkey)
@@ -117,7 +113,7 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     if(!prsa)
         throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
     RsaAutoPtr rsa(prsa);
-    
+
     // Get some information about the source string
     size_t               leftOver = str.length();
     const unsigned char* src      = (const unsigned char*) str.c_str();
@@ -143,9 +139,39 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
     return dstBuff;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
+: _impl( new Impl(pkey) ),
+  _prsa( 0 )
+{}
+
+SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
+: _impl( pkey._impl ),
+  _prsa( 0 )
+{}
+
+SSLPublicKey::SSLPublicKey(ImplPtr ptr)
+: _impl( ptr ),
+  _prsa( 0 )
+{}
+
+SSLPublicKey::~SSLPublicKey()
+{}
+
+bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
+{ return _impl->verifyStringSignature(str, sig, digest); }
+
+const std::string SSLPublicKey::encryptString(const std::string& str) const
+{ return _impl->encryptString(str); }
+
+evp_pkey_st* SSLPublicKey::impl() const
+{ return _impl->_pkey; }
+    
 } // namespace Pt
 } // namespace Ssl
-
 
 /*
     // Initialize a cipher BIO

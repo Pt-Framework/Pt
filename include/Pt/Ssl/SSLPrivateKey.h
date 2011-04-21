@@ -40,6 +40,9 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Instantiate an empty private-key.
         SSLPrivateKey();
 
+        //! \brief Copy ctor.
+        SSLPrivateKey(const SSLPrivateKey& pkey);
+
         //! \brief Instantiate an empty private-key.
         SSLPrivateKey(const std::string& password);
 
@@ -68,41 +71,19 @@ class PT_SSL_API SSLPrivateKey {
         evp_pkey_st* impl() const;
         
     private:
+        // Foward declaration of the shared implementation class
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
 
-        // Copy ctor
-        inline SSLPrivateKey(ImplPtr ptr)
-        : _impl(ptr)
-        {}
+        // Instantiate from the given implementation
+        SSLPrivateKey(ImplPtr ptr);
 
     private:
+        // Shared implementation of the class (COW)
         ImplPtr _impl;
+
+        // Non-shared data
 };
-
-//! \internal
-class PT_SSL_API SSLPrivateKey::Impl {
-    public:
-        Impl();
-        Impl(const std::string& password);
-        ~Impl();
-
-        void loadFromString(const std::string& keyData);
-        void loadFromFile(const std::string& fileName);
-
-        const std::string signString(const std::string& str, const char* digest) const;
-        const std::string decryptString(const std::string& str) const;
-
-        friend class SSLContext;
-        friend class SSLPrivateKey;
-
-    private:
-        void clear();
-
-        std::string  _pswd;
-        evp_pkey_st* _pkey;
-};
-
 
 } // namespace Pt
 } // namespace Ssl

@@ -36,6 +36,7 @@ struct ssl_st;
 struct bio_st;
 struct x509_st;
 struct evp_pkey_st;
+struct rsa_st;
 
 namespace Pt {
 namespace Ssl {

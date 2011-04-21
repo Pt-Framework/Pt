@@ -37,6 +37,9 @@ namespace Ssl {
 //! \brief Public key.
 class PT_SSL_API SSLPublicKey {
     public:
+        //! \brief Copy ctor.
+        SSLPublicKey(const SSLPublicKey& pkey);
+        
         //! \brief Standard dtor.
         ~SSLPublicKey();
 
@@ -52,32 +55,22 @@ class PT_SSL_API SSLPublicKey {
         /// \internal Return the raw OpenSSL public key handle.
         evp_pkey_st* impl() const;
 
+        //
+        
     private:
+        // Foward declaration of the shared implementation class
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
 
-    private:
-        // Copy ctor
-        inline SSLPublicKey(ImplPtr ptr)
-        : _impl(ptr)
-        {}
+        // Instantiate from the given implementation
+        SSLPublicKey(ImplPtr ptr);
 
+    private:
+        // Shared implementation of the class (COW)
         ImplPtr _impl;
-};
 
-//! \internal
-class PT_SSL_API SSLPublicKey::Impl {
-    public:
-        Impl(evp_pkey_st* pkey);
-        ~Impl();
-
-        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
-        const std::string encryptString(const std::string& str) const;
-
-        friend class SSLPublicKey;
-
-    private:
-        evp_pkey_st* _pkey;
+        // Non-shared data
+        rsa_st* _prsa;
 };
 
 } // namespace Pt

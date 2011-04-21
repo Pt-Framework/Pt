@@ -34,60 +34,32 @@
 namespace Pt {
 namespace Ssl {
 
-static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
-{
-    // Get the password
-    const std::string& password = *((std::string*) userdata);
+class PT_SSL_API SSLPrivateKey::Impl {
+    public:
+        Impl();
+        Impl(const std::string& password);
+        ~Impl();
 
-    // If the wanted length is not the same with the given password length, just return 0
-    if((unsigned) num < password.length() + 1) return 0;
+        void loadFromString(const std::string& keyData);
+        void loadFromFile(const std::string& fileName);
 
-    // Copy the password to the buffer and return the length
-    strcpy(buff, &password[0]);
-    return password.length();
-}
+        const std::string signString(const std::string& str, const char* digest) const;
+        const std::string decryptString(const std::string& str) const;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-SSLPrivateKey::SSLPrivateKey()
-: _impl( new Impl() )
-{}
+        friend class SSLContext;
+        friend class SSLPrivateKey;
 
-SSLPrivateKey::SSLPrivateKey(const std::string& password)
-: _impl( new Impl(password) )
-{}
+    private:
+        void clear();
 
-SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
-: _impl( new Impl(password) )
-{ _impl->loadFromString(keyData); }
+        static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
+        static void tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters);
 
-SSLPrivateKey::~SSLPrivateKey()
-{}
+        std::string  _pswd;
+        evp_pkey_st* _pkey;
+};
 
-void SSLPrivateKey::loadFromString(const std::string& keyData)
-{
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromString(keyData);
-}
 
-void SSLPrivateKey::loadFromFile(const std::string& fileName)
-{
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromFile(fileName);
-}
-
-void SSLPrivateKey::clear()
-{ _impl = new Impl(); }
-
-const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
-{ return _impl->signString(str, digest); }
-
-const std::string SSLPrivateKey::decryptString(const std::string& str) const
-{ return _impl->decryptString(str); }
-
-evp_pkey_st* SSLPrivateKey::impl() const
-{ return _impl->_pkey; }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 SSLPrivateKey::Impl::Impl()
 : _pswd(), _pkey(0)
 {}
@@ -108,7 +80,7 @@ void SSLPrivateKey::Impl::loadFromString(const std::string& keyData)
     BioAutoPtr in( BIO_new_mem_buf( (void*) keyData.c_str(), keyData.length() ) );
 
     // Try to read/parse the private key
-    _pkey = PEM_read_bio_PrivateKey(in.get(), 0, passwordCallback, (void*) &_pswd);
+    _pkey = PEM_read_bio_PrivateKey(in.get(), 0, SSLPrivateKey::Impl::passwordCallback, (void*) &_pswd);
     if(!_pkey)
         throw SSLRuntimeError("Could not read/parse/decode private-key data!", PT_SOURCEINFO);
 }
@@ -183,7 +155,54 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str, const 
     return ssldata2string(&sig[0], siglen);
 }
 
-static void tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters)
+const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) const
+{
+    if( ! _pkey )
+        throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
+
+    // Get the RSA key from the private key
+    RSA* prsa = EVP_PKEY_get1_RSA(_pkey);
+    if(!prsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
+    RsaAutoPtr rsa(prsa);
+
+    // Tokenize the source by the '\n' character
+    std::vector<std::string> tokens;
+    SSLPrivateKey::Impl::tokenize(tokens, str, "\n");
+
+    // Prepare the buffers
+    const int                  rsaSize = RSA_size(rsa.get());
+    std::string                dstBuff;
+    std::vector<unsigned char> srcBuff;
+    std::vector<unsigned char> tmpBuff;
+    srcBuff.resize(rsaSize);
+    tmpBuff.resize(rsaSize);
+
+    // Walk torugh the tokens
+    for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+        const int slen = string2ssldata(*it, &srcBuff[0], rsaSize);
+        const int dlen = RSA_private_decrypt(slen, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
+        dstBuff += std::string((const char*) &tmpBuff[0], dlen);
+    }
+
+    // Return the decrypted string
+    return dstBuff;
+}
+
+int SSLPrivateKey::Impl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+{
+    // Get the password
+    const std::string& password = *((std::string*) userdata);
+
+    // If the wanted length is not the same with the given password length, just return 0
+    if((unsigned) num < password.length() + 1) return 0;
+
+    // Copy the password to the buffer and return the length
+    strcpy(buff, &password[0]);
+    return password.length();
+}
+
+void SSLPrivateKey::Impl::tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters)
 {
     // Clear the destination vector
     tokens.clear();
@@ -208,40 +227,57 @@ static void tokenize(std::vector<std::string> &tokens, const std::string &source
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) const
+SSLPrivateKey::SSLPrivateKey()
+: _impl( new Impl() )
+{}
+
+SSLPrivateKey::SSLPrivateKey(const SSLPrivateKey& pkey)
+: _impl( pkey._impl )
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& password)
+: _impl( new Impl(password) )
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
+: _impl( new Impl(password) )
+{ _impl->loadFromString(keyData); }
+
+SSLPrivateKey::SSLPrivateKey(ImplPtr ptr)
+: _impl(ptr)
+{}
+
+SSLPrivateKey::~SSLPrivateKey()
+{}
+
+void SSLPrivateKey::loadFromString(const std::string& keyData)
 {
-    if( ! _pkey )
-        throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
-
-    // Get the RSA key from the private key
-    RSA* prsa = EVP_PKEY_get1_RSA(_pkey);
-    if(!prsa)
-        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
-    RsaAutoPtr rsa(prsa);
-
-    // Tokenize the source by the '\n' character
-    std::vector<std::string> tokens;
-    tokenize(tokens, str, "\n");
-
-    // Prepare the buffers
-    const int                  rsaSize = RSA_size(rsa.get());
-    std::string                dstBuff;
-    std::vector<unsigned char> srcBuff;
-    std::vector<unsigned char> tmpBuff;
-    srcBuff.resize(rsaSize);
-    tmpBuff.resize(rsaSize);
-
-    // Walk torugh the tokens
-    for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-        const int slen = string2ssldata(*it, &srcBuff[0], rsaSize);
-        const int dlen = RSA_private_decrypt(slen, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
-        dstBuff += std::string((const char*) &tmpBuff[0], dlen);
-    }
-
-    // Return the decrypted string
-    return dstBuff;
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromString(keyData);
 }
+
+void SSLPrivateKey::loadFromFile(const std::string& fileName)
+{
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromFile(fileName);
+}
+
+void SSLPrivateKey::clear()
+{ _impl = new Impl(); }
+
+const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
+{ return _impl->signString(str, digest); }
+
+const std::string SSLPrivateKey::decryptString(const std::string& str) const
+{ return _impl->decryptString(str); }
+
+evp_pkey_st* SSLPrivateKey::impl() const
+{ return _impl->_pkey; }
+
 
 } // namespace Pt
 } // namespace Ssl
