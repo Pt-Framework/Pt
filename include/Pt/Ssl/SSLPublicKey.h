@@ -37,6 +37,13 @@ namespace Ssl {
 //! \brief Public key.
 class PT_SSL_API SSLPublicKey {
     public:
+        //! \brief Padding mode for string encryption.
+        enum PaddingMode {
+            RSA_PKCS1,      //!< The most widely used mode. 
+            RSA_PKCS1_OAEP  //!< Recommended for new applications.
+        };
+
+    public:
         //! \brief Copy ctor.
         SSLPublicKey(const SSLPublicKey& pkey);
         
@@ -49,8 +56,14 @@ class PT_SSL_API SSLPublicKey {
         //! \brief Encrypt the given string with this public key.
         const std::string encryptString(const std::string& str) const;
         
+        //! \brief Begin string encryption.
+        void beginEncryptString(PaddingMode pmode);
 
-        //
+        //! \brief Try to encrypt the given string; may return an empty string if there is too few input data.
+        const std::string tryEncryptString(const std::string& str);
+
+        //! \brief End string encryption.
+        const std::string endEncryptString();
         
         /// \internal Instantiate a public-key from the given OpenSSL raw private key handle.
         SSLPublicKey(evp_pkey_st* pkey);
@@ -67,8 +80,28 @@ class PT_SSL_API SSLPublicKey {
         // Shared implementation of the class (COW)
         ImplPtr _impl;
 
-        // Non-shared data
-        rsa_st* _prsa;
+        // Non-shared data for string encryption
+        rsa_st*                    _rsa;
+        int                        _epmode;
+        int                        _rsaSize;
+        int                        _maxChunkSize;
+        std::string                _eibuf;
+        std::vector<unsigned char> _eobuf;
+};
+
+//! \internal
+class PT_SSL_API SSLPublicKey::Impl {
+    public:
+        Impl(evp_pkey_st* pkey);
+        ~Impl();
+
+        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
+        const std::string encryptString(const std::string& str) const;
+
+        friend class SSLPublicKey;
+
+    private:
+        evp_pkey_st* _pkey;
 };
 
 } // namespace Pt

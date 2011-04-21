@@ -82,6 +82,32 @@ class PT_SSL_API SSLPrivateKey {
         // Non-shared data
 };
 
+//! \internal
+class PT_SSL_API SSLPrivateKey::Impl {
+    public:
+        Impl();
+        Impl(const std::string& password);
+        ~Impl();
+
+        void loadFromString(const std::string& keyData);
+        void loadFromFile(const std::string& fileName);
+
+        const std::string signString(const std::string& str, const char* digest) const;
+        const std::string decryptString(const std::string& str) const;
+
+        friend class SSLContext;
+        friend class SSLPrivateKey;
+
+    private:
+        void clear();
+
+        static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
+        static void tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters);
+
+        std::string  _pswd;
+        evp_pkey_st* _pkey;
+};
+
 } // namespace Pt
 } // namespace Ssl
 

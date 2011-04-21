@@ -34,20 +34,6 @@
 namespace Pt {
 namespace Ssl {
 
-class SSLPublicKey::Impl {
-    public:
-        Impl(evp_pkey_st* pkey);
-        ~Impl();
-
-        bool verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const;
-        const std::string encryptString(const std::string& str) const;
-
-        friend class SSLPublicKey;
-
-    private:
-        evp_pkey_st* _pkey;
-};
-
 SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 : _pkey(pkey)
 {}
@@ -145,22 +131,128 @@ const std::string SSLPublicKey::Impl::encryptString(const std::string& str) cons
 
 SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
 : _impl( new Impl(pkey) ),
-  _prsa( 0 )
+  _rsa ( 0 )
 {}
 
 SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
 : _impl( pkey._impl ),
-  _prsa( 0 )
+  _rsa ( 0 )
 {}
 
 SSLPublicKey::~SSLPublicKey()
-{}
+{
+    if(_rsa) {
+        RSA_free(_rsa);
+        _rsa = 0;
+    }
+}
 
 bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
 { return _impl->verifyStringSignature(str, sig, digest); }
 
 const std::string SSLPublicKey::encryptString(const std::string& str) const
 { return _impl->encryptString(str); }
+
+void SSLPublicKey::beginEncryptString(PaddingMode pmode)
+{
+    if( !_impl || !_impl->_pkey )
+        throw SSLRuntimeError("Attempting to encrypt string using an empty public key!", PT_SOURCEINFO);
+    if( _rsa )
+        throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
+
+    // Get the RSA key from the public key
+    _rsa = EVP_PKEY_get1_RSA(_impl->_pkey);
+    if(!_rsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
+
+    // Determine the padding mode
+    _epmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
+    
+    // Get the RSA and maximum chunk size
+    _rsaSize      = RSA_size(_rsa);
+    _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 41) : (_rsaSize - 11);
+
+    // Clear the input buffer and resize the output buffer
+    _eibuf.clear();
+    _eobuf.resize(_rsaSize);
+}
+
+const std::string SSLPublicKey::tryEncryptString(const std::string& str)
+{
+    if( !_rsa )
+        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+
+    // Append the string to the input buffer
+    _eibuf += str;
+    if(_eibuf.length() < size_t(_maxChunkSize)) return "";
+
+    // Get some information about the source string
+    size_t               leftOver = _eibuf.length();
+    const unsigned char* srcBuf   = (const unsigned char*) _eibuf.c_str();
+    
+    // Encrypt the string
+    std::string dstBuff;
+    while(leftOver >= size_t(_maxChunkSize)) {
+        // Perform encryption
+        const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_eobuf[0], _rsa, _epmode);
+        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        // Append the result to the output buffer
+        dstBuff += ssldata2string(&_eobuf[0], dlen);
+        dstBuff += '\n';
+        // Adjust the state of the source string
+        leftOver -= _maxChunkSize;
+        srcBuf   += _maxChunkSize;
+    }
+
+    // Remove the encrypted string from the input buffer
+    if(leftOver) _eibuf.erase(0, _eibuf.length() - leftOver);
+    else         _eibuf.clear();
+
+    // Return the encrypted string
+    return dstBuff;
+}
+
+const std::string SSLPublicKey::endEncryptString()
+{
+    if( !_rsa )
+        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+
+    // Encrypt the remaining data
+    std::string dstBuff;
+    if(!_eibuf.empty()) {
+        const int dlen = RSA_public_encrypt(_eibuf.length(), (const unsigned char*) _eibuf.c_str(), &_eobuf[0], _rsa, _epmode);
+        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        dstBuff = ssldata2string(&_eobuf[0], dlen);
+    }
+
+    // Free the RSA
+    RSA_free(_rsa);
+    _rsa = 0;
+
+    // Return the encrypted string
+    return dstBuff;
+}
+
+/*
+
+    // Get some information about the source string
+    size_t               leftOver = str.length();
+    const unsigned char* src      = (const unsigned char*) str.c_str();
+
+    // Prepare the destination buffer
+    const int                  rsaSize = RSA_size(rsa.get());
+    std::string                dstBuff;
+    std::vector<unsigned char> tmpBuff;
+    tmpBuff.resize(rsaSize);
+
+    // Encrypt the string
+    while(leftOver > 0) {
+        const int slen = std::min<size_t>(leftOver, rsaSize - 11);
+        dstBuff += '\n';
+        leftOver -= slen;
+        src      += slen
+*/
+    
 
 evp_pkey_st* SSLPublicKey::impl() const
 { return _impl->_pkey; }
