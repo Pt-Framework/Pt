@@ -75,9 +75,6 @@ class PT_SSL_API SSLPrivateKey {
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
 
-        // Instantiate from the given implementation
-        SSLPrivateKey(ImplPtr ptr);
-
     private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;

@@ -247,10 +247,6 @@ SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& pass
 : _impl( new Impl(password) )
 { _impl->loadFromString(keyData); }
 
-SSLPrivateKey::SSLPrivateKey(ImplPtr ptr)
-: _impl(ptr)
-{}
-
 SSLPrivateKey::~SSLPrivateKey()
 {}
 

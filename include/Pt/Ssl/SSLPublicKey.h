@@ -49,21 +49,19 @@ class PT_SSL_API SSLPublicKey {
         //! \brief Encrypt the given string with this public key.
         const std::string encryptString(const std::string& str) const;
         
+
+        //
+        
         /// \internal Instantiate a public-key from the given OpenSSL raw private key handle.
         SSLPublicKey(evp_pkey_st* pkey);
 
         /// \internal Return the raw OpenSSL public key handle.
         evp_pkey_st* impl() const;
-
-        //
         
     private:
         // Foward declaration of the shared implementation class
         class Impl;
         typedef SmartPtr<Impl> ImplPtr;
-
-        // Instantiate from the given implementation
-        SSLPublicKey(ImplPtr ptr);
 
     private:
         // Shared implementation of the class (COW)

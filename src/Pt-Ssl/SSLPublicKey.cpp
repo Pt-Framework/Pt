@@ -153,11 +153,6 @@ SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
   _prsa( 0 )
 {}
 
-SSLPublicKey::SSLPublicKey(ImplPtr ptr)
-: _impl( ptr ),
-  _prsa( 0 )
-{}
-
 SSLPublicKey::~SSLPublicKey()
 {}
 
