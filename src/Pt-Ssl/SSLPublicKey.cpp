@@ -132,6 +132,7 @@ void SSLPublicKey::beginEncryptString(PaddingMode pmode)
     // Get the RSA and maximum chunk size
     _rsaSize      = RSA_size(_rsa);
     _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 41) : (_rsaSize - 11);
+    --_maxChunkSize;
 
     // Clear the input buffer and resize the output buffer
     _eibuf.clear();
