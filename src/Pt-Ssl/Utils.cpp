@@ -125,7 +125,27 @@ unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned 
 
         cnv[0] = *ptrcur++;
         cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
-        
+
+        *mdcur++ = strtoul(cnv, 0, 16);
+    }
+
+    return mdcur - md;
+}
+
+unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax)
+{
+    const char*          ptrcur = str;
+    const char*          ptrmax = ptrcur + slen;
+          unsigned char* mdcur  = md;
+    const unsigned char* mdmax  = mdcur + nmax;
+    char                 cnv[3] = { 0, 0, 0 };
+
+    for(;;) {
+        if(ptrcur >= ptrmax || md >= mdmax) break;
+
+        cnv[0] = *ptrcur++;
+        cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
+
         *mdcur++ = strtoul(cnv, 0, 16);
     }
 

@@ -74,19 +74,30 @@ int main(int argc, char** argv)
         // Start encryption test #2
         Pt::Ssl::SSLPublicKey serverPubKey2(serverPubKey);
         std::string           tenc2;
-        serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1); // Later we can use RSA_PKCS1_OAEP too!
+        serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
         tenc2 += serverPubKey2.tryEncryptString(text);
         tenc2 += serverPubKey2.tryEncryptString(" ");
-        tenc2 += serverPubKey2.tryEncryptString(text2);
+        //tenc2 += serverPubKey2.tryEncryptString(text2);
 
         // End the encryption tests
         tenc1 += serverPubKey .endEncryptString();
         tenc2 += serverPubKey2.endEncryptString();
 
+        std::string tdec1;
+        serverPrivKey.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1);
+        tdec1 += serverPrivKey.tryDecryptString(tenc1);
+
+        // Start decryption test #2
+        Pt::Ssl::SSLPrivateKey serverPrivKey2(serverPrivKey);
+        std::string            tdec2;
+        serverPrivKey2.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1_OAEP);
+        tdec2 += serverPrivKey2.tryDecryptString(tenc2);
+
+        // End the decryption tests
+        tdec1 += serverPrivKey .endDecryptString();
+        tdec2 += serverPrivKey2.endDecryptString();
+  
         // Check if the decrypted texts are the same with the source texts
-        const std::string& tdec1 = serverPrivKey.decryptString(tenc1);
-        const std::string& tdec2 = serverPrivKey.decryptString(tenc2);
-     
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
                      << "\nDecryption #2 status: " << ( ( (text + " " + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"

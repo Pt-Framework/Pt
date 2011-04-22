@@ -129,6 +129,159 @@ const std::string SSLPrivateKey::Impl::signString(const std::string& str, const 
     return ssldata2string(&sig[0], siglen);
 }
 
+int SSLPrivateKey::Impl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+{
+    // Get the password
+    const std::string& password = *((std::string*) userdata);
+
+    // If the wanted length is not the same with the given password length, just return 0
+    if((unsigned) num < password.length() + 1) return 0;
+
+    // Copy the password to the buffer and return the length
+    strcpy(buff, &password[0]);
+    return password.length();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLPrivateKey::SSLPrivateKey()
+: _impl( new Impl() ), _rsa(0)
+{}
+
+SSLPrivateKey::SSLPrivateKey(const SSLPrivateKey& pkey)
+: _impl( pkey._impl ), _rsa(0)
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& password)
+: _impl( new Impl(password) ), _rsa(0)
+{}
+
+SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
+: _impl( new Impl(password) ), _rsa(0)
+{ _impl->loadFromString(keyData); }
+
+SSLPrivateKey::~SSLPrivateKey()
+{
+    if(_rsa) {
+        RSA_free(_rsa);
+        _rsa = 0;
+    }    
+}
+
+void SSLPrivateKey::loadFromString(const std::string& keyData)
+{
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromString(keyData);
+}
+
+void SSLPrivateKey::loadFromFile(const std::string& fileName)
+{
+    _impl = new Impl(_impl->_pswd);
+    _impl->loadFromFile(fileName);
+}
+
+void SSLPrivateKey::clear()
+{ _impl = new Impl(); }
+
+const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
+{ return _impl->signString(str, digest); }
+
+void SSLPrivateKey::beginDecryptString(PaddingMode pmode)
+{
+    if( !_impl || !_impl->_pkey )
+        throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
+    if( _rsa )
+        throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
+
+    // Get the RSA key from the private key
+    _rsa = EVP_PKEY_get1_RSA(_impl->_pkey);
+    if(!_rsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
+
+    // Determine the padding mode
+    _epmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
+
+    // Get the RSA size
+    _rsaSize = RSA_size(_rsa);
+
+    // Clear the input buffer and resize the output and conversion buffers
+    _dibuf.clear();
+    _dobuf.resize(_rsaSize);
+    _dcbuf.resize(_rsaSize);
+    
+}
+
+const std::string SSLPrivateKey::tryDecryptString(const std::string& str)
+{
+    if( !_rsa )
+        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
+
+    // Append the string to the input buffer
+    _dibuf += str;
+
+    // Get the source string
+    const char* srcBuf = _dibuf.c_str();
+
+    // Decrypt the string
+    std::string dstBuff;
+    size_t      curPos = 0;
+    size_t      sepPos = _dibuf.find_first_of('\n', curPos);
+    while(sepPos != std::string::npos) {
+        // Perform decryption
+        const int slen = sepPos - curPos;
+        const int clen = string2ssldata(srcBuf, slen, &_dcbuf[0], _rsaSize);
+        const int dlen = RSA_private_decrypt(clen, &_dcbuf[0], &_dobuf[0], _rsa, _epmode);
+        if(dlen < 0) throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+        if(dlen > 0) dstBuff += std::string((const char*) &_dobuf[0], dlen);
+        // Adjust the state of the source string
+        curPos += slen + 1;
+        srcBuf += slen;
+        // Find the position of the next separator
+        if(curPos >= _dibuf.length()) break;
+        sepPos = _dibuf.find_first_of('\n', curPos);
+    }
+
+    // Remove the decrypted string from the input buffer
+    if(curPos >= _dibuf.length()) _dibuf.clear();
+    else                          _dibuf.erase(0, curPos);
+
+    // Return the decrypted string
+    return dstBuff;
+}
+
+const std::string SSLPrivateKey::endDecryptString()
+{
+    if( !_rsa )
+        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
+
+    // Decrypt the remaining data
+    std::string dstBuff;
+    if(!_dibuf.empty()) {
+        const int clen = string2ssldata(_dibuf, &_dcbuf[0], _rsaSize);
+        const int dlen = RSA_private_decrypt(clen, &_dcbuf[0], &_dobuf[0], _rsa, _epmode);
+        if(dlen < 0) throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+        if(dlen > 0) dstBuff += std::string((const char*) &_dobuf[0], dlen);
+    }
+
+    // Free the RSA
+    RSA_free(_rsa);
+    _rsa = 0;
+
+    // Return the decrypted string
+    return dstBuff;
+}
+
+evp_pkey_st* SSLPrivateKey::impl() const
+{ return _impl->_pkey; }
+
+
+} // namespace Pt
+} // namespace Ssl
+
+/*
+
 const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) const
 {
     if( ! _pkey )
@@ -163,19 +316,6 @@ const std::string SSLPrivateKey::Impl::decryptString(const std::string& str) con
     return dstBuff;
 }
 
-int SSLPrivateKey::Impl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
-{
-    // Get the password
-    const std::string& password = *((std::string*) userdata);
-
-    // If the wanted length is not the same with the given password length, just return 0
-    if((unsigned) num < password.length() + 1) return 0;
-
-    // Copy the password to the buffer and return the length
-    strcpy(buff, &password[0]);
-    return password.length();
-}
-
 void SSLPrivateKey::Impl::tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters)
 {
     // Clear the destination vector
@@ -201,138 +341,4 @@ void SSLPrivateKey::Impl::tokenize(std::vector<std::string> &tokens, const std::
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLPrivateKey::SSLPrivateKey()
-: _impl( new Impl() )
-{}
-
-SSLPrivateKey::SSLPrivateKey(const SSLPrivateKey& pkey)
-: _impl( pkey._impl )
-{}
-
-SSLPrivateKey::SSLPrivateKey(const std::string& password)
-: _impl( new Impl(password) )
-{}
-
-SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
-: _impl( new Impl(password) )
-{ _impl->loadFromString(keyData); }
-
-SSLPrivateKey::~SSLPrivateKey()
-{
-    if(_rsa) {
-        RSA_free(_rsa);
-        _rsa = 0;
-    }    
-}
-
-void SSLPrivateKey::loadFromString(const std::string& keyData)
-{
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromString(keyData);
-}
-
-void SSLPrivateKey::loadFromFile(const std::string& fileName)
-{
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromFile(fileName);
-}
-
-void SSLPrivateKey::clear()
-{ _impl = new Impl(); }
-
-const std::string SSLPrivateKey::signString(const std::string& str, const char* digest) const
-{ return _impl->signString(str, digest); }
-
-const std::string SSLPrivateKey::decryptString(const std::string& str) const
-{ return _impl->decryptString(str); }
-
-void SSLPrivateKey::beginDecryptString(PaddingMode pmode)
-{
-    if( !_impl || !_impl->_pkey )
-        throw SSLRuntimeError("Attempting to decrypt string using an empty private key!", PT_SOURCEINFO);
-    if( _rsa )
-        throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
-
-    // Get the RSA key from the private key
-    _rsa = EVP_PKEY_get1_RSA(_impl->_pkey);
-    if(!_rsa)
-        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
-
-    // Determine the padding mode
-    _epmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
-
-    // Get the RSA size
-    _rsaSize = RSA_size(_rsa);
-
-    // Clear the input buffer and resize the output buffer
-    _dibuf.clear();
-    _dobuf.resize(_rsaSize);
-    
-}
-
-const std::string SSLPrivateKey::tryDecryptString(const std::string& str)
-{
-    if( !_rsa )
-        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
-
-    // Append the string to the input buffer
-    _dibuf += str;
-    if(_dibuf.length() < size_t(_rsaSize)) return "";
-
-    //
-    size_t curPos = 0;
-    size_t sepPos = _dibuf.find_first_of('\n', curPos);
-    while(sepPos != std::string::npos) {
-    }
-
-
-/*
-
-        const int slen = string2ssldata(*it, &srcBuff[0], rsaSize);
-        const int dlen = RSA_private_decrypt(slen, &srcBuff[0], &tmpBuff[0], rsa.get(), RSA_PKCS1_PADDING);
-        if(dlen > 0) dstBuff += std::string((const char*) &tmpBuff[0], dlen);
-
-        
-    // Get some information about the source string
-    size_t               leftOver = _dibuf.length();
-    const unsigned char* srcBuf   = (const unsigned char*) _dibuf.c_str();
-
-    // Encrypt the string
-    std::string dstBuff;
-    while(leftOver >= size_t(_maxChunkSize)) {
-        // Perform encryption
-        const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_dobuf[0], _rsa, _epmode);
-        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-        // Append the result to the output buffer
-        if(dlen > 0) {
-            dstBuff += ssldata2string(&_dobuf[0], dlen);
-            dstBuff += '\n';
-        }
-        // Adjust the state of the source string
-        leftOver -= _maxChunkSize;
-        srcBuf   += _maxChunkSize;
-    }
-
-    // Remove the decrypted string from the input buffer
-    if(leftOver) _dibuf.erase(0, _dibuf.length() - leftOver);
-    else         _dibuf.clear();
 */
-
-    // Return the decrypted string
-    //return dstBuff;
-}
-
-const std::string SSLPrivateKey::endDecryptString()
-{
-}
-
-evp_pkey_st* SSLPrivateKey::impl() const
-{ return _impl->_pkey; }
-
-
-} // namespace Pt
-} // namespace Ssl

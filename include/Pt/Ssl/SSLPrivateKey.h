@@ -71,9 +71,6 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Sign the given string with this private key.
         const std::string signString(const std::string& str, const char* digest = "SHA1") const;
 
-        //! \brief Decrypt the given string with this private key.
-        const std::string decryptString(const std::string& str) const;
-
         //! \brief Begin string decryption.
         void beginDecryptString(PaddingMode pmode);
 
@@ -101,6 +98,7 @@ class PT_SSL_API SSLPrivateKey {
         int                        _rsaSize;
         std::string                _dibuf;
         std::vector<unsigned char> _dobuf;
+        std::vector<unsigned char> _dcbuf;
 };
 
 //! \internal
@@ -114,7 +112,6 @@ class PT_SSL_API SSLPrivateKey::Impl {
         void loadFromFile(const std::string& fileName);
 
         const std::string signString(const std::string& str, const char* digest) const;
-        const std::string decryptString(const std::string& str) const;
 
         friend class SSLContext;
         friend class SSLPrivateKey;
@@ -123,7 +120,6 @@ class PT_SSL_API SSLPrivateKey::Impl {
         void clear();
 
         static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
-        static void tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters);
 
         std::string  _pswd;
         evp_pkey_st* _pkey;

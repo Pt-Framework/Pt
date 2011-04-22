@@ -196,27 +196,6 @@ const std::string SSLPublicKey::endEncryptString()
     return dstBuff;
 }
 
-/*
-
-    // Get some information about the source string
-    size_t               leftOver = str.length();
-    const unsigned char* src      = (const unsigned char*) str.c_str();
-
-    // Prepare the destination buffer
-    const int                  rsaSize = RSA_size(rsa.get());
-    std::string                dstBuff;
-    std::vector<unsigned char> tmpBuff;
-    tmpBuff.resize(rsaSize);
-
-    // Encrypt the string
-    while(leftOver > 0) {
-        const int slen = std::min<size_t>(leftOver, rsaSize - 11);
-        dstBuff += '\n';
-        leftOver -= slen;
-        src      += slen
-*/
-    
-
 evp_pkey_st* SSLPublicKey::impl() const
 { return _impl->_pkey; }
     
