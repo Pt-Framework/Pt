@@ -37,6 +37,13 @@ namespace Ssl {
 //! \brief Private key.
 class PT_SSL_API SSLPrivateKey {
     public:
+        //! \brief Padding mode for string decryption.
+        enum PaddingMode {
+            RSA_PKCS1,      //!< The most widely used mode.
+            RSA_PKCS1_OAEP  //!< Recommended for new applications.
+        };
+
+    public:
         //! \brief Instantiate an empty private-key.
         SSLPrivateKey();
 
@@ -66,6 +73,15 @@ class PT_SSL_API SSLPrivateKey {
 
         //! \brief Decrypt the given string with this private key.
         const std::string decryptString(const std::string& str) const;
+
+        //! \brief Begin string decryption.
+        void beginDecryptString(PaddingMode pmode);
+
+        //! \brief Try to decrypt the given string; may return an empty string if there is too few input data.
+        const std::string tryDecryptString(const std::string& str);
+
+        //! \brief End string decryption.
+        const std::string endDecryptString();
         
         /// \internal Return the raw OpenSSL private key handle.
         evp_pkey_st* impl() const;
@@ -79,7 +95,12 @@ class PT_SSL_API SSLPrivateKey {
         // Shared implementation of the class (COW)
         ImplPtr _impl;
 
-        // Non-shared data
+        // Non-shared data for string decryption
+        rsa_st*                    _rsa;
+        int                        _epmode;
+        int                        _rsaSize;
+        std::string                _dibuf;
+        std::vector<unsigned char> _dobuf;
 };
 
 //! \internal
