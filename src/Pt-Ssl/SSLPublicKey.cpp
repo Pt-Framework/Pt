@@ -156,7 +156,14 @@ const std::string SSLPublicKey::tryEncryptString(const std::string& str)
     while(leftOver >= size_t(_maxChunkSize)) {
         // Perform encryption
         const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_eobuf[0], _rsa, _epmode);
-        if(dlen < 0) throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        }
         // Append the result to the output buffer
         if(dlen > 0) {
             dstBuff += ssldata2string(&_eobuf[0], dlen);

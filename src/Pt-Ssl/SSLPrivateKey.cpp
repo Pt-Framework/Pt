@@ -233,11 +233,18 @@ const std::string SSLPrivateKey::tryDecryptString(const std::string& str)
         const int slen = sepPos - curPos;
         const int clen = string2ssldata(srcBuf, slen, &_dcbuf[0], _rsaSize);
         const int dlen = RSA_private_decrypt(clen, &_dcbuf[0], &_dobuf[0], _rsa, _epmode);
-        if(dlen < 0) throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+        }
         if(dlen > 0) dstBuff += std::string((const char*) &_dobuf[0], dlen);
         // Adjust the state of the source string
         curPos += slen + 1;
-        srcBuf += slen;
+        srcBuf += slen + 1;
         // Find the position of the next separator
         if(curPos >= _dibuf.length()) break;
         sepPos = _dibuf.find_first_of('\n', curPos);

@@ -77,7 +77,7 @@ int main(int argc, char** argv)
         serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
         tenc2 += serverPubKey2.tryEncryptString(text);
         tenc2 += serverPubKey2.tryEncryptString(" ");
-        //tenc2 += serverPubKey2.tryEncryptString(text2);
+        tenc2 += serverPubKey2.tryEncryptString(text2);
 
         // End the encryption tests
         tenc1 += serverPubKey .endEncryptString();
