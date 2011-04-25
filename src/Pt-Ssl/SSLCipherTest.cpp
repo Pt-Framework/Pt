@@ -53,18 +53,37 @@ int main(int argc, char** argv)
 
         Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
         
-
+        // Test texts
         const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
 
-        // Verification test
-        const std::string& tsig = serverPrivKey.signString(text);
-        const bool         vres = serverPubKey.verifyStringSignature(text, tsig);
-        PT_SSL_LOG_M("\n\n##### SIGNING TEXT #####"
-                     << "\n\nInput text:\n" << text
-                     << "\n\nResulting signature:\n" << tsig
-                     << "\n\nVerification result:\n" << (vres ? "OK" : "FAILED") << "\n");
+        // Start signing test #1
+        serverPrivKey.beginSignString();
+        serverPrivKey.addStringToSign(text2);
+        
+        // Start signing test #2
+        Pt::Ssl::SSLPrivateKey serverPrivKey2(serverPrivKey);
+        serverPrivKey2.beginSignString();
+        serverPrivKey2.addStringToSign(text);
+        serverPrivKey2.addStringToSign(text);
 
+        // End the signing tests
+        const std::string& tsig1 = serverPrivKey .endSignString();
+        const std::string& tsig2 = serverPrivKey2.endSignString();
+
+        // Verify the signature
+        // NOTE: Later we will implement it using multiple-chunks functions like above :D
+        const bool vres1 = serverPubKey.verifyStringSignature(text2, tsig1);
+        const bool vres2 = serverPubKey.verifyStringSignature(text + text, tsig2);
+
+        // Check if the decrypted texts are the same with the source texts
+        PT_SSL_LOG_M("\n\n##### STRING SIGNING #####"
+                     << "\nVerification #1 status: " << ( vres1 ? "OK" : "FAILED")
+                     << "\nVerification #2 status: " << ( vres2 ? "OK" : "FAILED") << "\n"
+                    );
+
+        PT_SSL_LOG_M("################################################################################");
+        
         // Start encryption test #1
         std::string tenc1;
         serverPubKey.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1);
@@ -72,30 +91,33 @@ int main(int argc, char** argv)
         tenc1 += serverPubKey.tryEncryptString(" ");
 
         // Start encryption test #2
-        Pt::Ssl::SSLPublicKey serverPubKey2(serverPubKey);
+        Pt::Ssl::SSLPublicKey serverPubKey3(serverPubKey);
         std::string           tenc2;
-        serverPubKey2.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
-        tenc2 += serverPubKey2.tryEncryptString(text);
-        tenc2 += serverPubKey2.tryEncryptString(" ");
-        tenc2 += serverPubKey2.tryEncryptString(text2);
+        serverPubKey3.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
+        tenc2 += serverPubKey3.tryEncryptString(text);
+        tenc2 += serverPubKey3.tryEncryptString(" ");
+        tenc2 += serverPubKey3.tryEncryptString(text2);
 
         // End the encryption tests
         tenc1 += serverPubKey .endEncryptString();
-        tenc2 += serverPubKey2.endEncryptString();
+        tenc2 += serverPubKey3.endEncryptString();
 
+        // Start decryption test #1
         std::string tdec1;
         serverPrivKey.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1);
         tdec1 += serverPrivKey.tryDecryptString(tenc1);
 
         // Start decryption test #2
-        Pt::Ssl::SSLPrivateKey serverPrivKey2(serverPrivKey);
+        Pt::Ssl::SSLPrivateKey serverPrivKey3(serverPrivKey);
         std::string            tdec2;
-        serverPrivKey2.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1_OAEP);
-        tdec2 += serverPrivKey2.tryDecryptString(tenc2);
+        serverPrivKey3.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1_OAEP);
+        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(  0, 100));
+        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(100, 200));
+        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(300));
 
         // End the decryption tests
         tdec1 += serverPrivKey .endDecryptString();
-        tdec2 += serverPrivKey2.endDecryptString();
+        tdec2 += serverPrivKey3.endDecryptString();
   
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
