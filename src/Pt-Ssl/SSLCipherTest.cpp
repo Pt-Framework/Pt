@@ -70,16 +70,27 @@ int main(int argc, char** argv)
         // End the signing tests
         const std::string& tsig1 = serverPrivKey .endSignString();
         const std::string& tsig2 = serverPrivKey2.endSignString();
+        
+        // Start verification test #1
+        serverPubKey.beginVerifyString();
+        serverPubKey.addStringToVerify(text2.substr(  0, 100));
+        serverPubKey.addStringToVerify(text2.substr(100, 200));
+        serverPubKey.addStringToVerify(text2.substr(300));
 
-        // Verify the signature
-        // NOTE: Later we will implement it using multiple-chunks functions like above :D
-        const bool vres1 = serverPubKey.verifyStringSignature(text2, tsig1);
-        const bool vres2 = serverPubKey.verifyStringSignature(text + text, tsig2);
+        // Start verification test #2
+        Pt::Ssl::SSLPublicKey serverPubKey2(serverPubKey);
+        serverPubKey2.beginVerifyString();
+        serverPubKey2.addStringToVerify(text);
+        serverPubKey2.addStringToVerify(text);
 
+        // End the signing verification
+        const bool tsig1ok = serverPubKey .endVerifyString(tsig1);
+        const bool tsig2ok = serverPubKey2.endVerifyString(tsig2);
+        
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING SIGNING #####"
-                     << "\nVerification #1 status: " << ( vres1 ? "OK" : "FAILED")
-                     << "\nVerification #2 status: " << ( vres2 ? "OK" : "FAILED") << "\n"
+                     << "\nVerification #1 status: " << ( tsig1ok ? "OK" : "FAILED")
+                     << "\nVerification #2 status: " << ( tsig2ok ? "OK" : "FAILED") << "\n"
                     );
 
         PT_SSL_LOG_M("################################################################################");

@@ -41,66 +41,16 @@ SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 SSLPublicKey::Impl::~Impl()
 { if(_pkey) EVP_PKEY_free(_pkey); }
 
-bool SSLPublicKey::Impl::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
-{
-    if( ! _pkey )
-        throw SSLRuntimeError("Attempting to verify signature using an empty public key!", PT_SOURCEINFO);
-
-    // Initialize a message-digest BIO
-    BioAutoPtr bmd( BIO_new(BIO_f_md()) );
-    if(!bmd) {
-        throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
-    }
-
-    // Initialize a message-digest context
-    EVP_MD_CTX* pmctx = 0;
-    if(!BIO_get_md_ctx(bmd.get(), &pmctx)) {
-        throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
-    }
-    EvpMdCtxAutoPtr mctx(pmctx);
-
-    // Initialize a verification sb-context
-    // (there is no need to free this sub-context because it is owned by the message-digest context)
-    EVP_PKEY_CTX* pctx = 0;
-    if(!EVP_DigestVerifyInit(mctx.get(), &pctx, EVP_get_digestbyname(digest), 0, _pkey)) {
-        throw SSLRuntimeError("Could not initialize the verification context!", PT_SOURCEINFO);
-    }
-
-    // Add data to the message-digest context
-    if(!EVP_DigestSignUpdate(mctx.get(), (void*) str.c_str(), str.length())) {
-        throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
-    }
-
-    // Allocate buffer for the signature binary data
-    const size_t               binlen = EVP_PKEY_size(_pkey);
-    std::vector<unsigned char> bin;
-    bin.resize(binlen);
-
-    // Convert the signature string to binary data
-    string2ssldata(sig, &bin[0], binlen);
-
-    // Finalize the verification process
-    const int ret = EVP_DigestVerifyFinal(mctx.get(), &bin[0], binlen);
-    if(ret < 0) {
-        throw SSLRuntimeError("Could not finalize the verification process!", PT_SOURCEINFO);
-    }
-
-    // Return the result
-    return ret > 0;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
-: _impl( new Impl(pkey) ),
-  _rsa ( 0 )
+: _impl( new Impl(pkey) ), _sbio(0), _mctx(0), _rsa ( 0 )
 {}
 
 SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
-: _impl( pkey._impl ),
-  _rsa ( 0 )
+: _impl( pkey._impl ), _sbio(0), _mctx(0), _rsa ( 0 )
 {}
 
 SSLPublicKey::~SSLPublicKey()
@@ -109,10 +59,81 @@ SSLPublicKey::~SSLPublicKey()
         RSA_free(_rsa);
         _rsa = 0;
     }
+
+    if(_sbio) {
+        BIO_free(_sbio);
+        _sbio = 0;
+        _mctx = 0;
+    }    
 }
 
-bool SSLPublicKey::verifyStringSignature(const std::string& str, const std::string& sig, const char* digest) const
-{ return _impl->verifyStringSignature(str, sig, digest); }
+void SSLPublicKey::beginVerifyString(const char* digest)
+{
+    if( !_impl || !_impl->_pkey )
+        throw SSLRuntimeError("Attempting to verify string using an empty public key!", PT_SOURCEINFO);
+    if( _sbio )
+        throw SSLRuntimeError("A verification process is already active!", PT_SOURCEINFO);
+
+    // Initialize a message-digest BIO
+    BioAutoPtr bmd( BIO_new(BIO_f_md()) );
+    if(!bmd) {
+        throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
+    }
+
+    // Initialize a message-digest context
+    // (there is no need to free this context because it is owned by the message-digest BIO)
+    if(!BIO_get_md_ctx(bmd.get(), &_mctx)) {
+        throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
+    }
+
+    // Initialize a verification sub-context
+    // (there is no need to free this sub-context because it is owned by the message-digest context)
+    EVP_PKEY_CTX* pctx = 0;
+    if(!EVP_DigestVerifyInit(_mctx, &pctx, EVP_get_digestbyname(digest), 0, _impl->_pkey)) {
+        throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
+    }
+
+    // Copy the BIO
+    _sbio = bmd.get();
+    bmd .release();
+}
+
+void SSLPublicKey::addStringToVerify(const std::string& str)
+{
+    if( !_sbio )
+        throw SSLRuntimeError("No active verification process!", PT_SOURCEINFO);
+
+    if(!EVP_DigestSignUpdate(_mctx, (void*) str.c_str(), str.length())) {
+        throw SSLRuntimeError("Could not add data to the verification context!", PT_SOURCEINFO);
+    }
+}
+
+const bool SSLPublicKey::endVerifyString(const std::string& sig)
+{
+    if( !_sbio )
+        throw SSLRuntimeError("No active verification process!", PT_SOURCEINFO);
+
+    // Allocate buffer for the signature binary data
+    const size_t               binlen = EVP_PKEY_size(_impl->_pkey);
+    std::vector<unsigned char> bin;
+    bin.resize(binlen);
+
+    // Convert the signature string to binary data
+    string2ssldata(sig, &bin[0], binlen);
+
+    // Finalize the verification process
+    const int ret = EVP_DigestVerifyFinal(_mctx, &bin[0], binlen);
+    if(ret < 0) {
+        throw SSLRuntimeError("Could not finalize the verification process!", PT_SOURCEINFO);
+    }
+
+    // Free the BIO (and all the contexts)
+    BIO_free(_sbio);
+    _sbio = 0;
+
+    // Return the result
+    return ret > 0;
+}
 
 void SSLPublicKey::beginEncryptString(PaddingMode pmode)
 {

@@ -203,7 +203,7 @@ const std::string SSLPrivateKey::endSignString()
         throw SSLRuntimeError("Could not finalize the signing process!", PT_SOURCEINFO);
     }
 
-    // Free the BIO
+    // Free the BIO (and all the contexts)
     BIO_free(_sbio);
     _sbio = 0;
 
