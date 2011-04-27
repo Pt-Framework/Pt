@@ -50,15 +50,6 @@ class PT_SSL_API SSLPublicKey {
         //! \brief Standard dtor.
         ~SSLPublicKey();
 
-        //! \brief Begin string verification.
-        void beginVerifyString(const char* digest = "SHA1");
-
-        //! \brief Add a string chunk to be verified.
-        void addStringToVerify(const std::string& str);
-
-        //! \brief End string verification.
-        const bool endVerifyString(const std::string& sig);
-        
         //! \brief Begin string encryption.
         void beginEncryptString(PaddingMode pmode);
 
@@ -82,10 +73,6 @@ class PT_SSL_API SSLPublicKey {
     private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;
-
-        // Non-shared data for string verification
-        bio_st*        _sbio;
-        env_md_ctx_st* _mctx;
 
         // Non-shared data for string encryption
         rsa_st*                    _rsa;

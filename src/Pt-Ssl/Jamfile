@@ -13,6 +13,7 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
+                       SecureDigest.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;

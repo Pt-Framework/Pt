@@ -100,19 +100,19 @@ int SSLPrivateKey::Impl::passwordCallback(char* buff, int num, int /*rwflag*/, v
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLPrivateKey::SSLPrivateKey()
-: _impl( new Impl() ), _sbio(0), _mctx(0), _rsa(0)
+: _impl( new Impl() ), _rsa(0)
 {}
 
 SSLPrivateKey::SSLPrivateKey(const SSLPrivateKey& pkey)
-: _impl( pkey._impl ), _sbio(0), _mctx(0), _rsa(0)
+: _impl( pkey._impl ), _rsa(0)
 {}
 
 SSLPrivateKey::SSLPrivateKey(const std::string& password)
-: _impl( new Impl(password) ),_sbio(0), _mctx(0),  _rsa(0)
+: _impl( new Impl(password) ), _rsa(0)
 {}
 
 SSLPrivateKey::SSLPrivateKey(const std::string& keyData, const std::string& password)
-: _impl( new Impl(password) ), _sbio(0), _mctx(0), _rsa(0)
+: _impl( new Impl(password) ), _rsa(0)
 { _impl->loadFromString(keyData); }
 
 SSLPrivateKey::~SSLPrivateKey()
@@ -120,12 +120,6 @@ SSLPrivateKey::~SSLPrivateKey()
     if(_rsa) {
         RSA_free(_rsa);
         _rsa = 0;
-    }
-
-    if(_sbio) {
-        BIO_free(_sbio);
-        _sbio = 0;
-        _mctx = 0;
     }
 }
 
@@ -143,73 +137,6 @@ void SSLPrivateKey::loadFromFile(const std::string& fileName)
 
 void SSLPrivateKey::clear()
 { _impl = new Impl(); }
-
-void SSLPrivateKey::beginSignString(const char* digest)
-{
-    if( !_impl || !_impl->_pkey )
-        throw SSLRuntimeError("Attempting to sign string using an empty private key!", PT_SOURCEINFO);
-    if( _sbio )
-        throw SSLRuntimeError("A signing process is already active!", PT_SOURCEINFO);
-
-    // Initialize a message-digest BIO
-    BioAutoPtr bmd( BIO_new(BIO_f_md()) );
-    if(!bmd) {
-        throw SSLRuntimeError("Could not initialize message-digest BIO!", PT_SOURCEINFO);
-    }
-
-    // Initialize a message-digest context
-    // (there is no need to free this context because it is owned by the message-digest BIO)
-    if(!BIO_get_md_ctx(bmd.get(), &_mctx)) {
-        throw SSLRuntimeError("Could not initialize message-digest context!", PT_SOURCEINFO);
-    }
-
-    // Initialize a signing sub-context
-    // (there is no need to free this sub-context because it is owned by the message-digest context)
-    EVP_PKEY_CTX* pctx = 0;
-    if(!EVP_DigestSignInit(_mctx, &pctx, EVP_get_digestbyname(digest), 0, _impl->_pkey)) {
-        throw SSLRuntimeError("Could not initialize the signing context!", PT_SOURCEINFO);
-    }
-
-    // Copy the BIO
-    _sbio = bmd.get();
-    bmd .release();
-}
-
-void SSLPrivateKey::addStringToSign(const std::string& str)
-{
-    if( !_sbio )
-        throw SSLRuntimeError("No active signing process!", PT_SOURCEINFO);
-
-    if(!EVP_DigestSignUpdate(_mctx, (void*) str.c_str(), str.length())) {
-        throw SSLRuntimeError("Could not add data to the signing context!", PT_SOURCEINFO);
-    }
-}
-
-const std::string SSLPrivateKey::endSignString()
-{
-    if( !_sbio )
-        throw SSLRuntimeError("No active signing process!", PT_SOURCEINFO);
-    
-    // Get the maximum length of the signature binary data
-    size_t siglen = 0;
-    EVP_DigestSignFinal(_mctx, 0, &siglen);
-
-    // Allocate buffer for the signature binary data
-    std::vector<unsigned char> sig;
-    sig.resize(siglen);
-
-    // Finalize the signing process
-    if(!EVP_DigestSignFinal(_mctx, &sig[0], &siglen)) {
-        throw SSLRuntimeError("Could not finalize the signing process!", PT_SOURCEINFO);
-    }
-
-    // Free the BIO (and all the contexts)
-    BIO_free(_sbio);
-    _sbio = 0;
-
-    // Return the signature string
-    return ssldata2string(&sig[0], siglen);    
-}
 
 void SSLPrivateKey::beginDecryptString(PaddingMode pmode)
 {

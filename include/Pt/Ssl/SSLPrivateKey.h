@@ -68,15 +68,6 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Clear (delete) any loaded key.
         void clear();
 
-        //! \brief Begin string signing.
-        void beginSignString(const char* digest = "SHA1");
-
-        //! \brief Add a string chunk to be signed.
-        void addStringToSign(const std::string& str);
-
-        //! \brief End string signing.
-        const std::string endSignString();
-        
         //! \brief Begin string decryption.
         void beginDecryptString(PaddingMode pmode);
 
@@ -97,10 +88,6 @@ class PT_SSL_API SSLPrivateKey {
     private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;
-
-        // Non-shared data for string signing
-        bio_st*        _sbio;
-        env_md_ctx_st* _mctx;
 
         // Non-shared data for string decryption
         rsa_st*                    _rsa;

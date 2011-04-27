@@ -29,8 +29,10 @@
 
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLCertificateList.h>
-#include <Pt/Ssl/SSLPrivateKey.h>
+#include <Pt/Ssl/SecureDigest.h>
 #include <Pt/System/Logger.h>
+
+#include <sstream>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
@@ -58,34 +60,35 @@ int main(int argc, char** argv)
         const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
 
         // Start signing test #1
-        serverPrivKey.beginSignString();
-        serverPrivKey.addStringToSign(text2);
-        
+        Pt::Ssl::SecureDigest secureDigest1(serverPrivKey, Pt::Ssl::SecureDigest::MD5_Digest);
+        std::stringstream     ss1(text2, std::ios_base::in |std::ios_base::binary);
+        secureDigest1.update(ss1);
+       
         // Start signing test #2
-        Pt::Ssl::SSLPrivateKey serverPrivKey2(serverPrivKey);
-        serverPrivKey2.beginSignString();
-        serverPrivKey2.addStringToSign(text);
-        serverPrivKey2.addStringToSign(text);
+        Pt::Ssl::SecureDigest secureDigest2(serverPrivKey, Pt::Ssl::SecureDigest::SHA1_Digest);
+        secureDigest2.update(text);
+        secureDigest2.update(text);
 
         // End the signing tests
-        const std::string& tsig1 = serverPrivKey .endSignString();
-        const std::string& tsig2 = serverPrivKey2.endSignString();
-        
+        secureDigest1.finish();
+        secureDigest2.finish();
+        const std::string& tsig1 = secureDigest1.getSignature();
+        const std::string& tsig2 = secureDigest2.getSignature();
+
         // Start verification test #1
-        serverPubKey.beginVerifyString();
-        serverPubKey.addStringToVerify(text2.substr(  0, 100));
-        serverPubKey.addStringToVerify(text2.substr(100, 200));
-        serverPubKey.addStringToVerify(text2.substr(300));
+        secureDigest1.start(serverPubKey, tsig1, Pt::Ssl::SecureDigest::MD5_Digest);
+        secureDigest1.update(text2.substr(  0, 100));
+        secureDigest1.update(text2.substr(100, 200));
+        secureDigest1.update(text2.substr(300));
 
         // Start verification test #2
-        Pt::Ssl::SSLPublicKey serverPubKey2(serverPubKey);
-        serverPubKey2.beginVerifyString();
-        serverPubKey2.addStringToVerify(text);
-        serverPubKey2.addStringToVerify(text);
+        secureDigest2.start(serverPubKey, tsig2, Pt::Ssl::SecureDigest::SHA1_Digest);
+        secureDigest2.update(text);
+        secureDigest2.update(text);
 
-        // End the signing verification
-        const bool tsig1ok = serverPubKey .endVerifyString(tsig1);
-        const bool tsig2ok = serverPubKey2.endVerifyString(tsig2);
+        // End the the verification tests
+        const bool tsig1ok = secureDigest1.finish();
+        const bool tsig2ok = secureDigest2.finish();
         
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING SIGNING #####"
@@ -94,7 +97,7 @@ int main(int argc, char** argv)
                     );
 
         PT_SSL_LOG_M("################################################################################");
-        
+
         // Start encryption test #1
         std::string tenc1;
         serverPubKey.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1);
