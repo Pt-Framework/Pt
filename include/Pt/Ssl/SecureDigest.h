@@ -64,12 +64,15 @@ class PT_SSL_API SecureDigest : public NonCopyable {
         void start(const SSLPublicKey& pkey, const std::string& sig, DigestType digestType = SHA1_Digest);
        
         //! \brief Add data (update the state of this secure-digest object).
+        void update(const char* str, int len);
+
+        //! \brief Add data (update the state of this secure-digest object).
         void update(const std::string& str);
 
         //! \brief Add data (update the state of this secure-digest object).
         void update(std::istream& is);
 
-        //! \brief Finish a data signing / verification process.
+        //! \brief Finish a data signing/verification process.
         //! This function will return true if the operation was a success. In the case
         //! of data verification, true means that the signature is a match.
         bool finish();

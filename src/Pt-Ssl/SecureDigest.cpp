@@ -26,6 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/Ssl/BasicSymmetricCipher.h>
+#include <Pt/Ssl/RSACipher.h>
+
 #include <Pt/Ssl/SecureDigest.h>
 #include <fstream>
 
@@ -109,12 +112,21 @@ void SecureDigest::start(const SSLPublicKey& pkey, const std::string& sig, Diges
     bmd.release();
 }
 
+void SecureDigest::update(const char* str, int len)
+{
+    if( !_sbio )
+        throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
+
+    if(!EVP_DigestSignUpdate(_mctx, str, len))
+        throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
+}
+
 void SecureDigest::update(const std::string& str)
 {
     if( !_sbio )
         throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
 
-    if(!EVP_DigestSignUpdate(_mctx, (void*) str.c_str(), str.length()))
+    if(!EVP_DigestSignUpdate(_mctx, str.c_str(), str.length()))
         throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
 }
 
@@ -130,7 +142,7 @@ void SecureDigest::update(std::istream& is)
         is.read(buff, sizeof(buff));
         const std::streamsize got = is.gcount();
 
-        if(got > 0 && !EVP_DigestSignUpdate(_mctx, (void*) buff, got))
+        if(got > 0 && !EVP_DigestSignUpdate(_mctx, buff, got))
             throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
 
     } while(!is.eof());
