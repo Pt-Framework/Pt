@@ -160,7 +160,6 @@ void SSLPrivateKey::beginDecryptString(PaddingMode pmode)
     _dibuf.clear();
     _dobuf.resize(_rsaSize);
     _dcbuf.resize(_rsaSize);
-    
 }
 
 const std::string SSLPrivateKey::tryDecryptString(const std::string& str)

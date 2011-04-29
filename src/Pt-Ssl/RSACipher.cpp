@@ -34,26 +34,73 @@ namespace Pt {
 namespace Ssl {
 
 RSACipher::RSACipher(std::ostream& out)
-: BasicCipher(out)
+: BasicCipher(out), _rsa(0)
 {}
 
 RSACipher::RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode)
-: BasicCipher(out)
+: BasicCipher(out), _rsa(0)
 { startEncrypt(pkey, pmode); }
 
 RSACipher::RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode)
-: BasicCipher(out)
+: BasicCipher(out), _rsa(0)
 { startDecrypt(pkey, pmode); }
 
 RSACipher::~RSACipher()
-{}
+{
+    if(!_rsa) return;
+
+    RSA_free(_rsa);
+    _rsa = 0;
+}
 
 void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
 {
+    if( _rsa ) {
+        if(_maxChunkSize)
+            throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
+        else
+            throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
+    }
+
+    // Get the RSA key from the public key
+    _rsa = EVP_PKEY_get1_RSA(pkey.impl());
+    if(!_rsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
+
+    // Determine the padding mode
+    _pmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
+
+    // Get the RSA and maximum chunk size
+    _rsaSize      = RSA_size(_rsa);
+    _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 42) : (_rsaSize - 12);
+
+    // Resize the conversion buffer
+    _cnvbuf.resize(_rsaSize);
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
 {
+    if( _rsa ) {
+        if(_maxChunkSize)
+            throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
+        else
+            throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
+    }
+
+    // Get the RSA key from the private key
+    _rsa = EVP_PKEY_get1_RSA(pkey.impl());
+    if(!_rsa)
+        throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
+
+    // Determine the padding mode
+    _pmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
+
+    // Get the RSA size and set the maximum chunk size to zero
+    _rsaSize      = RSA_size(_rsa);
+    _maxChunkSize = 0;
+
+    // Resize the conversion buffer
+    _cnvbuf.resize(_rsaSize);
 }
 
 void RSACipher::update(const char* str, int len)

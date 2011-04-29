@@ -76,6 +76,13 @@ class PT_SSL_API RSACipher : public BasicCipher {
 
         //! \brief Finish a data encryption/decryption process.
         void finish();
+
+    private:
+        rsa_st*                    _rsa;          // RSA key 
+        int                        _rsaSize;      // Size of the RSA
+        int                        _maxChunkSize; // Maximum data chunk size (encryption only)
+        int                        _pmode;        // Padding mode
+        std::vector<unsigned char> _cnvbuf;       // Conversion buffer
 };
 
 } // namespace Pt

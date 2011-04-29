@@ -157,27 +157,3 @@ evp_pkey_st* SSLPublicKey::impl() const
 } // namespace Pt
 } // namespace Ssl
 
-/*
-    // Initialize a cipher BIO
-    BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
-    if(!benc) {
-        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
-    }
-
-    // Initialize a cipher context
-    EVP_CIPHER_CTX* pcctx = 0;
-    if(!BIO_get_cipher_ctx(benc.get(), &pcctx)) {
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    }
-    EvpCipherCtxAutoPtr cctx(pcctx);
-
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
-    if(!cipher) {
-        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-    }
-
-    if(!EVP_CipherInit_ex(cctx.get(), cipher, 0, 0, 0, 1)) {
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    }
-*/
-
