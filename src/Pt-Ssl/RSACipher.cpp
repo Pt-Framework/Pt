@@ -34,23 +34,23 @@ namespace Pt {
 namespace Ssl {
 
 RSACipher::RSACipher(std::ostream& out)
-: BasicCipher(out), _rsa(0)
+: BasicCipher(out), _rsa(0), _inpBuf(0)
 {}
 
 RSACipher::RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode)
-: BasicCipher(out), _rsa(0)
+: BasicCipher(out), _rsa(0), _inpBuf(0)
 { startEncrypt(pkey, pmode); }
 
 RSACipher::RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode)
-: BasicCipher(out), _rsa(0)
+: BasicCipher(out), _rsa(0), _inpBuf(0)
 { startDecrypt(pkey, pmode); }
 
 RSACipher::~RSACipher()
 {
-    if(!_rsa) return;
-
-    RSA_free(_rsa);
-    _rsa = 0;
+    if(_rsa) {
+        RSA_free(_rsa);
+        _rsa = 0;
+    }
 }
 
 void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
@@ -75,8 +75,9 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
     _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 42) : (_rsaSize - 12);
 
     // Prepare the buffers
-    _inpBuf.str("");
     _cnvBuf.resize(_rsaSize);
+    _inpBuf.resize(_maxChunkSize);
+    setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
@@ -101,8 +102,9 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
     _maxChunkSize = 0;
 
     // Prepare the buffers
-    _inpBuf.str("");
     _cnvBuf.resize(_rsaSize);
+    _inpBuf.resize(_rsaSize);
+    setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
 }
 
 void RSACipher::update(const char* str, int len)
@@ -110,7 +112,7 @@ void RSACipher::update(const char* str, int len)
     if( !_rsa )
         throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
 
-    doUpdate(str, len);
+    sputn(str, len);
 }
 
 void RSACipher::update(const std::string& str)
@@ -125,7 +127,7 @@ void RSACipher::update(std::istream& is)
     do {
         is.read(buff, sizeof(buff));
         const std::streamsize got = is.gcount();
-        if(got > 0) doUpdate(buff, got);
+        if(got > 0) sputn(buff, got);
 
     } while(!is.eof());
 }
@@ -134,9 +136,61 @@ void RSACipher::finish()
 {
 }
 
-void RSACipher::doUpdate(const char* str, int len)
+int RSACipher::sync()
 {
+    return 0;
 }
+
+int RSACipher::underflow()
+{
+    return 0;
+}
+
+int RSACipher::overflow(int c)
+{
+    return 0;
+}
+
+
+/*
+    // Append the string to the input buffer
+    _eibuf += str;
+    if(_eibuf.length() < size_t(_maxChunkSize)) return "";
+
+    // Get some information about the source string
+    size_t               leftOver = _eibuf.length();
+    const unsigned char* srcBuf   = (const unsigned char*) _eibuf.c_str();
+
+    // Encrypt the string
+    std::string dstBuff;
+    while(leftOver >= size_t(_maxChunkSize)) {
+        // Perform encryption
+        const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_eobuf[0], _rsa, _epmode);
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        }
+        // Append the result to the output buffer
+        if(dlen > 0) {
+            dstBuff += ssldata2string(&_eobuf[0], dlen);
+            dstBuff += '\n';
+        }
+        // Adjust the state of the source string
+        leftOver -= _maxChunkSize;
+        srcBuf   += _maxChunkSize;
+    }
+
+    // Remove the encrypted string from the input buffer
+    if(leftOver) _eibuf.erase(0, _eibuf.length() - leftOver);
+    else         _eibuf.clear();
+
+    // Return the encrypted string
+    return dstBuff;
+*/
 
 } // namespace Pt
 } // namespace Ssl

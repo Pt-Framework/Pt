@@ -32,13 +32,11 @@
 #include <Pt/Ssl/SSLPublicKey.h>
 #include <Pt/Ssl/SSLPrivateKey.h>
 
-#include <sstream>
-
 namespace Pt {
 namespace Ssl {
 
 //! \brief RSA cipher classes.
-class PT_SSL_API RSACipher : public BasicCipher {
+class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
     public:
         //! \brief Padding mode for data encryption.
         enum PaddingMode {
@@ -77,16 +75,18 @@ class PT_SSL_API RSACipher : public BasicCipher {
         //! \brief Finish a data encryption/decryption process.
         void finish();
 
+    protected:
+        virtual int sync();
+        virtual int_type underflow();
+        virtual int_type overflow(int_type ch);
+
     private:
         rsa_st*                    _rsa;          // RSA key 
         int                        _rsaSize;      // Size of the RSA
         int                        _maxChunkSize; // Maximum data chunk size (encryption only)
         int                        _pmode;        // Padding mode
-        std::stringstream          _inpBuf;       // Input buffer
         std::vector<unsigned char> _cnvBuf;       // Conversion buffer
-
-        // Add data (update the state of this cipher object).
-        void doUpdate(const char* str, int len);
+        std::vector<char>          _inpBuf;       // Input buffer
 };
 
 } // namespace Pt
