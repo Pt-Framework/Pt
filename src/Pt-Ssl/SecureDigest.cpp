@@ -26,9 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/BasicSymmetricCipher.h>
-#include <Pt/Ssl/RSACipher.h>
-
 #include <Pt/Ssl/SecureDigest.h>
 #include <fstream>
 

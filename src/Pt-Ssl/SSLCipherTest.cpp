@@ -30,6 +30,7 @@
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLCertificateList.h>
 #include <Pt/Ssl/SecureDigest.h>
+#include <Pt/Ssl/RSACipher.h>
 #include <Pt/System/Logger.h>
 
 #include <sstream>

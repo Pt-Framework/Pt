@@ -43,13 +43,10 @@ namespace Ssl {
 class PT_SSL_API BasicCipher : public NonCopyable {
     public:
         //! \brief Instantiate an empty basic-cipher object.
-        inline BasicCipher(std::ostream& out)
-        : _out(out)
-        {}
+        BasicCipher(std::ostream& out);
 
         //! \brief Standard dtor.
-        virtual ~BasicCipher()
-        {}
+        ~BasicCipher();
 
         //! \brief Add data (update the state of this cipher object).
         virtual void update(const char* str, int len) = 0;

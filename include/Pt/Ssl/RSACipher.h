@@ -48,23 +48,16 @@ class PT_SSL_API RSACipher : public BasicCipher {
 
     public:
         //! \brief Instantiate an empty RSA cipher object.
-        inline RSACipher(std::ostream& out)
-        : BasicCipher(out)
-        {}
+        RSACipher(std::ostream& out);
 
         //! \brief Instantiate an RSA cipher object for data encryption.
-        inline RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1)
-        : BasicCipher(out)
-        { startEncrypt(pkey, pmode); }
+        RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);
 
         //! \brief Instantiate an RSA cipher object for data decryption.
-        inline RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1)
-        : BasicCipher(out)
-        { startDecrypt(pkey, pmode); }
+        RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
 
         //! \brief Standard dtor.
-        virtual ~RSACipher()
-        {}
+        virtual ~RSACipher();
 
         //! \brief Start a data encryption process.
         void startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);

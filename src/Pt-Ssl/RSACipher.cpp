@@ -25,45 +25,52 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_BASICSYMETRICCIPHER_H
-#define PT_SSL_BASICSYMETRICCIPHER_H
 
-#include <Pt/Ssl/BasicCipher.h>
+#include <Pt/Ssl/RSACipher.h>
+
+#include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief The base of all symmetric-cipher classes.
-//! Symmetric-cipher needs password. Therefore we specify a method
-//! to set a password in this class.
-class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
-    public:
-        //! \brief Instantiate an empty symmetric-cipher object.
-        BasicSymmetricCipher(std::ostream& out);
+RSACipher::RSACipher(std::ostream& out)
+: BasicCipher(out)
+{}
 
-        //! \brief Standard dtor.
-        virtual ~BasicSymmetricCipher();
+RSACipher::RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode)
+: BasicCipher(out)
+{ startEncrypt(pkey, pmode); }
 
-        //! \brief Start a data encryption process.
-        virtual void startEncrypt(const std::string& password);
+RSACipher::RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode)
+: BasicCipher(out)
+{ startDecrypt(pkey, pmode); }
 
-        //! \brief Start a data decryption process.
-        virtual void startDecrypt(const std::string& password);
+RSACipher::~RSACipher()
+{}
 
-    protected:
-        enum Mode {
-            Invalid,
-            Encrypt,
-            Decrypt
-        };
-        
-    protected:
-        Mode        _mode;
-        std::string _pswd;
-        
-};
+void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
+{
+}
+
+void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
+{
+}
+
+void RSACipher::update(const char* str, int len)
+{
+}
+
+void RSACipher::update(const std::string& str)
+{
+}
+
+void RSACipher::update(std::istream& is)
+{
+}
+
+void RSACipher::finish()
+{
+}
 
 } // namespace Pt
 } // namespace Ssl
-
-#endif
