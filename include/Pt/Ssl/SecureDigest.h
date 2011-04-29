@@ -88,6 +88,9 @@ class PT_SSL_API SecureDigest : public NonCopyable {
         bio_st*        _sbio;
         env_md_ctx_st* _mctx;
 
+        // Add data (update the state of this secure-digest object).
+        void doUpdate(const char* str, int len);
+
         // Convert digest enum to string
         static const char* digestEnumToString(DigestType digestType);
 };

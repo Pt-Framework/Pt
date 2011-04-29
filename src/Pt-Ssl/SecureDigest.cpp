@@ -114,18 +114,11 @@ void SecureDigest::update(const char* str, int len)
     if( !_sbio )
         throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
 
-    if(!EVP_DigestSignUpdate(_mctx, str, len))
-        throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
+    doUpdate(str, len);
 }
 
 void SecureDigest::update(const std::string& str)
-{
-    if( !_sbio )
-        throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
-
-    if(!EVP_DigestSignUpdate(_mctx, str.c_str(), str.length()))
-        throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
-}
+{ update(str.c_str(), str.length()); }
 
 void SecureDigest::update(std::istream& is)
 {
@@ -133,14 +126,10 @@ void SecureDigest::update(std::istream& is)
         throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
 
     char buff[1024];
-
     do {
-
         is.read(buff, sizeof(buff));
         const std::streamsize got = is.gcount();
-
-        if(got > 0 && !EVP_DigestSignUpdate(_mctx, buff, got))
-            throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
+        if(got > 0) doUpdate(buff, got);
 
     } while(!is.eof());
 }
@@ -188,6 +177,12 @@ bool SecureDigest::finish()
 
     // Done
     return ok;
+}
+
+void SecureDigest::doUpdate(const char* str, int len)
+{
+    if(!EVP_DigestSignUpdate(_mctx, str, len))
+        throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
 }
 
 const char* SecureDigest::digestEnumToString(DigestType digestType)

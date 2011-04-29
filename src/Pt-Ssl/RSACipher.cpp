@@ -74,8 +74,9 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
     _rsaSize      = RSA_size(_rsa);
     _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 42) : (_rsaSize - 12);
 
-    // Resize the conversion buffer
-    _cnvbuf.resize(_rsaSize);
+    // Prepare the buffers
+    _inpBuf.str("");
+    _cnvBuf.resize(_rsaSize);
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
@@ -99,23 +100,41 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
     _rsaSize      = RSA_size(_rsa);
     _maxChunkSize = 0;
 
-    // Resize the conversion buffer
-    _cnvbuf.resize(_rsaSize);
+    // Prepare the buffers
+    _inpBuf.str("");
+    _cnvBuf.resize(_rsaSize);
 }
 
 void RSACipher::update(const char* str, int len)
 {
+    if( !_rsa )
+        throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
+
+    doUpdate(str, len);
 }
 
 void RSACipher::update(const std::string& str)
-{
-}
+{ update(str.c_str(), str.length()); }
 
 void RSACipher::update(std::istream& is)
 {
+    if( !_rsa )
+        throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
+
+    char buff[1024];
+    do {
+        is.read(buff, sizeof(buff));
+        const std::streamsize got = is.gcount();
+        if(got > 0) doUpdate(buff, got);
+
+    } while(!is.eof());
 }
 
 void RSACipher::finish()
+{
+}
+
+void RSACipher::doUpdate(const char* str, int len)
 {
 }
 

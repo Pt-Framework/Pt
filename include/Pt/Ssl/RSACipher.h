@@ -32,7 +32,7 @@
 #include <Pt/Ssl/SSLPublicKey.h>
 #include <Pt/Ssl/SSLPrivateKey.h>
 
-#include <string>
+#include <sstream>
 
 namespace Pt {
 namespace Ssl {
@@ -82,7 +82,11 @@ class PT_SSL_API RSACipher : public BasicCipher {
         int                        _rsaSize;      // Size of the RSA
         int                        _maxChunkSize; // Maximum data chunk size (encryption only)
         int                        _pmode;        // Padding mode
-        std::vector<unsigned char> _cnvbuf;       // Conversion buffer
+        std::stringstream          _inpBuf;       // Input buffer
+        std::vector<unsigned char> _cnvBuf;       // Conversion buffer
+
+        // Add data (update the state of this cipher object).
+        void doUpdate(const char* str, int len);
 };
 
 } // namespace Pt
