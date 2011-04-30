@@ -32,11 +32,14 @@ namespace Pt {
 namespace Ssl {
 
 BasicCipher::BasicCipher(std::ostream& out)
-: _out(out)
+: _out(&out)
 {}
 
 BasicCipher::~BasicCipher()
 {}
+
+void BasicCipher::setOutputStream(std::ostream& out)
+{ _out = &out; }
 
 } // namespace Pt
 } // namespace Ssl

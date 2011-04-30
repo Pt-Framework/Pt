@@ -48,6 +48,9 @@ class PT_SSL_API BasicCipher : public NonCopyable {
         //! \brief Standard dtor.
         ~BasicCipher();
 
+        //! \brief Set the output stream.
+        void setOutputStream(std::ostream& out);
+
         //! \brief Add data (update the state of this cipher object).
         virtual void update(const char* str, int len) = 0;
 
@@ -61,7 +64,7 @@ class PT_SSL_API BasicCipher : public NonCopyable {
         virtual void finish() = 0;
 
     protected:
-        std::ostream& _out;
+        std::ostream* _out;
 };
 
 } // namespace Pt

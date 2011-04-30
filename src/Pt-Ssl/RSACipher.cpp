@@ -156,9 +156,7 @@ int RSACipher::sync()
 }
 
 RSACipher::int_type RSACipher::underflow()
-{
-    return 0;
-}
+{ return traits_type::eof(); }
 
 RSACipher::int_type RSACipher::overflow(int_type ch)
 {
@@ -178,8 +176,12 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
 
 void RSACipher::doEncrypt()
 {
+    if( ! ( this->pptr() - this->pbase() ) ) return;
+
     // Encrypt the data
-    const int dlen = RSA_public_encrypt(this->pptr() - this->pbase(), (const unsigned char*) &_inpBuf[0], &_cnvBuf[0], _rsa, _pmode);
+    const int dlen = RSA_public_encrypt( this->pptr() - this->pbase(),
+                                         (const unsigned char*) &_inpBuf[0],
+                                         (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {
@@ -189,8 +191,8 @@ void RSACipher::doEncrypt()
         throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
     }
 
-    // Convert the data into string and write it to the output stream
-    _out << ssldata2string(&_cnvBuf[0], dlen) << std::endl;
+    // Write the data to the output stream
+    if(dlen > 0) _out->write((const char*) &_cnvBuf[0], dlen);
 
     // Reset the input buffer
     setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
@@ -198,6 +200,26 @@ void RSACipher::doEncrypt()
 
 void RSACipher::doDecrypt()
 {
+    if( ! ( this->pptr() - this->pbase() ) ) return;
+
+    // Decrypt the data
+    const int dlen = RSA_private_decrypt( this->pptr() - this->pbase(),
+                                          (const unsigned char*) &_inpBuf[0],
+                                          (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
+    if(dlen < 0) {
+        long i = ERR_get_error();
+        while(i) {
+            std::cerr << ERR_error_string(i, 0) << std::endl;
+            i = ERR_get_error();
+        }
+        throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+    }
+
+    // Write the data to the output stream
+    if(dlen > 0) _out->write((const char*) &_cnvBuf[0], dlen);
+
+    // Reset the input buffer
+    setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
 }
 
 } // namespace Pt

@@ -84,12 +84,12 @@ class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
         virtual void doDecrypt();
 
     private:
-        rsa_st*                    _rsa;          // RSA key 
-        int                        _rsaSize;      // Size of the RSA
-        int                        _maxChunkSize; // Maximum data chunk size (encryption only)
-        int                        _pmode;        // Padding mode
-        std::vector<unsigned char> _cnvBuf;       // Conversion buffer
-        std::vector<char>          _inpBuf;       // Input buffer
+        rsa_st*           _rsa;          // RSA key
+        int               _rsaSize;      // Size of the RSA
+        int               _maxChunkSize; // Maximum data chunk size (encryption only)
+        int               _pmode;        // Padding mode
+        std::vector<char> _cnvBuf;       // Conversion buffer
+        std::vector<char> _inpBuf;       // Input buffer
 };
 
 } // namespace Pt

@@ -106,7 +106,7 @@ int main(int argc, char** argv)
         rsac1.update(" ");
 
         // Start encryption test #2
-        std::stringstream  ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+        std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
         Pt::Ssl::RSACipher rsac2(ss2, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
         rsac2.update(text);
         rsac2.update(" ");
@@ -119,21 +119,22 @@ int main(int argc, char** argv)
         std::string tenc2 = ss2.str();
 
         // Start decryption test #1
-        std::string tdec1;
-        serverPrivKey.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1);
-        tdec1 += serverPrivKey.tryDecryptString(tenc1);
+        ss1.str(""); ss1.clear();
+        rsac1.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        rsac1.update(tenc1);
 
         // Start decryption test #2
-        Pt::Ssl::SSLPrivateKey serverPrivKey3(serverPrivKey);
-        std::string            tdec2;
-        serverPrivKey3.beginDecryptString(Pt::Ssl::SSLPrivateKey::RSA_PKCS1_OAEP);
-        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(  0, 100));
-        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(100, 200));
-        tdec2 += serverPrivKey3.tryDecryptString(tenc2.substr(300));
+        ss2.str(""); ss2.clear();
+        rsac2.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        rsac2.update(tenc2.substr(  0, 100));
+        rsac2.update(tenc2.substr(100, 200));
+        rsac2.update(tenc2.substr(300));
 
         // End the decryption tests
-        tdec1 += serverPrivKey .endDecryptString();
-        tdec2 += serverPrivKey3.endDecryptString();
+        rsac1.finish();
+        rsac2.finish();
+        std::string tdec1 = ss1.str();
+        std::string tdec2 = ss2.str();
   
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"

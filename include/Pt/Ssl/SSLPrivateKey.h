@@ -67,15 +67,6 @@ class PT_SSL_API SSLPrivateKey {
 
         //! \brief Clear (delete) any loaded key.
         void clear();
-
-        //! \brief Begin string decryption.
-        void beginDecryptString(PaddingMode pmode);
-
-        //! \brief Try to decrypt the given string; may return an empty string if there is too few input data.
-        const std::string tryDecryptString(const std::string& str);
-
-        //! \brief End string decryption.
-        const std::string endDecryptString();
         
         /// \internal Return the raw OpenSSL private key handle.
         evp_pkey_st* impl() const;
@@ -88,14 +79,6 @@ class PT_SSL_API SSLPrivateKey {
     private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;
-
-        // Non-shared data for string decryption
-        rsa_st*                    _rsa;
-        int                        _epmode;
-        int                        _rsaSize;
-        std::string                _dibuf;
-        std::vector<unsigned char> _dobuf;
-        std::vector<unsigned char> _dcbuf;
 };
 
 //! \internal
