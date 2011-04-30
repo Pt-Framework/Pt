@@ -31,7 +31,6 @@
 
 #include <Pt/Signal.h>
 #include <Pt/Ssl/SSLContext.h>
-#include <Pt/System/StreamBuffer.h>
 #include <string>
 
 namespace Pt {

@@ -57,7 +57,7 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
 {
     if( _rsa ) {
         if(_maxChunkSize)
-            throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
+            throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
         else
             throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
     }
@@ -84,7 +84,7 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
 {
     if( _rsa ) {
         if(_maxChunkSize)
-            throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
+            throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
         else
             throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
     }
@@ -134,63 +134,71 @@ void RSACipher::update(std::istream& is)
 
 void RSACipher::finish()
 {
+    // Process the remaining data
+    if(_maxChunkSize) doEncrypt();
+    else              doDecrypt();
+
+    // Free the RSA
+    RSA_free(_rsa);
+    _rsa = 0;
 }
 
 int RSACipher::sync()
 {
-    return 0;
-}
-
-int RSACipher::underflow()
-{
-    return 0;
-}
-
-int RSACipher::overflow(int c)
-{
-    return 0;
-}
-
-
-/*
-    // Append the string to the input buffer
-    _eibuf += str;
-    if(_eibuf.length() < size_t(_maxChunkSize)) return "";
-
-    // Get some information about the source string
-    size_t               leftOver = _eibuf.length();
-    const unsigned char* srcBuf   = (const unsigned char*) _eibuf.c_str();
-
-    // Encrypt the string
-    std::string dstBuff;
-    while(leftOver >= size_t(_maxChunkSize)) {
-        // Perform encryption
-        const int dlen = RSA_public_encrypt(_maxChunkSize, srcBuf, &_eobuf[0], _rsa, _epmode);
-        if(dlen < 0) {
-            long i = ERR_get_error();
-            while(i) {
-                std::cerr << ERR_error_string(i, 0) << std::endl;
-                i = ERR_get_error();
-            }
-            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+    if( this->pptr() ) {
+        while( this->pptr() > this->pbase() ) {
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() ) return -1;
         }
-        // Append the result to the output buffer
-        if(dlen > 0) {
-            dstBuff += ssldata2string(&_eobuf[0], dlen);
-            dstBuff += '\n';
-        }
-        // Adjust the state of the source string
-        leftOver -= _maxChunkSize;
-        srcBuf   += _maxChunkSize;
     }
 
-    // Remove the encrypted string from the input buffer
-    if(leftOver) _eibuf.erase(0, _eibuf.length() - leftOver);
-    else         _eibuf.clear();
+    return 0;
+}
 
-    // Return the encrypted string
-    return dstBuff;
-*/
+RSACipher::int_type RSACipher::underflow()
+{
+    return 0;
+}
+
+RSACipher::int_type RSACipher::overflow(int_type ch)
+{
+    // If we get here, its mean the are already enough data to be encrypted/decrypted
+    if(_maxChunkSize) doEncrypt();
+    else              doDecrypt();
+
+    // If the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);    
+}
+
+void RSACipher::doEncrypt()
+{
+    // Encrypt the data
+    const int dlen = RSA_public_encrypt(this->pptr() - this->pbase(), (const unsigned char*) &_inpBuf[0], &_cnvBuf[0], _rsa, _pmode);
+    if(dlen < 0) {
+        long i = ERR_get_error();
+        while(i) {
+            std::cerr << ERR_error_string(i, 0) << std::endl;
+            i = ERR_get_error();
+        }
+        throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+    }
+
+    // Convert the data into string and write it to the output stream
+    _out << ssldata2string(&_cnvBuf[0], dlen) << std::endl;
+
+    // Reset the input buffer
+    setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
+}
+
+void RSACipher::doDecrypt()
+{
+}
 
 } // namespace Pt
 } // namespace Ssl

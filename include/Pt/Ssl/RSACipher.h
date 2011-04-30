@@ -80,6 +80,9 @@ class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
 
+        virtual void doEncrypt();
+        virtual void doDecrypt();
+
     private:
         rsa_st*                    _rsa;          // RSA key 
         int                        _rsaSize;      // Size of the RSA

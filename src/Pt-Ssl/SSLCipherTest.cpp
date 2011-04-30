@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
         // Start signing test #1
         Pt::Ssl::SecureDigest secureDigest1(serverPrivKey, Pt::Ssl::SecureDigest::MD5_Digest);
-        std::stringstream     ss1(text2, std::ios_base::in |std::ios_base::binary);
+        std::stringstream     ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
         secureDigest1.update(ss1);
        
         // Start signing test #2
@@ -100,22 +100,23 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("################################################################################");
 
         // Start encryption test #1
-        std::string tenc1;
-        serverPubKey.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1);
-        tenc1 += serverPubKey.tryEncryptString(text);
-        tenc1 += serverPubKey.tryEncryptString(" ");
+        ss1.str(""); ss1.clear();
+        Pt::Ssl::RSACipher rsac1(ss1, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        rsac1.update(text);
+        rsac1.update(" ");
 
         // Start encryption test #2
-        Pt::Ssl::SSLPublicKey serverPubKey3(serverPubKey);
-        std::string           tenc2;
-        serverPubKey3.beginEncryptString(Pt::Ssl::SSLPublicKey::RSA_PKCS1_OAEP);
-        tenc2 += serverPubKey3.tryEncryptString(text);
-        tenc2 += serverPubKey3.tryEncryptString(" ");
-        tenc2 += serverPubKey3.tryEncryptString(text2);
+        std::stringstream  ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+        Pt::Ssl::RSACipher rsac2(ss2, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        rsac2.update(text);
+        rsac2.update(" ");
+        rsac2.update(text2);
 
         // End the encryption tests
-        tenc1 += serverPubKey .endEncryptString();
-        tenc2 += serverPubKey3.endEncryptString();
+        rsac1.finish();
+        rsac2.finish();
+        std::string tenc1 = ss1.str();
+        std::string tenc2 = ss2.str();
 
         // Start decryption test #1
         std::string tdec1;
