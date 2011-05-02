@@ -31,8 +31,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Ssl/Api.h>
 
-#include <iosfwd>
-#include <string>
+#include <streambuf>
 
 namespace Pt {
 namespace Ssl {
@@ -40,7 +39,7 @@ namespace Ssl {
 //! \brief The base of all cipher classes.
 //! Not all cipher will need password. Therefore we do not specify a method
 //! to set a password in this class.
-class PT_SSL_API BasicCipher : public NonCopyable {
+class PT_SSL_API BasicCipher : public NonCopyable, public std::streambuf {
     public:
         //! \brief Instantiate an empty basic-cipher object.
         BasicCipher(std::ostream& out);

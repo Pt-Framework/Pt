@@ -36,7 +36,7 @@ namespace Pt {
 namespace Ssl {
 
 //! \brief RSA cipher classes.
-class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
+class PT_SSL_API RSACipher : public BasicCipher {
     public:
         //! \brief Padding mode for data encryption.
         enum PaddingMode {
@@ -80,9 +80,6 @@ class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
 
-        virtual void doEncrypt();
-        virtual void doDecrypt();
-
     private:
         rsa_st*           _rsa;          // RSA key
         int               _rsaSize;      // Size of the RSA
@@ -90,6 +87,10 @@ class PT_SSL_API RSACipher : public BasicCipher, public std::streambuf {
         int               _pmode;        // Padding mode
         std::vector<char> _cnvBuf;       // Conversion buffer
         std::vector<char> _inpBuf;       // Input buffer
+
+        // Helper functions
+        virtual void doEncrypt();
+        virtual void doDecrypt();
 };
 
 } // namespace Pt

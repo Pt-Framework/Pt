@@ -36,15 +36,21 @@ namespace Ssl {
 
 SecureDigest::SecureDigest()
 : _sig(""), _rawSigSize(0), _sbio(0), _mctx(0)
-{}
+{ _inpBuf.resize(1024); }
 
 SecureDigest::SecureDigest(const SSLPrivateKey& pkey, DigestType digestType)
 : _sig(""), _rawSigSize(0), _sbio(0), _mctx(0)
-{ start(pkey, digestType); }
+{
+    _inpBuf.resize(1024);    
+    start(pkey, digestType);
+}
 
 SecureDigest::SecureDigest(const SSLPublicKey& pkey, const std::string& sig, DigestType digestType)
 : _sig(""), _rawSigSize(0), _sbio(0), _mctx(0)
-{ start(pkey, sig, digestType); }
+{
+    _inpBuf.resize(1024);
+    start(pkey, sig, digestType);
+}
 
 SecureDigest::~SecureDigest()
 { if(_sbio) BIO_free(_sbio); }
@@ -77,6 +83,9 @@ void SecureDigest::start(const SSLPrivateKey& pkey, DigestType digestType)
     // Copy the BIO
     _sbio = bmd.get();
     bmd.release();
+
+    // Prepare the streambuf
+    this->setp(&_inpBuf[0], &_inpBuf[0] + _inpBuf.size());
 }
 
 void SecureDigest::start(const SSLPublicKey& pkey, const std::string& sig, DigestType digestType)
@@ -107,6 +116,9 @@ void SecureDigest::start(const SSLPublicKey& pkey, const std::string& sig, Diges
     // Copy the BIO
     _sbio = bmd.get();
     bmd.release();
+
+    // Prepare the streambuf
+    this->setp(&_inpBuf[0], &_inpBuf[0] + _inpBuf.size());
 }
 
 void SecureDigest::update(const char* str, int len)
@@ -114,7 +126,7 @@ void SecureDigest::update(const char* str, int len)
     if( !_sbio )
         throw SSLRuntimeError("No active data signing/verification process!", PT_SOURCEINFO);
 
-    doUpdate(str, len);
+    this->sputn(str, len);
 }
 
 void SecureDigest::update(const std::string& str)
@@ -129,7 +141,7 @@ void SecureDigest::update(std::istream& is)
     do {
         is.read(buff, sizeof(buff));
         const std::streamsize got = is.gcount();
-        if(got > 0) doUpdate(buff, got);
+        if(got > 0) this->sputn(buff, got);
 
     } while(!is.eof());
 }
@@ -179,10 +191,46 @@ bool SecureDigest::finish()
     return ok;
 }
 
-void SecureDigest::doUpdate(const char* str, int len)
+int SecureDigest::sync()
 {
-    if(!EVP_DigestSignUpdate(_mctx, str, len))
+    if( this->pptr() ) {
+        while( this->pptr() > this->pbase() ) {
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() ) return -1;
+        }
+    }
+
+    return 0;
+}
+
+SecureDigest::int_type SecureDigest::underflow()
+{ return traits_type::eof(); }
+
+SecureDigest::int_type SecureDigest::overflow(int_type ch)
+{
+    // If we get here, its mean the are already enough data to be encrypted/decrypted
+    doUpdate();
+
+    // If the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
+}
+
+void SecureDigest::doUpdate()
+{
+    if( ! ( this->pptr() - this->pbase() ) ) return;
+
+    // Send the data
+    if(!EVP_DigestSignUpdate(_mctx, &_inpBuf[0], this->pptr() - this->pbase()))
         throw SSLRuntimeError("Could update the state of the the signing/verification context!", PT_SOURCEINFO);
+    
+    // Reset the input buffer
+    this->setp(&_inpBuf[0], &_inpBuf[0] + _inpBuf.size());
 }
 
 const char* SecureDigest::digestEnumToString(DigestType digestType)

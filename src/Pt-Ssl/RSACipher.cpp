@@ -77,7 +77,7 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
     // Prepare the buffers
     _cnvBuf.resize(_rsaSize);
     _inpBuf.resize(_maxChunkSize);
-    setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
+    this->setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
@@ -104,7 +104,7 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
     // Prepare the buffers
     _cnvBuf.resize(_rsaSize);
     _inpBuf.resize(_rsaSize);
-    setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
+    this->setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
 }
 
 void RSACipher::update(const char* str, int len)
@@ -112,7 +112,7 @@ void RSACipher::update(const char* str, int len)
     if( !_rsa )
         throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
 
-    sputn(str, len);
+    this->sputn(str, len);
 }
 
 void RSACipher::update(const std::string& str)
@@ -127,7 +127,7 @@ void RSACipher::update(std::istream& is)
     do {
         is.read(buff, sizeof(buff));
         const std::streamsize got = is.gcount();
-        if(got > 0) sputn(buff, got);
+        if(got > 0) this->sputn(buff, got);
 
     } while(!is.eof());
 }

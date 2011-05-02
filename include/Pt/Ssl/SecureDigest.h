@@ -36,7 +36,7 @@ namespace Pt {
 namespace Ssl {
 
 //! \brief Secure digest.
-class PT_SSL_API SecureDigest : public NonCopyable {
+class PT_SSL_API SecureDigest : public NonCopyable, public std::streambuf {
     public:
         //! \brief Digest type.
         enum DigestType {
@@ -81,15 +81,21 @@ class PT_SSL_API SecureDigest : public NonCopyable {
         inline const std::string& getSignature() const
         { return _sig; }
 
+    protected:
+        virtual int sync();
+        virtual int_type underflow();
+        virtual int_type overflow(int_type ch);
+
     private:
         // State
-        std::string    _sig;
-        size_t         _rawSigSize;
-        bio_st*        _sbio;
-        env_md_ctx_st* _mctx;
+        std::string       _sig;
+        size_t            _rawSigSize;
+        bio_st*           _sbio;
+        env_md_ctx_st*    _mctx;
+        std::vector<char> _inpBuf;
 
         // Add data (update the state of this secure-digest object).
-        void doUpdate(const char* str, int len);
+        void doUpdate();
 
         // Convert digest enum to string
         static const char* digestEnumToString(DigestType digestType);
