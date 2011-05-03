@@ -42,28 +42,19 @@ namespace Ssl {
 class PT_SSL_API BasicCipher : public NonCopyable, public std::streambuf {
     public:
         //! \brief Instantiate an empty basic-cipher object.
-        BasicCipher(std::ostream& out);
+        BasicCipher(std::iostream& ios);
 
         //! \brief Standard dtor.
         ~BasicCipher();
 
         //! \brief Set the output stream.
-        void setOutputStream(std::ostream& out);
-
-        //! \brief Add data (update the state of this cipher object).
-        virtual void update(const char* str, int len) = 0;
-
-        //! \brief Add data (update the state of this cipher object).
-        virtual void update(const std::string& str) = 0;
-
-        //! \brief Add data (update the state of this ciphert object).
-        virtual void update(std::istream& is) = 0;
+        void setIOStream(std::iostream& out);
 
         //! \brief Finish a data encryption/decryption process.
         virtual void finish() = 0;
 
     protected:
-        std::ostream* _out;
+        std::iostream* _ios;
 };
 
 } // namespace Pt

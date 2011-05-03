@@ -39,7 +39,7 @@ namespace Ssl {
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
     public:
         //! \brief Instantiate an empty symmetric-cipher object.
-        BasicSymmetricCipher(std::ostream& out);
+        BasicSymmetricCipher(std::iostream& ios);
 
         //! \brief Standard dtor.
         virtual ~BasicSymmetricCipher();

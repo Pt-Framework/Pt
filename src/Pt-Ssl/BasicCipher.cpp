@@ -31,15 +31,15 @@
 namespace Pt {
 namespace Ssl {
 
-BasicCipher::BasicCipher(std::ostream& out)
-: _out(&out)
+BasicCipher::BasicCipher(std::iostream& ios)
+: _ios(&ios)
 {}
 
 BasicCipher::~BasicCipher()
 {}
 
-void BasicCipher::setOutputStream(std::ostream& out)
-{ _out = &out; }
+void BasicCipher::setIOStream(std::iostream& ios)
+{ _ios = &ios; }
 
 } // namespace Pt
 } // namespace Ssl

@@ -59,10 +59,12 @@ int main(int argc, char** argv)
         // Test texts
         const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
+        
+        std::stringstream ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+        std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
         // Start signing test #1
         Pt::Ssl::SecureDigest secureDigest1(serverPrivKey, Pt::Ssl::SecureDigest::MD5_Digest);
-        std::stringstream     ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
         secureDigest1.update(ss1);
        
         // Start signing test #2
@@ -101,40 +103,53 @@ int main(int argc, char** argv)
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();
-        Pt::Ssl::RSACipher rsac1(ss1, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1);
-        rsac1.update(text);
-        rsac1.update(" ");
+        Pt::Ssl::RSACipher rsaCipher1(ss1, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        std::iostream      rsaIOS1(&rsaCipher1);
+        rsaIOS1.write(text.c_str(), text.length());
+        rsaIOS1.write(" ", 1);
 
         // Start encryption test #2
-        std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-        Pt::Ssl::RSACipher rsac2(ss2, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
-        rsac2.update(text);
-        rsac2.update(" ");
-        rsac2.update(text2);
+        ss2.str(""); ss2.clear();
+        Pt::Ssl::RSACipher rsaCipher2(ss2, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        std::iostream      rsaIOS2(&rsaCipher2);
+        rsaIOS2.write(text.c_str(), text.length());
+        rsaIOS2.write(" ", 1);
+        rsaIOS2.write(text2.c_str(), text2.length());
 
-        // End the encryption tests
-        rsac1.finish();
-        rsac2.finish();
-        std::string tenc1 = ss1.str();
-        std::string tenc2 = ss2.str();
+        // End the encryption tests and get a copy of the encrypted string
+        rsaCipher1.finish();
+        rsaCipher2.finish();
+        const std::string tenc1 = ss1.str();
+        const std::string tenc2 = ss2.str();
 
+        char buff[1024];
+        
         // Start decryption test #1
-        ss1.str(""); ss1.clear();
-        rsac1.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
-        rsac1.update(tenc1);
+        ss1.str(tenc1); ss1.clear();
+        rsaCipher1.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+
+        std::string tdec1;
+        rsaIOS1.clear();
+        while(rsaIOS1.eof()) {
+            const size_t got = rsaIOS1.readsome(buff, sizeof(buff));
+            if(got) tdec1 += std::string(buff, got);
+            std::cerr << "@@@ GOT : " << std::string(buff, got) << std::endl;
+        }
 
         // Start decryption test #2
-        ss2.str(""); ss2.clear();
-        rsac2.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
-        rsac2.update(tenc2.substr(  0, 100));
-        rsac2.update(tenc2.substr(100, 200));
-        rsac2.update(tenc2.substr(300));
+        ss2.str(tenc2); ss2.clear();
+        rsaIOS2.clear();
+        rsaCipher2.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
 
+        std::string tdec2;
+        while(rsaIOS2.eof()) {
+            const size_t got = rsaIOS2.readsome(buff, sizeof(buff));
+            if(got) tdec2+= std::string(buff, got);
+        }
+        
         // End the decryption tests
-        rsac1.finish();
-        rsac2.finish();
-        std::string tdec1 = ss1.str();
-        std::string tdec2 = ss2.str();
+        rsaCipher1.finish();
+        rsaCipher2.finish();
   
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"

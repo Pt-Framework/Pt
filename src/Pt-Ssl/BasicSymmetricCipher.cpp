@@ -31,8 +31,8 @@
 namespace Pt {
 namespace Ssl {
 
-BasicSymmetricCipher::BasicSymmetricCipher(std::ostream& out)
-: BasicCipher(out), _mode(Invalid)
+BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
+: BasicCipher(ios), _mode(Invalid)
 {}
 
 BasicSymmetricCipher::~BasicSymmetricCipher()

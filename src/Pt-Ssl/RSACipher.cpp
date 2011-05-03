@@ -33,16 +33,16 @@
 namespace Pt {
 namespace Ssl {
 
-RSACipher::RSACipher(std::ostream& out)
-: BasicCipher(out), _rsa(0), _inpBuf(0)
+RSACipher::RSACipher(std::iostream& ios)
+: BasicCipher(ios), _rsa(0), _ioBuf(0)
 {}
 
-RSACipher::RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode)
-: BasicCipher(out), _rsa(0), _inpBuf(0)
+RSACipher::RSACipher(std::iostream& ios, const SSLPublicKey& pkey, PaddingMode pmode)
+: BasicCipher(ios), _rsa(0), _ioBuf(0)
 { startEncrypt(pkey, pmode); }
 
-RSACipher::RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode)
-: BasicCipher(out), _rsa(0), _inpBuf(0)
+RSACipher::RSACipher(std::iostream& ios, const SSLPrivateKey& pkey, PaddingMode pmode)
+: BasicCipher(ios), _rsa(0), _ioBuf(0)
 { startDecrypt(pkey, pmode); }
 
 RSACipher::~RSACipher()
@@ -74,10 +74,13 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
     _rsaSize      = RSA_size(_rsa);
     _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 42) : (_rsaSize - 12);
 
-    // Prepare the buffers
+    // Prepare the input buffer
+    _ioBuf.resize(_maxChunkSize);
+    this->setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
+    this->setg(0, 0, 0);
+
+    // Resize the conversion buffer
     _cnvBuf.resize(_rsaSize);
-    _inpBuf.resize(_maxChunkSize);
-    this->setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
@@ -101,42 +104,19 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
     _rsaSize      = RSA_size(_rsa);
     _maxChunkSize = 0;
 
-    // Prepare the buffers
+    // Prepare the output buffer
+    _ioBuf.resize(_rsaSize);
+    this->setp(0, 0);
+    this->setg(0, 0, 0);
+
+    // Resize the conversion buffer
     _cnvBuf.resize(_rsaSize);
-    _inpBuf.resize(_rsaSize);
-    this->setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
-}
-
-void RSACipher::update(const char* str, int len)
-{
-    if( !_rsa )
-        throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
-
-    this->sputn(str, len);
-}
-
-void RSACipher::update(const std::string& str)
-{ update(str.c_str(), str.length()); }
-
-void RSACipher::update(std::istream& is)
-{
-    if( !_rsa )
-        throw SSLRuntimeError("No active data encryption/decryption process!", PT_SOURCEINFO);
-
-    char buff[1024];
-    do {
-        is.read(buff, sizeof(buff));
-        const std::streamsize got = is.gcount();
-        if(got > 0) this->sputn(buff, got);
-
-    } while(!is.eof());
 }
 
 void RSACipher::finish()
 {
-    // Process the remaining data
-    if(_maxChunkSize) doEncrypt();
-    else              doDecrypt();
+    // Encrypt the remaining data
+    if(_maxChunkSize) overflow(traits_type::eof());
 
     // Free the RSA
     RSA_free(_rsa);
@@ -156,56 +136,22 @@ int RSACipher::sync()
 }
 
 RSACipher::int_type RSACipher::underflow()
-{ return traits_type::eof(); }
-
-RSACipher::int_type RSACipher::overflow(int_type ch)
 {
-    // If we get here, its mean the are already enough data to be encrypted/decrypted
-    if(_maxChunkSize) doEncrypt();
-    else              doDecrypt();
+    if( ! _rsa )
+        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
 
-    // If the overflow char is not EOF, put it in the buffer area
-    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
-    {
-        *(this->pptr()) = traits_type::to_char_type(ch);
-        this->pbump(1);
-    }
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+    
+    // Is there enough data?
+    if(_ios->rdbuf()->in_avail() < _rsaSize) return 0;
 
-    return traits_type::not_eof(ch);    
-}
+    // Read from the attached iostream
+    _ios->read(&_cnvBuf[0], _rsaSize);
 
-void RSACipher::doEncrypt()
-{
-    if( ! ( this->pptr() - this->pbase() ) ) return;
-
-    // Encrypt the data
-    const int dlen = RSA_public_encrypt( this->pptr() - this->pbase(),
-                                         (const unsigned char*) &_inpBuf[0],
-                                         (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
-    if(dlen < 0) {
-        long i = ERR_get_error();
-        while(i) {
-            std::cerr << ERR_error_string(i, 0) << std::endl;
-            i = ERR_get_error();
-        }
-        throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-    }
-
-    // Write the data to the output stream
-    if(dlen > 0) _out->write((const char*) &_cnvBuf[0], dlen);
-
-    // Reset the input buffer
-    setp(&_inpBuf[0], &_inpBuf[0] + _maxChunkSize);
-}
-
-void RSACipher::doDecrypt()
-{
-    if( ! ( this->pptr() - this->pbase() ) ) return;
-
-    // Decrypt the data
-    const int dlen = RSA_private_decrypt( this->pptr() - this->pbase(),
-                                          (const unsigned char*) &_inpBuf[0],
-                                          (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
+    // Decrutp the data
+    const int dlen = RSA_private_decrypt( _rsaSize,
+                                            (const unsigned char*) &_cnvBuf[0],
+                                            (unsigned char*) &_ioBuf[0], _rsa, _pmode );
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {
@@ -215,11 +161,48 @@ void RSACipher::doDecrypt()
         throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
     }
 
-    // Write the data to the output stream
-    if(dlen > 0) _out->write((const char*) &_cnvBuf[0], dlen);
+    // Set the output buffer
+    this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
 
-    // Reset the input buffer
-    setp(&_inpBuf[0], &_inpBuf[0] + _rsaSize);
+    // Return the number of decrypted bytes
+    return dlen;
+}
+
+RSACipher::int_type RSACipher::overflow(int_type ch)
+{
+    if( ! _rsa )
+        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+
+    // Is there any data to be encrypted?
+    const size_t avail = this->pptr() - this->pbase();
+
+    if(avail) {
+        // Encrypt the data
+        const int dlen = RSA_public_encrypt( avail,
+                                            (const unsigned char*) &_ioBuf[0],
+                                            (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        }
+        // Write the data to the output stream
+        if(dlen > 0) _ios->write((const char*) &_cnvBuf[0], dlen);
+        // Reset the input buffer
+        setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
+    }
+    
+    // If the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);    
 }
 
 } // namespace Pt

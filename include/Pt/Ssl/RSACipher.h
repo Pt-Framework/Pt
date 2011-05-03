@@ -46,13 +46,13 @@ class PT_SSL_API RSACipher : public BasicCipher {
 
     public:
         //! \brief Instantiate an empty RSA cipher object.
-        RSACipher(std::ostream& out);
+        RSACipher(std::iostream& ios);
 
         //! \brief Instantiate an RSA cipher object for data encryption.
-        RSACipher(std::ostream& out, const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        RSACipher(std::iostream& ios, const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);
 
         //! \brief Instantiate an RSA cipher object for data decryption.
-        RSACipher(std::ostream& out, const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        RSACipher(std::iostream& ios, const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
 
         //! \brief Standard dtor.
         virtual ~RSACipher();
@@ -62,15 +62,6 @@ class PT_SSL_API RSACipher : public BasicCipher {
 
         //! \brief Start a data decryption process.
         void startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
-
-        //! \brief Add data (update the state of this cipher object).
-        void update(const char* str, int len);
-
-        //! \brief Add data (update the state of this cipher object).
-        void update(const std::string& str);
-
-        //! \brief Add data (update the state of this ciphert object).
-        void update(std::istream& is);
 
         //! \brief Finish a data encryption/decryption process.
         void finish();
@@ -85,12 +76,8 @@ class PT_SSL_API RSACipher : public BasicCipher {
         int               _rsaSize;      // Size of the RSA
         int               _maxChunkSize; // Maximum data chunk size (encryption only)
         int               _pmode;        // Padding mode
+        std::vector<char> _ioBuf;        // Input/output buffer
         std::vector<char> _cnvBuf;       // Conversion buffer
-        std::vector<char> _inpBuf;       // Input buffer
-
-        // Helper functions
-        virtual void doEncrypt();
-        virtual void doDecrypt();
 };
 
 } // namespace Pt
