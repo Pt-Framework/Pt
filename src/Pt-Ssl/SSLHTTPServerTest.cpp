@@ -110,6 +110,7 @@ class Server : public Pt::Connectable {
 
             if(_ssl->buffer().import() == -1) {
                 PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
+                _ssl->buffer().shutdown();
                 _ios->buffer().inputReady -= Pt::slot(*this, &Server::onInput);
                 _ios->buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
                 return;

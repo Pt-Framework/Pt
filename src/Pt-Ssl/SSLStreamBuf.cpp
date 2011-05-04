@@ -257,7 +257,7 @@ std::streamsize SSLStreamBuf::import()
             const int shutdownState = SSL_get_shutdown(_ssl);
             if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
                 PT_SSL_LOG("Received shutdown notification");
-                this->shutdown();
+                //this->shutdown();
                 return -1;
             }
         }
