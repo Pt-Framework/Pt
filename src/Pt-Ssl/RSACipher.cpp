@@ -140,18 +140,25 @@ RSACipher::int_type RSACipher::underflow()
     if( ! _rsa )
         throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
 
-    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
-    
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 1\n";
+
     // Is there enough data?
     if(_ios->rdbuf()->in_avail() < _rsaSize) return 0;
 
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 2\n";
+
     // Read from the attached iostream
     _ios->read(&_cnvBuf[0], _rsaSize);
+    
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 3\n";
 
-    // Decrutp the data
+    // Decrypt the data
     const int dlen = RSA_private_decrypt( _rsaSize,
-                                            (const unsigned char*) &_cnvBuf[0],
-                                            (unsigned char*) &_ioBuf[0], _rsa, _pmode );
+                                          (const unsigned char*) &_cnvBuf[0],
+                                          (unsigned char*) &_ioBuf[0], _rsa, _pmode );
+
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 4\n";
+
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {
