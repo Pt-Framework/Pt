@@ -127,6 +127,7 @@ class Client : public Pt::Connectable {
 
                 if(avail == -1) {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
+                    _ssl->buffer().shutdown();
                     _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
                     std::cerr
