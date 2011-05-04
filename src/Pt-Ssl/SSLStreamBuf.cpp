@@ -278,7 +278,7 @@ void SSLStreamBuf::shutdown()
         throw SSLRuntimeError("Failed reading from OpenSSL ouput BIO!", PT_SOURCEINFO);
 
     _ios->write(buff, n);
-    _ios->flush();
+    //_ios->flush();
     PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
 
     // Reset all

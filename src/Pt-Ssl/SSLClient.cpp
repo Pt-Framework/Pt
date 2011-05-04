@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2010 by Marc Boris Duerner
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2011 by Marc Boris Duerner
+ * Copyright (C) 2010-2011 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
 #include <Pt/Ssl/SSLClient.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,9 @@ SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* ses
 : std::iostream(0),
   _ios         (&ios),
   _sslbuf      (ios, ctx, sessionID, 1 * 1024)
-{ std::iostream::init(&_sslbuf); }
+{
+    std::iostream::init(&_sslbuf);
+}
 
 SSLClient::~SSLClient()
 {}
@@ -59,7 +62,8 @@ void SSLClient::beginHandshake(bool verifyServerCert)
 
 void SSLClient::endHandshake()
 {
-    if(_sslbuf.handshakeError()) {
+    if(_sslbuf.handshakeError())
+    {
         throw SSLHandshakeFailedError(
             "The client has failed to complete the handshaking process!",
             PT_SOURCEINFO );
@@ -140,5 +144,34 @@ void SSLClient::onReadHandshake(Pt::System::StreamBuffer& sb)
     }
 }
 
+void SSLClient::beginShutdown()
+{
+    _ios->buffer().outputReady += Pt::slot(*this, &SSLClient::onWriteShutdown);
+    _ios->buffer().inputReady  += Pt::slot(*this, &SSLClient::onReadShutdown);
+
+    PT_SSL_LOG("_sslbuf.beginShutdown()");
+    _sslbuf.shutdown();
+
+    PT_SSL_LOG("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
+    _ios->buffer().beginWrite();
+}
+
+void SSLClient::endShutdown()
+{
+}
+
+void SSLClient::onReadShutdown(Pt::System::StreamBuffer& sb)
+{
+}
+
+void SSLClient::onWriteShutdown(Pt::System::StreamBuffer& sb)
+{
+    sb.endWrite();
+    PT_SSL_LOG("Sent shutdown; remaining = " << sb.out_avail());
+
+    shutdownFinished.send(*this);
+}
+
 } // namespace Ssl
+
 } // namespace Pt

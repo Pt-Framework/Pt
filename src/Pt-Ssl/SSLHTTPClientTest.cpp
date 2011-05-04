@@ -148,7 +148,7 @@ class Client : public Pt::Connectable {
                     _result += std::string(buf, n);
                 }
             }
-            
+
             if(_header.empty()) {
                 size_t pos = _result.find("\r\n\r\n");
                 if(pos != std::string::npos) {

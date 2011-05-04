@@ -66,12 +66,21 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         */
         void endHandshake();
 
+        void beginShutdown();
+
+        void endShutdown();
+
         /** @brief This signal will be fired if the SLL system has finished the handshake */
         Pt::Signal<SSLClient&> handshakeFinished;
+
+        /** @brief This signal will be fired if the SLL system has finished the shutdown */
+        Pt::Signal<SSLClient&> shutdownFinished;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
         void onReadHandshake(Pt::System::StreamBuffer& sb);
+        void onReadShutdown(Pt::System::StreamBuffer& sb);
+        void onWriteShutdown(Pt::System::StreamBuffer& sb);
 
     private:
         System::IOStream* _ios;

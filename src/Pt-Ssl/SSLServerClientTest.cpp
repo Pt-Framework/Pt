@@ -42,7 +42,8 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 
 class Server : public Pt::Connectable {
     public:
-        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
+        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
+               Pt::Ssl::SSLContext& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _ios(8192, true), _loop(loop), _client(0)
         {
             PT_SSL_LOG_S("Waiting connection from client");
@@ -86,7 +87,7 @@ class Server : public Pt::Connectable {
                 _loop.exit();
                 return;
             }
-            
+
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
             PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
 
@@ -95,7 +96,7 @@ class Server : public Pt::Connectable {
 
             _ios.buffer().beginRead();
         }
-        
+
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
@@ -110,6 +111,7 @@ class Server : public Pt::Connectable {
                     _ssl->buffer().shutdown();
                     _ios.buffer().inputReady -= Pt::slot(*this, &Server::onInput);
                     _ios.buffer().outputReady -= Pt::slot(*this, &Server::onOutput);
+                    PT_SSL_LOG_S("Sending shutdown = " << _ios.buffer().out_avail());
                     return;
                 }
                 if( ! importResult )
@@ -126,7 +128,7 @@ class Server : public Pt::Connectable {
             }
 
             std::cerr
-                << "############################################################################################# SERVER RECEIVED: "
+                << "############################################################### SERVER RECEIVED: "
                 << std::endl << msg << std::endl;
 
             // Send reply
@@ -165,7 +167,8 @@ class Server : public Pt::Connectable {
 
 class Client : public Pt::Connectable {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
+        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
+               Pt::Ssl::SSLContext& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _ios(8192, true), _loop(loop), _msgCnt(0)
         {
             PT_SSL_LOG_C("Connecting to server");
@@ -215,6 +218,11 @@ class Client : public Pt::Connectable {
             _ios.buffer().beginWrite();
         }
 
+        void onShutdownFinished(Pt::Ssl::SSLClient& ssl)
+        {
+            PT_SSL_LOG_C("finished shutdown");
+        }
+
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
@@ -246,7 +254,7 @@ class Client : public Pt::Connectable {
                 }
             }
 
-            std::cerr << "############################################################################################# CLIENT RECEIVED: "
+            std::cerr << "########################################################### CLIENT RECEIVED: "
                       << std::endl << result << std::endl;
 
             if( result.find("!!!") == std::string::npos )
@@ -268,7 +276,9 @@ class Client : public Pt::Connectable {
                 PT_SSL_LOG_C("Shutting down the stream");
                 _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
                 _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
-                _ssl->buffer().shutdown();
+
+                _ssl->beginShutdown();
+                _ssl->shutdownFinished += Pt::slot(*this, &Client::onShutdownFinished);
             }
         }
 
@@ -318,7 +328,7 @@ int main(int argc, char** argv)
         clientContext  .setTrustedCACertificate(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);
-        
+
         Server server(loop, addr, port, serverContext);
         Client client(loop, addr, port, clientContext);
 

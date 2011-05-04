@@ -142,5 +142,33 @@ void SSLServer::onReadHandshake(Pt::System::StreamBuffer& sb)
     }
 }
 
+void SSLServer::beginShutdown()
+{
+    _ios->buffer().outputReady += Pt::slot(*this, &SSLServer::onWriteShutdown);
+    _ios->buffer().inputReady  += Pt::slot(*this, &SSLServer::onReadShutdown);
+
+    PT_SSL_LOG("_sslbuf.beginShutdown()");
+    _sslbuf.shutdown();
+
+    PT_SSL_LOG("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
+    _ios->buffer().beginWrite();
+}
+
+void SSLServer::endShutdown()
+{
+}
+
+void SSLServer::onReadShutdown(Pt::System::StreamBuffer& sb)
+{
+}
+
+void SSLServer::onWriteShutdown(Pt::System::StreamBuffer& sb)
+{
+    sb.endWrite();
+    PT_SSL_LOG("Sent shutdown; remaining = " << sb.out_avail());
+
+    shutdownFinished.send(*this);
+}
+
 } // namespace Ssl
 } // namespace Pt
