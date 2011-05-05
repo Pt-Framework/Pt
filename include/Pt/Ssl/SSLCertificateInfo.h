@@ -30,15 +30,6 @@
 
 #include <Pt/Ssl/Exception.h>
 
-// Forward declaration of some OpenSSL structures
-struct ssl_ctx_st;
-struct ssl_st;
-struct bio_st;
-struct x509_st;
-struct evp_pkey_st;
-struct rsa_st;
-struct env_md_ctx_st;
-
 namespace Pt {
 namespace Ssl {
 

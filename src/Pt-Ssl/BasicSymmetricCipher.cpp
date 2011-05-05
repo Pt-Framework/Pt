@@ -30,49 +30,71 @@
 
 #include "Utils.h"
 
+#include <openssl/rand.h>
+
 namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
-: BasicCipher(ios), _mode(Invalid)
-{}
+: BasicCipher(ios), _bioEnc(0)
+{
+    _ioBuf.resize(1024);
+}
 
 BasicSymmetricCipher::~BasicSymmetricCipher()
-{}
+{
+    if(_bioEnc) BIO_free(_bioEnc);
+}
 
 void BasicSymmetricCipher::startEncrypt(const std::string& password)
 {
-    _mode = Encrypt;
-    _pswd = password;
+    if( _bioEnc )
+        throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
+
+    // Generate salt
+    unsigned char salt[PKCS5_SALT_LEN];
+    if(RAND_pseudo_bytes(salt, sizeof salt) < 0)
+        throw SSLRuntimeError("Could not generate the encryption salt!", PT_SOURCEINFO);
+
+    // Get the cipher
+    // NOTE: Later we can use enum or ask the derivative class to set it
+    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
+    if(!cipher)
+        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+
+    // Derives a key and an IV from teh user password and salt
+    unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
+    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
+
     // Initialize a cipher BIO
     BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
     if(!benc)
         throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
 
     // Initialize a cipher context
+    // (there is no need to free this context because it is owned by the cihper BIO)
     EVP_CIPHER_CTX* pcctx = 0;
     if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
         throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-//    EvpCipherCtxAutoPtr cctx(pcctx);
 
     // Initialize the cipher
-    // NOTE: Later we can use enum or ask the derivative class to set it
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
-    if(!cipher)
-        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-//cctx.get()
     if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 1))
         throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    unsigned char key[EVP_MAX_KEY_LENGTH],iv[EVP_MAX_IV_LENGTH];
-    unsigned char salt[PKCS5_SALT_LEN];
     
+    if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 1))
+        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+
+    // Copy the BIO
+    _bioEnc = benc.get();
+    benc.release();
+
+    // Set the put pointers and reset the get pointers
+    this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
+    this->setg(0, 0, 0);
 }
 
 void BasicSymmetricCipher::startDecrypt(const std::string& password)
 {
-    _mode = Decrypt;
-    _pswd = password;
 }
 
 void BasicSymmetricCipher::finish()

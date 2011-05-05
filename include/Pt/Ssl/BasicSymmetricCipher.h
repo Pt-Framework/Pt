@@ -59,20 +59,13 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         void finish();
         
     protected:
-        enum Mode {
-            Invalid,
-            Encrypt,
-            Decrypt
-        };
-
-    protected:
         virtual int sync();
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
         
     protected:
-        Mode              _mode;
-        std::string       _pswd;
+        bio_st*           _bioEnc; // Encryption BIO
+        
         std::vector<char> _ioBuf;  // Input/output buffer
         std::vector<char> _cnvBuf; // Conversion buffer
         

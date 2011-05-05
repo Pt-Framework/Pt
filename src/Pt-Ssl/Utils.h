@@ -57,14 +57,6 @@ class FreeX509 {
 };
 typedef Pt::AutoPtr<X509, FreeX509> X509AutoPtr;
 
-// Used to automatically free an EVP_CIPHER_CTX*
-class FreeEVP_CIPHER_CTX {
-    protected:
-        void destroy(EVP_CIPHER_CTX* ptr)
-        { EVP_CIPHER_CTX_free(ptr); }
-};
-typedef Pt::AutoPtr<EVP_CIPHER_CTX, FreeEVP_CIPHER_CTX> EvpCipherCtxAutoPtr;
-
 // Converter functions for converting OpenSSL values into STL strings
 extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
 extern const std::string asn1str2string(const ASN1_STRING* asn1Val);
