@@ -143,6 +143,8 @@ RSACipher::int_type RSACipher::underflow()
 {
     if( ! _rsa )
         throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
+    if( this->pptr() )
+        throw SSLRuntimeError("The cipher is currently in data encryption mode!", PT_SOURCEINFO);
 
     std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 1\n";
 
@@ -196,6 +198,8 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
 {
     if( ! _rsa )
         throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+    if( this->gptr() )
+        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
 
     // Is there any data to be encrypted?
     const size_t avail = this->pptr() - this->pbase();
