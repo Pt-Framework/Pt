@@ -180,7 +180,7 @@ RSACipher::int_type RSACipher::underflow()
 
     // Set the get pointers
     if(dlen > 0) {
-        std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 6\n";
+        std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 6 -> " << dlen << "\n";
 
         this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
         return traits_type::to_int_type( *this->gptr() );
