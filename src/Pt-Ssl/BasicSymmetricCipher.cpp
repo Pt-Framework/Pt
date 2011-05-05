@@ -28,6 +28,8 @@
 
 #include <Pt/Ssl/BasicSymmetricCipher.h>
 
+#include "Utils.h"
+
 namespace Pt {
 namespace Ssl {
 
@@ -42,6 +44,27 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
 {
     _mode = Encrypt;
     _pswd = password;
+/*
+    // Initialize a cipher BIO
+    BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
+    if(!benc)
+        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+
+    // Initialize a cipher context
+    EVP_CIPHER_CTX* pcctx = 0;
+    if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
+        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+    EvpCipherCtxAutoPtr cctx(pcctx);
+
+    // Initialize the cipher
+    // NOTE: Later we can use enum or ask the derivative class to set it
+    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
+    if(!cipher)
+        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+
+    if(!EVP_CipherInit_ex(cctx.get(), cipher, 0, 0, 0, 1))
+        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+*/
 }
 
 void BasicSymmetricCipher::startDecrypt(const std::string& password)
@@ -50,30 +73,25 @@ void BasicSymmetricCipher::startDecrypt(const std::string& password)
     _pswd = password;
 }
 
+int BasicSymmetricCipher::sync()
+{
+    if( this->pptr() ) {
+        while( this->pptr() > this->pbase() ) {
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() ) return -1;
+        }
+    }
+
+    return 0;
+}
+
+BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
+{
+}
+
+BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
+{
+}
+
 } // namespace Pt
 } // namespace Ssl
-
-/*
-    // Initialize a cipher BIO
-    BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
-    if(!benc) {
-        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
-    }
-
-    // Initialize a cipher context
-    EVP_CIPHER_CTX* pcctx = 0;
-    if(!BIO_get_cipher_ctx(benc.get(), &pcctx)) {
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    }
-    EvpCipherCtxAutoPtr cctx(pcctx);
-
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
-    if(!cipher) {
-        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-    }
-
-    if(!EVP_CipherInit_ex(cctx.get(), cipher, 0, 0, 0, 1)) {
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    }
-*/
-

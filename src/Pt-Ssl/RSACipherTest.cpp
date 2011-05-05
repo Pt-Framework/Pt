@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2010 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2010 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -62,44 +62,6 @@ int main(int argc, char** argv)
         
         std::stringstream ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
         std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-
-        // Start signing test #1
-        Pt::Ssl::SecureDigest secureDigest1(serverPrivKey, Pt::Ssl::SecureDigest::MD5_Digest);
-        secureDigest1.update(ss1);
-       
-        // Start signing test #2
-        Pt::Ssl::SecureDigest secureDigest2(serverPrivKey, Pt::Ssl::SecureDigest::SHA1_Digest);
-        secureDigest2.update(text);
-        secureDigest2.update(text);
-
-        // End the signing tests
-        secureDigest1.finish();
-        secureDigest2.finish();
-        const std::string& tsig1 = secureDigest1.getSignature();
-        const std::string& tsig2 = secureDigest2.getSignature();
-
-        // Start verification test #1
-        secureDigest1.start(serverPubKey, tsig1, Pt::Ssl::SecureDigest::MD5_Digest);
-        secureDigest1.update(text2.substr(  0, 100));
-        secureDigest1.update(text2.substr(100, 200));
-        secureDigest1.update(text2.substr(300));
-
-        // Start verification test #2
-        secureDigest2.start(serverPubKey, tsig2, Pt::Ssl::SecureDigest::SHA1_Digest);
-        secureDigest2.update(text);
-        secureDigest2.update(text);
-
-        // End the the verification tests
-        const bool tsig1ok = secureDigest1.finish();
-        const bool tsig2ok = secureDigest2.finish();
-        
-        // Check if the decrypted texts are the same with the source texts
-        PT_SSL_LOG_M("\n\n##### STRING SIGNING #####"
-                     << "\nVerification #1 status: " << ( tsig1ok ? "OK" : "FAILED")
-                     << "\nVerification #2 status: " << ( tsig2ok ? "OK" : "FAILED") << "\n"
-                    );
-
-        PT_SSL_LOG_M("################################################################################");
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();

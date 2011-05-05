@@ -39,9 +39,17 @@ Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
 
-Main SSLCipherTest : SSLCipherTest.cpp ;
-LinkSharedLibraries SSLCipherTest : Pt-Ssl Pt-System Pt ;
-MakeLocate SSLCipherTest : $(OUTPUT_TARGET) ;
+Main SecureDigestTest : SecureDigestTest.cpp ;
+LinkSharedLibraries SecureDigestTest : Pt-Ssl Pt-System Pt ;
+MakeLocate SecureDigestTest : $(OUTPUT_TARGET) ;
+
+Main RSACipherTest : RSACipherTest.cpp ;
+LinkSharedLibraries RSACipherTest : Pt-Ssl Pt-System Pt ;
+MakeLocate RSACipherTest : $(OUTPUT_TARGET) ;
+
+Main SymmetricCipherTest : SymmetricCipherTest.cpp ;
+LinkSharedLibraries SymmetricCipherTest : Pt-Ssl Pt-System Pt ;
+MakeLocate SymmetricCipherTest : $(OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {

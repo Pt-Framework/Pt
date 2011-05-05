@@ -29,6 +29,9 @@
 #define PT_SSL_BASICSYMETRICCIPHER_H
 
 #include <Pt/Ssl/BasicCipher.h>
+#include <Pt/Ssl/Exception.h>
+
+#include <vector>
 
 namespace Pt {
 namespace Ssl {
@@ -36,6 +39,8 @@ namespace Ssl {
 //! \brief The base of all symmetric-cipher classes.
 //! Symmetric-cipher needs password. Therefore we specify a method
 //! to set a password in this class.
+//!
+//! NOTE: We can later use enum to specify the cipher or derive this class
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
     public:
         //! \brief Instantiate an empty symmetric-cipher object.
@@ -56,10 +61,17 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
             Encrypt,
             Decrypt
         };
+
+    protected:
+        virtual int sync();
+        virtual int_type underflow();
+        virtual int_type overflow(int_type ch);
         
     protected:
-        Mode        _mode;
-        std::string _pswd;
+        Mode              _mode;
+        std::string       _pswd;
+        std::vector<char> _ioBuf;  // Input/output buffer
+        std::vector<char> _cnvBuf; // Conversion buffer
         
 };
 
