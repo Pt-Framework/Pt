@@ -142,13 +142,13 @@ int main(int argc, char** argv)
         rsaCipher2.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
 
         std::string tdec2;
+#if 0
         while(!rsaIOS2.eof()) { // Test with blocking
             rsaIOS2.read(buff, sizeof(buff));
             std::cerr << "@@@ GOT : " << std::string(buff, rsaIOS2.gcount()) << std::endl;
             if(rsaIOS2.gcount()) tdec2 += std::string(buff, rsaIOS2.gcount());
         }
-
-        /*
+#else
         while(!rsaIOS2.eof()) { // Test with non-blocking
             const size_t got = rsaIOS2.readsome(buff, sizeof(buff));
             std::cerr << "@@@ GOT : " << std::string(buff, got) << std::endl;
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
             else
                 break;
         }
-        */
+#endif
 
         // End the decryption tests
         rsaCipher1.finish();

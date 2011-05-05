@@ -144,17 +144,25 @@ RSACipher::int_type RSACipher::underflow()
     if( ! _rsa )
         throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
 
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 1\n";
+
     // Check if we still have anything left if the get buffer
     if( this->gptr() && this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
-    
+
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 2\n";
+   
     // RSA only can decrypt a chunk with a fixed size,
     // assume EOF if we do not have it 
     if(_ios->rdbuf()->in_avail() < _rsaSize) return traits_type::eof();
 
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 3\n";
+    
     // Read from the attached iostream
     _ios->read(&_cnvBuf[0], _rsaSize);
     
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 4\n";
+
     // Decrypt the data
     const int dlen = RSA_private_decrypt( _rsaSize,
                                           (const unsigned char*) &_cnvBuf[0],
@@ -168,11 +176,17 @@ RSACipher::int_type RSACipher::underflow()
         throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
     }
 
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 5\n";
+
     // Set the get pointers
     if(dlen > 0) {
+        std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 6\n";
+
         this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
         return traits_type::to_int_type( *this->gptr() );
     }
+
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ 7\n";
 
     // EOF
     return traits_type::eof();
