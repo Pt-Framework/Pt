@@ -109,9 +109,9 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
     // Prepare the output buffer
     _ioBuf.resize(_rsaSize);
 
-    // Reset the put and get pointers
+    // Reset the put and set pointers
     this->setp(0, 0);
-    this->setg(0, 0, 0);
+    this->setg(&_ioBuf[0], &_ioBuf[0] + _rsaSize, &_ioBuf[0] + _rsaSize);
 
     // Resize the conversion buffer
     _cnvBuf.resize(_rsaSize);
