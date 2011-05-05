@@ -34,15 +34,15 @@ namespace Pt {
 namespace Ssl {
 
 RSACipher::RSACipher(std::iostream& ios)
-: BasicCipher(ios), _rsa(0), _ioBuf(0)
+: BasicCipher(ios), _rsa(0)
 {}
 
 RSACipher::RSACipher(std::iostream& ios, const SSLPublicKey& pkey, PaddingMode pmode)
-: BasicCipher(ios), _rsa(0), _ioBuf(0)
+: BasicCipher(ios), _rsa(0)
 { startEncrypt(pkey, pmode); }
 
 RSACipher::RSACipher(std::iostream& ios, const SSLPrivateKey& pkey, PaddingMode pmode)
-: BasicCipher(ios), _rsa(0), _ioBuf(0)
+: BasicCipher(ios), _rsa(0)
 { startDecrypt(pkey, pmode); }
 
 RSACipher::~RSACipher()
@@ -76,6 +76,8 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
 
     // Prepare the input buffer
     _ioBuf.resize(_maxChunkSize);
+
+    // Set the put pointers and reset the get pointers
     this->setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
     this->setg(0, 0, 0);
 
@@ -106,8 +108,10 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
 
     // Prepare the output buffer
     _ioBuf.resize(_rsaSize);
+
+    // Reset the put and get pointers
     this->setp(0, 0);
-    this->setg(&_ioBuf[0], &_ioBuf[0] + _rsaSize, &_ioBuf[0] + _rsaSize);
+    this->setg(0, 0, 0);
 
     // Resize the conversion buffer
     _cnvBuf.resize(_rsaSize);
@@ -140,25 +144,21 @@ RSACipher::int_type RSACipher::underflow()
     if( ! _rsa )
         throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
 
-    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 1\n";
-
-    // Is there enough data?
-    if(_ios->rdbuf()->in_avail() < _rsaSize) return 0;
-
-    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 2\n";
+    // Check if we still have anything left if the get buffer
+    if( this->gptr() && this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+    
+    // RSA only can decrypt a chunk with a fixed size,
+    // assume EOF if we do not have it 
+    if(_ios->rdbuf()->in_avail() < _rsaSize) return traits_type::eof();
 
     // Read from the attached iostream
     _ios->read(&_cnvBuf[0], _rsaSize);
     
-    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 3\n";
-
     // Decrypt the data
     const int dlen = RSA_private_decrypt( _rsaSize,
                                           (const unsigned char*) &_cnvBuf[0],
                                           (unsigned char*) &_ioBuf[0], _rsa, _pmode );
-
-    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$ 4\n";
-
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {
@@ -168,11 +168,14 @@ RSACipher::int_type RSACipher::underflow()
         throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
     }
 
-    // Set the output buffer
-    this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
+    // Set the get pointers
+    if(dlen > 0) {
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
+        return traits_type::to_int_type( *this->gptr() );
+    }
 
-    // Return the number of decrypted bytes
-    return dlen;
+    // EOF
+    return traits_type::eof();
 }
 
 RSACipher::int_type RSACipher::overflow(int_type ch)
@@ -198,7 +201,7 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
         }
         // Write the data to the output stream
         if(dlen > 0) _ios->write((const char*) &_cnvBuf[0], dlen);
-        // Reset the input buffer
+        // Reset the put pointers
         setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
     }
     
