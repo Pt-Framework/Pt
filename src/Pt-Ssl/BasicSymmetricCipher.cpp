@@ -36,15 +36,17 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
-: BasicCipher(ios), _bioEnc(0), _bioDec(0)
+: BasicCipher(ios), _bioEnc(0), _bioDec(0), _bioIO(0)
 {
     _ioBuf.resize(1024);
+    _cnvBuf.resize(4096);
 }
 
 BasicSymmetricCipher::~BasicSymmetricCipher()
 {
     if(_bioEnc) BIO_free(_bioEnc);
     if(_bioDec) BIO_free(_bioDec);
+    if(_bioIO ) BIO_free(_bioIO );
 }
 
 void BasicSymmetricCipher::startEncrypt(const std::string& password)
@@ -85,10 +87,13 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
     if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 1))
         throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
 
-    // Copy the BIO
+    // Copy the cipher BIO
     _bioEnc = benc.get();
     benc.release();
 
+    // Create an input/output BIO
+    _bioIO = BIO_push(_bioEnc, BIO_new(BIO_s_mem()));
+        
     // Set the put pointers and reset the get pointers
     this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
     this->setg(0, 0, 0);
@@ -108,6 +113,15 @@ void BasicSymmetricCipher::finish()
         BIO_free(_bioEnc);
         _bioEnc = 0;
     }
+
+    // Data decrypyion mode?
+    if(_bioDec) {
+        BIO_free(_bioDec);
+        _bioDec = 0;
+    }
+
+    BIO_free(_bioIO);
+    _bioIO = 0;
 }
 
 int BasicSymmetricCipher::sync()
@@ -138,26 +152,29 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
         throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
 
     // Is there any data to be encrypted?
-    const size_t avail = this->pptr() - this->pbase();
+    size_t avail = this->pptr() - this->pbase();
 
+    std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ " << std::string(&_ioBuf[0], avail) << std::endl;
+    
     if(avail) {
-        /*
-        // Encrypt the data
-        const int dlen = RSA_public_encrypt( avail,
-                                            (const unsigned char*) &_ioBuf[0],
-                                            (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
-        if(dlen < 0) {
-            long i = ERR_get_error();
-            while(i) {
-                std::cerr << ERR_error_string(i, 0) << std::endl;
-                i = ERR_get_error();
+        while(avail > 0) {
+            // Encrypt the data
+            const int written = BIO_write(_bioIO, &_ioBuf[0], avail);
+            if(written < 0)
+                throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+
+            avail -= written;
+
+            // Read the encrypted data and write it to the output stream
+            while(true) {
+                const int read = BIO_read(_bioIO, &_cnvBuf[0], _cnvBuf.size());
+                if(read > 0)
+                    _ios->write((const char*) &_cnvBuf[0], read);
+                else
+                    break;
+                std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$ avail=" << avail << ", written=" << written << ", read=" << read << std::endl;
             }
-            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
         }
-        // Write the data to the output stream
-        if(dlen > 0) _ios->write((const char*) &_cnvBuf[0], dlen);
-        */
-        
         // Reset the put pointers
         setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
     }

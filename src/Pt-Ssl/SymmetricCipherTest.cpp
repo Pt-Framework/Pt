@@ -54,15 +54,26 @@ int main(int argc, char** argv)
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();
-        
-        Pt::Ssl::BasicSymmetricCipher sc1(ss1);
-        std::iostream                 scIOS1(&sc1);
-
-        sc1.startEncrypt("my_password");
-
+        Pt::Ssl::BasicSymmetricCipher cipher1(ss1);
+        std::iostream                 scIOS1(&cipher1);
+        cipher1.startEncrypt("my_password_1");
         scIOS1.write(text.c_str(), text.length());
         scIOS1.write(" ", 1);
 
+        // Start encryption test #2
+        ss2.str(""); ss2.clear();
+        Pt::Ssl::BasicSymmetricCipher cipher2(ss2);
+        std::iostream                 scIOS2(&cipher2);
+        cipher2.startEncrypt("my_password_2");
+        scIOS2.write(text.c_str(), text.length());
+        scIOS2.write(" ", 1);
+        scIOS2.write(text2.c_str(), text2.length());
+        
+        // End the encryption tests and get a copy of the encrypted string
+        cipher1.finish();
+        cipher2.finish();
+        const std::string tenc1 = ss1.str();
+        const std::string tenc2 = ss2.str();
 
         /*
         // Check if the decrypted texts are the same with the source texts
