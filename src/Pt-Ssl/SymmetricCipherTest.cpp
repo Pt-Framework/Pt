@@ -45,21 +45,24 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("OpenSSL test progam started");
         PT_SSL_LOG_M("################################################################################");
 
-        // Load certificate and private key
-        Pt::Ssl::SSLCertificateList serverCertChain;
-        serverCertChain.loadFromFile("server.pem");
-
-        Pt::Ssl::SSLPrivateKey serverPrivKey("password");
-        serverPrivKey.loadFromFile("server.key");
-
-        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
-
         // Test texts
         const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
 
         std::stringstream ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
         std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+
+        // Start encryption test #1
+        ss1.str(""); ss1.clear();
+        
+        Pt::Ssl::BasicSymmetricCipher sc1(ss1);
+        std::iostream                 scIOS1(&sc1);
+
+        sc1.startEncrypt("my_password");
+
+        scIOS1.write(text.c_str(), text.length());
+        scIOS1.write(" ", 1);
+
 
         /*
         // Check if the decrypted texts are the same with the source texts

@@ -44,7 +44,6 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
 {
     _mode = Encrypt;
     _pswd = password;
-/*
     // Initialize a cipher BIO
     BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
     if(!benc)
@@ -54,23 +53,36 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
     EVP_CIPHER_CTX* pcctx = 0;
     if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
         throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    EvpCipherCtxAutoPtr cctx(pcctx);
+//    EvpCipherCtxAutoPtr cctx(pcctx);
 
     // Initialize the cipher
     // NOTE: Later we can use enum or ask the derivative class to set it
     const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
     if(!cipher)
         throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-
-    if(!EVP_CipherInit_ex(cctx.get(), cipher, 0, 0, 0, 1))
+//cctx.get()
+    if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 1))
         throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-*/
+
+    unsigned char key[EVP_MAX_KEY_LENGTH],iv[EVP_MAX_IV_LENGTH];
+    unsigned char salt[PKCS5_SALT_LEN];
+    
 }
 
 void BasicSymmetricCipher::startDecrypt(const std::string& password)
 {
     _mode = Decrypt;
     _pswd = password;
+}
+
+void BasicSymmetricCipher::finish()
+{
+    // Encrypt the remaining data
+    //if(_maxChunkSize) overflow(traits_type::eof());
+
+    // Free the RSA
+    //RSA_free(_rsa);
+    //_rsa = 0;
 }
 
 int BasicSymmetricCipher::sync()

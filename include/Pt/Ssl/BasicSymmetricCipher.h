@@ -55,6 +55,9 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         //! \brief Start a data decryption process.
         virtual void startDecrypt(const std::string& password);
 
+        //! \brief Finish a data encryption/decryption process.
+        void finish();
+        
     protected:
         enum Mode {
             Invalid,
