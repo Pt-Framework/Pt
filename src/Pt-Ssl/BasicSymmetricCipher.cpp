@@ -36,7 +36,7 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
-: BasicCipher(ios), _bioEnc(0)
+: BasicCipher(ios), _bioEnc(0), _bioDec(0)
 {
     _ioBuf.resize(1024);
 }
@@ -44,6 +44,7 @@ BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
 BasicSymmetricCipher::~BasicSymmetricCipher()
 {
     if(_bioEnc) BIO_free(_bioEnc);
+    if(_bioDec) BIO_free(_bioDec);
 }
 
 void BasicSymmetricCipher::startEncrypt(const std::string& password)
@@ -99,12 +100,14 @@ void BasicSymmetricCipher::startDecrypt(const std::string& password)
 
 void BasicSymmetricCipher::finish()
 {
-    // Encrypt the remaining data
-    //if(_maxChunkSize) overflow(traits_type::eof());
-
-    // Free the RSA
-    //RSA_free(_rsa);
-    //_rsa = 0;
+    // Data encryption mode?
+    if(_bioEnc) {
+        // Encrypt the remaining data
+        overflow(traits_type::eof());
+        // Free the BIO
+        BIO_free(_bioEnc);
+        _bioEnc = 0;
+    }
 }
 
 int BasicSymmetricCipher::sync()
@@ -121,10 +124,53 @@ int BasicSymmetricCipher::sync()
 
 BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
 {
+    if( ! _bioDec )
+        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
+    if( this->pptr() )
+        throw SSLRuntimeError("The cipher is currently in data encryption mode!", PT_SOURCEINFO);
 }
 
 BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
 {
+    if( ! _bioEnc )
+        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+    if( this->gptr() )
+        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
+
+    // Is there any data to be encrypted?
+    const size_t avail = this->pptr() - this->pbase();
+
+    if(avail) {
+        /*
+        // Encrypt the data
+        const int dlen = RSA_public_encrypt( avail,
+                                            (const unsigned char*) &_ioBuf[0],
+                                            (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        }
+        // Write the data to the output stream
+        if(dlen > 0) _ios->write((const char*) &_cnvBuf[0], dlen);
+        */
+        
+        // Reset the put pointers
+        setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
+    }
+
+    // If the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
+    {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
+    
 }
 
 } // namespace Pt

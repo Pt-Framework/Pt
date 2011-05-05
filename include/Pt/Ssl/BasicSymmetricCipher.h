@@ -65,6 +65,7 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         
     protected:
         bio_st*           _bioEnc; // Encryption BIO
+        bio_st*           _bioDec; // Decryption BIO
         
         std::vector<char> _ioBuf;  // Input/output buffer
         std::vector<char> _cnvBuf; // Conversion buffer
