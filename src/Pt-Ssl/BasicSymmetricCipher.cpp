@@ -96,7 +96,8 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
     benc.release();
 
     // Create an input/output BIO
-    _bioIO = BIO_push(_bioEnc, BIO_new(BIO_s_mem()));
+    _bioIO = BIO_new(BIO_s_mem());
+    BIO_push(_bioEnc, _bioIO);
         
     // Set the put pointers and reset the get pointers
     this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
@@ -150,7 +151,8 @@ void BasicSymmetricCipher::startDecrypt(const std::string& password)
     bdec.release();
 
     // Create an input/output BIO
-    _bioIO = BIO_push(_bioDec, BIO_new(BIO_s_mem()));
+    _bioIO = BIO_new(BIO_s_mem());
+    BIO_push(_bioDec, _bioIO);
 
     // Reset the put and set pointers
     this->setp(0, 0);
@@ -168,7 +170,7 @@ void BasicSymmetricCipher::finish()
         _bioEnc = 0;
     }
 
-    // Data decrypyion mode?
+    // Data decryption mode?
     if(_bioDec) {
         BIO_free(_bioDec);
         _bioDec = 0;
@@ -222,17 +224,19 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
         if(!got) return traits_type::eof();
 
         // Decrypt the data
-        const int written = BIO_write(_bioIO, &_cnvBuf[0], got);
+        const int written = BIO_write(_bioDec, &_cnvBuf[0], got);
         if(written < 0)
             throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
         avail -= written;
 
+        BIO_flush(_bioDec);
+        
         std::cerr << "$$$$$ underflow() : written = " << written << std::endl;
 
         // Read the decrypted data to the get buffer
         const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
         std::cerr << "$$$$$ underflow() : read = " << read << std::endl;
-        if(!read <= 0) return traits_type::eof();
+        if(read <= 0) return traits_type::eof();
 
         // Set the get pointers
         this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + read);
@@ -256,10 +260,12 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
     if(avail) {
         while(avail > 0) {
             // Encrypt the data
-            const int written = BIO_write(_bioIO, &_ioBuf[0], avail);
+            const int written = BIO_write(_bioEnc, &_ioBuf[0], avail);
             if(written < 0)
                 throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
             avail -= written;
+
+            BIO_flush(_bioEnc);
 
             std::cerr << "$$$$$ overflow() : written = " << written << std::endl;
 

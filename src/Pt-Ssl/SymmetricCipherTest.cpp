@@ -80,6 +80,7 @@ int main(int argc, char** argv)
         cipher2.finish();
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
+        std::cerr << std::endl;
 
         char buff[1024];
         
@@ -94,9 +95,6 @@ int main(int argc, char** argv)
             scIOS1.read(buff, sizeof(buff));
             if(scIOS1.gcount()) tdec1 += std::string(buff, scIOS1.gcount());
         }
-        std::cerr << "*************************" << std::endl;
-        std::cerr << tdec1 << std::endl;
-        std::cerr << "*************************" << std::endl;
 
         // Start decryption test #2
         std::cerr << "$$$$$ Decryption test #2 START" << std::endl;
@@ -116,6 +114,12 @@ int main(int argc, char** argv)
         std::cerr << "$$$$$ Decryption test #2 FINISH" << std::endl;
         cipher2.finish();
 
+        std::cerr << "*************************" << std::endl;
+        std::cerr << tdec1 << std::endl;
+        std::cerr << "*************************" << std::endl;
+        std::cerr << tdec2 << std::endl;
+        std::cerr << "*************************" << std::endl;
+        
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
