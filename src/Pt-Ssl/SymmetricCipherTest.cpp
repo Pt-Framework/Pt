@@ -81,13 +81,46 @@ int main(int argc, char** argv)
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
 
-        /*
+        char buff[1024];
+        
+        // Start decryption test #1
+        std::cerr << "$$$$$ Decryption test #1 START" << std::endl;
+        ss1.str(tenc1); ss1.clear();
+        cipher1.startDecrypt("my_password_1");
+
+        std::string tdec1;
+        scIOS1.clear();
+        while(!scIOS1.eof()) { // Test with blocking
+            scIOS1.read(buff, sizeof(buff));
+            if(scIOS1.gcount()) tdec1 += std::string(buff, scIOS1.gcount());
+        }
+        std::cerr << "*************************" << std::endl;
+        std::cerr << tdec1 << std::endl;
+        std::cerr << "*************************" << std::endl;
+
+        // Start decryption test #2
+        std::cerr << "$$$$$ Decryption test #2 START" << std::endl;
+        ss2.str(tenc2); ss2.clear();
+        cipher2.startDecrypt("my_password_2");
+
+        std::string tdec2;
+        scIOS2.clear();
+        while(!scIOS2.eof()) { // Test with blocking
+            scIOS2.read(buff, sizeof(buff));
+            if(scIOS2.gcount()) tdec2 += std::string(buff, scIOS2.gcount());
+        }
+
+        // End the decryption tests
+        std::cerr << "$$$$$ Decryption test #1 FINISH" << std::endl;
+        cipher1.finish();
+        std::cerr << "$$$$$ Decryption test #2 FINISH" << std::endl;
+        cipher2.finish();
+
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
                      << "\nDecryption #2 status: " << ( ( (text + " " + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"
                     );
-        */  
 
         // Done
         PT_SSL_LOG_M("################################################################################");
