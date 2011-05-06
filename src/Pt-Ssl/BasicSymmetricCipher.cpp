@@ -200,37 +200,47 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
     // Check if we still have anything left if the get buffer
     if( this->gptr() && this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
-    
-/*
-    // RSA only can decrypt a chunk with a fixed size,
-    // assume EOF if we do not have it
-    if(_ios->rdbuf()->in_avail() < _rsaSize) return traits_type::eof();
 
-    // Read from the attached iostream
-    _ios->read(&_cnvBuf[0], _rsaSize);
-
-    // Decrypt the data
-    const int dlen = RSA_private_decrypt( _rsaSize,
-                                          (const unsigned char*) &_cnvBuf[0],
-                                          (unsigned char*) &_ioBuf[0], _rsa, _pmode );
-    if(dlen < 0) {
-        long i = ERR_get_error();
-        while(i) {
-            std::cerr << ERR_error_string(i, 0) << std::endl;
-            i = ERR_get_error();
-        }
-        throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
-    }
-
-    // Set the get pointers
-    if(dlen > 0) {
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + dlen);
+    // Check if there is any data left in the input/output BIO
+    const int leftOver = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
+    std::cerr << "$$$$$ underflow() : left-over = " << leftOver << std::endl;
+    if(leftOver > 0) {
+        // Set the get pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + leftOver);
         return traits_type::to_int_type( *this->gptr() );
     }
-*/
+
+    // Get the amount of data data in the attached stream?
+    size_t avail = _ios->rdbuf()->in_avail();
+    
+    // Decrypt the data
+    if(avail) {
+        // Read from the attached iostream
+        _ios->read(&_cnvBuf[0], _cnvBuf.size());
+        const size_t got = _ios->gcount();
+        std::cerr << "$$$$$ underflow() : got = " << got << std::endl;
+        if(!got) return traits_type::eof();
+
+        // Decrypt the data
+        const int written = BIO_write(_bioIO, &_cnvBuf[0], got);
+        if(written < 0)
+            throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+        avail -= written;
+
+        std::cerr << "$$$$$ underflow() : written = " << written << std::endl;
+
+        // Read the decrypted data to the get buffer
+        const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
+        std::cerr << "$$$$$ underflow() : read = " << read << std::endl;
+        if(!read <= 0) return traits_type::eof();
+
+        // Set the get pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + read);
+        return traits_type::to_int_type( *this->gptr() );
+    }
+
     // EOF
     return traits_type::eof();
-    
 }
 
 BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
