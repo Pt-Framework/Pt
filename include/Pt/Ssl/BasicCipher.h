@@ -53,6 +53,11 @@ class PT_SSL_API BasicCipher : public NonCopyable, public std::streambuf {
         //! \brief Finish a data encryption/decryption process.
         virtual void finish() = 0;
 
+        /** @brief Reads data from the underlying stream
+            Returns the number bytes in the data.
+        */
+        virtual std::streamsize import();
+        
     protected:
         std::iostream* _ios;
 };

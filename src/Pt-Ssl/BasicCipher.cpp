@@ -28,6 +28,8 @@
 
 #include <Pt/Ssl/BasicCipher.h>
 
+#include <sstream>
+
 namespace Pt {
 namespace Ssl {
 
@@ -40,6 +42,17 @@ BasicCipher::~BasicCipher()
 
 void BasicCipher::setIOStream(std::iostream& ios)
 { _ios = &ios; }
+
+
+std::streamsize BasicCipher::import()
+{
+    const std::streamsize avail = _ios->rdbuf()->in_avail();
+    if(!avail) return 0;
+
+    if(underflow() == traits_type::eof()) return 0;
+
+    return this->egptr() - this->gptr();
+}
 
 } // namespace Pt
 } // namespace Ssl
