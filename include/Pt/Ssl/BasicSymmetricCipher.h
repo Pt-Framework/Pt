@@ -64,7 +64,7 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         virtual int_type overflow(int_type ch);
 
         void storeEncryptedData();
-        
+
     protected:
         bio_st*           _bioEnc; // Encryption BIO
         bio_st*           _bioDec; // Decryption BIO
