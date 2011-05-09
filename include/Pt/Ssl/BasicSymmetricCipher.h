@@ -62,6 +62,8 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         virtual int sync();
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
+
+        void storeEncryptedData();
         
     protected:
         bio_st*           _bioEnc; // Encryption BIO
@@ -70,7 +72,6 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         
         std::vector<char> _ioBuf;  // Input/output buffer
         std::vector<char> _cnvBuf; // Conversion buffer
-        
 };
 
 } // namespace Pt

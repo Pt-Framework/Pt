@@ -55,7 +55,6 @@ int main(int argc, char** argv)
         std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
         // Start encryption test #1
-        std::cerr << "$$$$$ Encryption test #1 START" << std::endl;
         ss1.str(""); ss1.clear();
         Pt::Ssl::BasicSymmetricCipher cipher1(ss1);
         std::iostream                 scIOS1(&cipher1);
@@ -64,7 +63,6 @@ int main(int argc, char** argv)
         scIOS1.write(" ", 1);
 
         // Start encryption test #2
-        std::cerr << "$$$$$ Encryption test #2 START" << std::endl;
         ss2.str(""); ss2.clear();
         Pt::Ssl::BasicSymmetricCipher cipher2(ss2);
         std::iostream                 scIOS2(&cipher2);
@@ -74,9 +72,7 @@ int main(int argc, char** argv)
         scIOS2.write(text2.c_str(), text2.length());
         
         // End the encryption tests and get a copy of the encrypted string
-        std::cerr << "$$$$$ Encryption test #1 FINISH" << std::endl;
         cipher1.finish();
-        std::cerr << "$$$$$ Encryption test #2 FINISH" << std::endl;
         cipher2.finish();
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
@@ -85,7 +81,6 @@ int main(int argc, char** argv)
         char buff[1024];
         
         // Start decryption test #1
-        std::cerr << "$$$$$ Decryption test #1 START" << std::endl;
         ss1.str(tenc1); ss1.clear();
         cipher1.startDecrypt("my_password_1");
 
@@ -97,7 +92,6 @@ int main(int argc, char** argv)
         }
 
         // Start decryption test #2
-        std::cerr << "$$$$$ Decryption test #2 START" << std::endl;
         ss2.str(tenc2); ss2.clear();
         cipher2.startDecrypt("my_password_2");
 
@@ -109,16 +103,8 @@ int main(int argc, char** argv)
         }
 
         // End the decryption tests
-        std::cerr << "$$$$$ Decryption test #1 FINISH" << std::endl;
         cipher1.finish();
-        std::cerr << "$$$$$ Decryption test #2 FINISH" << std::endl;
         cipher2.finish();
-
-        std::cerr << "*************************" << std::endl;
-        std::cerr << tdec1 << std::endl;
-        std::cerr << "*************************" << std::endl;
-        std::cerr << tdec2 << std::endl;
-        std::cerr << "*************************" << std::endl;
         
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"

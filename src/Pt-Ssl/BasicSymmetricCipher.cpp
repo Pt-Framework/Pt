@@ -164,7 +164,9 @@ void BasicSymmetricCipher::finish()
     // Data encryption mode?
     if(_bioEnc) {
         // Encrypt the remaining data
-        overflow(traits_type::eof());
+        sync();
+        (void) BIO_flush(_bioEnc);
+        storeEncryptedData();
         // Free the BIO
         BIO_free(_bioEnc);
         _bioEnc = 0;
@@ -205,7 +207,6 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
 
     // Check if there is any data left in the input/output BIO
     const int leftOver = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
-    std::cerr << "$$$$$ underflow() : left-over = " << leftOver << std::endl;
     if(leftOver > 0) {
         // Set the get pointers
         this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + leftOver);
@@ -220,7 +221,6 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
         // Read from the attached iostream
         _ios->read(&_cnvBuf[0], _cnvBuf.size());
         const size_t got = _ios->gcount();
-        std::cerr << "$$$$$ underflow() : got = " << got << std::endl;
         if(!got) return traits_type::eof();
 
         // Decrypt the data
@@ -229,13 +229,22 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
             throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
         avail -= written;
 
-        BIO_flush(_bioDec);
-        
-        std::cerr << "$$$$$ underflow() : written = " << written << std::endl;
+        // Read the decrypted data to the get buffer
+        const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
+        if(read <= 0) return traits_type::eof();
+
+        // Set the get pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + read);
+        return traits_type::to_int_type( *this->gptr() );
+    }
+
+    // Ensure that the remaining data is decrypted
+    else {
+        // Flush the BIO
+        (void) BIO_flush(_bioDec);
 
         // Read the decrypted data to the get buffer
         const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
-        std::cerr << "$$$$$ underflow() : read = " << read << std::endl;
         if(read <= 0) return traits_type::eof();
 
         // Set the get pointers
@@ -265,22 +274,13 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
                 throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
             avail -= written;
 
-            BIO_flush(_bioEnc);
-
-            std::cerr << "$$$$$ overflow() : written = " << written << std::endl;
-
-            // Read the encrypted data and write it to the output stream
-            while(true) {
-                const int read = BIO_read(_bioIO, &_cnvBuf[0], _cnvBuf.size());
-                std::cerr << "$$$$$ overflow() : read = " << read << std::endl;
-                if(read <= 0) break;
-                _ios->write((const char*) &_cnvBuf[0], read);
-            }
+            // Store the encrypted data to the atatched output stream
+            storeEncryptedData();
         }
         // Reset the put pointers
         setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
     }
-
+    
     // If the overflow char is not EOF, put it in the buffer area
     if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
@@ -289,7 +289,16 @@ BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);
-    
+}
+
+void BasicSymmetricCipher::storeEncryptedData()
+{
+    // Read the encrypted data and write it to the output stream
+    while(true) {
+        const int read = BIO_read(_bioIO, &_cnvBuf[0], _cnvBuf.size());
+        if(read <= 0) break;
+        _ios->write((const char*) &_cnvBuf[0], read);
+    }
 }
 
 } // namespace Pt
