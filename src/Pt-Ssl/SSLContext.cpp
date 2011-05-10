@@ -50,6 +50,30 @@ SSLInit::SSLInit()
         SSL_load_error_strings();
         ERR_load_crypto_strings();
 
+        EVP_add_cipher(EVP_des_ede3_cfb());
+        EVP_add_cipher(EVP_des_ede3_cfb1());
+        EVP_add_cipher(EVP_des_ede3_cfb8());
+        EVP_add_cipher(EVP_des_ede3_ofb());
+
+        EVP_add_cipher(EVP_aes_128_ecb());
+        EVP_add_cipher(EVP_aes_128_cbc());
+        EVP_add_cipher(EVP_aes_128_cfb());
+        EVP_add_cipher(EVP_aes_128_cfb1());
+        EVP_add_cipher(EVP_aes_128_cfb8());
+        EVP_add_cipher(EVP_aes_128_ofb());
+        EVP_add_cipher(EVP_aes_192_ecb());
+        EVP_add_cipher(EVP_aes_192_cbc());
+        EVP_add_cipher(EVP_aes_192_cfb());
+        EVP_add_cipher(EVP_aes_192_cfb1());
+        EVP_add_cipher(EVP_aes_192_cfb8());
+        EVP_add_cipher(EVP_aes_192_ofb());
+        EVP_add_cipher(EVP_aes_256_ecb());
+        EVP_add_cipher(EVP_aes_256_cbc());
+        EVP_add_cipher(EVP_aes_256_cfb());
+        EVP_add_cipher(EVP_aes_256_cfb1());
+        EVP_add_cipher(EVP_aes_256_cfb8());
+        EVP_add_cipher(EVP_aes_256_ofb());
+    
         Pt::System::LogTarget& target = Pt::System::LogTarget::get(PT_SSL_LOGGER_CATEGORY);
         target.setLogLevel(Pt::System::Info);
         target.setChannel("console://");

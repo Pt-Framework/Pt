@@ -34,7 +34,7 @@
 
 namespace Pt {
 namespace Ssl {
-
+    
 BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
 : BasicCipher(ios), _bioEnc(0), _bioDec(0), _bioIO(0)
 {

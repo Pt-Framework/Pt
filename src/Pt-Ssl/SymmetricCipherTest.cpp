@@ -105,6 +105,8 @@ int main(int argc, char** argv)
         // End the decryption tests
         cipher1.finish();
         cipher2.finish();
+
+        std::cerr  << std::endl << std::endl<< tdec1 << std::endl << std::endl;
         
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"

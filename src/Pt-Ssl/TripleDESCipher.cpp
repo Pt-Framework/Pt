@@ -42,7 +42,60 @@ TripleDESCipher::~TripleDESCipher()
 
 const char* TripleDESCipher::getOpenSSLCipherName() const
 {
+    /*
+        http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
+
+        Electronic Codebook Book (ECB)
+            + The simplest of the encryption modes.
+            + Message is broken into independent blocks which are encrypted.
+            + Each block is a value which is substituted, like a codebook, hence the name.
+            + Each block is encoded independently of the other blocks .
+            + Uses: secure transmission of small data.
+            + Provide little or no defense against modification
+            + Identical plaintext blocks are encrypted to identical ciphertext blocks
+
+        cipher-block chaining (CBC)
+            + Message is broken into blocks
+            + Each previous cipher blocks is chained with current plaintext block, hence the name.
+            + Each block of plaintext is XOR-ed with the previous ciphertext block before being encrypted.
+            + A change in the message affects all ciphertext blocks after the change as well as the original block.
+            + Uses: secure transmission of bulk data.
+            + An error in (or attack upon) one ciphertext block impacts two plaintext blocks upon decryption.
+
+        cipher feedback (CFB)
+        output feedback (OFB)
+            + Make the block cipher into a self-synchronizing stream cipher.
+            + Message is treated as a stream of bits.
+            + Result is feed back for next stage, hence the name.
+            + Uses: secure transmission of stream/bulk data.
+            + Flipping a bit in the ciphertext produces a flipped bit in the plaintext at the same location.
+            + Errors propagate for several blocks after the error.
+    */
+
+    //return "aes-128-cbc";
+    //return "aes-128-cfb";
+    //return "aes-128-cfb1";
+    //return "aes-128-cfb8";
+    //return "aes-128-ofb";
+      
+    //return "aes-192-cbc";
+    //return "aes-192-cfb";
+    //return "aes-192-cfb1";
+    //return "aes-192-cfb8";
+    //return "aes-192-ofb";
+  
+    //return "aes-256-cbc";
+    //return "aes-256-cfb";
+    //return "aes-256-cfb1";
+    //return "aes-256-cfb8";
+    //return "aes-256-ofb";
+
     return "des-ede3-cbc";
+    //return "des-ede3-cfb";
+    //return "des-ede3-cfb1"; // ERROR!
+    //return "des-ede3-cfb8";
+    //return "des-ede3-ofb";
+    
 }
 
 } // namespace Pt
