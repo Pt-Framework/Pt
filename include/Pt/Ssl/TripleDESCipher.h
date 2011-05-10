@@ -25,55 +25,25 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_BASICSYMETRICCIPHER_H
-#define PT_SSL_BASICSYMETRICCIPHER_H
+#ifndef PT_SSL_TRIPLEDESCIPHER_H
+#define PT_SSL_TRIPLEDESCIPHER_H
 
-#include <Pt/Ssl/BasicCipher.h>
-#include <Pt/Ssl/Exception.h>
-
-#include <vector>
+#include <Pt/Ssl/BasicSymmetricCipher.h>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief The base of all symmetric-cipher classes.
-//! Symmetric-cipher needs password. Therefore we specify a method
-//! to set a password in this class.
-class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
+//! \brief Triple-DES symmetric-cipher classes.
+class PT_SSL_API TripleDESCipher  : public BasicSymmetricCipher {
     public:
         //! \brief Instantiate an empty symmetric-cipher object.
-        BasicSymmetricCipher(std::iostream& ios);
+        TripleDESCipher(std::iostream& ios);
 
         //! \brief Standard dtor.
-        virtual ~BasicSymmetricCipher();
-
-        //! \brief Start a data encryption process.
-        virtual void startEncrypt(const std::string& password);
-
-        //! \brief Start a data decryption process.
-        virtual void startDecrypt(const std::string& password);
-
-        //! \brief Finish a data encryption/decryption process.
-        void finish();
+        virtual ~TripleDESCipher();
 
     protected:
-        virtual int sync();
-        virtual int_type underflow();
-        virtual int_type overflow(int_type ch);
-
-        //! \brief Override this to return the OpenSSL cipher string ID.
-        virtual const char* getOpenSSLCipherName() const = 0;
-
-        // Helper function to store the encrypted data to the attached iostream
-        void storeEncryptedData();
-
-    protected:
-        bio_st*           _bioEnc; // Encryption BIO
-        bio_st*           _bioDec; // Decryption BIO
-        bio_st*           _bioIO;  // Input/output BIO
-        
-        std::vector<char> _ioBuf;  // Input/output buffer
-        std::vector<char> _cnvBuf; // Conversion buffer
+        virtual const char* getOpenSSLCipherName() const;
 };
 
 } // namespace Pt

@@ -28,7 +28,7 @@
  */
 
 #include <Pt/Ssl/SSLContext.h>
-#include <Pt/Ssl/BasicSymmetricCipher.h>
+#include <Pt/Ssl/TripleDESCipher.h>
 #include <Pt/System/Logger.h>
 
 #include <sstream>
@@ -56,16 +56,16 @@ int main(int argc, char** argv)
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();
-        Pt::Ssl::BasicSymmetricCipher cipher1(ss1);
-        std::iostream                 scIOS1(&cipher1);
+        Pt::Ssl::TripleDESCipher cipher1(ss1);
+        std::iostream            scIOS1(&cipher1);
         cipher1.startEncrypt("my_password_1");
         scIOS1.write(text.c_str(), text.length());
         scIOS1.write(" ", 1);
 
         // Start encryption test #2
         ss2.str(""); ss2.clear();
-        Pt::Ssl::BasicSymmetricCipher cipher2(ss2);
-        std::iostream                 scIOS2(&cipher2);
+        Pt::Ssl::TripleDESCipher cipher2(ss2);
+        std::iostream            scIOS2(&cipher2);
         cipher2.startEncrypt("my_password_2");
         scIOS2.write(text.c_str(), text.length());
         scIOS2.write(" ", 1);

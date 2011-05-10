@@ -15,8 +15,9 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        SSLClient.cpp
                        SecureDigest.cpp
                        BasicCipher.cpp
-                       BasicSymmetricCipher.cpp
                        RSACipher.cpp
+                       BasicSymmetricCipher.cpp
+                       TripleDESCipher.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;

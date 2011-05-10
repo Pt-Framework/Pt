@@ -65,7 +65,7 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
 
     // Get the cipher
     // NOTE: Later we can use enum or ask the derivative class to set it
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
+    const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
     if(!cipher)
         throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
 
@@ -119,8 +119,7 @@ void BasicSymmetricCipher::startDecrypt(const std::string& password)
     */
 
     // Get the cipher
-    // NOTE: Later we can use enum or ask the derivative class to set it
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname("aes-256-cbc");
+    const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
     if(!cipher)
         throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
 
