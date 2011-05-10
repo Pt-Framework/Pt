@@ -41,17 +41,31 @@ namespace Ssl {
 //! to set a password in this class.
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
     public:
+        //! \brief Salt type
+        enum SaltType {
+            NoSalt,     //!< No salt.
+            NormalSalt, //!< Use pseudo-random bytes as salt.
+            StrongSalt  //!< Use strong pseudo-random bytes as salt.
+        };
+        
+    public:
         //! \brief Instantiate an empty symmetric-cipher object.
         BasicSymmetricCipher(std::iostream& ios);
 
         //! \brief Standard dtor.
         virtual ~BasicSymmetricCipher();
 
-        //! \brief Start a data encryption process.
-        virtual void startEncrypt(const std::string& password);
+        /** \brief Start a data encryption process.
+            If the useSalt parameter is set to NormalSalt or StrongSalt, the system will generate a random salt
+            to improve the security of the encryption. The salt will be returned as a string.
+         */ 
+        virtual const std::string startEncrypt(const std::string& password, SaltType saltType = NoSalt);
 
-        //! \brief Start a data decryption process.
-        virtual void startDecrypt(const std::string& password);
+        /** \brief Start a data decryption process.
+            If the salt parameter is not an empty string, it will be used in the decryption process.
+            It must be the same salt that was returned by startEncrypt().
+         */
+        virtual void startDecrypt(const std::string& password, const std::string& saltStr = "");
 
         //! \brief Finish a data encryption/decryption process.
         void finish();

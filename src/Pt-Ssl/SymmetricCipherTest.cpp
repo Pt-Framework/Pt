@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         ss2.str(""); ss2.clear();
         Pt::Ssl::TripleDESCipher cipher2(ss2);
         std::iostream            scIOS2(&cipher2);
-        cipher2.startEncrypt("my_password_2");
+        const std::string&       salt2 = cipher2.startEncrypt("my_password_2", Pt::Ssl::BasicSymmetricCipher::StrongSalt); // Use salt
         scIOS2.write(text.c_str(), text.length());
         scIOS2.write(" ", 1);
         scIOS2.write(text2.c_str(), text2.length());
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
         // Start decryption test #2
         ss2.str(tenc2); ss2.clear();
-        cipher2.startDecrypt("my_password_2");
+        cipher2.startDecrypt("my_password_2", salt2);
 
         std::string tdec2;
         scIOS2.clear();
@@ -106,8 +106,6 @@ int main(int argc, char** argv)
         cipher1.finish();
         cipher2.finish();
 
-        std::cerr  << std::endl << std::endl<< tdec1 << std::endl << std::endl;
-        
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")

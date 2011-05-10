@@ -49,7 +49,7 @@ BasicSymmetricCipher::~BasicSymmetricCipher()
     if(_bioIO ) BIO_free(_bioIO );
 }
 
-void BasicSymmetricCipher::startEncrypt(const std::string& password)
+const std::string BasicSymmetricCipher::startEncrypt(const std::string& password, SaltType saltType)
 {
     if( _bioEnc )
         throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
@@ -57,21 +57,34 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
         throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
 
     // Generate salt
-    /*
-    unsigned char salt[PKCS5_SALT_LEN];
-    if(RAND_pseudo_bytes(salt, sizeof salt) < 0)
-        throw SSLRuntimeError("Could not generate the encryption salt!", PT_SOURCEINFO);
-    */
+    unsigned char  saltBuff[PKCS5_SALT_LEN];
+    unsigned char* salt = 0;
+    switch(saltType) {
+        case StrongSalt:
+            if(RAND_bytes(saltBuff, sizeof saltBuff) < 0)
+                throw SSLRuntimeError("Could not generate a random salt!", PT_SOURCEINFO);
+            salt = saltBuff;
+            break;
+
+        case NormalSalt:
+            if(RAND_pseudo_bytes(saltBuff, sizeof saltBuff) < 0)
+                throw SSLRuntimeError("Could not generate a random salt!", PT_SOURCEINFO);
+            salt = saltBuff;
+            break;
+
+        default:
+            // Nothing to do
+            break;
+    }
 
     // Get the cipher
-    // NOTE: Later we can use enum or ask the derivative class to set it
     const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
     if(!cipher)
         throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
 
     // Derives a key and an IV from teh user password and salt
     unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
-    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), 0 /*salt*/, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
+    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
 
     // Initialize a cipher BIO
     BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
@@ -102,22 +115,27 @@ void BasicSymmetricCipher::startEncrypt(const std::string& password)
     // Set the put pointers and reset the get pointers
     this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
     this->setg(0, 0, 0);
+
+    // Return the salt
+    if(salt) return std::string((char*) salt, PKCS5_SALT_LEN);
+    return "";
 }
 
-void BasicSymmetricCipher::startDecrypt(const std::string& password)
+void BasicSymmetricCipher::startDecrypt(const std::string& password, const std::string& saltStr)
 {
     if( _bioEnc )
         throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
     if( _bioDec )
         throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
 
-    // Generate salt
-    /*
-    unsigned char salt[PKCS5_SALT_LEN];
-    if(RAND_pseudo_bytes(salt, sizeof salt) < 0)
-        throw SSLRuntimeError("Could not generate the encryption salt!", PT_SOURCEINFO);
-    */
-
+    // Use salt?
+    unsigned char* salt = 0;
+    if(!saltStr.empty()) {
+        if(saltStr.length() != PKCS5_SALT_LEN)
+            throw SSLRuntimeError("The salt string has an invalid length!", PT_SOURCEINFO);
+        salt = (unsigned char*) saltStr.c_str();
+    }
+    
     // Get the cipher
     const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
     if(!cipher)
@@ -125,7 +143,7 @@ void BasicSymmetricCipher::startDecrypt(const std::string& password)
 
     // Derives a key and an IV from teh user password and salt
     unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
-    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), 0 /*salt*/, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
+    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
 
     // Initialize a cipher BIO
     BioAutoPtr bdec( BIO_new(BIO_f_cipher()) );
