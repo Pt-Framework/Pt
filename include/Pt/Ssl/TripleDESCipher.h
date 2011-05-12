@@ -37,13 +37,19 @@ namespace Ssl {
 class PT_SSL_API TripleDESCipher  : public BasicSymmetricCipher {
     public:
         //! \brief Instantiate an empty symmetric-cipher object.
-        TripleDESCipher(std::iostream& ios);
+        TripleDESCipher(std::iostream& ios, Mode mode = CBC);
 
         //! \brief Standard dtor.
         virtual ~TripleDESCipher();
 
+        //! \brief Set the mode of operation of the cipher.
+        virtual void setMode(Mode mode = CBC);
+        
     protected:
         virtual const char* getOpenSSLCipherName() const;
+
+    private:
+        Mode _mode;
 };
 
 } // namespace Pt

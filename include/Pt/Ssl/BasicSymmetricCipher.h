@@ -47,7 +47,20 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
             NormalSalt, //!< Use pseudo-random bytes as salt.
             StrongSalt  //!< Use strong pseudo-random bytes as salt.
         };
-        
+
+        /** \brief Cipher mode of operations.
+            Please refer to http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation for more details.
+            Please note that not all ciphers will support all the modes.
+         */
+        enum Mode {
+            ECB,  //!< Electronic Codebook Book; not secure for long message that with many redundancies.
+            CBC,  //!< Cipher-Block Chaining; standard operational mode for block symmetric ciphers.
+            CFB1, //!< Cipher Feedback 1 bit; encrypting data as if it is a stream cipher.
+            CFB8, //!< Cipher Feedback 8 bit; encrypting data as if it is a stream cipher.
+            CFB,  //!< Cipher Feedback 64 bit; encrypting data as if it is a stream cipher.
+            OFB   //!< Output Feedback; encrypting data as if it is a stream cipher.
+        };
+
     public:
         //! \brief Instantiate an empty symmetric-cipher object.
         BasicSymmetricCipher(std::iostream& ios);
@@ -69,6 +82,9 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
 
         //! \brief Finish a data encryption/decryption process.
         void finish();
+
+        //! \brief Set the mode of operation of the cipher.
+        virtual void setMode(Mode mode) = 0;
 
     protected:
         virtual int sync();
