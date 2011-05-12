@@ -73,7 +73,7 @@ SSLInit::SSLInit()
         EVP_add_cipher(EVP_aes_256_cfb1());
         EVP_add_cipher(EVP_aes_256_cfb8());
         EVP_add_cipher(EVP_aes_256_ofb());
-    
+
         Pt::System::LogTarget& target = Pt::System::LogTarget::get(PT_SSL_LOGGER_CATEGORY);
         target.setLogLevel(Pt::System::Info);
         target.setChannel("console://");
