@@ -36,7 +36,7 @@
 namespace Pt {
 namespace Ssl {
 
-//! \brief The base of all symmetric-cipher classes.
+//! \brief The base of all symmetric-block-cipher classes.
 //! Symmetric-cipher needs password. Therefore we specify a method
 //! to set a password in this class.
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
@@ -61,8 +61,17 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
             OFB   //!< Output Feedback; encrypting data as if it is a stream cipher.
         };
 
+        /** \brief Cipher strength (key size).
+            Please note that not all ciphers allow us to specify the key size.
+         */
+        enum KeySize {
+            K128, //!< 128 bit.
+            K192, //!< 192 bit.
+            K256  //!< 256 bit.
+        };
+
     public:
-        //! \brief Instantiate an empty symmetric-cipher object.
+        //! \brief Instantiate an empty symmetric-block-cipher object.
         BasicSymmetricCipher(std::iostream& ios);
 
         //! \brief Standard dtor.

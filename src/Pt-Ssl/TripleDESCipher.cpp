@@ -46,7 +46,6 @@ void TripleDESCipher::setMode(Mode mode)
         throw SSLRuntimeError("Triple-DES cipher does not support the ECB and CFB1 modes!", PT_SOURCEINFO);
 
     _mode = mode;
-    
 }
 
 const char* TripleDESCipher::getOpenSSLCipherName() const
@@ -56,30 +55,8 @@ const char* TripleDESCipher::getOpenSSLCipherName() const
         case CFB8 : return "des-ede3-cfb8";
         case CFB  : return "des-ede3-cfb";
         case OFB  : return "des-ede3-ofb";
-        default   : throw SSLRuntimeError("Invalid cipher mode!", PT_SOURCEINFO);
+        default   : throw SSLRuntimeError("Invalid mode of operation!", PT_SOURCEINFO);
     }
-    
-    //return "aes-128-ecb";
-    //return "aes-128-cbc";
-    //return "aes-128-cfb";
-    //return "aes-128-cfb1";
-    //return "aes-128-cfb8";
-    //return "aes-128-ofb";
-      
-    //return "aes-192-ecb";
-    //return "aes-192-cbc";
-    //return "aes-192-cfb";
-    //return "aes-192-cfb1";
-    //return "aes-192-cfb8";
-    //return "aes-192-ofb";
-  
-    //return "aes-256-ecb";
-    //return "aes-256-cbc";
-    //return "aes-256-cfb";
-    //return "aes-256-cfb1";
-    //return "aes-256-cfb8";
-    //return "aes-256-ofb";
-
 }
 
 } // namespace Pt

@@ -25,35 +25,40 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_TRIPLEDESCIPHER_H
-#define PT_SSL_TRIPLEDESCIPHER_H
+#ifndef PT_SSL_AESCIPHER_H
+#define PT_SSL_AESCIPHER_H
 
 #include <Pt/Ssl/BasicSymmetricCipher.h>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief Triple-DES (Triple Data Encryption Standard) symmetric-block-cipher classes.
-class PT_SSL_API TripleDESCipher  : public BasicSymmetricCipher {
+//! \brief AES (Advanced Encryption Standard) symmetric-block-cipher classes.
+class PT_SSL_API AESCipher  : public BasicSymmetricCipher {
     public:
         using BasicSymmetricCipher::SaltType;
+        using BasicSymmetricCipher::KeySize;
         using BasicSymmetricCipher::Mode;
-        
+
     public:
         //! \brief Instantiate an empty symmetric-block-cipher object.
-        TripleDESCipher(std::iostream& ios, Mode mode = CBC);
+        AESCipher(std::iostream& ios, KeySize keySize = K128, Mode mode = CBC);
 
         //! \brief Standard dtor.
-        virtual ~TripleDESCipher();
+        virtual ~AESCipher();
+
+        //! \brief Set the key-size of the cipher.
+        virtual void setKeySize(KeySize keySize = K128);
 
         //! \brief Set the mode of operation of the cipher.
         virtual void setMode(Mode mode = CBC);
-        
+
     protected:
         virtual const char* getOpenSSLCipherName() const;
 
     private:
-        Mode _mode;
+        Mode    _mode;
+        KeySize _keySize;
 };
 
 } // namespace Pt

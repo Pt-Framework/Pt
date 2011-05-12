@@ -28,6 +28,7 @@
  */
 
 #include <Pt/Ssl/SSLContext.h>
+#include <Pt/Ssl/AESCipher.h>
 #include <Pt/Ssl/TripleDESCipher.h>
 #include <Pt/System/Logger.h>
 
@@ -56,17 +57,17 @@ int main(int argc, char** argv)
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();
-        Pt::Ssl::TripleDESCipher cipher1(ss1);
+        Pt::Ssl::TripleDESCipher cipher1(ss1, Pt::Ssl::TripleDESCipher::CBC);
         std::iostream            scIOS1(&cipher1);
-        cipher1.startEncrypt("my_password_1");
+        cipher1.startEncrypt("my_password_1", Pt::Ssl::TripleDESCipher::NoSalt);
         scIOS1.write(text.c_str(), text.length());
         scIOS1.write(" ", 1);
 
         // Start encryption test #2
         ss2.str(""); ss2.clear();
-        Pt::Ssl::TripleDESCipher cipher2(ss2);
-        std::iostream            scIOS2(&cipher2);
-        const std::string&       salt2 = cipher2.startEncrypt("my_password_2", Pt::Ssl::BasicSymmetricCipher::StrongSalt); // Use salt
+        Pt::Ssl::AESCipher  cipher2(ss2, Pt::Ssl::AESCipher::K256, Pt::Ssl::AESCipher::CBC);
+        std::iostream       scIOS2(&cipher2);
+        const std::string&  salt2 = cipher2.startEncrypt("my_password_2", Pt::Ssl::AESCipher::StrongSalt);
         scIOS2.write(text.c_str(), text.length());
         scIOS2.write(" ", 1);
         scIOS2.write(text2.c_str(), text2.length());
