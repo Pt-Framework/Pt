@@ -49,6 +49,7 @@
 // Forward declaration of some OpenSSL structures
 struct ssl_ctx_st;
 struct ssl_st;
+struct ssl_session_st;
 struct bio_st;
 struct x509_st;
 struct evp_pkey_st;
