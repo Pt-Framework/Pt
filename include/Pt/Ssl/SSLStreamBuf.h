@@ -31,6 +31,7 @@
 
 #include <Pt/Signal.h>
 #include <Pt/Ssl/SSLContext.h>
+#include <Pt/Ssl/SSLSession.h>
 #include <string>
 
 namespace Pt {
