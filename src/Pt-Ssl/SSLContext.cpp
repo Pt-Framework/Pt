@@ -120,6 +120,30 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
             reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID)
         );
     }
+
+    /*
+        // Possible functions that will allow us to store/retrieve session data to/from disk.
+
+        long SSL_CTX_set_session_cache_mode(SSL_CTX ctx, long mode);
+        int SSL_CTX_add_session(SSL_CTX *ctx, SSL_SESSION *c);
+        int SSL_CTX_remove_session(SSL_CTX *ctx, SSL_SESSION *c);
+        long SSL_CTX_sess_set_cache_size(SSL_CTX *ctx, long t);
+
+        void SSL_CTX_sess_set_new_cb(SSL_CTX *ctx, int (*new_session_cb)(SSL *, SSL_SESSION *));
+        void SSL_CTX_sess_set_remove_cb(SSL_CTX *ctx, void (*remove_session_cb)(SSL_CTX *ctx, SSL_SESSION *));
+        void SSL_CTX_sess_set_get_cb(SSL_CTX *ctx, SSL_SESSION (*get_session_cb)(SSL *, unsigned char *, int, int *));
+
+        int (*SSL_CTX_sess_get_new_cb(SSL_CTX *ctx))(struct ssl_st *ssl, SSL_SESSION *sess);
+        void (*SSL_CTX_sess_get_remove_cb(SSL_CTX *ctx))(struct ssl_ctx_st *ctx, SSL_SESSION *sess);
+        SSL_SESSION *(*SSL_CTX_sess_get_get_cb(SSL_CTX *ctx))(struct ssl_st *ssl, unsigned char *data, int len, int *copy);
+
+        int (*new_session_cb)(struct ssl_st *ssl, SSL_SESSION *sess);
+        void (*remove_session_cb)(struct ssl_ctx_st *ctx, SSL_SESSION *sess);
+        SSL_SESSION *(*get_session_cb)(struct ssl_st *ssl, unsigned char *data, int len, int *copy);
+
+        SSL_SESSION *d2i_SSL_SESSION(SSL_SESSION **a, const unsigned char **pp, long length);
+        int i2d_SSL_SESSION(SSL_SESSION *in, unsigned char **pp);
+    */
 }
 
 SSLContext::~SSLContext()

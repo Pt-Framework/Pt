@@ -77,6 +77,17 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         /** \brief Get the peer CN (Common Name). */
         const std::string getPeerCN() const;
 
+        /** @brief Get the current session data.
+            The value returned by this function is only meaningful after a
+            successful handshake.
+        */
+        const SSLSession getSession() const;
+
+        /** @brief Set the current session data.
+            It is only meaningful to call this function before starting any handshake.
+        */
+        void setSession(const SSLSession& sess);
+
         /** @brief Starts the server handshake
             After this method has been called, the first handshake message
             can be read from the client.

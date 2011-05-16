@@ -135,6 +135,26 @@ const std::string SSLStreamBuf::getPeerCN() const
     return (ret > 0) ? peerCN : "";
 }
 
+const SSLSession SSLStreamBuf::getSession() const
+{
+    if(!_ssl) return SSLSession();
+
+    SSL_SESSION* sess = SSL_get0_session(_ssl);
+    if(!_ssl) return SSLSession(); // No session available
+
+   return SSLSession(sess);
+}
+
+void SSLStreamBuf::setSession(const SSLSession& sess)
+{
+    SSL_SESSION* rsess = sess.impl(true);
+    if(!rsess)
+        throw SSLRuntimeError("Invalid session data!", PT_SOURCEINFO);
+
+    if(SSL_set_session(_ssl, rsess) == 0)
+        throw SSLRuntimeError("Could not set session!", PT_SOURCEINFO);
+}
+
 void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
     _handshakeStarted = true;

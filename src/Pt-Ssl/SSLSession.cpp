@@ -62,6 +62,8 @@ SSLSession::SSLSession(ssl_session_st* sess)
 
 ssl_session_st* SSLSession::impl(bool incRef) const
 {
+    if(!_sess) return 0;
+
     if(incRef) {
         CRYPTO_w_lock(CRYPTO_LOCK_SSL_SESSION);
         _sess->references++;
