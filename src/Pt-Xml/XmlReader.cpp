@@ -174,7 +174,7 @@ struct XmlReaderImpl
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
         {
-            log_warn("unexpected alpha '" << c << "' in line " << reader.line());
+            log_warn("unexpected alpha '" << c.narrow() << "' in line " << reader.line());
             this->syntaxError(reader.line());
             return this;
         }
