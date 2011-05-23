@@ -341,12 +341,12 @@ for _arg in $(ARGV)
     }
 }
 
-if ! [ CHECK_IF_FILE config.jam ] 
+if ! [ CHECK_IF_FILE config.jam ]
 {
-    CONFIGURE = 1 ;
+    NO_CONFIG = 1 ;
 }
 
-if $(CONFIGURE)
+if $(CONFIGURE) || $(NO_CONFIG)
 {
     TryCommand "rm -f config.tmp" ;
     TryCommand "del /f/q config.tmp" ;
@@ -401,13 +401,17 @@ JamInclude Jamrules.target_$(TARGET_OS:L) ;
 
 JamInclude Jamrules.$(TOOLSET:L) ;
 
-if $(CONFIGURE)
+if $(CONFIGURE) || $(NO_CONFIG)
 {
     Echo "Checking for toolset..."$(TOOLSET:L) ;
 
     include Jamconfig ;
 
     TryCommand $(MV) config.tmp config.jam ;
+}
+
+if $(CONFIGURE)
+{
     Exit "Configuration successful." ;
 }
 
