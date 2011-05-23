@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Drner
- * 
+ * Copyright (C) 2004-2010 by Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,45 +15,64 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_REFLEX_API_H
-#define PT_REFLEX_API_H
+#ifndef PT_REFLEX_PROPERTYINFO_H
+#define PT_REFLEX_PROPERTYINFO_H
 
-#include <Pt/Api.h>
-
-#if defined(PT_REFLEX_API_EXPORT)
-#    define PT_REFLEX_API PT_EXPORT
-#  else
-#    define PT_REFLEX_API PT_IMPORT
-#  endif
-
-/** @defgroup Reflection Reflection
-    @brief Object introspection, reflection and meta-objects
-
-    The Pt Reflection API offers support for properties and method invokation.
-*/
+#include <Pt/Reflex/Api.h>
 
 namespace Pt {
 
-/** @namespace Pt::Reflex
-    @brief Object introspection, reflection and meta-objects
-*/
+class Any;
+
 namespace Reflex {
 
-    class Type;
-    class TypeManager;
+class Type;
+
+class PropertyInfo
+{
+    public:
+        virtual ~PropertyInfo()
+        {}
+
+        virtual Type& type() = 0;
+
+        virtual const char* name() const = 0;
+
+        virtual Any get(void* instance) = 0;
+
+        virtual void set(void* instance, Any& value, Type& type) = 0;
+
+        unsigned ref()
+        { return ++_refs; }
+
+        unsigned unref()
+        { return --_refs; }
+
+        unsigned refs() const
+        { return _refs; }
+
+    protected:
+        PropertyInfo(unsigned refs = 0)
+        : _refs(refs)
+        {}
+
+    private:
+        unsigned _refs;
+};
 
 }
 
 }
 
 #endif
+
