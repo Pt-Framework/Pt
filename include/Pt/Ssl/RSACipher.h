@@ -66,6 +66,12 @@ class PT_SSL_API RSACipher : public BasicCipher {
         //! \brief Finish a data encryption/decryption process.
         void finish();
 
+        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
+            Returns the number of written (encoded) bytes or -1 if EOF.
+            Updates the 'next' pointers.
+         */
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush);
+
     protected:
         virtual int sync();
         virtual int_type underflow();
@@ -78,6 +84,10 @@ class PT_SSL_API RSACipher : public BasicCipher {
         int               _pmode;        // Padding mode
         std::vector<char> _ioBuf;        // Input/output buffer
         std::vector<char> _cnvBuf;       // Conversion buffer
+
+        // Experiment
+        std::vector<char> _intBuf;       // Internal buffer
+        size_t            _ofsIntBuf;    // Read offset to the above buffer
 };
 
 } // namespace Pt
