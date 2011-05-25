@@ -101,8 +101,8 @@ class PT_SSL_API RSACipher : public BasicCipher {
         std::vector<char> _ioBuf;        // Input/output buffer
         std::vector<char> _cnvBuf;       // Conversion buffer
 
-        int do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush);
-        int do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush);
+        int do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
+        int do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
 };
 
 } // namespace Pt

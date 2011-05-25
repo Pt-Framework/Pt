@@ -118,14 +118,7 @@ void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
 }
 
 void RSACipher::finish()
-{
-    // Encrypt the remaining data
-    if(_maxChunkSize) overflow(traits_type::eof());
-
-    // Free the RSA
-    RSA_free(_rsa);
-    _rsa = 0;
-}
+{ overflow(traits_type::eof()); }
 
 int RSACipher::sync()
 {
@@ -182,6 +175,9 @@ RSACipher::int_type RSACipher::underflow()
 
 RSACipher::int_type RSACipher::overflow(int_type ch)
 {
+    // No need to continue if not in data encryption mode
+    if(!_maxChunkSize) return traits_type::eof();
+
     // Is there any data to be encrypted?
     const size_t avail = this->pptr() - this->pbase();
 
@@ -228,7 +224,7 @@ int RSACipher::finish(const char* from, const char* from_end, const char*& from_
         return do_decrypt(from, from_end, from_next, to, to_end, to_next, true);
 }
 
-int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush)
+int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish)
 {
     if( ! _rsa )
         throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
@@ -244,7 +240,7 @@ int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& f
     if(outAvail < (size_t) _rsaSize) return 0;
 
     // Encrypt data
-    if(flush || inAvail >= (size_t) _maxChunkSize) {
+    if(finish || inAvail >= (size_t) _maxChunkSize) {
         // Encrypt the data
         const size_t readMax = std::min(inAvail, (size_t) _maxChunkSize);
         const int    dlen    = RSA_public_encrypt( readMax,
@@ -261,6 +257,11 @@ int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& f
         // Adjust the pointers
         from_next = from + readMax;
         to_next   = to   + _rsaSize;
+        // Free the RSA (only if this is the final call)
+        if(finish) {
+            RSA_free(_rsa);
+            _rsa = 0;
+        }
         // Return the number of written bytes
         return _rsaSize;
     }
@@ -269,7 +270,7 @@ int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& f
     return 0;
 }
 
-int RSACipher::do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush)
+int RSACipher::do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish)
 {
     throw SSLRuntimeError("Not implemented yet!", PT_SOURCEINFO);
     return 0;
