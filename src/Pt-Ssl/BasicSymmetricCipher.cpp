@@ -318,5 +318,29 @@ void BasicSymmetricCipher::storeEncryptedData()
     }
 }
 
+// Not implemented yet!
+size_t BasicSymmetricCipher::blockSize() const
+{
+    return 0;
+}
+
+// Not implemented yet!
+int BasicSymmetricCipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    return 0;
+}
+
+// Not implemented yet!
+int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    return 0;
+}
+
+// Not implemented yet!
+int BasicSymmetricCipher::finish(char* to, char* to_end, char*& to_next)
+{
+    return 0;
+}
+
 } // namespace Pt
 } // namespace Ssl

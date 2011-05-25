@@ -77,6 +77,9 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         //! \brief Standard dtor.
         virtual ~BasicSymmetricCipher();
 
+        //! \brief Set the mode of operation of the cipher.
+        virtual void setMode(Mode mode) = 0;
+
         /** \brief Start a data encryption process.
             If the useSalt parameter is set to NormalSalt or StrongSalt, the system will generate a random salt
             to improve the security of the encryption. The salt will be returned as a string.
@@ -92,9 +95,36 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         //! \brief Finish a data encryption/decryption process.
         void finish();
 
-        //! \brief Set the mode of operation of the cipher.
-        virtual void setMode(Mode mode) = 0;
+        /** \brief Returns the block (chunk) size.
+            The system expect that upon calling encode() or decode(), the user ensure that the
+            'to' pointer has at least 'block size' available space.
+         */
+        virtual size_t blockSize() const;
 
+        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
+            Returns the number of written (encoded) bytes.
+            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the 'from_next' and 'to_next' pointers as needed.
+         */
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+
+        /** \brief Decode bytes from the 'from' pointers to the 'to' pointers.
+            Returns the number of written (decoded) bytes.
+            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the 'from_next' and 'to_next' pointers as needed.
+         */
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+
+        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
+            Returns the number of written (encoded) bytes.
+            Returns zero the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the and 'to_next' pointer as needed.
+         */
+        virtual int finish(char* to, char* to_end, char*& to_next);
+        
     protected:
         virtual int sync();
         virtual int_type underflow();

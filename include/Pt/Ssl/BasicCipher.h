@@ -50,13 +50,40 @@ class PT_SSL_API BasicCipher : public NonCopyable, public std::streambuf {
         //! \brief Set the output stream.
         void setIOStream(std::iostream& out);
 
-        //! \brief Finish a data encryption/decryption process.
-        virtual void finish() = 0;
-
         /** @brief Reads data from the underlying stream
             Returns the number bytes in the data.
         */
         virtual std::streamsize import();
+
+        /** \brief Returns the block (chunk) size.
+            The system expect that upon calling encode() or decode(), the user ensure that the
+            'to' pointer has at least 'block size' available space.
+         */
+        virtual size_t blockSize() const = 0;
+
+        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
+            Returns the number of written (encoded) bytes.
+            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the 'from_next' and 'to_next' pointers as needed.
+         */
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next) = 0;
+
+        /** \brief Decode bytes from the 'from' pointers to the 'to' pointers.
+            Returns the number of written (decoded) bytes.
+            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the 'from_next' and 'to_next' pointers as needed.
+         */
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next) = 0;
+
+        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
+            Returns the number of written (encoded) bytes.
+            Returns zero the 'to' pointer does not have enough space.
+            Returns -1 if EOF.
+            Updates the and 'to_next' pointer as needed.
+         */
+        virtual int finish(char* to, char* to_end, char*& to_next) = 0;
         
     protected:
         std::iostream* _ios;

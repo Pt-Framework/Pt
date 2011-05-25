@@ -185,62 +185,6 @@ RSACipher::int_type RSACipher::underflow()
     return traits_type::eof();
 }
 
-int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush)
-{
-    if( ! _rsa )
-        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
-    if( this->gptr() )
-        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
-
-    // Is there any left-over data in the buffer that has not been copied to the destination buffer?
-    if(_ofsIntBuf < _intBuf.size()) {
-        // Copy the data to the destination buffer
-        const size_t outAvail = to_end - to;
-        const size_t writeMax = std::min(outAvail, _intBuf.size() - _ofsIntBuf);
-        memcpy(to, &_intBuf[0] + _ofsIntBuf, writeMax);
-        // Adjust the pointer and offset
-        to_next     = to + writeMax;
-        _ofsIntBuf += writeMax;
-        // Return the number of written bytes
-        return writeMax;
-    }
-
-    // Is there any data to be encrypted?
-    const size_t inAvail = from_end - from;
-    if(!inAvail) return -1; // Assume EOF?
-
-    // Encrypt data
-    if(flush || inAvail >= (size_t) _maxChunkSize) {
-        // Encrypt the data
-        const size_t readMax = std::min(inAvail, (size_t) _maxChunkSize);
-        const int    dlen    = RSA_public_encrypt( readMax,
-                                                   (const unsigned char*) from,
-                                                   (unsigned char*) &_intBuf[0], _rsa, _pmode );
-        if(dlen < 0) {
-            long i = ERR_get_error();
-            while(i) {
-                std::cerr << ERR_error_string(i, 0) << std::endl;
-                i = ERR_get_error();
-            }
-            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-        }
-        // Copy the data to the destination buffer
-        const size_t outAvail = to_end - to;
-        const size_t writeMax = std::min(outAvail, _intBuf.size());
-        memcpy(to, &_intBuf[0], writeMax);
-        // Adjust the pointers
-        from_next = from + readMax;
-        to_next   = to   + writeMax;
-        // Store the offset
-        _ofsIntBuf = writeMax;
-        // Return the number of written bytes
-        return writeMax;
-    }
-
-    // Not enough data
-    return 0;
-}
-
 RSACipher::int_type RSACipher::overflow(int_type ch)
 {
     if( ! _rsa )
@@ -278,6 +222,77 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);    
+}
+
+size_t RSACipher::blockSize() const
+{
+    return 0;
+}
+
+int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    if( ! _rsa )
+        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
+    if( this->gptr() )
+        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
+
+    // Is there any left-over data in the buffer that has not been copied to the destination buffer?
+    if(_ofsIntBuf < _intBuf.size()) {
+        // Copy the data to the destination buffer
+        const size_t outAvail = to_end - to;
+        const size_t writeMax = std::min(outAvail, _intBuf.size() - _ofsIntBuf);
+        memcpy(to, &_intBuf[0] + _ofsIntBuf, writeMax);
+        // Adjust the pointer and offset
+        to_next     = to + writeMax;
+        _ofsIntBuf += writeMax;
+        // Return the number of written bytes
+        return writeMax;
+    }
+
+    // Is there any data to be encrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1; // Assume EOF?
+
+    // Encrypt data
+    if(inAvail >= (size_t) _maxChunkSize) {
+        // Encrypt the data
+        const size_t readMax = std::min(inAvail, (size_t) _maxChunkSize);
+        const int    dlen    = RSA_public_encrypt( readMax,
+                                                   (const unsigned char*) from,
+                                                   (unsigned char*) &_intBuf[0], _rsa, _pmode );
+        if(dlen < 0) {
+            long i = ERR_get_error();
+            while(i) {
+                std::cerr << ERR_error_string(i, 0) << std::endl;
+                i = ERR_get_error();
+            }
+            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+        }
+        // Copy the data to the destination buffer
+        const size_t outAvail = to_end - to;
+        const size_t writeMax = std::min(outAvail, _intBuf.size());
+        memcpy(to, &_intBuf[0], writeMax);
+        // Adjust the pointers
+        from_next = from + readMax;
+        to_next   = to   + writeMax;
+        // Store the offset
+        _ofsIntBuf = writeMax;
+        // Return the number of written bytes
+        return writeMax;
+    }
+
+    // Not enough data
+    return 0;
+}
+
+int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    return 0;
+}
+
+int RSACipher::finish(char* to, char* to_end, char*& to_next)
+{
+    return 0;
 }
 
 } // namespace Pt
