@@ -331,13 +331,7 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
 }
 
 // Not implemented yet!
-int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
-{
-    return 0;
-}
-
-// Not implemented yet!
-int BasicSymmetricCipher::finish(char* to, char* to_end, char*& to_next)
+int BasicSymmetricCipher::finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
     return 0;
 }

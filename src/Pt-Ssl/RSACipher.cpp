@@ -83,11 +83,6 @@ void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
 
     // Resize the conversion buffer
     _cnvBuf.resize(_rsaSize);
-
-    // Experiment
-    _intBuf.resize(_rsaSize);
-    _ofsIntBuf = _intBuf.size();
-    
 }
 
 void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
@@ -187,33 +182,23 @@ RSACipher::int_type RSACipher::underflow()
 
 RSACipher::int_type RSACipher::overflow(int_type ch)
 {
-    if( ! _rsa )
-        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
-    if( this->gptr() )
-        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
-
     // Is there any data to be encrypted?
     const size_t avail = this->pptr() - this->pbase();
 
     if(avail) {
-        // Encrypt the data
-        const int dlen = RSA_public_encrypt( avail,
-                                            (const unsigned char*) &_ioBuf[0],
-                                            (unsigned char*) &_cnvBuf[0], _rsa, _pmode );
-        if(dlen < 0) {
-            long i = ERR_get_error();
-            while(i) {
-                std::cerr << ERR_error_string(i, 0) << std::endl;
-                i = ERR_get_error();
-            }
-            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-        }
+        const char* from_next = 0;
+        char*       to_next   = 0;
+        const int   ret       = traits_type::eq_int_type(ch, traits_type::eof())
+                              ? finish(this->pbase(), this->pptr(), from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next)
+                              : encode(this->pbase(), this->pptr(), from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
+        // Check for EOF
+        if(ret < 0) return traits_type::eof();
         // Write the data to the output stream
-        if(dlen > 0) _ios->write((const char*) &_cnvBuf[0], dlen);
+        if(ret > 0) _ios->write((const char*) &_cnvBuf[0], ret);
         // Reset the put pointers
         setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
     }
-    
+
     // If the overflow char is not EOF, put it in the buffer area
     if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
@@ -221,45 +206,50 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
         this->pbump(1);
     }
 
-    return traits_type::not_eof(ch);    
+    return traits_type::not_eof(ch);
 }
 
 size_t RSACipher::blockSize() const
-{
-    return 0;
-}
+{ return _rsaSize; }
 
 int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    if(_maxChunkSize)
+        return do_encrypt(from, from_end, from_next, to, to_end, to_next, false);
+    else
+        return do_decrypt(from, from_end, from_next, to, to_end, to_next, false);
+}
+
+int RSACipher::finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    if(_maxChunkSize)
+        return do_encrypt(from, from_end, from_next, to, to_end, to_next, true);
+    else
+        return do_decrypt(from, from_end, from_next, to, to_end, to_next, true);
+}
+
+int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush)
 {
     if( ! _rsa )
         throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
     if( this->gptr() )
         throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
 
-    // Is there any left-over data in the buffer that has not been copied to the destination buffer?
-    if(_ofsIntBuf < _intBuf.size()) {
-        // Copy the data to the destination buffer
-        const size_t outAvail = to_end - to;
-        const size_t writeMax = std::min(outAvail, _intBuf.size() - _ofsIntBuf);
-        memcpy(to, &_intBuf[0] + _ofsIntBuf, writeMax);
-        // Adjust the pointer and offset
-        to_next     = to + writeMax;
-        _ofsIntBuf += writeMax;
-        // Return the number of written bytes
-        return writeMax;
-    }
-
     // Is there any data to be encrypted?
     const size_t inAvail = from_end - from;
-    if(!inAvail) return -1; // Assume EOF?
+    if(!inAvail) return -1; // EOF
+
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(outAvail < (size_t) _rsaSize) return 0;
 
     // Encrypt data
-    if(inAvail >= (size_t) _maxChunkSize) {
+    if(flush || inAvail >= (size_t) _maxChunkSize) {
         // Encrypt the data
         const size_t readMax = std::min(inAvail, (size_t) _maxChunkSize);
         const int    dlen    = RSA_public_encrypt( readMax,
                                                    (const unsigned char*) from,
-                                                   (unsigned char*) &_intBuf[0], _rsa, _pmode );
+                                                   (unsigned char*) to, _rsa, _pmode );
         if(dlen < 0) {
             long i = ERR_get_error();
             while(i) {
@@ -268,30 +258,20 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
             }
             throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
         }
-        // Copy the data to the destination buffer
-        const size_t outAvail = to_end - to;
-        const size_t writeMax = std::min(outAvail, _intBuf.size());
-        memcpy(to, &_intBuf[0], writeMax);
         // Adjust the pointers
         from_next = from + readMax;
-        to_next   = to   + writeMax;
-        // Store the offset
-        _ofsIntBuf = writeMax;
+        to_next   = to   + _rsaSize;
         // Return the number of written bytes
-        return writeMax;
+        return _rsaSize;
     }
 
-    // Not enough data
+    // Not enough input data
     return 0;
 }
 
-int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+int RSACipher::do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush)
 {
-    return 0;
-}
-
-int RSACipher::finish(char* to, char* to_end, char*& to_next)
-{
+    throw SSLRuntimeError("Not implemented yet!", PT_SOURCEINFO);
     return 0;
 }
 

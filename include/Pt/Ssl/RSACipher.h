@@ -80,21 +80,13 @@ class PT_SSL_API RSACipher : public BasicCipher {
          */
         virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
 
-        /** \brief Decode bytes from the 'from' pointers to the 'to' pointers.
-            Returns the number of written (decoded) bytes.
-            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
+        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
+            Returns the number of written (encoded/decoded) bytes.
+            Returns zero if the 'to' pointer does not have enough space.
             Returns -1 if EOF.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
-
-        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
-            Returns the number of written (encoded) bytes.
-            Returns zero the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
-            Updates the and 'to_next' pointer as needed.
-         */
-        virtual int finish(char* to, char* to_end, char*& to_next);
+        virtual int finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
         
     protected:
         virtual int sync();
@@ -109,9 +101,8 @@ class PT_SSL_API RSACipher : public BasicCipher {
         std::vector<char> _ioBuf;        // Input/output buffer
         std::vector<char> _cnvBuf;       // Conversion buffer
 
-        // Experiment
-        std::vector<char> _intBuf;       // Internal buffer
-        size_t            _ofsIntBuf;    // Read offset to the above buffer
+        int do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush);
+        int do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool flush);
 };
 
 } // namespace Pt
