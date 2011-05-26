@@ -65,14 +65,15 @@ int main(int argc, char** argv)
 
         // Start encryption test #1
         ss1.str(""); ss1.clear();
-        Pt::Ssl::RSACipher rsaCipher1(ss1, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        Pt::Ssl::RSACipher rsaCipher1(ss1, serverPubKey);
         std::iostream      rsaIOS1(&rsaCipher1);
         rsaIOS1.write(text.c_str(), text.length());
         rsaIOS1.write(" ", 1);
 
         // Start encryption test #2
         ss2.str(""); ss2.clear();
-        Pt::Ssl::RSACipher rsaCipher2(ss2, serverPubKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        Pt::Ssl::RSACipher rsaCipher2(ss2, serverPubKey);
+        rsaCipher2.setPadding(Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
         std::iostream      rsaIOS2(&rsaCipher2);
         rsaIOS2.write(text.c_str(), text.length());
         rsaIOS2.write(" ", 1);
@@ -84,11 +85,14 @@ int main(int argc, char** argv)
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
 
+        std::cerr << "tenc1: " << tenc1.size() << " bytes." << std::endl;
+        std::cerr << "tenc2: " << tenc2.size() << " bytes." << std::endl;
+
         char buff[1024];
         
         // Start decryption test #1
         ss1.str(tenc1); ss1.clear();
-        rsaCipher1.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        rsaCipher1.setPrivateKey(serverPrivKey);
 
         std::string tdec1;
         rsaIOS1.clear();
@@ -100,7 +104,7 @@ int main(int argc, char** argv)
         // Start decryption test #2
         ss2.str(tenc2); ss2.clear();
         rsaIOS2.clear();
-        rsaCipher2.startDecrypt(serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        rsaCipher2.setPrivateKey(serverPrivKey);
 
         std::string tdec2;
         while(!rsaIOS2.eof()) { // Test with non-blocking
@@ -113,7 +117,10 @@ int main(int argc, char** argv)
         // End the decryption tests
         rsaCipher1.finish();
         rsaCipher2.finish();
-  
+
+        std::cerr << "tdec1: " << tdec1.size() << " bytes." << std::endl;
+        std::cerr << "tdec2: " << tdec2.size() << " bytes." << std::endl;
+
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")

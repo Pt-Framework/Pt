@@ -49,19 +49,21 @@ class PT_SSL_API RSACipher : public BasicCipher {
         RSACipher(std::iostream& ios);
 
         //! \brief Instantiate an RSA cipher object for data encryption.
-        RSACipher(std::iostream& ios, const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        RSACipher(std::iostream& ios, const SSLPublicKey& pkey);
 
         //! \brief Instantiate an RSA cipher object for data decryption.
-        RSACipher(std::iostream& ios, const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        RSACipher(std::iostream& ios, const SSLPrivateKey& pkey);
 
         //! \brief Standard dtor.
         virtual ~RSACipher();
 
+        void setPadding(PaddingMode pmode);
+
         //! \brief Start a data encryption process.
-        void startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        void setPublicKey(const SSLPublicKey& pkey);
 
         //! \brief Start a data decryption process.
-        void startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode = RSA_PKCS1);
+        void setPrivateKey(const SSLPrivateKey& pkey);
 
         //! \brief Finish a data encryption/decryption process.
         void finish();
@@ -96,6 +98,10 @@ class PT_SSL_API RSACipher : public BasicCipher {
     private:
         rsa_st*           _rsa;          // RSA key
         int               _rsaSize;      // Size of the RSA
+
+        rsa_st*           _rsaPriv;      // RSA key
+        int               _rsaSizePriv;  // Size of the RSA
+
         int               _maxChunkSize; // Maximum data chunk size (encryption only)
         int               _pmode;        // Padding mode
         std::vector<char> _ioBuf;        // Input/output buffer

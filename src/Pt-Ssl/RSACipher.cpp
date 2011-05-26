@@ -34,16 +34,42 @@ namespace Pt {
 namespace Ssl {
 
 RSACipher::RSACipher(std::iostream& ios)
-: BasicCipher(ios), _rsa(0)
-{}
+: BasicCipher(ios)
+, _rsa(0)
+, _rsaPriv(0)
+, _maxChunkSize(0)
+{
+    setPadding(RSA_PKCS1);
 
-RSACipher::RSACipher(std::iostream& ios, const SSLPublicKey& pkey, PaddingMode pmode)
-: BasicCipher(ios), _rsa(0)
-{ startEncrypt(pkey, pmode); }
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+}
 
-RSACipher::RSACipher(std::iostream& ios, const SSLPrivateKey& pkey, PaddingMode pmode)
-: BasicCipher(ios), _rsa(0)
-{ startDecrypt(pkey, pmode); }
+RSACipher::RSACipher(std::iostream& ios, const SSLPublicKey& pkey)
+: BasicCipher(ios)
+, _rsa(0)
+, _rsaPriv(0)
+, _maxChunkSize(0)
+{
+    setPadding(RSA_PKCS1);
+    setPublicKey(pkey);
+
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+}
+
+RSACipher::RSACipher(std::iostream& ios, const SSLPrivateKey& pkey)
+: BasicCipher(ios)
+, _rsa(0)
+, _rsaPriv(0)
+, _maxChunkSize(0)
+{
+    setPadding(RSA_PKCS1);
+    setPrivateKey(pkey);
+
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+}
 
 RSACipher::~RSACipher()
 {
@@ -51,74 +77,57 @@ RSACipher::~RSACipher()
         RSA_free(_rsa);
         _rsa = 0;
     }
+
+    if(_rsaPriv) {
+        RSA_free(_rsaPriv);
+        _rsaPriv = 0;
+    }
 }
 
-void RSACipher::startEncrypt(const SSLPublicKey& pkey, PaddingMode pmode)
-{
-    if( _rsa ) {
-        if(_maxChunkSize)
-            throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
-        else
-            throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
-    }
 
+void RSACipher::setPadding(PaddingMode pmode)
+{
+    _pmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
+
+    if(_rsa)
+    {
+        _rsaSize      = RSA_size(_rsa);
+        _maxChunkSize = (_pmode == RSA_PKCS1_OAEP_PADDING) ? (_rsaSize - 42) : (_rsaSize - 12);
+    }
+}
+
+
+void RSACipher::setPublicKey(const SSLPublicKey& pkey)
+{
     // Get the RSA key from the public key
     _rsa = EVP_PKEY_get1_RSA(pkey.impl());
     if(!_rsa)
         throw SSLRuntimeError("Could not extract the RSA key from the public key!", PT_SOURCEINFO);
 
-    // Determine the padding mode
-    _pmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
-
     // Get the RSA and maximum chunk size
     _rsaSize      = RSA_size(_rsa);
-    _maxChunkSize = (pmode == RSA_PKCS1_OAEP) ? (_rsaSize - 42) : (_rsaSize - 12);
-
-    // Prepare the input buffer
-    _ioBuf.resize(_maxChunkSize);
-
-    // Set the put pointers and reset the get pointers
-    this->setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
-    this->setg(0, 0, 0);
-
-    // Resize the conversion buffer
-    _cnvBuf.resize(_rsaSize);
+    _maxChunkSize = (_pmode == RSA_PKCS1_OAEP_PADDING) ? (_rsaSize - 42) : (_rsaSize - 12);
 }
 
-void RSACipher::startDecrypt(const SSLPrivateKey& pkey, PaddingMode pmode)
-{
-    if( _rsa ) {
-        if(_maxChunkSize)
-            throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
-        else
-            throw SSLRuntimeError("A decryption process is already active!", PT_SOURCEINFO);
-    }
 
+void RSACipher::setPrivateKey(const SSLPrivateKey& pkey)
+{
     // Get the RSA key from the private key
-    _rsa = EVP_PKEY_get1_RSA(pkey.impl());
-    if(!_rsa)
+    _rsaPriv = EVP_PKEY_get1_RSA(pkey.impl());
+    if(!_rsaPriv)
         throw SSLRuntimeError("Could not extract the RSA key from the private key!", PT_SOURCEINFO);
 
-    // Determine the padding mode
-    _pmode = (pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING;
-
     // Get the RSA size and set the maximum chunk size to zero
-    _rsaSize      = RSA_size(_rsa);
-    _maxChunkSize = 0;
-
-    // Prepare the output buffer
-    _ioBuf.resize(_rsaSize);
-
-    // Reset the put and set pointers
-    this->setp(0, 0);
-    this->setg(&_ioBuf[0], &_ioBuf[0] + _rsaSize, &_ioBuf[0] + _rsaSize);
-
-    // Resize the conversion buffer
-    _cnvBuf.resize(_rsaSize);
+    _rsaSizePriv      = RSA_size(_rsaPriv);
 }
 
+
 void RSACipher::finish()
-{ overflow(traits_type::eof()); }
+{
+    overflow( traits_type::eof() );
+    this->setp(0, 0);
+}
+
 
 int RSACipher::sync()
 {
@@ -132,28 +141,40 @@ int RSACipher::sync()
     return 0;
 }
 
+
 RSACipher::int_type RSACipher::underflow()
 {
-    if( ! _rsa )
-        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
-    if( this->pptr() )
-        throw SSLRuntimeError("The cipher is currently in data encryption mode!", PT_SOURCEINFO);
+    // No need to continue if not in data encryption mode
+    if( ! _rsaPriv || this->gptr() )
+        return traits_type::eof();
+
+    if( ! this->gptr() )
+    {
+        // Prepare the output buffer
+        _ioBuf.resize(_rsaSizePriv);
+
+        // Reset the put and set pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0] + _rsaSizePriv, &_ioBuf[0] + _rsaSizePriv);
+
+        // Resize the conversion buffer
+        _cnvBuf.resize(_rsaSizePriv);
+    }
 
     // Check if we still have anything left if the get buffer
     if( this->gptr() && this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
     // RSA only can decrypt a chunk with a fixed size,
-    // assume EOF if we do not have it 
-    if(_ios->rdbuf()->in_avail() < _rsaSize) return traits_type::eof();
+    // assume EOF if we do not have it
+    if(_ios->rdbuf()->in_avail() < _rsaSizePriv) return traits_type::eof();
 
     // Read from the attached iostream
-    _ios->read(&_cnvBuf[0], _rsaSize);
-    
+    _ios->read(&_cnvBuf[0], _rsaSizePriv);
+
     // Decrypt the data
-    const int dlen = RSA_private_decrypt( _rsaSize,
+    const int dlen = RSA_private_decrypt( _rsaSizePriv,
                                           (const unsigned char*) &_cnvBuf[0],
-                                          (unsigned char*) &_ioBuf[0], _rsa, _pmode );
+                                          (unsigned char*) &_ioBuf[0], _rsaPriv, _pmode );
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {
@@ -173,10 +194,24 @@ RSACipher::int_type RSACipher::underflow()
     return traits_type::eof();
 }
 
+
 RSACipher::int_type RSACipher::overflow(int_type ch)
 {
     // No need to continue if not in data encryption mode
-    if(!_maxChunkSize) return traits_type::eof();
+    if( ! _rsa || this->gptr() )
+        return traits_type::eof();
+
+    if( ! this->pptr() )
+    {
+        // Prepare the input buffer
+        _ioBuf.resize(_maxChunkSize);
+
+        // Set the put pointers and reset the get pointers
+        this->setp(&_ioBuf[0], &_ioBuf[0] + _maxChunkSize);
+
+        // Resize the conversion buffer
+        _cnvBuf.resize(_rsaSize);
+    }
 
     // Is there any data to be encrypted?
     const size_t avail = this->pptr() - this->pbase();
@@ -205,8 +240,10 @@ RSACipher::int_type RSACipher::overflow(int_type ch)
     return traits_type::not_eof(ch);
 }
 
+
 size_t RSACipher::blockSize() const
 { return _rsaSize; }
+
 
 int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
@@ -216,6 +253,7 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
         return do_decrypt(from, from_end, from_next, to, to_end, to_next, false);
 }
 
+
 int RSACipher::finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
     if(_maxChunkSize)
@@ -223,6 +261,7 @@ int RSACipher::finish(const char* from, const char* from_end, const char*& from_
     else
         return do_decrypt(from, from_end, from_next, to, to_end, to_next, true);
 }
+
 
 int RSACipher::do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish)
 {
