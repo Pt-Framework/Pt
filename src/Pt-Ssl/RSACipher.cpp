@@ -129,7 +129,7 @@ void RSACipher::setPadding(PaddingMode pmode)
 
     // Update the maximum chunk size (if needed)
     if(_rsaPub) {
-        _encCSize   = (_pmode == RSA_PKCS1_OAEP_PADDING) ? (_rsaPubSize - 42) : (_rsaPubSize - 12);
+        _encCSize = (_pmode == RSA_PKCS1_OAEP_PADDING) ? (_rsaPubSize - 42) : (_rsaPubSize - 12);
     }
 }
 
