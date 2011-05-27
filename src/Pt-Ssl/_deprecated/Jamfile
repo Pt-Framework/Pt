@@ -3,37 +3,56 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 
-SharedLibrary Pt-Ssl : SSLContext.cpp
-                       SSLConnector2.cpp
-                       SSLConnector2Server.cpp
-                       SSLConnector2Client.cpp
-                       SSLStreamBuffer.cpp
-                       SSLStreamBufferServer.cpp
-                       SSLStreamBufferClient.cpp
+SharedLibrary Pt-Ssl : Exception.cpp
+                       Utils.cpp
+                       SSLCipherInfo.cpp
+                       SSLPublicKey.cpp
+                       SSLPrivateKey.cpp
+                       SSLCertificateList.cpp
+                       SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
+                       SSLSession.cpp
+                       SecureDigest.cpp
+                       BasicCipher.cpp
+                       RSACipher.cpp
+                       BasicSymmetricCipher.cpp
+                       AESCipher.cpp
+                       TripleDESCipher.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
 
-Main SSLConnectorTest : SSLConnectorTest.cpp ;
-LinkSharedLibraries SSLConnectorTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLConnectorTest : $(OUTPUT_TARGET) ;
-
-Main SSLStreamBufferTest : SSLStreamBufferTest.cpp ;
-LinkSharedLibraries SSLStreamBufferTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLStreamBufferTest : $(OUTPUT_TARGET) ;
-
-Main SSLHTTPTest : SSLHTTPTest.cpp ;
-LinkSharedLibraries SSLHTTPTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPTest : $(OUTPUT_TARGET) ;
-
 Main SSLServerClientTest : SSLServerClientTest.cpp ;
 LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLServerClientTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPClientTest : SSLHTTPClientTest.cpp ;
+LinkSharedLibraries SSLHTTPClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPClientTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPServerTest : SSLHTTPServerTest.cpp ;
+LinkSharedLibraries SSLHTTPServerTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
+LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
+
+Main SecureDigestTest : SecureDigestTest.cpp ;
+LinkSharedLibraries SecureDigestTest : Pt-Ssl Pt-System Pt ;
+MakeLocate SecureDigestTest : $(OUTPUT_TARGET) ;
+
+Main RSACipherTest : RSACipherTest.cpp ;
+LinkSharedLibraries RSACipherTest : Pt-Ssl Pt-System Pt ;
+MakeLocate RSACipherTest : $(OUTPUT_TARGET) ;
+
+Main SymmetricCipherTest : SymmetricCipherTest.cpp ;
+LinkSharedLibraries SymmetricCipherTest : Pt-Ssl Pt-System Pt ;
+MakeLocate SymmetricCipherTest : $(OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {
@@ -47,10 +66,17 @@ if $(TARGET_OS) = "nt"
     }
 }
 
-File [ FDirName $(OUTPUT_TARGET) root.pem   ] : root.pem   ;
-File [ FDirName $(OUTPUT_TARGET) client.pem ] : client.pem ;
-File [ FDirName $(OUTPUT_TARGET) server.pem ] : server.pem ;
-File [ FDirName $(OUTPUT_TARGET) dh1024.pem ] : dh1024.pem ;
+# openssl x509 -in ca.cer     -outform PEM -out ca.pem
+# openssl x509 -in server.cer -outform PEM -out server.pem
+# openssl x509 -in client.cer -outform PEM -out client.pem
+
+# openssl pkcs12 -in pkcs-12-certificate-and-key-file -out pem-certificate-and-key-file
+
+File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
+File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
+File [ FDirName $(OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;
+File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
+File [ FDirName $(OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
 
 SubInclude TOP src Pt-Ssl openssl ;
-
+SubInclude TOP src Pt-Ssl tests ;
