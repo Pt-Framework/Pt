@@ -69,9 +69,9 @@ class PT_SSL_API RSACipher : public BasicCipher {
         //! \brief Set the padding mode.
         void setPadding(PaddingMode pmode);
 
-        /** \brief Returns the minimum block (chunk) size.
-            The system expect that upon calling encode() or decode(), the user ensure that the
-            'to' pointer has at least 'block size' available space.
+        /** \brief Returns the minimum block (chunk) size for encoding and decoding data.
+            Upon calling encode() or decode(), the user must ensure that the
+            'to' pointer can has the minimum available space.
          */
         virtual size_t blockSize() const;
 
@@ -81,7 +81,7 @@ class PT_SSL_API RSACipher : public BasicCipher {
             Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize);
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
             Returns -1 if the 'to' pointer does not have enough space.
@@ -89,7 +89,7 @@ class PT_SSL_API RSACipher : public BasicCipher {
             Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize);
 
     private:
         // Common data

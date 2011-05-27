@@ -43,7 +43,7 @@ RSACipher::RSACipher()
 {}
 
 RSACipher::RSACipher(const SSLPublicKey& pubKey, PaddingMode pmode)
-: _pmode     (pmode),
+: _pmode     ((pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING),
   _rsaPub    (0),
   _rsaPubSize(0),
   _encCSize  (0),
@@ -52,7 +52,7 @@ RSACipher::RSACipher(const SSLPublicKey& pubKey, PaddingMode pmode)
 { setPublicKey(pubKey); }
 
 RSACipher::RSACipher(const SSLPrivateKey& prvKey, PaddingMode pmode)
-: _pmode     (pmode),
+: _pmode     ((pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING),
   _rsaPub    (0),
   _rsaPubSize(0),
   _encCSize  (0),
@@ -61,7 +61,7 @@ RSACipher::RSACipher(const SSLPrivateKey& prvKey, PaddingMode pmode)
 { setPrivateKey(prvKey); }
 
 RSACipher::RSACipher(const SSLPublicKey& pubKey, const SSLPrivateKey& prvKey, PaddingMode pmode)
-: _pmode     (pmode),
+: _pmode     ((pmode == RSA_PKCS1_OAEP) ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING),
   _rsaPub    (0),
   _rsaPubSize(0),
   _encCSize  (0),
@@ -136,7 +136,7 @@ void RSACipher::setPadding(PaddingMode pmode)
 size_t RSACipher::blockSize() const
 { return std::max(_rsaPubSize, _rsaPrvSize); }
 
-int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish)
+int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize)
 {
     if(!_rsaPub)
         throw SSLRuntimeError("No public key specified!", PT_SOURCEINFO);
@@ -150,7 +150,7 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
     if(outAvail < _rsaPubSize) return -1;
 
     // Encrypt data
-    if(finish || inAvail >= _encCSize) {
+    if(finalize || inAvail >= _encCSize) {
         // Encrypt the data
         const size_t readMax = std::min(inAvail, _encCSize);
         const int    dlen    = RSA_public_encrypt( readMax, (const unsigned char*) from,
@@ -166,7 +166,7 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
         // Adjust the pointers
         from_next = from + readMax;
         to_next   = to   + _rsaPubSize;
-        // Finish happily :D
+        // Done happily :D
         return 1;
     }
 
@@ -175,7 +175,7 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
     
 }
 
-int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish)
+int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize)
 {
     return 0;
 }

@@ -30,6 +30,8 @@
 
 #include <Pt/Ssl/BasicCipher.h>
 
+#include <vector>
+
 namespace Pt {
 namespace Ssl {
 
@@ -60,9 +62,12 @@ class PT_SSL_API CipherStreamBuf : public NonCopyable, public std::streambuf {
         virtual void finish();
 
     protected:
-        std::iostream* _ios;
-        BasicCipher*   _cipher;
+        std::iostream*    _ios;    // Linked io-stream
+        BasicCipher*      _cipher; // Attached cipher
 
+        std::vector<char> _ioBuf;  // Input/output buffer
+        std::vector<char> _cnvBuf; // Conversion buffer
+        
         virtual int_type sync();
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);

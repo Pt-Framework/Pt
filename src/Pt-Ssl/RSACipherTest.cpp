@@ -64,6 +64,9 @@ int main(int argc, char** argv)
                                     + textShort + ' ' + textShort + ' ' + textShort + ' '
                                     + textShort + ' ' + textShort;
 
+        std::cerr << "textShort = " << textShort.size() << " bytes." << std::endl;
+        std::cerr << "textLong  = " << textLong .size() << " bytes." << std::endl;
+
         // Instantiate the ciphers
         Pt::Ssl::RSACipher cipher1(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
         Pt::Ssl::RSACipher cipher2(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
@@ -83,19 +86,24 @@ int main(int argc, char** argv)
         // Start encryption test
         ios1.write(textShort.c_str(), textShort.length());
         ios1.write(" ", 1);
-        
+        csb1.finish();
+
         ios2.write(textShort.c_str(), textShort.length());
         ios2.write(" ", 1);
         ios2.write(textLong.c_str(), textLong.length());
 
         // End the encryption tests and get a copy of the encrypted string
         csb1.finish();
-        csb1.finish();
+        csb2.finish();
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
 
-        std::cerr << "tenc1: " << tenc1.size() << " bytes." << std::endl;
-        std::cerr << "tenc2: " << tenc2.size() << " bytes." << std::endl;
+        std::cerr << "tenc1 = " << tenc1.size() << " bytes." << std::endl;
+        std::cerr << "tenc2 = " << tenc2.size() << " bytes." << std::endl;
+
+        // Reset the string stream for decryption test
+        ss1.str(tenc1); ss1.clear();
+        ss2.str(tenc2); ss2.clear();
 
         /*
 
@@ -103,7 +111,6 @@ int main(int argc, char** argv)
         char buff[1024];
         
         // Start decryption test #1
-        ss1.str(tenc1); ss1.clear();
         rsaCipher1.setPrivateKey(serverPrivKey);
 
         std::string tdec1;

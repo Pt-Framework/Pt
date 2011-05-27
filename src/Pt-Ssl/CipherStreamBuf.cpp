@@ -28,20 +28,28 @@
 
 #include <Pt/Ssl/CipherStreamBuf.h>
 
+#include <iostream>
 #include <sstream>
+#include <string.h>
 
 namespace Pt {
 namespace Ssl {
 
 CipherStreamBuf::CipherStreamBuf()
 : _ios(0), _cipher(0)
-{}
+{
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+}
 
 CipherStreamBuf::CipherStreamBuf(std::iostream& ios, BasicCipher& cipher)
 : _ios(0), _cipher(0)
 {
     setIOStream(ios);
     setCipher(cipher);
+
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
 }
 
 CipherStreamBuf::~CipherStreamBuf()
@@ -65,10 +73,22 @@ std::streamsize CipherStreamBuf::import()
 
 void CipherStreamBuf::finish()
 {
+    if( this->pptr() )
+        overflow( traits_type::eof() );
+    
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
 }
 
 CipherStreamBuf::int_type CipherStreamBuf::sync()
 {
+    if( this->pptr() ) {
+        while( this->pptr() > this->pbase() ) {
+            const int_type ch = this->overflow( traits_type::eof() );
+            if( ch == traits_type::eof() ) return -1;
+        }
+    }
+
     return 0;
 }
 
@@ -79,7 +99,59 @@ CipherStreamBuf::int_type CipherStreamBuf::underflow()
 
 CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
 {
-    return traits_type::eof();
+    // Just return EOF if any of the conditions is not met
+    if( !_ios || !_cipher || this->gptr() )
+        return traits_type::eof();
+
+    // Initialize the put pointer (if needed)
+    if( ! this->pptr() ) {
+        // Prepare the input buffer
+        _ioBuf.resize(_cipher->blockSize());
+        // Set the put pointers
+        this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
+        // Resize the conversion buffer
+        _cnvBuf.resize(_cipher->blockSize());
+    }
+
+    // Check if we should flush everything
+    const bool finalize = traits_type::eq_int_type(ch, traits_type::eof());
+
+    // Encode data
+    for(;;) {
+        // Is there any data to be encoded?
+        const char*  from     = this->pbase();
+        const char*  from_end = this->pptr();
+        const size_t inAvail  = from_end - from;
+        if(!inAvail) break;
+        // Encode the data
+        const char* from_next = 0;
+        char*       to_next   = 0;
+        const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next, finalize);
+        // Check for error
+        if(ret < 0) {
+            // Would never happen
+        }
+        // Break if there is not enough input data
+        if(!ret) break;
+        // Write the data to the output stream
+        _ios->write((const char*) &_cnvBuf[0], to_next - &_cnvBuf[0]);
+        // Reset the put pointers
+        this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
+        // Move leftover data to the front
+        const size_t leftOver = from_end - from_next;
+        if(leftOver > 0) {
+            traits_type::move(&_ioBuf[0], from_next, leftOver);
+            this->pbump(leftOver);
+        }
+    }
+
+    // If the overflow char is not EOF, put it in the buffer area
+    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+        *(this->pptr()) = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
 }
 
 } // namespace Pt
