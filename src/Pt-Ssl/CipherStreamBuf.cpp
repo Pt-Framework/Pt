@@ -26,38 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/TripleDESCipher.h>
+#include <Pt/Ssl/CipherStreamBuf.h>
+
+#include <sstream>
 
 namespace Pt {
 namespace Ssl {
 
-TripleDESCipher::TripleDESCipher(std::iostream& ios, Mode mode)
-: BasicSymmetricCipher(ios)
-{ setMode(mode); }
-
-TripleDESCipher::~TripleDESCipher()
-{}
-
-void TripleDESCipher::setMode(Mode mode)
-{
-    // Note: Actually OpenSSL support CFB1 in TripleDES,
-    //       however it seems to always produce corrupted data.
-    if(mode == ECB || mode == CFB1)
-        throw SSLRuntimeError("Triple-DES cipher does not support the ECB and CFB1 modes!", PT_SOURCEINFO);
-
-    _mode = mode;
-}
-
-const char* TripleDESCipher::getOpenSSLCipherName() const
-{
-    switch(_mode) {
-        case CBC  : return "des-ede3-cbc";
-        case CFB8 : return "des-ede3-cfb8";
-        case CFB  : return "des-ede3-cfb";
-        case OFB  : return "des-ede3-ofb";
-        default   : throw SSLRuntimeError("Invalid mode of operation!", PT_SOURCEINFO);
-    }
-}
 
 } // namespace Pt
 } // namespace Ssl
