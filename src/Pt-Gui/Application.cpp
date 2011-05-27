@@ -54,7 +54,8 @@ namespace Pt {
 namespace Gui {
 
 Application::Application(int argc, char** argv)
-: Pt::Application(argc, argv)
+: _argc(argc)
+, _argv(argv)
 {
     // base class already throws if constructed twice
     ::getGuiAppPtr() = this;

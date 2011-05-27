@@ -39,74 +39,104 @@ namespace Pt {
 
 namespace System {
 
-    class ApplicationImpl;
+class ApplicationImpl;
 
-    /**
-     * \brief The %Application class provides an event loop for console applications
-     * without a GUI.
-     *
-     * This class is used by non-GUI applications to provide the applications's event
-     * loop. There should be only exactly one instance of Application (or one of its
-     * subclasses) per application. This is not ensured, though.
-     *
-     * Application contains the main event loop, where event sources can be registered
-     * and events from those sources are dispatched to listeners, that were registered
-     * to the event loop. Events may for example be operating system events (timer, file
-     * system changes).
-     *
-     * The application and therefore the event loop is started with a call to run() and
-     * can be exited with a call to exit(). After calling exit() the application should
-     * terminate.
-     *
-     * The event loop can be access by calling eventLoop(). Events can be committed by
-     * calling EventLoop::commitEvent(). Long running operations can call
-     * EventLoop::processEvents() to keep the application responsive.
-     *
-     * There are convenience methods available for easier access to functionality of
-     * the underlying event loop. commitEvent() delegates to EventLoop::commitEvent(),
-     * queueEvent() delegates to EventLoop::delegateEvent() and processEvents() delegates
-     * to EventLoop::processEvents() without making it necessary to first obtain the
-     * event loop manually.
-     */
-    class PT_SYSTEM_API Application : public Pt::Application
-    {
-        public:
-            explicit Application(int argc = 0, char** argv = 0);
+/**
+ * \brief The %Application class provides an event loop for console applications
+ * without a GUI.
+ *
+ * This class is used by non-GUI applications to provide the applications's event
+ * loop. There should be only exactly one instance of Application (or one of its
+ * subclasses) per application. This is not ensured, though.
+ *
+ * Application contains the main event loop, where event sources can be registered
+ * and events from those sources are dispatched to listeners, that were registered
+ * to the event loop. Events may for example be operating system events (timer, file
+ * system changes).
+ *
+ * The application and therefore the event loop is started with a call to run() and
+ * can be exited with a call to exit(). After calling exit() the application should
+ * terminate.
+ *
+ * The event loop can be access by calling eventLoop(). Events can be committed by
+ * calling EventLoop::commitEvent(). Long running operations can call
+ * EventLoop::processEvents() to keep the application responsive.
+ *
+ * There are convenience methods available for easier access to functionality of
+ * the underlying event loop. commitEvent() delegates to EventLoop::commitEvent(),
+ * queueEvent() delegates to EventLoop::delegateEvent() and processEvents() delegates
+ * to EventLoop::processEvents() without making it necessary to first obtain the
+ * event loop manually.
+ */
+class PT_SYSTEM_API Application : public Pt::Connectable
+{
+    public:
+        explicit Application(int argc = 0, char** argv = 0);
 
-            Application(EventLoop* loop, int argc = 0, char** argv = 0);
+        Application(EventLoop* loop, int argc = 0, char** argv = 0);
 
-            ~Application();
+        ~Application();
 
-            static Application& instance();
+        static Application& instance();
 
-            EventLoop& loop()
-			{ return *_loop; }
+        EventLoop& loop()
+        { return *_loop; }
 
-            void run()
-			{ _loop->run(); }
+        void run()
+        { _loop->run(); }
 
-            void exit()
-			{ _loop->exit(); }
+        void exit()
+        { _loop->exit(); }
 
-            bool catchSystemSignal(int sig);
+        bool catchSystemSignal(int sig);
 
-            bool raiseSystemSignal(int sig);
+        bool raiseSystemSignal(int sig);
 
-            Signal<int> systemSignal;
+        Signal<int> systemSignal;
 
-            ApplicationImpl& impl()
-			{ return *_impl; }
+        int argc() const
+        { return _argc; }
 
-        protected:
-            void init(EventLoop& loop);
+        char** argv() const
+        { return _argv; }
 
-        private:
-            ApplicationImpl* _impl;
-            int     _argc;
-            char**  _argv;
-            EventLoop* _loop;
-            MainLoop* _owner;
-    };
+        template <typename T>
+        Arg<T> getArg(const char* name)
+        {
+            return Arg<T>(_argc, _argv, name);
+        }
+
+        template <typename T>
+        Arg<T> getArg(const char* name, const T& def)
+        {
+            return Arg<T>(_argc, _argv, name, def);
+        }
+
+        template <typename T>
+        Arg<T> getArg(const char name)
+        {
+            return Arg<T>(_argc, _argv, name);
+        }
+
+        template <typename T>
+        Arg<T> getArg(const char name, const T& def)
+        {
+            return Arg<T>(_argc, _argv, name, def);
+        }
+
+        ApplicationImpl& impl()
+        { return *_impl; }
+
+    protected:
+        void init(EventLoop& loop);
+
+    private:
+        int     _argc;
+        char**  _argv;
+        ApplicationImpl* _impl;
+        EventLoop* _loop;
+        MainLoop* _owner;
+};
 
 } // namespace System
 

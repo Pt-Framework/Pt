@@ -29,8 +29,8 @@
 #define Pt_Gui_Application_h
 
 #include <Pt/Gui/Api.h>
+#include <Pt/Arg.h>
 #include <Pt/Connectable.h>
-#include <Pt/Application.h>
 #include <Pt/Event.h>
 #include <Pt/Signal.h>
 
@@ -57,10 +57,11 @@ namespace Gui {
      * Events can be committed by calling commitEvent(). Long running operations
      * can call processEvents() to keep the application responsive.
      */
-    class PT_GUI_API Application : public Pt::Application
+    class PT_GUI_API Application : public Connectable
     {
         private:
-            //! Pointer to the implementation of Application.
+            int     _argc;
+            char**  _argv;
             class ApplicationImpl* _impl;
 
         public:
@@ -113,6 +114,36 @@ namespace Gui {
              * @param event An event that will be dispatched to the corresponding widget.
              */
             void dispatchEvent(const Pt::Event& ev);
+
+            int argc() const
+            { return _argc; }
+
+            char** argv() const
+            { return _argv; }
+
+            template <typename T>
+            Arg<T> getArg(const char* name)
+            {
+                return Arg<T>(_argc, _argv, name);
+            }
+
+            template <typename T>
+            Arg<T> getArg(const char* name, const T& def)
+            {
+                return Arg<T>(_argc, _argv, name, def);
+            }
+
+            template <typename T>
+            Arg<T> getArg(const char name)
+            {
+                return Arg<T>(_argc, _argv, name);
+            }
+
+            template <typename T>
+            Arg<T> getArg(const char name, const T& def)
+            {
+                return Arg<T>(_argc, _argv, name, def);
+            }
     };
 
 } // namespace gui

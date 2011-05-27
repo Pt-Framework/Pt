@@ -47,7 +47,8 @@ namespace Pt {
 namespace System {
 
 Application::Application(int argc, char** argv)
-: Pt::Application(argc, argv)
+: _argc(argc)
+, _argv(argv)
 , _loop(0)
 , _owner(0)
 {
@@ -62,7 +63,8 @@ Application::Application(int argc, char** argv)
 
 
 Application::Application(EventLoop* loop, int argc, char** argv)
-: Pt::Application(argc, argv)
+: _argc(argc)
+, _argv(argv)
 , _loop(0)
 , _owner(0)
 {
