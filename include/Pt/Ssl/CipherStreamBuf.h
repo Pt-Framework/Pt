@@ -25,35 +25,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_TRIPLEDESCIPHER_H
-#define PT_SSL_TRIPLEDESCIPHER_H
+#ifndef PT_SSL_CIPHERSTREAMBUF_H
+#define PT_SSL_CIPHERSTREAMBUF_H
 
-#include <Pt/Ssl/BasicSymmetricCipher.h>
+#include <Pt/NonCopyable.h>
+#include <Pt/Ssl/Api.h>
+
+#include <streambuf>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief Triple-DES (Triple Data Encryption Standard) symmetric-block-cipher classes.
-class PT_SSL_API TripleDESCipher  : public BasicSymmetricCipher {
+//! \brief
+class PT_SSL_API CipherStreamBuf : public NonCopyable, public std::streambuf {
     public:
-        using BasicSymmetricCipher::SaltType;
-        using BasicSymmetricCipher::Mode;
-        
-    public:
-        //! \brief Instantiate an empty symmetric-block-cipher object.
-        TripleDESCipher(std::iostream& ios, Mode mode = CBC);
-
-        //! \brief Standard dtor.
-        virtual ~TripleDESCipher();
-
-        //! \brief Set the mode of operation of the cipher.
-        virtual void setMode(Mode mode = CBC);
-        
-    protected:
-        virtual const char* getOpenSSLCipherName() const;
-
-    private:
-        Mode _mode;
 };
 
 } // namespace Pt
