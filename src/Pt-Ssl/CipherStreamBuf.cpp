@@ -33,6 +33,54 @@
 namespace Pt {
 namespace Ssl {
 
+CipherStreamBuf::CipherStreamBuf()
+: _ios(0), _cipher(0)
+{}
+
+CipherStreamBuf::CipherStreamBuf(std::iostream& ios, BasicCipher& cipher)
+: _ios(0), _cipher(0)
+{
+    setIOStream(ios);
+    setCipher(cipher);
+}
+
+CipherStreamBuf::~CipherStreamBuf()
+{}
+
+void CipherStreamBuf::setIOStream(std::iostream& ios)
+{ _ios = &ios; }
+
+void CipherStreamBuf::setCipher(BasicCipher& cipher)
+{ _cipher = &cipher; }
+
+std::streamsize CipherStreamBuf::import()
+{
+    const std::streamsize avail = _ios->rdbuf()->in_avail();
+    if(!avail) return 0;
+
+    if(underflow() == traits_type::eof()) return 0;
+
+    return this->egptr() - this->gptr();
+}
+
+void CipherStreamBuf::finish()
+{
+}
+
+CipherStreamBuf::int_type CipherStreamBuf::sync()
+{
+    return 0;
+}
+
+CipherStreamBuf::int_type CipherStreamBuf::underflow()
+{
+    return traits_type::eof();
+}
+
+CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
+{
+    return traits_type::eof();
+}
 
 } // namespace Pt
 } // namespace Ssl

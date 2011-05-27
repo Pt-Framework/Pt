@@ -28,17 +28,44 @@
 #ifndef PT_SSL_CIPHERSTREAMBUF_H
 #define PT_SSL_CIPHERSTREAMBUF_H
 
-#include <Pt/NonCopyable.h>
-#include <Pt/Ssl/Api.h>
-
-#include <streambuf>
+#include <Pt/Ssl/BasicCipher.h>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief
+//! \brief Cipher stream buffer.
 class PT_SSL_API CipherStreamBuf : public NonCopyable, public std::streambuf {
     public:
+        //! \brief Instantiate an empty cipher stream buffer class.
+        CipherStreamBuf();
+
+        //! \brief Instantiate a cipher stream buffer class.
+        CipherStreamBuf(std::iostream& ios, BasicCipher& cipher);
+
+        //! \brief Standard dtor.
+        ~CipherStreamBuf();
+
+        //! \brief Set the IO stream
+        void setIOStream(std::iostream& ios);
+
+        //! \brief Set the cipher.
+        void setCipher(BasicCipher& cipher);
+        
+        /** @brief Reads data from the underlying IO stream.
+            Returns the number bytes in the data.
+        */
+        virtual std::streamsize import();
+
+        //! \brief Finish the current operation.
+        virtual void finish();
+
+    protected:
+        std::iostream* _ios;
+        BasicCipher*   _cipher;
+
+        virtual int_type sync();
+        virtual int_type underflow();
+        virtual int_type overflow(int_type ch);
 };
 
 } // namespace Pt

@@ -46,69 +46,63 @@ class PT_SSL_API RSACipher : public BasicCipher {
 
     public:
         //! \brief Instantiate an empty RSA cipher object.
-        RSACipher(std::iostream& ios);
+        RSACipher();
 
-        //! \brief Instantiate an RSA cipher object for data encryption.
-        RSACipher(std::iostream& ios, const SSLPublicKey& pkey);
+        //! \brief Instantiate an RSA cipher object that can be used for data encryption.
+        RSACipher(const SSLPublicKey& pubKey, PaddingMode pmode = RSA_PKCS1);
 
-        //! \brief Instantiate an RSA cipher object for data decryption.
-        RSACipher(std::iostream& ios, const SSLPrivateKey& pkey);
+        //! \brief Instantiate an RSA cipher object that can be used for data decryption.
+        RSACipher(const SSLPrivateKey& prvKey, PaddingMode pmode = RSA_PKCS1);
+
+        //! \brief Instantiate an RSA cipher object that can be used for both data encryption and decryption.
+        RSACipher(const SSLPublicKey& pubKey, const SSLPrivateKey& prvKey, PaddingMode pmode = RSA_PKCS1);
 
         //! \brief Standard dtor.
         virtual ~RSACipher();
 
-        void setPadding(PaddingMode pmode);
-
-        //! \brief Start a data encryption process.
+        //! \brief Set the public key
         void setPublicKey(const SSLPublicKey& pkey);
 
-        //! \brief Start a data decryption process.
+        //! \brief Set the private key
         void setPrivateKey(const SSLPrivateKey& pkey);
 
-        //! \brief Finish a data encryption/decryption process.
-        void finish();
+        //! \brief Set the padding mode.
+        void setPadding(PaddingMode pmode);
 
-        /** \brief Returns the block (chunk) size.
+        /** \brief Returns the minimum block (chunk) size.
             The system expect that upon calling encode() or decode(), the user ensure that the
             'to' pointer has at least 'block size' available space.
          */
         virtual size_t blockSize() const;
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
-            Returns the number of written (encoded) bytes.
-            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+            Returns -1 if the 'to' pointer does not have enough space.
+            Returns  0 if there is not enough input bytes in the'from' pointer.
+            Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
 
-        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
-            Returns the number of written (encoded/decoded) bytes.
-            Returns zero if the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
+            Returns -1 if the 'to' pointer does not have enough space.
+            Returns  0 if there is not enough input bytes in the'from' pointer.
+            Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
-        
-    protected:
-        virtual int sync();
-        virtual int_type underflow();
-        virtual int_type overflow(int_type ch);
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
 
     private:
-        rsa_st*           _rsa;          // RSA key
-        int               _rsaSize;      // Size of the RSA
+        // Common data
+        int _pmode; // Padding mode
 
-        rsa_st*           _rsaPriv;      // RSA key
-        int               _rsaSizePriv;  // Size of the RSA
+        // Encryption
+        rsa_st* _rsaPub;     // RSA key
+        size_t  _rsaPubSize; // Size of the RSA
+        size_t  _encCSize;   // Maximum data chunk size for encryption
 
-        int               _maxChunkSize; // Maximum data chunk size (encryption only)
-        int               _pmode;        // Padding mode
-        std::vector<char> _ioBuf;        // Input/output buffer
-        std::vector<char> _cnvBuf;       // Conversion buffer
-
-        int do_encrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
-        int do_decrypt(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish);
+        // Decryption
+        rsa_st* _rsaPrv;      // RSA key
+        size_t  _rsaPrvSize;  // Size of the RSA
 };
 
 } // namespace Pt

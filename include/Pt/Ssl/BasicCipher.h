@@ -39,46 +39,35 @@ namespace Ssl {
 //! \brief The base of all cipher classes.
 //! Not all cipher will need password. Therefore we do not specify a method
 //! to set a password in this class.
-class PT_SSL_API BasicCipher : public NonCopyable, public std::streambuf {
+class PT_SSL_API BasicCipher : public NonCopyable {
     public:
         //! \brief Instantiate an empty basic-cipher object.
-        BasicCipher(std::iostream& ios);
+        BasicCipher();
 
         //! \brief Standard dtor.
         ~BasicCipher();
 
-        //! \brief Set the output stream.
-        void setIOStream(std::iostream& out);
-
-        /** @brief Reads data from the underlying stream
-            Returns the number bytes in the data.
-        */
-        virtual std::streamsize import();
-
-        /** \brief Returns the block (chunk) size.
+        /** \brief Returns the minimum block (chunk) size.
             The system expect that upon calling encode() or decode(), the user ensure that the
             'to' pointer has at least 'block size' available space.
          */
         virtual size_t blockSize() const = 0;
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
-            Returns the number of written (encoded) bytes.
-            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+            Returns -1 if the 'to' pointer does not have enough space.
+            Returns  0 if there is not enough input bytes in the'from' pointer.
+            Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next) = 0;
+        virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish) = 0;
 
-        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
-            Returns the number of written (encoded/decoded) bytes.
-            Returns zero if the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
+            Returns -1 if the 'to' pointer does not have enough space.
+            Returns  0 if there is not enough input bytes in the'from' pointer.
+            Returns  1 if success.
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next) = 0;
-        
-    protected:
-        std::iostream* _ios;
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finish) = 0;
 };
 
 } // namespace Pt

@@ -29,7 +29,7 @@
 
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLCertificateList.h>
-#include <Pt/Ssl/SecureDigest.h>
+#include <Pt/Ssl/CipherStreamBuf.h>
 #include <Pt/Ssl/RSACipher.h>
 #include <Pt/System/Logger.h>
 
@@ -47,46 +47,58 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("OpenSSL test progam started");
         PT_SSL_LOG_M("################################################################################");
 
-        // Load certificate and private key
+        // Load certificate 
         Pt::Ssl::SSLCertificateList serverCertChain;
         serverCertChain.loadFromFile("server.pem");
-        
+
+        // Extract the public key from the certificate
+        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
+
+        // Load private key
         Pt::Ssl::SSLPrivateKey serverPrivKey("password");
         serverPrivKey.loadFromFile("server.key");
 
-        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
-        
         // Test texts
-        const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
-        const std::string text2 = text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text + ' ' + text;
+        const std::string textShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
+        const std::string textLong  = textShort + ' ' + textShort + ' ' + textShort + ' '
+                                    + textShort + ' ' + textShort + ' ' + textShort + ' '
+                                    + textShort + ' ' + textShort;
+
+        // Instantiate the ciphers
+        Pt::Ssl::RSACipher cipher1(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
+        Pt::Ssl::RSACipher cipher2(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+
+        // Instantiate the string-streams
+        std::stringstream ss1("", std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+        std::stringstream ss2("", std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+
+        // Instantiate the cipher-stream-buffers
+        Pt::Ssl::CipherStreamBuf csb1(ss1, cipher1);
+        Pt::Ssl::CipherStreamBuf csb2(ss2, cipher2);
+
+        // Instantiate the io-streams
+        std::iostream ios1(&csb1);
+        std::iostream ios2(&csb2);
         
-        std::stringstream ss1(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-        std::stringstream ss2(text2, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-
-        // Start encryption test #1
-        ss1.str(""); ss1.clear();
-        Pt::Ssl::RSACipher rsaCipher1(ss1, serverPubKey);
-        std::iostream      rsaIOS1(&rsaCipher1);
-        rsaIOS1.write(text.c_str(), text.length());
-        rsaIOS1.write(" ", 1);
-
-        // Start encryption test #2
-        ss2.str(""); ss2.clear();
-        Pt::Ssl::RSACipher rsaCipher2(ss2, serverPubKey);
-        rsaCipher2.setPadding(Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
-        std::iostream      rsaIOS2(&rsaCipher2);
-        rsaIOS2.write(text.c_str(), text.length());
-        rsaIOS2.write(" ", 1);
-        rsaIOS2.write(text2.c_str(), text2.length());
+        // Start encryption test
+        ios1.write(textShort.c_str(), textShort.length());
+        ios1.write(" ", 1);
+        
+        ios2.write(textShort.c_str(), textShort.length());
+        ios2.write(" ", 1);
+        ios2.write(textLong.c_str(), textLong.length());
 
         // End the encryption tests and get a copy of the encrypted string
-        rsaCipher1.finish();
-        rsaCipher2.finish();
+        csb1.finish();
+        csb1.finish();
         const std::string tenc1 = ss1.str();
         const std::string tenc2 = ss2.str();
 
         std::cerr << "tenc1: " << tenc1.size() << " bytes." << std::endl;
         std::cerr << "tenc2: " << tenc2.size() << " bytes." << std::endl;
+
+        /*
+
 
         char buff[1024];
         
@@ -126,6 +138,7 @@ int main(int argc, char** argv)
                      << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
                      << "\nDecryption #2 status: " << ( ( (text + " " + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"
                     );
+*/
 
         // Done
         PT_SSL_LOG_M("################################################################################");
