@@ -39,7 +39,7 @@ IOError::IOError(const std::string& what, const SourceInfo& si)
 }
 
 
-IOError::IOError(const char* msg)
+IOError::IOError(const std::string& msg)
 : std::ios::failure(msg)
 {
 }

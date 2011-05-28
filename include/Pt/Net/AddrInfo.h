@@ -42,6 +42,8 @@ namespace Net {
         public:
             AddressInUse();
 
+            AddressInUse(const std::string& ipaddr, unsigned short int port);
+
             ~AddressInUse() throw()
             {}
     };

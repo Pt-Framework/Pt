@@ -29,15 +29,30 @@
 #include <Pt/Net/AddrInfo.h>
 #include <string.h>
 #include "AddrInfoImpl.h"
+#include <sstream>
 
 namespace Pt {
 
 namespace Net {
 
+namespace
+{
+  std::string AddressInUseMsg(const std::string& ipaddr, unsigned short int port)
+  {
+    std::ostringstream msg;
+    msg << "address " << ipaddr << ':' << port << " in use";
+    return msg.str();
+  }
+}
+
 AddressInUse::AddressInUse()
 : IOError("address in use")
 { }
 
+AddressInUse::AddressInUse(const std::string& ipaddr, unsigned short int port)
+    : IOError(AddressInUseMsg(ipaddr, port))
+{
+}
 
 AddrInfo::AddrInfo(AddrInfoImpl* impl)
   : _impl(impl)
