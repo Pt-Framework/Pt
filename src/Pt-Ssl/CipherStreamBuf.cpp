@@ -29,8 +29,10 @@
 
 #include <Pt/Ssl/CipherStreamBuf.h>
 
-#include <iostream>
+#include <iostream> // Remove this later!
 #include <sstream>
+
+#include <assert.h>
 #include <string.h>
 
 namespace Pt {
@@ -107,16 +109,16 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     // Initialize the put pointer (if needed)
     if( ! this->pptr() ) {
         // Prepare the input buffer
-        _ioBuf.resize(_cipher->blockSize());
+        _ioBuf.resize(_cipher->inputBlockSize());
         // Set the put pointers
         this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
         // Resize the conversion buffer
-        _cnvBuf.resize(_cipher->blockSize());
+        _cnvBuf.resize(_cipher->outputBlockSize());
     }
 
-    // Check if we should flush everything
-    const bool finalize = traits_type::eq_int_type(ch, traits_type::eof());
-
+    // Is the overflow char is an EOF?
+    const bool isEOFChar = traits_type::eq_int_type( ch, traits_type::eof() );
+    
     // Encode data
     for(;;) {
         // Is there any data to be encoded?
@@ -124,16 +126,13 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
         const char*  from_end = this->pptr();
         const size_t inAvail  = from_end - from;
         if(!inAvail) break;
+        // Is there enough data to be encoded?
+        if(!isEOFChar && inAvail < _cipher->inputBlockSize()) break;
         // Encode the data
         const char* from_next = 0;
         char*       to_next   = 0;
-        const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next, finalize);
-        // Check for error
-        if(ret < 0) {
-            // Would never happen
-        }
-        // Break if there is not enough input data
-        if(!ret) break;
+        const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
+        assert(ret == 1);
         // Write the data to the output stream
         _ios->write((const char*) &_cnvBuf[0], to_next - &_cnvBuf[0]);
         // Reset the put pointers
@@ -147,7 +146,7 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     }
 
     // If the overflow char is not EOF, put it in the buffer area
-    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) ) {
+    if( ! isEOFChar ) {
         *(this->pptr()) = traits_type::to_char_type(ch);
         this->pbump(1);
     }

@@ -134,51 +134,55 @@ void RSACipher::setPadding(PaddingMode pmode)
     }
 }
 
-size_t RSACipher::blockSize() const
-{ return std::max(_rsaPubSize, _rsaPrvSize); }
+size_t RSACipher::inputBlockSize() const
+{
+    // Because RSA size can be different, just return the larger one
+    return std::max(_encCSize, _rsaPrvSize);
+}
 
-int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize)
+size_t RSACipher::outputBlockSize() const
+{
+    // Because RSA size can be different, just return the larger one
+    return std::max(_rsaPubSize, _rsaPrvSize);
+}
+
+int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
     if(!_rsaPub)
         throw SSLRuntimeError("No public key specified!", PT_SOURCEINFO);
-
-    // Is there any data to be encrypted?
-    const size_t inAvail = from_end - from;
-    if(!inAvail) return 0;
 
     // Is the output area large enough?
     const size_t outAvail = to_end - to;
     if(outAvail < _rsaPubSize) return -1;
 
-    // Encrypt data
-    if(finalize || inAvail >= _encCSize) {
-        // Encrypt the data
-        const size_t readMax = std::min(inAvail, _encCSize);
-        const int    dlen    = RSA_public_encrypt( readMax, (const unsigned char*) from,
-                                                   (unsigned char*) to, _rsaPub, _pmode );
-        if(dlen < 0) {
-            long i = ERR_get_error();
-            while(i) {
-                std::cerr << ERR_error_string(i, 0) << std::endl;
-                i = ERR_get_error();
-            }
-            throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+    // Is there any data to be encrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Encrypt the data
+    const size_t readMax = std::min(inAvail, _encCSize);
+    const int    dlen    = RSA_public_encrypt( readMax, (const unsigned char*) from,
+                                                (unsigned char*) to, _rsaPub, _pmode );
+    if(dlen < 0) {
+        long i = ERR_get_error();
+        while(i) {
+            std::cerr << ERR_error_string(i, 0) << std::endl;
+            i = ERR_get_error();
         }
-        // Adjust the pointers
-        from_next = from + readMax;
-        to_next   = to   + _rsaPubSize;
-        // Done happily :D
-        return 1;
+        throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
     }
 
-    // Not enough input data
-    return 0;
-    
+    // Adjust the pointers
+    from_next = from + readMax;
+    to_next   = to   + _rsaPubSize;
+
+    // Done happily :D
+    return 1;
 }
 
-int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next, bool finalize)
+int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
-    return 0;
+    return -1;
 }
 
 } // namespace Pt
