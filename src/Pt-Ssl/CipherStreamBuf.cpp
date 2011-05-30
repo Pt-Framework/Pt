@@ -97,6 +97,46 @@ CipherStreamBuf::int_type CipherStreamBuf::sync()
 
 CipherStreamBuf::int_type CipherStreamBuf::underflow()
 {
+    // Just return EOF if any of the conditions is not met
+    if( !_ios || !_cipher || this->pptr() )
+        return traits_type::eof();
+    
+    // Initialize the get pointer (if needed)
+    if( ! this->gptr() ) {
+        // Prepare the output buffer
+        _ioBuf.resize(_cipher->outputBlockSize());
+        // Set the get pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), &_ioBuf[0] + _ioBuf.size());
+        // Resize the conversion buffer
+        _cnvBuf.resize(_cipher->inputBlockSize());
+    }
+
+    // Check if we still have anything left if the get buffer
+    if( this->gptr() && this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    // Decode data
+    for(;;) {
+        // Read from the attached iostream
+        _ios->read(&_cnvBuf[0], _cnvBuf.size());
+        // Is there any data to be decoded?
+        const size_t inAvail = _ios->gcount();
+        if(!inAvail) break;
+        // Decode the data
+        const char* from      = &_cnvBuf[0];
+        const char* from_end  = from + inAvail;
+        const char* from_next = 0;
+        char*       to_next   = 0;
+        const int   ret       = _cipher->decode(from, from_end, from_next, &_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), to_next);
+        assert(ret == 1);
+        // Reset the get pointers
+        const size_t outAvail = to_next - &_ioBuf[0];
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
+        // Done
+        return traits_type::to_int_type( *this->gptr() );
+    }
+
+    // EOF
     return traits_type::eof();
 }
 

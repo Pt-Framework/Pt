@@ -101,51 +101,37 @@ int main(int argc, char** argv)
         std::cerr << "tenc1 = " << tenc1.size() << " bytes." << std::endl;
         std::cerr << "tenc2 = " << tenc2.size() << " bytes." << std::endl;
 
-        // Reset the string stream for decryption test
-        ss1.str(tenc1); ss1.clear();
-        ss2.str(tenc2); ss2.clear();
-
-        /*
-
-
+        // Reset the stream for decryption test
         char buff[1024];
-        
-        // Start decryption test #1
-        rsaCipher1.setPrivateKey(serverPrivKey);
+        ss1.str(tenc1); ss1.clear(); ios1.clear();
+        ss2.str(tenc2); ss2.clear(); ios2.clear();
 
+        // Start decryption test
         std::string tdec1;
-        rsaIOS1.clear();
-        while(!rsaIOS1.eof()) { // Test with blocking
-            rsaIOS1.read(buff, sizeof(buff));
-            if(rsaIOS1.gcount()) tdec1 += std::string(buff, rsaIOS1.gcount());
+        while(!ios1.eof()) { // Test with blocking
+            ios1.read(buff, sizeof(buff));
+            if(ios1.gcount()) tdec1 += std::string(buff, ios1.gcount());
         }
 
-        // Start decryption test #2
-        ss2.str(tenc2); ss2.clear();
-        rsaIOS2.clear();
-        rsaCipher2.setPrivateKey(serverPrivKey);
-
         std::string tdec2;
-        while(!rsaIOS2.eof()) { // Test with non-blocking
-            if(rsaCipher2.import() <= 0) break;
-            const size_t got = rsaIOS2.readsome(buff, sizeof(buff));
+        while(!ios2.eof()) { // Test with non-blocking
+            if(csb2.import() <= 0) break;
+            const size_t got = ios2.readsome(buff, sizeof(buff));
             if(got <= 0) break;
             tdec2+= std::string(buff, got);
         }
-
+        
         // End the decryption tests
-        rsaCipher1.finish();
-        rsaCipher2.finish();
-
-        std::cerr << "tdec1: " << tdec1.size() << " bytes." << std::endl;
-        std::cerr << "tdec2: " << tdec2.size() << " bytes." << std::endl;
+        csb1.finish();
+        csb2.finish();
+        std::cerr << "tdec1 = " << tdec1.size() << " bytes." << std::endl;
+        std::cerr << "tdec2 = " << tdec2.size() << " bytes." << std::endl;
 
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
-                     << "\nDecryption #1 status: " << ( ( (text + " " ) == tdec1 ) ? "OK" : "FAILED")
-                     << "\nDecryption #2 status: " << ( ( (text + " " + text2) == tdec2 ) ? "OK" : "FAILED") << "\n"
+                     << "\nDecryption #1 status: " << ( ( (textShort + " " ) == tdec1 ) ? "OK" : "FAILED")
+                     << "\nDecryption #2 status: " << ( ( (textShort + " " + textLong) == tdec2 ) ? "OK" : "FAILED") << "\n"
                     );
-*/
 
         // Done
         PT_SSL_LOG_M("################################################################################");

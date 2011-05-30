@@ -182,7 +182,38 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
 
 int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
-    return -1;
+    if(!_rsaPrv)
+        throw SSLRuntimeError("No private key specified!", PT_SOURCEINFO);
+
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(outAvail < _rsaPrvSize) return -1;
+
+    // Is there any data to be decrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Is there enough data to be decrypted?
+    if(inAvail < _rsaPrvSize) return -1;
+
+    // Decrypt the data
+    const int dlen = RSA_private_decrypt( _rsaPrvSize, (const unsigned char*) from,
+                                         (unsigned char*) to, _rsaPub, _pmode );
+    if(dlen < 0) {
+        long i = ERR_get_error();
+        while(i) {
+            std::cerr << ERR_error_string(i, 0) << std::endl;
+            i = ERR_get_error();
+        }
+        throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+    }
+
+    // Adjust the pointers
+    from_next = from + _rsaPrvSize;
+    to_next   = to   + dlen;
+
+    // Done happily :D
+    return 1;
 }
 
 } // namespace Pt
