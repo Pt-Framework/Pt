@@ -42,6 +42,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("StringStreamTest")
         {
             Pt::Unit::TestSuite::registerMethod("Getline", *this, &StringStreamTest::getline );
+            Pt::Unit::TestSuite::registerMethod("WriteBool", *this, &StringStreamTest::WriteBool );
             Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::readInt );
             Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readFloat );
             Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &StringStreamTest::rdbufTest );
@@ -49,6 +50,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
         }
 
         void getline();
+        void WriteBool();
         void readInt();
         void readFloat();
         void rdbufTest();
@@ -68,6 +70,16 @@ void StringStreamTest::getline()
     std::getline(s, strLine);
 
     PT_UNIT_ASSERT(strLine == L"hier bin ich");
+}
+
+
+void StringStreamTest::WriteBool()
+{
+    Pt::StringStream ss;
+    ss << true << ' ' << false << ' ' << std::boolalpha << true << ' ' << false;
+    Pt::String str = ss.str();
+
+    PT_UNIT_ASSERT(str == L"1 0 true false");
 }
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
- * 
+ * Copyright (C) 2004-2010 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,16 +15,18 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include <algorithm>
 
 namespace std {
 
@@ -83,7 +85,73 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
 {
     static const Pt::Char falsename[] = {'f', 'a', 'l', 's', 'e', '\0'};
     return falsename;
-}    
+}
+
+
+
+
+// locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
+
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, double val) const
+// {
+//     return s;
+// }
+
+
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
+// {
+//     if(f.flags() & std::ios_base::boolalpha)
+//     {
+//         const numpunct<char_type>& npct = use_facet< numpunct<char_type> >( f.getloc() );
+//         Pt::String out = val ? npct.truename() : npct.falsename();
+//         std::copy(out.begin(), out.end(), s);
+
+//         streamsize pad = f.width();
+//         if( pad > out.size() )
+//         {
+
+//             if ( (f.flags() & ios_base::adjustfield) == ios_base::left)
+//             {
+//                 std::copy(out.begin(), out.end(), s);
+//                 std::fill_n(s, pad, fill);
+//             }
+//             else
+//             {
+//                 std::fill_n(s, pad, fill);
+//                 std::copy(out.begin(), out.end(), s);
+//             }
+//         }
+//         else
+//         {
+//             std::copy(out.begin(), out.end(), s);
+//         }
+//     }
+//     else
+//     {
+//         ++s = val? '1' : '0';
+//     }
+
+//     return s;
+// }
+
+
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long val) const
+// {
+//     return s;
+// }
+
+
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
+// {
+//     return s;
+// }
+
+
+
 
 #if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 //
