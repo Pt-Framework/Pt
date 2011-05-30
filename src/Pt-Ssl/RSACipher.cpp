@@ -198,7 +198,7 @@ int RSACipher::decode(const char* from, const char* from_end, const char*& from_
 
     // Decrypt the data
     const int dlen = RSA_private_decrypt( _rsaPrvSize, (const unsigned char*) from,
-                                         (unsigned char*) to, _rsaPub, _pmode );
+                                         (unsigned char*) to, _rsaPrv, _pmode );
     if(dlen < 0) {
         long i = ERR_get_error();
         while(i) {

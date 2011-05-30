@@ -122,6 +122,7 @@ CipherStreamBuf::int_type CipherStreamBuf::underflow()
         // Is there any data to be decoded?
         const size_t inAvail = _ios->gcount();
         if(!inAvail) break;
+        assert(inAvail >= _cipher->inputBlockSize());
         // Decode the data
         const char* from      = &_cnvBuf[0];
         const char* from_end  = from + inAvail;
