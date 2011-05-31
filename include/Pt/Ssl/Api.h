@@ -48,7 +48,6 @@ namespace Pt {
 namespace Ssl {
 
 } // namespace Ssl
-
 } // namespace Pt
 
 #endif

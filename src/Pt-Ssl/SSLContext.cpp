@@ -398,5 +398,5 @@ void SSLContext::getAvailableCiphers()
     SSL_free(ssl);
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

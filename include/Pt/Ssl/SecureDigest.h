@@ -101,7 +101,7 @@ class PT_SSL_API SecureDigest : public NonCopyable, public std::streambuf {
         static const char* digestEnumToString(DigestType digestType);
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

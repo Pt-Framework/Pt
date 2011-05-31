@@ -239,5 +239,5 @@ const char* SecureDigest::digestEnumToString(DigestType digestType)
     return "MD5";
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

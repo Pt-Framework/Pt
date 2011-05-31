@@ -73,5 +73,5 @@ ssl_session_st* SSLSession::impl(bool incRef) const
     return _sess;
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

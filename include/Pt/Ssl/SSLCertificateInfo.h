@@ -116,7 +116,7 @@ class PT_SSL_API SSLCertificateInfo {
         }
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

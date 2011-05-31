@@ -137,5 +137,5 @@ evp_pkey_st* SSLPrivateKey::impl() const
 { return _impl->_pkey; }
 
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

@@ -99,7 +99,7 @@ class PT_SSL_API SSLCertificateList::Impl {
         std::vector<SSLCertificateInfo> _certInfo;
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

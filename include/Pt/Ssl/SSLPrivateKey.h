@@ -103,7 +103,7 @@ class PT_SSL_API SSLPrivateKey::Impl {
         evp_pkey_st* _pkey;
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

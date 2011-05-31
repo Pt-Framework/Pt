@@ -39,5 +39,5 @@ BasicCipher::BasicCipher()
 BasicCipher::~BasicCipher()
 {}
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

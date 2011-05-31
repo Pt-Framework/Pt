@@ -172,5 +172,5 @@ const SSLPublicKey SSLCertificateList::Impl::getPublicKey() const
     return SSLPublicKey(pkey);
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

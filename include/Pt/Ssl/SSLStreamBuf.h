@@ -35,7 +35,6 @@
 #include <string>
 
 namespace Pt {
-
 namespace Ssl {
 
 /**
@@ -160,7 +159,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 };
 
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

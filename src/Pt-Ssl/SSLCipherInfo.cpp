@@ -55,5 +55,5 @@ const std::string SSLCipherInfo::dump() const
     return str;
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

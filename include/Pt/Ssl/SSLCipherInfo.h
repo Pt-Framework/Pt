@@ -68,7 +68,7 @@ inline bool operator==(const SSLCipherInfo& a, const SSLCipherInfo& b)
     return a.id == b.id;
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

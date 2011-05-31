@@ -537,5 +537,5 @@ void SSLStreamBuf::getCurrentCipher()
     _currentCipher.desc     = desc;
 }
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt

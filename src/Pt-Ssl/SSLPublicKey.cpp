@@ -59,6 +59,6 @@ SSLPublicKey::~SSLPublicKey()
 evp_pkey_st* SSLPublicKey::impl() const
 { return _impl->_pkey; }
     
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 

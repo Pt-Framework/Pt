@@ -72,9 +72,13 @@ class PT_SSL_API CipherStreamBuf : public NonCopyable, public std::streambuf {
         virtual int_type sync();
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
+
+    private:
+        virtual int_type do_underflow(std::streamsize size);
+        
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

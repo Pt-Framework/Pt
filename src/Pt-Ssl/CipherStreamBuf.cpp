@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/Ssl/Exception.h>
 #include <Pt/Ssl/CipherStreamBuf.h>
 
 #include <iostream> // Remove this later!
@@ -66,10 +67,12 @@ void CipherStreamBuf::setCipher(BasicCipher& cipher)
 
 std::streamsize CipherStreamBuf::import()
 {
-    const std::streamsize avail = _ios->rdbuf()->in_avail();
-    if(!avail) return 0;
+    if(!_cipher) return 0;
+    
+    const std::streamsize inAvail = _ios->rdbuf()->in_avail();
+    if(inAvail < (std::streamsize) _cipher->inputBlockSize()) return 0;
 
-    if(underflow() == traits_type::eof()) return 0;
+    if(do_underflow(_cipher->inputBlockSize()) == traits_type::eof()) return 0;
 
     return this->egptr() - this->gptr();
 }
@@ -96,50 +99,7 @@ CipherStreamBuf::int_type CipherStreamBuf::sync()
 }
 
 CipherStreamBuf::int_type CipherStreamBuf::underflow()
-{
-    // Just return EOF if any of the conditions is not met
-    if( !_ios || !_cipher || this->pptr() )
-        return traits_type::eof();
-    
-    // Initialize the get pointer (if needed)
-    if( ! this->gptr() ) {
-        // Prepare the output buffer
-        _ioBuf.resize(_cipher->outputBlockSize());
-        // Set the get pointers
-        this->setg(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), &_ioBuf[0] + _ioBuf.size());
-        // Resize the conversion buffer
-        _cnvBuf.resize(_cipher->inputBlockSize());
-    }
-
-    // Check if we still have anything left if the get buffer
-    if( this->gptr() && this->gptr() < this->egptr() )
-        return traits_type::to_int_type( *this->gptr() );
-
-    // Decode data
-    for(;;) {
-        // Read from the attached iostream
-        _ios->read(&_cnvBuf[0], _cnvBuf.size());
-        // Is there any data to be decoded?
-        const size_t inAvail = _ios->gcount();
-        if(!inAvail) break;
-        assert(inAvail >= _cipher->inputBlockSize());
-        // Decode the data
-        const char* from      = &_cnvBuf[0];
-        const char* from_end  = from + inAvail;
-        const char* from_next = 0;
-        char*       to_next   = 0;
-        const int   ret       = _cipher->decode(from, from_end, from_next, &_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), to_next);
-        assert(ret == 1);
-        // Reset the get pointers
-        const size_t outAvail = to_next - &_ioBuf[0];
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
-        // Done
-        return traits_type::to_int_type( *this->gptr() );
-    }
-
-    // EOF
-    return traits_type::eof();
-}
+{ return do_underflow(_cipher->inputBlockSize()); }
 
 CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
 {
@@ -195,5 +155,60 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     return traits_type::not_eof(ch);
 }
 
-} // namespace Pt
+CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)
+{
+    // Just return EOF if any of the conditions is not met
+    if( !_ios || !_cipher || this->pptr() )
+        return traits_type::eof();
+
+    // Initialize the get pointer (if needed)
+    if( ! this->gptr() ) {
+        // Prepare the output buffer
+        _ioBuf.resize(_cipher->outputBlockSize());
+        // Set the get pointers
+        this->setg(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), &_ioBuf[0] + _ioBuf.size());
+        // Resize the conversion buffer
+        _cnvBuf.resize(_cipher->inputBlockSize());
+    }
+
+    // Check if we still have anything left if the get buffer
+    if( this->gptr() && this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    // Decode data
+    for(;;) {
+        // Read from the attached iostream
+        char*           ptr     = &_cnvBuf[0];
+        size_t          maxSize = _cnvBuf.size();
+        std::streamsize inAvail = 0;
+        for(;;) {
+            _ios->read(ptr + inAvail, maxSize - inAvail);
+            if(!_ios->gcount()) return traits_type::eof();
+
+            inAvail += _ios->gcount();
+            if(inAvail >= size) break;
+
+            if(_ios->eof()) {
+                throw SSLRuntimeError("Unexpected EOF!", PT_SOURCEINFO);
+            }
+        }
+        // Decode the data
+        const char* from      = &_cnvBuf[0];
+        const char* from_end  = from + inAvail;
+        const char* from_next = 0;
+        char*       to_next   = 0;
+        const int   ret       = _cipher->decode(from, from_end, from_next, &_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), to_next);
+        assert(ret == 1);
+        // Reset the get pointers
+        const size_t outAvail = to_next - &_ioBuf[0];
+        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
+        // Done
+        return traits_type::to_int_type( *this->gptr() );
+    }
+
+    // EOF
+    return traits_type::eof();
+}
+
 } // namespace Ssl
+} // namespace Pt

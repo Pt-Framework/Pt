@@ -138,7 +138,7 @@ class PT_SSL_API SSLContext {
 };
 
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

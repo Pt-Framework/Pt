@@ -173,5 +173,4 @@ void SSLClient::onWriteShutdown(Pt::System::StreamBuffer& sb)
 }
 
 } // namespace Ssl
-
 } // namespace Pt

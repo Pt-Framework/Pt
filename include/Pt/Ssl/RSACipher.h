@@ -119,7 +119,7 @@ class PT_SSL_API RSACipher : public BasicCipher {
         size_t  _rsaPrvSize;  // Size of the RSA
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

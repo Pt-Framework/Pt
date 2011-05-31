@@ -83,7 +83,7 @@ class PT_SSL_API BasicCipher : public NonCopyable {
         virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next) = 0;
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

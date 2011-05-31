@@ -56,7 +56,7 @@ class PT_SSL_API SSLSession {
         ssl_session_st* _sess;
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

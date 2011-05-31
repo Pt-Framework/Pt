@@ -87,7 +87,7 @@ class PT_SSL_API SSLServer : public std::iostream, public Pt::Connectable
         SSLStreamBuf      _sslbuf;
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif
