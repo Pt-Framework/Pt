@@ -94,7 +94,6 @@ class Char
         : _value( (uint32_t)((unsigned short)val) )
         {}
 
-
 //#ifndef PT_WCHAR_T_IS_USHORT
         //! Constructs a character using the given 16-bit integer as base for the character value.
         Char(unsigned short val)
@@ -103,22 +102,22 @@ class Char
 //#endif
 
         //! Constructs a character using the given 32-bit integer as base for the character value.
-        Char(const int& val)
+        Char(int val)
         : _value( (uint32_t)(val) )
         {}
 
         //! Constructs a character using the given 32-bit integer as base for the character value.
-        Char(const unsigned int& val)
+        Char(unsigned int val)
         : _value(val)
         {}
 
         //! Constructs a character using the given long as base for the character value.
-        Char(const long value)
+        Char(long value)
         : _value( (uint32_t)((unsigned long)value) )
         {}
 
         //! Constructs a character using the given long as base for the character value.
-        Char(const unsigned long val)
+        Char(unsigned long val)
         : _value(val)
         {}
 
