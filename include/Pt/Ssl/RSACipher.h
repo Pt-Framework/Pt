@@ -70,22 +70,18 @@ class PT_SSL_API RSACipher : public BasicCipher {
         //! \brief Set the padding mode.
         void setPadding(PaddingMode pmode);
 
-        /** \brief Returns the expected input block (chunk) size for encoding and decoding data.
+        /** \brief Returns the expected input block (chunk) size for encoding data.
             For maximum efficiency, upon calling encode() the user must ensure that the
             'from' pointer has the minimum available data (unless of course at the end of
             the stream).
-            </br>
-            Upon calling decode() the user must ensure that the 'from' pointer
-            has the minimum available data or the decoding process may fail
-            (unless of course at the end of the stream).
          */
-        virtual size_t inputBlockSize() const;
+        virtual size_t encodingInputBlockSize() const;
 
-        /** \brief Returns the minimum output block (chunk) size for encoding and decoding data.
-            Upon calling encode() or decode(), the user must ensure that the
-            'to' pointer can has the minimum available space or the process will fail.
+        /** \brief Returns the minimum output block (chunk) size for encoding data.
+            Upon calling encode(), the user must ensure that the 'to' pointer has
+            the minimum available space or the process will fail.
          */
-        virtual size_t outputBlockSize() const;
+        virtual size_t encodingOutputBlockSize() const;
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
             Returns -1 if failed (the 'to' pointer does not have enough space or there is no data to be encoded at all).
@@ -95,6 +91,19 @@ class PT_SSL_API RSACipher : public BasicCipher {
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
         virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+        
+        /** \brief Returns the expected input block (chunk) size for decoding data.
+            Upon calling decode() the user must ensure that the 'from' pointer
+            has the minimum available data or the decoding process may fail
+            (unless of course at the end of the stream).
+         */
+        virtual size_t decodingInputBlockSize() const;
+
+        /** \brief Returns the minimum output block (chunk) size for decoding data.
+            Upon calling decode(), the user must ensure that the 'to' pointer has
+            the minimum available space or the process will fail.
+         */
+        virtual size_t decodingOutputBlockSize() const ;
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
             Returns -1 if failed (the 'to' pointer does not have enough space or there is no data to be decoded at all).

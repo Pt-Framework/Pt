@@ -70,9 +70,9 @@ std::streamsize CipherStreamBuf::import()
     if(!_cipher) return 0;
     
     const std::streamsize inAvail = _ios->rdbuf()->in_avail();
-    if(inAvail < (std::streamsize) _cipher->inputBlockSize()) return 0;
+    if(inAvail < (std::streamsize) _cipher->decodingInputBlockSize()) return 0;
 
-    if(do_underflow(_cipher->inputBlockSize()) == traits_type::eof()) return 0;
+    if(do_underflow(_cipher->decodingInputBlockSize()) == traits_type::eof()) return 0;
 
     return this->egptr() - this->gptr();
 }
@@ -99,7 +99,7 @@ CipherStreamBuf::int_type CipherStreamBuf::sync()
 }
 
 CipherStreamBuf::int_type CipherStreamBuf::underflow()
-{ return do_underflow(_cipher->inputBlockSize()); }
+{ return do_underflow(_cipher->decodingInputBlockSize()); }
 
 CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
 {
@@ -110,11 +110,11 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     // Initialize the put pointer (if needed)
     if( ! this->pptr() ) {
         // Prepare the input buffer
-        _ioBuf.resize(_cipher->inputBlockSize());
+        _ioBuf.resize(_cipher->encodingInputBlockSize());
         // Set the put pointers
         this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
         // Resize the conversion buffer
-        _cnvBuf.resize(_cipher->outputBlockSize());
+        _cnvBuf.resize(_cipher->encodingOutputBlockSize());
     }
 
     // Is the overflow char is an EOF?
@@ -128,7 +128,7 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
         const size_t inAvail  = from_end - from;
         if(!inAvail) break;
         // Is there enough data to be encoded?
-        if(!isEOFChar && inAvail < _cipher->inputBlockSize()) break;
+        if(!isEOFChar && inAvail < _cipher->encodingInputBlockSize()) break;
         // Encode the data
         const char* from_next = 0;
         char*       to_next   = 0;
@@ -164,11 +164,11 @@ CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)
     // Initialize the get pointer (if needed)
     if( ! this->gptr() ) {
         // Prepare the output buffer
-        _ioBuf.resize(_cipher->outputBlockSize());
+        _ioBuf.resize(_cipher->decodingOutputBlockSize());
         // Set the get pointers
         this->setg(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), &_ioBuf[0] + _ioBuf.size());
         // Resize the conversion buffer
-        _cnvBuf.resize(_cipher->inputBlockSize());
+        _cnvBuf.resize(_cipher->decodingInputBlockSize());
     }
 
     // Check if we still have anything left if the get buffer

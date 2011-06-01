@@ -134,17 +134,11 @@ void RSACipher::setPadding(PaddingMode pmode)
     }
 }
 
-size_t RSACipher::inputBlockSize() const
-{
-    // Because RSA size can be different, just return the larger one
-    return std::max(_encCSize, _rsaPrvSize);
-}
+size_t RSACipher::encodingInputBlockSize() const
+{ return _encCSize; }
 
-size_t RSACipher::outputBlockSize() const
-{
-    // Because RSA size can be different, just return the larger one
-    return std::max(_rsaPubSize, _rsaPrvSize);
-}
+size_t RSACipher::encodingOutputBlockSize() const
+{ return _rsaPubSize; }
 
 int RSACipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
@@ -179,6 +173,12 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
     // Done happily :D
     return 1;
 }
+
+size_t RSACipher::decodingInputBlockSize() const
+{ return _rsaPrvSize; }
+
+size_t RSACipher::decodingOutputBlockSize() const
+{ return _rsaPrvSize; }
 
 int RSACipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
