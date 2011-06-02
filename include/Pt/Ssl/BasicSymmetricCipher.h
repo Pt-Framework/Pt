@@ -37,11 +37,10 @@ namespace Ssl {
 //! \brief RSA cipher classes.
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
     public:
-        //! \brief Salt type.
+        //! \brief Salt generation type.
         enum SaltType {
-            NoSalt,     //!< No salt.
-            NormalSalt, //!< Use pseudo-random bytes as salt.
-            StrongSalt  //!< Use strong pseudo-random bytes as salt.
+            NormalSalt, //!< Cerate a sequence of pseudo-random bytes to be used as salt.
+            StrongSalt  //!< Cerate a sequence of strong pseudo-random bytes to be used as salt.
         };
 
         /** \brief Cipher mode of operations.

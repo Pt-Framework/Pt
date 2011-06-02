@@ -37,7 +37,7 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(const std::string& password, OperationMode operMode)
-: _operMode(operMode), _password(password)
+: _operMode(operMode), _password(password), _salt("")
 {
 }
 
@@ -65,15 +65,47 @@ const std::string& BasicSymmetricCipher::getSalt() const
 
 void BasicSymmetricCipher::genSalt(SaltType saltType)
 {
+    unsigned char saltBuff[PKCS5_SALT_LEN];
+
+    switch(saltType) {
+        case StrongSalt:
+            if(RAND_bytes(saltBuff, sizeof(saltBuff)) < 0)
+                throw SSLRuntimeError("Could not generate a new random salt!", PT_SOURCEINFO);
+            break;
+
+        case NormalSalt:
+            if(RAND_pseudo_bytes(saltBuff, sizeof(saltBuff)) < 0)
+                throw SSLRuntimeError("Could not generate a new random salt!", PT_SOURCEINFO);
+            break;
+
+        default:
+            throw SSLRuntimeError("Invalid salt type!", PT_SOURCEINFO);
+    }
+
+    _salt = std::string((char*) saltBuff, PKCS5_SALT_LEN);
 }
 
 int BasicSymmetricCipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
+    // Use salt?
+    unsigned char* salt = 0;
+    if( !_salt.empty() ) {
+        assert( _salt.length() == PKCS5_SALT_LEN );
+        salt = (unsigned char*) _salt.c_str();
+    }
+    
     return -1;
 }
 
 int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
+    // Use salt?
+    unsigned char* salt = 0;
+    if( !_salt.empty() ) {
+        assert( _salt.length() == PKCS5_SALT_LEN );
+        salt = (unsigned char*) _salt.c_str();
+    }
+    
     return -1;
 }
 

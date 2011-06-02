@@ -58,6 +58,8 @@ int main(int argc, char** argv)
         // Instantiate the ciphers
         Pt::Ssl::AESCipher cipher1("password1", Pt::Ssl::AESCipher::K128, Pt::Ssl::AESCipher::CBC);
         Pt::Ssl::AESCipher cipher2("password2", Pt::Ssl::AESCipher::K256, Pt::Ssl::AESCipher::OFB);
+        cipher1.genSalt(Pt::Ssl::AESCipher::StrongSalt);
+        cipher2.genSalt(Pt::Ssl::AESCipher::NormalSalt);
 
         // Instantiate the string-streams
         std::stringstream ss1("", std::ios_base::in | std::ios_base::out | std::ios_base::binary);
