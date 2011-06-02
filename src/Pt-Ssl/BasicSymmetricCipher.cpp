@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Ssl/BasicSymmetricCipher.h>
+#include <Pt/Ssl/Exception.h>
 
 #include "Utils.h"
 
@@ -36,6 +37,7 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(const std::string& password, OperationMode operMode)
+: _operMode(operMode), _password(password)
 {
 }
 
@@ -43,21 +45,23 @@ BasicSymmetricCipher::~BasicSymmetricCipher()
 {
 }
 
+void BasicSymmetricCipher::setMode(OperationMode operMode)
+{ _operMode = operMode; }
+
 void BasicSymmetricCipher::setPassword(const std::string& password)
-{
-}
+{ _password = password; }
 
 size_t BasicSymmetricCipher::saltLength() const
-{
-}
+{ return PKCS5_SALT_LEN; }
 
 void BasicSymmetricCipher::setSalt(const std::string& salt)
 {
+    if( !salt.empty() && salt.length() != saltLength() )
+        throw SSLRuntimeError("Invalid salt length!", PT_SOURCEINFO);
 }
 
 const std::string& BasicSymmetricCipher::getSalt() const
-{
-}
+{ return _salt; }
 
 void BasicSymmetricCipher::genSalt(SaltType saltType)
 {
@@ -65,10 +69,12 @@ void BasicSymmetricCipher::genSalt(SaltType saltType)
 
 int BasicSymmetricCipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
+    return -1;
 }
 
 int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
+    return -1;
 }
 
 } // namespace Pt

@@ -73,8 +73,10 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         //! \brief Standard dtor.
         virtual ~BasicSymmetricCipher();
 
-        //! \brief Set the mode of operation of the cipher.
-        virtual void setMode(OperationMode operMode) = 0;
+        /** \brief Set the mode of operation of the cipher.
+            Override this function if the specific cipher does not support all the modes.
+         */
+        virtual void setMode(OperationMode operMode);
 
         //! \brief Set the password of the cipher.
         void setPassword(const std::string& password);
@@ -83,7 +85,7 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         size_t saltLength() const;
         
         /** \brief Set the salt.
-            The length of the salt must be exactly saltLength() bytes.
+            Except the salt empty, its length must be exactly saltLength() bytes.
          */
         void setSalt(const std::string& salt);
         
@@ -117,6 +119,8 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
 
         // Data
         OperationMode _operMode;
+        std::string   _password;
+        std::string   _salt;
 };
 
 } // namespace Ssl

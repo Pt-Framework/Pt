@@ -34,9 +34,7 @@ namespace Ssl {
 
 AESCipher::AESCipher(const std::string& password, KeySize keySize, OperationMode operMode)
 : BasicSymmetricCipher(password, operMode)
-{
-    setKeySize(keySize);
-}
+{ setKeySize(keySize); }
 
 AESCipher::~AESCipher()
 {}
@@ -46,18 +44,42 @@ void AESCipher::setKeySize(KeySize keySize)
 
 size_t AESCipher::encodingInputBlockSize() const
 {
+    switch(_keySize) {
+        case K128: return 128 / 8;
+        case K192: return 192 / 8;
+        case K256: return 256 / 8;
+    }
+    return 0;
 }
 
 size_t AESCipher::encodingOutputBlockSize() const
 {
+    switch(_keySize) {
+        case K128: return 128 / 8;
+        case K192: return 192 / 8;
+        case K256: return 256 / 8;
+    }
+    return 0;
 }
 
 size_t AESCipher::decodingInputBlockSize() const
 {
+    switch(_keySize) {
+        case K128: return 128 / 8;
+        case K192: return 192 / 8;
+        case K256: return 256 / 8;
+    }
+    return 0;
 }
 
 size_t AESCipher::decodingOutputBlockSize() const
 {
+    switch(_keySize) {
+        case K128: return 128 / 8;
+        case K192: return 192 / 8;
+        case K256: return 256 / 8;
+    }
+    return 0;
 }
 
 const char* AESCipher::getOpenSSLCipherName() const
