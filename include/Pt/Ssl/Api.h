@@ -40,6 +40,16 @@
 #    define PT_SSL_API PT_IMPORT
 #  endif
 
+// Forward declaration of some OpenSSL structures
+struct ssl_ctx_st;
+struct ssl_st;
+struct ssl_session_st;
+struct bio_st;
+struct x509_st;
+struct evp_pkey_st;
+struct rsa_st;
+struct env_md_ctx_st;
+
 namespace Pt {
 
 /** @namespace Pt::Ssl

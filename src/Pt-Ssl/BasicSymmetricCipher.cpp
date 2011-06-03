@@ -37,12 +37,23 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(const std::string& password, OperationMode operMode)
-: _operMode(operMode), _password(password), _salt("")
-{
-}
+: _operMode(operMode),
+  _password(password),
+  _salt    (""),
+  _bioEnc  (0),
+  _bioEncIO(0),
+  _bioDec  (0),
+  _bioDecIO(0)
+{}
+
 
 BasicSymmetricCipher::~BasicSymmetricCipher()
 {
+    if(_bioEnc  ) BIO_free(_bioEnc  );
+    if(_bioEncIO) BIO_free(_bioEncIO);
+
+    if(_bioDec  ) BIO_free(_bioDec  );
+    if(_bioDecIO) BIO_free(_bioDecIO);
 }
 
 void BasicSymmetricCipher::setMode(OperationMode operMode)

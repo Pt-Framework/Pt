@@ -120,6 +120,12 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         OperationMode _operMode;
         std::string   _password;
         std::string   _salt;
+
+        bio_st* _bioEnc;   // Encryption BIO
+        bio_st* _bioEncIO; // Input/output BIO for encryption
+
+        bio_st* _bioDec;   // Decryption BIO
+        bio_st* _bioDecIO; // Input/output BIO for decryption
 };
 
 } // namespace Ssl
