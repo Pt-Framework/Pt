@@ -37,23 +37,23 @@ namespace Pt {
 namespace Ssl {
 
 BasicSymmetricCipher::BasicSymmetricCipher(const std::string& password, OperationMode operMode)
-: _operMode(operMode),
-  _password(password),
-  _salt    (""),
-  _bioEnc  (0),
-  _bioEncIO(0),
-  _bioDec  (0),
-  _bioDecIO(0)
+: _operMode (operMode),
+  _password (password),
+  _salt     (""),
+  _bioEncIn (0),
+  _bioEncOut(0),
+  _bioDecIn (0),
+  _bioDecOut(0)
 {}
 
 
 BasicSymmetricCipher::~BasicSymmetricCipher()
 {
-    if(_bioEnc  ) BIO_free(_bioEnc  );
-    if(_bioEncIO) BIO_free(_bioEncIO);
+    if(_bioEncIn ) BIO_free(_bioEncIn );
+    if(_bioEncOut) BIO_free(_bioEncOut);
 
-    if(_bioDec  ) BIO_free(_bioDec  );
-    if(_bioDecIO) BIO_free(_bioDecIO);
+    if(_bioDecIn ) BIO_free(_bioDecIn );
+    if(_bioDecOut) BIO_free(_bioDecOut);
 }
 
 void BasicSymmetricCipher::setMode(OperationMode operMode)
@@ -104,8 +104,60 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
         assert( _salt.length() == PKCS5_SALT_LEN );
         salt = (unsigned char*) _salt.c_str();
     }
+
+    // Initialize the cipher (if not yet)
+    if(!_bioEncIn) {
+        // Get the cipher
+        const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
+        if(!cipher)
+            throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+        // Derives a key and an IV from the user password and salt
+        unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
+        EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) _password.c_str(), _password.length(), 1, key, iv );
+        // Initialize a cipher BIO
+        BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
+        if(!benc)
+            throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+        // Initialize a cipher context
+        // (there is no need to free this context because it is owned by the cihper BIO)
+        EVP_CIPHER_CTX* pcctx = 0;
+        if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Initialize the cipher
+        if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 1))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 1))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Copy the cipher BIO
+        _bioEncIn = benc.get();
+        benc.release();
+        // Create the output BIO
+        _bioEncOut = BIO_new(BIO_s_mem());
+        BIO_push(_bioEncIn, _bioEncOut);
+    }
+
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(!outAvail) return -1;
+
+    // Is there any data to be encrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Write the data to the encryption BIO
+    const int written = BIO_write(_bioEncIn, from, inAvail);
+    if(written < 0)
+        throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+
+    // Read the ecnrypted data
+    const int read = BIO_read(_bioEncOut, to, outAvail);
     
-    return -1;
+    // Adjust the pointers
+    from_next = from + written;
+    if(read < 0) to_next = to + read;
+
+    // Done happily :D
+    return 1;
 }
 
 int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
@@ -117,6 +169,37 @@ int BasicSymmetricCipher::decode(const char* from, const char* from_end, const c
         salt = (unsigned char*) _salt.c_str();
     }
     
+    // Initialize the cipher (if not yet)
+    if(!_bioDecIn) {
+        // Get the cipher
+        const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
+        if(!cipher)
+            throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+        // Derives a key and an IV from the user password and salt
+        unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
+        EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) _password.c_str(), _password.length(), 1, key, iv );
+        // Initialize a cipher BIO
+        BioAutoPtr bdec( BIO_new(BIO_f_cipher()) );
+        if(!bdec)
+            throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+        // Initialize a cipher context
+        // (there is no need to free this context because it is owned by the cihper BIO)
+        EVP_CIPHER_CTX* pcctx = 0;
+        if(!BIO_get_cipher_ctx(bdec.get(), &pcctx))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Initialize the cipher
+        if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 0))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 0))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Copy the cipher BIO
+        _bioDecIn = bdec.get();
+        bdec.release();
+        // Create the output BIO
+        _bioDecIn = BIO_new(BIO_s_mem());
+        BIO_push(_bioDecIn, _bioDecIn);
+    }
+
     return -1;
 }
 

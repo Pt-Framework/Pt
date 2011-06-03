@@ -121,11 +121,11 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         std::string   _password;
         std::string   _salt;
 
-        bio_st* _bioEnc;   // Encryption BIO
-        bio_st* _bioEncIO; // Input/output BIO for encryption
+        bio_st* _bioEncIn;  // Input BIO for encryption (the cipher BIO)
+        bio_st* _bioEncOut; // Output BIO for encryption
 
-        bio_st* _bioDec;   // Decryption BIO
-        bio_st* _bioDecIO; // Input/output BIO for decryption
+        bio_st* _bioDecIn;  // Input BIO for decryption (the cipher BIO)
+        bio_st* _bioDecOut; // Output BIO for decryption
 };
 
 } // namespace Ssl
