@@ -138,7 +138,14 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
 
     // Is the output area large enough?
     const size_t outAvail = to_end - to;
-    if(!outAvail) return -1;
+    if(outAvail < encodingOutputBlockSize()) return -1;
+
+    // Is there any left-over data to be read
+    const int leftToRead = BIO_read(_bioEncOut, to, outAvail);
+    if(leftToRead > 0) {
+        to_next = to + leftToRead;
+        return 1;
+    }
 
     // Is there any data to be encrypted?
     const size_t inAvail = from_end - from;
@@ -149,15 +156,39 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
     if(written < 0)
         throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
 
-    // Read the ecnrypted data
+    // Read the encrypted data
     const int read = BIO_read(_bioEncOut, to, outAvail);
-    
+
     // Adjust the pointers
     from_next = from + written;
-    if(read < 0) to_next = to + read;
+    if(read > 0) to_next = to + read;
 
     // Done happily :D
     return 1;
+}
+
+bool BasicSymmetricCipher::finishEncode(char* to, char* to_end, char*& to_next)
+{
+    // Flush the BIO
+    (void) BIO_flush(_bioEncIn);
+
+    // Read the encrypted data
+    const size_t outAvail = to_end - to;
+    const int    read     = BIO_read(_bioEncOut, to, outAvail);
+
+    // Finished already?
+    if(read <= 0) {
+        BIO_free(_bioEncIn ); _bioEncIn  = 0;
+        BIO_free(_bioEncOut); _bioEncOut = 0;
+        return true;
+    }
+    // Adjust the pointer
+    else {
+        to_next = to + read;
+    }
+
+    // Assume not finished
+    return false;
 }
 
 int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
@@ -201,6 +232,11 @@ int BasicSymmetricCipher::decode(const char* from, const char* from_end, const c
     }
 
     return -1;
+}
+
+bool BasicSymmetricCipher::finishDecode(char* to, char* to_end, char*& to_next)
+{
+    return false;
 }
 
 } // namespace Pt

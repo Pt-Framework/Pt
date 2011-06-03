@@ -174,6 +174,9 @@ int RSACipher::encode(const char* from, const char* from_end, const char*& from_
     return 1;
 }
 
+bool RSACipher::finishEncode(char* to, char* to_end, char*& to_next)
+{ return true; }
+
 size_t RSACipher::decodingInputBlockSize() const
 { return _rsaPrvSize; }
 
@@ -215,6 +218,9 @@ int RSACipher::decode(const char* from, const char* from_end, const char*& from_
     // Done happily :D
     return 1;
 }
+
+bool RSACipher::finishDecode(char* to, char* to_end, char*& to_next)
+{ return true; }
 
 } // namespace Pt
 } // namespace Ssl

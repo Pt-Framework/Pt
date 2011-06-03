@@ -103,6 +103,11 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
          */
         virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
 
+        /** \brief Get the any left-over encoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishEncode(char* to, char* to_end, char*& to_next);
+        
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
             Returns -1 if failed (the 'to' pointer does not have enough space or there is no data to be decoded at all).
             <br/>
@@ -112,6 +117,11 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
          */
         virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
         
+        /** \brief Get the any left-over decoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishDecode(char* to, char* to_end, char*& to_next);
+
     protected:
         //! \brief Override this to return the OpenSSL cipher string ID.
         virtual const char* getOpenSSLCipherName() const = 0;

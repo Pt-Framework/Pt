@@ -80,7 +80,7 @@ std::streamsize CipherStreamBuf::import()
 void CipherStreamBuf::finish()
 {
     if( this->pptr() )
-        overflow( traits_type::eof() );
+        while( overflow(traits_type::eof()) != traits_type::eof() ) {}
     
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -119,23 +119,23 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
 
     // Is the overflow char is an EOF?
     const bool isEOFChar = traits_type::eq_int_type( ch, traits_type::eof() );
-    
+
     // Encode data
-    for(;;) {
-        // Is there any data to be encoded?
-        const char*  from     = this->pbase();
-        const char*  from_end = this->pptr();
-        const size_t inAvail  = from_end - from;
-        if(!inAvail) break;
+    char*           from     = this->pbase();
+    char*           from_end = this->pptr();
+    std::streamsize inAvail  = from_end - from;
+
+    while(inAvail) {
         // Is there enough data to be encoded?
-        if(!isEOFChar && inAvail < _cipher->encodingInputBlockSize()) break;
+        if(!isEOFChar && inAvail < (std::streamsize) _cipher->encodingInputBlockSize()) break;
         // Encode the data
         const char* from_next = 0;
         char*       to_next   = 0;
         const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
         assert(ret == 1);
         // Write the data to the output stream
-        _ios->write((const char*) &_cnvBuf[0], to_next - &_cnvBuf[0]);
+        const std::streamsize outAvail = to_next - &_cnvBuf[0];
+        if(outAvail > 0) _ios->write((const char*) &_cnvBuf[0], outAvail);
         // Reset the put pointers
         this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
         // Move leftover data to the front
@@ -144,6 +144,10 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
             traits_type::move(&_ioBuf[0], from_next, leftOver);
             this->pbump(leftOver);
         }
+        // Update the state
+        from     = this->pbase();
+        from_end = this->pptr();
+        inAvail  = from_end - from;
     }
 
     // If the overflow char is not EOF, put it in the buffer area
@@ -152,7 +156,20 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
         this->pbump(1);
     }
 
-    return traits_type::not_eof(ch);
+    // Finalize?
+    if(isEOFChar && !(this->pptr() - this->pbase())) {
+        // Read any left-over data
+        char*      to_next = 0;
+        const bool done    = _cipher->finishEncode(&_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
+        // Write the data to the output stream
+        const std::streamsize outAvail = to_next - &_cnvBuf[0];
+        if(outAvail > 0) _ios->write((const char*) &_cnvBuf[0], outAvail);
+        // Return back the EOF character if all done;
+        // otherwise, return 0
+        return done ? ch : 0;
+    }
+
+    return ch;
 }
 
 CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)

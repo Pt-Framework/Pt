@@ -91,6 +91,11 @@ class PT_SSL_API RSACipher : public BasicCipher {
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
         virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+
+        /** \brief Get the any left-over encoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishEncode(char* to, char* to_end, char*& to_next);
         
         /** \brief Returns the expected input block (chunk) size for decoding data.
             Upon calling decode() the user must ensure that the 'from' pointer
@@ -113,6 +118,11 @@ class PT_SSL_API RSACipher : public BasicCipher {
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
         virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+
+        /** \brief Get the any left-over decoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishDecode(char* to, char* to_end, char*& to_next);
 
     private:
         // Common data
