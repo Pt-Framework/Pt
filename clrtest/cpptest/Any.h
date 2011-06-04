@@ -1,0 +1,611 @@
+/*
+ * Copyright (C) 2004-2007 by Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#ifndef Pt_Any_h
+#define Pt_Any_h
+
+#include "TypeTraits.h"
+#include <typeinfo>
+#include <cstring>
+#include <algorithm>
+#include <utility>
+#include <iostream>
+
+namespace Pt {
+
+    /** @brief Contains an arbitrary type
+
+        @ingroup Reflection
+
+        Any can contain any other type that is default- and copy constructible
+        and less-than and equality comparable. When a value is assigned to an
+        Any a copy is made, just like when a type is inserted in a standard
+        C++ container. The contained type can be accessed via Pt::any_cast<>.
+        It is only possible to get the contained value if the type matches
+
+        @code
+            Any a = 5;
+            int i = any_cast<int>( a );    // i is 5 now
+            float f = any_cast<float>( a ) // throws std::bad_cast
+        @endcode
+
+        Anys can be compared by the contained types and values. Two Anys are
+        considered equal when the contained values are equal and of the same
+        type. A special case is less-than comparison, when the contained
+        types are different. std::type_info::before will be used to decide
+        which Any is less.
+
+        @code
+            Any a = 6;
+            Any b = 6;
+            Any c = '6';
+            Any d = 1;
+
+            // true, same type, same value
+            a == b;
+
+            // false, different types
+            b == c;
+
+            // true, same type and less
+            d \< a;
+
+            // implementation dependent
+            d \< c;
+        @endcode
+    */
+    class Any
+    {
+        template <typename T>
+        friend T any_cast(const Any&);
+
+        template <typename T>
+        friend struct AnyCast;
+
+        public:
+            /** @internal */
+            class Value
+            {
+                public:
+                    virtual ~Value() {}
+                    virtual Value* clone() const = 0;
+                    virtual const std::type_info& type() const = 0;
+                    // virtual bool equal(const Value& value) const = 0;
+                    // virtual bool lt(const Value& value) const = 0;
+                    virtual void* get() = 0;
+                    virtual const void* get() const = 0;
+            };
+
+            /** @internal */
+            template <typename T>
+            class BasicValue : public Value
+            {
+                public:
+                    BasicValue(const T& value = T())
+                    : _value(value)
+                    { }
+
+                    const T& value() const
+                    { return _value;}
+
+                    T& value()
+                    { return _value;}
+
+                    virtual const std::type_info& type() const
+                    { return typeid(T); }
+
+                    virtual Any::Value* clone() const
+                    { return new BasicValue(_value); }
+
+                    // virtual bool equal(const Value& value) const
+                    // {
+                    //     // try {
+                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
+                    //     //     return (bv._value == this->_value);
+                    //     // }
+                    //     // catch(...) {}
+
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other == _value;
+                    //     }
+
+                    //     return false;
+                    // }
+
+                    // virtual bool lt(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other < _value;
+                    //     }
+
+                    //     // try {
+                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
+                    //     //     return (bv._value < this->_value);
+                    //     // }
+                    //     // catch(...) {}
+
+                    //     bool x = !( typeid(T).before( value.type() ) );
+                    //     return !x;
+                    // }
+
+                    virtual void* get()
+                    { return &_value; }
+
+                    virtual const void* get() const
+                    { return &_value; }
+
+                private:
+                    T _value;
+            };
+
+            /** @internal */
+            template <typename T>
+            class BasicRefValue : public Value
+            {
+                public:
+                    BasicRefValue(T* value)
+                    : _value(value)
+                    { }
+
+                    virtual const std::type_info& type() const
+                    { return typeid(T); }
+
+                    virtual Any::Value* clone() const
+                    { return new BasicRefValue(_value); }
+
+                    // virtual bool equal(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other == *_value;
+                    //     }
+
+                    //     return false;
+                    // }
+
+                    // virtual bool lt(const Value& value) const
+                    // {
+                    //     if( this->type() == value.type() )
+                    //     {
+                    //         const T* other = reinterpret_cast<const T*>( value.get() );
+                    //         return *other < *_value;
+                    //     }
+
+                    //     bool x = !( typeid(T).before( value.type() ) );
+                    //     return !x;
+                    // }
+
+                    virtual void* get()
+                    { return (void*) _value; }
+
+                    virtual const void* get() const
+                    { return _value; }
+
+                private:
+                    T* _value;
+            };
+
+        public:
+            /** @brief Construct with value
+
+                Constructs the %Any from an value of arbitrary type. The type
+                to be assigned must be copy-constructible. Memory is allocated
+                to store the value. If an exception is thrown during
+                construction, the Any will be empty and the exception is
+                porpagated.
+
+                @param type Value to assign
+            */
+            template <typename T>
+            Any(const T& type)
+            : _value(0)
+            {
+                _value = new BasicValue<T>(type);
+            }
+
+            /** @brief Construct with reference
+
+                Constructs the %Any from a pointer to an arbitrary type. The
+                constructed %Any will not make a copy, but only keep a shallow
+                pointer. It is the resposibility of the caller to make sure
+                the type pointed to exists longer than the created %Any.
+
+                @param type Value to assign
+            */
+            template <typename T>
+            explicit Any(T* type)
+            : _value(0)
+            {
+                 _value = new BasicRefValue<T>(type);
+            }
+
+            /** @brief Default constructor
+
+                Constructs an empty any. No memory needs to be allocated for
+                empty Anys.
+            */
+            Any()
+            : _value(0)
+            { }
+
+            /** @internal @brief Assigns an abstract value
+            */
+            Any& assign(Value* value);
+
+            /** @brief Copy constructor
+
+                Constructs the Any by copying the value of the other Any. It
+                is legal to assign an empty Any. If an exception is thrown
+                during construction, the Any will be empty and the exception
+                is porpagated.
+
+                @param val Any to assign
+            */
+            Any(const Any& val);
+
+            /** @brief Destructor
+
+                Deallocates the memory needed to hold the value. This will
+                also destruct the contained type.
+            */
+            ~Any()
+            {
+                delete _value;
+            }
+
+            /** @brief Clear content
+
+                Removes the stored type resulting in a destructor call
+                for the stored type. All memory required to hold the value
+                is deallocated.
+            */
+            void clear()
+            {
+                delete _value;
+                _value = 0;
+            }
+
+            /** @brief Check if empty
+
+                Returns true if no value has been assigned, false otherwise.
+
+                @return True if empty
+            */
+            inline bool empty() const
+            { return !_value; }
+
+            /** @brief Swap values
+
+                The member function swaps the assigned values between *this and right.
+                No exceptions are thrown, and no memory needs to be allocated.
+
+                @param other Other any to swap value
+                @return self reference
+            */
+            Any& swap(Any& other);
+
+            /** @brief Returns type info of assigned type
+
+                Returns the std::type_info of the currently assigned type. If the
+                Any is empty the type_info of void is returned.
+
+                @return Type info
+            */
+            const std::type_info& type() const
+            { return _value ? _value->type() : typeid(void); }
+
+            /** @brief Assign value
+
+                Assigns a value of an arbitrary type. The type to be assigned
+                must be copy-constructible. Memory is allocated to store the value.
+                If an exception is thrown during construction, the Any will remain
+                unaltered and the exception is porpagated.
+
+                @param rhs Value to assign
+            */
+            template <typename T>
+            Any& operator=(const T& rhs)
+            {
+                Any::Value* tmp = new BasicValue<T>(rhs);
+                delete _value;
+                _value = tmp;
+                return *this;
+            }
+
+            /** @brief Assign reference
+
+                Initializes an %Any from a pointer to an arbitrary type. The
+                assignment will not make a copy, but only keep a shallow
+                pointer. It is the resposibility of the caller to make sure
+                the type pointed to exists longer than the %Any.
+
+                @param type Value to assign
+            */
+            template <typename T>
+            Any& operator=(T* rhs)
+            {
+                Any::Value* tmp = new BasicRefValue<T>(rhs);
+                delete _value;
+                _value = tmp;
+                return *this;
+            }
+
+            /** @brief Assign value of other Any
+
+                Assignes the value of another Any by copying the value of the
+                other Any. It is legal to assign an empty Any. If an exception
+                is thrown during assignment, the Any will remain unchanged and
+                the exception is porpagated.
+
+                @param rhs Any to assign
+            */
+            Any& operator=(const Any& rhs);
+
+            /* @brief Check if equal
+
+                Returns true if the contained type and the passed type are
+                equal and have equal values.
+
+                @return True if equal
+            */
+            // template <typename T>
+            // bool operator==(const T& value) const
+            // {
+            //     if(_value == 0)
+            //         return false;
+
+            //     return _value->equal( BasicValue<T>(value) );
+            // }
+
+            /* @brief Check if equal
+
+                Returns true if the contained types are equal and have
+                equal values.
+
+                @return True if equal
+            */
+            //bool operator==(const Any& a) const;
+
+            /* @brief Check if inequal
+
+                Returns true if the contained types have different values
+                or if the conatained types are different.
+
+                @return True if different
+            */
+            //bool operator!=(const Any& a) const;
+
+            /* @brief Check if less
+
+                Returns true if the value of the contained type is less than
+                the contained value of the other Any. If the contained types
+                are different type_info::before decides which Any is less.
+
+                @return True if less
+            */
+            //bool operator<(const Any& a) const;
+
+            /** @internal @brief Returns the value which the %Any contains
+            */
+            const Any::Value* value() const
+            { return _value; }
+
+            /** @internal @brief Returns the value which the %Any contains
+            */
+            Any::Value* value()
+            { return _value; }
+
+            /** @brief Get pointer to stored value
+
+                Returns a pointer to the stored value or 0 if the %Any is
+                empty. Use Any::type to find out which type is stored in
+                the &Any.
+
+                @return Pointer to stored value or 0 if empty
+            */
+            void* get()
+            {
+                if(_value)
+                    return _value->get();
+
+                return 0;
+            }
+
+            /** @brief Get pointer to stored value
+
+                Returns a pointer to the stored value or 0 if the %Any is
+                empty. Use Any::type to find out which type is stored in
+                the &Any.
+
+                @return Pointer to stored value or 0 if empty
+            */
+            const void* get() const
+            {
+                if(_value)
+                    return _value->get();
+
+                return 0;
+            }
+
+        private:
+            /** @internal */
+            Value* _value;
+    };
+
+
+    template <typename T>
+    struct AnyCast
+    {
+        static T cast(const Any& any)
+        {
+            // NOTE:
+            // - the first if(...) may not work properly on Linux when loading libs,
+            //   so there is also a comparison of string names (second if(...))
+            // - but: the name() method necessary for string comparison does not
+            //   exist on WinCE, so the second if(...) is not compiled for WinCE
+            typedef typename TypeTraits<T>::Value ValueT;
+
+            if( any.type() == typeid(ValueT) )
+            {
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return *vtp;
+            }
+
+#ifndef _WIN32_WCE
+            else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
+            {
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return *vtp;
+            }
+#endif
+
+            throw std::bad_cast();
+        }
+    };
+
+    template <typename T>
+    struct AnyCast<T*>
+    {
+        static T* cast(const Any& any)
+        {
+            // NOTE:
+            // - the first if(...) may not work properly on Linux when loading libs,
+            //   so there is also a comparison of string names (second if(...))
+            // - but: the name() method necessary for string comparison does not
+            //   exist on WinCE, so the second if(...) is not compiled for WinCE
+            typedef typename TypeTraits<T>::Value ValueT;
+
+            if( any.type() == typeid(ValueT) )
+            {
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return vtp;
+            }
+
+#ifndef _WIN32_WCE
+            else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
+            {
+                void* v = any._value->get();
+                ValueT* vtp = reinterpret_cast<ValueT*>(v);
+                return vtp;
+            }
+#endif
+
+            throw std::bad_cast();
+        }
+    };
+
+    /** @brief Get contained value
+
+        This function is used to get the contained value from an Any. It is
+        not possible to get a float out of an Any if the contained value is
+        an int, but the typeid's must match. It is, however, possible to
+        get a const reference to the contained type.
+
+        @param any Any to read to
+        @return contained value
+        @throw std::bad_cast on type mismatch
+    */
+    template <typename T>
+    inline T any_cast(const Any& any)
+    {
+        return AnyCast<T>::cast(any);
+    }
+
+
+inline Any& Any::assign(Value* value)
+{
+    if(_value)
+        delete _value;
+
+    _value = value;
+    return *this;
+}
+
+
+inline Any::Any(const Any& val)
+: _value(0)
+{
+    _value = val._value ? val._value->clone() : 0;
+}
+
+
+inline Any& Any::swap(Any& rhs)
+{
+    std::swap(_value, rhs._value);
+    return *this;
+}
+
+
+inline Any& Any::operator=(const Any& rhs)
+{
+    Any(rhs).swap(*this);
+    return *this;
+}
+
+
+// inline bool Any::operator==(const Any& a) const
+// {
+//     if(_value && a._value)
+//     {
+//         return _value->equal( *(a._value) );
+//     }
+
+//     // if one or both of the Anys is not initialised
+//     // they are considered equal if both have NULL values.
+//     return _value == a._value;
+// }
+
+
+// inline bool Any::operator!=(const Any& a) const
+// {
+//     return !( this->operator==(a) );
+// }
+
+
+// inline bool Any::operator<(const Any& a) const
+// {
+//     if(_value && a._value)
+//     {
+//         return _value->lt( *(a._value) );
+//     }
+
+//     // if one of the Anys is not initialised the
+//     //one having a NULL valueis considered less.
+//     return _value < a._value;
+// }
+
+} // namespace Pt
+
+#endif
