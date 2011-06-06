@@ -164,7 +164,7 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
     if(read > 0) to_next = to + read;
 
     // Done happily :D
-    return 1;
+    return (read > 0) ? 1 : 0;
 }
 
 bool BasicSymmetricCipher::finishEncode(char* to, char* to_end, char*& to_next)
@@ -227,15 +227,62 @@ int BasicSymmetricCipher::decode(const char* from, const char* from_end, const c
         _bioDecIn = bdec.get();
         bdec.release();
         // Create the output BIO
-        _bioDecIn = BIO_new(BIO_s_mem());
-        BIO_push(_bioDecIn, _bioDecIn);
+        _bioDecOut = BIO_new(BIO_s_mem());
+        BIO_push(_bioDecIn, _bioDecOut);
     }
 
-    return -1;
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(outAvail < decodingOutputBlockSize()) return -1;
+
+    // Is there any left-over data to be read
+    const int leftToRead = BIO_read(_bioDecOut, to, outAvail);
+    if(leftToRead > 0) {
+        to_next = to + leftToRead;
+        return 1;
+    }
+
+    // Is there any data to be decrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Write the data to the decryption BIO
+    const int written = BIO_write(_bioDecIn, from, inAvail);
+    if(written < 0)
+        throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+
+    // Read the decrypted data
+    const int read = BIO_read(_bioDecOut, to, outAvail);
+
+    // Adjust the pointers
+    from_next = from + written;
+    if(read > 0) to_next = to + read;
+
+    // Done happily :D
+    return (read > 0) ? 1 : 0;
 }
 
 bool BasicSymmetricCipher::finishDecode(char* to, char* to_end, char*& to_next)
 {
+    // Flush the BIO
+    (void) BIO_flush(_bioEncIn);
+
+    // Read the encrypted data
+    const size_t outAvail = to_end - to;
+    const int    read     = BIO_read(_bioDecOut, to, outAvail);
+
+    // Finished already?
+    if(read <= 0) {
+        BIO_free(_bioDecIn ); _bioDecIn  = 0;
+        BIO_free(_bioDecOut); _bioDecOut = 0;
+        return true;
+    }
+    // Adjust the pointer
+    else {
+        to_next = to + read;
+    }
+
+    // Assume not finished
     return false;
 }
 

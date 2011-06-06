@@ -129,8 +129,8 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
         // Is there enough data to be encoded?
         if(!isEOFChar && inAvail < (std::streamsize) _cipher->encodingInputBlockSize()) break;
         // Encode the data
-        const char* from_next = 0;
-        char*       to_next   = 0;
+        const char* from_next = from_end;
+        char*       to_next   = &_cnvBuf[0];
         const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
         assert(ret == 1);
         // Write the data to the output stream
@@ -159,7 +159,7 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     // Finalize?
     if(isEOFChar && !(this->pptr() - this->pbase())) {
         // Read any left-over data
-        char*      to_next = 0;
+        char*      to_next = &_cnvBuf[0];
         const bool done    = _cipher->finishEncode(&_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
         // Write the data to the output stream
         const std::streamsize outAvail = to_next - &_cnvBuf[0];
@@ -213,8 +213,9 @@ CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)
         const char* from      = &_cnvBuf[0];
         const char* from_end  = from + inAvail;
         const char* from_next = 0;
-        char*       to_next   = 0;
+        char*       to_next   = &_ioBuf[0];
         const int   ret       = _cipher->decode(from, from_end, from_next, &_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), to_next);
+        if(!ret) continue;
         assert(ret == 1);
         // Reset the get pointers
         const size_t outAvail = to_next - &_ioBuf[0];

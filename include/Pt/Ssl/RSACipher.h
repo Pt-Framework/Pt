@@ -84,7 +84,9 @@ class PT_SSL_API RSACipher : public BasicCipher {
         virtual size_t encodingOutputBlockSize() const;
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
-            Returns -1 if failed (the 'to' pointer does not have enough space or there is no data to be encoded at all).
+            Returns -1 if the 'to' pointer does not have enough space.
+            <br/>
+            Returns  0 if there is not enough input data.
             <br/>
             Returns  1 if success.
             <br/>
@@ -110,8 +112,10 @@ class PT_SSL_API RSACipher : public BasicCipher {
          */
         virtual size_t decodingOutputBlockSize() const ;
 
-        /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
-            Returns -1 if failed (the 'to' pointer does not have enough space or there is no data to be decoded at all).
+        /** \brief Decode bytes from the 'from' pointers to the 'to' pointers.
+            Returns -1 if the 'to' pointer does not have enough space.
+            <br/>
+            Returns  0 if there is not enough input data.
             <br/>
             Returns  1 if success.
             <br/>
