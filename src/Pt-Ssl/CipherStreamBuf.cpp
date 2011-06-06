@@ -79,9 +79,24 @@ std::streamsize CipherStreamBuf::import()
 
 void CipherStreamBuf::finish()
 {
-    if( this->pptr() )
-        while( overflow(traits_type::eof()) != traits_type::eof() ) {}
-    
+    // Encryption mode?
+    if( this->pptr() ) {
+        // Process left-over data
+        overflow(traits_type::eof());
+        // Finalize
+        for(;;) {
+            // Read any left-over data
+            char*      to_next = &_cnvBuf[0];
+            const bool done    = _cipher->finishEncode(&_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
+            // Write the data to the output stream
+            const std::streamsize outAvail = to_next - &_cnvBuf[0];
+            if(outAvail > 0) _ios->write((const char*) &_cnvBuf[0], outAvail);
+            // Done?
+            if(done) break;
+        }
+    }
+
+    // Reset the pointers
     this->setg(0, 0, 0);
     this->setp(0, 0);
 }
@@ -155,19 +170,6 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
     if( ! isEOFChar ) {
         *(this->pptr()) = traits_type::to_char_type(ch);
         this->pbump(1);
-    }
-
-    // Finalize?
-    if(isEOFChar && !(this->pptr() - this->pbase())) {
-        // Read any left-over data
-        char*      to_next = &_cnvBuf[0];
-        const bool done    = _cipher->finishEncode(&_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
-        // Write the data to the output stream
-        const std::streamsize outAvail = to_next - &_cnvBuf[0];
-        if(outAvail > 0) _ios->write((const char*) &_cnvBuf[0], outAvail);
-        // Return back the EOF character if all done;
-        // otherwise, return 0
-        return done ? ch : 0;
     }
 
     return ch;

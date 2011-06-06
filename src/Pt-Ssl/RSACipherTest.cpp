@@ -66,6 +66,7 @@ int main(int argc, char** argv)
 
         std::cerr << "textShort = " << textShort.size() << " bytes." << std::endl;
         std::cerr << "textLong  = " << textLong .size() << " bytes." << std::endl;
+        std::cerr << std::endl;
 
         // Instantiate the ciphers
         Pt::Ssl::RSACipher cipher1(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
@@ -86,14 +87,14 @@ int main(int argc, char** argv)
         // Start encryption test
         ios1.write(textShort.c_str(), textShort.length());
         ios1.write(" ", 1);
-        csb1.finish();
 
         ios2.write(textShort.c_str(), textShort.length());
         ios2.write(" ", 1);
         ios2.write(textLong.c_str(), textLong.length());
         
-        std::cerr << "input1 = " << (textShort + " " ).size() << " bytes." << std::endl;
-        std::cerr << "input2 = " << (textShort + " " + textLong).size() << " bytes." << std::endl;
+        std::cerr << "tinp1 = " << (textShort + " " ).size() << " bytes." << std::endl;
+        std::cerr << "tinp2 = " << (textShort + " " + textLong).size() << " bytes." << std::endl;
+        std::cerr << std::endl;
 
         // End the encryption tests and get a copy of the encrypted string
         csb1.finish();
@@ -103,6 +104,7 @@ int main(int argc, char** argv)
 
         std::cerr << "tenc1 = " << tenc1.size() << " bytes." << std::endl;
         std::cerr << "tenc2 = " << tenc2.size() << " bytes." << std::endl;
+        std::cerr << std::endl;
 
         // Reset the stream for decryption test
         char buff[1024];
@@ -129,6 +131,7 @@ int main(int argc, char** argv)
         csb2.finish();
         std::cerr << "tdec1 = " << tdec1.size() << " bytes." << std::endl;
         std::cerr << "tdec2 = " << tdec2.size() << " bytes." << std::endl;
+        std::cerr << std::endl;
 
         // Check if the decrypted texts are the same with the source texts
         PT_SSL_LOG_M("\n\n##### STRING ENCRYPTION #####"
