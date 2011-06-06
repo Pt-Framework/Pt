@@ -265,7 +265,7 @@ int BasicSymmetricCipher::decode(const char* from, const char* from_end, const c
 bool BasicSymmetricCipher::finishDecode(char* to, char* to_end, char*& to_next)
 {
     // Flush the BIO
-    (void) BIO_flush(_bioEncIn);
+    (void) BIO_flush(_bioDecIn);
 
     // Read the encrypted data
     const size_t outAvail = to_end - to;

@@ -132,6 +132,7 @@ CipherStreamBuf::int_type CipherStreamBuf::overflow(int_type ch)
         const char* from_next = from_end;
         char*       to_next   = &_cnvBuf[0];
         const int   ret       = _cipher->encode(from, from_end, from_next, &_cnvBuf[0], &_cnvBuf[0] + _cnvBuf.size(), to_next);
+        if(!ret) break;
         assert(ret == 1);
         // Write the data to the output stream
         const std::streamsize outAvail = to_next - &_cnvBuf[0];
@@ -199,16 +200,18 @@ CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)
         size_t          maxSize = _cnvBuf.size();
         std::streamsize inAvail = 0;
         for(;;) {
+            // Try to read from the input stream
             _ios->read(ptr + inAvail, maxSize - inAvail);
-            if(!_ios->gcount()) return traits_type::eof();
-
+            if(!_ios->gcount()) break;
+            // Accumulate and check if the total size has reached the wanted size
             inAvail += _ios->gcount();
             if(inAvail >= size) break;
-
+            // Check for unexpected EOF
             if(_ios->eof()) {
                 throw SSLRuntimeError("Unexpected EOF!", PT_SOURCEINFO);
             }
         }
+        if(!inAvail) break;
         // Decode the data
         const char* from      = &_cnvBuf[0];
         const char* from_end  = from + inAvail;
@@ -218,10 +221,22 @@ CipherStreamBuf::int_type CipherStreamBuf::do_underflow(std::streamsize size)
         if(!ret) continue;
         assert(ret == 1);
         // Reset the get pointers
-        const size_t outAvail = to_next - &_ioBuf[0];
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
+        const std::streamsize outAvail = to_next - &_ioBuf[0];
+        if(outAvail > 0) this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
         // Done
         return traits_type::to_int_type( *this->gptr() );
+    }
+
+    // Finalize?
+    if(_ios->eof()) {
+        // Read any left-over data
+        char*      to_next = &_ioBuf[0];
+        const bool done    = _cipher->finishDecode(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), to_next);
+        // Reset the get pointers
+        const std::streamsize outAvail = to_next - &_ioBuf[0];
+        if(outAvail > 0) this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + outAvail);
+        // Return zero if not yet done
+        if(!done) return 0;
     }
 
     // EOF

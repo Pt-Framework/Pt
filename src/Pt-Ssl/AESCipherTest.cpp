@@ -82,6 +82,9 @@ int main(int argc, char** argv)
         ios2.write(" ", 1);
         ios2.write(textLong.c_str(), textLong.length());
 
+        std::cerr << "input1 = " << (textShort + " " ).size() << " bytes." << std::endl;
+        std::cerr << "input2 = " << (textShort + " " + textLong).size() << " bytes." << std::endl;
+
         // End the encryption tests and get a copy of the encrypted string
         csb1.finish();
         csb2.finish();
