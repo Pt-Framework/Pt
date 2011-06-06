@@ -158,6 +158,7 @@ int BasicSymmetricCipher::encode(const char* from, const char* from_end, const c
 
     // Read the encrypted data
     const int read = BIO_read(_bioEncOut, to, outAvail);
+    //std::cerr << "E: written " << written << " bytes; read " << read << " bytes\n";
 
     // Adjust the pointers
     from_next = from + written;
@@ -175,6 +176,7 @@ bool BasicSymmetricCipher::finishEncode(char* to, char* to_end, char*& to_next)
     // Read the encrypted data
     const size_t outAvail = to_end - to;
     const int    read     = BIO_read(_bioEncOut, to, outAvail);
+    //std::cerr << "E: finish read " << read << " bytes\n";
 
     // Finished already?
     if(read <= 0) {
@@ -253,6 +255,7 @@ int BasicSymmetricCipher::decode(const char* from, const char* from_end, const c
 
     // Read the decrypted data
     const int read = BIO_read(_bioDecOut, to, outAvail);
+    //std::cerr << "D: written " << written << " bytes; read " << read << " bytes\n";
 
     // Adjust the pointers
     from_next = from + written;
@@ -270,6 +273,7 @@ bool BasicSymmetricCipher::finishDecode(char* to, char* to_end, char*& to_next)
     // Read the encrypted data
     const size_t outAvail = to_end - to;
     const int    read     = BIO_read(_bioDecOut, to, outAvail);
+    //std::cerr << "D: finish read " << read << " bytes\n";
 
     // Finished already?
     if(read <= 0) {

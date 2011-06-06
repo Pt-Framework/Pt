@@ -70,10 +70,8 @@ std::streamsize CipherStreamBuf::import()
     if(!_cipher) return 0;
     
     const std::streamsize inAvail = _ios->rdbuf()->in_avail();
-    if(inAvail < (std::streamsize) _cipher->decodingInputBlockSize()) return 0;
-
-    if(do_underflow(_cipher->decodingInputBlockSize()) == traits_type::eof()) return 0;
-
+    if(do_underflow(inAvail) == traits_type::eof()) return 0;
+    
     return this->egptr() - this->gptr();
 }
 
