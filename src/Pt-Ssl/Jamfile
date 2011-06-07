@@ -66,11 +66,13 @@ if $(TARGET_OS) = "nt"
     }
 }
 
-File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
-File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
-File [ FDirName $(OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;
-File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
-File [ FDirName $(OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
+File [ FDirName $(OUTPUT_TARGET) ca.pem         ] : cert$(SLASH)ca.pem         ;
+File [ FDirName $(OUTPUT_TARGET) client.pem     ] : cert$(SLASH)client.pem     ;
+File [ FDirName $(OUTPUT_TARGET) client.key     ] : cert$(SLASH)client.key     ;
+File [ FDirName $(OUTPUT_TARGET) server.pem     ] : cert$(SLASH)server.pem     ;
+File [ FDirName $(OUTPUT_TARGET) server.key     ] : cert$(SLASH)server.key     ;
+File [ FDirName $(OUTPUT_TARGET) dsakey1.pem    ] : cert$(SLASH)dsakey1.pem    ;
+File [ FDirName $(OUTPUT_TARGET) dsapubkey1.pem ] : cert$(SLASH)dsapubkey1.pem ;
 
 SubInclude TOP src Pt-Ssl openssl ;
 SubInclude TOP src Pt-Ssl tests ;

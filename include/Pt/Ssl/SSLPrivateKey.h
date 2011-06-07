@@ -68,7 +68,8 @@ class PT_SSL_API SSLPrivateKey {
         //! \brief Clear (delete) any loaded key.
         void clear();
         
-        /// \internal Return the raw OpenSSL private key handle.
+    public:
+        //! \internal Return the raw OpenSSL private key handle.
         evp_pkey_st* impl() const;
         
     private:

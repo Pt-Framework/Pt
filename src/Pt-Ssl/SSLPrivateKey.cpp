@@ -133,6 +133,8 @@ void SSLPrivateKey::loadFromFile(const std::string& fileName)
 void SSLPrivateKey::clear()
 { _impl = new Impl(); }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 evp_pkey_st* SSLPrivateKey::impl() const
 { return _impl->_pkey; }
 

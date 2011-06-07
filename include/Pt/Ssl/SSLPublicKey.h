@@ -44,16 +44,32 @@ class PT_SSL_API SSLPublicKey {
         };
 
     public:
+        //! \brief Instantiate an empty public-key.
+        SSLPublicKey();
+
         //! \brief Copy ctor.
         SSLPublicKey(const SSLPublicKey& pkey);
+
+        //! \brief Instantiate a public-key using the given key data.
+        SSLPublicKey(const std::string& keyData);
         
         //! \brief Standard dtor.
         ~SSLPublicKey();
 
-        /// \internal Instantiate a public-key from the given OpenSSL raw private key handle.
+        //! \brief Load public-key from the given data.
+        void loadFromString(const std::string& keyData);
+
+        //! \brief Load public-key from the given file.
+        void loadFromFile(const std::string& fileName);
+
+        //! \brief Clear (delete) any loaded key.
+        void clear();
+
+    public:
+        //! \internal Instantiate a public-key from the given OpenSSL raw private key handle.
         SSLPublicKey(evp_pkey_st* pkey);
 
-        /// \internal Return the raw OpenSSL public key handle.
+        //! \internal Return the raw OpenSSL public key handle.
         evp_pkey_st* impl() const;
         
     private:
@@ -69,12 +85,18 @@ class PT_SSL_API SSLPublicKey {
 //! \internal
 class PT_SSL_API SSLPublicKey::Impl {
     public:
+        Impl();
         Impl(evp_pkey_st* pkey);
         ~Impl();
+
+        void loadFromString(const std::string& keyData);
+        void loadFromFile(const std::string& fileName);
 
         friend class SSLPublicKey;
 
     private:
+        void clear();
+
         evp_pkey_st* _pkey;
 };
 

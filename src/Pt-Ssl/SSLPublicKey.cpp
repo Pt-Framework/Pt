@@ -27,33 +27,99 @@
  */
 
 #include <Pt/Ssl/SSLPublicKey.h>
-#include <iostream>
+#include <fstream>
 
 #include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
 
+SSLPublicKey::Impl::Impl()
+: _pkey(0)
+{}
+
 SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
 : _pkey(pkey)
 {}
 
 SSLPublicKey::Impl::~Impl()
-{ if(_pkey) EVP_PKEY_free(_pkey); }
+{ clear(); }
+
+void SSLPublicKey::Impl::loadFromString(const std::string& keyData)
+{
+    // Clear previous key (if any)
+    clear();
+
+    // Create a read-only memory BIO from the given string
+    BioAutoPtr in( BIO_new_mem_buf( (void*) keyData.c_str(), keyData.length() ) );
+
+    // Try to read/parse the public key
+    _pkey = PEM_read_bio_PUBKEY(in.get(), 0, 0, 0);//SSLPublicKey::Impl::passwordCallback, (void*) &_pswd);
+    if(!_pkey)
+        throw SSLRuntimeError("Could not read/parse/decode public-key data!", PT_SOURCEINFO);
+}
+
+void SSLPublicKey::Impl::loadFromFile(const std::string& fileName)
+{
+    std::string   data;
+    std::ifstream ifs;
+    char          rbuf[4096];
+
+    ifs.open(fileName.c_str(), std::ios::binary);
+    while(ifs) {
+        ifs.read( rbuf, sizeof(rbuf) );
+        data += std::string( rbuf, ifs.gcount() );
+    }
+
+    loadFromString(data);
+}
+
+void SSLPublicKey::Impl::clear()
+{
+    if(_pkey) {
+        EVP_PKEY_free(_pkey);
+        _pkey = 0;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
-: _impl( new Impl(pkey) )
+SSLPublicKey::SSLPublicKey()
+: _impl( new Impl() )
 {}
 
 SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
 : _impl( pkey._impl )
 {}
 
+SSLPublicKey::SSLPublicKey(const std::string& keyData)
+: _impl( new Impl() )
+{ _impl->loadFromString(keyData); }
+
 SSLPublicKey::~SSLPublicKey()
+{}
+
+void SSLPublicKey::loadFromString(const std::string& keyData)
+{
+    _impl = new Impl();
+    _impl->loadFromString(keyData);
+}
+
+void SSLPublicKey::loadFromFile(const std::string& fileName)
+{
+    _impl = new Impl();
+    _impl->loadFromFile(fileName);
+}
+
+void SSLPublicKey::clear()
+{ _impl = new Impl(); }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
+: _impl( new Impl(pkey) )
 {}
 
 evp_pkey_st* SSLPublicKey::impl() const

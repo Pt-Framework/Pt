@@ -46,14 +46,23 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("OpenSSL test progam started");
         PT_SSL_LOG_M("################################################################################");
 
-        // Load certificate and private key
+        // Load certificate
         Pt::Ssl::SSLCertificateList serverCertChain;
         serverCertChain.loadFromFile("server.pem");
 
-        Pt::Ssl::SSLPrivateKey serverPrivKey("password");
+        // Extract the public key from the certificate
+        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
+
+        // Load private key
+        Pt::Ssl::SSLPrivateKey serverPrivKey("abc123");
         serverPrivKey.loadFromFile("server.key");
 
-        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
+        // Load the DSA private and public key
+        Pt::Ssl::SSLPrivateKey dsaPrivKey("");
+        dsaPrivKey.loadFromFile("dsakey1.pem");
+
+        Pt::Ssl::SSLPublicKey dsaPubKey;
+        dsaPubKey.loadFromFile("dsapubkey1.pem");
 
         // Test texts
         const std::string text  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
@@ -71,11 +80,18 @@ int main(int argc, char** argv)
         secureDigest2.update(text);
         secureDigest2.update(text);
 
+        // Start signing test #3
+        Pt::Ssl::SecureDigest secureDigest3(dsaPrivKey, Pt::Ssl::SecureDigest::SHA1_Digest);
+        secureDigest3.update(text);
+        secureDigest3.update(text);
+        
         // End the signing tests
         secureDigest1.finish();
         secureDigest2.finish();
+        secureDigest3.finish();
         const std::string& tsig1 = secureDigest1.getSignature();
         const std::string& tsig2 = secureDigest2.getSignature();
+        const std::string& tsig3 = secureDigest3.getSignature();
 
         // Start verification test #1
         secureDigest1.start(serverPubKey, tsig1, Pt::Ssl::SecureDigest::MD5_Digest);
@@ -88,14 +104,21 @@ int main(int argc, char** argv)
         secureDigest2.update(text);
         secureDigest2.update(text);
 
+        // Start verification test #3
+        secureDigest3.start(dsaPubKey, tsig3, Pt::Ssl::SecureDigest::SHA1_Digest);
+        secureDigest3.update(text);
+        secureDigest3.update(text);
+        
         // End the the verification tests
         const bool tsig1ok = secureDigest1.finish();
         const bool tsig2ok = secureDigest2.finish();
+        const bool tsig3ok = secureDigest3.finish();
 
         // Check if the signature verifications are OK
         PT_SSL_LOG_M("\n\n##### STRING SIGNING #####"
                      << "\nVerification #1 status: " << ( tsig1ok ? "OK" : "FAILED")
-                     << "\nVerification #2 status: " << ( tsig2ok ? "OK" : "FAILED") << "\n"
+                     << "\nVerification #2 status: " << ( tsig2ok ? "OK" : "FAILED")
+                     << "\nVerification #3 status: " << ( tsig3ok ? "OK" : "FAILED") << "\n"
                     );
 
         // Done
