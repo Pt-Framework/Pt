@@ -314,7 +314,7 @@ int main(int argc, char** argv)
         trustedCACert.loadFromFile("ca.pem");
 
         Pt::Ssl::SSLCertificateList serverCertChain;
-        Pt::Ssl::SSLPrivateKey      serverPrivKey("password");
+        Pt::Ssl::SSLPrivateKey      serverPrivKey("abc123");
         Pt::Ssl::SSLContext         serverContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         serverCertChain.loadFromFile           ("server.pem");
         serverPrivKey  .loadFromFile           ("server.key");
@@ -323,7 +323,7 @@ int main(int argc, char** argv)
         serverContext  .setPrivateKey          (serverPrivKey);
 
         Pt::Ssl::SSLCertificateList clientCertChain;
-        Pt::Ssl::SSLPrivateKey      clientPrivKey("password");
+        Pt::Ssl::SSLPrivateKey      clientPrivKey("");
         Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         clientCertChain.loadFromFile           ("client.pem");
         clientPrivKey  .loadFromFile           ("client.key");

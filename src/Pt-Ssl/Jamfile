@@ -66,16 +66,6 @@ if $(TARGET_OS) = "nt"
     }
 }
 
-# openssl x509 -in ca.cer     -outform PEM -out ca.pem
-# openssl x509 -in server.cer -outform PEM -out server.pem
-# openssl x509 -in client.cer -outform PEM -out client.pem
-
-# openssl pkcs12 -in pkcs-12-certificate-and-key-file -out pem-certificate-and-key-file
-
-# openssl dsaparam -out dsaparam.pem 2048
-# openssl gendsa -out dsakey1.pem dsaparam.pem
-# openssl dsa -in dsakey1.pem -pubout -out dsapubkey1.pem
-
 File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
 File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
 File [ FDirName $(OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;

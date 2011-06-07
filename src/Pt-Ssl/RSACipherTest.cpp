@@ -55,7 +55,7 @@ int main(int argc, char** argv)
         Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
 
         // Load private key
-        Pt::Ssl::SSLPrivateKey serverPrivKey("password");
+        Pt::Ssl::SSLPrivateKey serverPrivKey("abc123");
         serverPrivKey.loadFromFile("server.key");
 
         // Test texts

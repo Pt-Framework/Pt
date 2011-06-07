@@ -222,7 +222,7 @@ int main(int argc, char** argv)
 
         Pt::Ssl::SSLCertificateList trustedCACert;
         Pt::Ssl::SSLCertificateList clientCertChain;
-        Pt::Ssl::SSLPrivateKey      clientPrivKey("password");
+        Pt::Ssl::SSLPrivateKey      clientPrivKey("");
         Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         trustedCACert  .loadFromFile           ("ca.pem");
         clientCertChain.loadFromFile           ("client.pem");
