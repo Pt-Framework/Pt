@@ -55,26 +55,32 @@ class ServerImpl;
 
 class IdleSocketEvent : public BasicEvent<IdleSocketEvent>
 {
+        const ServerImpl* _server;
         Socket* _socket;
 
     public:
-        explicit IdleSocketEvent(Socket* socket)
-            : _socket(socket)
+        explicit IdleSocketEvent(const ServerImpl* server, Socket* socket)
+            : _server(server)
+            , _socket(socket)
             { }
 
+        const ServerImpl* server() const   { return _server; }
         Socket* socket() const   { return _socket; }
 
 };
 
 class KeepAliveTimeoutEvent : public BasicEvent<KeepAliveTimeoutEvent>
 {
+        const ServerImpl* _server;
         Socket* _socket;
 
     public:
-        explicit KeepAliveTimeoutEvent(Socket* socket)
-            : _socket(socket)
+        explicit KeepAliveTimeoutEvent(const ServerImpl* server, Socket* socket)
+            : _server(server)
+            , _socket(socket)
             { }
 
+        const ServerImpl* server() const   { return _server; }
         Socket* socket() const   { return _socket; }
 
 };
@@ -94,31 +100,44 @@ class ServerStartEvent : public BasicEvent<ServerStartEvent>
 
 class NoWaitingThreadsEvent : public BasicEvent<NoWaitingThreadsEvent>
 {
+    const ServerImpl* _server;
+
+    public:
+        explicit NoWaitingThreadsEvent(const ServerImpl* server)
+            : _server(server)
+            { }
+
+        const ServerImpl* server() const   { return _server; }
 };
 
 class ThreadTerminatedEvent : public BasicEvent<ThreadTerminatedEvent>
 {
+        const ServerImpl* _server;
         Worker* _worker;
 
     public:
-        explicit ThreadTerminatedEvent(Worker* worker)
-            : _worker(worker)
+        explicit ThreadTerminatedEvent(const ServerImpl* server, Worker* worker)
+            : _server(server)
+            , _worker(worker)
             { }
 
+        const ServerImpl* server() const   { return _server; }
         Worker* worker() const   { return _worker; }
 };
 
 class ActiveSocketEvent : public BasicEvent<ActiveSocketEvent>
 {
+        const ServerImpl* _server;
         Socket* _socket;
 
     public:
-        explicit ActiveSocketEvent(Socket* socket)
-            : _socket(socket)
+        explicit ActiveSocketEvent(const ServerImpl* server, Socket* socket)
+            : _server(server)
+            , _socket(socket)
             { }
 
+        const ServerImpl* server() const   { return _server; }
         Socket* socket() const   { return _socket; }
-
 };
 
 class ServerImpl : public Connectable

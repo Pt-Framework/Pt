@@ -173,7 +173,7 @@ void ServerImpl::noWaitingThreads()
 {
     System::MutexLock lock(_threadMutex);
     if (_runmode == Server::Running)
-        _eventLoop.commitEvent(NoWaitingThreadsEvent());
+        _eventLoop.commitEvent(NoWaitingThreadsEvent(this));
 }
 
 void ServerImpl::threadTerminated(Worker* worker)
@@ -183,7 +183,7 @@ void ServerImpl::threadTerminated(Worker* worker)
     _threads.erase(worker);
     if (_runmode == Server::Running)
     {
-        _eventLoop.commitEvent(ThreadTerminatedEvent(worker));
+        _eventLoop.commitEvent(ThreadTerminatedEvent(this, worker));
     }
     else
     {
@@ -198,7 +198,7 @@ void ServerImpl::addIdleSocket(Socket* socket)
 
     if (_runmode == Server::Running)
     {
-        _eventLoop.commitEvent(IdleSocketEvent(socket));
+        _eventLoop.commitEvent(IdleSocketEvent(this, socket));
     }
     else
     {
@@ -209,6 +209,9 @@ void ServerImpl::addIdleSocket(Socket* socket)
 
 void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
 {
+    if(event.server() != this)
+        return;
+
     Socket* socket = event.socket();
 
     log_debug("add idle socket " << static_cast<void*>(socket) << " to selector");
@@ -221,11 +224,17 @@ void ServerImpl::onIdleSocket(const IdleSocketEvent& event)
 
 void ServerImpl::onActiveSocket(const ActiveSocketEvent& event)
 {
+    if(event.server() != this)
+        return;
+
     _queue.put(event.socket());
 }
 
 void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
 {
+    if(event.server() != this)
+        return;
+
     System::MutexLock lock(_threadMutex);
 
     if (_threads.size() >= maxThreads())
@@ -259,6 +268,9 @@ void ServerImpl::onNoWaitingThreads(const NoWaitingThreadsEvent& event)
 
 void ServerImpl::onThreadTerminated(const ThreadTerminatedEvent& event)
 {
+    if(event.server() != this)
+        return;
+
     System::MutexLock lock(_threadMutex);
     log_debug("thread terminated (" << static_cast<void*>(event.worker()) << ") " << _threads.size() << " threads left");
     try
@@ -291,7 +303,7 @@ void ServerImpl::onInput(Socket& socket)
     {
         socket.inputConnection.close();
         socket.timeoutConnection.close();
-        _eventLoop.commitEvent(ActiveSocketEvent(&socket));
+        _eventLoop.commitEvent(ActiveSocketEvent(this, &socket));
     }
     else
     {
@@ -304,7 +316,7 @@ void ServerImpl::onTimeout(Socket& socket)
 {
     log_debug("timeout; socket " << static_cast<void*>(&socket));
 
-    _eventLoop.commitEvent(KeepAliveTimeoutEvent(&socket));
+    _eventLoop.commitEvent(KeepAliveTimeoutEvent(this, &socket));
 }
 
 void ServerImpl::onKeepAliveTimeout(const KeepAliveTimeoutEvent& event)
