@@ -15,13 +15,13 @@
 				MenuCaption="&amp;Build"
 				CaptureOutputWith="ProcessBuffer"
 				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%wp">
+				RunFromDir="%rp">
 				<Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
 			</Target>
 			<Target
 				Name="Clean"
 				MenuCaption="&amp;Clean"
-				RunFromDir="%rw"
+				RunFromDir="%rp"
 				CaptureOutputWith="ProcessBuffer"
 				SaveOption="SaveNone">
 				<Exec CmdLine="$JAMCMD -q -sCONFIG=debug clean"/>
@@ -61,13 +61,13 @@
 				MenuCaption="&amp;Build"
 				CaptureOutputWith="ProcessBuffer"
 				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%wp">
+				RunFromDir="%rp">
 				<Exec CmdLine="$JAMCMD -q -sCONFIG=release"/>
 			</Target>
 			<Target
 				Name="Clean"
 				MenuCaption="&amp;Clean"
-				RunFromDir="%rw"
+				RunFromDir="%rp"
 				CaptureOutputWith="ProcessBuffer"
 				SaveOption="SaveNone">
 				<Exec CmdLine="$JAMCMD -q -sCONFIG=release clean"/>
@@ -107,125 +107,20 @@
 		<Folder
 			Name="Source Files"
 			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
-			<F N="src/Pt/Atomicity.cpp"/>
-			<F N="src/Pt/Atomicity.cw.x86.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.arm.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.avr32.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.mips.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.ppc.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.sparc.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.x86.cpp"/>
-			<F N="src/Pt/Atomicity.gcc.x86_64.cpp"/>
-			<F N="src/Pt/Atomicity.generic.cpp"/>
-			<F N="src/Pt/Atomicity.pthread.cpp"/>
-			<F N="src/Pt/Atomicity.sun.cpp"/>
-			<F N="src/Pt/Atomicity.windows.cpp"/>
-			<F N="src/Pt/Char.cpp"/>
-			<F N="src/Pt/Chunk.cpp"/>
-			<F N="src/Pt/Connectable.cpp"/>
-			<F N="src/Pt/Connection.cpp"/>
-			<F N="src/Pt/ConversionError.cpp"/>
-			<F N="src/Pt/Date.cpp"/>
-			<F N="src/Pt/DateTime.cpp"/>
-			<F N="src/Pt/Deserializer.cpp"/>
-			<F N="src/Pt/Facets.cpp"/>
-			<F N="src/Pt/Page.cpp"/>
-			<F N="src/Pt/PageAllocator.cpp"/>
-			<F N="src/Pt/PoolAllocator.cpp"/>
-			<F N="src/Pt/PoolFactory.cpp"/>
-			<F N="src/Pt/Regex.cpp"/>
-			<F N="src/Pt/regexp.cpp"/>
-			<F N="src/Pt/SerializationContext.cpp"/>
-			<F N="src/Pt/SerializationError.cpp"/>
-			<F N="src/Pt/SerializationInfo.cpp"/>
-			<F N="src/Pt/Serializer.cpp"/>
-			<F N="src/Pt/Settings.cpp"/>
-			<F N="src/Pt/SettingsReader.cpp"/>
-			<F N="src/Pt/SettingsWriter.cpp"/>
-			<F N="src/Pt/Signal.cpp"/>
-			<F N="src/Pt/StringStream.cpp"/>
-			<F N="src/Pt/TextBuffer.cpp"/>
-			<F N="src/Pt/TextCodec.cpp"/>
-			<F N="src/Pt/TextStream.cpp"/>
-			<F N="src/Pt/Time.cpp"/>
-			<F N="src/Pt/Unicode.cpp"/>
-			<F N="src/Pt/UnicodeTable.cpp"/>
-			<F N="src/Pt/Utf8Codec.cpp"/>
+			<F
+				N="*.cpp"
+				Recurse="1"
+				Refilter="0"
+				Excludes=""/>
 		</Folder>
 		<Folder
 			Name="Header Files"
 			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
-			<F N="include/Pt/Allocator.h"/>
-			<F N="include/Pt/Any.h"/>
-			<F N="include/Pt/Api.h"/>
-			<F N="include/Pt/Application.h"/>
-			<F N="include/Pt/Arg.h"/>
-			<F N="include/Pt/Atomicity.h"/>
-			<F N="include/Pt/Base64Codec.h"/>
-			<F N="include/Pt/Byteorder.h"/>
-			<F N="include/Pt/Callable.h"/>
-			<F N="include/Pt/Char.h"/>
-			<F N="src/Pt/Chunk.h"/>
-			<F N="include/Pt/Composer.h"/>
-			<F N="include/Pt/Connectable.h"/>
-			<F N="include/Pt/Connection.h"/>
-			<F N="include/Pt/ConstMethod.h"/>
-			<F N="include/Pt/ConversionError.h"/>
-			<F N="include/Pt/Convert.h"/>
-			<F N="include/Pt/Date.h"/>
-			<F N="include/Pt/DateTime.h"/>
-			<F N="include/Pt/Decomposer.h"/>
-			<F N="include/Pt/Delegate.h"/>
-			<F N="include/Pt/Deserializer.h"/>
-			<F N="include/Pt/Event.h"/>
-			<F N="include/Pt/Facets.h"/>
-			<F N="include/Pt/FixupInfo.h"/>
-			<F N="include/Pt/Formatter.h"/>
-			<F N="include/Pt/Function.h"/>
-			<F N="include/Pt/Invokable.h"/>
-			<F N="include/Pt/Main.h"/>
-			<F N="include/Pt/Math.h"/>
-			<F N="include/Pt/Method.h"/>
-			<F N="include/Pt/NonCopyable.h"/>
-			<F N="include/Pt/Pack1.h"/>
-			<F N="include/Pt/PackPop.h"/>
-			<F N="src/Pt/Page.h"/>
-			<F N="include/Pt/PageAllocator.h"/>
-			<F N="include/Pt/PoolAllocator.h"/>
-			<F N="src/Pt/PoolFactory.h"/>
-			<F N="include/Pt/RefCounted.h"/>
-			<F N="include/Pt/Regex.h"/>
-			<F N="src/Pt/regexp.h"/>
-			<F N="include/Pt/SerializationContext.h"/>
-			<F N="src/Pt/SerializationData.h"/>
-			<F N="include/Pt/SerializationError.h"/>
-			<F N="include/Pt/SerializationInfo.h"/>
-			<F N="include/Pt/SerializationSurrogate.h"/>
-			<F N="include/Pt/Serializer.h"/>
-			<F N="include/Pt/Settings.h"/>
-			<F N="src/Pt/SettingsReader.h"/>
-			<F N="src/Pt/SettingsWriter.h"/>
-			<F N="include/Pt/Signal.h"/>
-			<F N="include/Pt/Singleton.h"/>
-			<F N="include/Pt/Slot.h"/>
-			<F N="include/Pt/SmartPtr.h"/>
-			<F N="include/Pt/SourceInfo.h"/>
-			<F N="include/Pt/String.h"/>
-			<F N="include/Pt/StringData.h"/>
-			<F N="include/Pt/StringStream.h"/>
-			<F N="include/Pt/TextBuffer.h"/>
-			<F N="include/Pt/TextCodec.h"/>
-			<F N="include/Pt/TextStream.h"/>
-			<F N="include/Pt/Time.h"/>
-			<F N="include/Pt/Timespan.h"/>
-			<F N="include/Pt/TypeInfo.h"/>
-			<F N="include/Pt/Types.h"/>
-			<F N="include/Pt/TypeTraits.h"/>
-			<F N="src/Pt/Unicode.h"/>
-			<F N="include/Pt/Utf8Codec.h"/>
-			<F N="include/Pt/Variant.h"/>
-			<F N="include/Pt/Vector2d.h"/>
-			<F N="include/Pt/Void.h"/>
+			<F
+				N="*.h"
+				Recurse="1"
+				Refilter="0"
+				Excludes=""/>
 		</Folder>
 		<Folder
 			Name="Resource Files"
@@ -236,17 +131,6 @@
 		<Folder
 			Name="Other Files"
 			Filters="">
-			<F N="include/Pt/Callable.tpp"/>
-			<F N="include/Pt/ConstMethod.tpp"/>
-			<F N="include/Pt/Delegate.tpp"/>
-			<F N="include/Pt/Function.tpp"/>
-			<F N="include/Pt/Invokable.tpp"/>
-			<F N="include/Pt/Method.tpp"/>
-			<F N="include/Pt/Signal.tpp"/>
-			<F N="include/Pt/Slot.tpp"/>
-			<F N="include/Pt/String.tpp"/>
-			<F N="include/Pt/StringData.tpp"/>
-			<F N="include/Pt/Vector2d.tpp"/>
 		</Folder>
 	</Files>
 </Project>
