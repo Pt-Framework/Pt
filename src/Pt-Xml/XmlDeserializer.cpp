@@ -31,6 +31,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/String.h"
+#include "Pt/Date.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 
@@ -38,25 +39,59 @@ namespace Pt {
 
 namespace Xml {
 
+class DateSurrogate : public XmlDeserializer::Surrogate
+{
+    public:
+        DateSurrogate()
+        {}
+
+        virtual void setValue(IComposer& composer, const Pt::String& value)
+        {
+            Pt::Date date = Pt::Date::fromIsoString( value.narrow() );
+
+            IComposer* member = composer.beginMember("year");
+            member->setInt( date.year() );
+            member->finish();
+
+            member = composer.beginMember("month");
+            member->setUInt( date.month() );
+            member->finish();
+
+            member = composer.beginMember("day");
+            member->setUInt( date.day() );
+            member->finish();
+        }
+};
+
+
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
 : _reader(&reader)
 , _deser(0)
+, _surr(0)
 {
 	this->reset( &_xmlcontext );
+    //_surrogates["date"] = new DateSurrogate();
 }
 
 XmlDeserializer::XmlDeserializer(std::istream& is)
 : _reader( 0 )
 , _deleter(new XmlReader(is))
 , _deser(0)
+, _surr(0)
 {
 	this->reset( &_xmlcontext );
     _reader = _deleter.get();
+    //_surrogates["date"] = new DateSurrogate();
 }
 
 
 XmlDeserializer::~XmlDeserializer()
 {
+    std::map<std::string, Surrogate*>::iterator it = _surrogates.begin();
+    for(; it != _surrogates.end(); ++it)
+    {
+        delete it->second;
+    }
 }
 
 
@@ -138,6 +173,12 @@ void XmlDeserializer::OnBegin(const Node& node)
             {
                 //std::cerr << "TYPE: " << type.narrow() << std::endl;
                 _deser->setTypeName( type.narrow() );
+
+                std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type.narrow() );
+                if( it != _surrogates.end() )
+                {
+                    _surr = it->second;
+                }
             }
 
             String refId = se.attribute(L"ref");
@@ -241,7 +282,16 @@ void XmlDeserializer::OnValue(const Node& node)
         case Node::EndElement:
         {
             //std::cerr << "VALUE: " << _value.narrow() << std::endl;
-            _deser->setValue( _value );
+
+            if(_surr)
+            {
+                _surr->setValue(*_deser, _value);
+                _surr = 0;
+            }
+            else
+            {
+                _deser->setValue(_value);
+            }
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
             this->finishMember(ee);

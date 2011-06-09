@@ -33,6 +33,7 @@
 #include <Pt/String.h>
 #include <Pt/Deserializer.h>
 #include <memory>
+#include <map>
 
 namespace Pt {
 
@@ -51,6 +52,14 @@ class EndElement;
 class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
+        class Surrogate
+        {
+            public:
+                virtual ~Surrogate() {}
+
+                virtual void setValue(IComposer& composer, const Pt::String& value) = 0;
+        };
+
         explicit XmlDeserializer(XmlReader& reader);
 
         explicit XmlDeserializer(std::istream& is);
@@ -106,6 +115,10 @@ class PT_XML_API XmlDeserializer : public Deserializer
 
         //! @internal
         String _value;
+
+        Surrogate* _surr;
+
+        std::map<std::string, Surrogate*> _surrogates;
 };
 
 } // namespace Xml

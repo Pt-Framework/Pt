@@ -118,10 +118,12 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
     }
     else
     {
+        //Xml::Attribute typeAttr( String(L"type"), String::widen( type ) );
+
         if( ! name.empty() )
-            _writer->writeElement( String::widen( name ), value );
+            _writer->writeElement( String::widen( name )/*, &typeAttr, 1*/, value );
         else
-            _writer->writeElement( String::widen( type ), value );
+            _writer->writeElement( String::widen( type )/*, &typeAttr, 1*/, value );
     }
 }
 
