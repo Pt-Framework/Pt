@@ -32,6 +32,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "Utils.h"
+
 namespace Pt {
 
 namespace Ssl {
@@ -280,15 +282,17 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 
 void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
 {
-    // Clear the previous trusted CA certificates (if any)
-    X509_STORE_free(_ctx->cert_store);
-    _ctx->cert_store = X509_STORE_new();
+   X509_STOREAutoPtr cert_store(X509_STORE_new());
 
     // Try to add the CA X509 certificates (if any)
     for(std::vector<X509*>::const_iterator it = trustedCert.impl().begin(); it != trustedCert.impl().end(); ++it) {
-        if( ! X509_STORE_add_cert(_ctx->cert_store, *it) )
+        if( ! X509_STORE_add_cert(cert_store.get(), *it) )
             throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
     }
+
+    // Set it to the context
+    SSL_CTX_set_cert_store(_ctx, cert_store.get());
+    cert_store.release();
 
     // Store a reference to the certificate list
     _trustedCACert = trustedCert;
