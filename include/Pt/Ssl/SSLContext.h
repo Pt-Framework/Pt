@@ -93,12 +93,12 @@ class PT_SSL_API SSLContext {
         /** \brief Set the certificate-chain to be attached to this context.
          * Setting a certificate chain is mandatory for a server context.  In this case
          * the first certificate in the 'certChain' parameter must be the server certificate.
-         * The remaining certificates are assumed to be the certificates of intermediate CAs.
+         * The remaining certificates are the certificates of the intermediate CAs.
          * \n
          * Setting a certificate chain for a client context is only needed for certificate-based
          * client authentication.  In this case the first certificate in the 'certChain' parameter
-         * must be the client certificate. The remaining certificates are assumed to be the certificates
-         * of intermediate CAs.
+         * must be the client certificate. The remaining certificates are the certificates of the
+         * intermediate CAs.
          */
         void setCertificateChain(const SSLCertificateList& certChain);
 

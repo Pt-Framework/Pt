@@ -318,12 +318,16 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
 #endif
         _ctx->extra_certs = 0;
     }
+    
+    // Check if we do not have CA certificates
+    if(it == certChain.impl().end())
+        throw SSLRuntimeError("Could not find any CA certificate in the certificate list!", PT_SOURCEINFO);
 
-    // Try to add the CA X509 certificates (if any)
-    // NOTE: OpenSSL do not copy the X509 certificate, so we must do it manually
+    // Add the CA X509 certificates
     for(; it != certChain.impl().end(); ++it) {
 #ifdef COPY_EXTRA_CERT
         // Convert the X509 certificate to raw binary data
+        // NOTE: OpenSSL do not copy the X509 certificate, so we must "copy" it manually
         unsigned char* buf = 0;
         int            len = i2d_X509(*it, &buf);
         if(len < 0)
