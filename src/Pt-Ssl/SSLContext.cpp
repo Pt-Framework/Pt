@@ -112,6 +112,7 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
     SSL_CTX_set_verify_depth(_ctx, 1);
 #endif
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
+    SSL_CTX_set_mode(_ctx, SSL_MODE_NO_AUTO_CHAIN);
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
   //SSL_CTX_set_read_ahead(_ctx, 1);
 
@@ -230,16 +231,17 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
     */
 }
 
+#define COPY_EXTRA_CERT
+
 SSLContext::~SSLContext()
 {
-    // Clear any loaded CA certificates
-    // NOTE: If we do not do this, we will get segmentation fault.
+#ifndef COPY_EXTRA_CERT    
     if(_ctx->extra_certs) {
         sk_X509_pop(_ctx->extra_certs);
         _ctx->extra_certs = 0;
     }
+#endif
 
-    // Free the context
     SSL_CTX_free(_ctx);
 }
 
@@ -282,9 +284,8 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 
 void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
 {
-   X509_STOREAutoPtr cert_store(X509_STORE_new());
-
     // Try to add the CA X509 certificates (if any)
+    X509_STOREAutoPtr cert_store(X509_STORE_new());
     for(std::vector<X509*>::const_iterator it = trustedCert.impl().begin(); it != trustedCert.impl().end(); ++it) {
         if( ! X509_STORE_add_cert(cert_store.get(), *it) )
             throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
@@ -303,24 +304,44 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
     // Set the first certificate as this context's certificate
     std::vector<X509*>::const_iterator it = certChain.impl().begin();
     
-    // Try to use the X509 certificate
+    // Try to use the first X509 certificate
     ERR_clear_error();
     if( ! SSL_CTX_use_certificate( _ctx, *it ) || ERR_peek_error() )
         throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
 
     // Clear any previous CA certificates
     if(_ctx->extra_certs) {
+#ifdef COPY_EXTRA_CERT
         sk_X509_pop_free(_ctx->extra_certs, X509_free);
+#else
+        sk_X509_pop(_ctx->extra_certs);
+#endif
         _ctx->extra_certs = 0;
     }
 
     // Try to add the CA X509 certificates (if any)
-    // NOTE: OpenSSL do not copy the X509* data, so we must make sure that OpenSSL do not
-    //       free the X509 certificate when the context is destroyed. Please check the code
-    //       in ~SSLContext().
+    // NOTE: OpenSSL do not copy the X509 certificate, so we must do it manually
     for(; it != certChain.impl().end(); ++it) {
+#ifdef COPY_EXTRA_CERT
+        // Convert the X509 certificate to raw binary data
+        unsigned char* buf = 0;
+        int            len = i2d_X509(*it, &buf);
+        if(len < 0)
+            throw SSLRuntimeError("Could not convert the CA certificate to raw binary data!", PT_SOURCEINFO);
+        // Convert the raw binary data back to an X509 certificate
+        const unsigned char* tbf  = buf;
+        X509*                x509 = d2i_X509(0, &tbf, len);
+        OPENSSL_free(buf);
+        if(!x509)
+            throw SSLRuntimeError("Could not convert the raw binary data back to a CA certificate!", PT_SOURCEINFO);
+        // Add the certificate
+        if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
+            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+#else
+        // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+#endif
     }
 
     // Store a reference to the certificate chain
