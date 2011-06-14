@@ -78,6 +78,8 @@ extern const std::string ssldata2string(const unsigned char* md, unsigned int n)
 extern unsigned int      string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
 extern unsigned int      string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax);
 
+extern void readFileToString(const std::string& fileName, std::string& dst);
+
 } // namespace Ssl
 } // namespace Pt
 

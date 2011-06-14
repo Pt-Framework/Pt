@@ -27,7 +27,6 @@
  */
 
 #include <Pt/Ssl/SSLPublicKey.h>
-#include <fstream>
 
 #include "Utils.h"
 
@@ -61,16 +60,8 @@ void SSLPublicKey::Impl::loadFromString(const std::string& keyData)
 
 void SSLPublicKey::Impl::loadFromFile(const std::string& fileName)
 {
-    std::string   data;
-    std::ifstream ifs;
-    char          rbuf[4096];
-
-    ifs.open(fileName.c_str(), std::ios::binary);
-    while(ifs) {
-        ifs.read( rbuf, sizeof(rbuf) );
-        data += std::string( rbuf, ifs.gcount() );
-    }
-
+    std::string data;
+    readFileToString(fileName, data);
     loadFromString(data);
 }
 

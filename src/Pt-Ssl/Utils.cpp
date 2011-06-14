@@ -26,8 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Utils.h"
+#include <fstream>
 #include <cstdio>
+
+#include "Utils.h"
 
 namespace Pt {
 namespace Ssl {
@@ -150,6 +152,18 @@ unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsign
     }
 
     return mdcur - md;
+}
+
+void readFileToString(const std::string& fileName, std::string& dst)
+{
+    std::ifstream ifs;
+    char          rbuf[4096];
+
+    ifs.open(fileName.c_str(), std::ios::binary);
+    while(ifs) {
+        ifs.read( rbuf, sizeof(rbuf) );
+        dst += std::string( rbuf, ifs.gcount() );
+    }
 }
 
 } // namespace Pt
