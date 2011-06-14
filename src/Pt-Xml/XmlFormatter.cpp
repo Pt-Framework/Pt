@@ -32,6 +32,7 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Convert.h"
 #include "Pt/String.h"
+#include "Pt/Date.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 
@@ -39,16 +40,71 @@ namespace Pt {
 
 namespace Xml {
 
+class DateFormatter : public XmlFormatter::Surrogate
+{
+    public:
+        virtual ~DateFormatter() {}
+
+        virtual void beginObject(Formatter& formatter, const std::string& name,
+                                 const std::string& type, const std::string& id)
+        {
+            _name = name;
+            _id = id;
+        }
+
+        virtual void addInt(Formatter& formatter, const std::string& name,
+                            long long value, const std::string& id)
+        {
+            if(name == "year")
+                _year = value;
+            else if(name == "month")
+                _month = value;
+            else if(name == "day")
+                _day = value;
+        }
+
+        virtual void addUInt(Formatter& formatter, const std::string& name,
+                             unsigned long long value, const std::string& id)
+        {
+            if(name == "year")
+                _year = value;
+            else if(name == "month")
+                _month = value;
+            else if(name == "day")
+                _day = value;
+        }
+
+        virtual void finishObject(Formatter& formatter)
+        {
+            Pt::Date dt(_year, _month, _day);
+            std::string s = dt.toIsoString();
+            formatter.addValue(_name, "Pt::Date", Pt::String::widen(s), _id);
+        }
+
+    private:
+        std::string _name;
+        std::string _id;
+        int _year;
+        unsigned _month;
+        unsigned _day;
+};
+
+
 XmlFormatter::XmlFormatter()
 : _writer(0)
 , _deleter(0)
+, _surr(0)
 {
+    //_surrogates["Pt::Date"] = new DateFormatter();
 }
+
 
 XmlFormatter::XmlFormatter(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
+, _surr(0)
 {
+    //_surrogates["Pt::Date"] = new DateFormatter();
     _writer = _deleter.get();
 }
 
@@ -56,13 +112,21 @@ XmlFormatter::XmlFormatter(std::ostream& os)
 XmlFormatter::XmlFormatter(XmlWriter* writer)
 : _writer(writer)
 , _deleter(0)
+, _surr(0)
 {
+    //_surrogates["Pt::Date"] = new DateFormatter();
 }
 
 
 XmlFormatter::~XmlFormatter()
 {
     this->detach();
+
+    std::map<std::string, Surrogate*>::iterator it = _surrogates.begin();
+    for(; it != _surrogates.end(); ++it)
+    {
+        delete it->second;
+    }
 }
 
 
@@ -107,6 +171,8 @@ void XmlFormatter::flush()
 void XmlFormatter::addValue(const std::string& name, const std::string& type,
                              const Pt::String& value, const std::string& id)
 {
+    std::cout << "ADD VALUE: " << name <<  ", " <<  type << std::endl;
+
     if( ! id.empty() )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
@@ -147,6 +213,12 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 void XmlFormatter::addInt(const std::string& name, long long value,
                           const std::string& id)
 {
+    if(_surr)
+    {
+        _surr->addInt(*this, name, value, id);
+        return;
+    }
+
     convert(_value, value);
 	this->addValue(name, "int", _value, id);
 }
@@ -155,6 +227,12 @@ void XmlFormatter::addInt(const std::string& name, long long value,
 void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
                            const std::string& id)
 {
+    if(_surr)
+    {
+        _surr->addInt(*this, name, value, id);
+        return;
+    }
+
     convert(_value, value);
 	this->addValue(name, "unsigned", _value, id);
 }
@@ -216,6 +294,16 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
                                const std::string& id)
 {
+    std::cout << "BEGIN OBJECT: " << name <<  ", " <<  type << std::endl;
+
+    std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type );
+    if( it != _surrogates.end() )
+    {
+        _surr = it->second;
+        _surr->beginObject(*this, name, type, id);
+        return;
+    }
+
     if( ! id.empty() )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
@@ -248,6 +336,14 @@ void XmlFormatter::finishMember()
 
 void XmlFormatter::finishObject()
 {
+    std::cout << "FINISH OBJECT" << std::endl;
+    if(_surr)
+    {
+        _surr->finishObject(*this);
+        _surr = 0;
+        return;
+    }
+
     _writer->writeEndElement();
 }
 

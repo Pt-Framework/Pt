@@ -33,6 +33,7 @@
 #include <Pt/Formatter.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <memory>
+#include <map>
 
 namespace Pt {
 
@@ -46,6 +47,23 @@ namespace Xml {
 class PT_XML_API XmlFormatter : public Formatter
 {
     public:
+        class Surrogate
+        {
+            public:
+                virtual ~Surrogate() {}
+
+                virtual void beginObject(Formatter& formatter, const std::string& name,
+                                         const std::string& type, const std::string& id) = 0;
+
+                virtual void addInt(Formatter& formatter, const std::string& name,
+                                    long long value, const std::string& id) = 0;
+
+                virtual void addUInt(Formatter& formatter, const std::string& name,
+                                    unsigned long long value, const std::string& id) = 0;
+
+                virtual void finishObject(Formatter& formatter) = 0;
+        };
+
         /** @brief Construct a serializer without initializing the
                     serializer for writing.
 
@@ -156,6 +174,10 @@ class PT_XML_API XmlFormatter : public Formatter
         std::auto_ptr<XmlWriter> _deleter;
 
         Pt::String _value;
+
+        Surrogate* _surr;
+
+        std::map<std::string, Surrogate*> _surrogates;
 };
 
 } // namespace Xml
