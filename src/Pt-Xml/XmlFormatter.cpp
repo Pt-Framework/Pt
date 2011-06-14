@@ -95,7 +95,7 @@ XmlFormatter::XmlFormatter()
 , _deleter(0)
 , _surr(0)
 {
-    //_surrogates["Pt::Date"] = new DateFormatter();
+    _surrogates["Pt::Date"] = new DateFormatter();
 }
 
 
@@ -104,7 +104,7 @@ XmlFormatter::XmlFormatter(std::ostream& os)
 , _deleter( new XmlWriter(os) )
 , _surr(0)
 {
-    //_surrogates["Pt::Date"] = new DateFormatter();
+    _surrogates["Pt::Date"] = new DateFormatter();
     _writer = _deleter.get();
 }
 
@@ -114,7 +114,7 @@ XmlFormatter::XmlFormatter(XmlWriter* writer)
 , _deleter(0)
 , _surr(0)
 {
-    //_surrogates["Pt::Date"] = new DateFormatter();
+    _surrogates["Pt::Date"] = new DateFormatter();
 }
 
 
@@ -171,25 +171,25 @@ void XmlFormatter::flush()
 void XmlFormatter::addValue(const std::string& name, const std::string& type,
                              const Pt::String& value, const std::string& id)
 {
-    std::cout << "ADD VALUE: " << name <<  ", " <<  type << std::endl;
-
     if( ! id.empty() )
     {
-        Xml::Attribute attr( String(L"id"), String::widen( id ) );
+        Xml::Attribute attr[2];
+        attr[0] = Xml::Attribute( String(L"type"), String::widen( type ) );
+        attr[1] = Xml::Attribute( String(L"id"), String::widen( id ) );
 
         if( ! name.empty() )
-            _writer->writeElement( String::widen( name ), &attr, 1, value );
+            _writer->writeElement( String::widen( name ), attr, 2, value );
         else
-            _writer->writeElement( String::widen( type ), &attr, 1, value );
+            _writer->writeElement( String::widen( type ), attr, 2, value );
     }
     else
     {
-        //Xml::Attribute typeAttr( String(L"type"), String::widen( type ) );
+        Xml::Attribute typeAttr( String(L"type"), String::widen( type ) );
 
         if( ! name.empty() )
-            _writer->writeElement( String::widen( name )/*, &typeAttr, 1*/, value );
+            _writer->writeElement( String::widen( name ), &typeAttr, 1, value );
         else
-            _writer->writeElement( String::widen( type )/*, &typeAttr, 1*/, value );
+            _writer->writeElement( String::widen( type ), &typeAttr, 1, value );
     }
 }
 
@@ -294,8 +294,6 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
                                const std::string& id)
 {
-    std::cout << "BEGIN OBJECT: " << name <<  ", " <<  type << std::endl;
-
     std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type );
     if( it != _surrogates.end() )
     {
@@ -336,7 +334,6 @@ void XmlFormatter::finishMember()
 
 void XmlFormatter::finishObject()
 {
-    std::cout << "FINISH OBJECT" << std::endl;
     if(_surr)
     {
         _surr->finishObject(*this);

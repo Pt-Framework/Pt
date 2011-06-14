@@ -468,6 +468,12 @@ struct XmlReaderImpl
             return this;
         }
 
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._endElem.name() += c;
+            return this;
+        }
+
         virtual State* onCloseBracket(Pt::Char c, XmlReaderImpl& reader)
         {
             reader._chars.clear();
@@ -723,6 +729,12 @@ struct XmlReaderImpl
             reader._current = &(reader._startElem);
             reader._depth++;
             return OnEmptyElement::instance();
+        }
+
+        virtual State* onColon(Pt::Char c, XmlReaderImpl& reader)
+        {
+            reader._startElem.name() += c;
+            return this;
         }
 
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)

@@ -265,13 +265,11 @@ void SerializationTest::Benchmark1()
         convert(v, num);
         si.addElement().setValue(v);
 
-        //vec.reserve(5);
         si >>= vec; //55 000
 
         si.clear(); // 130 000
 
         u += vec.size();
-        vec.clear();
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;

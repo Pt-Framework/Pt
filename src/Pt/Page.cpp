@@ -47,7 +47,7 @@ namespace Pt {
 
 	void* Page::allocate(std::size_t reqSize)
 	{
-		void* addr = &_mem  + _bytesAlreadyAllocated;
+		void* addr = _mem  + _bytesAlreadyAllocated;
 		_bytesAlreadyAllocated += reqSize;
 
 		return addr;

@@ -111,7 +111,7 @@ class PT_XML_API XmlDeserializer : public Deserializer
         ProcessNode _processNode;
 
         //! @internal
-        IComposer* _deser;
+        IComposer* _composer;
 
         //! @internal
         String _value;

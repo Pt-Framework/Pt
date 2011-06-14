@@ -132,19 +132,19 @@ void operator>>=(const SerializationInfo& si_, Date& date)
     int year = 0;
     unsigned month = 0, day = 0;
 
-    SerializationSurrogate surr = si_.getSurrogate("date");
-    const SerializationInfo& si2 = surr.inflate(si_);
+    //SerializationSurrogate surr = si_.getSurrogate("date");
+    //const SerializationInfo& si2 = surr.inflate(si_);
 
-    if(si2.category() == SerializationInfo::Scalar)
-    {
-        std::string s = si2.toValue<std::string>();
-        date = Date::fromIsoString(s);
-        return;
-    }
+    // if(si2.category() == SerializationInfo::Scalar)
+    // {
+    //     std::string s = si2.toValue<std::string>();
+    //     date = Date::fromIsoString(s);
+    //     return;
+    // }
 
-    si2.getMember("year") >>=  year;
-    si2.getMember("month") >>= month;
-    si2.getMember("day") >>=  day;
+    si_.getMember("year") >>=  year;
+    si_.getMember("month") >>= month;
+    si_.getMember("day") >>=  day;
     date.set(year, month, day);
 }
 
@@ -156,8 +156,8 @@ void operator<<=(SerializationInfo& si, const Date& date)
     si.addMember("day") <<=  date.day();
     si.setTypeName("Pt::Date");
 
-    SerializationSurrogate surr = si.getSurrogate("date");
-    surr.deflate(si);
+    //SerializationSurrogate surr = si.getSurrogate("date");
+    //surr.deflate(si);
 }
 
 }

@@ -173,7 +173,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dr");
@@ -198,7 +198,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
-            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.deserialize(dateptr2);
@@ -229,7 +229,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             ser.serialize(dates, "dates");
             ser.serialize(dateptr, "dateptr");
@@ -249,7 +249,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
-            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             deser.deserialize(dates);
             deser.deserialize(dateptr);
@@ -268,7 +268,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
             ser.context()->enableReferencing(false);
 
             ser.serialize(date1, "date1a");
@@ -292,7 +292,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
-            deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             deser.deserialize(date3);
             deser.deserialize(date4);
@@ -527,7 +527,7 @@ void XmlSerializerTest::DynamicObject()
     Pt::Xml::XmlReader reader(tis);
     Pt::Xml::XmlDeserializer deser(reader);
     deser.context()->enableReferencing(true);
-    deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+    //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
     Pt::SmartPtr<Pt::Reflex::Reflectable> refl1;
     MyObject refl2("myObj");
