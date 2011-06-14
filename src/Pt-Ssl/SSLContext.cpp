@@ -43,6 +43,20 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//#define COPY_EXTRA_CERT
+
+inline static void clearExtraCerts(SSL_CTX* ctx, bool free)
+{
+    if(!ctx->extra_certs) return;
+
+    if(free)
+        sk_X509_pop_free(ctx->extra_certs, X509_free);
+    else
+        sk_X509_pop(ctx->extra_certs);
+
+    ctx->extra_certs = 0;
+}
+
 static int ssl_init_counter = 0;
 
 SSLInit::SSLInit()
@@ -231,15 +245,10 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
     */
 }
 
-#define COPY_EXTRA_CERT
-
 SSLContext::~SSLContext()
 {
 #ifndef COPY_EXTRA_CERT    
-    if(_ctx->extra_certs) {
-        sk_X509_pop(_ctx->extra_certs);
-        _ctx->extra_certs = 0;
-    }
+    clearExtraCerts(_ctx, false);
 #endif
 
     SSL_CTX_free(_ctx);
@@ -310,14 +319,11 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
         throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
 
     // Clear any previous CA certificates
-    if(_ctx->extra_certs) {
 #ifdef COPY_EXTRA_CERT
-        sk_X509_pop_free(_ctx->extra_certs, X509_free);
+    clearExtraCerts(_ctx, true);
 #else
-        sk_X509_pop(_ctx->extra_certs);
+    clearExtraCerts(_ctx, false);
 #endif
-        _ctx->extra_certs = 0;
-    }
     
     // Check if we do not have CA certificates
     if(it == certChain.impl().end())
