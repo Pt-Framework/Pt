@@ -30,6 +30,12 @@
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
 #include "Pt/SerializationInfo.h"
+
+#ifdef ALLOCATOR
+#include "Pt/PoolAllocator.h"
+#include "Pt/PageAllocator.h"
+#endif
+
 #include <map>
 
 namespace Pt {
@@ -40,6 +46,9 @@ class SerializationCache
         SerializationCache()
         : _limit(64)
         , refsEnabled(false)
+#ifdef ALLOCATOR
+        ,  _alloc(4096, 128, 32)
+#endif
         {}
 
         std::map<std::string, Pt::SerializationSurrogate> _surrogates;
@@ -49,6 +58,9 @@ class SerializationCache
         std::vector<SerializationNode*> _refs;
         size_t _limit;
         bool refsEnabled;
+#ifdef ALLOCATOR
+        PoolAllocator _alloc;
+#endif
 };
 
 
@@ -225,6 +237,10 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
     {
         case SerializationInfo::Scalar:
         {
+#ifdef ALLOCATOR
+            void* m = _cache->_alloc.allocate( sizeof(ValueNode) );
+            node = new (m) ValueNode();
+#else
 			if( _cache->_scalars.empty() )
 			{
 				node = new ValueNode();
@@ -233,6 +249,7 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 
             node = _cache->_scalars.back();
 			_cache->_scalars.pop_back();
+#endif
 			break;
 	    }
 
@@ -279,10 +296,15 @@ void SerializationContext::push(SerializationNode* node)
     switch( node->category() )
     {
         case SerializationInfo::Scalar:
+#ifdef ALLOCATOR
+            node->~SerializationNode();
+            _cache->_alloc.deallocate(node, sizeof(ValueNode));
+#else
             if(_cache->_scalars.size() < _cache->_limit)
                 _cache->_scalars.push_back(node);
             else
                 delete node;
+#endif
             break;
 
     	case SerializationInfo::Struct:
