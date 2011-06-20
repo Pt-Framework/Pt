@@ -72,13 +72,6 @@ class PT_SSL_API SSLContext {
         inline const std::vector<SSLCipherInfo>& availableCiphers() const
         { return _availCiphers; }
 
-        /** \brief Return a list of enabled ciphers. */
-        inline const std::vector<SSLCipherInfo>& enabledCiphers() const
-        { return _enabledCiphers; }
-
-        /** \brief Set the list of enabled ciphers. */
-        void setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers);
-
         /** \brief Set the list of trusted CA certificates for this context.
          * Setting the list of trusted CA certificates is needed if you would like to check if
          * the other peer's certificate is signed by a trusted Certificate Authority. In this case
@@ -89,23 +82,47 @@ class PT_SSL_API SSLContext {
         /** \brief Return the list of trusted CA certificates that is currently attached to this context. */
         const SSLCertificateList trustedCACertificate() const
         { return SSLCertificateList(_trustedCACert); }
-        
-        /** \brief Set the certificate-chain to be attached to this context.
-         * Setting a certificate chain is mandatory for a server context.  In this case
-         * the first certificate in the 'certChain' parameter must be the server certificate.
+
+        /** \brief Set the main certificate and add certificate chain to this context.
+         * Set the first certificate in the list as the main certificate of this context and add
+         * the remaining certificates into the certificate chain (no certificates in the existing chain
+         * will be deleted).
+         * \n
+         * Setting a main certificate and certificate chain is mandatory for a server context.
+         * In this case the first certificate in the 'certChain' parameter must be the server certificate.
          * The remaining certificates are the certificates of the intermediate CAs.
          * \n
-         * Setting a certificate chain for a client context is only needed for certificate-based
-         * client authentication.  In this case the first certificate in the 'certChain' parameter
-         * must be the client certificate. The remaining certificates are the certificates of the
-         * intermediate CAs.
+         * Setting a main certificate and certificate chain for a client context is only needed for
+         * certificate-based client authentication. In this case the first certificate in the 'certChain'
+         * parameter must be the client certificate. The remaining certificates are the certificates of
+         * the intermediate CAs.
          */
-        void setCertificateChain(const SSLCertificateList& certChain);
+        void setCertificateChain(const SSLCertificateList& certList);
 
-        /** \brief Return the certificate-chain that is currently attached to this context. */
-        const SSLCertificateList certificateChain() const
-        { return _certChain; }
-        
+        /** \brief Set the main certificate of this context.
+         * Set the first certificate in the list as the main certificate of this context.
+         * \n
+         * Setting a main certificate is mandatory for a server context.
+         * \n
+         * Setting a main certificate for a client context is only needed for certificate-based
+         * client authentication.
+         * \n
+         * You may want to also set the certificate-chain.
+         */
+        void setCertificate(const SSLCertificateList& certList);
+
+        /** \brief Add certificate chain to this context.
+         * Add the certificates in the list into the certificate chain of this context
+         * (no certificates in the existing chain will be deleted). By default the first
+         * certificate in the list is skipped.
+         * \n
+         * Setting a certificate chain is mandatory for a server context.
+         * \n
+         * Setting a certificate chain for a client context is only needed for certificate-based
+         * client authentication.
+         */
+        void addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert = true);
+
         /** \brief Set the private key to be attached to this context.
          * Setting a private key is mandatory for a server context.
          * \n
@@ -127,14 +144,13 @@ class PT_SSL_API SSLContext {
         void getAvailableCiphers();
 
     private:
-        ssl_ctx_st*                _ctx;            // OpenSSL's SSL context
-        Protocol                   _protocol;       // Selected SSL protocol
-        std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
-        std::vector<SSLCipherInfo> _enabledCiphers; // List of enabled ciphers
+        ssl_ctx_st*                _ctx;             // OpenSSL's SSL context
+        Protocol                   _protocol;        // Selected SSL protocol
+        std::vector<SSLCipherInfo> _availCiphers;    // List of all available ciphers for the current protocol
 
-        SSLCertificateList          _trustedCACert; // List of trusted CA certificates
-        SSLCertificateList          _certChain;     // Certificate chain
-        SSLPrivateKey               _privKey;       // Private key
+        SSLCertificateList         _trustedCACert;  // List of trusted CA certificates
+        SSLPrivateKey              _privKey;        // Private key
+        bool                       _certChainExist; // Flag
 };
 
 

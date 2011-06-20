@@ -65,9 +65,6 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
 
-    // Set enabled ciphers
-    setEnabledCiphers( ctx.enabledCiphers() );
-
     // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
@@ -78,15 +75,12 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
             reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID)
         );
     }
-
-    //SSL_SESSION *SSL_get1_session(SSL *ssl); /* obtain a reference count */
-    //int SSL_set_session(SSL *to, SSL_SESSION *session);
-    // QUESTION: How to actually store the session data (SSL_SESSION*) to file???
 }
 
 SSLStreamBuf::~SSLStreamBuf()
 { SSL_free(_ssl); }
 
+/*
 void SSLStreamBuf::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     if(_handshakeStarted)
@@ -105,6 +99,7 @@ void SSLStreamBuf::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 
     _enabledCiphers = ciphers;
 }
+*/
 
 const SSLCipherInfo& SSLStreamBuf::currentCipher() const
 {

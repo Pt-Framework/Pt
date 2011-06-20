@@ -88,6 +88,7 @@ class PT_SSL_API SSLCertificateList::Impl {
 
         inline const std::vector<SSLCertificateInfo>& certInfo() const
         { return _certInfo; }
+
         const SSLPublicKey getPublicKey() const;
 
         friend class SSLCertificateList;

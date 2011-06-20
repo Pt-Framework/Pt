@@ -43,19 +43,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define COPY_EXTRA_CERT
-
-inline static void clearExtraCerts(SSL_CTX* ctx, bool free)
-{
-    if(!ctx->extra_certs) return;
-
-    if(free)
-        sk_X509_pop_free(ctx->extra_certs, X509_free);
-    else
-        sk_X509_pop(ctx->extra_certs);
-
-    ctx->extra_certs = 0;
-}
+#define COPY_EXTRA_CERT
 
 static int ssl_init_counter = 0;
 
@@ -106,7 +94,7 @@ SSLInit::~SSLInit()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
-: _protocol(protocol)
+: _protocol(protocol), _certChainExist(false)
 {
     // Create the context
     switch(_protocol) {
@@ -119,7 +107,6 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
     }
 
     getAvailableCiphers();
-    _enabledCiphers = _availCiphers;
 
     // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
@@ -247,8 +234,11 @@ SSLContext::SSLContext(const char* sessionID, Protocol    protocol)
 
 SSLContext::~SSLContext()
 {
-#ifndef COPY_EXTRA_CERT    
-    clearExtraCerts(_ctx, false);
+#ifndef COPY_EXTRA_CERT
+    if(_ctx->extra_certs) {
+        sk_X509_pop(_ctx->extra_certs);
+        _ctx->extra_certs = 0;
+    }
 #endif
 
     SSL_CTX_free(_ctx);
@@ -274,9 +264,9 @@ void SSLContext::setProtocol(Protocol protocol)
         throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
 
     getAvailableCiphers();
-    _enabledCiphers = _availCiphers;
 }
 
+/*
 void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     std::string str;
@@ -290,6 +280,7 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 
     _enabledCiphers = ciphers;
 }
+*/
 
 void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
 {
@@ -308,30 +299,32 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     _trustedCACert = trustedCert;
 }
 
-void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
+void SSLContext::setCertificateChain(const SSLCertificateList& certList)
 {
-    // Set the first certificate as this context's certificate
-    std::vector<X509*>::const_iterator it = certChain.impl().begin();
-    
-    // Try to use the first X509 certificate
-    ERR_clear_error();
-    if( ! SSL_CTX_use_certificate( _ctx, *it ) || ERR_peek_error() )
-        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+    setCertificate(certList);
+    if(certList.impl().size() > 1) addCertificateChain(certList, true);
+}
 
-    // Clear any previous CA certificates
-#ifdef COPY_EXTRA_CERT
-    clearExtraCerts(_ctx, true);
-#else
-    clearExtraCerts(_ctx, false);
-#endif
+void SSLContext::setCertificate(const SSLCertificateList& certList)
+{
+    ERR_clear_error();
     
-    // Check if we do not have CA certificates
-    if(it == certChain.impl().end())
+    if( ! SSL_CTX_use_certificate( _ctx, *certList.impl().begin() ) || ERR_peek_error() )
+        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+}
+
+void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert)
+{
+    // Skip the first certificate (if needed)
+    std::vector<X509*>::const_iterator it = certList.impl().begin();
+    if(skipFirstCert) ++it;
+
+    // Check if we do not have any CA certificates
+    if(it == certList.impl().end())
         throw SSLRuntimeError("Could not find any CA certificate in the certificate list!", PT_SOURCEINFO);
 
     // Add the CA X509 certificates
-    for(; it != certChain.impl().end(); ++it) {
-#ifdef COPY_EXTRA_CERT
+    for(; it != certList.impl().end(); ++it) {
         // Convert the X509 certificate to raw binary data
         // NOTE: OpenSSL do not copy the X509 certificate, so we must "copy" it manually
         unsigned char* buf = 0;
@@ -347,15 +340,12 @@ void SSLContext::setCertificateChain(const SSLCertificateList& certChain)
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
-#else
-        // Add the certificate
-        if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
-            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
-#endif
+        //if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
+        //    throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
     }
 
-    // Store a reference to the certificate chain
-    _certChain = certChain;
+    // Set flag
+    _certChainExist = true;
 }
 
 void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
@@ -368,7 +358,7 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
     _privKey = privKey;
     
     // Check the private key (if needed)
-    if(!_certChain.impl().empty()) {
+    if(!_certChainExist) {
         if(!SSL_CTX_check_private_key(_ctx))
             throw SSLRuntimeError(
                 "The private key does not agree with the corresponding public key in the certificate!",
@@ -435,3 +425,4 @@ void SSLContext::getAvailableCiphers()
 
 } // namespace Ssl
 } // namespace Pt
+

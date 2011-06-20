@@ -51,8 +51,6 @@ class ContextTest : public Pt::Unit::TestSuite
         {
             Pt::Ssl::SSLContext ctx(0, Pt::Ssl::SSLContext::SSLv3or2);
             PT_UNIT_ASSERT( ctx.availableCiphers().size() > 0 );
-            PT_UNIT_ASSERT( ctx.enabledCiphers().size() > 0 );
-            PT_UNIT_ASSERT( ctx.availableCiphers() == ctx.enabledCiphers() );
         }
 };
 
