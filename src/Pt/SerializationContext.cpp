@@ -31,6 +31,8 @@
 #include "Pt/SerializationError.h"
 #include "Pt/SerializationInfo.h"
 
+//#define ALLOCATOR 1
+
 #ifdef ALLOCATOR
 #include "Pt/PoolAllocator.h"
 #include "Pt/PageAllocator.h"
@@ -193,6 +195,10 @@ void SerializationContext::setLimit(size_t n)
 
 SerializationInfo* SerializationContext::get()
 {
+#ifdef ALLOCATOR
+    void* m = _cache->_alloc.allocate( sizeof(SerializationInfo) );
+    return new (m) SerializationInfo(this);
+#else
     SerializationInfo* si = 0;
 
     if( _cache->_infos.empty() )
@@ -206,11 +212,16 @@ SerializationInfo* SerializationContext::get()
     }
 
     return si;
+#endif
 }
 
 
 void SerializationContext::push(SerializationInfo* si)
 {
+#ifdef ALLOCATOR
+    si->~SerializationInfo();
+    _cache->_alloc.deallocate(si, sizeof(SerializationInfo));
+#else
     SerializationNode* node = si->releaseNode();
 
     if(node)
@@ -226,6 +237,7 @@ void SerializationContext::push(SerializationInfo* si)
     {
         delete si;
     }
+#endif
 }
 
 
