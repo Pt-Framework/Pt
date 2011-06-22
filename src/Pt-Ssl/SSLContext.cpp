@@ -326,8 +326,8 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
     // Add the CA X509 certificates
     for(; it != certList.impl().end(); ++it) {
 #ifdef COPY_EXTRA_CERT
-        // Convert the X509 certificate to raw binary data
         // NOTE: OpenSSL do not copy the X509 certificate, so we must "copy" it manually
+        // Convert the X509 certificate to raw binary data
         unsigned char* buf = 0;
         int            len = i2d_X509(*it, &buf);
         if(len < 0)
