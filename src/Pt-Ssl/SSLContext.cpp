@@ -43,7 +43,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define COPY_EXTRA_CERT
+//#define COPY_EXTRA_CERT
 
 static int ssl_init_counter = 0;
 
@@ -325,6 +325,7 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
 
     // Add the CA X509 certificates
     for(; it != certList.impl().end(); ++it) {
+#ifdef COPY_EXTRA_CERT
         // Convert the X509 certificate to raw binary data
         // NOTE: OpenSSL do not copy the X509 certificate, so we must "copy" it manually
         unsigned char* buf = 0;
@@ -340,8 +341,11 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
             throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
-        //if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
-        //    throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+#else        
+        // Add the certificate
+        if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
+            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+#endif
     }
 
     // Set flag
