@@ -43,7 +43,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define COPY_EXTRA_CERT
+#define COPY_EXTRA_CERT
 
 static int ssl_init_counter = 0;
 
