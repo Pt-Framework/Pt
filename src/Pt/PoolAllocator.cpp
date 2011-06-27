@@ -39,7 +39,7 @@ namespace {
  */
  std::size_t getOffset(std::size_t numBytes, std::size_t alignment)
  {
-    const std::size_t alignExtra = alignment-1;
+    const std::size_t alignExtra = alignment - 1;
     return (numBytes + alignExtra) / alignment;
  }
 
@@ -70,55 +70,54 @@ PoolAllocator::~PoolAllocator(void)
 
 void* PoolAllocator::allocate(std::size_t size)
 {
-    if (size > getMaxObjectSize())
+    if (size > getMaxObjectSize() || 0 == size)
     {
         return ::operator new( size );
     }
+
     assert(NULL != _pool);
-    if (0 == size)
-    {
-        return 0;
-    }
-    const std::size_t index = getOffset(size, getAlignment()) - 1;
+
+    const std::size_t index = getOffset( size, getAlignment() ) - 1;
+
+#ifndef NDEBUG
     const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
     assert(index < allocCount);
+#endif
 
     PoolFactory& allocator = _pool[ index ];
     assert(allocator.blockSize() >= size);
     assert(allocator.blockSize() < size + getAlignment());
-    void* place = allocator.allocate();
 
-    return place;
+    return allocator.allocate();
 }
 
 void PoolAllocator::deallocate(void* p, std::size_t size)
 {
-    if (NULL == p)
-    {
-        return;
-    }
-
-    if (size > getMaxObjectSize())
+    if (size > getMaxObjectSize() || NULL == p)
     {
         ::operator delete(p);
         return;
     }
 
     assert(NULL != _pool);
-    
+
     if (0 == size)
     {
         size = 1;
     }
-    
-    const std::size_t index       = getOffset(size, getAlignment()) - 1;
-    const std::size_t allocCount  = getOffset(getMaxObjectSize(), getAlignment());
-    (void) allocCount;
+
+    const std::size_t index = getOffset(size, getAlignment()) - 1;
+
+#ifndef NDEBUG
+    const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
     assert(index < allocCount);
-    PoolFactory& allocator     = _pool[ index ];
+#endif
+
+    PoolFactory& allocator = _pool[ index ];
     assert(allocator.blockSize() >= size);
     assert(allocator.blockSize()  < size + getAlignment());
     const bool found = allocator.deallocate(p);
+
     (void) found;
     assert( found );
 }
