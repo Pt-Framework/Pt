@@ -31,7 +31,7 @@
 #include "Pt/SerializationError.h"
 #include "Pt/SerializationInfo.h"
 
-//#define ALLOCATOR 1
+#define ALLOCATOR 1
 
 #ifdef ALLOCATOR
 #include "Pt/PoolAllocator.h"
@@ -47,9 +47,8 @@ class SerializationCache
     public:
         SerializationCache()
         : _limit(64)
-        , refsEnabled(false)
 #ifdef ALLOCATOR
-        ,  _alloc(4096, 128, 32)
+        ,  _alloc(4096, 128, 8)
 #endif
         {}
 
@@ -59,23 +58,10 @@ class SerializationCache
         std::vector<SerializationNode*> _objects;
         std::vector<SerializationNode*> _refs;
         size_t _limit;
-        bool refsEnabled;
 #ifdef ALLOCATOR
         PoolAllocator _alloc;
 #endif
 };
-
-
-void SerializationContext::enableReferencing(bool enabled)
-{
-    _cache->refsEnabled = enabled;
-}
-
-
-bool SerializationContext::referencingEnabled() const
-{
-    return _cache->refsEnabled;
-}
 
 
 bool SerializationContext::beginSave(const void* p, const std::string& name)
@@ -146,6 +132,7 @@ void SerializationContext::reset()
 
 SerializationContext::SerializationContext()
 : _cache(0)
+, _refsEnabled(false)
 {
     _cache = new SerializationCache;
 }

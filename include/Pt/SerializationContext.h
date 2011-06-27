@@ -53,9 +53,15 @@ class PT_API SerializationContext
 
         virtual ~SerializationContext();
 
-        void enableReferencing(bool enabled);
+        inline void enableReferencing(bool enabled)
+        {
+            _refsEnabled = enabled;
+        }
 
-        bool referencingEnabled() const;
+        inline bool referencingEnabled() const
+        {
+            return _refsEnabled;
+        }
 
         virtual void reset();
 
@@ -102,6 +108,7 @@ class PT_API SerializationContext
 
     private:
         SerializationCache* _cache;
+        bool _refsEnabled;
 };
 
 } // namespace Pt
