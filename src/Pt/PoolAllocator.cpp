@@ -37,7 +37,7 @@ namespace {
 /**
  * @brief Calculates index into array where a PoolFactory of numBytes is located.
  */
- std::size_t getOffset(std::size_t numBytes, std::size_t alignment)
+ inline std::size_t getOffset(std::size_t numBytes, std::size_t alignment)
  {
     const std::size_t alignExtra = alignment - 1;
     return (numBytes + alignExtra) / alignment;

@@ -114,14 +114,14 @@ public:
      *
      * @return Returns max # of bytes allocates by PoolFactorys.
      */
-    std::size_t getMaxObjectSize() const
+    inline std::size_t getMaxObjectSize() const
     { return _maxObjectSize; }
 
     /**
      * @brief Returns # of bytes between allocation boundaries.
      * @return Returns # of bytes between allocation boundaries.
      */
-    std::size_t getAlignment() const 
+    inline std::size_t getAlignment() const 
     { return _objectAlignSize; }
 
     /** 
