@@ -53,8 +53,8 @@ class SerializationCache
 #endif
         {
 #ifdef ALLOCATOR
-            _chunkSi.init(64, 64);
-            _chunkNode.init( 24, 170 );
+            _chunkSi.init(sizeof(SerializationInfo), 128);
+            _chunkNode.init( sizeof(ValueNode), 128 );
 #endif
         }
 
