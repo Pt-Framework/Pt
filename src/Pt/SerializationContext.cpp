@@ -30,8 +30,9 @@
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
 #include "Pt/SerializationInfo.h"
+#include "Chunk.h"
 
-#define ALLOCATOR 1
+//#define ALLOCATOR 1
 
 #ifdef ALLOCATOR
 #include "Pt/PoolAllocator.h"
@@ -48,9 +49,14 @@ class SerializationCache
         SerializationCache()
         : _limit(64)
 #ifdef ALLOCATOR
-        ,  _alloc(4096, 128, 8)
+        //,  _alloc(4096, 128, 8)
 #endif
-        {}
+        {
+#ifdef ALLOCATOR
+            _chunkSi.init(64, 64);
+            _chunkNode.init( 24, 170 );
+#endif
+        }
 
         std::map<std::string, Pt::SerializationSurrogate> _surrogates;
         std::vector<SerializationInfo*> _infos;
@@ -59,7 +65,9 @@ class SerializationCache
         std::vector<SerializationNode*> _refs;
         size_t _limit;
 #ifdef ALLOCATOR
-        PoolAllocator _alloc;
+        Chunk _chunkSi;
+        Chunk _chunkNode;
+        //PoolAllocator _alloc;
 #endif
 };
 
@@ -183,7 +191,8 @@ void SerializationContext::setLimit(size_t n)
 SerializationInfo* SerializationContext::get()
 {
 #ifdef ALLOCATOR
-    void* m = _cache->_alloc.allocate( sizeof(SerializationInfo) );
+    //void* m = _cache->_alloc.allocate( sizeof(SerializationInfo) );
+    void* m = _cache->_chunkSi.allocate( sizeof(SerializationInfo) );
     return new (m) SerializationInfo(this);
 #else
     SerializationInfo* si = 0;
@@ -207,7 +216,8 @@ void SerializationContext::push(SerializationInfo* si)
 {
 #ifdef ALLOCATOR
     si->~SerializationInfo();
-    _cache->_alloc.deallocate(si, sizeof(SerializationInfo));
+    //_cache->_alloc.deallocate(si, sizeof(SerializationInfo));
+    _cache->_chunkSi.deallocate(si, sizeof(SerializationInfo));
 #else
     SerializationNode* node = si->releaseNode();
 
@@ -237,7 +247,8 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
         case SerializationInfo::Scalar:
         {
 #ifdef ALLOCATOR
-            void* m = _cache->_alloc.allocate( sizeof(ValueNode) );
+            //void* m = _cache->_alloc.allocate( sizeof(ValueNode) );
+            void* m = _cache->_chunkNode.allocate( sizeof(ValueNode) );
             node = new (m) ValueNode();
 #else
 			if( _cache->_scalars.empty() )
@@ -297,7 +308,8 @@ void SerializationContext::push(SerializationNode* node)
         case SerializationInfo::Scalar:
 #ifdef ALLOCATOR
             node->~SerializationNode();
-            _cache->_alloc.deallocate(node, sizeof(ValueNode));
+            //_cache->_alloc.deallocate(node, sizeof(ValueNode));
+            _cache->_chunkNode.deallocate(node, sizeof(ValueNode));
 #else
             if(_cache->_scalars.size() < _cache->_limit)
                 _cache->_scalars.push_back(node);
