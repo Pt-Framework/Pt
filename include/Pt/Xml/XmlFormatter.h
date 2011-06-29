@@ -166,6 +166,11 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void finishObject();
 
+        void onBeginObject(const std::string& name, const std::string& type,
+                           const std::string& id);
+
+        void onFinishObject();
+
     private:
         //! @internal
         XmlWriter* _writer;

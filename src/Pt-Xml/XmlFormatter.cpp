@@ -302,6 +302,13 @@ void XmlFormatter::beginObject(const std::string& name, const std::string& type,
         return;
     }
 
+    this->onBeginObject(name, type, id);
+}
+
+
+void XmlFormatter::onBeginObject(const std::string& name, const std::string& type,
+                                 const std::string& id)
+{
     if( ! id.empty() )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
@@ -341,6 +348,12 @@ void XmlFormatter::finishObject()
         return;
     }
 
+    this->onFinishObject();
+}
+
+
+void XmlFormatter::onFinishObject()
+{
     _writer->writeEndElement();
 }
 

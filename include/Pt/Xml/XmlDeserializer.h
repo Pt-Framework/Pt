@@ -52,12 +52,24 @@ class EndElement;
 class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
-        class Surrogate
+        class Surrogate : public IComposer
         {
             public:
-                virtual ~Surrogate() {}
+                Surrogate()
+                : _composer(0)
+                {}
 
-                virtual void setValue(IComposer& composer, const Pt::String& value) = 0;
+                virtual void clear()
+                { _composer = 0; }
+
+                void begin(IComposer& comp)
+                { _composer = &comp; }
+
+                virtual IComposer* finish()
+                { return _composer; }
+
+            protected:
+                IComposer* _composer;
         };
 
         explicit XmlDeserializer(XmlReader& reader);
@@ -74,7 +86,7 @@ class PT_XML_API XmlDeserializer : public Deserializer
         virtual void onBegin(IComposer& deser);
 
         //! @brief Returns true when type is complete
-        virtual bool onAdvance();
+        virtual bool onAdvance(IComposer& deser);
 
         //virtual void getold(IComposer* deser);
         virtual void get(IComposer& deser);
@@ -90,9 +102,24 @@ class PT_XML_API XmlDeserializer : public Deserializer
 
         void OnMemberEnd(const Node& node);
 
-        void beginMember(const StartElement& se);
+        void beginXmlMember(const StartElement& se);
 
-        void finishMember(const EndElement& ee);
+        void finishXmlMember(const EndElement& ee);
+
+        // API to be moved to Deserializer
+        void setName(const std::string& value);
+
+        void setTypeName(const std::string& value);
+
+        void setReference(const std::string& value);
+
+        void setId(const std::string& value);
+
+        void setValue(const Pt::String& value);
+
+        void beginMember(const std::string& name);
+
+        void finishMember();
 
     private:
         //! @internal

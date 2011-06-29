@@ -45,19 +45,31 @@ class DateSurrogate : public XmlDeserializer::Surrogate
         DateSurrogate()
         {}
 
-        virtual void setValue(IComposer& composer, const Pt::String& value)
+        virtual void setContext(SerializationContext* context)
+        {}
+
+        virtual void setName(const std::string& name)
+        {}
+
+        virtual void setId(const std::string& id)
+        {}
+
+        virtual void setTypeName(const std::string& type)
+        {}
+
+        virtual void setValue(const Pt::String& value)
         {
             Pt::Date date = Pt::Date::fromIsoString( value.narrow() );
 
-            IComposer* member = composer.beginMember("year");
+            IComposer* member = _composer->beginMember("year");
             member->setInt( date.year() );
             member->finish();
 
-            member = composer.beginMember("month");
+            member = _composer->beginMember("month");
             member->setUInt( date.month() );
             member->finish();
 
-            member = composer.beginMember("day");
+            member = _composer->beginMember("day");
             member->setUInt( date.day() );
             member->finish();
         }
@@ -126,8 +138,10 @@ void XmlDeserializer::onBegin(IComposer& comp)
 }
 
 
-bool XmlDeserializer::onAdvance()
+bool XmlDeserializer::onAdvance(IComposer& comp)
 {
+    _composer = &comp;
+
     while( _reader->advance() )
     {
         const Pt::Xml::Node& node = _reader->get();
@@ -159,33 +173,27 @@ void XmlDeserializer::OnBegin(const Node& node)
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
             //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
-            _composer->setName( se.name().narrow() );
+            this->setName( se.name().narrow() );
 
             String nodeId = se.attribute(L"id");
             if( ! nodeId.empty() )
             {
                 //std::cerr << "ID: " << nodeId.narrow() << std::endl;
-                _composer->setId( nodeId.narrow() );
+                this->setId( nodeId.narrow() );
             }
 
             String type = se.attribute(L"type");
             if( ! type.empty() )
             {
                 //std::cerr << "TYPE: " << type.narrow() << std::endl;
-                _composer->setTypeName( type.narrow() );
-
-                std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type.narrow() );
-                if( it != _surrogates.end() )
-                {
-                    _surr = it->second;
-                }
+                this->setTypeName( type.narrow() );
             }
 
             String refId = se.attribute(L"ref");
             if( ! refId.empty() )
             {
                 //std::cerr << "REF: " << refId.narrow() << std::endl;
-                _composer->setReference( refId.narrow() );
+                this->setReference( refId.narrow() );
                 _processNode = &XmlDeserializer::OnReferenceBegin;
                 break;
             }
@@ -219,7 +227,7 @@ void XmlDeserializer::OnReferenceBegin(const Node& node)
         case Node::EndElement:
         {
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-            this->finishMember(ee);
+            this->finishXmlMember(ee);
             break;
         }
 
@@ -238,7 +246,7 @@ void XmlDeserializer::OnMemberBegin(const Node& node)
         case Node::StartElement:
         {
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-            this->beginMember(se);
+            this->beginXmlMember(se);
             break;
         }
 
@@ -253,10 +261,10 @@ void XmlDeserializer::OnMemberBegin(const Node& node)
         case Node::EndElement:
         {
             //std::cerr << "VALUE: <empty>" << std::endl;
-            _composer->setValue( Pt::String() );
+            this->setValue( Pt::String() );
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-            this->finishMember(ee);
+            this->finishXmlMember(ee);
             break;
         }
 
@@ -275,7 +283,7 @@ void XmlDeserializer::OnValue(const Node& node)
         case Node::StartElement:
         {
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-            this->beginMember(se);
+            this->beginXmlMember(se);
             break;
         }
 
@@ -283,18 +291,10 @@ void XmlDeserializer::OnValue(const Node& node)
         {
             //std::cerr << "VALUE: " << _value.narrow() << std::endl;
 
-            if(_surr)
-            {
-                _surr->setValue(*_composer, _value);
-                _surr = 0;
-            }
-            else
-            {
-                _composer->setValue(_value);
-            }
+            this->setValue(_value);
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-            this->finishMember(ee);
+            this->finishXmlMember(ee);
             break;
         }
 
@@ -313,14 +313,14 @@ void XmlDeserializer::OnMemberEnd(const Node& node)
         case Node::StartElement:
         {
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-            this->beginMember(se);
+            this->beginXmlMember(se);
             break;
         }
 
         case Node::EndElement:
         {
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-            this->finishMember(ee);
+            this->finishXmlMember(ee);
             break;
         }
 
@@ -330,36 +330,30 @@ void XmlDeserializer::OnMemberEnd(const Node& node)
 }
 
 
-void XmlDeserializer::beginMember(const Xml::StartElement& se)
+void XmlDeserializer::beginXmlMember(const Xml::StartElement& se)
 {
     //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
-    _composer = _composer->beginMember( se.name().narrow() );
+    this->beginMember( se.name().narrow() );
 
     String nodeId = se.attribute(L"id");
     if( ! nodeId.empty() )
     {
         //std::cerr << "ID: " << nodeId.narrow() << std::endl;
-        _composer->setId( nodeId.narrow() );
+        this->setId( nodeId.narrow() );
     }
 
     String type = se.attribute(L"type");
     if( ! type.empty() )
     {
         //std::cerr << "BTYPE: " << type.narrow() << std::endl;
-        _composer->setTypeName( type.narrow() );
-
-        std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type.narrow() );
-        if( it != _surrogates.end() )
-        {
-            _surr = it->second;
-        }
+        this->setTypeName( type.narrow() );
     }
 
     String refId = se.attribute(L"ref");
     if( ! refId.empty() )
     {
         //std::cerr << "REF: " << refId.narrow() << std::endl;
-        _composer->setReference( refId.narrow() );
+        this->setReference( refId.narrow() );
         _processNode = &XmlDeserializer::OnReferenceBegin;
         return;
     }
@@ -368,12 +362,69 @@ void XmlDeserializer::beginMember(const Xml::StartElement& se)
 }
 
 
-void XmlDeserializer::finishMember(const Xml::EndElement& )
+void XmlDeserializer::finishXmlMember(const Xml::EndElement& )
 {
     //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
     //std::cerr << "END MEMBER: " << ee.name().narrow() << std::endl;
-    _composer = _composer->finish();
+    this->finishMember();
     _processNode = &XmlDeserializer::OnMemberEnd;
+}
+
+
+void XmlDeserializer::setName(const std::string& name)
+{
+    _composer->setName( name );
+}
+
+
+void XmlDeserializer::setTypeName(const std::string& type)
+{
+    _composer->setTypeName(type);
+
+    std::map<std::string, Surrogate*>::iterator it = _surrogates.find(type);
+    if( it != _surrogates.end() )
+    {
+        _surr = it->second;
+        _surr->begin(*_composer);
+    }
+}
+
+
+void XmlDeserializer::setReference(const std::string& refid)
+{
+    _composer->setReference( refid );
+}
+
+
+void XmlDeserializer::setId(const std::string& id)
+{
+    _composer->setId( id );
+}
+
+
+void XmlDeserializer::setValue(const Pt::String& value)
+{
+    if(_surr)
+    {
+        _surr->setValue(value);
+        _surr = 0;
+    }
+    else
+    {
+        _composer->setValue(value);
+    }
+}
+
+
+void XmlDeserializer::beginMember(const std::string& name)
+{
+    _composer = _composer->beginMember(name);
+}
+
+
+void XmlDeserializer::finishMember()
+{
+    _composer = _composer->finish();
 }
 
 } // namespace Xml

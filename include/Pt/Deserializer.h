@@ -112,7 +112,7 @@ class Deserializer
             if( ! _current )
                 return true;
 
-            bool finished = this->onAdvance();
+            bool finished = this->onAdvance(*_current);
             if(finished)
             {
                 delete _current;
@@ -131,7 +131,7 @@ class Deserializer
     protected:
         virtual void onBegin(IComposer& deser) = 0;
 
-        virtual bool onAdvance() = 0;
+        virtual bool onAdvance(IComposer& deser) = 0;
 
     protected:
         virtual void get(IComposer& deser) = 0;
