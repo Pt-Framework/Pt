@@ -133,7 +133,8 @@ void SerializationInfo::format(Formatter& formatter)
 
 SerializationInfo::Category SerializationInfo::category() const
 {
-    return _node ? _node->category() : Void;
+    ///return _node ? _node->category() : Void;
+    return _category;
 }
 
 
@@ -152,7 +153,7 @@ SerializationInfo::~SerializationInfo()
     {
         if(_context)
         {
-            _context->push(_node);
+            _context->push(_node, _category);
         }
         else
         {
@@ -171,7 +172,7 @@ void SerializationInfo::clear()
         else
             _node->clear();
 
-        if(_node->category() == Context)
+        if(this->category() == Context)
             this->setCategory(Void);
     }
 
@@ -185,6 +186,35 @@ void SerializationInfo::clear()
         _id.clear();
 
     _bound = 0;
+    _category = Void;
+}
+
+
+void SerializationInfo::clear(SerializationContext* context)
+{
+    if(_node)
+    {
+        if( _context )
+            _node->clear(*_context);
+        else
+            _node->clear();
+
+        if(this->category() == Context)
+            this->setCategory(Void);
+    }
+
+    if( _name.size() )
+        _name.clear();
+
+    if( _type.size() )
+        _type.clear();
+
+    if( _id.size() )
+        _id.clear();
+
+    _bound = 0;
+    _context = context;
+    _category = Void;
 }
 
 
@@ -202,9 +232,9 @@ void SerializationInfo::setCategory(Category category)
     {
         SerializationNode* node = 0;
 
-        if(_node)
+        if(this->category() == SerializationInfo::Context)
         {
-            node = _node->toCategory(_context, category);
+            node = category == SerializationInfo::Void ? 0 : _node;
         }
         else
         {
@@ -216,19 +246,21 @@ void SerializationInfo::setCategory(Category category)
             delete _node; // OPTIMIZE
             _node = node;
         }
+
+        _category = category;
     }
 }
 
 
-void SerializationInfo::setContext(SerializationContext* context)
-{
-    _context = context;
+// void SerializationInfo::setContext(SerializationContext* context)
+// {
+//     _context = context;
 
-    if(_node)
-    {
-        _node->setContext(context);
-    }
-}
+//     if(_node)
+//     {
+//         _node->setContext(context);
+//     }
+// }
 
 
 Pt::String* SerializationInfo::initString()
@@ -341,13 +373,8 @@ void SerializationInfo::getValue(short& s) const
 }
 
 
-void SerializationInfo::getValue(int& i) const
-{
-    long long l = 0;
-    this->getValue(l);
-    // TODO: consider SerializationError on overflow
-    i = static_cast<int>(l);
-}
+//void SerializationInfo::getValue(int& i) const
+
 
 
 void SerializationInfo::getValue(long& i) const
@@ -373,7 +400,26 @@ void SerializationInfo::setValue(long long l)
     if( category() == Context )
         return;
 
-    this->setCategory(Scalar);
+    //this->setCategory(Scalar);
+
+    SerializationNode* node = 0;
+    if( _context )
+    {
+        node = _context->get(Scalar);
+    }
+    else
+        node = new ValueNode();
+
+    if(_node )
+    {
+        if(_context)
+            _context->push(_node, _category);
+        else
+            delete _node;
+    }
+    _node = node;
+    _category = Scalar;
+
     static_cast<ValueNode*>(_node)->setInt(l);
 }
 
@@ -420,6 +466,7 @@ void SerializationInfo::setValue(unsigned long long ul)
         return;
 
     this->setCategory(Scalar);
+
     static_cast<ValueNode*>(_node)->setUInt(ul);
 }
 
@@ -578,7 +625,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 void SerializationInfo::removeMember(const std::string& name)
 {
-    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    if(this->category() == Struct || this->category() == Sequence)
     {
         ObjectNode* snode = static_cast<ObjectNode*>(_node);
 
@@ -625,7 +672,7 @@ SerializationInfo& SerializationInfo::addElement()
 
 SerializationInfo::Iterator SerializationInfo::begin()
 {
-    if( ! _node || (_node->category() != Struct && _node->category() != Sequence) )
+    if( ! _node || (this->category() != Struct && this->category() != Sequence) )
     {
         return SerializationInfo::Iterator(0);
     }
@@ -637,7 +684,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
 
 SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
-    if( ! _node || (_node->category() != Struct && _node->category() != Sequence) )
+    if( ! _node || (this->category() != Struct && this->category() != Sequence) )
     {
         return SerializationInfo::ConstIterator(0);
     }
@@ -649,7 +696,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 
 const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    if(this->category() == Struct || this->category() == Sequence)
     {
         const ObjectNode* snode = static_cast<const ObjectNode*>(_node);
         ConstIterator it( snode->begin() );
@@ -666,7 +713,7 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
 
 const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
-    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    if(this->category() == Struct || this->category() == Sequence)
     {
         ObjectNode* snode = (ObjectNode*) _node;
         ConstIterator it( snode->begin() );
@@ -683,7 +730,7 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 
 SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
-    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    if(this->category() == Struct || this->category() == Sequence)
     {
         ObjectNode* snode = (ObjectNode*) _node;
         Iterator it ( snode->begin() );
@@ -700,7 +747,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 
 size_t SerializationInfo::memberCount() const
 {
-    if(_node && (_node->category() == Struct || _node->category() == Sequence) )
+    if(this->category() == Struct || this->category() == Sequence)
     {
         return static_cast<const ObjectNode*>(_node)->size();
     }

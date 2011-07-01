@@ -99,7 +99,7 @@ class Serializer
 
         void queue(IDecomposer& dec)
         {
-            dec.setContext(_context);
+            dec.clear(_context);
             _stack.push_back(&dec);
         }
 
@@ -116,7 +116,7 @@ class Serializer
             _heap.push_back(dec);
             _stack.push_back(dec);
 
-            dec->setContext(_context);
+            dec->clear(_context);
             dec->begin(type, name);
         }
 

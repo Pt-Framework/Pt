@@ -81,7 +81,7 @@ class Deserializer
         void deserialize(T& type)
         {
             Composer<T> deser;
-            deser.setContext(_context);
+            deser.clear(_context);
             deser.begin(type);
 
             this->get(deser);
@@ -89,7 +89,7 @@ class Deserializer
 
         void begin(IComposer& composer)
         {
-            composer.setContext(_context);
+            composer.clear(_context);
             this->onBegin(composer);
         }
 
@@ -102,7 +102,7 @@ class Deserializer
             Composer<T>* composer = new Composer<T>;
             _current = composer;
 
-            composer->setContext(_context);
+            composer->clear(_context);
             composer->begin(type);
             this->onBegin(*composer);
         }

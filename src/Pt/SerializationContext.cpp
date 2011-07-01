@@ -222,7 +222,7 @@ void SerializationContext::push(SerializationInfo* si)
     SerializationNode* node = si->releaseNode();
 
     if(node)
-        this->push(node);
+        this->push(node, si->category());
 
     si->clear();
 
@@ -278,13 +278,13 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
         case SerializationInfo::Struct:
 			if( _cache->_objects.empty() )
 			{
-				node = new ObjectNode(category);
+				node = new ObjectNode(/*category*/);
 				break;
 		    }
 
             node = _cache->_objects.back();
 			_cache->_objects.pop_back();
-			node->setCategory(category);
+			//node->setCategory(category);
             break;
 
         case SerializationInfo::Context:
@@ -299,11 +299,11 @@ SerializationNode* SerializationContext::get(SerializationInfo::Category categor
 }
 
 
-void SerializationContext::push(SerializationNode* node)
+void SerializationContext::push(SerializationNode* node, SerializationInfo::Category category)
 {
     node->clear(*this);
 
-    switch( node->category() )
+    switch(category)
     {
         case SerializationInfo::Scalar:
 #ifdef ALLOCATOR

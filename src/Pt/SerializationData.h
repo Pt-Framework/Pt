@@ -41,19 +41,13 @@ class SerializationNode
 		virtual ~SerializationNode()
 		{}
 
-		SerializationInfo::Category category() const
-		{ return _category; }
+		// SerializationInfo::Category category() const
+		// { return _category; }
 
-		void setCategory(SerializationInfo::Category cat)
-		{ _category = cat; }
+		// void setCategory(SerializationInfo::Category cat)
+		// { _category = cat; }
 
-        virtual SerializationNode* toCategory(SerializationContext* context,
-                                              SerializationInfo::Category category)
-        {
-            return createNode(context, category);
-        }
-
-        virtual void setContext(SerializationContext* context) = 0;
+        //virtual void setContext(SerializationContext* context) = 0;
 
 		virtual void clear() = 0;
 
@@ -63,12 +57,12 @@ class SerializationNode
                                              SerializationInfo::Category category);
 
     protected:
-		SerializationNode(SerializationInfo::Category cat)
-		: _category(cat)
+		SerializationNode(/*SerializationInfo::Category cat*/)
+		//: _category(cat)
 		{}
 
 	private:
-		SerializationInfo::Category _category;
+		//SerializationInfo::Category _category;
 };
 
 
@@ -76,24 +70,15 @@ class ContextNode : public SerializationNode
 {
     public:
         ContextNode()
-        : SerializationNode(SerializationInfo::Context)
+        : SerializationNode(/*SerializationInfo::Context*/)
         , _context(0)
         {}
 
         virtual ~ContextNode()
 		{}
 
-        SerializationNode* toCategory(SerializationContext* context,
-                                      SerializationInfo::Category category)
-        {
-            if(category == SerializationInfo::Void)
-                return 0;
-
-            return this;
-        }
-
-        virtual void setContext(SerializationContext* context)
-        { _context = context; }
+        //virtual void setContext(SerializationContext* context)
+        //{ _context = context; }
 
 		virtual void clear()
         {
@@ -124,7 +109,7 @@ class ValueNode : public SerializationNode
 
     public:
         ValueNode()
-        : SerializationNode(SerializationInfo::Scalar)
+        : SerializationNode(/*SerializationInfo::Scalar*/)
         , _type(String)
         {}
 
@@ -304,15 +289,15 @@ class ValueNode : public SerializationNode
             }
         }
 
-        virtual void setContext(SerializationContext* context)
-        { }
+        //virtual void setContext(SerializationContext* context)
+        //{ }
 
         virtual void clear()
 		{
 			_type = ValueNode::String;
 
 			if( _value.size() )
-				_value.clear();
+				 _value.clear();
 		}
 
         virtual void clear(SerializationContext& context)
@@ -375,7 +360,7 @@ class ReferenceNode : public SerializationNode
 {
     public:
         ReferenceNode()
-        : SerializationNode(SerializationInfo::Reference)
+        : SerializationNode(/*SerializationInfo::Reference*/)
         {}
 
         const std::string& refId() const
@@ -390,15 +375,15 @@ class ReferenceNode : public SerializationNode
         void setAddress(void* addr)
         { _address = addr; }
 
-        virtual void setContext(SerializationContext* context)
-        { }
+        //virtual void setContext(SerializationContext* context)
+        //{ }
 
         virtual void clear()
         { _refid.clear(); }
 
         virtual void clear(SerializationContext& context)
         { _refid.clear(); }
-    
+
     private:
         void* _address;
         std::string _refid;
@@ -407,8 +392,8 @@ class ReferenceNode : public SerializationNode
 class ObjectNode : public SerializationNode
 {
     public:
-        ObjectNode(SerializationInfo::Category category)
-        : SerializationNode(category)
+        ObjectNode(/*SerializationInfo::Category category*/)
+        : SerializationNode(/*category*/)
         , _first(0)
         , _last(0)
         , _size(0)
@@ -483,13 +468,13 @@ class ObjectNode : public SerializationNode
         unsigned size() const
         { return _size; }
 
-        virtual void setContext(SerializationContext* context)
-        {
-			for(SerializationInfo* it = begin(); it != end(); it = it->sibling())
-			{
-				it->setContext(context);
-			}
-        }
+        // virtual void setContext(SerializationContext* context)
+        // {
+		// 	for(SerializationInfo* it = begin(); it != end(); it = it->sibling())
+		// 	{
+		// 		it->setContext(context);
+		// 	}
+        // }
 
 		virtual void clear()
 		{
@@ -555,7 +540,7 @@ inline SerializationNode* SerializationNode::createNode(SerializationContext* co
 
             case SerializationInfo::Sequence:
             case SerializationInfo::Struct:
-                node = new ObjectNode(category);
+                node = new ObjectNode(/*category*/);
                 break;
 
             case SerializationInfo::Context:

@@ -42,7 +42,7 @@ class IComposer
 
         virtual void clear() = 0;
 
-        virtual void setContext(SerializationContext* context) = 0;
+        virtual void clear(SerializationContext* context) = 0;
 
         virtual void setName(const std::string& name) = 0;
 
@@ -112,9 +112,9 @@ class Composer : public IComposer
             _current = 0;
         }
 
-        virtual void setContext(SerializationContext* context)
+        virtual void clear(SerializationContext* context)
         {
-            _si.setContext(context);
+            _si.clear(context);
         }
 
         virtual void setName(const std::string& name)

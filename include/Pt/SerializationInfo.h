@@ -66,7 +66,8 @@ class PT_API SerializationInfo
 
     public:
         SerializationInfo()
-        : _node(0)
+        : _category(Void)
+        , _node(0)
         , _context(0)
         , _parent(0)
         , _next(0)
@@ -74,7 +75,8 @@ class PT_API SerializationInfo
         { }
 
         explicit SerializationInfo(SerializationContext* context)
-        : _node( 0 )
+        : _category(Void)
+        , _node( 0 )
         , _context(context)
         , _parent(0)
         , _next(0)
@@ -93,6 +95,8 @@ class PT_API SerializationInfo
     public:
         void clear();
 
+        void clear(SerializationContext* context);
+
         SerializationNode* releaseNode();
 
         Category category() const;
@@ -105,7 +109,7 @@ class PT_API SerializationInfo
         SerializationContext* context() const
         { return _context; }
 
-        void setContext(SerializationContext* context);
+        //void setContext(SerializationContext* context);
 
         SerializationSurrogate getSurrogate(const char* name) const;
 
@@ -163,8 +167,13 @@ class PT_API SerializationInfo
         void setValue(short s)
         { this->setValue( static_cast<long long>(s) ); }
 
-        void getValue(int& i) const;
-
+        inline void getValue(int& i) const
+        {
+            long long l = 0;
+            this->getValue(l);
+            // TODO: consider SerializationError on overflow
+            i = static_cast<int>(l);
+        }
         void setValue(int i)
         { this->setValue( static_cast<long long>(i) ); }
 
@@ -355,6 +364,7 @@ class PT_API SerializationInfo
         Pt::String* initString();
 
     private:
+        Category _category;
         mutable SerializationNode* _node;
         SerializationContext* _context;
         SerializationInfo* _parent;
@@ -362,7 +372,7 @@ class PT_API SerializationInfo
         std::string _name;
         std::string _type;
         std::string _id;
-        mutable const void* _bound;
+        mutable const void* _bound; // TODO: could be bool
 };
 
 class SerializationInfo::Iterator

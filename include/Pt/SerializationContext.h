@@ -100,7 +100,7 @@ class PT_API SerializationContext
 
         SerializationNode* get(SerializationInfo::Category category);
 
-        void push(SerializationNode* node);
+        void push(SerializationNode* node, SerializationInfo::Category category);
 
         void setSurrogates(const char* name, Deflate def, Inflate inf);
 

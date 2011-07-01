@@ -62,6 +62,9 @@ class PT_XML_API XmlDeserializer : public Deserializer
                 virtual void clear()
                 { _composer = 0; }
 
+                virtual void clear(SerializationContext* ctx)
+                { _composer = 0; }
+
                 void begin(IComposer& comp)
                 { _composer = &comp; }
 

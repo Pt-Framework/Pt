@@ -88,7 +88,7 @@ class IntComposer : public Pt::IComposer
         virtual void clear()
         { }
 
-        virtual void setContext(Pt::SerializationContext*)
+        virtual void clear(Pt::SerializationContext*)
         { }
 
         virtual void setName(const std::string& name)
@@ -107,17 +107,17 @@ class IntComposer : public Pt::IComposer
 
         virtual void setInt(long l)
         {
-            _si.setValue(l);
-            //*_type = static_cast<int>(l);
+            //_si.setValue(l);
+            *_type = static_cast<int>(l);
         }
 
         virtual Pt::IComposer* finish()
         {
-            _si >>= *_type;
+            //_si >>= *_type;
             return _parent;
         }
 
-        Pt::SerializationInfo _si;
+        //Pt::SerializationInfo _si;
     private:
         value_type* _type;
         IComposer* _parent;
@@ -146,7 +146,7 @@ class VectorComposer : public Pt::IComposer
         virtual void clear()
         { }
 
-        virtual void setContext(Pt::SerializationContext*)
+        virtual void clear(Pt::SerializationContext*)
         { }
 
         virtual void setName(const std::string& name)
@@ -241,6 +241,7 @@ void SerializationTest::Benchmark1()
     Pt::System::Clock clock;
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
+    //while(true)
     {
         input.clear(); // 105 000
         input.seekg(std::ios::beg);
@@ -358,7 +359,7 @@ void SerializationTest::Benchmark3()
     for(unsigned n = 0; n < 50000; ++n)
     {
         Pt::Composer< std::vector<int> >* com = new Pt::Composer< std::vector<int> >();
-        com->setContext(&context);
+        com->clear(&context);
         com->begin(vec);
         Pt::IComposer* composer = com;
 

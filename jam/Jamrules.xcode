@@ -51,7 +51,7 @@ if $(CONFIG:L) = debug
 else
 {
 	CCFLAGS += -DNDEBUG ;
-	OPTIM	  ?= -O2 ;
+	OPTIM	  ?= -g -O2 ;
 }
 
 WARN ?= -Wall ;
