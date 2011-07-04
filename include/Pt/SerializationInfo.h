@@ -61,26 +61,42 @@ class PT_API SerializationInfo
             Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4, Context = 5
         };
 
+        enum Type {
+            Unknown, Bool, String, Int, UInt, Float
+        };
+
+        // type info layout
+        // 0 - public
+        // 1 - scalar / compound
+        // 2 - type id
+        // 3 - type id
+        // 4 - type id
+        // 5 - type id
+        // 6 - type id
+        // 7 - type id
+
         class Iterator;
         class ConstIterator;
+
+        friend class SerializationContext;
 
     public:
         SerializationInfo()
         : _category(Void)
-        , _node(0)
         , _context(0)
         , _parent(0)
         , _next(0)
         , _bound(0)
+        , _type(Unknown)
         { }
 
         explicit SerializationInfo(SerializationContext* context)
         : _category(Void)
-        , _node( 0 )
         , _context(context)
         , _parent(0)
         , _next(0)
         , _bound(0)
+        , _type(Unknown)
         { }
 
         ~SerializationInfo();
@@ -97,19 +113,22 @@ class PT_API SerializationInfo
 
         void clear(SerializationContext* context);
 
-        SerializationNode* releaseNode();
+        bool isScalar() const
+        { return _category == Scalar; }
 
-        Category category() const;
+        bool isStruct() const
+        { return _category == Struct; }
 
-        void setCategory(Category category);
+        bool isSequence() const
+        { return _category == Sequence; }
 
-        void setContextual()
-        { this->setCategory(Context); }
+        bool isReference() const
+        { return _category == Reference; }
+
+        void setContextual();
 
         SerializationContext* context() const
         { return _context; }
-
-        //void setContext(SerializationContext* context);
 
         SerializationSurrogate getSurrogate(const char* name) const;
 
@@ -124,13 +143,13 @@ class PT_API SerializationInfo
         { return _parent; }
 
         const std::string& typeName() const
-        { return _type; }
+        { return _typeName; }
 
         void setTypeName(const std::string& type)
-        { _type = type; }
+        { _typeName = type; }
 
         void setTypeName(const char* type)
-        { _type = type; }
+        { _typeName = type; }
 
         const std::string& name() const
         { return _name; }
@@ -152,15 +171,47 @@ class PT_API SerializationInfo
 
         /** @brief Returns the content as string.
         */
-        const Pt::String& toString() const;
+        Pt::String toString() const
+        {
+            Pt::String value;
+            this->getValue(value);
+            return value;
+        }
+
+        void getValue(std::string& s) const
+        {
+            Pt::String value;
+            this->getValue(value);
+            convert(s, value);
+        }
+
+        void setValue(const std::string& s)
+        {
+            Pt::String value;
+            convert(value, s);
+            this->setValue(value);
+            this->setTypeName("string");
+        }
 
         void getValue(Pt::String& s) const;
 
         void setValue(const Pt::String& s);
 
+        void getValue(char& c) const;
+
+        void setValue(char c);
+
         void getValue(bool& b) const;
 
         void setValue(bool b);
+
+        inline void getValue(signed char& c) const
+        {
+            long long l = 0;
+            this->getValue(l);
+            // TODO: consider SerializationError on overflow
+            c = static_cast<signed char>(l);
+        }
 
         void getValue(short& s) const;
 
@@ -174,6 +225,7 @@ class PT_API SerializationInfo
             // TODO: consider SerializationError on overflow
             i = static_cast<int>(l);
         }
+
         void setValue(int i)
         { this->setValue( static_cast<long long>(i) ); }
 
@@ -185,6 +237,14 @@ class PT_API SerializationInfo
         void getValue(long long& l) const;
 
         void setValue(long long l);
+
+        inline void getValue(unsigned char& c) const
+        {
+            long long l = 0;
+            this->getValue(l);
+            // TODO: consider SerializationError on overflow
+            c = static_cast<unsigned char>(l);
+        }
 
         void getValue(unsigned short& us) const;
 
@@ -213,6 +273,8 @@ class PT_API SerializationInfo
         void getValue(double& f) const;
 
         void setValue(double f);
+
+        void setSequence();
 
         bool beginSave(const void* p);
 
@@ -298,37 +360,6 @@ class PT_API SerializationInfo
 
         void format(Formatter& formatter);
 
-    public:
-        /** @brief Deserialization of flat child value types
-        */
-        template <typename T>
-        void getValue(T& value) const
-        {
-            convert( value, this->toString() );
-        }
-
-        /** @brief Serialization of flat data-types
-        */
-        template <typename T>
-        void setValue(const T& value)
-        {
-            Pt::String* str = initString();
-            if(str)
-                convert( *str, value );
-        }
-
-        /** @internal DEPRECATED
-        */
-        template <typename T>
-        void toValue(T& value) const
-        { this->getValue(value); }
-
-        /** @internal DEPRECATED
-        */
-        template <typename T>
-        T toValue() const
-        { return convert<T>( this->toString() ); }
-
         /** @internal DEPRECATED
             This is needed as a workaround for some compilers (GCC 3.x) to
             allow access to 'T getValue(const std::string& name) const'.
@@ -336,43 +367,60 @@ class PT_API SerializationInfo
         template <typename T>
         friend T getValue(const std::string& name, SerializationInfo* si);
 
-        /** @internal DEPRECATED
+        /** @internal rename to getMember
         */
         template <typename T>
         T getValue(const std::string& name) const
         {
             T value;
-            this->getMember(name).toValue(value);
+            this->getMember(name).getValue(value);
             return value;
         }
-
-        /** @internal DEPRECATED
-        */
-        template <typename T>
-        void addValue(const std::string& name, const T& value)
-        { this->addMember(name) <<= value; }
-
-        /** @internal DEPRECATED
-        */
-        template <typename T>
-        void getValue(const std::string& name, T& value) const
-        { this->getMember(name) >>= value; }
 
     protected:
         void load(void* fixme, FixupHandler fh, unsigned mid) const;
 
-        Pt::String* initString();
+        Category category() const;
+
+        void clearValue();
+
+        SerializationInfo& addChild();
+
+        struct Ref
+        {
+            void* address;
+            char refid[sizeof(std::string)];
+        };
+
+        struct Seq
+        {
+            SerializationInfo* first;
+            SerializationInfo* last;
+            size_t size;
+        };
+
+        union Variant
+        {
+            bool b;
+            long long l;
+            unsigned long long ul;
+            double f;
+            char str[sizeof(Pt::String)];
+            Ref ref;
+            Seq seq;
+        };
 
     private:
         Category _category;
-        mutable SerializationNode* _node;
         SerializationContext* _context;
         SerializationInfo* _parent;
         SerializationInfo* _next;
         std::string _name;
-        std::string _type;
+        std::string _typeName;
         std::string _id;
         mutable const void* _bound; // TODO: could be bool
+        Type _type;
+        mutable Variant _value;
 };
 
 class SerializationInfo::Iterator
@@ -846,7 +894,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
     }
 
     si.setTypeName("array");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -873,7 +921,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
     }
 
     si.setTypeName("list");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -901,7 +949,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
     }
 
     si.setTypeName("deque");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -945,7 +993,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
     }
 
     si.setTypeName("set");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -982,7 +1030,7 @@ inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& mu
     }
 
     si.setTypeName("multiset");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -1034,7 +1082,7 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
     }
 
     si.setTypeName("map");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 
@@ -1068,7 +1116,7 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
     }
 
     si.setTypeName("multimap");
-    si.setCategory(SerializationInfo::Sequence);
+    si.setSequence();
 }
 
 } // namespace Pt

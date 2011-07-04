@@ -96,7 +96,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 
 void operator >>=(const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& color)
 {
-    Pt::String s = si.toValue<Pt::String>();
+    Pt::String s = si.toString();
     color = Gfx::ARgbColor::fromHtml(s);
 }
 

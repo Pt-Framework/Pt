@@ -605,7 +605,7 @@ void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
 template <typename T, typename M, typename D >
 void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 {
-    if(li.in().category() == Pt::SerializationInfo::Reference)
+    if( li.in().isReference() )
     {
         li.in().loadReference(sp);
     }

@@ -40,6 +40,8 @@ namespace XmlRpc {
 
 class PT_XMLRPC_API Fault : public std::exception
 {
+    friend void operator >>=(const Pt::SerializationInfo&, Fault&);
+
     public:
         enum ErrorCodes {
             parseError                  = -32700,
@@ -97,8 +99,8 @@ class PT_XMLRPC_API Fault : public std::exception
 
 inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
 {
-    fault.setRc( si.getValue<int>("faultCode") );
-    fault.setText( si.getValue<std::string>("faultString") );
+    si.getMember("faultCode") >>= fault._rc;
+    si.getMember("faultString") >>= fault._msg;
 }
 
 

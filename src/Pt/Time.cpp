@@ -105,7 +105,8 @@ void convert(std::string& str, const Time& time)
 
 void operator >>=(const SerializationInfo& si, Time& time)
 {
-    std::string s = si.toValue<std::string>();
+    std::string s;
+    si.getValue(s);
     convert(time, s);
 
     //unsigned hour = si.getValue<unsigned>("hour");

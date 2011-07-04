@@ -136,7 +136,8 @@ void convert(std::string& str, const DateTime& dt)
 
 void operator >>=(const SerializationInfo& si, DateTime& datetime)
 {
-    std::string s = si.toValue<std::string>();
+    std::string s;
+    si.getValue(s);
     convert(datetime, s);
 
     //Date date(1,1,1);

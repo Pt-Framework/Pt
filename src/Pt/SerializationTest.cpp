@@ -416,21 +416,17 @@ void SerializationTest::BuiltInTypesTest()
     bool boolVal1 = true;
     bool boolVal2;
     si <<= boolVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "bool");
-    si.toValue(boolVal2);
-    PT_UNIT_ASSERT(boolVal2 == true);
-    PT_UNIT_ASSERT(si.toString() == Pt::String(L"true") );
     si >>= boolVal2;
     PT_UNIT_ASSERT(boolVal2 == true);
+    PT_UNIT_ASSERT(si.toString() == Pt::String(L"true") );
 
     char charVal1 = 'c';
-    char charVal2;
+    char charVal2 = 'x';
     si <<= charVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "char");
-    si.toValue(charVal2);
-    PT_UNIT_ASSERT(charVal2 == 'c');
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"c") );
     si >>= charVal2;
     PT_UNIT_ASSERT(charVal2 == 'c');
@@ -438,10 +434,8 @@ void SerializationTest::BuiltInTypesTest()
     signed char sigCharVal1 = -127;
     signed char sigCharVal2;
     si <<= sigCharVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "char");
-    si.toValue(sigCharVal2);
-    PT_UNIT_ASSERT(sigCharVal2 == -127);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-127") );
     si >>= sigCharVal2;
     PT_UNIT_ASSERT(sigCharVal2 == -127);
@@ -449,10 +443,8 @@ void SerializationTest::BuiltInTypesTest()
     unsigned char usigCharVal1 = 255;
     unsigned char usigCharVal2;
     si <<= usigCharVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "char");
-    si.toValue(usigCharVal2);
-    PT_UNIT_ASSERT(usigCharVal2 == 255);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"255") );
     si >>= usigCharVal2;
     PT_UNIT_ASSERT(usigCharVal2 == 255);
@@ -460,10 +452,8 @@ void SerializationTest::BuiltInTypesTest()
     short shortVal1 = -32767;
     short shortVal2;
     si <<= shortVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(shortVal2);
-    PT_UNIT_ASSERT(shortVal2 == -32767);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-32767") );
     si >>= shortVal2;
     PT_UNIT_ASSERT(shortVal2 == -32767);
@@ -471,10 +461,8 @@ void SerializationTest::BuiltInTypesTest()
     unsigned short ushortVal1 = 65535;
     unsigned short ushortVal2;
     si <<= ushortVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(ushortVal2);
-    PT_UNIT_ASSERT(ushortVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= ushortVal2;
     PT_UNIT_ASSERT(ushortVal2 == 65535);
@@ -482,10 +470,8 @@ void SerializationTest::BuiltInTypesTest()
     int intVal1 = -32767;
     int intVal2;
     si <<= intVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(intVal2);
-    PT_UNIT_ASSERT(intVal2 == -32767);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-32767") );
     si >>= intVal2;
     PT_UNIT_ASSERT(intVal2 == -32767);
@@ -493,10 +479,8 @@ void SerializationTest::BuiltInTypesTest()
     unsigned int uintVal1 = 65535;
     unsigned int uintVal2;
     si <<= uintVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(uintVal2);
-    PT_UNIT_ASSERT(uintVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= uintVal2;
     PT_UNIT_ASSERT(uintVal2 == 65535);
@@ -504,10 +488,8 @@ void SerializationTest::BuiltInTypesTest()
     long longVal1 = -32767;
     long longVal2;
     si <<= longVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(longVal2);
-    PT_UNIT_ASSERT(longVal2 == -32767);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-32767") );
     si >>= longVal2;
     PT_UNIT_ASSERT(longVal2 == -32767);
@@ -515,10 +497,8 @@ void SerializationTest::BuiltInTypesTest()
     unsigned long ulongVal1 = 65535;
     unsigned long ulongVal2;
     si <<= ulongVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "int");
-    si.toValue(ulongVal2);
-    PT_UNIT_ASSERT(ulongVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= ulongVal2;
     PT_UNIT_ASSERT(ulongVal2 == 65535);
@@ -526,10 +506,8 @@ void SerializationTest::BuiltInTypesTest()
     float floatVal1 = 77.3547f;
     float floatVal2;
     si <<= floatVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "double");
-    si.toValue(floatVal2);
-    PT_UNIT_ASSERT( floatVal2 > 77.3 && floatVal2 < 77.4f );
     PT_UNIT_ASSERT(si.toString().find(Pt::String(L"77.354"))== 0 );
     si >>= floatVal2;
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
@@ -537,12 +515,10 @@ void SerializationTest::BuiltInTypesTest()
     double doubleVal1 = 198.8196;
     double doubleVal2;
     si <<= doubleVal1;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Scalar);
+    PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT(si.typeName() == "double");
-    si.toValue(doubleVal2);
-    PT_UNIT_ASSERT( doubleVal2 > 198.8 && doubleVal2 < 198.9 );
-    Pt::String asString = si.toString();
-    PT_UNIT_ASSERT( asString.find(L"198.8196") != Pt::String::npos );
+    Pt::String toString = si.toString();
+    PT_UNIT_ASSERT( toString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
     PT_UNIT_ASSERT(doubleVal2 == 198.8196);
 }
@@ -560,7 +536,7 @@ void SerializationTest::StdVectorTest()
 
     Pt::SerializationInfo si;
     si <<= iv;
-    PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Sequence);
+    PT_UNIT_ASSERT(si.isSequence());
 
     Pt::SerializationInfo::Iterator it = si.begin();
     int counter = 0;
@@ -568,9 +544,9 @@ void SerializationTest::StdVectorTest()
 
     while(it!=si.end())
     {
-        it->toValue(intValue);
+        it->getValue(intValue);
 
-        PT_UNIT_ASSERT(it->category() == Pt::SerializationInfo::Scalar);
+        PT_UNIT_ASSERT(it->isScalar());
         PT_UNIT_ASSERT(intValue == counter);
 
         ++it;

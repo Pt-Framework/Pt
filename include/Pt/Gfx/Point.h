@@ -227,8 +227,8 @@ namespace Pt {
          */
         inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<Pt::uint8_t>& point)
         {
-            si.addValue("x", static_cast<Pt::uint16_t>(point.x()));
-            si.addValue("y", static_cast<Pt::uint16_t>(point.y()));
+            si.addMember("x") <<=  static_cast<Pt::uint16_t>(point.x());
+            si.addMember("y") <<= static_cast<Pt::uint16_t>(point.y());
             si.setTypeName("Point");
         }
 
@@ -237,8 +237,8 @@ namespace Pt {
         template <typename T>
         inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<T>& point)
         {
-            si.addValue("x", point.x());
-            si.addValue("y", point.y());
+            si.addMember("x") <<= point.x();
+            si.addMember("y") <<= point.y();
             si.setTypeName("Point");
         }
 
@@ -246,8 +246,9 @@ namespace Pt {
          */
         inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<Pt::uint8_t>& point)
         {
-            Pt::uint16_t x = si.getValue<Pt::uint16_t>("x");
-            Pt::uint16_t y = si.getValue<Pt::uint16_t>("y");
+            Pt::uint16_t x, y;
+            si.getMember("x") >>= x;
+            si.getMember("y") >>= y;
 
             point.setX( static_cast<Pt::uint8_t>(x) );
             point.setY( static_cast<Pt::uint8_t>(y)) ;
@@ -258,10 +259,9 @@ namespace Pt {
         template <typename T>
         inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<T>& point)
         {
-            T x;
-            T y;
-            si.getValue("x", x);
-            si.getValue("y", y);
+            T x, y;
+            si.getMember("x") >>= x;
+            si.getMember("y") >>= y;
 
             point.setX(x);
             point.setY(y);
