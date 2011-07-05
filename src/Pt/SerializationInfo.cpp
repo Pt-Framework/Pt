@@ -56,9 +56,11 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
                 break;
 
             case String:
+            {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
                 formatter.addValue( _name, _typeName, *str, _id );
                 break;
+            }
 
             default:
                 break;
@@ -132,9 +134,11 @@ void SerializationInfo::format(Formatter& formatter)
                 break;
 
             case String:
+            {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
                 formatter.addValue( _name, _typeName, *str, _id );
                 break;
+            }
 
             default:
                 break;
@@ -462,9 +466,11 @@ void SerializationInfo::getValue( bool& value) const
             break;
 
         case String:
+        {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
             break;
+        }
 
         default:
             break;
@@ -527,9 +533,11 @@ void SerializationInfo::getValue(long long & l) const
             break;
 
         case String:
+        {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
             break;
+        }
 
         default:
             break;
@@ -602,9 +610,11 @@ void SerializationInfo::getValue(unsigned long long & l) const
             break;
 
         case String:
+        {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
             break;
+        }
 
         default:
             break;
@@ -658,9 +668,11 @@ void SerializationInfo::getValue( double& value) const
             break;
 
         case String:
+        {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
             break;
+        }
 
         default:
             break;

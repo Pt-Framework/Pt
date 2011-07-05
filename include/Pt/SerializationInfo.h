@@ -44,7 +44,6 @@ namespace Pt {
 
 class SerializationSurrogate;
 class SerializationContext;
-class SerializationNode;
 class Formatter;
 
 /** @brief Represents arbitrary types during serialization.
@@ -62,7 +61,7 @@ class PT_API SerializationInfo
         };
 
         enum Type {
-            Unknown, Bool, String, Int, UInt, Float
+            Unknown = 0, Bool = 1, String = 2, Int = 3, UInt = 4, Float = 5
         };
 
         // type info layout
