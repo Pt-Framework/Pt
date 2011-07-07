@@ -55,7 +55,7 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
                 formatter.addFloat( _name, _value.f, _id );
                 break;
 
-            case String:
+            case Str:
             {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
                 formatter.addValue( _name, _typeName, *str, _id );
@@ -133,7 +133,7 @@ void SerializationInfo::format(Formatter& formatter)
                 formatter.addFloat( _name, _value.f, _id );
                 break;
 
-            case String:
+            case Str:
             {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
                 formatter.addValue( _name, _typeName, *str, _id );
@@ -258,7 +258,7 @@ void SerializationInfo::clearValue()
             }
         }
     }
-    else if(_type == String)
+    else if(_type == Str)
     {
         Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
         str->~basic_string();
@@ -371,7 +371,7 @@ void SerializationInfo::getValue(Pt::String& s) const
     if( this->category() != Scalar )
         throw SerializationError("not a value");
 
-    if(_type == String)
+    if(_type == Str)
     {
         const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
         s = *str;
@@ -404,7 +404,7 @@ void SerializationInfo::setValue(const Pt::String& value)
     {
         new(_value.str) Pt::String(value);
     }
-    else if(_type != String)
+    else if(_type != Str)
     {
         this->clearValue();
         new(_value.str) Pt::String(value);
@@ -416,7 +416,7 @@ void SerializationInfo::setValue(const Pt::String& value)
     }
 
     _category = Scalar;
-    _type = String;
+    _type = Str;
 }
 
 
@@ -465,7 +465,7 @@ void SerializationInfo::getValue( bool& value) const
             value = 0 != _value.f;
             break;
 
-        case String:
+        case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
@@ -532,7 +532,7 @@ void SerializationInfo::getValue(long long & l) const
             l =  static_cast<long long>(_value.f);
             break;
 
-        case String:
+        case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
@@ -609,7 +609,7 @@ void SerializationInfo::getValue(unsigned long long & l) const
             l =  static_cast<unsigned long long>(_value.f);
             break;
 
-        case String:
+        case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
@@ -667,7 +667,7 @@ void SerializationInfo::getValue( double& value) const
             value = _value.f;
             break;
 
-        case String:
+        case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
