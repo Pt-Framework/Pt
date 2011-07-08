@@ -61,7 +61,7 @@ class PT_API SerializationInfo
         };
 
         enum Type {
-            Unknown = 0, Bool = 1, Str = 2, Int = 3, UInt = 4, Float = 5
+            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5
         };
 
         // type info layout

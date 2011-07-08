@@ -39,7 +39,7 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
     {
         switch(_type)
         {
-            case Bool:
+            case Boolean:
                 formatter.addBool( _name, _value.b, _id );
                 break;
 
@@ -117,7 +117,7 @@ void SerializationInfo::format(Formatter& formatter)
     {
         switch(_type)
         {
-            case Bool:
+            case Boolean:
                 formatter.addBool( _name, _value.b, _id );
                 break;
 
@@ -376,7 +376,7 @@ void SerializationInfo::getValue(Pt::String& s) const
         const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
         s = *str;
     }
-    else if(_type ==  Bool)
+    else if(_type ==  Boolean)
     {
         convert(s, _value.b);
     }
@@ -449,7 +449,7 @@ void SerializationInfo::getValue( bool& value) const
 
     switch(_type)
     {
-        case Bool:
+        case Boolean:
             value = _value.b;
             break;
 
@@ -487,7 +487,7 @@ void SerializationInfo::setValue(bool value)
 
     _category = Scalar;
     _value.b = value;
-    _type = Bool;
+    _type = Boolean;
 }
 
 
@@ -516,7 +516,7 @@ void SerializationInfo::getValue(long long & l) const
 
     switch(_type)
     {
-        case Bool:
+        case Boolean:
             l =  static_cast<long long>(_value.b);
             break;
 
@@ -593,7 +593,7 @@ void SerializationInfo::getValue(unsigned long long & l) const
 
     switch(_type)
     {
-        case Bool:
+        case Boolean:
             l =  static_cast<unsigned long long>(_value.b);
             break;
 
@@ -651,7 +651,7 @@ void SerializationInfo::getValue( double& value) const
 
     switch(_type)
     {
-        case Bool:
+        case Boolean:
             value = static_cast<double>(_value.b);
             break;
 
