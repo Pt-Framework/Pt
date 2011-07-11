@@ -75,7 +75,7 @@ class BasicSurrogate : public ISurrogate
 
         virtual SerializationInfo::Value* decompose(const void* type)
         {
-            const T* type = reinterpret_cast<const T*>(type);
+            const T* t = reinterpret_cast<const T*>(type);
             V* value = new V;
             return value;
         }
