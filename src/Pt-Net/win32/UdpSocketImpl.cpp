@@ -103,8 +103,8 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
                 this->close();
         }
 
-		if( it->ai_family == AF_INET6 )
-			continue; //This is a workaround!!!! TODO: Broadcast for IPV6 
+		if( it->ai_family == AF_INET6 && _broadcast)
+			continue;
 
         if( _fd == INVALID_SOCKET )
             _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
