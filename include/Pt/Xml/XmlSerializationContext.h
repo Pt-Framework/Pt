@@ -36,9 +36,41 @@ namespace Pt {
 
 namespace Xml {
 
+class XmlFormatter;
+
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
+        class Value : public SerializationInfo::Value
+        {
+            public:
+                virtual ~Value() {}
+
+                virtual const std::type_info& typeInfo() const
+                {
+                    return typeid(XmlSerializationContext::Value);
+                }
+
+                virtual void format(XmlFormatter& formatter, const std::string& name, const std::string& id) const = 0;
+        };
+
+        class Date : public Value
+        {
+            public:
+                Date()
+                {}
+
+                void set(const std::string& isodate)
+                {
+                    _isodate = isodate;
+                }
+
+                virtual void format(XmlFormatter& formatter, const std::string& name, const std::string& id) const;
+
+            private:
+                std::string _isodate;
+        };
+
         XmlSerializationContext();
 
         //! @brief Destructor

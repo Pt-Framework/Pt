@@ -66,6 +66,7 @@ inline void convert(int& n, const Pt::String& str)
 #include "Pt/SerializationInfo.h"
 #include "Pt/Deserializer.h"
 
+
 class IntComposer : public Pt::IComposer
 {
     public:
@@ -358,10 +359,10 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        Pt::Composer< std::vector<int> >* com = new Pt::Composer< std::vector<int> >();
-        com->clear(&context);
-        com->begin(vec);
-        Pt::IComposer* composer = com;
+        Pt::Composer< std::vector<int> > com;
+        com.clear(&context);
+        com.begin(vec);
+        Pt::IComposer* composer = &com;
 
         input.clear();
         input.seekg(std::ios::beg);
@@ -397,8 +398,6 @@ void SerializationTest::Benchmark3()
         composer = composer->finish();
 
         composer->finish();
-
-        delete com;
 
         u += vec.size();
     }

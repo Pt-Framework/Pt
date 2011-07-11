@@ -29,6 +29,7 @@
 #define Pt_SerializationContext_h
 
 #include <Pt/Api.h>
+#include <Pt/TypeInfo.h>
 #include <Pt/SerializationInfo.h>
 #include <typeinfo>
 #include <string>
@@ -38,6 +39,48 @@ namespace Pt {
 class SerializationNode;
 class SerializationCache;
 class SerializationSurrogate;
+
+class ISurrogate
+{
+    public:
+        virtual ~ISurrogate()
+        {}
+
+        const std::type_info& valueType() const
+        {   return *_valueType; }
+
+        virtual void compose(void* type, const SerializationInfo::Value& value) = 0;
+
+        virtual SerializationInfo::Value* decompose(const void* type) = 0;
+
+    protected:
+        ISurrogate(const std::type_info& valtype)
+        : _valueType(&valtype)
+        {}
+
+    private:
+        const std::type_info* _valueType;
+};
+
+template <typename T, typename V>
+class BasicSurrogate : public ISurrogate
+{
+    public:
+        BasicSurrogate()
+        : ISurrogate( typeid(T) )
+        {}
+
+        virtual void compose(void* type, const SerializationInfo::Value& value)
+        {}
+
+        virtual SerializationInfo::Value* decompose(const void* type)
+        {
+            const T* type = reinterpret_cast<const T*>(type);
+            V* value = new V;
+            return value;
+        }
+};
+
 
 class PT_API SerializationContext
 {
@@ -102,8 +145,45 @@ class PT_API SerializationContext
 
         SerializationSurrogate getSurrogate(const char* name);
 
+        void registerSurrogate(const std::type_info& ti, ISurrogate* surrogate)
+        {
+            _surrmap[ti] = surrogate;
+        }
+
+        template <typename T>
+        SerializationInfo::Value* decompose(const T& type)
+        {
+            Pt::TypeInfo toType = typeid(T);
+
+            if( _surrmap.find( toType ) != _surrmap.end() )
+            {
+                return _surrmap[toType]->decompose(&type);
+            }
+
+            return 0;
+        }
+
+        template <typename T>
+        bool compose(const SerializationInfo::Value& value, T& type)
+        {
+            Pt::TypeInfo toType = typeid(T);
+            Pt::TypeInfo valueType = value.typeInfo();
+
+            if( _surrmap.find( toType ) != _surrmap.end() )
+            {
+                if( _surrmap[toType]->valueType() == valueType)
+                {
+                    _surrmap[toType]->compose(&type, &value);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     private:
         SerializationCache* _cache;
+        std::map<Pt::TypeInfo, ISurrogate*> _surrmap;
         bool _refsEnabled;
 };
 

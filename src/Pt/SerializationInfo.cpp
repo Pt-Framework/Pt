@@ -263,6 +263,10 @@ void SerializationInfo::clearValue()
         Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
         str->~basic_string();
     }
+    else if(_type == Val)
+    {
+        delete _value.val;
+    }
     else if(_category == Reference)
     {
         std::string* str = reinterpret_cast<std::string*>(_value.ref.refid);
@@ -690,6 +694,19 @@ void SerializationInfo::setValue(double value)
     _category = Scalar;
     _value.f = value;
     _type = Float;
+}
+
+
+void SerializationInfo::setValue(Value* value)
+{
+    if( category() == Context )
+        return;
+
+    this->clearValue();
+
+    _category = Scalar;
+    _value.val = value;
+    _type = Val;
 }
 
 

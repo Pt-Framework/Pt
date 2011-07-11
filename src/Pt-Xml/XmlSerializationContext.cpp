@@ -26,10 +26,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/XmlSerializationContext.h"
+#include "Pt/Xml/XmlFormatter.h"
 
 namespace Pt {
 
 namespace Xml {
+
+
+void XmlSerializationContext::Date::format(XmlFormatter& formatter, const std::string& name,
+                                          const std::string& id) const
+{
+    formatter.addValue(name, "Pt::Date", Pt::String::widen(_isodate), id);
+}
+
 
 XmlSerializationContext::XmlSerializationContext()
 {

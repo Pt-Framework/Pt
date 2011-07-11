@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/XmlFormatter.h"
+#include "Pt/Xml/XmlSerializationContext.h"
 #include "Pt/Xml/XmlWriter.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
@@ -40,71 +41,17 @@ namespace Pt {
 
 namespace Xml {
 
-class DateFormatter : public XmlFormatter::Surrogate
-{
-    public:
-        virtual ~DateFormatter() {}
-
-        virtual void beginObject(Formatter& formatter, const std::string& name,
-                                 const std::string& type, const std::string& id)
-        {
-            _name = name;
-            _id = id;
-        }
-
-        virtual void addInt(Formatter& formatter, const std::string& name,
-                            long long value, const std::string& id)
-        {
-            if(name == "year")
-                _year = value;
-            else if(name == "month")
-                _month = value;
-            else if(name == "day")
-                _day = value;
-        }
-
-        virtual void addUInt(Formatter& formatter, const std::string& name,
-                             unsigned long long value, const std::string& id)
-        {
-            if(name == "year")
-                _year = value;
-            else if(name == "month")
-                _month = value;
-            else if(name == "day")
-                _day = value;
-        }
-
-        virtual void finishObject(Formatter& formatter)
-        {
-            Pt::Date dt(_year, _month, _day);
-            std::string s = dt.toIsoString();
-            formatter.addValue(_name, "Pt::Date", Pt::String::widen(s), _id);
-        }
-
-    private:
-        std::string _name;
-        std::string _id;
-        int _year;
-        unsigned _month;
-        unsigned _day;
-};
-
-
 XmlFormatter::XmlFormatter()
 : _writer(0)
 , _deleter(0)
-, _surr(0)
 {
-    _surrogates["Pt::Date"] = new DateFormatter();
 }
 
 
 XmlFormatter::XmlFormatter(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
-, _surr(0)
 {
-    _surrogates["Pt::Date"] = new DateFormatter();
     _writer = _deleter.get();
 }
 
@@ -112,21 +59,13 @@ XmlFormatter::XmlFormatter(std::ostream& os)
 XmlFormatter::XmlFormatter(XmlWriter* writer)
 : _writer(writer)
 , _deleter(0)
-, _surr(0)
 {
-    _surrogates["Pt::Date"] = new DateFormatter();
 }
 
 
 XmlFormatter::~XmlFormatter()
 {
     this->detach();
-
-    std::map<std::string, Surrogate*>::iterator it = _surrogates.begin();
-    for(; it != _surrogates.end(); ++it)
-    {
-        delete it->second;
-    }
 }
 
 
@@ -165,6 +104,17 @@ void XmlFormatter::flush()
 {
     if (_writer)
         _writer->flush();
+}
+
+
+void XmlFormatter::addValue(const std::string& name, const SerializationInfo::Value& value, const std::string& id)
+{
+    if( value.typeInfo() != typeid(XmlSerializationContext::Value) )
+    {
+        throw SerializationError("unknown scalar value type");
+    }
+
+    static_cast<const XmlSerializationContext::Value&>(value).format(*this, name, id);
 }
 
 
@@ -213,12 +163,6 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 void XmlFormatter::addInt(const std::string& name, long long value,
                           const std::string& id)
 {
-    if(_surr)
-    {
-        _surr->addInt(*this, name, value, id);
-        return;
-    }
-
     convert(_value, value);
 	this->addValue(name, "int", _value, id);
 }
@@ -227,12 +171,6 @@ void XmlFormatter::addInt(const std::string& name, long long value,
 void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
                            const std::string& id)
 {
-    if(_surr)
-    {
-        _surr->addInt(*this, name, value, id);
-        return;
-    }
-
     convert(_value, value);
 	this->addValue(name, "unsigned", _value, id);
 }
@@ -294,14 +232,6 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
                                const std::string& id)
 {
-    std::map<std::string, Surrogate*>::iterator it = _surrogates.find( type );
-    if( it != _surrogates.end() )
-    {
-        _surr = it->second;
-        _surr->beginObject(*this, name, type, id);
-        return;
-    }
-
     this->onBeginObject(name, type, id);
 }
 
@@ -341,13 +271,6 @@ void XmlFormatter::finishMember()
 
 void XmlFormatter::finishObject()
 {
-    if(_surr)
-    {
-        _surr->finishObject(*this);
-        _surr = 0;
-        return;
-    }
-
     this->onFinishObject();
 }
 

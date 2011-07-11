@@ -46,6 +46,9 @@ class SerializationSurrogate;
 class SerializationContext;
 class Formatter;
 
+
+
+
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
@@ -61,7 +64,20 @@ class PT_API SerializationInfo
         };
 
         enum Type {
-            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5
+            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5, Val = 6
+        };
+
+        class Value
+        {
+            public:
+                virtual ~Value() {}
+
+                virtual const std::type_info& typeInfo() const = 0;
+
+            protected:
+                Value() {}
+                Value(const Value&);
+                Value& operator=(const Value&);
         };
 
         // type info layout
@@ -273,6 +289,8 @@ class PT_API SerializationInfo
 
         void setValue(double f);
 
+        void setValue(Value* val);
+
         void setSequence();
 
         bool beginSave(const void* p);
@@ -404,6 +422,7 @@ class PT_API SerializationInfo
             long long l;
             unsigned long long ul;
             double f;
+            Value* val;
             char str[sizeof(Pt::String)];
             Ref ref;
             Seq seq;

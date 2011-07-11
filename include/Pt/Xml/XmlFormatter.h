@@ -29,6 +29,8 @@
 #define Pt_Xml_XmlFormatter_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Date.h>
+#include <Pt/TypeInfo.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
 #include <Pt/Xml/XmlWriter.h>
@@ -39,6 +41,88 @@ namespace Pt {
 
 namespace Xml {
 
+/*
+
+struct ISurrogate
+{
+    const std::type_info* _fromType;
+    const std::type_info* _toType;
+
+    virtual void compose(void* type, const Value& value) = 0;
+    virtual Value* decompose(const void* type) = 0;
+};
+
+
+template <typename T, typename V>
+struct Surrogate
+{
+}
+
+
+template <typename T, typename V>
+void registerSurrogate()
+
+
+std::map<Pt::TypeInfo, ISurrogate*> _surrmap;
+
+
+template <typename T>
+bool SerializationContext::compose(const Value& value, T& type)
+{
+    Pt::TypeInfo toType = typeid(T);
+    Pt::TypeInfo valueType = value.typeInfo();
+
+    if( _surrmap.find( toType ) != _surrmap.end() )
+    {
+        if( _surrmap[toType]->_fromType == valueType)
+        {
+            _surrmap[toType]->compose(&type, &value);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+void operator<<=(Pt::Date& date, const SerializationInfo& si)
+{
+    if( si.isValue() && compose(si.value(), date) )
+        return true;
+
+    // normal serialization
+}
+
+
+
+template <typename T>
+Value* SerializationContext::decompose(const T& type)
+{
+    Pt::TypeInfo toType = typeid(T);
+
+    if( _surrmap.find( toType ) != _surrmap.end() )
+    {
+        return _surrmap[toType]->decompose(&type);
+    }
+
+    return 0;
+}
+
+
+void operator<<=(SerializationInfo& si, const Date& date)
+{
+    Value* value = decompose(date);
+    if(value)
+    {
+        si.setValue(value);
+        return true;
+    }
+
+    // normal serialization
+}
+*/
+
 /** @brief Serialize objects or object data to XML
 
     Thic class performs XML serialization of a single object or
@@ -47,23 +131,6 @@ namespace Xml {
 class PT_XML_API XmlFormatter : public Formatter
 {
     public:
-        class Surrogate
-        {
-            public:
-                virtual ~Surrogate() {}
-
-                virtual void beginObject(Formatter& formatter, const std::string& name,
-                                         const std::string& type, const std::string& id) = 0;
-
-                virtual void addInt(Formatter& formatter, const std::string& name,
-                                    long long value, const std::string& id) = 0;
-
-                virtual void addUInt(Formatter& formatter, const std::string& name,
-                                    unsigned long long value, const std::string& id) = 0;
-
-                virtual void finishObject(Formatter& formatter) = 0;
-        };
-
         /** @brief Construct a serializer without initializing the
                     serializer for writing.
 
@@ -127,6 +194,9 @@ class PT_XML_API XmlFormatter : public Formatter
         //! @internal
         void flush();
 
+        void addValue(const std::string& name, const SerializationInfo::Value& value,
+                      const std::string& id);
+
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
@@ -179,10 +249,6 @@ class PT_XML_API XmlFormatter : public Formatter
         std::auto_ptr<XmlWriter> _deleter;
 
         Pt::String _value;
-
-        Surrogate* _surr;
-
-        std::map<std::string, Surrogate*> _surrogates;
 };
 
 } // namespace Xml
