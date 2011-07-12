@@ -131,10 +131,10 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( _sender->isConnected() );
 
-            _receiver->bind("", 8000, 0);
+            _receiver->bind("0.0.0.0", 8000, 0);
             PT_UNIT_ASSERT( _receiver->isBound() );
 
-            _receiver2->bind("", 8000, 0);
+            _receiver2->bind("0.0.0.0", 8000, 0);
             PT_UNIT_ASSERT( _receiver2->isBound() );
 
             _loop->add(*_receiver);
@@ -178,11 +178,11 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _sender->connect("224.0.1.1", 8000);
             PT_UNIT_ASSERT( _sender->isConnected() );
 
-            _receiver->bind("", 8000, 0);
+            _receiver->bind("0.0.0.0", 8000, 0);
             _receiver->joinMulticastGroup("224.0.1.1");
             PT_UNIT_ASSERT( _receiver->isBound() );
 
-            _receiver2->bind("", 8000, 0);
+            _receiver2->bind("0.0.0.0", 8000, 0);
             _receiver2->joinMulticastGroup("224.0.1.1");
             PT_UNIT_ASSERT( _receiver2->isBound() );
 

@@ -93,6 +93,9 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
                 this->close();
         }
 
+        if(it->ai_family == AF_INET6 && _broadcast )
+            continue;
+
         if( _fd < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
@@ -102,10 +105,18 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         if( _fd < 0 )
             continue;
 
+#ifdef SO_REUSEPORT
+        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on)) < 0)
+		{
+			this->close();
+            throw System::SystemError("setsockopt SO_REUSEPORT");
+		}
+#endif
+
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0)
 		{
 			this->close();
-            throw System::SystemError("setsockopt");
+            throw System::SystemError("setsockopt SO_REUSEADDR");
 		}
 
 #if defined(IPV6_V6ONLY)
