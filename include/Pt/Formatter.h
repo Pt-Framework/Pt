@@ -44,6 +44,9 @@ class Formatter
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 
+        virtual void addBytes(const std::string& name, const std::string& type,
+                              const char* value, size_t length, const std::string& id) = 0;
+
         virtual void addBool(const std::string& name, bool value,
                              const std::string& id) = 0;
 
@@ -55,9 +58,6 @@ class Formatter
 
         virtual void addFloat(const std::string& name, double value,
                               const std::string& id) = 0;
-
-        virtual void addBytes(const std::string& name, const std::string& type,
-                              const char* value, size_t length, const std::string& id) = 0;
 
         virtual void addReference(const std::string& name, const std::string& refId) = 0;
 

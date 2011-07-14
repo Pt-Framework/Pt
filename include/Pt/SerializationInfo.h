@@ -220,6 +220,10 @@ class PT_API SerializationInfo
 
         void setValue(const Pt::String& s);
 
+        const char* getBinary(size_t& length) const;
+
+        void setBinary(const char* data, size_t length);
+
         void getValue(char& c) const;
 
         void setValue(char c);
@@ -415,6 +419,12 @@ class PT_API SerializationInfo
             char refid[sizeof(std::string)];
         };
 
+        struct BinVal
+        {
+            const char* data;
+            size_t length;
+        };
+
         struct Seq
         {
             SerializationInfo* first;
@@ -429,6 +439,7 @@ class PT_API SerializationInfo
             unsigned long long ul;
             double f;
             char str[sizeof(Pt::String)];
+            BinVal bin;
             Ref ref;
             Seq seq;
         };

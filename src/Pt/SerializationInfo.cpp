@@ -347,6 +347,18 @@ void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m)
 }
 
 
+const char* SerializationInfo::getBinary(size_t& length) const
+{
+    length = 0;
+    return 0;
+}
+
+
+void SerializationInfo::setBinary(const char* data, size_t length)
+{
+}
+
+
 void SerializationInfo::getValue(Pt::String& s) const
 {
     if( this->category() != Scalar )
