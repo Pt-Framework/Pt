@@ -33,6 +33,7 @@
 #include <Pt/Convert.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>
+#include <Pt/SerializationContext.h>
 #include <typeinfo>
 #include <vector>
 #include <set>
@@ -42,42 +43,20 @@
 
 namespace Pt {
 
-class SerializationSurrogate;
 class SerializationContext;
 class Formatter;
-
-
-
 
 /** @brief Represents arbitrary types during serialization.
 */
 class PT_API SerializationInfo
 {
     public:
-        typedef void (*FixupHandler)(void* fixme,
-                                     void* target,
-                                     const std::type_info& targetType,
-                                     unsigned m);
-
         enum Category {
             Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4, Context = 5
         };
 
         enum Type {
-            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5, Val = 6
-        };
-
-        class Value
-        {
-            public:
-                virtual ~Value() {}
-
-                virtual const std::type_info& typeInfo() const = 0;
-
-            protected:
-                Value() {}
-                Value(const Value&);
-                Value& operator=(const Value&);
+            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5 //Binary = 7
         };
 
         // type info layout
@@ -92,8 +71,6 @@ class PT_API SerializationInfo
 
         class Iterator;
         class ConstIterator;
-
-        friend class SerializationContext;
 
     public:
         SerializationInfo()
@@ -145,7 +122,38 @@ class PT_API SerializationInfo
         SerializationContext* context() const
         { return _context; }
 
-        SerializationSurrogate getSurrogate(const char* name) const;
+        template <typename T>
+        bool compose(T& type) const
+        {
+            if(_context)
+            {
+                const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
+                if(surr)
+                {
+                    surr->compose(*this, type);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        template <typename T>
+        bool decompose(const T& type)
+        {
+            if(_context)
+            {
+                const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
+                if(surr)
+                {
+                    surr->decompose(*this, type);
+                    this->setTypeName(surr->typeName());
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         void rebind(void* obj) const;
 
@@ -289,8 +297,6 @@ class PT_API SerializationInfo
 
         void setValue(double f);
 
-        void setValue(Value* val);
-
         void setSequence();
 
         bool beginSave(const void* p);
@@ -395,7 +401,7 @@ class PT_API SerializationInfo
         }
 
     protected:
-        void load(void* fixme, FixupHandler fh, unsigned mid) const;
+        void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
 
         Category category() const;
 
@@ -422,7 +428,6 @@ class PT_API SerializationInfo
             long long l;
             unsigned long long ul;
             double f;
-            Value* val;
             char str[sizeof(Pt::String)];
             Ref ref;
             Seq seq;

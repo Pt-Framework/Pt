@@ -107,17 +107,6 @@ void XmlFormatter::flush()
 }
 
 
-void XmlFormatter::addValue(const std::string& name, const SerializationInfo::Value& value, const std::string& id)
-{
-    if( value.typeInfo() != typeid(XmlSerializationContext::Value) )
-    {
-        throw SerializationError("unknown scalar value type");
-    }
-
-    static_cast<const XmlSerializationContext::Value&>(value).format(*this, name, id);
-}
-
-
 void XmlFormatter::addValue(const std::string& name, const std::string& type,
                              const Pt::String& value, const std::string& id)
 {

@@ -41,10 +41,6 @@ class Formatter
         virtual ~Formatter()
         { }
 
-        virtual void addValue(const std::string& name, const SerializationInfo::Value& value,
-                              const std::string& id)
-        {}
-
         virtual void addValue(const std::string& name, const std::string& type,
                               const Pt::String& value, const std::string& id) = 0;
 

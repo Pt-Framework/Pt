@@ -52,29 +52,6 @@ class EndElement;
 class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
-        class Surrogate : public IComposer
-        {
-            public:
-                Surrogate()
-                : _composer(0)
-                {}
-
-                virtual void clear()
-                { _composer = 0; }
-
-                virtual void clear(SerializationContext* ctx)
-                { _composer = 0; }
-
-                void begin(IComposer& comp)
-                { _composer = &comp; }
-
-                virtual IComposer* finish()
-                { return _composer; }
-
-            protected:
-                IComposer* _composer;
-        };
-
         explicit XmlDeserializer(XmlReader& reader);
 
         explicit XmlDeserializer(std::istream& is);
@@ -145,10 +122,7 @@ class PT_XML_API XmlDeserializer : public Deserializer
 
         //! @internal
         String _value;
-
-        Surrogate* _surr;
-
-        std::map<std::string, Surrogate*> _surrogates;
+        std::string _typeName;
 };
 
 } // namespace Xml

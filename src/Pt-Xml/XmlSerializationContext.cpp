@@ -27,18 +27,11 @@
  */
 #include "Pt/Xml/XmlSerializationContext.h"
 #include "Pt/Xml/XmlFormatter.h"
+#include "Pt/Convert.h"
 
 namespace Pt {
 
 namespace Xml {
-
-
-void XmlSerializationContext::Date::format(XmlFormatter& formatter, const std::string& name,
-                                          const std::string& id) const
-{
-    formatter.addValue(name, "Pt::Date", Pt::String::widen(_isodate), id);
-}
-
 
 XmlSerializationContext::XmlSerializationContext()
 {
@@ -179,7 +172,7 @@ void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void
 }
 
 
-void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupHandler fh, unsigned m)
+void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler fh, unsigned m)
 {
     //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
     Fixup fi(obj, fh, 0, m);

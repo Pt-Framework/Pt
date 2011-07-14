@@ -31,6 +31,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/SerializationContext.h>
 #include <map>
+#include <string>
 
 namespace Pt {
 
@@ -41,36 +42,6 @@ class XmlFormatter;
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
-        class Value : public SerializationInfo::Value
-        {
-            public:
-                virtual ~Value() {}
-
-                virtual const std::type_info& typeInfo() const
-                {
-                    return typeid(XmlSerializationContext::Value);
-                }
-
-                virtual void format(XmlFormatter& formatter, const std::string& name, const std::string& id) const = 0;
-        };
-
-        class Date : public Value
-        {
-            public:
-                Date()
-                {}
-
-                void set(const std::string& isodate)
-                {
-                    _isodate = isodate;
-                }
-
-                virtual void format(XmlFormatter& formatter, const std::string& name, const std::string& id) const;
-
-            private:
-                std::string _isodate;
-        };
-
         XmlSerializationContext();
 
         //! @brief Destructor
@@ -103,7 +74,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
 
-        virtual void prepareFixup(void* obj, const std::string& id, FixupHandler, unsigned m);
+        virtual void prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned m);
 
         virtual void fixup();
 
@@ -117,7 +88,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
                 , _type(0)
                 {}
 
-                Fixup(void* fixme, FixupHandler handler, const std::type_info* type, unsigned m = 0)
+                Fixup(void* fixme, FixupInfo::FixupHandler handler, const std::type_info* type, unsigned m = 0)
                 : _instance(fixme)
                 , _fixup(handler)
                 , _type(type)
@@ -135,7 +106,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
                     _instance = obj;
                 }
 
-                FixupHandler fixup() const
+                FixupInfo::FixupHandler fixup() const
                 { return _fixup; }
 
                 const std::type_info* type() const
@@ -146,7 +117,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
             private:
                 void* _instance;
-                SerializationInfo::FixupHandler _fixup;
+                FixupInfo::FixupHandler _fixup;
                 const std::type_info* _type;
                 unsigned _m;
         };

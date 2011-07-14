@@ -39,71 +39,25 @@ namespace Pt {
 
 namespace Xml {
 
-class DateSurrogate : public XmlDeserializer::Surrogate
-{
-    public:
-        DateSurrogate()
-        {}
-
-        virtual void setContext(SerializationContext* context)
-        {}
-
-        virtual void setName(const std::string& name)
-        {}
-
-        virtual void setId(const std::string& id)
-        {}
-
-        virtual void setTypeName(const std::string& type)
-        {}
-
-        virtual void setValue(const Pt::String& value)
-        {
-            Pt::Date date = Pt::Date::fromIsoString( value.narrow() );
-
-            IComposer* member = _composer->beginMember("year");
-            member->setInt( date.year() );
-            member->finish();
-
-            member = _composer->beginMember("month");
-            member->setUInt( date.month() );
-            member->finish();
-
-            member = _composer->beginMember("day");
-            member->setUInt( date.day() );
-            member->finish();
-        }
-};
-
-
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
 : _reader(&reader)
 , _composer(0)
-, _surr(0)
 {
 	this->reset( &_xmlcontext );
-    _surrogates["Pt::Date"] = new DateSurrogate();
 }
 
 XmlDeserializer::XmlDeserializer(std::istream& is)
 : _reader( 0 )
 , _deleter(new XmlReader(is))
 , _composer(0)
-, _surr(0)
 {
 	this->reset( &_xmlcontext );
     _reader = _deleter.get();
-    _surrogates["Pt::Date"] = new DateSurrogate();
 }
 
 
 XmlDeserializer::~XmlDeserializer()
 {
-    std::map<std::string, Surrogate*>::iterator it = _surrogates.begin();
-    for(; it != _surrogates.end(); ++it)
-    {
-        delete it->second;
-    }
 }
 
 
@@ -154,10 +108,12 @@ bool XmlDeserializer::onAdvance(IComposer& comp)
 
         if( _composer == 0 )
         {
+            //std::cerr << "-> COMPOSER END" << std::endl;
             return true;
         }
     }
 
+    //std::cerr << "-> COMPOSER MORE" << std::endl;
     return false;
 }
 
@@ -380,13 +336,7 @@ void XmlDeserializer::setName(const std::string& name)
 void XmlDeserializer::setTypeName(const std::string& type)
 {
     _composer->setTypeName(type);
-
-    std::map<std::string, Surrogate*>::iterator it = _surrogates.find(type);
-    if( it != _surrogates.end() )
-    {
-        _surr = it->second;
-        _surr->begin(*_composer);
-    }
+    _typeName = type;
 }
 
 
@@ -404,15 +354,7 @@ void XmlDeserializer::setId(const std::string& id)
 
 void XmlDeserializer::setValue(const Pt::String& value)
 {
-    if(_surr)
-    {
-        _surr->setValue(value);
-        _surr = 0;
-    }
-    else
-    {
-        _composer->setValue(value);
-    }
+    _composer->setValue(value);
 }
 
 

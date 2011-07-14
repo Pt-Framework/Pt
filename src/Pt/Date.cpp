@@ -127,54 +127,30 @@ void convert(Date& date, const std::string& s)
 }
 
 
-void operator>>=(const SerializationInfo& si_, Date& date)
+void operator>>=(const SerializationInfo& si, Date& date)
 {
     int year = 0;
     unsigned month = 0, day = 0;
 
-    //Surrogate<Date>* surr = si.compose(date);
-    //surr->decompose(date);
+    if( si.compose(date) )
+        return;
 
-    //SerializationSurrogate surr = si_.getSurrogate("date");
-    //const SerializationInfo& si2 = surr.inflate(si_);
-
-    // if(si2.category() == SerializationInfo::Scalar)
-    // {
-    //     std::string s = si2.toValue<std::string>();
-    //     date = Date::fromIsoString(s);
-    //     return;
-    // }
-
-    si_.getMember("year") >>=  year;
-    si_.getMember("month") >>= month;
-    si_.getMember("day") >>=  day;
+    si.getMember("year") >>=  year;
+    si.getMember("month") >>= month;
+    si.getMember("day") >>=  day;
     date.set(year, month, day);
 }
 
 
 void operator<<=(SerializationInfo& si, const Date& date)
 {
-    //Surrogate<Date>* surr = si.getSurrogate<Date>();
-    //surr->decompose(date);
-
-    SerializationContext* ctx = si.context();
-    if(ctx)
-    {
-        SerializationInfo::Value* value = ctx->decompose(date);
-        if(value)
-        {
-            si.setValue(value);
-            return;
-        }
-    }
+    if( si.decompose(date) )
+        return;
 
     si.addMember("year") <<=  date.year();
     si.addMember("month") <<= date.month();
     si.addMember("day") <<=  date.day();
     si.setTypeName("Pt::Date");
-
-    //SerializationSurrogate surr = si.getSurrogate("date");
-    //surr.deflate(si);
 }
 
 }

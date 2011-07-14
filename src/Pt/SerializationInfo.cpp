@@ -66,11 +66,6 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
                 break;
         }
 
-        //static_cast<ValueNode*>(_node)->format( formatter,
-        //                                        this->name(),
-        //                                        this->typeName(),
-        //                                        this->id() );
-
         return false;
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
@@ -143,11 +138,6 @@ void SerializationInfo::format(Formatter& formatter)
             default:
                 break;
         }
-
-        //static_cast<ValueNode*>(_node)->format( formatter,
-        //                                        this->name(),
-        //                                        this->typeName(),
-        //                                        this->id() );
     }
     else if(this->category() == Pt::SerializationInfo::Reference)
     {
@@ -192,15 +182,6 @@ void SerializationInfo::format(Formatter& formatter)
 SerializationInfo::Category SerializationInfo::category() const
 {
     return _category;
-}
-
-
-SerializationSurrogate SerializationInfo::getSurrogate(const char* name) const
-{
-    if( _context && this->category() != Context )
-        return _context->getSurrogate(name);
-
-    return SerializationSurrogate();
 }
 
 
@@ -262,10 +243,6 @@ void SerializationInfo::clearValue()
     {
         Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
         str->~basic_string();
-    }
-    else if(_type == Val)
-    {
-        delete _value.val;
     }
     else if(_category == Reference)
     {
@@ -355,7 +332,7 @@ void SerializationInfo::setReference(const std::string& id)
 
 
 // called during deserialization, when a reference needs to be fixed up
-void SerializationInfo::load(void* type, FixupHandler fh, unsigned m) const
+void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m) const
 {
     if( this->category() != Reference)
         throw SerializationError("not a reference");
@@ -694,19 +671,6 @@ void SerializationInfo::setValue(double value)
     _category = Scalar;
     _value.f = value;
     _type = Float;
-}
-
-
-void SerializationInfo::setValue(Value* value)
-{
-    if( category() == Context )
-        return;
-
-    this->clearValue();
-
-    _category = Scalar;
-    _value.val = value;
-    _type = Val;
 }
 
 

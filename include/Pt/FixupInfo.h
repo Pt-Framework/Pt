@@ -37,6 +37,12 @@ namespace Pt {
 class FixupInfo
 {
     public:
+        typedef void (*FixupHandler)(void* fixme,
+                                     void* target,
+                                     const std::type_info& targetType,
+                                     unsigned m);
+
+    public:
         FixupInfo(void* target, const std::type_info& targetType, unsigned mid)
         : _target(target)
         , _type(&targetType)
@@ -110,7 +116,7 @@ struct FixupThunk
 
 
 template <typename T>
-inline void fixup(const FixupInfo& fixup, T*& fixme )
+inline void fixup(const FixupInfo& fixup, T*& fixme)
 {
     fixme = 0;
 

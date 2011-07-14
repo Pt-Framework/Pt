@@ -29,99 +29,57 @@
 #define Pt_SerializationSurrogate_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationContext.h>
+#include <string>
 
 namespace Pt {
 
-class SerializationContext;
 class SerializationInfo;
-
-// class SerializationSurrogate
-// {
-//     public:
-//         virtual ~SerializationSurrogate()
-//         {}
-
-//         virtual void pack(SerializationInfo& it) const = 0;
-
-//         virtual void unpack(SerializationInfo& to, const SerializationInfo& from) const = 0;
-
-//     protected:
-//         SerializationSurrogate()
-//         {}
-// };
 
 class SerializationSurrogate
 {
     public:
-        typedef void (*Deflate)(SerializationInfo& si);
+        virtual ~SerializationSurrogate()
+        {}
 
-        typedef void (*Inflate)(SerializationInfo& to, const SerializationInfo& from);
+        const std::string& typeName() const
+        { return _typeName; }
 
+    protected:
+        SerializationSurrogate(const std::string& typeName)
+        : _typeName(typeName)
+        {}
+
+    private:
+        std::string _typeName;
+};
+
+
+template <typename T>
+class BasicSerializationSurrogate : public SerializationSurrogate
+{
     public:
-        SerializationSurrogate()
-        : _si(0)
-        , _deflate(0)
-        , _inflate(0)
-        { }
+        typedef void (*Compose)(const Pt::SerializationInfo& si, T& type);
+        typedef void (*Decompose)(Pt::SerializationInfo& si, const T& type);
 
-        SerializationSurrogate(Deflate def, Inflate inf)
-        : _si(0)
-        , _deflate(def)
-        , _inflate(inf)
-        { }
+        BasicSerializationSurrogate(const std::string& typeName, Compose c, Decompose d)
+        : SerializationSurrogate( typeName )
+        , _decompose(d)
+        , _compose(c)
+        {}
 
-        SerializationSurrogate(const SerializationSurrogate& sp)
-        : _si(0)
-        , _deflate(sp._deflate)
-        , _inflate(sp._inflate)
-        { }
-
-        ~SerializationSurrogate()
+        void decompose(Pt::SerializationInfo& si, const T& type) const
         {
-            if( _si && _si->context() )
-            {
-                _si->context()->push(_si);
-            }
+            _decompose(si, type);
         }
 
-        SerializationSurrogate& operator=(const SerializationSurrogate& sp)
+        void compose(const Pt::SerializationInfo& si, T& type) const
         {
-            _si = 0;
-            _deflate = sp._deflate;
-            _inflate = sp._inflate;
-            return *this;
-        }
-
-        void deflate(SerializationInfo& si) const
-        {
-            if(_deflate)
-            {
-                _deflate(si);
-            }
-        }
-
-
-        const SerializationInfo& inflate(const SerializationInfo& from)
-        {
-            if( ! _inflate )
-            {
-                return from;
-            }
-
-            if(_si == 0)
-            {
-                _si = from.context()->get();
-                _inflate(*_si, from);
-            }
-
-            return *_si;
+            _compose(si, type);
         }
 
     private:
-        SerializationInfo* _si;
-        Deflate _deflate;
-        Inflate _inflate;
+        Decompose _decompose;
+        Compose _compose;
 };
 
 } // namespace Pt

@@ -57,7 +57,6 @@ class SerializationCache
 #endif
         }
 
-        std::map<std::string, Pt::SerializationSurrogate> _surrogates;
         std::vector<SerializationInfo*> _infos;
         size_t _limit;
 #ifdef ALLOCATOR
@@ -118,7 +117,7 @@ void SerializationContext::rebindFixup(const std::string& id, void* obj, void* p
 }
 
 
-void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupHandler, unsigned mid)
+void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid)
 {
 }
 
@@ -150,6 +149,12 @@ SerializationContext::~SerializationContext()
     }
 
     delete _cache;
+
+    std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator siter;
+    for(siter = _surrmap.begin(); siter != _surrmap.end(); ++siter)
+    {
+        delete siter->second;
+    }
 }
 
 
@@ -210,22 +215,58 @@ void SerializationContext::push(SerializationInfo* si)
 }
 
 
-void SerializationContext::setSurrogates(const char* name, Deflate def, Inflate inf)
+void SerializationContext::registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate)
 {
-    // keep function ptrs in Surrogate object and always use context
-    // for temporary SerializationInfos
-    _cache->_surrogates[name] = SerializationSurrogate(def, inf);
+    std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator it = _surrmap.find( ti );
+    if( it != _surrmap.end() )
+    {
+        delete it->second;
+    }
+
+    _surrmap[ ti ] = surrogate;
 }
 
 
-SerializationSurrogate SerializationContext::getSurrogate(const char* name)
+const SerializationSurrogate* SerializationContext::getSurrogate(const std::type_info& ti) const
 {
-    std::map<std::string, SerializationSurrogate>::const_iterator it;
-    it = _cache->_surrogates.find(name);
-    if( it == _cache->_surrogates.end() )
-        return SerializationSurrogate();
+    std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
+    if( it != _surrmap.end() )
+    {
+        return it->second;
+    }
 
-    return it->second;
+    return 0;
 }
+
+
+// bool SerializationContext::decompose(SerializationInfo& si, const void* type, const std::type_info& ti) const
+// {
+//     std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
+//     bool found = ( it != _surrmap.end() );
+
+//     if(found)
+//     {
+//         const SerializationSurrogate* surrogate = it->second;
+//         surrogate->decompose(si, type);
+//         si.setTypeName( surrogate->typeName() );
+//     }
+
+//     return found;
+// }
+
+
+// bool SerializationContext::compose(const SerializationInfo& si, void* type, const std::type_info& ti) const
+// {
+//     std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
+//     bool found = ( it != _surrmap.end() );
+
+//     if(found)
+//     {
+//         const SerializationSurrogate* surrogate = it->second;
+//         surrogate->compose(si, type);
+//     }
+
+//     return found;
+// }
 
 } // namespace Pt

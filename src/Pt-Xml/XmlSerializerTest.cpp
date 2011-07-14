@@ -121,6 +121,21 @@ inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date
 
 }
 
+
+void toXmlString(Pt::SerializationInfo& si, const Pt::Date& date)
+{
+    si.setValue( Pt::String::widen( date.toIsoString() ) );
+}
+
+
+void fromXmlString(const Pt::SerializationInfo& si, Pt::Date& date)
+{
+    Pt::String str;
+    si.getValue(str);
+    date = Pt::Date::fromIsoString( str.narrow() );
+}
+
+
 class XmlSerializerTest: public Pt::Unit::TestSuite
 {
     public:
@@ -136,31 +151,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
         }
 
-        static void pack(Pt::SerializationInfo& si)
-        {
-            int year = 0;
-            unsigned month = 0, day = 0;
-
-            si.getMember("year") >>= year;
-            si.getMember("month") >>= month;
-            si.getMember("day") >>= day;
-
-            Pt::Date date(year, month, day);
-            std::string s = date.toIsoString();
-            si.setValue(s);
-            si.setTypeName("date");
-        }
-
-        static void unpack(Pt::SerializationInfo& to, const Pt::SerializationInfo& from)
-        {
-            std::string isoString;
-            from >>= isoString;
-            Pt::Date date = Pt::Date::fromIsoString(isoString);
-            to.addMember("year") <<= date.year();
-            to.addMember("month") <<= date.month();
-            to.addMember("day") <<= date.day();
-        }
-
     protected:
         void Reference()
         {
@@ -173,7 +163,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            ser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dr");
@@ -198,7 +188,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
-            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
+            deser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
+
             deser.deserialize(date2);
             deser.deserialize(dr);
             deser.deserialize(dateptr2);
@@ -229,7 +220,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             ser.serialize(dates, "dates");
             ser.serialize(dateptr, "dateptr");
@@ -249,7 +239,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
-            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             deser.deserialize(dates);
             deser.deserialize(dateptr);
@@ -268,7 +257,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
-            //ser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
             ser.context()->enableReferencing(false);
 
             ser.serialize(date1, "date1a");
@@ -292,7 +280,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlReader reader(tis);
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
-            //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
             deser.deserialize(date3);
             deser.deserialize(date4);
@@ -336,8 +323,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            // std::cerr << output.str();
-            // std::cerr << "---------------------\n" << std::endl;
+            //std::cerr << output.str();
+            //std::cerr << "---------------------\n" << std::endl;
 
             Pt::Date date1b;
             Pt::Date date2b;
@@ -357,6 +344,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
                     break;
             }
 
+            tis.buffer().import();
             deser.begin(date2b);
             while( tis.buffer().in_avail() )
             {
@@ -365,6 +353,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
                     break;
             }
 
+            tis.buffer().import();
             deser.begin(dateptr1b);
             while( tis.buffer().in_avail() )
             {
@@ -375,8 +364,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             deser.finish();
 
-            // std::cerr << "date1b: " << date1b.toIsoString() << std::endl;
-            // std::cerr << "date2b: " << date2b.toIsoString() << std::endl;
+            //std::cerr << "date1b: " << date1b.toIsoString() << std::endl;
+            //std::cerr << "date2b: " << date2b.toIsoString() << std::endl;
             PT_UNIT_ASSERT(date1a == date1b);
             PT_UNIT_ASSERT(date2a == date2b);
             PT_UNIT_ASSERT(dateptr1b == &date1b);
@@ -387,77 +376,77 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<XmlSerializerTest> register_XmlSerializerTest;
 
-class Object
-{
-    public:
-        Object()
-        {}
+// class Object
+// {
+//     public:
+//         Object()
+//         {}
 
-        virtual ~Object()
-        {}
+//         virtual ~Object()
+//         {}
 
-        void setProperty(const char* name, const Pt::Any& value)
-        { _properties[name] = value; }
+//         void setProperty(const char* name, const Pt::Any& value)
+//         { _properties[name] = value; }
 
-    private:
-        std::map<std::string, Pt::Any> _properties;
-};
+//     private:
+//         std::map<std::string, Pt::Any> _properties;
+// };
 
-class Port : public Object
-{
-    public:
-        Port()
-        {}
+// class Port : public Object
+// {
+//     public:
+//         Port()
+//         {}
 
-        virtual ~Port()
-        {}
-};
+//         virtual ~Port()
+//         {}
+// };
 
-class PortList : public Object
-{
-    public:
-        PortList()
-        {}
+// class PortList : public Object
+// {
+//     public:
+//         PortList()
+//         {}
 
-        virtual ~PortList()
-        {}
+//         virtual ~PortList()
+//         {}
 
-    private:
-};
+//     private:
+// };
 
-class Runtime : public Object
-{
-    public:
-        Runtime()
-        {}
+// class Runtime : public Object
+// {
+//     public:
+//         Runtime()
+//         {}
 
-        ~Runtime()
-        {}
+//         ~Runtime()
+//         {}
 
-        static Object* createObject(const std::string& typeName)
-        {
-            if(typeName == "Port")
-                return new Port();
-            if(typeName == "PortList")
-                return new PortList();
+//         static Object* createObject(const std::string& typeName)
+//         {
+//             if(typeName == "Port")
+//                 return new Port();
+//             if(typeName == "PortList")
+//                 return new PortList();
 
-            return 0;
-        }
-};
+//             return 0;
+//         }
+// };
 
 
-void operator >>=(const Pt::SerializationInfo& si, Object& rt)
-{
-    Pt::SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        Object* obj = Runtime::createObject( it->typeName().c_str() );
-        Pt::SmartPtr<Object> ptr(obj);
-        rt.setProperty(it->name().c_str(), Pt::Any(ptr));
+// void operator >>=(const Pt::SerializationInfo& si, Object& rt)
+// {
+//     Pt::SerializationInfo::ConstIterator it;
+//     for(it = si.begin(); it != si.end(); ++it)
+//     {
+//         Object* obj = Runtime::createObject( it->typeName().c_str() );
+//         Pt::SmartPtr<Object> ptr(obj);
+//         rt.setProperty(it->name().c_str(), Pt::Any(ptr));
 
-        *it >> Pt::load() >>= ptr; // not ptr, but property !!
-    }
-}
+//         *it >> Pt::load() >>= ptr; // not ptr, but property !!
+//     }
+// }
 
 namespace Pt {
 
@@ -527,7 +516,6 @@ void XmlSerializerTest::DynamicObject()
     Pt::Xml::XmlReader reader(tis);
     Pt::Xml::XmlDeserializer deser(reader);
     deser.context()->enableReferencing(true);
-    //deser.context()->setSurrogates("date", &XmlSerializerTest::pack, &XmlSerializerTest::unpack);
 
     Pt::SmartPtr<Pt::Reflex::Reflectable> refl1;
     MyObject refl2("myObj");
