@@ -55,6 +55,17 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
                 formatter.addFloat( _name, _value.f, _id );
                 break;
 
+            case Blob:
+                formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+                break;
+
+            case Binary:
+            {
+                const char* data = reinterpret_cast<const char*>(&_value);
+                const char* last = data + sizeof(Variant) - 1;
+                formatter.addBytes( _name, _typeName, data, *last, _id );
+                break;
+            }
             case Str:
             {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
@@ -128,6 +139,17 @@ void SerializationInfo::format(Formatter& formatter)
                 formatter.addFloat( _name, _value.f, _id );
                 break;
 
+            case Blob:
+                formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+                break;
+
+            case Binary:
+            {
+                const char* data = reinterpret_cast<const char*>(&_value);
+                const char* last = data + sizeof(Variant) - 1;
+                formatter.addBytes( _name, _typeName, data, *last, _id );
+                break;
+            }
             case Str:
             {
                 const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
@@ -181,7 +203,7 @@ void SerializationInfo::format(Formatter& formatter)
 
 SerializationInfo::Category SerializationInfo::category() const
 {
-    return _category;
+    return static_cast<Category>(_category);
 }
 
 
@@ -204,7 +226,7 @@ void SerializationInfo::clear()
     if( _id.size() )
         _id.clear();
 
-    _bound = 0;
+    _bound = false;
     _category = Void;
     _type = Unknown;
 }
@@ -243,6 +265,10 @@ void SerializationInfo::clearValue()
     {
         Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
         str->~basic_string();
+    }
+    else if(_type == Blob)
+    {
+        delete [] _value.blob.data;
     }
     else if(_category == Reference)
     {
@@ -349,13 +375,53 @@ void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m)
 
 const char* SerializationInfo::getBinary(size_t& length) const
 {
-    length = 0;
-    return 0;
+    const char* ret = 0;
+
+    if(_type == Binary)
+    {
+        ret = reinterpret_cast<char*>(&_value);
+        const char* last = ret + sizeof(Variant) - 1;
+        length = *last;
+    }
+    else if(_type == Blob)
+    {
+        length = _value.blob.length;
+        ret = _value.blob.data;
+    }
+    else
+    {
+        throw SerializationError("not a binary value");
+    }
+
+    return ret;
 }
 
 
 void SerializationInfo::setBinary(const char* data, size_t length)
 {
+    if( category() == Context )
+        return;
+
+    if(_category != Void)
+        this->clearValue();
+
+    if( length < sizeof(Variant) )
+    {
+        char* first = reinterpret_cast<char*>(&_value);
+        std::memcpy(first, data, length);
+        char* last = first + sizeof(Variant) - 1;
+        *last = static_cast<Pt::uint8_t>(length);
+        _type = Binary;
+    }
+    else
+    {
+        _value.blob.data = new char[length];
+        std::memcpy(_value.blob.data, data, length);
+        _value.blob.length = length;
+        _type = Blob;
+    }
+
+    _category = Scalar;
 }
 
 
@@ -716,7 +782,7 @@ bool SerializationInfo::beginSave(const void* p)
             first = false;
         }
 
-        _bound = p;
+        _bound = true;
     }
 
     return first;
@@ -735,7 +801,7 @@ void SerializationInfo::finishSave()
 
 void SerializationInfo::rebind(void* obj) const
 {
-    _bound = obj;
+    _bound = true;
 
     if( ! _context )
         return;
@@ -763,7 +829,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 {
     if(_context && _context->referencingEnabled() && (_parent == 0 || _parent->_bound) )
     {
-        _bound = p;
+        _bound = true;
         _context->beginLoad(p, ti, _name, _id);
     }
 }

@@ -194,6 +194,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Benchmark1", *this, &SerializationTest::Benchmark1 );
             Pt::Unit::TestSuite::registerMethod( "Benchmark2", *this, &SerializationTest::Benchmark2 );
             Pt::Unit::TestSuite::registerMethod( "Benchmark3", *this, &SerializationTest::Benchmark3 );
+            Pt::Unit::TestSuite::registerMethod( "Binary", *this, &SerializationTest::Binary );
             Pt::Unit::TestSuite::registerMethod( "BuiltInTypesTest", *this, &SerializationTest::BuiltInTypesTest );
             Pt::Unit::TestSuite::registerMethod( "StdVectorTest", *this, &SerializationTest::StdVectorTest );
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
@@ -204,6 +205,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Benchmark1();
         void Benchmark2();
         void Benchmark3();
+        void Binary();
         void BuiltInTypesTest();
         void StdVectorTest();
         void DateTest();
@@ -405,6 +407,34 @@ void SerializationTest::Benchmark3()
 
     std::cerr << "Time3: " << ts.toUSecs() << " " << u << std::endl;
     //std::exit(1);
+}
+
+
+void SerializationTest::Binary()
+{
+    const char buf[] = "01234567890123456789012345678901234567890123456789"
+                       "01234567890123456789012345678901234567890123456789"
+                       "01234567890123456789012345678901234567890123456789";
+
+    Pt::SerializationInfo si;
+    si.setBinary( buf, sizeof(buf) );
+
+    size_t size = 0;
+    const char* data = si.getBinary(size);
+    PT_UNIT_ASSERT(size == sizeof(buf));
+    PT_UNIT_ASSERT( 0 == std::memcmp(data, buf, sizeof(buf)) );
+
+    short s = 42;
+    data = reinterpret_cast<const char*>(&s);
+    si.setBinary( data, sizeof(short) );
+
+    s = 0;
+    size = 0;
+    data = si.getBinary(size);
+    PT_UNIT_ASSERT(size == sizeof(short));
+
+    std::memcpy(&s, data, size);
+    PT_UNIT_ASSERT(s == 42);
 }
 
 

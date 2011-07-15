@@ -56,7 +56,7 @@ class PT_API SerializationInfo
         };
 
         enum Type {
-            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5 //Binary = 7
+            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5, Binary = 7, Blob = 8
         };
 
         // type info layout
@@ -74,21 +74,21 @@ class PT_API SerializationInfo
 
     public:
         SerializationInfo()
-        : _category(Void)
+        : _bound(false)
+        , _category(Void)
+        , _type(Unknown)
         , _context(0)
         , _parent(0)
         , _next(0)
-        , _bound(0)
-        , _type(Unknown)
         { }
 
         explicit SerializationInfo(SerializationContext* context)
-        : _category(Void)
+        : _bound(false)
+        , _category(Void)
+        , _type(Unknown)
         , _context(context)
         , _parent(0)
         , _next(0)
-        , _bound(0)
-        , _type(Unknown)
         { }
 
         ~SerializationInfo();
@@ -419,9 +419,9 @@ class PT_API SerializationInfo
             char refid[sizeof(std::string)];
         };
 
-        struct BinVal
+        struct BlobValue
         {
-            const char* data;
+            char* data;
             size_t length;
         };
 
@@ -439,21 +439,21 @@ class PT_API SerializationInfo
             unsigned long long ul;
             double f;
             char str[sizeof(Pt::String)];
-            BinVal bin;
+            BlobValue blob;
             Ref ref;
             Seq seq;
         };
 
     private:
-        Category _category;
+        mutable bool _bound;
+        Pt::uint8_t _category;
+        Pt::uint8_t _type;
         SerializationContext* _context;
         SerializationInfo* _parent;
         SerializationInfo* _next;
         std::string _name;
         std::string _typeName;
         std::string _id;
-        mutable const void* _bound; // TODO: could be bool
-        Type _type;
         mutable Variant _value;
 };
 
