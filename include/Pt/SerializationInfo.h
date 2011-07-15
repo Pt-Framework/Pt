@@ -51,16 +51,23 @@ class Formatter;
 class PT_API SerializationInfo
 {
     public:
-        enum Category {
-            Void = 0, Scalar = 1, Struct = 2, Sequence = 3, Reference = 4, Context = 5
-        };
-
         enum Type {
-            Unknown = 0, Boolean = 1, Str = 2, Int = 3, UInt = 4, Float = 5, Binary = 7, Blob = 8
+            Void      = 0,
+            Context   = 1,
+            Reference = 2,
+            Boolean   = 3,
+            Str       = 4,
+            Int       = 5,
+            UInt      = 6,
+            Float     = 7,
+            Binary    = 8,
+            Blob      = 9,
+            Struct    = 10,
+            Sequence  = 11
         };
 
         // type info layout
-        // 0 - public
+        // 0 - public / private
         // 1 - scalar / compound
         // 2 - type id
         // 3 - type id
@@ -75,8 +82,8 @@ class PT_API SerializationInfo
     public:
         SerializationInfo()
         : _bound(false)
-        , _category(Void)
-        , _type(Unknown)
+        , _isCompound(false)
+        , _type(Void)
         , _context(0)
         , _parent(0)
         , _next(0)
@@ -84,8 +91,8 @@ class PT_API SerializationInfo
 
         explicit SerializationInfo(SerializationContext* context)
         : _bound(false)
-        , _category(Void)
-        , _type(Unknown)
+        , _isCompound(false)
+        , _type(Void)
         , _context(context)
         , _parent(0)
         , _next(0)
@@ -105,19 +112,24 @@ class PT_API SerializationInfo
 
         void clear(SerializationContext* context);
 
-        bool isScalar() const
-        { return _category == Scalar; }
+        inline bool isScalar() const
+        { return _isCompound == false; }
 
-        bool isStruct() const
-        { return _category == Struct; }
+        inline bool isCompound() const
+        { return _isCompound == false; }
 
-        bool isSequence() const
-        { return _category == Sequence; }
+        inline bool isStruct() const
+        { return _type == Struct; }
 
-        bool isReference() const
-        { return _category == Reference; }
+        inline bool isSequence() const
+        { return _type == Sequence; }
+
+        inline bool isReference() const
+        { return _type == Reference; }
 
         void setContextual();
+
+        void setSequence();
 
         SerializationContext* context() const
         { return _context; }
@@ -301,8 +313,6 @@ class PT_API SerializationInfo
 
         void setValue(double f);
 
-        void setSequence();
-
         bool beginSave(const void* p);
 
         void finishSave();
@@ -407,8 +417,6 @@ class PT_API SerializationInfo
     protected:
         void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
 
-        Category category() const;
-
         void clearValue();
 
         SerializationInfo& addChild();
@@ -446,7 +454,7 @@ class PT_API SerializationInfo
 
     private:
         mutable bool _bound;
-        Pt::uint8_t _category;
+        bool _isCompound;
         Pt::uint8_t _type;
         SerializationContext* _context;
         SerializationInfo* _parent;

@@ -35,69 +35,66 @@ namespace Pt {
 
 bool SerializationInfo::beginFormat(Formatter& formatter)
 {
-    if(this->category() == SerializationInfo::Scalar)
+    switch(_type)
     {
-        switch(_type)
+        case Boolean:
+            formatter.addBool( _name, _value.b, _id );
+            break;
+
+        case Int:
+            formatter.addInt( _name, _value.l, _id );
+            break;
+
+        case UInt:
+            formatter.addUInt( _name, _value.ul, _id );
+            break;
+
+        case Float:
+            formatter.addFloat( _name, _value.f, _id );
+            break;
+
+        case Blob:
+            formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+            break;
+
+        case Binary:
         {
-            case Boolean:
-                formatter.addBool( _name, _value.b, _id );
-                break;
+            const char* data = reinterpret_cast<const char*>(&_value);
+            const char* last = data + sizeof(Variant) - 1;
+            formatter.addBytes( _name, _typeName, data, *last, _id );
+            break;
+        }
+        case Str:
+        {
+            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
+            formatter.addValue( _name, _typeName, *str, _id );
+            break;
+        }
+        case Reference:
+        {
+            if( ! _context )
+                throw SerializationError("context not available");
 
-            case Int:
-                formatter.addInt( _name, _value.l, _id );
-                break;
-
-            case UInt:
-                formatter.addUInt( _name, _value.ul, _id );
-                break;
-
-            case Float:
-                formatter.addFloat( _name, _value.f, _id );
-                break;
-
-            case Blob:
-                formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
-                break;
-
-            case Binary:
-            {
-                const char* data = reinterpret_cast<const char*>(&_value);
-                const char* last = data + sizeof(Variant) - 1;
-                formatter.addBytes( _name, _typeName, data, *last, _id );
-                break;
-            }
-            case Str:
-            {
-                const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-                formatter.addValue( _name, _typeName, *str, _id );
-                break;
-            }
-
-            default:
-                break;
+            const void* refAddr = _value.ref.address;
+            const char* id = _context->getId( refAddr );
+            formatter.addReference( this->name(), id);
+            break;
         }
 
-        return false;
-    }
-    else if(this->category() == Pt::SerializationInfo::Reference)
-    {
-        if( ! _context )
-            throw SerializationError("context not available");
+        case Struct:
+        {
+            formatter.beginObject( this->name(), this->typeName(), this->id() );
+            return true;
+        }
 
-        const void* refAddr = _value.ref.address;
-        const char* id = _context->getId( refAddr );
-        formatter.addReference( this->name(), id);
-        return false;
-    }
-    else if(this->category() == SerializationInfo::Struct)
-    {
-        formatter.beginObject( this->name(), this->typeName(), this->id() );
-        return true;
-    }
-    else if(this->category() == Pt::SerializationInfo::Sequence)
-    {
-        formatter.beginArray( this->name(), this->typeName(), this->id() );
-        return true;
+        case Sequence:
+        {
+            formatter.beginArray( this->name(), this->typeName(), this->id() );
+            return true;
+        }
+
+        default:
+            break;
     }
 
     return false;
@@ -106,11 +103,11 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
 
 void SerializationInfo::endFormat(Formatter& formatter)
 {
-    if(this->category() == SerializationInfo::Struct)
+    if(_type == SerializationInfo::Struct)
     {
         formatter.finishObject();
     }
-    else if(this->category() == Pt::SerializationInfo::Sequence)
+    else if(_type == Pt::SerializationInfo::Sequence)
     {
         formatter.finishArray();
     }
@@ -119,91 +116,88 @@ void SerializationInfo::endFormat(Formatter& formatter)
 
 void SerializationInfo::format(Formatter& formatter)
 {
-    if(this->category() == SerializationInfo::Scalar)
+    switch(_type)
     {
-        switch(_type)
+        case Boolean:
+            formatter.addBool( _name, _value.b, _id );
+            break;
+
+        case Int:
+            formatter.addInt( _name, _value.l, _id );
+            break;
+
+        case UInt:
+            formatter.addUInt( _name, _value.ul, _id );
+            break;
+
+        case Float:
+            formatter.addFloat( _name, _value.f, _id );
+            break;
+
+        case Blob:
+            formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+            break;
+
+        case Binary:
         {
-            case Boolean:
-                formatter.addBool( _name, _value.b, _id );
-                break;
+            const char* data = reinterpret_cast<const char*>(&_value);
+            const char* last = data + sizeof(Variant) - 1;
+            formatter.addBytes( _name, _typeName, data, *last, _id );
+            break;
+        }
+        case Str:
+        {
+            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
+            formatter.addValue( _name, _typeName, *str, _id );
+            break;
+        }
 
-            case Int:
-                formatter.addInt( _name, _value.l, _id );
-                break;
+        case Reference:
+        {
+            if( ! _context )
+                throw SerializationError("context not available");
 
-            case UInt:
-                formatter.addUInt( _name, _value.ul, _id );
-                break;
+            const void* refAddr = _value.ref.address;
+            const char* id = _context->getId( refAddr );
+            formatter.addReference( this->name(), id);
+            break;
+        }
 
-            case Float:
-                formatter.addFloat( _name, _value.f, _id );
-                break;
+        case Struct:
+        {
+            formatter.beginObject( this->name(), this->typeName(), this->id() );
 
-            case Blob:
-                formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
-                break;
-
-            case Binary:
+            SerializationInfo::Iterator it;
+            for(it = this->begin(); it != this->end(); ++it)
             {
-                const char* data = reinterpret_cast<const char*>(&_value);
-                const char* last = data + sizeof(Variant) - 1;
-                formatter.addBytes( _name, _typeName, data, *last, _id );
-                break;
+                formatter.beginMember( it->name(), it->typeName(), it->id() );
+                it->format(formatter);
+                formatter.finishMember();
             }
-            case Str:
+
+            formatter.finishObject();
+            break;
+        }
+
+        case Sequence:
+        {
+            formatter.beginArray( this->name(), this->typeName(), this->id() );
+
+            SerializationInfo::Iterator it;
+            for(it = this->begin(); it != this->end(); ++it)
             {
-                const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-                formatter.addValue( _name, _typeName, *str, _id );
-                break;
+                formatter.beginElement( it->typeName(), it->id()  );
+                it->format(formatter);
+                formatter.finishElement();
             }
 
-            default:
-                break;
-        }
-    }
-    else if(this->category() == Pt::SerializationInfo::Reference)
-    {
-        if( ! _context )
-            throw SerializationError("context not available");
-
-        const void* refAddr = _value.ref.address;
-        const char* id = _context->getId( refAddr );
-        formatter.addReference( this->name(), id);
-    }
-    else if(this->category() == SerializationInfo::Struct)
-    {
-        formatter.beginObject( this->name(), this->typeName(), this->id() );
-
-        SerializationInfo::Iterator it;
-        for(it = this->begin(); it != this->end(); ++it)
-        {
-            formatter.beginMember( it->name(), it->typeName(), it->id() );
-            it->format(formatter);
-            formatter.finishMember();
+            formatter.finishArray();
+            break;
         }
 
-        formatter.finishObject();
+        default:
+            break;
     }
-    else if(this->category() == Pt::SerializationInfo::Sequence)
-    {
-        formatter.beginArray( this->name(), this->typeName(), this->id() );
-
-        SerializationInfo::Iterator it;
-        for(it = this->begin(); it != this->end(); ++it)
-        {
-            formatter.beginElement( it->typeName(), it->id()  );
-            it->format(formatter);
-            formatter.finishElement();
-        }
-
-        formatter.finishArray();
-    }
-}
-
-
-SerializationInfo::Category SerializationInfo::category() const
-{
-    return static_cast<Category>(_category);
 }
 
 
@@ -227,8 +221,8 @@ void SerializationInfo::clear()
         _id.clear();
 
     _bound = false;
-    _category = Void;
-    _type = Unknown;
+    _isCompound = false;
+    _type = Void;
 }
 
 
@@ -241,50 +235,60 @@ void SerializationInfo::clear(SerializationContext* context)
 
 void SerializationInfo::clearValue()
 {
-    if(_category == Struct || _category == Sequence)
+    switch(_type)
     {
-        for(SerializationInfo* it = _value.seq.first; it != 0; )
+        case Struct:
+        case Sequence:
         {
-            if(_context)
+            for(SerializationInfo* it = _value.seq.first; it != 0; )
             {
-                SerializationInfo* tmp = it;
-                it = it->sibling();
-                tmp->setSibling(0);
+                if(_context)
+                {
+                    SerializationInfo* tmp = it;
+                    it = it->sibling();
+                    tmp->setSibling(0);
 
-                _context->push(tmp);
+                    _context->push(tmp);
+                }
+                else
+                {
+                    SerializationInfo* tmp = it;
+                    it = it->sibling();
+                    delete tmp;
+                }
             }
-            else
-            {
-                SerializationInfo* tmp = it;
-                it = it->sibling();
-                delete tmp;
-            }
+            break;
         }
-    }
-    else if(_type == Str)
-    {
-        Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
-        str->~basic_string();
-    }
-    else if(_type == Blob)
-    {
-        delete [] _value.blob.data;
-    }
-    else if(_category == Reference)
-    {
-        std::string* str = reinterpret_cast<std::string*>(_value.ref.refid);
-        str->~basic_string();
+
+        case Str:
+        {
+            Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
+            str->~basic_string();
+            break;
+        }
+
+        case Blob:
+        {
+            delete [] _value.blob.data;
+            break;
+        }
+
+        case Reference:
+        {
+            std::string* str = reinterpret_cast<std::string*>(_value.ref.refid);
+            str->~basic_string();
+            break;
+        }
     }
 }
 
 
 void SerializationInfo::setSequence()
 {
-    if(this->category() == SerializationInfo::Context)
+    if(_type == SerializationInfo::Context)
         return;
 
-    if( this->category() != SerializationInfo::Sequence &&
-        this->category() != SerializationInfo::Struct )
+    if( ! _isCompound )
     {
         this->clearValue();
 
@@ -292,30 +296,29 @@ void SerializationInfo::setSequence()
         _value.seq.last = 0;
         _value.seq.size = 0;
 
-        _category = Sequence;
-        _type = Unknown;
+        _isCompound = true;
     }
 
-    _category = Sequence;
+    _type = Sequence;
 }
 
 
 void SerializationInfo::setContextual()
 {
-    if(this->category() == SerializationInfo::Context)
+    if(_type == SerializationInfo::Context)
         return;
 
     this->clearValue();
 
-    _category = Context;
-    _type = Unknown;
+    _isCompound = false;
+    _type = Context;
 }
 
 
 // called during serialization, when a reference needs to be unlinked
 void SerializationInfo::setReference(const void* ref)
 {
-    if( category() == Context )
+    if( _type == Context )
     {
         if( _context && this->context()->referencingEnabled() )
             this->context()->prepareId(ref);
@@ -323,13 +326,13 @@ void SerializationInfo::setReference(const void* ref)
         return;
     }
 
-    if(category() != Reference)
+    if(_type != Reference)
     {
         this->clearValue();
 
         new(_value.ref.refid) std::string;
-        _type = Unknown;
-        _category = Reference;
+        _type = Reference;
+        _isCompound = false;
     }
 
     _value.ref.address = const_cast<void*>(ref) ;
@@ -339,13 +342,13 @@ void SerializationInfo::setReference(const void* ref)
 // called during deserialization, when a reference id was parsed
 void SerializationInfo::setReference(const std::string& id)
 {
-    if(category() != Reference)
+    if(_type != Reference)
     {
         this->clearValue();
 
         new(_value.ref.refid) std::string(id);
-        _type = Unknown;
-        _category = Reference;
+        _type = Reference;
+        _isCompound = false;
     }
     else
     {
@@ -360,7 +363,7 @@ void SerializationInfo::setReference(const std::string& id)
 // called during deserialization, when a reference needs to be fixed up
 void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m) const
 {
-    if( this->category() != Reference)
+    if( _type != Reference)
         throw SerializationError("not a reference");
 
     const std::string* refId = reinterpret_cast<const std::string*>(_value.ref.refid);
@@ -399,10 +402,10 @@ const char* SerializationInfo::getBinary(size_t& length) const
 
 void SerializationInfo::setBinary(const char* data, size_t length)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
-    if(_category != Void)
+    if(_type != Void)
         this->clearValue();
 
     if( length < sizeof(Variant) )
@@ -421,15 +424,12 @@ void SerializationInfo::setBinary(const char* data, size_t length)
         _type = Blob;
     }
 
-    _category = Scalar;
+    _isCompound = false;
 }
 
 
 void SerializationInfo::getValue(Pt::String& s) const
 {
-    if( this->category() != Scalar )
-        throw SerializationError("not a value");
-
     if(_type == Str)
     {
         const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
@@ -451,15 +451,17 @@ void SerializationInfo::getValue(Pt::String& s) const
     {
         convert(s, _value.f);
     }
+    else
+        throw SerializationError("not a value");
 }
 
 
 void SerializationInfo::setValue(const Pt::String& value)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
-    if(_category == Void)
+    if(_type == Void)
     {
         new(_value.str) Pt::String(value);
     }
@@ -474,7 +476,7 @@ void SerializationInfo::setValue(const Pt::String& value)
         *str = value;
     }
 
-    _category = Scalar;
+    _isCompound = false;
     _type = Str;
 }
 
@@ -492,7 +494,7 @@ void SerializationInfo::getValue(char& c) const
 
 void SerializationInfo::setValue(char c)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
     Pt::String s;
@@ -501,11 +503,8 @@ void SerializationInfo::setValue(char c)
 }
 
 
-void SerializationInfo::getValue( bool& value) const
+void SerializationInfo::getValue(bool& value) const
 {
-    if( this->category() != Scalar )
-        throw SerializationError("expected integer value");
-
     switch(_type)
     {
         case Boolean:
@@ -532,19 +531,19 @@ void SerializationInfo::getValue( bool& value) const
         }
 
         default:
-            break;
+            throw SerializationError("expected integer value");
     }
 }
 
 
 void SerializationInfo::setValue(bool value)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
     this->clearValue();
 
-    _category = Scalar;
+    _isCompound = false;
     _value.b = value;
     _type = Boolean;
 }
@@ -570,9 +569,6 @@ void SerializationInfo::getValue(long& i) const
 
 void SerializationInfo::getValue(long long & l) const
 {
-    if( this->category() != Scalar )
-        throw SerializationError("expected scalar value");
-
     switch(_type)
     {
         case Boolean:
@@ -599,20 +595,20 @@ void SerializationInfo::getValue(long long & l) const
         }
 
         default:
-            break;
+            throw SerializationError("expected scalar value");
     }
 }
 
 
 void SerializationInfo::setValue(long long l)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
-    if(_category != Void && _type != Int)
+    if(_type != Void)
         this->clearValue();
 
-    _category = Scalar;
+    _isCompound = false;
     _value.l = l;
     _type = Int;
 }
@@ -647,9 +643,6 @@ void SerializationInfo::getValue(unsigned long& ui) const
 
 void SerializationInfo::getValue(unsigned long long & l) const
 {
-    if( this->category() != Scalar )
-        throw SerializationError("expected integer value");
-
     switch(_type)
     {
         case Boolean:
@@ -676,19 +669,19 @@ void SerializationInfo::getValue(unsigned long long & l) const
         }
 
         default:
-            break;
+            throw SerializationError("expected integer value");
     }
 }
 
 
 void SerializationInfo::setValue(unsigned long long l)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
     this->clearValue();
 
-    _category = Scalar;
+    _isCompound = false;
     _value.ul = l;
     _type = UInt;
 }
@@ -705,9 +698,6 @@ void SerializationInfo::getValue(float& f) const
 
 void SerializationInfo::getValue( double& value) const
 {
-    if( this->category() != Scalar )
-        throw SerializationError("expected integer value");
-
     switch(_type)
     {
         case Boolean:
@@ -734,19 +724,19 @@ void SerializationInfo::getValue( double& value) const
         }
 
         default:
-            break;
+            throw SerializationError("expected integer value");
     }
 }
 
 
 void SerializationInfo::setValue(double value)
 {
-    if( category() == Context )
+    if( _type == Context )
         return;
 
     this->clearValue();
 
-    _category = Scalar;
+    _isCompound = false;
     _value.f = value;
     _type = Float;
 }
@@ -757,7 +747,7 @@ bool SerializationInfo::beginSave(const void* p)
     if( ! this->context() || ! this->context()->referencingEnabled() )
         return true;
 
-    if( category() == Context )
+    if( _type == Context )
     {
         return this->context()->beginSave(p, _name);
     }
@@ -791,7 +781,7 @@ bool SerializationInfo::beginSave(const void* p)
 
 void SerializationInfo::finishSave()
 {
-    if( category() == Context && this->context() && this->context()->referencingEnabled() )
+    if( _type == Context && this->context() && this->context()->referencingEnabled() )
     {
         this->context()->finishSave();
         return;
@@ -814,7 +804,7 @@ void SerializationInfo::rebind(void* obj) const
 
 void SerializationInfo::rebindFixup(void* obj) const
 {
-    if( this->category() != Reference )
+    if( _type != Reference )
         throw SerializationError("not a reference");
 
     const std::string* refId = reinterpret_cast<const std::string*>(_value.ref.refid);
@@ -846,23 +836,23 @@ void SerializationInfo::finishLoad() const
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    if( category() == Context )
+    if( _type == Context )
     {
         _name = name;
         return *this;
     }
 
-    if( this->category() != Sequence && this->category() != Struct)
+    if( ! _isCompound )
     {
         this->clearValue();
 
         _value.seq.size = 0;
         _value.seq.first = 0;
         _value.seq.last = 0;
-        _type = Unknown;
+        _isCompound = true;
     }
 
-    _category = Struct;
+    _type = Struct;
 
     SerializationInfo& si = this->addChild();
     si.setName(name);
@@ -872,7 +862,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
 void SerializationInfo::removeMember(const std::string& name)
 {
-    if(this->category() == Struct || this->category() == Sequence)
+    if( _isCompound )
     {
         SerializationInfo* si = 0;
         SerializationInfo* prev = 0;
@@ -917,24 +907,24 @@ void SerializationInfo::removeMember(const std::string& name)
 
 SerializationInfo& SerializationInfo::addElement()
 {
-    if( category() == Context )
+    if( _type == Context )
     {
         if( _name.size() )
             _name.clear();
         return *this;
     }
 
-   if( this->category() != Sequence && this->category() != Struct)
+   if( ! _isCompound )
     {
         this->clearValue();
 
         _value.seq.size = 0;
         _value.seq.first = 0;
         _value.seq.last = 0;
-        _type = Unknown;
+        _isCompound = true;
     }
 
-    _category = Sequence;
+    _type = Sequence;
 
     return this->addChild();
 }
@@ -972,7 +962,7 @@ SerializationInfo& SerializationInfo::addChild()
 
 SerializationInfo::Iterator SerializationInfo::begin()
 {
-    if(this->category() != Struct && this->category() != Sequence)
+    if( ! _isCompound )
     {
         return SerializationInfo::Iterator(0);
     }
@@ -983,7 +973,7 @@ SerializationInfo::Iterator SerializationInfo::begin()
 
 SerializationInfo::ConstIterator SerializationInfo::begin() const
 {
-    if(this->category() != Struct && this->category() != Sequence)
+    if( ! _isCompound )
     {
         return SerializationInfo::ConstIterator(0);
     }
@@ -994,7 +984,7 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 
 const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
-    if(this->category() == Struct || this->category() == Sequence)
+    if( _isCompound )
     {
         ConstIterator it( _value.seq.first );
         for(; it != ConstIterator( 0 ); ++it)
@@ -1010,7 +1000,7 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
 
 const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
-    if(this->category() == Struct || this->category() == Sequence)
+    if( _isCompound )
     {
         ConstIterator it(_value.seq.first);
         for(; it != ConstIterator( 0 ); ++it)
@@ -1026,7 +1016,7 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 
 SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
-    if(this->category() == Struct || this->category() == Sequence)
+    if( _isCompound )
     {
         Iterator it ( _value.seq.first);
         for(; it != Iterator( 0); ++it)
@@ -1042,7 +1032,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 
 size_t SerializationInfo::memberCount() const
 {
-    if(this->category() == Struct || this->category() == Sequence)
+    if( _isCompound )
     {
         return _value.seq.size;
     }

@@ -53,6 +53,9 @@ class IComposer
         virtual void setValue(const Pt::String& value)
         { throw SerializationError("unexpected value"); }
 
+        virtual void setValue(const char* data, size_t length)
+        { throw SerializationError("unexpected value"); }
+
         virtual void setBool(bool value)
         { throw SerializationError("unexpected bool value"); }
 
@@ -135,6 +138,11 @@ class Composer : public IComposer
         virtual void setValue(const Pt::String& value)
         {
             _current->setValue(value);
+        }
+
+        virtual void setValue(const char* data, size_t length)
+        {
+            _current->setBinary(data, length);
         }
 
         virtual void setBool(bool value)
