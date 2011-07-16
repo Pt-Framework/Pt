@@ -30,19 +30,15 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/XmlSerializationContext.h>
-#include <Pt/String.h>
+#include <Pt/Xml/XmlFormatter.h>
 #include <Pt/Deserializer.h>
 #include <memory>
-#include <map>
 
 namespace Pt {
 
 namespace Xml {
 
 class XmlReader;
-class Node;
-class StartElement;
-class EndElement;
 
 /** @brief Deserialize objects or object data to XML
 
@@ -62,67 +58,17 @@ class PT_XML_API XmlDeserializer : public Deserializer
         XmlReader& reader()
         { return *_reader; }
 
-    protected:
-        virtual void onBegin(IComposer& deser);
-
-        //! @brief Returns true when type is complete
-        virtual bool onAdvance(IComposer& deser);
-
-        //virtual void getold(IComposer* deser);
-        virtual void get(IComposer& deser);
-
-    private:
-        void OnBegin(const Node& node);
-
-        void OnReferenceBegin(const Node& node);
-
-        void OnMemberBegin(const Node& node);
-
-        void OnValue(const Node& node);
-
-        void OnMemberEnd(const Node& node);
-
-        void beginXmlMember(const StartElement& se);
-
-        void finishXmlMember(const EndElement& ee);
-
-        // API to be moved to Deserializer
-        void setName(const std::string& value);
-
-        void setTypeName(const std::string& value);
-
-        void setReference(const std::string& value);
-
-        void setId(const std::string& value);
-
-        void setValue(const Pt::String& value);
-
-        void beginMember(const std::string& name);
-
-        void finishMember();
-
     private:
         //! @internal
         XmlSerializationContext _xmlcontext;
+
+        XmlFormatter _formatter;
 
         //! @internal
         XmlReader* _reader;
 
         //! @internal
         std::auto_ptr<XmlReader> _deleter;
-
-        //! @internal
-        typedef void (XmlDeserializer::*ProcessNode)(const Node&);
-
-        //! @internal
-        ProcessNode _processNode;
-
-        //! @internal
-        IComposer* _composer;
-
-        //! @internal
-        String _value;
-        std::string _typeName;
 };
 
 } // namespace Xml

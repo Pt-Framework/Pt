@@ -28,12 +28,13 @@
 #include "Pt/Xml/XmlFormatter.h"
 #include "Pt/Xml/XmlSerializationContext.h"
 #include "Pt/Xml/XmlWriter.h"
+#include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
+#include <Pt/Composer.h>
 #include "Pt/Convert.h"
 #include "Pt/String.h"
-#include "Pt/Date.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 
@@ -44,14 +45,18 @@ namespace Xml {
 XmlFormatter::XmlFormatter()
 : _writer(0)
 , _deleter(0)
+, _composer(0)
 {
+    _processNode = &XmlFormatter::OnBegin;
 }
 
 
 XmlFormatter::XmlFormatter(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
+, _composer(0)
 {
+    _processNode = &XmlFormatter::OnBegin;
     _writer = _deleter.get();
 }
 
@@ -59,7 +64,9 @@ XmlFormatter::XmlFormatter(std::ostream& os)
 XmlFormatter::XmlFormatter(XmlWriter* writer)
 : _writer(writer)
 , _deleter(0)
+, _composer(0)
 {
+    _processNode = &XmlFormatter::OnBegin;
 }
 
 
@@ -86,6 +93,12 @@ void XmlFormatter::attach(XmlWriter& writer)
 
     _deleter.reset(0);
     _writer = &writer;
+}
+
+
+void XmlFormatter::attach(XmlReader& reader)
+{
+    _reader = &reader;
 }
 
 
@@ -267,6 +280,265 @@ void XmlFormatter::finishObject()
 void XmlFormatter::onFinishObject()
 {
     _writer->writeEndElement();
+}
+
+
+void XmlFormatter::get(IComposer& comp)
+{
+    //std::cerr << "-> GET"<< std::endl;
+    _composer = &comp;
+
+    _processNode = &XmlFormatter::OnBegin;
+
+    XmlReader::Iterator it = _reader->current();
+    if(it->type() == Node::EndElement)
+        ++it;
+
+    for( ; it != _reader->end(); ++it)
+    {
+        //std::cerr << "-> GOT NODE: " << it->type() << std::endl;
+        (this->*_processNode)(*it);
+
+        if(_composer == 0)
+            break;
+    }
+
+    //std::cerr << "-> DONE"<< std::endl;
+}
+
+
+bool XmlFormatter::advance(IComposer& comp)
+{
+    _composer = &comp;
+
+    while( _reader->advance() )
+    {
+        const Pt::Xml::Node& node = _reader->get();
+        //std::cerr << "-> GOT NODE: " << node.type() << std::endl;
+
+        if(node.type() == Node::EndDocument)
+            throw SerializationError("incomplete type");
+
+        (this->*_processNode)(node);
+
+        if( _composer == 0 )
+        {
+            //std::cerr << "-> COMPOSER END" << std::endl;
+            _processNode = &XmlFormatter::OnBegin;
+            return true;
+        }
+    }
+
+    //std::cerr << "-> COMPOSER MORE" << std::endl;
+    return false;
+}
+
+
+void XmlFormatter::OnBegin(const Node& node)
+{
+    //std::cerr << "-> OnBegin" << std::endl;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+            //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
+            _composer->setName( se.name().narrow() );
+
+            String nodeId = se.attribute(L"id");
+            if( ! nodeId.empty() )
+            {
+                //std::cerr << "ID: " << nodeId.narrow() << std::endl;
+                _composer->setId( nodeId.narrow() );
+            }
+
+            String type = se.attribute(L"type");
+            if( ! type.empty() )
+            {
+                //std::cerr << "TYPE: " << type.narrow() << std::endl;
+                _composer->setTypeName(type.narrow());
+            }
+
+            String refId = se.attribute(L"ref");
+            if( ! refId.empty() )
+            {
+                //std::cerr << "REF: " << refId.narrow() << std::endl;
+                _composer->setReference( refId.narrow() );
+                _processNode = &XmlFormatter::OnReferenceBegin;
+                break;
+            }
+
+            _processNode = &XmlFormatter::OnMemberBegin;
+            break;
+        }
+
+        case Node::EndElement:
+        {
+            throw SerializationError("expected start element");
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void XmlFormatter::OnReferenceBegin(const Node& node)
+{
+    //std::cerr << "-> OnReferenceBegin" << std::endl;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            throw SerializationError("invalid reference");
+        }
+
+        case Node::EndElement:
+        {
+            const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+            this->finishXmlMember(ee);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void XmlFormatter::OnMemberBegin(const Node& node)
+{
+    //std::cerr << "-> OnMemberBegin" << std::endl;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+            this->beginXmlMember(se);
+            break;
+        }
+
+        case Node::Characters:
+        {
+            const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+            _value = chars.content();
+            _processNode = &XmlFormatter::OnValue;
+            break;
+        }
+
+        case Node::EndElement:
+        {
+            //std::cerr << "VALUE: <empty>" << std::endl;
+            _composer->setValue(Pt::String() );
+
+            const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+            this->finishXmlMember(ee);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void XmlFormatter::OnValue(const Node& node)
+{
+    //std::cerr << "-> OnValue" << std::endl;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+            this->beginXmlMember(se);
+            break;
+        }
+
+        case Node::EndElement:
+        {
+            //std::cerr << "VALUE: " << _value.narrow() << std::endl;
+            _composer->setValue(_value);
+
+            const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+            this->finishXmlMember(ee);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void XmlFormatter::OnMemberEnd(const Node& node)
+{
+    //std::cerr << "-> OnMemberEnd" << std::endl;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+            this->beginXmlMember(se);
+            break;
+        }
+
+        case Node::EndElement:
+        {
+            const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+            this->finishXmlMember(ee);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
+void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
+{
+    //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
+    _composer = _composer->beginMember(se.name().narrow() );
+
+    String nodeId = se.attribute(L"id");
+    if( ! nodeId.empty() )
+    {
+        //std::cerr << "ID: " << nodeId.narrow() << std::endl;
+        _composer->setId( nodeId.narrow() );
+    }
+
+    String type = se.attribute(L"type");
+    if( ! type.empty() )
+    {
+        //std::cerr << "BTYPE: " << type.narrow() << std::endl;
+        _composer->setTypeName(type.narrow());
+    }
+
+    String refId = se.attribute(L"ref");
+    if( ! refId.empty() )
+    {
+        //std::cerr << "REF: " << refId.narrow() << std::endl;
+        _composer->setReference( refId.narrow() );
+        _processNode = &XmlFormatter::OnReferenceBegin;
+        return;
+    }
+
+    _processNode = &XmlFormatter::OnMemberBegin;
+}
+
+
+void XmlFormatter::finishXmlMember(const Xml::EndElement& )
+{
+    //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+    //std::cerr << "END MEMBER: " << ee.name().narrow() << std::endl;
+    _composer = _composer->finish();
+    _processNode = &XmlFormatter::OnMemberEnd;
 }
 
 } // namespace Xml

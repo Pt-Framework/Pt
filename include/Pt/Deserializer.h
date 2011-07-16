@@ -30,8 +30,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/Composer.h>
+#include <Pt/Formatter.h>
 #include <Pt/SerializationContext.h>
-#include <map>
 
 namespace Pt {
 
@@ -40,6 +40,7 @@ class Deserializer
     public:
         Deserializer()
         : _context(0)
+        , _fmt(0)
         , _current(0)
         {}
 
@@ -51,6 +52,9 @@ class Deserializer
 
         SerializationContext* context()
         { return _context; }
+
+        void setFormatter(Formatter& formatter)
+        { _fmt = &formatter; }
 
         void clear()
         {
@@ -84,13 +88,7 @@ class Deserializer
             deser.clear(_context);
             deser.begin(type);
 
-            this->get(deser);
-        }
-
-        void begin(IComposer& composer)
-        {
-            composer.clear(_context);
-            this->onBegin(composer);
+            _fmt->get(deser);
         }
 
         template <typename T>
@@ -104,7 +102,6 @@ class Deserializer
 
             composer->clear(_context);
             composer->begin(type);
-            this->onBegin(*composer);
         }
 
         bool advance()
@@ -112,7 +109,7 @@ class Deserializer
             if( ! _current )
                 return true;
 
-            bool finished = this->onAdvance(*_current);
+            bool finished = _fmt->advance(*_current);
             if(finished)
             {
                 delete _current;
@@ -128,16 +125,9 @@ class Deserializer
                 _context->fixup();
         }
 
-    protected:
-        virtual void onBegin(IComposer& deser) = 0;
-
-        virtual bool onAdvance(IComposer& deser) = 0;
-
-    protected:
-        virtual void get(IComposer& deser) = 0;
-
     private:
         SerializationContext* _context;
+        Formatter* _fmt;
         IComposer* _current;
 };
 

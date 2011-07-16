@@ -35,6 +35,8 @@
 
 namespace Pt {
 
+class IComposer;
+
 class Formatter
 {
     public:
@@ -79,6 +81,13 @@ class Formatter
         virtual void finishMember() = 0;
 
         virtual void finishObject() = 0;
+
+        //! @brief Returns true when type is complete
+        virtual bool advance(IComposer& deser)
+        { return false; }
+
+        virtual void get(IComposer& deser)
+        {}
 
     protected:
         Formatter()

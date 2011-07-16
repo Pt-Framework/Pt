@@ -29,17 +29,20 @@
 #define Pt_Xml_XmlFormatter_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Date.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
-#include <Pt/Xml/XmlWriter.h>
 #include <memory>
-#include <map>
 
 namespace Pt {
 
 namespace Xml {
+
+class XmlReader;
+class XmlWriter;
+class Node;
+class StartElement;
+class EndElement;
 
 /** @brief Serialize objects or object data to XML
 
@@ -102,6 +105,8 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         void attach(XmlWriter& writer);
 
+        void attach(XmlReader& reader);
+
         /** @brief Detaches the currently set writer from this object.
 
             Before detaching the writer, the underlaying stream is flushed.
@@ -156,14 +161,48 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void onFinishObject();
 
+        //! @brief Returns true when type is complete
+        bool advance(IComposer& deser);
+
+        //virtual void getold(IComposer* deser);
+        void get(IComposer& deser);
+
+    protected:
+        void OnBegin(const Node& node);
+
+        void OnReferenceBegin(const Node& node);
+
+        void OnMemberBegin(const Node& node);
+
+        void OnValue(const Node& node);
+
+        void OnMemberEnd(const Node& node);
+
+        void beginXmlMember(const StartElement& se);
+
+        void finishXmlMember(const EndElement& ee);
+
     private:
         //! @internal
         XmlWriter* _writer;
 
         //! @internal
+        XmlReader* _reader;
+
+        //! @internal
         std::auto_ptr<XmlWriter> _deleter;
 
+        //! @internal
         Pt::String _value;
+
+        //! @internal
+        typedef void (XmlFormatter::*ProcessNode)(const Node&);
+
+        //! @internal
+        ProcessNode _processNode;
+
+        //! @internal
+        IComposer* _composer;
 };
 
 } // namespace Xml
