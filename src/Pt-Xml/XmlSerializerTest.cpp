@@ -312,7 +312,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dateptr1a, "dateptr1");
 
             //std::cerr << "\n--------------------" << std::endl;
-            ser.beginFormat();
+            ser.begin();
             while( ser.advance() )
             {
                 //ser.flush();
