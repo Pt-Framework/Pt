@@ -110,8 +110,6 @@ class PT_API SerializationInfo
     public:
         void clear();
 
-        void clear(SerializationContext* context);
-
         inline bool isScalar() const
         { return _isCompound == false; }
 

@@ -35,46 +35,22 @@
 
 namespace Pt {
 
-class Deserializer
+class PT_API Deserializer
 {
     public:
-        Deserializer()
-        : _context(0)
-        , _fmt(0)
-        , _current(0)
-        {}
+        Deserializer();
 
-        virtual ~Deserializer()
-        {
-            delete _current;
-            _current = 0;
-        }
+        virtual ~Deserializer();
 
-        SerializationContext* context()
-        { return _context; }
+        SerializationContext* context();
 
-        void setFormatter(Formatter& formatter)
-        { _fmt = &formatter; }
+        void reset(SerializationContext* context);
 
-        void clear()
-        {
-            if(_context)
-                _context->reset();
+        Formatter* formatter();
 
-            delete _current;
-            _current = 0;
-        }
+        void setFormatter(Formatter& formatter);
 
-        void reset(SerializationContext* context)
-        {
-            if(_context)
-                _context->reset();
-
-            delete _current;
-            _current = 0;
-
-            _context = context;
-        }
+        void clear();
 
         /** @brief Deserialize an object
 
@@ -84,51 +60,35 @@ class Deserializer
         template <typename T>
         void deserialize(T& type)
         {
-            Composer<T> deser;
-            deser.clear(_context);
-            deser.begin(type);
-
-            _fmt->get(deser);
+            Composer<T> comp(_context);
+            comp.begin(type);
+            _fmt->parse(comp);
         }
 
         template <typename T>
         void begin(T& type)
         {
-            delete _current;
-            _current = 0;
-
-            Composer<T>* composer = new Composer<T>;
+            void* m = this->allocate( sizeof(Composer<T>) );
+            Composer<T>* composer = new (m) Composer<T>(_context);
             _current = composer;
-
-            composer->clear(_context);
             composer->begin(type);
         }
 
-        bool advance()
-        {
-            if( ! _current )
-                return true;
+        bool advance();
 
-            bool finished = _fmt->advance(*_current);
-            if(finished)
-            {
-                delete _current;
-                _current = 0;
-            }
+        void finish();
 
-            return finished;
-        }
+    private:
+        void* allocate(size_t n);
 
-        void finish()
-        {
-            if(_context)
-                _context->fixup();
-        }
+        void deallocate(void* p);
 
     private:
         SerializationContext* _context;
         Formatter* _fmt;
         IComposer* _current;
+        void* _mem;
+        std::size_t _memsize;
 };
 
 } // namespace Pt

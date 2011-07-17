@@ -32,7 +32,6 @@
 #include <Pt/Xml/XmlSerializationContext.h>
 #include <Pt/Xml/XmlFormatter.h>
 #include <Pt/Deserializer.h>
-#include <memory>
 
 namespace Pt {
 
@@ -48,27 +47,52 @@ class XmlReader;
 class PT_XML_API XmlDeserializer : public Deserializer
 {
     public:
-        explicit XmlDeserializer(XmlReader& reader);
+        XmlDeserializer()
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
-        explicit XmlDeserializer(std::istream& is);
+        explicit XmlDeserializer(XmlReader& reader)
+        : _formatter(reader)
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
-        //! @brief Destructor
-        ~XmlDeserializer();
+        explicit XmlDeserializer(std::istream& is)
+        : _formatter(is)
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
-        XmlReader& reader()
-        { return *_reader; }
+        void attach(std::istream& is)
+        {
+            _formatter.attach(is);
+        }
+
+        void attach(XmlReader& reader)
+        {
+            _formatter.attach(reader);
+        }
+
+        void detach()
+        {
+            _formatter.detach();
+        }
+
+        XmlReader* reader()
+        {
+            return _formatter.reader();
+        }
 
     private:
         //! @internal
         XmlSerializationContext _xmlcontext;
 
+        //! @internal
         XmlFormatter _formatter;
-
-        //! @internal
-        XmlReader* _reader;
-
-        //! @internal
-        std::auto_ptr<XmlReader> _deleter;
 };
 
 } // namespace Xml

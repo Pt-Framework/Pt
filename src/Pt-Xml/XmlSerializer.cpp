@@ -31,57 +31,6 @@ namespace Pt {
 
 namespace Xml {
 
-XmlSerializer::XmlSerializer()
-{
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
-
-
-XmlSerializer::XmlSerializer(std::ostream& os)
-: _formatter(os)
-{
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
-
-
-XmlSerializer::XmlSerializer(XmlWriter* writer)
-: _formatter(writer)
-{
-    this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-}
-
-
-XmlSerializer::~XmlSerializer()
-{
-}
-
-
-void XmlSerializer::attach(std::ostream& os)
-{
-    _formatter.attach(os);
-}
-
-
-void XmlSerializer::attach(XmlWriter& writer)
-{
-    _formatter.attach(writer);
-}
-
-
-void XmlSerializer::detach()
-{
-    _formatter.detach();
-}
-
-
-void XmlSerializer::flush()
-{
-    _formatter.flush();
-}
-
 } // namespace Xml
 
 } // namespace Pt

@@ -8,11 +8,9 @@ PT_XML_SOURCES = Characters.cpp
                  NamespaceContext.cpp
                  QName.cpp
                  StartElement.cpp
-                 XmlDeserializer.cpp
                  XmlError.cpp
                  XmlFormatter.cpp
                  XmlReader.cpp
-                 XmlSerializer.cpp
                  XmlSerializationContext.cpp
                  XmlWriter.cpp
                  ;

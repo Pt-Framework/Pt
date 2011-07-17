@@ -361,8 +361,7 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        Pt::Composer< std::vector<int> > com;
-        com.clear(&context);
+        Pt::Composer< std::vector<int> > com(&context);
         com.begin(vec);
         Pt::IComposer* composer = &com;
 

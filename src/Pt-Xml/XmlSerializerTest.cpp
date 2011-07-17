@@ -337,30 +337,18 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlDeserializer deser(reader);
 
             deser.begin(date1b);
-            while( tis.buffer().in_avail() )
-            {
-                bool finished = deser.advance();
-                if(finished)
-                    break;
-            }
+            while( tis.buffer().in_avail() && deser.advance() )
+            { }
 
             tis.buffer().import();
             deser.begin(date2b);
-            while( tis.buffer().in_avail() )
-            {
-                bool finished = deser.advance();
-                if(finished)
-                    break;
-            }
+            while( tis.buffer().in_avail()  && deser.advance() )
+            { }
 
             tis.buffer().import();
             deser.begin(dateptr1b);
-            while( tis.buffer().in_avail() )
-            {
-                bool finished = deser.advance();
-                if(finished)
-                    break;
-            }
+            while( tis.buffer().in_avail()  && deser.advance() )
+            { }
 
             deser.finish();
 

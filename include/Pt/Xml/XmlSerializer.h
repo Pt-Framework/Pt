@@ -37,6 +37,8 @@ namespace Pt {
 
 namespace Xml {
 
+class XmlWriter;
+
 /** @brief Serialize objects or object data to XML
 
     Thic class performs XML serialization of a single object or
@@ -51,14 +53,23 @@ class PT_XML_API XmlSerializer : public Serializer
             The serializer can be "opened" for writing by calling
             method attach().
         */
-        XmlSerializer();
+        XmlSerializer()
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
         /** @brief Construct a serializer writing to a byte stream
 
             The serializer will write the objects as XML with
             UTF-8 encoding to the output stream.
         */
-        XmlSerializer(std::ostream& os);
+        explicit XmlSerializer(std::ostream& os)
+        : _formatter(os)
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
         /** @brief Construct a serializer writing to the given XmlWriter object
 
@@ -66,10 +77,12 @@ class PT_XML_API XmlSerializer : public Serializer
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        XmlSerializer(XmlWriter* writer);
-
-        //! @brief Destructor
-        ~XmlSerializer();
+        explicit XmlSerializer(XmlWriter& writer)
+        : _formatter(writer)
+        {
+            this->reset( &_xmlcontext );
+            this->setFormatter(_formatter);
+        }
 
         /** @brief Opens this serializer for writing into the given stream.
 
@@ -81,7 +94,11 @@ class PT_XML_API XmlSerializer : public Serializer
             XmlWriter object. If this method is called anyway or called twice an
             std::logic_error is thrown.
         */
-        void attach(std::ostream& os);
+
+        void attach(std::ostream& os)
+        {
+            _formatter.attach(os);
+        }
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 
@@ -95,16 +112,31 @@ class PT_XML_API XmlSerializer : public Serializer
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        void attach(XmlWriter& writer);
 
+        void attach(XmlWriter& writer)
+        {
+            _formatter.attach(writer);
+        }
         /** @brief Detaches the currently set writer from this object.
 
             Before detaching the writer, the underlaying stream is flushed.
             If there is no currently set writer, nothing happens.
         */
-        void detach();
 
-        void flush();
+        void detach()
+        {
+            _formatter.detach();
+        }
+
+        void flush()
+        {
+            _formatter.flush();
+        }
+
+        XmlWriter* writer()
+        {
+            return _formatter.writer();
+        }
 
     private:
         XmlFormatter _formatter;

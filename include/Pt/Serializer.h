@@ -36,72 +36,22 @@
 
 namespace Pt {
 
-class Serializer
+class PT_API Serializer
 {
     public:
-        Serializer()
-        : _context(0)
-        , _formatter(0)
-        {}
+        Serializer();
 
-        virtual ~Serializer()
-        {
-            std::vector<IDecomposer*>::iterator it;
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
+        virtual ~Serializer();
 
-            _heap.clear();
-            _stack.clear();
-        }
+        SerializationContext* context();
 
-        SerializationContext* context()
-        { return _context; }
+        void reset(SerializationContext* context);
 
-        Formatter& formatter()
-        { return *_formatter; }
+        Formatter* formatter();
 
-        void setFormatter(Formatter& formatter)
-        { _formatter = &formatter; }
+        void setFormatter(Formatter& formatter);
 
-        void clear()
-        {
-            if(_context)
-                _context->reset();
-
-            std::vector<IDecomposer*>::iterator it;
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _heap.clear();
-            _stack.clear();
-        }
-
-        void reset(SerializationContext* context)
-        {
-            if(_context)
-                _context->reset();
-
-            std::vector<IDecomposer*>::iterator it;
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _heap.clear();
-            _stack.clear();
-
-            _context = context;
-        }
-
-        void queue(IDecomposer& dec)
-        {
-            dec.clear(_context);
-            _stack.push_back(&dec);
-        }
+        void clear();
 
         /** @brief Serialize an object
 
@@ -112,69 +62,31 @@ class Serializer
         template <typename T>
         void serialize(const T& type, const char* name)
         {
-            Decomposer<T>* dec = new Decomposer<T>;
-            _heap.push_back(dec);
+            void* m = this->allocate( sizeof(Decomposer<T>) );
+            Decomposer<T>* dec = new (m) Decomposer<T>(_context);
             _stack.push_back(dec);
 
-            dec->clear(_context);
             dec->begin(type, name);
         }
 
-        void beginFormat()
-        {
-            _current = 0;
-            if( _stack.empty() )
-                return;
+        // TODO: can this be joined into advance() ?
+        void begin();
 
-            _current = _stack.front();
-            _current->beginFormat(*_formatter);
-        }
+        bool advance();
 
-        bool advance()
-        {
-            if( ! _current )
-                return false;
+        void finish();
 
-            _current = _current->advance(*_formatter);
-            if( _current )
-                return true;
+    private:
+        void* allocate(size_t n);
 
-            // at least one on the stack, otherwise _current is 0
-            _stack.front()->clear();
-            _stack.erase( _stack.begin() );
-
-            if( _stack.empty() )
-                return false;
-
-            _current = _stack.front();
-            _current->beginFormat(*_formatter);
-            return true;
-        }
-
-        void finish()
-        {
-            std::vector<IDecomposer*>::iterator it;
-
-            for(it = _stack.begin(); it != _stack.end(); ++it)
-            {
-                (*it)->format(*_formatter);
-            }
-
-            for(it = _heap.begin(); it != _heap.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _heap.clear();
-            _stack.clear();
-        }
+        void deallocate(void* p);
 
     private:
         SerializationContext* _context;
         Formatter* _formatter;
         std::vector<IDecomposer*> _stack;
-        std::vector<IDecomposer*> _heap;
         IDecomposer* _current;
+        void* _alloc;
 };
 
 } // namespace Pt

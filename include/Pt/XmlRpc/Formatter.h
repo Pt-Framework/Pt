@@ -91,6 +91,12 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void finish();
 
+        virtual bool parseSome(IComposer& composer)
+        { return false; }
+
+        virtual void parse(IComposer& composer)
+        {}
+
     private:
         Xml::XmlWriter* _writer;
         Pt::String _value;

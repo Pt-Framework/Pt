@@ -31,4 +31,125 @@
 
 namespace Pt {
 
+Serializer::Serializer()
+: _context(0)
+, _formatter(0)
+, _alloc(0)
+{}
+
+
+Serializer::~Serializer()
+{
+    std::vector<IDecomposer*>::iterator it;
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        (*it)->~IDecomposer();
+        this->deallocate(*it);
+    }
+
+    _stack.clear();
+}
+
+
+SerializationContext* Serializer::context()
+{
+    return _context;
+}
+
+
+void Serializer::reset(SerializationContext* context)
+{
+    this->clear();
+    _context = context;
+}
+
+
+Formatter* Serializer::formatter()
+{
+    return _formatter;
+}
+
+
+void Serializer::setFormatter(Formatter& formatter)
+{
+    _formatter = &formatter;
+}
+
+
+void Serializer::clear()
+{
+    if(_context)
+        _context->reset();
+
+    std::vector<IDecomposer*>::iterator it;
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        (*it)->~IDecomposer();
+        this->deallocate(*it);
+    }
+
+    _stack.clear();
+}
+
+
+void Serializer::begin()
+{
+    _current = 0;
+    if( _stack.empty() )
+        return;
+
+    _current = _stack.front();
+    _current->beginFormat(*_formatter);
+}
+
+
+bool Serializer::advance()
+{
+    if( ! _current )
+        return false;
+
+    _current = _current->advanceFormat(*_formatter);
+    if( _current )
+        return true;
+
+    // at least one on the stack, otherwise _current is 0
+    _stack.front()->~IDecomposer();
+    this->deallocate( _stack.front() );
+    _stack.erase( _stack.begin() );
+
+    if( _stack.empty() )
+        return false;
+
+    _current = _stack.front();
+    _current->beginFormat(*_formatter);
+    return true;
+}
+
+
+void Serializer::finish()
+{
+    std::vector<IDecomposer*>::iterator it;
+
+    for(it = _stack.begin(); it != _stack.end(); ++it)
+    {
+        (*it)->format(*_formatter);
+        (*it)->~IDecomposer();
+        this->deallocate(*it);
+    }
+
+    _stack.clear();
+}
+
+
+void* Serializer::allocate(size_t n)
+{
+    return ::operator new( n );
+}
+
+
+void Serializer::deallocate(void* p)
+{
+    ::operator delete (p);
+}
+
 } // namespace Pt

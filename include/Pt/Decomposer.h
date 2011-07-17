@@ -41,15 +41,11 @@ class IDecomposer
         virtual ~IDecomposer()
         {}
 
-        virtual void clear() = 0;
-
-        virtual void clear(SerializationContext* context) = 0;
-
         virtual void format(Formatter& formatter) = 0;
 
         virtual void beginFormat(Formatter& formatter) {}
 
-        virtual IDecomposer* advance(Formatter& formatter) { return 0; }
+        virtual IDecomposer* advanceFormat(Formatter& formatter) { return 0; }
 
     protected:
         IDecomposer()
@@ -61,9 +57,10 @@ template <typename T>
 class Decomposer : public IDecomposer
 {
     public:
-        Decomposer()
+        Decomposer(SerializationContext* context = 0)
         : _parent(0)
         , _type(0)
+        , _si(context)
         , _current(0)
         { }
 
@@ -72,10 +69,12 @@ class Decomposer : public IDecomposer
 
         void begin(const T& type, const char* name)
         {
-            //std::cerr << "begin " << &type << std::endl;
-
             if(_type)
-                this->clear();
+            {
+                _si.clear();
+                _it = SerializationInfo::Iterator();
+                _current = 0;
+            }
 
             _type = &type;
             _si.setName(name);
@@ -90,23 +89,8 @@ class Decomposer : public IDecomposer
             }
         }
 
-        virtual void clear()
-        {
-            _si.clear();
-            _parent = 0;
-            _it = SerializationInfo::Iterator();
-            _type = 0;
-            _current = 0;
-        }
-
-        virtual void clear(SerializationContext* context)
-        {
-            _si.clear(context);
-        }
-
         virtual void format(Formatter& formatter)
         {
-            //std::cerr << "format " << _type << std::endl;
             _si << Pt::save() <<= *_type;
             _si.format(formatter);
         }
@@ -117,16 +101,12 @@ class Decomposer : public IDecomposer
             _current = &_si;
             _current->beginFormat(formatter);
             _it = _current->begin();
-            //std::cerr << "BEGIN FORMAT" << std::endl;
         }
 
-        virtual IDecomposer* advance(Formatter& formatter)
+        virtual IDecomposer* advanceFormat(Formatter& formatter)
         {
-            //std::cerr << "ADVANCE" << std::endl;
-
             if( _it == _current->end() )
             {
-                //std::cerr << "AT CURRENT END" << std::endl;
                 _current->endFormat(formatter);
                 _current = _current->parent();
                 if(_current)
@@ -137,7 +117,6 @@ class Decomposer : public IDecomposer
 
             if( _it->beginFormat(formatter) )
             {
-                //std::cerr << "BEGIN CHILD FORMAT" << std::endl;
                 _it = _current->begin();
                 if( _it != _current->end() )
                 {
@@ -146,7 +125,6 @@ class Decomposer : public IDecomposer
                 }
             }
 
-            //std::cerr << "END FORMAT - NEXT" << std::endl;
             _it->endFormat(formatter);
             ++_it;
             return this;

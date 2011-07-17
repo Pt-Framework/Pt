@@ -44,7 +44,9 @@ namespace Xml {
 
 XmlFormatter::XmlFormatter()
 : _writer(0)
-, _deleter(0)
+, _wrPtr(0)
+, _reader(0)
+, _rdPtr(0)
 , _composer(0)
 {
     _processNode = &XmlFormatter::OnBegin;
@@ -52,20 +54,51 @@ XmlFormatter::XmlFormatter()
 
 
 XmlFormatter::XmlFormatter(std::ostream& os)
-: _writer( 0 )
-, _deleter( new XmlWriter(os) )
+: _writer(0)
+, _wrPtr(0)
+, _reader(0)
+, _rdPtr(0)
 , _composer(0)
 {
+    this->attach(os);
     _processNode = &XmlFormatter::OnBegin;
-    _writer = _deleter.get();
+    _writer = _wrPtr.get();
 }
 
 
-XmlFormatter::XmlFormatter(XmlWriter* writer)
-: _writer(writer)
-, _deleter(0)
+XmlFormatter::XmlFormatter(XmlWriter& writer)
+: _writer(0)
+, _wrPtr(0)
+, _reader(0)
+, _rdPtr(0)
 , _composer(0)
 {
+    this->attach(writer);
+    _processNode = &XmlFormatter::OnBegin;
+}
+
+
+XmlFormatter::XmlFormatter(std::istream& is)
+: _writer(0)
+, _wrPtr(0)
+, _reader(0)
+, _rdPtr(0)
+, _composer(0)
+{
+    this->attach(is);
+    _processNode = &XmlFormatter::OnBegin;
+    _writer = _wrPtr.get();
+}
+
+
+XmlFormatter::XmlFormatter(XmlReader& reader)
+: _writer(0)
+, _wrPtr(0)
+, _reader(0)
+, _rdPtr(0)
+, _composer(0)
+{
+    this->attach(reader);
     _processNode = &XmlFormatter::OnBegin;
 }
 
@@ -81,8 +114,8 @@ void XmlFormatter::attach(std::ostream& os)
     if (_writer)
         throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
 
-    _deleter.reset(new XmlWriter(os));
-    _writer = _deleter.get();
+    _wrPtr.reset(new XmlWriter(os));
+    _writer = _wrPtr.get();
 }
 
 
@@ -91,13 +124,21 @@ void XmlFormatter::attach(XmlWriter& writer)
     if (_writer)
         throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
 
-    _deleter.reset(0);
+    _wrPtr.reset(0);
     _writer = &writer;
+}
+
+
+void XmlFormatter::attach(std::istream& is)
+{
+    _rdPtr.reset( new XmlReader(is) );
+    _reader = _rdPtr.get();
 }
 
 
 void XmlFormatter::attach(XmlReader& reader)
 {
+    _rdPtr.reset(0);
     _reader = &reader;
 }
 
@@ -106,9 +147,14 @@ void XmlFormatter::detach()
 {
     if (_writer)
     {
-        this->flush();
-        _deleter.reset(0);
+        _wrPtr.reset(0);
         _writer = 0;
+    }
+
+    if (_reader)
+    {
+        _rdPtr.reset(0);
+        _reader = 0;
     }
 }
 
@@ -123,6 +169,9 @@ void XmlFormatter::flush()
 void XmlFormatter::addValue(const std::string& name, const std::string& type,
                              const Pt::String& value, const std::string& id)
 {
+    if( ! _writer )
+        return;
+
     if( ! id.empty() )
     {
         Xml::Attribute attr[2];
@@ -188,6 +237,9 @@ void XmlFormatter::addFloat(const std::string& name, double value,
 
 void XmlFormatter::addReference(const std::string& name, const std::string& id)
 {
+    if( ! _writer )
+        return;
+
     Attribute attr( Pt::String(L"ref"), Pt::String::widen( id ) );
     _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
 }
@@ -196,6 +248,9 @@ void XmlFormatter::addReference(const std::string& name, const std::string& id)
 void XmlFormatter::beginArray(const std::string& name, const std::string& type,
                               const std::string& id)
 {
+    if( ! _writer )
+        return;
+
     if( ! id.empty() )
     {
         Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
@@ -227,6 +282,9 @@ void XmlFormatter::finishElement()
 
 void XmlFormatter::finishArray()
 {
+    if( ! _writer )
+        return;
+
     _writer->writeEndElement();
 }
 
@@ -241,6 +299,9 @@ void XmlFormatter::beginObject(const std::string& name, const std::string& type,
 void XmlFormatter::onBeginObject(const std::string& name, const std::string& type,
                                  const std::string& id)
 {
+    if( ! _writer )
+        return;
+
     if( ! id.empty() )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
@@ -279,11 +340,14 @@ void XmlFormatter::finishObject()
 
 void XmlFormatter::onFinishObject()
 {
+    if( ! _writer )
+        return;
+
     _writer->writeEndElement();
 }
 
 
-void XmlFormatter::get(IComposer& comp)
+void XmlFormatter::parse(IComposer& comp)
 {
     //std::cerr << "-> GET"<< std::endl;
     _composer = &comp;
@@ -307,7 +371,7 @@ void XmlFormatter::get(IComposer& comp)
 }
 
 
-bool XmlFormatter::advance(IComposer& comp)
+bool XmlFormatter::parseSome(IComposer& comp)
 {
     _composer = &comp;
 

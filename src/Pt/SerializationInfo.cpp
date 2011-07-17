@@ -226,13 +226,6 @@ void SerializationInfo::clear()
 }
 
 
-void SerializationInfo::clear(SerializationContext* context)
-{
-    this->clear();
-    _context = context;
-}
-
-
 void SerializationInfo::clearValue()
 {
     switch(_type)

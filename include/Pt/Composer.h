@@ -40,10 +40,6 @@ class IComposer
         virtual ~IComposer()
         {}
 
-        virtual void clear() = 0;
-
-        virtual void clear(SerializationContext* context) = 0;
-
         virtual void setName(const std::string& name) = 0;
 
         virtual void setId(const std::string& id) = 0;
@@ -89,11 +85,12 @@ template <typename T>
 class Composer : public IComposer
 {
     public:
-        Composer()
+        Composer(SerializationContext* context = 0)
         : _parent(0)
         , _type(0)
+        , _si(context)
         , _current(&_si)
-        {}
+        { }
 
         void setParent(IComposer* parent)
         { _parent = parent; }
@@ -101,23 +98,12 @@ class Composer : public IComposer
         void begin(T& type)
         {
             if(_type)
-                this->clear();
+            {
+                _si.clear();
+            }
 
             _type = &type;
             _current = &_si;
-        }
-
-        virtual void clear()
-        {
-            _si.clear();
-            _parent = 0;
-            _type = 0;
-            _current = 0;
-        }
-
-        virtual void clear(SerializationContext* context)
-        {
-            _si.clear(context);
         }
 
         virtual void setName(const std::string& name)

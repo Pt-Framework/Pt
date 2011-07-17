@@ -26,8 +26,110 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Deserializer.h"
-#include <cassert>
 
 namespace Pt {
+
+Deserializer::Deserializer()
+: _context(0)
+, _fmt(0)
+, _current(0)
+, _mem(0)
+, _memsize(0)
+{}
+
+Deserializer::~Deserializer()
+{
+    if(_current)
+    {
+        _current->~IComposer();
+    }
+
+    this->deallocate(_mem);
+}
+
+SerializationContext* Deserializer::context()
+{
+    return _context;
+}
+
+
+void Deserializer::reset(SerializationContext* context)
+{
+    this->clear();
+    _context = context;
+}
+
+
+Formatter* Deserializer::formatter()
+{
+    return _fmt;
+}
+
+
+void Deserializer::setFormatter(Formatter& formatter)
+{
+    _fmt = &formatter;
+}
+
+
+void Deserializer::clear()
+{
+    if(_context)
+        _context->reset();
+
+    if(_current)
+    {
+        _current->~IComposer();
+        _current = 0;
+    }
+}
+
+
+bool Deserializer::advance()
+{
+    if( ! _current )
+        return false;
+
+    bool finished = _fmt->parseSome(*_current);
+    if(finished)
+    {
+        _current->~IComposer();
+        _current = 0;
+    }
+
+    return ! finished;
+}
+
+
+void Deserializer::finish()
+{
+    if(_context)
+        _context->fixup();
+}
+
+
+void* Deserializer::allocate(size_t n)
+{
+    if(_current)
+    {
+        _current->~IComposer();
+        _current = 0;
+    }
+
+    if(n < _memsize)
+        return _mem;
+
+    if(_mem)
+        this->deallocate(_mem);
+
+    _mem = ::operator new( n );
+    return _mem;
+}
+
+
+void Deserializer::deallocate(void* p)
+{
+    ::operator delete (p);
+}
 
 } // namespace Pt

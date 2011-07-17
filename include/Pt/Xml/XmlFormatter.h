@@ -29,7 +29,6 @@
 #define Pt_Xml_XmlFormatter_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/TypeInfo.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
 #include <memory>
@@ -65,8 +64,7 @@ class PT_XML_API XmlFormatter : public Formatter
             The serializer will write the objects as XML with
             UTF-8 encoding to the output stream.
         */
-        XmlFormatter(std::ostream& os);
-
+        explicit XmlFormatter(std::ostream& os);
 
         /** @brief Construct a serializer writing to the given XmlWriter object
 
@@ -74,7 +72,11 @@ class PT_XML_API XmlFormatter : public Formatter
             This class will not free the given XmlWriter object. The caller is
             responsible to free it if needed.
         */
-        XmlFormatter(XmlWriter* writer);
+        explicit XmlFormatter(XmlWriter& writer);
+
+        explicit XmlFormatter(std::istream& is);
+
+        explicit XmlFormatter(XmlReader& reader);
 
         //! @brief Destructor
         ~XmlFormatter();
@@ -105,7 +107,15 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         void attach(XmlWriter& writer);
 
+        XmlWriter* writer()
+        { return _writer;}
+
+        void attach(std::istream& is);
+
         void attach(XmlReader& reader);
+
+        XmlReader* reader()
+        { return _reader;}
 
         /** @brief Detaches the currently set writer from this object.
 
@@ -161,11 +171,9 @@ class PT_XML_API XmlFormatter : public Formatter
 
         void onFinishObject();
 
-        //! @brief Returns true when type is complete
-        bool advance(IComposer& deser);
+        bool parseSome(IComposer& composer);
 
-        //virtual void getold(IComposer* deser);
-        void get(IComposer& deser);
+        void parse(IComposer& composer);
 
     protected:
         void OnBegin(const Node& node);
@@ -187,10 +195,13 @@ class PT_XML_API XmlFormatter : public Formatter
         XmlWriter* _writer;
 
         //! @internal
+        std::auto_ptr<XmlWriter> _wrPtr;
+
+        //! @internal
         XmlReader* _reader;
 
         //! @internal
-        std::auto_ptr<XmlWriter> _deleter;
+        std::auto_ptr<XmlReader> _rdPtr;
 
         //! @internal
         Pt::String _value;

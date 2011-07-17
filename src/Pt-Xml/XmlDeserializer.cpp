@@ -26,34 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/XmlDeserializer.h"
-#include "Pt/Xml/XmlReader.h"
 
 namespace Pt {
 
 namespace Xml {
-
-XmlDeserializer::XmlDeserializer(XmlReader& reader)
-: _reader(&reader)
-{
-	this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-    _formatter.attach(*_reader);
-}
-
-XmlDeserializer::XmlDeserializer(std::istream& is)
-: _reader( 0 )
-, _deleter(new XmlReader(is))
-{
-	this->reset( &_xmlcontext );
-    this->setFormatter(_formatter);
-    _reader = _deleter.get();
-    _formatter.attach(*_reader);
-}
-
-
-XmlDeserializer::~XmlDeserializer()
-{
-}
 
 } // namespace Xml
 

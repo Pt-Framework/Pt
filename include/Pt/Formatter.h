@@ -82,12 +82,11 @@ class Formatter
 
         virtual void finishObject() = 0;
 
-        //! @brief Returns true when type is complete
-        virtual bool advance(IComposer& deser)
-        { return false; }
+        //! @brief Returns true if composer completes, false if no more data available
+        virtual bool parseSome(IComposer& composer) = 0;
 
-        virtual void get(IComposer& deser)
-        {}
+        //! @brief Parse until composer completes.
+        virtual void parse(IComposer& composer) = 0;
 
     protected:
         Formatter()
