@@ -44,7 +44,7 @@ class XmlWriter;
     Thic class performs XML serialization of a single object or
     object data.
 */
-class PT_XML_API XmlSerializer : public Serializer
+class XmlSerializer : public Serializer
 {
     public:
         /** @brief Construct a serializer without initializing the

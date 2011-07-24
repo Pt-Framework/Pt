@@ -44,7 +44,7 @@ class XmlReader;
     Thic class performs XML deserialization of a single object or
     object data.
 */
-class PT_XML_API XmlDeserializer : public Deserializer
+class XmlDeserializer : public Deserializer
 {
     public:
         XmlDeserializer()
