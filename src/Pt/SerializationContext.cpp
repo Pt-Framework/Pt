@@ -30,13 +30,11 @@
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
 #include "Pt/SerializationInfo.h"
-#include "Chunk.h"
 
-//#define ALLOCATOR 1
+#define ALLOCATOR 1
 
 #ifdef ALLOCATOR
-#include "Pt/PoolAllocator.h"
-#include "Pt/PageAllocator.h"
+#include "PoolFactory.h"
 #endif
 
 #include <map>
@@ -48,20 +46,16 @@ class SerializationCache
     public:
         SerializationCache()
         : _limit(64)
-#ifdef ALLOCATOR
-        //,  _alloc(4096, 128, 8)
-#endif
         {
 #ifdef ALLOCATOR
-            _chunkSi.init(sizeof(SerializationInfo), 128);
+            _alloc.init(sizeof(SerializationInfo), sizeof(SerializationInfo) * 64);
 #endif
         }
 
         std::vector<SerializationInfo*> _infos;
         size_t _limit;
 #ifdef ALLOCATOR
-        Chunk _chunkSi;
-        //PoolAllocator _alloc;
+        PoolFactory _alloc;
 #endif
 };
 
@@ -132,6 +126,11 @@ void SerializationContext::reset()
 }
 
 
+class MemSize : private Pt::SerializationInfo
+{
+    char where_align;
+};
+
 SerializationContext::SerializationContext()
 : _cache(0)
 , _refsEnabled(false)
@@ -173,8 +172,7 @@ void SerializationContext::setLimit(size_t n)
 SerializationInfo* SerializationContext::get()
 {
 #ifdef ALLOCATOR
-    //void* m = _cache->_alloc.allocate( sizeof(SerializationInfo) );
-    void* m = _cache->_chunkSi.allocate( sizeof(SerializationInfo) );
+    void* m = _cache->_alloc.allocate();
     return new (m) SerializationInfo(this);
 #else
     SerializationInfo* si = 0;
@@ -198,8 +196,7 @@ void SerializationContext::push(SerializationInfo* si)
 {
 #ifdef ALLOCATOR
     si->~SerializationInfo();
-    //_cache->_alloc.deallocate(si, sizeof(SerializationInfo));
-    _cache->_chunkSi.deallocate(si, sizeof(SerializationInfo));
+    _cache->_alloc.deallocate(si);
 #else
     si->clear();
 
