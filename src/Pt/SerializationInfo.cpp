@@ -30,6 +30,43 @@
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/SerializationSurrogate.h>
+#include <cstring>
+#include <cassert>
+
+namespace {
+
+inline void freeRefStr(const char*& str, bool& isRef)
+{
+    if(isRef == false)
+    {
+        delete [] str;
+        str = "";
+        isRef = true;
+    }
+}
+
+
+inline void setRefStr(const char*& str, bool& isRef, const char* from)
+{
+    assert( from != 0 );
+    freeRefStr(str, isRef);
+    str = from;
+}
+
+
+inline void copyRefStr(const char*& str, bool& isRef, const char* from, size_t fromLen)
+{
+    assert( from != 0 );
+
+    freeRefStr(str, isRef);
+
+    ++fromLen;
+    str = new char[fromLen];
+    std::memcpy( const_cast<char*>(str), from, fromLen );
+    isRef = false;
+}
+
+}
 
 namespace Pt {
 
@@ -39,6 +76,10 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
     {
         case Boolean:
             formatter.addBool( _name, _value.b, _id );
+            break;
+
+        case Char:
+            formatter.addChar( _name, _value.ui32, _id );
             break;
 
         case Int:
@@ -120,6 +161,10 @@ void SerializationInfo::format(Formatter& formatter)
     {
         case Boolean:
             formatter.addBool( _name, _value.b, _id );
+            break;
+
+        case Char:
+            formatter.addChar( _name, _value.ui32, _id );
             break;
 
         case Int:
@@ -204,6 +249,8 @@ void SerializationInfo::format(Formatter& formatter)
 SerializationInfo::~SerializationInfo()
 {
     this->clearValue();
+
+    freeRefStr(_id, _idRef);
 }
 
 
@@ -217,8 +264,7 @@ void SerializationInfo::clear()
     if( _typeName.size() )
         _typeName.clear();
 
-    if( _id.size() )
-        _id.clear();
+    freeRefStr(_id, _idRef);
 
     _bound = false;
     _isCompound = false;
@@ -276,6 +322,19 @@ void SerializationInfo::clearValue()
 }
 
 
+void SerializationInfo::setId(const std::string& id)
+{
+    copyRefStr(_id, _idRef, id.c_str(), id.size());
+}
+
+
+void SerializationInfo::setId(const char* id)
+{
+    const std::string::size_type len = std::strlen(id);
+    copyRefStr(_id, _idRef, id, len);
+}
+
+
 void SerializationInfo::setSequence()
 {
     if(_type == SerializationInfo::Context)
@@ -291,6 +350,7 @@ void SerializationInfo::setSequence()
 
         _isCompound = true;
     }
+
 
     _type = Sequence;
 }
@@ -432,6 +492,10 @@ void SerializationInfo::getValue(Pt::String& s) const
     {
         convert(s, _value.b);
     }
+    else if(_type ==  Char)
+    {
+        s += Pt::Char(_value.ui32);
+    }
     else if(_type ==  Int)
     {
         convert(s, _value.l);
@@ -445,7 +509,7 @@ void SerializationInfo::getValue(Pt::String& s) const
         convert(s, _value.f);
     }
     else
-        throw SerializationError("not a value");
+        throw SerializationError("not a string value");
 }
 
 
@@ -474,25 +538,61 @@ void SerializationInfo::setValue(const Pt::String& value)
 }
 
 
+void SerializationInfo::setValue(const char* s)
+{
+    this->setValue( std::string(s) );
+}
+
+
 void SerializationInfo::getValue(char& c) const
 {
-    Pt::String s;
-    this->getValue(s);
-    if( s.empty() )
-        throw SerializationError("not a char value");
-
-    c = s[0];
+    Pt::Char ch;
+    this->getValue(ch);
+	c = static_cast<int>(ch);
 }
 
 
 void SerializationInfo::setValue(char c)
 {
+	Pt::Char ch(c);
+	this->setValue(ch);
+}
+
+
+void SerializationInfo::getValue(Pt::Char& c) const
+{
+    switch(_type)
+    {
+        case Char:
+            c = _value.ui32;
+            break;
+
+        case Str:
+        {
+            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
+            if( str->size() != 1 )
+				throw SerializationError("expected character value");
+				
+			c = (*str)[0];
+            break;
+        }
+
+        default:
+            throw SerializationError("expected character value");
+    }
+}
+
+
+void SerializationInfo::setValue(const Pt::Char& c)
+{
     if( _type == Context )
         return;
 
-    Pt::String s;
-    s.push_back( Pt::Char(c));
-    this->setValue(s);
+    this->clearValue();
+
+    _isCompound = false;
+    _value.ui32 = c;
+    _type = Char;
 }
 
 
@@ -755,9 +855,11 @@ bool SerializationInfo::beginSave(const void* p)
         const char* id = _context->makeId(p);
         if(id)
         {
-            // the id can be "" or a null-terminated string which means,
-            // in either case, the type was saved for the first time.
-            _id = id;
+            // we point to a string owned by the context. The lifetime of this
+            // SerializationInfo is coupled to the lifetime of the context.
+            // The id can be "" or a null-terminated string which means,
+            // in either case, the type was saved for the first time.      
+            setRefStr(_id, _idRef, id);
         }
         else
         {

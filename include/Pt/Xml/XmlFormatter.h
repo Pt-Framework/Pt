@@ -133,6 +133,9 @@ class PT_XML_API XmlFormatter : public Formatter
         void addBool(const std::string& name, bool value,
                      const std::string& id);
 
+        void addChar(const std::string& name, const Pt::Char& value,
+                     const std::string& id);
+
         void addInt(const std::string& name, long long value,
                     const std::string& id);
 

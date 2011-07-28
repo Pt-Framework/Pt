@@ -53,17 +53,20 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void addValue(const std::string& name, const std::string& type,
                       const Pt::String& value, const std::string& id);
 
-		void addBool(const std::string& name, bool value, 
-		             const std::string& id);
+        void addBool(const std::string& name, bool value, 
+                     const std::string& id);
 
-		void addInt(const std::string& name, long long value, 
-		            const std::string& id);
+        void addChar(const std::string& name, const Pt::Char& value,
+                     const std::string& id);
 
-		void addUInt(const std::string& name, unsigned long long value, 
-		             const std::string& id);
+        void addInt(const std::string& name, long long value, 
+                    const std::string& id);
 
-		void addFloat(const std::string& name, double value, 
-		              const std::string& id);
+        void addUInt(const std::string& name, unsigned long long value, 
+                     const std::string& id);
+
+        void addFloat(const std::string& name, double value, 
+                      const std::string& id);
 
         void addBytes(const std::string& name, const std::string& type,
                       const char* value, size_t length, const std::string& id);

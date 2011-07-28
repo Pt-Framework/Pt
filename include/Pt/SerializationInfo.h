@@ -30,6 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
+#include <Pt/Types.h>
 #include <Pt/Convert.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>
@@ -56,14 +57,15 @@ class PT_API SerializationInfo
             Context   = 1,
             Reference = 2,
             Boolean   = 3,
-            Str       = 4,
-            Int       = 5,
-            UInt      = 6,
-            Float     = 7,
-            Binary    = 8,
-            Blob      = 9,
-            Struct    = 10,
-            Sequence  = 11
+            Char      = 4,
+            Str       = 5,
+            Int       = 6,
+            UInt      = 7,
+            Float     = 8,
+            Binary    = 9,
+            Blob      = 10,
+            Struct    = 11,
+            Sequence  = 12
         };
 
         // type info layout
@@ -87,6 +89,8 @@ class PT_API SerializationInfo
         , _context(0)
         , _parent(0)
         , _next(0)
+        , _idRef(true)
+        , _id("")
         { }
 
         explicit SerializationInfo(SerializationContext* context)
@@ -96,6 +100,8 @@ class PT_API SerializationInfo
         , _context(context)
         , _parent(0)
         , _next(0)
+        , _idRef(true)
+        , _id("")
         { }
 
         ~SerializationInfo();
@@ -175,8 +181,8 @@ class PT_API SerializationInfo
         const SerializationInfo* parent() const
         { return _parent; }
 
-        const std::string& typeName() const
-        { return _typeName; }
+        const char* typeName() const
+        { return _typeName.c_str(); }
 
         void setTypeName(const std::string& type)
         { _typeName = type; }
@@ -193,14 +199,12 @@ class PT_API SerializationInfo
         void setName(const char* name)
         { _name = name; }
 
-        const std::string& id() const
+        const char* id() const
         { return _id; }
 
-        void setId(const std::string& id)
-        { _id = id; }
+        void setId(const std::string& id);
 
-        void setId(const char* id)
-        { _id = id; }
+        void setId(const char* id);
 
         /** @brief Returns the content as string.
         */
@@ -225,7 +229,9 @@ class PT_API SerializationInfo
             this->setValue(value);
             this->setTypeName("string");
         }
-
+        
+        void setValue(const char* s);
+        
         void getValue(Pt::String& s) const;
 
         void setValue(const Pt::String& s);
@@ -237,7 +243,11 @@ class PT_API SerializationInfo
         void getValue(char& c) const;
 
         void setValue(char c);
+        
+        void getValue(Pt::Char& c) const;
 
+        void setValue(const Pt::Char& c);
+        
         void getValue(bool& b) const;
 
         void setValue(bool b);
@@ -441,6 +451,7 @@ class PT_API SerializationInfo
         union Variant
         {
             bool b;
+            uint32_t ui32;
             long long l;
             unsigned long long ul;
             double f;
@@ -459,7 +470,8 @@ class PT_API SerializationInfo
         SerializationInfo* _next;
         std::string _name;
         std::string _typeName;
-        std::string _id;
+        bool _idRef; // TODO: join into bitfield
+        const char* _id;
         mutable Variant _value;
 };
 

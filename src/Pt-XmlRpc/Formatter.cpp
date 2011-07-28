@@ -35,8 +35,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-
-
 void Formatter::addValue(const std::string& name, const std::string& type,
                          const Pt::String& value, const std::string& id)
 {
@@ -49,32 +47,39 @@ void Formatter::addValue(const std::string& name, const std::string& type,
 void Formatter::addBool(const std::string& name, bool value, 
                         const std::string& id)
 {
-	convert(_value, value);
-	this->addValue(name, "boolean", _value, id);
+    convert(_value, value);
+    this->addValue(name, "boolean", _value, id);
 }
 
+void Formatter::addChar(const std::string& name, const Pt::Char& value,
+                        const std::string& id)
+{
+    _value.clear();
+    _value += value;
+    this->addValue(name, "string", _value, id);
+}
 
 void Formatter::addInt(const std::string& name, long long value, 
                        const std::string& id)
 {
-	convert(_value, value);
-	this->addValue(name, "int", _value, id);
+    convert(_value, value);
+    this->addValue(name, "int", _value, id);
 }
 
 
 void Formatter::addUInt(const std::string& name, unsigned long long value, 
                         const std::string& id)
 {
-	convert(_value, value);
-	this->addValue(name, "int", _value, id);
+    convert(_value, value);
+    this->addValue(name, "int", _value, id);
 }
 
 
 void Formatter::addFloat(const std::string& name, double value, 
                          const std::string& id)
 {
-	convert(_value, value);
-	this->addValue(name, "double", _value, id);
+    convert(_value, value);
+    this->addValue(name, "double", _value, id);
 }
 
 

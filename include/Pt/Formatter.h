@@ -29,8 +29,8 @@
 #define Pt_Formatter_h
 
 #include <Pt/Api.h>
+#include <Pt/Char.h>
 #include <Pt/String.h>
-#include <Pt/SerializationContext.h>
 #include <string>
 
 namespace Pt {
@@ -50,6 +50,9 @@ class Formatter
                               const char* value, size_t length, const std::string& id) = 0;
 
         virtual void addBool(const std::string& name, bool value,
+                             const std::string& id) = 0;
+
+        virtual void addChar(const std::string& name, const Pt::Char& value,
                              const std::string& id) = 0;
 
         virtual void addInt(const std::string& name, long long value,
