@@ -51,42 +51,42 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         { _writer = &writer; }
 
         void addValue(const std::string& name, const std::string& type,
-                      const Pt::String& value, const std::string& id);
+                      const Pt::String& value, const char* id);
 
         void addBool(const std::string& name, bool value, 
-                     const std::string& id);
+                     const char* id);
 
         void addChar(const std::string& name, const Pt::Char& value,
-                     const std::string& id);
+                     const char* id);
 
         void addInt(const std::string& name, long long value, 
-                    const std::string& id);
+                    const char* id);
 
         void addUInt(const std::string& name, unsigned long long value, 
-                     const std::string& id);
+                     const char* id);
 
         void addFloat(const std::string& name, double value, 
-                      const std::string& id);
+                      const char* id);
 
         void addBytes(const std::string& name, const std::string& type,
-                      const char* value, size_t length, const std::string& id);
+                      const char* value, size_t length, const char* id);
 
-        void addReference(const std::string& name, const std::string& id);
+        void addReference(const std::string& name, const char* id);
 
         void beginArray(const std::string& name, const std::string& type,
-                        const std::string& id);
+                        const char* id);
 
-        virtual void beginElement(const std::string& type, const std::string& id);
+        virtual void beginElement(const std::string& type, const char* id);
 
         virtual void finishElement();
 
         void finishArray();
 
         void beginObject(const std::string& name, const std::string& type,
-                         const std::string& id);
+                         const char* id);
 
         void beginMember(const std::string& name, const std::string& type,
-                         const std::string& id);
+                         const char* id);
 
         void finishMember();
 

@@ -36,7 +36,7 @@ namespace Pt {
 namespace XmlRpc {
 
 void Formatter::addValue(const std::string& name, const std::string& type,
-                         const Pt::String& value, const std::string& id)
+                         const Pt::String& value, const char* id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeElement( Pt::String::widen(type), value );
@@ -45,14 +45,14 @@ void Formatter::addValue(const std::string& name, const std::string& type,
 
 
 void Formatter::addBool(const std::string& name, bool value, 
-                        const std::string& id)
+                        const char* id)
 {
     convert(_value, value);
     this->addValue(name, "boolean", _value, id);
 }
 
 void Formatter::addChar(const std::string& name, const Pt::Char& value,
-                        const std::string& id)
+                        const char* id)
 {
     _value.clear();
     _value += value;
@@ -60,7 +60,7 @@ void Formatter::addChar(const std::string& name, const Pt::Char& value,
 }
 
 void Formatter::addInt(const std::string& name, long long value, 
-                       const std::string& id)
+                       const char* id)
 {
     convert(_value, value);
     this->addValue(name, "int", _value, id);
@@ -68,7 +68,7 @@ void Formatter::addInt(const std::string& name, long long value,
 
 
 void Formatter::addUInt(const std::string& name, unsigned long long value, 
-                        const std::string& id)
+                        const char* id)
 {
     convert(_value, value);
     this->addValue(name, "int", _value, id);
@@ -76,7 +76,7 @@ void Formatter::addUInt(const std::string& name, unsigned long long value,
 
 
 void Formatter::addFloat(const std::string& name, double value, 
-                         const std::string& id)
+                         const char* id)
 {
     convert(_value, value);
     this->addValue(name, "double", _value, id);
@@ -84,7 +84,7 @@ void Formatter::addFloat(const std::string& name, double value,
 
 
 void Formatter::addBytes(const std::string& name, const std::string& type,
-                         const char* data, size_t length, const std::string& id)
+                         const char* data, size_t length, const char* id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     std::string value(data, length);
@@ -93,14 +93,14 @@ void Formatter::addBytes(const std::string& name, const std::string& type,
 }
 
 
-void Formatter::addReference(const std::string& name, const std::string& value)
+void Formatter::addReference(const std::string& name, const char*value)
 {
     throw SerializationError("references not supported");
 }
 
 
 void Formatter::beginArray(const std::string&, const std::string& type,
-                           const std::string&)
+                           const char*)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeStartElement( Pt::String::widen("array") );
@@ -108,7 +108,7 @@ void Formatter::beginArray(const std::string&, const std::string& type,
 }
 
 
-void Formatter::beginElement(const std::string& type, const std::string& id)
+void Formatter::beginElement(const std::string& type, const char* id)
 {
 }
 
@@ -127,7 +127,7 @@ void Formatter::finishArray()
 
 
 void Formatter::beginObject(const std::string& name, const std::string& type,
-                            const std::string& id)
+                            const char* id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeStartElement( Pt::String::widen("struct") );
@@ -135,7 +135,7 @@ void Formatter::beginObject(const std::string& name, const std::string& type,
 
 
 void Formatter::beginMember(const std::string& name, const std::string& type, 
-                            const std::string& id)
+                            const char* id)
 {
     _writer->writeStartElement( Pt::String::widen("member") );
     _writer->writeElement( Pt::String::widen("name"), Pt::String::widen(name) );

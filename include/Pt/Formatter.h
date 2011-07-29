@@ -44,42 +44,42 @@ class Formatter
         { }
 
         virtual void addValue(const std::string& name, const std::string& type,
-                              const Pt::String& value, const std::string& id) = 0;
+                              const Pt::String& value, const char* id) = 0;
 
         virtual void addBytes(const std::string& name, const std::string& type,
-                              const char* value, size_t length, const std::string& id) = 0;
+                              const char* value, size_t length, const char* id) = 0;
 
         virtual void addBool(const std::string& name, bool value,
-                             const std::string& id) = 0;
+                             const char* id) = 0;
 
         virtual void addChar(const std::string& name, const Pt::Char& value,
-                             const std::string& id) = 0;
+                             const char* id) = 0;
 
         virtual void addInt(const std::string& name, long long value,
-                            const std::string& id) = 0;
+                            const char* id) = 0;
 
         virtual void addUInt(const std::string& name, unsigned long long value,
-                             const std::string& id) = 0;
+                             const char* id) = 0;
 
         virtual void addFloat(const std::string& name, double value,
-                              const std::string& id) = 0;
+                              const char* id) = 0;
 
-        virtual void addReference(const std::string& name, const std::string& refId) = 0;
+        virtual void addReference(const std::string& name, const char* refId) = 0;
 
         virtual void beginArray(const std::string& name, const std::string& type,
-                                const std::string& id) = 0;
+                                const char* id) = 0;
 
-        virtual void beginElement(const std::string& type, const std::string& id) = 0;
+        virtual void beginElement(const std::string& type, const char* id) = 0;
 
         virtual void finishElement() = 0;
 
         virtual void finishArray() = 0;
 
         virtual void beginObject(const std::string& name, const std::string& type,
-                                 const std::string& id) = 0;
+                                 const char* id) = 0;
 
         virtual void beginMember(const std::string& name, const std::string& type,
-                                 const std::string& id) = 0;
+                                 const char* id) = 0;
 
         virtual void finishMember() = 0;
 

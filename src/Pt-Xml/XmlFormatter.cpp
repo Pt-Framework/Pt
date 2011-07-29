@@ -167,12 +167,12 @@ void XmlFormatter::flush()
 
 
 void XmlFormatter::addValue(const std::string& name, const std::string& type,
-                             const Pt::String& value, const std::string& id)
+                             const Pt::String& value, const char* id)
 {
     if( ! _writer )
         return;
 
-    if( ! id.empty() )
+    if( *id != '\0' )
     {
         Xml::Attribute attr[2];
         attr[0] = Xml::Attribute( String(L"type"), String::widen( type ) );
@@ -196,7 +196,7 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 
 
 void XmlFormatter::addBytes(const std::string& name, const std::string& type,
-                            const char* value, size_t length, const std::string& id)
+                            const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
     this->addValue(name, type, _value, id);
@@ -204,7 +204,7 @@ void XmlFormatter::addBytes(const std::string& name, const std::string& type,
 
 
 void XmlFormatter::addBool(const std::string& name, bool value,
-                           const std::string& id)
+                           const char* id)
 {
     convert(_value, value);
     this->addValue(name, "bool", _value, id);
@@ -212,7 +212,7 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 
 
 void XmlFormatter::addChar(const std::string& name, const Pt::Char& value,
-                     const std::string& id)
+                     const char* id)
 {
     _value.clear();
     _value += value;
@@ -220,7 +220,7 @@ void XmlFormatter::addChar(const std::string& name, const Pt::Char& value,
 }
 
 void XmlFormatter::addInt(const std::string& name, long long value,
-                          const std::string& id)
+                          const char* id)
 {
     convert(_value, value);
     this->addValue(name, "int", _value, id);
@@ -228,7 +228,7 @@ void XmlFormatter::addInt(const std::string& name, long long value,
 
 
 void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
-                           const std::string& id)
+                           const char* id)
 {
     convert(_value, value);
     this->addValue(name, "unsigned", _value, id);
@@ -236,14 +236,14 @@ void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
 
 
 void XmlFormatter::addFloat(const std::string& name, double value,
-                            const std::string& id)
+                            const char* id)
 {
     convert(_value, value);
     this->addValue(name, "double", _value, id);
 }
 
 
-void XmlFormatter::addReference(const std::string& name, const std::string& id)
+void XmlFormatter::addReference(const std::string& name, const char* id)
 {
     if( ! _writer )
         return;
@@ -254,12 +254,12 @@ void XmlFormatter::addReference(const std::string& name, const std::string& id)
 
 
 void XmlFormatter::beginArray(const std::string& name, const std::string& type,
-                              const std::string& id)
+                              const char*id)
 {
     if( ! _writer )
         return;
 
-    if( ! id.empty() )
+    if( *id != '\0' )
     {
         Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
 
@@ -278,7 +278,7 @@ void XmlFormatter::beginArray(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::beginElement(const std::string& type, const std::string& id)
+void XmlFormatter::beginElement(const std::string& type, const char* id)
 {
 }
 
@@ -298,19 +298,19 @@ void XmlFormatter::finishArray()
 
 
 void XmlFormatter::beginObject(const std::string& name, const std::string& type,
-                               const std::string& id)
+                               const char* id)
 {
     this->onBeginObject(name, type, id);
 }
 
 
 void XmlFormatter::onBeginObject(const std::string& name, const std::string& type,
-                                 const std::string& id)
+                                 const char* id)
 {
     if( ! _writer )
         return;
 
-    if( ! id.empty() )
+    if( *id != '\0' )
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
 
@@ -330,7 +330,7 @@ void XmlFormatter::onBeginObject(const std::string& name, const std::string& typ
 
 
 void XmlFormatter::beginMember(const std::string& name, const std::string& type,
-                               const std::string& id)
+                               const char* id)
 {
 }
 
