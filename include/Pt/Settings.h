@@ -146,7 +146,7 @@ class PT_API Settings : public SerializationInfo
                     return this->entry(name);
                 }
 
-                const std::string& name() const
+                const char* name() const
                 { return _si->name(); }
 
                 Entry& operator*()
@@ -225,7 +225,7 @@ class PT_API Settings : public SerializationInfo
                     return this->entry(name);
                 }
 
-                const std::string& name() const
+                const char* name() const
                 { return _si->name(); }
 
                 const ConstEntry& operator*() const

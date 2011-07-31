@@ -89,6 +89,10 @@ class PT_API SerializationInfo
         , _context(0)
         , _parent(0)
         , _next(0)
+        , _nameRef(true)
+        , _Name("")
+        , _tnRef(true)
+        , _TypeName("")
         , _idRef(true)
         , _id("")
         { }
@@ -100,6 +104,10 @@ class PT_API SerializationInfo
         , _context(context)
         , _parent(0)
         , _next(0)
+        , _nameRef(true)
+        , _Name("")
+        , _tnRef(true)
+        , _TypeName("")
         , _idRef(true)
         , _id("")
         { }
@@ -182,22 +190,20 @@ class PT_API SerializationInfo
         { return _parent; }
 
         const char* typeName() const
-        { return _typeName.c_str(); }
+        { return _TypeName; }
 
-        void setTypeName(const std::string& type)
-        { _typeName = type; }
+        void setTypeName(const std::string& type);
 
-        void setTypeName(const char* type)
-        { _typeName = type; }
+        //void setTypeName(const char* type)
+        //{ _typeName = type; }
 
-        const std::string& name() const
-        { return _name; }
+        const char* name() const
+        { return _Name; }
 
-        void setName(const std::string& name)
-        { _name = name; }
+        void setName(const std::string& name);
 
-        void setName(const char* name)
-        { _name = name; }
+        //void setName(const char* name)
+        //{ _name = name; }
 
         const char* id() const
         { return _id; }
@@ -468,8 +474,12 @@ class PT_API SerializationInfo
         SerializationContext* _context;
         SerializationInfo* _parent;
         SerializationInfo* _next;
-        std::string _name;
-        std::string _typeName;
+        //std::string _name;
+        //std::string _typeName;
+        bool _nameRef;
+        const char* _Name;
+        bool _tnRef;
+        const char* _TypeName;
         bool _idRef; // TODO: join into bitfield
         const char* _id;
         mutable Variant _value;

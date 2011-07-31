@@ -101,7 +101,7 @@ void SettingsTest::Entry()
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
     Pt::Settings::Entry& entry = *settings.begin();
-    PT_UNIT_ASSERT( entry.name() == "myEntry" );
+    PT_UNIT_ASSERT( 0 == std::strcmp(entry.name(),"myEntry") );
 
     Pt::Date date2(2000, 1, 1);
     entry.get(date2);
@@ -158,7 +158,7 @@ void SettingsTest::ConstEntry()
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
     Pt::Settings::ConstEntry entry = settings.begin();
-    PT_UNIT_ASSERT( entry.name() == "number" );
+    PT_UNIT_ASSERT( 0 == std::strcmp(entry.name(),"number") );
 
     int n = 0;
     PT_UNIT_ASSERT( entry.get(n) );

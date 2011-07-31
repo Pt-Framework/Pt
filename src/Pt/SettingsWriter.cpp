@@ -96,7 +96,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
         }
         else if( it->isStruct() || it->isSequence() )
         {
-            if( it->name().empty() == false && ! sd.isSequence() )
+            if( it->name()[0] != '\0' && ! sd.isSequence() )
                 *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");
 
             *_os << Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");

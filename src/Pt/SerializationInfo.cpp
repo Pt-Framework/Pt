@@ -75,40 +75,40 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
     switch(_type)
     {
         case Boolean:
-            formatter.addBool( _name, _value.b, _id );
+            formatter.addBool( _Name, _value.b, _id );
             break;
 
         case Char:
-            formatter.addChar( _name, _value.ui32, _id );
+            formatter.addChar( _Name, _value.ui32, _id );
             break;
 
         case Int:
-            formatter.addInt( _name, _value.l, _id );
+            formatter.addInt( _Name, _value.l, _id );
             break;
 
         case UInt:
-            formatter.addUInt( _name, _value.ul, _id );
+            formatter.addUInt( _Name, _value.ul, _id );
             break;
 
         case Float:
-            formatter.addFloat( _name, _value.f, _id );
+            formatter.addFloat( _Name, _value.f, _id );
             break;
 
         case Blob:
-            formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+            formatter.addBytes( _Name, _TypeName, _value.blob.data, _value.blob.length, _id );
             break;
 
         case Binary:
         {
             const char* data = reinterpret_cast<const char*>(&_value);
             const char* last = data + sizeof(Variant) - 1;
-            formatter.addBytes( _name, _typeName, data, *last, _id );
+            formatter.addBytes( _Name, _TypeName, data, *last, _id );
             break;
         }
         case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addValue( _name, _typeName, *str, _id );
+            formatter.addValue( _Name, _TypeName, *str, _id );
             break;
         }
         case Reference:
@@ -118,19 +118,19 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
 
             const void* refAddr = _value.ref.address;
             const char* id = _context->getId( refAddr );
-            formatter.addReference( this->name(), id);
+            formatter.addReference( _Name, id);
             break;
         }
 
         case Struct:
         {
-            formatter.beginObject( this->name(), this->typeName(), this->id() );
+            formatter.beginObject( _Name, this->typeName(), this->id() );
             return true;
         }
 
         case Sequence:
         {
-            formatter.beginArray( this->name(), this->typeName(), this->id() );
+            formatter.beginArray( _Name, this->typeName(), this->id() );
             return true;
         }
 
@@ -160,40 +160,40 @@ void SerializationInfo::format(Formatter& formatter)
     switch(_type)
     {
         case Boolean:
-            formatter.addBool( _name, _value.b, _id );
+            formatter.addBool( _Name, _value.b, _id );
             break;
 
         case Char:
-            formatter.addChar( _name, _value.ui32, _id );
+            formatter.addChar( _Name, _value.ui32, _id );
             break;
 
         case Int:
-            formatter.addInt( _name, _value.l, _id );
+            formatter.addInt( _Name, _value.l, _id );
             break;
 
         case UInt:
-            formatter.addUInt( _name, _value.ul, _id );
+            formatter.addUInt( _Name, _value.ul, _id );
             break;
 
         case Float:
-            formatter.addFloat( _name, _value.f, _id );
+            formatter.addFloat( _Name, _value.f, _id );
             break;
 
         case Blob:
-            formatter.addBytes( _name, _typeName, _value.blob.data, _value.blob.length, _id );
+            formatter.addBytes( _Name, _TypeName, _value.blob.data, _value.blob.length, _id );
             break;
 
         case Binary:
         {
             const char* data = reinterpret_cast<const char*>(&_value);
             const char* last = data + sizeof(Variant) - 1;
-            formatter.addBytes( _name, _typeName, data, *last, _id );
+            formatter.addBytes( _Name, _TypeName, data, *last, _id );
             break;
         }
         case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addValue( _name, _typeName, *str, _id );
+            formatter.addValue( _Name, _TypeName, *str, _id );
             break;
         }
 
@@ -204,13 +204,13 @@ void SerializationInfo::format(Formatter& formatter)
 
             const void* refAddr = _value.ref.address;
             const char* id = _context->getId( refAddr );
-            formatter.addReference( this->name(), id);
+            formatter.addReference( _Name, id);
             break;
         }
 
         case Struct:
         {
-            formatter.beginObject( this->name(), this->typeName(), this->id() );
+            formatter.beginObject( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
             for(it = this->begin(); it != this->end(); ++it)
@@ -226,7 +226,7 @@ void SerializationInfo::format(Formatter& formatter)
 
         case Sequence:
         {
-            formatter.beginArray( this->name(), this->typeName(), this->id() );
+            formatter.beginArray( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
             for(it = this->begin(); it != this->end(); ++it)
@@ -250,6 +250,8 @@ SerializationInfo::~SerializationInfo()
 {
     this->clearValue();
 
+    freeRefStr(_Name, _nameRef);
+    freeRefStr(_TypeName, _tnRef);
     freeRefStr(_id, _idRef);
 }
 
@@ -258,12 +260,8 @@ void SerializationInfo::clear()
 {
     this->clearValue();
 
-    if( _name.size() )
-        _name.clear();
-
-    if( _typeName.size() )
-        _typeName.clear();
-
+    freeRefStr(_Name, _nameRef);
+    freeRefStr(_TypeName, _tnRef);
     freeRefStr(_id, _idRef);
 
     _bound = false;
@@ -319,6 +317,18 @@ void SerializationInfo::clearValue()
             break;
         }
     }
+}
+
+
+void SerializationInfo::setName(const std::string& name)
+{
+    copyRefStr(_Name, _nameRef, name.c_str(), name.size());
+}
+
+
+void SerializationInfo::setTypeName(const std::string& type)
+{ 
+    copyRefStr(_TypeName, _tnRef, type.c_str(), type.size());
 }
 
 
@@ -842,7 +852,7 @@ bool SerializationInfo::beginSave(const void* p)
 
     if( _type == Context )
     {
-        return this->context()->beginSave(p, _name);
+        return this->context()->beginSave(p, _Name);
     }
 
     bool first = true;
@@ -915,7 +925,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
     if(_context && _context->referencingEnabled() && (_parent == 0 || _parent->_bound) )
     {
         _bound = true;
-        _context->beginLoad(p, ti, _name, _id);
+        _context->beginLoad(p, ti, _Name, _id);
     }
 }
 
@@ -933,7 +943,7 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
     if( _type == Context )
     {
-        _name = name;
+        this->setName(name);
         return *this;
     }
 
@@ -964,7 +974,7 @@ void SerializationInfo::removeMember(const std::string& name)
 
         for(SerializationInfo* it = _value.seq.first; it != 0; it = it->sibling())
         {
-            if(it->name() == name)
+            if( name == it->name() )
             {
                 SerializationInfo* next = it->sibling();
                 if( prev )
@@ -1004,8 +1014,7 @@ SerializationInfo& SerializationInfo::addElement()
 {
     if( _type == Context )
     {
-        if( _name.size() )
-            _name.clear();
+        freeRefStr(_Name, _nameRef);
         return *this;
     }
 
@@ -1084,7 +1093,7 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
         ConstIterator it( _value.seq.first );
         for(; it != ConstIterator( 0 ); ++it)
         {
-            if( it->name() == name )
+            if( name == it->name() )
                 return *it;
         }
     }
@@ -1100,7 +1109,7 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
         ConstIterator it(_value.seq.first);
         for(; it != ConstIterator( 0 ); ++it)
         {
-            if( it->name() == name )
+            if( name == it->name() )
                 return &(*it);
         }
     }
@@ -1116,7 +1125,7 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
         Iterator it ( _value.seq.first);
         for(; it != Iterator( 0); ++it)
         {
-            if( it->name() == name )
+            if( name == it->name() )
                 return &(*it);
         }
     }
