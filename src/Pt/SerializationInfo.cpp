@@ -312,8 +312,7 @@ void SerializationInfo::clearValue()
 
         case Reference:
         {
-            std::string* str = reinterpret_cast<std::string*>(_value.ref.refid);
-            str->~basic_string();
+			delete [] _value.ref.refId;
             break;
         }
     }
@@ -393,7 +392,8 @@ void SerializationInfo::setReference(const void* ref)
     {
         this->clearValue();
 
-        new(_value.ref.refid) std::string;
+		_value.ref.refId = new char[1];
+		_value.ref.refId[0] = '\0';
         _type = Reference;
         _isCompound = false;
     }
@@ -409,14 +409,17 @@ void SerializationInfo::setReference(const std::string& id)
     {
         this->clearValue();
 
-        new(_value.ref.refid) std::string(id);
+		_value.ref.refId = new char[ id.size() + 1 ];
+		std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
         _type = Reference;
         _isCompound = false;
     }
     else
     {
-        std::string* str = reinterpret_cast<std::string*>(_value.ref.refid);
-        *str = id;
+		char* str = new char[ id.size() + 1 ];
+		delete [] _value.ref.refId;
+		_value.ref.refId = str;
+		std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
     }
 
     _value.ref.address = 0;
@@ -429,12 +432,12 @@ void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m)
     if( _type != Reference)
         throw SerializationError("not a reference");
 
-    const std::string* refId = reinterpret_cast<const std::string*>(_value.ref.refid);
+    const char* refId = _value.ref.refId;
     _value.ref.address = type;
 
     if(_context)
     {
-        _context->prepareFixup(type, *refId, fh, m);
+        _context->prepareFixup(type, refId, fh, m);
     }
 }
 
@@ -912,11 +915,11 @@ void SerializationInfo::rebindFixup(void* obj) const
     if( _type != Reference )
         throw SerializationError("not a reference");
 
-    const std::string* refId = reinterpret_cast<const std::string*>(_value.ref.refid);
+    const char* refId = _value.ref.refId;
     void* addr = _value.ref.address;
 
     if(_context)
-        _context->rebindFixup( *refId, obj, addr );
+        _context->rebindFixup( refId, obj, addr );
 }
 
 

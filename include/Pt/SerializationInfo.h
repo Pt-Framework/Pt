@@ -439,7 +439,7 @@ class PT_API SerializationInfo
         struct Ref
         {
             void* address;
-            char refid[sizeof(std::string)];
+            char* refId;
         };
 
         struct BlobValue
