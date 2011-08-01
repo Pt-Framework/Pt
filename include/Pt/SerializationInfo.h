@@ -83,33 +83,34 @@ class PT_API SerializationInfo
 
     public:
         SerializationInfo()
-        : _bound(false)
-        , _isCompound(false)
-        , _type(Void)
-        , _context(0)
+        : _context(0)
         , _parent(0)
         , _next(0)
-        , _nameRef(true)
         , _Name("")
-        , _tnRef(true)
         , _TypeName("")
-        , _idRef(true)
         , _id("")
+        , _bound(false)
+        , _isCompound(false)
+        , _type(Void)
+        , _nameRef(true)
+        , _tnRef(true)
+        , _idRef(true)
+        
         { }
 
         explicit SerializationInfo(SerializationContext* context)
-        : _bound(false)
-        , _isCompound(false)
-        , _type(Void)
-        , _context(context)
+        : _context(context)
         , _parent(0)
         , _next(0)
-        , _nameRef(true)
         , _Name("")
-        , _tnRef(true)
         , _TypeName("")
-        , _idRef(true)
         , _id("")
+        , _bound(false)
+        , _isCompound(false)
+        , _type(Void)
+        , _nameRef(true)
+        , _tnRef(true)
+        , _idRef(true)
         { }
 
         ~SerializationInfo();
@@ -434,7 +435,7 @@ class PT_API SerializationInfo
         void clearValue();
 
         SerializationInfo& addChild();
-
+	public:
         struct Ref
         {
             void* address;
@@ -468,21 +469,19 @@ class PT_API SerializationInfo
         };
 
     private:
-        mutable bool _bound;
-        bool _isCompound;
-        Pt::uint8_t _type;
+		mutable Variant _value;
         SerializationContext* _context;
         SerializationInfo* _parent;
         SerializationInfo* _next;
-        //std::string _name;
-        //std::string _typeName;
-        bool _nameRef;
         const char* _Name;
-        bool _tnRef;
         const char* _TypeName;
-        bool _idRef; // TODO: join into bitfield
         const char* _id;
-        mutable Variant _value;
+        mutable bool _bound; // TODO: join into bitfield
+        bool _isCompound;    // TODO: join into bitfield
+        Pt::uint8_t _type;   // TODO: join into bitfield
+        bool _nameRef;       // TODO: join into bitfield
+        bool _tnRef;         // TODO: join into bitfield
+        bool _idRef;         // TODO: join into bitfield
 };
 
 class SerializationInfo::Iterator
