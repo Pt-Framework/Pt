@@ -57,7 +57,6 @@ inline void setRefStr(const char*& str, bool& isRef, const char* from)
 inline void copyRefStr(const char*& str, bool& isRef, const char* from, size_t fromLen)
 {
     assert( from != 0 );
-
     freeRefStr(str, isRef);
 
     ++fromLen;
@@ -328,6 +327,18 @@ void SerializationInfo::setName(const std::string& name)
 void SerializationInfo::setTypeName(const std::string& type)
 { 
     copyRefStr(_TypeName, _tnRef, type.c_str(), type.size());
+}
+
+
+void SerializationInfo::setTypeName(const char* type, bool copy)
+{
+	if(copy)
+	{
+		const std::size_t len = std::strlen(type);
+		copyRefStr(_TypeName, _tnRef, type, len);
+	}
+	else
+		setRefStr(_TypeName, _tnRef, type);
 }
 
 

@@ -195,7 +195,7 @@ class PT_API SerializationInfo
 
         void setTypeName(const std::string& type);
 
-        //void setTypeName(const char* type)
+        void setTypeName(const char* type, bool copy = true);
         //{ _typeName = type; }
 
         const char* name() const
@@ -800,7 +800,7 @@ inline void operator >>=(const SerializationInfo& si, int& n)
 inline void operator <<=(SerializationInfo& si, const int& n)
 {
     si.setValue(n);
-    si.setTypeName("int");
+    si.setTypeName("int", false);
 }
 
 
@@ -954,7 +954,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("array");
+    //si.setTypeName("array");
     si.setSequence();
 }
 

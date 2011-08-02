@@ -269,11 +269,13 @@ void SerializationTest::Benchmark1()
         convert(v, num);
         si.addElement().setValue(v);
 
-        si >>= vec; //55 000
-
-        si.clear(); // 130 000
-
+        si >>= vec;
+        si.clear();
         u += vec.size();
+
+		//si <<= vec;
+		//si.clear();
+        //u += vec.size();
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;
