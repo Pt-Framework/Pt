@@ -225,19 +225,6 @@ void SerializationTest::Benchmark1()
     int u = 0;
     int v = 0;
 
-    // Pt::SerializationInfo sin;
-    // sin.addMember("a") <<= 1;
-    // sin.addMember("b") <<= 2;
-    // sin.addMember("c") <<= 3;
-
-    // Pt::SerializationInfo::Iterator sit = sin.begin();
-    // for( ; sit != sin.end(); ++sit)
-    // {
-    //     std::cerr << "YYYYY: " << sit->name() << std::endl;
-    // }
-    // std::cerr << "XXXXXX: " << sin.getMember("a").sibling()->name() << std::endl;
-    // std::cerr << "XXXXXX: " << sin.getMember("b").sibling()->name() << std::endl;
-
     Pt::SerializationContext context;
     Pt::SerializationInfo si(&context);
 
@@ -273,9 +260,9 @@ void SerializationTest::Benchmark1()
         si.clear();
         u += vec.size();
 
-		//si <<= vec;
-		//si.clear();
-        //u += vec.size();
+		// si <<= vec;
+		// si.clear();
+        // u += vec.size();
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;

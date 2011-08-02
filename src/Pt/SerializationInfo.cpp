@@ -324,6 +324,18 @@ void SerializationInfo::setName(const std::string& name)
 }
 
 
+void SerializationInfo::setName(const char* name, bool copy)
+{
+	if(copy)
+	{
+		const std::size_t len = std::strlen(name);
+		copyRefStr(_Name, _nameRef, name, len);
+	}
+	else
+		setRefStr(_Name, _nameRef, name);
+}
+
+
 void SerializationInfo::setTypeName(const std::string& type)
 { 
     copyRefStr(_TypeName, _tnRef, type.c_str(), type.size());
@@ -953,11 +965,11 @@ void SerializationInfo::finishLoad() const
 }
 
 
-SerializationInfo& SerializationInfo::addMember(const std::string& name)
+SerializationInfo& SerializationInfo::addMember(const char* name, bool copy)
 {
     if( _type == Context )
     {
-        this->setName(name);
+        this->setName(name, copy);
         return *this;
     }
 
@@ -974,12 +986,12 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
     _type = Struct;
 
     SerializationInfo& si = this->addChild();
-    si.setName(name);
+    si.setName(name, copy);
     return si;
 }
 
 
-void SerializationInfo::removeMember(const std::string& name)
+void SerializationInfo::removeMember(const char* name)
 {
     if( _isCompound )
     {
@@ -988,7 +1000,7 @@ void SerializationInfo::removeMember(const std::string& name)
 
         for(SerializationInfo* it = _value.seq.first; it != 0; it = it->sibling())
         {
-            if( name == it->name() )
+            if( 0 == std::strcmp(name, it->name()) )
             {
                 SerializationInfo* next = it->sibling();
                 if( prev )
@@ -1100,30 +1112,30 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 }
 
 
-const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
+const SerializationInfo& SerializationInfo::getMember(const char* name) const
 {
     if( _isCompound )
     {
         ConstIterator it( _value.seq.first );
         for(; it != ConstIterator( 0 ); ++it)
         {
-            if( name == it->name() )
+            if( 0 == std::strcmp(name, it->name()) )
                 return *it;
         }
     }
 
-    throw SerializationError("Missing info for '" + name + "'", PT_SOURCEINFO);
+    throw SerializationError("Missing info for '" + std::string(name) + "'", PT_SOURCEINFO);
 }
 
 
-const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
+const SerializationInfo* SerializationInfo::findMember(const char* name) const
 {
     if( _isCompound )
     {
         ConstIterator it(_value.seq.first);
         for(; it != ConstIterator( 0 ); ++it)
         {
-            if( name == it->name() )
+            if( 0 == std::strcmp(name, it->name()) )
                 return &(*it);
         }
     }
@@ -1132,14 +1144,14 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
 }
 
 
-SerializationInfo* SerializationInfo::findMember(const std::string& name)
+SerializationInfo* SerializationInfo::findMember(const char* name)
 {
     if( _isCompound )
     {
         Iterator it ( _value.seq.first);
         for(; it != Iterator( 0); ++it)
         {
-            if( name == it->name() )
+            if( 0 == std::strcmp(name, it->name()) )
                 return &(*it);
         }
     }

@@ -196,15 +196,13 @@ class PT_API SerializationInfo
         void setTypeName(const std::string& type);
 
         void setTypeName(const char* type, bool copy = true);
-        //{ _typeName = type; }
 
         const char* name() const
         { return _Name; }
 
         void setName(const std::string& name);
-
-        //void setName(const char* name)
-        //{ _name = name; }
+        
+        void setName(const char* name, bool copy = true);
 
         const char* id() const
         { return _id; }
@@ -338,11 +336,17 @@ class PT_API SerializationInfo
 
         /** @brief Serialization of member data
         */
-        SerializationInfo& addMember(const std::string& name);
+        SerializationInfo& addMember(const std::string& name)
+        { return this->addMember( name.c_str() ); }
+        
+        SerializationInfo& addMember(const char* name, bool copy = true);
 
         /** @brief Serialization of member data
         */
-        void removeMember(const std::string& name);
+        void removeMember(const std::string& name)
+        { return this->removeMember( name.c_str() ); }
+        
+        void removeMember(const char* name);
 
         /** @brief Serialization of member data
         */
@@ -350,21 +354,30 @@ class PT_API SerializationInfo
 
         /** @brief Deserialization of member data
         */
-        const SerializationInfo& getMember(const std::string& name) const;
+        const SerializationInfo& getMember(const std::string& name) const
+        { return this->getMember( name.c_str() ); }
+        
+        const SerializationInfo& getMember(const char* name) const;
 
         /** @brief Find member data by name
 
             This method returns the data for an object with the name \a name.
             or null if it is not present.
         */
-        const SerializationInfo* findMember(const std::string& name) const;
+        const SerializationInfo* findMember(const std::string& name) const
+        { return this->findMember( name.c_str() ); }
+        
+        const SerializationInfo* findMember(const char* name) const;
 
         /** @brief Find member data by name
 
             This method returns the data for an object with the name \a name.
             or null if it is not present.
         */
-        SerializationInfo* findMember(const std::string& name);
+        SerializationInfo* findMember(const std::string& name)
+        { return this->findMember( name.c_str() ); }
+        
+        SerializationInfo* findMember(const char* name);
 
         size_t memberCount() const;
 
