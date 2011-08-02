@@ -166,7 +166,7 @@ void XmlFormatter::flush()
 }
 
 
-void XmlFormatter::addValue(const std::string& name, const std::string& type,
+void XmlFormatter::addValue(const char* name, const char* type,
                              const Pt::String& value, const char* id)
 {
     if( ! _writer )
@@ -178,7 +178,7 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
         attr[0] = Xml::Attribute( String(L"type"), String::widen( type ) );
         attr[1] = Xml::Attribute( String(L"id"), String::widen( id ) );
 
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeElement( String::widen( name ), attr, 2, value );
         else
             _writer->writeElement( String::widen( type ), attr, 2, value );
@@ -187,7 +187,7 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
     {
         Xml::Attribute typeAttr( String(L"type"), String::widen( type ) );
 
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeElement( String::widen( name ), &typeAttr, 1, value );
         else
             _writer->writeElement( String::widen( type ), &typeAttr, 1, value );
@@ -195,7 +195,7 @@ void XmlFormatter::addValue(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::addBytes(const std::string& name, const std::string& type,
+void XmlFormatter::addBytes(const char* name, const char* type,
                             const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
@@ -203,7 +203,7 @@ void XmlFormatter::addBytes(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::addBool(const std::string& name, bool value,
+void XmlFormatter::addBool(const char* name, bool value,
                            const char* id)
 {
     convert(_value, value);
@@ -211,7 +211,7 @@ void XmlFormatter::addBool(const std::string& name, bool value,
 }
 
 
-void XmlFormatter::addChar(const std::string& name, const Pt::Char& value,
+void XmlFormatter::addChar(const char* name, const Pt::Char& value,
                      const char* id)
 {
     _value.clear();
@@ -219,7 +219,7 @@ void XmlFormatter::addChar(const std::string& name, const Pt::Char& value,
     this->addValue(name, "char", _value, id);
 }
 
-void XmlFormatter::addInt(const std::string& name, long long value,
+void XmlFormatter::addInt(const char* name, long long value,
                           const char* id)
 {
     convert(_value, value);
@@ -227,7 +227,7 @@ void XmlFormatter::addInt(const std::string& name, long long value,
 }
 
 
-void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
+void XmlFormatter::addUInt(const char* name, unsigned long long value,
                            const char* id)
 {
     convert(_value, value);
@@ -235,7 +235,7 @@ void XmlFormatter::addUInt(const std::string& name, unsigned long long value,
 }
 
 
-void XmlFormatter::addFloat(const std::string& name, double value,
+void XmlFormatter::addFloat(const char* name, double value,
                             const char* id)
 {
     convert(_value, value);
@@ -243,7 +243,7 @@ void XmlFormatter::addFloat(const std::string& name, double value,
 }
 
 
-void XmlFormatter::addReference(const std::string& name, const char* id)
+void XmlFormatter::addReference(const char* name, const char* id)
 {
     if( ! _writer )
         return;
@@ -253,7 +253,7 @@ void XmlFormatter::addReference(const std::string& name, const char* id)
 }
 
 
-void XmlFormatter::beginArray(const std::string& name, const std::string& type,
+void XmlFormatter::beginArray(const char* name, const char* type,
                               const char*id)
 {
     if( ! _writer )
@@ -263,14 +263,14 @@ void XmlFormatter::beginArray(const std::string& name, const std::string& type,
     {
         Attribute attr( Pt::String(L"id"), Pt::String::widen( id ) );
 
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeStartElement( Pt::String::widen( name ), &attr, 1 );
         else
             _writer->writeStartElement( String::widen( type ), &attr, 1 );
     }
     else
     {
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeStartElement( Pt::String::widen( name ) );
         else
             _writer->writeStartElement( String::widen( type ) );
@@ -278,7 +278,7 @@ void XmlFormatter::beginArray(const std::string& name, const std::string& type,
 }
 
 
-void XmlFormatter::beginElement(const std::string& type, const char* id)
+void XmlFormatter::beginElement(const char* type, const char* id)
 {
 }
 
@@ -297,14 +297,14 @@ void XmlFormatter::finishArray()
 }
 
 
-void XmlFormatter::beginObject(const std::string& name, const std::string& type,
+void XmlFormatter::beginObject(const char* name, const char* type,
                                const char* id)
 {
     this->onBeginObject(name, type, id);
 }
 
 
-void XmlFormatter::onBeginObject(const std::string& name, const std::string& type,
+void XmlFormatter::onBeginObject(const char* name, const char* type,
                                  const char* id)
 {
     if( ! _writer )
@@ -314,14 +314,14 @@ void XmlFormatter::onBeginObject(const std::string& name, const std::string& typ
     {
         Xml::Attribute attr( String(L"id"), String::widen( id ) );
 
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeStartElement( String::widen( name ), &attr, 1 );
         else
             _writer->writeStartElement( String::widen( type ), &attr, 1 );
     }
     else
     {
-        if( ! name.empty() )
+        if( *name != '\0' )
             _writer->writeStartElement( String::widen( name ) );
         else
             _writer->writeStartElement( String::widen( type ) );
@@ -329,7 +329,7 @@ void XmlFormatter::onBeginObject(const std::string& name, const std::string& typ
 }
 
 
-void XmlFormatter::beginMember(const std::string& name, const std::string& type,
+void XmlFormatter::beginMember(const char* name, const char* type,
                                const char* id)
 {
 }
