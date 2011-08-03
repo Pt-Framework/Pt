@@ -40,9 +40,10 @@ inline void freeRefStr(const char*& str, bool& isRef)
     if(isRef == false)
     {
         delete [] str;
-        str = "";
         isRef = true;
     }
+    
+    str = "";
 }
 
 
@@ -59,10 +60,13 @@ inline void copyRefStr(const char*& str, bool& isRef, const char* from, size_t f
     assert( from != 0 );
     freeRefStr(str, isRef);
 
-    ++fromLen;
-    str = new char[fromLen];
-    std::memcpy( const_cast<char*>(str), from, fromLen );
-    isRef = false;
+	if(fromLen > 0)
+	{
+		++fromLen;
+		str = new char[fromLen];
+		std::memcpy( const_cast<char*>(str), from, fromLen );
+		isRef = false;
+    }
 }
 
 }
