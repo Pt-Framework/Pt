@@ -266,6 +266,8 @@ void SerializationTest::Benchmark1()
     }
     Pt::Timespan ts = clock.stop();
     std::cerr << "Time1: " << ts.toUSecs() << " " << u <<  std::endl;
+    std::cerr << "sizeof(SerialitazionInfo): " << sizeof(Pt::SerializationInfo) << " " << u <<  std::endl;
+    std::cerr << "sizeof(void*): " << sizeof(void*) << " " << u <<  std::endl;
     //std::exit(1);
 }
 
