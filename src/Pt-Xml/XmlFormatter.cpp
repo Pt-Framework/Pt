@@ -179,18 +179,18 @@ void XmlFormatter::addValue(const char* name, const char* type,
         attr[1] = Xml::Attribute( String(L"id"), String::widen( id ) );
 
         if( *name != '\0' )
-            _writer->writeElement( String::widen( name ), attr, 2, value );
+            _writer->writeElement( String::widen( name ), value, attr, 2 );
         else
-            _writer->writeElement( String::widen( type ), attr, 2, value );
+            _writer->writeElement( String::widen( type ), value, attr, 2 );
     }
     else
     {
         Xml::Attribute typeAttr( String(L"type"), String::widen( type ) );
 
         if( *name != '\0' )
-            _writer->writeElement( String::widen( name ), &typeAttr, 1, value );
+            _writer->writeElement( String::widen( name ), value, &typeAttr, 1 );
         else
-            _writer->writeElement( String::widen( type ), &typeAttr, 1, value );
+            _writer->writeElement( String::widen( type ), value, &typeAttr, 1 );
     }
 }
 
@@ -249,7 +249,7 @@ void XmlFormatter::addReference(const char* name, const char* id)
         return;
 
     Attribute attr( Pt::String(L"ref"), Pt::String::widen( id ) );
-    _writer->writeElement( Pt::String::widen( name ), &attr, 1, Pt::String() );
+    _writer->writeElement( Pt::String::widen( name ), Pt::String(), &attr, 1 );
 }
 
 

@@ -419,7 +419,7 @@ class PT_API SerializationInfo
             this->load(&fixme, FixupThunk<T>::fixupPointer, mid);
         }
 
-        bool beginFormat(Formatter& formatter);
+        Iterator beginFormat(Formatter& formatter);
 
         void endFormat(Formatter& formatter);
 

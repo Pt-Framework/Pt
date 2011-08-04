@@ -62,8 +62,15 @@ void Formatter::addChar(const char* name, const Pt::Char& value,
 void Formatter::addInt(const char* name, long long value, 
                        const char* id)
 {
+    static const Pt::Char VALUE[] = { 'v', 'a', 'l', 'u', 'e', '\0' };
+    static const Pt::Char INT[] = { 'i', 'n', 't', '\0' };
+
     convert(_value, value);
-    this->addValue(name, "int", _value, id);
+    _writer->writeStartElement( VALUE );
+    _writer->writeElement( INT, _value );
+    _writer->writeEndElement();
+
+    //this->addValue(name, "int", _value, id);
 }
 
 
@@ -99,12 +106,16 @@ void Formatter::addReference(const char* name, const char*value)
 }
 
 
-void Formatter::beginArray(const char*, const char* type,
+void Formatter::beginArray(const char*, const char*,
                            const char*)
 {
-    _writer->writeStartElement( Pt::String::widen("value") );
-    _writer->writeStartElement( Pt::String::widen("array") );
-    _writer->writeStartElement( Pt::String::widen("data") );
+    static const Pt::Char VALUE[] = { 'v', 'a', 'l', 'u', 'e', '\0' };
+    static const Pt::Char ARRAY[] = { 'a', 'r', 'r', 'a', 'y', '\0' };
+    static const Pt::Char DATA[] = { 'd', 'a', 't', 'a', '\0' };
+
+    _writer->writeStartElement( VALUE );
+    _writer->writeStartElement( ARRAY );
+    _writer->writeStartElement( DATA );
 }
 
 

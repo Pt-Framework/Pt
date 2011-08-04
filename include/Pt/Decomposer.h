@@ -81,6 +81,8 @@ class Decomposer : public IDecomposer
 
             if( _si.context() && _si.context()->referencingEnabled() )
             {
+                // TODO: the contextual SerializationInfo can be provided by
+                // the context
                 _si.setContextual();
                 _si << Pt::save() <<= type;
 
@@ -99,8 +101,7 @@ class Decomposer : public IDecomposer
         {
             _si << Pt::save() <<= *_type;
             _current = &_si;
-            _current->beginFormat(formatter);
-            _it = _current->begin();
+            _it = _current->beginFormat(formatter);
         }
 
         virtual IDecomposer* advanceFormat(Formatter& formatter)
@@ -115,14 +116,12 @@ class Decomposer : public IDecomposer
                 return _current != 0 ? this : _parent;
             }
 
-            if( _it->beginFormat(formatter) )
+            SerializationInfo::Iterator it = _it->beginFormat(formatter);
+            if( it != _current->end() )
             {
-                _it = _current->begin();
-                if( _it != _current->end() )
-                {
-                     _current = &(*_it);
-                     return this;
-                }
+                 _it = it;
+                 _current = &(*_it);
+                 return this;
             }
 
             _it->endFormat(formatter);

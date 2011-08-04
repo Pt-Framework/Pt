@@ -50,15 +50,15 @@ namespace Xml {
 
             void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
 
-            void writeStartElement(const Pt::String& localName);
+            void writeStartElement(const Pt::Char* localName, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount);
+            void writeStartElement(const Pt::String& localName, const Attribute* attr = 0, size_t attrCount = 0);
 
             void writeEndElement();
 
-            void writeElement(const Pt::String& localName, const Pt::String& content);
+            void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeElement(const Pt::String& localName, const Attribute* attr, size_t attrCount, const Pt::String& content);
+            void writeElement(const Pt::Char* localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
 
             void writeCharacters(const Pt::String& text);
 

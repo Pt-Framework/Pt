@@ -73,7 +73,7 @@ inline void copyRefStr(const char*& str, bool& isRef, const char* from, size_t f
 
 namespace Pt {
 
-bool SerializationInfo::beginFormat(Formatter& formatter)
+SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
 {
     switch(_type)
     {
@@ -128,20 +128,20 @@ bool SerializationInfo::beginFormat(Formatter& formatter)
         case Struct:
         {
             formatter.beginObject( _Name, this->typeName(), this->id() );
-            return true;
+            return this->begin();
         }
 
         case Sequence:
         {
             formatter.beginArray( _Name, this->typeName(), this->id() );
-            return true;
+            return this->begin();
         }
 
         default:
             break;
     }
 
-    return false;
+    return end();
 }
 
 
@@ -216,7 +216,8 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.beginObject( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
-            for(it = this->begin(); it != this->end(); ++it)
+            SerializationInfo::Iterator end = this->end();
+            for(it = this->begin(); it != end; ++it)
             {
                 formatter.beginMember( it->name(), it->typeName(), it->id() );
                 it->format(formatter);
@@ -232,7 +233,8 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.beginArray( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
-            for(it = this->begin(); it != this->end(); ++it)
+            SerializationInfo::Iterator end = this->end();
+            for(it = this->begin(); it != end; ++it)
             {
                 formatter.beginElement( it->typeName(), it->id()  );
                 it->format(formatter);
