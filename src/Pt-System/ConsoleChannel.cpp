@@ -57,7 +57,7 @@ void ConsoleChannel::onClose()
 
 void ConsoleChannel::onWrite(const std::string& message)
 {
-    std::cerr << message;
+    std::clog << message;
 }
 
 
