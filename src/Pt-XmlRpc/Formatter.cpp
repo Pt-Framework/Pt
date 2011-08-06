@@ -34,6 +34,19 @@
 
 namespace  {
 
+static const Pt::Char XMLRPC_VALUE[]   = { 'v', 'a', 'l', 'u', 'e', '\0' };
+static const Pt::Char XMLRPC_INT[]     = { 'i', 'n', 't', '\0' };
+static const Pt::Char XMLRPC_DOUBLE[]  = { 'd', 'o', 'u', 'b', 'l', 'e', '\0' };
+static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
+static const Pt::Char XMLRPC_BOOLEAN[] = { 'b', 'o', 'o', 'l', 'e', 'a', 'n', '\0' };
+static const Pt::Char XMLRPC_STRUCT[]  = { 's', 't', 'r', 'u', 'c', 't', '\0' };
+static const Pt::Char XMLRPC_MEMBER[]  = { 'm', 'e', 'm', 'b', 'e', 'r', '\0' };
+static const Pt::Char XMLRPC_NAME[]    = { 'n', 'a', 'm', 'e', '\0' };
+static const Pt::Char XMLRPC_ARRAY[]   = { 'a', 'r', 'r', 'a', 'y', '\0' };
+static const Pt::Char XMLRPC_DATA[]    = { 'd', 'a', 't', 'a', '\0' };
+static const Pt::Char XMLRPC_FALSE[]   = { 'f', 'a', 'l', 's', 'e', '\0' };
+static const Pt::Char XMLRPC_TRUE[]    = { 't', 'r', 'u', 'e', '\0' };
+
 template <typename T>
 inline const Pt::Char* signed_integer_to_string(Pt::Char* buf, size_t n, T i)
 {
@@ -73,6 +86,33 @@ inline const Pt::Char* signed_integer_to_string(Pt::Char* buf, size_t n, T i)
     return psz;
 }
 
+template <typename T>
+inline const Pt::Char* unsigned_integer_to_string(Pt::Char* buf, size_t n, T i)
+{
+    const char* digits = "0123456789";
+    assert( *digits == '0' );
+
+    if(0 == n)
+        return 0;
+
+    Pt::Char* psz = buf + n - 1;
+    *psz = 0;
+
+    do
+    {
+        if(psz == buf)
+            return 0;
+
+        signed lsd = i % 10;
+        i /= 10;
+        --psz;
+        *psz = digits[lsd];
+
+    } while(i != 0);
+
+    return psz;
+}
+
 }
 
 namespace Pt {
@@ -82,8 +122,8 @@ namespace XmlRpc {
 void Formatter::addString(const char* name, const char* type,
                           const Pt::String& value, const char* id)
 {
-    _writer->writeStartElement( Pt::String::widen("value") );
-    _writer->writeElement( Pt::String::widen(type), value );
+    _writer->writeStartElement(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_STRING, value.c_str());
     _writer->writeEndElement();
 }
 
@@ -91,41 +131,53 @@ void Formatter::addString(const char* name, const char* type,
 void Formatter::addBool(const char* name, bool value, 
                         const char* id)
 {
-    convert(_value, value);
-    this->addString(name, "boolean", _value, id);
+    _writer->writeStartElement(XMLRPC_VALUE );
+
+    if(value)
+        _writer->writeElement(XMLRPC_BOOLEAN, XMLRPC_TRUE);
+    else
+        _writer->writeElement(XMLRPC_BOOLEAN, XMLRPC_FALSE);
+
+    _writer->writeEndElement();
 }
 
 void Formatter::addChar(const char* name, const Pt::Char& value,
                         const char* id)
 {
-    _value.clear();
-    _value += value;
-    this->addString(name, "string", _value, id);
+    Pt::Char str[2] = { value, '\0' };
+
+    _writer->writeStartElement(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_STRING , str);
+    _writer->writeEndElement();
 }
 
 void Formatter::addInt(const char* name, long long value, 
                        const char* id)
 {
-    static const Pt::Char VALUE[] = { 'v', 'a', 'l', 'u', 'e', '\0' };
-    static const Pt::Char INT[] = { 'i', 'n', 't', '\0' };
-
-    const size_t bufsize = (sizeof(value) * 4) + 1;
+    const size_t bufsize = (sizeof(value) * 4) + 4;
     Pt::Char buf[bufsize];
     const Pt::Char* num = signed_integer_to_string(buf, bufsize, value);
     if( 0 == num  )
         throw std::logic_error("conversion buffer too small");
 
-    _writer->writeStartElement( VALUE );
-    _writer->writeElement( INT, num );
-    _writer->writeEndElement();
+    _writer->writeStartTag(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_INT, num);
+    _writer->writeEndTag(XMLRPC_VALUE);
 }
 
 
 void Formatter::addUInt(const char* name, unsigned long long value, 
                         const char* id)
 {
-    convert(_value, value);
-    this->addString(name, "int", _value, id);
+    const size_t bufsize = (sizeof(value) * 4) + 4;
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = unsigned_integer_to_string(buf, bufsize, value);
+    if( 0 == num  )
+        throw std::logic_error("conversion buffer too small");
+
+    _writer->writeStartElement(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_INT, num);
+    _writer->writeEndElement();
 }
 
 
@@ -133,14 +185,18 @@ void Formatter::addFloat(const char* name, double value,
                          const char* id)
 {
     convert(_value, value);
-    this->addString(name, "double", _value, id);
+    _writer->writeStartElement(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_DOUBLE, _value.c_str());
+    _writer->writeEndElement();
 }
 
 
 void Formatter::addBytes(const char* name, const char* type,
                          const char* data, size_t length, const char* id)
 {
-    _writer->writeStartElement( Pt::String::widen("value") );
+    // TODO: this should be base64 encoded
+
+    _writer->writeStartElement(XMLRPC_VALUE);
     std::string value(data, length);
     _writer->writeElement( Pt::String::widen(type), Pt::String::widen(value) );
     _writer->writeEndElement();
@@ -156,13 +212,9 @@ void Formatter::addReference(const char* name, const char*value)
 void Formatter::beginArray(const char*, const char*,
                            const char*)
 {
-    static const Pt::Char VALUE[] = { 'v', 'a', 'l', 'u', 'e', '\0' };
-    static const Pt::Char ARRAY[] = { 'a', 'r', 'r', 'a', 'y', '\0' };
-    static const Pt::Char DATA[] = { 'd', 'a', 't', 'a', '\0' };
-
-    _writer->writeStartElement( VALUE );
-    _writer->writeStartElement( ARRAY );
-    _writer->writeStartElement( DATA );
+    _writer->writeStartTag(XMLRPC_VALUE);
+    _writer->writeStartTag(XMLRPC_ARRAY);
+    _writer->writeStartTag(XMLRPC_DATA);
 }
 
 
@@ -178,25 +230,25 @@ void Formatter::finishElement()
 
 void Formatter::finishArray()
 {
-    _writer->writeEndElement();
-    _writer->writeEndElement();
-    _writer->writeEndElement();
+    _writer->writeEndTag(XMLRPC_DATA);
+    _writer->writeEndTag(XMLRPC_ARRAY);
+    _writer->writeEndTag(XMLRPC_VALUE);
 }
 
 
 void Formatter::beginObject(const char* name, const char* type,
                             const char* id)
 {
-    _writer->writeStartElement( Pt::String::widen("value") );
-    _writer->writeStartElement( Pt::String::widen("struct") );
+    _writer->writeStartElement(XMLRPC_VALUE);
+    _writer->writeStartElement(XMLRPC_STRUCT);
 }
 
 
 void Formatter::beginMember(const char* name, const char* type, 
                             const char* id)
 {
-    _writer->writeStartElement( Pt::String::widen("member") );
-    _writer->writeElement( Pt::String::widen("name"), Pt::String::widen(name) );
+    _writer->writeStartElement(XMLRPC_MEMBER);
+    _writer->writeElement(XMLRPC_NAME, Pt::String::widen(name) );
 }
 
 

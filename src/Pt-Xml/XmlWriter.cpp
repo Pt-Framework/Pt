@@ -81,6 +81,25 @@ void XmlWriter::begin(std::ostream& os)
 }
 
 
+void XmlWriter::writeStartTag(const Pt::Char* name)
+{
+    _tos << Pt::Char('<') << name;
+    _tos << Pt::Char('>');
+
+    if( useEndl() )
+        this->endl();
+}
+
+
+void XmlWriter::writeEndTag(const Pt::Char* name)
+{
+    _tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
+
+    if( useEndl() )
+        this->endl();
+}
+
+
 void XmlWriter::writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns)
 {
 }
