@@ -35,8 +35,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
-void Formatter::addValue(const char* name, const char* type,
-                         const Pt::String& value, const char* id)
+void Formatter::addString(const char* name, const char* type,
+                          const Pt::String& value, const char* id)
 {
     _writer->writeStartElement( Pt::String::widen("value") );
     _writer->writeElement( Pt::String::widen(type), value );
@@ -48,7 +48,7 @@ void Formatter::addBool(const char* name, bool value,
                         const char* id)
 {
     convert(_value, value);
-    this->addValue(name, "boolean", _value, id);
+    this->addString(name, "boolean", _value, id);
 }
 
 void Formatter::addChar(const char* name, const Pt::Char& value,
@@ -56,7 +56,7 @@ void Formatter::addChar(const char* name, const Pt::Char& value,
 {
     _value.clear();
     _value += value;
-    this->addValue(name, "string", _value, id);
+    this->addString(name, "string", _value, id);
 }
 
 void Formatter::addInt(const char* name, long long value, 
@@ -70,7 +70,7 @@ void Formatter::addInt(const char* name, long long value,
     _writer->writeElement( INT, _value );
     _writer->writeEndElement();
 
-    //this->addValue(name, "int", _value, id);
+    //this->addString(name, "int", _value, id);
 }
 
 
@@ -78,7 +78,7 @@ void Formatter::addUInt(const char* name, unsigned long long value,
                         const char* id)
 {
     convert(_value, value);
-    this->addValue(name, "int", _value, id);
+    this->addString(name, "int", _value, id);
 }
 
 
@@ -86,7 +86,7 @@ void Formatter::addFloat(const char* name, double value,
                          const char* id)
 {
     convert(_value, value);
-    this->addValue(name, "double", _value, id);
+    this->addString(name, "double", _value, id);
 }
 
 

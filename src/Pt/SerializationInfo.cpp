@@ -111,7 +111,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
         case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addValue( _Name, _TypeName, *str, _id );
+            formatter.addString( _Name, _TypeName, *str, _id );
             break;
         }
         case Reference:
@@ -196,7 +196,7 @@ void SerializationInfo::format(Formatter& formatter)
         case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addValue( _Name, _TypeName, *str, _id );
+            formatter.addString( _Name, _TypeName, *str, _id );
             break;
         }
 

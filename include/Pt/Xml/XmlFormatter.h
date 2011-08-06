@@ -127,8 +127,8 @@ class PT_XML_API XmlFormatter : public Formatter
         //! @internal
         void flush();
 
-        void addValue(const char*, const char* type,
-                      const Pt::String& value, const char* id);
+        void addString(const char*, const char* type,
+                       const Pt::String& value, const char* id);
 
         void addBool(const char* name, bool value,
                      const char* id);

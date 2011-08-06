@@ -43,8 +43,8 @@ class Formatter
         virtual ~Formatter()
         { }
 
-        virtual void addValue(const char* name, const char* type,
-                              const Pt::String& value, const char* id) = 0;
+        virtual void addString(const char* name, const char* type,
+                               const Pt::String& value, const char* id) = 0;
 
         virtual void addBytes(const char* name, const char* type,
                               const char* value, size_t length, const char* id) = 0;

@@ -50,8 +50,8 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void attach(Xml::XmlWriter& writer)
         { _writer = &writer; }
 
-        void addValue(const char* name, const char* type,
-                      const Pt::String& value, const char* id);
+        void addString(const char* name, const char* type,
+                       const Pt::String& value, const char* id);
 
         void addBool(const char* name, bool value, 
                      const char* id);
