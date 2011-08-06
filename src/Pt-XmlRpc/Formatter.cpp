@@ -30,6 +30,50 @@
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/Convert.h>
+#include <cassert>
+
+namespace  {
+
+template <typename T>
+inline const Pt::Char* signed_integer_to_string(Pt::Char* buf, size_t n, T i)
+{
+    const bool negative = i < 0;
+
+    const char* digits = "9876543210123456789";
+    digits += 9;
+    assert( *digits == '0' );
+
+    if(0 == n)
+        return 0;
+
+    Pt::Char* psz = buf + n - 1;
+    *psz = 0;
+
+    do
+    {
+        if(psz == buf)
+            return 0;
+
+        signed lsd = i % 10;
+        i /= 10;
+        --psz;
+        *psz = digits[lsd];
+
+    } while(i != 0);
+
+    if(negative)
+    {
+        if(psz == buf)
+            return 0;
+
+        --psz;
+        *psz = '-';
+    }
+
+    return psz;
+}
+
+}
 
 namespace Pt {
 
@@ -65,12 +109,15 @@ void Formatter::addInt(const char* name, long long value,
     static const Pt::Char VALUE[] = { 'v', 'a', 'l', 'u', 'e', '\0' };
     static const Pt::Char INT[] = { 'i', 'n', 't', '\0' };
 
-    convert(_value, value);
-    _writer->writeStartElement( VALUE );
-    _writer->writeElement( INT, _value );
-    _writer->writeEndElement();
+    const size_t bufsize = (sizeof(value) * 4) + 1;
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = signed_integer_to_string(buf, bufsize, value);
+    if( 0 == num  )
+        throw std::logic_error("conversion buffer too small");
 
-    //this->addString(name, "int", _value, id);
+    _writer->writeStartElement( VALUE );
+    _writer->writeElement( INT, num );
+    _writer->writeEndElement();
 }
 
 

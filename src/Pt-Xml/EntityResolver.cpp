@@ -627,14 +627,8 @@ String EntityResolver::resolveEntity(const String& entity) const
 
 String EntityResolver::getEntity(Char ch) const
 {
-    OStringStream s;
-    getEntity(s, ch);
-    return s.str();
-}
+    OStringStream os;
 
-
-void EntityResolver::getEntity(std::basic_ostream<Char>& os, Char ch) const
-{
     unsigned u = 0;
     unsigned o = sizeof(rent)/sizeof(Ent) - 1;
     while (o - u > 1)
@@ -643,7 +637,7 @@ void EntityResolver::getEntity(std::basic_ostream<Char>& os, Char ch) const
         if (rent[m].charValue == ch.value())
         {
             printEntity(os, rent[m].entity);
-            return;
+            return os.str();
         }
 
         if (ch.value() < rent[m].charValue)
@@ -660,8 +654,47 @@ void EntityResolver::getEntity(std::basic_ostream<Char>& os, Char ch) const
         os << ch;
     else
         os << Char('&') << Char('#') << ch.value() << Char(';');
+
+    return os.str();
 }
 
+
+void EntityResolver::getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const
+{
+    const Pt::Char* it = str;
+
+    for( ; *it != '\0'; ++it)
+    {
+        unsigned u = 0;
+        unsigned o = sizeof(rent)/sizeof(Ent) - 1;
+        while (o - u > 1)
+        {
+            unsigned m = (o + u) / 2;
+            if (rent[m].charValue == it->value())
+            {
+                printEntity(os, rent[m].entity);
+                goto next;
+            }
+
+            if (it->value() < rent[m].charValue)
+                o = m;
+            else
+                u = m;
+        }
+
+        if (rent[u].charValue == it->value())
+            printEntity(os, rent[u].entity);
+        else if (rent[o].charValue == it->value())
+            printEntity(os, rent[o].entity);
+        else if (it->value() >= ' ' && it->value() <= 0x7F)
+            os << *it;
+        else
+            os << Char('&') << Char('#') << it->value() << Char(';');
+
+        next:
+            continue;
+    }
+}
 
 } // namespace Xml
 

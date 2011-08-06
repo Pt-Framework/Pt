@@ -93,13 +93,9 @@ class PT_XML_API EntityResolver {
         String getEntity(Char ch) const;
 
         /**
-         * @brief Outputs the entity value (token) of the given character.
-         *
-         * Returns the entity of the given char. If there is no entity found, either the
-         * given character as a string or a numeric entity is returned depending of the
-         * passed flag.
+         * @brief Performs entity replacement while writing to a stream.
          */
-        void getEntity(std::basic_ostream<Char>& os, Char ch) const;
+        void getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const;
 
     private:
         //! Entity map containing entities which are associated to their resolved entity value.

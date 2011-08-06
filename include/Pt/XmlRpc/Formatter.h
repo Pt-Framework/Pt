@@ -46,7 +46,6 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         : _writer(&writer)
         { }
 
-
         void attach(Xml::XmlWriter& writer)
         { _writer = &writer; }
 

@@ -25,7 +25,6 @@
  */
 #include "Pt/Xml/XmlWriter.h"
 #include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/EntityResolver.h"
 #include "Pt/Utf8Codec.h"
 #include <iostream>
 
@@ -172,7 +171,7 @@ void XmlWriter::writeElement(const Pt::String& localName, const Pt::String& cont
 }
 
 
-void XmlWriter::writeElement(const Pt::Char* localName, const Pt::String& content, const Attribute* attr, size_t attrCount)
+void XmlWriter::writeElement(const Pt::Char* localName, const Pt::Char* content, const Attribute* attr, size_t attrCount)
 {
     if( useIndent() )
     {
@@ -201,13 +200,15 @@ void XmlWriter::writeElement(const Pt::Char* localName, const Pt::String& conten
 }
 
 
+void XmlWriter::writeCharacters(const Pt::Char* text)
+{
+    _resolver.getEntity(_tos, text);
+}
+
+
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    static EntityResolver resolver;
-
-    Pt::String::const_iterator it;
-    for(it = text.begin(); it != text.end(); ++it)
-        resolver.getEntity(_tos, *it);
+    _resolver.getEntity(_tos, text.c_str());
 }
 
 

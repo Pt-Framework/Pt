@@ -27,6 +27,7 @@
 #define PT_Xml_XmlWriter_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/EntityResolver.h>
 #include <Pt/String.h>
 #include <Pt/TextStream.h>
 #include <stack>
@@ -58,7 +59,9 @@ namespace Xml {
 
             void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeElement(const Pt::Char* localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
+            void writeElement(const Pt::Char* localName, const Char* content, const Attribute* attr = 0, size_t attrCount = 0);
+
+            void writeCharacters(const Pt::Char* text);
 
             void writeCharacters(const Pt::String& text);
 
@@ -91,6 +94,7 @@ namespace Xml {
             void useEndl(bool sw)            { setFormatFlags(UseEndl, sw); }
 
         private:
+            EntityResolver _resolver;
             TextOStream _tos;
             std::stack<Pt::String> _elements;
             int _flags;
