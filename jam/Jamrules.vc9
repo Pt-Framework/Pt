@@ -23,6 +23,7 @@ Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" 
 VCDIR ?= $(VISUALC)\\vc ;
 
 PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
+PLATFORMSDK = $(PLATFORMSDK:J=" ") ;
 
 AR          = $(VISUALC)\\vc\\bin\\lib ;
 AS          = masm386 ;
