@@ -223,7 +223,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != XMLRPC_METHODCALL )
+                if( se.name() != L"methodCall" )
                     throw Xml::XmlError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;
