@@ -69,7 +69,7 @@ inline const Pt::Char* signed_integer_to_string(Pt::Char* buf, size_t n, T i)
         if(psz == buf)
             return 0;
 
-        signed lsd = i % 10;
+        T lsd = i % 10;
         i /= 10;
         --psz;
         *psz = digits[lsd];
@@ -105,7 +105,7 @@ inline const Pt::Char* unsigned_integer_to_string(Pt::Char* buf, size_t n, T i)
         if(psz == buf)
             return 0;
 
-        signed lsd = i % 10;
+        T lsd = i % 10;
         i /= 10;
         --psz;
         *psz = digits[lsd];
@@ -117,6 +117,13 @@ inline const Pt::Char* unsigned_integer_to_string(Pt::Char* buf, size_t n, T i)
 
 inline const Pt::Char* double_to_string(Pt::Char* str, size_t n, double d)
 {
+    const char* digits = "9876543210123456789";
+    digits += 9;
+    assert( *digits == '0' );
+
+    Pt::Char* end = str + n;
+    Pt::Char* psz = end;
+
     if(0 == n)
         return 0;
 
@@ -131,18 +138,60 @@ inline const Pt::Char* double_to_string(Pt::Char* str, size_t n, double d)
     }
 
     //2. Test for infinity by comparing with max
-    
 
     //3. Split into integer and fractional parts with modf (<cmath>)
-    // double intpart = 0;
-    // double remain = std::modf(d, &intpart);
+    double intpart = 0;
+    double fract = std::modf(d, &intpart);
+    int digit = 0;
 
     //4. Repeatedly div-mod the integer part to extract the digits
-    //left of the decimal point, and repeatedly multiply and modf
-    //the fractional part to get the digits to the right. It will
-    //probably be faster to work in base 10^9 rather than 10.
+    //left of the decimal point.
 
-    return 0;
+    do
+    {
+        if(psz == str)
+            return 0;
+
+        digit = static_cast<int>( std::fmod(intpart, 10) );
+        intpart /= 10;
+        --psz;
+        *psz = digits[digit];
+
+    } while(intpart != 0.0);
+
+    size_t leng = end - psz;
+    std::memmove(str, psz, leng);
+    psz = str + leng;
+
+    if(str == end)
+        return 0;
+        
+    *psz = '.';
+    psz++;
+
+    //5. repeatedly multiply and modf the fractional part to get the 
+    //digits to the right. It will probably be faster to work in base 
+    //10^9 rather than 10.
+
+    do
+    {
+        fract *= 10;
+        fract = modf(fract, &intpart);
+        digit = static_cast<int>(intpart);
+        char c = digits[n];
+
+        if(psz == end)
+            return 0;
+
+        *psz = c;
+        ++psz;
+    } while(digit != 0);
+
+    if(psz == end)
+         return 0;
+
+    *psz = 0;
+    return str;
 }
 
 }
