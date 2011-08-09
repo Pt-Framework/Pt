@@ -40,6 +40,19 @@ namespace Pt {
 
 namespace XmlRpc {
 
+static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
+static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
+static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
+static const Pt::Char XMLRPC_PARAM[]  = { 'p', 'a', 'r', 'a', 'm', '\0' };
+static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
+static const Pt::Char XMLRPC_FAULTCODE[]  = { 'f', 'a', 'u', 'l', 't', 'C', 'o', 'd', 'e', '\0' };
+static const Pt::Char XMLRPC_FAULTSTRING[]  = { 'f', 'a', 'u', 'l', 't', 'S', 't', 'r', 'i', 'n', 'g', '\0' };
+static const Pt::Char XMLRPC_STRUCT[]  = { 's', 't', 'r', 'u', 'c', 't', '\0' };
+static const Pt::Char XMLRPC_MEMBER[]  = { 'm', 'e', 'm', 'b', 'e', 'r', '\0' };
+static const Pt::Char XMLRPC_NAME[]    = { 'n', 'a', 'm', 'e', '\0' };
+static const Pt::Char XMLRPC_VALUE[]   = { 'v', 'a', 'l', 'u', 'e', '\0' };
+static const Pt::Char XMLRPC_INT[]     = { 'i', 'n', 't', '\0' };
+static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
 
 XmlRpcResponder::XmlRpcResponder(Service& service)
 : Http::Responder(service)
@@ -122,32 +135,32 @@ void XmlRpcResponder::replyError(std::ostream& os, Http::Request& request,
     reply.setHeader("Content-Type", "text/xml");
 
     _writer.begin(os);
-    _writer.writeStartElement( L"methodResponse" );
-    _writer.writeStartElement( L"fault" );
-    _writer.writeStartElement( L"value" );
-    _writer.writeStartElement( L"struct" );
+    _writer.writeStartTag( XMLRPC_METHODRESPONSE );
+    _writer.writeStartTag( XMLRPC_FAULT );
+    _writer.writeStartTag( XMLRPC_VALUE );
+    _writer.writeStartTag( XMLRPC_STRUCT );
 
-    _writer.writeStartElement( L"member" );
-    _writer.writeElement( L"name", L"faultCode" );
-    _writer.writeStartElement( L"value" );
-    _writer.writeElement( L"int", Pt::convert<Pt::String>(_fault.rc()) );
-    _writer.writeEndElement(); // value
-    _writer.writeEndElement(); // member
+    _writer.writeStartTag( XMLRPC_MEMBER );
+    _writer.writeElement( XMLRPC_NAME, XMLRPC_FAULTCODE );
+    _writer.writeStartTag( XMLRPC_VALUE );
+    _writer.writeElement( XMLRPC_INT, Pt::convert<Pt::String>(_fault.rc()) );
+    _writer.writeEndTag(XMLRPC_VALUE); // value
+    _writer.writeEndTag(XMLRPC_MEMBER); // member
 
-    _writer.writeStartElement( L"member" );
-    _writer.writeElement( L"name", L"faultString" );
-    _writer.writeStartElement( L"value" );
+    _writer.writeStartTag( XMLRPC_MEMBER );
+    _writer.writeElement( XMLRPC_NAME, XMLRPC_FAULTSTRING );
+    _writer.writeStartTag( XMLRPC_VALUE );
 
     const char* msg = (_fault.rc() ? _fault.what() : ex.what());
-    _writer.writeElement( L"string", Pt::String::widen(msg));
+    _writer.writeElement( XMLRPC_STRING, Pt::String::widen(msg));
 
-    _writer.writeEndElement(); // value
-    _writer.writeEndElement(); // member
+    _writer.writeEndTag(XMLRPC_VALUE); // value
+    _writer.writeEndTag(XMLRPC_MEMBER); // member
 
-    _writer.writeEndElement(); // struct
-    _writer.writeEndElement(); // value
-    _writer.writeEndElement(); // fault
-    _writer.writeEndElement(); // methodResponse
+    _writer.writeEndTag(XMLRPC_STRUCT); // struct
+    _writer.writeEndTag(XMLRPC_VALUE); // value
+    _writer.writeEndTag(XMLRPC_FAULT); // fault
+    _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
     _writer.flush();
 }
 
@@ -179,13 +192,13 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
         reply.setHeader("Content-Type", "text/xml");
 
         _writer.begin(os);
-        _writer.writeStartElement( L"methodResponse" );
-        _writer.writeStartElement( L"params" );
-        _writer.writeStartElement( L"param" );
+        _writer.writeStartTag( XMLRPC_METHODRESPONSE );
+        _writer.writeStartTag( XMLRPC_PARAMS );
+        _writer.writeStartTag( XMLRPC_PARAM );
         rh->format(_formatter);
-        _writer.writeEndElement(); // param
-        _writer.writeEndElement(); // params
-        _writer.writeEndElement(); // methodResponse
+        _writer.writeEndTag(XMLRPC_PARAM); // param
+        _writer.writeEndTag(XMLRPC_PARAMS); // params
+        _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
         _writer.flush();
     }
     catch (const Fault& fault)
@@ -210,7 +223,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"methodCall" )
+                if( se.name() != XMLRPC_METHODCALL )
                     throw Xml::XmlError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;

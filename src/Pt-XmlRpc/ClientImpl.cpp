@@ -37,12 +37,18 @@
 #include "Pt/System/Selectable.h"
 #include "Pt/Utf8Codec.h"
 
-
 #define log_debug(x)
 
 namespace Pt {
 
 namespace XmlRpc {
+
+static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
+static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
+static const Pt::Char XMLRPC_METHODNAME[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '\0' };
+static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
+static const Pt::Char XMLRPC_PARAM[]  = { 'p', 'a', 'r', 'a', 'm', '\0' };
+static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
 
 ClientImpl::ClientImpl()
 : _state(OnBegin)
@@ -212,19 +218,19 @@ void ClientImpl::onReplyFinished()
 void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
     _writer.begin( prepareRequest() );
-    _writer.writeStartElement( L"methodCall" );
-    _writer.writeElement( L"methodName", name );
-    _writer.writeStartElement( L"params" );
+    _writer.writeStartTag( XMLRPC_METHODCALL );
+    _writer.writeElement( XMLRPC_METHODNAME, name.c_str() );
+    _writer.writeStartTag( XMLRPC_PARAMS );
 
     for(unsigned n = 0; n < argc; ++n)
     {
-        _writer.writeStartElement( L"param" );
+        _writer.writeStartTag( XMLRPC_PARAM );
         argv[n]->format(_formatter);
-        _writer.writeEndElement();
+        _writer.writeEndTag(XMLRPC_PARAM);
     }
 
-    _writer.writeEndElement();
-    _writer.writeEndElement();
+    _writer.writeEndTag(XMLRPC_PARAMS);
+    _writer.writeEndTag(XMLRPC_METHODCALL);
     _writer.flush();
 }
 
@@ -238,7 +244,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"methodResponse" )
+                if( se.name() != XMLRPC_METHODRESPONSE )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodResponseBegin;
@@ -252,13 +258,13 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // <params> or <fault>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() == L"params")
+                if( se.name() == XMLRPC_PARAMS)
                 {
                     _state = OnParamsBegin;
                     break;
                 }
 
-                else if( se.name() == L"fault")
+                else if( se.name() == XMLRPC_FAULT)
                 {
                     _fh.begin(_fault);
                     _scanner.begin(_fh);
@@ -288,7 +294,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // </methodResponse>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"methodResponse" )
+                if( ee.name() != XMLRPC_METHODRESPONSE )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _method->setFault(_fault.rc(), _fault.text());
@@ -309,7 +315,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // <param>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"param" )
+                if( se.name() != XMLRPC_PARAM )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParam;
@@ -335,7 +341,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // </params>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"params" )
+                if( ee.name() != XMLRPC_PARAMS )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParamsEnd;
@@ -348,7 +354,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // </methodResponse>
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if( ee.name() != L"methodResponse" )
+                if( ee.name() != XMLRPC_METHODRESPONSE )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodResponseEnd;
