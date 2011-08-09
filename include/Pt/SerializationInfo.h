@@ -32,6 +32,7 @@
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <Pt/Convert.h>
+#include <Pt/LiteralPtr.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>
 #include <Pt/SerializationContext.h>
@@ -195,7 +196,9 @@ class PT_API SerializationInfo
 
         void setTypeName(const std::string& type);
 
-        void setTypeName(const char* type, bool copy = true);
+        void setTypeName(const char* type);
+        
+        void setTypeName(const LiteralPtr<char>& type);
 
         const char* name() const
         { return _Name; }
@@ -810,10 +813,11 @@ inline void operator >>=(const SerializationInfo& si, int& n)
 }
 
 
+
 inline void operator <<=(SerializationInfo& si, const int& n)
 {
     si.setValue(n);
-    si.setTypeName("int", false);
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -967,7 +971,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    //si.setTypeName("array");
+    si.setTypeName( Pt::LiteralPtr<char>("std::vector") );
     si.setSequence();
 }
 

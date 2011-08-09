@@ -343,20 +343,21 @@ void SerializationInfo::setName(const char* name, bool copy)
 
 
 void SerializationInfo::setTypeName(const std::string& type)
-{ 
+{
     copyRefStr(_TypeName, _tnRef, type.c_str(), type.size());
 }
 
 
-void SerializationInfo::setTypeName(const char* type, bool copy)
+void SerializationInfo::setTypeName(const char* type)
 {
-	if(copy)
-	{
-		const std::size_t len = std::strlen(type);
-		copyRefStr(_TypeName, _tnRef, type, len);
-	}
-	else
-		setRefStr(_TypeName, _tnRef, type);
+    const std::size_t len = std::strlen(type);
+    copyRefStr(_TypeName, _tnRef, type, len);
+}
+
+
+void SerializationInfo::setTypeName(const LiteralPtr<char>& type)
+{
+    setRefStr( _TypeName, _tnRef, type.get() );
 }
 
 
