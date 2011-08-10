@@ -48,15 +48,15 @@ class PT_XMLRPC_API Scanner
         OnParam,
         OnValueBegin,
         OnValueEnd,
-        //OnParamEnd,
 
-        OnScalarBegin,
+        OnBoolBegin,
+        OnIntBegin,
+        OnDoubleBegin,
+        OnStringBegin,
+
         OnScalar,
         OnScalarEnd,
-        
-        OnIntBegin,
-        //OnScalar,
-        
+
         OnStructBegin,
         OnMemberBegin,
         OnNameBegin,

@@ -87,13 +87,21 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 {
                     _state = OnArrayBegin;
                 }
-                else if(se.name() == L"int")
+                else if(se.name() == L"int" || se.name() == L"i4")
                 {
                     _state = OnIntBegin;
                 }
+                else if(se.name() == L"boolean")
+                {
+                    _state = OnBoolBegin;
+                }
+                else if(se.name() == L"double")
+                {
+                    _state = OnDoubleBegin;
+                }
                 else
                 {
-                    _state = OnScalarBegin;
+                    _state = OnStringBegin;
                 }
 
                 _value.clear();
@@ -316,22 +324,48 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             break;
         }
 
-        case OnScalarBegin:
+        case OnBoolBegin:
         {
-            log_debug("OnScalarBegin ");
+            log_debug("OnBoolBegin ");
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                _state = OnScalar;
+                log_debug("-> found bool " << chars.content().narrow());
 
-                log_debug("-> found value " << chars.content().narrow());
-                _current->setValue( chars.content() );
-            }
-            else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
-            {
-                log_debug("-> found empty value ");
-                _current->setValue( Pt::String() );
-                _state = OnScalarEnd;
+                bool found = false;
+                bool value = false;
+                const Pt::String& strval = chars.content();
+                for(Pt::String::const_iterator it = strval.begin(); it != strval.end(); ++it)
+                {
+                    if( Pt::isspace(*it) )
+                        continue;
+
+                    switch(*it)
+                    {
+                        case '0':
+                            if(found) 
+                                throwSerializationError();
+
+                            value = false;
+                            found = true;
+                            break;
+
+                        case '1': 
+                            if(found) 
+                                throwSerializationError();
+
+                            value = true;
+                            found = true;
+                            break;
+
+                        default:
+                            throwSerializationError();
+                            break;
+                    }
+                }
+
+                _current->setBool(value);
+                _state = OnScalar;
             }
             else
             {
@@ -347,8 +381,6 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                _state = OnScalar;
-
                 log_debug("-> found int " << chars.content().narrow());
 
                 bool neg = false;
@@ -393,6 +425,139 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     number *= -1;
 
                 _current->setInt(number);
+                _state = OnScalar;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnDoubleBegin:
+        {
+            log_debug("OnDoubleBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                log_debug("-> found double " << chars.content().narrow());
+
+                bool neg = false;
+                double number = 0.0;
+                const Pt::String& numstr = chars.content();
+                Pt::String::const_iterator it;
+                for(it = numstr.begin(); it != numstr.end(); ++it)
+                {
+                    if( Pt::isspace(*it) )
+                        continue;
+
+                    if( *it == '.' )
+                    {
+                        ++it;
+                        break;
+                    }
+
+                    switch(*it)
+                    {
+                        case '+':
+                            break;
+
+                        case '-': 
+                            if(neg) throwSerializationError();
+                            neg = true; 
+                            break;
+
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            number *= 10;
+                            number += static_cast<int>(*it) - 48;
+                            break;
+
+                        default:
+                            throwSerializationError();
+                            break;
+                    }
+
+                }
+
+                log_debug("-> intpart " << number);
+
+                unsigned digits = 0;
+                double fraction = 0.0;
+                for(; it != numstr.end(); ++it)
+                {
+                    if( Pt::isspace(*it) )
+                        break;
+
+                    switch(*it)
+                    {
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            fraction *= 10;
+                            fraction += static_cast<int>(*it) - 48;
+                            ++digits;
+                            break;
+
+                        default:
+                            throwSerializationError();
+                            break;
+                    }
+                }
+
+                log_debug("-> fraction  " << fraction);
+
+                // do not allow characters other than whitespace at end
+                for(; it != numstr.end(); ++it)
+                {
+                    if( 0 == Pt::isspace(*it) )
+                        throwSerializationError();
+                }
+
+                fraction /= (digits * 10);
+                number += fraction;
+
+                if(neg)
+                    number *= -1;
+
+                _current->setFloat(number);
+                log_debug("-> parsed double " << number);
+                _state = OnScalar;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnStringBegin:
+        {
+            log_debug("OnStringBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                _state = OnScalar;
+
+                log_debug("-> found string " << chars.content().narrow());
+                _current->setValue( chars.content() );
             }
             else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
             {
@@ -407,7 +572,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
             break;
         }
-        
+
         case OnScalar:
         {
             log_debug("OnScalar");
