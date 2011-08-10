@@ -53,7 +53,10 @@ class PT_XMLRPC_API Scanner
         OnScalarBegin,
         OnScalar,
         OnScalarEnd,
-
+        
+        OnIntBegin,
+        //OnScalar,
+        
         OnStructBegin,
         OnMemberBegin,
         OnNameBegin,

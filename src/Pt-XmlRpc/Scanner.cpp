@@ -87,6 +87,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 {
                     _state = OnArrayBegin;
                 }
+                else if(se.name() == L"int")
+                {
+                    _state = OnIntBegin;
+                }
                 else
                 {
                     _state = OnScalarBegin;
@@ -337,6 +341,73 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             break;
         }
 
+        case OnIntBegin:
+        {
+            log_debug("OnIntBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                _state = OnScalar;
+
+                log_debug("-> found int " << chars.content().narrow());
+
+                bool neg = false;
+                long number = 0;
+                const Pt::String& numstr = chars.content();
+                for(Pt::String::const_iterator it = numstr.begin(); it != numstr.end(); ++it)
+                {
+                    if( Pt::isspace(*it) )
+                        continue;
+
+                    switch(*it)
+                    {
+                        case '+':
+                            break;
+
+                        case '-': 
+                            if(neg) throwSerializationError();
+                            neg = true; 
+                            break;
+
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            number *= 10;
+                            number += static_cast<int>(*it) - 48;
+                            break;
+
+                        default:
+                            throwSerializationError();
+                            break;
+                    }
+                }
+
+                if(neg)
+                    number *= -1;
+
+                _current->setInt(number);
+            }
+            else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
+            {
+                log_debug("-> found empty value ");
+                _current->setValue( Pt::String() );
+                _state = OnScalarEnd;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+        
         case OnScalar:
         {
             log_debug("OnScalar");

@@ -129,9 +129,6 @@ class PT_API SerializationInfo
         inline bool isScalar() const
         { return _isCompound == false; }
 
-        inline bool isCompound() const
-        { return _isCompound == false; }
-
         inline bool isStruct() const
         { return _type == Struct; }
 
