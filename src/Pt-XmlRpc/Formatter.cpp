@@ -28,8 +28,7 @@
  */
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
-#include <Pt/SerializationInfo.h>
-#include <Pt/Convert.h>
+#include <Pt/SerializationError.h>
 #include <limits>
 #include <cassert>
 #include <cmath>
@@ -124,76 +123,185 @@ inline const Pt::Char* double_to_string(Pt::Char* str, size_t n, double d)
     Pt::Char* end = str + n;
     Pt::Char* psz = end;
 
-    if(0 == n)
-        return 0;
-
-    // 1. Test for NaN with x != x
+    // 1. Test for not-a-number with x != x
     if( d != d ) 
     {
         if(n < 4)
             return 0;
 
-        str[0] = 'N'; str[1] = 'a'; str[2] = 'N'; str[3] = '\0';
+        str[0] = 'n'; str[1] = 'a'; str[2] = 'n'; str[3] = '\0';
         return str;
     }
 
     //2. Test for infinity by comparing with max
+    if( d == std::numeric_limits<double>::infinity() ) 
+    {
+        if(n < 4)
+            return 0;
 
+        str[0] = 'i'; str[1] = 'n'; str[2] = 'f'; str[3] = '\0';
+        return str;
+    }
+    
     //3. Split into integer and fractional parts with modf (<cmath>)
     double intpart = 0;
     double fract = std::modf(d, &intpart);
     int digit = 0;
-
+	size_t places = std::numeric_limits<double>::digits10;
+    
     //4. Repeatedly div-mod the integer part to extract the digits
-    //left of the decimal point.
-
-    do
+    //   left of the decimal point.
+    
+    if(intpart == 0)
     {
-        if(psz == str)
-            return 0;
+		if(psz == str)
+			return 0;
+			
+		*(--psz) = '0';
+    }
+    else
+    {
+		do
+		{
+			if(psz == str)
+				return 0;
+			
+			double remain = std::fmod(intpart, 10);
+			digit = static_cast<int>( remain );
+			intpart -= remain;
+			intpart /= 10;
+			*(--psz) = digits[digit];
+			--places;
+		} 
+		while(intpart != 0.0);
+    }
+    
+    if(d < 0.0)
+    {
+		if(psz == str)
+			return 0;
+		*(--psz) = '-';
+    }
+    
+    size_t count = end - psz;
+    std::memmove(str, psz, count * sizeof(Pt::Char));
+    psz = str + count;
+    
+    if(psz == end)
+		return 0;
 
-        digit = static_cast<int>( std::fmod(intpart, 10) );
-        intpart /= 10;
-        --psz;
-        *psz = digits[digit];
-
-    } while(intpart != 0.0);
-
-    size_t leng = end - psz;
-    std::memmove(str, psz, leng);
-    psz = str + leng;
-
-    if(str == end)
-        return 0;
-        
     *psz = '.';
     psz++;
 
     //5. repeatedly multiply and modf the fractional part to get the 
-    //digits to the right. It will probably be faster to work in base 
-    //10^9 rather than 10.
+    //   digits to the right. It will probably be faster to work in base 
+    //   10^9 rather than 10.
 
     do
     {
         fract *= 10;
         fract = modf(fract, &intpart);
         digit = static_cast<int>(intpart);
-        char c = digits[n];
+        char c = digits[digit];
 
         if(psz == end)
             return 0;
-
+	
         *psz = c;
         ++psz;
-    } while(digit != 0);
+    } 
+    while(--places != 0 && fract != 0.0);
 
+	//6. add null terminator
     if(psz == end)
          return 0;
 
-    *psz = 0;
+    *psz = '\0';
     return str;
 }
+/*
+struct Tester
+{
+	Tester()
+	{
+		std::cerr << "-----   TEST   -----" << std::endl;
+		{
+		Pt::Char buf1[1024];
+		const Pt::Char* res = double_to_string(buf1, 1024, 123.1415);
+		Pt::String str1(res);
+		std::cerr << "R1: " << str1.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		{
+		Pt::Char buf2[1024];
+		const Pt::Char* res1 = double_to_string(buf2, 1024, 0.123);
+		Pt::String str2(res1);
+		std::cerr << "R2: " << str2.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, 0.0);
+		Pt::String str3(res3);
+		std::cerr << "R3: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, 0.00001);
+		Pt::String str3(res3);
+		std::cerr << "R4: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, 1.0);
+		Pt::String str3(res3);
+		std::cerr << "R5: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, 10000.0);
+		Pt::String str3(res3);
+		std::cerr << "R6: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+		
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, -123.321);
+		Pt::String str3(res3);
+		std::cerr << "R6: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
 
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, std::numeric_limits<double>::quiet_NaN());
+		Pt::String str3(res3);
+		std::cerr << "R6: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}
+
+		{
+		Pt::Char buf3[1024];
+		const Pt::Char* res3 = double_to_string(buf3, 1024, std::numeric_limits<double>::infinity());
+		Pt::String str3(res3);
+		std::cerr << "R6: " << str3.narrow() << std::endl;
+		std::cerr << "--------------------" << std::endl;
+		}	
+		
+		std::exit(1);
+	}
+} g_tester;
+*/
 }
 
 namespace Pt {
@@ -265,9 +373,15 @@ void Formatter::addUInt(const char* name, unsigned long long value,
 void Formatter::addFloat(const char* name, double value, 
                          const char* id)
 {
-    convert(_value, value);
+    const size_t bufsize = 64;
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = double_to_string(buf, bufsize, value);
+    if( 0 == num  )
+        throw std::logic_error("conversion buffer too small");
+    
+    //convert(_value, value);
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_DOUBLE, _value.c_str());
+    _writer->writeElement(XMLRPC_DOUBLE, num);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
