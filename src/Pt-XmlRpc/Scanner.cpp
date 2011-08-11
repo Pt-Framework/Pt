@@ -112,6 +112,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 //    or <value>...</value>                     (case 2)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 _value = chars.content();
+                
+                //NOTE we could get rid of this is the XmlReader could be set up
+                //     to ignore characters between two start tags and only report
+                //     "leaf characters".
             }
             else if(node.type() == Xml::Node::EndElement)
             {
