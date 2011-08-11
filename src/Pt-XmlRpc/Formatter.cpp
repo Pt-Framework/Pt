@@ -219,13 +219,37 @@ inline const Pt::Char* double_to_string(Pt::Char* str, size_t n, double d)
     *psz = '\0';
     return str;
 }
+
+
+
 /*
 struct Tester
 {
 	Tester()
 	{
 		std::cerr << "-----   TEST   -----" << std::endl;
-		{
+
+        char fstrbuf[80];
+        char* fstr = fstrbuf;
+        double num = 2.55;
+        int m = std::log10(num);
+        int digit;
+        double tolerance = .00001;
+
+        while (num > 0 + tolerance)
+        {
+            double weight = std::pow(10.0, m);
+            digit = floor(num / weight);
+            num -= (digit * weight);
+            *(fstr++) = '0' + digit;
+            if (m == 0)
+                *(fstr++) = '.';
+            m--;
+        }
+        *(fstr) = '\0';
+        std::cerr << "FFFFF: " << fstrbuf << std::endl;
+
+        {
 		Pt::Char buf1[1024];
 		const Pt::Char* res = double_to_string(buf1, 1024, 123.1415);
 		Pt::String str1(res);
@@ -302,6 +326,7 @@ struct Tester
 	}
 } g_tester;
 */
+
 }
 
 namespace Pt {
