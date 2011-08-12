@@ -227,6 +227,8 @@ class PT_API SerializationInfo
             convert(s, value);
         }
 
+        void getValue(Pt::String& s) const;
+
         void setValue(const std::string& s)
         {
             Pt::String value;
@@ -234,11 +236,9 @@ class PT_API SerializationInfo
             this->setValue(value);
             this->setTypeName("string");
         }
-        
+
         void setValue(const char* s);
         
-        void getValue(Pt::String& s) const;
-
         void setValue(const Pt::String& s);
 
         const char* getBinary(size_t& length) const;
@@ -253,9 +253,9 @@ class PT_API SerializationInfo
 
         void setValue(const Pt::Char& c);
         
-        void getValue(bool& b) const;
+        void getBool(bool& b) const;
 
-        void setValue(bool b);
+        void setBool(bool b);
 
         inline void getValue(signed char& c) const
         {
@@ -728,13 +728,13 @@ inline void operator <<=(SerializationInfo& si, const T* ptr)
 
 inline void operator >>=(const SerializationInfo& si, bool& n)
 {
-    si.getValue(n);
+    si.getBool(n);
 }
 
 
 inline void operator <<=(SerializationInfo& si, bool n)
 {
-    si.setValue(n);
+    si.setBool(n);
     si.setTypeName("bool");
 }
 

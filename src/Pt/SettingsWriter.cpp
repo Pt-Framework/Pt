@@ -30,13 +30,15 @@
 namespace Pt {
 
 void SettingsWriter::write(const SerializationInfo& si)
-{
+{	
+	Pt::String value;
     SerializationInfo::ConstIterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {
         if( it->isScalar() )
         {
-            this->writeEntry( it->name(), it->toString(), it->typeName() );
+			it->getValue(value);
+            this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
         }
         else if( it->isStruct() )
@@ -60,13 +62,15 @@ void SettingsWriter::write(const SerializationInfo& si)
 
 void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string& prefix)
 {
+	Pt::String value;
     SerializationInfo::ConstIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if( it->isScalar() )
         {
+			it->getValue(value);
             *_os << Pt::String::widen( prefix ) << '.';
-            this->writeEntry( it->name(), it->toString(), it->typeName() );
+            this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
         }
         else if( it->isStruct() )
@@ -82,6 +86,7 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
 
 void SettingsWriter::writeChild(const SerializationInfo& sd)
 {
+	Pt::String value;
     bool separate = false;
 
     SerializationInfo::ConstIterator it;
@@ -92,7 +97,8 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
 
         if( it->isScalar() )
         {
-            this->writeEntry( it->name(), it->toString(), it->typeName() );
+			it->getValue(value);
+            this->writeEntry( it->name(), value, it->typeName() );
         }
         else if( it->isStruct() || it->isSequence() )
         {

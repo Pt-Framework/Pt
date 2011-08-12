@@ -639,7 +639,7 @@ void SerializationInfo::setValue(const Pt::Char& c)
 }
 
 
-void SerializationInfo::getValue(bool& value) const
+void SerializationInfo::getBool(bool& value) const
 {
     switch(_type)
     {
@@ -672,7 +672,7 @@ void SerializationInfo::getValue(bool& value) const
 }
 
 
-void SerializationInfo::setValue(bool value)
+void SerializationInfo::setBool(bool value)
 {
     if( _type == Context )
         return;
