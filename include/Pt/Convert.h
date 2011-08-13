@@ -39,6 +39,41 @@
 
 namespace Pt {
 
+// nothrow
+PT_API const Pt::Char* format(Pt::Char* s, size_t n, long long value);
+
+// nothrow
+PT_API const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value);
+
+// nothrow
+PT_API const Pt::Char* parse(long long& n, const Pt::Char* str);
+
+// nothrow
+PT_API const Pt::Char* parse(unsigned long long& n, const Pt::Char* str);
+
+//
+// Conversions to Pt::String
+//
+
+inline void convert(String& s, const String& str)
+{
+    s = str;
+}
+
+inline void convert(String& s, const std::string& value)
+{
+    s = String::widen(value);
+}
+
+PT_API void convert(String& s, bool value);
+PT_API void convert(String& s, char value);
+PT_API void convert(String& s, unsigned char value);
+PT_API void convert(String& s, signed char value);
+PT_API void convert(String& s, int value);
+PT_API void convert(String& s, unsigned int value);
+PT_API void convert(String& s, float value);
+PT_API void convert(String& s, double value);
+
 template <typename T>
 inline void convert(String& s, const T& value)
 {
@@ -46,6 +81,19 @@ inline void convert(String& s, const T& value)
     os << value;
     s = os.str();
 }
+
+//
+// Conversions from Pt::String
+//
+
+PT_API void convert(bool& n, const String& str);
+PT_API void convert(char& n, const String& str);
+PT_API void convert(unsigned char& n, const String& str);
+PT_API void convert(signed char& n, const String& str);
+PT_API void convert(int& n, const String& str);
+PT_API void convert(unsigned int& n, const String& str);
+PT_API void convert(float& n, const String& str);
+PT_API void convert(double& n, const String& str);
 
 template <typename T>
 inline void convert(T& t, const String& str)
@@ -57,6 +105,27 @@ inline void convert(T& t, const String& str)
         ConversionError::doThrow("T", "Pt::String");
 }
 
+
+
+//
+// Conversions to std::string
+//
+
+inline void convert(std::string& s, const std::string& str)
+{
+    s = str;
+}
+
+inline void convert(std::string& s,const String& str)
+{
+    s = str.narrow();
+}
+
+PT_API void convert(std::string& s, int value);
+PT_API void convert(std::string& s, unsigned int value);
+PT_API void convert(std::string& s, float value);
+PT_API void convert(std::string& s, double value);
+
 template <typename T>
 inline void convert(std::string& s, const T& value)
 {
@@ -64,6 +133,14 @@ inline void convert(std::string& s, const T& value)
     os << value;
     s = os.str();
 }
+
+//
+// Conversions from std::string
+//
+
+PT_API void convert(bool& n, const std::string& str);
+PT_API void convert(float& n, const std::string& str);
+PT_API void convert(double& n, const std::string& str);
 
 template <typename T>
 inline void convert(T& t, const std::string& str)
@@ -75,62 +152,6 @@ inline void convert(T& t, const std::string& str)
         ConversionError::doThrow("T", "std::string");
 }
 
-inline void convert(String& s, const String& str)
-{
-    s = str;
-}
-
-inline void convert(std::string& s, const std::string& str)
-{
-    s = str;
-}
-
-PT_API void convert(String& s, bool value);
-
-PT_API void convert(bool& n, const String& str);
-
-PT_API void convert(bool& n, const std::string& str);
-
-PT_API void convert(String& s, char value);
-
-PT_API void convert(char& n, const String& str);
-
-PT_API void convert(String& s, unsigned char value);
-
-PT_API void convert(unsigned char& n, const String& str);
-
-PT_API void convert(String& s, signed char value);
-
-PT_API void convert(signed char& n, const String& str);
-
-inline void convert(String& s, const std::string& value)
-{
-    s = String::widen(value);
-}
-
-inline void convert(std::string& s,const String& str)
-{
-    s = str.narrow();
-}
-
-PT_API void convert(String& s, float value);
-
-PT_API void convert(float& n, const String& str);
-
-PT_API void convert(String& s, double value);
-
-PT_API void convert(double& n, const String& str);
-
-PT_API void convert(std::string& s, float value);
-
-PT_API void convert(float& n, const std::string& str);
-
-PT_API void convert(std::string& s, double value);
-
-PT_API void convert(double& n, const std::string& str);
-
-inline void convert(float& n, const wchar_t* str)
-{ convert(n, String(str)); }
 
 inline void convert(float& n, const char* str)
 { convert(n, std::string(str)); }
@@ -138,8 +159,20 @@ inline void convert(float& n, const char* str)
 inline void convert(double& n, const char* str)
 { convert(n, std::string(str)); }
 
+//
+// Conversions from wide character strings
+//
+
+inline void convert(float& n, const wchar_t* str)
+{ convert(n, String(str)); }
+
 inline void convert(double& n, const wchar_t* str)
 { convert(n, String(str)); }
+
+
+//
+// Generic stream-based conversions
+//
 
 template<typename T, typename S>
 void convert(T& to, const S& from)

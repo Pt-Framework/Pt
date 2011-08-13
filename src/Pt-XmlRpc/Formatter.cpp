@@ -28,6 +28,7 @@
  */
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
 #include <limits>
 #include <cassert>
@@ -47,69 +48,6 @@ static const Pt::Char XMLRPC_ARRAY[]   = { 'a', 'r', 'r', 'a', 'y', '\0' };
 static const Pt::Char XMLRPC_DATA[]    = { 'd', 'a', 't', 'a', '\0' };
 static const Pt::Char XMLRPC_FALSE[]   = { '0', '\0' };
 static const Pt::Char XMLRPC_TRUE[]    = { '1', '\0' };
-
-template <typename T>
-inline const Pt::Char* signed_integer_to_string(Pt::Char* buf, size_t n, T i)
-{
-    const bool negative = i < 0;
-
-    const char* digits = "9876543210123456789";
-    digits += 9;
-    assert( *digits == '0' );
-
-    if(0 == n)
-        return 0;
-
-    Pt::Char* psz = buf + n - 1;
-    *psz = 0;
-
-    do
-    {
-        if(psz == buf)
-            return 0;
-
-        T lsd = i % 10;
-        i /= 10;
-        --psz;
-        *psz = digits[lsd];
-
-    } while(i != 0);
-
-    if(negative)
-    {
-        if(psz == buf)
-            return 0;
-
-        --psz;
-        *psz = '-';
-    }
-
-    return psz;
-}
-
-template <typename T>
-inline const Pt::Char* unsigned_integer_to_string(Pt::Char* buf, size_t n, T i)
-{
-    if(0 == n)
-        return 0;
-
-    Pt::Char* psz = buf + n - 1;
-    *psz = 0;
-
-    do
-    {
-        if(psz == buf)
-            return 0;
-
-        T lsd = i % 10;
-        i /= 10;
-        --psz;
-        *psz = '0' + int(lsd);
-
-    } while(i != 0);
-
-    return psz;
-}
 
 template <typename T>
 inline const Pt::Char* double_to_string(Pt::Char* str, size_t n, T d)
@@ -344,7 +282,7 @@ void Formatter::addInt(const char* name, long long value,
 {
     const size_t bufsize = (sizeof(value) * 4) + 4;
     Pt::Char buf[bufsize];
-    const Pt::Char* num = signed_integer_to_string(buf, bufsize, value);
+    const Pt::Char* num = format(buf, bufsize, value);
     if( 0 == num  )
         throw std::logic_error("conversion buffer too small");
 
@@ -359,7 +297,7 @@ void Formatter::addUInt(const char* name, unsigned long long value,
 {
     const size_t bufsize = (sizeof(value) * 4) + 4;
     Pt::Char buf[bufsize];
-    const Pt::Char* num = unsigned_integer_to_string(buf, bufsize, value);
+    const Pt::Char* num = format(buf, bufsize, value);
     if( 0 == num  )
         throw std::logic_error("conversion buffer too small");
 

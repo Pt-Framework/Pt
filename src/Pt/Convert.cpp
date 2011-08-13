@@ -30,12 +30,11 @@
 #include <iomanip>
 #include <limits>
 #include <cctype>
+#include <cmath>
+#include <cassert>
 
-namespace Pt
-{
+namespace {
 
-namespace
-{
     template <typename CharT>
     bool _stricmpL(const CharT* p1, const CharT* p2)
     {
@@ -46,118 +45,356 @@ namespace
         return p1[n] == p2[n];
     }
 
-    bool _stricmpL(const String& s, const wchar_t* p)
+    bool _stricmpL(const Pt::String& s, const wchar_t* p)
     {
-        String::size_type n = 0;
+        Pt::String::size_type n = 0;
         for ( ; n < s.size(); ++n)
             if (Pt::tolower(s[n]) != p[n])
                 return false;
         return p[n] == L'\0';
     }
 
-}
-
-void convert(String& s, bool value)
-{
-    static const String trueValue = L"true";
-    static const String falseValue = L"false";
-    s = value ? trueValue : falseValue;
-}
-
-void convert(bool& n, const String& str)
-{
-    if (str == L"true" || str == L"1")
-        n = true;
-    else if (str == L"false" || str == L"0")
-        n = false;
-    else
-        ConversionError::doThrow("bool", "Pt::String");
-}
-
-void convert(bool& n, const std::string& str)
-{
-    if (str == "true" || str == "1")
-        n = true;
-    else if (str == "false" || str == "0")
-        n = false;
-    else
-        ConversionError::doThrow("bool", "std::string");
-}
-
-void convert(String& s, char value)
-{
-    s = String( 1, Char(value) );
-}
-
-
-void convert(char& n, const String& str)
-{
-    if ( str.empty() )
-        ConversionError::doThrow("char", "Pt::String");
-
-    n = str[0].narrow('*');
-}
-
-
-void convert(String& s, unsigned char value)
-{
-    OStringStream ss;
-    unsigned int i = static_cast<unsigned int>(value);
-    ss << i;
-    s = ss.str();
-}
-
-
-void convert(unsigned char& n, const String& str)
-{
-    if ( str.empty() )
-        ConversionError::doThrow("unsigned char", "Pt::String");
-
-    // interpret as numeric value
-    IStringStream ss(str);
-    Char ch;
-    unsigned int i = 0;
-    ss >> i;
-    if (ss.fail()
-      || i > std::numeric_limits<unsigned char>::max()
-      || i < std::numeric_limits<unsigned char>::min()
-      || !(ss >> ch).eof())
+    template <typename CharT, typename T>
+    const CharT* convertSigned(T& n, const CharT* str)
     {
-        ConversionError::doThrow("unsigned char", "Pt::String");
+        n = 0;
+        bool neg = false;
+
+        while(*str != '\0')
+        {
+            if( Pt::isspace(*str) )
+                continue;
+
+            switch(*str)
+            {
+                case '+':
+                    break;
+
+                case '-': 
+                    if(neg) 
+                        return 0;
+
+                    n *= -1; 
+                    break;
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    n *= 10;
+                    n += static_cast<int>(*str) - '0';
+                    break;
+
+                default:
+                    return 0;
+                    break;
+            }
+
+            ++str;
+        }
+
+        return str;
     }
 
-    n = static_cast<unsigned char>(i);
-}
+    template <typename CharT, typename T>
+    const CharT* convertUnsigned(T& n, const CharT* str)
+    {
+        n = 0;
 
+        while(*str != '\0')
+        {
+            if( Pt::isspace(*str) )
+                continue;
 
-void convert(String& s, signed char value)
-{
-    OStringStream ss;
-    int i = static_cast<signed int>(value);
-    ss << i;
-    s = ss.str();
-}
+            switch(*str)
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    n *= 10;
+                    n += static_cast<int>(*str) - '0';
+                    break;
 
+                default:
+                    return 0;
+                    break;
+            }
 
-void convert(signed char& n, const String& str)
-{
-    if ( str.empty() )
-        ConversionError::doThrow("signed char", "Pt::String");
+            ++str;
+        }
+
+        return str;
+    }
+
+    template <typename CharT, typename T>
+    inline const CharT* convertSigned(CharT* buf, size_t n, T i)
+    {
+        const bool negative = i < 0;
+        i = std::abs(i);
+
+        if(0 == n)
+            return 0;
+
+        CharT* psz = buf + n - 1;
+        *psz = 0;
+
+        do
+        {
+            if(psz == buf)
+                return 0;
+
+            T lsd = i % 10;
+            i /= 10;
+            --psz;
+            *psz = '0' + int(lsd);
+
+        } while(i != 0);
+
+        if(negative)
+        {
+            if(psz == buf)
+                return 0;
+
+            --psz;
+            *psz = '-';
+        }
+
+        return psz;
+    }
+
+    template <typename CharT, typename T>
+    inline const CharT* convertUnsigned(CharT* buf, size_t n, T i)
+    {
+        if(0 == n)
+            return 0;
+
+        CharT* psz = buf + n - 1;
+        *psz = 0;
+
+        do
+        {
+            if(psz == buf)
+                return 0;
+
+            T lsd = i % 10;
+            i /= 10;
+            --psz;
+            *psz = '0' + int(lsd);
+
+        } while(i != 0);
+
+        return psz;
+    }
+    
+    template <typename CharT, typename T>
+    inline bool convertSigned(std::basic_string<CharT>& to, T n)
+    {
+        const size_t bufsize = (sizeof(T) * 4) + 4;
+        CharT buf[bufsize];
+        const CharT* str = convertSigned(buf, bufsize, n);
+
+        if(str)
+            to.assign(str);
+
+        return 0 != str;
+    }
+
+    template <typename CharT, typename T>
+    inline bool convertUnsigned(std::basic_string<CharT>& to, T n)
+    {
+        const size_t bufsize = (sizeof(T) * 4) + 4;
+        CharT buf[bufsize];
+        const CharT* str = convertUnsigned(buf, bufsize, n);
+
+        if(str)
+            to.assign(str);
+
+        return 0 != str;
+    }
+
+    template <typename Iterator, typename T>
+    inline const Pt::Char* double_to_string(Iterator str, size_t n, T d)
+    {
+        Pt::Char* end = str + n;
+        Pt::Char* psz = str;
+
+        // 1. Test for not-a-number with x != x
+        if( d != d ) 
+        {
+            if(n < 4)
+                return 0;
+
+            str[0] = 'n'; str[1] = 'a'; str[2] = 'n'; str[3] = '\0';
+            return str;
+        }
+
+        //2. Test for infinity by comparing with max
+        if( d == std::numeric_limits<T>::infinity() ) 
+        {
+            if(n < 4)
+                return 0;
+
+            str[0] = 'i'; str[1] = 'n'; str[2] = 'f'; str[3] = '\0';
+            return str;
+        }
         
-    // interpret as numeric value
-    IStringStream ss(str);
-    Char ch;
-    int i = 0;
-    ss >> i;
-    if (ss.fail()
-      || i > std::numeric_limits<signed char>::max()
-      || i < std::numeric_limits<signed char>::min()
-      || !(ss >> ch).eof())
-    {
-        ConversionError::doThrow("signed char", "Pt::String");
+        //3. intergal part
+        if(d < 0.0)
+        {
+    		if(psz == end)
+    			return 0;
+
+    		*psz = '-';
+    		++psz;
+        }
+
+    	int digit = 0;
+    	T num = std::fabs(d);
+    	int m = static_cast<int>( std::log10(num) );
+    	size_t places = std::numeric_limits<T>::digits10;
+        
+        if(num == 0.0 || m < 0)
+        {
+    		if(psz == end)
+    			return 0;
+
+    		*psz = '0';
+    		++psz;
+        }
+        else
+        {
+    		while(m >= 0)
+    		{
+    			T weight = std::pow(10.0, m);
+    			digit = static_cast<int>( floor(num / weight) );
+    			num -= (digit * weight);
+    			
+    			if(psz == end)
+    				return 0;
+
+    			*psz = '0' + digit;
+    			++psz;
+    	     
+    			--m;
+    			--places;
+    		}
+        }
+        
+        //4. fractional part
+    	T fract = num;
+        
+        if(psz == end)
+    		return 0;
+
+        *psz = '.';
+        ++psz;
+
+        do
+        {
+            fract *= 10;
+            digit = static_cast<int>( floor(fract) );
+            fract -= digit;
+            char c = '0' + digit;
+
+            if(psz == end)
+                return 0;
+    	
+            *psz = c;
+            ++psz;
+        } 
+        while(--places != 0 && fract != 0.0);
+
+    	//5. add null terminator
+        if(psz == end)
+             return 0;
+
+        *psz = 0;
+        return str;
     }
-    n = static_cast<signed char>(i);
 }
+
+namespace Pt {
+
+const Pt::Char* format(Pt::Char* s, size_t n, long long value)
+{
+    return convertSigned(s, n, value);
+}
+
+
+const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value)
+{
+    return convertUnsigned(s, n, value);
+}
+
+
+const Pt::Char* parse(long long& n, const Pt::Char* str)
+{
+    return convertSigned( n, str );
+}
+
+
+const Pt::Char* parse(unsigned long long& n, const Pt::Char* str)
+{
+    return convertUnsigned( n, str );
+}
+
+
+//
+// Conversions to Pt::String
+//
+
+void convert(String& str, bool value)
+{
+    static const wchar_t* trueValue = L"true";
+    static const wchar_t* falseValue = L"false";
+    str = value ? trueValue : falseValue;
+}
+
+void convert(String& str, char value)
+{
+    str = String( 1, Char(value) );
+}
+
+void convert(String& str, unsigned char value)
+{
+    if( false == convertUnsigned(str, value) )
+        ConversionError::doThrow("unsigned char", "Pt::String");
+}
+
+
+void convert(String& str, signed char value)
+{
+    if( false == convertSigned(str, value) )
+        ConversionError::doThrow("signed char", "Pt::String");
+}
+
+
+void convert(Pt::String& str, int value)
+{
+    if( false == convertSigned(str, value) )
+        ConversionError::doThrow("int", "Pt::String");
+}
+
+
+void convert(Pt::String& str, unsigned int value)
+{
+    if( false == convertUnsigned(str, value) )
+        ConversionError::doThrow("unsigned int", "Pt::String");
+}
+
 
 void convert(String& s, float value)
 {
@@ -171,6 +408,79 @@ void convert(String& s, float value)
     OStringStream os;
     os << value;
     s = os.str();
+}
+
+
+void convert(String& s, double value)
+{
+    // not a number
+    if (value != value)
+    {
+        s = L"nan";
+        return;
+    }
+
+    OStringStream os;
+    os << std::fixed << std::setprecision(15) << value;
+    s = os.str();
+}
+
+//
+// Conversions from Pt::String
+//
+
+void convert(bool& n, const String& str)
+{
+    if (str == L"true" || str == L"1")
+        n = true;
+    else if (str == L"false" || str == L"0")
+        n = false;
+    else
+        ConversionError::doThrow("bool", "Pt::String");
+}
+
+void convert(char& c, const String& str)
+{
+    if ( str.empty() )
+        ConversionError::doThrow("char", "Pt::String");
+
+    int n = str[0];
+    c = n;
+}
+
+void convert(unsigned char& n, const String& str)
+{
+    const Pt::Char* end = convertUnsigned( n, str.c_str() );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("unsigned char", "Pt::String");
+}
+
+
+void convert(signed char& n, const String& str)
+{
+    const Pt::Char* end = convertSigned( n, str.c_str() );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("signed char", "Pt::String");
+}
+
+
+void convert(int& n, const Pt::String& str)
+{
+    const Pt::Char* end = convertSigned( n, str.c_str() );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("int", "Pt::String");
+}
+
+
+void convert(unsigned int& n, const Pt::String& str)
+{
+    const Pt::Char* end = convertUnsigned( n, str.c_str() );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("int", "Pt::String");
 }
 
 
@@ -208,21 +518,6 @@ void convert(float& n, const String& str)
 }
 
 
-void convert(String& s, double value)
-{
-    // not a number
-    if (value != value)
-    {
-        s = L"nan";
-        return;
-    }
-
-    OStringStream os;
-    os << std::fixed << std::setprecision(15) << value;
-    s = os.str();
-}
-
-
 void convert(double& n, const String& str)
 {
     // not a number
@@ -256,6 +551,24 @@ void convert(double& n, const String& str)
     }
 }
 
+//
+// Conversions to std::string
+//
+
+void convert(std::string& str, int value)
+{
+    if( false == convertSigned(str, value) )
+        ConversionError::doThrow("int", "std::string");
+}
+
+
+void convert(std::string& str, unsigned int value)
+{
+    if( false == convertUnsigned(str, value) )
+        ConversionError::doThrow("unsigned int", "std::string");
+}
+
+
 void convert(std::string& s, float value)
 {
     // not a number
@@ -268,6 +581,44 @@ void convert(std::string& s, float value)
     std::ostringstream os;
     os << value;
     s = os.str();
+}
+
+
+void convert(std::string& s, double value)
+{
+    // not a number
+    if (value != value)
+    {
+        s = "nan";
+    }
+    else if (value == std::numeric_limits<double>::infinity())
+    {
+        s = "inf";
+    }
+    else if (value == -std::numeric_limits<double>::infinity())
+    {
+        s = "-inf";
+    }
+    else
+    {
+        std::ostringstream os;
+        os << std::fixed << std::setprecision(15) << value;
+        s = os.str();
+    }
+}
+
+//
+// Conversions from std::string
+//
+
+void convert(bool& n, const std::string& str)
+{
+    if (str == "true" || str == "1")
+        n = true;
+    else if (str == "false" || str == "0")
+        n = false;
+    else
+        ConversionError::doThrow("bool", "std::string");
 }
 
 
@@ -305,29 +656,6 @@ void convert(float& n, const std::string& str)
     }
 }
 
-
-void convert(std::string& s, double value)
-{
-    // not a number
-    if (value != value)
-    {
-        s = "nan";
-    }
-    else if (value == std::numeric_limits<double>::infinity())
-    {
-        s = "inf";
-    }
-    else if (value == -std::numeric_limits<double>::infinity())
-    {
-        s = "-inf";
-    }
-    else
-    {
-        std::ostringstream os;
-        os << std::fixed << std::setprecision(15) << value;
-        s = os.str();
-    }
-}
 
 void convert(double& n, const std::string& str)
 {
