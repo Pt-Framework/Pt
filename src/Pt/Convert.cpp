@@ -55,7 +55,7 @@ namespace {
     }
 
     template <typename CharT, typename T>
-    const CharT* convertSigned(T& n, const CharT* str)
+    const CharT* parseSigned(T& n, const CharT* str)
     {
         n = 0;
         bool neg = false;
@@ -103,7 +103,7 @@ namespace {
     }
 
     template <typename CharT, typename T>
-    const CharT* convertUnsigned(T& n, const CharT* str)
+    const CharT* parseUnsigned(T& n, const CharT* str)
     {
         n = 0;
 
@@ -140,7 +140,7 @@ namespace {
     }
 
     template <typename CharT, typename T>
-    inline const CharT* convertSigned(CharT* buf, size_t n, T i)
+    inline const CharT* formatSigned(CharT* buf, size_t n, T i)
     {
         const bool negative = i < 0;
         i = std::abs(i);
@@ -176,7 +176,7 @@ namespace {
     }
 
     template <typename CharT, typename T>
-    inline const CharT* convertUnsigned(CharT* buf, size_t n, T i)
+    inline const CharT* formatUnsigned(CharT* buf, size_t n, T i)
     {
         if(0 == n)
             return 0;
@@ -204,7 +204,7 @@ namespace {
     {
         const size_t bufsize = (sizeof(T) * 4) + 4;
         CharT buf[bufsize];
-        const CharT* str = convertSigned(buf, bufsize, n);
+        const CharT* str = formatSigned(buf, bufsize, n);
 
         if(str)
             to.assign(str);
@@ -217,7 +217,7 @@ namespace {
     {
         const size_t bufsize = (sizeof(T) * 4) + 4;
         CharT buf[bufsize];
-        const CharT* str = convertUnsigned(buf, bufsize, n);
+        const CharT* str = formatUnsigned(buf, bufsize, n);
 
         if(str)
             to.assign(str);
@@ -330,25 +330,25 @@ namespace Pt {
 
 const Pt::Char* format(Pt::Char* s, size_t n, long long value)
 {
-    return convertSigned(s, n, value);
+    return formatSigned(s, n, value);
 }
 
 
 const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value)
 {
-    return convertUnsigned(s, n, value);
+    return formatUnsigned(s, n, value);
 }
 
 
 const Pt::Char* parse(long long& n, const Pt::Char* str)
 {
-    return convertSigned( n, str );
+    return parseSigned( n, str );
 }
 
 
 const Pt::Char* parse(unsigned long long& n, const Pt::Char* str)
 {
-    return convertUnsigned( n, str );
+    return parseUnsigned( n, str );
 }
 
 
@@ -450,7 +450,7 @@ void convert(char& c, const String& str)
 
 void convert(unsigned char& n, const String& str)
 {
-    const Pt::Char* end = convertUnsigned( n, str.c_str() );
+    const Pt::Char* end = parseUnsigned( n, str.c_str() );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("unsigned char", "Pt::String");
@@ -459,7 +459,7 @@ void convert(unsigned char& n, const String& str)
 
 void convert(signed char& n, const String& str)
 {
-    const Pt::Char* end = convertSigned( n, str.c_str() );
+    const Pt::Char* end = parseSigned( n, str.c_str() );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("signed char", "Pt::String");
@@ -468,7 +468,7 @@ void convert(signed char& n, const String& str)
 
 void convert(int& n, const Pt::String& str)
 {
-    const Pt::Char* end = convertSigned( n, str.c_str() );
+    const Pt::Char* end = parseSigned( n, str.c_str() );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("int", "Pt::String");
@@ -477,7 +477,7 @@ void convert(int& n, const Pt::String& str)
 
 void convert(unsigned int& n, const Pt::String& str)
 {
-    const Pt::Char* end = convertUnsigned( n, str.c_str() );
+    const Pt::Char* end = parseUnsigned( n, str.c_str() );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("int", "Pt::String");
