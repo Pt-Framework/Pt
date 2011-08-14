@@ -35,7 +35,6 @@
 #include <Pt/StringStream.h>
 #include <sstream>
 #include <string>
-#include <typeinfo>
 
 namespace Pt {
 
@@ -46,10 +45,16 @@ PT_API const Pt::Char* format(Pt::Char* s, size_t n, long long value);
 PT_API const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value);
 
 // nothrow
-PT_API const Pt::Char* parse(long long& n, const Pt::Char* str);
+PT_API const Pt::Char* format(Pt::Char* s, size_t n, double value);
 
 // nothrow
-PT_API const Pt::Char* parse(unsigned long long& n, const Pt::Char* str);
+PT_API const Pt::Char* parse(const Pt::Char* str, long long& n);
+
+// nothrow
+PT_API const Pt::Char* parse(const Pt::Char* str, unsigned long long& n);
+
+// nothrow
+PT_API const Pt::Char* parse(const Pt::Char* str, double& n);
 
 //
 // Conversions to Pt::String

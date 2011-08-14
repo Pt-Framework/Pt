@@ -27,7 +27,6 @@
  */
 
 #include <Pt/Convert.h>
-#include <iomanip>
 #include <limits>
 #include <cctype>
 #include <cmath>
@@ -55,7 +54,7 @@ namespace {
     }
 
     template <typename CharT, typename T>
-    const CharT* parseSigned(T& n, const CharT* str)
+    const CharT* parseSigned(const CharT* str, T& n)
     {
         n = 0;
         bool neg = false;
@@ -74,7 +73,7 @@ namespace {
                     if(neg) 
                         return 0;
 
-                    n *= -1; 
+                    neg = true; 
                     break;
 
                 case '0':
@@ -99,11 +98,14 @@ namespace {
             ++str;
         }
 
+        if(neg) 
+            n *= -1;
+
         return str;
     }
 
     template <typename CharT, typename T>
-    const CharT* parseUnsigned(T& n, const CharT* str)
+    const CharT* parseUnsigned(const CharT* str, T& n)
     {
         n = 0;
 
@@ -225,11 +227,108 @@ namespace {
         return 0 != str;
     }
 
-    template <typename Iterator, typename T>
-    inline const Pt::Char* double_to_string(Iterator str, size_t n, T d)
+    template <typename CharT, typename T>
+    const CharT* parseFloat(const CharT* str, T& n)
     {
-        Pt::Char* end = str + n;
-        Pt::Char* psz = str;
+        bool neg = false;
+        n = 0.0;
+
+        // TODO: nan, inf
+        //       parse for -, n, N, i, I first
+
+        while(*str != '\0')
+        {
+            if( Pt::isspace(*str) )
+                continue;
+
+            if( *str == '.' )
+            {
+                ++str;
+                break;
+            }
+
+            switch(*str)
+            {
+                case '+':
+                    break;
+
+                case '-': 
+                    if(neg) 
+                        return 0;
+
+                    neg = true; 
+                    break;
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    n *= 10;
+                    n += static_cast<int>(*str) - 48;
+                    break;
+
+                default:
+                    return 0;
+                    break;
+            }
+
+            ++str;
+        }
+
+        unsigned digits = 0;
+        T fraction = 0.0;
+        while(*str != '\0')
+        {
+            if( Pt::isspace(*str) )
+                break;
+
+            switch(*str)
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    fraction *= 10;
+                    fraction += static_cast<int>(*str) - 48;
+                    ++digits;
+                    break;
+
+                default:
+                    return 0;
+                    break;
+            }
+
+            ++str;
+        }
+
+        T base = 10.0;
+        T exp = digits;
+        fraction /= std::pow(base, exp);
+        n += fraction;
+
+        if(neg)
+            n *= -1;
+
+        return str;
+    }
+
+    template <typename CharT, typename T>
+    inline const CharT* formatFloat(CharT* str, size_t n, T d)
+    {
+        CharT* end = str + n;
+        CharT* psz = str;
 
         // 1. Test for not-a-number with x != x
         if( d != d ) 
@@ -340,17 +439,27 @@ const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value)
 }
 
 
-const Pt::Char* parse(long long& n, const Pt::Char* str)
+const Pt::Char* format(Pt::Char* s, size_t n, double value)
 {
-    return parseSigned( n, str );
+        return formatFloat(s, n, value);
 }
 
 
-const Pt::Char* parse(unsigned long long& n, const Pt::Char* str)
+const Pt::Char* parse(const Pt::Char* str, long long& n)
 {
-    return parseUnsigned( n, str );
+    return parseSigned(str, n);
 }
 
+
+const Pt::Char* parse(const Pt::Char* str, unsigned long long& n)
+{
+    return parseUnsigned(str, n);
+}
+
+const Pt::Char* parse(const Pt::Char* str, double& n)
+{
+    return parseFloat(str, n);
+}
 
 //
 // Conversions to Pt::String
@@ -398,31 +507,25 @@ void convert(Pt::String& str, unsigned int value)
 
 void convert(String& s, float value)
 {
-    // not a number
-    if (value != value)
-    {
-        s = L"nan";
-        return;
-    }
+    const size_t bufsize = 64;
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = formatFloat(buf, bufsize, value);
+    if( 0 == num  )
+        ConversionError::doThrow("float", "Pt::String");
 
-    OStringStream os;
-    os << value;
-    s = os.str();
+    s.assign(num);
 }
 
 
 void convert(String& s, double value)
 {
-    // not a number
-    if (value != value)
-    {
-        s = L"nan";
-        return;
-    }
+    const size_t bufsize = 64;
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = formatFloat(buf, bufsize, value);
+    if( 0 == num  )
+        ConversionError::doThrow("float", "Pt::String");
 
-    OStringStream os;
-    os << std::fixed << std::setprecision(15) << value;
-    s = os.str();
+    s.assign(num);
 }
 
 //
@@ -450,7 +553,7 @@ void convert(char& c, const String& str)
 
 void convert(unsigned char& n, const String& str)
 {
-    const Pt::Char* end = parseUnsigned( n, str.c_str() );
+    const Pt::Char* end = parseUnsigned( str.c_str(), n);
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("unsigned char", "Pt::String");
@@ -459,7 +562,7 @@ void convert(unsigned char& n, const String& str)
 
 void convert(signed char& n, const String& str)
 {
-    const Pt::Char* end = parseSigned( n, str.c_str() );
+    const Pt::Char* end = parseSigned( str.c_str(), n );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("signed char", "Pt::String");
@@ -468,7 +571,7 @@ void convert(signed char& n, const String& str)
 
 void convert(int& n, const Pt::String& str)
 {
-    const Pt::Char* end = parseSigned( n, str.c_str() );
+    const Pt::Char* end = parseSigned( str.c_str(), n );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("int", "Pt::String");
@@ -477,7 +580,7 @@ void convert(int& n, const Pt::String& str)
 
 void convert(unsigned int& n, const Pt::String& str)
 {
-    const Pt::Char* end = parseUnsigned( n, str.c_str() );
+    const Pt::Char* end = parseUnsigned( str.c_str(), n );
 
     if(0 == end || *end != '\0')
         ConversionError::doThrow("int", "Pt::String");
@@ -486,6 +589,11 @@ void convert(unsigned int& n, const Pt::String& str)
 
 void convert(float& n, const String& str)
 {
+    const Pt::Char* end = parseFloat( str.c_str(), n );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("float", "Pt::String");
+/*
     // not a number
     if (_stricmpL(str, L"nan"))
     {
@@ -515,40 +623,16 @@ void convert(float& n, const String& str)
     {
         ConversionError::doThrow("float", "Pt::String");
     }
+    */
 }
 
 
 void convert(double& n, const String& str)
 {
-    // not a number
-    if (_stricmpL(str, L"nan"))
-    {
-        n = std::numeric_limits<double>::quiet_NaN();
-        return;
-    }
+    const Pt::Char* end = parseFloat( str.c_str(), n );
 
-    // inf
-    if (_stricmpL(str, L"inf") || _stricmpL(str.c_str(), L"infinity"))
-    {
-        n = std::numeric_limits<double>::infinity();
-        return;
-    }
-
-    // -inf
-    if (_stricmpL(str, L"-inf") || _stricmpL(str.c_str(), L"-infinity"))
-    {
-        n = -std::numeric_limits<double>::infinity();
-        return;
-    }
-
-    IStringStream is(str);
-    Char ch;
-    is >> std::fixed >> std::setprecision(15) >> n;
-
-    if (is.fail() || !(is >> ch).eof())
-    {
+    if(0 == end || *end != '\0')
         ConversionError::doThrow("double", "Pt::String");
-    }
 }
 
 //
@@ -569,42 +653,27 @@ void convert(std::string& str, unsigned int value)
 }
 
 
-void convert(std::string& s, float value)
+void convert(std::string& str, float value)
 {
-    // not a number
-    if (value != value)
-    {
-        s = "nan";
-        return;
-    }
+    const size_t bufsize = 64;
+    char buf[bufsize];
+    const char* num = formatFloat(buf, bufsize, value);
+    if( 0 == num  )
+        ConversionError::doThrow("float", "std::string");
 
-    std::ostringstream os;
-    os << value;
-    s = os.str();
+    str.assign(num);
 }
 
 
-void convert(std::string& s, double value)
+void convert(std::string& str, double value)
 {
-    // not a number
-    if (value != value)
-    {
-        s = "nan";
-    }
-    else if (value == std::numeric_limits<double>::infinity())
-    {
-        s = "inf";
-    }
-    else if (value == -std::numeric_limits<double>::infinity())
-    {
-        s = "-inf";
-    }
-    else
-    {
-        std::ostringstream os;
-        os << std::fixed << std::setprecision(15) << value;
-        s = os.str();
-    }
+    const size_t bufsize = 64;
+    char buf[bufsize];
+    const char* num = formatFloat(buf, bufsize, value);
+    if( 0 == num  )
+        ConversionError::doThrow("double", "std::string");
+
+    str.assign(num);
 }
 
 //
@@ -624,70 +693,19 @@ void convert(bool& n, const std::string& str)
 
 void convert(float& n, const std::string& str)
 {
-    // not a number
-    if (_stricmpL(str.c_str(), "nan"))
-    {
-        n = std::numeric_limits<float>::quiet_NaN();
-        return;
-    }
+    const char* end = parseFloat( str.c_str(), n );
 
-    // inf
-    if (_stricmpL(str.c_str(), "inf") || _stricmpL(str.c_str(), "infinity"))
-    {
-        n = std::numeric_limits<float>::infinity();
-        return;
-    }
-
-    // -inf
-    if (_stricmpL(str.c_str(), "-inf") || _stricmpL(str.c_str(), "-infinity"))
-    {
-        n = -std::numeric_limits<float>::infinity();
-        return;
-    }
-
-
-    std::istringstream is(str);
-    char ch;
-    is >> n;
-
-    if (is.fail() || !(is >> ch).eof())
-    {
+    if(0 == end || *end != '\0')
         ConversionError::doThrow("float", "std::string");
-    }
 }
 
 
 void convert(double& n, const std::string& str)
 {
-    // not a number
-    if (_stricmpL(str.c_str(), "nan"))
-    {
-        n = std::numeric_limits<double>::quiet_NaN();
-        return;
-    }
+    const char* end = parseFloat( str.c_str(), n );
 
-    // inf
-    if (_stricmpL(str.c_str(), "inf") || _stricmpL(str.c_str(), "infinity"))
-    {
-        n = std::numeric_limits<double>::infinity();
-        return;
-    }
-
-    // -inf
-    if (_stricmpL(str.c_str(), "-inf") || _stricmpL(str.c_str(), "-infinity"))
-    {
-        n = -std::numeric_limits<double>::infinity();
-        return;
-    }
-
-    std::stringstream is(str);
-    char ch;
-    is >> std::fixed >> std::setprecision(15) >> n;
-
-    if (is.fail() || !(is >> ch).eof())
-    {
-        ConversionError::doThrow("double", "std::string");
-    }
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("float", "std::string");
 }
 
 }

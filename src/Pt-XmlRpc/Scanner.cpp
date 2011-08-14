@@ -30,6 +30,7 @@
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
+#include <Pt/Convert.h>
 
 #define log_define(e)
 #define log_debug(e)
@@ -387,46 +388,11 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 log_debug("-> found int " << chars.content().narrow());
 
-                bool neg = false;
-                long number = 0;
-                const Pt::String& numstr = chars.content();
-                for(Pt::String::const_iterator it = numstr.begin(); it != numstr.end(); ++it)
-                {
-                    if( Pt::isspace(*it) )
-                        continue;
+                long long number = 0;
+                const Pt::Char* end = parse( chars.content().c_str(), number );
 
-                    switch(*it)
-                    {
-                        case '+':
-                            break;
-
-                        case '-': 
-                            if(neg) throwSerializationError();
-                            neg = true; 
-                            break;
-
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            number *= 10;
-                            number += static_cast<int>(*it) - 48;
-                            break;
-
-                        default:
-                            throwSerializationError();
-                            break;
-                    }
-                }
-
-                if(neg)
-                    number *= -1;
+                if(0 == end)
+                    throwSerializationError();
 
                 _current->setInt(number);
                 _state = OnScalar;
@@ -447,98 +413,11 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 log_debug("-> found double " << chars.content().narrow());
 
-                bool neg = false;
                 double number = 0.0;
-                const Pt::String& numstr = chars.content();
-                Pt::String::const_iterator it;
-                for(it = numstr.begin(); it != numstr.end(); ++it)
-                {
-                    if( Pt::isspace(*it) )
-                        continue;
+                const Pt::Char* end = parse( chars.content().c_str(), number );
 
-                    if( *it == '.' )
-                    {
-                        ++it;
-                        break;
-                    }
-
-                    switch(*it)
-                    {
-                        case '+':
-                            break;
-
-                        case '-': 
-                            if(neg) throwSerializationError();
-                            neg = true; 
-                            break;
-
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            number *= 10;
-                            number += static_cast<int>(*it) - 48;
-                            break;
-
-                        default:
-                            throwSerializationError();
-                            break;
-                    }
-
-                }
-
-                log_debug("-> intpart " << number);
-
-                unsigned digits = 0;
-                double fraction = 0.0;
-                for(; it != numstr.end(); ++it)
-                {
-                    if( Pt::isspace(*it) )
-                        break;
-
-                    switch(*it)
-                    {
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            fraction *= 10;
-                            fraction += static_cast<int>(*it) - 48;
-                            ++digits;
-                            break;
-
-                        default:
-                            throwSerializationError();
-                            break;
-                    }
-                }
-
-                log_debug("-> fraction  " << fraction);
-
-                // do not allow characters other than whitespace at end
-                for(; it != numstr.end(); ++it)
-                {
-                    if( 0 == Pt::isspace(*it) )
-                        throwSerializationError();
-                }
-
-                fraction /= (digits * 10);
-                number += fraction;
-
-                if(neg)
-                    number *= -1;
+                if(0 == end)
+                    throwSerializationError();
 
                 _current->setFloat(number);
                 log_debug("-> parsed double " << number);

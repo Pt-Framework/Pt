@@ -140,20 +140,29 @@ void ConversionTest::stdstring()
 
 void ConversionTest::Float()
 {
-    float value = 1.23f;
+    float value = 1.234f;
     Pt::String str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str == L"1.23" );
+    PT_UNIT_ASSERT( str.substr(0, 4) == L"1.23" );
+
+    value = -12.3456f;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 7) == L"-12.345" );
 
     str = L"2.34";
     value = Pt::convert<float>(str);
-    PT_UNIT_ASSERT( value > 2.3F && value < 2.4f );
+    PT_UNIT_ASSERT( value > 2.3f && value < 2.4f );
+
+    str = L"-12.3456";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value < -12.3f && value > -12.4f );
 }
 
 void ConversionTest::Double()
 {
     double value = 1.2345678910;
     Pt::String str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str == L"1.234567891000000" );
+
+    PT_UNIT_ASSERT( str.substr(0, 10) == L"1.23456789" );
 
     str = L"2.3456789";
     value = Pt::convert<double>(str);
