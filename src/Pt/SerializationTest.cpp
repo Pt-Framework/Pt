@@ -106,7 +106,7 @@ class IntComposer : public Pt::IComposer
             convert(*_type, value);
         }
 
-        virtual void setInt(long l)
+        virtual void setInt64(Pt::int64_t l)
         {
             //_si.setValue(l);
             *_type = static_cast<int>(l);
@@ -238,23 +238,23 @@ void SerializationTest::Benchmark1()
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addElement().setValue(v);
+        si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addElement().setValue(v);
+        si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addElement().setValue(v);
+        si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addElement().setValue(v);
+        si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
-        si.addElement().setValue(v);
+        si.addElement().setInt32(v);
 
         si >>= vec;
         si.clear();
@@ -298,31 +298,31 @@ void SerializationTest::Benchmark2()
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt(v);
+        deser->setInt64(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt(v);
+        deser->setInt64(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt(v);
+        deser->setInt64(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt(v);
+        deser->setInt64(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt(v);
+        deser->setInt64(v);
         deser = deser->finish();
 
         deser->finish();
@@ -362,31 +362,31 @@ void SerializationTest::Benchmark3()
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt(v);
+        composer->setInt64(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt(v);
+        composer->setInt64(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt(v);
+        composer->setInt64(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt(v);
+        composer->setInt64(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt(v);
+        composer->setInt64(v);
         composer = composer->finish();
 
         composer->finish();
@@ -450,8 +450,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= charVal2;
     PT_UNIT_ASSERT(charVal2 == 'c');
 
-    signed char sigCharVal1 = -127;
-    signed char sigCharVal2;
+    Pt::int8_t sigCharVal1 = -127;
+    Pt::int8_t sigCharVal2;
     si <<= sigCharVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(), "char") );
@@ -459,8 +459,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= sigCharVal2;
     PT_UNIT_ASSERT(sigCharVal2 == -127);
 
-    unsigned char usigCharVal1 = 255;
-    unsigned char usigCharVal2;
+    Pt::uint8_t usigCharVal1 = 255;
+    Pt::uint8_t usigCharVal2;
     si <<= usigCharVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(), "char") );
@@ -468,8 +468,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= usigCharVal2;
     PT_UNIT_ASSERT(usigCharVal2 == 255);
 
-    short shortVal1 = -32767;
-    short shortVal2;
+    Pt::int16_t shortVal1 = -32767;
+    Pt::int16_t shortVal2;
     si <<= shortVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(), "int") );
@@ -477,8 +477,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= shortVal2;
     PT_UNIT_ASSERT(shortVal2 == -32767);
 
-    unsigned short ushortVal1 = 65535;
-    unsigned short ushortVal2;
+    Pt::uint16_t ushortVal1 = 65535;
+    Pt::uint16_t ushortVal2;
     si <<= ushortVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(),"int") );
@@ -486,8 +486,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= ushortVal2;
     PT_UNIT_ASSERT(ushortVal2 == 65535);
 
-    int intVal1 = -32767;
-    int intVal2;
+    Pt::int32_t intVal1 = -32767;
+    Pt::int32_t intVal2;
     si <<= intVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(),"int") );
@@ -495,8 +495,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= intVal2;
     PT_UNIT_ASSERT(intVal2 == -32767);
 
-    unsigned int uintVal1 = 65535;
-    unsigned int uintVal2;
+    Pt::uint32_t uintVal1 = 65535;
+    Pt::uint32_t uintVal2;
     si <<= uintVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(), "int") );
@@ -504,8 +504,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= uintVal2;
     PT_UNIT_ASSERT(uintVal2 == 65535);
 
-    long longVal1 = -32767;
-    long longVal2;
+    Pt::int64_t longVal1 = -32767;
+    Pt::int64_t longVal2;
     si <<= longVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(), "int") );
@@ -513,8 +513,8 @@ void SerializationTest::BuiltInTypesTest()
     si >>= longVal2;
     PT_UNIT_ASSERT(longVal2 == -32767);
 
-    unsigned long ulongVal1 = 65535;
-    unsigned long ulongVal2;
+    Pt::uint64_t ulongVal1 = 65535;
+    Pt::uint64_t ulongVal2;
     si <<= ulongVal1;
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(),"int") );
@@ -561,9 +561,9 @@ void SerializationTest::StdVectorTest()
     int counter = 0;
     int intValue;
 
-    while(it!=si.end())
+    while(it != si.end())
     {
-        it->getValue(intValue);
+        *it >>= intValue;
 
         PT_UNIT_ASSERT(it->isScalar());
         PT_UNIT_ASSERT(intValue == counter);

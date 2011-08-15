@@ -394,7 +394,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 if(0 == end)
                     throwSerializationError();
 
-                _current->setInt(number);
+                _current->setInt64(number);
                 _state = OnScalar;
             }
             else

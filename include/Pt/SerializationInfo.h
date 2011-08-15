@@ -236,65 +236,79 @@ class PT_API SerializationInfo
 
         void setBool(bool b);
 
-        inline void getValue(signed char& c) const
+        inline void getInt8(Pt::int8_t& n) const
         {
-            long long l = 0;
-            this->getValue(l);
+            Pt::int64_t l = 0;
+            this->getInt64(l);
             // TODO: consider SerializationError on overflow
-            c = static_cast<signed char>(l);
+            n = static_cast<Pt::int8_t>(l);
+        }
+        
+        void setInt8(Pt::int8_t n)
+        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
+        
+        void getInt16(Pt::int16_t& n) const
+        {
+            Pt::int64_t l = 0;
+            this->getInt64(l);
+            // TODO: consider SerializationError on overflow
+            n = static_cast<Pt::int16_t>(l);
+        }
+        
+        void setInt16(Pt::int16_t n)
+        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
+
+        inline void getInt32(Pt::int32_t& i) const
+        {
+            Pt::int64_t l = 0;
+            this->getInt64(l);
+            // TODO: consider SerializationError on overflow
+            i = static_cast<Pt::int32_t>(l);
         }
 
-        void getValue(short& s) const;
+        void setInt32(Pt::int32_t n)
+        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
 
-        void setValue(short s)
-        { this->setValue( static_cast<long long>(s) ); }
+        void getInt64(Pt::int64_t& l) const;
 
-        inline void getValue(int& i) const
+        void setInt64(Pt::int64_t l);
+
+        inline void getUInt8(Pt::uint8_t& n) const
         {
-            long long l = 0;
-            this->getValue(l);
+            Pt::uint64_t l = 0;
+            this->getUInt64(l);
             // TODO: consider SerializationError on overflow
-            i = static_cast<int>(l);
+            n = static_cast<Pt::uint8_t>(l);
         }
 
-        void setValue(int i)
-        { this->setValue( static_cast<long long>(i) ); }
+        void setUInt8(Pt::uint8_t n)
+        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
 
-        void getValue(long& l) const;
-
-        void setValue(long l)
-        { this->setValue( static_cast<long long>(l) ); }
-
-        void getValue(long long& l) const;
-
-        void setValue(long long l);
-
-        inline void getValue(unsigned char& c) const
+        void getUInt16(Pt::uint16_t& n) const
         {
-            long long l = 0;
-            this->getValue(l);
+            Pt::uint64_t l = 0;
+            this->getUInt64(l);
             // TODO: consider SerializationError on overflow
-            c = static_cast<unsigned char>(l);
+            n = static_cast<Pt::uint16_t>(l);
         }
 
-        void getValue(unsigned short& us) const;
+        void setUInt16(Pt::uint16_t n)
+        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
 
-        void setValue(unsigned short us)
-        { this->setValue( static_cast<unsigned long long>(us) ); }
+        void getUInt32(Pt::uint32_t& n) const
+        {
+            Pt::uint64_t l = 0;
+            this->getUInt64(l);
+            // TODO: consider SerializationError on overflow
+            n = static_cast<Pt::uint32_t>(l);
+        }
 
-        void getValue(unsigned int& ui) const;
+        void setUInt32(Pt::uint32_t n)
+        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
 
-        void setValue(unsigned int ui)
-        { this->setValue( static_cast<unsigned long long>(ui) ); }
+        void getUInt64(Pt::uint64_t& n) const;
 
-        void getValue(unsigned long& ul) const;
-
-        void setValue(unsigned long ul)
-        { this->setValue( static_cast<unsigned long long>(ul) ); }
-
-        void getValue(unsigned long long& ul) const;
-
-        void setValue(unsigned long long ul);
+        void setUInt64(Pt::uint64_t n);
 
         void getValue(float& f) const;
 
@@ -709,148 +723,106 @@ inline void operator <<=(SerializationInfo& si, bool n)
 }
 
 
-inline void operator >>=(const SerializationInfo& si, signed char& n)
+inline void operator >>=(const SerializationInfo& si, Pt::int8_t& n)
 {
-    si.getValue(n);
+    si.getInt8(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, signed char n)
+inline void operator <<=(SerializationInfo& si, Pt::int8_t n)
 {
-    si.setValue(n);
+    si.setInt8(n);
     si.setTypeName("char");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, unsigned char& n)
+inline void operator >>=(const SerializationInfo& si, Pt::int16_t& n)
 {
-    si.getValue(n);
+    si.getInt16(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, unsigned char n)
+inline void operator <<=(SerializationInfo& si, Pt::int16_t n)
 {
-    si.setValue(n);
-    si.setTypeName("char");
-}
-
-
-inline void operator >>=(const SerializationInfo& si, char& ch)
-{
-	Pt::Char tmp;
-    si.getChar(tmp);
-    ch = static_cast<int>(tmp);
-}
-
-
-inline void operator <<=(SerializationInfo& si, char ch)
-{
-    si.setChar( Pt::Char(ch) );
-    si.setTypeName("char");
-}
-
-
-inline void operator >>=(const SerializationInfo& si, short& n)
-{
-    si.getValue(n);
-}
-
-
-inline void operator <<=(SerializationInfo& si, short n)
-{
-    si.setValue(n);
+    si.setInt16(n);
     si.setTypeName("int");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, unsigned short& n)
+inline void operator >>=(const SerializationInfo& si, Pt::int32_t& n)
 {
-    si.getValue(n);
+    si.getInt32(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, unsigned short n)
+inline void operator <<=(SerializationInfo& si, Pt::int32_t n)
 {
-    si.setValue(n);
-    si.setTypeName("int");
-}
-
-
-inline void operator >>=(const SerializationInfo& si, int& n)
-{
-    si.getValue(n);
-}
-
-
-
-inline void operator <<=(SerializationInfo& si, const int& n)
-{
-    si.setValue(n);
+    si.setInt32(n);
     si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
-inline void operator >>=(const SerializationInfo& si, unsigned int& n)
+inline void operator >>=(const SerializationInfo& si, Pt::int64_t& n)
 {
-    si.getValue(n);
+    si.getInt64(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, unsigned int n)
+inline void operator <<=(SerializationInfo& si, Pt::int64_t n)
 {
-    si.setValue(n);
+    si.setInt64(n);
     si.setTypeName("int");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, long& n)
+inline void operator >>=(const SerializationInfo& si, Pt::uint8_t& n)
 {
-    si.getValue(n);
+    si.getUInt8(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, long n)
+inline void operator <<=(SerializationInfo& si, Pt::uint8_t n)
 {
-    si.setValue(n);
+    si.setUInt8(n);
+    si.setTypeName("char");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, Pt::uint16_t& n)
+{
+    si.getUInt16(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, Pt::uint16_t n)
+{
+    si.setUInt16(n);
     si.setTypeName("int");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, unsigned long& n)
+inline void operator >>=(const SerializationInfo& si, Pt::uint32_t& n)
 {
-    si.getValue(n);
+    si.getUInt32(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, unsigned long n)
+inline void operator <<=(SerializationInfo& si, Pt::uint32_t n)
 {
-    si.setValue(n);
+    si.setUInt32(n);
     si.setTypeName("int");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, long long& n)
+inline void operator >>=(const SerializationInfo& si, Pt::uint64_t& n)
 {
-    si.getValue(n);
+    si.getUInt64(n);
 }
 
 
-inline void operator <<=(SerializationInfo& si, long long n)
+inline void operator <<=(SerializationInfo& si, Pt::uint64_t n)
 {
-    si.setValue(n);
-    si.setTypeName("int");
-}
-
-
-inline void operator >>=(const SerializationInfo& si, unsigned long long& n)
-{
-    si.getValue(n);
-}
-
-
-inline void operator <<=(SerializationInfo& si, unsigned long long n)
-{
-    si.setValue(n);
+    si.setUInt64(n);
     si.setTypeName("int");
 }
 
@@ -878,6 +850,21 @@ inline void operator <<=(SerializationInfo& si, double n)
 {
     si.setValue(n);
     si.setTypeName("double");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, char& ch)
+{
+	Pt::Char tmp;
+    si.getChar(tmp);
+    ch = static_cast<int>(tmp);
+}
+
+
+inline void operator <<=(SerializationInfo& si, char ch)
+{
+    si.setChar( Pt::Char(ch) );
+    si.setTypeName("char");
 }
 
 

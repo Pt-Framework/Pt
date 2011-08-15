@@ -55,10 +55,10 @@ class IComposer
         virtual void setBool(bool value)
         { throw SerializationError("unexpected bool value"); }
 
-        virtual void setInt(long value)
+        virtual void setInt64(Pt::int64_t value)
         { throw SerializationError("unexpected integer value"); }
 
-        virtual void setUInt(unsigned long value)
+        virtual void setUInt64(unsigned long value)
         { throw SerializationError("unexpected unsigned value"); }
 
         virtual void setFloat(double value)
@@ -133,17 +133,17 @@ class Composer : public IComposer
 
         virtual void setBool(bool value)
         {
-            _current->setValue(value);
+            _current->setBool(value);
         }
 
-        virtual void setInt(long value)
+        virtual void setInt64(Pt::int64_t value)
         {
-            _current->setValue(value);
+            _current->setInt64(value);
         }
 
-        virtual void setUInt(unsigned long value)
+        virtual void setUInt64(unsigned long value)
         {
-            _current->setValue(value);
+            _current->setUInt64(value);
         }
 
         virtual void setFloat(double value)

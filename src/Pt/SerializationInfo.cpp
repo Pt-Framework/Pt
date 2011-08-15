@@ -664,25 +664,7 @@ void SerializationInfo::setBool(bool value)
 }
 
 
-void SerializationInfo::getValue(short& s) const
-{
-    long long l = 0;
-    this->getValue(l);
-    // TODO: consider SerializationError on overflow
-    s = static_cast<short>(l);
-}
-
-
-void SerializationInfo::getValue(long& i) const
-{
-    long long l = 0;
-    this->getValue(l);
-    // TODO: consider SerializationError on overflow
-    i = static_cast<int>(l);
-}
-
-
-void SerializationInfo::getValue(long long & l) const
+void SerializationInfo::getInt64(Pt::int64_t& l) const
 {
     switch(_type)
     {
@@ -715,7 +697,7 @@ void SerializationInfo::getValue(long long & l) const
 }
 
 
-void SerializationInfo::setValue(long long l)
+void SerializationInfo::setInt64(Pt::int64_t l)
 {
     if( _type == Context )
         return;
@@ -729,51 +711,24 @@ void SerializationInfo::setValue(long long l)
 }
 
 
-void SerializationInfo::getValue(unsigned short& us) const
-{
-    unsigned long long ul = 0;
-    this->getValue(ul);
-    // TODO: consider SerializationError on overflow
-    us = static_cast<unsigned short>(ul);
-}
-
-
-void SerializationInfo::getValue(unsigned int& ui) const
-{
-    unsigned long long ul = 0;
-    this->getValue(ul);
-    // TODO: consider SerializationError on overflow
-    ui = static_cast<unsigned int>(ul);
-}
-
-
-void SerializationInfo::getValue(unsigned long& ui) const
-{
-    unsigned long long ul = 0;
-    this->getValue(ul);
-    // TODO: consider SerializationError on overflow
-    ui = static_cast<unsigned long>(ul);
-}
-
-
-void SerializationInfo::getValue(unsigned long long & l) const
+void SerializationInfo::getUInt64(Pt::uint64_t& l) const
 {
     switch(_type)
     {
         case Boolean:
-            l =  static_cast<unsigned long long>(_value.b);
+            l =  static_cast<Pt::uint64_t>(_value.b);
             break;
 
         case Int:
-            l =  static_cast<unsigned long long>(_value.l);
+            l =  static_cast<Pt::uint64_t>(_value.l);
             break;
 
         case UInt:
-            l =  static_cast<unsigned long long>(_value.ul);
+            l =  static_cast<Pt::uint64_t>(_value.ul);
             break;
 
         case Float:
-            l =  static_cast<unsigned long long>(_value.f);
+            l =  static_cast<Pt::uint64_t>(_value.f);
             break;
 
         case Str:
@@ -789,7 +744,7 @@ void SerializationInfo::getValue(unsigned long long & l) const
 }
 
 
-void SerializationInfo::setValue(unsigned long long l)
+void SerializationInfo::setUInt64(Pt::uint64_t l)
 {
     if( _type == Context )
         return;
