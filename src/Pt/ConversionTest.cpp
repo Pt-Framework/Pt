@@ -33,6 +33,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <iostream>
+#include <limits>
 
 class ConversionTest : public Pt::Unit::TestSuite
 {
@@ -46,7 +47,8 @@ class ConversionTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "UChar8", *this, &ConversionTest::UChar8 );
             Pt::Unit::TestSuite::registerMethod( "SChar8", *this, &ConversionTest::SChar8 );
             Pt::Unit::TestSuite::registerMethod( "stdstring", *this, &ConversionTest::stdstring );
-            Pt::Unit::TestSuite::registerMethod( "Float", *this, &ConversionTest::Float );
+            Pt::Unit::TestSuite::registerMethod( "FloatToString", *this, &ConversionTest::FloatToString );
+            Pt::Unit::TestSuite::registerMethod( "StringToFloat", *this, &ConversionTest::StringToFloat );
             Pt::Unit::TestSuite::registerMethod( "Double", *this, &ConversionTest::Double );
             Pt::Unit::TestSuite::registerMethod( "VoidPtr", *this, &ConversionTest::VoidPtr );
         }
@@ -58,7 +60,8 @@ class ConversionTest : public Pt::Unit::TestSuite
         void UChar8();
         void SChar8();
         void stdstring();
-        void Float();
+        void FloatToString();
+        void StringToFloat();
         void Double();
         void VoidPtr();
 };
@@ -138,23 +141,74 @@ void ConversionTest::stdstring()
 }
 
 
-void ConversionTest::Float()
+void ConversionTest::FloatToString()
 {
     float value = 1.234f;
     Pt::String str = Pt::convert<Pt::String>(value);
     PT_UNIT_ASSERT( str.substr(0, 4) == L"1.23" );
 
-    value = -12.3456f;
+    value = -123.4567f;
     str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str.substr(0, 7) == L"-12.345" );
+    PT_UNIT_ASSERT( str.substr(0, 8) == L"-123.456" );
+    
+    value = 1000000000.01f;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 12) == L"1000000000.0" );
+    
+    value = 0.00000000011f;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 12) == L"0.0000000001" );
+    
+    value = std::numeric_limits<float>::quiet_NaN();
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 3) == L"nan" );
+    
+    value = std::numeric_limits<float>::infinity();
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 3) == L"inf" );
 
-    str = L"2.34";
-    value = Pt::convert<float>(str);
-    PT_UNIT_ASSERT( value > 2.3f && value < 2.4f );
+    value = - std::numeric_limits<float>::infinity();
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 4) == L"-inf" );
+}
 
-    str = L"-12.3456";
+void ConversionTest::StringToFloat()
+{
+    Pt::String str = L"1.234";
+    float value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > 1.23f && value < 1.24f );
+
+    str = L"-123.4567";
     value = Pt::convert<float>(str);
-    PT_UNIT_ASSERT( value < -12.3f && value > -12.4f );
+    PT_UNIT_ASSERT( value < -123.4f && value > -123.5f );
+    
+    str = L"1000000000.0";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value < 1000010000.0f && value > 999999000.0f );
+    
+    str = L"-1000000000.0";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > -1000010000.0f && value < -999999000.0f );
+    
+    str = L"nan";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value != value);
+    
+    str = L"NaN";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value != value);
+    
+    str = L"inf";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value == std::numeric_limits<float>::infinity());
+
+    str = L"-inf";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value == - std::numeric_limits<float>::infinity());
+    
+    str = L"infinity";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value == std::numeric_limits<float>::infinity());
 }
 
 void ConversionTest::Double()

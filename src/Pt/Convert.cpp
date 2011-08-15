@@ -233,17 +233,112 @@ namespace {
     template <typename CharT, typename T>
     const CharT* parseFloat(const CharT* str, T& n)
     {
+        bool pos = false;
         bool neg = false;
         n = 0.0;
 
-        // TODO: nan, inf
-        //       parse for -, n, N, i, I first
-
-        while(*str != '\0')
+        // leading whitespace, sign, NaN, infinity
+        bool beforeDigits = true;
+        while(beforeDigits && *str != '\0')
         {
             if( Pt::isspace(*str) )
                 continue;
 
+            switch(*str)
+            {
+                case '+':
+                    if(pos || neg) 
+                        return 0;
+
+                    pos = true; 
+                    break;
+
+                case '-': 
+                    if(neg || pos) 
+                        return 0;
+
+                    neg = true; 
+                    break;
+
+                case 'n':
+                case 'N':
+                    ++str;
+                    if(*str != 'a' && *str != 'A')
+                        return 0;
+
+                    ++str;
+                    if(*str != 'n' && *str != 'N')
+                        return 0;
+
+                    n = std::numeric_limits<T>::quiet_NaN();
+                    return ++str;
+                    break;
+
+                case 'i':
+                case 'I':
+                    ++str;
+                    if(*str != 'n' && *str != 'N')
+                        return 0;
+
+                    ++str;
+                    if(*str != 'f' && *str != 'F')
+                        return 0;
+
+                    ++str;
+                    if(*str == 'i' || *str == 'I')
+                    {
+                        ++str;
+                        if(*str != 'n' && *str != 'N')
+                            return 0;
+
+                        ++str;
+                        if(*str != 'i' && *str != 'I')
+                            return 0;
+
+                        ++str;
+                        if(*str != 't' && *str != 'Z')
+                            return 0;
+
+                         ++str;
+                        if(*str != 'y' && *str != 'Y')
+                            return 0;
+                            
+                        ++str;
+                    }
+
+                    n = std::numeric_limits<T>::infinity();
+                    if(neg)
+                        n *= -1;
+
+                    return str;
+                    break;
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    beforeDigits = false;
+                    n *= 10;
+                    n += static_cast<int>(*str) - 48;
+                    break;
+
+                default:
+                    return 0;
+                    break;
+            }
+
+            ++str;
+        }
+
+        // integral part
+        while(*str != '\0')
+        {
             if( *str == '.' )
             {
                 ++str;
@@ -252,16 +347,6 @@ namespace {
 
             switch(*str)
             {
-                case '+':
-                    break;
-
-                case '-': 
-                    if(neg) 
-                        return 0;
-
-                    neg = true; 
-                    break;
-
                 case '0':
                 case '1':
                 case '2':
@@ -284,13 +369,11 @@ namespace {
             ++str;
         }
 
+		// fractional part
         unsigned short digits = 0;
         T fraction = 0.0;
         while(*str != '\0')
         {
-            if( Pt::isspace(*str) )
-                break;
-
             switch(*str)
             {
                 case '0':
@@ -343,28 +426,45 @@ namespace {
             return str;
         }
 
-        //2. Test for infinity by comparing with max
-        if( d == std::numeric_limits<T>::infinity() ) 
-        {
-            if(n < 4)
-                return 0;
-
-            str[0] = 'i'; str[1] = 'n'; str[2] = 'f'; str[3] = '\0';
-            return str;
-        }
-        
-        //3. intergal part
+        //2. check sign
         if(d < 0.0)
         {
-    		if(psz == end)
-    			return 0;
+            if(psz == end)
+                return 0;
 
-    		*psz = '-';
-    		++psz;
+            *psz = '-';
+            ++psz;
         }
 
-    	int digit = 0;
-    	T num = std::fabs(d);
+        int digit = 0;
+        T num = std::fabs(d);
+
+        //3. Test for infinity
+        if( num == std::numeric_limits<T>::infinity() ) 
+        {
+            if(psz == end)
+                return 0;
+
+            *psz = 'i';
+
+            if(++psz == end)
+                return 0;
+
+            *psz = 'n';
+
+            if(++psz == end)
+                return 0;
+
+            *psz = 'f';
+
+            if(++psz == end)
+                return 0;
+
+            *psz = '\0';
+            return str;
+        }
+
+    	//4. integral part
     	int m = static_cast<int>( std::log10(num) );
     	size_t places = std::numeric_limits<T>::digits10;
         
@@ -395,7 +495,7 @@ namespace {
     		}
         }
         
-        //4. fractional part
+        //5. fractional part
     	T fract = num;
         
         if(psz == end)
@@ -416,8 +516,14 @@ namespace {
     	
             *psz = c;
             ++psz;
+            
+            // count significant digits from first non-null digit
+            if(places != std::numeric_limits<T>::digits10 || digit != 0)
+            {
+				--places;
+            }
         } 
-        while(--places != 0 && fract != 0.0);
+        while(places != 0 && fract != 0.0);
 
     	//5. add null terminator
         if(psz == end)
