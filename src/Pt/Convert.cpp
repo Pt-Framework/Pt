@@ -145,7 +145,10 @@ namespace {
     inline const CharT* formatSigned(CharT* buf, size_t n, T i)
     {
         const bool negative = i < 0;
-        i = std::abs(i);
+        if(negative)
+        {
+			i = -i;
+        }
 
         if(0 == n)
             return 0;
@@ -281,7 +284,7 @@ namespace {
             ++str;
         }
 
-        unsigned digits = 0;
+        unsigned short digits = 0;
         T fraction = 0.0;
         while(*str != '\0')
         {
@@ -377,7 +380,7 @@ namespace {
         {
     		while(m >= 0)
     		{
-    			T weight = std::pow(10.0, m);
+    			T weight = std::pow( T(10.0), m);
     			digit = static_cast<int>( floor(num / weight) );
     			num -= (digit * weight);
     			
