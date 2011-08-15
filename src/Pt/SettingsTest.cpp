@@ -195,8 +195,13 @@ void SettingsTest::Comment()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT("1#;2" == settings.getValue<std::string>("a") );
-    PT_UNIT_ASSERT(2 == settings.getValue<int>("b") );
+	std::string a;
+	settings.getMember("a") >>= a;
+    PT_UNIT_ASSERT("1#;2" == a );
+    
+    int b = 0;
+    settings.getMember("b") >>= b;
+    PT_UNIT_ASSERT(2 == b );
 }
 
 void SettingsTest::ArrayOfArrays()
@@ -223,9 +228,14 @@ void SettingsTest::SimpleValue()
 
     Pt::Settings settings;
     settings.load(ts);
-
-    PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
-    PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
+    
+    int a = 0;
+    settings.getMember("a") >>= a;
+    PT_UNIT_ASSERT(5 == a );
+    
+    int b = 0;
+    settings.getMember("b") >>= b;
+    PT_UNIT_ASSERT(6 == b );
 }
 
 void SettingsTest::SimpleTypedValue()
@@ -237,9 +247,14 @@ void SettingsTest::SimpleTypedValue()
 
     Pt::Settings settings;
     settings.load(ts);
-
-    PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
-    PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
+    
+    int a = 0;
+    settings.getMember("a") >>= a;
+    PT_UNIT_ASSERT(5 == a );
+    
+    int b = 0;
+    settings.getMember("b") >>= b;
+    PT_UNIT_ASSERT(6 == b );
 }
 
 void SettingsTest::SimpleQoutedValue()
@@ -251,9 +266,14 @@ void SettingsTest::SimpleQoutedValue()
 
     Pt::Settings settings;
     settings.load(ts);
-
-    PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("a") );
-    PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("b") );
+    
+    std::string a;
+    settings.getMember("a") >>= a;
+    PT_UNIT_ASSERT("a b c" == a );
+    
+    std::string b;
+    settings.getMember("b") >>= b;
+    PT_UNIT_ASSERT("a b c" == b );
 }
 
 void SettingsTest::SimpleArray()
@@ -372,14 +392,29 @@ void SettingsTest::Section()
     settings.load(ts);
 
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "1");
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "2");
+    
+    std::string v;
+    settings.findMember("a.b.c.d")->getMember("v") >>= v;
+    PT_UNIT_ASSERT( v == "1");
+    
+    std::string u;
+    settings.findMember("a.b.c.d")->getMember("u") >>= u;
+    PT_UNIT_ASSERT( u == "2");
 
     PT_UNIT_ASSERT( settings.findMember("x.y.z.u") )
-    PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("v") == "3");
-    PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("w") == "4");
+    
+    settings.findMember("x.y.z.u")->getMember("v") >>= v;
+    PT_UNIT_ASSERT( v == "3");
+    
+    std::string w;
+    settings.findMember("x.y.z.u")->getMember("w") >>= w;
+    PT_UNIT_ASSERT( w == "4");
 
     PT_UNIT_ASSERT( settings.findMember("e.f.g.u") )
-    PT_UNIT_ASSERT( settings.findMember("e.f.g.u")->getValue<std::string>("v") == "5");
-    PT_UNIT_ASSERT( settings.findMember("e.f.g.u")->getValue<std::string>("w") == "6");
+    
+    settings.findMember("e.f.g.u")->getMember("v") >>= v;
+    PT_UNIT_ASSERT( v == "5");
+    
+    settings.findMember("e.f.g.u")->getMember("w") >>= w;
+    PT_UNIT_ASSERT( w == "6");
 }

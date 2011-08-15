@@ -52,9 +52,9 @@ typedef std::multimap<int, int> IntMultimap;
 
 void operator >>=(const Pt::SerializationInfo& si, Color& color)
 {
-    color.red = si.getValue<int>("red");
-    color.green = si.getValue<int>("green");
-    color.blue = si.getValue<int>("blue");
+    si.getMember("red") >>= color.red;
+    si.getMember("green") >>= color.green;
+    si.getMember("blue") >>= color.blue;
 }
 
 

@@ -106,7 +106,7 @@ void convert(std::string& str, const Time& time)
 void operator >>=(const SerializationInfo& si, Time& time)
 {
     std::string s;
-    si.getValue(s);
+    si >>= s;
     convert(time, s);
 
     //unsigned hour = si.getValue<unsigned>("hour");
@@ -121,8 +121,8 @@ void operator <<=(SerializationInfo& si, const Time& time)
 {
     std::string s;
     convert(s, time);
-    si.setValue(s);
-    si.setTypeName("Date");
+    si <<= s;
+    si.setTypeName("Pt::Time");
 
     //unsigned hour = 0;
     //unsigned min = 0;

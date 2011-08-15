@@ -85,15 +85,15 @@ namespace Xml {
 
             int format() const               { return _flags; }
 
-            bool useXmlDeclaration() const   { return _flags & UseXmlDeclaration; }
+            bool useXmlDeclaration() const   { return UseXmlDeclaration == (_flags & UseXmlDeclaration); }
 
             void useXmlDeclaration(bool sw)  { setFormatFlags(UseXmlDeclaration, sw); }
 
-            bool useIndent() const           { return _flags & UseIndent; }
+            bool useIndent() const           { return UseIndent == (_flags & UseIndent); }
 
             void useIndent(bool sw)          { setFormatFlags(UseIndent, sw); }
 
-            bool useEndl() const             { return _flags & UseEndl; }
+            bool useEndl() const             { return UseEndl == (_flags & UseEndl); }
 
             void useEndl(bool sw)            { setFormatFlags(UseEndl, sw); }
 

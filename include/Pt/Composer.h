@@ -123,7 +123,7 @@ class Composer : public IComposer
 
         virtual void setValue(const Pt::String& value)
         {
-            _current->setValue(value);
+            _current->setString(value);
         }
 
         virtual void setValue(const char* data, size_t length)

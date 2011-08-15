@@ -524,7 +524,7 @@ void SerializationInfo::setBinary(const char* data, size_t length)
 }
 
 
-void SerializationInfo::getValue(Pt::String& s) const
+void SerializationInfo::getString(Pt::String& s) const
 {
     if(_type == Str)
     {
@@ -556,7 +556,7 @@ void SerializationInfo::getValue(Pt::String& s) const
 }
 
 
-void SerializationInfo::setValue(const Pt::String& value)
+void SerializationInfo::setString(const Pt::String& value)
 {
     if( _type == Context )
         return;
@@ -578,12 +578,6 @@ void SerializationInfo::setValue(const Pt::String& value)
 
     _isCompound = false;
     _type = Str;
-}
-
-
-void SerializationInfo::setValue(const char* s)
-{
-    this->setValue( std::string(s) );
 }
 
 

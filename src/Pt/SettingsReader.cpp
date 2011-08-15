@@ -144,7 +144,7 @@ void SettingsReader::leaveMember()
 
 void SettingsReader::pushValue()
 {
-    _current->setValue(_token);
+    _current->setString(_token);
     _token.clear();
 }
 

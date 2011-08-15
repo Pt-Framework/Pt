@@ -137,7 +137,7 @@ void convert(std::string& str, const DateTime& dt)
 void operator >>=(const SerializationInfo& si, DateTime& datetime)
 {
     std::string s;
-    si.getValue(s);
+    si >>= s;
     convert(datetime, s);
 
     //Date date(1,1,1);
@@ -154,8 +154,8 @@ void operator <<=(SerializationInfo& si, const DateTime& datetime)
 {
     std::string s;
     convert(s, datetime);
-    si.setValue(s);
-    si.setTypeName( "DateTime");
+    si <<= s;
+    si.setTypeName("Pt::DateTime");
 
     //si.setTypeName("DateTime");
     //SerializationInfo& date = si.addMember("date");

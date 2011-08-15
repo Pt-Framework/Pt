@@ -124,14 +124,14 @@ inline void operator >>=(const Pt::SerializationInfo& si, std::multiset<Pt::Date
 
 void toXmlString(Pt::SerializationInfo& si, const Pt::Date& date)
 {
-    si.setValue( Pt::String::widen( date.toIsoString() ) );
+    si.setString( Pt::String::widen( date.toIsoString() ) );
 }
 
 
 void fromXmlString(const Pt::SerializationInfo& si, Pt::Date& date)
 {
     Pt::String str;
-    si.getValue(str);
+    si.getString(str);
     date = Pt::Date::fromIsoString( str.narrow() );
 }
 

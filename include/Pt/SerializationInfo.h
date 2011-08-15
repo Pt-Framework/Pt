@@ -216,30 +216,13 @@ class PT_API SerializationInfo
         Pt::String toString() const
         {
             Pt::String value;
-            this->getValue(value);
+            this->getString(value);
             return value;
         }
 
-        void getValue(std::string& s) const
-        {
-            Pt::String value;
-            this->getValue(value);
-            convert(s, value);
-        }
-
-        void getValue(Pt::String& s) const;
-
-        void setValue(const std::string& s)
-        {
-            Pt::String value;
-            convert(value, s);
-            this->setValue(value);
-            this->setTypeName("string");
-        }
-
-        void setValue(const char* s);
-        
-        void setValue(const Pt::String& s);
+        void getString(Pt::String& s) const;
+       
+        void setString(const Pt::String& s);
 
         const char* getBinary(size_t& length) const;
 
@@ -434,13 +417,13 @@ class PT_API SerializationInfo
 
         /** @internal rename to getMember
         */
-        template <typename T>
+        /*template <typename T>
         T getValue(const std::string& name) const
         {
             T value;
             this->getMember(name).getValue(value);
             return value;
-        }
+        }*/
 
     protected:
         void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
@@ -911,33 +894,35 @@ inline void operator <<=(SerializationInfo& si, double n)
 
 inline void operator <<=(SerializationInfo& si, const char* str)
 {
-    si.setValue(str);
+    si.setString( Pt::String::widen(str) );
     si.setTypeName("string");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, std::string& n)
+inline void operator >>=(const SerializationInfo& si, std::string& str)
 {
-    si.getValue(n);
+	Pt::String tmp;
+    si.getString(tmp);
+    str = tmp.narrow();
 }
 
 
-inline void operator <<=(SerializationInfo& si, const std::string& n)
+inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
-    si.setValue(n);
+    si.setString( Pt::String::widen(str) );
     si.setTypeName("string");
 }
 
 
-inline void operator >>=(const SerializationInfo& si, Pt::String& n)
+inline void operator >>=(const SerializationInfo& si, Pt::String& str)
 {
-    si.getValue(n);
+    si.getString(str);
 }
 
 
-inline void operator <<=(SerializationInfo& si, const Pt::String& n)
+inline void operator <<=(SerializationInfo& si, const Pt::String& str)
 {
-    si.setValue(n);
+    si.setString(str);
     si.setTypeName("string");
 }
 

@@ -137,7 +137,7 @@ void operator <<=(SerializationInfo& si, const Gfx::Pen& pen)
        << pen.color().toHtml() << Pt::Char('-')
        << pen.style();
 
-    si.setValue( ss.str() );
+    si.setString( ss.str() );
     si.setTypeName("Pen");
 }
 

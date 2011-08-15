@@ -96,15 +96,16 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 
 void operator >>=(const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& color)
 {
-    Pt::String s = si.toString();
+    Pt::String s;
+    si >>= s;
     color = Gfx::ARgbColor::fromHtml(s);
 }
 
 
 void operator <<=(SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& color)
 {
-    si.setTypeName("ARgbColor");
-    si.setValue( color.toHtml() );
+    si <<= color.toHtml();
+    si.setTypeName("Pt::Gfx::ARgbColor");
 }
 
 }

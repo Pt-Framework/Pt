@@ -116,7 +116,7 @@ void operator <<=(SerializationInfo& si, const Gfx::Font& f)
        << f.angle() << Pt::Char('-')
        << f.direction();
 
-    si.setValue( ss.str() );
+    si.setString( ss.str() );
     si.setTypeName("Brush");
 }
 

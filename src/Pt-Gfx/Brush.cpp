@@ -123,7 +123,7 @@ void operator >>=( const SerializationInfo& si, Gfx::Brush& brush )
 
 void operator <<=( SerializationInfo& si, const Gfx::Brush& brush )
 {
-    si.setValue( brush.color().toHtml() );
+    si.setString( brush.color().toHtml() );
     si.setTypeName("Brush");
 }
 

@@ -37,7 +37,7 @@ void SettingsWriter::write(const SerializationInfo& si)
     {
         if( it->isScalar() )
         {
-			it->getValue(value);
+			it->getString(value);
             this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
         }
@@ -68,7 +68,7 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
     {
         if( it->isScalar() )
         {
-			it->getValue(value);
+			it->getString(value);
             *_os << Pt::String::widen( prefix ) << '.';
             this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
@@ -97,7 +97,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
 
         if( it->isScalar() )
         {
-			it->getValue(value);
+			it->getString(value);
             this->writeEntry( it->name(), value, it->typeName() );
         }
         else if( it->isStruct() || it->isSequence() )
