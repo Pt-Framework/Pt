@@ -466,7 +466,7 @@ namespace {
 
     	//4. integral part
     	int m = static_cast<int>( std::log10(num) );
-    	size_t places = std::numeric_limits<T>::digits10;
+    	int places = std::numeric_limits<T>::digits10;
         
         if(num == 0.0 || m < 0)
         {
