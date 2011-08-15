@@ -581,22 +581,7 @@ void SerializationInfo::setString(const Pt::String& value)
 }
 
 
-void SerializationInfo::getValue(char& c) const
-{
-    Pt::Char ch;
-    this->getValue(ch);
-	c = static_cast<int>(ch);
-}
-
-
-void SerializationInfo::setValue(char c)
-{
-	Pt::Char ch(c);
-	this->setValue(ch);
-}
-
-
-void SerializationInfo::getValue(Pt::Char& c) const
+void SerializationInfo::getChar(Pt::Char& c) const
 {
     switch(_type)
     {
@@ -620,7 +605,7 @@ void SerializationInfo::getValue(Pt::Char& c) const
 }
 
 
-void SerializationInfo::setValue(const Pt::Char& c)
+void SerializationInfo::setChar(const Pt::Char& c)
 {
     if( _type == Context )
         return;

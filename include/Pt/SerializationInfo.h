@@ -228,13 +228,9 @@ class PT_API SerializationInfo
 
         void setBinary(const char* data, size_t length);
 
-        void getValue(char& c) const;
+        void getChar(Pt::Char& c) const;
 
-        void setValue(char c);
-        
-        void getValue(Pt::Char& c) const;
-
-        void setValue(const Pt::Char& c);
+        void setChar(const Pt::Char& c);
         
         void getBool(bool& b) const;
 
@@ -411,20 +407,11 @@ class PT_API SerializationInfo
         /** @internal DEPRECATED
             This is needed as a workaround for some compilers (GCC 3.x) to
             allow access to 'T getValue(const std::string& name) const'.
-         */
-        template <typename T>
-        friend T getValue(const std::string& name, SerializationInfo* si);
 
-        /** @internal rename to getMember
+            template <typename T>
+            friend T getValue(const std::string& name, SerializationInfo* si);
         */
-        /*template <typename T>
-        T getValue(const std::string& name) const
-        {
-            T value;
-            this->getMember(name).getValue(value);
-            return value;
-        }*/
-
+        
     protected:
         void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
 
@@ -748,15 +735,17 @@ inline void operator <<=(SerializationInfo& si, unsigned char n)
 }
 
 
-inline void operator >>=(const SerializationInfo& si, char& n)
+inline void operator >>=(const SerializationInfo& si, char& ch)
 {
-    si.getValue(n);
+	Pt::Char tmp;
+    si.getChar(tmp);
+    ch = static_cast<int>(tmp);
 }
 
 
-inline void operator <<=(SerializationInfo& si, char n)
+inline void operator <<=(SerializationInfo& si, char ch)
 {
-    si.setValue(n);
+    si.setChar( Pt::Char(ch) );
     si.setTypeName("char");
 }
 
