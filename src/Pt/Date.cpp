@@ -147,9 +147,9 @@ void operator<<=(SerializationInfo& si, const Date& date)
     if( si.decompose(date) )
         return;
 
-    si.addMember("year", false) <<=  date.year();
-    si.addMember("month", false) <<= date.month();
-    si.addMember("day", false) <<=  date.day();
+    si.addMember( Pt::LiteralPtr<char>("year") ) <<=  date.year();
+    si.addMember( Pt::LiteralPtr<char>("month") ) <<= date.month();
+    si.addMember( Pt::LiteralPtr<char>("day") ) <<=  date.day();
     si.setTypeName( Pt::LiteralPtr<char>("Pt::Date") );
 }
 

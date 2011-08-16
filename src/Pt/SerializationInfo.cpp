@@ -394,16 +394,18 @@ void SerializationInfo::setName(const std::string& name)
 }
 
 
-void SerializationInfo::setName(const char* name, bool copy)
+void SerializationInfo::setName(const char* name)
 {
-	if(copy)
-	{
-		const std::size_t len = std::strlen(name);
-		copyRefStr(_Name, _nameRef, name, len);
-	}
-	else
-		setRefStr(_Name, _nameRef, name);
+    const std::size_t len = std::strlen(name);
+    copyRefStr(_Name, _nameRef, name, len);
 }
+
+
+void SerializationInfo::setName(const LiteralPtr<char>& name)
+{
+    setRefStr(_Name, _nameRef, name.get() );
+}
+
 
 
 void SerializationInfo::setTypeName(const std::string& type)
@@ -627,44 +629,6 @@ void SerializationInfo::getString(Pt::String& s) const
 		default:
 			throw SerializationError("not a string value");
 	}
-
-/*
-    if(_type == Str)
-    {
-        const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-        s = *str;
-    }
-    else if(_type ==  Boolean)
-    {
-        convert(s, _value.b);
-    }
-    else if(_type ==  Char)
-    {
-        s += Pt::Char(_value.ui32);
-    }
-    else if(_type ==  Int8)
-    {
-        convert(s, _value.l);
-    }
-    else if(_type == UInt)
-    {
-        convert(s, _value.ul);
-    }
-    else if(_type ==  Float)
-    {
-        convert(s, _value.f);
-    }
-    else if(_type ==  Double)
-    {
-        convert(s, _value.f);
-    }
-    else if(_type ==  LongDouble)
-    {
-        convert(s, _value.f);
-    }
-    else
-        throw SerializationError("not a string value");
-*/
 }
 
 
@@ -1103,11 +1067,11 @@ void SerializationInfo::finishLoad() const
 }
 
 
-SerializationInfo& SerializationInfo::addMember(const char* name, bool copy)
+SerializationInfo& SerializationInfo::addMember(const char* name)
 {
     if( _type == Context )
     {
-        this->setName(name, copy);
+        this->setName(name);
         return *this;
     }
 
@@ -1124,7 +1088,33 @@ SerializationInfo& SerializationInfo::addMember(const char* name, bool copy)
     _type = Struct;
 
     SerializationInfo& si = this->addChild();
-    si.setName(name, copy);
+    si.setName(name);
+    return si;
+}
+
+
+SerializationInfo& SerializationInfo::addMember(const LiteralPtr<char>& name)
+{
+    if( _type == Context )
+    {
+        this->setName(name);
+        return *this;
+    }
+
+    if( ! _isCompound )
+    {
+        this->clearValue();
+
+        _value.seq.size = 0;
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _isCompound = true;
+    }
+
+    _type = Struct;
+
+    SerializationInfo& si = this->addChild();
+    si.setName(name);
     return si;
 }
 

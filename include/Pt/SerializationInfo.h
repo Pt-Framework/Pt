@@ -209,8 +209,10 @@ class PT_API SerializationInfo
         { return _Name; }
 
         void setName(const std::string& name);
+
+        void setName(const char* type);
         
-        void setName(const char* name, bool copy = true);
+        void setName(const LiteralPtr<char>& type);
 
         const char* id() const
         { return _id; }
@@ -349,7 +351,9 @@ class PT_API SerializationInfo
         SerializationInfo& addMember(const std::string& name)
         { return this->addMember( name.c_str() ); }
         
-        SerializationInfo& addMember(const char* name, bool copy = true);
+        SerializationInfo& addMember(const char* name);
+        
+        SerializationInfo& addMember(const LiteralPtr<char>& name);
 
         /** @brief Serialization of member data
         */
@@ -723,7 +727,7 @@ template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
     si.setReference( ptr );
-    si.setTypeName("reference");
+    si.setTypeName( Pt::LiteralPtr<char>("reference") );
 }
 
 
@@ -736,7 +740,7 @@ inline void operator >>=(const SerializationInfo& si, bool& n)
 inline void operator <<=(SerializationInfo& si, bool n)
 {
     si.setBool(n);
-    si.setTypeName("bool");
+    si.setTypeName( Pt::LiteralPtr<char>("bool") );
 }
 
 
@@ -749,7 +753,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::int8_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int8_t n)
 {
     si.setInt8(n);
-    si.setTypeName("char");
+    si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
@@ -762,7 +766,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::int16_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int16_t n)
 {
     si.setInt16(n);
-    si.setTypeName("int");
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -788,7 +792,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::int64_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int64_t n)
 {
     si.setInt64(n);
-    si.setTypeName("int");
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -801,7 +805,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint8_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint8_t n)
 {
     si.setUInt8(n);
-    si.setTypeName("char");
+    si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
@@ -814,7 +818,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint16_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint16_t n)
 {
     si.setUInt16(n);
-    si.setTypeName("int");
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -827,7 +831,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint32_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint32_t n)
 {
     si.setUInt32(n);
-    si.setTypeName("int");
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -840,7 +844,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint64_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint64_t n)
 {
     si.setUInt64(n);
-    si.setTypeName("int");
+    si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -853,7 +857,7 @@ inline void operator >>=(const SerializationInfo& si, float& n)
 inline void operator <<=(SerializationInfo& si, float n)
 {
     si.setFloat(n);
-    si.setTypeName("double");
+    si.setTypeName( Pt::LiteralPtr<char>("double") );
 }
 
 
@@ -866,7 +870,7 @@ inline void operator >>=(const SerializationInfo& si, double& n)
 inline void operator <<=(SerializationInfo& si, double n)
 {
     si.setDouble(n);
-    si.setTypeName("double");
+    si.setTypeName( Pt::LiteralPtr<char>("double") );
 }
 
 
@@ -881,14 +885,14 @@ inline void operator >>=(const SerializationInfo& si, char& ch)
 inline void operator <<=(SerializationInfo& si, char ch)
 {
     si.setChar( Pt::Char(ch) );
-    si.setTypeName("char");
+    si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
 inline void operator <<=(SerializationInfo& si, const char* str)
 {
     si.setString( Pt::String::widen(str) );
-    si.setTypeName("string");
+    si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
 
@@ -903,7 +907,7 @@ inline void operator >>=(const SerializationInfo& si, std::string& str)
 inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
     si.setString( Pt::String::widen(str) );
-    si.setTypeName("string");
+    si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
 
@@ -916,7 +920,7 @@ inline void operator >>=(const SerializationInfo& si, Pt::String& str)
 inline void operator <<=(SerializationInfo& si, const Pt::String& str)
 {
     si.setString(str);
-    si.setTypeName("string");
+    si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
 
@@ -973,7 +977,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("list");
+    si.setTypeName( Pt::LiteralPtr<char>("list") );
     si.setSequence();
 }
 
@@ -1001,7 +1005,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("deque");
+    si.setTypeName( Pt::LiteralPtr<char>("deque") );
     si.setSequence();
 }
 
@@ -1045,7 +1049,7 @@ inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("set");
+    si.setTypeName( Pt::LiteralPtr<char>("set") );
     si.setSequence();
 }
 
@@ -1082,7 +1086,7 @@ inline void operator <<=(SerializationInfo& si, const std::multiset<T, C, A>& mu
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("multiset");
+    si.setTypeName( Pt::LiteralPtr<char>("multiset") );
     si.setSequence();
 }
 
@@ -1098,9 +1102,9 @@ inline void operator >>=(const SerializationInfo& si, std::pair<A, B>& p)
 template <typename A, typename B>
 inline void operator <<=(SerializationInfo& si, const std::pair<A, B>& p)
 {
-    si.setTypeName("pair");
-    si.addMember("first") <<= p.first;
-    si.addMember("second") <<= p.second;
+    si.setTypeName( Pt::LiteralPtr<char>("pair") );
+    si.addMember( Pt::LiteralPtr<char>("first") ) <<= p.first;
+    si.addMember( Pt::LiteralPtr<char>("second") ) <<= p.second;
 }
 
 
@@ -1134,7 +1138,7 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("map");
+    si.setTypeName( Pt::LiteralPtr<char>("map") );
     si.setSequence();
 }
 
@@ -1168,7 +1172,7 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
         si.addElement() << Pt::save() <<= *it;
     }
 
-    si.setTypeName("multimap");
+    si.setTypeName( Pt::LiteralPtr<char>("multimap") );
     si.setSequence();
 }
 
