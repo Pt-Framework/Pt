@@ -67,8 +67,17 @@ class Formatter
         virtual void addInt64(const char* name, Pt::int64_t value,
                               const char* id) = 0;
         
-        virtual void addUInt(const char* name, unsigned long long value,
-                             const char* id) = 0;
+        virtual void addUInt8(const char* name, Pt::uint8_t value,
+                              const char* id) = 0;
+        
+        virtual void addUInt16(const char* name, Pt::uint16_t value,
+                               const char* id) = 0;
+        
+        virtual void addUInt32(const char* name, Pt::uint32_t value,
+                               const char* id) = 0;
+        
+        virtual void addUInt64(const char* name, Pt::uint64_t value,
+                               const char* id) = 0;
 
         virtual void addFloat(const char* name, float value,
                               const char* id) = 0;

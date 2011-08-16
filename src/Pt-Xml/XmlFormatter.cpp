@@ -246,8 +246,26 @@ void XmlFormatter::addInt64(const char* name, Pt::int64_t value,
 }
 
 
-void XmlFormatter::addUInt(const char* name, unsigned long long value,
-                           const char* id)
+void XmlFormatter::addUInt8(const char* name, Pt::uint8_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}
+
+
+void XmlFormatter::addUInt16(const char* name, Pt::uint16_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}    
+
+
+void XmlFormatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}
+
+
+void XmlFormatter::addUInt64(const char* name, Pt::uint64_t value,
+                             const char* id)
 {
     convert(_value, value);
     this->addString(name, "unsigned", _value, id);

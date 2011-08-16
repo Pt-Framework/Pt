@@ -101,8 +101,20 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             formatter.addInt64( _Name, _value.l, _id );
             break;
 
-        case UInt:
-            formatter.addUInt( _Name, _value.ul, _id );
+        case UInt8:
+            formatter.addUInt8( _Name, _value.ul, _id );
+            break;
+
+        case UInt16:
+            formatter.addUInt16( _Name, _value.ul, _id );
+            break;
+
+        case UInt32:
+            formatter.addUInt32( _Name, _value.ul, _id );
+            break;
+
+        case UInt64:
+            formatter.addUInt64( _Name, _value.ul, _id );
             break;
 
         case Float:
@@ -206,8 +218,20 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.addInt64( _Name, _value.l, _id );
             break;
 
-        case UInt:
-            formatter.addUInt( _Name, _value.ul, _id );
+        case UInt8:
+            formatter.addUInt8( _Name, _value.ul, _id );
+            break;
+
+        case UInt16:
+            formatter.addUInt16( _Name, _value.ul, _id );
+            break;
+
+        case UInt32:
+            formatter.addUInt32( _Name, _value.ul, _id );
+            break;
+
+        case UInt64:
+            formatter.addUInt64( _Name, _value.ul, _id );
             break;
 
         case Float:
@@ -587,7 +611,10 @@ void SerializationInfo::getString(Pt::String& s) const
 			convert(s, _value.l);
 			break;
 
-		case UInt:
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
 			convert(s, _value.ul);
 			break;
 
@@ -718,7 +745,10 @@ void SerializationInfo::getBool(bool& value) const
             value = 0 != _value.l;
             break;
 
-        case UInt:
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
             value = 0 != _value.ul;
             break;
 
@@ -796,7 +826,10 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             l =  static_cast<Pt::int64_t>(_value.l);
             break;
 
-        case UInt:
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
             l =  static_cast<Pt::int64_t>(_value.ul);
             break;
 
@@ -833,6 +866,27 @@ void SerializationInfo::setInt64(Pt::int64_t l)
 }
 
 
+void SerializationInfo::setUInt8(Pt::uint8_t n)
+{ 
+    this->setUInt64( static_cast<Pt::uint64_t>(n) );
+    _type = UInt8; 
+}
+
+
+void SerializationInfo::setUInt16(Pt::uint16_t n)
+{ 
+     this->setUInt64( static_cast<Pt::uint64_t>(n) ); 
+     _type = UInt16; 
+}
+
+
+void SerializationInfo::setUInt32(Pt::uint32_t n)
+{ 
+    this->setUInt64( static_cast<Pt::uint64_t>(n) );
+    _type = UInt32; 
+}
+
+
 void SerializationInfo::getUInt64(Pt::uint64_t& l) const
 {
     switch(_type)
@@ -848,7 +902,10 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             l =  static_cast<Pt::uint64_t>(_value.l);
             break;
 
-        case UInt:
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
             l =  static_cast<Pt::uint64_t>(_value.ul);
             break;
 
@@ -880,7 +937,21 @@ void SerializationInfo::setUInt64(Pt::uint64_t l)
 
     _isCompound = false;
     _value.ul = l;
-    _type = UInt;
+    _type = UInt64;
+}
+
+
+void SerializationInfo::setFloat(float f)
+{ 
+    this->setLongDouble(f); 
+    _type = Float;
+}
+
+
+void SerializationInfo::setDouble(double f)
+{ 
+    this->setLongDouble(f); 
+    _type = Double;
 }
 
 
@@ -899,7 +970,10 @@ void SerializationInfo::getLongDouble(long double& value) const
             value = static_cast<double>(_value.l);
             break;
 
-        case UInt:
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
             value = static_cast<double>(_value.ul);
             break;
 

@@ -120,8 +120,25 @@ void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 }
 
 
-void Formatter::addUInt(const char* name, unsigned long long value, 
-                        const char* id)
+void Formatter::addUInt8(const char* name, Pt::uint8_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}
+
+
+void Formatter::addUInt16(const char* name, Pt::uint16_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}    
+
+
+void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
+{
+	this->addUInt64(name, value, id);
+}
+
+
+void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 {
     const size_t bufsize = (sizeof(value) * 4) + 4;
     Pt::Char buf[bufsize];

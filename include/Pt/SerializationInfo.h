@@ -64,14 +64,17 @@ class PT_API SerializationInfo
             Int16      = 7,
             Int32      = 8,
             Int64      = 9,
-            UInt       = 10,
-            Float      = 11,
-            Double     = 12,
-            LongDouble = 13,
-            Binary     = 14,
-            Blob       = 15,
-            Struct     = 16,
-            Sequence   = 17
+            UInt8      = 10,
+            UInt16     = 11,
+            UInt32     = 12,
+            UInt64     = 13,
+            Float      = 14,
+            Double     = 15,
+            LongDouble = 16,
+            Binary     = 17,
+            Blob       = 18,
+            Struct     = 19,
+            Sequence   = 20
         };
 
         // type info layout
@@ -283,8 +286,7 @@ class PT_API SerializationInfo
             n = static_cast<Pt::uint8_t>(l);
         }
 
-        void setUInt8(Pt::uint8_t n)
-        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
+        void setUInt8(Pt::uint8_t n);
 
         void getUInt16(Pt::uint16_t& n) const
         {
@@ -294,8 +296,7 @@ class PT_API SerializationInfo
             n = static_cast<Pt::uint16_t>(l);
         }
 
-        void setUInt16(Pt::uint16_t n)
-        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
+        void setUInt16(Pt::uint16_t n);
 
         void getUInt32(Pt::uint32_t& n) const
         {
@@ -305,8 +306,7 @@ class PT_API SerializationInfo
             n = static_cast<Pt::uint32_t>(l);
         }
 
-        void setUInt32(Pt::uint32_t n)
-        { this->setUInt64( static_cast<Pt::uint64_t>(n) ); }
+        void setUInt32(Pt::uint32_t n);
 
         void getUInt64(Pt::uint64_t& n) const;
 
@@ -320,8 +320,7 @@ class PT_API SerializationInfo
 			f = static_cast<float>(d);
 		}
 
-        void setFloat(float f)
-        { this->setLongDouble(f); }
+        void setFloat(float f);
 
         void getDouble(double& f) const
 		{
@@ -331,8 +330,7 @@ class PT_API SerializationInfo
 			f = static_cast<double>(d);
 		}
 
-        void setDouble(double f)
-        { this->setLongDouble(f); }
+        void setDouble(double f);
                 
         void getLongDouble(long double& d) const;
 
