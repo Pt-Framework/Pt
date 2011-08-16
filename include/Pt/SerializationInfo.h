@@ -60,15 +60,18 @@ class PT_API SerializationInfo
             Boolean    = 3,
             Char       = 4,
             Str        = 5,
-            Int        = 6,
-            UInt       = 7,
-            Float      = 8,
-            Double     = 9,
-            LongDouble = 10,
-            Binary     = 11,
-            Blob       = 12,
-            Struct     = 13,
-            Sequence   = 14
+            Int8       = 6,
+            Int16      = 7,
+            Int32      = 8,
+            Int64      = 9,
+            UInt       = 10,
+            Float      = 11,
+            Double     = 12,
+            LongDouble = 13,
+            Binary     = 14,
+            Blob       = 15,
+            Struct     = 16,
+            Sequence   = 17
         };
 
         // type info layout
@@ -246,8 +249,7 @@ class PT_API SerializationInfo
             n = static_cast<Pt::int8_t>(l);
         }
         
-        void setInt8(Pt::int8_t n)
-        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
+        void setInt8(Pt::int8_t n);
         
         void getInt16(Pt::int16_t& n) const
         {
@@ -257,8 +259,7 @@ class PT_API SerializationInfo
             n = static_cast<Pt::int16_t>(l);
         }
         
-        void setInt16(Pt::int16_t n)
-        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
+        void setInt16(Pt::int16_t n);
 
         inline void getInt32(Pt::int32_t& i) const
         {
@@ -268,8 +269,7 @@ class PT_API SerializationInfo
             i = static_cast<Pt::int32_t>(l);
         }
 
-        void setInt32(Pt::int32_t n)
-        { this->setInt64( static_cast<Pt::int64_t>(n) ); }
+        void setInt32(Pt::int32_t n);
 
         void getInt64(Pt::int64_t& l) const;
 
@@ -314,18 +314,25 @@ class PT_API SerializationInfo
 
         void getFloat(float& f) const
 		{
-			double d = 0.0;
-			this->getDouble(d);
+			long double d = 0.0;
+			this->getLongDouble(d);
 			// TODO: consider SerializationError on overflow
 			f = static_cast<float>(d);
 		}
-        
+
         void setFloat(float f)
-        { this->setDouble( double(f) ); }
+        { this->setLongDouble(f); }
 
-        void getDouble(double& f) const;
+        void getDouble(double& f) const
+		{
+			long double d = 0.0;
+			this->getLongDouble(d);
+			// TODO: consider SerializationError on overflow
+			f = static_cast<double>(d);
+		}
 
-        void setDouble(double f);
+        void setDouble(double f)
+        { this->setLongDouble(f); }
                 
         void getLongDouble(long double& d) const;
 

@@ -87,8 +87,26 @@ void Formatter::addChar(const char* name, const Pt::Char& value,
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
-void Formatter::addInt(const char* name, long long value, 
-                       const char* id)
+
+void Formatter::addInt8(const char* name, Pt::int8_t value, const char* id)
+{
+	this->addInt64(name, value, id);
+}
+
+
+void Formatter::addInt16(const char* name, Pt::int16_t value, const char* id)
+{
+	this->addInt64(name, value, id);
+}    
+
+
+void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
+{
+	this->addInt64(name, value, id);
+}
+
+
+void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 {
     const size_t bufsize = (sizeof(value) * 4) + 4;
     Pt::Char buf[bufsize];

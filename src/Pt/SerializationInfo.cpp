@@ -85,8 +85,20 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             formatter.addChar( _Name, _value.ui32, _id );
             break;
 
-        case Int:
-            formatter.addInt( _Name, _value.l, _id );
+        case Int8:
+            formatter.addInt8( _Name, _value.l, _id );
+            break;
+
+        case Int16:
+            formatter.addInt16( _Name, _value.l, _id );
+            break;
+
+        case Int32:
+            formatter.addInt32( _Name, _value.l, _id );
+            break;
+
+        case Int64:
+            formatter.addInt64( _Name, _value.l, _id );
             break;
 
         case UInt:
@@ -178,8 +190,20 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.addChar( _Name, _value.ui32, _id );
             break;
 
-        case Int:
-            formatter.addInt( _Name, _value.l, _id );
+        case Int8:
+            formatter.addInt8( _Name, _value.l, _id );
+            break;
+
+        case Int16:
+            formatter.addInt16( _Name, _value.l, _id );
+            break;
+
+        case Int32:
+            formatter.addInt32( _Name, _value.l, _id );
+            break;
+
+        case Int64:
+            formatter.addInt64( _Name, _value.l, _id );
             break;
 
         case UInt:
@@ -542,6 +566,42 @@ void SerializationInfo::setBinary(const char* data, size_t length)
 
 void SerializationInfo::getString(Pt::String& s) const
 {
+	switch(_type)
+	{
+		case Str:
+			s = *(reinterpret_cast<const Pt::String*>(_value.str));
+			break;
+
+		case Boolean:
+			convert(s, _value.b);
+			break;
+
+		case Char:
+			s += Pt::Char(_value.ui32);
+			break;
+
+		case Int8:
+		case Int16:
+		case Int32:
+		case Int64:
+			convert(s, _value.l);
+			break;
+
+		case UInt:
+			convert(s, _value.ul);
+			break;
+
+		case Float:
+		case Double:
+		case LongDouble:
+			convert(s, _value.f);
+			break;
+		
+		default:
+			throw SerializationError("not a string value");
+	}
+
+/*
     if(_type == Str)
     {
         const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
@@ -555,7 +615,7 @@ void SerializationInfo::getString(Pt::String& s) const
     {
         s += Pt::Char(_value.ui32);
     }
-    else if(_type ==  Int)
+    else if(_type ==  Int8)
     {
         convert(s, _value.l);
     }
@@ -577,6 +637,7 @@ void SerializationInfo::getString(Pt::String& s) const
     }
     else
         throw SerializationError("not a string value");
+*/
 }
 
 
@@ -650,7 +711,10 @@ void SerializationInfo::getBool(bool& value) const
             value = _value.b;
             break;
 
-        case Int:
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
             value = 0 != _value.l;
             break;
 
@@ -696,6 +760,27 @@ void SerializationInfo::setBool(bool value)
 }
 
 
+void SerializationInfo::setInt8(Pt::int8_t n)
+{ 
+    this->setInt64( static_cast<Pt::int64_t>(n) );
+    _type = Int8; 
+}
+
+
+void SerializationInfo::setInt16(Pt::int16_t n)
+{ 
+     this->setInt64( static_cast<Pt::int64_t>(n) ); 
+     _type = Int16; 
+}
+
+
+void SerializationInfo::setInt32(Pt::int32_t n)
+{ 
+    this->setInt64( static_cast<Pt::int64_t>(n) );
+    _type = Int32; 
+}
+
+
 void SerializationInfo::getInt64(Pt::int64_t& l) const
 {
     switch(_type)
@@ -704,7 +789,10 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             l =  static_cast<Pt::int64_t>(_value.b);
             break;
 
-        case Int:
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
             l =  static_cast<Pt::int64_t>(_value.l);
             break;
 
@@ -713,13 +801,7 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             break;
 
         case Float:
-            l =  static_cast<Pt::int64_t>(_value.f);
-            break;
-
         case Double:
-            l =  static_cast<Pt::int64_t>(_value.f);
-            break;
-
         case LongDouble:
             l =  static_cast<Pt::int64_t>(_value.f);
             break;
@@ -747,7 +829,7 @@ void SerializationInfo::setInt64(Pt::int64_t l)
 
     _isCompound = false;
     _value.l = l;
-    _type = Int;
+    _type = Int64;
 }
 
 
@@ -759,7 +841,10 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             l =  static_cast<Pt::uint64_t>(_value.b);
             break;
 
-        case Int:
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
             l =  static_cast<Pt::uint64_t>(_value.l);
             break;
 
@@ -768,13 +853,7 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             break;
 
         case Float:
-            l =  static_cast<Pt::uint64_t>(_value.f);
-            break;
-
         case Double:
-            l =  static_cast<Pt::uint64_t>(_value.f);
-            break;
-
         case LongDouble:
             l =  static_cast<Pt::uint64_t>(_value.f);
             break;
@@ -805,60 +884,6 @@ void SerializationInfo::setUInt64(Pt::uint64_t l)
 }
 
 
-void SerializationInfo::getDouble(double& value) const
-{
-    switch(_type)
-    {
-        case Boolean:
-            value = static_cast<double>(_value.b);
-            break;
-
-        case Int:
-            value = static_cast<double>(_value.l);
-            break;
-
-        case UInt:
-            value = static_cast<double>(_value.ul);
-            break;
-
-        case Float:
-            value = _value.f;
-            break;
-
-        case Double:
-            value = _value.f;
-            break;
-
-        case LongDouble:
-            value = _value.f;
-            break;
-
-        case Str:
-        {
-            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            convert(value, *str);
-            break;
-        }
-
-        default:
-            throw SerializationError("expected integer value");
-    }
-}
-
-
-void SerializationInfo::setDouble(double value)
-{
-    if( _type == Context )
-        return;
-
-    this->clearValue();
-
-    _isCompound = false;
-    _value.f = value;
-    _type = Double;
-}
-
-
 void SerializationInfo::getLongDouble(long double& value) const
 {
     switch(_type)
@@ -867,7 +892,10 @@ void SerializationInfo::getLongDouble(long double& value) const
             value = static_cast<double>(_value.b);
             break;
 
-        case Int:
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
             value = static_cast<double>(_value.l);
             break;
 
@@ -876,13 +904,7 @@ void SerializationInfo::getLongDouble(long double& value) const
             break;
 
         case Float:
-            value = _value.f;
-            break;
-
         case Double:
-            value = _value.f;
-            break;
-        
         case LongDouble:
             value = _value.f;
             break;
