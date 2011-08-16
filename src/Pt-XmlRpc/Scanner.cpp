@@ -394,7 +394,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 if(0 == end)
                     throwSerializationError();
 
-                _current->setInt64(number);
+                _current->setInt(number);
                 _state = OnScalar;
             }
             else
@@ -419,7 +419,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 if(0 == end)
                     throwSerializationError();
 
-                _current->setFloat(number);
+                _current->setDouble(number);
                 log_debug("-> parsed double " << number);
                 _state = OnScalar;
             }

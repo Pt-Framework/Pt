@@ -54,19 +54,21 @@ class PT_API SerializationInfo
 {
     public:
         enum Type {
-            Void      = 0,
-            Context   = 1,
-            Reference = 2,
-            Boolean   = 3,
-            Char      = 4,
-            Str       = 5,
-            Int       = 6,
-            UInt      = 7,
-            Float     = 8,
-            Binary    = 9,
-            Blob      = 10,
-            Struct    = 11,
-            Sequence  = 12
+            Void       = 0,
+            Context    = 1,
+            Reference  = 2,
+            Boolean    = 3,
+            Char       = 4,
+            Str        = 5,
+            Int        = 6,
+            UInt       = 7,
+            Float      = 8,
+            Double     = 9,
+            LongDouble = 10,
+            Binary     = 11,
+            Blob       = 12,
+            Struct     = 13,
+            Sequence   = 14
         };
 
         // type info layout
@@ -310,15 +312,25 @@ class PT_API SerializationInfo
 
         void setUInt64(Pt::uint64_t n);
 
-        void getValue(float& f) const;
+        void getFloat(float& f) const
+		{
+			double d = 0.0;
+			this->getDouble(d);
+			// TODO: consider SerializationError on overflow
+			f = static_cast<float>(d);
+		}
+        
+        void setFloat(float f)
+        { this->setDouble( double(f) ); }
 
-        void setValue(float f)
-        { this->setValue( double(f) ); }
+        void getDouble(double& f) const;
 
-        void getValue(double& f) const;
+        void setDouble(double f);
+                
+        void getLongDouble(long double& d) const;
 
-        void setValue(double f);
-
+        void setLongDouble(long double d);
+        
         bool beginSave(const void* p);
 
         void finishSave();
@@ -458,7 +470,7 @@ class PT_API SerializationInfo
             uint32_t ui32;
             long long l;
             unsigned long long ul;
-            double f;
+            long double f;
             char str[sizeof(Pt::String)];
             BlobValue blob;
             Ref ref;
@@ -829,26 +841,26 @@ inline void operator <<=(SerializationInfo& si, Pt::uint64_t n)
 
 inline void operator >>=(const SerializationInfo& si, float& n)
 {
-    si.getValue(n);
+    si.getFloat(n);
 }
 
 
 inline void operator <<=(SerializationInfo& si, float n)
 {
-    si.setValue(n);
+    si.setFloat(n);
     si.setTypeName("double");
 }
 
 
 inline void operator >>=(const SerializationInfo& si, double& n)
 {
-    si.getValue(n);
+    si.getDouble(n);
 }
 
 
 inline void operator <<=(SerializationInfo& si, double n)
 {
-    si.setValue(n);
+    si.setDouble(n);
     si.setTypeName("double");
 }
 

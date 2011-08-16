@@ -235,11 +235,27 @@ void XmlFormatter::addUInt(const char* name, unsigned long long value,
 }
 
 
-void XmlFormatter::addFloat(const char* name, double value,
+void XmlFormatter::addFloat(const char* name, float value,
+                            const char* id)
+{
+    convert(_value, value);
+    this->addString(name, "float", _value, id);
+}
+
+
+void XmlFormatter::addDouble(const char* name, double value,
                             const char* id)
 {
     convert(_value, value);
     this->addString(name, "double", _value, id);
+}
+
+
+void XmlFormatter::addLongDouble(const char* name, long double value,
+                                 const char* id)
+{
+    convert(_value, value);
+    this->addString(name, "long double", _value, id);
 }
 
 

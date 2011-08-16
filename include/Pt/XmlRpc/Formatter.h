@@ -64,8 +64,14 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void addUInt(const char* name, unsigned long long value, 
                      const char* id);
 
-        void addFloat(const char* name, double value, 
+        void addFloat(const char* name, float value, 
                       const char* id);
+
+        void addDouble(const char* name, double value, 
+                       const char* id);
+
+        void addLongDouble(const char* name, long double value, 
+                           const char* id);
 
         void addBytes(const char* name, const char* type,
                       const char* value, size_t length, const char* id);

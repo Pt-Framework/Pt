@@ -61,9 +61,15 @@ class Formatter
         virtual void addUInt(const char* name, unsigned long long value,
                              const char* id) = 0;
 
-        virtual void addFloat(const char* name, double value,
+        virtual void addFloat(const char* name, float value,
                               const char* id) = 0;
 
+        virtual void addDouble(const char* name, double value,
+                               const char* id) = 0;
+        
+        virtual void addLongDouble(const char* name, long double value,
+                                   const char* id) = 0;
+        
         virtual void addReference(const char* name, const char* refId) = 0;
 
         virtual void beginArray(const char* name, const char* type,

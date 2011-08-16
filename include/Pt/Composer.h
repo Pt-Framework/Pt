@@ -55,13 +55,23 @@ class IComposer
         virtual void setBool(bool value)
         { throw SerializationError("unexpected bool value"); }
 
-        virtual void setInt64(Pt::int64_t value)
-        { throw SerializationError("unexpected integer value"); }
+        /** @brief Compose a signed integer type.
 
-        virtual void setUInt64(unsigned long value)
+            There is only one method for all sizes of signed integer types,
+            because that type information is not required for composition. 
+        */
+        virtual void setInt(Pt::int64_t value)
+        { throw SerializationError("unexpected integer value"); }
+        
+        /** @brief Compose a unsigned integer type.
+
+            There is only one method for all sizes of unsigned integer types,
+            because that type information is not required for composition. 
+        */
+        virtual void setUInt(Pt::int64_t value)
         { throw SerializationError("unexpected unsigned value"); }
 
-        virtual void setFloat(double value)
+        virtual void setDouble(double value)
         { throw SerializationError("unexpected float value"); }
 
         virtual void setReference(const std::string& id)
@@ -136,19 +146,19 @@ class Composer : public IComposer
             _current->setBool(value);
         }
 
-        virtual void setInt64(Pt::int64_t value)
+        virtual void setInt(Pt::int64_t value)
         {
             _current->setInt64(value);
         }
 
-        virtual void setUInt64(unsigned long value)
+        virtual void setUInt(Pt::uint64_t value)
         {
             _current->setUInt64(value);
         }
 
-        virtual void setFloat(double value)
+        virtual void setDouble(double value)
         {
-            _current->setValue(value);
+            _current->setDouble(value);
         }
 
         virtual void setReference(const std::string& id)

@@ -554,6 +554,12 @@ const Pt::Char* format(Pt::Char* s, size_t n, double value)
 }
 
 
+const Pt::Char* format(Pt::Char* s, size_t n, long double value)
+{
+        return formatFloat(s, n, value);
+}
+
+
 const Pt::Char* parse(const Pt::Char* str, long long& n)
 {
     return parseSigned(str, n);
@@ -565,7 +571,14 @@ const Pt::Char* parse(const Pt::Char* str, unsigned long long& n)
     return parseUnsigned(str, n);
 }
 
+
 const Pt::Char* parse(const Pt::Char* str, double& n)
+{
+    return parseFloat(str, n);
+}
+
+
+const Pt::Char* parse(const Pt::Char* str, long double& n)
 {
     return parseFloat(str, n);
 }
@@ -616,7 +629,7 @@ void convert(Pt::String& str, unsigned int value)
 
 void convert(String& s, float value)
 {
-    const size_t bufsize = 64;
+    const size_t bufsize = 64; // TODO: use back_inserter
     Pt::Char buf[bufsize];
     const Pt::Char* num = formatFloat(buf, bufsize, value);
     if( 0 == num  )
@@ -628,11 +641,23 @@ void convert(String& s, float value)
 
 void convert(String& s, double value)
 {
-    const size_t bufsize = 64;
+    const size_t bufsize = 64; // TODO: use back_inserter
     Pt::Char buf[bufsize];
     const Pt::Char* num = formatFloat(buf, bufsize, value);
     if( 0 == num  )
-        ConversionError::doThrow("float", "Pt::String");
+        ConversionError::doThrow("double", "Pt::String");
+
+    s.assign(num);
+}
+
+
+void convert(String& s, long double value)
+{
+    const size_t bufsize = 64; // TODO: use back_inserter
+    Pt::Char buf[bufsize];
+    const Pt::Char* num = formatFloat(buf, bufsize, value);
+    if( 0 == num  )
+        ConversionError::doThrow("long double", "Pt::String");
 
     s.assign(num);
 }
@@ -737,6 +762,15 @@ void convert(float& n, const String& str)
 
 
 void convert(double& n, const String& str)
+{
+    const Pt::Char* end = parseFloat( str.c_str(), n );
+
+    if(0 == end || *end != '\0')
+        ConversionError::doThrow("double", "Pt::String");
+}
+
+
+void convert(long double& n, const String& str)
 {
     const Pt::Char* end = parseFloat( str.c_str(), n );
 

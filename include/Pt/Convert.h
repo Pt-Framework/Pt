@@ -38,14 +38,17 @@
 
 namespace Pt {
 
-// nothrow
+// TODO: use back_inserter
 PT_API const Pt::Char* format(Pt::Char* s, size_t n, long long value);
 
-// nothrow
+// TODO: use back_inserter
 PT_API const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value);
 
-// nothrow
+// TODO: use back_inserter
 PT_API const Pt::Char* format(Pt::Char* s, size_t n, double value);
+
+// TODO: use back_inserter
+PT_API const Pt::Char* format(Pt::Char* s, size_t n, long double value);
 
 // nothrow
 PT_API const Pt::Char* parse(const Pt::Char* str, long long& n);
@@ -55,6 +58,9 @@ PT_API const Pt::Char* parse(const Pt::Char* str, unsigned long long& n);
 
 // nothrow
 PT_API const Pt::Char* parse(const Pt::Char* str, double& n);
+
+// nothrow
+PT_API const Pt::Char* parse(const Pt::Char* str, long double& n);
 
 //
 // Conversions to Pt::String
@@ -78,6 +84,7 @@ PT_API void convert(String& s, int value);
 PT_API void convert(String& s, unsigned int value);
 PT_API void convert(String& s, float value);
 PT_API void convert(String& s, double value);
+PT_API void convert(String& s, long double value);
 
 template <typename T>
 inline void convert(String& s, const T& value)
@@ -99,6 +106,7 @@ PT_API void convert(int& n, const String& str);
 PT_API void convert(unsigned int& n, const String& str);
 PT_API void convert(float& n, const String& str);
 PT_API void convert(double& n, const String& str);
+PT_API void convert(long double& n, const String& str);
 
 template <typename T>
 inline void convert(T& t, const String& str)

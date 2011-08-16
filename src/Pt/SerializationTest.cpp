@@ -106,7 +106,7 @@ class IntComposer : public Pt::IComposer
             convert(*_type, value);
         }
 
-        virtual void setInt64(Pt::int64_t l)
+        virtual void setInt(Pt::int64_t l)
         {
             //_si.setValue(l);
             *_type = static_cast<int>(l);
@@ -298,31 +298,31 @@ void SerializationTest::Benchmark2()
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt64(v);
+        deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt64(v);
+        deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt64(v);
+        deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt64(v);
+        deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         deser = deser->beginMember(name);
-        deser->setInt64(v);
+        deser->setInt(v);
         deser = deser->finish();
 
         deser->finish();
@@ -362,31 +362,31 @@ void SerializationTest::Benchmark3()
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt64(v);
+        composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt64(v);
+        composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt64(v);
+        composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt64(v);
+        composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
         convert(v, num);
         composer = composer->beginElement();
-        composer->setInt64(v);
+        composer->setInt(v);
         composer = composer->finish();
 
         composer->finish();
@@ -537,6 +537,7 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(),"double") );
     Pt::String toString = si.toString();
+    std::cerr << toString.narrow() << std::endl;
     PT_UNIT_ASSERT( toString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
     PT_UNIT_ASSERT(doubleVal2 == 198.8196);

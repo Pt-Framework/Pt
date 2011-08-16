@@ -117,8 +117,14 @@ void Formatter::addUInt(const char* name, unsigned long long value,
 }
 
 
-void Formatter::addFloat(const char* name, double value, 
-                         const char* id)
+void Formatter::addFloat(const char* name, float value,const char* id)
+{
+    // spec supports only double precision floats
+    this->addDouble(name, value, id);
+}
+
+
+void Formatter::addDouble(const char* name, double value, const char* id)
 {
     const size_t bufsize = 64;
     Pt::Char buf[bufsize];
@@ -129,6 +135,13 @@ void Formatter::addFloat(const char* name, double value,
     _writer->writeStartTag(XMLRPC_VALUE);
     _writer->writeElement(XMLRPC_DOUBLE, num);
     _writer->writeEndTag(XMLRPC_VALUE);
+}
+
+
+void Formatter::addLongDouble(const char* name, long double value,const char* id)
+{
+    // spec supports only double precision floats
+    this->addDouble(name, static_cast<double>(value), id);
 }
 
 
