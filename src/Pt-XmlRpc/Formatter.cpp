@@ -49,6 +49,59 @@ static const Pt::Char XMLRPC_DATA[]    = { 'd', 'a', 't', 'a', '\0' };
 static const Pt::Char XMLRPC_FALSE[]   = { '0', '\0' };
 static const Pt::Char XMLRPC_TRUE[]    = { '1', '\0' };
 
+template<typename T>
+class array_appender
+{
+    public:
+		array_appender()
+		: _ptr(0)
+		, _end(0)
+		{ }
+
+		array_appender(T* ptr, size_t length)
+		: _ptr(ptr)
+		, _end(ptr + length)
+		{ }
+		
+		array_appender<T>& operator=(const T& val)
+		{
+		    if(_ptr != _end)
+				*_ptr = val;
+
+		    return *this;
+		}
+
+		bool operator==(const array_appender<T>& it) const
+		{
+		    return _ptr == it._ptr;
+		}
+
+		array_appender<T>& operator*()
+		{
+			return *this;
+		}
+
+		array_appender<T>& operator++()
+		{
+			if(_ptr != _end)
+				++_ptr;
+
+			return *this;
+		}
+
+		array_appender<T> operator++(int)
+		{
+			if(_ptr != _end)
+				++_ptr;
+
+			return *this;
+		}
+
+	private:
+		T* _ptr;
+		T* _end;
+};
+
 }
 
 namespace Pt {
@@ -185,12 +238,20 @@ void Formatter::addDouble(const char* name, double value, const char* id)
 {
     const size_t bufsize = 64;
     Pt::Char buf[bufsize];
-    const Pt::Char* num = format(buf, bufsize, value);
-    if( 0 == num  )
-        throw std::logic_error("conversion buffer too small");
     
+    array_appender<Pt::Char> it(buf, bufsize);
+    array_appender<Pt::Char> end;
+    it = putFloat(it, value);
+    if(it == end)
+    {
+		// TODO: use dynamic buffer now
+		throw std::logic_error("float too large");
+	}
+
+    *it = '\0';
+
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_DOUBLE, num);
+    _writer->writeElement(XMLRPC_DOUBLE, buf);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 

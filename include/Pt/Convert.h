@@ -35,6 +35,10 @@
 #include <Pt/StringStream.h>
 #include <sstream>
 #include <string>
+#include <limits>
+#include <iterator>
+#include <cctype>
+#include <cmath>
 
 namespace Pt {
 
@@ -45,10 +49,10 @@ PT_API const Pt::Char* format(Pt::Char* s, size_t n, long long value);
 PT_API const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value);
 
 // TODO: use back_inserter
-PT_API const Pt::Char* format(Pt::Char* s, size_t n, double value);
+//PT_API const Pt::Char* format(Pt::Char* s, size_t n, double value);
 
 // TODO: use back_inserter
-PT_API const Pt::Char* format(Pt::Char* s, size_t n, long double value);
+//PT_API const Pt::Char* format(Pt::Char* s, size_t n, long double value);
 
 // nothrow
 PT_API const Pt::Char* parse(const Pt::Char* str, long long& n);
@@ -214,6 +218,90 @@ T convert(const S& from)
     T value = T();
     convert(value, from);
     return value;
+}
+
+
+template <typename IterT, typename T>
+inline IterT putFloat(IterT it, T d)
+{
+    // 1. Test for not-a-number with d != d
+    if( d != d ) 
+    {
+        *it = 'n'; ++it;
+        *it = 'a'; ++it;
+        *it = 'n'; ++it;
+        return it;
+    }
+
+    // 2. check sign
+    if(d < 0.0)
+    {
+        *it = '-';
+        ++it;
+    }
+
+    int digit = 0;
+    T num = std::fabs(d);
+
+    // 3. Test for infinity
+    if( num == std::numeric_limits<T>::infinity() ) 
+    {
+        *it = 'i'; ++it;
+        *it = 'n'; ++it;
+        *it = 'f'; ++it;
+        return it;
+    }
+
+	// 4. integral part
+	int m = static_cast<int>( std::log10(num) );
+	int places = std::numeric_limits<T>::digits10;
+    
+    if(num == 0.0 || m < 0)
+    {
+		*it = '0';
+		++it;
+    }
+    else
+    {
+		while(m >= 0)
+		{
+			T weight = std::pow( T(10.0), m);
+			digit = static_cast<int>( floor(num / weight) );
+			num -= (digit * weight);
+
+			*it = '0' + digit;
+			++it;
+
+			--m;
+			--places;
+		}
+    }
+    
+    // 5. fractional part
+	T fract = num;
+
+    *it = '.';
+    ++it;
+
+    do
+    {
+        fract *= 10;
+        digit = static_cast<int>( std::floor(fract) );
+        fract -= digit;
+        char c = '0' + digit;
+
+        *it = c;
+        ++it;
+        
+        // count significant digits from first non-null digit
+        if(places != std::numeric_limits<T>::digits10 || digit != 0)
+        {
+            --places;
+        }
+    } 
+    while(places != 0 && fract != 0.0);
+
+    return it;
 }
 
 } // namespace Pt

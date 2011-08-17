@@ -27,9 +27,6 @@
  */
 
 #include <Pt/Convert.h>
-#include <limits>
-#include <cctype>
-#include <cmath>
 #include <cassert>
 
 namespace {
@@ -627,39 +624,21 @@ void convert(Pt::String& str, unsigned int value)
 }
 
 
-void convert(String& s, float value)
+void convert(String& str, float value)
 {
-    const size_t bufsize = 64; // TODO: use back_inserter
-    Pt::Char buf[bufsize];
-    const Pt::Char* num = formatFloat(buf, bufsize, value);
-    if( 0 == num  )
-        ConversionError::doThrow("float", "Pt::String");
-
-    s.assign(num);
+    putFloat(std::back_inserter(str), value);
 }
 
 
-void convert(String& s, double value)
+void convert(String& str, double value)
 {
-    const size_t bufsize = 64; // TODO: use back_inserter
-    Pt::Char buf[bufsize];
-    const Pt::Char* num = formatFloat(buf, bufsize, value);
-    if( 0 == num  )
-        ConversionError::doThrow("double", "Pt::String");
-
-    s.assign(num);
+	putFloat(std::back_inserter(str), value);
 }
 
 
-void convert(String& s, long double value)
+void convert(String& str, long double value)
 {
-    const size_t bufsize = 64; // TODO: use back_inserter
-    Pt::Char buf[bufsize];
-    const Pt::Char* num = formatFloat(buf, bufsize, value);
-    if( 0 == num  )
-        ConversionError::doThrow("long double", "Pt::String");
-
-    s.assign(num);
+    putFloat(std::back_inserter(str), value);
 }
 
 //
@@ -798,25 +777,13 @@ void convert(std::string& str, unsigned int value)
 
 void convert(std::string& str, float value)
 {
-    const size_t bufsize = 64;
-    char buf[bufsize];
-    const char* num = formatFloat(buf, bufsize, value);
-    if( 0 == num  )
-        ConversionError::doThrow("float", "std::string");
-
-    str.assign(num);
+    putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, double value)
 {
-    const size_t bufsize = 64;
-    char buf[bufsize];
-    const char* num = formatFloat(buf, bufsize, value);
-    if( 0 == num  )
-        ConversionError::doThrow("double", "std::string");
-
-    str.assign(num);
+    putFloat(std::back_inserter(str), value);
 }
 
 //
