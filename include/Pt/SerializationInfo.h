@@ -58,23 +58,25 @@ class PT_API SerializationInfo
             Context    = 1,
             Reference  = 2,
             Boolean    = 3,
-            Char       = 4,
-            Str        = 5,
-            Int8       = 6,
-            Int16      = 7,
-            Int32      = 8,
-            Int64      = 9,
-            UInt8      = 10,
-            UInt16     = 11,
-            UInt32     = 12,
-            UInt64     = 13,
-            Float      = 14,
-            Double     = 15,
-            LongDouble = 16,
-            Binary     = 17,
-            Blob       = 18,
-            Struct     = 19,
-            Sequence   = 20
+            Char8      = 4,
+            Char       = 5,
+            Str8       = 6,
+            Str        = 7,
+            Int8       = 8,
+            Int16      = 9,
+            Int32      = 10,
+            Int64      = 11,
+            UInt8      = 12,
+            UInt16     = 13,
+            UInt32     = 14,
+            UInt64     = 15,
+            Float      = 16,
+            Double     = 17,
+            LongDouble = 18,
+            Binary     = 19,
+            Blob       = 20,
+            Struct     = 21,
+            Sequence   = 22
         };
 
         // type info layout
@@ -221,6 +223,12 @@ class PT_API SerializationInfo
 
         void setId(const char* id);
 
+        void getString8(std::string& s) const;
+
+        void setString8(const char* s);
+
+        void setString8(const std::string& s);
+
         /** @brief Returns the content as string.
         */
         Pt::String toString() const
@@ -231,17 +239,21 @@ class PT_API SerializationInfo
         }
 
         void getString(Pt::String& s) const;
-       
+
         void setString(const Pt::String& s);
 
         const char* getBinary(size_t& length) const;
 
         void setBinary(const char* data, size_t length);
 
+        void getChar8(char c) const;
+
+        void setChar8(char c);
+
         void getChar(Pt::Char& c) const;
 
         void setChar(const Pt::Char& c);
-        
+
         void getBool(bool& b) const;
 
         void setBool(bool b);
@@ -480,6 +492,7 @@ class PT_API SerializationInfo
             long long l;
             unsigned long long ul;
             long double f;
+            char* cstr;
             char str[sizeof(Pt::String)];
             BlobValue blob;
             Ref ref;
@@ -891,7 +904,7 @@ inline void operator <<=(SerializationInfo& si, char ch)
 
 inline void operator <<=(SerializationInfo& si, const char* str)
 {
-    si.setString( Pt::String::widen(str) );
+    si.setString8(str);
     si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
@@ -906,7 +919,7 @@ inline void operator >>=(const SerializationInfo& si, std::string& str)
 
 inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
-    si.setString( Pt::String::widen(str) );
+    si.setString8( str.c_str() );
     si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 

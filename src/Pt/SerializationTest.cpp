@@ -196,6 +196,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Benchmark3", *this, &SerializationTest::Benchmark3 );
             Pt::Unit::TestSuite::registerMethod( "Binary", *this, &SerializationTest::Binary );
             Pt::Unit::TestSuite::registerMethod( "BuiltInTypesTest", *this, &SerializationTest::BuiltInTypesTest );
+            Pt::Unit::TestSuite::registerMethod( "String8", *this, &SerializationTest::String8 );
             Pt::Unit::TestSuite::registerMethod( "StdVectorTest", *this, &SerializationTest::StdVectorTest );
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
@@ -207,6 +208,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Benchmark3();
         void Binary();
         void BuiltInTypesTest();
+        void String8();
         void StdVectorTest();
         void DateTest();
         void TimeTest();
@@ -537,10 +539,25 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.isScalar());
     PT_UNIT_ASSERT( 0 == std::strcmp(si.typeName(),"double") );
     Pt::String toString = si.toString();
-    std::cerr << toString.narrow() << std::endl;
     PT_UNIT_ASSERT( toString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
     PT_UNIT_ASSERT(doubleVal2 == 198.8196);
+}
+
+
+void SerializationTest::String8()
+{
+    Pt::SerializationInfo si;
+    std::string str = "Hello World!";
+    si <<= str;
+    PT_UNIT_ASSERT(si.isScalar());
+
+    Pt::String toString = si.toString();
+    PT_UNIT_ASSERT( toString == L"Hello World!" );
+
+    std::string str2;
+    si >>= str2;
+    PT_UNIT_ASSERT(str2 == str);
 }
 
 

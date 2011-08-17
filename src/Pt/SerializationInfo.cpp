@@ -85,6 +85,10 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             formatter.addChar( _Name, _value.ui32, _id );
             break;
 
+        case Char8:
+            formatter.addChar8( _Name, _value.ui32, _id );
+            break;
+
         case Int8:
             formatter.addInt8( _Name, _value.l, _id );
             break;
@@ -138,6 +142,11 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             const char* data = reinterpret_cast<const char*>(&_value);
             const char* last = data + sizeof(Variant) - 1;
             formatter.addBytes( _Name, _TypeName, data, *last, _id );
+            break;
+        }
+        case Str8:
+        {
+            formatter.addString8( _Name, _value.cstr, _id );
             break;
         }
         case Str:
@@ -202,6 +211,10 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.addChar( _Name, _value.ui32, _id );
             break;
 
+        case Char8:
+            formatter.addChar8( _Name, _value.ui32, _id );
+            break;
+
         case Int8:
             formatter.addInt8( _Name, _value.l, _id );
             break;
@@ -255,6 +268,11 @@ void SerializationInfo::format(Formatter& formatter)
             const char* data = reinterpret_cast<const char*>(&_value);
             const char* last = data + sizeof(Variant) - 1;
             formatter.addBytes( _Name, _TypeName, data, *last, _id );
+            break;
+        }
+        case Str8:
+        {
+            formatter.addString8( _Name, _value.cstr, _id );
             break;
         }
         case Str:
@@ -365,7 +383,11 @@ void SerializationInfo::clearValue()
             }
             break;
         }
-
+        case Str8:
+        {
+            delete [] _value.cstr;
+            break;
+        }
         case Str:
         {
             Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
@@ -590,6 +612,90 @@ void SerializationInfo::setBinary(const char* data, size_t length)
 }
 
 
+void SerializationInfo::getString8(std::string& s) const
+{
+	switch(_type)
+	{
+		case Str:
+			s = reinterpret_cast<const Pt::String*>(_value.str)->narrow();
+			break;
+		
+		case Str8:
+			s = _value.cstr;
+			break;
+		
+		case Boolean:
+			convert(s, _value.b);
+			break;
+
+		case Char:
+		case Char8:
+			s.clear();
+			s += char(int(_value.ui32));
+			break;
+
+		case Int8:
+		case Int16:
+		case Int32:
+		case Int64:
+			convert(s, _value.l);
+			break;
+
+		case UInt8:
+		case UInt16:
+		case UInt32:
+		case UInt64:
+			convert(s, _value.ul);
+			break;
+
+		case Float:
+		case Double:
+		case LongDouble:
+			convert(s, _value.f);
+			break;
+		
+		default:
+			throw SerializationError("not a string value");
+	}
+}
+
+
+void SerializationInfo::setString8(const char* s)
+{
+    if( _type == Context )
+        return;
+
+    if(_type != Void)
+        this->clearValue();
+
+    size_t length = std::strlen(s);
+    _value.cstr = new char[length+1];
+    std::memcpy(_value.cstr, s, length);
+    _value.cstr[length] = 0;
+
+    _type = Str8;
+    _isCompound = false;
+}
+
+
+void SerializationInfo::setString8(const std::string& s)
+{
+    if( _type == Context )
+        return;
+
+    if(_type != Void)
+        this->clearValue();
+
+    size_t length = s.size();
+    _value.cstr = new char[length+1];
+    std::memcpy(_value.cstr, s.c_str(), length);
+    _value.cstr[length] = 0;
+
+    _type = Str8;
+    _isCompound = false;
+}
+
+
 void SerializationInfo::getString(Pt::String& s) const
 {
 	switch(_type)
@@ -597,12 +703,18 @@ void SerializationInfo::getString(Pt::String& s) const
 		case Str:
 			s = *(reinterpret_cast<const Pt::String*>(_value.str));
 			break;
-
+		
+		case Str8:
+			s = Pt::String::widen(_value.cstr);
+			break;
+		
 		case Boolean:
 			convert(s, _value.b);
 			break;
 
 		case Char:
+		case Char8:
+			s.clear();
 			s += Pt::Char(_value.ui32);
 			break;
 
@@ -657,11 +769,34 @@ void SerializationInfo::setString(const Pt::String& value)
 }
 
 
+void SerializationInfo::getChar8(char c) const
+{
+    Pt::Char ch;
+    this->getChar(ch);
+    // TODO: consider SerializationError on overflow
+    c = static_cast<int>(ch);
+}
+
+
+void SerializationInfo::setChar8(char c)
+{
+    if( _type == Context )
+        return;
+
+    this->clearValue();
+
+    _isCompound = false;
+    _value.ui32 = c;
+    _type = Char8;
+}
+
+
 void SerializationInfo::getChar(Pt::Char& c) const
 {
     switch(_type)
     {
         case Char:
+        case Char8:
             c = _value.ui32;
             break;
 
@@ -670,8 +805,17 @@ void SerializationInfo::getChar(Pt::Char& c) const
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             if( str->size() != 1 )
 				throw SerializationError("expected character value");
-				
+
 			c = (*str)[0];
+            break;
+        }
+
+        case Str8:
+        {
+            if( _value.cstr[0] == '\0' )
+				throw SerializationError("expected character value");
+
+			c = _value.cstr[0];
             break;
         }
 
@@ -734,7 +878,11 @@ void SerializationInfo::getBool(bool& value) const
             convert(value, *str);
             break;
         }
-
+        case Str8:
+        {
+            convert(value, _value.cstr);
+            break;
+        }
         default:
             throw SerializationError("expected integer value");
     }
@@ -809,6 +957,10 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             convert(l, *str);
             break;
         }
+
+        case Str8:
+            convert(l, _value.cstr);
+            break;
 
         default:
             throw SerializationError("expected scalar value");
@@ -885,6 +1037,9 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             convert(l, *str);
             break;
         }
+        case Str8:
+            convert(l, _value.cstr);
+            break;
 
         default:
             throw SerializationError("expected integer value");
@@ -953,6 +1108,10 @@ void SerializationInfo::getLongDouble(long double& value) const
             convert(value, *str);
             break;
         }
+        
+        case Str8:
+            convert(value, _value.cstr);
+            break;
 
         default:
             throw SerializationError("expected integer value");

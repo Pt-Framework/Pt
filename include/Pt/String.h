@@ -342,6 +342,8 @@ class basic_string< Pt::Char > {
 
         std::string narrow(char dfault = '?') const;
 
+        static basic_string widen(const char* str);
+
         static basic_string widen(const std::string& str);
 
         template <typename OutIterT>

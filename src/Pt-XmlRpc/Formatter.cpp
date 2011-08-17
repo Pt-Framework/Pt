@@ -64,6 +64,16 @@ void Formatter::addString(const char* name, const char* type,
 }
 
 
+void Formatter::addString8(const char* name, const char* value, const char* id)
+{
+	Pt::String str = Pt::String::widen(value);
+    
+    _writer->writeStartTag(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_STRING, str.c_str());
+    _writer->writeEndTag(XMLRPC_VALUE);
+}
+
+
 void Formatter::addBool(const char* name, bool value, 
                         const char* id)
 {
@@ -77,8 +87,20 @@ void Formatter::addBool(const char* name, bool value,
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
+
 void Formatter::addChar(const char* name, const Pt::Char& value,
                         const char* id)
+{
+    Pt::Char str[2] = { value, '\0' };
+
+    _writer->writeStartTag(XMLRPC_VALUE);
+    _writer->writeElement(XMLRPC_STRING , str);
+    _writer->writeEndTag(XMLRPC_VALUE);
+}
+
+
+void Formatter::addChar8(const char* name, char value,
+                         const char* id)
 {
     Pt::Char str[2] = { value, '\0' };
 

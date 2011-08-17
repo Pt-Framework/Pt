@@ -1032,6 +1032,19 @@ inline std::string basic_string<Pt::Char>::narrow(char dfault) const
 }
 
 
+inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const char* str)
+{
+    std::basic_string<Pt::Char> ret;
+    std::size_t len = std::char_traits<char>::length(str);
+    ret.reserve(len);
+
+    for( ; *str != '\0'; ++str)
+        ret += Pt::Char(*str);
+
+    return ret;
+}
+
+
 inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
 {
     std::basic_string<Pt::Char> ret;

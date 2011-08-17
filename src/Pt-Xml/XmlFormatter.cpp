@@ -195,6 +195,14 @@ void XmlFormatter::addString(const char* name, const char* type,
 }
 
 
+void XmlFormatter::addString8(const char* name, const char* value, 
+                              const char* id)
+{
+    _value = Pt::String::widen(value);
+    this->addString(name, "string", _value, id);
+}
+
+
 void XmlFormatter::addBytes(const char* name, const char* type,
                             const char* value, size_t length, const char* id)
 {
@@ -212,10 +220,18 @@ void XmlFormatter::addBool(const char* name, bool value,
 
 
 void XmlFormatter::addChar(const char* name, const Pt::Char& value,
-                     const char* id)
+                           const char* id)
 {
     _value.clear();
     _value += value;
+    this->addString(name, "char", _value, id);
+}
+
+
+void XmlFormatter::addChar8(const char* name, char value, const char* id)
+{
+    _value.clear();
+    _value += Pt::Char(value);
     this->addString(name, "char", _value, id);
 }
 

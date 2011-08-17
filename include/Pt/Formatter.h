@@ -49,33 +49,39 @@ class Formatter
         virtual void addBytes(const char* name, const char* type,
                               const char* value, size_t length, const char* id) = 0;
 
+        virtual void addString8(const char* name, const char* value, 
+                                const char* id) = 0;
+
         virtual void addBool(const char* name, bool value,
                              const char* id) = 0;
 
         virtual void addChar(const char* name, const Pt::Char& value,
                              const char* id) = 0;
 
+        virtual void addChar8(const char* name, char value,
+                              const char* id) = 0;
+
         virtual void addInt8(const char* name, Pt::int8_t value,
                              const char* id) = 0;
-        
+
         virtual void addInt16(const char* name, Pt::int16_t value,
                               const char* id) = 0;
-        
+
         virtual void addInt32(const char* name, Pt::int32_t value,
                               const char* id) = 0;
-        
+
         virtual void addInt64(const char* name, Pt::int64_t value,
                               const char* id) = 0;
-        
+
         virtual void addUInt8(const char* name, Pt::uint8_t value,
                               const char* id) = 0;
-        
+
         virtual void addUInt16(const char* name, Pt::uint16_t value,
                                const char* id) = 0;
-        
+
         virtual void addUInt32(const char* name, Pt::uint32_t value,
                                const char* id) = 0;
-        
+
         virtual void addUInt64(const char* name, Pt::uint64_t value,
                                const char* id) = 0;
 
@@ -84,10 +90,10 @@ class Formatter
 
         virtual void addDouble(const char* name, double value,
                                const char* id) = 0;
-        
+
         virtual void addLongDouble(const char* name, long double value,
                                    const char* id) = 0;
-        
+
         virtual void addReference(const char* name, const char* refId) = 0;
 
         virtual void beginArray(const char* name, const char* type,
