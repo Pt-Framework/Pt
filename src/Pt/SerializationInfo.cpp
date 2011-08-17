@@ -1399,8 +1399,10 @@ SerializationInfo::ConstIterator SerializationInfo::begin() const
 }
 
 
-const SerializationInfo& SerializationInfo::getMember(const char* name) const
+const SerializationInfo& SerializationInfo::getMember(const char* name, size_t) const
 {
+    // TODO: check first if the member at the hinted offset has the specified name
+    //       or if it is nameless. If not perform a linear search.
     if( _isCompound )
     {
         ConstIterator it( _value.seq.first );
