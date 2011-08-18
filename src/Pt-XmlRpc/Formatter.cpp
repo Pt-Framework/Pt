@@ -50,7 +50,7 @@ static const Pt::Char XMLRPC_FALSE[]   = { '0', '\0' };
 static const Pt::Char XMLRPC_TRUE[]    = { '1', '\0' };
 
 template<typename T>
-class array_appender
+class array_appender : public std::iterator<std::output_iterator_tag, T>
 {
     public:
 		array_appender()
@@ -183,14 +183,19 @@ void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
 
 void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 {
-    const size_t bufsize = (sizeof(value) * 4) + 4;
+    const size_t bufsize = (sizeof(value) * 4) + 1 ;
     Pt::Char buf[bufsize];
-    const Pt::Char* num = format(buf, bufsize, value);
-    if( 0 == num  )
-        throw std::logic_error("conversion buffer too small");
+    
+    array_appender<Pt::Char> it(buf, bufsize);
+    array_appender<Pt::Char> end;
+    it = putSigned(it, value);
+    if(it == end)
+		throw std::logic_error("invalid buffer size");
+
+    *it = '\0';
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_INT, num);
+    _writer->writeElement(XMLRPC_INT, buf);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -215,14 +220,19 @@ void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
 
 void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 {
-    const size_t bufsize = (sizeof(value) * 4) + 4;
+    const size_t bufsize = (sizeof(value) * 4) + 1 ;
     Pt::Char buf[bufsize];
-    const Pt::Char* num = format(buf, bufsize, value);
-    if( 0 == num  )
-        throw std::logic_error("conversion buffer too small");
+    
+    array_appender<Pt::Char> it(buf, bufsize);
+    array_appender<Pt::Char> end;
+    it = putUnsigned(it, value);
+    if(it == end)
+		throw std::logic_error("invalid buffer size");
+
+    *it = '\0';
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_INT, num);
+    _writer->writeElement(XMLRPC_INT, buf);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 

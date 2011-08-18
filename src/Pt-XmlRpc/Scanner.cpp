@@ -389,9 +389,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 log_debug("-> found int " << chars.content().narrow());
 
                 long long number = 0;
-                const Pt::Char* end = parse( chars.content().c_str(), number );
+                bool ok = false;
+                getSigned( chars.content().begin(), chars.content().end(), ok, number );
 
-                if(0 == end)
+                if( ! ok )
                     throwSerializationError();
 
                 _current->setInt(number);
@@ -414,9 +415,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 log_debug("-> found double " << chars.content().narrow());
 
                 double number = 0.0;
-                const Pt::Char* end = parse( chars.content().c_str(), number );
+                bool ok = false;
+                getFloat( chars.content().begin(), chars.content().end(), ok, number );
 
-                if(0 == end)
+                if( ! ok )
                     throwSerializationError();
 
                 _current->setDouble(number);

@@ -42,30 +42,6 @@
 
 namespace Pt {
 
-// TODO: use back_inserter
-PT_API const Pt::Char* format(Pt::Char* s, size_t n, long long value);
-
-// TODO: use back_inserter
-PT_API const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value);
-
-// TODO: use back_inserter
-//PT_API const Pt::Char* format(Pt::Char* s, size_t n, double value);
-
-// TODO: use back_inserter
-//PT_API const Pt::Char* format(Pt::Char* s, size_t n, long double value);
-
-// nothrow
-PT_API const Pt::Char* parse(const Pt::Char* str, long long& n);
-
-// nothrow
-PT_API const Pt::Char* parse(const Pt::Char* str, unsigned long long& n);
-
-// nothrow
-PT_API const Pt::Char* parse(const Pt::Char* str, double& n);
-
-// nothrow
-PT_API const Pt::Char* parse(const Pt::Char* str, long double& n);
-
 //
 // Conversions to Pt::String
 //
@@ -75,17 +51,21 @@ inline void convert(String& s, const String& str)
     s = str;
 }
 
-inline void convert(String& s, const std::string& value)
-{
-    s = String::widen(value);
-}
+PT_API void convert(String& s, const std::string& value);
 
 PT_API void convert(String& s, bool value);
+
 PT_API void convert(String& s, char value);
 PT_API void convert(String& s, unsigned char value);
 PT_API void convert(String& s, signed char value);
+
+PT_API void convert(String& s, short value);
+PT_API void convert(String& s, unsigned short value);
 PT_API void convert(String& s, int value);
 PT_API void convert(String& s, unsigned int value);
+PT_API void convert(String& s, long value);
+PT_API void convert(String& s, unsigned long value);
+
 PT_API void convert(String& s, float value);
 PT_API void convert(String& s, double value);
 PT_API void convert(String& s, long double value);
@@ -103,11 +83,18 @@ inline void convert(String& s, const T& value)
 //
 
 PT_API void convert(bool& n, const String& str);
+
 PT_API void convert(char& n, const String& str);
 PT_API void convert(unsigned char& n, const String& str);
 PT_API void convert(signed char& n, const String& str);
+
+PT_API void convert(short& n, const String& str);
+PT_API void convert(unsigned short& n, const String& str);
 PT_API void convert(int& n, const String& str);
 PT_API void convert(unsigned int& n, const String& str);
+PT_API void convert(long& n, const String& str);
+PT_API void convert(unsigned long& n, const String& str);
+
 PT_API void convert(float& n, const String& str);
 PT_API void convert(double& n, const String& str);
 PT_API void convert(long double& n, const String& str);
@@ -122,7 +109,11 @@ inline void convert(T& t, const String& str)
         ConversionError::doThrow("T", "Pt::String");
 }
 
+//
+// Conversions from const Pt::Char* (null-terminated)
+//
 
+PT_API void convert(int& n, const Pt::Char* str);
 
 //
 // Conversions to std::string
@@ -133,15 +124,24 @@ inline void convert(std::string& s, const std::string& str)
     s = str;
 }
 
-inline void convert(std::string& s,const String& str)
-{
-    s = str.narrow();
-}
+PT_API void convert(std::string& s, const String& str);
 
+PT_API void convert(std::string& s, bool value);
+
+PT_API void convert(std::string& s, char value);
+PT_API void convert(std::string& s, signed char value);
+PT_API void convert(std::string& s, unsigned char value);
+
+PT_API void convert(std::string& s, short value);
+PT_API void convert(std::string& s, unsigned short value);
 PT_API void convert(std::string& s, int value);
 PT_API void convert(std::string& s, unsigned int value);
+PT_API void convert(std::string& s, long value);
+PT_API void convert(std::string& s, unsigned long value);
+
 PT_API void convert(std::string& s, float value);
 PT_API void convert(std::string& s, double value);
+PT_API void convert(std::string& s, long double value);
 
 template <typename T>
 inline void convert(std::string& s, const T& value)
@@ -156,8 +156,21 @@ inline void convert(std::string& s, const T& value)
 //
 
 PT_API void convert(bool& n, const std::string& str);
+
+PT_API void convert(char& n, const std::string& str);
+PT_API void convert(signed char& n, const std::string& str);
+PT_API void convert(unsigned char& n, const std::string& str);
+
+PT_API void convert(short& n, const std::string& str);
+PT_API void convert(unsigned short& n, const std::string& str);
+PT_API void convert(int& n, const std::string& str);
+PT_API void convert(unsigned int& n, const std::string& str);
+PT_API void convert(long& n, const std::string& str);
+PT_API void convert(unsigned long& n, const std::string& str);
+
 PT_API void convert(float& n, const std::string& str);
 PT_API void convert(double& n, const std::string& str);
+PT_API void convert(long double& n, const std::string& str);
 
 template <typename T>
 inline void convert(T& t, const std::string& str)
@@ -169,23 +182,11 @@ inline void convert(T& t, const std::string& str)
         ConversionError::doThrow("T", "std::string");
 }
 
-
-inline void convert(float& n, const char* str)
-{ convert(n, std::string(str)); }
-
-inline void convert(double& n, const char* str)
-{ convert(n, std::string(str)); }
-
 //
-// Conversions from wide character strings
+// Conversions from const char* (null-terminated)
 //
 
-inline void convert(float& n, const wchar_t* str)
-{ convert(n, String(str)); }
-
-inline void convert(double& n, const wchar_t* str)
-{ convert(n, String(str)); }
-
+PT_API void convert(int& n, const char* str);
 
 //
 // Generic stream-based conversions
@@ -218,6 +219,396 @@ T convert(const S& from)
     T value = T();
     convert(value, from);
     return value;
+}
+
+//
+// parsing and formating of numbers
+//
+
+template <typename InIterT, typename T>
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
+{
+    n = 0;
+    bool neg = false;
+    ok = false;
+    
+    // strip leading whitespace, parse sign
+    for( ; it != end; ++it)
+    {
+        if( ! Pt::isspace(*it) )
+        {
+			switch(*it)
+			{
+				case '-':
+					neg = true; 
+					// fall through intended
+					
+				case '+':
+					++it; 
+					break;
+			}
+			
+			break;
+        }
+    }
+
+	// parse number
+    bool done = false;
+    while(it != end)
+    {
+        switch(*it)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                n *= 10;
+                n += static_cast<int>(*it) - '0';
+                break;
+
+            default:
+                done = true;
+                break;
+        }
+
+        if(done)
+            break;
+
+        ++it;
+    }
+
+    if(neg) 
+        n *= -1;
+
+	ok = true;
+    return it;
+}
+
+
+template <typename OutIterT, typename T>
+inline OutIterT putSigned(OutIterT it, T i)
+{
+    const bool negative = i < 0;
+    if(negative)
+    {
+		i = -i;
+		*it = '-'; ++it;
+    }
+   
+    // large enough for packed hex, dec, oct numbers
+    const std::size_t buflen = (sizeof(T) * 4) + 1;
+	char buf[buflen];
+    
+    char* end = buf + buflen;
+    char* cur = end;
+
+    do
+    {
+        T lsd = i % 10;
+        i /= 10;
+        --cur;
+        *cur = '0' + int(lsd);
+    } 
+    while(i != 0 && cur != buf);
+
+	return std::copy(cur, end, it);
+}
+
+
+template <typename InIterT, typename T>
+InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
+{
+    n = 0;
+    ok = false;
+    
+    // strip leading whitespace, parse sign
+    for( ; it != end; ++it)
+    {
+        if( ! Pt::isspace(*it) )
+        {
+			switch(*it)
+			{				
+				case '+':
+					++it; 
+					break;
+			}
+			
+			break;
+        }
+    }
+
+	// parse number
+    bool done = false;
+    while(it != end)
+    {
+        switch(*it)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                n *= 10;
+                n += static_cast<int>(*it) - '0';
+                break;
+
+            default:
+                done = true;
+                break;
+        }
+
+        if(done)
+            break;
+
+        ++it;
+    }
+
+	ok = true;
+    return it;
+}
+
+
+template <typename OutIterT, typename T>
+inline OutIterT putUnsigned(OutIterT it, T i)
+{
+    // large enough for packed hex, dec, oct numbers with a sign
+    const std::size_t buflen = (sizeof(T) * 4) + 1;
+	char buf[buflen];
+    
+    char* end = buf + buflen;
+    char* cur = end;
+
+    do
+    {
+        T lsd = i % 10;
+        i /= 10;
+        --cur;
+        *cur = '0' + int(lsd);
+    } 
+    while(i != 0 && cur != buf);
+
+	return std::copy(cur, end, it);
+}
+
+
+template <typename InIterT, typename T>
+InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
+{
+    bool pos = false;
+    bool neg = false;
+    n = 0.0;
+    ok = false;
+
+    // leading whitespace, sign, NaN, infinity
+    bool beforeDigits = true;
+    while(beforeDigits && it != end)
+    {
+        if( Pt::isspace(*it) )
+            continue;
+
+        switch(*it)
+        {
+            case '+':
+                if(pos || neg)
+                    return it;
+
+                pos = true; 
+                break;
+
+            case '-': 
+                if(neg || pos) 
+                    return it;
+
+                neg = true; 
+                break;
+
+            case 'n':
+            case 'N':
+                if(++it == end)
+                    return it;
+
+                if(*it != 'a' && *it != 'A')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 'n' && *it != 'N')
+                    return it;
+
+                n = std::numeric_limits<T>::quiet_NaN();
+                ok = true;
+                return ++it;
+                break;
+
+            case 'i':
+            case 'I':
+                if(++it == end)
+                    return it;
+
+                if(*it != 'n' && *it != 'N')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 'f' && *it != 'F')
+                    return it;
+
+                if( ++it != end )
+                {
+                    if(*it != 'i' && *it != 'I')
+                        return it;
+
+                    if(++it == end)
+                        return it;
+
+                    if(*it != 'n' && *it != 'N')
+                        return it;
+
+                    if(++it == end)
+                        return it;
+
+                    if(*it != 'i' && *it != 'I')
+                        return it;
+
+                    if(++it == end)
+                        return it;
+
+                    if(*it != 't' && *it != 'T')
+                        return it;
+
+                    if(++it == end)
+                        return it;
+
+                    if(*it != 'y' && *it != 'Y')
+                        return it;
+
+                    ++it;
+                }
+
+                n = std::numeric_limits<T>::infinity();
+                if(neg)
+                    n *= -1;
+
+                ok = true;
+                return it;
+                break;
+
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                beforeDigits = false;
+                n *= 10;
+                n += static_cast<int>(*it) - 48;
+                break;
+
+            default:
+                return it;
+                break;
+        }
+
+        ++it;
+    }
+
+    // integral part
+    while(it != end)
+    {
+        if( *it == '.' )
+        {
+            ++it;
+            break;
+        }
+
+        switch(*it)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                n *= 10;
+                n += static_cast<int>(*it) - 48;
+                break;
+
+            default:
+                return it;
+                break;
+        }
+
+        ++it;
+    }
+    
+    if(it == end)
+		return it;
+
+	// fractional part
+    unsigned short digits = 0;
+    T fraction = 0.0;
+    bool done = false;
+    while(it != end)
+    {
+        switch(*it)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                fraction *= 10;
+                fraction += static_cast<int>(*it) - 48;
+                ++digits;
+                break;
+
+            default:
+                done = true;
+                break;
+        }
+
+		if(done)
+			break;
+
+        ++it;
+    }
+
+    T base = 10.0;
+    T exp = digits;
+    fraction /= std::pow(base, exp);
+    n += fraction;
+
+    if(neg)
+        n *= -1;
+
+	ok = true;
+    return it;
 }
 
 

@@ -29,560 +29,74 @@
 #include <Pt/Convert.h>
 #include <cassert>
 
-namespace {
-
-    template <typename CharT>
-    bool _stricmpL(const CharT* p1, const CharT* p2)
-    {
-        unsigned n;
-        for (n = 0; p1[n] && p2[n]; ++n)
-            if (std::tolower(p1[n]) != std::tolower(p2[n]))
-                return false;
-        return p1[n] == p2[n];
-    }
-
-    bool _stricmpL(const Pt::String& s, const wchar_t* p)
-    {
-        Pt::String::size_type n = 0;
-        for ( ; n < s.size(); ++n)
-            if (Pt::tolower(s[n]) != p[n])
-                return false;
-        return p[n] == L'\0';
-    }
-
-    template <typename CharT, typename T>
-    const CharT* parseSigned(const CharT* str, T& n)
-    {
-        n = 0;
-        bool neg = false;
-
-        while(*str != '\0')
-        {
-            if( Pt::isspace(*str) )
-                continue;
-
-            switch(*str)
-            {
-                case '+':
-                    break;
-
-                case '-': 
-                    if(neg) 
-                        return 0;
-
-                    neg = true; 
-                    break;
-
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    n *= 10;
-                    n += static_cast<int>(*str) - '0';
-                    break;
-
-                default:
-                    return 0;
-                    break;
-            }
-
-            ++str;
-        }
-
-        if(neg) 
-            n *= -1;
-
-        return str;
-    }
-
-    template <typename CharT, typename T>
-    const CharT* parseUnsigned(const CharT* str, T& n)
-    {
-        n = 0;
-
-        while(*str != '\0')
-        {
-            if( Pt::isspace(*str) )
-                continue;
-
-            switch(*str)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    n *= 10;
-                    n += static_cast<int>(*str) - '0';
-                    break;
-
-                default:
-                    return 0;
-                    break;
-            }
-
-            ++str;
-        }
-
-        return str;
-    }
-
-    template <typename CharT, typename T>
-    inline const CharT* formatSigned(CharT* buf, size_t n, T i)
-    {
-        const bool negative = i < 0;
-        if(negative)
-        {
-			i = -i;
-        }
-
-        if(0 == n)
-            return 0;
-
-        CharT* psz = buf + n - 1;
-        *psz = 0;
-
-        do
-        {
-            if(psz == buf)
-                return 0;
-
-            T lsd = i % 10;
-            i /= 10;
-            --psz;
-            *psz = '0' + int(lsd);
-
-        } while(i != 0);
-
-        if(negative)
-        {
-            if(psz == buf)
-                return 0;
-
-            --psz;
-            *psz = '-';
-        }
-
-        return psz;
-    }
-
-    template <typename CharT, typename T>
-    inline const CharT* formatUnsigned(CharT* buf, size_t n, T i)
-    {
-        if(0 == n)
-            return 0;
-
-        CharT* psz = buf + n - 1;
-        *psz = 0;
-
-        do
-        {
-            if(psz == buf)
-                return 0;
-
-            T lsd = i % 10;
-            i /= 10;
-            --psz;
-            *psz = '0' + int(lsd);
-
-        } while(i != 0);
-
-        return psz;
-    }
-    
-    template <typename CharT, typename T>
-    inline bool convertSigned(std::basic_string<CharT>& to, T n)
-    {
-        const size_t bufsize = (sizeof(T) * 4) + 4;
-        CharT buf[bufsize];
-        const CharT* str = formatSigned(buf, bufsize, n);
-
-        if(str)
-            to.assign(str);
-
-        return 0 != str;
-    }
-
-    template <typename CharT, typename T>
-    inline bool convertUnsigned(std::basic_string<CharT>& to, T n)
-    {
-        const size_t bufsize = (sizeof(T) * 4) + 4;
-        CharT buf[bufsize];
-        const CharT* str = formatUnsigned(buf, bufsize, n);
-
-        if(str)
-            to.assign(str);
-
-        return 0 != str;
-    }
-
-    template <typename CharT, typename T>
-    const CharT* parseFloat(const CharT* str, T& n)
-    {
-        bool pos = false;
-        bool neg = false;
-        n = 0.0;
-
-        // leading whitespace, sign, NaN, infinity
-        bool beforeDigits = true;
-        while(beforeDigits && *str != '\0')
-        {
-            if( Pt::isspace(*str) )
-                continue;
-
-            switch(*str)
-            {
-                case '+':
-                    if(pos || neg) 
-                        return 0;
-
-                    pos = true; 
-                    break;
-
-                case '-': 
-                    if(neg || pos) 
-                        return 0;
-
-                    neg = true; 
-                    break;
-
-                case 'n':
-                case 'N':
-                    ++str;
-                    if(*str != 'a' && *str != 'A')
-                        return 0;
-
-                    ++str;
-                    if(*str != 'n' && *str != 'N')
-                        return 0;
-
-                    n = std::numeric_limits<T>::quiet_NaN();
-                    return ++str;
-                    break;
-
-                case 'i':
-                case 'I':
-                    ++str;
-                    if(*str != 'n' && *str != 'N')
-                        return 0;
-
-                    ++str;
-                    if(*str != 'f' && *str != 'F')
-                        return 0;
-
-                    ++str;
-                    if(*str == 'i' || *str == 'I')
-                    {
-                        ++str;
-                        if(*str != 'n' && *str != 'N')
-                            return 0;
-
-                        ++str;
-                        if(*str != 'i' && *str != 'I')
-                            return 0;
-
-                        ++str;
-                        if(*str != 't' && *str != 'Z')
-                            return 0;
-
-                         ++str;
-                        if(*str != 'y' && *str != 'Y')
-                            return 0;
-                            
-                        ++str;
-                    }
-
-                    n = std::numeric_limits<T>::infinity();
-                    if(neg)
-                        n *= -1;
-
-                    return str;
-                    break;
-
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    beforeDigits = false;
-                    n *= 10;
-                    n += static_cast<int>(*str) - 48;
-                    break;
-
-                default:
-                    return 0;
-                    break;
-            }
-
-            ++str;
-        }
-
-        // integral part
-        while(*str != '\0')
-        {
-            if( *str == '.' )
-            {
-                ++str;
-                break;
-            }
-
-            switch(*str)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    n *= 10;
-                    n += static_cast<int>(*str) - 48;
-                    break;
-
-                default:
-                    return 0;
-                    break;
-            }
-
-            ++str;
-        }
-
-		// fractional part
-        unsigned short digits = 0;
-        T fraction = 0.0;
-        while(*str != '\0')
-        {
-            switch(*str)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    fraction *= 10;
-                    fraction += static_cast<int>(*str) - 48;
-                    ++digits;
-                    break;
-
-                default:
-                    return 0;
-                    break;
-            }
-
-            ++str;
-        }
-
-        T base = 10.0;
-        T exp = digits;
-        fraction /= std::pow(base, exp);
-        n += fraction;
-
-        if(neg)
-            n *= -1;
-
-        return str;
-    }
-
-    template <typename CharT, typename T>
-    inline const CharT* formatFloat(CharT* str, size_t n, T d)
-    {
-        CharT* end = str + n;
-        CharT* psz = str;
-
-        // 1. Test for not-a-number with x != x
-        if( d != d ) 
-        {
-            if(n < 4)
-                return 0;
-
-            str[0] = 'n'; str[1] = 'a'; str[2] = 'n'; str[3] = '\0';
-            return str;
-        }
-
-        //2. check sign
-        if(d < 0.0)
-        {
-            if(psz == end)
-                return 0;
-
-            *psz = '-';
-            ++psz;
-        }
-
-        int digit = 0;
-        T num = std::fabs(d);
-
-        //3. Test for infinity
-        if( num == std::numeric_limits<T>::infinity() ) 
-        {
-            if(psz == end)
-                return 0;
-
-            *psz = 'i';
-
-            if(++psz == end)
-                return 0;
-
-            *psz = 'n';
-
-            if(++psz == end)
-                return 0;
-
-            *psz = 'f';
-
-            if(++psz == end)
-                return 0;
-
-            *psz = '\0';
-            return str;
-        }
-
-    	//4. integral part
-    	int m = static_cast<int>( std::log10(num) );
-    	int places = std::numeric_limits<T>::digits10;
-        
-        if(num == 0.0 || m < 0)
-        {
-    		if(psz == end)
-    			return 0;
-
-    		*psz = '0';
-    		++psz;
-        }
-        else
-        {
-    		while(m >= 0)
-    		{
-    			T weight = std::pow( T(10.0), m);
-    			digit = static_cast<int>( floor(num / weight) );
-    			num -= (digit * weight);
-    			
-    			if(psz == end)
-    				return 0;
-
-    			*psz = '0' + digit;
-    			++psz;
-    	     
-    			--m;
-    			--places;
-    		}
-        }
-        
-        //5. fractional part
-    	T fract = num;
-        
-        if(psz == end)
-    		return 0;
-
-        *psz = '.';
-        ++psz;
-
-        do
-        {
-            fract *= 10;
-            digit = static_cast<int>( floor(fract) );
-            fract -= digit;
-            char c = '0' + digit;
-
-            if(psz == end)
-                return 0;
-    	
-            *psz = c;
-            ++psz;
-            
-            // count significant digits from first non-null digit
-            if(places != std::numeric_limits<T>::digits10 || digit != 0)
-            {
-				--places;
-            }
-        } 
-        while(places != 0 && fract != 0.0);
-
-    	//5. add null terminator
-        if(psz == end)
-             return 0;
-
-        *psz = 0;
-        return str;
-    }
-}
-
 namespace Pt {
 
-const Pt::Char* format(Pt::Char* s, size_t n, long long value)
+/** @internal This is useful, move this to Pt/Iterator.h
+*/
+template<typename T>
+class nullterm_array_iterator : public std::iterator<std::input_iterator_tag, T>
 {
-    return formatSigned(s, n, value);
-}
+    public:
+		nullterm_array_iterator()
+		: _ptr(0)
+		{ }
 
+		explicit nullterm_array_iterator(const T* ptr)
+		: _ptr(ptr)
+		{
+			if(*_ptr == '\0')
+				_ptr = 0; 
+		}
 
-const Pt::Char* format(Pt::Char* s, size_t n, unsigned long long value)
-{
-    return formatUnsigned(s, n, value);
-}
+		nullterm_array_iterator<T>& operator=(const nullterm_array_iterator<T>& it)
+		{
+		    _ptr = it._ptr;
+		    return *this;
+		}
 
+		bool operator==(const nullterm_array_iterator<T>& it) const
+		{
+		    return _ptr == it._ptr;
+		}
 
-const Pt::Char* format(Pt::Char* s, size_t n, double value)
-{
-        return formatFloat(s, n, value);
-}
+		bool operator!=(const nullterm_array_iterator<T>& it) const
+		{
+		    return _ptr != it._ptr;
+		}
 
+		const T& operator*() const
+		{
+			return *_ptr;
+		}
 
-const Pt::Char* format(Pt::Char* s, size_t n, long double value)
-{
-        return formatFloat(s, n, value);
-}
+		nullterm_array_iterator<T>& operator++()
+		{
+			if(*++_ptr == '\0')
+				_ptr = 0;
 
+			return *this;
+		}
 
-const Pt::Char* parse(const Pt::Char* str, long long& n)
-{
-    return parseSigned(str, n);
-}
+		nullterm_array_iterator<T> operator++(int)
+		{
+			if(*++_ptr == '\0')
+				_ptr = 0;
 
+			return *this;
+		}
 
-const Pt::Char* parse(const Pt::Char* str, unsigned long long& n)
-{
-    return parseUnsigned(str, n);
-}
-
-
-const Pt::Char* parse(const Pt::Char* str, double& n)
-{
-    return parseFloat(str, n);
-}
-
-
-const Pt::Char* parse(const Pt::Char* str, long double& n)
-{
-    return parseFloat(str, n);
-}
+	private:
+		const T* _ptr;
+};
 
 //
 // Conversions to Pt::String
 //
+
+void convert(String& s, const std::string& value)
+{
+    s = String::widen(value);
+}
 
 void convert(String& str, bool value)
 {
@@ -598,46 +112,77 @@ void convert(String& str, char value)
 
 void convert(String& str, unsigned char value)
 {
-    if( false == convertUnsigned(str, value) )
-        ConversionError::doThrow("unsigned char", "Pt::String");
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, signed char value)
 {
-    if( false == convertSigned(str, value) )
-        ConversionError::doThrow("signed char", "Pt::String");
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(Pt::String& str, short value)
+{
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(Pt::String& str, unsigned short value)
+{
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, int value)
 {
-    if( false == convertSigned(str, value) )
-        ConversionError::doThrow("int", "Pt::String");
+	str.clear();
+	putSigned(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned int value)
 {
-    if( false == convertUnsigned(str, value) )
-        ConversionError::doThrow("unsigned int", "Pt::String");
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
+}
+
+
+void convert(Pt::String& str, long value)
+{
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(Pt::String& str, unsigned long value)
+{
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, float value)
 {
+	str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, double value)
 {
+	str.clear();
 	putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, long double value)
 {
+	str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
@@ -666,123 +211,226 @@ void convert(char& c, const String& str)
 
 void convert(unsigned char& n, const String& str)
 {
-    const Pt::Char* end = parseUnsigned( str.c_str(), n);
+    bool ok = false;
+    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
 
-    if(0 == end || *end != '\0')
+    if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned char", "Pt::String");
 }
 
 
 void convert(signed char& n, const String& str)
 {
-    const Pt::Char* end = parseSigned( str.c_str(), n );
+    bool ok = false;
+    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
 
-    if(0 == end || *end != '\0')
+    if( r != str.end() || ! ok )
         ConversionError::doThrow("signed char", "Pt::String");
+}
+
+
+void convert(short& n, const Pt::String& str)
+{
+    bool ok = false;
+    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("short", "Pt::String");
+}
+
+
+void convert(unsigned short& n, const Pt::String& str)
+{
+    bool ok = false;
+    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned short", "Pt::String");
 }
 
 
 void convert(int& n, const Pt::String& str)
 {
-    const Pt::Char* end = parseSigned( str.c_str(), n );
+    bool ok = false;
+    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
 
-    if(0 == end || *end != '\0')
+    if( r != str.end() || ! ok )
         ConversionError::doThrow("int", "Pt::String");
 }
 
 
 void convert(unsigned int& n, const Pt::String& str)
 {
-    const Pt::Char* end = parseUnsigned( str.c_str(), n );
+    bool ok = false;
+    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
 
-    if(0 == end || *end != '\0')
-        ConversionError::doThrow("int", "Pt::String");
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned int", "Pt::String");
+}
+
+
+void convert(long& n, const Pt::String& str)
+{
+    bool ok = false;
+    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("long", "Pt::String");
+}
+
+
+void convert(unsigned long& n, const Pt::String& str)
+{
+    bool ok = false;
+    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned long", "Pt::String");
 }
 
 
 void convert(float& n, const String& str)
 {
-    const Pt::Char* end = parseFloat( str.c_str(), n );
-
-    if(0 == end || *end != '\0')
+    bool ok = false;
+    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
         ConversionError::doThrow("float", "Pt::String");
-/*
-    // not a number
-    if (_stricmpL(str, L"nan"))
-    {
-        n = std::numeric_limits<float>::quiet_NaN();
-        return;
-    }
-
-    // inf
-    if (_stricmpL(str, L"inf") || _stricmpL(str.c_str(), L"infinity"))
-    {
-        n = std::numeric_limits<float>::infinity();
-        return;
-    }
-
-    // -inf
-    if (_stricmpL(str, L"-inf") || _stricmpL(str.c_str(), L"-infinity"))
-    {
-        n = -std::numeric_limits<float>::infinity();
-        return;
-    }
-
-    IStringStream is(str);
-    Char ch;
-    is >> n;
-
-    if (is.fail() || !(is >> ch).eof())
-    {
-        ConversionError::doThrow("float", "Pt::String");
-    }
-    */
 }
 
 
 void convert(double& n, const String& str)
 {
-    const Pt::Char* end = parseFloat( str.c_str(), n );
-
-    if(0 == end || *end != '\0')
+    bool ok = false;
+    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
         ConversionError::doThrow("double", "Pt::String");
 }
 
 
 void convert(long double& n, const String& str)
 {
-    const Pt::Char* end = parseFloat( str.c_str(), n );
+    bool ok = false;
+    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
+        ConversionError::doThrow("long double", "Pt::String");
+}
 
-    if(0 == end || *end != '\0')
-        ConversionError::doThrow("double", "Pt::String");
+//
+// Conversions from Pt::Char*
+//
+
+void convert(int& n, const Pt::Char* str)
+{
+    bool ok = false;
+    nullterm_array_iterator<Pt::Char> it(str);
+    nullterm_array_iterator<Pt::Char> end;
+    it = getSigned( it, end, ok, n );
+
+    if( it != end || ! ok )
+        ConversionError::doThrow("int", "const char*");
 }
 
 //
 // Conversions to std::string
 //
 
+void convert(std::string& s, const String& str)
+{
+    s = str.narrow();
+}
+
+
+void convert(std::string& str, bool value)
+{
+    static const char* trueValue = "true";
+    static const char* falseValue = "false";
+    str = value ? trueValue : falseValue;
+}
+
+
+void convert(std::string& str, char value)
+{
+	str.clear();
+	str += value;
+}
+
+
+void convert(std::string& str, signed char value)
+{
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, unsigned char value)
+{
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, short value)
+{
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, unsigned short value)
+{
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
+}
+
+
 void convert(std::string& str, int value)
 {
-    if( false == convertSigned(str, value) )
-        ConversionError::doThrow("int", "std::string");
+	str.clear();
+	putSigned(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned int value)
 {
-    if( false == convertUnsigned(str, value) )
-        ConversionError::doThrow("unsigned int", "std::string");
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, long value)
+{
+	str.clear();
+	putSigned(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, unsigned long value)
+{
+	str.clear();
+	putUnsigned(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, float value)
 {
+    str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, double value)
 {
+    str.clear();
+    putFloat(std::back_inserter(str), value);
+}
+
+
+void convert(std::string& str, long double value)
+{
+    str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
@@ -801,21 +449,138 @@ void convert(bool& n, const std::string& str)
 }
 
 
+void convert(char& c, const std::string& str)
+{
+    if ( str.empty() )
+        ConversionError::doThrow("char", "std::string");
+
+    int n = str[0];
+    c = n;
+}
+
+
+void convert(signed char& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("signed char", "std::string");
+}
+
+
+void convert(unsigned char& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned char", "std::string");
+}
+
+
+void convert(short& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("short", "std::string");
+}
+
+
+void convert(unsigned short& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned short", "std::string");
+}
+
+
+void convert(int& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("int", "std::string");
+}
+
+
+void convert(unsigned int& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned int", "std::string");
+}
+
+
+void convert(long& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("long", "std::string");
+}
+
+
+void convert(unsigned long& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+
+    if( r != str.end() || ! ok )
+        ConversionError::doThrow("unsigned long", "std::string");
+}
+
+
 void convert(float& n, const std::string& str)
 {
-    const char* end = parseFloat( str.c_str(), n );
-
-    if(0 == end || *end != '\0')
+    bool ok = false;
+    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
         ConversionError::doThrow("float", "std::string");
 }
 
 
 void convert(double& n, const std::string& str)
 {
-    const char* end = parseFloat( str.c_str(), n );
+    bool ok = false;
+    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
+        ConversionError::doThrow("double", "std::string");
+}
 
-    if(0 == end || *end != '\0')
-        ConversionError::doThrow("float", "std::string");
+
+void convert(long double& n, const std::string& str)
+{
+    bool ok = false;
+    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    
+    if(r != str.end() || ! ok)
+        ConversionError::doThrow("long double", "std::string");
+}
+
+//
+// Conversions from const char*
+//
+
+void convert(int& n, const char* str)
+{
+    bool ok = false;
+    nullterm_array_iterator<char> it(str);
+    nullterm_array_iterator<char> end;
+    it = getSigned( it, end, ok, n );
+
+    if( it != end || ! ok )
+        ConversionError::doThrow("int", "const char*");
 }
 
 }

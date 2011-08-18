@@ -42,7 +42,10 @@ class ConversionTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("ConversionTest")
         {
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
-            Pt::Unit::TestSuite::registerMethod( "Int", *this, &ConversionTest::Int );
+            Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
+            Pt::Unit::TestSuite::registerMethod( "StringToInt", *this, &ConversionTest::StringToInt );
+            Pt::Unit::TestSuite::registerMethod( "UIntToString", *this, &ConversionTest::UIntToString );
+            Pt::Unit::TestSuite::registerMethod( "StringToUInt", *this, &ConversionTest::StringToUInt );
             Pt::Unit::TestSuite::registerMethod( "Char8", *this, &ConversionTest::Char8 );
             Pt::Unit::TestSuite::registerMethod( "UChar8", *this, &ConversionTest::UChar8 );
             Pt::Unit::TestSuite::registerMethod( "SChar8", *this, &ConversionTest::SChar8 );
@@ -55,7 +58,10 @@ class ConversionTest : public Pt::Unit::TestSuite
 
     protected:
         void Bool();
-        void Int();
+        void IntToString();
+        void StringToInt();
+        void UIntToString();
+        void StringToUInt();
         void Char8();
         void UChar8();
         void SChar8();
@@ -81,15 +87,90 @@ void ConversionTest::Bool()
 }
 
 
-void ConversionTest::Int()
+void ConversionTest::IntToString()
 {
-    int value = 10;
+    int value = 0;
     Pt::String str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str == L"10" );
+    PT_UNIT_ASSERT( str.substr(0, 4) == L"0" );
 
-    str = L"20";
+    value = 1;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 8) == L"1" );
+
+    value = -1;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 12) == L"-1" );
+    
+    value = 123456;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 8) == L"123456" );
+    
+    value = -123456;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 12) == L"-123456" );
+}
+
+void ConversionTest::StringToInt()
+{
+    Pt::String str = L"0";
+    int value = Pt::convert<int>(str);
+    PT_UNIT_ASSERT( value == 0 );
+
+    str = L"1";
     value = Pt::convert<int>(str);
-    PT_UNIT_ASSERT( value == 20 );
+    PT_UNIT_ASSERT( value == 1 );
+    
+    str = L"+1";
+    value = Pt::convert<int>(str);
+    PT_UNIT_ASSERT( value == 1 );
+    
+    str = L"-1";
+    value = Pt::convert<int>(str);
+    PT_UNIT_ASSERT( value == -1 );
+    
+    str = L"123456";
+    value = Pt::convert<int>(str);
+    PT_UNIT_ASSERT( value == 123456 );
+    
+    str = L"-123456";
+    value = Pt::convert<int>(str);
+    PT_UNIT_ASSERT( value == -123456 );
+}
+
+
+void ConversionTest::UIntToString()
+{
+    unsigned int value = 0;
+    Pt::String str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 4) == L"0" );
+
+    value = 1;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 8) == L"1" );
+    
+    value = 123456;
+    str = Pt::convert<Pt::String>(value);
+    PT_UNIT_ASSERT( str.substr(0, 8) == L"123456" );
+}
+
+
+void ConversionTest::StringToUInt()
+{
+    Pt::String str = L"0";
+    int value = Pt::convert<unsigned int>(str);
+    PT_UNIT_ASSERT( value == 0 );
+
+    str = L"1";
+    value = Pt::convert<unsigned int>(str);
+    PT_UNIT_ASSERT( value == 1 );
+    
+    //str = L"+1";
+    //value = Pt::convert<unsigned int>(str);
+    //PT_UNIT_ASSERT( value == 1 );
+    
+    str = L"123456";
+    value = Pt::convert<unsigned int>(str);
+    PT_UNIT_ASSERT( value == 123456 );
 }
 
 
@@ -193,11 +274,11 @@ void ConversionTest::StringToFloat()
     str = L"nan";
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value != value);
-    
+
     str = L"NaN";
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value != value);
-    
+ 
     str = L"inf";
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value == std::numeric_limits<float>::infinity());
