@@ -429,8 +429,8 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     ok = false;
 
     // leading whitespace, sign, NaN, infinity
-    bool beforeDigits = true;
-    while(beforeDigits && it != end)
+    bool done = false;
+    while(it != end)
     {
         if( Pt::isspace(*it) )
             continue;
@@ -524,25 +524,13 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
                 return it;
                 break;
 
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                beforeDigits = false;
-                n *= 10;
-                n += static_cast<int>(*it) - 48;
-                break;
-
             default:
-                return it;
+                done = true;
                 break;
         }
+
+        if(done)
+            break;
 
         ++it;
     }
@@ -568,6 +556,9 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
             case '7':
             case '8':
             case '9':
+                if ( n != 0.0 && 10.0 > std::numeric_limits<T>::max() / n )
+					return it;
+
                 n *= 10;
                 n += static_cast<int>(*it) - 48;
                 break;
@@ -581,12 +572,23 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     }
     
     if(it == end)
-		return it;
+        return it;
 
-	// fractional part
+    // fractional part
     unsigned short digits = 0;
+    size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
+    while(it != end && *it == '0')
+    {
+        if( digits > maxDigits )
+            return it;
+
+		++digits;
+		++it;
+    }
+ 
+    unsigned short significants = 0;
     T fraction = 0.0;
-    bool done = false;
+    done = false;
     while(it != end)
     {
         switch(*it)
@@ -601,9 +603,15 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
             case '7':
             case '8':
             case '9':
-                fraction *= 10;
-                fraction += static_cast<int>(*it) - 48;
-                ++digits;
+                if( significants <= std::numeric_limits<T>::digits10 )
+                {
+                    fraction *= 10;
+                    fraction += static_cast<int>(*it) - 48;
+
+                    ++digits;
+				    ++significants;
+                }
+
                 break;
 
             default:
