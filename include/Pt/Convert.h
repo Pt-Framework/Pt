@@ -556,9 +556,6 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
             case '7':
             case '8':
             case '9':
-                if ( n != 0.0 && 10.0 > std::numeric_limits<T>::max() / n )
-					return it;
-
                 n *= 10;
                 n += static_cast<int>(*it) - 48;
                 break;
