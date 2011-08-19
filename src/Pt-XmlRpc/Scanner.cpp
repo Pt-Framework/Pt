@@ -388,7 +388,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 log_debug("-> found int " << chars.content().narrow());
 
-                long long number = 0;
+                Pt::int32_t number = 0;
                 bool ok = false;
                 getSigned( chars.content().begin(), chars.content().end(), ok, number );
 

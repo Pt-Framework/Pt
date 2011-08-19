@@ -380,12 +380,12 @@ class PT_API SerializationInfo
 
         /** @brief Deserialization of member data
         */
-        const SerializationInfo& getMember(const std::string& name, size_t n = 0) const
+        const SerializationInfo& getMember(const std::string& name) const
         { return this->getMember( name.c_str() ); }
 
         /** @brief Deserialization of member data
         */ 
-        const SerializationInfo& getMember(const char* name, size_t n = 0) const;
+        const SerializationInfo& getMember(const char* name) const;
 
         /** @brief Find member data by name
 

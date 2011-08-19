@@ -42,6 +42,7 @@ class ConversionTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("ConversionTest")
         {
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
+            Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
             Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
             Pt::Unit::TestSuite::registerMethod( "StringToInt", *this, &ConversionTest::StringToInt );
             Pt::Unit::TestSuite::registerMethod( "UIntToString", *this, &ConversionTest::UIntToString );
@@ -58,6 +59,7 @@ class ConversionTest : public Pt::Unit::TestSuite
 
     protected:
         void Bool();
+        void NumberOverflow();
         void IntToString();
         void StringToInt();
         void UIntToString();
@@ -84,6 +86,22 @@ void ConversionTest::Bool()
     str = L"false";
     b = Pt::convert<bool>(str);
     PT_UNIT_ASSERT( b == false );
+}
+
+
+void ConversionTest::NumberOverflow()
+{
+    Pt::String str = L"256";
+    PT_UNIT_ASSERT_THROW( Pt::convert<unsigned char>(str), Pt::ConversionError );
+    
+    str = L"2000";
+    PT_UNIT_ASSERT_THROW( Pt::convert<unsigned char>(str), Pt::ConversionError );
+    
+    str = L"128";
+    PT_UNIT_ASSERT_THROW( Pt::convert<signed char>(str), Pt::ConversionError );
+    
+    str = L"1000";
+    PT_UNIT_ASSERT_THROW( Pt::convert<signed char>(str), Pt::ConversionError );
 }
 
 

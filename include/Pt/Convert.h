@@ -253,6 +253,7 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
     }
 
 	// parse number
+	T d = 0;
     bool done = false;
     while(it != end)
     {
@@ -268,8 +269,16 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
             case '7':
             case '8':
             case '9':
+                if ( n != 0 && 10 > std::numeric_limits<T>::max() / n )
+					return it;
+
                 n *= 10;
-                n += static_cast<int>(*it) - '0';
+
+                d = *it - '0';
+                if(d > std::numeric_limits<T>::max() - n)
+                    return it;
+                
+                n += d;
                 break;
 
             default:
@@ -344,6 +353,7 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
     }
 
 	// parse number
+	T d = 0;
     bool done = false;
     while(it != end)
     {
@@ -359,8 +369,16 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
             case '7':
             case '8':
             case '9':
+                if ( n != 0 && 10 > std::numeric_limits<T>::max() / n )
+					return it;
+
                 n *= 10;
-                n += static_cast<int>(*it) - '0';
+
+                d = *it - '0';
+                if(d > std::numeric_limits<T>::max() - n)
+                    return it;
+                
+                n += d;
                 break;
 
             default:
