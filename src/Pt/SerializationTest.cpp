@@ -28,44 +28,19 @@
  */
 #undef PT_API_EXPORT
 
-
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
 #include "Pt/SerializationContext.h"
-#include "Pt/Math.h"
+#include "Pt/SerializationInfo.h"
+#include "Pt/Deserializer.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <iterator>
-#include <cstring> // for atoi only
-
 #include "Pt/System/Clock.h"
 #include "Pt/StringStream.h"
-
-namespace Pt {
-
-inline void convert(int& n, const Pt::String& str)
-{
-    // Pt::StringStream ssc;
-    // ssc.clear();
-    // ssc.str(str);
-    // ssc >> n;
-
-    //int value = 1234;
-    //memcpy(&n, &value, sizeof(int));
-
-    n = std::atoi("111");
-}
-
-}
-
-#include "Pt/SerializationInfo.h"
-#include "Pt/Deserializer.h"
-
+#include <string>
+#include <iostream>
 
 class IntComposer : public Pt::IComposer
 {

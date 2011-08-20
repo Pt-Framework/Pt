@@ -49,7 +49,7 @@ Service::~Service()
 }
 
 
-ServiceProcedure* Service::getProcedure(const std::string& name)
+ServiceProcedure* Service::getProcedure(const std::string& name, SerializationContext* ctx)
 {
     ProcedureMap::iterator it = _procedures.find( name );
     if( it == _procedures.end() )
@@ -57,7 +57,7 @@ ServiceProcedure* Service::getProcedure(const std::string& name)
         return 0;
     }
 
-    return it->second->clone();
+    return it->second->clone(ctx);
 }
 
 
@@ -74,6 +74,13 @@ void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 }
 
 
+Http::Responder* Service::newResponder()
+{
+    return new XmlRpcResponder(*this);
+}
+
+
+/*
 Http::Responder* Service::createResponder(const Http::Request& req)
 {
     if (req.header().isHeaderValue("Content-Type", "text/xml"))
@@ -87,6 +94,7 @@ void Service::releaseResponder(Http::Responder* resp)
 {
     delete resp;
 }
+*/
 
 }
 

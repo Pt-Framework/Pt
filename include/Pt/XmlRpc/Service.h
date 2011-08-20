@@ -53,7 +53,7 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
-        virtual ServiceProcedure* clone() const = 0;
+        virtual ServiceProcedure* clone(SerializationContext* ctx) const = 0;
 
         virtual IComposer** beginCall() = 0;
 
@@ -73,9 +73,15 @@ class BasicServiceProcedure : public ServiceProcedure
     public:
         typedef Callable<R, A1, A2, A3, A4, A5> CallableT;
 
-        BasicServiceProcedure( const CallableT& cb )
+        BasicServiceProcedure( const CallableT& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _a1(ctx)
+        , _a2(ctx)
+        , _a3(ctx)
+        , _a4(ctx)
+        , _a5(ctx)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
@@ -92,9 +98,9 @@ class BasicServiceProcedure : public ServiceProcedure
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -152,9 +158,14 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
     public:
         typedef Callable<R, A1, A2, A3, A4> CallableT;
 
-        BasicServiceProcedure( const CallableT& cb )
+        BasicServiceProcedure( const CallableT& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _a1(ctx)
+        , _a2(ctx)
+        , _a3(ctx)
+        , _a4(ctx)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
@@ -170,9 +181,9 @@ class BasicServiceProcedure<R, C, A1, A2, A3, A4,
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -228,9 +239,13 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
     public:
         typedef Callable<R, A1, A2, A3> CallableT;
 
-        BasicServiceProcedure( const CallableT& cb )
+        BasicServiceProcedure( const CallableT& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _a1(ctx)
+        , _a2(ctx)
+        , _a3(ctx)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
@@ -245,9 +260,9 @@ class BasicServiceProcedure<R, C, A1, A2, A3,
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -297,20 +312,18 @@ class BasicServiceProcedure<R, C, A1, A2,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2>& cb )
+        BasicServiceProcedure( const Callable<R, A1, A2>& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _a1(ctx)
+        , _a2(ctx)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
             _args[0] = &_a1;
             _args[1] = &_a2;
             _args[2] = 0;
-
-            /// TODO
-            //_a1.setContext(_context);
-            //_a2.setContext(_context);
-            //_r.setContext(_context);
         }
 
         ~BasicServiceProcedure()
@@ -318,9 +331,9 @@ class BasicServiceProcedure<R, C, A1, A2,
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -347,8 +360,6 @@ class BasicServiceProcedure<R, C, A1, A2,
         V1 _v1;
         V2 _v2;
         IComposer* _args[3];
-        /// TODO
-        //static SerializationContext _context;
         Composer<V1> _a1;
         Composer<V2> _a2;
         Decomposer<RV> _r;
@@ -375,9 +386,11 @@ class BasicServiceProcedure<R, C, A1,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1>& cb )
+        BasicServiceProcedure( const Callable<R, A1>& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _a1(ctx)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
@@ -390,9 +403,9 @@ class BasicServiceProcedure<R, C, A1,
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -430,9 +443,10 @@ class BasicServiceProcedure<R, C, Pt::Void,
                                   Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R>& cb )
+        BasicServiceProcedure( const Callable<R>& cb, SerializationContext* ctx = 0 )
         : ServiceProcedure()
         , _cb(0)
+        , _r(ctx)
         {
             _cb = cb.clone();
 
@@ -444,9 +458,9 @@ class BasicServiceProcedure<R, C, Pt::Void,
             delete _cb;
         }
 
-        ServiceProcedure* clone() const
+        ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new BasicServiceProcedure(*_cb);
+            return new BasicServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -471,7 +485,7 @@ class BasicServiceProcedure<R, C, Pt::Void,
 };
 
 
-class PT_XMLRPC_API Service : public Http::Service
+class PT_XMLRPC_API Service : public Http::CachedServiceBase
 {
     public:
         Service()
@@ -480,7 +494,7 @@ class PT_XMLRPC_API Service : public Http::Service
         virtual ~Service();
 
         // TODO cache service procedures and clone on demand
-        ServiceProcedure* getProcedure(const std::string& name);
+        ServiceProcedure* getProcedure(const std::string& name, SerializationContext* ctx);
 
         void releaseProcedure(ServiceProcedure* proc);
 
@@ -526,9 +540,11 @@ class PT_XMLRPC_API Service : public Http::Service
             this->registerProcedure(name, proc);
         }
 
-        virtual Http::Responder* createResponder(const Http::Request&);
+        virtual Http::Responder* newResponder();
 
-        virtual void releaseResponder(Http::Responder* resp);
+        //virtual Http::Responder* createResponder(const Http::Request&);
+
+        //virtual void releaseResponder(Http::Responder* resp);
 
     protected:
         void registerProcedure(const std::string& name, ServiceProcedure* proc);

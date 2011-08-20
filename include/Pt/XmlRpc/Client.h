@@ -47,6 +47,7 @@ class ClientImpl;
 class PT_XMLRPC_API Client : public NonCopyable
 {
         ClientImpl* _impl;
+        SerializationContext _ctx;
 
     protected:
         void impl(ClientImpl* i) { _impl = i; }
@@ -57,6 +58,11 @@ class PT_XMLRPC_API Client : public NonCopyable
         { }
 
         virtual ~Client();
+
+        SerializationContext& context()
+        {
+            return _ctx;
+        }
 
         void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 

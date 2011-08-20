@@ -98,7 +98,8 @@ class RemoteProcedureBase : public IRemoteProcedure
     public:
         RemoteProcedureBase(Client& client, const std::string& name)
         : IRemoteProcedure(client, name),
-          _result(client)
+          _result(client),
+          _r( & client.context() )
         { }
 
         void setFault(int rc, const std::string& msg)
@@ -147,6 +148,16 @@ class RemoteProcedure : public RemoteProcedureBase<R>
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
+        , _a6( & client.context() )
+        , _a7( & client.context() )
+        , _a8( & client.context() )
+        , _a9( & client.context() )
+        , _a10( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
@@ -226,6 +237,15 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
+        , _a6( & client.context() )
+        , _a7( & client.context() )
+        , _a8( & client.context() )
+        , _a9( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
@@ -302,6 +322,14 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
+        , _a6( & client.context() )
+        , _a7( & client.context() )
+        , _a8( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
@@ -375,6 +403,13 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
+        , _a6( & client.context() )
+        , _a7( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
@@ -445,6 +480,12 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
+        , _a6( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
@@ -512,6 +553,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
+        , _a5( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
@@ -576,6 +622,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
+        , _a4( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
@@ -637,6 +687,9 @@ class RemoteProcedure<R, A1, A2, A3,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
+        , _a3( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2, const A3& a3)
@@ -695,6 +748,8 @@ class RemoteProcedure<R, A1, A2,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
+        , _a2( & client.context() )
         { }
 
         void begin(const A1& a1, const A2& a2)
@@ -750,6 +805,7 @@ class RemoteProcedure<R, A1,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+        , _a1( & client.context() )
         { }
 
         void begin(const A1& a1)
