@@ -86,7 +86,7 @@ class PT_HTTP_API Service
         virtual void releaseResponder(Responder*) = 0;
 };
 
-class CachedServiceBase : public Service
+class PT_HTTP_API CachedServiceBase : public Service
 {
         typedef std::vector<Responder*> Responders;
         Responders responders;
