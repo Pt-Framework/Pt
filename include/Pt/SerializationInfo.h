@@ -35,7 +35,7 @@
 #include <Pt/LiteralPtr.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>
-#include <Pt/SerializationContext.h>
+#include <Pt/SerializationSurrogate.h>
 #include <typeinfo>
 #include <vector>
 #include <set>
@@ -148,8 +148,6 @@ class PT_API SerializationInfo
         inline bool isReference() const
         { return _type == Reference; }
 
-        void setContextual();
-
         void setSequence();
 
         SerializationContext* context() const
@@ -158,34 +156,26 @@ class PT_API SerializationInfo
         template <typename T>
         bool compose(T& type) const
         {
-            if(_context)
-            {
-                const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
-                if(surr)
-                {
-                    surr->compose(*this, type);
-                    return true;
-                }
-            }
+            const SerializationSurrogate* s = this->getSurrogate(typeid(T));
+            if(0 == s)
+                return false;
 
-            return false;
+            const BasicSerializationSurrogate<T>* surr = static_cast<const BasicSerializationSurrogate<T>*>(s);
+            surr->compose(*this, type);
+            return true;
         }
 
         template <typename T>
         bool decompose(const T& type)
         {
-            if(_context)
-            {
-                const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
-                if(surr)
-                {
-                    surr->decompose(*this, type);
-                    this->setTypeName(surr->typeName());
-                    return true;
-                }
-            }
+            const SerializationSurrogate* s = this->getSurrogate(typeid(T));
+            if(0 == s)
+                return false;
 
-            return false;
+            const BasicSerializationSurrogate<T>* surr = static_cast<const BasicSerializationSurrogate<T>*>(s);
+            surr->decompose(*this, type);
+            this->setTypeName( surr->typeName() );
+            return true;
         }
 
         void rebind(void* obj) const;
@@ -460,13 +450,18 @@ class PT_API SerializationInfo
             template <typename T>
             friend T getValue(const std::string& name, SerializationInfo* si);
         */
-        
+
     protected:
         void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
 
         void clearValue();
 
         SerializationInfo& addChild();
+
+        void setContextual(SerializationContext& ctx);
+
+        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
+
 	public:
         struct Ref
         {

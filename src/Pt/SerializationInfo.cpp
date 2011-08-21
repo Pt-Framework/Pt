@@ -483,15 +483,18 @@ void SerializationInfo::setSequence()
 }
 
 
-void SerializationInfo::setContextual()
+void SerializationInfo::setContextual(SerializationContext& ctx)
 {
-    if(_type == SerializationInfo::Context)
+    if(_type == Context)
+    {
+        _context = &ctx;
         return;
+    }
 
     this->clearValue();
-
     _isCompound = false;
     _type = Context;
+    _context = &ctx;
 }
 
 
@@ -903,21 +906,30 @@ void SerializationInfo::setBool(bool value)
 
 
 void SerializationInfo::setInt8(Pt::int8_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setInt64( static_cast<Pt::int64_t>(n) );
     _type = Int8; 
 }
 
 
 void SerializationInfo::setInt16(Pt::int16_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
      this->setInt64( static_cast<Pt::int64_t>(n) ); 
      _type = Int16; 
 }
 
 
 void SerializationInfo::setInt32(Pt::int32_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setInt64( static_cast<Pt::int64_t>(n) );
     _type = Int32; 
 }
@@ -983,21 +995,30 @@ void SerializationInfo::setInt64(Pt::int64_t l)
 
 
 void SerializationInfo::setUInt8(Pt::uint8_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setUInt64( static_cast<Pt::uint64_t>(n) );
     _type = UInt8; 
 }
 
 
 void SerializationInfo::setUInt16(Pt::uint16_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
      this->setUInt64( static_cast<Pt::uint64_t>(n) ); 
      _type = UInt16; 
 }
 
 
 void SerializationInfo::setUInt32(Pt::uint32_t n)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setUInt64( static_cast<Pt::uint64_t>(n) );
     _type = UInt32; 
 }
@@ -1061,14 +1082,20 @@ void SerializationInfo::setUInt64(Pt::uint64_t l)
 
 
 void SerializationInfo::setFloat(float f)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setLongDouble(f); 
     _type = Float;
 }
 
 
 void SerializationInfo::setDouble(double f)
-{ 
+{
+    if( _type == Context )
+        return;
+
     this->setLongDouble(f); 
     _type = Double;
 }
@@ -1178,6 +1205,15 @@ void SerializationInfo::finishSave()
         this->context()->finishSave();
         return;
     }
+}
+
+
+const SerializationSurrogate* SerializationInfo::getSurrogate(const std::type_info& ti) const
+{
+    if( 0 == _context )
+        return 0;
+
+    return _context->getSurrogate(ti);
 }
 
 

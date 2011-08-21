@@ -31,6 +31,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/SerializationContext.h>
 #include <string>
 
 namespace Pt {

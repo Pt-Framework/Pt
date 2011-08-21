@@ -79,15 +79,10 @@ class Decomposer : public IDecomposer
             _type = &type;
             _si.setName(name);
 
-            if( _si.context() && _si.context()->referencingEnabled() )
+            Pt::SerializationContext* ctx = _si.context();
+            if( ctx && ctx->referencingEnabled() )
             {
-                // TODO: the contextual SerializationInfo can be provided by
-                // the context
-                _si.setContextual();
-                _si << Pt::save() <<= type;
-
-                _si.clear();
-                _si.setName(name);
+                *ctx << Pt::save() <<= type;
             }
         }
 

@@ -135,6 +135,7 @@ SerializationContext::SerializationContext()
 : _cache(0)
 , _refsEnabled(false)
 {
+    SerializationInfo::setContextual(*this);
     _cache = new SerializationCache;
 }
 

@@ -32,6 +32,7 @@
 #include <Pt/TypeInfo.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationSurrogate.h>
+#include <Pt/SerializationInfo.h>
 #include <map>
 #include <typeinfo>
 #include <string>
@@ -41,7 +42,7 @@ namespace Pt {
 class SerializationCache;
 class SerializationInfo;
 
-class PT_API SerializationContext
+class PT_API SerializationContext : public SerializationInfo
 {
     public:
         SerializationContext();
@@ -102,20 +103,11 @@ class PT_API SerializationContext
             registerSurrogate(typeid(T), surr);
         }
 
-        template <typename T>
-        const BasicSerializationSurrogate<T>* getSurrogate()
-        {
-            const SerializationSurrogate* surr = getSurrogate( typeid(T) );
-            if(surr)
-                return static_cast< const BasicSerializationSurrogate<T>* >(surr);
-
-            return 0;
-        }
+        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
 
     protected:
         void registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate);
-        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
-
+        
     private:
         SerializationCache* _cache;
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
