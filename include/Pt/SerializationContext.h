@@ -40,7 +40,6 @@
 namespace Pt {
 
 class SerializationCache;
-class SerializationInfo;
 
 class PT_API SerializationContext : public SerializationInfo
 {
@@ -86,6 +85,10 @@ class PT_API SerializationContext : public SerializationInfo
         virtual void fixup();
 
     public:
+        SerializationInfo& si()
+        {
+            return *this;
+        }
         void setLimit(size_t n);
 
         size_t limit() const;
@@ -103,27 +106,11 @@ class PT_API SerializationContext : public SerializationInfo
             registerSurrogate(typeid(T), surr);
         }
 
-
-        template <typename T>
-        const BasicSerializationSurrogate<T>* getSurrogate() const
-        {
-            const SerializationSurrogate* surr = this->getSurrogate( typeid(T) );
-            if( ! surr )
-                return 0;
-
-            return static_cast<const BasicSerializationSurrogate<T>*>(surr);
-        }
-		
-		/** @internal This is needed as a workaround for some compilers (GCC 3.x),
-		    so the getSurrogate template can be found.
-		*/
-		template <typename T>
-        friend const BasicSerializationSurrogate<T>* getSurrogate(SerializationContext*);
+        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
 
     protected:
         void registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate);
-        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
-        
+
     private:
         SerializationCache* _cache;
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;

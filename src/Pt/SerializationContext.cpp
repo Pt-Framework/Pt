@@ -29,7 +29,6 @@
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
-#include "Pt/SerializationInfo.h"
 
 #define ALLOCATOR 1
 

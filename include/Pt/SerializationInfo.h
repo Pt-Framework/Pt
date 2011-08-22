@@ -154,33 +154,10 @@ class PT_API SerializationInfo
         { return _context; }
 
         template <typename T>
-        bool compose(T& type) const
-        {
-            if( ! _context )
-				return false;
-            
-            const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
-            if( ! surr )
-                return false;
-
-            surr->compose(*this, type);
-            return true;
-        }
+        bool compose(T& type) const;
 
         template <typename T>
-        bool decompose(const T& type)
-        {
-            if( ! _context )
-				return false;
-            
-            const BasicSerializationSurrogate<T>* surr = _context->getSurrogate<T>();
-            if( ! surr )
-                return false;
-
-            surr->decompose(*this, type);
-            this->setTypeName( surr->typeName() );
-            return true;
-        }
+        bool decompose(const T& type);
 
         void rebind(void* obj) const;
 
@@ -447,16 +424,26 @@ class PT_API SerializationInfo
 
         void format(Formatter& formatter);
 
-        /** @internal DEPRECATED
-            This is needed as a workaround for some compilers (GCC 3.x) to
-            allow access to 'T getValue(const std::string& name) const'.
-
-            template <typename T>
-            friend T getValue(const std::string& name, SerializationInfo* si);
-        */
-
     protected:
         void setContextual(SerializationContext& ctx);
+
+        template <typename T>
+        const BasicSerializationSurrogate<T>* getSurrogate() const
+        {
+            const SerializationSurrogate* surr = this->getSurrogate( typeid(T) );
+            if( ! surr )
+                return 0;
+
+            return static_cast<const BasicSerializationSurrogate<T>*>(surr);
+        }
+
+        /** @internal This is needed as a workaround for some compilers (GCC 3.x),
+		    so the getSurrogate template can be found.
+		*/
+		template <typename T>
+        friend const BasicSerializationSurrogate<T>* getSurrogate(SerializationInfo*);
+
+        const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
 
         void load(void* fixme, FixupInfo::FixupHandler fh, unsigned mid) const;
 
@@ -514,6 +501,30 @@ class PT_API SerializationInfo
         bool _idRef;         // TODO: join into bitfield
 };
 
+template <typename T>
+inline bool SerializationInfo::compose(T& type) const
+{
+    const BasicSerializationSurrogate<T>* surr = this->getSurrogate<T>();
+    if( ! surr )
+        return false;
+
+    surr->compose(*this, type);
+    return true;
+}
+
+template <typename T>
+inline bool SerializationInfo::decompose(const T& type)
+{
+    const BasicSerializationSurrogate<T>* surr = this->getSurrogate<T>();
+    if( ! surr )
+        return false;
+
+    surr->decompose(*this, type);
+    this->setTypeName( surr->typeName() );
+    return true;
+}
+
+
 class SerializationInfo::Iterator
 {
     public:
@@ -556,6 +567,7 @@ class SerializationInfo::Iterator
     private:
         SerializationInfo* _si;
 };
+
 
 class SerializationInfo::ConstIterator
 {
@@ -1191,3 +1203,4 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 } // namespace Pt
 
 #endif
+

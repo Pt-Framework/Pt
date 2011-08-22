@@ -547,6 +547,16 @@ void SerializationInfo::setReference(const std::string& id)
 }
 
 
+const SerializationSurrogate* SerializationInfo::getSurrogate(const std::type_info& ti) const
+{
+    if(_context) {
+        return _context->getSurrogate(ti);
+    }
+
+    return 0;
+}
+
+
 // called during deserialization, when a reference needs to be fixed up
 void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m) const
 {
