@@ -60,77 +60,6 @@ class SerializationCache
 };
 
 
-bool SerializationContext::beginSave(const void* p, const std::string& name)
-{
-    return true;
-}
-
-
-void SerializationContext::finishSave()
-{
-}
-
-
-void SerializationContext::prepareId(const void* p)
-{
-    throw SerializationError("missing unlink information");
-}
-
-
-const char* SerializationContext::getId(const void* p)
-{
-    throw SerializationError("missing unlink information");
-    return 0;
-}
-
-
-const char* SerializationContext::makeId(const void* p)
-{
-    return "";
-}
-
-
-void SerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
-                                     const std::string& name, const std::string& id)
-{
-}
-
-
-void SerializationContext::finishLoad()
-{
-}
-
-
-void SerializationContext::rebindTarget(const char* id, void* obj)
-{
-}
-
-
-void SerializationContext::rebindFixup(const std::string& id, void* obj, void* prev)
-{
-}
-
-
-void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid)
-{
-}
-
-
-void SerializationContext::fixup()
-{
-}
-
-
-void SerializationContext::reset()
-{
-}
-
-
-class MemSize : private Pt::SerializationInfo
-{
-    char where_align;
-};
-
 SerializationContext::SerializationContext()
 : _cache(0)
 , _refsEnabled(false)
@@ -237,34 +166,69 @@ const SerializationSurrogate* SerializationContext::getSurrogate(const std::type
 }
 
 
-// bool SerializationContext::decompose(SerializationInfo& si, const void* type, const std::type_info& ti) const
-// {
-//     std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
-//     bool found = ( it != _surrmap.end() );
-
-//     if(found)
-//     {
-//         const SerializationSurrogate* surrogate = it->second;
-//         surrogate->decompose(si, type);
-//         si.setTypeName( surrogate->typeName() );
-//     }
-
-//     return found;
-// }
+bool SerializationContext::beginSave(const void* p, const std::string& name)
+{
+    return true;
+}
 
 
-// bool SerializationContext::compose(const SerializationInfo& si, void* type, const std::type_info& ti) const
-// {
-//     std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
-//     bool found = ( it != _surrmap.end() );
+void SerializationContext::finishSave()
+{
+}
 
-//     if(found)
-//     {
-//         const SerializationSurrogate* surrogate = it->second;
-//         surrogate->compose(si, type);
-//     }
 
-//     return found;
-// }
+void SerializationContext::prepareId(const void* p)
+{
+    throw SerializationError("missing unlink information");
+}
+
+
+const char* SerializationContext::getId(const void* p)
+{
+    throw SerializationError("missing unlink information");
+    return 0;
+}
+
+
+const char* SerializationContext::makeId(const void* p)
+{
+    return "";
+}
+
+
+void SerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
+                                     const std::string& name, const std::string& id)
+{
+}
+
+
+void SerializationContext::finishLoad()
+{
+}
+
+
+void SerializationContext::rebindTarget(const char* id, void* obj)
+{
+}
+
+
+void SerializationContext::rebindFixup(const std::string& id, void* obj, void* prev)
+{
+}
+
+
+void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid)
+{
+}
+
+
+void SerializationContext::fixup()
+{
+}
+
+
+void SerializationContext::reset()
+{
+}
 
 } // namespace Pt

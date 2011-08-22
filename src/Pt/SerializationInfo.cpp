@@ -910,7 +910,11 @@ void SerializationInfo::setInt8(Pt::int8_t n)
     if( _type == Context )
         return;
 
-    this->setInt64( static_cast<Pt::int64_t>(n) );
+    if(_type != Void)
+        this->clearValue();
+
+    _isCompound = false;
+    _value.l = n;
     _type = Int8; 
 }
 
@@ -920,7 +924,11 @@ void SerializationInfo::setInt16(Pt::int16_t n)
     if( _type == Context )
         return;
 
-     this->setInt64( static_cast<Pt::int64_t>(n) ); 
+    if(_type != Void)
+        this->clearValue();
+
+    _isCompound = false;
+    _value.l = n;
      _type = Int16; 
 }
 
@@ -930,7 +938,11 @@ void SerializationInfo::setInt32(Pt::int32_t n)
     if( _type == Context )
         return;
 
-    this->setInt64( static_cast<Pt::int64_t>(n) );
+    if(_type != Void)
+        this->clearValue();
+
+    _isCompound = false;
+    _value.l = n;
     _type = Int32; 
 }
 
@@ -999,7 +1011,10 @@ void SerializationInfo::setUInt8(Pt::uint8_t n)
     if( _type == Context )
         return;
 
-    this->setUInt64( static_cast<Pt::uint64_t>(n) );
+    this->clearValue();
+
+    _isCompound = false;
+    _value.ul = n;
     _type = UInt8; 
 }
 
@@ -1009,7 +1024,10 @@ void SerializationInfo::setUInt16(Pt::uint16_t n)
     if( _type == Context )
         return;
 
-     this->setUInt64( static_cast<Pt::uint64_t>(n) ); 
+    this->clearValue();
+
+    _isCompound = false;
+    _value.ul = n;
      _type = UInt16; 
 }
 
@@ -1019,7 +1037,10 @@ void SerializationInfo::setUInt32(Pt::uint32_t n)
     if( _type == Context )
         return;
 
-    this->setUInt64( static_cast<Pt::uint64_t>(n) );
+    this->clearValue();
+
+    _isCompound = false;
+    _value.ul = n;
     _type = UInt32; 
 }
 
@@ -1205,15 +1226,6 @@ void SerializationInfo::finishSave()
         this->context()->finishSave();
         return;
     }
-}
-
-
-const SerializationSurrogate* SerializationInfo::getSurrogate(const std::type_info& ti) const
-{
-    if( 0 == _context )
-        return 0;
-
-    return _context->getSurrogate(ti);
 }
 
 
