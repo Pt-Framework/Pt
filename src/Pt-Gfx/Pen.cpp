@@ -27,7 +27,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Gfx/Pen.h"
-#include <Pt/Gfx/ARgbImage.h>
+#include "Pt/Gfx/ARgbImage.h"
+#include "Pt/Convert.h"
 
 namespace Pt {
 

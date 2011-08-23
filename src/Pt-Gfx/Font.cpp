@@ -31,7 +31,7 @@
 #include "Pt/Gfx/Font.h"
 #include "Pt/StringStream.h"
 #include "Pt/SerializationInfo.h"
-
+#include "Pt/Convert.h"
 
 namespace Pt {
 

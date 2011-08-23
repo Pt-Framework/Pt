@@ -31,7 +31,6 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
-#include <Pt/Convert.h>
 #include <Pt/LiteralPtr.h>
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationError.h>

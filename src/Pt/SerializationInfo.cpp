@@ -26,14 +26,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Formatter.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/Convert.h>
+#include <Pt/Formatter.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/SerializationSurrogate.h>
 #include <cstring>
 #include <cassert>
 
 namespace {
+
+inline void freeRefStr2(const char*& str, unsigned char& flags, unsigned char mask)
+{
+    if(flags & mask != mask)
+    {
+        delete [] str;
+        flags |= mask;
+    }
+    
+    str = "";
+}
+
+inline void setRefStr2(const char*& str, unsigned char& flags, unsigned char mask, const char* from)
+{
+    assert( from != 0 );
+    freeRefStr2(str, flags, mask);
+    str = from;
+}
+
+inline void copyRefStr2(const char*& str, unsigned char& flags, unsigned char mask, const char* from, size_t fromLen)
+{
+    assert( from != 0 );
+    freeRefStr2(str, flags, mask);
+
+	if(fromLen > 0)
+	{
+		++fromLen;
+		str = new char[fromLen];
+		std::memcpy( const_cast<char*>(str), from, fromLen );
+		flags &= ~mask;
+    }
+}
 
 inline void freeRefStr(const char*& str, bool& isRef)
 {

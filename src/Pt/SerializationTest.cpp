@@ -31,6 +31,7 @@
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
+#include "Pt/Convert.h"
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/Deserializer.h"

@@ -26,9 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Date.h"
+#include "Pt/Convert.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/SerializationContext.h"
-#include "Pt/SerializationSurrogate.h"
 #include <cctype>
 
 namespace Pt {
