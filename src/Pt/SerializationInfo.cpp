@@ -36,12 +36,16 @@
 
 namespace {
 
+static const unsigned char TYPENAME_REF_BIT = 32;
+static const unsigned char NAME_REF_BIT     = 64;
+static const unsigned char ID_REF_BIT       = 128;
+
 inline void freeRefStr2(const char*& str, unsigned char& flags, unsigned char mask)
 {
-    if(flags & mask != mask)
+    if(flags & mask == mask)
     {
         delete [] str;
-        flags |= mask;
+        flags &= ~mask;
     }
     
     str = "";
@@ -64,7 +68,7 @@ inline void copyRefStr2(const char*& str, unsigned char& flags, unsigned char ma
 		++fromLen;
 		str = new char[fromLen];
 		std::memcpy( const_cast<char*>(str), from, fromLen );
-		flags &= ~mask;
+		flags |= mask;
     }
 }
 
@@ -370,9 +374,9 @@ SerializationInfo::~SerializationInfo()
 {
     this->clearValue();
 
-    freeRefStr(_Name, _nameRef);
-    freeRefStr(_TypeName, _tnRef);
-    freeRefStr(_id, _idRef);
+    freeRefStr2(_Name, _flags, NAME_REF_BIT);
+    freeRefStr2(_TypeName, _flags, TYPENAME_REF_BIT);
+    freeRefStr2(_id, _flags, ID_REF_BIT);
 }
 
 
@@ -380,9 +384,9 @@ void SerializationInfo::clear()
 {
     this->clearValue();
 
-    freeRefStr(_Name, _nameRef);
-    freeRefStr(_TypeName, _tnRef);
-    freeRefStr(_id, _idRef);
+    freeRefStr2(_Name, _flags, NAME_REF_BIT);
+    freeRefStr2(_TypeName, _flags, TYPENAME_REF_BIT);
+    freeRefStr2(_id, _flags, ID_REF_BIT);
 
     _bound = false;
     _isCompound = false;
@@ -445,53 +449,53 @@ void SerializationInfo::clearValue()
 
 void SerializationInfo::setName(const std::string& name)
 {
-    copyRefStr(_Name, _nameRef, name.c_str(), name.size());
+    copyRefStr2(_Name, _flags, NAME_REF_BIT, name.c_str(), name.size());
 }
 
 
 void SerializationInfo::setName(const char* name)
 {
     const std::size_t len = std::strlen(name);
-    copyRefStr(_Name, _nameRef, name, len);
+    copyRefStr2(_Name, _flags, NAME_REF_BIT, name, len);
 }
 
 
 void SerializationInfo::setName(const LiteralPtr<char>& name)
 {
-    setRefStr(_Name, _nameRef, name.get() );
+    setRefStr2(_Name, _flags, NAME_REF_BIT, name.get() );
 }
 
 
 
 void SerializationInfo::setTypeName(const std::string& type)
 {
-    copyRefStr(_TypeName, _tnRef, type.c_str(), type.size());
+    copyRefStr2(_TypeName, _flags, TYPENAME_REF_BIT, type.c_str(), type.size());
 }
 
 
 void SerializationInfo::setTypeName(const char* type)
 {
     const std::size_t len = std::strlen(type);
-    copyRefStr(_TypeName, _tnRef, type, len);
+    copyRefStr2(_TypeName, _flags, TYPENAME_REF_BIT, type, len);
 }
 
 
 void SerializationInfo::setTypeName(const LiteralPtr<char>& type)
 {
-    setRefStr( _TypeName, _tnRef, type.get() );
+    setRefStr2( _TypeName, _flags, TYPENAME_REF_BIT, type.get() );
 }
 
 
 void SerializationInfo::setId(const std::string& id)
 {
-    copyRefStr(_id, _idRef, id.c_str(), id.size());
+    copyRefStr2(_id, _flags, ID_REF_BIT, id.c_str(), id.size());
 }
 
 
 void SerializationInfo::setId(const char* id)
 {
     const std::string::size_type len = std::strlen(id);
-    copyRefStr(_id, _idRef, id, len);
+    copyRefStr2(_id, _flags, ID_REF_BIT, id, len);
 }
 
 
@@ -949,6 +953,18 @@ void SerializationInfo::setBool(bool value)
 }
 
 
+void SerializationInfo::getInt8(Pt::int8_t& n) const
+{
+    Pt::int64_t l = 0;
+    this->getInt64(l);
+
+    if( l > std::numeric_limits<Pt::int8_t>::max() )
+        throw SerializationError("expected int8 value");
+
+    n = static_cast<Pt::int8_t>(l);
+}
+
+
 void SerializationInfo::setInt8(Pt::int8_t n)
 {
     if( _type == Context )
@@ -963,6 +979,18 @@ void SerializationInfo::setInt8(Pt::int8_t n)
 }
 
 
+void SerializationInfo::getInt16(Pt::int16_t& n) const
+{
+    Pt::int64_t l = 0;
+    this->getInt64(l);
+
+    if( l > std::numeric_limits<Pt::int16_t>::max() )
+        throw SerializationError("expected int16 value");
+
+    n = static_cast<Pt::int16_t>(l);
+}
+
+
 void SerializationInfo::setInt16(Pt::int16_t n)
 {
     if( _type == Context )
@@ -974,6 +1002,18 @@ void SerializationInfo::setInt16(Pt::int16_t n)
     _isCompound = false;
     _value.l = n;
      _type = Int16; 
+}
+
+
+void SerializationInfo::getInt32(Pt::int32_t& i) const
+{
+    Pt::int64_t l = 0;
+    this->getInt64(l);
+
+    if( l > std::numeric_limits<Pt::int32_t>::max() )
+        throw SerializationError("expected int32 value");
+
+    i = static_cast<Pt::int32_t>(l);
 }
 
 
@@ -1050,6 +1090,18 @@ void SerializationInfo::setInt64(Pt::int64_t l)
 }
 
 
+void SerializationInfo::getUInt8(Pt::uint8_t& n) const
+{
+    Pt::uint64_t l = 0;
+    this->getUInt64(l);
+
+    if( l > std::numeric_limits<Pt::uint8_t>::max() )
+        throw SerializationError("expected uint8 value");
+
+    n = static_cast<Pt::uint8_t>(l);
+}
+
+
 void SerializationInfo::setUInt8(Pt::uint8_t n)
 {
     if( _type == Context )
@@ -1063,6 +1115,18 @@ void SerializationInfo::setUInt8(Pt::uint8_t n)
 }
 
 
+void SerializationInfo::getUInt16(Pt::uint16_t& n) const
+{
+    Pt::uint64_t l = 0;
+    this->getUInt64(l);
+
+    if( l > std::numeric_limits<Pt::uint16_t>::max() )
+        throw SerializationError("expected uint16 value");
+
+    n = static_cast<Pt::uint16_t>(l);
+}
+
+
 void SerializationInfo::setUInt16(Pt::uint16_t n)
 {
     if( _type == Context )
@@ -1073,6 +1137,18 @@ void SerializationInfo::setUInt16(Pt::uint16_t n)
     _isCompound = false;
     _value.ul = n;
      _type = UInt16; 
+}
+
+
+void SerializationInfo::getUInt32(Pt::uint32_t& n) const
+{
+    Pt::uint64_t l = 0;
+    this->getUInt64(l);
+
+    if( l > std::numeric_limits<Pt::uint32_t>::max() )
+        throw SerializationError("expected uint32 value");
+
+    n = static_cast<Pt::uint32_t>(l);
 }
 
 
@@ -1146,6 +1222,18 @@ void SerializationInfo::setUInt64(Pt::uint64_t l)
 }
 
 
+void SerializationInfo::getFloat(float& f) const
+{
+    long double d = 0.0;
+    this->getLongDouble(d);
+
+    if( d > std::numeric_limits<float>::max() )
+        throw SerializationError("expected float value");
+
+    f = static_cast<float>(d);
+}
+
+
 void SerializationInfo::setFloat(float f)
 {
     if( _type == Context )
@@ -1153,6 +1241,18 @@ void SerializationInfo::setFloat(float f)
 
     this->setLongDouble(f); 
     _type = Float;
+}
+
+
+void SerializationInfo::getDouble(double& f) const
+{
+    long double d = 0.0;
+    this->getLongDouble(d);
+
+    if( d > std::numeric_limits<double>::max() )
+        throw SerializationError("expected double value");
+
+    f = static_cast<double>(d);
 }
 
 
@@ -1248,7 +1348,7 @@ bool SerializationInfo::beginSave(const void* p)
             // SerializationInfo is coupled to the lifetime of the context.
             // The id can be "" or a null-terminated string which means,
             // in either case, the type was saved for the first time.      
-            setRefStr(_id, _idRef, id);
+            setRefStr2(_id, _flags, ID_REF_BIT, id);
         }
         else
         {
@@ -1419,7 +1519,7 @@ SerializationInfo& SerializationInfo::addElement()
 {
     if( _type == Context )
     {
-        freeRefStr(_Name, _nameRef);
+        freeRefStr2(_Name, _flags, NAME_REF_BIT);
         return *this;
     }
 

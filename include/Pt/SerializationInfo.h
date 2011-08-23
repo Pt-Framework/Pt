@@ -36,6 +36,7 @@
 #include <Pt/SerializationError.h>
 #include <Pt/SerializationSurrogate.h>
 #include <typeinfo>
+#include <limits>
 #include <vector>
 #include <set>
 #include <map>
@@ -102,10 +103,10 @@ class PT_API SerializationInfo
         , _bound(false)
         , _isCompound(false)
         , _type(Void)
-        , _nameRef(true)
-        , _tnRef(true)
-        , _idRef(true)
-        
+        //, _nameRef(true)
+        //, _tnRef(true)
+        //, _idRef(true)
+        , _flags(0)
         { }
 
         explicit SerializationInfo(SerializationContext* context)
@@ -118,9 +119,10 @@ class PT_API SerializationInfo
         , _bound(false)
         , _isCompound(false)
         , _type(Void)
-        , _nameRef(true)
-        , _tnRef(true)
-        , _idRef(true)
+        //, _nameRef(true)
+        //, _tnRef(true)
+        //, _idRef(true)
+        , _flags(0)
         { }
 
         ~SerializationInfo();
@@ -228,33 +230,15 @@ class PT_API SerializationInfo
 
         void setBool(bool b);
 
-        inline void getInt8(Pt::int8_t& n) const
-        {
-            Pt::int64_t l = 0;
-            this->getInt64(l);
-            // TODO: consider SerializationError on overflow
-            n = static_cast<Pt::int8_t>(l);
-        }
+        void getInt8(Pt::int8_t& n) const;
         
         void setInt8(Pt::int8_t n);
         
-        void getInt16(Pt::int16_t& n) const
-        {
-            Pt::int64_t l = 0;
-            this->getInt64(l);
-            // TODO: consider SerializationError on overflow
-            n = static_cast<Pt::int16_t>(l);
-        }
+        void getInt16(Pt::int16_t& n) const;
         
         void setInt16(Pt::int16_t n);
 
-        inline void getInt32(Pt::int32_t& i) const
-        {
-            Pt::int64_t l = 0;
-            this->getInt64(l);
-            // TODO: consider SerializationError on overflow
-            i = static_cast<Pt::int32_t>(l);
-        }
+        void getInt32(Pt::int32_t& i) const;
 
         void setInt32(Pt::int32_t n);
 
@@ -262,33 +246,15 @@ class PT_API SerializationInfo
 
         void setInt64(Pt::int64_t l);
 
-        inline void getUInt8(Pt::uint8_t& n) const
-        {
-            Pt::uint64_t l = 0;
-            this->getUInt64(l);
-            // TODO: consider SerializationError on overflow
-            n = static_cast<Pt::uint8_t>(l);
-        }
+        void getUInt8(Pt::uint8_t& n) const;
 
         void setUInt8(Pt::uint8_t n);
 
-        void getUInt16(Pt::uint16_t& n) const
-        {
-            Pt::uint64_t l = 0;
-            this->getUInt64(l);
-            // TODO: consider SerializationError on overflow
-            n = static_cast<Pt::uint16_t>(l);
-        }
+        void getUInt16(Pt::uint16_t& n) const;
 
         void setUInt16(Pt::uint16_t n);
 
-        void getUInt32(Pt::uint32_t& n) const
-        {
-            Pt::uint64_t l = 0;
-            this->getUInt64(l);
-            // TODO: consider SerializationError on overflow
-            n = static_cast<Pt::uint32_t>(l);
-        }
+        void getUInt32(Pt::uint32_t& n) const;
 
         void setUInt32(Pt::uint32_t n);
 
@@ -296,23 +262,11 @@ class PT_API SerializationInfo
 
         void setUInt64(Pt::uint64_t n);
 
-        void getFloat(float& f) const
-		{
-			long double d = 0.0;
-			this->getLongDouble(d);
-			// TODO: consider SerializationError on overflow
-			f = static_cast<float>(d);
-		}
+        void getFloat(float& f) const;
 
         void setFloat(float f);
 
-        void getDouble(double& f) const
-		{
-			long double d = 0.0;
-			this->getLongDouble(d);
-			// TODO: consider SerializationError on overflow
-			f = static_cast<double>(d);
-		}
+        void getDouble(double& f) const;
 
         void setDouble(double f);
                 
@@ -495,9 +449,7 @@ class PT_API SerializationInfo
         mutable bool _bound; // TODO: join into bitfield
         bool _isCompound;    // TODO: join into bitfield
         Pt::uint8_t _type;   // TODO: join into bitfield
-        bool _nameRef;       // TODO: join into bitfield
-        bool _tnRef;         // TODO: join into bitfield
-        bool _idRef;         // TODO: join into bitfield
+        Pt::uint8_t _flags;
 };
 
 template <typename T>
