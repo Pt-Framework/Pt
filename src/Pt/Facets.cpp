@@ -89,6 +89,117 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
 
 
 
+ostreambuf_iterator<Pt::Char>
+put_bool(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, bool val)
+{
+    //if( !(f.flags() & ios_base::boolalpha) )
+	//    return do_put(s, f, fill, static_cast<long>(val));
+    
+    typedef Pt::Char char_type;
+    const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
+ 
+    Pt::String str = val ? np.truename() : np.falsename();
+ 
+    streamsize width = f.width(0); // width of 0 allowed?
+   
+    if( str.size() >= static_cast<size_t>(width) )
+    {
+        return std::copy(str.begin(), str.end(), s);
+    }
+
+    streamsize pad = width - str.size();
+    ios_base::fmtflags dir = f.flags() & ios_base::adjustfield;
+
+    if (dir == ios_base::left) 
+    {
+       std::copy(str.begin(), str.end(), s);
+       std::fill_n(s, pad, fill);
+       return s;
+    }
+
+    // right/internal padding 
+    std::fill_n(s, pad, fill);
+    return std::copy(str.begin(), str.end(), s);
+}
+
+/*
+template <class _CharT, class _OutputIter>
+_OutputIter 
+__copy_integer_and_fill(const _CharT* __buf, ptrdiff_t __len,
+                        _OutputIter __oi,
+                        ios_base::fmtflags __flg, streamsize __wid, _CharT __fill,
+                        _CharT __xplus, _CharT __xminus) {
+  if (__len >= __wid)
+    return std::copy(__buf, __buf + __len, __oi);
+  else 
+  {
+    ptrdiff_t __pad = __STATIC_CAST(ptrdiff_t, (min) (__STATIC_CAST(streamsize, (numeric_limits<ptrdiff_t>::max)()),
+                                                      __STATIC_CAST(streamsize, __wid - __len)));
+    ios_base::fmtflags __dir = __flg & ios_base::adjustfield;
+
+    if (__dir == ios_base::left) {
+      __oi = _STLP_STD::copy(__buf, __buf + __len, __oi);
+      return _STLP_PRIV __fill_n(__oi, __pad, __fill);
+    }
+    else if (__dir == ios_base::internal && __len != 0 &&
+             (__buf[0] == __xplus || __buf[0] == __xminus)) {
+      *__oi++ = __buf[0];
+      __oi = __fill_n(__oi, __pad, __fill);
+       return _STLP_STD::copy(__buf + 1, __buf + __len, __oi);
+    }
+    else if (__dir == ios_base::internal && __len >= 2 &&
+             (__flg & ios_base::showbase) &&
+             (__flg & ios_base::basefield) == ios_base::hex) {
+      *__oi++ = __buf[0];
+      *__oi++ = __buf[1];
+      __oi = __fill_n(__oi, __pad, __fill);
+      return _STLP_STD::copy(__buf + 2, __buf + __len, __oi);
+    }
+    else {
+      __oi = __fill_n(__oi, __pad, __fill);
+      return _STLP_STD::copy(__buf, __buf + __len, __oi);
+    }
+  }
+}*/
+ 
+ostreambuf_iterator<Pt::Char>
+put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long val)
+{
+    const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
+    const string& grouping = np.grouping();
+
+if( ! grouping.empty() ) 
+{
+    int basechars = 0;
+    
+    if (f.flags() & ios_base::showbase)
+    {
+        switch(f.flags() & ios_base::basefield) 
+        {
+            case ios_base::hex: 
+                basechars = 2; 
+                break;
+            case ios_base::oct: 
+                basechars = 1; 
+                break;
+            
+            default: basechars = 0;
+        }
+    }
+
+     // make sure there is room at the end of the buffer
+     // we pass to __insert_grouping
+     //_STLP_STD::copy(__buf, __iend, (char *) __grpbuf);
+     //__buf = __grpbuf;
+     //__iend = __grpbuf + __len;
+     //__len = __insert_grouping(__buf, __iend, __grouping, __np.thousands_sep(),
+     //                          '+', '-', basechars);
+}
+ 
+   //return __copy_integer_and_fill(__buf, __len, __s, __flags, __f.width(0), __fill, '+', '-');
+
+    return s;
+}
 
 // locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
 

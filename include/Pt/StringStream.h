@@ -35,11 +35,11 @@
 
 namespace Pt {
 
-class PT_API StringStreamBuffer : public std::basic_stringbuf<Pt::Char>
+class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
 {
     public:
-        explicit StringStreamBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
-        explicit StringStreamBuffer(const Pt::String& str,
+        explicit StringBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
+        explicit StringBuffer(const Pt::String& str,
                                     std::ios::openmode mode = std::ios::in | std::ios::out);
 };
 
@@ -74,7 +74,7 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
         void str(const Pt::String& str);
 
     private:
-        Pt::StringStreamBuffer _buffer;
+        Pt::StringBuffer _buffer;
 };
 
 } // namespace std

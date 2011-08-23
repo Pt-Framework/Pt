@@ -29,12 +29,12 @@
 
 namespace Pt {
 
-StringStreamBuffer::StringStreamBuffer(std::ios::openmode mode)
+StringBuffer::StringBuffer(std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(mode)
 {
 }
 
-StringStreamBuffer::StringStreamBuffer(const Pt::String& str, std::ios::openmode mode)
+StringBuffer::StringBuffer(const Pt::String& str, std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(str, mode)
 {
 }
