@@ -885,7 +885,7 @@ void SerializationInfo::getBool(bool& value) const
             value = 0 != _value.f;
             break;
 
-        case Str:
+        /*case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
@@ -895,9 +895,10 @@ void SerializationInfo::getBool(bool& value) const
         {
             convert(value, _value.cstr);
             break;
-        }
+        }*/
+
         default:
-            throw SerializationError("expected integer value");
+            throw SerializationError("expected bool value");
     }
 }
 
@@ -985,7 +986,7 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             l =  static_cast<Pt::int64_t>(_value.f);
             break;
 
-        case Str:
+        /*case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
@@ -994,10 +995,10 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
 
         case Str8:
             convert(l, _value.cstr);
-            break;
+            break;*/
 
         default:
-            throw SerializationError("expected scalar value");
+            throw SerializationError("expected int value");
     }
 }
 
@@ -1083,7 +1084,7 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             l =  static_cast<Pt::uint64_t>(_value.f);
             break;
 
-        case Str:
+        /*case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(l, *str);
@@ -1091,10 +1092,10 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
         }
         case Str8:
             convert(l, _value.cstr);
-            break;
+            break;*/
 
         default:
-            throw SerializationError("expected integer value");
+            throw SerializationError("expected unsigned int value");
     }
 }
 
@@ -1160,7 +1161,7 @@ void SerializationInfo::getLongDouble(long double& value) const
             value = _value.f;
             break;
         
-        case Str:
+        /*case Str:
         {
             const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
             convert(value, *str);
@@ -1169,10 +1170,10 @@ void SerializationInfo::getLongDouble(long double& value) const
         
         case Str8:
             convert(value, _value.cstr);
-            break;
+            break;*/
 
         default:
-            throw SerializationError("expected integer value");
+            throw SerializationError("expected float value");
     }
 }
 

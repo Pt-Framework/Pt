@@ -574,7 +574,7 @@ void XmlFormatter::OnMemberBegin(const Node& node)
         case Node::EndElement:
         {
             //std::cerr << "VALUE: <empty>" << std::endl;
-            _composer->setValue(Pt::String() );
+            _composer->setString(Pt::String() );
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
             this->finishXmlMember(ee);
@@ -586,6 +586,49 @@ void XmlFormatter::OnMemberBegin(const Node& node)
     }
 }
 
+void setValue(Pt::IComposer& composer, const Pt::String& value)
+{
+	//TODO: also look at the parsed type name
+
+	if(value == L"yes" || value == L"YES" ||
+	   value == L"on" || value == L"ON" ||
+	   value == L"true" || value == L"TRUE" )
+	{
+	    composer.setBool(true);
+	}
+	else if(value == L"no" || value == L"NO" ||
+	        value == L"off" || value == L"OFF" ||
+	        value == L"false" || value == L"FALSE" )
+	{
+	    composer.setBool(false);
+	}
+	else
+	{
+		unsigned dot = 0;
+		unsigned digits = 0;
+		Pt::String::const_iterator it;
+		for( it = value.begin(); it != value.end(); ++it )
+		{
+			if(*it == '.')
+				dot++;
+			else if(Pt::isdigit(*it))
+				digits++;
+		}
+
+		if(dot == 1 && digits >= 1 && (value.length() - 1) == digits )
+		{
+			composer.setDouble( convert<double>(value) );
+		}
+		else if(value.length() == digits && digits >= 1)
+		{
+			composer.setInt( convert<Pt::int32_t>(value) );
+		}
+		else
+		{
+			composer.setString(value);
+		}
+	}
+}
 
 void XmlFormatter::OnValue(const Node& node)
 {
@@ -603,7 +646,8 @@ void XmlFormatter::OnValue(const Node& node)
         case Node::EndElement:
         {
             //std::cerr << "VALUE: " << _value.narrow() << std::endl;
-            _composer->setValue(_value);
+            setValue(*_composer, _value);
+            //_composer->setString(_value);
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
             this->finishXmlMember(ee);

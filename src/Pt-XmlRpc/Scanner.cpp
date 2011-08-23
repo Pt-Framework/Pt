@@ -125,7 +125,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     throwSerializationError();
 
                 // is always type string
-                _current->setValue( _value );
+                _current->setString( _value );
                 _value.clear();
 
                 _state = OnValueEnd;
@@ -442,12 +442,12 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 _state = OnScalar;
 
                 log_debug("-> found string " << chars.content().narrow());
-                _current->setValue( chars.content() );
+                _current->setString( chars.content() );
             }
             else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
             {
                 log_debug("-> found empty value ");
-                _current->setValue( Pt::String() );
+                _current->setString( Pt::String() );
                 _state = OnScalarEnd;
             }
             else

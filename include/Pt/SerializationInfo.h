@@ -200,7 +200,7 @@ class PT_API SerializationInfo
 
         void setString8(const std::string& s);
 
-        /** @brief Returns the content as string.
+        /** @internal DEPRECATED Returns the content as string.
         */
         Pt::String toString() const
         {

@@ -46,11 +46,14 @@ class IComposer
 
         virtual void setTypeName(const std::string& type) = 0;
 
-        virtual void setValue(const Pt::String& value)
+        virtual void setString(const Pt::String& value)
         { throw SerializationError("unexpected value"); }
 
-        virtual void setValue(const char* data, size_t length)
+        virtual void setBinary(const char* data, size_t length)
         { throw SerializationError("unexpected value"); }
+
+        virtual void setChar(const Pt::Char& ch)
+        { throw SerializationError("unexpected bool value"); }
 
         virtual void setBool(bool value)
         { throw SerializationError("unexpected bool value"); }
@@ -131,14 +134,19 @@ class Composer : public IComposer
             _current->setTypeName(type);
         }
 
-        virtual void setValue(const Pt::String& value)
+        virtual void setString(const Pt::String& value)
         {
             _current->setString(value);
         }
 
-        virtual void setValue(const char* data, size_t length)
+        virtual void setBinary(const char* data, size_t length)
         {
             _current->setBinary(data, length);
+        }
+
+        virtual void setChar(const Pt::Char& ch)
+        {
+            _current->setChar(ch);
         }
 
         virtual void setBool(bool value)
