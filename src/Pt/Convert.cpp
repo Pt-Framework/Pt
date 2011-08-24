@@ -113,56 +113,56 @@ void convert(String& str, char value)
 void convert(String& str, unsigned char value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(String& str, signed char value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(Pt::String& str, short value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(Pt::String& str, unsigned short value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');;
 }
 
 
 void convert(Pt::String& str, int value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(Pt::String& str, unsigned int value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(Pt::String& str, long value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(Pt::String& str, unsigned long value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
@@ -361,56 +361,56 @@ void convert(std::string& str, char value)
 void convert(std::string& str, signed char value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, unsigned char value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, short value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, unsigned short value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, int value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, unsigned int value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, long value)
 {
 	str.clear();
-	putSigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 
 void convert(std::string& str, unsigned long value)
 {
 	str.clear();
-	putUnsigned(std::back_inserter(str), value);
+	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
 }
 
 

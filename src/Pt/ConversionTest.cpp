@@ -33,7 +33,9 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <iostream>
+#include <iterator>
 #include <limits>
+#include <iomanip>
 
 class ConversionTest : public Pt::Unit::TestSuite
 {
@@ -41,6 +43,7 @@ class ConversionTest : public Pt::Unit::TestSuite
         ConversionTest()
         : Pt::Unit::TestSuite("ConversionTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
             Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
@@ -58,6 +61,7 @@ class ConversionTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void Octal();
         void Bool();
         void NumberOverflow();
         void IntToString();
@@ -75,6 +79,23 @@ class ConversionTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<ConversionTest> register_ConversionTest;
+
+
+void ConversionTest::Octal()
+{
+    int n = -42;
+    std::string s;
+    Pt::putOctal(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
+    //std::cerr << "\nOCT: " << s << std::endl;
+    
+    s.clear();
+    Pt::putHex(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
+    //std::cerr << "HEX: " << s << std::endl;
+    
+    s.clear();
+    Pt::putDecimal(std::back_inserter(s), n, std::ios_base::internal, 8, ' ');
+    //std::cerr << "DEC: " << s << std::endl;
+}
 
 
 void ConversionTest::Bool()

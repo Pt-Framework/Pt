@@ -33,6 +33,7 @@
 #include <Pt/String.h>
 #include <Pt/ConversionError.h>
 #include <Pt/StringStream.h>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <limits>
@@ -225,6 +226,478 @@ T convert(const S& from)
 // parsing and formating of numbers
 //
 
+template <typename OutIterT, typename CharT>
+inline OutIterT putAdjustNumber(OutIterT it, const char* beg, const char* end, bool hasSign,
+                                std::ios_base::fmtflags flags, 
+                                std::streamsize width, CharT fill) 
+{
+    std::streamsize len = end - beg;
+    if (len >= width)
+    {
+        return std::copy(beg, end, it);
+    }
+
+    std::streamsize pad =  width - len;
+    std::ios_base::fmtflags dir = flags & std::ios_base::adjustfield;
+
+    if (dir == std::ios_base::left) 
+    {
+        it = std::copy(beg, end, it);
+        for ( ; pad > 0; --pad)  *it++ = fill;
+        return it;
+    }
+    
+    if( dir == std::ios_base::internal && hasSign) 
+    {
+        *it++ = *beg;
+        for ( ; pad > 0; --pad)  *it++ = fill;
+        return std::copy(beg + 1, end, it);
+    }
+
+    // right adjustment
+    for (; pad > 0; --pad)  *it++ = fill;
+    return std::copy(beg, end, it);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putDecimalNumber(OutIterT it, T i, char sign,
+                                 std::ios_base::fmtflags flags, 
+                                 std::streamsize width, CharT fill)
+{
+    // large enough for packed hex, dec, oct numbers with a sign
+    const std::size_t buflen = (sizeof(T) * 4) + 1;
+	char buf[buflen];
+    
+    char* end = buf + buflen;
+    char* cur = end;
+
+    do
+    {
+        T lsd = i % 10;
+        i /= 10;
+        --cur;
+        *cur = '0' + int(lsd);
+    } 
+    while(i != 0 && cur != buf);
+
+	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    if(hasSign)
+    {
+        if(cur != buf)
+        {
+	        --cur;
+            *cur = sign;
+        }
+    }
+
+    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putUnsignedDecimal(OutIterT it, T i, 
+                                   std::ios_base::fmtflags flags, 
+                                   std::streamsize width, CharT fill)
+{
+    return putDecimalNumber(it, i, '+', flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putDecimal(OutIterT it, T i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+    const bool negative = i < 0;
+    char sign = '+';
+    if(negative)
+    {
+		i = -i;
+		sign = '-';
+    }
+    
+    return putDecimalNumber(it, i, sign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putDecimal(OutIterT it, unsigned char i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+	return putUnsignedDecimal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putDecimal(OutIterT it, unsigned short i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+	return putUnsignedDecimal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putDecimal(OutIterT it, unsigned int i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+	return putUnsignedDecimal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putDecimal(OutIterT it, unsigned long i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+	return putUnsignedDecimal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putDecimal(OutIterT it, unsigned long long i, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
+{
+	return putUnsignedDecimal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putHexNumber(OutIterT it, T i, char sign,
+                             std::ios_base::fmtflags flags, 
+                             std::streamsize width, CharT fill)
+{
+    static const char* chartabLower = "0123456789abcdef";
+    static const char* chartabUpper = "0123456789ABCDEF";
+    const char* chartab = chartabLower;
+    const T base = 16;
+
+    if(flags & std::ios_base::uppercase)
+    {
+        chartab = chartabUpper;
+    }
+
+    // large enough for packed hex, dec, oct numbers with sign and prefix
+    const std::size_t buflen = (sizeof(T) * 4) + 3;
+	char buf[buflen];
+    
+    char* end = buf + buflen;
+    char* cur = end;
+
+    do
+    {
+        T lsd = i % base;
+        i /= base;
+        --cur;
+        const char* ch = chartab + int(lsd);
+        *cur = *ch;
+    } 
+    while(i != 0 && cur != buf);
+	
+	if(flags & std::ios_base::showbase)
+	{
+		if(cur != buf)
+		{
+		    --cur;
+		    *cur = 'x';
+		}
+		if(cur != buf)
+		{
+		    --cur;
+		    *cur = '0';
+		}
+	}
+
+	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    if(hasSign)
+    {
+        if(cur != buf)
+        {
+	        --cur;
+            *cur = sign;
+        }
+    }
+
+    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putUnsignedHex(OutIterT it, unsigned char i, 
+                               std::ios_base::fmtflags flags, 
+                               std::streamsize width, CharT fill)
+{
+	return putHexNumber(it, i, '+', flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putHex(OutIterT it, T i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+    const bool negative = i < 0;
+    char sign = '+';
+    if(negative)
+    {
+		i = -i;
+		sign = '-';
+    }
+
+    return putHexNumber(it, i, sign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putHex(OutIterT it, unsigned char i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+	return putUnsignedHex(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putHex(OutIterT it, unsigned short i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+	return putUnsignedHex(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putHex(OutIterT it, unsigned int i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+	return putUnsignedHex(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putHex(OutIterT it, unsigned long i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+	return putUnsignedHex(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putHex(OutIterT it, unsigned long long i, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill)
+{
+	return putUnsignedHex(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putOctalNumber(OutIterT it, T i, char sign,
+                               std::ios_base::fmtflags flags, 
+                               std::streamsize width, CharT fill)
+{
+    const T base = 8;
+
+    // large enough for packed hex, dec, oct numbers
+    const std::size_t buflen = (sizeof(T) * 4) + 2;
+	char buf[buflen];
+    
+    char* end = buf + buflen;
+    char* cur = end;
+
+    do
+    {
+        T lsd = i % base;
+        i /= base;
+        --cur;
+        *cur = '0' + int(lsd);
+    } 
+    while(i != 0 && cur != buf);
+
+	if(flags & std::ios_base::showbase)
+	{
+		if(cur != buf)
+		{
+		    --cur;
+		    *cur = '0';
+		}
+	}
+
+	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    if(hasSign)
+    {
+        if(cur != buf)
+        {
+	        --cur;
+            *cur = sign;
+        }
+    }
+
+    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putUnsignedOctal(OutIterT it, unsigned char i, 
+                                 std::ios_base::fmtflags flags, 
+                                 std::streamsize width, CharT fill)
+{
+	return putOctalNumber(it, i, '+', flags, width, fill);
+}
+
+
+template <typename OutIterT, typename T, typename CharT>
+inline OutIterT putOctal(OutIterT it, T i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+    const bool negative = i < 0;
+    char sign = '+';
+    if(negative)
+    {
+		i = -i;
+		sign = '-';
+    }
+
+    return putOctalNumber(it, i, sign, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putOctal(OutIterT it, unsigned char i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+	return putUnsignedOctal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putOctal(OutIterT it, unsigned short i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+	return putUnsignedOctal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putOctal(OutIterT it, unsigned int i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+	return putUnsignedOctal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putOctal(OutIterT it, unsigned long i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+	return putUnsignedOctal(it, i, flags, width, fill);
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putOctal(OutIterT it, unsigned long long i, 
+                         std::ios_base::fmtflags flags, 
+                         std::streamsize width, CharT fill)
+{
+	return putUnsignedOctal(it, i, flags, width, fill);
+}
+
+
+template <typename IterT, typename T>
+inline IterT putFloat(IterT it, T d)
+{
+    // 1. Test for not-a-number with d != d
+    if( d != d ) 
+    {
+        *it = 'n'; ++it;
+        *it = 'a'; ++it;
+        *it = 'n'; ++it;
+        return it;
+    }
+
+    // 2. check sign
+    if(d < 0.0)
+    {
+        *it = '-';
+        ++it;
+    }
+
+    int digit = 0;
+    T num = std::fabs(d);
+
+    // 3. Test for infinity
+    if( num == std::numeric_limits<T>::infinity() ) 
+    {
+        *it = 'i'; ++it;
+        *it = 'n'; ++it;
+        *it = 'f'; ++it;
+        return it;
+    }
+
+	// 4. integral part
+	int m = static_cast<int>( std::log10(num) );
+	int places = std::numeric_limits<T>::digits10;
+    
+    if(num == 0.0 || m < 0)
+    {
+		*it = '0';
+		++it;
+    }
+    else
+    {
+		while(m >= 0)
+		{
+			T weight = std::pow( T(10.0), m);
+			digit = static_cast<int>( floor(num / weight) );
+			num -= (digit * weight);
+
+			*it = '0' + digit;
+			++it;
+
+			--m;
+			--places;
+		}
+    }
+    
+    // 5. fractional part
+	T fract = num;
+
+    *it = '.';
+    ++it;
+
+    do
+    {
+        fract *= 10;
+        digit = static_cast<int>( std::floor(fract) );
+        fract -= digit;
+        char c = '0' + digit;
+
+        *it = c;
+        ++it;
+        
+        // count significant digits from first non-null digit
+        if(places != std::numeric_limits<T>::digits10 || digit != 0)
+        {
+            --places;
+        }
+    } 
+    while(places != 0 && fract != 0.0);
+
+    return it;
+}
+
+
 template <typename InIterT, typename T>
 InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
 {
@@ -300,36 +773,6 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
 }
 
 
-template <typename OutIterT, typename T>
-inline OutIterT putSigned(OutIterT it, T i)
-{
-    const bool negative = i < 0;
-    if(negative)
-    {
-		i = -i;
-		*it = '-'; ++it;
-    }
-   
-    // large enough for packed hex, dec, oct numbers
-    const std::size_t buflen = (sizeof(T) * 4) + 1;
-	char buf[buflen];
-    
-    char* end = buf + buflen;
-    char* cur = end;
-
-    do
-    {
-        T lsd = i % 10;
-        i /= 10;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
-
-	return std::copy(cur, end, it);
-}
-
-
 template <typename InIterT, typename T>
 InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
 {
@@ -394,29 +837,6 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
 
 	ok = true;
     return it;
-}
-
-
-template <typename OutIterT, typename T>
-inline OutIterT putUnsigned(OutIterT it, T i)
-{
-    // large enough for packed hex, dec, oct numbers with a sign
-    const std::size_t buflen = (sizeof(T) * 4) + 1;
-	char buf[buflen];
-    
-    char* end = buf + buflen;
-    char* cur = end;
-
-    do
-    {
-        T lsd = i % 10;
-        i /= 10;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
-
-	return std::copy(cur, end, it);
 }
 
 
@@ -631,90 +1051,6 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
         n *= -1;
 
 	ok = true;
-    return it;
-}
-
-
-template <typename IterT, typename T>
-inline IterT putFloat(IterT it, T d)
-{
-    // 1. Test for not-a-number with d != d
-    if( d != d ) 
-    {
-        *it = 'n'; ++it;
-        *it = 'a'; ++it;
-        *it = 'n'; ++it;
-        return it;
-    }
-
-    // 2. check sign
-    if(d < 0.0)
-    {
-        *it = '-';
-        ++it;
-    }
-
-    int digit = 0;
-    T num = std::fabs(d);
-
-    // 3. Test for infinity
-    if( num == std::numeric_limits<T>::infinity() ) 
-    {
-        *it = 'i'; ++it;
-        *it = 'n'; ++it;
-        *it = 'f'; ++it;
-        return it;
-    }
-
-	// 4. integral part
-	int m = static_cast<int>( std::log10(num) );
-	int places = std::numeric_limits<T>::digits10;
-    
-    if(num == 0.0 || m < 0)
-    {
-		*it = '0';
-		++it;
-    }
-    else
-    {
-		while(m >= 0)
-		{
-			T weight = std::pow( T(10.0), m);
-			digit = static_cast<int>( floor(num / weight) );
-			num -= (digit * weight);
-
-			*it = '0' + digit;
-			++it;
-
-			--m;
-			--places;
-		}
-    }
-    
-    // 5. fractional part
-	T fract = num;
-
-    *it = '.';
-    ++it;
-
-    do
-    {
-        fract *= 10;
-        digit = static_cast<int>( std::floor(fract) );
-        fract -= digit;
-        char c = '0' + digit;
-
-        *it = c;
-        ++it;
-        
-        // count significant digits from first non-null digit
-        if(places != std::numeric_limits<T>::digits10 || digit != 0)
-        {
-            --places;
-        }
-    } 
-    while(places != 0 && fract != 0.0);
-
     return it;
 }
 

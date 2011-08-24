@@ -188,7 +188,7 @@ void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
     
     array_appender<Pt::Char> it(buf, bufsize);
     array_appender<Pt::Char> end;
-    it = putSigned(it, value);
+    it = putDecimal(it, value, std::ios_base::dec, 0, ' ');
     if(it == end)
 		throw std::logic_error("invalid buffer size");
 
@@ -225,7 +225,7 @@ void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
     
     array_appender<Pt::Char> it(buf, bufsize);
     array_appender<Pt::Char> end;
-    it = putUnsigned(it, value);
+    it = putDecimal(it, value, std::ios_base::dec, 0, ' ');
     if(it == end)
 		throw std::logic_error("invalid buffer size");
 
