@@ -38,14 +38,13 @@
 #include <iomanip>
 
 template <typename CharT, typename T>
-inline std::streamsize putScientificNumber(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+inline std::streamsize putFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
 {    
     if(n == T(0.0))
     {
         intpart = 0;
-        exp = 0;
-        *fraction = '0';
-        return 1;
+        exp = 0;
+        return 0;
     }
 
     const bool neg = n < 0;
@@ -81,194 +80,195 @@ inline std::streamsize putScientificNumber(CharT* fraction, std::streamsize prec
     return places;
 }
 
-template <typename OutIterT, typename CharT>
-inline OutIterT putAdjustNumber(std::streamsize width, 
-                                std::streamsize& lpad, 
-                                std::streamsize& ipad, 
-                                std::streamsize& rpad) 
-{
-    std::streamsize len = end - beg;
-    if (len >= width)
-    {
-        return std::copy(beg, end, it);
-    }
-
-    std::streamsize pad =  width - len;
-    std::ios_base::fmtflags dir = flags & std::ios_base::adjustfield;
-
-    if (dir == std::ios_base::left) 
-    {
-        it = std::copy(beg, end, it);
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return it;
-    }
-    
-    if( dir == std::ios_base::internal && hasSign) 
-    {
-        *it++ = *beg;
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return std::copy(beg + 1, end, it);
-    }
-
-    // right adjustment
-    for (; pad > 0; --pad)  *it++ = fill;
-    return std::copy(beg, end, it);
-}
-
 
 template <typename IterT, typename T, typename CharT>
 inline IterT putFixed(IterT it, T d, 
                       std::ios_base::fmtflags flags, 
                       std::streamsize width, CharT fill)
 {
-    const std::streamsize precision = std::numeric_limits<T>::digits10;
-    char buf[precision];
+    bool leftAdjust = flags & std::ios_base::left;
+    bool internalAdjust = flags & std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
+
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT buf[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = putScientificNumber(buf, precision, i, e, d);
+    std::streamsize fractSize = putFloat(buf, bufsize, i, e, d);
 
     std::streamsize len = 0;
     bool hasSign = (i < 0) || flags & std::ios_base::showpos;
     if(hasSign)
         ++len;
-    
+
     if(e < 0)
-		len += std::max(-e, fractSize) + 2; 
+        len += std::max(-e, fractSize) + 2; 
     else
-        len += std::max(e+1, fractSize) + 2;
+    {
+        len += std::max(e+1, fractSize);
+        if(fractSize != 0 || flags & std::ios_base::showpoint)
+            len += 2;
+    }
 
     std::streamsize pad = 0;
     if (len < width)
         pad = width - len;
 
-    std::ios_base::fmtflags dir = flags & std::ios_base::adjustfield;
-
-	if (dir == std::ios_base::right) 
-		while ( len++ < width)
-		    *it++ = fill;
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
 
     if(hasSign)
-		*it++ = (i < 0) ? '-' : '+';
-	
-	if (dir == std::ios_base::internal) 
-	while ( len++ < width)
-	    *it++ = fill;
-    
+        *it++ = (i < 0) ? '-' : '+';
+
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
     if(i < 0)
         i = -i;   
 
     std::streamsize n = 0;
-    
+
     if(e < 0)
     {
         *it++ = '0';
         *it++ = '.';
 
-		while(n > ++e)
-			*it++ = '0';
+        while(n > ++e)
+            *it++ = '0';
 
-
-		*it++ = '0' + i;
+        *it++ = '0' + i;
     }
     else
     {
         *it++ = '0' + i;
-		while(n < e)
-		{
-			if(n < fractSize)
-				*it++ = buf[n];
-			else
-				*it++ = '0';
+        while(n < e)
+        {
+            if(n < fractSize)
+                *it++ = buf[n];
+            else
+                *it++ = '0';
 
-			++n;
-		}
+            ++n;
+        }
 
-		*it++ = '.';
-
-		if(fractSize == 0)
-		    *it++ = '0';
+        if(fractSize != 0)
+        {
+            *it++ = '.';
+        }
+        else if(flags & std::ios_base::showpoint) 
+        {
+            *it++ = '.';
+            *it++ = '0';
+        }
     }
 
-	while(n < fractSize)
-	{
-	    *it++ = buf[n];
-	     ++n;
-	}
-	
-	if (dir == std::ios_base::left) 
-		while ( len++ < width)
-		    *it++ = fill;
-    
+    for(; n < fractSize; ++n)
+        *it++ = buf[n];
+
+    if (leftAdjust) 
+        while ( len++ < width)
+            *it++ = fill;
+
     return it;
 }
 
-template <typename IterT, typename T>
-inline IterT putScientific(IterT it, T n)
+template <typename IterT, typename T, typename CharT>
+inline IterT putScientific(IterT it, T d, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill)
 {
-    bool neg = (n < 0);
-    int digit = 0;
-    int exp = 0;
-    
-    if(neg)
-        n = -n;
-    
-    // calculate exponent
-    int m = static_cast<int>( std::log10(n) );
-    
-    if (neg)
-        *(it++) = '-';
+    bool leftAdjust = flags & std::ios_base::left;
+    bool internalAdjust = flags & std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
 
-    if(m != 0)
-		n /= std::pow(10.0, m);
-	
-	digit = static_cast<int>( std::floor(n) );
-	n -= digit;
-	*it++ = '0' + digit;
-    *it++ = '.';
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT buf[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = putFloat(buf, bufsize, i, e, d);
 
-    T eps = std::numeric_limits<T>::epsilon();
-    int places = std::numeric_limits<T>::digits10;
-    do
-    {
-		eps *= 10.0;
-        n *= 10.0;
-        digit = static_cast<int>( std::floor(n) );
-        
-        n -= digit;
-        char c = '0' + digit;
+    std::streamsize len = fractSize + 1; // int and fraction digits
+    bool hasSign = (i < 0) || flags & std::ios_base::showpos;
+    if(hasSign)
+        ++len;
 
-        *it = c;
-        ++it;
-        --places;
-    } 
-    while(places != 0 && n > eps);
-    
-    *it++ = 'e';
-    if(m < 0)
-    {
-		*it++ = '-';
-		m = -m;
-	}
+    len += 3; // exp digits
+    if(e < 0)
+        len++;
 
-	const size_t bufsize = std::numeric_limits<T>::digits10;
-	char buf[bufsize];
-	char* cur = buf + sizeof(buf);
-	char* end = cur;
-    do
+    if(fractSize != 0)
+        len += 1;
+    else if(flags & std::ios_base::showpoint)
+        len += 2;
+
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    if(hasSign)
+        *it++ = (i < 0) ? '-' : '+';
+
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    if(i < 0)
+        i = -i;   
+
+    *it++ = '0' + i;
+
+    if(fractSize != 0)
     {
-        digit = m % 10;
-        m /= 10;
-        --cur;
-        *cur = '0' + int(digit);
-    } 
-    while(m != 0 && cur != buf);
-    
-    while(cur != end)
-    {
-        *it++ = *cur;
-        cur++;
+        *it++ = '.';
+        it = std::copy(buf, buf+fractSize, it);
     }
-	
+    else if(flags & std::ios_base::showpoint) 
+    {
+        *it++ = '.';
+        *it++ = '0';
+    }
+
+    *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
+
+    if(exp < 0)
+        *it++ = (i < 0) ? '-' : '+';
+
+    bool negExp = e < 0;
+    if(negExp)
+        e = -e;
+
+    if(negExp)
+        *it++ = '-';
+
+    if(e < 10)
+        *it++ = '0';
+
+    //TODO use integer put function
+    const size_t expsize = std::numeric_limits<T>::digits10;
+    CharT exp[expsize];
+    CharT* end = exp + expsize;
+    CharT* ptr = end;
+    do
+    {
+        int digit = e % 10;
+        e /= 10;
+        --ptr;
+        *ptr = '0' + int(digit);
+    } 
+    while(e != 0 && ptr != exp);
+    
+    while(ptr != end)
+    {
+        *it++ = *ptr;
+        ptr++;
+    }
+
+    if(leftAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
     return it;
 }
 
@@ -278,6 +278,8 @@ class ConversionTest : public Pt::Unit::TestSuite
         ConversionTest()
         : Pt::Unit::TestSuite("ConversionTest")
         {
+            //Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
+            //Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
             Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
@@ -296,6 +298,8 @@ class ConversionTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void ScientificFloat();
+        void FixedFloat();
         void Octal();
         void Bool();
         void NumberOverflow();
@@ -315,24 +319,64 @@ class ConversionTest : public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<ConversionTest> register_ConversionTest;
 
-
-void ConversionTest::Octal()
+void ConversionTest::ScientificFloat()
 {
-    int n = -42;
+    std::cerr << "\n--- ScientificFloat --- "<< std::endl;
     std::string s;
-    Pt::putOctal(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
-    //std::cerr << "\nOCT: " << s << std::endl;
-    
-    s.clear();
-    Pt::putHex(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
-    //std::cerr << "HEX: " << s << std::endl;
-    
-    s.clear();
-    Pt::putDecimal(std::back_inserter(s), n, std::ios_base::internal, 8, ' ');
-    //std::cerr << "DEC: " << s << std::endl;
 
-	/*
-    std::cerr << "\n--- START --- "<< std::endl;
+    s.clear();
+    double d0 = 12345.6789;
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    std::cerr << s << "|" <<  std::endl;
+    
+    s.clear();
+    d0 = -12345.6789;
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    std::cerr << s << "|" << std::endl;
+    
+    s.clear();
+    d0 = 10000.0;
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    std::cerr << s << "|" << std::endl;
+    
+    s.clear();
+    d0 = -10000.0;
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
+    std::cerr << s << std::endl;
+    
+    s.clear();
+    d0 = 1.0;
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
+    std::cerr << s << std::endl; 
+    
+    s.clear();
+    d0 = -1.0;
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, 15, ' ');
+    std::cerr << s << std::endl;
+    
+    s.clear();
+    d0 = 0.0;
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
+    std::cerr << s << std::endl; 
+    
+    s.clear();
+    d0 = 0.00001;
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
+    std::cerr << s << std::endl;
+    
+    s.clear();
+    d0 = -0.00001;
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
+    std::cerr << s << std::endl;
+
+    std::cerr << "--- DONE --- "<< std::endl;
+}
+
+
+void ConversionTest::FixedFloat()
+{
+    std::cerr << "\n--- FixedFloat --- "<< std::endl;
+    std::string s;
 
     s.clear();
     double d0 = 12345.6789;
@@ -361,25 +405,42 @@ void ConversionTest::Octal()
     
     s.clear();
     d0 = -1.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
-    std::cerr << s << std::endl;   
+    putFixed(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, 15, ' ');
+    std::cerr << s << std::endl;
     
     s.clear();
     d0 = 0.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::right, 15, ' ');
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
     std::cerr << s << std::endl; 
     
     s.clear();
     d0 = 0.00001;
-    putFixed(std::back_inserter(s), d0, std::ios_base::right, 15, ' ');
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
     std::cerr << s << std::endl;
     
     s.clear();
     d0 = -0.00001;
-    putFixed(std::back_inserter(s), d0, std::ios_base::right, 15, ' ');
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
     std::cerr << s << std::endl;
 
-    std::cerr << "--- DONE --- "<< std::endl;*/
+    std::cerr << "--- DONE --- "<< std::endl;
+}
+
+
+void ConversionTest::Octal()
+{
+    int n = -42;
+    std::string s;
+    Pt::putOctal(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
+    //std::cerr << "\nOCT: " << s << std::endl;
+    
+    s.clear();
+    Pt::putHex(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
+    //std::cerr << "HEX: " << s << std::endl;
+    
+    s.clear();
+    Pt::putDecimal(std::back_inserter(s), n, std::ios_base::internal, 8, ' ');
+    //std::cerr << "DEC: " << s << std::endl;
 }
 
 
