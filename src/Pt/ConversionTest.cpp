@@ -38,7 +38,7 @@
 #include <iomanip>
 
 template <typename CharT, typename T>
-inline std::streamsize putFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
 {    
     if(n == T(0.0))
     {
@@ -84,35 +84,37 @@ inline std::streamsize putFloat(CharT* fraction, std::streamsize precision, int&
 template <typename IterT, typename T, typename CharT>
 inline IterT putFixed(IterT it, T d, 
                       std::ios_base::fmtflags flags, 
-                      std::streamsize width, CharT fill)
+                      std::streamsize width, CharT fill,
+                      std::streamsize precision = 6)
 {
-    bool leftAdjust = flags & std::ios_base::left;
-    bool internalAdjust = flags & std::ios_base::internal;
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
     bool rightAdjust = ! (leftAdjust || internalAdjust);
 
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
     CharT buf[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = putFloat(buf, bufsize, i, e, d);
+    std::streamsize fractSize = formatFloat(buf, bufsize, i, e, d);
 
+    // show only significant digits
+    //precision = 1;
+    //if(e < fractSize)
+    //    precision = fractSize - e;
+        
     std::streamsize len = 0;
     bool hasSign = (i < 0) || flags & std::ios_base::showpos;
     if(hasSign)
         ++len;
 
-    if(e < 0)
-        len += std::max(-e, fractSize) + 2; 
-    else
-    {
-        len += std::max(e+1, fractSize);
-        if(fractSize != 0 || flags & std::ios_base::showpoint)
-            len += 2;
-    }
+    len += precision + 1;
+	
+	if(e > 0)
+	    len += e;
 
-    std::streamsize pad = 0;
-    if (len < width)
-        pad = width - len;
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+	if(hasPoint)
+	    len++;
 
     if(rightAdjust) 
         while(len++ < width)
@@ -125,47 +127,34 @@ inline IterT putFixed(IterT it, T d,
         while(len++ < width)
             *it++ = fill;
 
-    if(i < 0)
-        i = -i;   
-
+    i = (i < 0) ? -i : i;   
     std::streamsize n = 0;
 
-    if(e < 0)
+    if(e >= 0)
     {
-        *it++ = '0';
-        *it++ = '.';
-
-        while(n > ++e)
-            *it++ = '0';
-
         *it++ = '0' + i;
+        for(; n < e; ++n)
+            *it++ = (n < fractSize) ? buf[n] : '0';
+
+        if(hasPoint)
+            *it++ = '.';
     }
     else
     {
-        *it++ = '0' + i;
-        while(n < e)
-        {
-            if(n < fractSize)
-                *it++ = buf[n];
-            else
-                *it++ = '0';
-
-            ++n;
-        }
-
-        if(fractSize != 0)
-        {
+        *it++ = '0';
+        
+        if(hasPoint)
             *it++ = '.';
-        }
-        else if(flags & std::ios_base::showpoint) 
-        {
-            *it++ = '.';
+
+        for( ;n > ++e && precision > 0; --precision)
             *it++ = '0';
-        }
+
+        if(precision-- > 0)
+            *it++ = '0' + i;
     }
 
-    for(; n < fractSize; ++n)
-        *it++ = buf[n];
+    for(; precision > 0; ++n, --precision)
+        *it++ = (n < fractSize) ?  buf[n] : '0';
 
     if (leftAdjust) 
         while ( len++ < width)
@@ -177,31 +166,28 @@ inline IterT putFixed(IterT it, T d,
 template <typename IterT, typename T, typename CharT>
 inline IterT putScientific(IterT it, T d, 
                            std::ios_base::fmtflags flags, 
-                           std::streamsize width, CharT fill)
+                           std::streamsize width, CharT fill,
+                           std::streamsize precision = 6)
 {
-    bool leftAdjust = flags & std::ios_base::left;
-    bool internalAdjust = flags & std::ios_base::internal;
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
     bool rightAdjust = ! (leftAdjust || internalAdjust);
 
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
-    CharT buf[bufsize];
+    CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = putFloat(buf, bufsize, i, e, d);
+    std::streamsize fractSize = formatFloat(fract, bufsize, i, e, d);
 
-    std::streamsize len = fractSize + 1; // int and fraction digits
-    bool hasSign = (i < 0) || flags & std::ios_base::showpos;
+    std::streamsize len = precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
+    
+    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
     if(hasSign)
         ++len;
 
-    len += 3; // exp digits
-    if(e < 0)
-        len++;
-
-    if(fractSize != 0)
-        len += 1;
-    else if(flags & std::ios_base::showpoint)
-        len += 2;
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+	if(hasPoint)
+	    len++;
 
     if(rightAdjust) 
         while(len++ < width)
@@ -214,56 +200,29 @@ inline IterT putScientific(IterT it, T d,
         while(len++ < width)
             *it++ = fill;
 
-    if(i < 0)
-        i = -i;   
-
+    i = (i < 0) ? -i : i;   
     *it++ = '0' + i;
 
-    if(fractSize != 0)
-    {
-        *it++ = '.';
-        it = std::copy(buf, buf+fractSize, it);
-    }
-    else if(flags & std::ios_base::showpoint) 
-    {
-        *it++ = '.';
-        *it++ = '0';
-    }
+    if(hasPoint)
+        *it++ = '.'; 
+        
+    for( std::streamsize n = 0; n < precision; ++n)
+        *it++ = (n < fractSize) ? fract[n] : '0';
 
     *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
-
-    if(exp < 0)
-        *it++ = (i < 0) ? '-' : '+';
 
     bool negExp = e < 0;
     if(negExp)
         e = -e;
 
-    if(negExp)
-        *it++ = '-';
+    *it++ = (negExp) ? '-' : '+';
 
+    if(e < 100)
+        *it++ = '0';
     if(e < 10)
         *it++ = '0';
 
-    //TODO use integer put function
-    const size_t expsize = std::numeric_limits<T>::digits10;
-    CharT exp[expsize];
-    CharT* end = exp + expsize;
-    CharT* ptr = end;
-    do
-    {
-        int digit = e % 10;
-        e /= 10;
-        --ptr;
-        *ptr = '0' + int(digit);
-    } 
-    while(e != 0 && ptr != exp);
-    
-    while(ptr != end)
-    {
-        *it++ = *ptr;
-        ptr++;
-    }
+    it = Pt::putDecimal(it, e, 0, 0, ' ');
 
     if(leftAdjust) 
         while(len++ < width)
@@ -321,107 +280,112 @@ Pt::Unit::RegisterTest<ConversionTest> register_ConversionTest;
 
 void ConversionTest::ScientificFloat()
 {
-    std::cerr << "\n--- ScientificFloat --- "<< std::endl;
+    std::cerr << "\n--- ScientificFloat --- " << std::endl;
+    std::cerr << "                    |" <<  std::endl;
     std::string s;
+    std::streamsize width = 20;
 
     s.clear();
     double d0 = 12345.6789;
-    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" <<  std::endl;
     
     s.clear();
     d0 = -12345.6789;
-    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 10000.0;
-    putScientific(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -10000.0;
-    putScientific(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
-    std::cerr << s << std::endl;
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 1.0;
-    putScientific(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
-    std::cerr << s << std::endl; 
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -1.0;
-    putScientific(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, 15, ' ');
-    std::cerr << s << std::endl;
+    putScientific(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 0.0;
-    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl; 
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = 0.00001;
-    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl;
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -0.00001;
-    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl;
+    putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl;
 
     std::cerr << "--- DONE --- "<< std::endl;
+    std::exit(1);
 }
 
 
 void ConversionTest::FixedFloat()
 {
     std::cerr << "\n--- FixedFloat --- "<< std::endl;
+    std::cerr << "                    |" <<  std::endl;
     std::string s;
+    std::streamsize width = 20;
 
     s.clear();
     double d0 = 12345.6789;
-    putFixed(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
-    std::cerr << s << "|" <<  std::endl;
+    putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -12345.6789;
-    putFixed(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 10000.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::left, 15, ' ');
+    putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -10000.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
-    std::cerr << s << std::endl;
+    putFixed(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 1.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::internal, 15, ' ');
-    std::cerr << s << std::endl; 
+    putFixed(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = -1.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, 15, ' ');
-    std::cerr << s << std::endl;
+    putFixed(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 0.0;
-    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl; 
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = 0.00001;
-    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl;
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -0.00001;
-    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, 15, ' ');
-    std::cerr << s << std::endl;
+    putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    std::cerr << s << "|" << std::endl;
 
     std::cerr << "--- DONE --- "<< std::endl;
 }
