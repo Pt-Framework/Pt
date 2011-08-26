@@ -222,7 +222,7 @@ inline IterT putScientific(IterT it, T d,
     if(e < 10)
         *it++ = '0';
 
-    it = Pt::putDecimal(it, e, 0, 0, ' ');
+    it = Pt::putDecimal(it, e, std::ios_base::dec, 0, ' ');
 
     if(leftAdjust) 
         while(len++ < width)

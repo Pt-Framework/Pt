@@ -411,11 +411,48 @@ inline CharT* formatOctal(CharT* buf, std::streamsize buflen, T i, bool showBase
     return cur;
 }
 
+
+template <typename CharT, typename T>
+inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, unsigned base = 10,
+                        bool upperCase = false)
+{
+    static const char* chartabLower = "0123456789abcdefghij";
+    static const char* chartabUpper = "0123456789ABCDEFGHIJ";
+    const char* chartab = chartabLower;
+    if(upperCase)
+        chartab = chartabUpper;
+    
+    CharT* end = buf + buflen;
+    CharT* cur = end;
+
+    CharT sign;
+    putSign(sign, i); 
+
+    do
+    {
+        T lsd = i % base;
+        i /= base;
+        --cur;
+        const char* ch = chartab + int(lsd);
+        *cur = *ch;
+    } 
+    while(i != 0 && cur != buf);
+    
+    if(cur == buf)
+        return 0;
+    
+    --cur;
+    *cur = sign;
+    return cur;
+}
+
+
 template <typename OutIterT, typename CharT>
 inline OutIterT putNumber(OutIterT it, const char* beg, const char* end,
                           std::ios_base::fmtflags flags, 
                           std::streamsize width, CharT fill) 
 {
+    //bool showBase = (flags & std::ios_base::showpos) == std::ios_base::showbase;
     bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
     bool showSign = showPos || *beg == '-';
     if(false == showSign)
