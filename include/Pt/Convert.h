@@ -226,11 +226,139 @@ T convert(const S& from)
 // parsing and formating of numbers
 //
 
-/*template <typename OutIterT, typename CharT>
-inline OutIterT putAdjustNumber(OutIterT it, const char* beg, const char* end, bool hasSign,
-                                std::ios_base::fmtflags flags, 
-                                std::streamsize width, CharT fill) 
+template <typename T>
+inline bool formatNegate(T& i)
 {
+    bool isNeg = i < 0;
+    if(isNeg)
+        i = -i;
+
+    return isNeg;
+}
+
+inline bool formatNegate(unsigned char&)
+{
+    return false;
+}
+
+inline bool formatNegate(unsigned short&)
+{
+    return false;
+}
+
+inline bool formatNegate(unsigned int&)
+{
+    return false;
+}
+
+inline bool formatNegate(unsigned long&)
+{
+    return false;
+}
+
+inline bool formatNegate(unsigned long long&)
+{
+    return false;
+}
+
+
+template <typename CharT, typename T>
+inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, 
+                        const CharT* basetab, std::size_t base, CharT neg)
+{
+    CharT* end = buf + buflen;
+    CharT* cur = end;
+
+    bool isNeg = formatNegate(i); 
+
+    do
+    {
+        T lsd = i % base;
+        i /= base;
+        --cur;
+        const CharT* ch = basetab + int(lsd);
+        *cur = *ch;
+    } 
+    while(i != 0 && cur != buf);
+    
+    if(cur == buf)
+        return buf;
+    
+    if(isNeg)
+    {
+        --cur;
+        *cur = neg;
+    }
+
+    return cur;
+}
+
+template <typename T>
+inline char* formatInt(char* buf, std::streamsize buflen, T i)
+{
+    static const char basetab[] = "0123456789";
+    return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(char), '-');
+}
+
+template <typename T>
+inline Pt::Char* formatInt(Pt::Char* buf, std::streamsize buflen, T i)
+{
+    static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(Pt::Char), Pt::Char('-'));
+}
+
+
+template <typename CharT, typename T>
+inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+{    
+    if(n == T(0.0))
+    {
+        intpart = 0;
+        exp = 0;
+        return 0;
+    }
+
+    const bool neg = n < 0;
+    if(neg)
+        n = -n;
+
+    exp = static_cast<int>( std::log10(n) );
+    
+    if(exp != 0)
+        n /= std::pow(10.0, exp);
+
+    intpart = static_cast<int>( std::floor(n) );
+    n -= intpart;
+    if(neg)
+        intpart = -intpart;
+    
+    int digit = 0;
+    T eps = std::numeric_limits<T>::epsilon();
+    std::streamsize places = 0;
+
+    while(n > eps && places <= precision)
+    {
+        eps *= 10.0;
+        n *= 10.0;
+        digit = static_cast<int>( std::floor(n) );
+        n -= digit;
+        char c = '0' + digit;
+
+        *fraction++ = c;
+        ++places;
+    }
+
+    return places;
+}
+
+
+template <typename OutIterT, typename CharT>
+inline OutIterT putNumber(OutIterT it, const CharT* beg, const CharT* end,
+                          std::ios_base::fmtflags flags, 
+                          std::streamsize width, CharT fill) 
+{
+    bool hasSign = *beg == '+' || *beg == '-';
+
     std::streamsize len = end - beg;
     if (len >= width)
     {
@@ -257,233 +385,6 @@ inline OutIterT putAdjustNumber(OutIterT it, const char* beg, const char* end, b
     // right adjustment
     for (; pad > 0; --pad)  *it++ = fill;
     return std::copy(beg, end, it);
-}*/
-
-
-template <typename CharT, typename T>
-inline void putSign(CharT& sign, T& i)
-{
-    sign = (i < 0) ? '-' : '+';
-    i = (i < 0) ? -i : i;
-}
-
-template <typename CharT>
-inline void putSign(CharT& sign, unsigned char&)
-{
-    sign = '+';
-}
-
-template <typename CharT>
-inline void putSign(CharT& sign, unsigned short&)
-{
-    sign = '+';
-}
-
-template <typename CharT>
-inline void putSign(CharT& sign, unsigned int&)
-{
-    sign = '+';
-}
-
-template <typename CharT>
-inline void putSign(CharT& sign, unsigned long&)
-{
-    sign = '+';
-}
-
-template <typename CharT>
-inline void putSign(CharT& sign, unsigned long long&)
-{
-    sign = '+';
-}
-
-template <typename CharT, typename T>
-inline CharT* formatDecimal(CharT* buf, std::streamsize buflen, T i)
-{
-    CharT* end = buf + buflen;
-    CharT* cur = end;
-
-    CharT sign;
-    putSign(sign, i); 
-
-    do
-    {
-        T lsd = i % 10;
-        i /= 10;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
-
-    if(cur == buf)
-        return 0;
-    
-    --cur;
-    *cur = sign;
-    return cur;
-}
-
-
-template <typename CharT, typename T>
-inline CharT* formatHex(CharT* buf, std::streamsize buflen, T i, 
-                         bool showBase = true, bool upperCase = false)
-{
-	const T base = 16;
-
-    static const char* chartabLower = "0123456789abcdef";
-    static const char* chartabUpper = "0123456789ABCDEF";
-    const char* chartab = chartabLower;
-    if(upperCase)
-        chartab = chartabUpper;
-    
-    CharT* end = buf + buflen;
-    CharT* cur = end;
-
-    CharT sign;
-    putSign(sign, i); 
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        const char* ch = chartab + int(lsd);
-        *cur = *ch;
-    } 
-    while(i != 0 && cur != buf);
-	
-	if(showBase)
-	{
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = 'x';
-		}
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = '0';
-		}
-	}
-    
-    if(cur == buf)
-        return 0;
-    
-    --cur;
-    *cur = sign;
-    return cur;
-}
-
-
-template <typename CharT, typename T>
-inline CharT* formatOctal(CharT* buf, std::streamsize buflen, T i, bool showBase = true)
-{
-    const T base = 8;
-    CharT* end = buf + buflen;
-    CharT* cur = end;
-
-    CharT sign;
-    putSign(sign, i); 
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
-
-	if(showBase)
-	{
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = '0';
-		}
-	}
-
-    if(cur == buf)
-        return 0;
-    
-    --cur;
-    *cur = sign;
-    return cur;
-}
-
-
-template <typename CharT, typename T>
-inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, unsigned base = 10,
-                        bool upperCase = false)
-{
-    static const char* chartabLower = "0123456789abcdefghij";
-    static const char* chartabUpper = "0123456789ABCDEFGHIJ";
-    const char* chartab = chartabLower;
-    if(upperCase)
-        chartab = chartabUpper;
-    
-    CharT* end = buf + buflen;
-    CharT* cur = end;
-
-    CharT sign;
-    putSign(sign, i); 
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        const char* ch = chartab + int(lsd);
-        *cur = *ch;
-    } 
-    while(i != 0 && cur != buf);
-    
-    if(cur == buf)
-        return 0;
-    
-    --cur;
-    *cur = sign;
-    return cur;
-}
-
-
-template <typename OutIterT, typename CharT>
-inline OutIterT putNumber(OutIterT it, const char* beg, const char* end,
-                          std::ios_base::fmtflags flags, 
-                          std::streamsize width, CharT fill) 
-{
-    //bool showBase = (flags & std::ios_base::showpos) == std::ios_base::showbase;
-    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
-    bool showSign = showPos || *beg == '-';
-    if(false == showSign)
-        ++beg;
-
-    std::streamsize len = end - beg;
-    if (len >= width)
-    {
-        return std::copy(beg, end, it);
-    }
-
-    std::streamsize pad =  width - len;
-    std::ios_base::fmtflags dir = flags & std::ios_base::adjustfield;
-
-    if (dir == std::ios_base::left) 
-    {
-        it = std::copy(beg, end, it);
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return it;
-    }
-    
-    if( dir == std::ios_base::internal && showSign) 
-    {
-        *it++ = *beg;
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return std::copy(beg + 1, end, it);
-    }
-
-    // right adjustment
-    for (; pad > 0; --pad)  *it++ = fill;
-    return std::copy(beg, end, it);
 }
 
 
@@ -492,22 +393,20 @@ inline OutIterT putDecimal(OutIterT it, T i,
                            std::ios_base::fmtflags flags, 
                            std::streamsize width, CharT fill)
 {
-    /*const bool negative = i < 0;
-    char sign = '+';
-    if(negative)
-    {
-		i = -i;
-		sign = '-';
-    }
-    
-    return putDecimalNumber(it, i, sign, flags, width, fill);*/
+    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
+
+    static const CharT basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     // large enough for decimal with a sign
     const std::size_t buflen = (sizeof(T) * 4) + 1;
-    char buf[buflen];
-    char* decimal = formatDecimal(buf, buflen, i);
-    
-    return putNumber(it, decimal, buf+buflen, flags, width, fill);
+    CharT buf[buflen];
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(CharT), CharT('-'));
+
+    CharT first = *number;
+    if(showPos && first != '-' && number != buf)
+        *(--number) = '+';
+
+    return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
 
@@ -516,24 +415,42 @@ inline OutIterT putHex(OutIterT it, T i,
                        std::ios_base::fmtflags flags, 
                        std::streamsize width, CharT fill)
 {
-    /*const bool negative = i < 0;
-    char sign = '+';
-    if(negative)
+    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
+    bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
+    bool upperCase = (flags & std::ios_base::uppercase) == std::ios_base::uppercase;
+    
+    static const CharT basetabL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                      'a', 'b', 'c', 'd', 'e', 'f'};
+
+    static const CharT basetabU[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                      'A', 'B', 'C', 'D', 'E', 'F'};
+
+    const CharT* basetab = basetabL;
+    if(upperCase)
+        basetab = basetabU;
+
+    // large enough for hex number, sign and base
+    const std::size_t buflen = (sizeof(T) * 4) + 3;
+    CharT buf[buflen];
+
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetabL)/sizeof(CharT), CharT('-'));
+
+    CharT first = *number;
+    if(showBase && (number - buf >= 2))
     {
-		i = -i;
-		sign = '-';
+        if(first != '-') 
+            --number;
+
+        *number-- = 'x';
+        *number = '0';
+
+        if(first == '-') 
+            *(--number) = first;
     }
 
-    return putHexNumber(it, i, sign, flags, width, fill);*/
-    
-	bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
-	bool upperCase = (flags & std::ios_base::uppercase) == std::ios_base::uppercase;
-	
-	// large enough for hex number, sign and base
-    const std::size_t buflen = (sizeof(T) * 4) + 3;
-    char buf[buflen];
-    char* number = formatHex(buf, buflen, i, showBase, upperCase);
-    
+    if(showPos && first != '-' && number != buf)
+        *(--number) = '+';
+
     return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
@@ -543,222 +460,185 @@ inline OutIterT putOctal(OutIterT it, T i,
                          std::ios_base::fmtflags flags, 
                          std::streamsize width, CharT fill)
 {
-    /*const bool negative = i < 0;
-    char sign = '+';
-    if(negative)
-    {
-		i = -i;
-		sign = '-';
-    }
-
-    return putOctalNumber(it, i, sign, flags, width, fill);*/
-    
-    
+    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
     bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
     
+    static const CharT basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7' };
+
     // large enough for octal with a sign and base
     const std::size_t buflen = (sizeof(T) * 4) + 2;
-    char buf[buflen];
-    char* number = formatOctal(buf, buflen, i, showBase);
+    CharT buf[buflen];
+
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(CharT), CharT('-'));
+
+    CharT first = *number;
+    if(showBase && (number != buf))
+    {
+        if(first != '-') 
+            --number;
+
+        *number = '0';
+
+        if(first == '-') 
+            *(--number) = first;
+    }
+
+    if(showPos && first != '-' && number != buf)
+        *(--number) = '+';
+
     return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
 
-/*template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putDecimalNumber(OutIterT it, T i, char sign,
-                                 std::ios_base::fmtflags flags, 
-                                 std::streamsize width, CharT fill)
+template <typename IterT, typename T, typename CharT>
+inline IterT putFixed(IterT it, T d, 
+                      std::ios_base::fmtflags flags, 
+                      std::streamsize width, CharT fill,
+                      std::streamsize precision = 6)
 {
-    // large enough for packed hex, dec, oct numbers with a sign
-    const std::size_t buflen = (sizeof(T) * 4) + 1;
-	char buf[buflen];
-    
-    char* end = buf + buflen;
-    char* cur = end;
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
 
-    do
-    {
-        T lsd = i % 10;
-        i /= 10;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT buf[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = Pt::formatFloat(buf, bufsize, i, e, d);
 
-	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    // show only significant digits
+    //precision = 1;
+    //if(e < fractSize)
+    //    precision = fractSize - e;
+        
+    std::streamsize len = 0;
+    bool hasSign = (i < 0) || flags & std::ios_base::showpos;
     if(hasSign)
-    {
-        if(cur != buf)
-        {
-	        --cur;
-            *cur = sign;
-        }
-    }
+        ++len;
 
-    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
-}*/
-
-
-/*template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putUnsignedDecimal(OutIterT it, T i, 
-                                   std::ios_base::fmtflags flags, 
-                                   std::streamsize width, CharT fill)
-{
-    //return putDecimalNumber(it, i, '+', flags, width, fill);
-    
-    // large enough for decimal with a sign
-    const std::size_t buflen = (sizeof(T) * 4) + 1;
-    char buf[buflen];
-    char* decimal = putDecimal(buf, buflen, i);
-    return putNumber(it, decimal, buf+buflen, flags, width, fill);
-}*/
-
-
-
-
-
-/*template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putHexNumber(OutIterT it, T i, char sign,
-                             std::ios_base::fmtflags flags, 
-                             std::streamsize width, CharT fill)
-{
-    static const char* chartabLower = "0123456789abcdef";
-    static const char* chartabUpper = "0123456789ABCDEF";
-    const char* chartab = chartabLower;
-    const T base = 16;
-
-    if(flags & std::ios_base::uppercase)
-    {
-        chartab = chartabUpper;
-    }
-
-    // large enough for packed hex, dec, oct numbers with sign and prefix
-    const std::size_t buflen = (sizeof(T) * 4) + 3;
-	char buf[buflen];
-    
-    char* end = buf + buflen;
-    char* cur = end;
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        const char* ch = chartab + int(lsd);
-        *cur = *ch;
-    } 
-    while(i != 0 && cur != buf);
+    len += precision + 1;
 	
-	if(flags & std::ios_base::showbase)
-	{
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = 'x';
-		}
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = '0';
-		}
-	}
+	if(e > 0)
+	    len += e;
 
-	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+	if(hasPoint)
+	    len++;
+
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
     if(hasSign)
+        *it++ = (i < 0) ? '-' : '+';
+
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    i = (i < 0) ? -i : i;   
+    std::streamsize n = 0;
+
+    if(e >= 0)
     {
-        if(cur != buf)
-        {
-	        --cur;
-            *cur = sign;
-        }
+        *it++ = '0' + i;
+        for(; n < e; ++n)
+            *it++ = (n < fractSize) ? buf[n] : '0';
+
+        if(hasPoint)
+            *it++ = '.';
+    }
+    else
+    {
+        *it++ = '0';
+        
+        if(hasPoint)
+            *it++ = '.';
+
+        for( ;n > ++e && precision > 0; --precision)
+            *it++ = '0';
+
+        if(precision-- > 0)
+            *it++ = '0' + i;
     }
 
-    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
-}*/
+    for(; precision > 0; ++n, --precision)
+        *it++ = (n < fractSize) ?  buf[n] : '0';
 
+    if (leftAdjust) 
+        while ( len++ < width)
+            *it++ = fill;
 
-/*template <typename OutIterT, typename CharT>
-inline OutIterT putUnsignedHex(OutIterT it, unsigned char i, 
-                               std::ios_base::fmtflags flags, 
-                               std::streamsize width, CharT fill)
+    return it;
+}
+
+template <typename IterT, typename T, typename CharT>
+inline IterT putScientific(IterT it, T d, 
+                           std::ios_base::fmtflags flags, 
+                           std::streamsize width, CharT fill,
+                           std::streamsize precision = 6)
 {
-	//return putHexNumber(it, i, '+', flags, width, fill);
-	bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
-	bool upperCase = (flags & std::ios_base::uppercase) == std::ios_base::uppercase;
-	
-	// large enough for hex number, sign and base
-    const std::size_t buflen = (sizeof(T) * 4) + 3;
-    char buf[buflen];
-    char* number = putHexNum(buf, buflen, i, showBase, upperCase);
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
+
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT fract[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d);
+
+    std::streamsize len = precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
     
-    return putNumber(it, number, buf+buflen, flags, width, fill);
-}*/
-
-
-
-/*template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putOctalNumber(OutIterT it, T i, char sign,
-                               std::ios_base::fmtflags flags, 
-                               std::streamsize width, CharT fill)
-{
-    const T base = 8;
-
-    // large enough for packed hex, dec, oct numbers
-    const std::size_t buflen = (sizeof(T) * 4) + 2;
-	char buf[buflen];
-    
-    char* end = buf + buflen;
-    char* cur = end;
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        *cur = '0' + int(lsd);
-    } 
-    while(i != 0 && cur != buf);
-
-	if(flags & std::ios_base::showbase)
-	{
-		if(cur != buf)
-		{
-		    --cur;
-		    *cur = '0';
-		}
-	}
-
-	const bool hasSign = (sign == '-') || (flags & std::ios_base::showpos);
+    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
     if(hasSign)
-    {
-        if(cur != buf)
-        {
-	        --cur;
-            *cur = sign;
-        }
-    }
+        ++len;
 
-    return putAdjustNumber(it, cur, end, hasSign, flags, width, fill);
-}*/
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+	if(hasPoint)
+	    len++;
 
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
 
-/*template <typename OutIterT, typename CharT>
-inline OutIterT putUnsignedOctal(OutIterT it, unsigned char i, 
-                                 std::ios_base::fmtflags flags, 
-                                 std::streamsize width, CharT fill)
-{
-	//return putOctalNumber(it, i, '+', flags, width, fill);
-    
-    bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
-    
-    // large enough for octal with a sign and base
-    const std::size_t buflen = (sizeof(T) * 4) + 2;
-    char buf[buflen];
-    char* number = putOctal(buf, buflen, i, showBase);
-    
-    return putNumber(it, number, buf+buflen, flags, width, fill);
-}*/
+    if(hasSign)
+        *it++ = (i < 0) ? '-' : '+';
 
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    i = (i < 0) ? -i : i;   
+    *it++ = '0' + i;
+
+    if(hasPoint)
+        *it++ = '.'; 
+        
+    for( std::streamsize n = 0; n < precision; ++n)
+        *it++ = (n < fractSize) ? fract[n] : '0';
+
+    *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
+
+    bool negExp = e < 0;
+    if(negExp)
+        e = -e;
+
+    *it++ = (negExp) ? '-' : '+';
+
+    if(e < 100)
+        *it++ = '0';
+    if(e < 10)
+        *it++ = '0';
+
+    it = putDecimal(it, e, std::ios_base::dec, 0, ' ');
+
+    if(leftAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    return it;
+}
 
 
 
