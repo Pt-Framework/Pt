@@ -37,15 +37,138 @@
 #include <limits>
 #include <iomanip>
 
+
+namespace Pt {
+
+template <typename IterT, typename T, typename CharT>
+inline IterT putFloatT(IterT it, T d, 
+                       std::ios_base::fmtflags flags, 
+                       std::streamsize width, CharT fill,
+                       std::streamsize precision = 1)
+{
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
+
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT fract[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d);
+
+    // show only significant digits
+    //precision = 1;
+    //if(e < fractSize)
+    //    precision = fractSize - e;
+        
+    std::streamsize len = 0;
+
+    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
+    if(hasSign)
+        ++len;
+
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+    if(hasPoint)
+        len++;
+
+    if(flags & std::ios_base::scientific) 
+    {
+        len += precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
+    }
+    else // flags & std::ios_base::fixed
+    {    
+        len += precision + 1;
+        
+        if(e > 0)
+            len += e;
+    }
+
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    if(hasSign)
+        *it++ = (i < 0) ? '-' : '+';
+
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    i = (i < 0) ? -i : i;   
+    std::streamsize n = 0;
+
+    if(flags & std::ios_base::scientific) 
+    {
+        *it++ = '0' + i;
+
+        if(hasPoint)
+            *it++ = '.'; 
+            
+        for( ; n < precision; ++n)
+            *it++ = (n < fractSize) ? fract[n] : '0';
+
+        *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
+
+        bool negExp = e < 0;
+        if(negExp)
+            e = -e;
+    
+        *it++ = (negExp) ? '-' : '+';
+
+        if(e < 100)
+            *it++ = '0';
+        if(e < 10)
+            *it++ = '0';
+
+        it = putDecimal(it, e, std::ios_base::dec, 0, ' ');
+    }
+    else // flags & std::ios_base::fixed
+    {
+        if(e >= 0)
+        {
+            *it++ = '0' + i;
+            for(; n < e; ++n)
+                *it++ = (n < fractSize) ? fract[n] : '0';
+    
+            if(hasPoint)
+                *it++ = '.';
+        }
+        else
+        {
+            *it++ = '0';
+            
+            if(hasPoint)
+                *it++ = '.';
+    
+            for( ;n > ++e && precision > 0; --precision)
+                *it++ = '0';
+    
+            if(precision-- > 0)
+                *it++ = '0' + i;
+        }
+    
+        for(; precision > 0; ++n, --precision)
+            *it++ = (n < fractSize) ?  fract[n] : '0';
+    }
+
+    if (leftAdjust) 
+        while ( len++ < width)
+            *it++ = fill;
+
+    return it;
+}
+
+}
+
 class ConversionTest : public Pt::Unit::TestSuite
 {
     public:
         ConversionTest()
         : Pt::Unit::TestSuite("ConversionTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
-            //Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
-            //Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
+            Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
+            Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
+            Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
             Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
@@ -93,47 +216,47 @@ void ConversionTest::ScientificFloat()
 
     s.clear();
     double d0 = 12345.6789;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
     std::cerr << s << "|" <<  std::endl;
     
     s.clear();
     d0 = -12345.6789;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 10000.0;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -10000.0;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 1.0;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -1.0;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal|std::ios_base::showpoint, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 0.0;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
     std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = 0.00001;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -0.00001;
-    Pt::putScientific(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
     std::cerr << s << "|" << std::endl;
 
     std::cerr << "--- DONE --- "<< std::endl;
@@ -150,47 +273,47 @@ void ConversionTest::FixedFloat()
 
     s.clear();
     double d0 = 12345.6789;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -12345.6789;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 10000.0;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::left, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -10000.0;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 1.0;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::internal, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal, width, ' ');
     std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = -1.0;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::internal|std::ios_base::showpoint, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal|std::ios_base::showpoint, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = 0.0;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
     std::cerr << s << "|" << std::endl; 
     
     s.clear();
     d0 = 0.00001;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
     std::cerr << s << "|" << std::endl;
     
     s.clear();
     d0 = -0.00001;
-    Pt::putFixed(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
+    Pt::putFloatT(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
     std::cerr << s << "|" << std::endl;
 
     std::cerr << "--- DONE --- "<< std::endl;
