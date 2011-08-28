@@ -81,7 +81,7 @@ namespace System {
             */
             Thread();
 
-            /** @brief Contructs a thread with a thread entry
+            /** @brief Constructs a thread with a thread entry
 
                 Constructs a thread object to execute the %Callable \a cb.
                 The Thread is not started on construction, but when start()
@@ -89,7 +89,7 @@ namespace System {
             */
             explicit Thread(const Callable<void>& cb);
 
-            /** @brief Contructs a thread with an event loop
+            /** @brief Constructs a thread with an event loop
 
                 Constructs a thread object to run the event loop \a loop in
                 a separate thread. The Thread is not started on construction,
@@ -206,7 +206,7 @@ namespace System {
     class AttachedThread : public Thread
     {
         public:
-            /** @brief Contructs a thread with a thread entry
+            /** @brief Constructs a thread with a thread entry
 
                 Constructs a thread object to execute the %Callable \a cb.
                 The Thread is not started on construction, but when start()
@@ -216,7 +216,7 @@ namespace System {
             : Thread(cb)
             {}
 
-            /** @brief Contructs a thread with an event loop
+            /** @brief Constructs a thread with an event loop
 
                 Constructs a thread object to run the event loop \a loop in
                 a separate thread. The Thread is not started on construction,
@@ -296,7 +296,7 @@ namespace System {
             }
 
         protected:
-            /** @brief Contructs a detched thread
+            /** @brief Constructs a detched thread
 
                 Constructs a thread object to execute the virtual method
                 run() when start() is called. %DetachedThreads are always

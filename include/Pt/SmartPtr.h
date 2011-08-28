@@ -433,7 +433,7 @@ namespace Pt {
             : object(ptr)
             { this->link(*this, ptr); }
 
-            /** \brief Copy contructor.
+            /** \brief Copy constructor.
 
                 The behaviour depends on the Model. When the default model is
                 used both SmartPtr will reference the same heap object.

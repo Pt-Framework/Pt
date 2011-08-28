@@ -72,7 +72,7 @@ namespace System {
         public:
             /** @brief Default constructor
 
-                Contructs an inactive timer.
+                Constructs an inactive timer.
             */
             Timer();
 

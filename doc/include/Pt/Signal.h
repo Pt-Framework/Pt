@@ -28,7 +28,7 @@ class Signal : public SignalBase {
         typedef Invokable<ARGUMENTS> InvokableT;
 
     public:
-        /** @brief Default contructor */
+        /** @brief Default constructor */
         Signal();
 
         /** @brief Copy Constructor */

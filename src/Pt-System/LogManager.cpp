@@ -256,7 +256,7 @@ LogTarget& LogManager::target(const std::string& name)
         }
         else
         {
-            // The target inherits the log level of the parent upon contruction
+            // The target inherits the log level of the parent upon construction
             foundTarget = new LogTarget(targetName, _concurrency, foundTarget);
             _targetMap[targetName] = foundTarget;
         }

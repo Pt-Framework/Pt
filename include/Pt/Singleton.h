@@ -82,7 +82,7 @@ namespace Pt {
             }
 
         protected:
-            /**  @brief Contructor
+            /**  @brief Constructor
              */
             Singleton()
             { }

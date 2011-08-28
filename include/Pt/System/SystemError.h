@@ -56,7 +56,7 @@ class PT_SYSTEM_API SystemError : public std::runtime_error
 class PT_SYSTEM_API OpenLibraryFailed : public SystemError
 {
     public:
-        //! @brief Contructs from a message string and source info
+        //! @brief Constructs from a message string and source info
         OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si);
 
         //! @brief Destructor
