@@ -166,8 +166,8 @@ class ConversionTest : public Pt::Unit::TestSuite
         ConversionTest()
         : Pt::Unit::TestSuite("ConversionTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
-            Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
+            //Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
+            //Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
             Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
