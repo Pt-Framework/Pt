@@ -127,7 +127,7 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 
 //     static locale::id id;
 
-//     // XXX
+//     // NOTE: rouguwave solaris
 //     //virtual locale::id& __get_id (void) const { return id; }
 
 // protected:
@@ -140,19 +140,15 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 
 //     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-//         long long val) const { return s; }
+//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-//         unsigned long long val) const { return s; }
+//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const;
 
 //     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, double val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-//         long double  val) const { return s; }
+//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long double  val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-//         const void*) const { return s; }
+//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
 // };
 
 

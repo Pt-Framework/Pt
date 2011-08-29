@@ -293,6 +293,7 @@ inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i,
     return cur;
 }
 
+/*
 template <typename T>
 inline char* formatInt(char* buf, std::streamsize buflen, T i)
 {
@@ -307,25 +308,34 @@ inline Pt::Char* formatInt(Pt::Char* buf, std::streamsize buflen, T i)
     return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(Pt::Char), Pt::Char('-'));
 }
 
+template <typename CharT, typename OutIterT, typename T>
+inline OutIterT putInt(OutIterT it, T i)
+{
+    return it;
+}
+*/
 
 template <typename CharT, typename T>
-inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n)
-{    
-    if(n == T(0.0))
-    {
-        intpart = 0;
-        exp = 0;
+inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n,
+                                   const CharT* basetab, std::size_t base)
+{
+    intpart = 0;
+    exp = 0;
+    
+    if(n == T(0.0) || n != n)
         return 0;
-    }
 
     const bool neg = n < 0;
-    if(neg)
+    if(n < 0)
         n = -n;
-
+    
+    if( n == std::numeric_limits<T>::infinity() )
+        return 0;
+    
     exp = static_cast<int>( std::log10(n) );
     
     if(exp != 0)
-        n /= std::pow(10.0, exp);
+        n /= std::pow(T(10.0), exp);
 
     intpart = static_cast<int>( std::floor(n) );
     n -= intpart;
@@ -342,16 +352,105 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, i
         n *= 10.0;
         digit = static_cast<int>( std::floor(n) );
         n -= digit;
-        char c = '0' + digit;
+        const CharT* c = basetab + digit;
 
-        *fraction++ = c;
+        *fraction++ = *c;
         ++places;
     }
 
     return places;
 }
 
+template <typename T>
+inline std::streamsize formatFloat(char* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+{
+    static const char basetab[] = "0123456789";
+    return formatFloat(fraction, precision, intpart, exp, n, basetab, sizeof(basetab)/sizeof(char));
+}
 
+template <typename T>
+inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+{
+    static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    return formatFloat(fraction, precision, intpart, exp, n, basetab, sizeof(basetab)/sizeof(Pt::Char));
+}
+/*
+template <typename CharT, typename OutIterT, typename T>
+inline OutIterT putFloat(OutIterT it, T i)
+{
+    return it;
+}*/
+
+template <typename IterT, typename T>
+inline IterT putFloat(IterT it, T d)
+{
+    // 1. Test for not-a-number with d != d
+    if( d != d ) 
+    {
+        *it = 'n'; ++it;
+        *it = 'a'; ++it;
+        *it = 'n'; ++it;
+        return it;
+    }
+
+    // 2. check sign
+    if(d < 0.0)
+    {
+        *it = '-';
+        ++it;
+    }
+
+    int digit = 0;
+    T num = std::fabs(d);
+
+    // 3. Test for infinity
+    if( num == std::numeric_limits<T>::infinity() ) 
+    {
+        *it = 'i'; ++it;
+        *it = 'n'; ++it;
+        *it = 'f'; ++it;
+        return it;
+    }
+    
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    char fract[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, num);
+
+    // show only significant digits for default format
+    std::streamsize precision = 1;
+    if(e < fractSize)
+        precision = fractSize - e;
+
+    std::streamsize n = 0;
+    if(e >= 0)
+    {
+        *it++ = '0' + i;
+        for(; n < e; ++n)
+            *it++ = (n < fractSize) ? fract[n] : '0';
+
+        *it++ = '.';
+    }
+    else
+    {
+        *it++ = '0';
+        *it++ = '.';
+
+        for( ;n > ++e && precision > 0; --precision)
+            *it++ = '0';
+
+        if(precision-- > 0)
+            *it++ = '0' + i;
+    }
+
+    for(; precision > 0; ++n, --precision)
+        *it++ = (n < fractSize) ?  fract[n] : '0'; 
+
+    return it;
+}
+
+// TODO: move to num_put facet
 template <typename OutIterT, typename CharT>
 inline OutIterT putNumber(OutIterT it, const CharT* beg, const CharT* end,
                           std::ios_base::fmtflags flags, 
@@ -387,7 +486,7 @@ inline OutIterT putNumber(OutIterT it, const CharT* beg, const CharT* end,
     return std::copy(beg, end, it);
 }
 
-
+// TODO: move to num_put facet
 template <typename OutIterT, typename T, typename CharT>
 inline OutIterT putDecimal(OutIterT it, T i, 
                            std::ios_base::fmtflags flags, 
@@ -409,7 +508,7 @@ inline OutIterT putDecimal(OutIterT it, T i,
     return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
-
+// TODO: move to num_put facet
 template <typename OutIterT, typename T, typename CharT>
 inline OutIterT putHex(OutIterT it, T i, 
                        std::ios_base::fmtflags flags, 
@@ -454,7 +553,7 @@ inline OutIterT putHex(OutIterT it, T i,
     return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
-
+// TODO: move to num_put facet
 template <typename OutIterT, typename T, typename CharT>
 inline OutIterT putOctal(OutIterT it, T i, 
                          std::ios_base::fmtflags flags, 
@@ -489,8 +588,131 @@ inline OutIterT putOctal(OutIterT it, T i,
     return putNumber(it, number, buf+buflen, flags, width, fill);
 }
 
-
+// TODO: move to num_put facet
 template <typename IterT, typename T, typename CharT>
+inline IterT putFloat(IterT it, T d, 
+                      std::ios_base::fmtflags flags, 
+                      std::streamsize width, CharT fill,
+                      std::streamsize precision = 6)
+{
+    bool scientific = (flags & std::ios_base::scientific) == std::ios_base::scientific;
+    bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
+    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
+    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
+    bool rightAdjust = ! (leftAdjust || internalAdjust);
+
+    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    CharT fract[bufsize];
+    int i = 0;
+    int e = 0;
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d);
+
+    std::streamsize len = 0;
+    if( 0 == (flags & std::ios_base::floatfield) )
+    {
+        // show only significant digits for default format
+        precision = 1;
+        if(e < fractSize)
+            precision = fractSize - e;
+    }
+
+    if(scientific)
+    {
+        len += precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
+    }
+    else // fixed and default
+    {
+        len += precision + 1;
+    
+        if(e > 0)
+            len += e;
+    }
+
+    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
+    if(hasSign)
+        ++len;
+
+    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+    if(hasPoint)
+        len++;
+    
+    if(rightAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    if(hasSign)
+        *it++ = (i < 0) ? '-' : '+';
+
+    if (internalAdjust) 
+        while(len++ < width)
+            *it++ = fill;
+
+    i = (i < 0) ? -i : i;   
+    std::streamsize n = 0;
+
+    if(scientific) 
+    {
+        *it++ = '0' + i;
+
+        if(hasPoint)
+            *it++ = '.'; 
+    }
+    else if(e >= 0) // fixed and default
+    {
+        *it++ = '0' + i;
+        for(; n < e; ++n)
+            *it++ = (n < fractSize) ? fract[n] : '0';
+
+        if(hasPoint)
+            *it++ = '.';
+    }
+    else
+    {
+        *it++ = '0';
+        
+        if(hasPoint)
+            *it++ = '.';
+
+        for( ;n > ++e && precision > 0; --precision)
+            *it++ = '0';
+
+        if(precision-- > 0)
+            *it++ = '0' + i;
+    }
+
+    for(; precision > 0; ++n, --precision)
+        *it++ = (n < fractSize) ?  fract[n] : '0';   
+
+    if(scientific) 
+    {
+        *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
+
+        CharT sign = '+';
+        if(e < 0)
+        {
+            e = -e;
+            sign = '-';
+        }
+    
+        *it++ = sign;
+
+        if(e < 100)
+            *it++ = '0';
+        if(e < 10)
+            *it++ = '0';
+
+        it = putDecimal(it, e, std::ios_base::dec, 0, ' ');
+    }
+
+    if (leftAdjust) 
+        while ( len++ < width)
+            *it++ = fill;
+
+    return it;
+}
+
+
+/*template <typename IterT, typename T, typename CharT>
 inline IterT putFixed(IterT it, T d, 
                       std::ios_base::fmtflags flags, 
                       std::streamsize width, CharT fill,
@@ -570,9 +792,9 @@ inline IterT putFixed(IterT it, T d,
             *it++ = fill;
 
     return it;
-}
+}*/
 
-template <typename IterT, typename T, typename CharT>
+/*template <typename IterT, typename T, typename CharT>
 inline IterT putScientific(IterT it, T d, 
                            std::ios_base::fmtflags flags, 
                            std::streamsize width, CharT fill,
@@ -638,92 +860,7 @@ inline IterT putScientific(IterT it, T d,
             *it++ = fill;
 
     return it;
-}
-
-
-
-template <typename IterT, typename T>
-inline IterT putFloat(IterT it, T d)
-{
-    // 1. Test for not-a-number with d != d
-    if( d != d ) 
-    {
-        *it = 'n'; ++it;
-        *it = 'a'; ++it;
-        *it = 'n'; ++it;
-        return it;
-    }
-
-    // 2. check sign
-    if(d < 0.0)
-    {
-        *it = '-';
-        ++it;
-    }
-
-    int digit = 0;
-    T num = std::fabs(d);
-
-    // 3. Test for infinity
-    if( num == std::numeric_limits<T>::infinity() ) 
-    {
-        *it = 'i'; ++it;
-        *it = 'n'; ++it;
-        *it = 'f'; ++it;
-        return it;
-    }
-
-	// 4. integral part
-	int m = static_cast<int>( std::log10(num) );
-	int places = std::numeric_limits<T>::digits10;
-    
-    if(num == 0.0 || m < 0)
-    {
-		*it = '0';
-		++it;
-    }
-    else
-    {
-		while(m >= 0)
-		{
-			T weight = std::pow( T(10.0), m);
-			digit = static_cast<int>( floor(num / weight) );
-			num -= (digit * weight);
-
-			*it = '0' + digit;
-			++it;
-
-			--m;
-			--places;
-		}
-    }
-    
-    // 5. fractional part
-	T fract = num;
-
-    *it = '.';
-    ++it;
-
-    do
-    {
-        fract *= 10;
-        digit = static_cast<int>( std::floor(fract) );
-        fract -= digit;
-        char c = '0' + digit;
-
-        *it = c;
-        ++it;
-        
-        // count significant digits from first non-null digit
-        if(places != std::numeric_limits<T>::digits10 || digit != 0)
-        {
-            --places;
-        }
-    } 
-    while(places != 0 && fract != 0.0);
-
-    return it;
-}
+}*/
 
 
 template <typename InIterT, typename T>

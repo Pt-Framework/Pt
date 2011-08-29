@@ -91,10 +91,12 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
 
 		array_appender<T> operator++(int)
 		{
+		    array_appender<T> tmp = *this;
+
 			if(_ptr != _end)
 				++_ptr;
 
-			return *this;
+			return tmp;
 		}
 
 	private:
@@ -254,7 +256,7 @@ void Formatter::addDouble(const char* name, double value, const char* id)
     it = putFloat(it, value);
     if(it == end)
     {
-		// TODO: use dynamic buffer now
+		// TODO: use dynamic buffer now or allow to write to writer directly
 		throw std::logic_error("float too large");
 	}
 
