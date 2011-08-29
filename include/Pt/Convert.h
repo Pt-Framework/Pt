@@ -346,7 +346,7 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, i
     T eps = std::numeric_limits<T>::epsilon();
     std::streamsize places = 0;
 
-    while(n > eps && places <= precision)
+    while(n > eps && places < precision)
     {
         eps *= 10.0;
         n *= 10.0;
