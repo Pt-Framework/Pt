@@ -376,13 +376,23 @@ inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize precision
 }
 /*
 template <typename CharT, typename OutIterT, typename T>
-inline OutIterT putFloat(OutIterT it, T i)
+inline OutIterT putFloat(OutIterT it, T n)
 {
     return it;
 }*/
 
-template <typename IterT, typename T>
-inline IterT putFloat(IterT it, T d)
+
+struct FloatFormat
+{
+    typedef char CharT;
+
+    static CharT neg()
+    { return '-'; }
+};
+
+
+template <typename OutIterT, typename T, typename FormatT>
+inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
 {
     // 1. Test for not-a-number with d != d
     if( d != d ) 
@@ -396,11 +406,10 @@ inline IterT putFloat(IterT it, T d)
     // 2. check sign
     if(d < 0.0)
     {
-        *it = '-';
+        *it = fmt.neg();
         ++it;
     }
 
-    int digit = 0;
     T num = std::fabs(d);
 
     // 3. Test for infinity
@@ -413,7 +422,7 @@ inline IterT putFloat(IterT it, T d)
     }
     
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
-    char fract[bufsize];
+    typename FormatT::CharT fract[bufsize];
     int i = 0;
     int e = 0;
     std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, num);
@@ -449,6 +458,15 @@ inline IterT putFloat(IterT it, T d)
 
     return it;
 }
+
+
+template <typename OutIterT, typename T>
+inline OutIterT putFloat(OutIterT it, T d)
+{
+    FloatFormat fmt;
+    return putFloat(it, d, fmt);
+}
+
 
 // TODO: move to num_put facet
 template <typename OutIterT, typename CharT>
@@ -596,7 +614,7 @@ inline IterT putFloat(IterT it, T d,
                       std::streamsize precision = 6)
 {
     bool scientific = (flags & std::ios_base::scientific) == std::ios_base::scientific;
-    bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
+    //bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
     bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
     bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
     bool rightAdjust = ! (leftAdjust || internalAdjust);
@@ -661,7 +679,7 @@ inline IterT putFloat(IterT it, T d,
     {
         *it++ = '0' + i;
         for(; n < e; ++n)
-            *it++ = (n < fractSize) ? fract[n] : '0';
+            *it++ = (n < fractSize) ? fract[n] : CharT('0');
 
         if(hasPoint)
             *it++ = '.';
@@ -681,7 +699,7 @@ inline IterT putFloat(IterT it, T d,
     }
 
     for(; precision > 0; ++n, --precision)
-        *it++ = (n < fractSize) ?  fract[n] : '0';   
+        *it++ = (n < fractSize) ?  fract[n] : CharT('0');   
 
     if(scientific) 
     {

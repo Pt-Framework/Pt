@@ -83,73 +83,75 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 };
 
 
-// template <>
-// class PT_API num_put<Pt::Char, ostreambuf_iterator<Pt::Char> > : public locale::facet {
-//     public:
-//     typedef Pt::Char char_type;
-//     typedef ostreambuf_iterator<Pt::Char> iter_type;
+template <>
+class PT_API num_put<Pt::Char, ostreambuf_iterator<Pt::Char> > : public locale::facet 
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef ostreambuf_iterator<Pt::Char> iter_type;
 
-//     explicit num_put(size_t refs = 0)
-//     : locale::facet(refs)
-//     { }
+        explicit num_put(size_t refs = 0)
+        : locale::facet(refs)
+        { }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, bool val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, bool val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     /// NOTE: rouguwave solaris
-//     iter_type put(iter_type s, ios_base& f, char_type fill, int val) const
-//     { return this->do_put( s, f, fill, long(val) ); }
+        // NOTE: rouguwave solaris
+        iter_type put(iter_type s, ios_base& f, char_type fill, int val) const
+        { return this->do_put( s, f, fill, long(val) ); }
 
-//      /// NOTE: rouguwave solaris
-//     iter_type put(iter_type s, ios_base& f, char_type fill, unsigned val) const
-//     { return this->do_put( s, f, fill, (unsigned long)(val) ); }
+        // NOTE: rouguwave solaris
+        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned val) const
+        { return this->do_put( s, f, fill, (unsigned long)(val) ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, long val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, long val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, long long val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, long long val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, double val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, double val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     iter_type put(iter_type s, ios_base& f, char_type fill, long double val) const
-//     { return this->do_put( s, f, fill, val ); }
+        iter_type put(iter_type s, ios_base& f, char_type fill, long double val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//      iter_type put(iter_type s, ios_base& f, char_type fill, const void* val) const
-//     { return this->do_put( s, f, fill, val ); }
+         iter_type put(iter_type s, ios_base& f, char_type fill, const void* val) const
+        { return this->do_put( s, f, fill, val ); }
 
-//     static locale::id id;
+        static locale::id id;
 
-//     // NOTE: rouguwave solaris
-//     //virtual locale::id& __get_id (void) const { return id; }
+        // NOTE: rouguwave solaris
+        virtual locale::id& __get_id (void) const 
+        { return id; }
 
-// protected:
-//     virtual ~num_put()
-//     {}
+    protected:
+        virtual ~num_put()
+        {}
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, bool val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, bool val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long long val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, double val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, double val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long double  val) const;
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, long double  val) const;
 
-//     virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
-// };
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
+};
 
 
 // template<>

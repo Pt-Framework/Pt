@@ -90,9 +90,11 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
 
 
 
+locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
+
  
-ostreambuf_iterator<Pt::Char>
-put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long val)
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -115,8 +117,32 @@ put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long val)
 }
 
 
-ostreambuf_iterator<Pt::Char>
-put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long long val)
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long long val) const
+{
+	// TODO: grouping
+    //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
+    //const string& grouping = np.grouping();
+
+    switch (f.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            Pt::putOctal(s, val, f.flags(), f.width(0), fill);
+            break;
+        case ios_base::hex:
+            Pt::putHex(s, val, f.flags(), f.width(0), fill);
+            break;
+        default:
+            Pt::putDecimal(s, val, f.flags(), f.width(0), fill);
+            break;
+    }
+
+    return s;
+}
+
+
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -139,8 +165,8 @@ put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long long 
 }
 
 
-ostreambuf_iterator<Pt::Char>
-put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, unsigned long val)
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long long val) const
 {
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
@@ -163,56 +189,34 @@ put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, unsigned l
 }
 
 
-ostreambuf_iterator<Pt::Char>
-put_long(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, unsigned long long val)
-{
-	// TODO: grouping
-    //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
-    //const string& grouping = np.grouping();
-    
-    switch (f.flags() & ios_base::basefield) 
-    {
-        case ios_base::oct:
-            Pt::putOctal(s, val, f.flags(), f.width(0), fill);
-            break;
-        case ios_base::hex:
-            Pt::putHex(s, val, f.flags(), f.width(0), fill);
-            break;
-        default:
-            Pt::putDecimal(s, val, f.flags(), f.width(0), fill);
-            break;
-    }
-
-    return s;
-}
-
-
-ostreambuf_iterator<Pt::Char>
-put_double(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, double val)
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, double val) const
 {
     Pt::putFloat(s, val, f.flags(), f.width(0), fill, f.precision());
     return s;
 }
 
-ostreambuf_iterator<Pt::Char>
-put_double(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, long double val)
+
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long double val) const
 {
     Pt::putFloat(s, val, f.flags(), f.width(0), fill, f.precision());
     return s;
 }
 
-ostreambuf_iterator<Pt::Char>
-put_bool(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, bool val)
+
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
 {
-    if( !(f.flags() & ios_base::boolalpha) )
-	    return put_long(s, f, fill, static_cast<long>(val));
+    if( 0 == (f.flags() & ios_base::boolalpha) )
+	    return do_put(s, f, fill, static_cast<long>(val));
     
     typedef Pt::Char char_type;
     const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
  
     Pt::String str = val ? np.truename() : np.falsename();
  
-    streamsize width = f.width(0); // width of 0 allowed?
+    streamsize width = f.width(0);
    
     if( str.size() >= static_cast<size_t>(width) )
     {
@@ -234,15 +238,17 @@ put_bool(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, bool val)
     return std::copy(str.begin(), str.end(), s);
 }
 
-ostreambuf_iterator<Pt::Char>
-put_ptr(ostreambuf_iterator<Pt::Char> s, ios_base& f, Pt::Char fill, const void* ptr)
+
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, const void* ptr) const
 {
     std::size_t val = reinterpret_cast<std::size_t>(ptr);
     Pt::putHex(s, val, f.flags(), f.width(0), fill);
     return s;
 }
 
-// locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
+
+
 
 // num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
 // num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, double val) const

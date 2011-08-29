@@ -33,7 +33,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <iostream>
-
+#include <iomanip>
 
 class StringStreamTest : public Pt::Unit::TestSuite
 {
@@ -76,10 +76,32 @@ void StringStreamTest::getline()
 void StringStreamTest::WriteBool()
 {
     Pt::StringStream ss;
-    ss << true << ' ' << false << ' ' << std::boolalpha << true << ' ' << false;
-    Pt::String str = ss.str();
+    Pt::String str;
 
-    PT_UNIT_ASSERT(str == L"1 0 true false");
+    ss << true;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"1");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::internal <<  std::setw(10) << false;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"         0");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::boolalpha << std::right << std::setw(10) << true << std::flush;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"      true");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::boolalpha << std::left << std::setw(10) << false << std::flush;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"false     ");
 }
 
 
