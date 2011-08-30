@@ -248,6 +248,9 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
 
+                if(_proc)
+                    _service->releaseProcedure(_proc);
+
                 _proc = _service->getProcedure( chars.content().narrow(), &_context );
                 if( ! _proc )
                     throw std::runtime_error("no such procedure");
