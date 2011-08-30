@@ -45,7 +45,6 @@ class ConversionTest : public Pt::Unit::TestSuite
         {
             //Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
             //Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
-            Pt::Unit::TestSuite::registerMethod( "Octal", *this, &ConversionTest::Octal );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
             Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
@@ -65,7 +64,6 @@ class ConversionTest : public Pt::Unit::TestSuite
     protected:
         void ScientificFloat();
         void FixedFloat();
-        void Octal();
         void Bool();
         void NumberOverflow();
         void IntToString();
@@ -194,24 +192,6 @@ void ConversionTest::FixedFloat()
     std::cerr << s << "|" << std::endl;
 
     std::cerr << "--- DONE --- "<< std::endl;
-}
-
-
-void ConversionTest::Octal()
-{
-    int n = 42;
-    std::string s;
-    std::cerr << "             |"<< std::endl;
-    Pt::putOctal(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
-    std::cerr << "OCT: " << s << std::endl;
-    
-    s.clear();
-    Pt::putHex(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showbase, 8, ' ');
-    std::cerr << "HEX: " << s << std::endl;
-    
-    s.clear();
-    Pt::putDecimal(std::back_inserter(s), n, std::ios_base::internal|std::ios_base::showpos, 8, ' ');
-    std::cerr << "DEC: " << s << std::endl;
 }
 
 
@@ -386,7 +366,6 @@ void ConversionTest::FloatToString()
 
     value = -123.4567f;
     str = Pt::convert<Pt::String>(value);
-    std::cerr << str.narrow() << std::endl;
     PT_UNIT_ASSERT( str.substr(0, 8) == L"-123.456" );
     
     value = 1000000000.01f;
@@ -453,7 +432,6 @@ void ConversionTest::Double()
 {
     double value = 1.2345678910;
     Pt::String str = Pt::convert<Pt::String>(value);
-
     PT_UNIT_ASSERT( str.substr(0, 10) == L"1.23456789" );
 
     str = L"2.3456789";

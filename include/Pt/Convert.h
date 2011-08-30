@@ -316,8 +316,8 @@ inline OutIterT putInt(OutIterT it, T i)
 */
 
 template <typename CharT, typename T>
-inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, int& intpart, int& exp, T n,
-                                   const CharT* basetab, std::size_t base)
+inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
+                                   const CharT* basetab, std::size_t base, std::streamsize precision, bool scientific)
 {
     intpart = 0;
     exp = 0;
@@ -337,6 +337,15 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, i
     if(exp != 0)
         n /= std::pow(T(10.0), exp);
 
+    if(precision >= 0 && precision < fractSize)
+    {
+		if( ! scientific )
+		    precision += exp;
+            
+        T roundfact = std::pow(T(10.0), precision);
+        n = (std::floor((n * roundfact) + T(0.5)) + T(0.1)) / roundfact;
+    }
+
     intpart = static_cast<int>( std::floor(n) );
     n -= intpart;
     if(neg)
@@ -346,7 +355,7 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, i
     T eps = std::numeric_limits<T>::epsilon();
     std::streamsize places = 0;
 
-    while(n > eps && places < precision)
+    while(n > eps && places < fractSize)
     {
         eps *= 10.0;
         n *= 10.0;
@@ -362,17 +371,21 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize precision, i
 }
 
 template <typename T>
-inline std::streamsize formatFloat(char* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+inline std::streamsize formatFloat(char* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
+                                   std::streamsize precision, bool scientific)
 {
     static const char basetab[] = "0123456789";
-    return formatFloat(fraction, precision, intpart, exp, n, basetab, sizeof(basetab)/sizeof(char));
+    //std::streamsize precision = std::numeric_limits<T>::digits10;
+    return formatFloat(fraction, fractSize, intpart, exp, n, basetab, sizeof(basetab)/sizeof(char), precision, scientific);
 }
 
 template <typename T>
-inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize precision, int& intpart, int& exp, T n)
+inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
+                                    std::streamsize precision, bool scientific)
 {
     static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-    return formatFloat(fraction, precision, intpart, exp, n, basetab, sizeof(basetab)/sizeof(Pt::Char));
+    //std::streamsize precision = std::numeric_limits<T>::digits10;
+    return formatFloat(fraction, fractSize, intpart, exp, n, basetab, sizeof(basetab)/sizeof(Pt::Char), precision, scientific);
 }
 /*
 template <typename CharT, typename OutIterT, typename T>
@@ -425,7 +438,7 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
     typename FormatT::CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, num);
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, num, bufsize, false);
 
     // show only significant digits for default format
     std::streamsize precision = 1;
@@ -618,12 +631,17 @@ inline IterT putFloat(IterT it, T d,
     bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
     bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
     bool rightAdjust = ! (leftAdjust || internalAdjust);
+    
+    if( 0 == (flags & std::ios_base::floatfield) )
+    {
+        precision = std::numeric_limits<T>::digits10;
+    }
 
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
     CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d);
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, precision, scientific);
 
     std::streamsize len = 0;
     if( 0 == (flags & std::ios_base::floatfield) )
