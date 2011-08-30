@@ -136,13 +136,6 @@ void StringStreamTest::WriteHex()
     ss.clear();
     ss.str( Pt::String() );
 
-    ss << std::hex << std::internal <<  std::setw(10) << -42;
-    str = ss.str();
-    PT_UNIT_ASSERT(str == L"-       2a");
-
-    ss.clear();
-    ss.str( Pt::String() );
-
     ss << std::hex << std::showbase << std::right << std::setw(10) << 42 << std::flush;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"      0x2a");
@@ -171,13 +164,6 @@ void StringStreamTest::WriteOct()
     ss << std::oct << std::internal <<  std::setw(10) << 42;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"        52");
-
-    ss.clear();
-    ss.str( Pt::String() );
-
-    ss << std::oct << std::internal <<  std::setw(10) << -42;
-    str = ss.str();
-    PT_UNIT_ASSERT(str == L"-       52");
 
     ss.clear();
     ss.str( Pt::String() );

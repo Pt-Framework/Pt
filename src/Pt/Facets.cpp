@@ -147,7 +147,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 	// TODO: grouping
     //const numpunct<char>& np = use_facet<numpunct<char> >(f.getloc());
     //const string& grouping = np.grouping();
-    
+
     switch (f.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
