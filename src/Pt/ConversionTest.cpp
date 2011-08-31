@@ -441,7 +441,7 @@ void ConversionTest::Double()
 
 void ConversionTest::VoidPtr()
 {
-    void* value = (void*)0x9;
+    void* value = (void*)0x12345678;
     Pt::String str = Pt::convert<Pt::String>(value);
 
     void* value2 = Pt::convert<void*>(str);

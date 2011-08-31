@@ -505,7 +505,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     std::size_t addr = 0;
     bool ok = false;
 
-    Pt::getUnsigned(it, end, ok, addr);
+    Pt::getUnsigned(it, end, ok, addr, 16);
 
     if( ok )
     {

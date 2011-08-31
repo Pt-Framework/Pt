@@ -339,8 +339,8 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, i
 
     if(precision >= 0 && precision < fractSize)
     {
-		if( ! scientific )
-		    precision += exp;
+        if( ! scientific )
+            precision += exp;
             
         T roundfact = std::pow(T(10.0), precision);
         n = (std::floor((n * roundfact) + T(0.5)) + T(0.1)) / roundfact;
@@ -775,13 +775,13 @@ inline IterT putFixed(IterT it, T d,
         ++len;
 
     len += precision + 1;
-	
-	if(e > 0)
-	    len += e;
+    
+    if(e > 0)
+        len += e;
 
     bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
-	if(hasPoint)
-	    len++;
+    if(hasPoint)
+        len++;
 
     if(rightAdjust) 
         while(len++ < width)
@@ -853,8 +853,8 @@ inline IterT putScientific(IterT it, T d,
         ++len;
 
     bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
-	if(hasPoint)
-	    len++;
+    if(hasPoint)
+        len++;
 
     if(rightAdjust) 
         while(len++ < width)
@@ -900,7 +900,7 @@ inline IterT putScientific(IterT it, T d,
 
 
 template <typename InIterT, typename T>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
 {
     n = 0;
     bool neg = false;
@@ -911,132 +911,117 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
     {
         if( ! Pt::isspace(*it) )
         {
-			switch(*it)
-			{
-				case '-':
-					neg = true; 
-					// fall through intended
-					
-				case '+':
-					++it; 
-					break;
-			}
-			
-			break;
+            neg = *it == '-';
+            if(*it == '-' || *it == '+')
+                ++it;
+
+            break;
         }
     }
 
-    // parse number
-    T d = 0;
-    bool done = false;
-    while(it != end)
+    static const unsigned char chartab[128] = 
     {
-        switch(*it)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if ( n != 0 && 10 > std::numeric_limits<T>::max() / n )
-                  return it;
-
-                n *= 10;
-
-                d = *it - '0';
-                if(d > std::numeric_limits<T>::max() - n)
-                    return it;
-                
-                n += d;
-                break;
-
-            default:
-                done = true;
-                break;
-        }
-
-        if(done)
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+    };
+   
+    // parse number
+    T fact(base);
+    unsigned char d = 0;
+    while(it != end)
+    {    
+        int cc = *it;
+        if(cc < 48 || cc > 122)
             break;
+        
+        d = chartab[ static_cast<unsigned char>(cc) ];
+        
+        if(d >= base) // also covers 0xFF lookup result
+            break;
+        
+        if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
+          return it;
 
+        n *= fact;
+
+        if(d > std::numeric_limits<T>::max() - n)
+            return it;
+
+        n += d;
         ++it;
     }
 
     if(neg) 
         n *= -1;
 
-	ok = true;
+      ok = true;
     return it;
 }
 
 
 template <typename InIterT, typename T>
-InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
+InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
 {
     n = 0;
     ok = false;
-    
+
     // strip leading whitespace, parse sign
     for( ; it != end; ++it)
     {
         if( ! Pt::isspace(*it) )
         {
-			switch(*it)
-			{				
-				case '+':
-					++it; 
-					break;
-			}
-			
-			break;
+            if(*it == '-' || *it == '+')
+                ++it;
+
+            break;
         }
     }
 
-	// parse number
-	T d = 0;
-    bool done = false;
-    while(it != end)
+    static const unsigned char chartab[128] = 
     {
-        switch(*it)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if ( n != 0 && 10 > std::numeric_limits<T>::max() / n )
-					return it;
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+    };
 
-                n *= 10;
-
-                d = *it - '0';
-                if(d > std::numeric_limits<T>::max() - n)
-                    return it;
-                
-                n += d;
-                break;
-
-            default:
-                done = true;
-                break;
-        }
-
-        if(done)
+    // parse number
+    T fact(base);
+    unsigned char d = 0;
+    while(it != end)
+    {    
+        int cc = *it;
+        if(cc < 48 || cc > 122)
             break;
+        
+        d = chartab[ static_cast<unsigned char>(cc) ];
+        
+        if(d >= base) // also covers 0xFF lookup result
+            break;
+        
+        if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
+          return it;
 
+        n *= fact;
+
+        if(d > std::numeric_limits<T>::max() - n)
+            return it;
+
+        n += d;
         ++it;
     }
 
-	ok = true;
+    ok = true;
     return it;
 }
 
@@ -1200,8 +1185,8 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
         if( digits > maxDigits )
             return it;
 
-		++digits;
-		++it;
+        ++digits;
+        ++it;
     }
  
     unsigned short significants = 0;
@@ -1227,7 +1212,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
                     fraction += static_cast<int>(*it) - 48;
 
                     ++digits;
-				    ++significants;
+                    ++significants;
                 }
 
                 break;
@@ -1237,8 +1222,8 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
                 break;
         }
 
-		if(done)
-			break;
+        if(done)
+            break;
 
         ++it;
     }
@@ -1251,7 +1236,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     if(neg)
         n *= -1;
 
-	ok = true;
+    ok = true;
     return it;
 }
 
