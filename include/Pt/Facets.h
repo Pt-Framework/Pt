@@ -84,7 +84,8 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
 
 
 template <>
-class PT_API num_put<Pt::Char, ostreambuf_iterator<Pt::Char> > : public locale::facet 
+class PT_API num_put< Pt::Char, 
+                      ostreambuf_iterator<Pt::Char> > : public locale::facet 
 {
     public:
         typedef Pt::Char char_type;
@@ -154,345 +155,83 @@ class PT_API num_put<Pt::Char, ostreambuf_iterator<Pt::Char> > : public locale::
 };
 
 
-// template<>
-// class PT_API num_get< Pt::Char, istreambuf_iterator<Pt::Char> > : public locale::facet
-// {
-//     public:
-//         typedef Pt::Char char_type;
-//         typedef istreambuf_iterator<Pt::Char> iter_type;
+template<>
+class PT_API num_get< Pt::Char, 
+                      istreambuf_iterator<Pt::Char> > : public locale::facet
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef istreambuf_iterator<Pt::Char> iter_type;
 
-//         explicit num_get(size_t refs = 0)
-//         {}
+        explicit num_get(size_t refs = 0)
+        : locale::facet(refs)
+        {}
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, bool&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, bool& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, signed char&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, long&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long long int& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, long long int&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned short& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, long long unsigned int&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned int& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, short&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned long& val) const
+        { return this->do_get(it, end, f, s, val); }
+        
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, unsigned long long & val) const
+        { return this->do_get(it, end, f, s, val); }
+        
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, float& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, unsigned short&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, double& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, int&) const
-//         { return iter_type(); }
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, long double& val) const
+        { return this->do_get(it, end, f, s, val); }
 
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, unsigned int&) const
-//         { return iter_type(); }
-
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, unsigned long&) const
-//         { return iter_type(); }
-
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, float&) const
-//         { return iter_type(); }
-
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, double&) const
-//         { return iter_type(); }
-
-//         iter_type get(iter_type, iter_type, ios_base&,
-//                     ios_base::iostate&, long double&) const
-//         { return iter_type(); }
-
-//         iter_type get(iter_type in, iter_type end, ios_base&,
-//                     ios_base::iostate&, void*&) const
-//         { return iter_type(); }
-
-//         static locale::id id;
-
-//         virtual locale::id& __get_id (void) const
-//         { return id; } // XXX
-
-//     protected:
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, bool&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, long&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&,
-//                                  unsigned short&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&,
-//                                  unsigned int&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, unsigned long&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, float&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, double&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, long double&) const
-//         { return iter_type(); }
-
-//         virtual iter_type do_get(iter_type, iter_type, ios_base&,
-//                                  ios_base::iostate&, void*&) const
-//         { return iter_type(); }
-// };
-
-
-#if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    // When STLport is used we provide a num_put<Pt::Char> facet
-    // which will use num_put<wchar_t> internally.
-    template <>
-    class PT_API num_put<Pt::Char> : public locale::facet {
-        public:
-        typedef Pt::Char    char_type;
-        typedef ostreambuf_iterator<Pt::Char>   iter_type;
-
-        typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
-        locale loc;
-        const num_put<wchar_t, iter_type_w>& numput_wchar;
-
-        explicit num_put(size_t refs = 0);
-
-#if !defined (_STLP_NO_BOOL)
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            bool val) const;
-#endif
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            int val) const                   /// NOTE: rouguwave solaris
-        { return this->do_put( s, f, fill, long(val) ); }
-
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            unsigned val) const              /// NOTE: rouguwave solaris
-        { return this->do_put( s, f, fill, (unsigned long)(val) ); }
-
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
-            long val) const;
-
-        iter_type put(iter_type s, ios_base& f, char_type fill, 
-            unsigned long val) const;
-
-#if defined (_STLP_LONG_LONG)
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            long long val) const;
-
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            unsigned long long val) const;
-#endif
-
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            double val) const;
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            long double val) const;
-#endif
-
-        iter_type put(iter_type s, ios_base& f, char_type fill,
-            const void* val) const;
+        iter_type get(iter_type it, iter_type end, ios_base& f, ios_base::iostate& s, void*& val) const
+        { return this->do_get(it, end, f, s, val); }
 
         static locale::id id;
 
-        virtual locale::id& __get_id (void) const { return id; } // XXX
+        // NOTE: rouguwave solaris
+        virtual locale::id& __get_id (void) const
+        { return id; }
 
     protected:
-        virtual ~num_put()
-        {
-        }
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, bool&) const;
 
-#if !defined (_STLP_NO_BOOL)
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            bool val) const;
-#endif
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long&) const;
+        
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long long&) const;
+        
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned short&) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            long val) const;
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned int&) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            unsigned long val) const;
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned long&) const;
 
-#if defined (_STLP_LONG_LONG)
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            long long val) const;
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, unsigned long long&) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            unsigned long long val) const;
-#endif
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, float&) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            double val) const;
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, double&) const;
 
-#if !defined (_STLP_NO_LONG_DOUBLE)
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            long double  val) const;
-#endif
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long double&) const;
 
-        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            const void*) const;
-    };
-
-#endif
-
-#if defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    /* LNG */
-   // _USE_FACET (_NumGet, __strm.getloc ())
-   // .get (_Iter (__strm), _Iter (), __strm, __err, __val);
-
-  template<> /// NOTE: TODO
-  class PT_API num_get< Pt::Char, 
-                        istreambuf_iterator< Pt::Char, 
-                                             char_traits<Pt::Char> > > : public locale::facet
-  {
-
-    public:
-      typedef Pt::Char char_type;
-      typedef istreambuf_iterator<Pt::Char, char_traits<Pt::Char> > iter_type;
-
-      explicit num_get(size_t refs = 0)
-      {}
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, bool&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, signed char&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, long&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, short&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, unsigned short&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, int&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, unsigned int&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, unsigned long&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, float&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, double&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type, iter_type, ios_base&,
-                    ios_base::iostate&, long double&) const
-      { return iter_type(); }
-
-      iter_type get(iter_type in, iter_type end, ios_base&,
-                    ios_base::iostate&, void*&) const
-      { return iter_type(); }
-
-      static locale::id id;
-
-      virtual locale::id& __get_id (void) const
-      { return id; } // XXX
-
-    protected:
-/*    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, bool&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, long&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&,
-                             unsigned short&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, 
-                             unsigned int&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, unsigned long&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, float&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, double&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, long double&) const
-    {}
-
-    virtual iter_type do_get(iter_type, iter_type, ios_base&,
-                             ios_base::iostate&, void*&) const
-    {}
-*/
+        virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, void*&) const;
 };
-
-#endif // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 }
 
-// TODO: Move this into STLport?
-#if PT_STLPORT
-
-_STLP_BEGIN_NAMESPACE
-_STLP_MOVE_TO_PRIV_NAMESPACE
-
-void  _Initialize_get_float( const ctype<Pt::Char>& ct,
-        Pt::Char& Plus, Pt::Char& Minus,
-        Pt::Char& pow_e, Pt::Char& pow_E,
-        Pt::Char* digits);
-
-_STLP_MOVE_TO_STD_NAMESPACE
-_STLP_END_NAMESPACE
-
-#endif
 
 namespace Pt {
 

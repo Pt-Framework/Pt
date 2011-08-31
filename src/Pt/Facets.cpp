@@ -31,6 +31,10 @@
 
 namespace std {
 
+//
+// numpunct facet specialized for Pt::Char
+//
+
 locale::id numpunct<Pt::Char>::id;
 
 
@@ -88,11 +92,47 @@ Pt::String numpunct<Pt::Char>::do_falsename() const
     return falsename;
 }
 
-
+//
+// num_put facet specialized for Pt::Char
+//
 
 locale::id num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::id;
 
+
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
+num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
+{
+    if( 0 == (f.flags() & ios_base::boolalpha) )
+        return do_put(s, f, fill, static_cast<long>(val));
+    
+    typedef Pt::Char char_type;
+    const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
  
+    Pt::String str = val ? np.truename() : np.falsename();
+ 
+    streamsize width = f.width(0);
+   
+    if( str.size() >= static_cast<size_t>(width) )
+    {
+        return std::copy(str.begin(), str.end(), s);
+    }
+
+    streamsize pad = width - str.size();
+    ios_base::fmtflags dir = f.flags() & ios_base::adjustfield;
+
+    if (dir == ios_base::left) 
+    {
+       std::copy(str.begin(), str.end(), s);
+       std::fill_n(s, pad, fill);
+       return s;
+    }
+
+    // right/internal padding 
+    std::fill_n(s, pad, fill);
+    return std::copy(str.begin(), str.end(), s);
+}
+
+
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long val) const
 {
@@ -206,40 +246,6 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
 
 
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
-{
-    if( 0 == (f.flags() & ios_base::boolalpha) )
-	    return do_put(s, f, fill, static_cast<long>(val));
-    
-    typedef Pt::Char char_type;
-    const numpunct<char_type>& np = use_facet< numpunct<char_type> >( f.getloc() );
- 
-    Pt::String str = val ? np.truename() : np.falsename();
- 
-    streamsize width = f.width(0);
-   
-    if( str.size() >= static_cast<size_t>(width) )
-    {
-        return std::copy(str.begin(), str.end(), s);
-    }
-
-    streamsize pad = width - str.size();
-    ios_base::fmtflags dir = f.flags() & ios_base::adjustfield;
-
-    if (dir == ios_base::left) 
-    {
-       std::copy(str.begin(), str.end(), s);
-       std::fill_n(s, pad, fill);
-       return s;
-    }
-
-    // right/internal padding 
-    std::fill_n(s, pad, fill);
-    return std::copy(str.begin(), str.end(), s);
-}
-
-
-num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
 num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, const void* ptr) const
 {
     std::size_t val = reinterpret_cast<std::size_t>(ptr);
@@ -247,247 +253,273 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
     return s;
 }
 
-
-
-
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, double val) const
-// {
-//     return s;
-// }
-
-
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, bool val) const
-// {
-//     if(f.flags() & std::ios_base::boolalpha)
-//     {
-//         const numpunct<char_type>& npct = use_facet< numpunct<char_type> >( f.getloc() );
-//         Pt::String out = val ? npct.truename() : npct.falsename();
-//         std::copy(out.begin(), out.end(), s);
-
-//         streamsize pad = f.width();
-//         if( pad > out.size() )
-//         {
-
-//             if ( (f.flags() & ios_base::adjustfield) == ios_base::left)
-//             {
-//                 std::copy(out.begin(), out.end(), s);
-//                 std::fill_n(s, pad, fill);
-//             }
-//             else
-//             {
-//                 std::fill_n(s, pad, fill);
-//                 std::copy(out.begin(), out.end(), s);
-//             }
-//         }
-//         else
-//         {
-//             std::copy(out.begin(), out.end(), s);
-//         }
-//     }
-//     else
-//     {
-//         ++s = val? '1' : '0';
-//     }
-
-//     return s;
-// }
-
-
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, long val) const
-// {
-//     return s;
-// }
-
-
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::iter_type
-// num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base& f, char_type fill, unsigned long val) const
-// {
-//     return s;
-// }
-
-
-
-
-#if PT_STLPORT || defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
 //
-// num_put facet
+// num_get facet specialized for Pt::Char
 //
-template<class val_type>
-static num_put<Pt::Char>::iter_type put_val(const num_put<wchar_t,num_put<Pt::Char>::iter_type_w>& numput_wchar,
-                                     num_put<Pt::Char>::iter_type s, ios_base& f, num_put<Pt::Char>::char_type fill,
-                                     val_type val)
+
+locale::id num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::id;
+
+
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           bool& val) const
 {
-    basic_ostringstream<wchar_t> tmp;
+    if(stream.flags() & ios_base::boolalpha) 
+    {
+        const numpunct<Pt::Char>& np = use_facet< numpunct<Pt::Char> >(stream.getloc());
+        const Pt::String truename  = np.truename();
+        const Pt::String falsename = np.falsename();
+        bool true_ok  = true;
+        bool false_ok = true;
 
-    num_put<Pt::Char>::iter_type_w begin(tmp);
+        size_t n = 0;
+        for ( ; it != end; ++it) 
+        {
+            Pt::Char c = *it;
+            true_ok  = true_ok && (n < truename.size()) && (c == truename[n]);
+            false_ok = false_ok && (n < falsename.size()) && (c == falsename[n]);
+            ++n;
 
-    // take over flags and other settings
-    tmp.flags(f.flags());
-    tmp.precision(f.precision());
-    tmp.width(f.width());
-    numput_wchar.put(begin, tmp, static_cast<wchar_t>(fill), val);
+            if( (! true_ok && ! false_ok) ||
+                (true_ok  && n >= truename.size()) ||
+                (false_ok && n >= falsename.size()) ) 
+            {
+                ++it;
+                break;
+            }
+        }
 
-    basic_string<wchar_t> str = tmp.str();
+        if (true_ok && n < truename.size())  
+            true_ok  = false;
 
-    basic_string<wchar_t>::iterator srcit = str.begin();
-    const size_t len = str.length();
-    for (size_t i = 0; i < len; ++i)
-        *s++ = *srcit++;
+        if (false_ok && n < falsename.size()) 
+            false_ok = false;
 
-    return s;    
+        if (true_ok || false_ok) 
+        {
+            state = ios_base::goodbit;
+            val = true_ok;
+        }
+        else
+            state = ios_base::failbit;
+
+        if (it == end)
+            state |= ios_base::eofbit;
+    }
+    else 
+    {
+        long l = 3;
+        it = this->do_get(it, end, stream, state, l);
+        if( 0 == (state & ios_base::failbit) ) 
+        {
+            if (l == 0)
+                val = false;
+            else if (l == 1)
+                val = true;
+            else
+                state |= ios_base::failbit;
+        }
+    }
+
+    return it;
 }
 
-locale::id num_put<Pt::Char>::id;
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           long& val) const
+{
+    bool ok = false;
+    it = Pt::getSigned(it, end, ok, val);
 
-#if defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
-num_put<Pt::Char>::num_put(size_t refs) 
-: locale::facet(refs), numput_wchar( use_facet(loc, (num_put<wchar_t>*) 0) ) /// FIXME: baaaad !!!
-{
-}
-#else
-num_put<Pt::Char>::num_put(size_t refs)
-: locale::facet(refs), numput_wchar(use_facet<num_put<wchar_t,iter_type_w> >(loc))
-{
-}
-#endif
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
 
-#if !defined (_STLP_NO_BOOL)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-              bool val) const
-{
-    return this->do_put(s, f, fill, val);
-}
-#endif
+    if (it == end)
+        state |= ios_base::eofbit;
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-              long val) const
-{
-    return this->do_put(s, f, fill, val);
+    return it;
 }
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-                                                    unsigned long val) const
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           long long& val) const
 {
-    return this->do_put(s, f, fill, val);
+    bool ok = false;
+    it = Pt::getSigned(it, end, ok, val);
+
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
 }
 
-#if defined (_STLP_LONG_LONG)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-              long long val) const
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           unsigned short& val) const
 {
-    return this->do_put(s, f, fill, val);
+    bool ok = false;
+    it = Pt::getUnsigned(it, end, ok, val);
+
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
 }
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-              unsigned long long val) const
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           unsigned int& val) const
 {
-    return this->do_put(s, f, fill, val);
-}
-#endif
+    bool ok = false;
+    it = Pt::getUnsigned(it, end, ok, val);
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-              double val) const
-{
-    return this->do_put(s, f, fill, val);
-}
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
 
-#if !defined (_STLP_NO_LONG_DOUBLE)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-                                                    long double val) const
-{
-    return this->do_put(s, f, fill, val);
-}
-#endif
+    if (it == end)
+        state |= ios_base::eofbit;
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-                                                    const void* val) const
-{
-    return this->do_put(s, f, fill, val);
+    return it;
 }
 
-#if !defined (_STLP_NO_BOOL)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                    bool val) const
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           unsigned long& val) const
 {
-    return put_val<bool>(numput_wchar, s, f, fill, val);
-}
-#endif
+    bool ok = false;
+    it = Pt::getUnsigned(it, end, ok, val);
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                    long val) const
-{
-    return put_val<long>(numput_wchar, s, f, fill, val);
-}
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                       unsigned long val) const
-{
-    return put_val<unsigned long>(numput_wchar, s, f, fill, val);
-}
+    if (it == end)
+        state |= ios_base::eofbit;
 
-#if defined (_STLP_LONG_LONG)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                    long long val) const
-{
-    return put_val<long long>(numput_wchar, s, f, fill, val);
+    return it;
 }
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                    unsigned long long val) const
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           unsigned long long& val) const
 {
-    return put_val<unsigned long long>(numput_wchar, s, f, fill, val);
-}
-#endif
+    bool ok = false;
+    it = Pt::getUnsigned(it, end, ok, val);
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                    double val) const
-{
-    return put_val<double>(numput_wchar, s, f, fill, val);
-}
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
 
-#if !defined (_STLP_NO_LONG_DOUBLE)
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                       long double val) const
-{
-    return put_val<long double>(numput_wchar, s, f, fill, val);
-}
-#endif
+    if (it == end)
+        state |= ios_base::eofbit;
 
-num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                       const void* val) const
-{
-
-// Note:
-// The STLport internal routine for serializing a pointer 
-// performs hexadecimal conversion i.e. the result is a hexadecimal string.
-// The routines for deserializing does NOT expect a hexadecimal string
-// Is this a bug in STLport?
-// 
-// Here we force a numerical conversion because we don't provide a num_get
-// facet where we could force hexadecimal deserialization.
-
-// force writing with hexadecimal value
-//ios_base::fmtflags flags = f.flags();
-//f.setf(ios_base::hex, ios_base::basefield);
-//f.setf(ios_base::showbase);	
-//iter_type result = put_val<size_t>(numput_wchar, s, f, fill, val_);
-//f.flags(flags);
-//return result;
-
-#if defined (_STLP_LONG_LONG)
-    long long val_ = reinterpret_cast<long long>(val);
-#else
-    long val_ = reinterpret_cast<long>(val);
-#endif
-    return do_put(s, f, fill, val_);    
+    return it;
 }
 
-locale::id num_get<Pt::Char>::id;
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           float& val) const
+{
+    bool ok = false;
+    it = Pt::getFloat(it, end, ok, val);
 
-#endif
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
+}
+
+
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           double& val) const
+{
+    bool ok = false;
+    it = Pt::getFloat(it, end, ok, val);
+
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
+}
+
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           long double& val) const
+{
+    bool ok = false;
+    it = Pt::getFloat(it, end, ok, val);
+
+    if( ok )
+        state = ios_base::goodbit;
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
+}
+
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
+num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
+                                                           ios_base& stream, ios_base::iostate& state, 
+                                                           void*& val) const
+{
+    std::size_t addr = 0;
+    bool ok = false;
+
+    Pt::getUnsigned(it, end, ok, addr);
+
+    if( ok )
+    {
+        val = reinterpret_cast<void*>(addr);
+        state = ios_base::goodbit;
+    }
+    else
+        state = ios_base::failbit;
+
+    if (it == end)
+        state |= ios_base::eofbit;
+
+    return it;
+}
 
 } // namespace std
 

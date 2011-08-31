@@ -926,8 +926,8 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
         }
     }
 
-	// parse number
-	T d = 0;
+    // parse number
+    T d = 0;
     bool done = false;
     while(it != end)
     {
@@ -944,7 +944,7 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
             case '8':
             case '9':
                 if ( n != 0 && 10 > std::numeric_limits<T>::max() / n )
-					return it;
+                  return it;
 
                 n *= 10;
 

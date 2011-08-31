@@ -37,10 +37,13 @@
 
 class StringStreamTest : public Pt::Unit::TestSuite
 {
-	public:
+    public:
         StringStreamTest()
         : Pt::Unit::TestSuite("StringStreamTest")
         {
+            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::readFloat );
+            Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readInt );
+            Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &StringStreamTest::rdbufTest );
             Pt::Unit::TestSuite::registerMethod("Getline", *this, &StringStreamTest::getline );
             Pt::Unit::TestSuite::registerMethod("WriteBool", *this, &StringStreamTest::WriteBool );
             Pt::Unit::TestSuite::registerMethod("WriteHex", *this, &StringStreamTest::WriteHex );
@@ -49,12 +52,12 @@ class StringStreamTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod("WriteFixed", *this, &StringStreamTest::WriteFixed );
             Pt::Unit::TestSuite::registerMethod("WriteScientific", *this, &StringStreamTest::WriteScientific );
             Pt::Unit::TestSuite::registerMethod("WritePtr", *this, &StringStreamTest::WritePtr );
-            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::readInt );
-            Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readFloat );
-            Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &StringStreamTest::rdbufTest );
 
         }
 
+        void readInt();
+        void readFloat();
+        void rdbufTest();
         void getline();
         void WriteBool();
         void WriteHex();
@@ -63,13 +66,43 @@ class StringStreamTest : public Pt::Unit::TestSuite
         void WriteFixed();
         void WriteScientific();
         void WritePtr();
-        void readInt();
-        void readFloat();
-        void rdbufTest();
 };
 
 Pt::Unit::RegisterTest<StringStreamTest> _registerStringStreamTest;
 
+
+void StringStreamTest::readInt()
+{
+    Pt::String str = L"123";
+    Pt::StringStream s(str);
+
+    int i = 0;
+    s >> i;
+
+    PT_UNIT_ASSERT(i == 123);
+}
+
+void StringStreamTest::readFloat()
+{
+    Pt::String str = L"123.125";
+    Pt::StringStream s(str);
+
+    float f;
+    s >> f;
+
+    PT_UNIT_ASSERT(f == 123.125);
+}
+
+
+void StringStreamTest::rdbufTest()
+{
+    Pt::String str = L"hier ist noch ein Test";
+    Pt::StringStream s(str);
+
+    std::basic_stringbuf<Pt::Char>* buffer = s.rdbuf();
+
+    PT_UNIT_ASSERT(buffer->str() == L"hier ist noch ein Test");
+}
 
 
 void StringStreamTest::getline()
@@ -465,39 +498,3 @@ void StringStreamTest::WritePtr()
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0         ");
 }
-
-
-void StringStreamTest::readInt()
-{
-    Pt::String str = L"123";
-    Pt::StringStream s(str);
-
-    int i;
-    s >> i;
-
-    PT_UNIT_ASSERT(i == 123);
-}
-
-void StringStreamTest::readFloat()
-{
-    Pt::String str = L"123.125";
-    Pt::StringStream s(str);
-
-    float f;
-    s >> f;
-
-    PT_UNIT_ASSERT(f == 123.125);
-}
-
-
-void StringStreamTest::rdbufTest()
-{
-    Pt::String str = L"hier ist noch ein Test";
-    Pt::StringStream s(str);
-
-    std::basic_stringbuf<Pt::Char>* buffer = s.rdbuf();
-
-    PT_UNIT_ASSERT(buffer->str() == L"hier ist noch ein Test");
-}
-
-
