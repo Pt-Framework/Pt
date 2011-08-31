@@ -330,8 +330,22 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            long& val) const
 {
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+
     bool ok = false;
-    it = Pt::getSigned(it, end, ok, val);
+    it = Pt::getSigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -349,8 +363,22 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            long long& val) const
 {
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+
     bool ok = false;
-    it = Pt::getSigned(it, end, ok, val);
+    it = Pt::getSigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
