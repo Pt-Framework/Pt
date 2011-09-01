@@ -262,18 +262,19 @@ inline bool formatNegate(unsigned long long&)
 }
 
 
-struct HexFormat
+template <typename CharType, unsigned Base>
+struct NumberFormat
 {
-    typedef char CharT;
+    typedef CharType CharT;
 
-    static CharT neg()
+    static CharT minus()
     { return '-'; }
 
-    static CharT pos()
-    { return '+'; }
+    static CharT point()
+    { return '.'; }
 
     static unsigned base()
-    { return 16; }
+    { return Base; }
     
     static CharT toChar(unsigned n)
     {
@@ -296,12 +297,43 @@ struct HexFormat
         };
 
         int cc = ch;
-        if(cc > 122)
+        if(cc > 127)
             return 0xFF;
 
         return chartab[ static_cast<unsigned char>(cc) ];
     }
 };
+
+
+template <typename CharT, typename T, typename FormatT>
+inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, const FormatT& fmt)
+{
+    CharT* end = buf + buflen;
+    CharT* cur = end;
+
+    const unsigned base = fmt.base();
+    bool isNeg = formatNegate(i); 
+
+    do
+    {
+        T lsd = i % base;
+        i /= base;
+        --cur;
+        *cur = fmt.toChar( unsigned(lsd) );
+    } 
+    while(i != 0 && cur != buf);
+    
+    if(cur == buf)
+        return buf;
+    
+    if(isNeg)
+    {
+        --cur;
+        *cur = fmt.minus();
+    }
+
+    return cur;
+}
 
 
 template <typename CharT, typename T>
@@ -352,12 +384,16 @@ inline Pt::Char* formatInt(Pt::Char* buf, std::streamsize buflen, T i)
 */
 
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putInt(OutIterT it, T i, FormatT& fmt)
+inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
 {
     // large enough for oct/dec/hex with a sign
-    /*const std::size_t buflen = (sizeof(T) * 4) + 3;
+    const std::size_t buflen = (sizeof(T) * 4) + 3;
     typename FormatT::CharT buf[buflen];
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 10, CharT('-'));*/
+    typename FormatT::CharT* p = Pt::formatInt(buf, buflen, i, fmt);
+
+    typename FormatT::CharT* end = buf + buflen;
+    for(; p != end; ++p)
+        *it++ = *p;
 
     return it;
 }
@@ -1245,7 +1281,6 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     n += fraction;
 
     // exponent [e|E][+|-][0-9]*
-    bool negExp = false;
     if(it != end && (*it == 'e' || *it == 'E') )
     {
         if(++it == end)
@@ -1256,7 +1291,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
         if( ! ok )
             return it;
             
-        n *= std::pow(base, exp);
+        n *= std::pow(base, T(exp));
     }
 
     if( ! pos )
