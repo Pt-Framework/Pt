@@ -899,25 +899,39 @@ inline IterT putScientific(IterT it, T d,
 }*/
 
 
-template <typename InIterT, typename T>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
+template <typename InIterT>
+InIterT getSign(InIterT it, InIterT end, bool& pos)
 {
-    n = 0;
-    bool neg = false;
-    ok = false;
+    pos = true;
     
     // strip leading whitespace, parse sign
     for( ; it != end; ++it)
     {
         if( ! Pt::isspace(*it) )
         {
-            neg = *it == '-';
-            if(*it == '-' || *it == '+')
-                ++it;
+            switch(*it)
+            {
+                case '-': pos = false;
+                case '+': ++it;
+                default: break;
+            }
 
             break;
         }
     }
+    
+    return it;
+}
+
+
+template <typename InIterT, typename T>
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
+{
+    n = 0;
+    ok = false;
+
+    bool pos = false;
+    it = getSign(it, end, pos);
 
     static const unsigned char chartab[128] = 
     {
@@ -957,7 +971,7 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10
         ++it;
     }
 
-    if(neg) 
+    if( ! pos ) 
         n *= -1;
 
       ok = true;
@@ -971,17 +985,11 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 
     n = 0;
     ok = false;
 
-    // strip leading whitespace, parse sign
-    for( ; it != end; ++it)
-    {
-        if( ! Pt::isspace(*it) )
-        {
-            if(*it == '-' || *it == '+')
-                ++it;
-
-            break;
-        }
-    }
+    bool pos = true;
+    it = getSign(it, end, pos);
+    
+    if(! pos)
+        return it;
 
     static const unsigned char chartab[128] = 
     {
@@ -1029,34 +1037,18 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 
 template <typename InIterT, typename T>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
 {
-    bool pos = false;
-    bool neg = false;
     n = 0.0;
     ok = false;
 
-    // leading whitespace, sign, NaN, infinity
+    bool pos = false;
+    it = getSign(it, end, pos);
+    
+    // NaN, -inf, +inf
     bool done = false;
     while(it != end)
     {
-        if( Pt::isspace(*it) )
-            continue;
-
         switch(*it)
         {
-            case '+':
-                if(pos || neg)
-                    return it;
-
-                pos = true; 
-                break;
-
-            case '-': 
-                if(neg || pos) 
-                    return it;
-
-                neg = true; 
-                break;
-
             case 'n':
             case 'N':
                 if(++it == end)
@@ -1123,7 +1115,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
                 }
 
                 n = std::numeric_limits<T>::infinity();
-                if(neg)
+                if(!pos)
                     n *= -1;
 
                 ok = true;
@@ -1142,98 +1134,84 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     }
 
     // integral part
-    while(it != end)
+    for( ; it != end; ++it)
     {
         if( *it == '.' )
         {
             ++it;
             break;
         }
-
-        switch(*it)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                n *= 10;
-                n += static_cast<int>(*it) - 48;
-                break;
-
-            default:
-                return it;
-                break;
-        }
-
-        ++it;
+        
+        int uc = *it;
+        if(uc < 48 || uc > 57)
+            return it;
+        
+        n *= 10;
+        n += static_cast<int>(*it) - 48;    
     }
     
+    // it is ok, if fraction is missing
     if(it == end)
-        return it;
+    {
+        if( ! pos )
+            n *= -1;
 
-    // fractional part
-    unsigned short digits = 0;
+        ok = true;
+        return it;
+    }
+
+    // fractional part, ignore 0 digits after dot
+    unsigned short fractDigits = 0;
     size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
     while(it != end && *it == '0')
     {
-        if( digits > maxDigits )
+        if( fractDigits > maxDigits )
             return it;
 
-        ++digits;
+        ++fractDigits;
         ++it;
     }
  
+    // fractional part, parse like integer, skip insignificant digits
     unsigned short significants = 0;
     T fraction = 0.0;
-    done = false;
-    while(it != end)
+    for( ; it != end; ++it)
     {
-        switch(*it)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if( significants <= std::numeric_limits<T>::digits10 )
-                {
-                    fraction *= 10;
-                    fraction += static_cast<int>(*it) - 48;
-
-                    ++digits;
-                    ++significants;
-                }
-
-                break;
-
-            default:
-                done = true;
-                break;
-        }
-
-        if(done)
+        int uc = *it;
+        if(uc < 48 || uc > 57)
             break;
 
-        ++it;
+        if( significants <= std::numeric_limits<T>::digits10 )
+        {
+            fraction *= 10;
+            fraction += static_cast<int>(*it) - 48;
+
+            ++fractDigits;
+            ++significants;
+        }
     }
 
+    // fractional part, scale down
     T base = 10.0;
-    T exp = digits;
-    fraction /= std::pow(base, exp);
+    fraction /= std::pow(base, T(fractDigits));
     n += fraction;
 
-    if(neg)
+    // exponent [e|E][+|-][0-9]*
+    bool negExp = false;
+    if(it != end && (*it == 'e' || *it == 'E') )
+    {
+        if(++it == end)
+            return it;
+
+        long exp = 0;
+        it = getSigned(it, end, ok, exp);
+        if( ! ok )
+            return it;
+            
+        n *= std::pow(base, exp);
+    }
+
+    if( ! pos )
         n *= -1;
 
     ok = true;

@@ -90,7 +90,13 @@ void StringStreamTest::readFloat()
     float f;
     s >> f;
 
-    PT_UNIT_ASSERT(f == 123.125);
+    PT_UNIT_ASSERT(f - 123.125 < 0.01);
+    
+    s.clear();
+    s.str(L"1.2345e+02");
+    s >> f;
+
+    PT_UNIT_ASSERT(f - 123.45 < 0.01);
 }
 
 
