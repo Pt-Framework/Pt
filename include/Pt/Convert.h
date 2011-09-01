@@ -262,6 +262,48 @@ inline bool formatNegate(unsigned long long&)
 }
 
 
+struct HexFormat
+{
+    typedef char CharT;
+
+    static CharT neg()
+    { return '-'; }
+
+    static CharT pos()
+    { return '+'; }
+
+    static unsigned base()
+    { return 16; }
+    
+    static CharT toChar(unsigned n)
+    {
+        static const char* digtab = "0123456789abcdef";
+        return digtab[n]; 
+    }
+    
+    static unsigned toDigit(CharT ch)
+    {
+        static const unsigned char chartab[128] = 
+        {
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+        };
+
+        int cc = ch;
+        if(cc > 122)
+            return 0xFF;
+
+        return chartab[ static_cast<unsigned char>(cc) ];
+    }
+};
+
+
 template <typename CharT, typename T>
 inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, 
                         const CharT* basetab, std::size_t base, CharT neg)
@@ -307,13 +349,19 @@ inline Pt::Char* formatInt(Pt::Char* buf, std::streamsize buflen, T i)
     static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
     return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(Pt::Char), Pt::Char('-'));
 }
+*/
 
-template <typename CharT, typename OutIterT, typename T>
-inline OutIterT putInt(OutIterT it, T i)
+template <typename OutIterT, typename T, typename FormatT>
+inline OutIterT putInt(OutIterT it, T i, FormatT& fmt)
 {
+    // large enough for oct/dec/hex with a sign
+    /*const std::size_t buflen = (sizeof(T) * 4) + 3;
+    typename FormatT::CharT buf[buflen];
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 10, CharT('-'));*/
+
     return it;
 }
-*/
+
 
 template <typename CharT, typename T>
 inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
@@ -530,7 +578,7 @@ inline OutIterT putDecimal(OutIterT it, T i,
     // large enough for decimal with a sign
     const std::size_t buflen = (sizeof(T) * 4) + 1;
     CharT buf[buflen];
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(CharT), CharT('-'));
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 10, CharT('-'));
 
     CharT first = *number;
     if(showPos && first != '-' && number != buf)
@@ -563,7 +611,7 @@ inline OutIterT putHex(OutIterT it, T i,
     const std::size_t buflen = (sizeof(T) * 4) + 3;
     CharT buf[buflen];
 
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetabL)/sizeof(CharT), CharT('-'));
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 16, CharT('-'));
 
     CharT first = *number;
     if(showBase && (number - buf >= 2))
@@ -599,7 +647,7 @@ inline OutIterT putOctal(OutIterT it, T i,
     const std::size_t buflen = (sizeof(T) * 4) + 2;
     CharT buf[buflen];
 
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(CharT), CharT('-'));
+    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 8, CharT('-'));
 
     CharT first = *number;
     if(showBase && (number != buf))
