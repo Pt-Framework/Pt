@@ -34,6 +34,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 class StringStreamTest : public Pt::Unit::TestSuite
 {
