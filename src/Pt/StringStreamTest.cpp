@@ -41,7 +41,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
         StringStreamTest()
         : Pt::Unit::TestSuite("StringStreamTest")
         {
-            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::readFloat );
+            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::ReadFloat );
             Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readInt );
             Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &StringStreamTest::rdbufTest );
             Pt::Unit::TestSuite::registerMethod("Getline", *this, &StringStreamTest::getline );
@@ -56,7 +56,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
         }
 
         void readInt();
-        void readFloat();
+        void ReadFloat();
         void rdbufTest();
         void getline();
         void WriteBool();
@@ -82,21 +82,53 @@ void StringStreamTest::readInt()
     PT_UNIT_ASSERT(i == 123);
 }
 
-void StringStreamTest::readFloat()
+void StringStreamTest::ReadFloat()
 {
-    Pt::String str = L"123.125";
-    Pt::StringStream s(str);
+    Pt::String str;
+    Pt::StringStream s;
+    float f = 0.0f;
 
-    float f;
+    s.clear();
+    s.str(L"123.125");
     s >> f;
+    PT_UNIT_ASSERT( std::fabs(f - 123.125) < 0.01);
 
-    PT_UNIT_ASSERT(f - 123.125 < 0.01);
-    
+    f = 0.0f;
+    s.clear();
+    s.str(L"-123.125");
+    s >> f;
+    s >> str;
+    PT_UNIT_ASSERT(std::fabs(f + 123.125) < 0.01);
+
+    str.clear();
+    f = 0.0f;
+    s.clear();
+    s.str(L"   123.125  a ");
+    s >> f;
+    s >> str;
+    PT_UNIT_ASSERT(std::fabs(f - 123.125) < 0.01);
+    PT_UNIT_ASSERT(str == L"a");
+
+    f = 0.0f;
     s.clear();
     s.str(L"1.2345e+02");
     s >> f;
+    PT_UNIT_ASSERT(std::fabs(f - 123.45) < 0.01);
 
-    PT_UNIT_ASSERT(f - 123.45 < 0.01);
+    f = 0.0f;
+    s.clear();
+    s.str(L"-1.2345e+02");
+    s >> f;
+    PT_UNIT_ASSERT( std::fabs(f + 123.45) < 0.01);
+
+    str.clear();
+    f = 0.0f;
+    s.clear();
+    s.str(L"   1.2345e+02   a ");
+    s >> f;
+    s >> str;
+    PT_UNIT_ASSERT( std::fabs(f - 123.45) < 0.01);
+    PT_UNIT_ASSERT(str == L"a");
 }
 
 

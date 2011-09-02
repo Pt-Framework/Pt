@@ -396,8 +396,22 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned short& val) const
 {
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+    
     bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val);
+    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -415,8 +429,22 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned int& val) const
 {
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+    
     bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val);
+    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -433,9 +461,23 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned long& val) const
-{
+{    
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+    
     bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val);
+    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -453,8 +495,22 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned long long& val) const
 {
+    std::size_t base = 10;
+    switch(stream.flags() & ios_base::basefield) 
+    {
+        case ios_base::oct:
+            base = 8;
+            break;
+        case ios_base::hex:
+            base = 16;
+            break;
+        default:
+            base = 10;
+            break;
+    }
+    
     bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val);
+    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -472,6 +528,8 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            float& val) const
 {
+    // accept scientific and fixed format. The respective maniuplators 
+    // are for input only
     bool ok = false;
     it = Pt::getFloat(it, end, ok, val);
 
@@ -492,6 +550,8 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            double& val) const
 {
+    // accept scientific and fixed format. The respective maniuplators 
+    // are for input only
     bool ok = false;
     it = Pt::getFloat(it, end, ok, val);
 
@@ -511,6 +571,8 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            long double& val) const
 {
+    // accept scientific and fixed format. The respective maniuplators 
+    // are for input only
     bool ok = false;
     it = Pt::getFloat(it, end, ok, val);
 
@@ -530,10 +592,11 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            void*& val) const
 {
+    std::size_t base = 16;
     std::size_t addr = 0;
     bool ok = false;
 
-    Pt::getUnsigned(it, end, ok, addr, 16);
+    Pt::getUnsigned(it, end, ok, addr, base);
 
     if( ok )
     {
