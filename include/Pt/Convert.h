@@ -262,7 +262,7 @@ inline bool formatNegate(unsigned long long&)
 }
 
 
-template <typename CharType, unsigned Base>
+template <typename CharType>
 struct NumberFormat
 {
     typedef CharType CharT;
@@ -278,20 +278,76 @@ struct NumberFormat
     
     static CharT e()
     { return 'e'; }
+};
 
-    static CharT E()
-    { return 'E'; }
-
-    static unsigned base()
-    { return Base; }
+template <typename CharType>
+struct DecimalFormat : public NumberFormat<CharType>
+{
+    static const int base = 10;
     
     static CharT toChar(unsigned char n)
     {
-        n &= 0x1F; // prevent
+        return '0' + n; 
+    }
+    
+    /** @brief Converts a character to a digit.
+    
+        Returns a number equal or less than the base on success or a number
+        greater than base on failure.
+    */
+    static unsigned char toDigit(CharT ch)
+    {
+        int cc = ch - 48;
+        // let negatives overrun
+        return static_cast<unsigned>(cc);
+
+    }
+};
+
+
+template <typename CharType>
+struct OctalFormat : public NumberFormat<CharType>
+{
+    static const int base = 8;
+    
+    static CharT toChar(unsigned char n)
+    {
+        return '0' + n; 
+    }
+    
+    /** @brief Converts a character to a digit.
+    
+        Returns a number equal or less than the base on success or a number
+        greater than base on failure.
+        
+    */
+    static unsigned char toDigit(CharT ch)
+    {
+        int cc = ch - 48;
+        // let negatives overrun
+        return static_cast<unsigned>(cc);
+
+    }
+};
+
+
+template <typename CharType>
+struct HexFormat : public NumberFormat<CharType>
+{
+    static const int base = 16;
+    
+    static CharT toChar(unsigned char n)
+    {
+        n &= 0x1F; // prevent overrun
         static const char* digtab = "0123456789abcdef";
         return digtab[n]; 
     }
+
+    /** @brief Converts a character to a digit.
     
+        Returns a number equal or less than the base on success or a number
+        greater than base on failure.
+    */
     static unsigned char toDigit(CharT ch)
     {
         static const unsigned char chartab[64] = 
@@ -321,7 +377,7 @@ inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, const FormatT& 
     CharT* end = buf + buflen;
     CharT* cur = end;
 
-    const unsigned base = fmt.base();
+    const unsigned base = fmt.base;
     bool isNeg = formatNegate(i); 
 
     do
@@ -346,7 +402,31 @@ inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, const FormatT& 
 }
 
 
-template <typename CharT, typename T>
+template <typename OutIterT, typename T, typename FormatT>
+inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
+{
+    // large enough even for binary and a sign
+    const std::size_t buflen = (sizeof(T) * 8) + 1;
+    typename FormatT::CharT buf[buflen];
+    typename FormatT::CharT* p = Pt::formatInt(buf, buflen, i, fmt);
+
+    typename FormatT::CharT* end = buf + buflen;
+    for(; p != end; ++p)
+        *it++ = *p;
+
+    return it;
+}
+
+
+template <typename OutIterT, typename T>
+inline OutIterT putInt(OutIterT it, T i)
+{
+    DecimalFormat<char> fmt;
+    return putInt(it, i, fmt);
+}
+
+
+/*template <typename CharT, typename T>
 inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, 
                         const CharT* basetab, std::size_t base, CharT neg)
 {
@@ -375,38 +455,7 @@ inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i,
     }
 
     return cur;
-}
-
-/*
-template <typename T>
-inline char* formatInt(char* buf, std::streamsize buflen, T i)
-{
-    static const char basetab[] = "0123456789";
-    return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(char), '-');
-}
-
-template <typename T>
-inline Pt::Char* formatInt(Pt::Char* buf, std::streamsize buflen, T i)
-{
-    static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-    return formatInt(buf, buflen, i, basetab, sizeof(basetab)/sizeof(Pt::Char), Pt::Char('-'));
-}
-*/
-
-template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
-{
-    // large enough for oct/dec/hex with a sign
-    const std::size_t buflen = (sizeof(T) * 4) + 3;
-    typename FormatT::CharT buf[buflen];
-    typename FormatT::CharT* p = Pt::formatInt(buf, buflen, i, fmt);
-
-    typename FormatT::CharT* end = buf + buflen;
-    for(; p != end; ++p)
-        *it++ = *p;
-
-    return it;
-}
+}*/
 
 
 template <typename CharT, typename T>
@@ -481,21 +530,6 @@ inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize fractSize
     //std::streamsize precision = std::numeric_limits<T>::digits10;
     return formatFloat(fraction, fractSize, intpart, exp, n, basetab, sizeof(basetab)/sizeof(Pt::Char), precision, scientific);
 }
-/*
-template <typename CharT, typename OutIterT, typename T>
-inline OutIterT putFloat(OutIterT it, T n)
-{
-    return it;
-}*/
-
-
-struct FloatFormat
-{
-    typedef char CharT;
-
-    static CharT neg()
-    { return '-'; }
-};
 
 
 template <typename OutIterT, typename T, typename FormatT>
@@ -513,7 +547,7 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
     // 2. check sign
     if(d < 0.0)
     {
-        *it = fmt.neg();
+        *it = fmt.minus();
         ++it;
     }
 
@@ -567,430 +601,39 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
 }
 
 
+template <typename CharType>
+struct FixedFormat : public NumberFormat<CharType>
+{
+    static const bool scientific = false;
+    
+    static CharT toChar(unsigned char n)
+    {
+        n &= 0x1F; // prevent overrun
+        static const char* digtab = "0123456789abcdef";
+        return digtab[n]; 
+    }
+    
+    /** @brief Converts a character to a digit.
+    
+        Returns a number equal or less than the base on success or a number
+        greater than base on failure.
+    */
+    static unsigned char toDigit(CharT ch)
+    {
+        int cc = ch - 48;
+        // let negatives overrun
+        return static_cast<unsigned>(cc);
+
+    }
+};
+
+
 template <typename OutIterT, typename T>
 inline OutIterT putFloat(OutIterT it, T d)
 {
-    FloatFormat fmt;
+    FixedFormat<char> fmt;
     return putFloat(it, d, fmt);
 }
-
-
-// TODO: move to num_put facet
-template <typename OutIterT, typename CharT>
-inline OutIterT putNumber(OutIterT it, const CharT* beg, const CharT* end,
-                          std::ios_base::fmtflags flags, 
-                          std::streamsize width, CharT fill) 
-{
-    bool hasSign = *beg == '+' || *beg == '-';
-
-    std::streamsize len = end - beg;
-    if (len >= width)
-    {
-        return std::copy(beg, end, it);
-    }
-
-    std::streamsize pad =  width - len;
-    std::ios_base::fmtflags dir = flags & std::ios_base::adjustfield;
-
-    if (dir == std::ios_base::left) 
-    {
-        it = std::copy(beg, end, it);
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return it;
-    }
-    
-    if( dir == std::ios_base::internal && hasSign) 
-    {
-        *it++ = *beg;
-        for ( ; pad > 0; --pad)  *it++ = fill;
-        return std::copy(beg + 1, end, it);
-    }
-
-    // right adjustment
-    for (; pad > 0; --pad)  *it++ = fill;
-    return std::copy(beg, end, it);
-}
-
-// TODO: move to num_put facet
-template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putDecimal(OutIterT it, T i, 
-                           std::ios_base::fmtflags flags, 
-                           std::streamsize width, CharT fill)
-{
-    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
-
-    static const CharT basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-    // large enough for decimal with a sign
-    const std::size_t buflen = (sizeof(T) * 4) + 1;
-    CharT buf[buflen];
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 10, CharT('-'));
-
-    CharT first = *number;
-    if(showPos && first != '-' && number != buf)
-        *(--number) = '+';
-
-    return putNumber(it, number, buf+buflen, flags, width, fill);
-}
-
-// TODO: move to num_put facet
-template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putHex(OutIterT it, T i, 
-                       std::ios_base::fmtflags flags, 
-                       std::streamsize width, CharT fill)
-{
-    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
-    bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
-    bool upperCase = (flags & std::ios_base::uppercase) == std::ios_base::uppercase;
-    
-    static const CharT basetabL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                                      'a', 'b', 'c', 'd', 'e', 'f'};
-
-    static const CharT basetabU[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                                      'A', 'B', 'C', 'D', 'E', 'F'};
-
-    const CharT* basetab = basetabL;
-    if(upperCase)
-        basetab = basetabU;
-
-    // large enough for hex number, sign and base
-    const std::size_t buflen = (sizeof(T) * 4) + 3;
-    CharT buf[buflen];
-
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 16, CharT('-'));
-
-    CharT first = *number;
-    if(showBase && (number - buf >= 2))
-    {
-        if(first != '-') 
-            --number;
-
-        *number-- = 'x';
-        *number = '0';
-
-        if(first == '-') 
-            *(--number) = first;
-    }
-
-    if(showPos && first != '-' && number != buf)
-        *(--number) = '+';
-
-    return putNumber(it, number, buf+buflen, flags, width, fill);
-}
-
-// TODO: move to num_put facet
-template <typename OutIterT, typename T, typename CharT>
-inline OutIterT putOctal(OutIterT it, T i, 
-                         std::ios_base::fmtflags flags, 
-                         std::streamsize width, CharT fill)
-{
-    bool showPos = (flags & std::ios_base::showpos) == std::ios_base::showpos;
-    bool showBase = (flags & std::ios_base::showbase) == std::ios_base::showbase;
-    
-    static const CharT basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7' };
-
-    // large enough for octal with a sign and base
-    const std::size_t buflen = (sizeof(T) * 4) + 2;
-    CharT buf[buflen];
-
-    CharT* number = Pt::formatInt(buf, buflen, i, basetab, 8, CharT('-'));
-
-    CharT first = *number;
-    if(showBase && (number != buf))
-    {
-        if(first != '-') 
-            --number;
-
-        *number = '0';
-
-        if(first == '-') 
-            *(--number) = first;
-    }
-
-    if(showPos && first != '-' && number != buf)
-        *(--number) = '+';
-
-    return putNumber(it, number, buf+buflen, flags, width, fill);
-}
-
-// TODO: move to num_put facet
-template <typename IterT, typename T, typename CharT>
-inline IterT putFloat(IterT it, T d, 
-                      std::ios_base::fmtflags flags, 
-                      std::streamsize width, CharT fill,
-                      std::streamsize precision = 6)
-{
-    bool scientific = (flags & std::ios_base::scientific) == std::ios_base::scientific;
-    //bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
-    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
-    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
-    bool rightAdjust = ! (leftAdjust || internalAdjust);
-    
-    if( 0 == (flags & std::ios_base::floatfield) )
-    {
-        precision = std::numeric_limits<T>::digits10;
-    }
-
-    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
-    CharT fract[bufsize];
-    int i = 0;
-    int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, precision, scientific);
-
-    std::streamsize len = 0;
-    if( 0 == (flags & std::ios_base::floatfield) )
-    {
-        // show only significant digits for default format
-        precision = 1;
-        if(e < fractSize)
-            precision = fractSize - e;
-    }
-
-    if(scientific)
-    {
-        len += precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
-    }
-    else // fixed and default
-    {
-        len += precision + 1;
-    
-        if(e > 0)
-            len += e;
-    }
-
-    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
-    if(hasSign)
-        ++len;
-
-    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
-    if(hasPoint)
-        len++;
-    
-    if(rightAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    if(hasSign)
-        *it++ = (i < 0) ? '-' : '+';
-
-    if (internalAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    i = (i < 0) ? -i : i;   
-    std::streamsize n = 0;
-
-    if(scientific) 
-    {
-        *it++ = '0' + i;
-
-        if(hasPoint)
-            *it++ = '.'; 
-    }
-    else if(e >= 0) // fixed and default
-    {
-        *it++ = '0' + i;
-        for(; n < e; ++n)
-            *it++ = (n < fractSize) ? fract[n] : CharT('0');
-
-        if(hasPoint)
-            *it++ = '.';
-    }
-    else
-    {
-        *it++ = '0';
-        
-        if(hasPoint)
-            *it++ = '.';
-
-        for( ;n > ++e && precision > 0; --precision)
-            *it++ = '0';
-
-        if(precision-- > 0)
-            *it++ = '0' + i;
-    }
-
-    for(; precision > 0; ++n, --precision)
-        *it++ = (n < fractSize) ?  fract[n] : CharT('0');   
-
-    if(scientific) 
-    {
-        *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
-
-        CharT sign = '+';
-        if(e < 0)
-        {
-            e = -e;
-            sign = '-';
-        }
-    
-        *it++ = sign;
-
-        if(e < 100)
-            *it++ = '0';
-        if(e < 10)
-            *it++ = '0';
-
-        it = putDecimal(it, e, std::ios_base::dec, 0, ' ');
-    }
-
-    if (leftAdjust) 
-        while ( len++ < width)
-            *it++ = fill;
-
-    return it;
-}
-
-
-/*template <typename IterT, typename T, typename CharT>
-inline IterT putFixed(IterT it, T d, 
-                      std::ios_base::fmtflags flags, 
-                      std::streamsize width, CharT fill,
-                      std::streamsize precision = 6)
-{
-    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
-    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
-    bool rightAdjust = ! (leftAdjust || internalAdjust);
-
-    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
-    CharT buf[bufsize];
-    int i = 0;
-    int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(buf, bufsize, i, e, d);
-
-    // show only significant digits
-    //precision = 1;
-    //if(e < fractSize)
-    //    precision = fractSize - e;
-        
-    std::streamsize len = 0;
-    bool hasSign = (i < 0) || flags & std::ios_base::showpos;
-    if(hasSign)
-        ++len;
-
-    len += precision + 1;
-    
-    if(e > 0)
-        len += e;
-
-    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
-    if(hasPoint)
-        len++;
-
-    if(rightAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    if(hasSign)
-        *it++ = (i < 0) ? '-' : '+';
-
-    if (internalAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    i = (i < 0) ? -i : i;   
-    std::streamsize n = 0;
-
-    if(e >= 0)
-    {
-        *it++ = '0' + i;
-        for(; n < e; ++n)
-            *it++ = (n < fractSize) ? buf[n] : '0';
-
-        if(hasPoint)
-            *it++ = '.';
-    }
-    else
-    {
-        *it++ = '0';
-        
-        if(hasPoint)
-            *it++ = '.';
-
-        for( ;n > ++e && precision > 0; --precision)
-            *it++ = '0';
-
-        if(precision-- > 0)
-            *it++ = '0' + i;
-    }
-
-    for(; precision > 0; ++n, --precision)
-        *it++ = (n < fractSize) ?  buf[n] : '0';
-
-    if (leftAdjust) 
-        while ( len++ < width)
-            *it++ = fill;
-
-    return it;
-}*/
-
-/*template <typename IterT, typename T, typename CharT>
-inline IterT putScientific(IterT it, T d, 
-                           std::ios_base::fmtflags flags, 
-                           std::streamsize width, CharT fill,
-                           std::streamsize precision = 6)
-{
-    bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
-    bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
-    bool rightAdjust = ! (leftAdjust || internalAdjust);
-
-    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
-    CharT fract[bufsize];
-    int i = 0;
-    int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d);
-
-    std::streamsize len = precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
-    
-    bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
-    if(hasSign)
-        ++len;
-
-    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
-    if(hasPoint)
-        len++;
-
-    if(rightAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    if(hasSign)
-        *it++ = (i < 0) ? '-' : '+';
-
-    if (internalAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    i = (i < 0) ? -i : i;   
-    *it++ = '0' + i;
-
-    if(hasPoint)
-        *it++ = '.'; 
-        
-    for( std::streamsize n = 0; n < precision; ++n)
-        *it++ = (n < fractSize) ? fract[n] : '0';
-
-    *it++ = (flags & std::ios_base::uppercase) ? 'E' : 'e';
-
-    bool negExp = e < 0;
-    if(negExp)
-        e = -e;
-
-    *it++ = (negExp) ? '-' : '+';
-
-    if(e < 100)
-        *it++ = '0';
-    if(e < 10)
-        *it++ = '0';
-
-    it = putDecimal(it, e, std::ios_base::dec, 0, ' ');
-
-    if(leftAdjust) 
-        while(len++ < width)
-            *it++ = fill;
-
-    return it;
-}*/
 
 
 template <typename InIterT>

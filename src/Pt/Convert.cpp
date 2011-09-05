@@ -37,56 +37,56 @@ template<typename T>
 class nullterm_array_iterator : public std::iterator<std::input_iterator_tag, T>
 {
     public:
-		nullterm_array_iterator()
-		: _ptr(0)
-		{ }
+        nullterm_array_iterator()
+        : _ptr(0)
+        { }
 
-		explicit nullterm_array_iterator(const T* ptr)
-		: _ptr(ptr)
-		{
-			if(*_ptr == '\0')
-				_ptr = 0; 
-		}
+        explicit nullterm_array_iterator(const T* ptr)
+        : _ptr(ptr)
+        {
+            if(*_ptr == '\0')
+                _ptr = 0; 
+        }
 
-		nullterm_array_iterator<T>& operator=(const nullterm_array_iterator<T>& it)
-		{
-		    _ptr = it._ptr;
-		    return *this;
-		}
+        nullterm_array_iterator<T>& operator=(const nullterm_array_iterator<T>& it)
+        {
+            _ptr = it._ptr;
+            return *this;
+        }
 
-		bool operator==(const nullterm_array_iterator<T>& it) const
-		{
-		    return _ptr == it._ptr;
-		}
+        bool operator==(const nullterm_array_iterator<T>& it) const
+        {
+            return _ptr == it._ptr;
+        }
 
-		bool operator!=(const nullterm_array_iterator<T>& it) const
-		{
-		    return _ptr != it._ptr;
-		}
+        bool operator!=(const nullterm_array_iterator<T>& it) const
+        {
+            return _ptr != it._ptr;
+        }
 
-		const T& operator*() const
-		{
-			return *_ptr;
-		}
+        const T& operator*() const
+        {
+            return *_ptr;
+        }
 
-		nullterm_array_iterator<T>& operator++()
-		{
-			if(*++_ptr == '\0')
-				_ptr = 0;
+        nullterm_array_iterator<T>& operator++()
+        {
+            if(*++_ptr == '\0')
+                _ptr = 0;
 
-			return *this;
-		}
+            return *this;
+        }
 
-		nullterm_array_iterator<T> operator++(int)
-		{
-			if(*++_ptr == '\0')
-				_ptr = 0;
+        nullterm_array_iterator<T> operator++(int)
+        {
+            if(*++_ptr == '\0')
+                _ptr = 0;
 
-			return *this;
-		}
+            return *this;
+        }
 
-	private:
-		const T* _ptr;
+    private:
+        const T* _ptr;
 };
 
 //
@@ -112,77 +112,77 @@ void convert(String& str, char value)
 
 void convert(String& str, unsigned char value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, signed char value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, short value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned short value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');;
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, int value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned int value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, long value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned long value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, float value)
 {
-	str.clear();
+    str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, double value)
 {
-	str.clear();
-	putFloat(std::back_inserter(str), value);
+    str.clear();
+    putFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, long double value)
 {
-	str.clear();
+    str.clear();
     putFloat(std::back_inserter(str), value);
 }
 
@@ -353,64 +353,64 @@ void convert(std::string& str, bool value)
 
 void convert(std::string& str, char value)
 {
-	str.clear();
-	str += value;
+    str.clear();
+    str += value;
 }
 
 
 void convert(std::string& str, signed char value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned char value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, short value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned short value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, int value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned int value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, long value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned long value)
 {
-	str.clear();
-	putDecimal(std::back_inserter(str), value, std::ios_base::dec, 0, ' ');
+    str.clear();
+    putInt(std::back_inserter(str), value);
 }
 
 

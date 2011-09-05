@@ -43,8 +43,6 @@ class ConversionTest : public Pt::Unit::TestSuite
         ConversionTest()
         : Pt::Unit::TestSuite("ConversionTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "ScientificFloat", *this, &ConversionTest::ScientificFloat );
-            //Pt::Unit::TestSuite::registerMethod( "FixedFloat", *this, &ConversionTest::FixedFloat );
             Pt::Unit::TestSuite::registerMethod( "Bool", *this, &ConversionTest::Bool );
             Pt::Unit::TestSuite::registerMethod( "NumberOverflow", *this, &ConversionTest::NumberOverflow );
             Pt::Unit::TestSuite::registerMethod( "IntToString", *this, &ConversionTest::IntToString );
@@ -62,8 +60,6 @@ class ConversionTest : public Pt::Unit::TestSuite
         }
 
     protected:
-        void ScientificFloat();
-        void FixedFloat();
         void Bool();
         void NumberOverflow();
         void IntToString();
@@ -81,118 +77,6 @@ class ConversionTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<ConversionTest> register_ConversionTest;
-
-void ConversionTest::ScientificFloat()
-{
-    std::cerr << "\n--- ScientificFloat --- " << std::endl;
-    std::cerr << "                    |" <<  std::endl;
-    std::string s;
-    std::streamsize width = 20;
-
-    s.clear();
-    double d0 = 12345.6789;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
-    std::cerr << s << "|" <<  std::endl;
-    
-    s.clear();
-    d0 = -12345.6789;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 10000.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::left, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -10000.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 1.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -1.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific|std::ios_base::internal|std::ios_base::showpoint, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 0.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
-    std::cerr << s << "|" << std::endl; 
-    
-    s.clear();
-    d0 = 0.00001;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -0.00001;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::scientific, width, ' ');
-    std::cerr << s << "|" << std::endl;
-
-    std::cerr << "--- DONE --- "<< std::endl;
-    std::exit(1);
-}
-
-
-void ConversionTest::FixedFloat()
-{
-    std::cerr << "\n--- FixedFloat --- "<< std::endl;
-    std::cerr << "                    |" <<  std::endl;
-    std::string s;
-    std::streamsize width = 20;
-
-    s.clear();
-    double d0 = 12345.6789;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::left, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -12345.6789;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::left, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 10000.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::left, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -10000.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 1.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal, width, ' ');
-    std::cerr << s << "|" << std::endl; 
-    
-    s.clear();
-    d0 = -1.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed|std::ios_base::internal|std::ios_base::showpoint, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = 0.0;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
-    std::cerr << s << "|" << std::endl; 
-    
-    s.clear();
-    d0 = 0.00001;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
-    std::cerr << s << "|" << std::endl;
-    
-    s.clear();
-    d0 = -0.00001;
-    Pt::putFloat(std::back_inserter(s), d0, std::ios_base::fixed, width, ' ');
-    std::cerr << s << "|" << std::endl;
-
-    std::cerr << "--- DONE --- "<< std::endl;
-}
 
 
 void ConversionTest::Bool()
