@@ -283,6 +283,8 @@ struct NumberFormat
 template <typename CharType>
 struct DecimalFormat : public NumberFormat<CharType>
 {
+    typedef CharType CharT;
+
     static const int base = 10;
     
     static CharT toChar(unsigned char n)
@@ -308,6 +310,8 @@ struct DecimalFormat : public NumberFormat<CharType>
 template <typename CharType>
 struct OctalFormat : public NumberFormat<CharType>
 {
+    typedef CharType CharT;
+
     static const int base = 8;
     
     static CharT toChar(unsigned char n)
@@ -334,6 +338,8 @@ struct OctalFormat : public NumberFormat<CharType>
 template <typename CharType>
 struct HexFormat : public NumberFormat<CharType>
 {
+    typedef CharType CharT;
+
     static const int base = 16;
     
     static CharT toChar(unsigned char n)
@@ -604,6 +610,8 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
 template <typename CharType>
 struct FixedFormat : public NumberFormat<CharType>
 {
+    typedef CharType CharT;
+
     static const bool scientific = false;
     
     static CharT toChar(unsigned char n)

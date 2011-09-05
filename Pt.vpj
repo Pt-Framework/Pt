@@ -1,136 +1,136 @@
 <!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
 <Project
-	Version="10.0"
-	VendorName="SlickEdit"
-	WorkingDir="%wp">
-	<Config
-		Name="Debug"
-		Type="cpp"
-		DebugCallbackName="gdb"
-		OutputFile="%bdPt"
-		CompilerConfigName="Latest Version">
-		<Menu>
-			<Target
-				Name="Build"
-				MenuCaption="&amp;Build"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rp">
-				<Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
-			</Target>
-			<Target
-				Name="Clean"
-				MenuCaption="&amp;Clean"
-				RunFromDir="%rp"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveNone">
-				<Exec CmdLine="$JAMCMD -q -sCONFIG=debug clean"/>
-			</Target>
-			<Target
-				Name="Debug"
-				MenuCaption="&amp;Debug"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='vsdebugio -prog "%o"'/>
-			</Target>
-			<Target
-				Name="Execute"
-				MenuCaption="E&amp;xecute"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%o"'/>
-			</Target>
-		</Menu>
-		<Includes>
-			<Include Dir="./include"/>
-		</Includes>
-	</Config>
-	<Config
-		Name="Release"
-		Type="cpp"
-		DebugCallbackName="gdb"
-		OutputFile="%bdPt"
-		CompilerConfigName="Latest Version">
-		<Menu>
-			<Target
-				Name="Build"
-				MenuCaption="&amp;Build"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rp">
-				<Exec CmdLine="$JAMCMD -q -sCONFIG=release"/>
-			</Target>
-			<Target
-				Name="Clean"
-				MenuCaption="&amp;Clean"
-				RunFromDir="%rp"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveNone">
-				<Exec CmdLine="$JAMCMD -q -sCONFIG=release clean"/>
-			</Target>
-			<Target
-				Name="Debug"
-				MenuCaption="&amp;Debug"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='vsdebugio -prog "%o"'/>
-			</Target>
-			<Target
-				Name="Execute"
-				MenuCaption="E&amp;xecute"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%o"'/>
-			</Target>
-		</Menu>
-		<Includes>
-			<Include Dir="./include"/>
-		</Includes>
-	</Config>
-	<Rules Name="Compile">
-		<Rule
-			InputExts="*.s"
-			OutputExts="*.o"
-			LinkObject="1">
-			<Exec CmdLine='as -o "%bd%n.o" "%f"'/>
-		</Rule>
-	</Rules>
-	<Files>
-		<Folder
-			Name="Source Files"
-			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
-			<F
-				N="*.cpp"
-				Recurse="1"
-				Refilter="0"
-				Excludes=""/>
-		</Folder>
-		<Folder
-			Name="Header Files"
-			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
-			<F
-				N="*.h"
-				Recurse="1"
-				Refilter="0"
-				Excludes=""/>
-		</Folder>
-		<Folder
-			Name="Resource Files"
-			Filters="*.ico;*.cur;*.dlg"/>
-		<Folder
-			Name="Bitmaps"
-			Filters="*.bmp"/>
-		<Folder
-			Name="Other Files"
-			Filters="">
-		</Folder>
-	</Files>
+    Version="10.0"
+    VendorName="SlickEdit"
+    WorkingDir="%wp">
+    <Config
+        Name="Debug"
+        Type="cpp"
+        DebugCallbackName="gdb"
+        OutputFile="%bdPt"
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rp">
+                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
+            </Target>
+            <Target
+                Name="Clean"
+                MenuCaption="&amp;Clean"
+                RunFromDir="%rp"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveNone">
+                <Exec CmdLine="$JAMCMD -q -sCONFIG=debug clean"/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='vsdebugio -prog "%o"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o"'/>
+            </Target>
+        </Menu>
+        <Includes>
+            <Include Dir="./include"/>
+        </Includes>
+    </Config>
+    <Config
+        Name="Release"
+        Type="cpp"
+        DebugCallbackName="gdb"
+        OutputFile="%bdPt"
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rp">
+                <Exec CmdLine="$JAMCMD -q -sCONFIG=release"/>
+            </Target>
+            <Target
+                Name="Clean"
+                MenuCaption="&amp;Clean"
+                RunFromDir="%rp"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveNone">
+                <Exec CmdLine="$JAMCMD -q -sCONFIG=release clean"/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='vsdebugio -prog "%o"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o"'/>
+            </Target>
+        </Menu>
+        <Includes>
+            <Include Dir="./include"/>
+        </Includes>
+    </Config>
+    <Rules Name="Compile">
+        <Rule
+            InputExts="*.s"
+            OutputExts="*.o"
+            LinkObject="1">
+            <Exec CmdLine='as -o "%bd%n.o" "%f"'/>
+        </Rule>
+    </Rules>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
+            <F
+                N="*.cpp"
+                Recurse="1"
+                Refilter="0"
+                Excludes=""/>
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+            <F
+                N="*.h"
+                Recurse="1"
+                Refilter="0"
+                Excludes=""/>
+        </Folder>
+        <Folder
+            Name="Resource Files"
+            Filters="*.ico;*.cur;*.dlg"/>
+        <Folder
+            Name="Bitmaps"
+            Filters="*.bmp"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+        </Folder>
+    </Files>
 </Project>
