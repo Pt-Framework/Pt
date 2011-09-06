@@ -43,9 +43,6 @@ namespace Pt {
 */
 class DateTime
 {
-    friend void operator >>=(const SerializationInfo& si, DateTime& dt);
-    friend void operator <<=(SerializationInfo& si, const DateTime& dt);
-
     public:
         DateTime()
         { }
@@ -103,7 +100,7 @@ class DateTime
         const Date& date() const
         { return _date; }
 
-        const Date& date()
+        Date& date()
         { return _date; }
 
         DateTime& setDate(const Date& date)
@@ -112,7 +109,7 @@ class DateTime
         const Time& time() const
         { return _time; }
 
-        const Time& time()
+        Time& time()
         { return _time; }
 
         DateTime& setTime(const Time& time)

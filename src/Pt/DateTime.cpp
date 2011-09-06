@@ -44,8 +44,8 @@ void operator >>=(const SerializationInfo& si, DateTime& datetime)
     if( si.compose(datetime) )
         return;
 
-    si >>= datetime._date;
-    si >>= datetime._time;
+    si >>= datetime.date();
+    si >>= datetime.time();
 }
 
 
@@ -54,8 +54,8 @@ void operator <<=(SerializationInfo& si, const DateTime& datetime)
     if( si.decompose(datetime) )
         return;
 
-    si <<= datetime._date;
-    si <<= datetime._time;
+    si <<= datetime.date();
+    si <<= datetime.time();
     si.setTypeName( Pt::LiteralPtr<char>("Pt::DateTime") );
 }
 
