@@ -272,12 +272,6 @@ struct NumberFormat
 
     static CharT minus()
     { return '-'; }
-
-    static CharT point()
-    { return '.'; }
-    
-    static CharT e()
-    { return 'e'; }
 };
 
 template <typename CharType>
@@ -432,9 +426,37 @@ inline OutIterT putInt(OutIterT it, T i)
 }
 
 
-template <typename CharT, typename T>
+template <typename CharType>
+struct FloatFormat : public DecimalFormat<CharType>
+{
+    typedef CharType CharT;
+
+    static CharT point()
+    { return '.'; }
+
+    static CharT e()
+    { return 'e'; }
+
+    static CharT E()
+    { return 'E'; }
+
+    static const CharT* nan()
+    { 
+        static const CharT nanstr[] = { 'n', 'a', 'n', 0 };
+        return nanstr; 
+    }
+
+    static const CharT* inf()
+    { 
+        static const CharT nanstr[] = { 'i', 'n', 'f', 0 };
+        return nanstr; 
+    }
+};
+
+
+template <typename CharT, typename T, typename FormatT>
 inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
-                               const CharT* basetab, std::size_t base, int precision, bool scientific)
+                               const FormatT& fmt, int precision, bool scientific)
 {
     intpart = 0;
     exp = 0;
@@ -478,43 +500,32 @@ inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intp
         n *= 10.0;
         digit = static_cast<int>( std::floor(n) );
         n -= digit;
-        const CharT* c = basetab + digit;
 
-        *fraction++ = *c;
+        CharT c = fmt.toChar(digit);
+        *fraction++ = c;
+
         ++places;
     }
 
     return places;
 }
 
-template <typename T>
-inline std::size_t formatFloat(char* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
-                                   int precision, bool scientific)
-{
-    static const char basetab[] = "0123456789";
-    //std::streamsize precision = std::numeric_limits<T>::digits10;
-    return formatFloat(fraction, fractSize, intpart, exp, n, basetab, sizeof(basetab)/sizeof(char), precision, scientific);
-}
-
-template <typename T>
-inline std::size_t formatFloat(Pt::Char* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
-                                   int precision, bool scientific)
-{
-    static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-    //std::streamsize precision = std::numeric_limits<T>::digits10;
-    return formatFloat(fraction, fractSize, intpart, exp, n, basetab, sizeof(basetab)/sizeof(Pt::Char), precision, scientific);
-}
-
 
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
+inline OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision, bool scientific)
 {
+    typedef typename FormatT::CharT CharT;
+    CharT zero = fmt.toChar(0);
+
     // 1. Test for not-a-number with d != d
     if( d != d ) 
     {
-        *it = 'n'; ++it;
-        *it = 'a'; ++it;
-        *it = 'n'; ++it;
+        for(const CharT* nanstr = fmt.nan(); *nanstr != 0; ++nanstr)
+        {
+            *it = *nanstr;
+            ++it;
+        }
+
         return it;
     }
 
@@ -530,90 +541,65 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
     // 3. Test for infinity
     if( num == std::numeric_limits<T>::infinity() ) 
     {
-        *it = 'i'; ++it;
-        *it = 'n'; ++it;
-        *it = 'f'; ++it;
+        for(const CharT* infstr = fmt.inf(); *infstr != 0; ++infstr)
+        {
+            *it = *infstr;
+            ++it;
+        }
+
         return it;
     }
     
     const int bufsize = std::numeric_limits<T>::digits10;
-    typename FormatT::CharT fract[bufsize];
+    CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    int fractSize = Pt::formatFloat(fract, bufsize, i, e, num, bufsize, false);
+    int fractSize = Pt::formatFloat(fract, bufsize, i, e, num, fmt, precision, scientific);
 
     // show only significant digits for default format
-    int precision = 1;
+    precision = 1;
     if( e < fractSize )
         precision = fractSize - e;
 
     int n = 0;
     if(e >= 0)
     {
-        *it++ = '0' + i;
+        *it++ = fmt.toChar(i);
         for(; n < e; ++n)
-            *it++ = (n < fractSize) ? fract[n] : '0';
+            *it++ = (n < fractSize) ? fract[n] : zero;
 
-        *it++ = '.';
+        *it++ = fmt.point();
     }
     else
     {
-        *it++ = '0';
-        *it++ = '.';
+        *it++ = zero;
+        *it++ = fmt.point();
 
         for( ;n > ++e && precision > 0; --precision)
-            *it++ = '0';
+            *it++ = zero;
 
         if(precision-- > 0)
-            *it++ = '0' + i;
+            *it++ = fmt.toChar(i);
     }
 
     for(; precision > 0; ++n, --precision)
-        *it++ = (n < fractSize) ?  fract[n] : '0'; 
+        *it++ = (n < fractSize) ?  fract[n] : zero; 
 
     return it;
 }
 
 
-template <typename CharType>
-struct FixedFormat : public NumberFormat<CharType>
-{
-    typedef CharType CharT;
-
-    static const bool scientific = false;
-    
-    static CharT toChar(unsigned char n)
-    {
-        n &= 0x1F; // prevent overrun
-        static const char* digtab = "0123456789abcdef";
-        return digtab[n]; 
-    }
-    
-    /** @brief Converts a character to a digit.
-    
-        Returns a number equal or less than the base on success or a number
-        greater than base on failure.
-    */
-    static unsigned char toDigit(CharT ch)
-    {
-        int cc = ch - 48;
-        // let negatives overrun
-        return static_cast<unsigned>(cc);
-
-    }
-};
-
-
 template <typename OutIterT, typename T>
 inline OutIterT putFloat(OutIterT it, T d)
 {
-    FixedFormat<char> fmt;
-    return putFloat(it, d, fmt);
+    const int precision = std::numeric_limits<T>::digits10;
+    FloatFormat<char> fmt;
+    return putFloat(it, d, fmt, precision, false);
 }
 
 
-template <typename InIterT>
-InIterT getSign(InIterT it, InIterT end, bool& pos)
+template <typename InIterT, typename FormatT>
+InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 {
     pos = true;
     
@@ -622,11 +608,14 @@ InIterT getSign(InIterT it, InIterT end, bool& pos)
     {
         if( ! Pt::isspace(*it) )
         {
-            switch(*it)
+            if(*it == fmt.minus())
             {
-                case '-': pos = false;
-                case '+': ++it;
-                default: break;
+                pos = false;
+                ++it;
+            }
+            else if( *it == fmt.plus() )
+            {
+                ++it;
             }
 
             break;
@@ -637,39 +626,23 @@ InIterT getSign(InIterT it, InIterT end, bool& pos)
 }
 
 
-template <typename InIterT, typename T>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
+template <typename InIterT, typename T, typename FormatT>
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
     n = 0;
     ok = false;
 
     bool pos = false;
-    it = getSign(it, end, pos);
-
-    static const unsigned char chartab[128] = 
-    {
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
-    };
-   
+    it = getSign(it, end, pos, fmt);
+  
     // parse number
-    T fact(base);
+    const T fact = fmt.base;
     unsigned char d = 0;
     while(it != end)
     {    
-        int cc = *it;
-        if(cc < 48 || cc > 122)
-            break;
+        d = fmt.toDigit(*it);
         
-        d = chartab[ static_cast<unsigned char>(cc) ];
-        
-        if(d >= base) // also covers 0xFF lookup result
+        if(d >= fmt.base)
             break;
         
         if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
@@ -693,41 +666,32 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10
 
 
 template <typename InIterT, typename T>
-InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 10)
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
+{
+    return getSigned( it, end, ok, n, Pt::DecimalFormat<char>() );
+}
+
+
+template <typename InIterT, typename T, typename FormatT>
+InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
     n = 0;
     ok = false;
 
     bool pos = true;
-    it = getSign(it, end, pos);
+    it = getSign(it, end, pos, fmt);
     
     if(! pos)
         return it;
 
-    static const unsigned char chartab[128] = 
-    {
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
-    };
-
     // parse number
-    T fact(base);
+    T fact = fmt.base;
     unsigned char d = 0;
     while(it != end)
     {    
-        int cc = *it;
-        if(cc < 48 || cc > 122)
-            break;
+        d = fmt.toDigit(*it);
         
-        d = chartab[ static_cast<unsigned char>(cc) ];
-        
-        if(d >= base) // also covers 0xFF lookup result
+        if(d >= fmt.base)
             break;
         
         if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
@@ -748,13 +712,22 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, std::size_t base = 
 
 
 template <typename InIterT, typename T>
-InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
+InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
 {
+    return getUnsigned( it, end, ok, n, Pt::DecimalFormat<char>() );
+}
+
+
+template <typename InIterT, typename T, typename FormatT>
+InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+{
+    typedef typename FormatT::CharT CharT;
+    CharT zero = fmt.toChar(0);
     n = 0.0;
     ok = false;
 
     bool pos = false;
-    it = getSign(it, end, pos);
+    it = getSign(it, end, pos, fmt);
     
     // NaN, -inf, +inf
     bool done = false;
@@ -849,18 +822,18 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     // integral part
     for( ; it != end; ++it)
     {
-        if( *it == '.' )
+        if( *it == fmt.point() )
         {
             ++it;
             break;
         }
         
-        int uc = *it;
-        if(uc < 48 || uc > 57)
+        int digit = fmt.toDigit(*it); 
+        if(digit >= fmt.base)
             return it;
         
         n *= 10;
-        n += static_cast<int>(*it) - 48;    
+        n += digit; 
     }
     
     // it is ok, if fraction is missing
@@ -876,7 +849,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     // fractional part, ignore 0 digits after dot
     unsigned short fractDigits = 0;
     size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
-    while(it != end && *it == '0')
+    while(it != end && *it == zero)
     {
         if( fractDigits > maxDigits )
             return it;
@@ -890,14 +863,14 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     T fraction = 0.0;
     for( ; it != end; ++it)
     {
-        int uc = *it;
-        if(uc < 48 || uc > 57)
+        int digit = fmt.toDigit(*it); 
+        if(digit >= fmt.base)
             break;
 
         if( significants <= std::numeric_limits<T>::digits10 )
         {
             fraction *= 10;
-            fraction += static_cast<int>(*it) - 48;
+            fraction += digit;
 
             ++fractDigits;
             ++significants;
@@ -910,13 +883,13 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     n += fraction;
 
     // exponent [e|E][+|-][0-9]*
-    if(it != end && (*it == 'e' || *it == 'E') )
+    if(it != end && (*it == fmt.e() || *it == fmt.E()) )
     {
         if(++it == end)
             return it;
 
         long exp = 0;
-        it = getSigned(it, end, ok, exp);
+        it = getSigned(it, end, ok, exp, fmt);
         if( ! ok )
             return it;
             
@@ -930,6 +903,12 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
     return it;
 }
 
+
+template <typename InIterT, typename T>
+InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
+{
+    return getFloat( it, end, ok, n, FloatFormat<char>() );
+}
 } // namespace Pt
 
 #endif

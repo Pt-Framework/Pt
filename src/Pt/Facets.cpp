@@ -201,9 +201,11 @@ inline IterT putFloat(IterT it, T d,
 
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
     CharT fract[bufsize];
+
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, precision, scientific);
+    Pt::FloatFormat<Pt::Char> fmt;
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, fmt, precision, scientific);
 
     std::streamsize len = 0;
     if( 0 == (flags & std::ios_base::floatfield) )
@@ -612,22 +614,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            long& val) const
 {
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getSigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getSigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getSigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-
-    bool ok = false;
-    it = Pt::getSigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -645,22 +644,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            long long& val) const
 {
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getSigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getSigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getSigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-
-    bool ok = false;
-    it = Pt::getSigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -678,22 +674,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned short& val) const
 {
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-    
-    bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -711,22 +704,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned int& val) const
 {
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-    
-    bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -744,22 +734,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned long& val) const
 {    
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-    
-    bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -777,22 +764,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            unsigned long long& val) const
 {
-    std::size_t base = 10;
+    bool ok = false;
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            base = 8;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            base = 16;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            base = 10;
+            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
-    
-    bool ok = false;
-    it = Pt::getUnsigned(it, end, ok, val, base);
 
     if( ok )
         state = ios_base::goodbit;
@@ -874,11 +858,9 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
                                                            ios_base& stream, ios_base::iostate& state, 
                                                            void*& val) const
 {
-    std::size_t base = 16;
     std::size_t addr = 0;
     bool ok = false;
-
-    Pt::getUnsigned(it, end, ok, addr, base);
+    Pt::getUnsigned(it, end, ok, addr, Pt::HexFormat<Pt::Char>());
 
     if( ok )
     {
