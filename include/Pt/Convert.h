@@ -428,6 +428,27 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
 
     return cur;
 }
+    
+inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat& fmt)
+{
+    CharT* end = buf + buflen;
+    CharT* cur = end;
+    T mask = 1;
+    
+    do
+    {
+        --cur;
+        *cur = fmt.toChar( unsigned(i & mask) );
+        i = i >> 1;
+    } 
+    while(i != 0 && cur != buf);
+    
+    if(cur == buf)
+        return buf;
+    
+    return cur;
+}
+   
 
 
 template <typename OutIterT, typename T, typename FormatT>
