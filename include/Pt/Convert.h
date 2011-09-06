@@ -376,7 +376,7 @@ struct BinaryFormat : public NumberFormat<CharType>
 {
     typedef CharType CharT;
 
-    static const int base = 1;
+    static const int base = 2;
     
     static CharT toChar(unsigned char n)
     {
