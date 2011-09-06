@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 PTV AG
+ * Copyright (C) 2006-2011 Marc Duerner
  * Copyright (C) 2010 Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -24,119 +24,96 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 #ifndef PT_MATH_H
 #define PT_MATH_H
 
 #include <Pt/Types.h>
 #include <Pt/Api.h>
-
 #include <cmath>
 #include <cassert>
-#include <math.h>
-
-#ifdef PI
-#undef PI
-#endif
-
 
 namespace Pt {
-    //! Various constants for PI
-    static const double PI      = 3.14159265358979323846;  // pi
-    static const double PI_2    = 6.28318530717958647692;  // 2*pi
-    static const double PI_HALF = 1.57079632679489661923;  // pi/2
-    static const double PI_QUAT = 0.78539816339744830961;  // pi/4
-    static const double PI_180  = 0.01745329251994329576;  // pi/180
-    static const double PI_SQR  = 9.86960440108935861883449099987615114f; //pi^2
 
-    /**
-      * @brief Fast sine calculation, not as precise as sin(theta)
-      *
-      * theta is required in rad [0, 2*PI]
-      *
-      * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
-      *
-      * In range [0, 2*PI] max. abs error in fast mode is 0.06
-      */
-    template <typename T, bool accurate>
-    T fastSin(const T& theta)
+//! Various constants for Pi
+static const double Pi      = 3.14159265358979323846;  // pi
+static const double PiDouble    = 6.28318530717958647692;  // 2*pi
+static const double PiHalf = 1.57079632679489661923;  // pi/2
+static const double PiQuart = 0.78539816339744830961;  // pi/4
+static const double Pi180  = 0.01745329251994329576;  // pi/180
+static const double PiSqr  = 9.86960440108935861883449099987615114f; //pi^2
+
+/** @brief Fast sine calculation, not as precise as sin(theta)
+ 
+    theta is required in rad [0, 2*Pi]
+    
+    In range [0, 2*Pi] max. abs error in fast accurate mode is 0.0015
+    
+    In range [0, 2*Pi] max. abs error in fast mode is 0.06
+*/
+template <typename T, bool accurate>
+T fastSin(const T& theta)
+{
+    assert(theta <= PiDouble);
+    assert(theta >= 0);
+    T localTheta = theta;
+
+    if (localTheta > Pi)
     {
-        assert(theta <= PI_2);
-        assert(theta >= 0);
-        T localTheta = theta;
-
-        if (localTheta > PI)
-        {
-            localTheta -= PI_2;
-        }
-
-        const T B = 4 / PI;
-        const T C = -4 / PI_SQR;
-
-        T y = B * localTheta + C * localTheta * std::fabs(localTheta);
-
-        if (accurate)
-        {
-            //  const float Q = 0.775;
-                const T P = 0.225;
-
-                y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
-        }
-
-        return y;
+        localTheta -= PiDouble;
     }
 
-    /**
-      * @brief Fast cosine calculation, not as precise as cos(theta)
-      *
-      * theta is required in rad [0, 2*PI]
-      *
-      * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
-      *
-      * In range [0, 2*PI] max. abs error in fast mode is 0.06
-      */
-    template <typename T, bool accurate>
-    T fastCos(const T& theta)
+    const T B = 4 / Pi;
+    const T C = -4 / PiSqr;
+
+    T y = B * localTheta + C * localTheta * std::fabs(localTheta);
+
+    if (accurate)
     {
-        assert(theta <= PI_2);
-        assert(theta >= 0);
+        //  const float Q = 0.775;
+            const T P = 0.225;
 
-        T sinTheta = theta + PI_HALF;
-
-        if (sinTheta > PI_2)     // Original x > pi/2
-        {
-            sinTheta -= PI_2;   // Wrap: cos(x) = cos(x - 2 pi)
-        }
-
-        return fastSin<T, accurate>(sinTheta);
+            y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
     }
 
-    /** @brief Return the Euclidean distance of the given values
-      */
-    inline double hypot(double x, double y)
+    return y;
+}
+
+/** @brief Fast cosine calculation, not as precise as cos(theta)
+    
+    theta is required in rad [0, 2*Pi]
+    
+    In range [0, 2*Pi] max. abs error in fast accurate mode is 0.0015
+    
+    In range [0, 2*Pi] max. abs error in fast mode is 0.06
+*/
+template <typename T, bool accurate>
+T fastCos(const T& theta)
+{
+    assert(theta <= PiDouble);
+    assert(theta >= 0);
+
+    T sinTheta = theta + PiHalf;
+
+    if (sinTheta > PiDouble)     // Original x > pi/2
     {
-        #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
-            return _hypot(x, y);
-        #else
-            return ::hypot(x, y);
-        #endif
+        sinTheta -= PiDouble;   // Wrap: cos(x) = cos(x - 2 pi)
     }
 
-    /** @brief A faster rounding function.
-      */
-    inline int round(double d)
-    {
-        return static_cast<int>(d<0 ? d-.5 : d+.5);
-    }
+    return fastSin<T, accurate>(sinTheta);
+}
 
-    /** @brief Return the absolute value for the given 64-bit integer.
-      */
-    inline Pt::int64_t abs(Pt::int64_t value)
-    {
-        return value < 0 ? -value : value;
-    }
+/** @brief Return the Euclidean distance of the given values
+*/
+inline double hypot(double x, double y)
+{
+    #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
+        return _hypot(x, y);
+    #else
+        return ::hypot(x, y);
+    #endif
+}
 
 } // namespace Pt
 

@@ -39,6 +39,27 @@
 
 namespace Pt {
 
+void operator >>=(const SerializationInfo& si, DateTime& datetime)
+{
+    if( si.compose(datetime) )
+        return;
+
+    si >>= datetime._date;
+    si >>= datetime._time;
+}
+
+
+void operator <<=(SerializationInfo& si, const DateTime& datetime)
+{
+    if( si.decompose(datetime) )
+        return;
+
+    si <<= datetime._date;
+    si <<= datetime._time;
+    si.setTypeName( Pt::LiteralPtr<char>("Pt::DateTime") );
+}
+
+
 inline unsigned short getNumber2(const char* s)
 {
     if( ! std::isdigit(s[0]) || !std::isdigit(s[1]) )
@@ -46,6 +67,7 @@ inline unsigned short getNumber2(const char* s)
 
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
+
 
 inline unsigned short getNumber3(const char* s)
 {
@@ -133,36 +155,5 @@ void convert(std::string& str, const DateTime& dt)
     str.assign(ret, 23);
 }
 
-
-void operator >>=(const SerializationInfo& si, DateTime& datetime)
-{
-    std::string s;
-    si >>= s;
-    convert(datetime, s);
-
-    //Date date(1,1,1);
-    //si.getMember("date") >>= date;
-    //datetime.setDate(date);
-
-    //Time time;
-    //si.getMember("time") >>= time;
-    //datetime.setTime(time);
 }
 
-
-void operator <<=(SerializationInfo& si, const DateTime& datetime)
-{
-    std::string s;
-    convert(s, datetime);
-    si <<= s;
-    si.setTypeName("Pt::DateTime");
-
-    //si.setTypeName("DateTime");
-    //SerializationInfo& date = si.addMember("date");
-
-    //date <<= datetime.date();
-    //SerializationInfo& time  = si.addMember("time");
-    //time <<= datetime.time();
-}
-
-}

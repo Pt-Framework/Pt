@@ -43,26 +43,29 @@ namespace Pt {
 */
 class DateTime
 {
+    friend void operator >>=(const SerializationInfo& si, DateTime& dt);
+    friend void operator <<=(SerializationInfo& si, const DateTime& dt);
+
     public:
-		DateTime()
-		{ }
+        DateTime()
+        { }
 
-		DateTime(int year, unsigned month, unsigned day,
-		                   unsigned hour = 0, unsigned minute = 0, 
-		                   unsigned second = 0, unsigned msec = 0)
-		: _date(year, month, day)
-		, _time(hour, minute, second, msec)
-		{ }
+        DateTime(int year, unsigned month, unsigned day,
+                           unsigned hour = 0, unsigned minute = 0, 
+                           unsigned second = 0, unsigned msec = 0)
+        : _date(year, month, day)
+        , _time(hour, minute, second, msec)
+        { }
 
-		DateTime(const DateTime& dateTime)
-		: _date( dateTime.date() )
-		, _time( dateTime.time() )
-		{ }
+        DateTime(const DateTime& dateTime)
+        : _date( dateTime.date() )
+        , _time( dateTime.time() )
+        { }
 
         DateTime& operator=(const DateTime& dateTime);
 
         ~DateTime()
-		{}
+        {}
 
         static DateTime fromJulianDays(unsigned julianDays)
         {

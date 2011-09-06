@@ -103,7 +103,7 @@ void convert(std::string& str, const Time& time)
 }
 
 
-void operator >>=(const SerializationInfo& si, Time& time)
+/*void operator >>=(const SerializationInfo& si, Time& time)
 {
     std::string s;
     si >>= s;
@@ -114,10 +114,9 @@ void operator >>=(const SerializationInfo& si, Time& time)
     //unsigned sec = si.getValue<unsigned>("second");
     //unsigned msec = si.getValue<unsigned>("millisec");
     //time.set(hour, min, sec, msec);
-}
+}*/
 
-
-void operator <<=(SerializationInfo& si, const Time& time)
+/*void operator <<=(SerializationInfo& si, const Time& time)
 {
     std::string s;
     convert(s, time);
@@ -135,6 +134,43 @@ void operator <<=(SerializationInfo& si, const Time& time)
     //si.addValue("second", sec );
     //si.addValue("millisec", msec );
     //si.setTypeName("Time");
+}*/
+
+
+void operator>>=(const SerializationInfo& si, Time& time)
+{
+    unsigned hour = 0;
+    unsigned min = 0;
+    unsigned sec = 0;
+    unsigned msec = 0;
+
+    if( si.compose(time) )
+        return;
+
+    si.getMember("hour") >>=  hour;
+    si.getMember("min") >>= min;
+    si.getMember("sec") >>=  sec;
+    si.getMember("msec") >>=  msec;
+    time.set(hour, min, sec, msec);
+}
+
+
+void operator<<=(SerializationInfo& si, const Time& time)
+{
+    if( si.decompose(time) )
+        return;
+
+    unsigned hour = 0;
+    unsigned min = 0;
+    unsigned sec = 0;
+    unsigned msec = 0;
+    time.get(hour, min, sec, msec);
+
+    si.addMember( Pt::LiteralPtr<char>("hour") ) <<=  hour;
+    si.addMember( Pt::LiteralPtr<char>("min") ) <<= min;
+    si.addMember( Pt::LiteralPtr<char>("sec") ) <<=  sec;
+    si.addMember( Pt::LiteralPtr<char>("msec") ) <<=  msec;
+    si.setTypeName( Pt::LiteralPtr<char>("Pt::Time") );
 }
 
 } // namespace Pt
