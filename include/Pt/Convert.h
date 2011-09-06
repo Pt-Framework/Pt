@@ -378,7 +378,7 @@ struct HexFormat : public NumberFormat<CharType>
 
 
 template <typename CharT, typename T, typename FormatT>
-inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, const FormatT& fmt)
+inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
 {
     CharT* end = buf + buflen;
     CharT* cur = end;
@@ -432,41 +432,9 @@ inline OutIterT putInt(OutIterT it, T i)
 }
 
 
-/*template <typename CharT, typename T>
-inline CharT* formatInt(CharT* buf, std::streamsize buflen, T i, 
-                        const CharT* basetab, std::size_t base, CharT neg)
-{
-    CharT* end = buf + buflen;
-    CharT* cur = end;
-
-    bool isNeg = formatNegate(i); 
-
-    do
-    {
-        T lsd = i % base;
-        i /= base;
-        --cur;
-        const CharT* ch = basetab + int(lsd);
-        *cur = *ch;
-    } 
-    while(i != 0 && cur != buf);
-    
-    if(cur == buf)
-        return buf;
-    
-    if(isNeg)
-    {
-        --cur;
-        *cur = neg;
-    }
-
-    return cur;
-}*/
-
-
 template <typename CharT, typename T>
-inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
-                                   const CharT* basetab, std::size_t base, std::streamsize precision, bool scientific)
+inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
+                               const CharT* basetab, std::size_t base, int precision, bool scientific)
 {
     intpart = 0;
     exp = 0;
@@ -486,7 +454,7 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, i
     if(exp != 0)
         n /= std::pow(T(10.0), exp);
 
-    if(precision >= 0 && precision < fractSize)
+    if( precision >= 0 && std::size_t(precision) < fractSize )
     {
         if( ! scientific )
             precision += exp;
@@ -502,7 +470,7 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, i
     
     int digit = 0;
     T eps = std::numeric_limits<T>::epsilon();
-    std::streamsize places = 0;
+    std::size_t places = 0;
 
     while(n > eps && places < fractSize)
     {
@@ -520,8 +488,8 @@ inline std::streamsize formatFloat(CharT* fraction, std::streamsize fractSize, i
 }
 
 template <typename T>
-inline std::streamsize formatFloat(char* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
-                                   std::streamsize precision, bool scientific)
+inline std::size_t formatFloat(char* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
+                                   int precision, bool scientific)
 {
     static const char basetab[] = "0123456789";
     //std::streamsize precision = std::numeric_limits<T>::digits10;
@@ -529,8 +497,8 @@ inline std::streamsize formatFloat(char* fraction, std::streamsize fractSize, in
 }
 
 template <typename T>
-inline std::streamsize formatFloat(Pt::Char* fraction, std::streamsize fractSize, int& intpart, int& exp, T n,
-                                    std::streamsize precision, bool scientific)
+inline std::size_t formatFloat(Pt::Char* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
+                                   int precision, bool scientific)
 {
     static const Pt::Char basetab[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
     //std::streamsize precision = std::numeric_limits<T>::digits10;
@@ -568,18 +536,18 @@ inline OutIterT putFloat(OutIterT it, T d, FormatT& fmt)
         return it;
     }
     
-    const std::streamsize bufsize = std::numeric_limits<T>::digits10;
+    const int bufsize = std::numeric_limits<T>::digits10;
     typename FormatT::CharT fract[bufsize];
     int i = 0;
     int e = 0;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, num, bufsize, false);
+    int fractSize = Pt::formatFloat(fract, bufsize, i, e, num, bufsize, false);
 
     // show only significant digits for default format
-    std::streamsize precision = 1;
-    if(e < fractSize)
+    int precision = 1;
+    if( e < fractSize )
         precision = fractSize - e;
 
-    std::streamsize n = 0;
+    int n = 0;
     if(e >= 0)
     {
         *it++ = '0' + i;
