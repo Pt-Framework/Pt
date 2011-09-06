@@ -85,10 +85,6 @@ class PT_API SerializationContext : public SerializationInfo
         virtual void fixup();
 
     public:
-        SerializationInfo& si()
-        {
-            return *this;
-        }
         void setLimit(size_t n);
 
         size_t limit() const;
