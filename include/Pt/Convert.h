@@ -371,6 +371,34 @@ struct HexFormat : public NumberFormat<CharType>
 };
 
 
+template <typename CharType>
+struct BinaryFormat : public NumberFormat<CharType>
+{
+    typedef CharType CharT;
+
+    static const int base = 1;
+    
+    static CharT toChar(unsigned char n)
+    {
+        return '0' + n; 
+    }
+    
+    /** @brief Converts a character to a digit.
+    
+        Returns a number equal or less than the base on success or a number
+        greater than base on failure.
+        
+    */
+    static unsigned char toDigit(CharT ch)
+    {
+        int cc = ch - 48;
+        // let negatives overrun
+        return static_cast<unsigned>(cc);
+
+    }
+};
+
+
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
 {
