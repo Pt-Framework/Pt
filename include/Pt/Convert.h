@@ -429,7 +429,8 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
     return cur;
 }
     
-inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat& fmt)
+template <typename CharT, typename T>
+inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<CharT>& fmt)
 {
     CharT* end = buf + buflen;
     CharT* cur = end;
@@ -438,7 +439,7 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat&
     do
     {
         --cur;
-        *cur = fmt.toChar( unsigned(i & mask) );
+        *cur = fmt.toChar( unsigned(i & mask));
         i = i >> 1;
     } 
     while(i != 0 && cur != buf);
