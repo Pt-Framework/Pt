@@ -2,40 +2,16 @@
 # Platform specific prefixes and suffixes
 ##############################################################################
 
-SUFOBJ = .obj ;
-PRELIB = "" ;
-SUFLIB = .lib ;
-SUFEXE = .exe ;
-SUFDLL = .dll ;
+SUFOBJ	= .obj ;
+PRELIB	= "" ;
+SUFLIB	= .lib ;
+SUFEXE	= .exe ;
+SUFDLL	= .dll ;
 SUFDBG = "" ;
 
 ##############################################################################
 # Default toolkit
 ##############################################################################
 
-if $(MSVCDir)
-{
-    TOOLSET ?= vc7 ;
-}
-else if $(VSINSTALLDIR)
-{
-    if $(VS100COMNTOOLS)
-    {
-        TOOLSET ?= vc10 ;
-    }
-
-    if $(VS90COMNTOOLS)
-    {
-        TOOLSET ?= vc9 ;
-    }
-   
-    TOOLSET ?= vc8 ;
-}
-else if $(MINGW)
-{
-    TOOLSET ?= mingw ;
-}
-else
-{
-    TOOLSET ?= vc7 ;
-}
+TARGET_OSPLAT ?= arm ;
+TOOLSET ?= vc8 ;

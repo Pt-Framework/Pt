@@ -2,17 +2,15 @@
 # Platform specific prefixes and suffixes
 ##############################################################################
 
-SUFOBJ = .o ;
-PRELIB = lib ;
-SUFLIB = .a ;
-SUFEXE = "" ;
-SUFDLL = .a ;
-SUFDBG = "" ;
+SUFOBJ	= .o ;
+PRELIB	= "" ;
+SUFLIB	= .lib ;
+SUFEXE	= .exe ;
+SUFDLL	= .dll ;
+SUFDBG  = "" ;
 
 ##############################################################################
 # Default toolkit
 ##############################################################################
 
-TOOLSET ?= xlc ;
-OSPLAT ?= ppc ;
-TARGET_OSPLAT ?= ppc ;
+TOOLSET ?= gcce ;

@@ -1,15 +1,16 @@
-PRELIB    = lib ;
-SUFLIB    = .a ;
-SUFDLL    = .so ;
-SUFEXE	  = "" ;
-SUFDBG    = "" ;
-SUFOBJ    = .o ;
+##############################################################################
+# Platform specific prefixes and suffixes
+##############################################################################
 
-if $(CONFIG:L) = debug 
-{
-	SUFLIB  = d.a ;
-	SUFDLL  = d.so ;
-	SUFEXE	= d ;
-	SUFDBG  = d ;
-}
+PRELIB = lib ;
+SUFLIB = .a ;
+SUFDLL = .so ;
+SUFEXE = "" ;
+SUFDBG = "" ;
+SUFOBJ = .o ;
 
+##############################################################################
+# Default toolkit
+##############################################################################
+
+TOOLSET ?= xcode ;
