@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
+ * Copyright (C) 2004-2011 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -229,6 +229,285 @@ class PT_API num_get< Pt::Char,
 
         virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, void*&) const;
 };
+
+#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
+
+    /** @brief Ctype localization facet
+        @ingroup Unicode
+    */
+    template <>
+    class PT_API ctype< Pt::Char > : public ctype_base {
+
+#else
+    /** @brief Ctype localization facet
+        @ingroup Unicode
+    */
+    template <>
+    class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
+
+#endif
+
+    public:
+        typedef ctype_base::mask mask;
+
+        static locale::id id;
+        virtual locale::id& __get_id (void) const { return id; }
+
+    public:
+        explicit ctype(size_t refs = 0);
+
+        virtual ~ctype();
+
+        bool is(mask m, Pt::Char c) const
+        { return this->do_is(m, c); }
+
+        const Pt::Char* is(const Pt::Char *lo, const Pt::Char *hi, mask *vec) const
+        { return this->do_is(lo, hi, vec); }
+
+        const Pt::Char* scan_is(mask m, const Pt::Char* lo, const Pt::Char* hi) const
+        { return this->do_scan_is(m, lo, hi); }
+
+        const Pt::Char* scan_not(mask m, const Pt::Char* lo, const Pt::Char* hi) const
+        { return this->do_scan_not(m, lo, hi); }
+
+        Pt::Char toupper(Pt::Char c) const
+        { return this->do_toupper(c); }
+
+        const Pt::Char* toupper(Pt::Char *lo, const Pt::Char* hi) const
+        { return this->do_toupper(lo, hi); }
+
+        Pt::Char tolower(Pt::Char c) const
+        { return this->do_tolower(c); }
+
+        const Pt::Char* tolower(Pt::Char* lo, const Pt::Char* hi) const
+        { return this->do_tolower(lo, hi); }
+
+        Pt::Char widen(char c) const
+        { return this->do_widen(c); }
+
+        const char* widen(const char* lo, const char* hi, Pt::Char* to) const
+        { return this->do_widen(lo, hi, to); }
+
+        char narrow(Pt::Char c, char dfault) const
+        { return this->do_narrow(c, dfault); }
+
+        const Pt::Char* narrow(const Pt::Char* lo, const Pt::Char* hi,
+                            char dfault, char *to) const
+        { return this->do_narrow(lo, hi, dfault, to); }
+
+    protected:
+        virtual bool do_is(mask m, Pt::Char c) const;
+
+        virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
+                                    mask* vec) const;
+
+        virtual const Pt::Char* do_scan_is(mask m, const Pt::Char* lo,
+                                            const Pt::Char* hi) const;
+
+        virtual const Pt::Char* do_scan_not(mask m, const Pt::Char* lo,
+                                            const Pt::Char* hi) const;
+
+        virtual Pt::Char do_toupper(Pt::Char) const;
+
+        virtual const Pt::Char* do_toupper(Pt::Char* lo, const Pt::Char* hi) const;
+
+        virtual Pt::Char do_tolower(Pt::Char) const;
+
+        virtual const Pt::Char* do_tolower(Pt::Char* lo, const Pt::Char* hi) const;
+
+        virtual Pt::Char do_widen(char) const;
+
+        virtual const char* do_widen(const char* lo, const char* hi,
+                                    Pt::Char* dest) const;
+
+        virtual char do_narrow(Pt::Char, char dfault) const;
+
+        virtual const Pt::Char* do_narrow(const Pt::Char* lo, const Pt::Char* hi,
+                                        char dfault, char* dest) const;
+};
+
+#if (defined _MSC_VER || defined __QNX__)
+
+template<>
+class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
+
+#else
+
+template<>
+class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
+
+#endif
+
+    public:
+        static locale::id id;
+        virtual locale::id& __get_id (void) const { return id; }
+
+    public:
+        explicit codecvt(size_t ref = 0);
+
+        virtual ~codecvt();
+
+        codecvt_base::result out(Pt::MBState& state, 
+                                 const Pt::Char* from,
+                                 const Pt::Char* from_end, 
+                                 const Pt::Char*& from_next,
+                                 char* to, 
+                                 char* to_end, 
+                                 char*& to_next) const
+        { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
+
+        codecvt_base::result unshift(Pt::MBState& state, 
+                                     char* to, 
+                                     char* to_end,
+                                     char*& to_next) const
+        { return this->do_unshift(state, to, to_end, to_next); }
+
+        codecvt_base::result in(Pt::MBState& state, 
+                                const char* from,
+                                const char* from_end, 
+                                const char*& from_next,
+                                Pt::Char* to, 
+                                Pt::Char* to_end, 
+                                Pt::Char*& to_next) const
+        { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
+
+        int encoding() const
+        { return this->do_encoding(); }
+
+        bool always_noconv() const
+        { return this->do_always_noconv(); }
+
+        int length(Pt::MBState& state, const char* from,
+                   const char* end, size_t max) const
+        { return this->do_length(state, from, end, max); }
+
+        int max_length() const
+        { return this->do_max_length(); }
+
+    protected:
+        virtual codecvt_base::result do_out(Pt::MBState& state, 
+                                            const Pt::Char* from,
+                                            const Pt::Char* from_end, 
+                                            const Pt::Char*& from_next,
+                                            char* to, 
+                                            char* to_end, 
+                                            char*& to_next) const = 0;
+
+        virtual codecvt_base::result do_unshift(Pt::MBState& state, 
+                                                char* to,
+                                                char* to_end, 
+                                                char*& to_next) const = 0;
+
+        virtual codecvt_base::result do_in(Pt::MBState& state,
+                                           const char* from, 
+                                           const char* from_end,
+                                           const char*& from_next, 
+                                           Pt::Char* to, 
+                                           Pt::Char* to_end,
+                                           Pt::Char*& to_next) const = 0;
+
+        virtual int do_encoding() const throw() = 0;
+
+        virtual bool do_always_noconv() const throw() = 0;
+
+        virtual int do_length(Pt::MBState&, 
+                              const char* from,
+                              const char* end, 
+                              size_t max) const = 0;
+
+        virtual int do_max_length() const throw() = 0;
+};
+
+#if (defined _MSC_VER || defined __QNX__)
+
+template<>
+class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base {
+
+#else
+
+template<>
+class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public locale::facet {
+
+#endif
+
+    public:
+        static locale::id id;
+        virtual locale::id& __get_id (void) const { return id; }
+
+    public:
+        explicit codecvt(size_t ref = 0);
+
+        virtual ~codecvt();
+
+        codecvt_base::result out(Pt::MBState& state, 
+                                 const char* from,
+                                 const char* from_end, 
+                                 const char*& from_next,
+                                 char* to, 
+                                 char* to_end, 
+                                 char*& to_next) const
+        { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
+
+        codecvt_base::result unshift(Pt::MBState& state, 
+                                     char* to, 
+                                     char* to_end,
+                                     char*& to_next) const
+        { return this->do_unshift(state, to, to_end, to_next); }
+
+        codecvt_base::result in(Pt::MBState& state, 
+                                const char* from,
+                                const char* from_end, 
+                                const char*& from_next,
+                                char* to, char* to_end, 
+                                char*& to_next) const
+        { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
+
+        int encoding() const
+        { return this->do_encoding(); }
+
+        bool always_noconv() const
+        { return this->do_always_noconv(); }
+
+        int length(Pt::MBState& state, const char* from,
+                   const char* end, size_t max) const
+        { return this->do_length(state, from, end, max); }
+
+        int max_length() const
+        { return this->do_max_length(); }
+
+    protected:
+        virtual codecvt_base::result do_out(Pt::MBState& state, 
+                                            const char* from,
+                                            const char* from_end, 
+                                            const char*& from_next,
+                                            char* to, 
+                                            char* to_end, 
+                                            char*& to_next) const = 0;
+
+        virtual codecvt_base::result do_unshift(Pt::MBState& state, 
+                                                char* to,
+                                                char* to_end, 
+                                                char*& to_next) const = 0;
+
+        virtual codecvt_base::result do_in(Pt::MBState& state,
+                                           const char* from, 
+                                           const char* from_end,
+                                           const char*& from_next, 
+                                           char* to, 
+                                           char* to_end,
+                                           char*& to_next) const = 0;
+
+        virtual int do_encoding() const throw() = 0;
+
+        virtual bool do_always_noconv() const throw() = 0;
+
+        virtual int do_length(Pt::MBState&, 
+                              const char* from,
+                              const char* end, 
+                              size_t max) const = 0;
+
+        virtual int do_max_length() const throw() = 0;
+}; 
 
 }
 

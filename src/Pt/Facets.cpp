@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2010 Marc Boris Duerner
+ * Copyright (C) 2004-2011 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -875,6 +875,192 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 
     return it;
 }
+
+//
+// ctype facet for Pt::Char
+//
+
+std::locale::id ctype<Pt::Char>::id;
+
+#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
+
+ctype<Pt::Char>::ctype(size_t refs)
+: ctype_base(refs)
+{ }
+
+#else
+
+ctype<Pt::Char>::ctype(size_t refs)
+: locale::facet(refs)
+{ }
+
+#endif
+
+
+ctype<Pt::Char>::~ctype()
+{
+}
+
+
+bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
+{
+    return (m & ctypeMask(c)) != 0;
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) const
+{
+    for( ; begin < end; ++begin)
+    {
+        *vec = ctypeMask(*begin);
+        ++vec;
+    }
+
+    return end;
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const
+{
+    while( begin != end && !is(m,*begin))
+    {
+        ++begin;
+    }
+
+    return begin;
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const
+{
+    while( begin != end && is(m,*begin))
+    {
+        ++begin;
+    }
+
+    return begin;
+}
+
+
+Pt::Char
+ctype<Pt::Char>::do_toupper(Pt::Char ch) const
+{
+    return toupper(ch);
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const
+{
+    for(; begin < end; ++begin)
+    {
+        *begin = do_toupper(*begin);
+    }
+
+    return end;
+}
+
+
+Pt::Char
+ctype<Pt::Char>::do_tolower(Pt::Char ch) const
+{
+    return tolower(ch);
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const
+{
+    for(; begin < end; ++begin) {
+        *begin = do_tolower(*begin);
+    }
+
+    return end;
+}
+
+
+Pt::Char ctype<Pt::Char>::do_widen(char ch) const
+{
+    return Pt::Char(ch);
+}
+
+
+const char* ctype<Pt::Char>::do_widen(const char* begin, const char* end, Pt::Char* dest) const
+{
+    for(const char* cur = begin; cur < end; ++cur) {
+        *dest = do_widen(*cur);
+        ++dest;
+    }
+
+    return end;
+}
+
+
+char ctype<Pt::Char>::do_narrow(Pt::Char ch, char dfault) const
+{
+    return ch.narrow(dfault);
+}
+
+
+const Pt::Char*
+ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const
+{
+    for(const Pt::Char* cur = begin; cur < end; ++cur) {
+        *dest = do_narrow(*cur, dfault);
+        ++dest;
+    }
+
+    return end;
+}
+
+//
+// codecvt facet for Char/char
+//
+
+std::locale::id codecvt<Pt::Char, char, Pt::MBState>::id;
+
+#if defined _MSC_VER || __QNX__
+
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+: codecvt_base(ref)
+{}
+
+#else
+
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+: locale::facet(ref)
+{}
+
+#endif
+
+codecvt<Pt::Char, char, Pt::MBState>::~codecvt()
+{}
+
+//
+// codecvt facet for char/char
+//
+
+std::locale::id codecvt<char, char, Pt::MBState>::id;
+
+#if defined _MSC_VER || __QNX__
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: codecvt_base(ref)
+{}
+
+#else
+
+codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+: locale::facet(ref)
+{}
+
+#endif
+
+codecvt<char, char, Pt::MBState>::~codecvt()
+{}
 
 } // namespace std
 

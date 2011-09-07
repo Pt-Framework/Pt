@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Marc Boris Duerner
+ * Copyright (C) 2005-2011 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,12 +94,10 @@ class Char
         : _value( (uint32_t)((unsigned short)val) )
         {}
 
-//#ifndef PT_WCHAR_T_IS_USHORT
         //! Constructs a character using the given 16-bit integer as base for the character value.
         Char(unsigned short val)
         : _value( (uint32_t)(val) )
         {}
-//#endif
 
         //! Constructs a character using the given 32-bit integer as base for the character value.
         Char(int val)
@@ -121,23 +119,26 @@ class Char
         : _value(val)
         {}
 
-        /**
-         * @brief Narrows this character into an 8-bit char if possible.
-         *
-         * If the character can not be converted into an 8-bit char because its value is
-         * greater than 255, the defaultCharacter which is passed to this method is returned.
-         *
-         * If this character is equal or lower than 255 the character is cast to char.
-         *
-         * @param def The default character which is returned if this character can not be narrowed
-         * @return An 8-bit char which is a narrowed representation of this character object or
-         * the default character if this character object's value is out of range (>255).
-         */
-        char narrow(char def = '?') const;
+        /** @brief Narrows this character into an 8-bit char if possible.
+         
+            If the character can not be converted into an 8-bit char because its value is
+            greater than 255, the defaultCharacter which is passed to this method is returned.
 
-        static Char null()
+            If this character is equal or lower than 255 the character is cast to char.
+
+            @param def The default character which is returned if this character can not be narrowed
+            @return An 8-bit char which is a narrowed representation of this character object or
+                    the default character if this character object's value is out of range (>255).
+        */
+        char narrow(char def = '?') const
         {
-            return Char(0);
+            if( _value <= 0xff )
+                return (char)_value;
+
+            if( _value == this->eofval() )
+                return std::char_traits<char>::eof();
+
+            return def;
         }
 
         /**
@@ -157,7 +158,7 @@ class Char
          */
         uint32_t value() const
         { return _value; }
-
+        
         /**
          * @brief This conversion operator converts the internal value of this character to unsigned 32 bits.
          *
@@ -312,6 +313,21 @@ class Char
         friend Char operator<<(const Char& a, int b)
         { return a.value() << b; }
 
+        static Char null()
+        {
+            return Char(0);
+        }
+
+        static Char eof()
+        {
+            return Pt::Char( Pt::uint32_t(-1) );
+        }
+
+        static Pt::uint32_t eofval()
+        {
+            return Pt::uint32_t(-1);
+        }
+
     private:
         Pt::uint32_t _value;
 };
@@ -464,7 +480,7 @@ inline bool char_traits<Pt::Char>::eq_int_type(const int_type& c1, const int_typ
 
 inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::eof()
 {
-    return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
+    return Pt::Char::eof().value();
 }
 
 inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_type& c)
@@ -474,159 +490,7 @@ inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_
 
 } // namespace std
 
-namespace Pt {
-
-inline char Char::narrow(char def) const
-{
-    if( _value == std::char_traits<Char>::eof() )
-    {
-        return std::char_traits<char>::eof();
-    }
-
-    if( _value <= 0xff )
-    {
-        return (char)_value;
-    }
-
-    return def;
-}
-
-} // namespace Pt
-
-#ifdef PT_WITH_STD_LOCALE
-
-#include <locale>
-
-namespace std {
-
-#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
-
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype< Pt::Char > : public ctype_base {
-
-#else
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
-
-#endif
-
-    public:
-        typedef ctype_base::mask mask;
-
-        static locale::id id;
-        virtual locale::id& __get_id (void) const { return id; }
-
-    public:
-        explicit ctype(size_t refs = 0);
-
-        virtual ~ctype();
-
-        bool is(mask m, Pt::Char c) const
-        { return this->do_is(m, c); }
-
-        const Pt::Char* is(const Pt::Char *lo, const Pt::Char *hi, mask *vec) const
-        { return this->do_is(lo, hi, vec); }
-
-        const Pt::Char* scan_is(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-        { return this->do_scan_is(m, lo, hi); }
-
-        const Pt::Char* scan_not(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-        { return this->do_scan_not(m, lo, hi); }
-
-        Pt::Char toupper(Pt::Char c) const
-        { return this->do_toupper(c); }
-
-        const Pt::Char* toupper(Pt::Char *lo, const Pt::Char* hi) const
-        { return this->do_toupper(lo, hi); }
-
-        Pt::Char tolower(Pt::Char c) const
-        { return this->do_tolower(c); }
-
-        const Pt::Char* tolower(Pt::Char* lo, const Pt::Char* hi) const
-        { return this->do_tolower(lo, hi); }
-
-        Pt::Char widen(char c) const
-        { return this->do_widen(c); }
-
-        const char* widen(const char* lo, const char* hi, Pt::Char* to) const
-        { return this->do_widen(lo, hi, to); }
-
-        char narrow(Pt::Char c, char dfault) const
-        { return this->do_narrow(c, dfault); }
-
-        const Pt::Char* narrow(const Pt::Char* lo, const Pt::Char* hi,
-                            char dfault, char *to) const
-        { return this->do_narrow(lo, hi, dfault, to); }
-
-    protected:
-        virtual bool do_is(mask m, Pt::Char c) const;
-
-        virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
-                                    mask* vec) const;
-
-        virtual const Pt::Char* do_scan_is(mask m, const Pt::Char* lo,
-                                            const Pt::Char* hi) const;
-
-        virtual const Pt::Char* do_scan_not(mask m, const Pt::Char* lo,
-                                            const Pt::Char* hi) const;
-
-        virtual Pt::Char do_toupper(Pt::Char) const;
-
-        virtual const Pt::Char* do_toupper(Pt::Char* lo, const Pt::Char* hi) const;
-
-        virtual Pt::Char do_tolower(Pt::Char) const;
-
-        virtual const Pt::Char* do_tolower(Pt::Char* lo, const Pt::Char* hi) const;
-
-        virtual Pt::Char do_widen(char) const;
-
-        virtual const char* do_widen(const char* lo, const char* hi,
-                                    Pt::Char* dest) const;
-
-        virtual char do_narrow(Pt::Char, char dfault) const;
-
-        virtual const Pt::Char* do_narrow(const Pt::Char* lo, const Pt::Char* hi,
-                                        char dfault, char* dest) const;
-};
-
-} // namespace std
-
-#else
-
-namespace std {
-
-class ctype_base
-{
-    public:
-        enum {
-            alpha  = 1 << 5,
-            cntrl  = 1 << 2,
-            digit  = 1 << 6,
-            lower  = 1 << 4,
-            print  = 1 << 1,
-            punct  = 1 << 7,
-            space  = 1 << 0,
-            upper  = 1 << 3,
-            xdigit = 1 << 8,
-            alnum  = alpha | digit,
-            graph  = alnum | punct
-        };
-
-        typedef unsigned short mask;
-
-        ctype_base(size_t _refs = 0)
-        { }
-};
-
-}
-
-#endif
+#include <Pt/Locale.h>
 
 namespace Pt {
 
@@ -693,24 +557,6 @@ PT_API Pt::Char toupper(const Pt::Char& ch);
 
 } // namespace Pt
 
-// TODO: Move this into STLport?
-#if PT_STLPORT
-
-_STLP_BEGIN_NAMESPACE
-_STLP_MOVE_TO_PRIV_NAMESPACE
-
-    bool __get_fdigit(Pt::Char& c, const Pt::Char* digits);
-    bool __get_fdigit_or_sep(Pt::Char& c, Pt::Char sep, const Pt::Char* digits);
-
-_STLP_MOVE_TO_STD_NAMESPACE
-_STLP_END_NAMESPACE
-
-#endif
-
-#ifdef PT_WITH_STD_LOCALE
-#include <Pt/Facets.h>
-#else
 #include <Pt/String.h>
-#endif
 
 #endif

@@ -29,7 +29,6 @@ SharedLibrary Pt : Atomicity.cpp
                    Signal.cpp
                    StringStream.cpp
                    TextBuffer.cpp
-                   TextCodec.cpp
                    TextStream.cpp
                    Time.cpp
                    Utf8Codec.cpp
