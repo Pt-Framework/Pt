@@ -29,6 +29,7 @@
 #ifndef PT_HTTP_CHUNKEDREADER_H
 #define PT_HTTP_CHUNKEDREADER_H
 
+#include <Pt/Http/Api.h>
 #include <streambuf>
 #include <iostream>
 

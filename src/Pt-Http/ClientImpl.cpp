@@ -407,7 +407,7 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         log_debug("request sent - begin write");
         _stream.buffer().beginWrite();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& )
     {
         _errorPending = true;
         _client->replyFinished(*_client);
@@ -441,7 +441,7 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
                 _readHeader = true;
             }
         }
-        catch (const System::IOError& e)
+        catch (const System::IOError&)
         {
             if (_reconnectOnError && _request != 0)
             {
@@ -455,9 +455,9 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
             throw;
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
-        log_warn("error of type " << typeid(e).name() << " occured: " << e.what());
+        log_warn("exception occured: " << e.what());
 
         _errorPending = true;
 
@@ -494,7 +494,7 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
                 processBodyAvailable(sb);
             }
         }
-        catch (const System::IOError& e)
+        catch (const System::IOError&)
         {
             // after writing the request, the first read request may
             // detect, that the server has already closed the connection,
@@ -511,7 +511,7 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
             throw;
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         _errorPending = true;
         _client->replyFinished(*_client);

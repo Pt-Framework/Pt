@@ -51,7 +51,7 @@ namespace Pt {
 
 namespace Xml {
 
-struct XmlReaderImpl
+class XmlReaderImpl
 {
     struct State
     {
@@ -1501,184 +1501,185 @@ struct XmlReaderImpl
         }
     };
 
-
-    XmlReaderImpl(std::basic_istream<Char>& is, int flags)
-    : _textBuffer( is.rdbuf() )
-    , _buffer(0)
-    , _flags(flags)
-    , _standalone(true)
-    , _depth(0)
-    , _line(1)
-    , _state(0)
-    , _current(0)
-    {
-        _state = XmlReaderImpl::OnDocumentBegin::instance();
-    }
-
-    XmlReaderImpl(std::istream& is, int flags)
-    : _textBuffer(0)
-    , _buffer(0)
-    , _flags(flags)
-    , _standalone(true)
-    , _depth(0)
-    , _line(1)
-    , _state(0)
-    , _current(0)
-    {
-        _state = XmlReaderImpl::OnDocumentBegin::instance();
-        _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-        _textBuffer = _buffer;
-    }
-
-    ~XmlReaderImpl()
-    {
-        delete _buffer;
-    }
-
-    void reset(std::basic_istream<Char>& is, int flags)
-    {
-        delete _buffer;
-        _buffer = 0;
-        _textBuffer = is.rdbuf();
-
-        _state = XmlReaderImpl::OnDocumentBegin::instance();
-        _flags = flags;
-        _version.clear();
-        _encoding.clear();
-        _standalone = true;
-        _depth = 0;
-        _line = 1;
-        _current = 0;
-    }
-
-    void reset(std::istream& is, int flags)
-    {
-        delete _buffer;
-        _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-        _textBuffer = _buffer;
-
-        _state = XmlReaderImpl::OnDocumentBegin::instance();
-        _flags = flags;
-        _version.clear();
-        _encoding.clear();
-        _standalone = true;
-        _depth = 0;
-        _line = 1;
-        _current = 0;
-    }
-
-    const Pt::String& version() const
-    { return _version; }
-
-    const Pt::String& encoding() const
-    { return _encoding; }
-
-    bool standalone() const
-    { return _standalone; }
-
-    EntityResolver& entityResolver()
-    { return _resolver; }
-
-    size_t depth() const
-    {
-        return _depth;
-    }
-
-    std::size_t line() const
-    {
-        return _line;
-    }
-
-    const Node& get()
-    {
-        if( ! _current )
+    public:
+        XmlReaderImpl(std::basic_istream<Char>& is, int flags)
+        : _textBuffer( is.rdbuf() )
+        , _buffer(0)
+        , _flags(flags)
+        , _standalone(true)
+        , _depth(0)
+        , _line(1)
+        , _state(0)
+        , _current(0)
         {
-            this->next();
+            _state = XmlReaderImpl::OnDocumentBegin::instance();
         }
 
-        return *_current;
-    }
-
-    const Node& next()
-    {
-        const Pt::Char eof = std::char_traits<char>::eof();
-
-        _current = 0;
-        Pt::Char ch = 0;
-        do
+        XmlReaderImpl(std::istream& is, int flags)
+        : _textBuffer(0)
+        , _buffer(0)
+        , _flags(flags)
+        , _standalone(true)
+        , _depth(0)
+        , _line(1)
+        , _state(0)
+        , _current(0)
         {
-            ch = _textBuffer->sbumpc();
-            _state = _state->onChar(ch, *this);
+            _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+            _textBuffer = _buffer;
+        }
 
-            if(ch == '\n')
+        ~XmlReaderImpl()
+        {
+            delete _buffer;
+        }
+
+        void reset(std::basic_istream<Char>& is, int flags)
+        {
+            delete _buffer;
+            _buffer = 0;
+            _textBuffer = is.rdbuf();
+
+            _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _flags = flags;
+            _version.clear();
+            _encoding.clear();
+            _standalone = true;
+            _depth = 0;
+            _line = 1;
+            _current = 0;
+        }
+
+        void reset(std::istream& is, int flags)
+        {
+            delete _buffer;
+            _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+            _textBuffer = _buffer;
+
+            _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _flags = flags;
+            _version.clear();
+            _encoding.clear();
+            _standalone = true;
+            _depth = 0;
+            _line = 1;
+            _current = 0;
+        }
+
+        const Pt::String& version() const
+        { return _version; }
+
+        const Pt::String& encoding() const
+        { return _encoding; }
+
+        bool standalone() const
+        { return _standalone; }
+
+        EntityResolver& entityResolver()
+        { return _resolver; }
+
+        size_t depth() const
+        {
+            return _depth;
+        }
+
+        std::size_t line() const
+        {
+            return _line;
+        }
+
+        const Node& get()
+        {
+            if( ! _current )
             {
-                ++_line;
+                this->next();
             }
+
+            return *_current;
         }
-        while ( !_current && ch != eof);
 
-        return *_current;
-    }
-
-    bool advance()
-    {
-        const Pt::Char eof = std::char_traits<char>::eof();
-
-        _current = 0;
-        Pt::Char ch = 0;
-        while( ! _current && _textBuffer->in_avail() > 0 )
+        const Node& next()
         {
-            ch = _textBuffer->sbumpc();
-            _state = _state->onChar(ch, *this);
+            const Pt::Char eof = std::char_traits<char>::eof();
 
-            if(ch == '\n')
+            _current = 0;
+            Pt::Char ch = 0;
+            do
             {
-                ++_line;
+                ch = _textBuffer->sbumpc();
+                _state = _state->onChar(ch, *this);
+
+                if(ch == '\n')
+                {
+                    ++_line;
+                }
             }
+            while ( !_current && ch != eof);
+
+            return *_current;
         }
 
-        return _current != 0;
-    }
-
-    void resolveEntity(String& str)
-    {
-        str = _resolver.resolveEntity( str );
-    }
-
-    void appendContent(Pt::Char c)
-    {
-        String& content = _chars.content();
-        if (content.capacity() <= content.size() + 20)
+        bool advance()
         {
-            if (content.capacity() < 16)
-                content.reserve(16);
-            else
-                content.reserve(content.capacity() + content.capacity() / 2);
+            const Pt::Char eof = std::char_traits<char>::eof();
+
+            _current = 0;
+            Pt::Char ch = 0;
+            while( ! _current && _textBuffer->in_avail() > 0 )
+            {
+                ch = _textBuffer->sbumpc();
+                _state = _state->onChar(ch, *this);
+
+                if(ch == '\n')
+                {
+                    ++_line;
+                }
+            }
+
+            return _current != 0;
         }
-        content += c;
-    }
 
-    std::basic_streambuf<Char>* _textBuffer;
-    std::basic_streambuf<Char>* _buffer;
-    int _flags;
-    EntityResolver _resolver;
+        void resolveEntity(String& str)
+        {
+            str = _resolver.resolveEntity( str );
+        }
 
-    Pt::String _version;
-    Pt::String _encoding;
-    bool _standalone;
-    size_t _depth;
-    std::size_t _line;
+        void appendContent(Pt::Char c)
+        {
+            String& content = _chars.content();
+            if (content.capacity() <= content.size() + 20)
+            {
+                if (content.capacity() < 16)
+                    content.reserve(16);
+                else
+                    content.reserve(content.capacity() + content.capacity() / 2);
+            }
+            content += c;
+        }
 
-    State* _state;
-    Node* _current;
-    String _token;
-    DocTypeDeclaration _docType;
-    ProcessingInstruction _procInstr;
-    StartElement _startElem;
-    EndElement _endElem;
-    Characters _chars;
-    Attribute _attr;
-    EndDocument _endDoc;
+    private:
+        std::basic_streambuf<Char>* _textBuffer;
+        std::basic_streambuf<Char>* _buffer;
+        int _flags;
+        EntityResolver _resolver;
+
+        Pt::String _version;
+        Pt::String _encoding;
+        bool _standalone;
+        size_t _depth;
+        std::size_t _line;
+
+        State* _state;
+        Node* _current;
+        String _token;
+        DocTypeDeclaration _docType;
+        ProcessingInstruction _procInstr;
+        StartElement _startElem;
+        EndElement _endElem;
+        Characters _chars;
+        Attribute _attr;
+        EndDocument _endDoc;
 };
 
 
