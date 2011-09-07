@@ -363,6 +363,10 @@ if $(CONFIGURE) || $(NO_CONFIG)
     ConfigureLn ;
     ConfigureDotSlash ;
 }
+else
+{
+    include config.jam ;
+}
 
 ##########################################################################
 # Include base rules
@@ -433,8 +437,6 @@ if $(CONFIGURE)
 {
     Exit "Configuration successful." ;
 }
-
-include config.jam ;
 
 ##########################################################################
 # include the project top level Jamfile
