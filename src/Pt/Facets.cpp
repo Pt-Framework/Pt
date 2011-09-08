@@ -789,6 +789,19 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     return it;
 }
 
+
+/* NOTE: this could be useful
+void Initialize_get_float(const ctype<Pt::Char>& ct, Pt::Char& Plus, Pt::Char& Minus,
+                          Pt::Char& pow_e, Pt::Char& pow_E, Pt::Char* digits) 
+{
+    char ndigits[11] = "0123456789";
+    Plus  = ct.widen('+');
+    Minus = ct.widen('-');
+    pow_e = ct.widen('e');
+    pow_E = ct.widen('E');
+    ct.widen(ndigits + 0, ndigits + 10, digits);
+}
+*/
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::iter_type
 num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_type end, 
                                                            ios_base& stream, ios_base::iostate& state, 
@@ -1063,25 +1076,3 @@ codecvt<char, char, Pt::MBState>::~codecvt()
 {}
 
 } // namespace std
-
-#if PT_STLPORT
-
-_STLP_BEGIN_NAMESPACE
-_STLP_MOVE_TO_PRIV_NAMESPACE
-
-void  _Initialize_get_float( const ctype<Pt::Char>& ct,
-        Pt::Char& Plus, Pt::Char& Minus,
-        Pt::Char& pow_e, Pt::Char& pow_E,
-        Pt::Char* digits) {
-  char ndigits[11] = "0123456789";
-  Plus  = ct.widen('+');
-  Minus = ct.widen('-');
-  pow_e = ct.widen('e');
-  pow_E = ct.widen('E');
-  ct.widen(ndigits + 0, ndigits + 10, digits);
-}    
-
-_STLP_MOVE_TO_STD_NAMESPACE
-_STLP_END_NAMESPACE  
-
-#endif

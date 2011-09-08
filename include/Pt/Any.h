@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 by Marc Boris Duerner
+ * Copyright (C) 2004-2011 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -122,41 +122,6 @@ namespace Pt {
                     virtual Any::Value* clone() const
                     { return new BasicValue(_value); }
 
-                    // virtual bool equal(const Value& value) const
-                    // {
-                    //     // try {
-                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
-                    //     //     return (bv._value == this->_value);
-                    //     // }
-                    //     // catch(...) {}
-
-                    //     if( this->type() == value.type() )
-                    //     {
-                    //         const T* other = reinterpret_cast<const T*>( value.get() );
-                    //         return *other == _value;
-                    //     }
-
-                    //     return false;
-                    // }
-
-                    // virtual bool lt(const Value& value) const
-                    // {
-                    //     if( this->type() == value.type() )
-                    //     {
-                    //         const T* other = reinterpret_cast<const T*>( value.get() );
-                    //         return *other < _value;
-                    //     }
-
-                    //     // try {
-                    //     //     const BasicValue<T>& bv = dynamic_cast< const BasicValue<T>& >(value);
-                    //     //     return (bv._value < this->_value);
-                    //     // }
-                    //     // catch(...) {}
-
-                    //     bool x = !( typeid(T).before( value.type() ) );
-                    //     return !x;
-                    // }
-
                     virtual void* get()
                     { return &_value; }
 
@@ -181,29 +146,6 @@ namespace Pt {
 
                     virtual Any::Value* clone() const
                     { return new BasicRefValue(_value); }
-
-                    // virtual bool equal(const Value& value) const
-                    // {
-                    //     if( this->type() == value.type() )
-                    //     {
-                    //         const T* other = reinterpret_cast<const T*>( value.get() );
-                    //         return *other == *_value;
-                    //     }
-
-                    //     return false;
-                    // }
-
-                    // virtual bool lt(const Value& value) const
-                    // {
-                    //     if( this->type() == value.type() )
-                    //     {
-                    //         const T* other = reinterpret_cast<const T*>( value.get() );
-                    //         return *other < *_value;
-                    //     }
-
-                    //     bool x = !( typeid(T).before( value.type() ) );
-                    //     return !x;
-                    // }
 
                     virtual void* get()
                     { return (void*) _value; }
@@ -371,50 +313,6 @@ namespace Pt {
             */
             Any& operator=(const Any& rhs);
 
-            /* @brief Check if equal
-
-                Returns true if the contained type and the passed type are
-                equal and have equal values.
-
-                @return True if equal
-            */
-            // template <typename T>
-            // bool operator==(const T& value) const
-            // {
-            //     if(_value == 0)
-            //         return false;
-
-            //     return _value->equal( BasicValue<T>(value) );
-            // }
-
-            /* @brief Check if equal
-
-                Returns true if the contained types are equal and have
-                equal values.
-
-                @return True if equal
-            */
-            //bool operator==(const Any& a) const;
-
-            /* @brief Check if inequal
-
-                Returns true if the contained types have different values
-                or if the conatained types are different.
-
-                @return True if different
-            */
-            //bool operator!=(const Any& a) const;
-
-            /* @brief Check if less
-
-                Returns true if the value of the contained type is less than
-                the contained value of the other Any. If the contained types
-                are different type_info::before decides which Any is less.
-
-                @return True if less
-            */
-            //bool operator<(const Any& a) const;
-
             /** @internal @brief Returns the value which the %Any contains
             */
             const Any::Value* value() const
@@ -574,38 +472,6 @@ inline Any& Any::operator=(const Any& rhs)
     Any(rhs).swap(*this);
     return *this;
 }
-
-
-// inline bool Any::operator==(const Any& a) const
-// {
-//     if(_value && a._value)
-//     {
-//         return _value->equal( *(a._value) );
-//     }
-
-//     // if one or both of the Anys is not initialised
-//     // they are considered equal if both have NULL values.
-//     return _value == a._value;
-// }
-
-
-// inline bool Any::operator!=(const Any& a) const
-// {
-//     return !( this->operator==(a) );
-// }
-
-
-// inline bool Any::operator<(const Any& a) const
-// {
-//     if(_value && a._value)
-//     {
-//         return _value->lt( *(a._value) );
-//     }
-
-//     // if one of the Anys is not initialised the
-//     //one having a NULL valueis considered less.
-//     return _value < a._value;
-// }
 
 } // namespace Pt
 
