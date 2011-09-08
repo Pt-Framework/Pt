@@ -39,6 +39,8 @@ class PT_API ConversionError : public std::runtime_error
     public:
         explicit ConversionError(const std::string& msg);
 
+        explicit ConversionError(const char* msg);
+
         ~ConversionError() throw()
         {}
 

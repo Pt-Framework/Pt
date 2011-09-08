@@ -34,6 +34,11 @@ ConversionError::ConversionError(const std::string& msg)
 {
 }
 
+ConversionError::ConversionError(const char* msg)
+: std::runtime_error(msg)
+{
+}
+
 void ConversionError::doThrow(const char* typeto, const char* typefrom)
 {
     std::string msg = "conversion from ";
