@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
+ * Copyright (C) 2004-2011 Marc Boris Duerner 
  * Copyright (C) 2006 by Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
@@ -30,21 +30,21 @@
 #define Pt_Api_h
 
 #if defined(_MSC_VER)
-	//http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
-	//http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
-	//http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
+    //http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
+    //http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
+    //http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
 
-	// deprectated stdc++ functions
-	#pragma warning( disable : 4996 )
+    // deprectated stdc++ functions
+    #pragma warning( disable : 4996 )
 
-	// dll-linkage
-	#pragma warning( disable : 4251 )
+    // dll-linkage
+    #pragma warning( disable : 4251 )
 
-	//non dll-interface base class
-	#pragma warning( disable : 4275 )
+    // non dll-interface base class
+    #pragma warning( disable : 4275 )
 
-	// exception sepcification ignored
-	#pragma warning( disable : 4290 )
+    // exception sepcification ignored
+    #pragma warning( disable : 4290 )
 #endif
 
 #if defined (__INTEL_COMPILER)
@@ -88,9 +88,6 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
     #define PT_EXPORT __declspec(dllexport)
     #define PT_IMPORT __declspec(dllimport)
-    #if !defined(_NATIVE_WCHAR_T_DEFINED)
-        #define PT_WCHAR_T_IS_USHORT
-    #endif
 #elif __GNUC__ >= 4
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
@@ -99,7 +96,6 @@
     // dynamic linking is not yet supported
     #define PT_EXPORT
     #define PT_IMPORT
-    #define PT_WCHAR_T_IS_USHORT
 #else
     #define PT_EXPORT
     #define PT_IMPORT
@@ -173,3 +169,4 @@ namespace Pt {
 */
 
 #endif
+
