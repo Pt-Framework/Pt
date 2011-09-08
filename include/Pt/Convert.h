@@ -198,7 +198,7 @@ void convert(T& to, const S& from)
 {
     StringStream ss;
     if( !(ss << from && ss >> to) )
-        ConversionError::doThrow(typeid(T).name(), typeid(S).name());
+        ConversionError::doThrow("conversion between streamable types failed");
 }
 
 
