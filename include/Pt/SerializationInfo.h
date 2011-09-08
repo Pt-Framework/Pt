@@ -74,9 +74,8 @@ class PT_API SerializationInfo
             Double     = 17,
             LongDouble = 18,
             Binary     = 19,
-            Blob       = 20,
-            Struct     = 21,
-            Sequence   = 22
+            Struct     = 20,
+            Sequence   = 21
         };
 
         // type info layout
@@ -102,6 +101,7 @@ class PT_API SerializationInfo
         , _id("")
         , _bound(false)
         , _isCompound(false)
+        , _isAlloc(false)
         , _type(Void)
         //, _nameRef(true)
         //, _tnRef(true)
@@ -118,6 +118,7 @@ class PT_API SerializationInfo
         , _id("")
         , _bound(false)
         , _isCompound(false)
+        , _isAlloc(false)
         , _type(Void)
         //, _nameRef(true)
         //, _tnRef(true)
@@ -136,6 +137,9 @@ class PT_API SerializationInfo
 
     public:
         void clear();
+
+        inline Type type() const
+        { return static_cast<Type>(_type); }
 
         inline bool isScalar() const
         { return _isCompound == false; }
@@ -391,9 +395,9 @@ class PT_API SerializationInfo
         }
 
         /** @internal This is needed as a workaround for some compilers (GCC 3.x),
-		    so the getSurrogate template can be found.
-		*/
-		template <typename T>
+            so the getSurrogate template can be found.
+        */
+        template <typename T>
         friend const BasicSerializationSurrogate<T>* getSurrogate(SerializationInfo*);
 
         const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
@@ -404,7 +408,7 @@ class PT_API SerializationInfo
 
         SerializationInfo& addChild();
 
-    public:
+    private:
         struct Ref
         {
             void* address;
@@ -439,7 +443,7 @@ class PT_API SerializationInfo
         };
 
     private:
-		mutable Variant _value;
+        mutable Variant _value;
         SerializationContext* _context;
         SerializationInfo* _parent;
         SerializationInfo* _next;
@@ -448,6 +452,7 @@ class PT_API SerializationInfo
         const char* _id;
         mutable bool _bound; // TODO: join into bitfield
         bool _isCompound;    // TODO: join into bitfield
+        bool _isAlloc;       // TODO: join into bitfield
         Pt::uint8_t _type;   // TODO: join into bitfield
         Pt::uint8_t _flags;
 };
@@ -578,7 +583,7 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 
 
 
-struct id
+struct SerPubl
 {};
 
 
@@ -609,13 +614,13 @@ class SaveInfo
 };
 
 
-inline id save()
+inline SerPubl save()
 {
-    return id();
+    return SerPubl();
 }
 
 
-inline SaveInfo operator <<(SerializationInfo& si, const id&)
+inline SaveInfo operator <<(SerializationInfo& si, const SerPubl&)
 {
     return SaveInfo(si);
 }
@@ -665,13 +670,13 @@ class LoadInfo
 };
 
 
-inline id load()
+inline SerPubl load()
 {
-    return id();
+    return SerPubl();
 }
 
 
-inline LoadInfo operator >>(const SerializationInfo& si, const id&)
+inline LoadInfo operator >>(const SerializationInfo& si, const SerPubl&)
 {
     return LoadInfo(si);
 }
@@ -851,7 +856,7 @@ inline void operator <<=(SerializationInfo& si, double n)
 
 inline void operator >>=(const SerializationInfo& si, char& ch)
 {
-	Pt::Char tmp;
+    Pt::Char tmp;
     si.getChar(tmp);
     ch = static_cast<int>(tmp);
 }
@@ -873,7 +878,7 @@ inline void operator <<=(SerializationInfo& si, const char* str)
 
 inline void operator >>=(const SerializationInfo& si, std::string& str)
 {
-	Pt::String tmp;
+    Pt::String tmp;
     si.getString(tmp);
     str = tmp.narrow();
 }
@@ -1154,4 +1159,3 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 } // namespace Pt
 
 #endif
-

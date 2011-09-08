@@ -40,10 +40,10 @@
 
 namespace Pt {
 
-class SerializationCache
+class SerializationContextImpl
 {
     public:
-        SerializationCache()
+        SerializationContextImpl()
         : _limit(64)
         {
 #ifdef ALLOCATOR
@@ -56,6 +56,8 @@ class SerializationCache
 #ifdef ALLOCATOR
         PoolFactory _alloc;
 #endif
+
+        std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
 };
 
 
@@ -64,7 +66,7 @@ SerializationContext::SerializationContext()
 , _refsEnabled(false)
 {
     SerializationInfo::setContextual(*this);
-    _cache = new SerializationCache;
+    _cache = new SerializationContextImpl;
 }
 
 
@@ -76,13 +78,13 @@ SerializationContext::~SerializationContext()
         delete *iter;
     }
 
-    delete _cache;
-
     std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator siter;
-    for(siter = _surrmap.begin(); siter != _surrmap.end(); ++siter)
+    for(siter = _cache->_surrmap.begin(); siter != _cache->_surrmap.end(); ++siter)
     {
         delete siter->second;
     }
+    
+    delete _cache;
 }
 
 
@@ -143,20 +145,20 @@ void SerializationContext::push(SerializationInfo* si)
 
 void SerializationContext::registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate)
 {
-    std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator it = _surrmap.find( ti );
-    if( it != _surrmap.end() )
+    std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator it = _cache->_surrmap.find( ti );
+    if( it != _cache->_surrmap.end() )
     {
         delete it->second;
     }
 
-    _surrmap[ ti ] = surrogate;
+    _cache->_surrmap[ ti ] = surrogate;
 }
 
 
 const SerializationSurrogate* SerializationContext::getSurrogate(const std::type_info& ti) const
 {
-    std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _surrmap.find(ti);
-    if( it != _surrmap.end() )
+    std::map<Pt::TypeInfo, SerializationSurrogate*>::const_iterator it = _cache->_surrmap.find(ti);
+    if( it != _cache->_surrmap.end() )
     {
         return it->second;
     }

@@ -39,7 +39,7 @@
 
 namespace Pt {
 
-class SerializationCache;
+class SerializationContextImpl;
 
 class PT_API SerializationContext : public SerializationInfo
 {
@@ -108,8 +108,7 @@ class PT_API SerializationContext : public SerializationInfo
         void registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate);
 
     private:
-        SerializationCache* _cache;
-        std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
+        SerializationContextImpl* _cache;
         bool _refsEnabled;
 };
 

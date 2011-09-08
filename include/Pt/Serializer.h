@@ -69,7 +69,6 @@ class PT_API Serializer
             dec->begin(type, name);
         }
 
-        // TODO: can this be joined into advance() ?
         void begin();
 
         bool advance();

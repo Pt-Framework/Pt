@@ -42,7 +42,7 @@ static const unsigned char ID_REF_BIT       = 128;
 
 inline void freeRefStr2(const char*& str, unsigned char& flags, unsigned char mask)
 {
-    if(flags & mask == mask)
+    if( (flags & mask) == mask )
     {
         delete [] str;
         flags &= ~mask;
@@ -170,16 +170,25 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             formatter.addLongDouble( _Name, _value.f, _id );
             break;
 
-        case Blob:
-            formatter.addBytes( _Name, _TypeName, _value.blob.data, _value.blob.length, _id );
-            break;
-
         case Binary:
         {
-            const char* data = reinterpret_cast<const char*>(&_value);
-            const char* last = data + sizeof(Variant) - 1;
-            formatter.addBytes( _Name, _TypeName, data, *last, _id );
-            break;
+            const char* data = 0;
+            size_t len = 0;
+
+            if(_isAlloc)
+            {
+                data = _value.blob.data;
+                len = _value.blob.length;
+            }
+            else
+            {
+                data = reinterpret_cast<const char*>(&_value);
+                const char* last = data + sizeof(Variant) - 1;
+                len = *last;
+            }
+
+            formatter.addBytes( _Name, _TypeName, data, len, _id );
+             break;
         }
         case Str8:
         {
@@ -296,15 +305,24 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.addLongDouble( _Name, _value.f, _id );
             break;
 
-        case Blob:
-            formatter.addBytes( _Name, _TypeName, _value.blob.data, _value.blob.length, _id );
-            break;
-
         case Binary:
         {
-            const char* data = reinterpret_cast<const char*>(&_value);
-            const char* last = data + sizeof(Variant) - 1;
-            formatter.addBytes( _Name, _TypeName, data, *last, _id );
+            const char* data = 0;
+            size_t len = 0;
+
+            if(_isAlloc)
+            {
+                data = _value.blob.data;
+                len = _value.blob.length;
+            }
+            else
+            {
+                data = reinterpret_cast<const char*>(&_value);
+                const char* last = data + sizeof(Variant) - 1;
+                len = *last;
+            }
+
+            formatter.addBytes( _Name, _TypeName, data, len, _id );
             break;
         }
         case Str8:
@@ -432,15 +450,19 @@ void SerializationInfo::clearValue()
             break;
         }
 
-        case Blob:
+        case Binary:
         {
-            delete [] _value.blob.data;
+            if(_isAlloc)
+            {
+                delete [] _value.blob.data;
+                _isAlloc = false;
+            }
             break;
         }
 
         case Reference:
         {
-			delete [] _value.ref.refId;
+            delete [] _value.ref.refId;
             break;
         }
     }
@@ -614,20 +636,19 @@ const char* SerializationInfo::getBinary(size_t& length) const
 {
     const char* ret = 0;
 
-    if(_type == Binary)
-    {
-        ret = reinterpret_cast<char*>(&_value);
-        const char* last = ret + sizeof(Variant) - 1;
-        length = *last;
-    }
-    else if(_type == Blob)
+    if(_type != Binary)
+        throw SerializationError("not a binary value");
+    
+    if(_isAlloc)
     {
         length = _value.blob.length;
         ret = _value.blob.data;
     }
     else
     {
-        throw SerializationError("not a binary value");
+        ret = reinterpret_cast<char*>(&_value);
+        const char* last = ret + sizeof(Variant) - 1;
+        length = *last;
     }
 
     return ret;
@@ -648,16 +669,17 @@ void SerializationInfo::setBinary(const char* data, size_t length)
         std::memcpy(first, data, length);
         char* last = first + sizeof(Variant) - 1;
         *last = static_cast<Pt::uint8_t>(length);
-        _type = Binary;
+        _isAlloc = false;
     }
     else
     {
         _value.blob.data = new char[length];
         std::memcpy(_value.blob.data, data, length);
         _value.blob.length = length;
-        _type = Blob;
+        _isAlloc = true;
     }
 
+    _type = Binary;
     _isCompound = false;
 }
 
