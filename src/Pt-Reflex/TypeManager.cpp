@@ -434,7 +434,7 @@ Type* TypeManager::getType(const std::type_info& ti)
         if(_parent)
             return _parent->getType(ti);
 
-        throw std::invalid_argument(std::string("no such type: ") + ti.name());
+        throw std::invalid_argument("no such type");
     }
 
     return type;
