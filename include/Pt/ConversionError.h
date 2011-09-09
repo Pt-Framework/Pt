@@ -29,7 +29,6 @@
 #define PT_CONVERSINERROR_H
 
 #include <Pt/Api.h>
-#include <Pt/SourceInfo.h>
 #include <stdexcept>
 
 namespace Pt {

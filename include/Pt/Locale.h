@@ -29,7 +29,6 @@
 #define PT_LOCALE_H
 
 #include <Pt/Api.h>
-#include <Pt/String.h>
 
 #ifdef PT_WITH_STD_LOCALE
 
