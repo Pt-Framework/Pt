@@ -4,6 +4,5 @@
 		<Project File="Pt.vpj" />
 	</Projects>
 	<Environment>
-		<Set Name="JAMCMD" Value="./jam.sh" />
 	</Environment>
 </Workspace>

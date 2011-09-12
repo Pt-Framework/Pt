@@ -24,7 +24,7 @@
                 RunFromDir="%rp"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveNone">
-                <Exec CmdLine="$JAMCMD -q -sCONFIG=debug clean"/>
+                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug clean"/>
             </Target>
             <Target
                 Name="Debug"
@@ -62,7 +62,7 @@
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rp">
-                <Exec CmdLine="$JAMCMD -q -sCONFIG=release"/>
+                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=release"/>
             </Target>
             <Target
                 Name="Clean"
@@ -70,7 +70,7 @@
                 RunFromDir="%rp"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveNone">
-                <Exec CmdLine="$JAMCMD -q -sCONFIG=release clean"/>
+                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=release clean"/>
             </Target>
             <Target
                 Name="Debug"
