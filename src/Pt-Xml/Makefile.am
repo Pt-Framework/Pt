@@ -1,16 +1,12 @@
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/include -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libPt-Xml.la
 
 libPt_Xml_la_SOURCES = \
 	Characters.cpp \
-	Comment.cpp \
-	DocTypeDeclaration.cpp \
 	EndElement.cpp \
 	EntityResolver.cpp \
 	NamespaceContext.cpp \
-	Namespace.cpp \
-	ProcessingInstruction.cpp \
 	QName.cpp \
 	StartElement.cpp \
 	XmlDeserializer.cpp \

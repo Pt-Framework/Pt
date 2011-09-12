@@ -2,21 +2,8 @@ nobase_include_HEADERS = \
 	Pt/Allocator.h \
 	Pt/Any.h \
 	Pt/Api.h \
-	Pt/Application.h \
 	Pt/Arg.h \
-	Pt/Atomicity.cw.x86.h \
-	Pt/Atomicity.gcc.arm.h \
-	Pt/Atomicity.gcc.avr32.h \
-	Pt/Atomicity.gcc.mips.h \
-	Pt/Atomicity.gcc.ppc.h \
-	Pt/Atomicity.gcc.sparc.h \
-	Pt/Atomicity.gcc.x86_64.h \
-	Pt/Atomicity.gcc.x86.h \
-	Pt/Atomicity.generic.h \
 	Pt/Atomicity.h \
-	Pt/Atomicity.pthread.h \
-	Pt/Atomicity.sun.h \
-	Pt/Atomicity.windows.h \
 	Pt/Base64Codec.h \
 	Pt/Byteorder.h \
 	Pt/Callable.h \
@@ -43,6 +30,8 @@ nobase_include_HEADERS = \
 	Pt/Function.tpp \
 	Pt/Invokable.h \
 	Pt/Invokable.tpp \
+	Pt/LiteralPtr.h \
+	Pt/Locale.h \
 	Pt/Main.h \
 	Pt/Method.h \
 	Pt/Method.tpp \
@@ -81,8 +70,6 @@ nobase_include_HEADERS = \
 	Pt/TypeTraits.h \
 	Pt/Utf8Codec.h \
 	Pt/Variant.h \
-	Pt/Vector2d.h \
-	Pt/Vector2d.tpp \
 	Pt/Void.h \
 	Pt/Cma/Api.h \
 	Pt/Cma/ComponentBuilder.h \
@@ -110,13 +97,13 @@ nobase_include_HEADERS = \
 	Pt/System/IOError.h \
 	Pt/System/IOStream.h \
 	Pt/System/Library.h \
+	Pt/System/MainLoop.h \
 	Pt/System/Mutex.h \
 	Pt/System/Pipe.h \
 	Pt/System/Plugin.h \
 	Pt/System/Process.h \
 	Pt/System/Queue.h \
 	Pt/System/Selectable.h \
-	Pt/System/Selector.h \
 	Pt/System/Semaphore.h \
 	Pt/System/SerialDevice.h \
 	Pt/System/StreamBuffer.h \
@@ -125,7 +112,6 @@ nobase_include_HEADERS = \
 	Pt/System/Timer.h \
 	Pt/System/Url.h \
 	Pt/System/LogLevel.h \
-	Pt/System/LogTarget.h \
 	Pt/System/LogChannel.h \
 	Pt/System/Logger.h \
 	Pt/Net/AddrInfo.h \
@@ -159,15 +145,9 @@ nobase_include_HEADERS = \
 	Pt/Http/Server.h \
 	Pt/Http/Service.h \
 	Pt/Reflex/Api.h \
-	Pt/Reflex/CallableInfo.h \
-	Pt/Reflex/Context.h \
-	Pt/Reflex/MemberInfo.h \
-	Pt/Reflex/MethodInfoBase.h \
 	Pt/Reflex/MethodInfo.h \
 	Pt/Reflex/PropertyInfo.h \
-	Pt/Reflex/PropertyValue.h \
 	Pt/Reflex/Reflectable.h \
-	Pt/Reflex/SignalInfo.h \
 	Pt/Reflex/Type.h \
 	Pt/Xml/Api.h \
 	Pt/Xml/Characters.h \

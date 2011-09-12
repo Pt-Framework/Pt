@@ -237,6 +237,9 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         */
         static void initTargets(const std::string& file);
 
+        static void initTargets()
+        { initTargets("log.properties"); }
+
         /** @brief Initialize logging targets with a settings
 
             All targets listed in the given settings are created and

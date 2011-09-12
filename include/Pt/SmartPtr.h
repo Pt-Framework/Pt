@@ -387,8 +387,8 @@ namespace Pt {
 
 
     template <typename T,
-              typename Model = ExternalRefCounted<T>,
-              typename Destroy = DeletePolicy<T> >
+              template <class> class OwnershipPolicy = ExternalRefCounted,
+              template <class> class DestroyPolicy = DeletePolicy>
     /** @brief Policy based smart pointer.
 
         The SmartPtr implements a model that determines how the contained
@@ -406,8 +406,8 @@ namespace Pt {
         \param Model Model for linking/unlinking.
         \param DestroyPolicy policy, to destroy the object.
     */
-    class SmartPtr : public Model,
-                     public Destroy
+    class SmartPtr : public OwnershipPolicy<T>,
+                     public DestroyPolicy<T>
     {
         private:
             //! \brief The raw pointer
@@ -586,7 +586,7 @@ namespace Pt {
     };
 
 
-template <typename T, typename M, typename D >
+template <typename T, template <class> class M, template <class> class D >
 void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
 {
     if( fixup.isNull() )
@@ -602,7 +602,7 @@ void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
 
 
 // TODO: rename to load()
-template <typename T, typename M, typename D >
+template <typename T, template <class> class M, template <class> class D >
 void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 {
     if( li.in().isReference() )
@@ -616,7 +616,7 @@ void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 }
 
 
-template <typename T, typename M>
+template <typename T, template <class> class M>
 void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 {
     sp = new T();
@@ -625,7 +625,7 @@ void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 
 
 // TODO: rename save()
-template <typename T, typename M, typename D >
+template <typename T, template <class> class M, template <class> class D >
 void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
 {
     if( ! sp.getPointer() || ! si.save( *sp ) )
@@ -635,7 +635,7 @@ void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
 }
 
 
-template <typename T, typename M, typename D >
+template <typename T, template <class> class M, template <class> class D >
 void operator <<=(Pt::SerializationInfo& si, const SmartPtr<T,M, D>& sp)
 {
     if( sp.getPointer() )

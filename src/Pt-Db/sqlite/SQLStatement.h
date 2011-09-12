@@ -39,7 +39,7 @@ namespace sqlite {
     {
         sqlite3_stmt* _stmt;
         sqlite3_stmt* _stmtInUse;
-        SmartPtr<Connection, InternalRefCounted<Connection> > _conn;
+        SmartPtr<Connection, InternalRefCounted > _conn;
         const std::string _query;
 
         sqlite3_stmt* getBindStmt();

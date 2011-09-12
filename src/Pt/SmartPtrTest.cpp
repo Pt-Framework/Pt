@@ -119,7 +119,7 @@ void SmartPtrTest::RefCounted()
 {
     Object* obj = new Object();
 
-    typedef Pt::SmartPtr< Object, Pt::ExternalRefCounted<Object> > Ptr;
+    typedef Pt::SmartPtr< Object, Pt::ExternalRefCounted> Ptr;
 
     {
         Ptr smartPtr(obj);
@@ -144,7 +144,7 @@ void SmartPtrTest::InternalRefCounted()
 {
     Object* obj = new Object();
 
-    typedef Pt::SmartPtr<Object, Pt::InternalRefCounted<Object> > Ptr;
+    typedef Pt::SmartPtr<Object, Pt::InternalRefCounted> Ptr;
 
     {
         Ptr smartPtr(obj);
@@ -167,7 +167,7 @@ void SmartPtrTest::RefLinked()
 {
     Object* obj = new Object();
 
-    typedef Pt::SmartPtr<Object, Pt::RefLinked<Object> > Ptr;
+    typedef Pt::SmartPtr<Object, Pt::RefLinked> Ptr;
 
     {
         Ptr smartPtr(obj);

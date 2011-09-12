@@ -62,7 +62,7 @@ namespace Db {
 
         private:
             //! \brief Reference counted implementation.
-            SmartPtr<IConnection, InternalRefCounted<IConnection> > _connection;
+            SmartPtr<IConnection, InternalRefCounted> _connection;
 
         public:
             /** \brief Standard constructor.

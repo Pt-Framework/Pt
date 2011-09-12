@@ -37,7 +37,7 @@ namespace sqlite {
 
     class Cursor : public ICursor
     {
-        SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
+        SmartPtr<Statement, InternalRefCounted> _statement;
         sqlite3_stmt* _stmt;
 
         public:

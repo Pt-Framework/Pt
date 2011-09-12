@@ -178,14 +178,15 @@ static struct BlobStaticInitializer
 class Blob
 {
     //! @brief Release policy for SmartPtr
+    template <typename T>
     struct Release
     {
-        void destroy(IBlob* blob)
+        void destroy(T* blob)
         { blob->destroy(); }
     };
 
     //! @brief Pointer to shared data
-    SmartPtr< IBlob, InternalRefCounted<IBlob>, Release > m_data;
+    SmartPtr<IBlob, InternalRefCounted, Release> m_data;
 
 public:
     Blob()

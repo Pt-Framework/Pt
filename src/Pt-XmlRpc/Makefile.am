@@ -1,4 +1,4 @@
-AM_CPPFLAGS =  -I$(top_srcdir)/src -I$(top_builddir)/include -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libPt-XmlRpc.la
 
@@ -9,7 +9,6 @@ libPt_XmlRpc_la_SOURCES = \
 	Formatter.cpp \
 	HttpClient.cpp \
 	HttpClientImpl.cpp \
-	RemoteProcedure.cpp \
 	Responder.cpp \
 	Scanner.cpp \
 	Service.cpp

@@ -78,8 +78,8 @@ namespace Db {
     */
     class IStmtCacheConnection : public IConnection
     {
-        typedef SmartPtr<IStatement, InternalRefCounted<IStatement> > StatementPtr;
-        typedef std::map<std::string,  StatementPtr > StatementCache;
+        typedef SmartPtr<IStatement, InternalRefCounted> StatementPtr;
+        typedef std::map<std::string, StatementPtr> StatementCache;
         StatementCache _stmtCache;
 
     public:

@@ -55,7 +55,7 @@ namespace Db {
 
         private:
             //! \brief Reference counted implementation.
-            SmartPtr<IValue, InternalRefCounted<IValue> > _value;
+            SmartPtr<IValue, InternalRefCounted > _value;
 
         public:
             /** \brief Construct a Value from an implemenataion.

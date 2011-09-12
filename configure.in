@@ -72,9 +72,11 @@ AC_CONFIG_FILES([
   src/Pt-Net/tests/Makefile
   src/Pt-Unit/Makefile
   src/Pt-Http/Makefile
+  src/Pt-Http/tests/Makefile
   src/Pt-Reflex/Makefile
   src/Pt-Xml/Makefile
   src/Pt-XmlRpc/Makefile
+  src/Pt-XmlRpc/tests/Makefile
   include/Makefile
   ])
 

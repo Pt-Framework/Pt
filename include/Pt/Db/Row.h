@@ -59,7 +59,7 @@ namespace Db {
         private:
 
             //! \brief Reference counted implementation.
-            SmartPtr<IRow, InternalRefCounted<IRow> > row;
+            SmartPtr<IRow, InternalRefCounted > row;
 
         public:
 

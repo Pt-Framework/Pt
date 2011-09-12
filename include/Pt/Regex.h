@@ -42,10 +42,11 @@ namespace Pt {
 class RegexSMatch;
 
 
+template <typename T>
 class RegexDestroyPolicy
 {
     protected:
-        void destroy(pt_regexp* expr)
+        void destroy(T* expr)
         {
             std::free(expr);
         }
@@ -64,7 +65,7 @@ class PT_API InvalidRegex : public std::invalid_argument
 
 class PT_API Regex
 {
-      SmartPtr<pt_regexp, ExternalRefCounted<pt_regexp>, RegexDestroyPolicy > _expr;
+      SmartPtr<pt_regexp, ExternalRefCounted, RegexDestroyPolicy > _expr;
 
     public:
         explicit Regex(const Pt::Char* ex);
