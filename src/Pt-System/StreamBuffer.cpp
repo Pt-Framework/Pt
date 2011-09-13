@@ -35,6 +35,43 @@ namespace Pt {
 
 namespace System {
 
+void StreamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend)
+{
+    sb._ibufferSize = bufferSize + 4;
+    sb._ibuffer = 0;
+    sb._obufferSize = bufferSize;
+    sb._obuffer = 0;
+    //sb._pbmax = 4;
+    sb._oextend = extend;
+
+    if( sb.gptr() )
+        sb.setg(sb._ibuffer, sb._ibuffer + sb._ibufferSize, sb._ibuffer + sb._ibufferSize);
+
+    if( sb.pptr() )
+        sb.setp(sb._obuffer, sb._obuffer + sb._obufferSize);
+}
+
+
+void StreamBufferAttach(StreamBuffer& sb, IODevice& ioDevice)
+{
+    if( ioDevice.busy() )
+        throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+    if(sb._ioDevice)
+    {
+        if( sb._ioDevice->busy() )
+            throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+        disconnect(ioDevice.inputReady, sb, &StreamBuffer::onRead);
+        disconnect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+    }
+
+    sb._ioDevice = &ioDevice;
+    connect(ioDevice.inputReady, sb, &StreamBuffer::onRead);
+    connect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+}
+
+
 StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
 : _sb(0),
   _ioDevice(0),

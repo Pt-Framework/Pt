@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Marc Boris Duerner
+ * Copyright (C) 2005-2011 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,31 +42,31 @@ class StreamBuffer;
 
 class PT_SYSTEM_API StreamBufferBase : public Connectable
 {
-	public:
-	    typedef std::streambuf::int_type int_type;
-		typedef std::streambuf::pos_type pos_type;
-		typedef std::streambuf::off_type off_type;
-		typedef std::streambuf::traits_type traits_type;
+    public:
+        typedef std::streambuf::int_type int_type;
+        typedef std::streambuf::pos_type pos_type;
+        typedef std::streambuf::off_type off_type;
+        typedef std::streambuf::traits_type traits_type;
 
     public:
-		StreamBufferBase(size_t bufferSize, bool extend);
+        StreamBufferBase(size_t bufferSize, bool extend);
 
-		virtual ~StreamBufferBase();
+        virtual ~StreamBufferBase();
 
-		void init(StreamBuffer& sb);
+        void init(StreamBuffer& sb);
 
         IODevice* device()
-		{ return _ioDevice; }
+        { return _ioDevice; }
 
-		void attach(IODevice& ioDevice);
+        void attach(IODevice& ioDevice);
 
-		void beginRead();
+        void beginRead();
 
-	    void onRead(IODevice& ioDevice);
+        void onRead(IODevice& ioDevice);
 
-		void endRead();
+        void endRead();
 
-		size_t beginWrite();
+        size_t beginWrite();
 
         void onWrite(IODevice& dev);
 
@@ -74,7 +74,7 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 
         void discard();
 
-		Signal<StreamBuffer&> inputReady;
+        Signal<StreamBuffer&> inputReady;
 
         Signal<StreamBuffer&> outputReady;
 
@@ -91,12 +91,12 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 
         pos_type do_seekpos(pos_type p, std::ios::openmode mode );
 
-	    std::streamsize do_showfull();
+        std::streamsize do_showfull();
 
         int_type do_pbackfail(int_type c);
 
-    private:
-	    StreamBuffer* _sb;
+    protected:
+        StreamBuffer* _sb;
         IODevice* _ioDevice;
         size_t _ibufferSize;
         char* _ibuffer;
@@ -106,34 +106,43 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
         bool _oextend;
 };
 
+class StreamBuffer;
+ 
+PT_SYSTEM_API void StreamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend);
+
+PT_SYSTEM_API void StreamBufferAttach(StreamBuffer& sb, IODevice& ioDevice);
+
+
 //! @brief A stream buffer for IODevices with linear buffer area
 class StreamBuffer : public std::streambuf
                    , public StreamBufferBase
 {
     friend class StreamBufferBase;
+    friend void StreamBufferInit(StreamBuffer&, size_t, bool);
+    friend void StreamBufferAttach(StreamBuffer&, IODevice&);
 
-	public:
-	    typedef std::streambuf::int_type int_type;
-		typedef std::streambuf::pos_type pos_type;
-		typedef std::streambuf::off_type off_type;
-		typedef std::streambuf::traits_type traits_type;
+    public:
+        typedef std::streambuf::int_type int_type;
+        typedef std::streambuf::pos_type pos_type;
+        typedef std::streambuf::off_type off_type;
+        typedef std::streambuf::traits_type traits_type;
 
     public:
         explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
-		: StreamBufferBase(bufferSize, extend)
-		{
-		    StreamBufferBase::init(*this);
-			StreamBufferBase::attach(ioDevice);
-		}
+        : StreamBufferBase(bufferSize, extend)
+        {
+            StreamBufferBase::init(*this);
+            StreamBufferBase::attach(ioDevice);
+        }
 
         explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false)
-		: StreamBufferBase(bufferSize, extend)
-		{
-		    StreamBufferBase::init(*this);
-		}
+        : StreamBufferBase(bufferSize, extend)
+        {
+            StreamBufferBase::init(*this);
+        }
 
-		~StreamBuffer()
-		{}
+        ~StreamBuffer()
+        {}
 
         std::streamsize speekn(char* buffer, std::streamsize size)
         { return this->xspeekn(buffer, size); }
@@ -148,28 +157,28 @@ class StreamBuffer : public std::streambuf
 
     protected:
         virtual int sync()
-		{ return do_sync(); }
+        { return do_sync(); }
 
         virtual int_type underflow()
-		{ return StreamBufferBase::do_underflow(); }
+        { return StreamBufferBase::do_underflow(); }
 
         virtual int_type overflow(int_type ch)
-		{ return StreamBufferBase::do_overflow(ch); }
+        { return StreamBufferBase::do_overflow(ch); }
 
         virtual std::streamsize xspeekn(char* buffer, std::streamsize size)
-		{ return StreamBufferBase::do_xspeekn(buffer, size); }
+        { return StreamBufferBase::do_xspeekn(buffer, size); }
 
         virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
-		{ return StreamBufferBase::do_seekoff(offset, sd, mode); }
+        { return StreamBufferBase::do_seekoff(offset, sd, mode); }
 
         virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
-		{ return StreamBufferBase::do_seekpos(p, mode); }
+        { return StreamBufferBase::do_seekpos(p, mode); }
 
-		virtual std::streamsize showfull()
-		{ return StreamBufferBase::do_showfull(); }
+        virtual std::streamsize showfull()
+        { return StreamBufferBase::do_showfull(); }
 
         virtual int_type pbackfail(int_type c)
-		{ return StreamBufferBase::do_pbackfail(c); }
+        { return StreamBufferBase::do_pbackfail(c); }
 };
 
 } // namespace System
