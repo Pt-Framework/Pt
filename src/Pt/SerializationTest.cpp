@@ -42,6 +42,7 @@
 #include "Pt/StringStream.h"
 #include <string>
 #include <iostream>
+#include <cstddef>
 
 class IntComposer : public Pt::IComposer
 {
@@ -387,7 +388,7 @@ void SerializationTest::Binary()
     Pt::SerializationInfo si;
     si.setBinary( buf, sizeof(buf) );
 
-    size_t size = 0;
+    std::size_t size = 0;
     const char* data = si.getBinary(size);
     PT_UNIT_ASSERT(size == sizeof(buf));
     PT_UNIT_ASSERT( 0 == std::memcmp(data, buf, sizeof(buf)) );

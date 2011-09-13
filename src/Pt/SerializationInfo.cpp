@@ -32,6 +32,7 @@
 #include <Pt/SerializationContext.h>
 #include <Pt/SerializationSurrogate.h>
 #include <cstring>
+#include <cstddef>
 #include <cassert>
 
 namespace {
@@ -58,7 +59,7 @@ inline void setRefStr2(const char*& str, unsigned char& flags, unsigned char mas
     str = from;
 }
 
-inline void copyRefStr2(const char*& str, unsigned char& flags, unsigned char mask, const char* from, size_t fromLen)
+inline void copyRefStr2(const char*& str, unsigned char& flags, unsigned char mask, const char* from, std::size_t fromLen)
 {
     assert( from != 0 );
     freeRefStr2(str, flags, mask);
@@ -92,7 +93,7 @@ inline void setRefStr(const char*& str, bool& isRef, const char* from)
 }
 
 
-inline void copyRefStr(const char*& str, bool& isRef, const char* from, size_t fromLen)
+inline void copyRefStr(const char*& str, bool& isRef, const char* from, std::size_t fromLen)
 {
     assert( from != 0 );
     freeRefStr(str, isRef);
@@ -173,7 +174,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
         case Binary:
         {
             const char* data = 0;
-            size_t len = 0;
+            std::size_t len = 0;
 
             if(_isAlloc)
             {
@@ -308,7 +309,7 @@ void SerializationInfo::format(Formatter& formatter)
         case Binary:
         {
             const char* data = 0;
-            size_t len = 0;
+            std::size_t len = 0;
 
             if(_isAlloc)
             {
@@ -632,7 +633,7 @@ void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m)
 }
 
 
-const char* SerializationInfo::getBinary(size_t& length) const
+const char* SerializationInfo::getBinary(std::size_t& length) const
 {
     const char* ret = 0;
 
@@ -655,7 +656,7 @@ const char* SerializationInfo::getBinary(size_t& length) const
 }
 
 
-void SerializationInfo::setBinary(const char* data, size_t length)
+void SerializationInfo::setBinary(const char* data, std::size_t length)
 {
     if( _type == Context )
         return;
@@ -740,7 +741,7 @@ void SerializationInfo::setString8(const char* s)
     if(_type != Void)
         this->clearValue();
 
-    size_t length = std::strlen(s);
+    std::size_t length = std::strlen(s);
     _value.cstr = new char[length+1];
     std::memcpy(_value.cstr, s, length);
     _value.cstr[length] = 0;
@@ -758,7 +759,7 @@ void SerializationInfo::setString8(const std::string& s)
     if(_type != Void)
         this->clearValue();
 
-    size_t length = s.size();
+    std::size_t length = s.size();
     _value.cstr = new char[length+1];
     std::memcpy(_value.cstr, s.c_str(), length);
     _value.cstr[length] = 0;
@@ -1661,7 +1662,7 @@ SerializationInfo* SerializationInfo::findMember(const char* name)
 }
 
 
-size_t SerializationInfo::memberCount() const
+std::size_t SerializationInfo::memberCount() const
 {
     if( _isCompound )
     {
