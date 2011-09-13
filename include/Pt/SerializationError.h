@@ -45,7 +45,7 @@ class PT_API SerializationError : public std::runtime_error
     public:
         /** @brief Construct with message and source-info
         */
-        SerializationError(const std::string& msg, const SourceInfo& si);
+        SerializationError(const std::string& msg);
 
         SerializationError(const char* msg);
 

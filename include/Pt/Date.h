@@ -40,7 +40,7 @@ class SerializationInfo;
 class PT_API InvalidDate : public std::invalid_argument
 {
     public:
-        InvalidDate(const SourceInfo& si);
+        InvalidDate();
 
         ~InvalidDate() throw()
         {}

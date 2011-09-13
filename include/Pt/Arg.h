@@ -28,6 +28,7 @@
 #ifndef Pt_Arg_h
 #define Pt_Arg_h
 
+#include <Pt/Api.h>
 #include <sstream>
 #include <string.h>
 

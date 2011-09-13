@@ -29,8 +29,8 @@
 
 namespace Pt {
 
-SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
-: std::runtime_error(msg + si)
+SerializationError::SerializationError(const std::string& msg)
+: std::runtime_error(msg)
 { }
 
 

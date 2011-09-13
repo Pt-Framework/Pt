@@ -33,8 +33,8 @@
 
 namespace Pt {
 
-InvalidDate::InvalidDate(const SourceInfo& si)
-: std::invalid_argument("Invalid date" + si)
+InvalidDate::InvalidDate()
+: std::invalid_argument("Invalid date")
 {
 }
 
@@ -43,7 +43,7 @@ void greg2jul(unsigned& jd, int y, int m, int d)
 {
     if( ! Date::isValid(y, m, d) )
     {
-        throw InvalidDate(PT_SOURCEINFO);
+        throw InvalidDate();
     }
 
     jd=(1461*(y+4800+(m-14)/12))/4+(367*(m-2-12*((m-14)/12)))/12-(3*((y+4900+(m-14)/12)/100))/4+d-32075;

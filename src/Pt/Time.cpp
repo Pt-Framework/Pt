@@ -35,8 +35,8 @@
 
 namespace Pt {
 
-InvalidTime::InvalidTime(const SourceInfo& si)
-: std::invalid_argument("Invalid time" + si)
+InvalidTime::InvalidTime()
+: std::invalid_argument("Invalid time")
 { }
 
 

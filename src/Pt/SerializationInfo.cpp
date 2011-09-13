@@ -1625,7 +1625,7 @@ const SerializationInfo& SerializationInfo::getMember(const char* name) const
         }
     }
 
-    throw SerializationError("Missing info for '" + std::string(name) + "'", PT_SOURCEINFO);
+    throw SerializationError("Missing info for '" + std::string(name) + "'");
 }
 
 

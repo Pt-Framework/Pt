@@ -43,7 +43,7 @@ class SerializationInfo;
 class PT_API InvalidTime : public std::invalid_argument
 {
     public:
-        InvalidTime(const SourceInfo& si);
+        InvalidTime();
 
         ~InvalidTime() throw()
 		{}
@@ -127,7 +127,7 @@ class Time
 		{
 		    if ( ! isValid(hour, min, sec , msec) )
 		    {
-		        throw InvalidTime(PT_SOURCEINFO);
+		        throw InvalidTime();
 		    }
 
 		    _msecs = (hour*SecondsPerHour + min*SecondsPerMinute + sec) * 1000 + msec;
