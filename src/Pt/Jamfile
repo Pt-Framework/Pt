@@ -70,8 +70,55 @@ MakeLocate Pt-test : $(OUTPUT_TARGET) ;
 NOTFILE Pt-all ;
 DEPENDS Pt-all : Pt Pt-test ;
 
-
-
 ############################################
 # Main itest : itest.mm ;
 # Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
+
+
+
+
+
+# TODO1: include Jamfile from tests subdir
+#
+#SubInclude TOP src Pt tests ;
+
+
+# TODO2: Jamfile for Pt/tests subdir
+#
+#SubDir TOP src Pt tests ;
+#SubDirHdrs $(TOP)/include ;
+#
+#PtUnitTest Pt-test : Pt-test.cpp
+#                     AllocatorTest.cpp
+#                     AnyTest.cpp
+#                     AtomicTest.cpp
+#                     ByteorderTest.cpp
+#                     CharTest.cpp
+#                     ConversionTest.cpp
+#                     DateTest.cpp
+#                     DateTimeTest.cpp
+#                     DelegateTest.cpp
+#                     ExceptionTest.cpp
+#                     NonCopyableTest.cpp
+#                     RegExpTest.cpp
+#                     SerializationTest.cpp
+#                     SettingsTest.cpp
+#                     SingletonTest.cpp
+#                     SignalTest.cpp
+#                     SmartPtrTest.cpp
+#                     StringStreamTest.cpp
+#                     StringTest.cpp
+#                     TextStreamTest.cpp
+#                     TimeTest.cpp
+#                     TimespanTest.cpp
+#                     TypesTest.cpp
+#                     TypeTraitsTest.cpp
+#                     VariantTest.cpp
+#                     ;
+#
+#LinkSharedLibraries Pt-test : Pt Pt-System Pt-Unit ;
+#MakeLocate Pt-test : $(OUTPUT_TARGET) ;
+#
+# Pseudo target to call from projects
+#DEPENDS Pt-all : Pt-test ;
+
