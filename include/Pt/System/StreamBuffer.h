@@ -107,10 +107,42 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 };
 
 class StreamBuffer;
- 
+
 PT_SYSTEM_API void StreamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend);
 
 PT_SYSTEM_API void StreamBufferAttach(StreamBuffer& sb, IODevice& ioDevice);
+
+PT_SYSTEM_API void StreamBufferBeginRead(StreamBuffer& sb);
+
+PT_SYSTEM_API void StreamBufferEndRead(StreamBuffer& sb);
+
+PT_SYSTEM_API size_t StreamBufferBeginWrite(StreamBuffer& sb);
+
+PT_SYSTEM_API size_t StreamBufferEndWrite(StreamBuffer& sb);
+
+PT_SYSTEM_API void StreamBufferDiscard(StreamBuffer& sb);
+
+PT_SYSTEM_API int StreamBufferSync(StreamBuffer& sb);
+
+PT_SYSTEM_API std::streambuf::int_type StreamBufferUnderflow(StreamBuffer& sb);
+
+PT_SYSTEM_API std::streambuf::int_type StreamBufferOverflow(StreamBuffer& sb, std::streambuf::int_type ch);
+
+PT_SYSTEM_API std::streamsize StreamBufferXspeekn(StreamBuffer& sb, char* buffer, std::streamsize size);
+
+PT_SYSTEM_API std::streambuf::pos_type StreamBufferSeekoff(StreamBuffer& sb, 
+                                                           std::streambuf::off_type off, 
+                                                           std::ios::seekdir dir, 
+                                                           std::ios::openmode);
+
+
+PT_SYSTEM_API std::streambuf::pos_type StreamBufferSeekpos(StreamBuffer& sb, 
+                                                           std::streambuf::pos_type p, 
+                                                           std::ios::openmode mode);
+
+PT_SYSTEM_API std::streamsize StreamBufferShowfull(StreamBuffer& sb);
+
+PT_SYSTEM_API std::streambuf::int_type StreamBufferPbackfail(StreamBuffer& sb, std::streambuf::int_type c);
 
 
 //! @brief A stream buffer for IODevices with linear buffer area
@@ -118,8 +150,31 @@ class StreamBuffer : public std::streambuf
                    , public StreamBufferBase
 {
     friend class StreamBufferBase;
-    friend void StreamBufferInit(StreamBuffer&, size_t, bool);
-    friend void StreamBufferAttach(StreamBuffer&, IODevice&);
+    friend PT_SYSTEM_API void StreamBufferInit(StreamBuffer&, size_t, bool);
+    friend PT_SYSTEM_API void StreamBufferAttach(StreamBuffer&, IODevice&);
+    friend PT_SYSTEM_API void StreamBufferBeginRead(StreamBuffer&);
+    friend PT_SYSTEM_API void StreamBufferOnRead(StreamBuffer&);
+    friend PT_SYSTEM_API void StreamBufferEndRead(StreamBuffer&);
+    friend PT_SYSTEM_API size_t StreamBufferBeginWrite(StreamBuffer&);
+    friend PT_SYSTEM_API size_t StreamBufferEndWrite(StreamBuffer&);
+    friend PT_SYSTEM_API void StreamBufferDiscard(StreamBuffer&);
+    friend PT_SYSTEM_API int StreamBufferSync(StreamBuffer&);
+    friend PT_SYSTEM_API std::streambuf::int_type StreamBufferUnderflow(StreamBuffer&);
+    friend PT_SYSTEM_API std::streambuf::int_type StreamBufferOverflow(StreamBuffer&, 
+                                                                       std::streambuf::int_type);
+    friend PT_SYSTEM_API std::streamsize StreamBufferXspeekn(StreamBuffer& sb, 
+                                                             char* buffer, 
+                                                             std::streamsize size);
+    friend PT_SYSTEM_API std::streambuf::pos_type StreamBufferSeekoff(StreamBuffer&, 
+                                                               std::streambuf::off_type, 
+                                                               std::ios::seekdir, 
+                                                               std::ios::openmode);
+    friend PT_SYSTEM_API std::streambuf::pos_type StreamBufferSeekpos(StreamBuffer& , 
+                                                               std::streambuf::pos_type, 
+                                                               std::ios::openmode);
+    friend PT_SYSTEM_API std::streamsize StreamBufferShowfull(StreamBuffer& sb);
+    friend PT_SYSTEM_API std::streambuf::int_type StreamBufferPbackfail(StreamBuffer&, 
+                                                                        std::streambuf::int_type);
 
     public:
         typedef std::streambuf::int_type int_type;

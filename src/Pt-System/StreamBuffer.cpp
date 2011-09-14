@@ -72,6 +72,310 @@ void StreamBufferAttach(StreamBuffer& sb, IODevice& ioDevice)
 }
 
 
+void StreamBufferBeginRead(StreamBuffer& sb)
+{
+    if(sb._ioDevice == 0 || sb._ioDevice->reading())
+        return;
+
+    if( ! sb._ibuffer )
+    {
+        sb._ibuffer = new char[sb._ibufferSize];
+    }
+
+    size_t putback = sb._pbmax;
+    size_t leftover = 0;
+
+    // keep chars for putback
+    if( sb.gptr() )
+    {
+        putback = std::min<size_t>( sb.gptr() - sb.eback(), sb._pbmax);
+        char* to = sb._ibuffer + sb._pbmax - putback;
+        char* from = sb.gptr() - putback;
+
+        leftover = sb.egptr() - sb.gptr();
+        std::memmove( to, from, putback + leftover );
+    }
+
+    size_t used = sb._pbmax + leftover;
+
+    if( sb._ibufferSize == used )
+        throw std::logic_error( PT_ERROR_MSG("StreamBuffer is full") );
+
+    sb._ioDevice->beginRead( sb._ibuffer + used, sb._ibufferSize - used );
+
+    sb.setg( sb._ibuffer + (sb._pbmax - putback), // start of get area
+             sb._ibuffer + used, // gptr position
+             sb._ibuffer + used ); // end of get area
+}
+
+
+void StreamBufferEndRead(StreamBuffer& sb)
+{
+    size_t readSize = sb._ioDevice->endRead();
+
+    sb.setg( sb.eback(), // start of get area
+             sb.gptr(), // gptr position
+             sb.egptr() + readSize ); // end of get area
+}
+
+
+size_t StreamBufferBeginWrite(StreamBuffer& sb)
+{
+    if(sb._ioDevice == 0 || sb._ioDevice->writing())
+        return 0;
+
+    if( sb.pptr() )
+    {
+        size_t avail = sb.pptr() - sb.pbase();
+        if(avail > 0)
+        {
+            return sb._ioDevice->beginWrite(sb._obuffer, avail);
+        }
+    }
+
+    return 0;
+}
+
+
+size_t StreamBufferEndWrite(StreamBuffer& sb)
+{
+    typedef StreamBuffer::traits_type traits_type;
+
+    size_t leftover = 0;
+    size_t written = 0;
+
+    if( sb.pptr() )
+    {
+        size_t avail = sb.pptr() - sb.pbase();
+        written = sb._ioDevice->endWrite();
+
+        leftover = avail - written;
+        if(leftover > 0)
+        {
+            traits_type::move(sb._obuffer, sb._obuffer + written, leftover);
+        }
+    }
+
+    sb.setp(sb._obuffer, sb._obuffer + sb._obufferSize);
+    sb.pbump( leftover );
+
+    return written;
+}
+
+
+void StreamBufferDiscard(StreamBuffer& sb)
+{
+    if (sb._ioDevice && (sb._ioDevice->reading() || sb._ioDevice->writing()))
+        throw IOPending( PT_ERROR_MSG("discard failed - streambuffer is in use") );
+
+    sb.setg(0, 0, 0);
+    sb.setp(0, 0);
+}
+
+
+int StreamBufferSync(StreamBuffer& sb)
+{
+    typedef StreamBuffer::traits_type traits_type;
+
+    if( ! sb._ioDevice )
+        return 0;
+
+    if( sb.pptr() )
+    {
+        while( sb.pptr() > sb.pbase() )
+        {
+            const StreamBuffer::int_type ch = sb.overflow( traits_type::eof() );
+            if( ch == traits_type::eof() )
+            {
+                return -1;
+            }
+
+            sb._ioDevice->sync();
+        }
+    }
+
+    return 0;
+}
+
+
+std::streambuf::int_type StreamBufferUnderflow(StreamBuffer& sb)
+{
+    typedef StreamBuffer::traits_type traits_type;
+
+    if( ! sb._ioDevice )
+        return traits_type::eof();
+
+    if(sb._ioDevice->reading())
+        sb.endRead();
+
+    if( sb.gptr() < sb.egptr() )
+        return traits_type::to_int_type( *(sb.gptr()) );
+
+    if( sb._ioDevice->eof() )
+        return traits_type::eof();
+
+    if( ! sb._ibuffer )
+    {
+        sb._ibuffer = new char[sb._ibufferSize];
+    }
+
+    size_t putback = sb._pbmax;
+
+    if( sb.gptr() )
+    {
+        putback = std::min<size_t>(sb.gptr() - sb.eback(), sb._pbmax);
+        std::memmove( sb._ibuffer + (sb._pbmax - putback),
+                      sb.gptr() - putback,
+                      putback );
+    }
+
+    size_t readSize = sb._ioDevice->read( sb._ibuffer + sb._pbmax, sb._ibufferSize - sb._pbmax );
+
+    sb.setg( sb._ibuffer + sb._pbmax - putback,    // start of get area
+             sb._ibuffer + sb._pbmax,              // gptr position
+             sb._ibuffer + sb._pbmax + readSize ); // end of get area
+
+    if( sb._ioDevice->eof() )
+        return traits_type::eof();
+
+    return traits_type::to_int_type( *(sb.gptr()) );
+}
+
+
+std::streambuf::int_type StreamBufferOverflow(StreamBuffer& sb, std::streambuf::int_type ch)
+{
+    typedef StreamBuffer::traits_type traits_type;
+
+    if( ! sb._ioDevice )
+        return traits_type::eof();
+
+    if( ! sb._obuffer )
+    {
+        sb._obuffer = new char[sb._obufferSize];
+        sb.setp(sb._obuffer, sb._obuffer + sb._obufferSize);
+    }
+    else if(sb._ioDevice->writing()) // beginWrite is unfinished
+    {
+        sb.endWrite();
+    }
+    else if (traits_type::eq_int_type( ch, traits_type::eof() ) || ! sb._oextend)
+    {
+        // normal blocking overflow case
+        size_t avail = sb.pptr() - sb._obuffer;
+        size_t written = sb._ioDevice->write(sb._obuffer, avail);
+        size_t leftover = avail - written;
+
+        if(leftover > 0)
+        {
+            traits_type::move(sb._obuffer, sb._obuffer + written, leftover);
+        }
+        sb.setp(sb._obuffer, sb._obuffer + sb._obufferSize);
+        sb.pbump( leftover );
+    }
+    else
+    {
+        // if the buffer area is extensible and overflow is not called by
+        // sync/flush we copy the output buffer to a larger one
+        size_t bufsize = sb._obufferSize + (sb._obufferSize / 2);
+        char* buf = new char[ bufsize ];
+        traits_type::copy(buf, sb._obuffer, sb._obufferSize);
+        std::swap(sb._obuffer, buf);
+        sb.setp(sb._obuffer, sb._obuffer + bufsize);
+        sb.pbump( sb._obufferSize );
+        sb._obufferSize = bufsize;
+        delete [] buf;
+    }
+
+    // if the overflow char is not EOF put it in buffer
+    if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
+    {
+        *sb.pptr() = traits_type::to_char_type(ch);
+        sb.pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
+}
+
+
+std::streamsize StreamBufferXspeekn(StreamBuffer& sb, char* buffer, std::streamsize size)
+{
+    typedef StreamBuffer::traits_type traits_type;
+
+    if( traits_type::eof() == sb.underflow() )
+        return 0;
+
+    const std::streamsize avail = sb.egptr() - sb.gptr();
+    size = std::min(avail, size);
+    if(size == 0) {
+        return 0;
+    }
+
+    std::memcpy(buffer, sb.gptr(), sizeof(char) * size);
+    return size;
+}
+
+
+std::streambuf::pos_type StreamBufferSeekoff(StreamBuffer& sb, 
+                                             std::streambuf::off_type off, 
+                                             std::ios::seekdir dir, 
+                                             std::ios::openmode)
+{
+    typedef StreamBuffer::pos_type pos_type;
+    typedef StreamBuffer::off_type off_type;
+
+    pos_type ret = pos_type( off_type(-1) );
+
+    if ( ! sb._ioDevice || 
+         ! sb._ioDevice->enabled() ||
+         ! sb._ioDevice->seekable() || 
+         off == 0)
+    {
+        return ret;
+    }
+
+    if( sb._ioDevice->writing() )
+    {
+        sb.endWrite();
+    }
+
+    if( sb._ioDevice->reading() )
+    {
+        sb.endRead();
+    }
+
+    ret = sb._ioDevice->seek(off, dir);
+
+    // eliminate currently buffered sequence
+    sb.discard();
+
+    return ret;
+}
+
+
+std::streambuf::pos_type StreamBufferSeekpos(StreamBuffer& sb, 
+                                             std::streambuf::pos_type p, 
+                                             std::ios::openmode mode)
+{
+    return sb.seekoff(p, std::ios::beg, mode);
+}
+
+
+std::streamsize StreamBufferShowfull(StreamBuffer& sb)
+{
+    return 0;
+}
+
+std::streambuf::int_type StreamBufferPbackfail(StreamBuffer& sb, std::streambuf::int_type)
+{
+    typedef StreamBuffer::traits_type traits_type;
+    return traits_type::eof();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
 : _sb(0),
   _ioDevice(0),
