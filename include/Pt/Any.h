@@ -28,13 +28,10 @@
 #ifndef Pt_Any_h
 #define Pt_Any_h
 
-#include <Pt/Api.h>
 #include <Pt/TypeTraits.h>
 #include <typeinfo>
 #include <cstring>
-#include <algorithm>
-#include <utility>
-#include <iostream>
+#include <new>
 
 namespace Pt {
 
@@ -93,10 +90,9 @@ namespace Pt {
             {
                 public:
                     virtual ~Value() {}
-                    virtual Value* clone() const = 0;
+                    virtual Value* clone(char*) const = 0;
                     virtual const std::type_info& type() const = 0;
-                    // virtual bool equal(const Value& value) const = 0;
-                    // virtual bool lt(const Value& value) const = 0;
+                    virtual bool isRef() const = 0;
                     virtual void* get() = 0;
                     virtual const void* get() const = 0;
             };
@@ -119,8 +115,12 @@ namespace Pt {
                     virtual const std::type_info& type() const
                     { return typeid(T); }
 
-                    virtual Any::Value* clone() const
-                    { return new BasicValue(_value); }
+                    virtual Value* clone(char* data) const
+                    { return sizeof(T) > Any::sizeofData ? new BasicValue(_value)
+                                                         : new(data) BasicValue(_value); }
+
+                    virtual bool isRef() const
+                    { return false; }
 
                     virtual void* get()
                     { return &_value; }
@@ -144,8 +144,11 @@ namespace Pt {
                     virtual const std::type_info& type() const
                     { return typeid(T); }
 
-                    virtual Any::Value* clone() const
-                    { return new BasicRefValue(_value); }
+                    virtual Value* clone(char* data) const
+                    { return new(data) BasicRefValue(_value); }
+
+                    virtual bool isRef() const
+                    { return true; }
 
                     virtual void* get()
                     { return (void*) _value; }
@@ -156,6 +159,38 @@ namespace Pt {
                 private:
                     T* _value;
             };
+
+            /** @internal */
+            class RefValue : public Value
+            {
+                public:
+                    RefValue(void* value, const std::type_info& ti)
+                    : _value(value)
+                    , _ti(&ti)
+                    { }
+
+                    virtual bool isRef() const
+                    { return true; }
+
+                    virtual const std::type_info& type() const
+                    { return *_ti; }
+
+                    virtual Any::Value* clone(char* data) const
+                    { return new(data) RefValue(_value, *_ti); }
+
+                    virtual void* get()
+                    { return _value; }
+
+                    virtual const void* get() const
+                    { return _value; }
+
+                private:
+                    void* _value;
+                    const std::type_info* _ti;
+            };
+
+            bool dataUsed() const
+            { return static_cast<const void*>(_value) == static_cast<const void*>(_data); }
 
         public:
             /** @brief Construct with value
@@ -172,7 +207,8 @@ namespace Pt {
             Any(const T& type)
             : _value(0)
             {
-                _value = new BasicValue<T>(type);
+                _value = sizeof(T) > Any::sizeofData ? new BasicValue<T>(type)
+                                                     : new(static_cast<void*>(_data)) BasicValue<T>(type);
             }
 
             /** @brief Construct with reference
@@ -188,7 +224,13 @@ namespace Pt {
             explicit Any(T* type)
             : _value(0)
             {
-                 _value = new BasicRefValue<T>(type);
+                 _value = new(static_cast<void*>(_data)) BasicRefValue<T>(type);
+            }
+
+            explicit Any(void* type, const std::type_info& ti)
+            : _value(0)
+            {
+                 _value = new(static_cast<void*>(_data)) RefValue(type, ti);
             }
 
             /** @brief Default constructor
@@ -222,7 +264,13 @@ namespace Pt {
             */
             ~Any()
             {
-                delete _value;
+                if (_value)
+                {
+                    if (dataUsed())
+                        _value->~Value();
+                    else
+                        delete _value;
+                }
             }
 
             /** @brief Clear content
@@ -233,8 +281,14 @@ namespace Pt {
             */
             void clear()
             {
-                delete _value;
-                _value = 0;
+                if (_value)
+                {
+                    if (dataUsed())
+                        _value->~Value();
+                    else
+                        delete _value;
+                    _value = 0;
+                }
             }
 
             /** @brief Check if empty
@@ -255,6 +309,9 @@ namespace Pt {
                 @return self reference
             */
             Any& swap(Any& other);
+
+            inline bool isRef() const
+            { return _value && _value->isRef(); }
 
             /** @brief Returns type info of assigned type
 
@@ -278,9 +335,9 @@ namespace Pt {
             template <typename T>
             Any& operator=(const T& rhs)
             {
-                Any::Value* tmp = new BasicValue<T>(rhs);
-                delete _value;
-                _value = tmp;
+                clear();
+                _value = sizeof(T) > Any::sizeofData ? new BasicValue<T>(rhs)
+                                                     : new(static_cast<void*>(_data)) BasicValue<T>(rhs);
                 return *this;
             }
 
@@ -296,9 +353,8 @@ namespace Pt {
             template <typename T>
             Any& operator=(T* rhs)
             {
-                Any::Value* tmp = new BasicRefValue<T>(rhs);
-                delete _value;
-                _value = tmp;
+                clear();
+                _value = new BasicRefValue<T>(rhs);
                 return *this;
             }
 
@@ -355,9 +411,12 @@ namespace Pt {
                 return 0;
             }
 
+            static const unsigned sizeofData = sizeof(long double);
+
         private:
             /** @internal */
             Value* _value;
+            char _data[sizeofData];
     };
 
 
@@ -445,10 +504,8 @@ namespace Pt {
 
 inline Any& Any::assign(Value* value)
 {
-    if(_value)
-        delete _value;
-
-    _value = value;
+    clear();
+    _value = value->clone(_data);
     return *this;
 }
 
@@ -456,23 +513,60 @@ inline Any& Any::assign(Value* value)
 inline Any::Any(const Any& val)
 : _value(0)
 {
-    _value = val._value ? val._value->clone() : 0;
+    if (val._value)
+        _value = val._value->clone(_data);
 }
 
 
 inline Any& Any::swap(Any& rhs)
 {
-    std::swap(_value, rhs._value);
+    if (dataUsed())
+    {
+        if (rhs.dataUsed())
+        {
+            Any tmp(*this);
+            *this = rhs;
+            rhs = tmp;
+        }
+        else
+        {
+            Value* tmp = _value;
+            _value = rhs._value;
+            rhs._value = tmp->clone(rhs._data);
+            tmp->~Value();
+        }
+    }
+    else
+    {
+        if (rhs.dataUsed())
+        {
+            Value* tmp = rhs._value;
+            rhs._value = _value;
+            _value = tmp->clone(_data);
+            tmp->~Value();
+        }
+        else
+        {
+            Value* tmp = rhs._value;
+            rhs._value = _value;
+            _value = tmp;
+        }
+    }
+
     return *this;
 }
 
 
 inline Any& Any::operator=(const Any& rhs)
 {
-    Any(rhs).swap(*this);
+    clear();
+
+    if (rhs._value)
+        _value = rhs._value->clone(_data);
+
     return *this;
 }
 
-} // namespace Pt
+} // namespace xxx
 
 #endif

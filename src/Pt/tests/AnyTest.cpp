@@ -32,8 +32,21 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
-#include <sstream>
+#include <algorithm>
 
+
+struct LargeObject
+{
+    int data[64];
+
+    int* begin()                { return &data[0]; }
+    int* end()                  { return &data[64]; }
+    const int* begin() const    { return &data[0]; }
+    const int* end() const      { return &data[64]; }
+
+    bool operator== (const LargeObject& other) const
+    { return std::equal(begin(), end(), other.begin()); }
+};
 
 class AnyTest : public Pt::Unit::TestSuite
 {
@@ -53,6 +66,9 @@ class AnyTest : public Pt::Unit::TestSuite
             this->registerMethod( "Pointer", *this, &AnyTest::Pointer );
             this->registerMethod( "ConstPointer", *this, &AnyTest::Pointer );
             //this->registerMethod( "Equals", *this, &AnyTest::Equals );
+            this->registerMethod( "LargeObject", *this, &AnyTest::LargeObjectTest );
+            this->registerMethod( "SwapSimple", *this, &AnyTest::SwapSimpleTest );
+            this->registerMethod( "Swap", *this, &AnyTest::SwapTest );
         }
 
     protected:
@@ -158,6 +174,76 @@ class AnyTest : public Pt::Unit::TestSuite
             const std::string& s = Pt::any_cast<const std::string&>(a);
             PT_UNIT_ASSERT( s == "hello" );
         }
+
+        void LargeObjectTest()
+        {
+            LargeObject f;
+            Pt::Any a = Pt::Any(f);
+            const LargeObject& ff = Pt::any_cast<const LargeObject&>(a);
+            PT_UNIT_ASSERT(f == ff);
+        }
+
+        void SwapSimpleTest()
+        {
+            Pt::Any a = 17;
+            Pt::Any b = 1.7;
+            a.swap(b);
+
+            {
+                int n = Pt::any_cast<int>(b);
+                double d = Pt::any_cast<double>(a);
+                PT_UNIT_ASSERT(n == 17);
+                PT_UNIT_ASSERT(d == 1.7);
+            }
+        }
+
+        void SwapTest()
+        {
+            LargeObject f;
+            std::generate(f.begin(), f.end(), rand);
+            LargeObject f2;
+            std::generate(f2.begin(), f2.end(), rand);
+            *f2.begin() = *f.begin() + 1;
+
+            Pt::Any a = Pt::Any(f);
+            Pt::Any b = 1.5;
+
+            // swap large with small
+            a.swap(b);
+
+            {
+                const LargeObject& ff = Pt::any_cast<const LargeObject&>(b);
+                double d = Pt::any_cast<double>(a);
+
+                PT_UNIT_ASSERT(f == ff);
+                PT_UNIT_ASSERT(d == 1.5);
+            }
+
+            // swap small with large
+            a.swap(b);
+
+            {
+                const LargeObject& ff = Pt::any_cast<const LargeObject&>(a);
+                double d = Pt::any_cast<double>(b);
+
+                PT_UNIT_ASSERT(f == ff);
+                PT_UNIT_ASSERT(d == 1.5);
+            }
+
+            // swap large with other large
+            a = Pt::Any(f);
+            b = Pt::Any(f2);
+            a.swap(b);
+
+            {
+                const LargeObject& ff = Pt::any_cast<const LargeObject&>(b);
+                const LargeObject& ff2 = Pt::any_cast<const LargeObject&>(a);
+                PT_UNIT_ASSERT(f == ff);
+                PT_UNIT_ASSERT(f2 == ff2);
+            }
+
+        }
+
 };
 
 static Pt::Unit::RegisterTest<AnyTest> registerAnyTest;

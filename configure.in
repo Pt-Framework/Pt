@@ -66,7 +66,9 @@ AC_CONFIG_FILES([
   Makefile
   src/Makefile
   src/Pt/Makefile
+  src/Pt/tests/Makefile
   src/Pt-System/Makefile
+  src/Pt-System/tests/Makefile
   src/Pt-Cma/Makefile
   src/Pt-Net/Makefile
   src/Pt-Net/tests/Makefile

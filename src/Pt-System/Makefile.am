@@ -2,8 +2,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/Pt-System/posix -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libPt-System.la
 
-noinst_PROGRAMS = Pt-System-test
-
 libPt_System_la_SOURCES = \
 	posix/ApplicationImpl.cpp \
 	posix/ClockImpl.cpp \
@@ -54,18 +52,6 @@ libPt_System_la_SOURCES = \
     SerialChannel.cpp \
     Uri.cpp
 
-Pt_System_test_SOURCES = \
-	Pt-System-test.cpp \
-	ApplicationTest.cpp \
-	DirectoryTest.cpp \
-	EventLoopTest.cpp \
-	LoggerTest.cpp \
-	PipeTest.cpp \
-	ProcessTest.cpp \
-	ThreadTest.cpp \
-	TimerTest.cpp \
-	UriTest.cpp
-
 noinst_HEADERS = \
 	posix/ApplicationImpl.h \
 	posix/ClockImpl.h \
@@ -93,6 +79,3 @@ noinst_HEADERS = \
 libPt_System_la_LIBADD = $(top_builddir)/src/Pt/libPt.la
 libPt_System_la_CXXFLAGS = $(PTHREAD_CFLAGS)
 libPt_System_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
-
-Pt_System_test_LDADD = $(top_builddir)/src/Pt-System/libPt-System.la \
-	$(top_builddir)/src/Pt-Unit/libPt-Unit.la

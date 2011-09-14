@@ -2,8 +2,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libPt.la
 
-noinst_PROGRAMS = Pt-test
-
 libPt_la_SOURCES = \
 	Atomicity.cpp \
 	Char.cpp \
@@ -35,34 +33,6 @@ libPt_la_SOURCES = \
 	Page.cpp \
 	PageAllocator.cpp
 
-Pt_test_SOURCES = \
-	Pt-test.cpp \
-	AllocatorTest.cpp \
-	AnyTest.cpp \
-	AtomicTest.cpp \
-	ByteorderTest.cpp \
-	CharTest.cpp \
-	ConversionTest.cpp \
-	DateTest.cpp \
-	DateTimeTest.cpp \
-	DelegateTest.cpp \
-	ExceptionTest.cpp \
-	NonCopyableTest.cpp \
-	RegExpTest.cpp \
-	SerializationTest.cpp \
-	SettingsTest.cpp \
-	SingletonTest.cpp \
-	SignalTest.cpp \
-	SmartPtrTest.cpp \
-	StringStreamTest.cpp \
-	StringTest.cpp \
-	TextStreamTest.cpp \
-	TimeTest.cpp \
-	TimespanTest.cpp \
-	TypesTest.cpp \
-	TypeTraitsTest.cpp \
-	VariantTest.cpp
-
 noinst_HEADERS = \
 	regexp.h \
 	SerializationData.h \
@@ -72,6 +42,3 @@ noinst_HEADERS = \
 
 libPt_la_CXXFLAGS = $(PTHREAD_CFLAGS)
 libPt_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
-
-Pt_test_LDADD = $(top_builddir)/src/Pt/libPt.la \
-	$(top_builddir)/src/Pt-Unit/libPt-Unit.la
