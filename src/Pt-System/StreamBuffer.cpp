@@ -41,7 +41,6 @@ void StreamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend)
     sb._ibuffer = 0;
     sb._obufferSize = bufferSize;
     sb._obuffer = 0;
-    //sb._pbmax = 4;
     sb._oextend = extend;
 
     if( sb.gptr() )
@@ -109,6 +108,12 @@ void StreamBufferBeginRead(StreamBuffer& sb)
 }
 
 
+void StreamBufferOnRead(StreamBuffer& sb, IODevice& dev)
+{
+    sb.inputReady.send(sb);
+}
+
+
 void StreamBufferEndRead(StreamBuffer& sb)
 {
     size_t readSize = sb._ioDevice->endRead();
@@ -134,6 +139,12 @@ size_t StreamBufferBeginWrite(StreamBuffer& sb)
     }
 
     return 0;
+}
+
+
+void StreamBufferOnWrite(StreamBuffer& sb, IODevice& dev)
+{
+    sb.outputReady.send(sb);
 }
 
 
@@ -365,6 +376,7 @@ std::streamsize StreamBufferShowfull(StreamBuffer& sb)
     return 0;
 }
 
+
 std::streambuf::int_type StreamBufferPbackfail(StreamBuffer& sb, std::streambuf::int_type)
 {
     typedef StreamBuffer::traits_type traits_type;
@@ -373,19 +385,31 @@ std::streambuf::int_type StreamBufferPbackfail(StreamBuffer& sb, std::streambuf:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
-: _sb(0),
-  _ioDevice(0),
-  _ibufferSize(bufferSize+4),
+/*StreamBufferBase::StreamBufferBase(size_t bufferSize, bool extend)
+: _ioDevice(0),
+  _ibufferSize(bufferSize + 4),
   _ibuffer(0),
   _obufferSize(bufferSize),
   _obuffer(0),
-  _pbmax(4),
-  _oextend(extend)
-{
+  _pbmax(4), _oextend(extend)
+{ 
 }
 
 
@@ -717,7 +741,7 @@ StreamBuffer::int_type StreamBufferBase::do_pbackfail(StreamBuffer::int_type)
 {
     return traits_type::eof();
 }
-
+*/
 }
 
 }

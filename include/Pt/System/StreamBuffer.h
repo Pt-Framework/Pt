@@ -38,6 +38,7 @@ namespace Pt {
 
 namespace System {
 
+/* 
 class StreamBuffer;
 
 class PT_SYSTEM_API StreamBufferBase : public Connectable
@@ -74,9 +75,7 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 
         void discard();
 
-        Signal<StreamBuffer&> inputReady;
 
-        Signal<StreamBuffer&> outputReady;
 
     protected:
         int do_sync();
@@ -95,16 +94,9 @@ class PT_SYSTEM_API StreamBufferBase : public Connectable
 
         int_type do_pbackfail(int_type c);
 
-    protected:
-        StreamBuffer* _sb;
-        IODevice* _ioDevice;
-        size_t _ibufferSize;
-        char* _ibuffer;
-        std::size_t _obufferSize;
-        char* _obuffer;
-        const size_t _pbmax;
-        bool _oextend;
+
 };
+*/
 
 class StreamBuffer;
 
@@ -114,9 +106,13 @@ PT_SYSTEM_API void StreamBufferAttach(StreamBuffer& sb, IODevice& ioDevice);
 
 PT_SYSTEM_API void StreamBufferBeginRead(StreamBuffer& sb);
 
+PT_SYSTEM_API void StreamBufferOnRead(StreamBuffer& sb);
+
 PT_SYSTEM_API void StreamBufferEndRead(StreamBuffer& sb);
 
 PT_SYSTEM_API size_t StreamBufferBeginWrite(StreamBuffer& sb);
+
+PT_SYSTEM_API void StreamBufferOnWrite(StreamBuffer& sb);
 
 PT_SYSTEM_API size_t StreamBufferEndWrite(StreamBuffer& sb);
 
@@ -147,15 +143,16 @@ PT_SYSTEM_API std::streambuf::int_type StreamBufferPbackfail(StreamBuffer& sb, s
 
 //! @brief A stream buffer for IODevices with linear buffer area
 class StreamBuffer : public std::streambuf
-                   , public StreamBufferBase
+                   , public Connectable
 {
     friend class StreamBufferBase;
     friend PT_SYSTEM_API void StreamBufferInit(StreamBuffer&, size_t, bool);
     friend PT_SYSTEM_API void StreamBufferAttach(StreamBuffer&, IODevice&);
     friend PT_SYSTEM_API void StreamBufferBeginRead(StreamBuffer&);
-    friend PT_SYSTEM_API void StreamBufferOnRead(StreamBuffer&);
+    friend PT_SYSTEM_API void StreamBufferOnRead(StreamBuffer&, IODevice& dev);
     friend PT_SYSTEM_API void StreamBufferEndRead(StreamBuffer&);
     friend PT_SYSTEM_API size_t StreamBufferBeginWrite(StreamBuffer&);
+    friend PT_SYSTEM_API void StreamBufferOnWrite(StreamBuffer&, IODevice& dev);
     friend PT_SYSTEM_API size_t StreamBufferEndWrite(StreamBuffer&);
     friend PT_SYSTEM_API void StreamBufferDiscard(StreamBuffer&);
     friend PT_SYSTEM_API int StreamBufferSync(StreamBuffer&);
@@ -184,16 +181,30 @@ class StreamBuffer : public std::streambuf
 
     public:
         explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
-        : StreamBufferBase(bufferSize, extend)
+        : _ioDevice(0),
+          _ibufferSize(0),
+          _ibuffer(0),
+          _obufferSize(0),
+          _obuffer(0),
+          _pbmax(4),
+          _oextend(extend)
         {
-            StreamBufferBase::init(*this);
-            StreamBufferBase::attach(ioDevice);
+            StreamBufferInit(*this, bufferSize, extend);
+            StreamBufferAttach(*this, ioDevice);
         }
 
         explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false)
-        : StreamBufferBase(bufferSize, extend)
+        : _ioDevice(0),
+          //_ibufferSize(bufferSize + 4),
+          _ibufferSize(0),
+          _ibuffer(0),
+          //_obufferSize(bufferSize),
+          _obufferSize(0),
+          _obuffer(0),
+          _pbmax(4),
+          _oextend(extend)
         {
-            StreamBufferBase::init(*this);
+            StreamBufferInit(*this, bufferSize, extend);
         }
 
         ~StreamBuffer()
@@ -210,30 +221,70 @@ class StreamBuffer : public std::streambuf
              return this->showfull();
         }
 
+        IODevice* device()
+        { return _ioDevice; }
+
+        void attach(IODevice& ioDevice)
+        { StreamBufferAttach(*this, ioDevice); }
+
+        void beginRead()
+        { StreamBufferBeginRead(*this); }
+
+        void onRead(IODevice& dev)
+        { StreamBufferOnRead(*this, dev); }
+
+        void endRead()
+        { StreamBufferEndRead(*this); }
+
+        size_t beginWrite()
+        { return StreamBufferBeginWrite(*this); }
+
+        void onWrite(IODevice& dev)
+        { StreamBufferOnWrite(*this, dev); }
+
+        size_t endWrite()
+        { return StreamBufferEndWrite(*this); }
+
+        void discard()
+        { StreamBufferDiscard(*this); }
+
+        Signal<StreamBuffer&> inputReady;
+
+        Signal<StreamBuffer&> outputReady;
+
     protected:
         virtual int sync()
-        { return do_sync(); }
+        { return StreamBufferSync(*this); }
 
         virtual int_type underflow()
-        { return StreamBufferBase::do_underflow(); }
+        { return StreamBufferUnderflow(*this); }
 
         virtual int_type overflow(int_type ch)
-        { return StreamBufferBase::do_overflow(ch); }
+        { return StreamBufferOverflow(*this, ch); }
 
         virtual std::streamsize xspeekn(char* buffer, std::streamsize size)
-        { return StreamBufferBase::do_xspeekn(buffer, size); }
+        { return StreamBufferXspeekn(*this, buffer, size); }
 
         virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
-        { return StreamBufferBase::do_seekoff(offset, sd, mode); }
+        { return StreamBufferSeekoff(*this, offset, sd, mode); }
 
         virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
-        { return StreamBufferBase::do_seekpos(p, mode); }
+        { return StreamBufferSeekpos(*this, p, mode); }
 
         virtual std::streamsize showfull()
-        { return StreamBufferBase::do_showfull(); }
+        { return StreamBufferShowfull(*this); }
 
         virtual int_type pbackfail(int_type c)
-        { return StreamBufferBase::do_pbackfail(c); }
+        { return StreamBufferPbackfail(*this, c); }
+
+    protected:
+        IODevice* _ioDevice;
+        size_t _ibufferSize;
+        char* _ibuffer;
+        std::size_t _obufferSize;
+        char* _obuffer;
+        const size_t _pbmax;
+        bool _oextend;
 };
 
 } // namespace System
