@@ -67,26 +67,8 @@ Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
 # Main_LinkSharedLibraries PipeDemo : Pt Pt-System  ;
 # Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
-PT_SYSTEM_TESTS = ApplicationTest.cpp
-                  DirectoryTest.cpp
-                  EventLoopTest.cpp
-                  LoggerTest.cpp
-                  PipeTest.cpp
-                  ProcessTest.cpp
-                  #SerialDeviceTest.cpp
-                  ThreadTest.cpp
-                  TimerTest.cpp
-                  UriTest.cpp
-                  ;
-
-PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
-Main_LinkSharedLibraries Pt-System-test : Pt Pt-System  Pt-Unit ;
-PtUnitTest_MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
-
-Main ProcessTestChild : ProcessTestChild.cpp ;
-Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
-Main_LinkSharedLibraries ProcessTestChild : Pt Pt-System  ;
-Depends Pt-System-test : ProcessTestChild ;
-
 NOTFILE Pt-System-all ;
-DEPENDS Pt-System-all : Pt-System Pt-System-test ;
+DEPENDS Pt-System-all : Pt-System ;
+
+SubInclude TOP src Pt-System tests ;
+
