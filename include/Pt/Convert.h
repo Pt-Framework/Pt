@@ -399,6 +399,38 @@ struct BinaryFormat : public NumberFormat<CharType>
 };
 
 
+template <typename S, typename U>
+struct FormatAbsBase
+{
+    typedef U UnsignedType;
+    typedef S SignedType;
+
+    static UnsignedType abs(SignedType s, bool& isNeg)
+    {
+        isNeg = s < 0;
+
+        UnsignedType u = static_cast<UnsignedType>(s);
+        if(isNeg)
+            u = -s;
+
+        return u;
+    }
+};
+
+
+template <typename T>
+struct FormatAbs
+{
+};
+
+
+template <>
+struct FormatAbs<short> : public FormatAbsBase<short, unsigned short>
+{
+    typedef unsigned short UnsignedType;
+};
+
+
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
 {
@@ -428,7 +460,8 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
 
     return cur;
 }
-    
+
+
 template <typename CharT, typename T>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<CharT>& fmt)
 {
@@ -450,7 +483,6 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<
     return cur;
 }
    
-
 
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
