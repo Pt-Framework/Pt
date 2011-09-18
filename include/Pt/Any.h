@@ -116,8 +116,10 @@ namespace Pt {
                     { return typeid(T); }
 
                     virtual Value* clone(char* data) const
-                    { return sizeof(T) > Any::sizeofData ? new BasicValue(_value)
-                                                         : new(data) BasicValue(_value); }
+                    { 
+                        return sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue(_value)
+                                                                       : new(data) BasicValue(_value); 
+                    }
 
                     virtual bool isRef() const
                     { return false; }
@@ -207,8 +209,8 @@ namespace Pt {
             Any(const T& type)
             : _value(0)
             {
-                _value = sizeof(T) > Any::sizeofData ? new BasicValue<T>(type)
-                                                     : new(static_cast<void*>(_data)) BasicValue<T>(type);
+                _value = sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue<T>(type)
+                                                                 : new(static_cast<void*>(_data)) BasicValue<T>(type);
             }
 
             /** @brief Construct with reference
@@ -224,13 +226,15 @@ namespace Pt {
             explicit Any(T* type)
             : _value(0)
             {
-                 _value = new(static_cast<void*>(_data)) BasicRefValue<T>(type);
+                // storage is always large enough for BasicRefValue
+                _value = new(static_cast<void*>(_data)) BasicRefValue<T>(type);
             }
 
             explicit Any(void* type, const std::type_info& ti)
             : _value(0)
             {
-                 _value = new(static_cast<void*>(_data)) RefValue(type, ti);
+                // storage is always large enough for RefValue
+                _value = new(static_cast<void*>(_data)) RefValue(type, ti);
             }
 
             /** @brief Default constructor
@@ -336,8 +340,8 @@ namespace Pt {
             Any& operator=(const T& rhs)
             {
                 clear();
-                _value = sizeof(T) > Any::sizeofData ? new BasicValue<T>(rhs)
-                                                     : new(static_cast<void*>(_data)) BasicValue<T>(rhs);
+                _value = sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue<T>(rhs)
+                                                                 : new(static_cast<void*>(_data)) BasicValue<T>(rhs);
                 return *this;
             }
 
@@ -354,7 +358,7 @@ namespace Pt {
             Any& operator=(T* rhs)
             {
                 clear();
-                _value = new BasicRefValue<T>(rhs);
+                _value = new(static_cast<void*>(_data)) BasicRefValue<T>(rhs);
                 return *this;
             }
 
@@ -411,11 +415,14 @@ namespace Pt {
                 return 0;
             }
 
-            static const unsigned sizeofData = sizeof(long double);
-
         private:
+            //! @internal Size of the internal storage for small types.
+            static const unsigned sizeofData = sizeof(RefValue);
+
             /** @internal */
             Value* _value;
+
+            //! @internal Storage for small types.
             char _data[sizeofData];
     };
 
