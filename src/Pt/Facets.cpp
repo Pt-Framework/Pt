@@ -33,7 +33,7 @@ namespace {
 
 struct HexFormatUL
 {
-    static const int base = 16;
+    static const unsigned base = 16;
 
     HexFormatUL(const char* digtab)
     : _digtab(digtab)

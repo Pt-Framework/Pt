@@ -270,7 +270,7 @@ struct DecimalFormat : public NumberFormat<CharType>
 {
     typedef CharType CharT;
 
-    static const int base = 10;
+    static const unsigned base = 10;
     
     static CharT toChar(unsigned char n)
     {
@@ -297,7 +297,7 @@ struct OctalFormat : public NumberFormat<CharType>
 {
     typedef CharType CharT;
 
-    static const int base = 8;
+    static const unsigned base = 8;
     
     static CharT toChar(unsigned char n)
     {
@@ -325,7 +325,7 @@ struct HexFormat : public NumberFormat<CharType>
 {
     typedef CharType CharT;
 
-    static const int base = 16;
+    static const unsigned base = 16;
     
     static CharT toChar(unsigned char n)
     {
@@ -367,7 +367,7 @@ struct BinaryFormat : public NumberFormat<CharType>
 {
     typedef CharType CharT;
 
-    static const int base = 2;
+    static const unsigned base = 2;
     
     static CharT toChar(unsigned char n)
     {
@@ -787,19 +787,19 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
     // parse number
     UnsignedInt u = 0;
-    const T fact = fmt.base;
+    const UnsignedInt base = fmt.base;
     unsigned char d = 0;
     while(it != end)
     {    
         d = fmt.toDigit(*it);
         
-        if(d >= fmt.base)
+        if(d >= base)
             break;
         
-        if ( u != 0 && fact > max / u )
+        if ( u != 0u && base > (max/u) )
           return it;
 
-        u *= fact;
+        u *= base;
 
         if(d > max - u)
             return it;
@@ -877,6 +877,8 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
 template <typename InIterT, typename T, typename FormatT>
 InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
+    return getSigned(it, end, ok, n, fmt);
+/*
     typedef typename IntTraits<T>::Unsigned UnsignedInt;
     typedef typename IntTraits<T>::Signed SignedInt;
 
@@ -928,6 +930,7 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
     ok = true;
     return it;
+*/
 }
 
 
@@ -1087,7 +1090,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
             break;
         }
         
-        int digit = fmt.toDigit(*it); 
+        unsigned digit = fmt.toDigit(*it); 
         if(digit >= fmt.base)
             return it;
         
@@ -1122,7 +1125,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     T fraction = 0.0;
     for( ; it != end; ++it)
     {
-        int digit = fmt.toDigit(*it); 
+        unsigned digit = fmt.toDigit(*it); 
         if(digit >= fmt.base)
             break;
 
