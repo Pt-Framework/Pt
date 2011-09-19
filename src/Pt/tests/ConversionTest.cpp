@@ -59,13 +59,13 @@ class ConversionTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Double", *this, &ConversionTest::Double );
             Pt::Unit::TestSuite::registerMethod( "VoidPtr", *this, &ConversionTest::VoidPtr );
 
-            //Pt::Unit::TestSuite::registerMethod( "ShortLimitMin", *this, &ConversionTest::LimitMin<short> );
-            //Pt::Unit::TestSuite::registerMethod( "IntLimitMin", *this, &ConversionTest::LimitMin<int> );
-            //Pt::Unit::TestSuite::registerMethod( "LongLimitMin", *this, &ConversionTest::LimitMin<long> );
+            Pt::Unit::TestSuite::registerMethod( "ShortLimitMin", *this, &ConversionTest::LimitMin<short> );
+            Pt::Unit::TestSuite::registerMethod( "IntLimitMin", *this, &ConversionTest::LimitMin<int> );
+            Pt::Unit::TestSuite::registerMethod( "LongLimitMin", *this, &ConversionTest::LimitMin<long> );
             Pt::Unit::TestSuite::registerMethod( "UShortLimitMin", *this, &ConversionTest::LimitMin<unsigned short> );
             Pt::Unit::TestSuite::registerMethod( "UIntLimitMin", *this, &ConversionTest::LimitMin<unsigned int> );
             Pt::Unit::TestSuite::registerMethod( "ULongLimitMin", *this, &ConversionTest::LimitMin<unsigned long> );
-            Pt::Unit::TestSuite::registerMethod( "CharLimitMin", *this, &ConversionTest::LimitMin<char> );
+            Pt::Unit::TestSuite::registerMethod( "CharLimitMin", *this, &ConversionTest::LimitMin<signed char> );
             Pt::Unit::TestSuite::registerMethod( "UCharLimitMin", *this, &ConversionTest::LimitMin<unsigned char> );
 
             Pt::Unit::TestSuite::registerMethod( "ShortLimitMax", *this, &ConversionTest::LimitMax<short> );
@@ -74,7 +74,7 @@ class ConversionTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "UShortLimitMax", *this, &ConversionTest::LimitMax<unsigned short> );
             Pt::Unit::TestSuite::registerMethod( "UIntLimitMax", *this, &ConversionTest::LimitMax<unsigned int> );
             Pt::Unit::TestSuite::registerMethod( "ULongLimitMax", *this, &ConversionTest::LimitMax<unsigned long> );
-            Pt::Unit::TestSuite::registerMethod( "CharLimitMax", *this, &ConversionTest::LimitMax<char> );
+            Pt::Unit::TestSuite::registerMethod( "CharLimitMax", *this, &ConversionTest::LimitMax<signed char> );
             Pt::Unit::TestSuite::registerMethod( "UCharLimitMax", *this, &ConversionTest::LimitMax<unsigned char> );
         }
 
@@ -357,8 +357,8 @@ template <typename T>
 void ConversionTest::LimitMin()
 {
     std::string str;
-
     str = Pt::convert<std::string>(std::numeric_limits<T>::min());
+
     T s = Pt::convert<T>(str);
     PT_UNIT_ASSERT_EQUALS(s, std::numeric_limits<T>::min());
 }

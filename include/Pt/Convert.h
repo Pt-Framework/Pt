@@ -32,6 +32,7 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/ConversionError.h>
+#include <Pt/TypeTraits.h>
 #include <Pt/StringStream.h>
 #include <iostream>
 #include <sstream>
@@ -226,42 +227,6 @@ T convert(const S& from)
 // parsing and formating of numbers
 //
 
-template <typename T>
-inline bool formatNegate(T& i)
-{
-    bool isNeg = i < 0;
-    if(isNeg)
-        i = -i;
-
-    return isNeg;
-}
-
-inline bool formatNegate(unsigned char&)
-{
-    return false;
-}
-
-inline bool formatNegate(unsigned short&)
-{
-    return false;
-}
-
-inline bool formatNegate(unsigned int&)
-{
-    return false;
-}
-
-inline bool formatNegate(unsigned long&)
-{
-    return false;
-}
-
-inline bool formatNegate(unsigned long long&)
-{
-    return false;
-}
-
-
 template <typename CharType>
 struct NumberFormat
 {
@@ -399,55 +364,102 @@ struct BinaryFormat : public NumberFormat<CharType>
 };
 
 
-template <typename S, typename U>
-struct FormatAbsBase
+inline unsigned char formatAbs(char i, bool& isNeg)
 {
-    typedef U UnsignedType;
-    typedef S SignedType;
-
-    static UnsignedType abs(SignedType s, bool& isNeg)
-    {
-        isNeg = s < 0;
-
-        UnsignedType u = static_cast<UnsignedType>(s);
-        if(isNeg)
-            u = -s;
-
-        return u;
-    }
-};
+    isNeg = i < 0;
+    unsigned char u = isNeg ? -i : static_cast<unsigned char>(i);
+    return u;
+}
 
 
-template <typename T>
-struct FormatAbs
+inline unsigned char formatAbs(unsigned char i, bool& isNeg)
 {
-};
+    isNeg = false;
+    return i;
+}
 
 
-template <>
-struct FormatAbs<short> : public FormatAbsBase<short, unsigned short>
+inline unsigned short formatAbs(short i, bool& isNeg)
 {
-    typedef unsigned short UnsignedType;
-};
+    isNeg = i < 0;
+    unsigned short u = isNeg ? -i : static_cast<unsigned short>(i);
+    return u;
+}
+
+
+inline unsigned short formatAbs(unsigned short i, bool& isNeg)
+{
+    isNeg = false;
+    return i;
+}
+
+
+inline unsigned int formatAbs(int i, bool& isNeg)
+{
+    isNeg = i < 0;
+    unsigned int u = isNeg ? -i : static_cast<unsigned int>(i);
+    return u;
+}
+
+
+inline unsigned int formatAbs(unsigned int i, bool& isNeg)
+{
+    isNeg = false;
+    return i;
+}
+
+
+inline unsigned long formatAbs(long i, bool& isNeg)
+{
+    isNeg = i < 0;
+    unsigned long u = isNeg ? -i : static_cast<unsigned long>(i);
+    return u;
+}
+
+
+inline unsigned long formatAbs(unsigned long i, bool& isNeg)
+{
+    isNeg = false;
+    return i;
+}
+
+
+inline unsigned long long formatAbs(long long i, bool& isNeg)
+{
+    isNeg = i < 0;
+    unsigned long long u = isNeg ? -i : static_cast<unsigned long long>(i);
+    return u;
+}
+
+
+inline unsigned long long formatAbs(unsigned long long i, bool& isNeg)
+{
+    isNeg = false;
+    return i;
+}
 
 
 template <typename CharT, typename T, typename FormatT>
-inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const FormatT& fmt)
+inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt)
 {
+    typedef typename IntTraits<T>::Unsigned UnsignedInt;
+
     CharT* end = buf + buflen;
     CharT* cur = end;
 
     const unsigned base = fmt.base;
-    bool isNeg = formatNegate(i); 
+
+    bool isNeg = false;
+    UnsignedInt u = formatAbs(si, isNeg);
 
     do
     {
-        T lsd = i % base;
-        i /= base;
+        T lsd = u % base;
+        u /= base;
         --cur;
         *cur = fmt.toChar( unsigned(lsd) );
     } 
-    while(i != 0 && cur != buf);
+    while(u != 0 && cur != buf);
     
     if(cur == buf)
         return buf;
@@ -707,17 +719,33 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
     return it;
 }
 
-
 template <typename InIterT, typename T, typename FormatT>
 InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
+    typedef typename IntTraits<T>::Unsigned UnsignedInt;
+    typedef typename IntTraits<T>::Signed SignedInt;
+
     n = 0;
     ok = false;
+    UnsignedInt max = std::numeric_limits<T>::max();
 
     bool pos = false;
     it = getSign(it, end, pos, fmt);
-  
+
+    bool isNeg = ! pos;
+    if( isNeg )
+    {
+        // return if minus sign was parsed for unsigned type
+        if( isNeg != std::numeric_limits<T>::is_signed)
+            return it;
+
+        // abs(min) is max for negative signed types
+        SignedInt smin = std::numeric_limits<T>::min();
+        max = static_cast<UnsignedInt>(-smin);
+    }
+
     // parse number
+    UnsignedInt u = 0;
     const T fact = fmt.base;
     unsigned char d = 0;
     while(it != end)
@@ -727,25 +755,76 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
         if(d >= fmt.base)
             break;
         
-        if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
+        if ( u != 0 && fact > max / u )
           return it;
 
-        n *= fact;
+        u *= fact;
 
-        if(d > std::numeric_limits<T>::max() - n)
+        if(d > max - u)
             return it;
 
-        n += d;
+        u += d;
+        ++it;
+    }
+
+    if( isNeg ) 
+        n = static_cast<T>(u * -1);
+    else
+        n = static_cast<T>(u);
+
+    ok = true;
+    return it;
+}
+
+/* old signed interger specific code
+template <typename InIterT, typename T, typename FormatT>
+InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+{
+    typedef typename IntTraits<T>::Unsigned UnsignedInt;
+
+    n = 0;
+    ok = false;
+
+    bool pos = false;
+    it = getSign(it, end, pos, fmt);
+  
+    UnsignedInt max = std::numeric_limits<T>::max();
+    if( ! pos )
+        max = - std::numeric_limits<T>::min();
+
+    // parse number
+    UnsignedInt u = 0;
+    const T fact = fmt.base;
+    unsigned char d = 0;
+    while(it != end)
+    {    
+        d = fmt.toDigit(*it);
+        
+        if(d >= fmt.base)
+            break;
+        
+        if ( u != 0 && fact > max / u )
+          return it;
+
+        u *= fact;
+
+        if(d > max - u)
+            return it;
+
+        u += d;
         ++it;
     }
 
     if( ! pos ) 
-        n *= -1;
+        n = u * -1;
+    else
+        n = static_cast<T>(u);
 
-      ok = true;
+    ok = true;
     return it;
 }
-
+*/
+ 
 
 template <typename InIterT, typename T>
 InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
@@ -757,8 +836,64 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
 template <typename InIterT, typename T, typename FormatT>
 InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
+    typedef typename IntTraits<T>::Unsigned UnsignedInt;
+    typedef typename IntTraits<T>::Signed SignedInt;
+
     n = 0;
     ok = false;
+    UnsignedInt max = std::numeric_limits<T>::max();
+
+    bool pos = false;
+    it = getSign(it, end, pos, fmt);
+
+    bool isNeg = ! pos;
+    if( isNeg )
+    {
+        // return if minus sign was parsed for unsigned type
+        if( isNeg != std::numeric_limits<T>::is_signed)
+            return it;
+
+        SignedInt smin = std::numeric_limits<T>::min();
+        max = static_cast<UnsignedInt>(-smin);
+    }
+
+    // parse number
+    UnsignedInt u = 0;
+    const T fact = fmt.base;
+    unsigned char d = 0;
+    while(it != end)
+    {    
+        d = fmt.toDigit(*it);
+        
+        if(d >= fmt.base)
+            break;
+        
+        if ( u != 0 && fact > max / u )
+          return it;
+
+        u *= fact;
+
+        if(d > max - u)
+            return it;
+
+        u += d;
+        ++it;
+    }
+
+    if( isNeg ) 
+        n = static_cast<T>(u * -1);
+    else
+        n = static_cast<T>(u);
+
+    ok = true;
+    return it;
+}
+
+
+/* old unsigned interger specific code 
+template <typename InIterT, typename T, typename FormatT> InIterT 
+getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt) { 
+    n = 0; ok = false;
 
     bool pos = true;
     it = getSign(it, end, pos, fmt);
@@ -790,7 +925,8 @@ InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
     ok = true;
     return it;
-}
+} 
+*/ 
 
 
 template <typename InIterT, typename T>
