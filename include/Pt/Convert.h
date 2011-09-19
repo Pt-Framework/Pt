@@ -227,6 +227,32 @@ T convert(const S& from)
 // parsing and formating of numbers
 //
 
+template <typename OutIterT, typename T, typename FormatT>
+inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt);
+
+template <typename OutIterT, typename T>
+inline OutIterT putInt(OutIterT it, T i);
+
+template <typename OutIterT, typename T, typename FormatT>
+OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision, bool scientific);
+
+template <typename OutIterT, typename T>
+OutIterT putFloat(OutIterT it, T d);
+
+
+template <typename InIterT, typename T, typename FormatT>
+InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+
+template <typename InIterT, typename T>
+InIterT getInt(InIterT it, InIterT end, bool& ok, T& n);
+
+template <typename InIterT, typename T, typename FormatT>
+InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+
+template <typename InIterT, typename T>
+InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n);
+
+
 template <typename CharType>
 struct NumberFormat
 {
@@ -718,6 +744,21 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
     
     return it;
 }
+
+
+template <typename InIterT, typename T, typename FormatT>
+InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+{
+    return getSigned(it, end, ok, n, fmt);
+}
+
+
+template <typename InIterT, typename T>
+InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
+{
+    return getInt(it, end, ok, n, Pt::DecimalFormat<char>() );
+}
+
 
 template <typename InIterT, typename T, typename FormatT>
 InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
