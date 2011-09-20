@@ -1,0 +1,13 @@
+SubDir TOP src Pt-Http2 tests ;
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Http2 ;
+
+PtUnitTest Pt-Http-test : Pt-Http-test.cpp
+                          ServerTest.cpp
+                          ParserTest.cpp
+                          ;
+Main_LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-System Pt-Unit ;
+PtUnitTest_MakeLocate Pt-Http-test : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+DEPENDS Pt-Http-all : Pt-Http-test ;

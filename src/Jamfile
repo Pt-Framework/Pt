@@ -5,7 +5,16 @@ SubInclude TOP src Pt-Reflex ;
 SubInclude TOP src Pt-System ;
 SubInclude TOP src Pt-Cma ;
 SubInclude TOP src Pt-Net ;
-SubInclude TOP src Pt-Http ;
+
+if $(WITH_HTTP2) = yes
+{
+    SubInclude TOP src Pt-Http2 ;
+}
+else
+{
+    SubInclude TOP src Pt-Http ;
+}
+
 SubInclude TOP src Pt-Db ;
 SubInclude TOP src Pt-Gfx ;
 

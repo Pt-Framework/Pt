@@ -1,0 +1,28 @@
+SubDir TOP src Pt-Http2 ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
+SubDirHdrs $(TOP)/src/Pt-Http2/$(SYS:L) ;
+
+SharedLibrary Pt-Http : Client.cpp
+                        ClientImpl.cpp
+                        ChunkedReader.cpp
+                        NotFoundResponder.cpp
+                        NotFoundService.cpp
+                        NotAuthenticatedResponder.cpp
+                        NotAuthenticatedService.cpp
+                        MessageHeader.cpp
+                        Parser.cpp
+                        Responder.cpp
+                        Worker.cpp
+                        Server.cpp
+                        ServerImpl.cpp
+                        Service.cpp
+                        Socket.cpp ;
+SharedLibrary_LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
+SharedLibrary_MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+NOTFILE Pt-Http-all ;
+DEPENDS Pt-Http-all : Pt-Http ;
+
+SubInclude TOP src Pt-Http2 tests ;
