@@ -212,7 +212,7 @@ void convert(char& c, const String& str)
 void convert(unsigned char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned char", "Pt::String");
@@ -222,7 +222,7 @@ void convert(unsigned char& n, const String& str)
 void convert(signed char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("signed char", "Pt::String");
@@ -232,7 +232,7 @@ void convert(signed char& n, const String& str)
 void convert(short& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("short", "Pt::String");
@@ -242,7 +242,7 @@ void convert(short& n, const Pt::String& str)
 void convert(unsigned short& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned short", "Pt::String");
@@ -252,7 +252,7 @@ void convert(unsigned short& n, const Pt::String& str)
 void convert(int& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("int", "Pt::String");
@@ -262,7 +262,7 @@ void convert(int& n, const Pt::String& str)
 void convert(unsigned int& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned int", "Pt::String");
@@ -272,7 +272,7 @@ void convert(unsigned int& n, const Pt::String& str)
 void convert(long& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("long", "Pt::String");
@@ -282,7 +282,7 @@ void convert(long& n, const Pt::String& str)
 void convert(unsigned long& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned long", "Pt::String");
@@ -327,7 +327,7 @@ void convert(int& n, const Pt::Char* str)
     bool ok = false;
     nullterm_array_iterator<Pt::Char> it(str);
     nullterm_array_iterator<Pt::Char> end;
-    it = getSigned( it, end, ok, n );
+    it = getInt( it, end, ok, n );
 
     if( it != end || ! ok )
         ConversionError::doThrow("int", "const char*");
@@ -462,7 +462,7 @@ void convert(char& c, const std::string& str)
 void convert(signed char& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("signed char", "std::string");
@@ -472,7 +472,7 @@ void convert(signed char& n, const std::string& str)
 void convert(unsigned char& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned char", "std::string");
@@ -482,7 +482,7 @@ void convert(unsigned char& n, const std::string& str)
 void convert(short& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("short", "std::string");
@@ -492,7 +492,7 @@ void convert(short& n, const std::string& str)
 void convert(unsigned short& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned short", "std::string");
@@ -502,7 +502,7 @@ void convert(unsigned short& n, const std::string& str)
 void convert(int& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("int", "std::string");
@@ -512,7 +512,7 @@ void convert(int& n, const std::string& str)
 void convert(unsigned int& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned int", "std::string");
@@ -522,7 +522,7 @@ void convert(unsigned int& n, const std::string& str)
 void convert(long& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getSigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("long", "std::string");
@@ -532,7 +532,7 @@ void convert(long& n, const std::string& str)
 void convert(unsigned long& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getUnsigned( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned long", "std::string");
@@ -577,7 +577,7 @@ void convert(int& n, const char* str)
     bool ok = false;
     nullterm_array_iterator<char> it(str);
     nullterm_array_iterator<char> end;
-    it = getSigned( it, end, ok, n );
+    it = getInt( it, end, ok, n );
 
     if( it != end || ! ok )
         ConversionError::doThrow("int", "const char*");

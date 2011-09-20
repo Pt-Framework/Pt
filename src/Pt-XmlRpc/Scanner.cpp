@@ -390,7 +390,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                 Pt::int32_t number = 0;
                 bool ok = false;
-                getSigned( chars.content().begin(), chars.content().end(), ok, number );
+                getInt( chars.content().begin(), chars.content().end(), ok, number );
 
                 if( ! ok )
                     throwSerializationError();

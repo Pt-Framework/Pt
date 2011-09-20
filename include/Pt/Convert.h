@@ -224,31 +224,50 @@ T convert(const S& from)
 }
 
 //
-// parsing and formating of numbers
+// number formatting
 //
 
+/** @brief Formats an integer in a given format format.
+ */
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt);
 
+/** @brief Formats an integer in a decimal format.
+ */
 template <typename OutIterT, typename T>
 inline OutIterT putInt(OutIterT it, T i);
 
+/** @brief Formats a floating point value in a given format.
+ */
 template <typename OutIterT, typename T, typename FormatT>
 OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision, bool scientific);
 
+/** @brief Formats a floating point value in default format.
+ */
 template <typename OutIterT, typename T>
 OutIterT putFloat(OutIterT it, T d);
 
+//
+// number parsing
+//
 
+/** @brief Parses an integer value in a given format.
+ */
 template <typename InIterT, typename T, typename FormatT>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
+/** @brief Parses an integer value in decimal format.
+ */
 template <typename InIterT, typename T>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n);
 
+/** @brief Parses a floating point value in a given format.
+ */
 template <typename InIterT, typename T, typename FormatT>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
+/** @brief Parses a floating point value.
+ */
 template <typename InIterT, typename T>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n);
 
@@ -264,6 +283,7 @@ struct NumberFormat
     static CharT minus()
     { return '-'; }
 };
+
 
 template <typename CharType>
 struct DecimalFormat : public NumberFormat<CharType>
@@ -390,6 +410,34 @@ struct BinaryFormat : public NumberFormat<CharType>
 };
 
 
+template <typename CharType>
+struct FloatFormat : public DecimalFormat<CharType>
+{
+    typedef CharType CharT;
+
+    static CharT point()
+    { return '.'; }
+
+    static CharT e()
+    { return 'e'; }
+
+    static CharT E()
+    { return 'E'; }
+
+    static const CharT* nan()
+    { 
+        static const CharT nanstr[] = { 'n', 'a', 'n', 0 };
+        return nanstr; 
+    }
+
+    static const CharT* inf()
+    { 
+        static const CharT nanstr[] = { 'i', 'n', 'f', 0 };
+        return nanstr; 
+    }
+};
+
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned char formatAbs(char i, bool& isNeg)
 {
     isNeg = i < 0;
@@ -397,14 +445,14 @@ inline unsigned char formatAbs(char i, bool& isNeg)
     return u;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned char formatAbs(unsigned char i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned short formatAbs(short i, bool& isNeg)
 {
     isNeg = i < 0;
@@ -412,14 +460,14 @@ inline unsigned short formatAbs(short i, bool& isNeg)
     return u;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned short formatAbs(unsigned short i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned int formatAbs(int i, bool& isNeg)
 {
     isNeg = i < 0;
@@ -427,14 +475,14 @@ inline unsigned int formatAbs(int i, bool& isNeg)
     return u;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned int formatAbs(unsigned int i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned long formatAbs(long i, bool& isNeg)
 {
     isNeg = i < 0;
@@ -442,14 +490,14 @@ inline unsigned long formatAbs(long i, bool& isNeg)
     return u;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned long formatAbs(unsigned long i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned long long formatAbs(long long i, bool& isNeg)
 {
     isNeg = i < 0;
@@ -457,14 +505,15 @@ inline unsigned long long formatAbs(long long i, bool& isNeg)
     return u;
 }
 
-
+//! @internal @brief Returns the absolute value of \a i
 inline unsigned long long formatAbs(unsigned long long i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-
+/** @brief Formats an integer in a given format.
+ */
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt)
 {
@@ -499,7 +548,8 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
     return cur;
 }
 
-
+/** @brief Formats an integer in binary format.
+ */
 template <typename CharT, typename T>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<CharT>& fmt)
 {
@@ -544,34 +594,6 @@ inline OutIterT putInt(OutIterT it, T i)
     DecimalFormat<char> fmt;
     return putInt(it, i, fmt);
 }
-
-
-template <typename CharType>
-struct FloatFormat : public DecimalFormat<CharType>
-{
-    typedef CharType CharT;
-
-    static CharT point()
-    { return '.'; }
-
-    static CharT e()
-    { return 'e'; }
-
-    static CharT E()
-    { return 'E'; }
-
-    static const CharT* nan()
-    { 
-        static const CharT nanstr[] = { 'n', 'a', 'n', 0 };
-        return nanstr; 
-    }
-
-    static const CharT* inf()
-    { 
-        static const CharT nanstr[] = { 'i', 'n', 'f', 0 };
-        return nanstr; 
-    }
-};
 
 
 template <typename CharT, typename T, typename FormatT>
@@ -749,20 +771,6 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 template <typename InIterT, typename T, typename FormatT>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
-    return getSigned(it, end, ok, n, fmt);
-}
-
-
-template <typename InIterT, typename T>
-InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
-{
-    return getInt(it, end, ok, n, Pt::DecimalFormat<char>() );
-}
-
-
-template <typename InIterT, typename T, typename FormatT>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
-{
     typedef typename IntTraits<T>::Unsigned UnsignedInt;
     typedef typename IntTraits<T>::Signed SignedInt;
 
@@ -817,166 +825,11 @@ InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     return it;
 }
 
-/* old signed interger specific code
-template <typename InIterT, typename T, typename FormatT>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
-{
-    typedef typename IntTraits<T>::Unsigned UnsignedInt;
-
-    n = 0;
-    ok = false;
-
-    bool pos = false;
-    it = getSign(it, end, pos, fmt);
-  
-    UnsignedInt max = std::numeric_limits<T>::max();
-    if( ! pos )
-        max = - std::numeric_limits<T>::min();
-
-    // parse number
-    UnsignedInt u = 0;
-    const T fact = fmt.base;
-    unsigned char d = 0;
-    while(it != end)
-    {    
-        d = fmt.toDigit(*it);
-        
-        if(d >= fmt.base)
-            break;
-        
-        if ( u != 0 && fact > max / u )
-          return it;
-
-        u *= fact;
-
-        if(d > max - u)
-            return it;
-
-        u += d;
-        ++it;
-    }
-
-    if( ! pos ) 
-        n = u * -1;
-    else
-        n = static_cast<T>(u);
-
-    ok = true;
-    return it;
-}
-*/
- 
 
 template <typename InIterT, typename T>
-InIterT getSigned(InIterT it, InIterT end, bool& ok, T& n)
+InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
 {
-    return getSigned( it, end, ok, n, Pt::DecimalFormat<char>() );
-}
-
-
-template <typename InIterT, typename T, typename FormatT>
-InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
-{
-    return getSigned(it, end, ok, n, fmt);
-/*
-    typedef typename IntTraits<T>::Unsigned UnsignedInt;
-    typedef typename IntTraits<T>::Signed SignedInt;
-
-    n = 0;
-    ok = false;
-    UnsignedInt max = std::numeric_limits<T>::max();
-
-    bool pos = false;
-    it = getSign(it, end, pos, fmt);
-
-    bool isNeg = ! pos;
-    if( isNeg )
-    {
-        // return if minus sign was parsed for unsigned type
-        if( isNeg != std::numeric_limits<T>::is_signed)
-            return it;
-
-        SignedInt smin = std::numeric_limits<T>::min();
-        max = static_cast<UnsignedInt>(-smin);
-    }
-
-    // parse number
-    UnsignedInt u = 0;
-    const T fact = fmt.base;
-    unsigned char d = 0;
-    while(it != end)
-    {    
-        d = fmt.toDigit(*it);
-        
-        if(d >= fmt.base)
-            break;
-        
-        if ( u != 0 && fact > max / u )
-          return it;
-
-        u *= fact;
-
-        if(d > max - u)
-            return it;
-
-        u += d;
-        ++it;
-    }
-
-    if( isNeg ) 
-        n = static_cast<T>(u * -1);
-    else
-        n = static_cast<T>(u);
-
-    ok = true;
-    return it;
-*/
-}
-
-
-/* old unsigned interger specific code 
-template <typename InIterT, typename T, typename FormatT> InIterT 
-getUnsigned(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt) { 
-    n = 0; ok = false;
-
-    bool pos = true;
-    it = getSign(it, end, pos, fmt);
-    
-    if(! pos)
-        return it;
-
-    // parse number
-    T fact = fmt.base;
-    unsigned char d = 0;
-    while(it != end)
-    {    
-        d = fmt.toDigit(*it);
-        
-        if(d >= fmt.base)
-            break;
-        
-        if ( n != 0 && fact > std::numeric_limits<T>::max() / n )
-          return it;
-
-        n *= fact;
-
-        if(d > std::numeric_limits<T>::max() - n)
-            return it;
-
-        n += d;
-        ++it;
-    }
-
-    ok = true;
-    return it;
-} 
-*/ 
-
-
-template <typename InIterT, typename T>
-InIterT getUnsigned(InIterT it, InIterT end, bool& ok, T& n)
-{
-    return getUnsigned( it, end, ok, n, Pt::DecimalFormat<char>() );
+    return getInt(it, end, ok, n, Pt::DecimalFormat<char>() );
 }
 
 
@@ -1151,7 +1004,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
             return it;
 
         long exp = 0;
-        it = getSigned(it, end, ok, exp, fmt);
+        it = getInt(it, end, ok, exp, fmt);
         if( ! ok )
             return it;
             
@@ -1171,6 +1024,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
 {
     return getFloat( it, end, ok, n, FloatFormat<char>() );
 }
+
 } // namespace Pt
 
 #endif

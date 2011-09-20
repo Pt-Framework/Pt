@@ -618,13 +618,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getSigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getSigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getSigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -648,13 +648,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getSigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getSigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getSigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -678,13 +678,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -708,13 +708,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -738,13 +738,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -768,13 +768,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getUnsigned(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -873,7 +873,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 {
     std::size_t addr = 0;
     bool ok = false;
-    Pt::getUnsigned(it, end, ok, addr, Pt::HexFormat<Pt::Char>());
+    Pt::getInt(it, end, ok, addr, Pt::HexFormat<Pt::Char>());
 
     if( ok )
     {
