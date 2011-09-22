@@ -31,6 +31,13 @@
 
 namespace Pt {
 
+template <typename IterT>
+void _skipws(IterT& it, IterT end)
+{
+    while (it != end && isspace(*it))
+        ++it;
+}
+
 /** @internal This is useful, move this to Pt/Iterator.h
 */
 template<typename T>
@@ -45,7 +52,7 @@ class nullterm_array_iterator : public std::iterator<std::input_iterator_tag, T>
         : _ptr(ptr)
         {
             if(*_ptr == '\0')
-                _ptr = 0; 
+                _ptr = 0;
         }
 
         nullterm_array_iterator<T>& operator=(const nullterm_array_iterator<T>& it)
@@ -214,6 +221,9 @@ void convert(unsigned char& n, const String& str)
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned char", "Pt::String");
 }
@@ -223,6 +233,9 @@ void convert(signed char& n, const String& str)
 {
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("signed char", "Pt::String");
@@ -234,6 +247,9 @@ void convert(short& n, const Pt::String& str)
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("short", "Pt::String");
 }
@@ -243,6 +259,9 @@ void convert(unsigned short& n, const Pt::String& str)
 {
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned short", "Pt::String");
@@ -254,6 +273,9 @@ void convert(int& n, const Pt::String& str)
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("int", "Pt::String");
 }
@@ -263,6 +285,9 @@ void convert(unsigned int& n, const Pt::String& str)
 {
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned int", "Pt::String");
@@ -274,6 +299,9 @@ void convert(long& n, const Pt::String& str)
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("long", "Pt::String");
 }
@@ -284,6 +312,9 @@ void convert(unsigned long& n, const Pt::String& str)
     bool ok = false;
     Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned long", "Pt::String");
 }
@@ -293,7 +324,10 @@ void convert(float& n, const String& str)
 {
     bool ok = false;
     String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("float", "Pt::String");
 }
@@ -303,7 +337,10 @@ void convert(double& n, const String& str)
 {
     bool ok = false;
     String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("double", "Pt::String");
 }
@@ -313,7 +350,10 @@ void convert(long double& n, const String& str)
 {
     bool ok = false;
     String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("long double", "Pt::String");
 }
@@ -328,6 +368,9 @@ void convert(int& n, const Pt::Char* str)
     nullterm_array_iterator<Pt::Char> it(str);
     nullterm_array_iterator<Pt::Char> end;
     it = getInt( it, end, ok, n );
+
+    if (ok)
+        _skipws(it, end);
 
     if( it != end || ! ok )
         ConversionError::doThrow("int", "const char*");
@@ -474,6 +517,9 @@ void convert(unsigned char& n, const std::string& str)
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned char", "std::string");
 }
@@ -483,6 +529,9 @@ void convert(short& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("short", "std::string");
@@ -494,6 +543,9 @@ void convert(unsigned short& n, const std::string& str)
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned short", "std::string");
 }
@@ -503,6 +555,9 @@ void convert(int& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("int", "std::string");
@@ -514,6 +569,9 @@ void convert(unsigned int& n, const std::string& str)
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned int", "std::string");
 }
@@ -523,6 +581,9 @@ void convert(long& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+
+    if (ok)
+        _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
         ConversionError::doThrow("long", "std::string");
@@ -534,6 +595,9 @@ void convert(unsigned long& n, const std::string& str)
     bool ok = false;
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
+    if (ok)
+        _skipws(r, str.end());
+
     if( r != str.end() || ! ok )
         ConversionError::doThrow("unsigned long", "std::string");
 }
@@ -543,7 +607,10 @@ void convert(float& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("float", "std::string");
 }
@@ -553,7 +620,10 @@ void convert(double& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("double", "std::string");
 }
@@ -563,7 +633,10 @@ void convert(long double& n, const std::string& str)
 {
     bool ok = false;
     std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
-    
+
+    if (ok)
+        _skipws(r, str.end());
+
     if(r != str.end() || ! ok)
         ConversionError::doThrow("long double", "std::string");
 }
@@ -578,6 +651,9 @@ void convert(int& n, const char* str)
     nullterm_array_iterator<char> it(str);
     nullterm_array_iterator<char> end;
     it = getInt( it, end, ok, n );
+
+    if (ok)
+        _skipws(it, end);
 
     if( it != end || ! ok )
         ConversionError::doThrow("int", "const char*");
