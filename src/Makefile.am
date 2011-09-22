@@ -12,4 +12,5 @@ SUBDIRS = \
 	Pt-System/tests \
 	Pt-Http/tests \
 	Pt-Net/tests \
+	Pt-Xml/tests \
 	Pt-XmlRpc/tests

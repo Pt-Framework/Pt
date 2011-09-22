@@ -54,23 +54,23 @@ class RegExpTest : public Pt::Unit::TestSuite
             regex.match(str, smatch);
 
             //std::clog << "matches: " << smatch.size() << std::endl;
-            PT_UNIT_ASSERT(smatch.size() == 4)
+            PT_UNIT_ASSERT(smatch.size() == 4);
 
-            PT_UNIT_ASSERT(smatch.offsetBegin(0) == 0)
-            PT_UNIT_ASSERT(smatch.offsetEnd(0) == 11)
-            PT_UNIT_ASSERT(smatch.get(0) == L"abc DEF xyz")
+            PT_UNIT_ASSERT(smatch.offsetBegin(0) == 0);
+            PT_UNIT_ASSERT(smatch.offsetEnd(0) == 11);
+            PT_UNIT_ASSERT(smatch.get(0) == L"abc DEF xyz");
 
-            PT_UNIT_ASSERT(smatch.offsetBegin(1) == 0)
-            PT_UNIT_ASSERT(smatch.offsetEnd(1) == 3)
-            PT_UNIT_ASSERT(smatch.get(1) == L"abc")
+            PT_UNIT_ASSERT(smatch.offsetBegin(1) == 0);
+            PT_UNIT_ASSERT(smatch.offsetEnd(1) == 3);
+            PT_UNIT_ASSERT(smatch.get(1) == L"abc");
 
-            PT_UNIT_ASSERT(smatch.offsetBegin(2) == 4)
-            PT_UNIT_ASSERT(smatch.offsetEnd(2) == 7)
-            PT_UNIT_ASSERT(smatch.get(2) == L"DEF")
+            PT_UNIT_ASSERT(smatch.offsetBegin(2) == 4);
+            PT_UNIT_ASSERT(smatch.offsetEnd(2) == 7);
+            PT_UNIT_ASSERT(smatch.get(2) == L"DEF");
 
-            PT_UNIT_ASSERT(smatch.offsetBegin(3) == 8)
-            PT_UNIT_ASSERT(smatch.offsetEnd(3) == 11)
-            PT_UNIT_ASSERT(smatch.get(3) == L"xyz")
+            PT_UNIT_ASSERT(smatch.offsetBegin(3) == 8);
+            PT_UNIT_ASSERT(smatch.offsetEnd(3) == 11);
+            PT_UNIT_ASSERT(smatch.get(3) == L"xyz");
 
             // for(unsigned n = 0; n < smatch.size(); ++n)
             // {
@@ -90,7 +90,7 @@ class RegExpTest : public Pt::Unit::TestSuite
             Pt::Regex regex(expr);
             regex.match(str, smatch);
 
-            PT_UNIT_ASSERT(smatch.size() == 5)
+            PT_UNIT_ASSERT(smatch.size() == 5);
         }
 
         void MissingBrace()

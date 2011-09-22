@@ -391,7 +391,7 @@ void SettingsTest::Section()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
+    PT_UNIT_ASSERT( settings.findMember("a.b.c.d") );
     
     std::string v;
     settings.findMember("a.b.c.d")->getMember("v") >>= v;
@@ -401,7 +401,7 @@ void SettingsTest::Section()
     settings.findMember("a.b.c.d")->getMember("u") >>= u;
     PT_UNIT_ASSERT( u == "2");
 
-    PT_UNIT_ASSERT( settings.findMember("x.y.z.u") )
+    PT_UNIT_ASSERT( settings.findMember("x.y.z.u") );
     
     settings.findMember("x.y.z.u")->getMember("v") >>= v;
     PT_UNIT_ASSERT( v == "3");
@@ -410,7 +410,7 @@ void SettingsTest::Section()
     settings.findMember("x.y.z.u")->getMember("w") >>= w;
     PT_UNIT_ASSERT( w == "4");
 
-    PT_UNIT_ASSERT( settings.findMember("e.f.g.u") )
+    PT_UNIT_ASSERT( settings.findMember("e.f.g.u") );
     
     settings.findMember("e.f.g.u")->getMember("v") >>= v;
     PT_UNIT_ASSERT( v == "5");

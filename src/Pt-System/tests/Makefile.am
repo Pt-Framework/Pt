@@ -18,4 +18,6 @@ Pt_System_test_LDADD = $(top_builddir)/src/Pt/libPt.la \
 	$(top_builddir)/src/Pt-System/libPt-System.la \
 	$(top_builddir)/src/Pt-Unit/libPt-Unit.la
 
+ProcessTestChild_SOURCES = ProcessTestChild.cpp
+
 ProcessTestChild_LDADD = $(top_builddir)/src/Pt/libPt.la

@@ -97,26 +97,26 @@ class DelegateTest : public Pt::Unit::TestSuite
             Callee* recv = new Callee;
             Pt::Delegate<int> delegate;
             connect( delegate, *recv, &Callee::slot0 );
-            PT_UNIT_ASSERT(delegate.connectionCount() == 1)
+            PT_UNIT_ASSERT(delegate.connectionCount() == 1);
 
             // A deleted receiver must remove itself from a signal
             delete recv;
             delegate.invoke();
-            PT_UNIT_ASSERT(delegate.connectionCount() == 0)
+            PT_UNIT_ASSERT(delegate.connectionCount() == 0);
 
             // A delegate must call its slot when connected
             recv = new Callee;
             Pt::Connection connection = connect(delegate, *recv, &Callee::slot0 );
             int ret = delegate.call();
-            PT_UNIT_ASSERT( recv->count() == 1)
-            PT_UNIT_ASSERT( ret == 9)
+            PT_UNIT_ASSERT( recv->count() == 1);
+            PT_UNIT_ASSERT( ret == 9);
             recv->reset();
 
             // Closing connections must remove them
             connection.close();
             delegate.invoke();
-            PT_UNIT_ASSERT( recv->count() == 0 )
-            PT_UNIT_ASSERT( delegate.connectionCount() == 0)
+            PT_UNIT_ASSERT( recv->count() == 0 );
+            PT_UNIT_ASSERT( delegate.connectionCount() == 0);
 
             delete recv;
         }
@@ -127,26 +127,26 @@ class DelegateTest : public Pt::Unit::TestSuite
             Callee* recv = new Callee;
             Pt::Delegate<int, int, int> delegate;
             delegate += slot(*recv, &Callee::slot2);
-            PT_UNIT_ASSERT(delegate.connectionCount() == 1)
+            PT_UNIT_ASSERT(delegate.connectionCount() == 1);
 
             // A deleted receiver must remove itself from a signal
             delete recv;
             delegate.invoke(1, 2);
-            PT_UNIT_ASSERT(delegate.connectionCount() == 0)
+            PT_UNIT_ASSERT(delegate.connectionCount() == 0);
 
             // A delegate must call its slot when connected
             recv = new Callee;
             Pt::Connection connection = delegate += slot(*recv, &Callee::slot2);
             int ret = delegate.call(1, 2);
-            PT_UNIT_ASSERT( recv->count() == 1)
-            PT_UNIT_ASSERT( ret == 7)
+            PT_UNIT_ASSERT( recv->count() == 1);
+            PT_UNIT_ASSERT( ret == 7);
             recv->reset();
 
             // Closing connections must remove them
             connection.close();
             delegate.invoke(1, 2);
-            PT_UNIT_ASSERT( recv->count() == 0 )
-            PT_UNIT_ASSERT( delegate.connectionCount() == 0)
+            PT_UNIT_ASSERT( recv->count() == 0 );
+            PT_UNIT_ASSERT( delegate.connectionCount() == 0);
 
             delete recv;
         }
@@ -158,14 +158,14 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Delegate<int> d2;
 
             connect( d1, slot(d2) );
-            PT_UNIT_ASSERT( d1.connectionCount() == 1)
+            PT_UNIT_ASSERT( d1.connectionCount() == 1);
 
             connect( d2, slot(*recv, &Callee::slot0) );
-            PT_UNIT_ASSERT( d2.connectionCount() == 2)
+            PT_UNIT_ASSERT( d2.connectionCount() == 2);
 
             // Slot must be called via delegate chain
             d1.call();
-            PT_UNIT_ASSERT( recv->count() == 1 )
+            PT_UNIT_ASSERT( recv->count() == 1 );
 
             delete recv;
         }
@@ -177,17 +177,17 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Delegate<int> d2;
 
             Pt::Connection connection1 = connect(*d1, callee, &Callee::slot0);
-            PT_UNIT_ASSERT( d1->connectionCount() == 1)
+            PT_UNIT_ASSERT( d1->connectionCount() == 1);
 
             d2 = *d1;
-            PT_UNIT_ASSERT( d2.connectionCount() == 1)
+            PT_UNIT_ASSERT( d2.connectionCount() == 1);
 
             connection1.close();
-            PT_UNIT_ASSERT( d1->connectionCount() == 0)
+            PT_UNIT_ASSERT( d1->connectionCount() == 0);
             delete d1;
 
             d2.call();
-            PT_UNIT_ASSERT( callee.count() == 1 )
+            PT_UNIT_ASSERT( callee.count() == 1 );
         }
 
         void DeleteWhileCall()

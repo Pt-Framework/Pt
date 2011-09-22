@@ -1,0 +1,13 @@
+SubDir TOP src Pt-Xml tests ;
+SubDirHdrs $(TOP)/include ;
+
+PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp
+                         XmlSerializerTest.cpp
+                         XmlTest.cpp
+                         XmlWriterTest.cpp ;
+
+LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
+MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+DEPENDS Pt-Xml-all : Pt-Xml-test ;

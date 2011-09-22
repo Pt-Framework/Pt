@@ -81,29 +81,74 @@ namespace Unit {
             std::string _what;
     };
 
-    #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
+    #define PT_UNIT_ASSERT(cond) \
+        do { \
+            if( !(cond) ) \
+                throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO); \
+        } while (false)
 
-    #define PT_UNIT_ASSERT_MSG(cond, what) if( !(cond) ) throw Pt::Unit::Assertion((what), PT_SOURCEINFO);
+    #define PT_UNIT_ASSERT_MSG(cond, what) \
+        do { \
+            if( !(cond) ) \
+            { \
+                std::ostringstream _pt_msg; \
+                _pt_msg << what; \
+                throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
+            } \
+        } while (false)
 
     #define PT_UNIT_ASSERT_EQUALS(value1, value2) \
-        if( ! ((value1) == (value2)) ) \
-        { \
-          std::ostringstream _Pt_msg; \
-          _Pt_msg << "not equal: value1 (" #value1 ")=<" << value1 << "> value2 (" #value2 ")=<" << value2 << '>'; \
-          throw Pt::Unit::Assertion(_Pt_msg.str(), PT_SOURCEINFO); \
-        }
+        do { \
+            if( ! ((value1) == (value2)) ) \
+            { \
+                std::ostringstream _pt_msg; \
+                _pt_msg << "not equal: value1 (" #value1 ")=<" << value1 << "> value2 (" #value2 ")=<" << value2 << '>'; \
+                throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
+            } \
+        } while (false)
 
     #define PT_UNIT_ASSERT_THROW(cond, EX) \
-        try { \
-            cond; \
-            throw std::string("Exception expected."); \
-        } \
-        catch(const std::string & s) \
-        { \
-            throw Pt::Unit::Assertion(s, PT_SOURCEINFO); \
-        } \
-        catch(const EX &) \
-        {} \
+        do { \
+            struct _pt_ex { }; \
+            try \
+            { \
+                cond; \
+                throw _pt_ex(); \
+            } \
+            catch(const _pt_ex &) \
+            { \
+                std::ostringstream _pt_msg; \
+                _pt_msg << "exception of type " #EX " expected in " #cond; \
+                throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
+            } \
+            catch(const EX &) \
+            {} \
+        } while (false)
+
+    #define PT_UNIT_ASSERT_NOTHROW(cond) \
+        do { \
+            try { \
+            \
+                cond; \
+            } \
+            catch(const std::exception& e) \
+            { \
+                throw Pt::Unit::Assertion( \
+                    std::string("unexpected exception of type ") + typeid(e).name() + ": " + e.what(), \
+                    PT_SOURCEINFO); \
+            } \
+            catch(...) \
+            { \
+                throw Pt::Unit::Assertion("unexpected exception." , PT_SOURCEINFO); \
+            } \
+        } while (false)
+
+    #define PT_UNIT_FAIL(what) \
+        do { \
+            std::ostringstream _pt_msg; \
+            _pt_msg << what; \
+            throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
+        } while (false)
 
 } // namespace Unit
 

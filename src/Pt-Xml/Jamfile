@@ -19,15 +19,6 @@ SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-Xml :  Pt ;
 SharedLibrary_MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
 
-PT_XML_TESTS = XmlTest.cpp
-               XmlSerializerTest.cpp
-               XmlWriterTest.cpp
-               ;
-
-PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp $(PT_XML_TESTS) ;
-Main_LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-System Pt-Unit Pt-Reflex Pt ;
-PtUnitTest_MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
-
 Main XmlReaderTest : XmlReaderTest.cpp ;
 Main_LinkSharedLibraries XmlReaderTest : Pt-Xml Pt-System Pt ;
 Main_MakeLocate XmlReaderTest : $(OUTPUT_TARGET) ;
@@ -35,6 +26,7 @@ Main_MakeLocate XmlReaderTest : $(OUTPUT_TARGET) ;
 # Define pseudo targets to call from projects
 NOTFILE Pt-Xml-all ;
 DEPENDS Pt-Xml-all : Pt-Xml
-                     Pt-Xml-test
                      XmlReaderTest
                      ;
+
+SubInclude TOP src Pt-Xml tests ;

@@ -90,10 +90,10 @@ class LoggerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger logger("LoggerTest.a.b.c");
 
-            PT_UNIT_ASSERT_THROW( Pt::System::Logger l1("."), std::invalid_argument)
-            PT_UNIT_ASSERT_THROW( Pt::System::Logger l2("a..b"), std::invalid_argument)
-            PT_UNIT_ASSERT_THROW( Pt::System::Logger l3("a."), std::invalid_argument)
-            PT_UNIT_ASSERT_THROW( Pt::System::Logger l4(".a"), std::invalid_argument)
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l1("."), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l2("a..b"), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l3("a."), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW( Pt::System::Logger l4(".a"), std::invalid_argument);
         }
 
         void BenchmarkLogger()
@@ -250,9 +250,9 @@ class LoggerTest : public Pt::Unit::TestSuite
 
             Pt::System::LogTarget::get("LoggerTest.FileChannel").setChannel("console://");
 
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log") )
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.1") )
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.2") )
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log") );
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.1") );
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.2") );
         }
 
         void SerialChannel()

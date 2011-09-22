@@ -15,7 +15,6 @@ libPt_Xml_la_SOURCES = \
 	XmlReader.cpp \
 	XmlSerializationContext.cpp \
 	XmlSerializer.cpp \
-	XmlTest.cpp \
 	XmlWriter.cpp
 
 libPt_Xml_la_LIBADD = $(top_builddir)/src/Pt/libPt.la
