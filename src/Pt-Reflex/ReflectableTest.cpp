@@ -90,12 +90,12 @@ class ReflectableTest : public Pt::Unit::TestSuite
             TestReflectable reflectable;
 
             Pt::Reflex::Reflectable::PropertyIterator it = reflectable.propertiesBegin();
-            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
-            PT_UNIT_ASSERT( it->name() == std::string("number") )
+            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() );
+            PT_UNIT_ASSERT( it->name() == std::string("number") );
 
             ++it;
-            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
-            PT_UNIT_ASSERT( it->name() == std::string("count") )
+            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() );
+            PT_UNIT_ASSERT( it->name() == std::string("count") );
 
             ++it;
             PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );
@@ -106,12 +106,12 @@ class ReflectableTest : public Pt::Unit::TestSuite
             const TestReflectable reflectable;
 
             Pt::Reflex::Reflectable::ConstPropertyIterator it = reflectable.propertiesBegin();
-            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
-            PT_UNIT_ASSERT( it->name() == std::string("number") )
+            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() );
+            PT_UNIT_ASSERT( it->name() == std::string("number") );
 
             ++it;
-            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() )
-            PT_UNIT_ASSERT( it->name() == std::string("count") )
+            PT_UNIT_ASSERT( it != reflectable.propertiesEnd() );
+            PT_UNIT_ASSERT( it->name() == std::string("count") );
 
             ++it;
             PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );

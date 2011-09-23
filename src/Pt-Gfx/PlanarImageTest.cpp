@@ -70,10 +70,10 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
         void PlanarARgbView()
         {
-            PT_UNIT_ASSERT( Pt::Gfx::PlanarARgb::NumberOfChannels == 4 )
+            PT_UNIT_ASSERT( Pt::Gfx::PlanarARgb::NumberOfChannels == 4 );
 
             Pt::Gfx::PlanarARgbView view;
-            PT_UNIT_ASSERT( view.size(2,2) == 32 )
+            PT_UNIT_ASSERT( view.size(2,2) == 32 );
         }
 
 
@@ -145,10 +145,10 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
         void Yv12View()
         {
-            PT_UNIT_ASSERT( Pt::Gfx::Yv12View::NumberOfChannels == 3 )
+            PT_UNIT_ASSERT( Pt::Gfx::Yv12View::NumberOfChannels == 3 );
 
             Pt::Gfx::Yv12View view;
-            PT_UNIT_ASSERT( view.size(4, 4) == 24 )
+            PT_UNIT_ASSERT( view.size(4, 4) == 24 );
         }
 
         void Yv12BlockScale()
