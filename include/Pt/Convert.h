@@ -746,24 +746,19 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
     pos = true;
     
     // strip leading whitespace, parse sign
-    for( ; it != end; ++it)
-    {
-        if( ! Pt::isspace(*it) )
-        {
-            if(*it == fmt.minus())
-            {
-                pos = false;
-                ++it;
-            }
-            else if( *it == fmt.plus() )
-            {
-                ++it;
-            }
+    while (it != end && isspace(*it))
+        ++it;
 
-            break;
-        }
+    if(*it == fmt.minus())
+    {
+        pos = false;
+        ++it;
     }
-    
+    else if( *it == fmt.plus() )
+    {
+        ++it;
+    }
+
     return it;
 }
 
