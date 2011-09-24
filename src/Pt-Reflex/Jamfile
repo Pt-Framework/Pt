@@ -7,15 +7,10 @@ SharedLibrary Pt-Reflex : Reflectable.cpp
                           GenericType.cpp
                           TypeManager.cpp ;
 
-LinkSharedLibraries Pt-Reflex : Pt ;
-MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
-
-PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
-LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
-MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
+SharedLibrary_LinkSharedLibraries Pt-Reflex : Pt ;
+SharedLibrary_MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
 
 NOTFILE Pt-Reflex-all ;
-DEPENDS Pt-Reflex-all : Pt-Reflex
-                        Pt-Reflex-test ;
+DEPENDS Pt-Reflex-all : Pt-Reflex ;
 
-#SubInclude TOP src Pt-Reflex tests ;
+SubInclude TOP src Pt-Reflex tests ;

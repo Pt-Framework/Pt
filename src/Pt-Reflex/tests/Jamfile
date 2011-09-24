@@ -1,0 +1,11 @@
+SubDir TOP src Pt-Reflex tests ;
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Reflex ;
+
+PtUnitTest Pt-Reflex-test : ReflectableTest.cpp
+                          ;
+Main_LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
+PtUnitTest_MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
+
+# Pseudo target to call from projects
+DEPENDS Pt-Reflex-all : Pt-Reflex-test ;

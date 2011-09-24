@@ -12,3 +12,4 @@ utest: all
 	src/Pt-Http/tests/Pt-Http-test
 	src/Pt-Xml/tests/Pt-Xml-test
 	src/Pt-XmlRpc/tests/Pt-XmlRpc-test
+	src/Pt-Reflex/tests/Pt-Reflex-test

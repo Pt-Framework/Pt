@@ -76,6 +76,7 @@ AC_CONFIG_FILES([
   src/Pt-Http/Makefile
   src/Pt-Http/tests/Makefile
   src/Pt-Reflex/Makefile
+  src/Pt-Reflex/tests/Makefile
   src/Pt-Xml/Makefile
   src/Pt-Xml/tests/Makefile
   src/Pt-XmlRpc/Makefile

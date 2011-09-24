@@ -10,6 +10,7 @@ SUBDIRS = \
 	Pt-Unit \
 	Pt/tests \
 	Pt-System/tests \
+	Pt-Reflex/tests \
 	Pt-Http/tests \
 	Pt-Net/tests \
 	Pt-Xml/tests \
