@@ -35,10 +35,27 @@ libPt_la_SOURCES = \
 
 noinst_HEADERS = \
 	regexp.h \
+	Chunk.h \
+	Page.h \
+	PoolFactory.h \
 	SerializationData.h \
 	SettingsReader.h \
 	SettingsWriter.h \
-	Unicode.h
+	Unicode.h \
+	Atomicity.cw.x86.cpp \
+	Atomicity.gcc.arm.cpp \
+	Atomicity.gcc.avr32.cpp \
+	Atomicity.gcc.mips.cpp \
+	Atomicity.gcc.ppc.cpp \
+	Atomicity.gcc.sparc.cpp \
+	Atomicity.gcc.x86_64.cpp \
+	Atomicity.gcc.x86.cpp \
+	Atomicity.generic.cpp \
+	Atomicity.pthread.cpp \
+	Atomicity.sun.cpp \
+	Atomicity.windows.cpp \
+	Facets.cpp
 
-libPt_la_CXXFLAGS = $(PTHREAD_CFLAGS)
+libPt_la_CXXFLAGS = $(PTHREAD_CFLAGS) -D@PT_ATOMICITY@
 libPt_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
+

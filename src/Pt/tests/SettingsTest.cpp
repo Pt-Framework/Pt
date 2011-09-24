@@ -29,8 +29,8 @@
 
 #include "Pt/Settings.h"
 #include "Pt/Date.h"
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/TextStream.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -172,7 +172,7 @@ void SettingsTest::LoadSaveSerializable()
     settings.setObject(date, "myDate");
 
     std::ostringstream ss;
-    Pt::Text::TextOStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextOStream ts(ss, new Pt::Utf8Codec);
     settings.save(ts);
 
     Pt::Date date2(2000, 1, 1);
@@ -190,7 +190,7 @@ void SettingsTest::Comment()
     ss << "a = \"1#;2\"\n";
     ss << "#second comment\n";
     ss << "b = 2\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -209,7 +209,7 @@ void SettingsTest::ArrayOfArrays()
     std::stringstream ss;
     ss << "a={array{1,2,3},array{4,5,6}}\n";
     ss << "b = { { 1 , 2 , 3 } , { 4 , 5 , 6 } }\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -224,7 +224,7 @@ void SettingsTest::SimpleValue()
     std::stringstream ss;
     ss << "a = 5\n";
     ss << "b=6\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -243,7 +243,7 @@ void SettingsTest::SimpleTypedValue()
     std::stringstream ss;
     ss << "a = int ( 5 )\n";
     ss << "b = int(6)\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -262,7 +262,7 @@ void SettingsTest::SimpleQoutedValue()
     std::stringstream ss;
     ss << "a=\"a b c\"\n";
     ss << "b = \"a b c\"\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -281,7 +281,7 @@ void SettingsTest::SimpleArray()
     std::stringstream ss;
     ss << "a={1,2,3}\n";
     ss << "b = { 4 , 5 , 6 } \n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -292,7 +292,7 @@ void SettingsTest::SimpleNamedArray()
     std::stringstream ss;
     ss << "a=array{1,2,3}\n";
     ss << "b = array { 4 , 5 , 6 } \n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -303,7 +303,7 @@ void SettingsTest::SimpleQoutedArray()
     std::stringstream ss;
     ss << "a={\"1\",\"2\",\"3\"}\n";
     ss << "b = { \"4\" , \"5\" , \"6\" } \n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -314,7 +314,7 @@ void SettingsTest::SimpleTypedArray()
     std::stringstream ss;
     ss << "a={int(1),int(2),int(3)}\n";
     ss << "b = { int( 4 ) , int( 5 ) , int( 6 ) }\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -325,7 +325,7 @@ void SettingsTest::SimpleArrayQoutedTypedValues()
     std::stringstream ss;
     ss << "a={int(\"1\"),int(\"2\"),int(\"3\")}\n";
     ss << "b = { int( \"4\" ) , int( \"5\" ) , int( \"6\" ) }\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -336,7 +336,7 @@ void SettingsTest::ComplexType()
     std::stringstream ss;
     ss << "a={red=1,green=2,blue=3}\n";
     ss << "b = { red = 4 , green = 5 , blue = 6 }\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -350,7 +350,7 @@ void SettingsTest::ComplexTypeNamedQoutedValues()
     std::stringstream ss;
     ss << "a={red=\"1\",green=\"2\",blue=\"3\"}\n";
     ss << "b = { red = \"4\" , green = \"5\" , blue = \"6\" }\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -365,7 +365,7 @@ void SettingsTest::ComplexNamedType()
     ss << "a=Color{red=int(1),green=int(2),blue=int(3)}\n";
     ss << "b = Color { red = int ( 4 ) , green = int ( 5 ) , blue = int ( 6 ) }";
     ss << "[section]\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
@@ -386,7 +386,7 @@ void SettingsTest::Section()
     ss << "[e.f.g]\n";
     ss << "u.v = \"5\"\n";
     ss << "u.w = 6\n";
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);

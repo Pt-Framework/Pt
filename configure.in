@@ -54,6 +54,13 @@ case "${host_cpu}-${host_os}" in
     ;;
 esac
 
+#
+# checking inline assembler type for atomic operations
+#
+AC_PT_ATOMICTYPE
+
+AC_SUBST(PT_ATOMICITY)
+
 AC_SUBST(SHARED_LIB_FLAG)
 
 AC_COMPILE_IFELSE(

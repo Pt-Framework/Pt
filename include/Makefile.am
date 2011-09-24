@@ -110,6 +110,7 @@ nobase_include_HEADERS = \
 	Pt/System/SystemError.h \
 	Pt/System/Thread.h \
 	Pt/System/Timer.h \
+	Pt/System/Uri.h \
 	Pt/System/Url.h \
 	Pt/System/LogLevel.h \
 	Pt/System/LogChannel.h \
