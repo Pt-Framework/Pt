@@ -64,7 +64,7 @@ public:
     /**
      * @brief Returns block size with which the PoolFactory was initialized.
      */
-    std::size_t blockSize()const{ return _blockSize; }
+    std::size_t blockSize()const{ return _blockSize - sizeof(std::size_t); }
 
     /** 
      * @brief Releases the memory used by the empty Chunk.  

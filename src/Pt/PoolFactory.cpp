@@ -67,7 +67,7 @@ void PoolFactory::init(std::size_t blockSize, std::size_t pageSize)
 {
     assert(blockSize > 0);
     assert(pageSize >= blockSize);
-    _blockSize = blockSize;
+    _blockSize = blockSize + sizeof(std::size_t);
 
     std::size_t numBlocks = pageSize / blockSize;
     if (numBlocks > _MaxObjectsPerChunk)
@@ -124,6 +124,9 @@ void* PoolFactory::allocate()
     assert(_allocChunk != NULL);
     assert(!_allocChunk->isFilled());
     void* place = _allocChunk->allocate(_blockSize);
+    char* index = ((char*)place + _blockSize) - sizeof(std::size_t);
+    std::size_t pos = _allocChunk - &_chunks[0];
+    *( reinterpret_cast<std::size_t*>(index) ) = pos;  
 
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
     assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
@@ -147,7 +150,10 @@ bool PoolFactory::deallocate(void* p)
     assert(&_chunks.back() >= _allocChunk);
     assert(countEmptyChunks() < 2);
 
-    Chunk* foundChunk = findChunk(p);
+    char* index = ((char*)p + _blockSize) - sizeof(std::size_t);
+    std::size_t pos = *(reinterpret_cast<std::size_t*>(index));
+
+    Chunk* foundChunk = &_chunks[pos];//findChunk(p);
     if ( 0 == foundChunk )
     {
        return false;
