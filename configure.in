@@ -64,9 +64,9 @@ AC_SUBST(PT_ATOMICITY)
 AC_SUBST(SHARED_LIB_FLAG)
 
 AC_COMPILE_IFELSE(
-  [#include <netinet/tcp.h>
+  [AC_LANG_SOURCE([#include <netinet/tcp.h>
    int i = TCP_DEFER_ACCEPT;
-  ],
+  ])],
   AC_DEFINE(HAVE_TCP_DEFER_ACCEPT, [], [defined if TCP_DEFER_ACCEPT is defined]))
 
 AC_CONFIG_FILES([
