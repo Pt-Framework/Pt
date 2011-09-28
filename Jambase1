@@ -33,12 +33,12 @@ rule Configure
 
     if $(2[2])
     {
-	local _val2 = [ Escape $(2[2]) ] ;
-	WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" "\"$(_val2)\""  ;"  ;
+        local _val2 = [ Escape $(2[2]) ] ;
+        WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" "\"$(_val2)\""  ;"  ;
     }
     else
     {
-	WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" ;"  ;
+        WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" ;"  ;
     }
 }
 
@@ -87,7 +87,7 @@ rule ConfigureRm
 
     if ! $(RM)
     {
-	Exit "Checking for rm command... FAILED!" ;
+        Exit "Checking for rm command... FAILED!" ;
     }
 
     Configure RM : $(RM) ;
@@ -117,7 +117,7 @@ rule ConfigureMv
 
     if ! $(MV)
     {
-	Exit "Checking for move command... FAILED!" ;
+        Exit "Checking for move command... FAILED!" ;
     }
 
     Configure MV : $(MV) ;
@@ -147,7 +147,7 @@ rule ConfigureCp
 
     if ! $(CP)
     {
-	Exit "Checking for copy command... FAILED!" ;
+        Exit "Checking for copy command... FAILED!" ;
     }
 
     Configure CP : $(CP) ;
@@ -234,8 +234,7 @@ rule ConfigureLn
 
     if ! $(LN) && [ TryCommand "ln check.in check.out" ]
     {
-	LN = "ln" ;
-
+        LN = "ln" ;
     }
 
     TryCommand $(RM) "check.in" "check.out" ;
@@ -260,7 +259,7 @@ rule ConfigureDotSlash
     DOT = ;
     if ! $(DOT) && [ TryCommand "cd ." ]
     {
-	DOT = "." ;
+        DOT = "." ;
     }
 
     if ! $(DOT)
@@ -271,7 +270,7 @@ rule ConfigureDotSlash
     DOTDOT = ;
     if ! $(DOTDOT) && [ TryCommand "cd .." ]
     {
-	DOTDOT = ".." ;
+        DOTDOT = ".." ;
     }
 
     if ! $(DOTDOT)
@@ -383,12 +382,12 @@ JamInclude Jamrules.base ;
 # rules and variables.
 ##########################################################################
 
-SUFOBJ	?= .o ; # TODO: move these from Jamrules.base to here
-PRELIB	?= lib ;
-SUFLIB	?= .a ;
-SUFDLL	?= .so ;
-SUFEXE	?= "" ;
-SUFDBG  ?= "" ; # TODO: deprecated
+SUFOBJ ?= .o ; # TODO: move these from Jamrules.base to here
+PRELIB ?= lib ;
+SUFLIB ?= .a ;
+SUFDLL ?= .so ;
+SUFEXE ?= "" ;
+SUFDBG ?= "" ; # TODO: deprecated
 
 JamInclude $(TARGET_OS:L).jam ;
 

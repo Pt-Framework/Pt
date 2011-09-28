@@ -4,32 +4,31 @@
 # Set path to Visual Studio installation using environment variable VSINSTALLDIR 
 # if it was not passed to jam using -sVISUALC=<path> 
 
-
 if $(VISUALC) 
 {
-  VISUALC = $(VISUALC:J=" ") ;
+    VISUALC = $(VISUALC:J=" ") ;
 } 
 else
 {
-  if $(PROCESSOR_ARCHITECTURE) = "AMD64"
-  {
-	VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ]  ;
-  }
-  else
-  {
-  	VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\" : "InstallDir" ]  ;
-  }
-  VISUALC = $(VISUALC:P) ;
-  VISUALC = $(VISUALC:P) ;
-  VISUALC = $(VISUALC:P) ;
+    if $(PROCESSOR_ARCHITECTURE) = "AMD64"
+    {
+        VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ]  ;
+    }
+    else
+    {
+        VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ]  ;
+    }
+
+    VISUALC = $(VISUALC:P) ;
+    VISUALC = $(VISUALC:P) ;
+    VISUALC = $(VISUALC:P) ;
 }
 
-
+Exit V is $(VISUALC) ;
 
 if ! $(VISUALC)
 {
-  Exit "No Visual Studio installation path defined. 
-Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" ;
+    Exit "No Visual Studio installation path defined. Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" ;
 }
 
 # Path to VC/C++ module of visual studio installation 
@@ -41,97 +40,95 @@ PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
 
 if $(TARGET_OSPLAT:L) = "x64"
 {
+    #LIB=
+    #c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\LIB\amd64;
+    #c:\ProgramFiles (x86)\Microsoft Visual Studio 10.0\VC\ATLMFC\LIB\amd64;
+    #C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\lib\x64;
+    
+    #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
 
-LIB=
-c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\LIB\amd64;
-c:\ProgramFiles (x86)\Microsoft Visual Studio 10.0\VC\ATLMFC\LIB\amd64;
-C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\lib\x64;
+    AR          = $(VISUALC)\\vc\\bin\\amd64\\lib ;
+    AS          = masm386 ;
+    CC          = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
+    RC          = $(VISUALC)\\vc\\bin\\amd64\\rc ;
+    MT          = $(VISUALC)\\vc\\bin\\amd64\\mt -nologo ;
+    CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
+    C++         = $(CC) ;
+    #C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
+    C++FLAGS   += $(CCFLAGS) ;
+    LINK        = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
+    LINKFLAGS += /MANIFEST ;
+    LINKLIBS   ?= "" ;
+    UNDEFFLAG   = "/u _" ;
 
-HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
+    LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
 
-	AR          = $(VISUALC)\\vc\\bin\\amd64\\lib ;
-	AS          = masm386 ;
-	CC          = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
-	RC          = $(VISUALC)\\vc\\bin\\amd64\\rc ;
-	MT          = $(VISUALC)\\vc\\bin\\amd64\\mt -nologo ;
-	CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
-	C++         = $(CC) ;
-	#C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
-	C++FLAGS   += $(CCFLAGS) ;
-	LINK        = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
-	LINKFLAGS += /MANIFEST ;
-	LINKLIBS   ?= "" ;
-	UNDEFFLAG   = "/u _" ;
+    CCFLAGS += /DWIN32 ;
 
-	LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
+    if $(CONFIG:L) = debug 
+    {
+        CCFLAGS   += /MDd /Zi /RTC1 ;
+        OPTIM     ?= /Od ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else if $(CONFIG:L) = release 
+    {
+        CCFLAGS += /MD /D "NDEBUG" ;
+        OPTIM   ?= /Ox /Ot /Oy ;
+    }
+    else if $(CONFIG:L) = aqtime
+    {
+        CCFLAGS += /MD /Zi /D "NDEBUG" ;
+        OPTIM   ?= /Ox /Ot /Oy ;
+        LINKFLAGS += /DEBUG ;
+    }
 
-	CCFLAGS += /DWIN32 ;
-
-	if $(CONFIG:L) = debug 
-	{
-		CCFLAGS   += /MDd /Zi /RTC1 ;
-		OPTIM     ?= /Od ;
-		LINKFLAGS += /DEBUG ;
-	}
-	else if $(CONFIG:L) = release 
-	{
-		CCFLAGS += /MD /D "NDEBUG" ;
-		OPTIM   ?= /Ox /Ot /Oy ;
-	}
-	else if $(CONFIG:L) = aqtime
-	{
-		CCFLAGS += /MD /Zi /D "NDEBUG" ;
-		OPTIM   ?= /Ox /Ot /Oy ;
-		LINKFLAGS += /DEBUG ;
-	}
-
-	WARN     ?= /W3 ;
-	C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
+    WARN     ?= /W3 ;
+    C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
 }
-else $(TARGET_OSPLAT:L) = "x86"
+else if $(TARGET_OSPLAT:L) = "x86"
 {
-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
+    #HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
 
-	AR          = $(VISUALC)\\vc\\bin\\lib ;
-	AS          = masm386 ;
-	CC          = $(VISUALC)\\vc\\bin\\cl /nologo ;
-	RC          = $(VISUALC)\\vc\\bin\\rc ;
-	MT          = $(VISUALC)\\vc\\bin\\mt -nologo ;
-	CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
-	C++         = $(CC) ;
-	#C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
-	C++FLAGS   += $(CCFLAGS) ;
-	LINK        = $(VISUALC)\\vc\\bin\\link /nologo ;
-	#LINKFLAGS += /MANIFEST:NO ;
-	LINKFLAGS += /MANIFEST ;
-	LINKLIBS   ?= "" ;
-	UNDEFFLAG   = "/u _" ;
+    AR          = $(VISUALC)\\vc\\bin\\lib ;
+    AS          = masm386 ;
+    CC          = $(VISUALC)\\vc\\bin\\cl /nologo ;
+    RC          = $(VISUALC)\\vc\\bin\\rc ;
+    MT          = $(VISUALC)\\vc\\bin\\mt -nologo ;
+    CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
+    C++         = $(CC) ;
+    #C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
+    C++FLAGS   += $(CCFLAGS) ;
+    LINK        = $(VISUALC)\\vc\\bin\\link /nologo ;
+    #LINKFLAGS += /MANIFEST:NO ;
+    LINKFLAGS += /MANIFEST ;
+    LINKLIBS   ?= "" ;
+    UNDEFFLAG   = "/u _" ;
 
-	LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
+    LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
 
-	CCFLAGS += /DWIN32 ;
+    CCFLAGS += /DWIN32 ;
 
-	if $(CONFIG:L) = debug 
-	{
-		CCFLAGS   += /MDd /Zi /RTC1 ;
-		OPTIM     ?= /Od ;
-		LINKFLAGS += /DEBUG ;
-	}
-	else if $(CONFIG:L) = release 
-	{
-		CCFLAGS += /MD /D "NDEBUG" ;
-		OPTIM   ?= /Ox /Ot /Oy ;
-	}
-	else if $(CONFIG:L) = aqtime
-	{
-		CCFLAGS += /MD /Zi /D "NDEBUG" ;
-		OPTIM   ?= /Ox /Ot /Oy ;
-		LINKFLAGS += /DEBUG ;
-	}
+    if $(CONFIG:L) = debug 
+    {
+        CCFLAGS   += /MDd /Zi /RTC1 ;
+        OPTIM     ?= /Od ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else if $(CONFIG:L) = release 
+    {
+        CCFLAGS += /MD /D "NDEBUG" ;
+        OPTIM   ?= /Ox /Ot /Oy ;
+    }
+    else if $(CONFIG:L) = aqtime
+    {
+        CCFLAGS += /MD /Zi /D "NDEBUG" ;
+        OPTIM   ?= /Ox /Ot /Oy ;
+        LINKFLAGS += /DEBUG ;
+    }
 
-	WARN     ?= /W3 ;
-	C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
-
+    WARN     ?= /W3 ;
+    C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
 }
 
 

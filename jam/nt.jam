@@ -39,3 +39,6 @@ else
 {
     TOOLSET ?= vc7 ;
 }
+
+# TODO: if TOOLSET is not specify on command line search registry for 
+#       visual studio installation
