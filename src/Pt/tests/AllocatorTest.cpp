@@ -30,12 +30,14 @@
 #include "Chunk.h"
 #include <Pt/PoolAllocator.h>
 #include <Pt/PageAllocator.h>
+#include "PoolFactory.h"
 #include <Pt/Types.h>
 #include <Pt/DateTime.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/RegisterTest.h>
 #include <Pt/Unit/TestSuite.h>
+#include <Pt/SerializationInfo.h>
 
 class AllocatorTest : public Pt::Unit::TestSuite
 {
@@ -46,6 +48,9 @@ public:
         Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &AllocatorTest::allocateDeallocate );
 		Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &AllocatorTest::trimTest );
 		Pt::Unit::TestSuite::registerMethod( "benchMarkPrimitiveTypes", *this, &AllocatorTest::benchMarkPrimitiveTypes );
+
+        // TODO this test fails currently:
+		//Pt::Unit::TestSuite::registerMethod( "poolFactory", *this, &AllocatorTest::poolFactoryTest );
     }
 
 protected:
@@ -53,6 +58,7 @@ protected:
 	void allocateDeallocate();
 	void trimTest();
 	void benchMarkPrimitiveTypes();
+	void poolFactoryTest();
 
 };
 
@@ -192,6 +198,18 @@ void AllocatorTest::allocateDeallocate()
         PT_UNIT_ASSERT(chunk.chunk()._firstAvailableBlock == i);
         PT_UNIT_ASSERT(chunk.chunk()._blocksAvailable == 155 + (i+1));
     }
+}
+
+void AllocatorTest::poolFactoryTest()
+{
+    Pt::PoolFactory f;
+    f.init(8, 8*16);
+
+    void* a[50];
+    for (unsigned n = 0; n < 50; ++n)
+        a[n] = f.allocate();
+    for (unsigned n = 0; n < 50; ++n)
+        f.deallocate(a[n]);
 }
 
 Pt::Unit::RegisterTest<AllocatorTest> register_AllocatorTest;
