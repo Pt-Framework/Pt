@@ -58,7 +58,7 @@ protected:
 	void allocateDeallocate();
 	void trimTest();
 	void benchMarkPrimitiveTypes();
-	void poolFactoryTest();
+	//void poolFactoryTest();
 
 };
 
@@ -200,16 +200,16 @@ void AllocatorTest::allocateDeallocate()
     }
 }
 
-void AllocatorTest::poolFactoryTest()
-{
-    Pt::PoolFactory f;
-    f.init(8, 8*16);
+/* 
+void AllocatorTest::poolFactoryTest() { 
+    Pt::PoolFactory f; f.init(8, 8*16);
 
     void* a[50];
     for (unsigned n = 0; n < 50; ++n)
         a[n] = f.allocate();
     for (unsigned n = 0; n < 50; ++n)
         f.deallocate(a[n]);
-}
+} 
+*/ 
 
 Pt::Unit::RegisterTest<AllocatorTest> register_AllocatorTest;
