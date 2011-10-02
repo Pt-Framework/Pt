@@ -83,13 +83,6 @@ void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 }
 
 
-Http::Responder* Service::newResponder()
-{
-    return new XmlRpcResponder(*this);
-}
-
-
-/*
 Http::Responder* Service::createResponder(const Http::Request& req)
 {
     if (req.header().isHeaderValue("Content-Type", "text/xml"))
@@ -103,7 +96,6 @@ void Service::releaseResponder(Http::Responder* resp)
 {
     delete resp;
 }
-*/
 
 }
 

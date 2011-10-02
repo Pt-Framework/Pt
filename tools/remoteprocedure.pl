@@ -31,10 +31,11 @@ use Getopt::Std;
 
 my %opt;
 
-getopts('n:N:', \%opt);
+getopts('n:N:L:', \%opt);
 
-my $N = $opt{n} || 5;
+my $N = $opt{n} || 10;
 my $ns = $opt{N} || 'Pt';
+my $license = $opt{L} || 'lgpl++.txt';
 
 sub constRef {
   my $n = shift;
@@ -64,7 +65,21 @@ EOF
 ########################################################################
 ## first
 ##
+if ($license)
+{
+  open F, "<$license";
+  print "/*\n", <F>, "*/\n\n";
+  close F;
+}
+
 print <<EOF;
+#ifndef PT_XMLRPC_REMOTEPROCEDURE_TPP
+#define PT_XMLRPC_REMOTEPROCEDURE_TPP
+
+namespace Pt {
+
+namespace XmlRpc {
+
 template <typename R,
 EOF
 
@@ -85,6 +100,14 @@ class RemoteProcedure : public RemoteProcedureBase<R>
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+EOF
+for (my $n = 1; $n <= $N; ++$n)
+{
+  print <<EOF;
+        , _a$n( & client.context() )
+EOF
+}
+  print <<EOF;
         { }
 
         void begin($constRef)
@@ -177,6 +200,14 @@ EOF
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
+EOF
+for (my $n = 1; $n <= $nn; ++$n)
+{
+  print <<EOF;
+        , _a$n( & client.context() )
+EOF
+}
+  print <<EOF;
         { }
 
         void begin($constRef)
@@ -278,4 +309,9 @@ EOF
         }
 };
 
+}
+
+}
+
+#endif // PT_XMLRPC_REMOTEPROCEDURE_TPP
 EOF
