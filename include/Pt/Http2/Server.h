@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2011 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,9 @@
 #include <Pt/Http2/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
+#include <vector>
 #include <string>
 #include <cstddef>
 
@@ -47,32 +50,49 @@ namespace Http {
 
 class Request;
 class Service;
-class ServerImpl;
+class Handler;
+class Responder;
+class NotFoundService;
+class NotAuthenticatedService;
 
-class PT_HTTP_API Server : private Pt::NonCopyable
+class PT_HTTP_API Server : public Pt::Connectable
+                         , private Pt::NonCopyable
 {
     public:
         explicit Server(System::EventLoop& eventLoop);
+
         Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
+
         ~Server();
 
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
         void addService(const std::string& url, Service& service);
+
         void removeService(Service& service);
 
+        Responder* getResponder(const Request& request);
+
+        Responder* getDefaultResponder(const Request& request);
+
         std::size_t readTimeout() const;
+
         std::size_t writeTimeout() const;
+
         std::size_t keepAliveTimeout() const;
 
         void readTimeout(std::size_t ms);
+
         void writeTimeout(std::size_t ms);
+
         void keepAliveTimeout(std::size_t ms);
 
         unsigned minThreads() const;
+
         void minThreads(unsigned m);
 
         unsigned maxThreads() const;
+
         void maxThreads(unsigned m);
 
         enum Runmode {
@@ -85,8 +105,19 @@ class PT_HTTP_API Server : private Pt::NonCopyable
 
         Signal<Runmode> runmodeChanged;
 
+    protected:
+        void onAccept(Net::TcpServer& server);
+
     private:
-        ServerImpl* _impl;
+        System::EventLoop& _loop;
+        Net::TcpServer _serverSocket;
+        std::vector<Handler*> _sockets;
+
+        typedef std::multimap<std::string, Service*> ServicesType;
+        System::ReadWriteMutex _serviceMutex;
+        ServicesType _services;
+        NotFoundService* _defaultService;
+        NotAuthenticatedService* _noAuthService;
 };
 
 
@@ -95,3 +126,4 @@ class PT_HTTP_API Server : private Pt::NonCopyable
 } // namespace Pt
 
 #endif
+

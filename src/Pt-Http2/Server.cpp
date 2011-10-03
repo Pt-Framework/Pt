@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2011 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,102 +26,539 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "Parser.h"
+#include "NotFoundService.h"
+#include "NotAuthenticatedService.h"
 #include <Pt/Http2/Server.h>
+#include <Pt/Http2/Request.h>
+#include <Pt/Http2/Reply.h>
+#include <Pt/Http2/Service.h>
+#include <Pt/Http2/Responder.h>
 #include <Pt/System/EventLoop.h>
-#include "ServerImpl.h"
+#include <Pt/System/IOStream.h>
+#include <Pt/System/Timer.h>
+#include <iostream>
 
 namespace Pt {
 
 namespace Http {
 
-Server::Server(System::EventLoop& eventLoop)
-    : _impl(new ServerImpl(eventLoop, runmodeChanged))
+class Handler : public Net::TcpSocket, public Connectable
 {
+    class ParseEvent : public HeaderParser::MessageHeaderEvent
+    {
+            Request& _request;
+
+        public:
+            explicit ParseEvent(Request& request)
+            : HeaderParser::MessageHeaderEvent(request.header())
+            , _request(request)
+            { }
+
+            virtual void onMethod(const std::string& method);
+            virtual void onUrl(const std::string& url);
+            virtual void onUrlParam(const std::string& q);
+    };
+
+    public:
+        Handler(Server& server, System::EventLoop& loop, Net::TcpServer& tcpServer);
+
+        ~Handler();
+
+        void onInput(System::StreamBuffer& sb);
+
+        bool onOutput(System::StreamBuffer& sb);
+
+        void onTimeout();
+
+        bool doReply();
+
+        void sendReply();
+
+        bool isReady() const
+        { return _parser.end() && _contentLength == 0; }
+
+        const Request& request() const 
+        { return _request; }
+
+        const Reply& reply() const     
+        { return _reply; }
+
+        Signal<Handler&> inputReady;
+
+        Signal<Handler&> timeout;
+
+        System::StreamBuffer& buffer()         
+        { return _stream.buffer(); }
+
+    private:
+        Server& _server;
+        ParseEvent _parseEvent;
+        HeaderParser _parser;
+        Request _request;
+        Reply _reply;
+
+        System::Timer _timer;
+        int _contentLength;
+        Responder* _responder;
+        System::IOStream _stream;
+};
+
+
+void Handler::ParseEvent::onMethod(const std::string& method)
+{
+    _request.method(method);
 }
 
-Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
-    : _impl(new ServerImpl(eventLoop, runmodeChanged))
+
+void Handler::ParseEvent::onUrl(const std::string& url)
 {
-    _impl->listen(ip, port, backlog);
+    _request.url(url);
 }
+
+
+void Handler::ParseEvent::onUrlParam(const std::string& q)
+{
+    _request.qparams(q);
+}
+
+
+Handler::Handler(Server& server, System::EventLoop& loop, Net::TcpServer& tcpServer)
+: _server(server)
+, _parseEvent(_request)
+, _parser(_parseEvent, false)
+, _responder(0)
+{
+    loop.add(*this);
+    loop.add(_timer);
+
+    _stream.attachDevice(*this);
+    Pt::connect(_stream.buffer().inputReady, *this, &Handler::onInput);
+    Pt::connect(_stream.buffer().outputReady, *this, &Handler::onOutput);
+    Pt::connect(_timer.timeout, *this, &Handler::onTimeout);
+
+    Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DEFER_ACCEPT);
+    _stream.buffer().beginRead();
+    _timer.start( _server.readTimeout() );
+}
+
+
+Handler::~Handler()
+{
+    if(_responder)
+        _responder->release();
+}
+
+
+void Handler::onInput(System::StreamBuffer& sb)
+{
+    sb.endRead();
+
+    if (sb.in_avail() == 0 || sb.device()->eof())
+    {
+        close();
+        return;
+    }
+
+    _timer.start(_server.readTimeout());
+
+    if ( _responder == 0 )
+    {
+        _parser.advance(sb);
+
+        if (_parser.fail())
+        {
+            _responder = _server.getDefaultResponder(_request);
+            _responder->replyError(_reply.body(), _request, _reply,
+                std::runtime_error("invalid http header"));
+            _responder->release();
+            _responder = 0;
+
+            sendReply();
+
+            onOutput(sb);
+            return;
+        }
+
+        if( _parser.end() )
+        {
+            _responder = _server.getResponder(_request);
+
+            try
+            {
+                _responder->beginRequest(_stream, _request);
+            }
+            catch (const std::exception& e)
+            {
+                _reply.setHeader("Connection", "close");
+                _responder->replyError(_reply.body(), _request, _reply, e);
+                _responder->release();
+                _responder = 0;
+                sendReply();
+
+                onOutput(sb);
+                return;
+            }
+
+            _contentLength = _request.header().contentLength();
+
+            //log_debug("content length of request is " << _contentLength);
+            if (_contentLength == 0)
+            {
+                _timer.stop();
+                doReply();
+                return;
+            }
+        }
+        else
+        {
+            sb.beginRead();
+        }
+    }
+
+    if (_responder)
+    {
+        if (sb.in_avail() > 0)
+        {
+            try
+            {
+                std::size_t s = _responder->readBody(_stream);
+                assert(s > 0);
+                _contentLength -= s;
+            }
+            catch (const std::exception& e)
+            {
+                _reply.setHeader("Connection", "close");
+                _responder->replyError(_reply.body(), _request, _reply, e);
+                _responder->release();
+                _responder = 0;
+                sendReply();
+
+                onOutput(sb);
+                return;
+            }
+        }
+
+        if (_contentLength <= 0)
+        {
+            _timer.stop();
+            doReply();
+        }
+        else
+        {
+            sb.beginRead();
+        }
+    }
+}
+
+
+bool Handler::doReply()
+{
+    //log_trace("http::Socket::doReply");
+    try
+    {
+        _responder->reply(_reply.body(), _request, _reply);
+    }
+    catch (const std::exception& e)
+    {
+        //log_warn("responder reported error: " << e.what());
+        _reply.clear();
+        _responder->replyError(_reply.body(), _request, _reply, e);
+    }
+
+    _responder->release();
+    _responder = 0;
+
+    sendReply();
+
+    return onOutput(_stream.buffer());
+}
+
+
+bool Handler::onOutput(System::StreamBuffer& sb)
+{
+    //log_trace("onOutput");
+
+    //log_debug("send data to " << getPeerAddr());
+    
+    try
+    {
+        sb.endWrite();
+
+        if ( sb.out_avail() )
+        {
+            sb.beginWrite();
+            _timer.start(_server.writeTimeout());
+        }
+        else
+        {
+            bool keepAlive = _request.header().keepAlive()
+                          && _reply.header().keepAlive();
+
+            if(keepAlive)
+            {
+                //log_debug("do keep alive");
+                _timer.start(_server.keepAliveTimeout());
+                _request.clear();
+                _reply.clear();
+                _parser.reset(false);
+
+                if( sb.in_avail() )
+                    onInput(sb);
+                else
+                    _stream.buffer().beginRead();
+            }
+            else
+            {
+                //log_debug("don't do keep alive");
+                std::exit(1);
+                close();
+                return false;
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        //log_warn("exception occured when processing request: " << e.what());
+        close();
+        timeout(*this);
+        return false;
+    }
+
+    return true;
+}
+
+
+void Handler::onTimeout()
+{
+    //log_debug("timeout");
+    timeout(*this);
+}
+
+
+void Handler::sendReply()
+{
+    const char* contentLength = "Content-Length";
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    _stream << "HTTP/"
+        << _reply.header().httpVersionMajor() << '.'
+        << _reply.header().httpVersionMinor() << ' '
+        << _reply.header().httpReturnCode() << ' '
+        << _reply.header().httpReturnText() << "\r\n";
+
+    for (ReplyHeader::const_iterator it = _reply.header().begin();
+        it != _reply.header().end(); ++it)
+    {
+        _stream << it->first << ": " << it->second << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(contentLength))
+    {
+        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(server))
+    {
+        _stream << "Server: Pt-Net-Server\r\n";
+    }
+
+    if (!_reply.header().hasHeader(connection))
+    {
+        _stream << "Connection: "
+                << (_request.header().keepAlive() ? "keep-alive" : "close")
+                << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(date))
+    {
+        char buffer[50];
+        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    _stream << "\r\n";
+
+    _reply.sendBody(_stream);
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Server
+//////////////////////////////////////////////////////////////////////////
+
+Server::Server(System::EventLoop& eventLoop)
+: _loop(eventLoop)
+{
+    _defaultService = new NotFoundService();
+    _noAuthService = new NotAuthenticatedService();
+
+    _loop.add(_serverSocket);
+    _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
+}
+
+
+Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
+: _loop(eventLoop)
+, _serverSocket(ip, port, backlog)
+{
+    _defaultService = new NotFoundService();
+    _noAuthService = new NotAuthenticatedService();
+
+    _loop.add(_serverSocket);
+    _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
+}
+
 
 Server::~Server()
 {
-    if (!_impl)
-        return;
+    std::vector<Handler*>::iterator it;
+    for(it = _sockets.begin(); it != _sockets.end(); ++it)
+    {
+        delete *it;
+    }
 
-    if (_impl->runmode() == Running)
-        _impl->terminate();
-
-    delete _impl;
+    delete _defaultService;
+    delete _noAuthService;
 }
+
 
 void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
-    _impl->listen(ip, port, backlog);
+    _serverSocket.listen(ip, port, backlog);
 }
+
+
+void Server::onAccept(Net::TcpServer& server)
+{
+    _sockets.reserve(_sockets.size() + 1);
+
+    Handler* socket = new Handler(*this, _loop, server);
+    _sockets.push_back(socket);
+
+    _loop.add(*socket);
+    
+}
+
 
 void Server::addService(const std::string& url, Service& service)
 {
-    _impl->addService(url, service);
+    System::WriteLock serviceLock(_serviceMutex);
+    _services.insert(ServicesType::value_type(url, &service));
 }
+
 
 void Server::removeService(Service& service)
 {
-    _impl->removeService(service);
+    System::WriteLock serviceLock(_serviceMutex);
+    service.waitIdle();
+
+    ServicesType::iterator it = _services.begin();
+    while (it != _services.end())
+    {
+        if (it->second == &service)
+        {
+            _services.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
+
+
+Responder* Server::getResponder(const Request& request)
+{
+    System::ReadLock serviceLock(_serviceMutex);
+
+    for (ServicesType::const_iterator it = _services.lower_bound(request.url());
+        it != _services.end() && it->first == request.url(); ++it)
+    {
+        if (!it->second->checkAuth(request))
+        {
+            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
+        }
+
+        Responder* resp = it->second->doCreateResponder(request);
+        if (resp)
+        {
+            return resp;
+        }
+    }
+
+    return _defaultService->createResponder(request);
+}
+
+
+Responder* Server::getDefaultResponder(const Request& request)
+{ 
+    return _defaultService->createResponder(request); 
+}
+
 
 std::size_t Server::readTimeout() const
 {
-    return _impl->readTimeout();
+    return 20000;
 }
+
 
 std::size_t Server::writeTimeout() const
 {
-    return _impl->writeTimeout();
+    return 20000;
 }
+
 
 std::size_t Server::keepAliveTimeout() const
 {
-    return _impl->keepAliveTimeout();
+    return 2000;
 }
+
 
 void Server::readTimeout(std::size_t ms)
 {
-    _impl->readTimeout(ms);
+
 }
+
 
 void Server::writeTimeout(std::size_t ms)
 {
-    _impl->writeTimeout(ms);
+
 }
+
 
 void Server::keepAliveTimeout(std::size_t ms)
 {
-    _impl->keepAliveTimeout(ms);
+
 }
+
 
 unsigned Server::minThreads() const
 {
-    return _impl->minThreads();
+    return 1;
 }
+
 
 void Server::minThreads(unsigned m)
 {
-    _impl->minThreads(m);
+ 
 }
+
 
 unsigned Server::maxThreads() const
 {
-    return _impl->maxThreads();
+    return 2;
 }
+
 
 void Server::maxThreads(unsigned m)
 {
-    _impl->maxThreads(m);
-}
 
+}
 
 } // namespace Http
 
 } // namespace Pt
+
