@@ -605,9 +605,12 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
                 }
 
                 log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
-                if (_chunkedIStream.eod())
+                if( _chunkedIStream.eod() )
                 {
-                    _parser.readHeader();
+                    if( _replyHeader.hasHeader("Trailer") )
+                        _parser.readHeader();
+                    else
+                        _client->replyFinished(*_client);
                 }
             }
 
