@@ -30,32 +30,81 @@
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
 
-#define ALLOCATOR 1
-
-#ifdef ALLOCATOR
-#include "PoolFactory.h"
-#endif
-
 #include <map>
 
 namespace Pt {
+
+namespace
+{
+    // The BlockAllocator allocates multipe chunks of memory at once
+    // and returns on each call to allocate the next available chunk.
+    // The chunks are not deallocated nor recycled, but the memory
+    // is released, when the BlockAllocator is released.
+    //
+    // This fits perfectly well into the serialiation context, since
+    // a bunch of SerializationInfo objects are needed for serialization
+    // and are released all at once, when the serialation is finished.
+
+    template <typename T>
+    class BlockAllocator
+    {
+            BlockAllocator(const BlockAllocator&) { }
+            BlockAllocator& operator=(const BlockAllocator&)  { return *this; }
+
+        public:
+            explicit BlockAllocator(size_t numElementsPerBlock)
+                : _blockSize(numElementsPerBlock * sizeof(T)),
+                  _offset(_blockSize)
+            {
+                assert(numElementsPerBlock > 0);
+            }
+
+            ~BlockAllocator();
+
+            void* allocate();
+            void deallocate(void *) { }
+
+        private:
+            size_t _blockSize;
+            size_t _offset;
+            std::vector<char*> _memory;
+    };
+
+    template <typename T>
+    BlockAllocator<T>::~BlockAllocator()
+    {
+        for (std::vector<char*>::iterator it = _memory.begin(); it != _memory.end(); ++it)
+            delete[] *it;
+    }
+
+    template <typename T>
+    void* BlockAllocator<T>::allocate()
+    {
+        if (_offset >= _blockSize)
+        {
+            _memory.push_back( new char[_blockSize] );
+            _offset = 0;
+        }
+
+        void* ptr = static_cast<void*>(_memory.back() + _offset);
+
+        _offset += sizeof(T);
+
+        return ptr;
+    }
+}
 
 class SerializationContextImpl
 {
     public:
         SerializationContextImpl()
-        : _limit(64)
+        : _limit(64),
+          _alloc(256)
         {
-#ifdef ALLOCATOR
-            _alloc.init(sizeof(SerializationInfo), sizeof(SerializationInfo) * 64);
-#endif
         }
 
-        std::vector<SerializationInfo*> _infos;
         size_t _limit;
-#ifdef ALLOCATOR
-        PoolFactory _alloc;
-#endif
+        BlockAllocator<SerializationInfo> _alloc;
 
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
 };
@@ -72,12 +121,6 @@ SerializationContext::SerializationContext()
 
 SerializationContext::~SerializationContext()
 {
-    std::vector<SerializationInfo*>::iterator iter;
-    for(iter = _cache->_infos.begin(); iter != _cache->_infos.end(); ++iter)
-    {
-        delete *iter;
-    }
-
     std::map<Pt::TypeInfo, SerializationSurrogate*>::iterator siter;
     for(siter = _cache->_surrmap.begin(); siter != _cache->_surrmap.end(); ++siter)
     {
@@ -102,44 +145,15 @@ void SerializationContext::setLimit(size_t n)
 
 SerializationInfo* SerializationContext::get()
 {
-#ifdef ALLOCATOR
     void* m = _cache->_alloc.allocate();
     return new (m) SerializationInfo(this);
-#else
-    SerializationInfo* si = 0;
-
-    if( _cache->_infos.empty() )
-    {
-        si = new SerializationInfo(this);
-    }
-    else
-    {
-        si = _cache->_infos.back();
-        _cache->_infos.pop_back();
-    }
-
-    return si;
-#endif
 }
 
 
 void SerializationContext::push(SerializationInfo* si)
 {
-#ifdef ALLOCATOR
     si->~SerializationInfo();
     _cache->_alloc.deallocate(si);
-#else
-    si->clear();
-
-    if(_cache->_infos.size() < _cache->_limit)
-    {
-        _cache->_infos.push_back(si);
-    }
-    else
-    {
-        delete si;
-    }
-#endif
 }
 
 

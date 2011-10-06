@@ -113,23 +113,29 @@ int main(int argc, char* argv[])
 {
     try
     {
-        Pt::Arg<unsigned> N(argc, argv, 'n', 100000);
+        Pt::Arg<unsigned> nn(argc, argv, 'n', 100000);
+        Pt::Arg<unsigned> I(argc, argv, 'I', nn);
+        Pt::Arg<unsigned> D(argc, argv, 'D', nn);
+        Pt::Arg<unsigned> C(argc, argv, 'C', nn);
         Pt::Arg<bool> fileoutput(argc, argv, 'f');
 
-        std::cout << "benchmark xml serializer with " << N.getValue() << " iterations\n\n"
+        std::cout << "benchmark xml serializer with " << I.getValue() << " int vector " << D.getValue() << " double vector and " << C.getValue() << " custom vector iterations\n\n"
                      "options:\n"
-                     "   -n <number>       specify number of iterations\n"
+                     "   -n <number>       specify number of default iterations\n"
+                     "   -I <number>       specify number of iterations for int vector\n"
+                     "   -D <number>       specify number of iterations for double vector\n"
+                     "   -C <number>       specify number of iterations for custom object\n"
                      "   -f                write serialized output to files\n" << std::endl;
 
-        benchVector<int>("int", N, fileoutput);
-        benchVector<double>("double", N, fileoutput);
+        benchVector<int>("int", I, fileoutput);
+        benchVector<double>("double", D, fileoutput);
 
         {
             std::cout << "vector of custom objects:" << std::endl;
 
             TestObject obj;
             std::vector<TestObject> v;
-            for (unsigned n = 0; n < N; ++n)
+            for (unsigned n = 0; n < C; ++n)
             {
                 obj.intValue = n;
                 obj.stringValue = Pt::convert<std::string>(n);
