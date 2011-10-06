@@ -694,6 +694,8 @@ void ClientImpl::cancel()
     _socket.close();
     _stream.clear();
     _stream.buffer().discard();
+
+    _chunkedIStream.reset();
 }
 
 
