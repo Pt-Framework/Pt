@@ -12,6 +12,12 @@
 #include <Pt/Utf8Codec.h>
 #include <iostream>
 
+struct WeatherData
+{
+    Pt::String temperature;
+    Pt::String condition;
+};
+
 class GoogleWeatherClient : public Pt::Connectable
 {
     public:
@@ -33,6 +39,8 @@ class GoogleWeatherClient : public Pt::Connectable
         void beginRequest(const std::string& city)
         {
             _parseFunc = &GoogleWeatherClient::onXmlBegin;
+            _weather.condition.clear();
+            _weather.temperature.clear();
 
             _req.clear();
             _req.url("/ig/api?weather=" + city);
@@ -42,11 +50,6 @@ class GoogleWeatherClient : public Pt::Connectable
 
             _client.beginExecute(_req);
         }
-
-        // TODO: next step is to implement a way to notify the caller that
-        //       we have received a reply from the service.
-        void endRequest()
-        { }
 
     private:  
         void onHeaderReceived(Pt::Http::Client& client)
@@ -86,7 +89,10 @@ class GoogleWeatherClient : public Pt::Connectable
                     while( _reader.advance() ) // Xml::ParseError
                     {
                         const Pt::Xml::Node& node = _reader.get();
-                        (this->*_parseFunc)(node);
+
+                        // _parseFunc == 0 means end of document, we ignore the rest...
+                        if(_parseFunc)
+                            (this->*_parseFunc)(node);
                     }
                 }
             }
@@ -94,6 +100,7 @@ class GoogleWeatherClient : public Pt::Connectable
             {
                 std::cerr << error.what() << std::endl;
                 _client.cancel();
+                _loop.exit();
             }
 
             return n;
@@ -101,10 +108,11 @@ class GoogleWeatherClient : public Pt::Connectable
         
         void onReplyFinished(Pt::Http::Client& client)
         {
-            //if(_parseFunc == &GoogleWeatherClient::onXmlBegin)
-            //{  
-            //    // incomplete XML document
-            //}
+            if(_parseFunc != 0)
+            {  
+                // incomplete XML document
+                std::cerr << "inclomplete XML data" << std::endl;
+            }
 
             // we are being called when we have finished reading the body or
             // if an error occured.
@@ -118,122 +126,72 @@ class GoogleWeatherClient : public Pt::Connectable
                 client.cancel();
             }
 
-            // of course we would't stop here in a real program. This is
-            // just to demonstrate how to quit an event loop.
-            std::cout << "good bye!" << std::endl;
+            std::cerr << "Temperture: " << _weather.temperature.narrow() << std::endl;
+            std::cerr << "Condition: " << _weather.condition.narrow() << std::endl;
             _loop.exit();
         }
 
     private:
         void onXmlBegin(const Pt::Xml::Node& node)
         {
-            switch( node.type() )
+            if( node.type() == Pt::Xml::Node::StartElement)
             {
-                case Pt::Xml::Node::StartElement:
-                {
-                    const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
-                    if(se.name() == L"xml_api_reply")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlApiReply;
-                    }
-                    break;
-                }
-
-                default:
-                    break;
+                const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
+                if(se.name() == L"xml_api_reply")
+                    _parseFunc = &GoogleWeatherClient::onXmlApiReply;
             }
         }
 
         void onXmlApiReply(const Pt::Xml::Node& node)
         {
-            switch( node.type() )
+            if( node.type() == Pt::Xml::Node::StartElement)
             {
-                case Pt::Xml::Node::StartElement:
-                {
-                    const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
-                    if(se.name() == L"weather")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlWeather;
-                    }
+                const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
+                if(se.name() == L"weather")
+                    _parseFunc = &GoogleWeatherClient::onXmlWeather;
+            }
 
-                    break;
-                }
-
-                case Pt::Xml::Node::EndElement:
-                {
-                    const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
-                    if(ee.name() == L"xml_api_reply")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlBegin;
-                    }
-                }
-
-                default:
-                    break;
+            if( node.type() == Pt::Xml::Node::EndElement)
+            {
+                const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
+                if(ee.name() == L"xml_api_reply")
+                    _parseFunc = 0;
             }
         }
 
         void onXmlWeather(const Pt::Xml::Node& node)
         {
-            switch( node.type() )
+            if( node.type() == Pt::Xml::Node::StartElement)
             {
-                case Pt::Xml::Node::StartElement:
-                {
-                    const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
-                    if(se.name() == L"current_conditions")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlCurrentConditions;
-                    }
+                const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
+                if(static_cast<const Pt::Xml::StartElement&>(node).name() == L"current_conditions")
+                    _parseFunc = &GoogleWeatherClient::onXmlCurrentConditions;
+            }
 
-                    break;
-                }
-
-                case Pt::Xml::Node::EndElement:
-                {
-                    const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
-                    if(ee.name() == L"weather")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlApiReply;
-                    }
-                }
-
-                default:
-                    break;
+            if( node.type() == Pt::Xml::Node::EndElement)
+            {
+                const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
+                if(ee.name() == L"weather")
+                    _parseFunc = &GoogleWeatherClient::onXmlApiReply;
             }
         }
 
         void onXmlCurrentConditions(const Pt::Xml::Node& node)
         {
-            switch( node.type() )
+            if( node.type() == Pt::Xml::Node::StartElement)
             {
-                case Pt::Xml::Node::StartElement:
-                {
-                    const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
-                    if(se.name() == L"temp_c")
-                    {
-                        std::cout << "TEMP: " << se.attribute(L"data").narrow() << std::endl;
-                        _temp = se.attribute(L"data");
-                    }
-                    else if(se.name() == L"condition")
-                    {
-                        std::cout << "CONDITION: " << se.attribute(L"data").narrow() << std::endl;
-                        _condition = se.attribute(L"data");
-                    }
+                const Pt::Xml::StartElement& se = static_cast<const Pt::Xml::StartElement&>(node);
+                if(se.name() == L"temp_c")
+                    _weather.temperature = se.attribute(L"data");
+                else if(se.name() == L"condition")
+                    _weather.condition = se.attribute(L"data");
+            }
 
-                    break;
-                }
-
-                case Pt::Xml::Node::EndElement:
-                {
-                    const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
-                    if(ee.name() == L"current_conditions")
-                    {
-                        _parseFunc = &GoogleWeatherClient::onXmlWeather;
-                    }
-                }
-
-                default:
-                    break;
+            if( node.type() == Pt::Xml::Node::EndElement)
+            {
+                const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node);
+                if(ee.name() == L"current_conditions")
+                    _parseFunc = &GoogleWeatherClient::onXmlWeather;
             }
         }
 
@@ -245,8 +203,7 @@ class GoogleWeatherClient : public Pt::Connectable
         Pt::Xml::XmlReader _reader;
         typedef void (GoogleWeatherClient::*ParseFunc)(const Pt::Xml::Node&);
         ParseFunc _parseFunc;
-        Pt::String _condition;
-        Pt::String _temp;
+        WeatherData _weather;
 };
 
 
