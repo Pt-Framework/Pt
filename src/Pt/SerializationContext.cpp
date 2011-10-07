@@ -54,7 +54,8 @@ namespace
         public:
             explicit BlockAllocator(size_t numElementsPerBlock)
                 : _blockSize(numElementsPerBlock * sizeof(T)),
-                  _offset(_blockSize)
+                  _offset(_blockSize),
+                  _count(0)
             {
                 assert(numElementsPerBlock > 0);
             }
@@ -62,11 +63,12 @@ namespace
             ~BlockAllocator();
 
             void* allocate();
-            void deallocate(void *) { }
+            void deallocate(void *);
 
         private:
             size_t _blockSize;
             size_t _offset;
+            unsigned _count;
             std::vector<char*> _memory;
     };
 
@@ -89,9 +91,23 @@ namespace
         void* ptr = static_cast<void*>(_memory.back() + _offset);
 
         _offset += sizeof(T);
+        ++_count;
 
         return ptr;
     }
+
+    template <typename T>
+    void BlockAllocator<T>::deallocate(void*)
+    {
+        if  (--_count == 0)
+        {
+            for (std::vector<char*>::iterator it = _memory.begin(); it != _memory.end(); ++it)
+                delete[] *it;
+            _memory.clear();
+            _offset = _blockSize;
+        }
+    }
+
 }
 
 class SerializationContextImpl
@@ -99,7 +115,7 @@ class SerializationContextImpl
     public:
         SerializationContextImpl()
         : _limit(64),
-          _alloc(256)
+          _alloc(64)
         {
         }
 
@@ -126,7 +142,7 @@ SerializationContext::~SerializationContext()
     {
         delete siter->second;
     }
-    
+
     delete _cache;
 }
 
