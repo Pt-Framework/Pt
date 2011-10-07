@@ -639,6 +639,13 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
             if (_chunkedIStream.fail())
                 throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
         }
+        else if( _chunkedIStream.eod() )
+        {
+            if( _replyHeader.hasHeader("Trailer") )
+                _parser.readHeader();
+            else
+                _client->replyFinished(*_client);
+        }
 
         if (_socket.enabled())
         {
