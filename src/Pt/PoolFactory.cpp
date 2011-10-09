@@ -124,9 +124,6 @@ void* PoolFactory::allocate()
     assert(_allocChunk != NULL);
     assert(!_allocChunk->isFilled());
     void* place = _allocChunk->allocate(_blockSize);
-    char* index = ((char*)place + _blockSize) - sizeof(std::size_t);
-    std::size_t pos = _allocChunk - &_chunks[0];
-    *( reinterpret_cast<std::size_t*>(index) ) = pos;  
 
     // prove either _emptyChunk points nowhere, or points to a truly empty Chunk.
     assert((NULL == _emptyChunk) || (_emptyChunk->hasAvailable(_numBlocks)));
@@ -153,7 +150,7 @@ bool PoolFactory::deallocate(void* p)
     char* index = ((char*)p + _blockSize) - sizeof(std::size_t);
     std::size_t pos = *(reinterpret_cast<std::size_t*>(index));
 
-    Chunk* foundChunk = &_chunks[pos];//findChunk(p);
+	Chunk* foundChunk = findChunk(p);
     if ( 0 == foundChunk )
     {
        return false;
@@ -418,7 +415,8 @@ void PoolFactory::doDeallocate(void * p)
             assert(lastChunk->hasAvailable(_numBlocks));
             lastChunk->release();
             _chunks.pop_back();
-            if ((_allocChunk == lastChunk) || _allocChunk->isFilled())
+                        
+			if ((_allocChunk == lastChunk) || _allocChunk->isFilled())
             {
                 _allocChunk = _deallocChunk;
             }
