@@ -163,40 +163,55 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
 		void send(const Pt::Event& ev) const;
 
-		template <typename R>
-		Connection connect(const BasicSlot<R, const Pt::Event&>& slot)
-		{
-			Connection conn( *this, slot.clone() );
-			this->addRoute( 0, new IEventRoute(conn) );
-			return conn;
-		}
-
-		template <typename R>
-		void disconnect(const BasicSlot<R, const Pt::Event&>& slot)
+		template <typename R, typename EventT>
+		void disconnect(const BasicSlot<R, const EventT&>& slot)
 		{
 			this->removeRoute(slot);
 		}
 
 		template <typename EventT>
-		void subscribe( const BasicSlot<void, const EventT&>& slot )
+		Connection connect( const BasicSlot<void, const EventT&>& slot )
+		{
+			Connection conn( *this, slot.clone() );
+			EventT* selectAddRouteOverload = 0;
+			this->addRoute(conn, selectAddRouteOverload);
+			return conn;
+		}
+
+		/* REMOVED: use connect() instead 
+		template <typename EventT> 
+		void subscribe( const BasicSlot<void, const EventT&>& slot ) 
 		{
 			Connection conn( *this, slot.clone() );
 			const std::type_info& ti = typeid(EventT);
 			this->addRoute( &ti, new EventRoute<EventT>(conn) );
-		}
-
-		template <typename EventT>
-		void unsubscribe( const BasicSlot<void, const EventT&>& slot )
-		{
+		}*/
+		 
+		/* REMOVED: use disconnect() instead 
+		template <typename EventT> 
+		void unsubscribe( const BasicSlot<void, const EventT&>& slot ) 
+		{ 
 			const std::type_info& ti = typeid(EventT);
 			this->removeRoute(&ti, slot);
-		}
+		}*/
 
 		virtual void onConnectionOpen(const Connection& c);
 
 		virtual void onConnectionClose(const Connection& c);
 
 	protected:
+		void addRoute(Connection& conn, const Pt::Event*)
+		{
+			this->addRoute( 0, new IEventRoute(conn) );
+		}
+
+		template <typename EventT>
+		void addRoute(Connection& conn, const EventT*)
+		{
+			const std::type_info& ti = typeid(EventT);
+			this->addRoute( &ti, new EventRoute<EventT>(conn) );
+		}
+
 		void addRoute(const std::type_info* ti, IEventRoute* route);
 
 		void removeRoute(const Slot& slot);
@@ -209,6 +224,19 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 		mutable bool _sending;
 		mutable bool _dirty;
 };
+
+
+template <typename R, class EventT>
+Connection operator +=(Signal<const Pt::Event&>& signal, const BasicSlot<R, EventT>& slot)
+{
+	return signal.connect( slot );
+}
+
+template <typename R, class EventT>
+void operator -=(Signal<const Pt::Event&>& signal, const BasicSlot<R, EventT>& slot)
+{
+	signal.disconnect( slot );
+}
 
 template <typename R>
 Connection connect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))

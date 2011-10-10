@@ -318,7 +318,7 @@ class WeatherApplet : public Pt::System::Application
             _client.start( this->loop() );
 
             // event loop dispatches WeatherEvents to a slot
-            this->loop().event.subscribe( Pt::slot(*this, &WeatherApplet::printWeatherInfo) );
+            this->loop().event += Pt::slot(*this, &WeatherApplet::printWeatherInfo);
         }
 
     private:

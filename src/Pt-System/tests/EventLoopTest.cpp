@@ -95,8 +95,8 @@ class EventLoopTest : public Pt::Unit::TestSuite
             connect(el.timeout, el, &Pt::System::MainLoop::exit);
             el.setIdleTimeout(500);
 
-            el.event.subscribe( slot(*this, &EventLoopTest::onE1) );
-            el.event.subscribe( slot(*this, &EventLoopTest::onE2) );
+            el.event.connect( slot(*this, &EventLoopTest::onE1) );
+            el.event.connect( slot(*this, &EventLoopTest::onE2) );
 
             el.commitEvent( E1() );
             el.commitEvent( E2() );
