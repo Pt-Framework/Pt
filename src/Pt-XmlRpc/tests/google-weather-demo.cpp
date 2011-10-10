@@ -82,6 +82,10 @@ class GoogleWeatherClient : public Pt::Connectable
             _client.bodyAvailable += Pt::slot( *this, &GoogleWeatherClient::onBodyAvailable);
             _client.replyFinished += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
 
+            // the timeout signal is called when the interval has expired
+            _timer.timeout += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
+            _loop.add(_timer); // timers are managed by a loop
+
             // run member function in a worker thread, this does not start the thread
             _thread = new Pt::System::AttachedThread( Pt::callable(*this, &GoogleWeatherClient::run) );
         }
@@ -113,11 +117,9 @@ class GoogleWeatherClient : public Pt::Connectable
     private:
         void run()
         {
-            // the timeout signal is called when the interval has expired
-            _timer.timeout += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
-            _timer.start(2000); // interval of 2000ms
-            _loop.add(_timer); // timers are managed by a loop
-
+            // interval of 2000ms
+            _timer.start(2000);
+            
             // initial request to google weather
             this->beginRequest();
 
