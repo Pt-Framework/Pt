@@ -17,6 +17,8 @@
 #include <Pt/Event.h>
 #include <iostream>
 
+// This event object can be passed accross thread borders, stored in
+// event queues and dispatched by type within the reveiving thread
 class WeatherEvent : public Pt::BasicEvent<WeatherEvent>
 {
     public:
@@ -80,44 +82,54 @@ class GoogleWeatherClient : public Pt::Connectable
             _client.bodyAvailable += Pt::slot( *this, &GoogleWeatherClient::onBodyAvailable);
             _client.replyFinished += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
 
-            // run member function in a worker thread
+            // run member function in a worker thread, this does not start the thread
             _thread = new Pt::System::AttachedThread( Pt::callable(*this, &GoogleWeatherClient::run) );
         }
 
         ~GoogleWeatherClient()
         {
+            // exit the loop, so the thread can be joined
             _loop.exit();
             delete _thread;
         }
 
         void start(Pt::System::EventSink& sink)
         {
+            // thread starts to run
             _thread->start();
             _sink = &sink;
         }
 
         void exit()
         {
+            // it is thread safe to call exit on a loop used by another thread
+            // this is the way to cooperatively end the thread...
             _loop.exit();
+
+            // ...so we can join it without being blocked for a long time
             _thread->join();
         }
 
     private:
         void run()
         {
+            // the timeout signal is called when the interval has expired
             _timer.timeout += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
-            _timer.start(2000);
-            _loop.add(_timer);
+            _timer.start(2000); // interval of 2000ms
+            _loop.add(_timer); // timers are managed by a loop
 
+            // initial request to google weather
             this->beginRequest();
+
+            // the rest of this thread happens in the slots
             _loop.run();
         }
 
         void beginRequest()
         {
+            // cancel and reset previous request
             _client.cancel();
             _weather.clear();
-
             _parseFunc = &GoogleWeatherClient::onXmlBegin;
 
             _req.clear();
@@ -126,6 +138,8 @@ class GoogleWeatherClient : public Pt::Connectable
             _req.setHeader("Host", "www.google.com");
             _req.setHeader("Accept-Charset", "UTF-8");
 
+            // begin a new request, non-blocking, incoming data is processed
+            // via slots: onHeaderReceived, onBodyAvailable, onReplyFinished
             _client.beginExecute(_req);
         }
 
@@ -178,6 +192,8 @@ class GoogleWeatherClient : public Pt::Connectable
                 std::cerr << error.what() << std::endl;
                 _client.cancel();
                 _weather.setFailed(true);
+
+                // notify parent thread
                 if(_sink)
                     _sink->commitEvent(_weather);
             }
@@ -189,8 +205,8 @@ class GoogleWeatherClient : public Pt::Connectable
         {
             if(_parseFunc != 0)
             {  
-                // incomplete XML document
                 std::cerr << "inclomplete XML data" << std::endl;
+                _weather.setFailed(true);
             }
 
             // we are being called when we have finished reading the body or
@@ -206,6 +222,7 @@ class GoogleWeatherClient : public Pt::Connectable
                 _weather.setFailed(true);
             }
 
+            // notify parent thread
             if(_sink)
                 _sink->commitEvent(_weather);
         }
@@ -295,7 +312,10 @@ class WeatherApplet : public Pt::System::Application
         WeatherApplet()
         : _client("Berlin")
         {
+            // client will report WeatherEvents to this loop
             _client.start( this->loop() );
+
+            // event loop dispatches WeatherEvents to a slot
             this->loop().event.subscribe( Pt::slot(*this, &WeatherApplet::printWeatherInfo) );
         }
 
