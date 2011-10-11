@@ -180,7 +180,11 @@ void StreamBufferDiscard(StreamBuffer& sb)
         throw IOPending( PT_ERROR_MSG("discard failed - streambuffer is in use") );
 
     sb.setg(0, 0, 0);
-    sb.setp(0, 0);
+
+	if(sb._obuffer)
+		sb.setp(sb._obuffer, sb._obuffer + sb._obufferSize);
+	else
+		sb.setp(0, 0);
 }
 
 
