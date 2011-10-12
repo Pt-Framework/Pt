@@ -16,6 +16,7 @@
 #include <Pt/Utf8Codec.h>
 #include <Pt/Event.h>
 #include <iostream>
+#include <ctime>
 
 // This event object can be passed accross thread borders, stored in
 // event queues and dispatched by type within the reveiving thread
@@ -117,18 +118,28 @@ class GoogleWeatherClient : public Pt::Connectable
     private:
         void run()
         {
-            // interval of 2000ms
-            _timer.start(2000);
-            
-            // initial request to google weather
-            this->beginRequest();
-
-            // the rest of this thread happens in the slots
-            _loop.run();
+            try
+            {
+                // initial request to google weather
+                this->beginRequest();
+    
+                // the rest of this thread happens in the slots
+                _loop.run();
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << "unexpected error: " << e.what() << std::endl;
+            }
         }
 
         void beginRequest()
         {
+            std::cerr << time(0) << std::endl;
+
+            // interval of 2000ms
+            //_timer.start(2000);
+            _timer.stop();
+
             // cancel and reset previous request
             _client.cancel();
             _weather.clear();
@@ -149,11 +160,10 @@ class GoogleWeatherClient : public Pt::Connectable
         {
             if(client.header().httpReturnCode() != 200)
             {
-                std::cerr << "http error: " << client.header().httpReturnCode() 
+                std::cerr << "unexpected http return: " << client.header().httpReturnCode() 
                           << " - " << client.header().httpReturnText() << std::endl;
 
                 // don't need to cancel here, because replyFinished will be sent
-                return;
             }
 
             // we have the expected reply and prepare our text stream to process
@@ -191,7 +201,7 @@ class GoogleWeatherClient : public Pt::Connectable
             }
             catch(const Pt::Xml::XmlError& error)
             {
-                std::cerr << error.what() << std::endl;
+                std::cerr << "XML error: " << error.what() << std::endl;
                 _client.cancel();
                 _weather.setFailed(true);
 
@@ -227,6 +237,8 @@ class GoogleWeatherClient : public Pt::Connectable
             // notify parent thread
             if(_sink)
                 _sink->commitEvent(_weather);
+
+            _timer.start(2000);
         }
 
     private:
@@ -326,6 +338,7 @@ class WeatherApplet : public Pt::System::Application
         {
             std::cerr << "Temperture: " << wev.temperature().narrow() << std::endl;
             std::cerr << "Condition: " << wev.condition().narrow() << std::endl;
+            std::cerr << std::endl;
         }
 
     private:
