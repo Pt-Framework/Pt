@@ -135,6 +135,7 @@ class GoogleWeatherClient : public Pt::Connectable
         void beginRequest()
         {
             std::cerr << time(0) << std::endl;
+            std::cerr << "stopping timer" << std::endl;
 
             // interval of 2000ms
             //_timer.start(2000);
@@ -158,6 +159,7 @@ class GoogleWeatherClient : public Pt::Connectable
 
         void onHeaderReceived(Pt::Http::Client& client)
         {
+            std::cerr << "header received" << std::endl;
             if(client.header().httpReturnCode() != 200)
             {
                 std::cerr << "unexpected http return: " << client.header().httpReturnCode() 
@@ -187,6 +189,7 @@ class GoogleWeatherClient : public Pt::Connectable
                     if( ! m )
                         break;
         
+                    std::cerr << "impoprted text: " << m << std::endl;
                     n += m;
         
                     while( _reader.advance() ) // Xml::ParseError
@@ -197,6 +200,7 @@ class GoogleWeatherClient : public Pt::Connectable
                         if(_parseFunc)
                             (this->*_parseFunc)(node);
                     }
+                    std::cerr << "parsed XML: " << n << std::endl;
                 }
             }
             catch(const Pt::Xml::XmlError& error)
@@ -239,6 +243,7 @@ class GoogleWeatherClient : public Pt::Connectable
                 _sink->commitEvent(_weather);
 
             _timer.start(2000);
+            std::cerr << "next request in 2000 ms" << std::endl;
         }
 
     private:
