@@ -134,7 +134,7 @@ Pt::DateTime ClockImpl::getLocalTime()
 
 Timespan ClockImpl::getSystemTicks()
 {
-    return Timespan( 1000 * GetTickCount() );
+    return Timespan( Pt::int64_t(1000) * GetTickCount() );
 }
 
 } // namespace Pt
