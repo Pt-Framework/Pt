@@ -10,6 +10,5 @@ SubInclude TOP include Pt Gui ;
 SubInclude TOP include Pt Net ;
 SubInclude TOP include Pt Reflex ;
 SubInclude TOP include Pt System ;
-SubInclude TOP include Pt Text ;
 SubInclude TOP include Pt Unit ;
 SubInclude TOP include Pt Xml ;
