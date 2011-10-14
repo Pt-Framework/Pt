@@ -336,7 +336,7 @@ class WeatherApplet : public Pt::System::Application
         {
             std::cerr << "Temperture: " << wev.temperature().narrow() << std::endl;
             std::cerr << "Condition: " << wev.condition().narrow() << std::endl;
-            std::cerr << std::endl;
+            std::cerr << "Time: " << std::time(0) << std::endl;
         }
 
     private:
