@@ -31,8 +31,8 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/Plugin.h"
 
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/TextStream.h"
+#include "Pt/Utf8Codec.h"
 
 #include <list>
 #include <iostream>
@@ -54,7 +54,7 @@ class PT_EXPORT MyPlugin : public TestPlugin
 
 			int n = 0;
 			std::stringstream ss("1");
-		 	Pt::Text::TextStream ts(ss, new Pt::Text::Utf8Codec);
+		 	Pt::TextStream ts(ss, new Pt::Utf8Codec);
 			std::basic_iostream<Pt::Char>& bs = ts;
 			bs >> n;
 

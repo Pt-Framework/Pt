@@ -31,7 +31,7 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
-#include "Pt/Text/Utf8Codec.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/Main.h"
 
 #include <fstream>
