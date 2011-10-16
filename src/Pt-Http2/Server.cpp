@@ -34,7 +34,8 @@
 #include <Pt/Http2/Reply.h>
 #include <Pt/Http2/Service.h>
 #include <Pt/Http2/Responder.h>
-#include <Pt/System/EventLoop.h>
+#include <Pt/System/MainLoop.h>
+#include <Pt/System/Thread.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <iostream>
@@ -388,6 +389,39 @@ void Handler::sendReply()
 //////////////////////////////////////////////////////////////////////////
 // Server
 //////////////////////////////////////////////////////////////////////////
+
+class ServerThread : public Connectable 
+{
+    public:
+        ServerThread(Server& server)
+        : _server(&server)
+        , _thread(_loop)
+        {}
+
+        ServerThread::~ServerThread()
+        {
+            std::vector<Handler*>::iterator it;
+            for(it = _sockets.begin(); it != _sockets.end(); ++it)
+            {
+                delete *it;
+            }
+        }
+
+        void stop()
+        {
+            _loop.exit();
+            _thread.join();
+        }
+
+    private:
+        Server* _server;
+        Pt::System::MainLoop _loop;
+        Pt::System::AttachedThread _thread;
+        std::vector<Handler*> _sockets;
+        NotFoundService _defaultService;
+        NotAuthenticatedService _noAuthService;
+};
+
 
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)

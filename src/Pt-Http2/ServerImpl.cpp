@@ -56,12 +56,12 @@ ServerImpl::ServerImpl(System::EventLoop& eventLoop, Signal<Server::Runmode>& ru
       _runmodeChanged(runmodeChanged),
       _runmode(Server::Stopped)
 {
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onIdleSocket));
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onActiveSocket));
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onKeepAliveTimeout));
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onNoWaitingThreads));
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onThreadTerminated));
-    _eventLoop.event.subscribe(slot(*this, &ServerImpl::onServerStart));
+    _eventLoop.event += slot(*this, &ServerImpl::onIdleSocket);
+    _eventLoop.event += slot(*this, &ServerImpl::onActiveSocket);
+    _eventLoop.event += slot(*this, &ServerImpl::onKeepAliveTimeout);
+    _eventLoop.event += slot(*this, &ServerImpl::onNoWaitingThreads);
+    _eventLoop.event += slot(*this, &ServerImpl::onThreadTerminated);
+    _eventLoop.event += slot(*this, &ServerImpl::onServerStart);
 
     connect(_eventLoop.exited, *this, &ServerImpl::terminate);
 
