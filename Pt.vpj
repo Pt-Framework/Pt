@@ -15,6 +15,7 @@
                 MenuCaption="&amp;Build"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveWorkspaceFiles"
+                NoVSBUILD="1"
                 RunFromDir="%rp">
                 <Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
             </Target>
