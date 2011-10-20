@@ -183,7 +183,7 @@ namespace System {
 
             /** @brief Returns the idle timeout
             */
-            unsigned int idleTimeout() const
+            size_t idleTimeout() const
             { return _timeout; }
 
             /** @brief Notifies about wait timeouts
