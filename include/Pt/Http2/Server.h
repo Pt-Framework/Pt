@@ -108,6 +108,8 @@ class PT_HTTP_API Server : public Pt::Connectable
     protected:
         void onAccept(Net::TcpServer& server);
 
+        void onConnectionTimeout(Handler& handler);
+
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;

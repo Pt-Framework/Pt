@@ -44,6 +44,7 @@ namespace Pt {
 
 namespace Http {
 
+// TODO: rename class to Connection
 class Handler : public Net::TcpSocket, public Connectable
 {
     class ParseEvent : public HeaderParser::MessageHeaderEvent
@@ -471,9 +472,25 @@ void Server::onAccept(Net::TcpServer& server)
 
     Handler* socket = new Handler(*this, _loop, server);
     _sockets.push_back(socket);
-
+    socket->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
     _loop.add(*socket);
     
+}
+
+
+void Server::onConnectionTimeout(Handler& handler)
+{
+    //Socket* socket = event.socket();
+    std::vector<Handler*>::iterator it;
+    for(it = _sockets.begin(); it != _sockets.end(); ++it)
+    {
+        if(&handler == *it)
+        {
+            delete *it;
+            _sockets.erase(it);
+            break;
+        }
+    }
 }
 
 
