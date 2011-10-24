@@ -134,7 +134,25 @@ Pt::DateTime ClockImpl::getLocalTime()
 
 Timespan ClockImpl::getSystemTicks()
 {
-    return Timespan( Pt::int64_t(1000) * GetTickCount() );
+    FILETIME ft;
+
+    // win32 only : GetSystemTimeAsFileTime(&ft);
+    SYSTEMTIME st;
+    GetSystemTime( &st );
+    SystemTimeToFileTime( &st, &ft );
+
+    // number of 100-nanosecond intervals since January 1, 1601 (UTC)
+    Pt::uint64_t tmpres = 0;
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+
+    // convert to microseconds
+    tmpres /= 10;
+
+    return Timespan( static_cast<Pt::int64_t>(tmpres) );
+
+    //return Timespan( Pt::int64_t(1000) * GetTickCount() );
 }
 
 } // namespace Pt
