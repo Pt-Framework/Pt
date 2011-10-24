@@ -55,8 +55,6 @@ nobase_include_HEADERS = \
 	Pt/Slot.tpp \
 	Pt/SmartPtr.h \
 	Pt/SourceInfo.h \
-	Pt/StringData.h \
-	Pt/StringData.tpp \
 	Pt/String.h \
 	Pt/StringStream.h \
 	Pt/String.tpp \

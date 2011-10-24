@@ -31,6 +31,7 @@
 #include "Pt/SerializationError.h"
 
 #include <map>
+#include <cassert>
 
 namespace Pt {
 

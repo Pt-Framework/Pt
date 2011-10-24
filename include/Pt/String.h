@@ -31,11 +31,9 @@
 
 #include <Pt/Api.h>
 #include <Pt/Char.h>
-#include <Pt/StringData.h>
 
 #include <string>
 #include <iterator>
-#include <cassert>
 #include <stdexcept>
 
 
@@ -75,9 +73,7 @@ class basic_string< Pt::Char > {
         static const size_type npos = static_cast<size_type>(-1);
 
     public:
-        basic_string();
-
-        explicit basic_string( const allocator_type& a );
+        explicit basic_string( const allocator_type& a = allocator_type());
 
         basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
 
@@ -87,28 +83,35 @@ class basic_string< Pt::Char > {
 
         basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
 
-        basic_string(size_type n, Pt::Char c);
+        basic_string(size_type n, Pt::Char c, const allocator_type& a = allocator_type());
 
         basic_string(const basic_string& str);
 
-        basic_string(const basic_string& str, size_type pos);
+        basic_string(const basic_string& str, const allocator_type& a);
 
-        basic_string(const basic_string& str, size_type pos, size_type n);
+        basic_string(const basic_string& str, size_type pos, const allocator_type& a = allocator_type());
 
-        basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a);
+        basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a = allocator_type());
 
-        basic_string(const Pt::Char* begin, const Pt::Char* end);
+        basic_string(const Pt::Char* begin, const Pt::Char* end, const allocator_type& a = allocator_type());
+
+        template <typename InputIterator>
+        basic_string(InputIterator begin, InputIterator end, const allocator_type& a = allocator_type());
 
         ~basic_string();
 
     public:
-        iterator begin();
+        iterator begin()
+        { return privdata_rw(); }
 
-        iterator end();
+        iterator end()
+        { return privdata_rw() + length(); }
 
-        const_iterator begin() const;
+        const_iterator begin() const
+        { return privdata_ro(); }
 
-        const_iterator end() const;
+        const_iterator end() const
+        { return privdata_ro() + length(); }
 
         reverse_iterator rbegin()
         { return reverse_iterator( this->end() ); }
@@ -123,47 +126,29 @@ class basic_string< Pt::Char > {
         { return const_reverse_iterator( this->begin() ); }
 
         reference operator[](size_type n)
-        {
-            this->detach( _data->length() );
-            _data->setBusy();
-            return *(_data->str() + n);
-        }
+        { return privdata_rw()[n]; }
 
         const_reference operator[](size_type n) const
-        { return *(_data->str() + n); }
+        { return privdata_ro()[n]; }
 
         reference at(size_type n)
-        {
-            if( n > this->size() ) {
-                throw std::out_of_range("The given at-value is out of range");
-            }
-            this->detach( _data->length() );
-            _data->setBusy();
-            return *(_data->str() + n);
-        }
+        { return privdata_rw()[n]; }
 
         const_reference at(size_type n) const
-        {
-            if( n > this->size() ) {
-                throw std::out_of_range("The given at-value is out of range");
-            }
-            return *(_data->str() + n);
-        }
+        { return privdata_ro()[n]; }
 
     public:
         void push_back(Pt::Char ch)
         { this->append(1, ch); }
 
-        // untested
         void resize( size_t n, Pt::Char ch = value_type() );
 
-        // untested
         void reserve(size_t n = 0);
 
         void swap(basic_string& str);
 
         allocator_type get_allocator() const
-        { return _data->get_allocator(); }
+        { return _d; }
 
         size_type copy(Pt::Char* a, size_type n, size_type pos = 0) const;
 
@@ -174,32 +159,47 @@ class basic_string< Pt::Char > {
         { return basic_string(*this, pos); }
 
     public:
-        size_type length() const;
+        size_type length() const
+        { return isShortString() ? shortStringLength() : longStringLength(); }
 
-        size_type size() const;
+        size_type size() const
+        { return length(); }
 
-        bool empty() const;
+        bool empty() const
+        { return length() == 0; }
 
-        size_type max_size() const;
+        size_type max_size() const
+        { return ( size_type(-1) / sizeof(Pt::Char) ) - 1; }
 
-        size_type capacity() const;
+        size_type capacity() const
+        { return isShortString() ? shortStringCapacity() : longStringCapacity(); }
 
         const Pt::Char* data() const
-        { return this->c_str(); }
+        { return privdata_ro(); }
 
-        const Pt::Char* c_str() const;
+        const Pt::Char* c_str() const
+        { return privdata_ro(); }
 
         basic_string& assign(const basic_string& str);
 
         basic_string& assign(const basic_string& str, size_type pos, size_type n);
 
-        basic_string& assign(const Pt::Char* str);
+        basic_string& assign(const wchar_t* str);
+
+        basic_string& assign(const wchar_t* str, size_type n);
+
+        basic_string& assign(const Pt::Char* str)
+        { return assign(str, traits_type::length(str)); }
 
         basic_string& assign(const Pt::Char* str, size_type length);
 
         basic_string& assign(size_type n, Pt::Char c);
 
-        basic_string& append(const Pt::Char* str);
+        template <typename InputIterator>
+        basic_string& assign(InputIterator begin, InputIterator end);
+
+        basic_string& append(const Pt::Char* str)
+        { return append( str, traits_type::length(str) ); }
 
         basic_string& append(const Pt::Char* str, size_type n);
 
@@ -209,27 +209,36 @@ class basic_string< Pt::Char > {
 
         basic_string& append(const basic_string& str, size_type pos, size_type n);
 
+        template <typename InputIterator>
+        basic_string& append(InputIterator begin, InputIterator end);
+
         basic_string& append(const Pt::Char* begin, const Pt::Char* end);
 
-        basic_string& insert(size_type pos, const Pt::Char* str);
+        basic_string& insert(size_type pos, const Pt::Char* str)
+        { return this->insert( pos, str, traits_type::length(str) ); }
 
         basic_string& insert(size_type pos, const Pt::Char* str, size_type n);
 
         basic_string& insert(size_type pos, size_type n, Pt::Char ch);
 
-        basic_string& insert(size_type pos, const basic_string& str);
+        basic_string& insert(size_type pos, const basic_string& str)
+        { return insert(pos, str.privdata_ro(), str.length()); }
 
-        basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n);
+        basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n)
+        { return insert(pos, str.privdata_ro() + pos2, n > str.length() ? str.length() : n); }
 
-        basic_string& insert(iterator p, Pt::Char ch);
+        basic_string& insert(iterator p, Pt::Char ch)
+        { return insert(p - begin(), 1, ch); }
 
-        basic_string& insert(iterator p, size_type n, Pt::Char ch);
+        basic_string& insert(iterator p, size_type n, Pt::Char ch)
+        { return insert(p - begin(), n, ch); }
 
         // unimplemented
         //template <typename InputIterator>
         //basic_string& insert(iterator p, InputIterator first, InputIterator last);
 
-        void clear();
+        void clear()
+        { setLength(0); }
 
         basic_string& erase(size_type pos = 0, size_type n = npos);
 
@@ -261,6 +270,8 @@ class basic_string< Pt::Char > {
         int compare(const basic_string& str) const;
 
         int compare(const Pt::Char* str) const;
+
+        int compare(const Pt::Char* str, size_type n) const;
 
         int compare(const wchar_t* str) const;
 
@@ -338,13 +349,15 @@ class basic_string< Pt::Char > {
         size_type find_last_not_of(Pt::Char ch, size_type pos = npos) const;
 
     public:
-        void detach(size_type reserveSize);
-
         std::string narrow(char dfault = '?') const;
 
         static basic_string widen(const char* str);
 
         static basic_string widen(const std::string& str);
+
+        basic_string& widen_assign(const char* str);
+
+        basic_string& widen_assign(const std::string& str);
 
         template <typename OutIterT>
         OutIterT toUtf16(OutIterT to) const;
@@ -371,13 +384,77 @@ class basic_string< Pt::Char > {
         basic_string& operator+=(Pt::Char c)
         { return this->append(1, c); }
 
-        const Pt::StringData& sdata() const
+    private:
+        struct Ptr
         {
-            return *_data;
-        }
+          Pt::Char* _begin;
+          Pt::Char* _end;
+          Pt::Char* _capacity;
+        };
+
+        static const unsigned _minN = (sizeof(Ptr) / sizeof(Pt::uint32_t)) + 1;
+        static const unsigned _N = _minN < 7 ? 7 : _minN;
+
+        struct Data : public allocator_type
+        {
+            Data(const allocator_type& a)
+            : allocator_type(a)
+            {
+                _u._s[0] = 0;
+                _u._s[_N - 1] = _N - 1;
+            }
+
+            union
+            {
+                Ptr _p;
+                Pt::uint32_t _s[_N];
+            } _u;
+
+        } _d;
 
     private:
-        Pt::StringData* _data;
+        const Pt::Char* privdata_ro() const
+        { return isShortString() ? shortStringData() : longStringData(); }
+        Pt::Char* privdata_rw()
+        { return isShortString() ? shortStringData() : longStringData(); }
+
+        bool isShortString() const                    { return shortStringData()[_N-1] != Pt::Char(0xffff); }
+        void markLongString()                         { shortStringData()[_N-1] = Pt::Char(0xffff); }
+        const Pt::Char* shortStringData() const { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
+        Pt::Char* shortStringData()             { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
+        Pt::Char  shortStringMagic() const      { return shortStringData()[_N - 1]; }
+        Pt::Char& shortStringMagic()            { return shortStringData()[_N - 1]; }
+        size_type shortStringLength() const           { return _N - 1 - shortStringMagic().value(); }
+        size_type shortStringCapacity() const         { return _N - 1; }
+        void setShortStringLength(size_type n)        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = Pt::Char(_N - n - 1); }
+        void shortStringAssign(const Pt::Char* str, size_type n)
+        {
+            traits_type::copy(shortStringData(), str, n);
+            shortStringData()[n] = Pt::Char(0);
+            shortStringMagic() = Pt::Char(_N - n - 1);
+        }
+        void shortStringAssign(const wchar_t* str, size_type n)
+        {
+            for (size_type nn = 0; nn < n; ++nn)
+                shortStringData()[nn] = str[nn];
+            shortStringData()[n] = Pt::Char(0);
+            shortStringMagic() = Pt::Char(_N - n - 1);
+        }
+
+        const Pt::Char* longStringData() const    { return _d._u._p._begin; }
+        Pt::Char* longStringData()                { return _d._u._p._begin; }
+        size_type longStringLength() const              { return _d._u._p._end - _d._u._p._begin; }
+        size_type longStringCapacity() const            { return _d._u._p._capacity - _d._u._p._begin; }
+        void setLength(size_type n)
+        {
+            if (isShortString())
+                setShortStringLength(n);
+            else
+            {
+                _d._u._p._end = _d._u._p._begin + n;
+                _d._u._p._begin[n] = Pt::Char::null();
+            }
+        }
     };
 
     inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)

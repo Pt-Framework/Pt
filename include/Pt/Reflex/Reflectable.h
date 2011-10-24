@@ -36,6 +36,7 @@
 #include <Pt/ConstMethod.h>
 #include <Pt/Any.h>
 #include <stdexcept>
+#include <memory>
 
 namespace Pt {
 

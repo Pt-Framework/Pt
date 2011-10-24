@@ -63,7 +63,7 @@ bool Regex::match(const Pt::String& str, RegexSMatch& smatch) const
     smatch._str = str;
 
     pt_regexp* exp = const_cast<pt_regexp*>( _expr.getPointer() );
-    int ret = regexec( exp, smatch._match, str.c_str() );
+    int ret = regexec( exp, smatch._match, smatch._str.c_str() );
 
     if(ret == 0)
     {

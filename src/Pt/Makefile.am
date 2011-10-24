@@ -20,6 +20,7 @@ libPt_la_SOURCES = \
 	SettingsReader.cpp \
 	SettingsWriter.cpp \
 	Signal.cpp \
+	String.cpp \
 	StringStream.cpp \
 	TextBuffer.cpp \
 	TextStream.cpp \

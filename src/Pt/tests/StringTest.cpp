@@ -39,9 +39,6 @@
 #include <sstream>
 
 
-using namespace Pt;
-using namespace std;
-
 class StringTest : public Pt::Unit::TestSuite
 {
     public:
@@ -106,84 +103,84 @@ Pt::Unit::RegisterTest<StringTest> _registerStringTest;
 
 void StringTest::testConstructor()
 {
-    String s1;
-    PT_UNIT_ASSERT(s1 == String(L""));
+    Pt::String s1;
+    PT_UNIT_ASSERT(s1 == Pt::String(L""));
 
-    String s2(L"abcde");
+    Pt::String s2(L"abcde");
     PT_UNIT_ASSERT(s2 == L"abcde");
 
-    String s3(L"abcde", 3);
+    Pt::String s3(L"abcde", 3);
     PT_UNIT_ASSERT(s3 == L"abc");
 
-    String s4(3, 'x');
+    Pt::String s4(3, 'x');
     PT_UNIT_ASSERT(s4 == L"xxx");
 
-    String s5(s2);
+    Pt::String s5(s2);
     PT_UNIT_ASSERT(s5 == L"abcde");
 
-    String s6(s2, 1);
+    Pt::String s6(s2, 1);
     PT_UNIT_ASSERT(s6 == L"bcde");
 
-    String s7(s2, 1, 3);
+    Pt::String s7(s2, 1, 3);
     PT_UNIT_ASSERT(s7 == L"bcd");
 
-    String s10;
-    PT_UNIT_ASSERT(s10 == String(L""));
+    Pt::String s10;
+    PT_UNIT_ASSERT(s10 == Pt::String(L""));
 
-    const Char c11[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
-    String s11(c11);
+    const Pt::Char c11[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
+    Pt::String s11(c11);
     PT_UNIT_ASSERT(s11 == c11);
 
-    const Char c12[] = { 'a', 'b', 'c', '\0' };
-    String s12(L"abcde", 3);
+    const Pt::Char c12[] = { 'a', 'b', 'c', '\0' };
+    Pt::String s12(L"abcde", 3);
     PT_UNIT_ASSERT(s12 == c12);
 
-    const Char c13[] = { 'x', 'x', 'x', '\0' };
-    String s13(3, 'x');
+    const Pt::Char c13[] = { 'x', 'x', 'x', '\0' };
+    Pt::String s13(3, 'x');
     PT_UNIT_ASSERT(s13 == c13);
 
-    const Char c14[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
-    String s14(s11);
+    const Pt::Char c14[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
+    Pt::String s14(s11);
     PT_UNIT_ASSERT(s14 == c14);
 
-    const Char c15[] = { 'b', 'c', 'd', 'e', '\0' };
-    String s15(s11, 1);
+    const Pt::Char c15[] = { 'b', 'c', 'd', 'e', '\0' };
+    Pt::String s15(s11, 1);
     PT_UNIT_ASSERT(s15 == c15);
 
-    const Char c16[] = { 'b', 'c', 'd', '\0' };
-    String s16(s11, 1, 3);
+    const Pt::Char c16[] = { 'b', 'c', 'd', '\0' };
+    Pt::String s16(s11, 1, 3);
     PT_UNIT_ASSERT(s16 == c16);
 
 //  TODO API not implemented yet.
-//    String s20(s2.begin(), s2.end());
+//    Pt::String s20(s2.begin(), s2.end());
 //    PT_UNIT_ASSERT(s20 == L"abcde");
 }
 
 void StringTest::testCompare()
 {
-    const Char abc[] = { 'a', 'b', 'c', '\0' };
+    const Pt::Char abc[] = { 'a', 'b', 'c', '\0' };
 
     const wchar_t* z = L"abcxyz";
-    String s(L"abcd");
-    String t(abc);
+    Pt::String s(L"abcd");
+    Pt::String t(abc);
 
-    PT_UNIT_ASSERT(s.compare(s)                 == 0);
-    PT_UNIT_ASSERT(s.compare(t)                 == 1);
-    PT_UNIT_ASSERT(s.compare(z)                 == -1);
-    PT_UNIT_ASSERT(s.compare(1, 3, t)           == 1);
-    PT_UNIT_ASSERT(s.compare(1, 3, t, 1, 2)     == 1);
-    PT_UNIT_ASSERT(s.compare(1, 3, z)           == 1);
-    PT_UNIT_ASSERT(s.compare(1, 2, z + 1, 0, 2) == 0);
+    PT_UNIT_ASSERT_EQUALS(s.compare(s)                 , 0);
+    PT_UNIT_ASSERT_EQUALS(s.compare(t)                 , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare(z)                 , -1);
+    PT_UNIT_ASSERT_EQUALS(s.compare(1, 3, t)           , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare(1, 3, t, 1, 2)     , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare(1, 3, z)           , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare(1, 2, z + 1, 0, 2) , 0);
 
-    String x1(L"abc");
-    String x2(abc);
+    Pt::String x1(L"abc");
+    Pt::String x2(abc);
     PT_UNIT_ASSERT(x1 == x2);
     PT_UNIT_ASSERT(x1 == abc);
     PT_UNIT_ASSERT(x2 == abc);
 
-    const Char empty[] = { '\0' };
-    String y1(L"");
-    String y2(empty);
+    const Pt::Char empty[] = { '\0' };
+    Pt::String y1(L"");
+    Pt::String y2(empty);
     PT_UNIT_ASSERT(y1 == y2);
     PT_UNIT_ASSERT(y1 == empty);
     PT_UNIT_ASSERT(y2 == empty);
@@ -203,9 +200,9 @@ void StringTest::testAssign()
 }
 
     const wchar_t* z = L"abcde";
-    vector<wchar_t> v(z, z + 5);
-    String s;
-    String t(z);
+    std::vector<wchar_t> v(z, z + 5);
+    Pt::String s;
+    Pt::String t(z);
 
     s.assign(z);
     PT_UNIT_ASSERT(s == L"abcde");
@@ -236,9 +233,9 @@ void StringTest::testAssign()
 void StringTest::testAppend()
 {
     const wchar_t* z = L"abcde";
-    vector<wchar_t> v(z, z + 5);
-    String s(L"ABC");
-    String t(z);
+    std::vector<wchar_t> v(z, z + 5);
+    Pt::String s(L"ABC");
+    Pt::String t(z);
 
     s.append(z);
     PT_UNIT_ASSERT(s == L"ABCabcde");
@@ -278,17 +275,17 @@ void StringTest::testAppend()
     PT_UNIT_ASSERT(s == L"ABCabcde");
 
     s = L"ABC";
-    String u = s + t;
+    Pt::String u = s + t;
     PT_UNIT_ASSERT(u == L"ABCabcde");
 }
 
 void StringTest::testInsert()
 {
-    String::iterator i;
+    Pt::String::iterator i;
     const wchar_t* z = L"abcde";
-    vector<wchar_t> v(z, z + 5);
-    String s(L"ABC");
-    String t(z);
+    std::vector<wchar_t> v(z, z + 5);
+    Pt::String s(L"ABC");
+    Pt::String t(z);
 
     s.insert(2, z);
     PT_UNIT_ASSERT(s == L"ABabcdeC");
@@ -328,7 +325,7 @@ void StringTest::testInsert()
 
 void StringTest::testClear()
 {
-    String s(L"abcdefg");
+    Pt::String s(L"abcdefg");
 
     s.clear();
     PT_UNIT_ASSERT(s == L"");
@@ -336,9 +333,9 @@ void StringTest::testClear()
 
 void StringTest::testErase()
 {
-    String s(L"abcdefg");
-    String::iterator p = s.begin() + 2;
-    String::iterator q = s.end() - 2;
+    Pt::String s(L"abcdefg");
+    Pt::String::iterator p = s.begin() + 2;
+    Pt::String::iterator q = s.end() - 2;
 
     s.erase();
     PT_UNIT_ASSERT(s == L"");
@@ -366,11 +363,11 @@ void StringTest::testErase()
 void StringTest::testReplace()
 {
     const wchar_t* z = L"vwxyz";
-    vector<wchar_t> v(z, z + 5);
-    String s(L"ABCDEF");
-    String t(z);
-    String::iterator i1;
-    String::iterator i2;
+    std::vector<wchar_t> v(z, z + 5);
+    Pt::String s(L"ABCDEF");
+    Pt::String t(z);
+    Pt::String::iterator i1;
+    Pt::String::iterator i2;
 
     s.replace(1, 4, z);
     PT_UNIT_ASSERT(s == L"AvwxyzF");
@@ -397,7 +394,7 @@ void StringTest::testReplace()
     s.replace(i1, i2, z);
     PT_UNIT_ASSERT(s == L"AvwxyzF");
 
-    Char z2[] = { 'v', 'w', 'x', 'y'  };
+    Pt::Char z2[] = { 'v', 'w', 'x', 'y'  };
     i1 = s.begin() + 1;
     i2 = s.end() - 1;
     s.replace(i1, i2, z2 + 1, 3);
@@ -426,114 +423,114 @@ void StringTest::testReplace()
 
 void StringTest::testFind()
 {
-    String s(L"abc-abc");
-    String t(L"bc");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"bc");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.find(t)          == 1);
-    PT_UNIT_ASSERT(s.find(t, 2)       == 5);
-    PT_UNIT_ASSERT(s.find(L"bc")      == 1);
-    PT_UNIT_ASSERT(s.find(L"bc", 2)   == 5);
-    PT_UNIT_ASSERT(s.find(abcd, 2, 3) == 4);
-    PT_UNIT_ASSERT(s.find('b')        == 1);
-    PT_UNIT_ASSERT(s.find('b', 2)     == 5);
+    PT_UNIT_ASSERT_EQUALS(s.find(t)          , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find(t, 2)       , 5);
+    PT_UNIT_ASSERT_EQUALS(s.find(L"bc")      , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find(L"bc", 2)   , 5);
+    PT_UNIT_ASSERT_EQUALS(s.find(abcd, 2, 3) , 4);
+    PT_UNIT_ASSERT_EQUALS(s.find('b')        , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find('b', 2)     , 5);
 }
 
 void StringTest::testRFind()
 {
-    String s(L"abc-abc");
-    String t(L"bc");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"bc");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.rfind(t)          == 5);
-    PT_UNIT_ASSERT(s.rfind(t, 2)       == 1);
-    PT_UNIT_ASSERT(s.rfind(L"bc")      == 5);
-    PT_UNIT_ASSERT(s.rfind(L"bc", 2)   == 1);
-    PT_UNIT_ASSERT(s.rfind(abcd, 2, 3) == 0);
-    PT_UNIT_ASSERT(s.rfind('b')        == 5);
-    PT_UNIT_ASSERT(s.rfind('b', 2)     == 1);
+    PT_UNIT_ASSERT_EQUALS(s.rfind(t)          , 5);
+    PT_UNIT_ASSERT_EQUALS(s.rfind(t, 2)       , 1);
+    PT_UNIT_ASSERT_EQUALS(s.rfind(L"bc")      , 5);
+    PT_UNIT_ASSERT_EQUALS(s.rfind(L"bc", 2)   , 1);
+    PT_UNIT_ASSERT_EQUALS(s.rfind(abcd, 2, 3) , 0);
+    PT_UNIT_ASSERT_EQUALS(s.rfind('b')        , 5);
+    PT_UNIT_ASSERT_EQUALS(s.rfind('b', 2)     , 1);
 }
 
 void StringTest::testFindFirstOf()
 {
-    String s(L"abc-abc");
-    String t(L"a-x");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"a-x");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.find_first_of(t)          == 0);
-    PT_UNIT_ASSERT(s.find_first_of(t, 2)       == 3);
-    PT_UNIT_ASSERT(s.find_first_of(L"bc")      == 1);
-    PT_UNIT_ASSERT(s.find_first_of(L"bc", 2)   == 2);
-    PT_UNIT_ASSERT(s.find_first_of(abcd, 2, 3) == 2);
-    PT_UNIT_ASSERT(s.find_first_of('b')        == 1);
-    PT_UNIT_ASSERT(s.find_first_of('b', 2)     == 5);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of(t)          , 0);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of(t, 2)       , 3);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of(L"bc")      , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of(L"bc", 2)   , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of(abcd, 2, 3) , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of('b')        , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_of('b', 2)     , 5);
 }
 
 void StringTest::testFindLastOf()
 {
-    String s(L"abc-abc");
-    String t(L"a-x");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"a-x");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.find_last_of(t)          == 4);
-    PT_UNIT_ASSERT(s.find_last_of(t, 2)       == 0);
-    PT_UNIT_ASSERT(s.find_last_of(L"bc")      == 6);
-    PT_UNIT_ASSERT(s.find_last_of(L"bc", 2)   == 2);
-    PT_UNIT_ASSERT(s.find_last_of(abcd, 2, 3) == 2);
-    PT_UNIT_ASSERT(s.find_last_of('b')        == 5);
-    PT_UNIT_ASSERT(s.find_last_of('b', 2)     == 1);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of(t)          , 4);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of(t, 2)       , 0);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of(L"bc")      , 6);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of(L"bc", 2)   , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of(abcd, 2, 3) , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of('b')        , 5);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_of('b', 2)     , 1);
 }
 
 void StringTest::testFindFirstNotOf()
 {
-    String s(L"abc-abc");
-    String t(L"a-x");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"a-x");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.find_first_not_of(t)          == 1);
-    PT_UNIT_ASSERT(s.find_first_not_of(t, 2)       == 2);
-    PT_UNIT_ASSERT(s.find_first_not_of(L"bc")      == 0);
-    PT_UNIT_ASSERT(s.find_first_not_of(L"bc", 2)   == 3);
-    PT_UNIT_ASSERT(s.find_first_not_of(abcd, 2, 3) == 3);
-    PT_UNIT_ASSERT(s.find_first_not_of('b')        == 0);
-    PT_UNIT_ASSERT(s.find_first_not_of('b', 2)     == 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of(t)          , 1);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of(t, 2)       , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of(L"bc")      , 0);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of(L"bc", 2)   , 3);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of(abcd, 2, 3) , 3);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of('b')        , 0);
+    PT_UNIT_ASSERT_EQUALS(s.find_first_not_of('b', 2)     , 2);
 }
 
 void StringTest::testFindLastNotOf()
 {
-    String s(L"abc-abc");
-    String t(L"a-x");
-    Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abc-abc");
+    Pt::String t(L"a-x");
+    Pt::Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-    PT_UNIT_ASSERT(s.find_last_not_of(t)          == 6);
-    PT_UNIT_ASSERT(s.find_last_not_of(t, 2)       == 2);
-    PT_UNIT_ASSERT(s.find_last_not_of(L"bc")      == 4);
-    PT_UNIT_ASSERT(s.find_last_not_of(L"bc", 2)   == 0);
-    PT_UNIT_ASSERT(s.find_last_not_of(abcd, 2, 3) == String::npos);
-    PT_UNIT_ASSERT(s.find_last_not_of('b')        == 6);
-    PT_UNIT_ASSERT(s.find_last_not_of('b', 2)     == 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of(t)          , 6);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of(t, 2)       , 2);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of(L"bc")      , 4);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of(L"bc", 2)   , 0);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of(abcd, 2, 3) , Pt::String::npos);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of('b')        , 6);
+    PT_UNIT_ASSERT_EQUALS(s.find_last_not_of('b', 2)     , 2);
 }
 
 void StringTest::testCStr()
 {
-    String s1(L"abc");
+    Pt::String s1(L"abc");
     PT_UNIT_ASSERT(s1.c_str()[0] == 'a' && s1.c_str()[1] == 'b' && s1.c_str()[2] == 'c' && s1.c_str()[3] == '\0');
 
-    String s2;
+    Pt::String s2;
     PT_UNIT_ASSERT(s2.c_str()[0] == '\0');
 
-    Char abc[] = { 'a', 'b', 'c', '\0' };
-    String s3(abc);
+    Pt::Char abc[] = { 'a', 'b', 'c', '\0' };
+    Pt::String s3(abc);
     PT_UNIT_ASSERT(s3.c_str()[0] == 'a' && s3.c_str()[1] == 'b' && s3.c_str()[2] == 'c' && s3.c_str()[3] == '\0');
 
-    Char zero[] = { '\0' };
-    String s4(zero);
+    Pt::Char zero[] = { '\0' };
+    Pt::String s4(zero);
     PT_UNIT_ASSERT(s4.c_str()[0] == '\0');
 }
 
 void StringTest::testSubstr()
 {
-    String s(L"abcdefg");
+    Pt::String s(L"abcdefg");
 
     PT_UNIT_ASSERT(s.substr()     == L"abcdefg");
     PT_UNIT_ASSERT(s.substr(2)    == L"cdefg");
@@ -542,8 +539,8 @@ void StringTest::testSubstr()
 
 void StringTest::testSwap()
 {
-    String s1(L"abc");
-    String s2(L"xyz");
+    Pt::String s1(L"abc");
+    Pt::String s2(L"xyz");
 
     PT_UNIT_ASSERT(s1 == L"abc");
     PT_UNIT_ASSERT(s2 == L"xyz");
@@ -561,7 +558,7 @@ void StringTest::testSwap()
 
 void StringTest::testIndexOperator()
 {
-    String s(L"abcdef");
+    Pt::String s(L"abcdef");
 
     PT_UNIT_ASSERT(s[0] == 'a');
     PT_UNIT_ASSERT(s[5] == 'f');
@@ -577,7 +574,7 @@ void StringTest::testIndexOperator()
 
 void StringTest::testAt()
 {
-    String s(L"abcdef");
+    Pt::String s(L"abcdef");
 
     PT_UNIT_ASSERT(s.at(0) == 'a');
     PT_UNIT_ASSERT(s.at(5) == 'f');
@@ -585,7 +582,7 @@ void StringTest::testAt()
 
 void StringTest::testPushBack()
 {
-    String s(L"abc");
+    Pt::String s(L"abc");
 
     s.push_back('d');
     PT_UNIT_ASSERT(s == L"abcd");
@@ -593,81 +590,81 @@ void StringTest::testPushBack()
 
 void StringTest::testCopy()
 {
-    Char t1[3];
-    String s(L"abcd");
+    Pt::Char t1[3];
+    Pt::String s(L"abcd");
 
     s.copy(t1, 2);
     t1[2] = '\0';
 
-    const Char c1[] = { 'a', 'b', '\0' };
-    PT_UNIT_ASSERT(char_traits<Char>::compare(t1, c1, 3) == 0);
+    const Pt::Char c1[] = { 'a', 'b', '\0' };
+    PT_UNIT_ASSERT(std::char_traits<Pt::Char>::compare(t1, c1, 3) == 0);
 
 
-    Char t2[5];
+    Pt::Char t2[5];
     s.copy(t2, 4);
     t2[4] = '\0';
 
-    const Char c2[] = { 'a', 'b', 'c', 'd', '\0' };
-    PT_UNIT_ASSERT(char_traits<Char>::compare(t2, c2, 5) == 0);
+    const Pt::Char c2[] = { 'a', 'b', 'c', 'd', '\0' };
+    PT_UNIT_ASSERT_EQUALS(std::char_traits<Pt::Char>::compare(t2, c2, 5) , 0);
 
 
-    Char t3[3];
+    Pt::Char t3[3];
     s.copy(t3, 2, 2);
     t3[2] = '\0';
 
-    const Char c3[] = { 'c', 'd', '\0' };
-    PT_UNIT_ASSERT(char_traits<Char>::compare(t3, c3, 3) == 0);
+    const Pt::Char c3[] = { 'c', 'd', '\0' };
+    PT_UNIT_ASSERT_EQUALS(std::char_traits<Pt::Char>::compare(t3, c3, 3) , 0);
 }
 
 
 void StringTest::testReserve()
 {
-    const Char c1[] = { 'a', 'b', 'c', 'd', '\0' };
-    String s(L"abcd");
-    String s2 = s;
+    const Pt::Char c1[] = { 'a', 'b', 'c', 'd', '\0' };
+    Pt::String s(L"abcd");
+    Pt::String s2 = s;
     s2.reserve(10);
 
     PT_UNIT_ASSERT( s2.capacity() >= 10 );
     PT_UNIT_ASSERT( s2.size() == 4 );
-    PT_UNIT_ASSERT( char_traits<Char>::compare(s2.c_str(), c1, 4) == 0 );
+    PT_UNIT_ASSERT_EQUALS( std::char_traits<Pt::Char>::compare(s2.c_str(), c1, 4) , 0 );
 
-    PT_UNIT_ASSERT( s.capacity() == 4 );
-    PT_UNIT_ASSERT( s.size() == 4 );
-    PT_UNIT_ASSERT( char_traits<Char>::compare(s.c_str(), c1, 4) == 0 );
+    PT_UNIT_ASSERT( s.capacity() >= 4 );
+    PT_UNIT_ASSERT_EQUALS( s.size(), 4 );
+    PT_UNIT_ASSERT_EQUALS( std::char_traits<Pt::Char>::compare(s.c_str(), c1, 4) , 0 );
 }
 
 
 void StringTest::testReserveEmpty()
 {
-    String s;
+    Pt::String s;
     s.reserve(0);
     PT_UNIT_ASSERT( s.capacity() >= 0 );
-    PT_UNIT_ASSERT( s.size() == 0 );
+    PT_UNIT_ASSERT_EQUALS( s.size() , 0 );
 }
 
 
 void StringTest::testLengthAndSize()
 {
-    String s1;
-    PT_UNIT_ASSERT(s1.length() == 0);
-    PT_UNIT_ASSERT(s1.size()   == 0);
+    Pt::String s1;
+    PT_UNIT_ASSERT_EQUALS(s1.length() , 0);
+    PT_UNIT_ASSERT_EQUALS(s1.size()   , 0);
 
-    String s2(L"ab");
-    PT_UNIT_ASSERT(s2.length() == 2);
-    PT_UNIT_ASSERT(s2.size()   == 2);
+    Pt::String s2(L"ab");
+    PT_UNIT_ASSERT_EQUALS(s2.length() , 2);
+    PT_UNIT_ASSERT_EQUALS(s2.size()   , 2);
 
     s2 += L"cd";
-    PT_UNIT_ASSERT(s2.length() == 4);
-    PT_UNIT_ASSERT(s2.size()   == 4);
+    PT_UNIT_ASSERT_EQUALS(s2.length() , 4);
+    PT_UNIT_ASSERT_EQUALS(s2.size()   , 4);
 
 
-    Char ab[] = { 'a', 'b', '\0' };
-    String s3(ab);
-    PT_UNIT_ASSERT(s3.length() == 2);
-    PT_UNIT_ASSERT(s3.size()   == 2);
+    Pt::Char ab[] = { 'a', 'b', '\0' };
+    Pt::String s3(ab);
+    PT_UNIT_ASSERT_EQUALS(s3.length() , 2);
+    PT_UNIT_ASSERT_EQUALS(s3.size()   , 2);
 
-    Char cd[] = { 'c', 'd', '\0' };
+    Pt::Char cd[] = { 'c', 'd', '\0' };
     s3 += cd;
-    PT_UNIT_ASSERT(s3.length() == 4);
-    PT_UNIT_ASSERT(s3.size()   == 4);
+    PT_UNIT_ASSERT_EQUALS(s3.length() , 4);
+    PT_UNIT_ASSERT_EQUALS(s3.size()   , 4);
 }
