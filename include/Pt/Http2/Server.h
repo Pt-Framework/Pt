@@ -55,6 +55,9 @@ class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
 
+class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
+{};
+
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
 {
@@ -105,10 +108,15 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         Signal<Runmode> runmodeChanged;
 
+        System::EventLoop& loop()
+        {return _loop; }
+
     protected:
         void onAccept(Net::TcpServer& server);
 
         void onConnectionTimeout(Handler& handler);
+
+        void onAcceptEvent(const AcceptEvent& ev);
 
     private:
         System::EventLoop& _loop;

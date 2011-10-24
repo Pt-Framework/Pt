@@ -185,6 +185,7 @@ void Handler::onInput(System::StreamBuffer& sb)
         if( _parser.end() )
         {
             _responder = _server.getResponder(_request);
+            // TODO: test only_server.loop().commitEvent( AcceptEvent() );
 
             try
             {
@@ -432,6 +433,8 @@ Server::Server(System::EventLoop& eventLoop)
 
     _loop.add(_serverSocket);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
+
+    _loop.event += Pt::slot(*this, &Server::onAcceptEvent);
 }
 
 
@@ -444,6 +447,8 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 
     _loop.add(_serverSocket);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
+
+    _loop.event += Pt::slot(*this, &Server::onAcceptEvent);
 }
 
 
@@ -493,6 +498,10 @@ void Server::onConnectionTimeout(Handler& handler)
     }
 }
 
+
+void Server::onAcceptEvent(const AcceptEvent& ev)
+{
+}
 
 void Server::addService(const std::string& url, Service& service)
 {
