@@ -43,7 +43,7 @@ namespace std {
     @ingroup Unicode
 */
 template <>
-class basic_string< Pt::Char > {
+class PT_API basic_string< Pt::Char > {
     public:
         typedef Pt::Char value_type;
         typedef size_t size_type;
@@ -387,9 +387,9 @@ class basic_string< Pt::Char > {
     private:
         struct Ptr
         {
-          Pt::Char* _begin;
-          Pt::Char* _end;
-          Pt::Char* _capacity;
+            Pt::Char* _begin;
+            Pt::Char* _end;
+            Pt::Char* _capacity;
         };
 
         static const unsigned _minN = (sizeof(Ptr) / sizeof(Pt::uint32_t)) + 1;
@@ -418,31 +418,31 @@ class basic_string< Pt::Char > {
         Pt::Char* privdata_rw()
         { return isShortString() ? shortStringData() : longStringData(); }
 
-        bool isShortString() const                    { return shortStringData()[_N-1] != Pt::Char(0xffff); }
-        void markLongString()                         { shortStringData()[_N-1] = Pt::Char(0xffff); }
-        const Pt::Char* shortStringData() const { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
-        Pt::Char* shortStringData()             { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
-        Pt::Char  shortStringMagic() const      { return shortStringData()[_N - 1]; }
-        Pt::Char& shortStringMagic()            { return shortStringData()[_N - 1]; }
-        size_type shortStringLength() const           { return _N - 1 - shortStringMagic().value(); }
+        bool isShortString() const                    { return shortStringMagic() != 0xffff; }
+        void markLongString()                         { shortStringMagic() = 0xffff; }
+        const Pt::Char* shortStringData() const       { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
+        Pt::Char* shortStringData()                   { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
+        Pt::uint32_t  shortStringMagic() const        { return _d._u._s[_N - 1]; }
+        Pt::uint32_t& shortStringMagic()              { return _d._u._s[_N - 1]; }
+        size_type shortStringLength() const           { return _N - 1 - shortStringMagic(); }
         size_type shortStringCapacity() const         { return _N - 1; }
-        void setShortStringLength(size_type n)        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = Pt::Char(_N - n - 1); }
+        void setShortStringLength(size_type n)        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = _N - n - 1; }
         void shortStringAssign(const Pt::Char* str, size_type n)
         {
             traits_type::copy(shortStringData(), str, n);
             shortStringData()[n] = Pt::Char(0);
-            shortStringMagic() = Pt::Char(_N - n - 1);
+            shortStringMagic() = _N - n - 1;
         }
         void shortStringAssign(const wchar_t* str, size_type n)
         {
             for (size_type nn = 0; nn < n; ++nn)
                 shortStringData()[nn] = str[nn];
             shortStringData()[n] = Pt::Char(0);
-            shortStringMagic() = Pt::Char(_N - n - 1);
+            shortStringMagic() = _N - n - 1;
         }
 
-        const Pt::Char* longStringData() const    { return _d._u._p._begin; }
-        Pt::Char* longStringData()                { return _d._u._p._begin; }
+        const Pt::Char* longStringData() const          { return _d._u._p._begin; }
+        Pt::Char* longStringData()                      { return _d._u._p._begin; }
         size_type longStringLength() const              { return _d._u._p._end - _d._u._p._begin; }
         size_type longStringCapacity() const            { return _d._u._p._capacity - _d._u._p._begin; }
         void setLength(size_type n)
