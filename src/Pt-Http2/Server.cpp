@@ -39,6 +39,7 @@
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
 #include <iostream>
+#include <cassert>
 
 namespace Pt {
 
