@@ -176,9 +176,18 @@ void XmlFormatter::addString(const char* name, const char* type,
     unsigned countAttrs = 0;
 
     if (*name)
-        attr[countAttrs++] = Xml::Attribute( String(L"type"), String::widen( type ) );
+    {
+        attr[countAttrs].name().assign(L"type");
+        attr[countAttrs].value().widen_assign(type);
+        ++countAttrs;
+    }
+
     if (*id)
-        attr[countAttrs++] = Xml::Attribute( String(L"id"), String::widen( id ) );
+    {
+        attr[countAttrs].name().assign(L"id");
+        attr[countAttrs].value().widen_assign(id);
+        ++countAttrs;
+    }
 
     _writer->writeElement( String::widen( *name ? name : type ), value, attr, countAttrs );
 }
@@ -187,7 +196,7 @@ void XmlFormatter::addString(const char* name, const char* type,
 void XmlFormatter::addString8(const char* name, const char* value, 
                               const char* id)
 {
-    _value = Pt::String::widen(value);
+    _value.widen_assign(value);
     this->addString(name, "string", _value, id);
 }
 
@@ -306,7 +315,9 @@ void XmlFormatter::addReference(const char* name, const char* id)
     if( ! _writer )
         return;
 
-    Attribute attr( Pt::String(L"ref"), Pt::String::widen( id ) );
+    Attribute attr;
+    attr.name().assign(L"ref");
+    attr.value().widen_assign(id);
     _writer->writeElement( Pt::String::widen( name ), Pt::String(), &attr, 1 );
 }
 
@@ -317,13 +328,22 @@ void XmlFormatter::beginArray(const char* name, const char* type,
     if( ! _writer )
         return;
 
-    Xml::Attribute attr[3];
+    Xml::Attribute attr[2];
     unsigned countAttrs = 0;
 
     if (*name)
-        attr[countAttrs++] = Xml::Attribute( String(L"type"), String::widen( type ) );
+    {
+        attr[countAttrs].name().assign(L"type");
+        attr[countAttrs].value().widen_assign(type);
+        ++countAttrs;
+    }
+
     if (*id)
-        attr[countAttrs++] = Xml::Attribute( String(L"id"), String::widen( id ) );
+    {
+        attr[countAttrs].name().assign(L"id");
+        attr[countAttrs].value().widen_assign(id);
+        ++countAttrs;
+    }
 
     _writer->writeStartElement( String::widen( *name ? name : type ), attr, countAttrs );
 }
@@ -365,9 +385,18 @@ void XmlFormatter::onBeginObject(const char* name, const char* type,
     unsigned countAttrs = 0;
 
     if (*name)
-        attr[countAttrs++] = Xml::Attribute( String(L"type"), String::widen( type ) );
+    {
+        attr[countAttrs].name().assign(L"type");
+        attr[countAttrs].value().widen_assign(type);
+        ++countAttrs;
+    }
+
     if (*id)
-        attr[countAttrs++] = Xml::Attribute( String(L"id"), String::widen( id ) );
+    {
+        attr[countAttrs].name().assign(L"id");
+        attr[countAttrs].value().widen_assign(id);
+        ++countAttrs;
+    }
 
     _writer->writeStartElement( String::widen( *name ? name : type ), attr, countAttrs );
 

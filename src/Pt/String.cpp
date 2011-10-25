@@ -694,8 +694,11 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::widen_assign(const char* str)
     size_type len = std::char_traits<char>::length(str);
     reserve(len);
 
+    Pt::Char* p = privdata_rw();
     for (size_type n = 0; n < len; ++n)
-        *this += Pt::Char( str[n] );
+        p[n] = Pt::Char( str[n] );
+
+    setLength(len);
 
     return *this;
 }
@@ -706,8 +709,11 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::widen_assign(const std::string& 
     size_type len = str.length();
     reserve(len);
 
+    Pt::Char* p = privdata_rw();
     for (size_type n = 0; n < len; ++n)
-        *this += Pt::Char( str[n] );
+        p[n] = Pt::Char( str[n] );
+
+    setLength(len);
 
     return *this;
 }
