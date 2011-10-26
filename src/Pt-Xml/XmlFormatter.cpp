@@ -177,15 +177,15 @@ void XmlFormatter::addString(const char* name, const char* type,
 
     if (*name)
     {
-        attr[countAttrs].name().assign(L"type");
-        attr[countAttrs].value().widen_assign(type);
+        attr[countAttrs].name() = L"type";
+        attr[countAttrs].value() = type;
         ++countAttrs;
     }
 
     if (*id)
     {
-        attr[countAttrs].name().assign(L"id");
-        attr[countAttrs].value().widen_assign(id);
+        attr[countAttrs].name() = L"id";
+        attr[countAttrs].value() = id;
         ++countAttrs;
     }
 
@@ -196,7 +196,7 @@ void XmlFormatter::addString(const char* name, const char* type,
 void XmlFormatter::addString8(const char* name, const char* value, 
                               const char* id)
 {
-    _value.widen_assign(value);
+    _value = value;
     this->addString(name, "string", _value, id);
 }
 
@@ -316,8 +316,8 @@ void XmlFormatter::addReference(const char* name, const char* id)
         return;
 
     Attribute attr;
-    attr.name().assign(L"ref");
-    attr.value().widen_assign(id);
+    attr.name() = L"ref";
+    attr.value() = id;
     _writer->writeElement( Pt::String::widen( name ), Pt::String(), &attr, 1 );
 }
 
@@ -333,15 +333,15 @@ void XmlFormatter::beginArray(const char* name, const char* type,
 
     if (*name)
     {
-        attr[countAttrs].name().assign(L"type");
-        attr[countAttrs].value().widen_assign(type);
+        attr[countAttrs].name() = L"type";
+        attr[countAttrs].value() = type;
         ++countAttrs;
     }
 
     if (*id)
     {
-        attr[countAttrs].name().assign(L"id");
-        attr[countAttrs].value().widen_assign(id);
+        attr[countAttrs].name() = L"id";
+        attr[countAttrs].value() = id;
         ++countAttrs;
     }
 
@@ -386,15 +386,15 @@ void XmlFormatter::onBeginObject(const char* name, const char* type,
 
     if (*name)
     {
-        attr[countAttrs].name().assign(L"type");
-        attr[countAttrs].value().widen_assign(type);
+        attr[countAttrs].name() = L"type";
+        attr[countAttrs].value() = type;
         ++countAttrs;
     }
 
     if (*id)
     {
-        attr[countAttrs].name().assign(L"id");
-        attr[countAttrs].value().widen_assign(id);
+        attr[countAttrs].name() = L"id";
+        attr[countAttrs].value() = id;
         ++countAttrs;
     }
 

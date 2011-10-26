@@ -47,6 +47,7 @@ class StringTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &StringTest::testConstructor );
             Pt::Unit::TestSuite::registerMethod( "testCompare", *this, &StringTest::testCompare );
+            Pt::Unit::TestSuite::registerMethod( "testCompareShort", *this, &StringTest::testCompareShort );
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &StringTest::testAssign );
             Pt::Unit::TestSuite::registerMethod( "testAppend", *this, &StringTest::testAppend );
             Pt::Unit::TestSuite::registerMethod( "testInsert", *this, &StringTest::testInsert );
@@ -73,6 +74,7 @@ class StringTest : public Pt::Unit::TestSuite
     protected:
         void testConstructor();
         void testCompare();
+        void testCompareShort();
         void testAssign();
         void testAppend();
         void testInsert();
@@ -184,6 +186,34 @@ void StringTest::testCompare()
     PT_UNIT_ASSERT(y1 == y2);
     PT_UNIT_ASSERT(y1 == empty);
     PT_UNIT_ASSERT(y2 == empty);
+}
+
+void StringTest::testCompareShort()
+{
+    Pt::String s(L"abcd");
+
+    PT_UNIT_ASSERT_EQUALS(s.compare("abcd")            , 0);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abc")             , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abcxyz")          , -1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abd")             , -1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abb")             , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("ab")              , 1);
+
+    PT_UNIT_ASSERT_EQUALS(s.compare("abcd", 4)         , 0);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abcxyz", 3)       , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abcxyz", 4)       , -1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abd", 3)          , -1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("abb", 3)          , 1);
+    PT_UNIT_ASSERT_EQUALS(s.compare("ab", 2)           , 1);
+
+    Pt::String x1(L"abc");
+    PT_UNIT_ASSERT(x1 == "abc");
+
+    Pt::String y1(L"");
+    Pt::String y2("");
+    PT_UNIT_ASSERT(y1 == y2);
+    PT_UNIT_ASSERT(y1 == "");
+    PT_UNIT_ASSERT(y2 == "");
 }
 
 void StringTest::testAssign()

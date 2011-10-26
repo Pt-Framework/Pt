@@ -150,6 +150,35 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Ch
 }
 
 
+basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str)
+{
+    size_type len = str.length();
+    reserve(len);
+
+    Pt::Char* p = privdata_rw();
+    for (size_type n = 0; n < len; ++n)
+        p[n] = Pt::Char( str[n] );
+
+    setLength(len);
+
+    return *this;
+}
+
+
+basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str, size_type pos, size_type len)
+{
+    reserve(len);
+
+    Pt::Char* p = privdata_rw();
+    for (size_type n = 0; n < len; ++n)
+        p[n] = Pt::Char( str[pos + n] );
+
+    setLength(len);
+
+    return *this;
+}
+
+
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const wchar_t* str)
 {
     size_type length = 0;
@@ -168,6 +197,32 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const wchar_t* str, size_
     for (unsigned n = 0; n < length; ++n)
     {
         d[n] = str[n];
+    }
+
+    setLength(length);
+
+    return *this;
+}
+
+
+basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const char* str)
+{
+    size_type length = 0;
+    while (str[length])
+        ++length;
+    assign(str, length);
+
+    return *this;
+}
+
+
+basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const char* str, size_type length)
+{
+    reserve(length);
+    Pt::Char* d = privdata_rw();
+    for (unsigned n = 0; n < length; ++n)
+    {
+        d[n] = Pt::Char(str[n]);
     }
 
     setLength(length);
@@ -371,6 +426,38 @@ int basic_string<Pt::Char>::compare(const basic_string& str) const
 }
 
 
+int basic_string<Pt::Char>::compare(const char* str) const
+{
+    size_type size = length();
+    size_type n;
+    const Pt::Char* p = privdata_ro();
+    for (n = 0; n < size && str[n]; ++n)
+    {
+        Pt::Char ch(str[n]);
+        if (p[n] != ch)
+            return p[n] > ch ? 1 : -1;
+    }
+
+    return n < size ? 1 : str[n] ? -1 : 0;
+}
+
+
+int basic_string<Pt::Char>::compare(const char* str, size_type len) const
+{
+    size_type size = length();
+    size_type n;
+    const Pt::Char* p = privdata_ro();
+    for (n = 0; n < size && n < len; ++n)
+    {
+        Pt::Char ch(str[n]);
+        if (p[n] != ch)
+            return p[n] > ch ? 1 : -1;
+    }
+
+    return n < size ? 1 : n < len ? -1 : 0;
+}
+
+
 int basic_string<Pt::Char>::compare(const Pt::Char* str) const
 {
     return compare(str, traits_type::length(str));
@@ -406,6 +493,21 @@ int basic_string<Pt::Char>::compare(const wchar_t* str) const
     }
 
     return static_cast<int>( *self - Pt::Char(*str) );
+}
+
+
+int basic_string<Pt::Char>::compare(const wchar_t* str, size_type n) const
+{
+    const Pt::Char* self = privdata_ro();
+    size_type nn;
+    for (nn = 0; nn < n; ++nn)
+    {
+        if(*self != str[nn])
+            return *self < Pt::Char(str[nn]) ? -1 : +1;
+        ++self;
+    }
+
+    return *self ? 1 : nn < n ? -1 : 0;
 }
 
 
@@ -686,36 +788,6 @@ basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
         ret += Pt::Char( str[n] );
 
     return ret;
-}
-
-
-basic_string<Pt::Char>& basic_string<Pt::Char>::widen_assign(const char* str)
-{
-    size_type len = std::char_traits<char>::length(str);
-    reserve(len);
-
-    Pt::Char* p = privdata_rw();
-    for (size_type n = 0; n < len; ++n)
-        p[n] = Pt::Char( str[n] );
-
-    setLength(len);
-
-    return *this;
-}
-
-
-basic_string<Pt::Char>& basic_string<Pt::Char>::widen_assign(const std::string& str)
-{
-    size_type len = str.length();
-    reserve(len);
-
-    Pt::Char* p = privdata_rw();
-    for (size_type n = 0; n < len; ++n)
-        p[n] = Pt::Char( str[n] );
-
-    setLength(len);
-
-    return *this;
 }
 
 

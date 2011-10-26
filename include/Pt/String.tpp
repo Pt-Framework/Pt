@@ -56,6 +56,27 @@ inline basic_string<Pt::Char>::basic_string(const wchar_t* str, size_type length
 }
 
 
+inline basic_string<Pt::Char>::basic_string(const std::string& str, const allocator_type& a)
+: _d(a)
+{
+    assign(str);
+}
+
+
+inline basic_string<Pt::Char>::basic_string(const char* str, const allocator_type& a)
+: _d(a)
+{
+    assign(str);
+}
+
+
+inline basic_string<Pt::Char>::basic_string(const char* str, size_type length, const allocator_type& a)
+: _d(a)
+{
+    assign(str, length);
+}
+
+
 inline basic_string<Pt::Char>::basic_string(const Pt::Char* str, size_type n, const allocator_type& a)
 : _d(a)
 {

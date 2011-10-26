@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
+ * Copyright (C) 2011 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -80,6 +81,12 @@ class PT_API basic_string< Pt::Char > {
         basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
 
         basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
+
+        basic_string(const std::string& str, const allocator_type& a = allocator_type());
+
+        basic_string(const char* str, const allocator_type& a = allocator_type());
+
+        basic_string(const char* str, size_type n, const allocator_type& a = allocator_type());
 
         basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
 
@@ -184,6 +191,10 @@ class PT_API basic_string< Pt::Char > {
 
         basic_string& assign(const basic_string& str, size_type pos, size_type n);
 
+        basic_string& assign(const string& str);
+
+        basic_string& assign(const string& str, size_type pos, size_type n);
+
         basic_string& assign(const wchar_t* str);
 
         basic_string& assign(const wchar_t* str, size_type n);
@@ -192,6 +203,10 @@ class PT_API basic_string< Pt::Char > {
         { return assign(str, traits_type::length(str)); }
 
         basic_string& assign(const Pt::Char* str, size_type length);
+
+        basic_string& assign(const char* str);
+
+        basic_string& assign(const char* str, size_type length);
 
         basic_string& assign(size_type n, Pt::Char c);
 
@@ -275,6 +290,15 @@ class PT_API basic_string< Pt::Char > {
 
         int compare(const wchar_t* str) const;
 
+        int compare(const wchar_t* str, size_type n) const;
+
+        int compare(const std::string& str) const
+        { return compare(str.data(), str.length()); }
+
+        int compare(const char* str) const;
+
+        int compare(const char* str, size_type n) const;
+
         int compare(size_type pos, size_type n, const basic_string& str) const;
 
         int compare(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2) const;
@@ -355,10 +379,6 @@ class PT_API basic_string< Pt::Char > {
 
         static basic_string widen(const std::string& str);
 
-        basic_string& widen_assign(const char* str);
-
-        basic_string& widen_assign(const std::string& str);
-
         template <typename OutIterT>
         OutIterT toUtf16(OutIterT to) const;
 
@@ -367,6 +387,12 @@ class PT_API basic_string< Pt::Char > {
 
     public:
         basic_string& operator=(const basic_string& str)
+        { return this->assign(str); }
+
+        basic_string& operator=(const string& str)
+        { return this->assign(str); }
+
+        basic_string& operator=(const char* str)
         { return this->assign(str); }
 
         basic_string& operator=(const Pt::Char* str)
@@ -483,6 +509,21 @@ class PT_API basic_string< Pt::Char > {
     { return a.compare(b) == 0; }
 
     inline bool operator==(const basic_string<Pt::Char>& a, const wchar_t* b)
+    { return a.compare(b) == 0; }
+
+    inline bool operator==(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) == 0; }
+
+    inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) == 0; }
+
+    inline bool operator==(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) == 0; }
+
+    inline bool operator==(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) == 0; }
+
+    inline bool operator==(const std::string& b, const basic_string<Pt::Char>& a)
     { return a.compare(b) == 0; }
 
     // operator !=
