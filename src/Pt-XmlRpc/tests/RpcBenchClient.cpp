@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2011 Tommi Maekitalo
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include <iostream>
+#include <Pt/Arg.h>
+#include <Pt/XmlRpc/RemoteProcedure.h>
+#include <Pt/XmlRpc/HttpClient.h>
+#include <Pt/System/Thread.h>
+#include <Pt/System/Clock.h>
+#include <Pt/Timespan.h>
+#include <Pt/Atomicity.h>
+
+class BenchClient
+{
+    void exec();
+
+    Pt::XmlRpc::HttpClient client;
+    Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo;
+    Pt::System::AttachedThread thread;
+
+    static Pt::atomic_t requestsStarted;
+
+  public:
+    static unsigned maxRequests;
+
+    explicit BenchClient(unsigned short port)
+      : client("", port, "/myservice"),
+        echo(client, "echo"),
+        thread(Pt::callable(*this, &BenchClient::exec))
+    { }
+
+    void start()
+    { thread.start(); }
+
+    void join()
+    { thread.join(); }
+};
+
+Pt::atomic_t BenchClient::requestsStarted(0);
+unsigned BenchClient::maxRequests = 0;
+typedef std::vector<BenchClient*> BenchClients;
+
+void BenchClient::exec()
+{
+  while (static_cast<unsigned>(Pt::atomicIncrement(requestsStarted)) < maxRequests)
+  {
+    echo("hi");
+  }
+}
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    Pt::Arg<std::string> ip(argc, argv, 'i');
+    Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
+    Pt::Arg<unsigned> threads(argc, argv, 't', 4);
+    BenchClient::maxRequests = Pt::Arg<unsigned>(argc, argv, 'n', 10000);
+
+    std::cout << "call " << BenchClient::maxRequests << " requests with " << threads.getValue() << " threads\n\n"
+                 "options:\n"
+                 "   -l ip      set ip address of server (default: localhost)\n"
+                 "   -p number  set port number of server (default: 7002)\n"
+                 "   -t number  set number of threads (default: 4)\n"
+                 "   -n number  set number of requests (default: 10000)\n"
+              << std::endl;
+
+    BenchClients clients;
+
+    while (clients.size() < threads)
+      clients.push_back(new BenchClient(port));
+
+    Pt::System::Clock cl;
+    cl.start();
+
+    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
+      (*it)->start();
+
+    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
+      (*it)->join();
+
+    Pt::Timespan t = cl.stop();
+
+    std::cout << BenchClient::maxRequests << " requests in " << t.totalMSecs()/1e3 << " s => " << (BenchClient::maxRequests / (t.totalMSecs()/1e3)) << "#/s" << std::endl;
+
+    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
+      delete *it;
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+}
+
