@@ -114,8 +114,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
-            delete _loop;
             delete _server;
+            delete _loop;
         }
 
         ////////////////////////////////////////////////////////////
@@ -342,6 +342,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _multiply= &multiply;
 
             _loop->run();
+
+            delete _server;
+            _server = 0;
         }
 
         void onIntegerFinished(const Pt::XmlRpc::Result<int>& r)
@@ -526,6 +529,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Timespan ts = clock.stop();
             std::cerr << "Time   : " << ts.toUSecs() <<  std::endl;
             std::cerr << "Req/Sec: " << ((1000.0/ts.toUSecs())*1000000) <<  std::endl;
+
+            delete _server;
+            _server = 0;
         }
 
         void onArrayBenchmarkFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)

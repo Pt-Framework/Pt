@@ -55,8 +55,26 @@ class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
 
-class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
+class ServExitEvent : public Pt::BasicEvent<ServExitEvent>
 {};
+
+
+class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
+{
+    public:
+        AcceptEvent(Handler* socket = 0)
+        : _socket(socket)
+        {
+        }
+
+        Handler* handler() const
+        { return _socket; }
+
+    private:
+        Handler* _socket;
+};
+
+class ServerThread;
 
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
@@ -116,12 +134,11 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void onConnectionTimeout(Handler& handler);
 
-        void onAcceptEvent(const AcceptEvent& ev);
-
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
         std::vector<Handler*> _sockets;
+        ServerThread* _serverThread;
 
         typedef std::multimap<std::string, Service*> ServicesType;
         System::ReadWriteMutex _serviceMutex;

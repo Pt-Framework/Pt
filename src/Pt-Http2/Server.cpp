@@ -64,9 +64,13 @@ class Handler : public Net::TcpSocket, public Connectable
     };
 
     public:
+        Handler(Server& server, Net::TcpServer& tcpServer);
+
         Handler(Server& server, System::EventLoop& loop, Net::TcpServer& tcpServer);
 
         ~Handler();
+
+        void setLoop(System::EventLoop& loop);
 
         void onInput(System::StreamBuffer& sb);
 
@@ -123,6 +127,32 @@ void Handler::ParseEvent::onUrl(const std::string& url)
 void Handler::ParseEvent::onUrlParam(const std::string& q)
 {
     _request.qparams(q);
+}
+
+
+Handler::Handler(Server& server, Net::TcpServer& tcpServer)
+: _server(server)
+, _parseEvent(_request)
+, _parser(_parseEvent, false)
+, _responder(0)
+{
+    _stream.attachDevice(*this);
+    Pt::connect(_stream.buffer().inputReady, *this, &Handler::onInput);
+    Pt::connect(_stream.buffer().outputReady, *this, &Handler::onOutput);
+    Pt::connect(_timer.timeout, *this, &Handler::onTimeout);
+
+    Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DEFER_ACCEPT);
+}
+
+
+void Handler::setLoop(System::EventLoop& loop)
+{
+    loop.add(*this);
+    loop.add(_timer);
+
+    //std::cerr << "beginRead" << std::endl;
+    _stream.buffer().beginRead();
+    _timer.start( _server.readTimeout() );
 }
 
 
@@ -315,7 +345,6 @@ bool Handler::onOutput(System::StreamBuffer& sb)
             else
             {
                 //log_debug("don't do keep alive");
-                std::exit(1);
                 close();
                 return false;
             }
@@ -399,21 +428,67 @@ class ServerThread : public Connectable
         ServerThread(Server& server)
         : _server(&server)
         , _thread(_loop)
-        {}
+        {
+            _loop.event += Pt::slot(*this, &ServerThread::onAcceptEvent);
+            _loop.event += Pt::slot(*this, &ServerThread::onExitEvent);
+            _thread.start();
+        }
 
         ServerThread::~ServerThread()
+        {
+            stop();
+        }
+
+        void serve(Handler* socket)
+        {
+            AcceptEvent ev(socket);
+            _loop.commitEvent(ev);
+        }
+
+        void stop()
+        {
+            ServExitEvent ev;
+            _loop.commitEvent(ev);
+
+            _thread.join();
+        }
+
+    private:
+        void onExitEvent(const ServExitEvent& ev)
         {
             std::vector<Handler*>::iterator it;
             for(it = _sockets.begin(); it != _sockets.end(); ++it)
             {
                 delete *it;
             }
+
+            _sockets.clear();
+            _loop.exit();
         }
 
-        void stop()
+        void onAcceptEvent(const AcceptEvent& ev)
         {
-            _loop.exit();
-            _thread.join();
+            Handler* socket = ev.handler();
+
+            _sockets.push_back(socket);
+            socket->timeout += Pt::slot(*this, &ServerThread::onConnectionTimeout);
+
+            socket->setLoop(_loop);
+        }
+
+        void onConnectionTimeout(Handler& handler)
+        {
+            //Socket* socket = event.socket();
+            std::vector<Handler*>::iterator it;
+            for(it = _sockets.begin(); it != _sockets.end(); ++it)
+            {
+                if(&handler == *it)
+                {
+                    delete *it;
+                    _sockets.erase(it);
+                    break;
+                }
+            }
         }
 
     private:
@@ -428,33 +503,36 @@ class ServerThread : public Connectable
 
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
+, _serverThread(0)
 {
+    _serverThread = new ServerThread(*this);
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
     _loop.add(_serverSocket);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
-
-    _loop.event += Pt::slot(*this, &Server::onAcceptEvent);
 }
 
 
 Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
+, _serverThread(0)
 {
+    _serverThread = new ServerThread(*this);
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
     _loop.add(_serverSocket);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
-
-    _loop.event += Pt::slot(*this, &Server::onAcceptEvent);
 }
 
 
 Server::~Server()
 {
+    _serverThread->stop();
+    delete _serverThread;
+
     std::vector<Handler*>::iterator it;
     for(it = _sockets.begin(); it != _sockets.end(); ++it)
     {
@@ -474,13 +552,11 @@ void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 
 void Server::onAccept(Net::TcpServer& server)
 {
-    _sockets.reserve(_sockets.size() + 1);
+    Handler* socket = new Handler(*this, server);
+    _serverThread->serve(socket);
 
-    Handler* socket = new Handler(*this, _loop, server);
-    _sockets.push_back(socket);
-    socket->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
-    _loop.add(*socket);
-    
+    //_sockets.push_back(socket);
+    //socket->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
 }
 
 
@@ -499,10 +575,6 @@ void Server::onConnectionTimeout(Handler& handler)
     }
 }
 
-
-void Server::onAcceptEvent(const AcceptEvent& ev)
-{
-}
 
 void Server::addService(const std::string& url, Service& service)
 {
