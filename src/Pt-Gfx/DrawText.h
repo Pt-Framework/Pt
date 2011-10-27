@@ -37,6 +37,7 @@
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/FontMetrics.h"
+#include <cassert>
 
 namespace Pt{
 namespace Gfx{
