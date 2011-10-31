@@ -31,6 +31,7 @@
 #include <Pt/XmlRpc/RemoteProcedure.h>
 #include <Pt/XmlRpc/HttpClient.h>
 #include <Pt/System/Thread.h>
+#include <Pt/System/Mutex.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Timespan.h>
 #include <Pt/Atomicity.h>
@@ -43,16 +44,33 @@ class BenchClient
     Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo;
     Pt::System::AttachedThread thread;
 
-    static Pt::atomic_t requestsStarted;
+    static unsigned _numRequests;
+    static Pt::atomic_t _requestsStarted;
+    static Pt::atomic_t _requestsFinished;
+    static Pt::atomic_t _requestsFailed;
 
   public:
-    static unsigned maxRequests;
 
     explicit BenchClient(unsigned short port)
       : client("", port, "/myservice"),
         echo(client, "echo"),
         thread(Pt::callable(*this, &BenchClient::exec))
     { }
+
+    static unsigned numRequests()
+    { return _numRequests; }
+
+    static void numRequests(unsigned n)
+    { _numRequests = n; }
+
+    static unsigned requestsStarted()
+    { return static_cast<unsigned>(Pt::atomicGet(_requestsStarted)); }
+
+    static unsigned requestsFinished()
+    { return static_cast<unsigned>(Pt::atomicGet(_requestsFinished)); }
+
+    static unsigned requestsFailed()
+    { return static_cast<unsigned>(Pt::atomicGet(_requestsFailed)); }
 
     void start()
     { thread.start(); }
@@ -61,15 +79,32 @@ class BenchClient
     { thread.join(); }
 };
 
-Pt::atomic_t BenchClient::requestsStarted(0);
-unsigned BenchClient::maxRequests = 0;
+Pt::atomic_t BenchClient::_requestsStarted(0);
+Pt::atomic_t BenchClient::_requestsFinished(0);
+Pt::atomic_t BenchClient::_requestsFailed(0);
+unsigned BenchClient::_numRequests = 0;
 typedef std::vector<BenchClient*> BenchClients;
+
+static Pt::System::Mutex mutex;
 
 void BenchClient::exec()
 {
-  while (static_cast<unsigned>(Pt::atomicIncrement(requestsStarted)) < maxRequests)
+  while (static_cast<unsigned>(Pt::atomicIncrement(_requestsStarted)) <= _numRequests)
   {
-    echo("hi");
+    try
+    {
+      echo("hi");
+      Pt::atomicIncrement(_requestsFinished);
+    }
+    catch (const std::exception& e)
+    {
+      {
+        Pt::System::MutexLock lock(mutex);
+        std::cerr << "request failed with error " << e.what() << std::endl;
+      }
+
+      Pt::atomicIncrement(_requestsFailed);
+    }
   }
 }
 
@@ -80,9 +115,9 @@ int main(int argc, char* argv[])
     Pt::Arg<std::string> ip(argc, argv, 'i');
     Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);
-    BenchClient::maxRequests = Pt::Arg<unsigned>(argc, argv, 'n', 10000);
+    BenchClient::numRequests(Pt::Arg<unsigned>(argc, argv, 'n', 10000));
 
-    std::cout << "call " << BenchClient::maxRequests << " requests with " << threads.getValue() << " threads\n\n"
+    std::cout << "call " << BenchClient::numRequests() << " requests with " << threads.getValue() << " threads\n\n"
                  "options:\n"
                  "   -l ip      set ip address of server (default: localhost)\n"
                  "   -p number  set port number of server (default: 7002)\n"
@@ -106,7 +141,8 @@ int main(int argc, char* argv[])
 
     Pt::Timespan t = cl.stop();
 
-    std::cout << BenchClient::maxRequests << " requests in " << t.totalMSecs()/1e3 << " s => " << (BenchClient::maxRequests / (t.totalMSecs()/1e3)) << "#/s" << std::endl;
+    std::cout << BenchClient::numRequests() << " requests in " << t.totalMSecs()/1e3 << " s => " << (BenchClient::requestsStarted() / (t.totalMSecs()/1e3)) << "#/s\n"
+              << BenchClient::requestsFinished() << " finished " << BenchClient::requestsFailed() << " failed" << std::endl;
 
     for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
       delete *it;
