@@ -9,5 +9,13 @@ Main google-weather-demo : google-weather-demo.cpp ;
 LinkSharedLibraries google-weather-demo : Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate google-weather-demo : $(OUTPUT_TARGET) ;
 
+Main RpcBenchClient : RpcBenchClient.cpp ;
+LinkSharedLibraries RpcBenchClient : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
+MakeLocate RpcBenchClient : $(OUTPUT_TARGET) ;
+
+Main RpcBenchServer : RpcBenchServer.cpp ;
+LinkSharedLibraries RpcBenchServer : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
+MakeLocate RpcBenchServer.cpp : $(OUTPUT_TARGET) ;
+
 # Pseudo target to call from projects
 DEPENDS Pt-XmlRpc-all : Pt-XmlRpc-test ;

@@ -130,6 +130,8 @@ class PT_HTTP_API Server : public Pt::Connectable
         {return _loop; }
 
     protected:
+        void startWorker();
+
         void onAccept(Net::TcpServer& server);
 
         void onConnectionTimeout(Handler& handler);
@@ -138,7 +140,8 @@ class PT_HTTP_API Server : public Pt::Connectable
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
         std::vector<Handler*> _sockets;
-        ServerThread* _serverThread;
+        std::vector<ServerThread*> _serverThreads;
+        unsigned _useWorker;
 
         typedef std::multimap<std::string, Service*> ServicesType;
         System::ReadWriteMutex _serviceMutex;

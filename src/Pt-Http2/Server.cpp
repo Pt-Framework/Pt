@@ -496,16 +496,13 @@ class ServerThread : public Connectable
         Pt::System::MainLoop _loop;
         Pt::System::AttachedThread _thread;
         std::vector<Handler*> _sockets;
-        NotFoundService _defaultService;
-        NotAuthenticatedService _noAuthService;
 };
 
 
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
-, _serverThread(0)
+, _useWorker(0)
 {
-    _serverThread = new ServerThread(*this);
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
@@ -517,11 +514,12 @@ Server::Server(System::EventLoop& eventLoop)
 Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
-, _serverThread(0)
+, _useWorker(0)
 {
-    _serverThread = new ServerThread(*this);
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
+
+    this->startWorker();
 
     _loop.add(_serverSocket);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
@@ -530,8 +528,12 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 
 Server::~Server()
 {
-    _serverThread->stop();
-    delete _serverThread;
+    std::vector<ServerThread*>::iterator threadIt;
+    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
+    {
+        (*threadIt)->stop();
+        delete *threadIt;
+    }
 
     std::vector<Handler*>::iterator it;
     for(it = _sockets.begin(); it != _sockets.end(); ++it)
@@ -546,23 +548,44 @@ Server::~Server()
 
 void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
+    this->startWorker();
     _serverSocket.listen(ip, port, backlog);
+}
+
+
+void Server::startWorker()
+{
+    for(unsigned n = 1; n < this->maxThreads(); ++n)
+    {
+        ServerThread* st = new ServerThread(*this);
+        _serverThreads.push_back(st);
+    }
+
+    _useWorker = _serverThreads.size();
 }
 
 
 void Server::onAccept(Net::TcpServer& server)
 {
     Handler* socket = new Handler(*this, server);
-    _serverThread->serve(socket);
 
-    //_sockets.push_back(socket);
-    //socket->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
+    if(_useWorker < _serverThreads.size())
+    {
+        _serverThreads[_useWorker]->serve(socket);
+        ++_useWorker;
+    }
+    else
+    {
+        socket->setLoop(_loop);
+        _sockets.push_back(socket);
+        socket->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
+        _useWorker = 0;
+    }
 }
 
 
 void Server::onConnectionTimeout(Handler& handler)
 {
-    //Socket* socket = event.socket();
     std::vector<Handler*>::iterator it;
     for(it = _sockets.begin(); it != _sockets.end(); ++it)
     {
