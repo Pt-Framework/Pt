@@ -50,7 +50,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         { _writer = &writer; }
 
         void addString(const char* name, const char* type,
-                       const Pt::String& value, const char* id);
+                       const Pt::Char* value, const char* id);
 
         void addString8(const char* name, const char* value, const char* id);
 

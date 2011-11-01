@@ -111,10 +111,10 @@ namespace Pt {
 namespace XmlRpc {
 
 void Formatter::addString(const char* name, const char* type,
-                          const Pt::String& value, const char* id)
+                          const Pt::Char* value, const char* id)
 {
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_STRING, value.c_str());
+    _writer->writeElement(XMLRPC_STRING, value);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 

@@ -421,6 +421,12 @@ class PT_API SerializationInfo
             size_t length;
         };
 
+        struct StrValue
+        {
+            Pt::Char* str;
+            size_t length;
+        };
+
         struct Seq
         {
             SerializationInfo* first;
@@ -436,7 +442,7 @@ class PT_API SerializationInfo
             unsigned long long ul;
             long double f;
             char* cstr;
-            char str[sizeof(Pt::String)];
+            StrValue ustr;
             BlobValue blob;
             Ref ref;
             Seq seq;

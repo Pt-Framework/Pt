@@ -167,7 +167,7 @@ void XmlFormatter::flush()
 
 
 void XmlFormatter::addString(const char* name, const char* type,
-                             const Pt::String& value, const char* id)
+                             const Pt::Char* value, const char* id)
 {
     if( ! _writer )
         return;
@@ -197,7 +197,7 @@ void XmlFormatter::addString8(const char* name, const char* value,
                               const char* id)
 {
     _value = value;
-    this->addString(name, "string", _value, id);
+    this->addString(name, "string", _value.c_str(), id);
 }
 
 
@@ -205,7 +205,7 @@ void XmlFormatter::addBytes(const char* name, const char* type,
                             const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
-    this->addString(name, type, _value, id);
+    this->addString(name, type, _value.c_str(), id);
 }
 
 
@@ -213,7 +213,7 @@ void XmlFormatter::addBool(const char* name, bool value,
                            const char* id)
 {
     convert(_value, value);
-    this->addString(name, "bool", _value, id);
+    this->addString(name, "bool", _value.c_str(), id);
 }
 
 
@@ -222,7 +222,7 @@ void XmlFormatter::addChar(const char* name, const Pt::Char& value,
 {
     _value.clear();
     _value += value;
-    this->addString(name, "char", _value, id);
+    this->addString(name, "char", _value.c_str(), id);
 }
 
 
@@ -230,7 +230,7 @@ void XmlFormatter::addChar8(const char* name, char value, const char* id)
 {
     _value.clear();
     _value += Pt::Char(value);
-    this->addString(name, "char", _value, id);
+    this->addString(name, "char", _value.c_str(), id);
 }
 
 
@@ -256,7 +256,7 @@ void XmlFormatter::addInt64(const char* name, Pt::int64_t value,
                           const char* id)
 {
     convert(_value, value);
-    this->addString(name, "int", _value, id);
+    this->addString(name, "int", _value.c_str(), id);
 }
 
 
@@ -282,7 +282,7 @@ void XmlFormatter::addUInt64(const char* name, Pt::uint64_t value,
                              const char* id)
 {
     convert(_value, value);
-    this->addString(name, "unsigned", _value, id);
+    this->addString(name, "unsigned", _value.c_str(), id);
 }
 
 
@@ -290,7 +290,7 @@ void XmlFormatter::addFloat(const char* name, float value,
                             const char* id)
 {
     convert(_value, value);
-    this->addString(name, "float", _value, id);
+    this->addString(name, "float", _value.c_str(), id);
 }
 
 
@@ -298,7 +298,7 @@ void XmlFormatter::addDouble(const char* name, double value,
                             const char* id)
 {
     convert(_value, value);
-    this->addString(name, "double", _value, id);
+    this->addString(name, "double", _value.c_str(), id);
 }
 
 
@@ -306,7 +306,7 @@ void XmlFormatter::addLongDouble(const char* name, long double value,
                                  const char* id)
 {
     convert(_value, value);
-    this->addString(name, "long double", _value, id);
+    this->addString(name, "long double", _value.c_str(), id);
 }
 
 

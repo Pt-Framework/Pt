@@ -64,12 +64,12 @@ inline void copyRefStr2(const char*& str, unsigned char& flags, unsigned char ma
     assert( from != 0 );
     freeRefStr2(str, flags, mask);
 
-	if(fromLen > 0)
-	{
-		++fromLen;
-		str = new char[fromLen];
-		std::memcpy( const_cast<char*>(str), from, fromLen );
-		flags |= mask;
+    if(fromLen > 0)
+    {
+        ++fromLen;
+        str = new char[fromLen];
+        std::memcpy( const_cast<char*>(str), from, fromLen );
+        flags |= mask;
     }
 }
 
@@ -98,12 +98,12 @@ inline void copyRefStr(const char*& str, bool& isRef, const char* from, std::siz
     assert( from != 0 );
     freeRefStr(str, isRef);
 
-	if(fromLen > 0)
-	{
-		++fromLen;
-		str = new char[fromLen];
-		std::memcpy( const_cast<char*>(str), from, fromLen );
-		isRef = false;
+    if(fromLen > 0)
+    {
+        ++fromLen;
+        str = new char[fromLen];
+        std::memcpy( const_cast<char*>(str), from, fromLen );
+        isRef = false;
     }
 }
 
@@ -198,8 +198,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
         }
         case Str:
         {
-            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addString( _Name, _TypeName, *str, _id );
+            formatter.addString( _Name, _TypeName, _value.ustr.str, _id );
             break;
         }
         case Reference:
@@ -333,8 +332,7 @@ void SerializationInfo::format(Formatter& formatter)
         }
         case Str:
         {
-            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            formatter.addString( _Name, _TypeName, *str, _id );
+            formatter.addString( _Name, _TypeName, _value.ustr.str, _id );
             break;
         }
 
@@ -446,8 +444,7 @@ void SerializationInfo::clearValue()
         }
         case Str:
         {
-            Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
-            str->~basic_string();
+            delete [] _value.ustr.str;
             break;
         }
 
@@ -573,8 +570,8 @@ void SerializationInfo::setReference(const void* ref)
     {
         this->clearValue();
 
-		_value.ref.refId = new char[1];
-		_value.ref.refId[0] = '\0';
+        _value.ref.refId = new char[1];
+        _value.ref.refId[0] = '\0';
         _type = Reference;
         _isCompound = false;
     }
@@ -590,17 +587,17 @@ void SerializationInfo::setReference(const std::string& id)
     {
         this->clearValue();
 
-		_value.ref.refId = new char[ id.size() + 1 ];
-		std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
+        _value.ref.refId = new char[ id.size() + 1 ];
+        std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
         _type = Reference;
         _isCompound = false;
     }
     else
     {
-		char* str = new char[ id.size() + 1 ];
-		delete [] _value.ref.refId;
-		_value.ref.refId = str;
-		std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
+        char* str = new char[ id.size() + 1 ];
+        delete [] _value.ref.refId;
+        _value.ref.refId = str;
+        std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
     }
 
     _value.ref.address = 0;
@@ -662,7 +659,11 @@ void SerializationInfo::setBinary(const char* data, std::size_t length)
         return;
 
     if(_type != Void)
+    {
         this->clearValue();
+        _type = Void;
+        _isCompound = false;
+    }
 
     if( length < sizeof(Variant) )
     {
@@ -687,49 +688,49 @@ void SerializationInfo::setBinary(const char* data, std::size_t length)
 
 void SerializationInfo::getString8(std::string& s) const
 {
-	switch(_type)
-	{
-		case Str:
-			s = reinterpret_cast<const Pt::String*>(_value.str)->narrow();
-			break;
-		
-		case Str8:
-			s = _value.cstr;
-			break;
-		
-		case Boolean:
-			convert(s, _value.b);
-			break;
+    switch(_type)
+    {
+        case Str:
+            s = Pt::String(_value.ustr.str).narrow();
+            break;
+        
+        case Str8:
+            s = _value.cstr;
+            break;
+        
+        case Boolean:
+            convert(s, _value.b);
+            break;
 
-		case Char:
-		case Char8:
-			s.clear();
-			s += char(int(_value.ui32));
-			break;
+        case Char:
+        case Char8:
+            s.clear();
+            s += char(int(_value.ui32));
+            break;
 
-		case Int8:
-		case Int16:
-		case Int32:
-		case Int64:
-			convert(s, _value.l);
-			break;
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
+            convert(s, _value.l);
+            break;
 
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
-			convert(s, _value.ul);
-			break;
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
+            convert(s, _value.ul);
+            break;
 
-		case Float:
-		case Double:
-		case LongDouble:
-			convert(s, _value.f);
-			break;
-		
-		default:
-			throw SerializationError("not a string value");
-	}
+        case Float:
+        case Double:
+        case LongDouble:
+            convert(s, _value.f);
+            break;
+        
+        default:
+            throw SerializationError("not a string value");
+    }
 }
 
 
@@ -739,7 +740,11 @@ void SerializationInfo::setString8(const char* s)
         return;
 
     if(_type != Void)
+    {
         this->clearValue();
+        _type = Void;
+        _isCompound = false;
+    }
 
     std::size_t length = std::strlen(s);
     _value.cstr = new char[length+1];
@@ -757,7 +762,11 @@ void SerializationInfo::setString8(const std::string& s)
         return;
 
     if(_type != Void)
+    {
         this->clearValue();
+        _type = Void;
+        _isCompound = false;
+    }
 
     std::size_t length = s.size();
     _value.cstr = new char[length+1];
@@ -771,49 +780,49 @@ void SerializationInfo::setString8(const std::string& s)
 
 void SerializationInfo::getString(Pt::String& s) const
 {
-	switch(_type)
-	{
-		case Str:
-			s = *(reinterpret_cast<const Pt::String*>(_value.str));
-			break;
-		
-		case Str8:
-			s = Pt::String::widen(_value.cstr);
-			break;
-		
-		case Boolean:
-			convert(s, _value.b);
-			break;
-
-		case Char:
-		case Char8:
-			s.clear();
-			s += Pt::Char(_value.ui32);
-			break;
-
-		case Int8:
-		case Int16:
-		case Int32:
-		case Int64:
-			convert(s, _value.l);
-			break;
-
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
-			convert(s, _value.ul);
-			break;
-
-		case Float:
-		case Double:
-		case LongDouble:
-			convert(s, _value.f);
-			break;
-		
-		default:
-			throw SerializationError("not a string value");
-	}
+    switch(_type)
+    {
+        case Str:
+            s.assign(_value.ustr.str, _value.ustr.length);
+            break;
+        
+        case Str8:
+            s = Pt::String::widen(_value.cstr);
+            break;
+        
+        case Boolean:
+            convert(s, _value.b);
+            break;
+    
+        case Char:
+        case Char8:
+            s.clear();
+            s += Pt::Char(_value.ui32);
+            break;
+    
+        case Int8:
+        case Int16:
+        case Int32:
+        case Int64:
+            convert(s, _value.l);
+            break;
+    
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
+            convert(s, _value.ul);
+            break;
+    
+        case Float:
+        case Double:
+        case LongDouble:
+            convert(s, _value.f);
+            break;
+        
+        default:
+            throw SerializationError("not a string value");
+    }
 }
 
 
@@ -822,20 +831,17 @@ void SerializationInfo::setString(const Pt::String& value)
     if( _type == Context )
         return;
 
-    if(_type == Void)
-    {
-        new(_value.str) Pt::String(value);
-    }
-    else if(_type != Str)
+    if(_type != Void)
     {
         this->clearValue();
-        new(_value.str) Pt::String(value);
+        _type = Void;
+        _isCompound = false;
     }
-    else
-    {
-        Pt::String* str = reinterpret_cast<Pt::String*>(_value.str);
-        *str = value;
-    }
+
+    size_t len = value.size() + 1;
+    _value.ustr.str = new Pt::Char[len];
+    _value.ustr.length = value.size();
+    std::char_traits<Pt::Char>::copy(_value.ustr.str, value.c_str(), len);
 
     _isCompound = false;
     _type = Str;
@@ -875,20 +881,19 @@ void SerializationInfo::getChar(Pt::Char& c) const
 
         case Str:
         {
-            const Pt::String* str = reinterpret_cast<const Pt::String*>(_value.str);
-            if( str->size() != 1 )
-				throw SerializationError("expected character value");
-
-			c = (*str)[0];
+            if( _value.ustr.length != 1 )
+                throw SerializationError("expected character value");
+    
+            c = _value.ustr.str[0];
             break;
         }
-
+    
         case Str8:
         {
             if( _value.cstr[0] == '\0' )
-				throw SerializationError("expected character value");
-
-			c = _value.cstr[0];
+                throw SerializationError("expected character value");
+    
+            c = _value.cstr[0];
             break;
         }
 
@@ -926,10 +931,10 @@ void SerializationInfo::getBool(bool& value) const
             value = 0 != _value.l;
             break;
 
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
             value = 0 != _value.ul;
             break;
 
@@ -1069,10 +1074,10 @@ void SerializationInfo::getInt64(Pt::int64_t& l) const
             l =  static_cast<Pt::int64_t>(_value.l);
             break;
 
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
             l =  static_cast<Pt::int64_t>(_value.ul);
             break;
 
@@ -1203,10 +1208,10 @@ void SerializationInfo::getUInt64(Pt::uint64_t& l) const
             l =  static_cast<Pt::uint64_t>(_value.l);
             break;
 
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
             l =  static_cast<Pt::uint64_t>(_value.ul);
             break;
 
@@ -1304,10 +1309,10 @@ void SerializationInfo::getLongDouble(long double& value) const
             value = static_cast<double>(_value.l);
             break;
 
-		case UInt8:
-		case UInt16:
-		case UInt32:
-		case UInt64:
+        case UInt8:
+        case UInt16:
+        case UInt32:
+        case UInt64:
             value = static_cast<double>(_value.ul);
             break;
 

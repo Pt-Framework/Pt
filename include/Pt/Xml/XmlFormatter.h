@@ -130,7 +130,7 @@ class PT_XML_API XmlFormatter : public Formatter
         void flush();
 
         void addString(const char*, const char* type,
-                       const Pt::String& value, const char* id);
+                       const Pt::Char* value, const char* id);
         
         void addString8(const char* name, const char* value, 
                         const char* id);
