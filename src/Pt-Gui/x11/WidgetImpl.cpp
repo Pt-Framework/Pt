@@ -34,8 +34,8 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/ResizeEvent.h>
-#include <Pt/Text/TextStream.h>
-#include <Pt/Text/Utf8Codec.h>
+#include <Pt/TextStream.h>
+#include <Pt/Utf8Codec.h>
 
 #include <iostream>
 #include <sstream>
@@ -168,7 +168,7 @@ void WidgetImpl::setTitle(const Pt::String& text)
     XTextProperty tp;
 
     std::stringstream ss;
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+    Pt::TextStream textStream(ss, new Pt::Utf8Codec());
     textStream << text << Char(0); // Append extra \0 for proper line termination.
     textStream.flush();
 
