@@ -567,7 +567,7 @@ class PT_API basic_string< Pt::Char > {
     inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) > 0; }
 
-    ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
+    PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
 
 } // namespace std
 
