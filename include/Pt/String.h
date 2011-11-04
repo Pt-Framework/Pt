@@ -199,8 +199,7 @@ class PT_API basic_string< Pt::Char > {
 
         basic_string& assign(const wchar_t* str, size_type n);
 
-        basic_string& assign(const Pt::Char* str)
-        { return assign(str, traits_type::length(str)); }
+        basic_string& assign(const Pt::Char* str);
 
         basic_string& assign(const Pt::Char* str, size_type length);
 
@@ -213,8 +212,7 @@ class PT_API basic_string< Pt::Char > {
         template <typename InputIterator>
         basic_string& assign(InputIterator begin, InputIterator end);
 
-        basic_string& append(const Pt::Char* str)
-        { return append( str, traits_type::length(str) ); }
+        basic_string& append(const Pt::Char* str);
 
         basic_string& append(const Pt::Char* str, size_type n);
 
@@ -229,24 +227,19 @@ class PT_API basic_string< Pt::Char > {
 
         basic_string& append(const Pt::Char* begin, const Pt::Char* end);
 
-        basic_string& insert(size_type pos, const Pt::Char* str)
-        { return this->insert( pos, str, traits_type::length(str) ); }
+        basic_string& insert(size_type pos, const Pt::Char* str);
 
         basic_string& insert(size_type pos, const Pt::Char* str, size_type n);
 
         basic_string& insert(size_type pos, size_type n, Pt::Char ch);
 
-        basic_string& insert(size_type pos, const basic_string& str)
-        { return insert(pos, str.privdata_ro(), str.length()); }
+        basic_string& insert(size_type pos, const basic_string& str);
 
-        basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n)
-        { return insert(pos, str.privdata_ro() + pos2, n > str.length() ? str.length() : n); }
+        basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n);
 
-        basic_string& insert(iterator p, Pt::Char ch)
-        { return insert(p - begin(), 1, ch); }
+        basic_string& insert(iterator p, Pt::Char ch);
 
-        basic_string& insert(iterator p, size_type n, Pt::Char ch)
-        { return insert(p - begin(), n, ch); }
+        basic_string& insert(iterator p, size_type n, Pt::Char ch);
 
         // unimplemented
         //template <typename InputIterator>

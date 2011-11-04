@@ -354,37 +354,23 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::erase(size_type pos, size_type n
 
 
 INLINE
-basic_string<Pt::Char>::iterator
-basic_string<Pt::Char>::erase(iterator it)
-{
-    size_type pos = it - begin();
-    erase(pos, 1);
-    return begin() + pos;
-}
-
-
-INLINE
-basic_string<Pt::Char>::iterator
-basic_string<Pt::Char>::erase(iterator first, iterator last)
-{
-    size_type pos = first - begin();
-    erase(pos, last - first);
-    return begin() + pos;
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, const Pt::Char* str)
-{
-    return replace(pos, n, str, traits_type::length(str));
-}
-
-
-INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, const Pt::Char* str, size_type n2)
 {
-    erase(pos, n);
-    insert(pos, str, n2);
+    Pt::Char* p;
+    if (n != n2)
+    {
+        size_type l = length();
+        privreserve(l - n + n2);
+        p = privdata_rw();
+        traits_type::move(p + pos + n2, p + pos + n, l - pos - n);
+        setLength(l - n + n2);
+    }
+    else
+    {
+        p = privdata_rw();
+    }
+
+    traits_type::copy(p + pos, str, n2);
     return *this;
 }
 
@@ -392,60 +378,24 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, size_type n2, Pt::Char ch)
 {
-    erase(pos, n);
-    insert(pos, n2, ch);
+    Pt::Char* p;
+    if (n != n2)
+    {
+        size_type l = length();
+        privreserve(l - n + n2);
+        p = privdata_rw();
+        traits_type::move(p + pos + n2, p + pos + n, l - pos - n);
+        setLength(l - n + n2);
+    }
+    else
+    {
+        p = privdata_rw();
+    }
+
+    for (size_type nn = 0; nn < n2; ++nn)
+        p[pos + nn] = ch;
+
     return *this;
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, const basic_string& str)
-{
-    return replace(pos, n, str.privdata_ro(), str.length());
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n,
-                                                        const basic_string& str, size_type pos2, size_type n2)
-{
-    return replace(pos, n, str.privdata_ro() + pos2, n2);
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2, const Pt::Char* str)
-{
-    size_type pos = i1 - begin();
-    size_type n = i2 - i1;
-    return replace(pos, n, str);
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2, const Pt::Char* str, size_type n)
-{
-    size_type pos = i1 - begin();
-    size_type n1 = i2 - i1;
-    return replace(pos, n1, str, n);
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2, size_type n, Pt::Char ch)
-{
-    size_type pos = i1 - begin();
-    size_type n1 = i2 - i1;
-    return replace(pos, n1, n, ch);
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2, const basic_string& str)
-{
-    size_type pos = i1 - begin();
-    size_type n = i2 - i1;
-    return replace(pos, n, str);
 }
 
 
