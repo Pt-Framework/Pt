@@ -50,29 +50,10 @@ namespace Http {
 
 class Request;
 class Service;
-class Handler;
+class Connection;
 class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
-
-class ServExitEvent : public Pt::BasicEvent<ServExitEvent>
-{};
-
-
-class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
-{
-    public:
-        AcceptEvent(Handler* socket = 0)
-        : _socket(socket)
-        {
-        }
-
-        Handler* handler() const
-        { return _socket; }
-
-    private:
-        Handler* _socket;
-};
 
 class ServerThread;
 
@@ -134,14 +115,19 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void onAccept(Net::TcpServer& server);
 
-        void onConnectionTimeout(Handler& handler);
+        void onConnectionTimeout(Connection& conn);
 
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
-        std::vector<Handler*> _sockets;
+        std::vector<Connection*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;
+        unsigned _minThreads;
+        unsigned _maxThreads;
+        std::size_t _readTimeout;
+        std::size_t _writeTimeout;
+        std::size_t _keepAliveTimeout;
 
         typedef std::multimap<std::string, Service*> ServicesType;
         System::ReadWriteMutex _serviceMutex;
@@ -149,7 +135,6 @@ class PT_HTTP_API Server : public Pt::Connectable
         NotFoundService* _defaultService;
         NotAuthenticatedService* _noAuthService;
 };
-
 
 } // namespace Http
 
