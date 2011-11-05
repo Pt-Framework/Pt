@@ -53,10 +53,10 @@ namespace
 
     void operator<<= (Pt::SerializationInfo& si, const TestObject& obj)
     {
-        si.addMember("intValue") <<= obj.intValue;
-        si.addMember("stringValue") <<= obj.stringValue;
-        si.addMember("doubleValue") <<= obj.doubleValue;
-        si.setTypeName("TestObject");
+        si.addMember( Pt::LiteralPtr<char>("intValue") ) <<= obj.intValue;
+        si.addMember( Pt::LiteralPtr<char>("stringValue") ) <<= obj.stringValue;
+        si.addMember( Pt::LiteralPtr<char>("doubleValue") ) <<= obj.doubleValue;
+        si.setTypeName( Pt::LiteralPtr<char>("TestObject") );
     }
 }
 
