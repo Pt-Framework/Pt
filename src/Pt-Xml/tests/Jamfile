@@ -9,5 +9,9 @@ PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp
 LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
 MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
 
+Main SerializerBench : SerializerBench.cpp ;
+LinkSharedLibraries SerializerBench : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
+MakeLocate SerializerBench : $(OUTPUT_TARGET) ;
+
 # Pseudo target to call from projects
 DEPENDS Pt-Xml-all : Pt-Xml-test ;

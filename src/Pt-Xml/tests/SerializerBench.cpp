@@ -64,8 +64,14 @@ template <typename T, typename Serializer, typename Deserializer>
 void benchSerialization(const T& d, const char* fname = 0)
 {
     std::stringstream data;
+
+    Pt::SerializationContext ctx;
+
     Serializer serializer(data);
+    serializer.context()->enableReferencing(false);
+
     Deserializer deserializer(data);
+    deserializer.context()->enableReferencing(false);
 
     Pt::System::Clock clock;
     clock.start();
