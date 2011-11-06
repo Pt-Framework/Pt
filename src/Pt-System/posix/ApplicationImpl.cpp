@@ -64,7 +64,7 @@ namespace {
             while(it <= last)
             {
                 memcpy(&sigNo, it, sizeof(sigNo));
-                Pt::System::Application::instance().systemSignal.send(sigNo);
+                Pt::System::Application::instance().systemSignal().send(sigNo);
                 it += sizeof(sigNo);
             }
 

@@ -58,8 +58,8 @@ class ApplicationTest : public Pt::Unit::TestSuite
             bool hasSigUsr1 = app.catchSystemSignal(SIGUSR1);
             bool hasSigAlrm = app.catchSystemSignal(SIGALRM);
 
-            connect(app.loop().timeout, app, &Pt::System::Application::exit);
-            connect(app.systemSignal, *this, &ApplicationTest::onSignal);
+            app.loop().timeout += Pt::slot(app, &Pt::System::Application::exit);
+            app.systemSignal() += Pt::slot(*this, &ApplicationTest::onSignal);
 
             app.loop().setIdleTimeout(2000);
 

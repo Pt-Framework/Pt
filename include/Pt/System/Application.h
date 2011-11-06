@@ -92,7 +92,8 @@ class PT_SYSTEM_API Application : public Pt::Connectable
 
         bool raiseSystemSignal(int sig);
 
-        Signal<int> systemSignal;
+        Signal<int>& systemSignal()
+        { return _systemSignal; }
 
         int argc() const
         { return _argc; }
@@ -136,6 +137,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         ApplicationImpl* _impl;
         EventLoop* _loop;
         MainLoop* _owner;
+        Signal<int> _systemSignal;
 };
 
 } // namespace System
