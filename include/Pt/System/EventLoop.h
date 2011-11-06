@@ -44,267 +44,267 @@ namespace Pt {
 
 namespace System {
 
-    class Timer;
-    class Selectable;
+class Timer;
+class Selectable;
 
-    class WaitResult
+class WaitResult
+{
+    enum ResultType
     {
-        enum ResultType
+        Timeout = 0,
+        Event   = 1,
+        Device  = 2,
+        Timer   = 4,
+        Exit    = 8,
+        Init    = 16,
+    };
+
+    public:
+        WaitResult()
+        : _type(Timeout)
+        {}
+
+        void clear()
+        { _type = Timeout; }
+
+        bool isTimeout() const
+        { return _type == WaitResult::Timeout; }
+
+        bool isActive() const
+        { return _type != WaitResult::Timeout; }
+
+        bool isInit() const
+        { return WaitResult::Init == (_type & WaitResult::Init); }
+
+        void setInit()
         {
-            Timeout = 0,
-            Event   = 1,
-            Device  = 2,
-            Timer   = 4,
-            Exit    = 8,
-            Init    = 16,
-        };
+            _type |= WaitResult::Init;
+        }
 
-        public:
-            WaitResult()
-            : _type(Timeout)
-            {}
+        bool isExit() const
+        { return WaitResult::Exit == (_type & WaitResult::Exit); }
 
-            void clear()
-            { _type = Timeout; }
+        void setExit()
+        {
+            _type |= WaitResult::Exit;
+        }
 
-            bool isTimeout() const
-            { return _type == WaitResult::Timeout; }
+        bool isEvent() const
+        { return WaitResult::Event == (_type & WaitResult::Event); }
 
-            bool isActive() const
-            { return _type != WaitResult::Timeout; }
+        void setEvent()
+        {
+            _type |= WaitResult::Event;
+        }
 
-            bool isInit() const
-            { return WaitResult::Init == (_type & WaitResult::Init); }
+        bool isDevice() const
+        { return WaitResult::Device == (_type & WaitResult::Device); }
 
-            void setInit()
-            {
-                _type |= WaitResult::Init;
-            }
+        void setDevice()
+        {
+            _type |= WaitResult::Device;
+        }
 
-            bool isExit() const
-            { return WaitResult::Exit == (_type & WaitResult::Exit); }
+        bool isTimer() const
+        { return WaitResult::Timer == (_type & WaitResult::Timer); }
 
-            void setExit()
-            {
-                _type |= WaitResult::Exit;
-            }
+        void setTimer()
+        {
+            _type |= WaitResult::Timer;
+        }
 
-            bool isEvent() const
-            { return WaitResult::Event == (_type & WaitResult::Event); }
+    private:
+        int _type;
+};
 
-            void setEvent()
-            {
-                _type |= WaitResult::Event;
-            }
+/** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+*/
+class PT_SYSTEM_API EventLoop : public Connectable
+                              , public EventSink
+{
+    friend class Selectable;
+    friend class Timer;
+    friend class MainLoopImpl;
 
-            bool isDevice() const
-            { return WaitResult::Device == (_type & WaitResult::Device); }
+    //! @internal
+    typedef std::multimap<Timespan, Timer*> TimerQueue;
 
-            void setDevice()
-            {
-                _type |= WaitResult::Device;
-            }
+    //! @internal
+    typedef std::deque<Event*> EventQueue;
 
-            bool isTimer() const
-            { return WaitResult::Timer == (_type & WaitResult::Timer); }
+    public:
+        static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
-            void setTimer()
-            {
-                _type |= WaitResult::Timer;
-            }
+        /** @brief Destructs the EventLoop
+        */
+        virtual ~EventLoop();
 
-        private:
-            int _type;
-    };
+        Allocator& allocator()
+        { return *_usedalloc; }
 
-    /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
-    */
-    class PT_SYSTEM_API EventLoop : public Connectable
-                                  , public EventSink
-    {
-        friend class Selectable;
-        friend class Timer;
-        friend class MainLoopImpl;
+        /** @brief Adds a Selectable
+
+            Adds a Selectable to the selector. Selectable are removed
+            automatically when they get destroyed.
+        */
+        void add(Selectable& s);
+
+        /** @brief Removes a Selectable.
+        */
+        void remove(Selectable& s);
+
+        /** @brief Adds a Timer
+
+            Adds a Timer to the selector. Timers are removed
+            automatically when they get destroyed.
+
+            @param timer The device to add
+        */
+        void add(Timer& timer);
+
+        /** @brief Removes a Timer
+
+            @param timer The timer to remove
+        */
+        void remove(Timer& timer);
+
+        /** @brief Starts the event loop
+        */
+        void run();
+
+        /** @brief Stops the %EventLoop.
+        */
+        void exit();
+
+        /** @brief Sets the idle timeout
+        */
+        void setIdleTimeout(size_t msecs)
+        { _timeout = msecs; }
+
+        /** @brief Returns the idle timeout
+        */
+        size_t idleTimeout() const
+        { return _timeout; }
+
+        /** @brief Notifies about wait timeouts
+            This signal is send when the timeout given to a wait
+            call of the selector expires and no activity occured.
+        */
+        Signal<>& timeout()
+        { return _timeoutSignal; }
+
+        /** @brief Reports all events
+            TODO: rename to eventReady
+        */
+        Signal<const Event&>& event()
+        { return _event; }
+
+        /** @brief Emited when the eventloop is exited
+        */
+        Signal<>& exited()
+        { return _exited; }
+
+    protected:
+        /** @brief Constructs the EventLoop
+        */
+        EventLoop();
+
+        /** @brief Construct an EventLoop with a custom allocator
+        */
+        EventLoop(Allocator& a);
+
+        size_t runNext(WaitResult& result);
+
+        /** @brief A Selectable is attached to this %Selector
+
+            Does not throw exceptions.
+        */
+        virtual void onAttach(Selectable&) = 0;
+
+        /** @brief A Selectable is detached from this %Selector
+
+            Does not throw exceptions.
+        */
+        virtual void onDetach(Selectable&) = 0;
+
+        /** @brief A Selectable is enabled
+
+            Does not throw exceptions.
+        */
+        virtual void onEnable(Selectable&) = 0;
+
+        /** @brief A Selectable is disabled
+
+            Does not throw exceptions.
+        */
+        virtual void onDisable(Selectable&) = 0;
+
+        /** @brief A Selectable is reinitialised and needs to be updated
+
+            Does not throw exceptions.
+        */
+        virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
+
+        /** @brief A Selectable in this %Selector has changed
+
+            Does not throw exceptions.
+        */
+        virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
+
+        virtual void onRun() = 0;
+
+        virtual void onExit() = 0;
+
+        virtual void onCommitEvent(const Event& event);
+
+        virtual void onQueueEvent(const Event& event);
+
+        virtual void onProcessEvents();
+
+    private:
+        //! @internal
+        bool updateTimer(size_t& timeout);
 
         //! @internal
-        typedef std::multimap<Timespan, Timer*> TimerQueue;
+        void onAddTimer(Timer& timer);
 
         //! @internal
-        typedef std::deque<Event*> EventQueue;
+        void onRemoveTimer( Timer& timer );
 
-        public:
-            static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+        //! @internal
+        void onTimerChanged( Timer& timer );
 
-            /** @brief Destructs the EventLoop
-            */
-            virtual ~EventLoop();
+    private:
+        //! @internal
+        RecursiveMutex _queueMutex;
 
-            Allocator& allocator()
-            { return *_usedalloc; }
+        //! @internal
+        Allocator _allocator;
 
-            /** @brief Adds a Selectable
+        //! @internal
+        Allocator* _usedalloc;
 
-                Adds a Selectable to the selector. Selectable are removed
-                automatically when they get destroyed.
-            */
-            void add(Selectable& s);
+        //! @internal
+        EventQueue _eventQueue;
 
-            /** @brief Removes a Selectable.
-            */
-            void remove(Selectable& s);
+        //! @internal
+        TimerQueue _timers;
 
-            /** @brief Adds a Timer
+        //! @internal
+        size_t _timeout;
 
-                Adds a Timer to the selector. Timers are removed
-                automatically when they get destroyed.
+        //! @internal
+        int _state;
 
-                @param timer The device to add
-            */
-            void add(Timer& timer);
+        //! @internal
+        Signal<> _timeoutSignal;
 
-            /** @brief Removes a Timer
+        //! @internal
+        Signal<const Event&> _event;
 
-                @param timer The timer to remove
-            */
-            void remove(Timer& timer);
-
-            /** @brief Starts the event loop
-            */
-            void run();
-
-            /** @brief Stops the %EventLoop.
-            */
-            void exit();
-
-            /** @brief Sets the idle timeout
-            */
-            void setIdleTimeout(size_t msecs)
-            { _timeout = msecs; }
-
-            /** @brief Returns the idle timeout
-            */
-            size_t idleTimeout() const
-            { return _timeout; }
-
-            /** @brief Notifies about wait timeouts
-                This signal is send when the timeout given to a wait
-                call of the selector expires and no activity occured.
-            */
-            Signal<>& timeout()
-            { return _timeoutSignal; }
-
-            /** @brief Reports all events
-                TODO: rename to eventReady
-            */
-            Signal<const Event&>& event()
-            { return _event; }
-
-            /** @brief Emited when the eventloop is exited
-            */
-            Signal<>& exited()
-            { return _exited; }
-
-        protected:
-            /** @brief Constructs the EventLoop
-            */
-            EventLoop();
-
-            /** @brief Construct an EventLoop with a custom allocator
-            */
-            EventLoop(Allocator& a);
-
-            size_t runNext(WaitResult& result);
-
-            /** @brief A Selectable is attached to this %Selector
-
-                Does not throw exceptions.
-            */
-            virtual void onAttach(Selectable&) = 0;
-
-            /** @brief A Selectable is detached from this %Selector
-
-                Does not throw exceptions.
-            */
-            virtual void onDetach(Selectable&) = 0;
-
-            /** @brief A Selectable is enabled
-
-                Does not throw exceptions.
-            */
-            virtual void onEnable(Selectable&) = 0;
-
-            /** @brief A Selectable is disabled
-
-                Does not throw exceptions.
-            */
-            virtual void onDisable(Selectable&) = 0;
-
-            /** @brief A Selectable is reinitialised and needs to be updated
-
-                Does not throw exceptions.
-            */
-            virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
-
-            /** @brief A Selectable in this %Selector has changed
-
-                Does not throw exceptions.
-            */
-            virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
-
-            virtual void onRun() = 0;
-
-            virtual void onExit() = 0;
-
-            virtual void onCommitEvent(const Event& event);
-
-            virtual void onQueueEvent(const Event& event);
-
-            virtual void onProcessEvents();
-
-        private:
-            //! @internal
-            bool updateTimer(size_t& timeout);
-
-            //! @internal
-            void onAddTimer(Timer& timer);
-
-            //! @internal
-            void onRemoveTimer( Timer& timer );
-
-            //! @internal
-            void onTimerChanged( Timer& timer );
-
-        private:
-            //! @internal
-            RecursiveMutex _queueMutex;
-
-            //! @internal
-            Allocator _allocator;
-
-            //! @internal
-            Allocator* _usedalloc;
-
-            //! @internal
-            EventQueue _eventQueue;
-
-            //! @internal
-            TimerQueue _timers;
-
-            //! @internal
-            size_t _timeout;
-
-            //! @internal
-            int _state;
-
-            //! @internal
-            Signal<> _timeoutSignal;
-
-            //! @internal
-            Signal<const Event&> _event;
-
-            //! @internal
-            Signal<> _exited;
-    };
+        //! @internal
+        Signal<> _exited;
+};
 
 } // namespace System
 
