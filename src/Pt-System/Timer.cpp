@@ -150,7 +150,7 @@ bool Timer::update(const Timespan& now)
         if( ! sentry )
             return hasElapsed;
 
-        timeout.send();
+        timeout().send();
     }
 
     _remaining = _finished - now;

@@ -60,7 +60,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver2 = new Pt::Net::UdpSocket();
 
             _loop = new Pt::System::MainLoop();
-            _loop->timeout += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
         }
 

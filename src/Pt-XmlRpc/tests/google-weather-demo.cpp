@@ -84,7 +84,7 @@ class GoogleWeatherClient : public Pt::Connectable
             _client.replyFinished += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
 
             // the timeout signal is called when the interval has expired
-            _timer.timeout += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
+            _timer.timeout() += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
             _loop.add(_timer); // timers are managed by a loop
 
             // run member function in a worker thread, this does not start the thread
@@ -328,7 +328,7 @@ class WeatherApplet : public Pt::System::Application
             _client.start( this->loop() );
 
             // event loop dispatches WeatherEvents to a slot
-            this->loop().event += Pt::slot(*this, &WeatherApplet::printWeatherInfo);
+            this->loop().event() += Pt::slot(*this, &WeatherApplet::printWeatherInfo);
         }
 
     private:

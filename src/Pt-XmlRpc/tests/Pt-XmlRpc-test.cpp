@@ -106,8 +106,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             _loop = new Pt::System::MainLoop();
             _loop->setIdleTimeout(2000);
-            connect(_loop->timeout, *this, &PtXmlRpcTest::failTest);
-            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
+            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
             _server = new Pt::Http::Server(*_loop, "127.0.0.1", 8001);
         }

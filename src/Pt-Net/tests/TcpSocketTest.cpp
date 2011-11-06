@@ -54,7 +54,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             std::memset(input, 0, 20);
 
             _loop = new Pt::System::MainLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
 
             _acceptor = new Pt::Net::TcpSocket();

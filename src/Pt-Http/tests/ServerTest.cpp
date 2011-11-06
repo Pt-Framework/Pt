@@ -59,7 +59,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void NotFoundRequest()
         {
-            connect(loop->timeout, *loop, &Pt::System::MainLoop::exit);
+            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 

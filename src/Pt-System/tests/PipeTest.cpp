@@ -58,7 +58,7 @@ class PipeTest : public Pt::Unit::TestSuite
             _result.clear();
 
             _loop = new Pt::System::MainLoop();
-            _loop->timeout += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
         }
 

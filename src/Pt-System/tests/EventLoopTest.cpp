@@ -92,11 +92,11 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void DispatchTest()
         {
             Pt::System::MainLoop el;
-            connect(el.timeout, el, &Pt::System::MainLoop::exit);
+            el.timeout() += Pt::slot(el, &Pt::System::MainLoop::exit);
             el.setIdleTimeout(500);
 
-            el.event.connect( slot(*this, &EventLoopTest::onE1) );
-            el.event.connect( slot(*this, &EventLoopTest::onE2) );
+            el.event() += Pt::slot(*this, &EventLoopTest::onE1);
+            el.event() += Pt::slot(*this, &EventLoopTest::onE2);
 
             el.commitEvent( E1() );
             el.commitEvent( E2() );
@@ -121,7 +121,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         {
             Pt::System::MainLoop el;
             el.setIdleTimeout(300);
-            connect(el.timeout, el, &Pt::System::MainLoop::exit);
+            el.timeout() += Pt::slot(el, &Pt::System::MainLoop::exit);
 
             Pt::System::Clock clock;
             clock.start();

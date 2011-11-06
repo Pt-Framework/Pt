@@ -27,7 +27,6 @@
 #define PT_SELECTABLE_H
 
 #include <Pt/Types.h>
-#include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>

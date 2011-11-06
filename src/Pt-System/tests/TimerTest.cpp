@@ -56,7 +56,7 @@ class TimerTest : public Pt::Unit::TestSuite
             _timer->start(100);
 
             _loop = new Pt::System::MainLoop();
-            connect(_loop->timeout, *_loop, &Pt::System::MainLoop::exit);
+            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
             _loop->add(*_timer);
         }
@@ -72,7 +72,7 @@ class TimerTest : public Pt::Unit::TestSuite
 
         void Timeout()
         {
-            connect( _timer->timeout, *this, &TimerTest::onTimeout );
+            _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout);
 
             Pt::System::Clock clock;
             clock.start();
@@ -89,10 +89,10 @@ class TimerTest : public Pt::Unit::TestSuite
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
             _loop->add(exitTimer);
-            connect(exitTimer.timeout, *_loop, &Pt::System::MainLoop::exit);
+            exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
-            connect( _timer->timeout, *this, &TimerTest::onTimeout );
-            connect( _timer->timeout, *this, &TimerTest::removeTimer );
+            _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout);
+            _timer->timeout() += Pt::slot(*this, &TimerTest::removeTimer);
 
             _loop->run();
             PT_UNIT_ASSERT(_count == 1);
@@ -100,8 +100,8 @@ class TimerTest : public Pt::Unit::TestSuite
 
         void RemoveAddOnTimeout()
         {
-            connect( _timer->timeout, *this, &TimerTest::onTimeout );
-            connect( _timer->timeout, *this, &TimerTest::removeAddTimer );
+            _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout);
+            _timer->timeout() += Pt::slot(*this, &TimerTest::removeAddTimer);
 
             _loop->run();
             PT_UNIT_ASSERT(_count == 3);
@@ -112,10 +112,10 @@ class TimerTest : public Pt::Unit::TestSuite
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
             _loop->add(exitTimer);
-            connect(exitTimer.timeout, *_loop, &Pt::System::MainLoop::exit);
+            exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
-            connect( _timer->timeout, *this, &TimerTest::onTimeout );
-            connect( _timer->timeout, *this, &TimerTest::destroyTimer );
+            _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout );
+            _timer->timeout() += Pt::slot(*this, &TimerTest::destroyTimer );
 
             _loop->run();
             PT_UNIT_ASSERT(_count == 1);

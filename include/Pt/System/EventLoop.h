@@ -190,16 +190,19 @@ namespace System {
                 This signal is send when the timeout given to a wait
                 call of the selector expires and no activity occured.
             */
-            Signal<> timeout;
+            Signal<>& timeout()
+            { return _timeoutSignal; }
 
             /** @brief Reports all events
                 TODO: rename to eventReady
             */
-            Signal<const Event&> event;
+            Signal<const Event&>& event()
+            { return _event; }
 
             /** @brief Emited when the eventloop is exited
             */
-            Signal<> exited;
+            Signal<>& exited()
+            { return _exited; }
 
         protected:
             /** @brief Constructs the EventLoop
@@ -279,7 +282,7 @@ namespace System {
             Allocator _allocator;
 
             //! @internal
-			Allocator* _usedalloc;
+            Allocator* _usedalloc;
 
             //! @internal
             EventQueue _eventQueue;
@@ -292,6 +295,15 @@ namespace System {
 
             //! @internal
             int _state;
+
+            //! @internal
+            Signal<> _timeoutSignal;
+
+            //! @internal
+            Signal<const Event&> _event;
+
+            //! @internal
+            Signal<> _exited;
     };
 
 } // namespace System

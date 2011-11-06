@@ -129,7 +129,8 @@ namespace System {
 
                 This signal is sent if the interval time has expired.
             */
-            Signal<> timeout;
+            Signal<>& timeout()
+            { return _timeout; }
 
             const Timespan& finished() const
             { return _finished; }
@@ -141,6 +142,7 @@ namespace System {
             std::size_t _interval;
             Timespan    _remaining;
             Timespan    _finished;
+            Signal<>    _timeout;
     };
 
 }

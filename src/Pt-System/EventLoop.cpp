@@ -123,7 +123,7 @@ size_t EventLoop::runNext(WaitResult& result)
 {
     if( result.isTimeout() )
     {
-        timeout.send();
+        timeout().send();
     }
 
     if( result.isEvent() )
@@ -220,7 +220,7 @@ void EventLoop::onProcessEvents()
         try
         {
             lock.unlock();
-            event.send(*ev);
+            event().send(*ev);
         }
         catch(...)
         {
