@@ -117,6 +117,95 @@ class WaitResult
         int _type;
 };
 
+class EventLoopImpl
+{
+    //! @internal
+    typedef std::multimap<Timespan, Timer*> TimerQueue;
+
+    //! @internal
+    typedef std::deque<Event*> EventQueue;
+
+    public:
+        EventLoopImpl();
+
+        EventLoopImpl(Allocator& a);
+
+        virtual ~EventLoopImpl();
+
+        size_t runNext(WaitResult& result);
+
+        Allocator& allocator()
+        { return *_usedalloc; }
+
+        void setIdleTimeout(size_t msecs)
+        { _timeout = msecs; }
+
+        size_t idleTimeout() const
+        { return _timeout; }
+
+        Signal<>& timeout()
+        { return _timeoutSignal; }
+
+        Signal<const Event&>& event()
+        { return _event; }
+
+        Signal<>& exited()
+        { return _exited; }
+
+        void commitEvent(const Event& event);
+
+        void queueEvent(const Event& event);
+
+        void processEvents();
+ 
+    protected:
+        virtual void wake() = 0;
+
+    private:
+        //! @internal
+        bool updateTimer(size_t& timeout);
+
+        //! @internal
+        void onAddTimer(Timer& timer);
+
+        //! @internal
+        void onRemoveTimer( Timer& timer );
+
+        //! @internal
+        void onTimerChanged( Timer& timer );
+
+    private:
+        //! @internal
+        RecursiveMutex _queueMutex;
+
+        //! @internal
+        Allocator _allocator;
+
+        //! @internal
+        Allocator* _usedalloc;
+
+        //! @internal
+        EventQueue _eventQueue;
+
+        //! @internal
+        TimerQueue _timers;
+
+        //! @internal
+        size_t _timeout;
+
+        //! @internal
+        int _state;
+
+        //! @internal
+        Signal<> _timeoutSignal;
+
+        //! @internal
+        Signal<const Event&> _event;
+
+        //! @internal
+        Signal<> _exited;
+};
+
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
 class PT_SYSTEM_API EventLoop : public Connectable

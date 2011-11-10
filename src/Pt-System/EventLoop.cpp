@@ -35,6 +35,198 @@ namespace Pt {
 
 namespace System {
 
+EventLoopImpl::EventLoopImpl()
+: _allocator(/*255, 64*/)
+, _usedalloc(&_allocator)
+, _timeout(EventLoop::WaitInfinite)
+, _state(0)
+{}
+
+EventLoopImpl::EventLoopImpl(Allocator& a)
+: _allocator(/*255, 64*/)
+, _usedalloc(&a)
+, _timeout(EventLoop::WaitInfinite)
+, _state(0)
+{}
+
+EventLoopImpl:: ~EventLoopImpl()
+{
+    try
+    {
+        while ( ! _eventQueue.empty() )
+        {
+            Event* ev = _eventQueue.front();
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+        }
+    }
+    catch(...)
+    {}
+
+    while( _timers.size() )
+    {
+       Timer* timer = _timers.begin()->second;
+        timer->setParent(0);
+    }
+}
+
+size_t EventLoopImpl::runNext(WaitResult& result)
+{
+    if( result.isTimeout() )
+    {
+        timeout().send();
+    }
+
+    if( result.isEvent() )
+    {
+        RecursiveLock lock(_queueMutex);
+
+        if(_state == 1)
+        {
+            result.clear();
+            result.setExit();
+            return 0;
+        }
+
+        if( ! _eventQueue.empty() )
+        {
+            lock.unlock();
+            this->processEvents();
+        }
+
+        lock.unlock();
+    }
+
+    result.clear();
+
+    size_t timerTimeout = EventLoop::WaitInfinite;
+
+    // Check for active timers and process them
+    updateTimer(timerTimeout);
+
+    // no timer will become active within the idle timeout
+    if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoop::WaitInfinite)
+    {
+        return this->idleTimeout();
+    }
+
+    // A timer will become active before the timeout expires
+    result.setTimer();
+    return timerTimeout;
+}
+
+void EventLoopImpl::commitEvent(const Event& ev)
+{
+    {
+        RecursiveLock lock( _queueMutex );
+
+        Event& clonedEvent = ev.clone( this->allocator() );
+
+        try
+        {
+            _eventQueue.push_back(&clonedEvent);
+        }
+        catch(...)
+        {
+            clonedEvent.destroy( this->allocator() );
+            throw;
+        }
+    }
+
+    this->wake();
+}
+
+void EventLoopImpl::queueEvent(const Event& ev)
+{
+    RecursiveLock lock( _queueMutex );
+
+    Event& clonedEvent = ev.clone( this->allocator() );
+
+    try
+    {
+        _eventQueue.push_back(&clonedEvent);
+    }
+    catch(...)
+    {
+        clonedEvent.destroy( this->allocator() );
+        throw;
+    }
+}
+
+void EventLoopImpl::processEvents()
+{
+    while( 0 == _state )
+    {
+        RecursiveLock lock(_queueMutex);
+
+        if ( _eventQueue.empty() || 1 == _state )
+            break;
+
+        Event* ev = _eventQueue.front();
+        _eventQueue.pop_front();
+
+        try
+        {
+            lock.unlock();
+            event().send(*ev);
+        }
+        catch(...)
+        {
+            ev->destroy( this->allocator() );
+            throw;
+        }
+
+        ev->destroy( this->allocator() );
+    }
+}
+
+bool EventLoopImpl::updateTimer(size_t& lowestTimeout)
+{
+    if( _timers.empty() )
+        return false;
+
+    Timespan now = Clock::getSystemTicks();
+    Timer* timer = _timers.begin()->second;
+    bool timerActive = now >= timer->finished();
+
+    while( ! _timers.empty() )
+    {
+        timer = _timers.begin()->second;
+
+        if( now < timer->finished() )
+        {
+            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+            lowestTimeout = (remaining / 1000);
+            if(remaining % 1000 > 0) ++lowestTimeout;
+            break;
+        }
+
+        timer->update(now);
+
+        if( ! _timers.empty() )
+        {
+            timer = _timers.begin()->second;
+            _timers.erase( _timers.begin() );
+            TimerQueue::value_type elem(timer->finished(), timer);
+            _timers.insert(elem);
+            //_timers.insert( std::make_pair(timer->finished(), timer) );
+        }
+    }
+
+    return timerActive;
+}
+
+void EventLoopImpl::onAddTimer(Timer& timer)
+{}
+
+void EventLoopImpl::onRemoveTimer( Timer& timer )
+{}
+
+void EventLoopImpl::onTimerChanged( Timer& timer )
+{}
+
+
+
 EventLoop::EventLoop()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
