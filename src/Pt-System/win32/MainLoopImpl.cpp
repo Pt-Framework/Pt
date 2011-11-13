@@ -180,7 +180,7 @@ void MainLoopImpl::run(MainLoop& loop)
         if( result.isExit() )
             return;
 
-        this->waitNext(result, timeout);
+        this->waitNext(loop, result, timeout);
     }
 }
 
