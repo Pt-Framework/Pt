@@ -163,7 +163,7 @@ void MainLoopImpl::run(MainLoop& loop)
         if( result.isExit() )
             return;
 
-        this->waitNext(result, timeout);
+        this->waitNext(loop, result, timeout);
     }
 }
 
@@ -174,7 +174,7 @@ void MainLoopImpl::exit()
 }
 
 
-void MainLoopImpl::waitNext( WaitResult& result, std::size_t msecs )
+void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& result, std::size_t msecs )
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
@@ -232,6 +232,7 @@ void MainLoopImpl::waitNext( WaitResult& result, std::size_t msecs )
             {
                 //avail = true;
                 result.setEvent();
+                loop.processEvents();
                 continue;
             }
 

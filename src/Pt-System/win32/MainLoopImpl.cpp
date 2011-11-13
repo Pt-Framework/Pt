@@ -191,7 +191,7 @@ void MainLoopImpl::exit()
 }
 
 
-void MainLoopImpl::waitNext( WaitResult& ret, std::size_t umsecs )
+void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& ret, std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -260,6 +260,7 @@ void MainLoopImpl::waitNext( WaitResult& ret, std::size_t umsecs )
         if (offset == 0)
         {
             ret.setEvent();
+            loop.processEvents();
             return;
         }
         // I/O event at offset 1 was active

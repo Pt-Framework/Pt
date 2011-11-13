@@ -118,7 +118,7 @@ class MainLoopImpl
 
         void exit();
 
-        void waitNext(WaitResult& result, std::size_t msecs);
+        void waitNext(MainLoop& loop, WaitResult& result, std::size_t msecs);
 
         void wake();
 

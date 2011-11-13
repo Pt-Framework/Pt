@@ -329,11 +329,11 @@ size_t EventLoop::runNext(WaitResult& result)
             return 0;
         }
 
-        if( ! _eventQueue.empty() )
+        /**if( ! _eventQueue.empty() )
         {
             lock.unlock();
             this->processEvents();
-        }
+        }*/
 
         lock.unlock();
     }
