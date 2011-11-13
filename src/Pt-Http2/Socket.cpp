@@ -70,7 +70,7 @@ Socket::Socket(ServerImpl& server, Net::TcpServer& tcpServer)
     _stream.attachDevice(*this);
     Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
     Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
-    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
+    _timer.timeout() += Pt::slot(*this, &Socket::onTimeout);
 }
 
 Socket::Socket(Socket& socket)
@@ -85,7 +85,7 @@ Socket::Socket(Socket& socket)
     _stream.attachDevice(*this);
     Pt::connect(System::IODevice::inputReady, *this, &Socket::onIODeviceInput);
     Pt::connect(_stream.buffer().outputReady, *this, &Socket::onOutput);
-    Pt::connect(_timer.timeout, *this, &Socket::onTimeout);
+    _timer.timeout() += Pt::slot(*this, &Socket::onTimeout);
 }
 
 Socket::~Socket()

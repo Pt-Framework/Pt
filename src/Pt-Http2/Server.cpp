@@ -133,9 +133,9 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 , _responder(0)
 {
     _stream.attachDevice(*this);
-    Pt::connect(_stream.buffer().inputReady, *this, &Connection::onInput);
-    Pt::connect(_stream.buffer().outputReady, *this, &Connection::onOutput);
-    Pt::connect(_timer.timeout, *this, &Connection::onTimeout);
+    _stream.buffer().inputReady += Pt::slot(*this, &Connection::onInput);
+    _stream.buffer().outputReady += Pt::slot(*this, &Connection::onOutput);
+    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
 
     Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DEFER_ACCEPT);
 }
@@ -423,8 +423,8 @@ class ServerThread : public Connectable
         : _server(&server)
         , _thread(_loop)
         {
-            _loop.event += Pt::slot(*this, &ServerThread::onAcceptEvent);
-            _loop.event += Pt::slot(*this, &ServerThread::onExitEvent);
+            _loop.event() += Pt::slot(*this, &ServerThread::onAcceptEvent);
+            _loop.event() += Pt::slot(*this, &ServerThread::onExitEvent);
             _thread.start();
         }
 
