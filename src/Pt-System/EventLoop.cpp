@@ -70,6 +70,25 @@ EventLoopImpl:: ~EventLoopImpl()
     }
 }
 
+
+void EventLoopImpl::run(EventLoop& el)
+{
+    _state = 0;
+    el.onRun();
+    exited();
+}
+
+
+void EventLoopImpl::exit(EventLoop& el)
+{
+    RecursiveLock lock(_queueMutex);
+    _state = 1;
+    lock.unlock();
+
+    el.onExit();
+}
+
+
 size_t EventLoopImpl::runNext(WaitResult& result)
 {
     if( result.isTimeout() )
@@ -88,11 +107,11 @@ size_t EventLoopImpl::runNext(WaitResult& result)
             return 0;
         }
 
-        if( ! _eventQueue.empty() )
+        /*if( ! _eventQueue.empty() )
         {
             lock.unlock();
             this->processEvents();
-        }
+        }*/
 
         lock.unlock();
     }
@@ -115,7 +134,7 @@ size_t EventLoopImpl::runNext(WaitResult& result)
     return timerTimeout;
 }
 
-void EventLoopImpl::commitEvent(const Event& ev)
+void EventLoopImpl::commitEvent(EventLoop& el, const Event& ev)
 {
     {
         RecursiveLock lock( _queueMutex );
@@ -133,7 +152,7 @@ void EventLoopImpl::commitEvent(const Event& ev)
         }
     }
 
-    this->wake();
+    el.wake();
 }
 
 void EventLoopImpl::queueEvent(const Event& ev)
@@ -216,56 +235,86 @@ bool EventLoopImpl::updateTimer(size_t& lowestTimeout)
     return timerActive;
 }
 
-void EventLoopImpl::onAddTimer(Timer& timer)
-{}
 
-void EventLoopImpl::onRemoveTimer( Timer& timer )
-{}
+void EventLoopImpl::addTimer(Timer& timer)
+{
+    if( timer.active() )
+    {
+        TimerQueue::value_type elem(timer.finished(), &timer);
+        _timers.insert(elem);
+    }
+}
 
-void EventLoopImpl::onTimerChanged( Timer& timer )
-{}
+
+void EventLoopImpl::removeTimer( Timer& timer )
+{
+    std::multimap<Timespan, Timer*>::iterator it;
+    for(it = _timers.begin(); it != _timers.end(); ++it)
+    {
+        if(it->second == &timer)
+        {
+            _timers.erase(it);
+            return;
+        }
+    }
+}
 
 
 
 EventLoop::EventLoop()
-: _allocator(/*255, 64*/)
-, _usedalloc(&_allocator)
-, _timeout(WaitInfinite)
-, _state(0)
+: _impl(0)
 {
+    _impl = new EventLoopImpl();
 }
 
 
 EventLoop::EventLoop(Allocator& a)
-: _allocator(/*255, 64*/)
-, _usedalloc(&a)
-, _timeout(WaitInfinite)
-, _state(0)
+: _impl(0)
 {
+    _impl = new EventLoopImpl(a);
 }
 
 
 EventLoop::~EventLoop()
 {
-    try
-    {
-        while ( ! _eventQueue.empty() )
-        {
-            Event* ev = _eventQueue.front();
-            _eventQueue.pop_front();
-            ev->destroy( this->allocator() );
-        }
-    }
-    catch(...)
-    {}
-
-    while( _timers.size() )
-    {
-       Timer* timer = _timers.begin()->second;
-        timer->setParent(0);
-    }
+    delete _impl;
 }
 
+
+Allocator& EventLoop::allocator()
+{ 
+    return _impl->allocator(); 
+}
+
+
+void EventLoop::setIdleTimeout(size_t msecs)
+{ 
+    _impl->setIdleTimeout(msecs); 
+}
+
+
+size_t EventLoop::idleTimeout() const
+{ 
+    return _impl->idleTimeout(); 
+}
+
+
+Signal<>& EventLoop::timeout()
+{ 
+    return _impl->timeout(); 
+}
+
+
+Signal<const Event&>& EventLoop::event()
+{ 
+    return _impl->event(); 
+}
+
+
+Signal<>& EventLoop::exited()
+{ 
+    return _impl->exited(); 
+}
 
 void EventLoop::add(Selectable& s)
 {
@@ -295,208 +344,49 @@ void EventLoop::remove( Timer& timer )
 
 void EventLoop::run()
 {
-    _state = 0;
-    this->onRun();
-    exited();
+    _impl->run(*this);
 }
 
 
 void EventLoop::exit()
 {
-    RecursiveLock lock(_queueMutex);
-    _state = 1;
-    lock.unlock();
-
-    this->onExit();
+    _impl->exit(*this);
 }
 
 
 size_t EventLoop::runNext(WaitResult& result)
 {
-    if( result.isTimeout() )
-    {
-        timeout().send();
-    }
-
-    if( result.isEvent() )
-    {
-        RecursiveLock lock(_queueMutex);
-
-        if(_state == 1)
-        {
-            result.clear();
-            result.setExit();
-            return 0;
-        }
-
-        /**if( ! _eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }*/
-
-        lock.unlock();
-    }
-
-    result.clear();
-
-    size_t timerTimeout = EventLoop::WaitInfinite;
-
-    // Check for active timers and process them
-    updateTimer(timerTimeout);
-
-    // no timer will become active within the idle timeout
-    if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoop::WaitInfinite)
-    {
-        return this->idleTimeout();
-    }
-
-    // A timer will become active before the timeout expires
-    result.setTimer();
-    return timerTimeout;
+    return _impl->runNext(result);
 }
 
 
 void EventLoop::onCommitEvent(const Event& ev)
 {
-    {
-        RecursiveLock lock( _queueMutex );
-
-        Event& clonedEvent = ev.clone( this->allocator() );
-
-        try
-        {
-            _eventQueue.push_back(&clonedEvent);
-        }
-        catch(...)
-        {
-            clonedEvent.destroy( this->allocator() );
-            throw;
-        }
-    }
-
-    this->wake();
+    _impl->commitEvent(*this, ev);
 }
 
 
 void EventLoop::onQueueEvent(const Event& ev)
 {
-    RecursiveLock lock( _queueMutex );
-
-    Event& clonedEvent = ev.clone( this->allocator() );
-
-    try
-    {
-        _eventQueue.push_back(&clonedEvent);
-    }
-    catch(...)
-    {
-        clonedEvent.destroy( this->allocator() );
-        throw;
-    }
+    _impl->queueEvent(ev);
 }
 
 
 void EventLoop::onProcessEvents()
 {
-    while( 0 == _state )
-    {
-        RecursiveLock lock(_queueMutex);
-
-        if ( _eventQueue.empty() || 1 == _state )
-            break;
-
-        Event* ev = _eventQueue.front();
-        _eventQueue.pop_front();
-
-        try
-        {
-            lock.unlock();
-            event().send(*ev);
-        }
-        catch(...)
-        {
-            ev->destroy( this->allocator() );
-            throw;
-        }
-
-        ev->destroy( this->allocator() );
-    }
-}
-
-
-bool EventLoop::updateTimer(std::size_t& lowestTimeout)
-{
-    if( _timers.empty() )
-        return false;
-
-    Timespan now = Clock::getSystemTicks();
-    Timer* timer = _timers.begin()->second;
-    bool timerActive = now >= timer->finished();
-
-    while( ! _timers.empty() )
-    {
-        timer = _timers.begin()->second;
-
-        if( now < timer->finished() )
-        {
-            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
-            lowestTimeout = (remaining / 1000);
-            if(remaining % 1000 > 0) ++lowestTimeout;
-            break;
-        }
-
-        timer->update(now);
-
-        if( ! _timers.empty() )
-        {
-            timer = _timers.begin()->second;
-            _timers.erase( _timers.begin() );
-            TimerQueue::value_type elem(timer->finished(), timer);
-            _timers.insert(elem);
-            //_timers.insert( std::make_pair(timer->finished(), timer) );
-        }
-    }
-
-    return timerActive;
+    _impl->processEvents();
 }
 
 
 void EventLoop::onAddTimer(Timer& timer)
 {
-    if( timer.active() )
-    {
-        TimerQueue::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-    }
+    _impl->addTimer(timer);
 }
 
 
 void EventLoop::onRemoveTimer( Timer& timer )
 {
-    std::multimap<Timespan, Timer*>::iterator it;
-    for(it = _timers.begin(); it != _timers.end(); ++it)
-    {
-        if(it->second == &timer)
-        {
-            _timers.erase(it);
-            return;
-        }
-    }
-}
-
-
-void EventLoop::onTimerChanged(Timer& timer)
-{
-    if( timer.active() )
-    {
-        TimerQueue::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
-    }
-    else
-    {
-        EventLoop::onRemoveTimer(timer);
-    }
+    _impl->removeTimer(timer);
 }
 
 } // namespace System

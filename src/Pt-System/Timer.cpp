@@ -109,7 +109,7 @@ void Timer::start(std::size_t interval)
     _finished = Clock::getSystemTicks() + _remaining;
 
     if(_loop)
-        _loop->onTimerChanged(*this);
+        _loop->onAddTimer(*this);
 }
 
 
@@ -120,7 +120,7 @@ void Timer::stop()
     _finished = 0;
 
     if(_loop)
-        _loop->onTimerChanged(*this);
+        _loop->onRemoveTimer(*this);
 }
 
 
