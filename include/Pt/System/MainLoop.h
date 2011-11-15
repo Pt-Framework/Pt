@@ -98,14 +98,12 @@ namespace System {
     
     class PT_SYSTEM_API MainLoop : public EventLoop
     {
-        friend class MainLoopImpl;
-
         public:
             /** @brief Constructs the MainLoop
             */
             MainLoop();
 
-			MainLoop(Allocator& a);
+            MainLoop(Allocator& a);
 
             /** @brief Destructs the MainLoop
              */
@@ -124,11 +122,11 @@ namespace System {
 
             virtual void onChanged(Selectable& s);
 
-            virtual void onRun();
+            //virtual void onRun();
 
-            virtual void onExit();
+            //virtual void onExit();
 
-            virtual void onWake();
+            //virtual void onWake();
 
         private:
             MainLoopImpl* _impl;

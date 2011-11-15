@@ -42,6 +42,39 @@ namespace Pt {
 namespace System {
 
 MainLoopImpl::MainLoopImpl()
+: EventLoopImpl()
+{
+    _current = _devices.end();
+
+    //Open a pipe to send wake up message.
+    if( ::pipe( _wakePipe ) )
+        throw SystemError( PT_ERROR_MSG("pipe failed") );
+
+    int flags = ::fcntl(_wakePipe[0], F_GETFL);
+    if(-1 == flags)
+        throw SystemError(PT_ERROR_MSG("fcntl failed"));
+
+    int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
+    if(-1 == ret)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    flags = ::fcntl(_wakePipe[1], F_GETFL);
+    if(-1 == flags)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
+    if(-1 == ret)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    FD_ZERO(&_rfds);
+    FD_ZERO(&_wfds);
+    FD_ZERO(&_efds);
+
+    FD_SET(_wakePipe[0], &_rfds);
+}
+
+MainLoopImpl::MainLoopImpl(Allocator& a)
+: EventLoopImpl(a)
 {
     _current = _devices.end();
 
@@ -151,14 +184,14 @@ void MainLoopImpl::changed(Selectable& s)
 }
 
 
-void MainLoopImpl::run(MainLoop& loop)
+void MainLoopImpl::onRun()
 {
     WaitResult result;
     result.setInit();
 
     while(true)
     {
-        size_t timeout = loop.runNext(result);
+        size_t timeout = this->runNext(result);
 
         if( result.isExit() )
             return;
@@ -168,13 +201,14 @@ void MainLoopImpl::run(MainLoop& loop)
 }
 
 
-void MainLoopImpl::exit()
+void MainLoopImpl::onWake()
 {
-
+    ::write( _wakePipe[1], "W", 1);
+    ::fsync( _wakePipe[1] );
 }
 
 
-void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& result, std::size_t msecs )
+void MainLoopImpl::waitNext(WaitResult& result, std::size_t msecs )
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
@@ -232,7 +266,7 @@ void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& result, std::size_t msec
             {
                 //avail = true;
                 result.setEvent();
-                loop.processEvents();
+                EventLoopImpl::processEvents();
                 continue;
             }
 
@@ -279,13 +313,6 @@ void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& result, std::size_t msec
     }
 
     return;
-}
-
-
-void MainLoopImpl::wake()
-{
-    ::write( _wakePipe[1], "W", 1);
-    ::fsync( _wakePipe[1] );
 }
 
 } //namespace System

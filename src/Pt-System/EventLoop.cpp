@@ -35,6 +35,149 @@ namespace Pt {
 
 namespace System {
 
+EventLoop::EventLoop(EventLoopImpl* impl)
+: _impl(impl)
+{
+    //_impl = new EventLoopImpl();
+}
+
+
+EventLoop::EventLoop(EventLoopImpl* impl, Allocator& a)
+: _impl(impl)
+{
+    //_impl = new EventLoopImpl(a);
+}
+
+
+EventLoop::~EventLoop()
+{
+    //delete _impl;
+}
+
+void EventLoop::init(EventLoopImpl* impl)
+{
+    _impl = impl;
+}
+
+Allocator& EventLoop::allocator()
+{ 
+    return _impl->allocator(); 
+}
+
+
+void EventLoop::setIdleTimeout(size_t msecs)
+{ 
+    _impl->setIdleTimeout(msecs); 
+}
+
+
+size_t EventLoop::idleTimeout() const
+{ 
+    return _impl->idleTimeout(); 
+}
+
+
+Signal<>& EventLoop::timeout()
+{ 
+    return _impl->timeout(); 
+}
+
+
+Signal<const Event&>& EventLoop::event()
+{ 
+    return _impl->event(); 
+}
+
+
+Signal<>& EventLoop::exited()
+{ 
+    return _impl->exited(); 
+}
+
+void EventLoop::add(Selectable& s)
+{
+    s.setParent(this);
+}
+
+
+void EventLoop::remove(Selectable& s)
+{
+    if(s.parent() == this)
+        s.setParent(0);
+}
+
+
+void EventLoop::add(Timer& timer)
+{
+    timer.setParent(this);
+}
+
+
+void EventLoop::remove( Timer& timer )
+{
+    if(timer.parent() == this)
+        timer.setParent(0);
+}
+
+
+void EventLoop::run()
+{
+    _impl->run();
+}
+
+
+void EventLoop::exit()
+{
+    _impl->exit();
+}
+
+
+size_t EventLoop::runNext(WaitResult& result)
+{
+    return _impl->runNext(result);
+}
+
+
+void EventLoop::onCommitEvent(const Event& ev)
+{
+    _impl->commitEvent(ev);
+}
+
+
+void EventLoop::onQueueEvent(const Event& ev)
+{
+    _impl->queueEvent(ev);
+}
+
+
+void EventLoop::onProcessEvents()
+{
+    _impl->processEvents();
+}
+
+
+void EventLoop::onWake()
+{
+    _impl->wake();
+}
+
+
+void EventLoop::onAddTimer(Timer& timer)
+{
+    _impl->addTimer(timer);
+}
+
+
+void EventLoop::onRemoveTimer( Timer& timer )
+{
+    _impl->removeTimer(timer);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// EventLoopImpl
+//////////////////////////////////////////////////////////////////////////
+
 EventLoopImpl::EventLoopImpl()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
@@ -42,12 +185,14 @@ EventLoopImpl::EventLoopImpl()
 , _state(0)
 {}
 
+
 EventLoopImpl::EventLoopImpl(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
 , _timeout(EventLoop::WaitInfinite)
 , _state(0)
 {}
+
 
 EventLoopImpl:: ~EventLoopImpl()
 {
@@ -71,21 +216,27 @@ EventLoopImpl:: ~EventLoopImpl()
 }
 
 
-void EventLoopImpl::run(EventLoop& el)
+void EventLoopImpl::run()
 {
     _state = 0;
-    el.onRun();
+    this->onRun();
     exited();
 }
 
 
-void EventLoopImpl::exit(EventLoop& el)
+void EventLoopImpl::exit()
 {
     RecursiveLock lock(_queueMutex);
     _state = 1;
     lock.unlock();
 
-    el.onExit();
+    this->wake();
+}
+
+
+void EventLoopImpl::wake()
+{
+    this->onWake();
 }
 
 
@@ -134,7 +285,8 @@ size_t EventLoopImpl::runNext(WaitResult& result)
     return timerTimeout;
 }
 
-void EventLoopImpl::commitEvent(EventLoop& el, const Event& ev)
+
+void EventLoopImpl::commitEvent(const Event& ev)
 {
     {
         RecursiveLock lock( _queueMutex );
@@ -152,8 +304,9 @@ void EventLoopImpl::commitEvent(EventLoop& el, const Event& ev)
         }
     }
 
-    el.wake();
+    this->wake();
 }
+
 
 void EventLoopImpl::queueEvent(const Event& ev)
 {
@@ -171,6 +324,7 @@ void EventLoopImpl::queueEvent(const Event& ev)
         throw;
     }
 }
+
 
 void EventLoopImpl::processEvents()
 {
@@ -257,136 +411,6 @@ void EventLoopImpl::removeTimer( Timer& timer )
             return;
         }
     }
-}
-
-
-
-EventLoop::EventLoop()
-: _impl(0)
-{
-    _impl = new EventLoopImpl();
-}
-
-
-EventLoop::EventLoop(Allocator& a)
-: _impl(0)
-{
-    _impl = new EventLoopImpl(a);
-}
-
-
-EventLoop::~EventLoop()
-{
-    delete _impl;
-}
-
-
-Allocator& EventLoop::allocator()
-{ 
-    return _impl->allocator(); 
-}
-
-
-void EventLoop::setIdleTimeout(size_t msecs)
-{ 
-    _impl->setIdleTimeout(msecs); 
-}
-
-
-size_t EventLoop::idleTimeout() const
-{ 
-    return _impl->idleTimeout(); 
-}
-
-
-Signal<>& EventLoop::timeout()
-{ 
-    return _impl->timeout(); 
-}
-
-
-Signal<const Event&>& EventLoop::event()
-{ 
-    return _impl->event(); 
-}
-
-
-Signal<>& EventLoop::exited()
-{ 
-    return _impl->exited(); 
-}
-
-void EventLoop::add(Selectable& s)
-{
-    s.setParent(this);
-}
-
-
-void EventLoop::remove(Selectable& s)
-{
-    if(s.parent() == this)
-        s.setParent(0);
-}
-
-
-void EventLoop::add(Timer& timer)
-{
-    timer.setParent(this);
-}
-
-
-void EventLoop::remove( Timer& timer )
-{
-    if(timer.parent() == this)
-        timer.setParent(0);
-}
-
-
-void EventLoop::run()
-{
-    _impl->run(*this);
-}
-
-
-void EventLoop::exit()
-{
-    _impl->exit(*this);
-}
-
-
-size_t EventLoop::runNext(WaitResult& result)
-{
-    return _impl->runNext(result);
-}
-
-
-void EventLoop::onCommitEvent(const Event& ev)
-{
-    _impl->commitEvent(*this, ev);
-}
-
-
-void EventLoop::onQueueEvent(const Event& ev)
-{
-    _impl->queueEvent(ev);
-}
-
-
-void EventLoop::onProcessEvents()
-{
-    _impl->processEvents();
-}
-
-
-void EventLoop::onAddTimer(Timer& timer)
-{
-    _impl->addTimer(timer);
-}
-
-
-void EventLoop::onRemoveTimer( Timer& timer )
-{
-    _impl->removeTimer(timer);
 }
 
 } // namespace System

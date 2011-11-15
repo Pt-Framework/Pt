@@ -20,9 +20,10 @@
 #ifndef PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 #define PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 
-#include <Pt/System/Api.h>
-#include <Pt/System/IODevice.h>
-#include <Pt/System/Clock.h>
+#include "Pt/System/Api.h"
+#include "Pt/System/IODevice.h"
+#include "Pt/System/Clock.h"
+#include "Pt/System/EventLoop.h"
 #include <sys/select.h>
 #include <set>
 
@@ -30,12 +31,12 @@ namespace Pt {
 
 namespace System {
 
-class MainLoop;
-
-class MainLoopImpl
+class MainLoopImpl : public EventLoopImpl
 {
     public:
         MainLoopImpl();
+
+        MainLoopImpl(Allocator& a);
 
         ~MainLoopImpl();
 
@@ -49,13 +50,12 @@ class MainLoopImpl
 
         void changed(Selectable& s);
 
-        void run(MainLoop& loop);
+    protected:
+        virtual void onRun();
 
-        void exit();
+        virtual void onWake();
 
-        void waitNext(MainLoop& loop, WaitResult& result, std::size_t msecs);
-
-        void wake();
+        void waitNext(WaitResult& result, std::size_t msecs);
 
     private:
         int _wakePipe[2];

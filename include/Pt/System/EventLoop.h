@@ -46,6 +46,7 @@ namespace System {
 
 class Timer;
 class Selectable;
+class EventLoopImpl;
 
 class WaitResult
 {
@@ -124,8 +125,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
 {
     friend class Selectable;
     friend class Timer;
-    friend class EventLoopImpl;
-    friend class MainLoopImpl;
 
     //! @internal
     typedef std::multimap<Timespan, Timer*> TimerQueue;
@@ -202,11 +201,11 @@ class PT_SYSTEM_API EventLoop : public Connectable
     protected:
         /** @brief Constructs the EventLoop
         */
-        EventLoop();
+        EventLoop(EventLoopImpl* impl);
 
         /** @brief Construct an EventLoop with a custom allocator
         */
-        EventLoop(Allocator& a);
+        EventLoop(EventLoopImpl* impl, Allocator& a);
 
         size_t runNext(WaitResult& result);
 
@@ -246,9 +245,9 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
-        virtual void onRun() = 0;
+        //virtual void onRun() = 0;
 
-        virtual void onExit() = 0;
+        //virtual void onExit() = 0;
 
         virtual void onCommitEvent(const Event& event);
 
@@ -256,11 +255,16 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
         virtual void onProcessEvents();
 
+        virtual void onWake();
+
         //! @internal
         void onAddTimer(Timer& timer);
 
         //! @internal
         void onRemoveTimer( Timer& timer );
+
+    protected:
+        void init(EventLoopImpl* impl);
 
     private:
         EventLoopImpl* _impl;
@@ -279,9 +283,11 @@ class EventLoopImpl
 
         virtual ~EventLoopImpl();
 
-        void run(EventLoop& el);
+        void run();
 
-        void exit(EventLoop& el);
+        void exit();
+
+        void wake();
 
         size_t runNext(WaitResult& result);
 
@@ -303,7 +309,7 @@ class EventLoopImpl
         Signal<>& exited()
         { return _exited; }
 
-        void commitEvent(EventLoop& el, const Event& event);
+        void commitEvent(const Event& event);
 
         void queueEvent(const Event& event);
 
@@ -314,6 +320,11 @@ class EventLoopImpl
         void addTimer(Timer& timer);
 
         void removeTimer( Timer& timer );
+
+    protected:
+        virtual void onRun() = 0;
+
+        virtual void onWake() = 0;
 
     private:
         RecursiveMutex _queueMutex;

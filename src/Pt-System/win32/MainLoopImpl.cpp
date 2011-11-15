@@ -41,6 +41,28 @@ namespace Pt {
 namespace System {
 
 MainLoopImpl::MainLoopImpl()
+: EventLoopImpl()
+{
+    _current = _devices.end();
+    _currentAvail = _avail.end();
+
+    _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _wakeEvent == NULL )
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+
+    _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _ioEvent == NULL )
+    {
+        CloseHandle( _wakeEvent );
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+    }
+
+    _handles.add( _wakeEvent, 0 );
+    _handles.add( _ioEvent, 0 );
+}
+
+MainLoopImpl::MainLoopImpl(Allocator& a)
+: EventLoopImpl(a)
 {
     _current = _devices.end();
     _currentAvail = _avail.end();
@@ -162,36 +184,30 @@ void MainLoopImpl::changed(Selectable& s)
 }
 
 
-void MainLoopImpl::wake()
-{
-    SetEvent( _wakeEvent );
-}
-
-
-void MainLoopImpl::run(MainLoop& loop)
+void MainLoopImpl::onRun()
 {
     WaitResult result;
     result.setInit();
 
     while(true)
     {
-        size_t timeout = loop.runNext(result);
+        size_t timeout = this->runNext(result);
 
         if( result.isExit() )
             return;
 
-        this->waitNext(loop, result, timeout);
+        this->waitNext(result, timeout);
     }
 }
 
 
-void MainLoopImpl::exit()
+void MainLoopImpl::onWake()
 {
-
+    SetEvent( _wakeEvent );
 }
 
 
-void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& ret, std::size_t umsecs )
+void MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -260,7 +276,7 @@ void MainLoopImpl::waitNext(MainLoop& loop, WaitResult& ret, std::size_t umsecs 
         if (offset == 0)
         {
             ret.setEvent();
-            loop.processEvents();
+            EventLoopImpl::processEvents();
             return;
         }
         // I/O event at offset 1 was active

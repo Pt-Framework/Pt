@@ -34,15 +34,22 @@ namespace Pt {
 namespace System {
 
 MainLoop::MainLoop()
+: EventLoop(0)
+, _impl(0)
 {
     _impl = new MainLoopImpl();
+    EventLoop::init(_impl);
+    
 }
 
 
 MainLoop::MainLoop(Allocator& a)
-: EventLoop(a)
+: EventLoop(0)
+, _impl(0)
 {
-	_impl = new MainLoopImpl();
+    _impl = new MainLoopImpl(a);
+    EventLoop::init(_impl);
+    
 }
 
 
@@ -87,22 +94,22 @@ void MainLoop::onChanged(Selectable& s)
 }
 
 
-void MainLoop::onRun()
-{
-    _impl->run(*this);
-}
-
-
-void MainLoop::onExit()
-{
-    this->wake();
-}
-
-
-void MainLoop::onWake()
+/*void MainLoop::onWake()
 {
     _impl->wake();
-}
+}*/
+
+
+/*void MainLoop::onRun()
+{
+    _impl->run(*this);
+}*/
+
+
+/*void MainLoop::onExit()
+{
+    this->wake();
+}*/
 
 
 
