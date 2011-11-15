@@ -196,7 +196,7 @@ void MainLoopImpl::onRun()
         if( result.isExit() )
             return;
 
-        this->waitNext(loop, result, timeout);
+        this->waitNext(result, timeout);
     }
 }
 
