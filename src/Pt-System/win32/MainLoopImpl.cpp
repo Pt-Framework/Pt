@@ -192,7 +192,7 @@ void MainLoopImpl::onRun()
     bool isActive = true;
     while(isActive)
     {
-        size_t timeout = this->runNext();
+        size_t timeout = this->processTimers();
 
         //if( result.isExit() )
         //    return;

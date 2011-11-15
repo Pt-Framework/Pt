@@ -285,7 +285,7 @@ class EventLoopImpl
 
         void wake();
 
-        size_t runNext();
+        size_t processTimers();
 
         Allocator& allocator()
         { return *_usedalloc; }

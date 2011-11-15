@@ -246,7 +246,7 @@ void EventLoopImpl::wake()
 }
 
 
-size_t EventLoopImpl::runNext()
+size_t EventLoopImpl::processTimers()
 {
     /*if( result.isTimeout() )
     {
