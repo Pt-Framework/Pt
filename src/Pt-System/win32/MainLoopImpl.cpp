@@ -186,21 +186,18 @@ void MainLoopImpl::changed(Selectable& s)
 
 void MainLoopImpl::onRun()
 {
-    WaitResult result;
-    result.setInit();
+    //WaitResult result;
+    //result.setInit();
 
-    while(true)
+    bool isActive = true;
+    while(isActive)
     {
-        size_t timeout = this->runNext(result);
+        size_t timeout = this->runNext();
 
-        if( result.isExit() )
-            return;
+        //if( result.isExit() )
+        //    return;
 
-        /*bool avail =*/ this->waitNext(result, timeout);
-        /*if( ! avail)
-        {
-
-        }*/
+        this->waitNext(timeout, isActive);
     }
 }
 
@@ -211,7 +208,7 @@ void MainLoopImpl::onWake()
 }
 
 
-bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
+void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -260,7 +257,7 @@ bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
             if( s->enabled() && s->simpl().checkEvent() )
             {
                 //avail = true;
-                ret.setDevice();
+                //ret.setDevice();
             }
             if( _currentAvail != _avail.end() &&
                *_currentAvail == s )
@@ -271,7 +268,7 @@ bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
 
         if( result == WAIT_TIMEOUT)
         {
-            return false;
+            return;
         }
 
         const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
@@ -279,9 +276,9 @@ bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            ret.setEvent();
-            EventLoopImpl::processEvents();
-            return true;
+            //ret.setEvent();
+            isActive = EventLoopImpl::processEvents();
+            return;
         }
         // I/O event at offset 1 was active
         else if (offset == 1)
@@ -292,7 +289,7 @@ bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
                 if ( dev->enabled() && dev->simpl().checkEvent() )
                 {
                     //avail = true;
-                    ret.setDevice();
+                    //ret.setDevice();
                 }
 
                 if( _current != _devices.end() &&
@@ -305,9 +302,9 @@ bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
         else
         {
             Selectable* selectable = _handles.at(offset);
-            if( selectable->enabled() && selectable->simpl().checkEvent() )
+            //if( selectable->enabled() && selectable->simpl().checkEvent() )
                 //avail = true;
-                ret.setDevice();
+            //    ret.setDevice();
 
         }
     }

@@ -186,17 +186,18 @@ void MainLoopImpl::changed(Selectable& s)
 
 void MainLoopImpl::onRun()
 {
-    WaitResult result;
-    result.setInit();
+    //WaitResult result;
+    //result.setInit();
 
-    while(true)
+    bool isActive = true;
+    while(isActive)
     {
-        size_t timeout = this->runNext(result);
+        size_t timeout = this->runNext();
 
-        if( result.isExit() )
-            return;
+        //if( result.isExit() )
+        //    return;
 
-        this->waitNext(result, timeout);
+        this->waitNext(timeout, isActive);
     }
 }
 
@@ -208,7 +209,7 @@ void MainLoopImpl::onWake()
 }
 
 
-void MainLoopImpl::waitNext(WaitResult& result, std::size_t msecs )
+void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
@@ -265,8 +266,8 @@ void MainLoopImpl::waitNext(WaitResult& result, std::size_t msecs )
             if(ret > 0)
             {
                 //avail = true;
-                result.setEvent();
-                EventLoopImpl::processEvents();
+                //result.setEvent();
+                isActive = EventLoopImpl::processEvents();
                 continue;
             }
 
@@ -286,8 +287,8 @@ void MainLoopImpl::waitNext(WaitResult& result, std::size_t msecs )
     try
     {
         avail += _avail.size();
-        if(avail > 0)
-            result.setDevice();
+        //if(avail > 0)
+        //    result.setDevice();
 
         for( _current = _devices.begin(); _current != _devices.end(); )
         {

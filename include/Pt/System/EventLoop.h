@@ -49,7 +49,7 @@ class Timer;
 class Selectable;
 class EventLoopImpl;
 
-class WaitResult
+/*class WaitResult
 {
     enum ResultType
     {
@@ -117,7 +117,7 @@ class WaitResult
 
     private:
         int _type;
-};
+};*/
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
@@ -208,8 +208,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         EventLoop(EventLoopImpl* impl, Allocator& a);
 
-        size_t runNext(WaitResult& result);
-
         /** @brief A Selectable is attached to this %Selector
 
             Does not throw exceptions.
@@ -245,10 +243,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
             Does not throw exceptions.
         */
         virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
-
-        //virtual void onRun() = 0;
-
-        //virtual void onExit() = 0;
 
         virtual void onCommitEvent(const Event& event);
 
@@ -291,19 +285,19 @@ class EventLoopImpl
 
         void wake();
 
-        size_t runNext(WaitResult& result);
+        size_t runNext();
 
         Allocator& allocator()
         { return *_usedalloc; }
 
-        void setIdleTimeout(size_t msecs)
-        { _timeout = msecs; }
+        //void setIdleTimeout(size_t msecs)
+        //{ _timeout = msecs; }
 
-        size_t idleTimeout() const
-        { return _timeout; }
+        //size_t idleTimeout() const
+        //{ return _timeout; }
 
-        Signal<>& timeout()
-        { return _timeoutSignal; }
+        //Signal<>& timeout()
+        //{ return _timeoutSignal; }
 
         Signal<const Event&>& event()
         { return _event; }
@@ -315,18 +309,18 @@ class EventLoopImpl
 
         void queueEvent(const Event& event);
 
-        void processEvents();
+        bool processEvents();
 
         void addTimer(Timer& timer);
 
         void removeTimer( Timer& timer );
 
+        bool processTimers(size_t& timeout);
+
     protected:
         virtual void onRun() = 0;
 
         virtual void onWake() = 0;
-
-        bool updateTimer(size_t& timeout);
 
     private:
         RecursiveMutex _queueMutex;
@@ -334,9 +328,9 @@ class EventLoopImpl
         Allocator* _usedalloc;
         EventQueue _eventQueue;
         TimerQueue _timers;
-        size_t _timeout;
+        //size_t _timeout;
         int _state;
-        Signal<> _timeoutSignal;
+        //Signal<> _timeoutSignal;
         Signal<const Event&> _event;
         Signal<> _exited;
 };

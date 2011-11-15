@@ -55,7 +55,7 @@ class MainLoopImpl : public EventLoopImpl
 
         virtual void onWake();
 
-        void waitNext(WaitResult& result, std::size_t msecs);
+        void waitNext(std::size_t timeout, bool& isActive);
 
     private:
         int _wakePipe[2];
