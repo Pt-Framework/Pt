@@ -36,6 +36,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/System/Timer.h>
 #include <Pt/System/EventSink.h>
 #include <map>
 #include <deque>
@@ -268,6 +269,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
     private:
         EventLoopImpl* _impl;
+        Timer _idleTimer;
 };
 
 //! @internal
@@ -315,8 +317,6 @@ class EventLoopImpl
 
         void processEvents();
 
-        bool updateTimer(size_t& timeout);
-
         void addTimer(Timer& timer);
 
         void removeTimer( Timer& timer );
@@ -325,6 +325,8 @@ class EventLoopImpl
         virtual void onRun() = 0;
 
         virtual void onWake() = 0;
+
+        bool updateTimer(size_t& timeout);
 
     private:
         RecursiveMutex _queueMutex;

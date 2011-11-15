@@ -196,7 +196,11 @@ void MainLoopImpl::onRun()
         if( result.isExit() )
             return;
 
-        this->waitNext(result, timeout);
+        /*bool avail =*/ this->waitNext(result, timeout);
+        /*if( ! avail)
+        {
+
+        }*/
     }
 }
 
@@ -207,7 +211,7 @@ void MainLoopImpl::onWake()
 }
 
 
-void MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
+bool MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -267,7 +271,7 @@ void MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
 
         if( result == WAIT_TIMEOUT)
         {
-            return;
+            return false;
         }
 
         const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
@@ -277,7 +281,7 @@ void MainLoopImpl::waitNext(WaitResult& ret, std::size_t umsecs )
         {
             ret.setEvent();
             EventLoopImpl::processEvents();
-            return;
+            return true;
         }
         // I/O event at offset 1 was active
         else if (offset == 1)

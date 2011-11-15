@@ -38,6 +38,7 @@ namespace System {
 EventLoop::EventLoop(EventLoopImpl* impl)
 : _impl(impl)
 {
+    this->add(_idleTimer);
     //_impl = new EventLoopImpl();
 }
 
@@ -45,6 +46,7 @@ EventLoop::EventLoop(EventLoopImpl* impl)
 EventLoop::EventLoop(EventLoopImpl* impl, Allocator& a)
 : _impl(impl)
 {
+    this->add(_idleTimer);
     //_impl = new EventLoopImpl(a);
 }
 
@@ -67,19 +69,29 @@ Allocator& EventLoop::allocator()
 
 void EventLoop::setIdleTimeout(size_t msecs)
 { 
-    _impl->setIdleTimeout(msecs); 
+    if(msecs != WaitInfinite)
+        _idleTimer.start(msecs);
+    else
+        _idleTimer.stop();
+
+    //_impl->setIdleTimeout(msecs); 
 }
 
 
 size_t EventLoop::idleTimeout() const
 { 
-    return _impl->idleTimeout(); 
+    if( ! _idleTimer.active() )
+        return WaitInfinite;
+
+    return _idleTimer.interval();
+    //return _impl->idleTimeout(); 
 }
 
 
 Signal<>& EventLoop::timeout()
 { 
-    return _impl->timeout(); 
+    return _idleTimer.timeout();
+    //return _impl->timeout(); 
 }
 
 
@@ -242,10 +254,10 @@ void EventLoopImpl::wake()
 
 size_t EventLoopImpl::runNext(WaitResult& result)
 {
-    if( result.isTimeout() )
+    /*if( result.isTimeout() )
     {
         timeout().send();
-    }
+    }*/
 
     if( result.isEvent() )
     {

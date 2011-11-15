@@ -120,7 +120,7 @@ class MainLoopImpl : public EventLoopImpl
 
         virtual void onWake();
 
-        void waitNext(WaitResult& result, std::size_t msecs);
+        bool waitNext(WaitResult& result, std::size_t msecs);
 
     private:
         HANDLE _wakeEvent;
