@@ -49,76 +49,6 @@ class Timer;
 class Selectable;
 class EventLoopImpl;
 
-/*class WaitResult
-{
-    enum ResultType
-    {
-        Timeout = 0,
-        Event   = 1,
-        Device  = 2,
-        Timer   = 4,
-        Exit    = 8,
-        Init    = 16,
-    };
-
-    public:
-        WaitResult()
-        : _type(Timeout)
-        {}
-
-        void clear()
-        { _type = Timeout; }
-
-        bool isTimeout() const
-        { return _type == WaitResult::Timeout; }
-
-        bool isActive() const
-        { return _type != WaitResult::Timeout; }
-
-        bool isInit() const
-        { return WaitResult::Init == (_type & WaitResult::Init); }
-
-        void setInit()
-        {
-            _type |= WaitResult::Init;
-        }
-
-        bool isExit() const
-        { return WaitResult::Exit == (_type & WaitResult::Exit); }
-
-        void setExit()
-        {
-            _type |= WaitResult::Exit;
-        }
-
-        bool isEvent() const
-        { return WaitResult::Event == (_type & WaitResult::Event); }
-
-        void setEvent()
-        {
-            _type |= WaitResult::Event;
-        }
-
-        bool isDevice() const
-        { return WaitResult::Device == (_type & WaitResult::Device); }
-
-        void setDevice()
-        {
-            _type |= WaitResult::Device;
-        }
-
-        bool isTimer() const
-        { return WaitResult::Timer == (_type & WaitResult::Timer); }
-
-        void setTimer()
-        {
-            _type |= WaitResult::Timer;
-        }
-
-    private:
-        int _type;
-};*/
-
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
 class PT_SYSTEM_API EventLoop : public Connectable
@@ -126,12 +56,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
 {
     friend class Selectable;
     friend class Timer;
-
-    //! @internal
-    typedef std::multimap<Timespan, Timer*> TimerQueue;
-
-    //! @internal
-    typedef std::deque<Event*> EventQueue;
 
     public:
         static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
@@ -204,10 +128,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         EventLoop(EventLoopImpl* impl);
 
-        /** @brief Construct an EventLoop with a custom allocator
-        */
-        EventLoop(EventLoopImpl* impl, Allocator& a);
-
         /** @brief A Selectable is attached to this %Selector
 
             Does not throw exceptions.
@@ -244,22 +164,27 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
+        //! @internal EventSink interface
         virtual void onCommitEvent(const Event& event);
 
+        //! @internal EventSink interface
         virtual void onQueueEvent(const Event& event);
 
+        //! @internal EventSink interface
         virtual void onProcessEvents();
 
+        //! @internal EventSink interface
         virtual void onWake();
+
+    protected:
+        //! @internal
+        void init(EventLoopImpl* impl);
 
         //! @internal
         void onAddTimer(Timer& timer);
 
         //! @internal
         void onRemoveTimer( Timer& timer );
-
-    protected:
-        void init(EventLoopImpl* impl);
 
     private:
         EventLoopImpl* _impl;
@@ -285,19 +210,8 @@ class EventLoopImpl
 
         void wake();
 
-        size_t processTimers();
-
         Allocator& allocator()
         { return *_usedalloc; }
-
-        //void setIdleTimeout(size_t msecs)
-        //{ _timeout = msecs; }
-
-        //size_t idleTimeout() const
-        //{ return _timeout; }
-
-        //Signal<>& timeout()
-        //{ return _timeoutSignal; }
 
         Signal<const Event&>& event()
         { return _event; }
@@ -315,7 +229,7 @@ class EventLoopImpl
 
         void removeTimer( Timer& timer );
 
-        bool processTimers(size_t& timeout);
+        size_t processTimers();
 
     protected:
         virtual void onRun() = 0;
@@ -328,9 +242,7 @@ class EventLoopImpl
         Allocator* _usedalloc;
         EventQueue _eventQueue;
         TimerQueue _timers;
-        //size_t _timeout;
         int _state;
-        //Signal<> _timeoutSignal;
         Signal<const Event&> _event;
         Signal<> _exited;
 };
@@ -340,3 +252,4 @@ class EventLoopImpl
 } // namespace Pt
 
 #endif
+

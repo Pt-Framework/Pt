@@ -122,12 +122,6 @@ namespace System {
 
             virtual void onChanged(Selectable& s);
 
-            //virtual void onRun();
-
-            //virtual void onExit();
-
-            //virtual void onWake();
-
         private:
             MainLoopImpl* _impl;
     };

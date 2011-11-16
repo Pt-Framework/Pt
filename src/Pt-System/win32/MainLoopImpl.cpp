@@ -186,16 +186,10 @@ void MainLoopImpl::changed(Selectable& s)
 
 void MainLoopImpl::onRun()
 {
-    //WaitResult result;
-    //result.setInit();
-
     bool isActive = true;
     while(isActive)
     {
         size_t timeout = this->processTimers();
-
-        //if( result.isExit() )
-        //    return;
 
         this->waitNext(timeout, isActive);
     }
@@ -254,11 +248,10 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         for( _currentAvail = _avail.begin(); _currentAvail != _avail.end(); )
         {
             Selectable* s = *_currentAvail;
-            if( s->enabled() && s->simpl().checkEvent() )
-            {
-                //avail = true;
-                //ret.setDevice();
-            }
+
+            if( s->enabled() ) 
+                s->simpl().checkEvent();
+
             if( _currentAvail != _avail.end() &&
                *_currentAvail == s )
             {
@@ -276,7 +269,6 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            //ret.setEvent();
             isActive = EventLoopImpl::processEvents();
             return;
         }
@@ -286,11 +278,9 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             for( _current = _devices.begin(); _current != _devices.end(); )
             {
                 Selectable* dev = *_current;
-                if ( dev->enabled() && dev->simpl().checkEvent() )
-                {
-                    //avail = true;
-                    //ret.setDevice();
-                }
+
+                if( dev->enabled() ) 
+                    dev->simpl().checkEvent();
 
                 if( _current != _devices.end() &&
                    *_current == dev )
@@ -302,10 +292,9 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         else
         {
             Selectable* selectable = _handles.at(offset);
-            //if( selectable->enabled() && selectable->simpl().checkEvent() )
-                //avail = true;
-            //    ret.setDevice();
 
+            if( selectable->enabled() )
+                 selectable->simpl().checkEvent();
         }
     }
     catch (...)

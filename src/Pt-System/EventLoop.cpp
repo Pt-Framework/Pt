@@ -36,30 +36,24 @@ namespace Pt {
 namespace System {
 
 EventLoop::EventLoop(EventLoopImpl* impl)
-: _impl(impl)
+: _impl(0)
 {
-    this->add(_idleTimer);
-    //_impl = new EventLoopImpl();
-}
-
-
-EventLoop::EventLoop(EventLoopImpl* impl, Allocator& a)
-: _impl(impl)
-{
-    this->add(_idleTimer);
-    //_impl = new EventLoopImpl(a);
+    this->init(impl);
 }
 
 
 EventLoop::~EventLoop()
 {
-    //delete _impl;
 }
 
 void EventLoop::init(EventLoopImpl* impl)
 {
     _impl = impl;
+
+    if(impl)
+        this->add(_idleTimer);
 }
+
 
 Allocator& EventLoop::allocator()
 { 
@@ -73,8 +67,6 @@ void EventLoop::setIdleTimeout(size_t msecs)
         _idleTimer.start(msecs);
     else
         _idleTimer.stop();
-
-    //_impl->setIdleTimeout(msecs); 
 }
 
 
@@ -83,15 +75,13 @@ size_t EventLoop::idleTimeout() const
     if( ! _idleTimer.active() )
         return WaitInfinite;
 
-    return _idleTimer.interval();
-    //return _impl->idleTimeout(); 
+    return _idleTimer.interval(); 
 }
 
 
 Signal<>& EventLoop::timeout()
 { 
     return _idleTimer.timeout();
-    //return _impl->timeout(); 
 }
 
 
@@ -187,7 +177,6 @@ void EventLoop::onRemoveTimer( Timer& timer )
 EventLoopImpl::EventLoopImpl()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
-//, _timeout(EventLoop::WaitInfinite)
 , _state(0)
 {}
 
@@ -195,7 +184,6 @@ EventLoopImpl::EventLoopImpl()
 EventLoopImpl::EventLoopImpl(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
-//, _timeout(EventLoop::WaitInfinite)
 , _state(0)
 {}
 
@@ -243,52 +231,6 @@ void EventLoopImpl::exit()
 void EventLoopImpl::wake()
 {
     this->onWake();
-}
-
-
-size_t EventLoopImpl::processTimers()
-{
-    /*if( result.isTimeout() )
-    {
-        timeout().send();
-    }*/
-
-    /*if( result.isEvent() )
-    {
-        RecursiveLock lock(_queueMutex);
-
-        if(_state == 1)
-        {
-            result.clear();
-            result.setExit();
-            return 0;
-        }
-
-        if( ! _eventQueue.empty() )
-        {
-            lock.unlock();
-            this->processEvents();
-        }
-
-        lock.unlock();
-    }*/
-
-    //result.clear();
-
-    size_t timerTimeout = EventLoop::WaitInfinite;
-
-    // Check for active timers and process them
-    processTimers(timerTimeout);
-
-    // no timer will become active within the idle timeout
-    /*if(timerTimeout > this->idleTimeout() || timerTimeout == EventLoop::WaitInfinite)
-    {
-        return this->idleTimeout();
-    }*/
-
-    // A timer will become active before the timeout expires
-    //result.setTimer();
-    return timerTimeout;
 }
 
 
@@ -389,7 +331,48 @@ void EventLoopImpl::removeTimer( Timer& timer )
 }
 
 
-bool EventLoopImpl::processTimers(size_t& lowestTimeout)
+size_t EventLoopImpl::processTimers()
+{
+    size_t lowestTimeout = EventLoop::WaitInfinite;
+
+    if( _timers.empty() )
+        return lowestTimeout;
+
+    Timespan now = Clock::getSystemTicks();
+    Timer* timer = _timers.begin()->second;
+    bool timerActive = now >= timer->finished();
+
+    while( ! _timers.empty() )
+    {
+        timer = _timers.begin()->second;
+
+        if( now < timer->finished() )
+        {
+            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+            lowestTimeout = (remaining / 1000);
+            if(remaining % 1000 > 0) 
+                ++lowestTimeout;
+
+            break;
+        }
+
+        timer->update(now);
+
+        if( ! _timers.empty() )
+        {
+            timer = _timers.begin()->second;
+            _timers.erase( _timers.begin() );
+
+            TimerQueue::value_type elem(timer->finished(), timer);
+            _timers.insert(elem);
+        }
+    }
+
+    return lowestTimeout;
+}
+
+
+/*bool EventLoopImpl::processTimers(size_t& lowestTimeout)
 {
     if( _timers.empty() )
         return false;
@@ -423,7 +406,7 @@ bool EventLoopImpl::processTimers(size_t& lowestTimeout)
     }
 
     return timerActive;
-}
+}*/
 
 } // namespace System
 
