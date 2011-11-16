@@ -186,16 +186,10 @@ void MainLoopImpl::changed(Selectable& s)
 
 void MainLoopImpl::onRun()
 {
-    //WaitResult result;
-    //result.setInit();
-
     bool isActive = true;
     while(isActive)
     {
         size_t timeout = this->processTimers();
-
-        //if( result.isExit() )
-        //    return;
 
         this->waitNext(timeout, isActive);
     }
@@ -265,8 +259,6 @@ void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                //avail = true;
-                //result.setEvent();
                 isActive = EventLoopImpl::processEvents();
                 continue;
             }
@@ -287,8 +279,6 @@ void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
     try
     {
         avail += _avail.size();
-        //if(avail > 0)
-        //    result.setDevice();
 
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
