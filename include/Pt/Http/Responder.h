@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
+#include <Pt/Signal.h>
 #include <iosfwd>
 #include <exception>
 
@@ -57,8 +58,25 @@ class PT_HTTP_API Responder
 
         void release()     { _service.doReleaseResponder(this); }
 
+        void beginReply(std::ostream& os, Request& request, Reply& reply)
+        {
+            try
+            {
+                this->reply(os, request, reply);
+                _replyFinished(0);
+            }
+            catch(const std::exception& e)
+            {
+                _replyFinished(&e);
+            }
+        }
+
+        Signal<const std::exception*>& replyFinished()
+        { return _replyFinished; }
+
     private:
         Service& _service;
+        Signal<const std::exception*> _replyFinished;
 };
 
 } // namespace Http

@@ -13,11 +13,8 @@ SharedLibrary Pt-Http : Client.cpp
                         MessageHeader.cpp
                         Parser.cpp
                         Responder.cpp
-                        Worker.cpp
                         Server.cpp
-                        ServerImpl.cpp
-                        Service.cpp
-                        Socket.cpp ;
+                        Service.cpp ;
 SharedLibrary_LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 SharedLibrary_MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
 
