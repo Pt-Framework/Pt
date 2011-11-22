@@ -420,7 +420,8 @@ if $(CONFIGURE) || $(NO_CONFIG)
     }
 }
 
-JamInclude Jamrules.$(TOOLSET:L) ;
+#JamInclude Jamrules.$(TOOLSET:L) ;
+JamInclude $(TOOLSET:L).jam ;
 
 ##########################################################################
 # Include the project specific configuration
