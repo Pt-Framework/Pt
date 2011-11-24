@@ -192,7 +192,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
 };
 
 //! @internal
-class EventLoopImpl
+class PT_SYSTEM_API EventLoopImpl
 {
     typedef std::multimap<Timespan, Timer*> TimerQueue;
     typedef std::deque<Event*> EventQueue;

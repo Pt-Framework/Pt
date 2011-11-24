@@ -275,7 +275,8 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 }
             }
         }
-        else
+        // some of the other event handles was active
+        else if( offset < _handles.size() )
         {
             Selectable* selectable = _handles.at(offset);
 
@@ -309,7 +310,6 @@ DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs
 
     return result - WAIT_OBJECT_0;
 }
-
 
 } //namespace System
 

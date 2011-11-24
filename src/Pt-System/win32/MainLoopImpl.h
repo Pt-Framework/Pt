@@ -96,7 +96,7 @@ class HandleMap
 };
 
 
-class MainLoopImpl : public EventLoopImpl
+class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
 {
     public:
         MainLoopImpl();
