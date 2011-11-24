@@ -122,6 +122,8 @@ class MainLoopImpl : public EventLoopImpl
 
         void waitNext(std::size_t timeout, bool& isActive);
 
+        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
+
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;

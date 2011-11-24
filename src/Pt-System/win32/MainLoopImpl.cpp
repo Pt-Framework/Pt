@@ -86,26 +86,6 @@ MainLoopImpl::MainLoopImpl(Allocator& a)
 MainLoopImpl::~MainLoopImpl()
 {
     std::set<Selectable*>::iterator it;
-    // while( _devices.size() )
-    // {
-    //     it = _devices.begin();
-    //     (*it)->setParent(0);
-    // }
-
-    // while( _dirty.size() )
-    // {
-    //     it = _dirty.begin();
-    //     (*it)->setParent(0);
-    // }
-
-    // while( _handles.size() )
-    // {
-    //     Selectable* s = _handles.at(0);
-    //     if( s )
-    //         s->setParent(0);
-    //     else
-    //         _handles.pop_front();
-    // }
 
     while( _attached.size() )
     {
@@ -235,12 +215,15 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         msecs = 0;
     }
 
-    DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
+    /*DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
     if(result == WAIT_FAILED)
     {
         //DWORD err = GetLastError();
         throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-    }
+    }*/
+
+    bool isTimeout = false;
+    DWORD offset = waitFor(_handles.size(), _handles.handles(), msecs, isTimeout);
 
     try
     {
@@ -259,12 +242,15 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             }
         }
 
-        if( result == WAIT_TIMEOUT)
+        /*if( result == WAIT_TIMEOUT)
         {
             return;
-        }
+        }*/
 
-        const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
+        if(isTimeout)
+            return;
+
+        //const Pt::ssize_t offset = (result - WAIT_OBJECT_0);
 
         // wake event at offset 0 was active
         if (offset == 0)
@@ -304,6 +290,26 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         throw;
     }
 }
+
+
+DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+{
+    DWORD result = WaitForMultipleObjects( numHandles, handles, false, msecs );
+    if(result == WAIT_FAILED)
+    {
+        //DWORD err = GetLastError();
+        throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+    }
+
+    if( result == WAIT_TIMEOUT)
+    {
+        isTimeout = true;
+        return 0;
+    }
+
+    return result - WAIT_OBJECT_0;
+}
+
 
 } //namespace System
 

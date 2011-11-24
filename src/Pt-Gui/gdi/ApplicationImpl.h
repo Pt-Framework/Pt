@@ -490,6 +490,70 @@ namespace Gui {
             int exit();
     };
 
+    /*class MainLoop : public Pt::System::EventLoop
+    {
+        public:
+            MainLoop();
+
+            MainLoop(Allocator& a);
+
+            virtual ~MainLoop();
+
+        protected:
+            virtual void onAttach(Selectable&);
+
+            virtual void onDetach(Selectable&);
+
+            virtual void onEnable( Selectable& s );
+
+            virtual void onDisable( Selectable& s );
+
+            virtual void onReinit(Selectable& s);
+
+            virtual void onChanged(Selectable& s);
+
+        private:
+            class MainLoopImpl* _impl;
+    };
+
+    class MainLoopImpl : public EventLoopImpl
+    {
+        public:
+            MainLoopImpl();
+    
+            MainLoopImpl(Allocator& a);
+    
+            ~MainLoopImpl();
+    
+            void attach( Selectable& s );
+    
+            void detach( Selectable& s );
+    
+            void enable( Selectable& s );
+    
+            void disable( Selectable& s );
+    
+            void changed(Selectable& s);
+    
+        protected:
+            virtual void onRun();
+    
+            virtual void onWake();
+    
+            void waitNext(std::size_t timeout, bool& isActive);
+    
+        private:
+            HANDLE _wakeEvent;
+            HANDLE _ioEvent;
+            HandleMap _handles;
+            std::set<Selectable*>::iterator _current;
+            std::set<Selectable*>::iterator _currentAvail;
+            std::set<Selectable*> _attached;
+            std::set<Selectable*> _devices;
+            std::set<Selectable*> _dirty;
+            std::set<Selectable*> _avail;
+    };*/
+
 } // namespace Gui
 
 } // namespace Pt
