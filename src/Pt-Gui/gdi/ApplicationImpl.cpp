@@ -122,7 +122,7 @@ void GDIRegistry::registerWindowClasses()
     WNDCLASS topWindowClass;
 
     topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    topWindowClass.lpfnWndProc   = (WNDPROC)GDIEventLoop::wndProc;
+    topWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc; /// GDIEventLoop
     topWindowClass.cbClsExtra    = 0;
     topWindowClass.cbWndExtra    = 0;
     topWindowClass.hInstance     = _instanceHandle;
@@ -140,7 +140,7 @@ void GDIRegistry::registerWindowClasses()
     WNDCLASS childWindowClass;
 
     childWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    childWindowClass.lpfnWndProc   = (WNDPROC)GDIEventLoop::wndProc;
+    childWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc;  /// GDIEventLoop
     childWindowClass.cbClsExtra    = 0;
     childWindowClass.cbWndExtra    = 0;
     childWindowClass.hInstance     = _instanceHandle;
@@ -655,50 +655,50 @@ unsigned int GDIEventLoop::createModifiersFromMouseMessage(int wParam)
 ApplicationImpl::ApplicationImpl(Application& app)
 : _impl(0)
 {
-    connect(GDIEventLoop::eventQueueSignal, app.event);
-    //_impl = new MainLoopImpl();
-    //connect(_impl->event(), app.event);
+    //connect(GDIEventLoop::eventQueueSignal, app.event);
+    _impl = new MainLoopImpl();
+    connect(_impl->event(), app.event);
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-    //delete _impl;
+    delete _impl;
 }
 
 
 void ApplicationImpl::commitEvent(const Pt::Event& e)
 {
-    GDIEventLoop::instance().commitEvent(e);
+    ///GDIEventLoop::instance().commitEvent(e);
 }
 
 
 void ApplicationImpl::queueEvent(const Pt::Event& e)
 {
-    GDIEventLoop::instance().queueEvent(e);
+    ///GDIEventLoop::instance().queueEvent(e);
 }
 
 
 int ApplicationImpl::run()
 {
-    return GDIEventLoop::instance().run();
+    ///return GDIEventLoop::instance().run();
 
-    //_impl->run();
-    //return 0;
+    _impl->run();
+    return 0;
 }
 
 
 int ApplicationImpl::exit()
 {
-    return GDIEventLoop::instance().exit();
+    ///return GDIEventLoop::instance().exit();
 
-    //_impl->exit();
-    //return 0;
+    _impl->exit();
+    return 0;
 }
 
 void ApplicationImpl::processEvents()
 {
-    GDIEventLoop::instance().processEvents();
+    ///GDIEventLoop::instance().processEvents();
 }
 
 
@@ -730,7 +730,7 @@ MainLoopImpl::~MainLoopImpl()
 
 DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
-    DWORD result = MsgWaitForMultipleObjects(numHandles, handles, false, msecs, QS_ALLEVENTS);
+    DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
     if(result == WAIT_FAILED)
     {
         //DWORD err = GetLastError();
