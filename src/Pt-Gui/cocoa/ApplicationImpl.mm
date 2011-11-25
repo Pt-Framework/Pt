@@ -28,6 +28,8 @@ ApplicationImpl::ApplicationImpl(Application& a)
 {
     [PtGuiApplication sharedApplication];
     [NSApp initWithApplication: app];
+
+    // NSRunLoop, CFRunLoop, CFFileDescriptor
 }
 
 

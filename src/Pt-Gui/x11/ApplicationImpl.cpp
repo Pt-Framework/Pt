@@ -1294,6 +1294,25 @@ void ApplicationImpl::exit()
 }
 
 
+
+/*
+MainLoopImpl::MainLoopImpl()
+: Pt::System::MainLoopImpl()
+{
+}
+
+
+MainLoopImpl::MainLoopImpl(Allocator& a)
+: Pt::System::MainLoopImpl(a)
+{
+}
+
+
+MainLoopImpl::~MainLoopImpl()
+{
+}
+*/
+
 } // namespace Gui
 
 } // namespace Pt

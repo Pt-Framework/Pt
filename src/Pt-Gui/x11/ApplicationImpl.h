@@ -161,6 +161,16 @@ namespace Gui {
             void exit();
     };
 
+    /*class MainLoopImpl : public Pt::System::MainLoopImpl
+    {
+        public:
+            MainLoopImpl();
+    
+            MainLoopImpl(Allocator& a);
+    
+            ~MainLoopImpl();
+    };*/
+
 } // namespace Gui
 
 } // namespace Pt
