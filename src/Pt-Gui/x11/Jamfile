@@ -2,6 +2,7 @@ SubDir TOP src Pt-Gui x11 ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirHdrs /usr/include/X11 ;
+SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 Library Pt-Gui-x11 : ApplicationImpl.cpp

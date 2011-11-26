@@ -36,7 +36,11 @@
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/System/Selectable.h>
+#include <Pt/System/MainLoop.h>
 #include <Pt/Event.h>
+
+#include "posix/SelectableImpl.h"
 
 #include <map>
 #include <iostream>
@@ -74,19 +78,19 @@ namespace Gui {
 
             Widget* findWidget(Window winId);
 
-            int run();
+            //int run();
 
-            void wake();
+            //void wake();
 
-            void commitEvent(const Pt::Event& event);
+            //void commitEvent(const Pt::Event& event);
 
-            void queueEvent(const Pt::Event& event);
+            //void queueEvent(const Pt::Event& event);
 
-            void processX11Events();
+            //void processX11Events();
 
-            void processEvents();
+            //void processEvents();
 
-            void exit();
+            //void exit();
 
         public:
             Signal<const Pt::Event&> event;
@@ -94,6 +98,7 @@ namespace Gui {
         protected:
             X11EventLoop();
 
+        public:
             //! @brief Creates CloseEvents from X11 ClientMessage events
             void clientMessage(Widget& widget, XEvent& xev);
 
@@ -124,17 +129,18 @@ namespace Gui {
             //! @brief Creates a MouseEvent from an X11 LeaveNotify
             void leaveNotify(Widget& widget, XEvent& xev);
 
+        protected:
             //! @brief Converts the X11 key symbol to a unicode character.
             wchar_t keysymToUtf(int sym);
 
         private:
-            bool _stop;
+            //bool _stop;
             Display* _display;
-            int _wakeFds[2];
-            XEvent _xev;
-            Pt::Allocator _allocator;
-            std::list<Pt::Event*> _eventQueue;
-            System::Mutex _queueMutex;
+            //int _wakeFds[2];
+            //XEvent _xev;
+            //Pt::Allocator _allocator;
+            //std::list<Pt::Event*> _eventQueue;
+            //System::Mutex _queueMutex;
             std::map<Window, Widget*> _widgets;
     };
 
@@ -159,17 +165,67 @@ namespace Gui {
             void wake();
 
             void exit();
+
+        private:
+            class MainLoop* _loop;
     };
 
-    /*class MainLoopImpl : public Pt::System::MainLoopImpl
-    {
-        public:
-            MainLoopImpl();
+class  X11Fd : public System::Selectable
+             , private System::FdImpl
+{
+    public:
+        X11Fd();
+
+        ~X11Fd();
+
+        void setFd(int fd)
+        { System::FdImpl::setFd(fd); }
+        
+        // inherit doc
+        virtual System::SelectableImpl& simpl()
+        { return *this; }
+
+        void flush()
+        { this->onInput(); }
     
-            MainLoopImpl(Allocator& a);
-    
-            ~MainLoopImpl();
-    };*/
+    protected:
+        virtual void onInput();
+
+        // inherit doc
+        virtual void onClose()
+        { System::FdImpl::closeFd(); }
+        
+        // inherit doc
+        virtual bool onWait(std::size_t msecs)
+        { return false; }
+        
+        // inherit doc
+        virtual void onAttach(System::EventLoop& s)
+        { System::FdImpl::attach(s); }
+
+        // inherit doc
+        virtual void onDetach(System::EventLoop& s)
+        { System::FdImpl::detach(s); }
+
+    private:
+        XEvent _xev;
+};
+
+class MainLoop : public Pt::System::MainLoop
+{
+    public:
+        MainLoop();
+
+        MainLoop(Allocator& a);
+
+        ~MainLoop();
+
+        void flush()
+        { return _xfd.flush(); }
+
+    private:
+        X11Fd _xfd;
+};
 
 } // namespace Gui
 

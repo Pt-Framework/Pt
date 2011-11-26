@@ -20,12 +20,16 @@
 #ifndef PT_SYSTEM_SELECTABLEIMPL_H
 #define PT_SYSTEM_SELECTABLEIMPL_H
 
+#include "Pt/System/IOError.h"
 #include <cstddef>
 #include <sys/select.h>
+#include <unistd.h>
 
 namespace Pt {
 
 namespace System {
+
+class EventLoop;
 
 class SelectableImpl
 {
@@ -41,18 +45,111 @@ class SelectableImpl
 };
 
 
-class FileDescriptor
+class FdImpl : public SelectableImpl
 {
     public:
-        virtual ~FileDescriptor()
+        virtual ~FdImpl()
         {}
 
-        virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        int fd() const
+        {
+            return _fd;
+        }
 
-        virtual void exitSelect() = 0;
+        void setFd(int fd)
+        {
+            _fd = fd;
+        }
 
-        virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds) = 0;
+        void closeFd();
+
+        void attach(System::EventLoop& s);
+
+        void detach(System::EventLoop& s);
+
+        virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+
+        virtual void exitSelect();
+
+        virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+
+    protected:
+        FdImpl()
+        : _fd(-1)
+        , _rfds(0)
+        {
+        }
+
+        virtual void onInput() = 0;
+
+    private:
+        int _fd;
+        fd_set* _rfds;
 };
+
+
+inline void FdImpl::closeFd()
+{
+  if (_fd < 0)
+      return;
+
+    ::close(_fd);
+    _fd = -1;
+}
+
+
+inline void FdImpl::attach(System::EventLoop& s)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+}
+
+
+inline void FdImpl::detach(System::EventLoop& s)
+{
+    this->exitSelect();
+}
+
+
+inline int FdImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    _rfds = &rfds;
+
+    if( this->fd() > 0)
+    {
+        FD_SET(this->fd(), _rfds);
+    }
+
+    return this->fd();
+}
+
+
+inline void FdImpl::exitSelect()
+{
+    if( _rfds && this->fd() > 0)
+    {
+        FD_CLR(this->fd(), _rfds);
+    }
+
+    _rfds = 0;
+}
+
+
+inline int FdImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    if( this->fd() < 0)
+        return 0;
+
+    if( FD_ISSET(this->fd(), &rfds) )
+    {
+        this->onInput();
+        return 1;
+    }
+
+    return 0;
+}
 
 } // namespace System
 

@@ -841,8 +841,8 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 
 
 X11EventLoop::X11EventLoop()
-: _stop(false)
-, _display(0)
+: //_stop(false)
+ _display(0)
 {
     // Open a X11 display connection
     _display = XOpenDisplay(NULL);
@@ -851,8 +851,8 @@ X11EventLoop::X11EventLoop()
     XSync(_display, false);
 
     // Open a pipe to send wake up messages
-    if( ::pipe(_wakeFds) )
-        throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
+    //if( ::pipe(_wakeFds) )
+    //    throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
 
     // Set X11 to sync mode. Slow, for debugging only.
     //XSynchronize(_display, true);
@@ -864,7 +864,7 @@ X11EventLoop::X11EventLoop()
     AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
 
     // Do we really need this?
-    //XftInit(0);
+    //XftInit(0);  
 }
 
 
@@ -874,8 +874,8 @@ X11EventLoop::~X11EventLoop()
     XCloseDisplay(_display);
     _display = NULL;
 
-    ::close(_wakeFds[0]);
-    ::close(_wakeFds[1]);
+    //::close(_wakeFds[0]);
+    //::close(_wakeFds[1]); 
 }
 
 
@@ -899,7 +899,7 @@ Widget* X11EventLoop::findWidget(Window winId)
     return it->second;
 }
 
-
+/*
 int X11EventLoop::run()
 {
     std::vector<char> msgbuf(100);
@@ -1029,7 +1029,7 @@ void X11EventLoop::exit()
     _stop = true;
     this->wake();
 }
-
+*/
 
 void X11EventLoop::clientMessage(Widget& widget, XEvent& xev)
 {
@@ -1248,70 +1248,145 @@ wchar_t X11EventLoop::keysymToUtf(int sym)
 
 ApplicationImpl::ApplicationImpl(Application& app)
 {
+    _loop = new MainLoop();
+
     connect(X11EventLoop::instance().event, app.event);
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-    X11EventLoop::instance().exit();
+    delete _loop;
+
+    ///X11EventLoop::instance().exit();
 }
 
 
 void ApplicationImpl::commitEvent(const Pt::Event& event)
 {
-    X11EventLoop::instance().commitEvent(event);
+    ///X11EventLoop::instance().commitEvent(event);
 }
 
 
 void ApplicationImpl::queueEvent(const Pt::Event& event)
 {
-    X11EventLoop::instance().queueEvent(event);
+    ///X11EventLoop::instance().queueEvent(event);
 }
 
 
 void ApplicationImpl::processEvents()
 {
-    X11EventLoop::instance().processEvents();
+    ///X11EventLoop::instance().processEvents();
 }
 
 
 int ApplicationImpl::run()
 {
-    return X11EventLoop::instance().run();
+    _loop->flush();
+    _loop->run();
+    return 0;
+    ///return X11EventLoop::instance().run();
 }
 
 
 void ApplicationImpl::wake()
 {
-    X11EventLoop::instance().wake();
+    ///X11EventLoop::instance().wake();
 }
 
 
 void ApplicationImpl::exit()
 {
-    X11EventLoop::instance().exit();
+    _loop->exit();
+    ///X11EventLoop::instance().exit();
 }
 
 
+X11Fd::X11Fd()
+{
+    int xfd = XConnectionNumber( X11EventLoop::instance().display() );
+    System::FdImpl::setFd(xfd);
+    this->setEnabled(true);
+ 
+    // Do we really need this?
+    //XftInit(0);
+}
 
-/*
-MainLoopImpl::MainLoopImpl()
-: Pt::System::MainLoopImpl()
+
+X11Fd::~X11Fd()
+{
+    try
+    {
+        System::FdImpl::setFd(-1);
+        this->close();
+    }
+    catch(...)
+    {}
+}
+
+void X11Fd::onInput()
+{
+    Display* _display = X11EventLoop::instance().display() ;
+
+    // Get all pending events after a flush
+    if( ! XPending(_display) )
+        return;
+
+    // XEventsQueued(_display, QueuedAlready) > 0
+    while( XPending(_display) > 0 ) {
+
+        XNextEvent(_display, &_xev);
+
+        // Check which window receives the event
+        Widget* widget = X11EventLoop::instance().findWidget( _xev.xany.window );
+        if(widget == 0) continue;
+
+        //clog << "X11 Event: #" << widget << " " << _xev.xany.type << endl;
+        switch( _xev.xany.type )
+        {
+            case ClientMessage:   X11EventLoop::instance().clientMessage(*widget, _xev);   break;
+            case MotionNotify:    X11EventLoop::instance().motionNotify(*widget, _xev);    break;
+            case ButtonPress:     X11EventLoop::instance().buttonPress(*widget, _xev);     break;
+            case ButtonRelease:   X11EventLoop::instance().buttonRelease(*widget, _xev);   break;
+            case Expose:          X11EventLoop::instance().expose(*widget, _xev);          break;
+            case NoExpose:        X11EventLoop::instance().noExpose(*widget, _xev);        break;
+            case ConfigureNotify:
+            {
+                // Use only last configure event for the window in queue
+                XPending(_display);
+                while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) );
+                X11EventLoop::instance().configureNotify(*widget, _xev);
+                break;
+            }
+            case KeyPress:        X11EventLoop::instance().keyEvent(*widget, _xev);        break;
+            case KeyRelease:      X11EventLoop::instance().keyEvent(*widget, _xev);        break;
+            case EnterNotify:     X11EventLoop::instance().enterNotify(*widget, _xev);     break;
+            case LeaveNotify:     X11EventLoop::instance().leaveNotify(*widget, _xev);     break;
+
+            default:
+                break;
+        }
+    }
+}
+
+
+MainLoop::MainLoop()
+: Pt::System::MainLoop()
+{
+    this->add(_xfd);
+}
+
+
+MainLoop::MainLoop(Allocator& a)
+: Pt::System::MainLoop(a)
+{
+    this->add(_xfd);
+}
+
+
+MainLoop::~MainLoop()
 {
 }
-
-
-MainLoopImpl::MainLoopImpl(Allocator& a)
-: Pt::System::MainLoopImpl(a)
-{
-}
-
-
-MainLoopImpl::~MainLoopImpl()
-{
-}
-*/
 
 } // namespace Gui
 
