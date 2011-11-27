@@ -164,6 +164,8 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
+        virtual void onRun();
+
         //! @internal EventSink interface
         virtual void onCommitEvent(const Event& event);
 
@@ -235,6 +237,8 @@ class PT_SYSTEM_API EventLoopImpl
         virtual void onRun() = 0;
 
         virtual void onWake() = 0;
+
+        virtual void onExit() {}
 
     private:
         RecursiveMutex _queueMutex;

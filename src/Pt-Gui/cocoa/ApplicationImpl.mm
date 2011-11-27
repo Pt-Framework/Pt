@@ -18,29 +18,29 @@
  ***************************************************************************/
 #import "ApplicationImpl.h"
 #import "Application.h"
+#include <iostream>
+
+#import <AppKit/NSEvent.h>
+#import <Foundation/NSRunLoop.h>
 
 namespace Pt {
 
 namespace Gui {
 
 ApplicationImpl::ApplicationImpl(Application& a)
-: app(&a)
+: _loop(a)
 {
-    [PtGuiApplication sharedApplication];
-    [NSApp initWithApplication: app];
-
-    // NSRunLoop, CFRunLoop, CFFileDescriptor
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-    [NSApp release];
 }
 
 
 void ApplicationImpl::commitEvent(const Pt::Event& event)
 {
+    _loop.commitEvent(event);
 }
 
 
@@ -56,21 +56,194 @@ void ApplicationImpl::processEvents()
 
 int ApplicationImpl::run()
 {  
-	[NSApp run];
-	return 0;
+    _loop.run();
+    return 0;
 }
 
 
 void ApplicationImpl::wake()
 {
-
+    _loop.wake();
 }
 
 
 void ApplicationImpl::exit()
 {
-    [NSApp terminate: nil];
+    _loop.exit();
 }
+
+
+
+
+MainLoop::MainLoop(Application& app)
+: System::EventLoop(0)
+, _impl(0)
+{
+    _impl = new MainLoopImpl(app);
+    EventLoop::init(_impl);
+}
+
+
+MainLoop::MainLoop(Application& app, Allocator& a)
+: System::EventLoop(0)
+, _impl(0)
+{
+    _impl = new MainLoopImpl(app, a);
+    EventLoop::init(_impl);
+}
+
+
+MainLoop::~MainLoop()
+{
+    delete _impl;
+}
+
+
+void MainLoop::onAttach(System::Selectable&)
+{
+}
+
+
+void MainLoop::onDetach(System::Selectable&)
+{
+}
+
+
+void MainLoop::onEnable( System::Selectable& s )
+{
+}
+
+
+void MainLoop::onDisable( System::Selectable& s )
+{
+}
+
+
+void MainLoop::onReinit(System::Selectable& s)
+{
+}
+
+
+void MainLoop::onChanged(System::Selectable& s)
+{
+}
+
+
+void MainLoopImplOnWake(void* p)
+{
+    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
+
+    NSEvent* event = nil;
+
+    // process cocoa events
+    do
+    {
+        event = [NSApp nextEventMatchingMask: NSAnyEventMask
+                                   untilDate: nil
+                                      inMode: NSDefaultRunLoopMode
+                                     dequeue: YES];
+    
+        [NSApp sendEvent:event];
+    }
+    while(event != nil);
+
+    // process Pt events
+    bool isActive = impl->processEvents();
+
+    // handle loop exit
+    if( ! isActive)
+    {
+        // set stop flag
+        [NSApp stop: nil];
+
+        // post fake event so NSApp notices the stop flag
+        event = [NSEvent otherEventWithType: NSApplicationDefined
+                                   location: NSMakePoint(0,0)
+                              modifierFlags: 0
+                                  timestamp: 0.0
+                               windowNumber: 0
+                                    context: nil
+                                    subtype: 0
+                                      data1: 0
+                                      data2: 0];
+
+        [NSApp postEvent: event atStart: false];
+    }
+}
+
+
+MainLoopImpl::MainLoopImpl(Application& app)
+{
+    [PtGuiApplication sharedApplication];
+    [NSApp initWithApplication: &app];
+
+    // NSRunLoop, CFRunLoop, CFFileDescriptor
+    CFRunLoopSourceContext ctx;
+    ctx.version = 0;
+    ctx.info = this;
+    ctx.retain = NULL;
+    ctx.release = NULL;
+    ctx.copyDescription = NULL;
+    ctx.equal = NULL;
+    ctx.hash = NULL;
+    ctx.schedule = NULL;
+    ctx.cancel = NULL;
+    ctx.perform = &MainLoopImplOnWake;
+
+    _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
+
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+}
+
+
+MainLoopImpl::MainLoopImpl(Application& app, Allocator& a)
+: System::EventLoopImpl(a)
+{
+    [PtGuiApplication sharedApplication];
+    [NSApp initWithApplication: &app];
+
+    // NSRunLoop, CFRunLoop, CFFileDescriptor
+
+    CFRunLoopSourceContext ctx;
+    ctx.version = 0;
+    ctx.info = this;
+    ctx.retain = NULL;
+    ctx.release = NULL;
+    ctx.copyDescription = NULL;
+    ctx.equal = NULL;
+    ctx.hash = NULL;
+    ctx.schedule = NULL;
+    ctx.cancel = NULL;
+    ctx.perform = &MainLoopImplOnWake;
+
+    _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
+
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+}
+
+
+MainLoopImpl::~MainLoopImpl()
+{
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopRemoveSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRelease(_wakeSource);
+    [NSApp release];
+}
+
+
+void MainLoopImpl::onRun()
+{
+    [NSApp run];
+}
+
+
+void MainLoopImpl::onWake()
+{
+    CFRunLoopSourceSignal(_wakeSource);
+}
+
 
 } // namespace Gui
 

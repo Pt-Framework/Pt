@@ -39,7 +39,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
                                                                   NSResizableWindowMask
                                                          backing:NSBackingStoreBuffered
                                                          defer:NO];
-
+        [_window setReleasedWhenClosed: NO];
         [_window setAcceptsMouseMovedEvents:YES];
         [_window setContentView: _view];
         [_window setDelegate: _view];

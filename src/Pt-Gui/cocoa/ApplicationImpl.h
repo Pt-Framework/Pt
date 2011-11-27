@@ -22,10 +22,40 @@
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 #include <Pt/Gui/Application.h>
+#include <Pt/System/EventLoop.h>
+#include <CoreFoundation/CFRunLoop.h>
 
 namespace Pt {
 
 namespace Gui {
+
+
+class MainLoop : public System::EventLoop
+{
+    public:
+        MainLoop(Application& app);
+
+        MainLoop(Application& app, Allocator& a);
+
+        virtual ~MainLoop();
+
+    protected:
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable(System::Selectable& s);
+
+        virtual void onDisable(System::Selectable& s);
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
+
+    private:
+        class MainLoopImpl* _impl;
+};
+
 
 class PT_GUI_API ApplicationImpl
 {
@@ -45,9 +75,28 @@ class PT_GUI_API ApplicationImpl
         void wake();
 
         void exit();
-	
-	private:
-		Application* app;
+    
+    private:
+        MainLoop _loop;
+};
+
+
+class MainLoopImpl : public System::EventLoopImpl
+{
+    public:
+        MainLoopImpl(Application& app);
+
+        MainLoopImpl(Application& app, Allocator& a);
+
+        virtual ~MainLoopImpl();
+
+    protected:
+        virtual void onRun();
+
+        virtual void onWake();
+
+    private:
+        CFRunLoopSourceRef _wakeSource;
 };
 
 } // namespace Gui

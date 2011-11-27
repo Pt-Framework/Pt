@@ -124,13 +124,19 @@ void EventLoop::remove( Timer& timer )
 
 void EventLoop::run()
 {
-    _impl->run();
+    this->onRun();
 }
 
 
 void EventLoop::exit()
 {
     _impl->exit();
+}
+
+
+void EventLoop::onRun()
+{
+    _impl->run();
 }
 
 
@@ -225,6 +231,7 @@ void EventLoopImpl::exit()
     lock.unlock();
 
     this->wake();
+    this->onExit();
 }
 
 
