@@ -29,6 +29,7 @@
 #define Pt_Gui_Application_h
 
 #include <Pt/Gui/Api.h>
+#include <Pt/System/Application.h>
 #include <Pt/Arg.h>
 #include <Pt/Connectable.h>
 #include <Pt/Event.h>
@@ -65,12 +66,7 @@ namespace Gui {
             class ApplicationImpl* _impl;
 
         public:
-            /**
-             * @brief Initializes this application.
-             *
-             * Creates the platform specific Application object and stores it in _impl.
-             * Connects the event signal to dispatchEvent().
-             */
+
             Application(int argc = 0, char** argv = 0);
 
             //! @brief Deletes the platform specific Application object.
@@ -96,23 +92,9 @@ namespace Gui {
             // inheritdoc
             void exit();
 
-            /**
-             * \brief The signal to which slots can register themselves to listen for
-             * any event that is committed to this application's event loop.
-             */
-            Signal<const Pt::Event&> event;
+            Signal<const Pt::Event&>& event()
+            { return _event; }
 
-            /**
-             * @brief Receives GUI events for widgets and delivers them to the widget.
-             *
-             * General events which are sent to the 'event' signal of ptv::Application are
-             * passed to this method. If the event is a GUI event, it is sent to the method
-             * Widget::event(). From there it may be dispatched to more specific event handling
-             * methods.
-             * If the event is not a GUI event, it is ignored.
-             *
-             * @param event An event that will be dispatched to the corresponding widget.
-             */
             void dispatchEvent(const Pt::Event& ev);
 
             int argc() const
@@ -144,7 +126,72 @@ namespace Gui {
             {
                 return Arg<T>(_argc, _argv, name, def);
             }
+
+        private:
+            Signal<const Pt::Event&> _event;
     };
+
+/*
+class PT_GUI_API MainLoop : public Pt::System::EventLoop
+{
+    public:
+        MainLoop();
+
+        MainLoop(Allocator& a);
+
+        virtual ~MainLoop();
+
+    protected:
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable( System::Selectable& s );
+
+        virtual void onDisable( System::Selectable& s );
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
+
+    private:
+        class MainLoopImpl* _impl;
+};
+
+
+class PT_GUI_API Application : public Pt::System::Application
+{
+    public:
+        Application(int argc = 0, char** argv = 0);
+
+        ~Application();
+
+        static Application& instance();
+
+        MainLoop& loop()
+        { return _loop; }
+
+        Signal<const Pt::Event&>& event()
+        { return _loop.event(); }
+
+    protected:*/
+        /**
+         * @brief Receives GUI events for widgets and delivers them to the widget.
+         *
+         * General events which are sent to the 'event' signal of ptv::Application are
+         * passed to this method. If the event is a GUI event, it is sent to the method
+         * Widget::event(). From there it may be dispatched to more specific event handling
+         * methods.
+         * If the event is not a GUI event, it is ignored.
+         *
+         * @param event An event that will be dispatched to the corresponding widget.
+         */
+        /*void dispatchGuiEvent(const Pt::Event& ev);
+
+    private:
+        MainLoop _loop;
+};
+*/
 
 } // namespace gui
 

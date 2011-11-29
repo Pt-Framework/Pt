@@ -497,31 +497,7 @@ namespace Gui {
             class MainLoopImpl* _impl;
     };
 
-    /*class MainLoop : public Pt::System::EventLoop
-    {
-        public:
-            MainLoop();
 
-            MainLoop(Allocator& a);
-
-            virtual ~MainLoop();
-
-        protected:
-            virtual void onAttach(Selectable&);
-
-            virtual void onDetach(Selectable&);
-
-            virtual void onEnable( Selectable& s );
-
-            virtual void onDisable( Selectable& s );
-
-            virtual void onReinit(Selectable& s);
-
-            virtual void onChanged(Selectable& s);
-
-        private:
-            class MainLoopImpl* _impl;
-    };*/
 
     class MainLoopImpl : public Pt::System::MainLoopImpl
     {

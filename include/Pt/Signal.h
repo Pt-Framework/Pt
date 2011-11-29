@@ -232,11 +232,25 @@ Connection operator +=(Signal<const Pt::Event&>& signal, const BasicSlot<R, Even
 	return signal.connect( slot );
 }
 
+template <typename R>
+Connection operator +=(Signal<const Pt::Event&>& signal, const BasicSlot<R, const Pt::Event&>& slot)
+{
+	return signal.connect( slot );
+}
+
+
 template <typename R, class EventT>
 void operator -=(Signal<const Pt::Event&>& signal, const BasicSlot<R, EventT>& slot)
 {
 	signal.disconnect( slot );
 }
+
+template <typename R>
+void operator -=(Signal<const Pt::Event&>& signal, const BasicSlot<R, const Pt::Event&>& slot)
+{
+	signal.disconnect( slot );
+}
+
 
 template <typename R>
 Connection connect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))

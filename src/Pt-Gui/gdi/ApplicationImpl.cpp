@@ -657,7 +657,7 @@ ApplicationImpl::ApplicationImpl(Application& app)
 {
     //connect(GDIEventLoop::eventQueueSignal, app.event);
     _impl = new MainLoopImpl();
-    connect(_impl->event(), app.event);
+    connect(_impl->event(), app.event());
 }
 
 
@@ -700,6 +700,8 @@ void ApplicationImpl::processEvents()
 {
     ///GDIEventLoop::instance().processEvents();
 }
+
+
 
 
 MainLoopImpl* g_loopImpl = 0;

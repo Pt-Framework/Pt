@@ -49,9 +49,6 @@ EventLoop::~EventLoop()
 void EventLoop::init(EventLoopImpl* impl)
 {
     _impl = impl;
-
-    if(impl)
-        this->add(_idleTimer);
 }
 
 
@@ -124,7 +121,9 @@ void EventLoop::remove( Timer& timer )
 
 void EventLoop::run()
 {
+    _idleTimer.setParent(this);
     this->onRun();
+    _idleTimer.setParent(0);
 }
 
 

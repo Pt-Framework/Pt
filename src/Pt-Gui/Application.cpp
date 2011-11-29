@@ -47,8 +47,8 @@ Pt::Gui::Application*& getGuiAppPtr()
 	return _app;
 }
 
-}
-
+} 
+ 
 namespace Pt {
 
 namespace Gui {
@@ -61,7 +61,7 @@ Application::Application(int argc, char** argv)
     ::getGuiAppPtr() = this;
 
     _impl = new ApplicationImpl(*this);
-    connect(event, *this, &Application::dispatchEvent);
+    connect(event(), *this, &Application::dispatchEvent);
 }
 
 
@@ -125,6 +125,122 @@ void Application::dispatchEvent(const Pt::Event& e)
     }
 }
 
+
+/*
+MainLoop::MainLoop()
+: System::EventLoop(0)
+, _impl(0)
+{
+    _impl = new MainLoopImpl();
+    System::EventLoop::init(_impl);
+}
+
+
+
+MainLoop::MainLoop(Allocator& a)
+: System::EventLoop(0)
+, _impl(0)
+{
+    _impl = new MainLoopImpl(a);
+    System::EventLoop::init(_impl);
+}
+
+
+MainLoop::~MainLoop()
+{
+    delete _impl;
+}
+
+
+void MainLoop::onAttach(System::Selectable& s)
+{
+    _impl->attach(s);
+}
+
+
+void MainLoop::onDetach(System::Selectable& s)
+{
+    _impl->detach(s);
+}
+
+
+void MainLoop::onEnable( System::Selectable& s )
+{
+    _impl->enable(s);
+}
+
+
+void MainLoop::onDisable( System::Selectable& s )
+{
+    _impl->disable(s);
+}
+
+
+void MainLoop::onReinit(System::Selectable& s)
+{
+}
+
+
+void MainLoop::onChanged(System::Selectable& s)
+{
+    _impl->changed(s);
+}
+
+} // namespace Gui
+
+} // namespace Pt
+
+
+namespace {
+
+Pt::Gui::Application*& getGuiAppPtr()
+{
+    static Pt::Gui::Application* _app = 0;
+    return _app;
+}
+
+}
+
+
+namespace Pt {
+
+namespace Gui {
+
+Application::Application(int argc, char** argv)
+: System::Application(0, argc, argv)
+{
+    // base class already throws if constructed twice
+    ::getGuiAppPtr() = this;
+
+    this->init(_loop);
+    _loop.event() += Pt::slot(*this, &Application::dispatchGuiEvent);
+}
+
+
+Application::~Application()
+{
+}
+
+
+Application& Application::instance()
+{
+    Application* app = ::getGuiAppPtr();
+    if( ! app )
+        throw std::logic_error("application not initialized");
+
+    return *app;
+}
+
+
+void Application::dispatchGuiEvent(const Pt::Event& e)
+{
+    const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
+
+    if (guiEvent) {
+        guiEvent->widget().event(*guiEvent);
+    }
+}
+*/
 } // namespace Gui
 
 } // namespace Pt
