@@ -129,6 +129,16 @@ void MainLoop::onChanged(System::Selectable& s)
 }
 
 
+AppImpl::AppImpl()
+{
+}
+
+
+AppImpl::~AppImpl()
+{
+}
+
+
 void MainLoopImplOnWake(void* p)
 {
     MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);

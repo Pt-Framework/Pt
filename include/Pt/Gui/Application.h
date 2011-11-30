@@ -131,7 +131,7 @@ namespace Gui {
             Signal<const Pt::Event&> _event;
     };
 
-/*
+
 class PT_GUI_API MainLoop : public Pt::System::EventLoop
 {
     public:
@@ -159,6 +159,7 @@ class PT_GUI_API MainLoop : public Pt::System::EventLoop
 };
 
 
+/*
 class PT_GUI_API Application : public Pt::System::Application
 {
     public:
@@ -168,11 +169,9 @@ class PT_GUI_API Application : public Pt::System::Application
 
         static Application& instance();
 
-        MainLoop& loop()
-        { return _loop; }
+        MainLoop& loop();
 
-        Signal<const Pt::Event&>& event()
-        { return _loop.event(); }
+        Signal<const Pt::Event&>& event();
 
     protected:*/
         /**
@@ -188,8 +187,9 @@ class PT_GUI_API Application : public Pt::System::Application
          */
         /*void dispatchGuiEvent(const Pt::Event& ev);
 
-    private:
-        MainLoop _loop;
+    private:     
+        class AppImpl* _appImpl; 
+        //MainLoop _loop;
 };
 */
 

@@ -1388,6 +1388,17 @@ MainLoop::~MainLoop()
 {
 }
 
+
+AppImpl::AppImpl()
+{
+    _loop->add(_xfd);
+}
+
+
+AppImpl::~AppImpl()
+{
+}
+
 } // namespace Gui
 
 } // namespace Pt

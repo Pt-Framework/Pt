@@ -57,6 +57,21 @@ class MainLoop : public System::EventLoop
 };
 
 
+class AppImpl
+{
+    public:
+        AppImpl();
+
+        ~AppImpl();
+
+        MainLoop& loop()
+        { return _loop; }
+
+    private:
+        MainLoop _loop;
+};
+
+
 class PT_GUI_API ApplicationImpl
 {
     public:

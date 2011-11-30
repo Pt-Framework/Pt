@@ -126,7 +126,6 @@ void Application::dispatchEvent(const Pt::Event& e)
 }
 
 
-/*
 MainLoop::MainLoop()
 : System::EventLoop(0)
 , _impl(0)
@@ -191,6 +190,7 @@ void MainLoop::onChanged(System::Selectable& s)
 } // namespace Pt
 
 
+/*
 namespace {
 
 Pt::Gui::Application*& getGuiAppPtr()
@@ -208,17 +208,24 @@ namespace Gui {
 
 Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
-{
+, _appImpl(0) 
+{ 
+    _appImpl = new AppImpl();
+ 
     // base class already throws if constructed twice
     ::getGuiAppPtr() = this;
 
-    this->init(_loop);
-    _loop.event() += Pt::slot(*this, &Application::dispatchGuiEvent);
+    this->init(_appImpl->loop());
+    _appImpl->loop() += Pt::slot(*this, &Application::dispatchGuiEvent);
+ 
+ 
+    //_loop.event() += Pt::slot(*this, &Application::dispatchGuiEvent);
 }
 
 
 Application::~Application()
 {
+    delete _appImpl; 
 }
 
 
@@ -230,8 +237,20 @@ Application& Application::instance()
 
     return *app;
 }
+ 
+ 
+MainLoop& Application::loop() 
+{ 
+    return _appImpl->loop();
+}
+ 
+ 
+Signal<const Pt::Event&>& Application::event() 
+{ 
+    return _appImpl->loop().event();
+}
 
-
+ 
 void Application::dispatchGuiEvent(const Pt::Event& e)
 {
     const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
@@ -239,8 +258,10 @@ void Application::dispatchGuiEvent(const Pt::Event& e)
     if (guiEvent) {
         guiEvent->widget().event(*guiEvent);
     }
-}
-*/
+} 
+
 } // namespace Gui
 
 } // namespace Pt
+*/
+

@@ -227,6 +227,23 @@ class MainLoop : public Pt::System::MainLoop
         X11Fd _xfd;
 };
 
+typedef System::MainLoopImpl MainLoopImpl;
+
+class AppImpl
+{
+    public:
+        AppImpl();
+
+        ~AppImpl();
+
+        MainLoop& loop()
+        { return _loop; }
+
+    private:
+        MainLoop _loop;
+        X11Fd _xfd;
+};
+
 } // namespace Gui
 
 } // namespace Pt
