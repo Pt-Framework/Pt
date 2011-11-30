@@ -27,108 +27,6 @@ namespace Pt {
 
 namespace Gui {
 
-ApplicationImpl::ApplicationImpl(Application& a)
-: _loop(a)
-{
-}
-
-
-ApplicationImpl::~ApplicationImpl()
-{
-}
-
-
-void ApplicationImpl::commitEvent(const Pt::Event& event)
-{
-    _loop.commitEvent(event);
-}
-
-
-void ApplicationImpl::queueEvent(const Pt::Event& event)
-{
-}
-
-
-void ApplicationImpl::processEvents()
-{
-}
-
-
-int ApplicationImpl::run()
-{  
-    _loop.run();
-    return 0;
-}
-
-
-void ApplicationImpl::wake()
-{
-    _loop.wake();
-}
-
-
-void ApplicationImpl::exit()
-{
-    _loop.exit();
-}
-
-
-
-
-MainLoop::MainLoop(Application& app)
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl(app);
-    EventLoop::init(_impl);
-}
-
-
-MainLoop::MainLoop(Application& app, Allocator& a)
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl(app, a);
-    EventLoop::init(_impl);
-}
-
-
-MainLoop::~MainLoop()
-{
-    delete _impl;
-}
-
-
-void MainLoop::onAttach(System::Selectable&)
-{
-}
-
-
-void MainLoop::onDetach(System::Selectable&)
-{
-}
-
-
-void MainLoop::onEnable( System::Selectable& s )
-{
-}
-
-
-void MainLoop::onDisable( System::Selectable& s )
-{
-}
-
-
-void MainLoop::onReinit(System::Selectable& s)
-{
-}
-
-
-void MainLoop::onChanged(System::Selectable& s)
-{
-}
-
-
 AppImpl::AppImpl()
 {
 }
@@ -182,10 +80,10 @@ void MainLoopImplOnWake(void* p)
 }
 
 
-MainLoopImpl::MainLoopImpl(Application& app)
+MainLoopImpl::MainLoopImpl()
 {
     [PtGuiApplication sharedApplication];
-    [NSApp initWithApplication: &app];
+    [NSApp initWithLoop: this];
 
     // NSRunLoop, CFRunLoop, CFFileDescriptor
     CFRunLoopSourceContext ctx;
@@ -207,14 +105,13 @@ MainLoopImpl::MainLoopImpl(Application& app)
 }
 
 
-MainLoopImpl::MainLoopImpl(Application& app, Allocator& a)
+MainLoopImpl::MainLoopImpl(Allocator& a)
 : System::EventLoopImpl(a)
 {
     [PtGuiApplication sharedApplication];
-    [NSApp initWithApplication: &app];
+    [NSApp initWithLoop: this];
 
     // NSRunLoop, CFRunLoop, CFFileDescriptor
-
     CFRunLoopSourceContext ctx;
     ctx.version = 0;
     ctx.info = this;
@@ -253,7 +150,6 @@ void MainLoopImpl::onWake()
 {
     CFRunLoopSourceSignal(_wakeSource);
 }
-
 
 } // namespace Gui
 

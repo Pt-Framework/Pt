@@ -29,34 +29,6 @@ namespace Pt {
 
 namespace Gui {
 
-
-class MainLoop : public System::EventLoop
-{
-    public:
-        MainLoop(Application& app);
-
-        MainLoop(Application& app, Allocator& a);
-
-        virtual ~MainLoop();
-
-    protected:
-        virtual void onAttach(System::Selectable&);
-
-        virtual void onDetach(System::Selectable&);
-
-        virtual void onEnable(System::Selectable& s);
-
-        virtual void onDisable(System::Selectable& s);
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
-
-    private:
-        class MainLoopImpl* _impl;
-};
-
-
 class AppImpl
 {
     public:
@@ -72,38 +44,29 @@ class AppImpl
 };
 
 
-class PT_GUI_API ApplicationImpl
-{
-    public:
-        ApplicationImpl(Application& app);
-
-        ~ApplicationImpl();
-
-        void commitEvent(const Pt::Event& event);
-
-        void queueEvent(const Pt::Event& event);
-
-        void processEvents();
-
-        int run();
-
-        void wake();
-
-        void exit();
-    
-    private:
-        MainLoop _loop;
-};
-
-
 class MainLoopImpl : public System::EventLoopImpl
 {
     public:
-        MainLoopImpl(Application& app);
+        MainLoopImpl();
 
-        MainLoopImpl(Application& app, Allocator& a);
+        MainLoopImpl(Allocator& a);
 
         virtual ~MainLoopImpl();
+
+        void attach( System::Selectable& s )
+        {}
+
+        void detach( System::Selectable& s )
+        {}
+
+        void enable( System::Selectable& dev )
+        {}
+
+        void disable( System::Selectable& dev )
+        {}
+
+        void changed(System::Selectable& s)
+        {}
 
     protected:
         virtual void onRun();
@@ -119,3 +82,4 @@ class MainLoopImpl : public System::EventLoopImpl
 } // namespace Pt
 
 #endif
+

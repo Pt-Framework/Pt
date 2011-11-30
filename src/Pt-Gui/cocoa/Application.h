@@ -18,7 +18,7 @@
  ***************************************************************************/
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
-#include <Pt/Gui/Application.h>
+#import "ApplicationImpl.h"
 
 #import <Foundation/NSGeometry.h>
 #import <Foundation/NSAutoreleasePool.h>
@@ -26,14 +26,15 @@
 
 @interface PtGuiApplication : NSApplication
 {
-    Pt::Gui::Application* application;
+    Pt::Gui::MainLoopImpl* _loop;
     NSAutoreleasePool* pool;
 }
 
-- (void) initWithApplication:(Pt::Gui::Application*) app;
+- (void) initWithLoop:(Pt::Gui::MainLoopImpl*) loop;
 
 - (void) dealloc;
 
 - (void) processEvent:(Pt::Gui::Event*) mev;
 
 @end
+

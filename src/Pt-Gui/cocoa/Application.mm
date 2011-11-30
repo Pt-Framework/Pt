@@ -21,10 +21,10 @@
 
 @implementation PtGuiApplication
 
-- (void) initWithApplication:(Pt::Gui::Application*) app
+- (void) initWithLoop:(Pt::Gui::MainLoopImpl*) loop
 {
     pool = [[NSAutoreleasePool alloc] init];
-    application = app;
+    _loop = loop;
 }
 
 - (void) dealloc
@@ -36,6 +36,8 @@
 - (void) processEvent:(Pt::Gui::Event*) ev
 {
     //std::cerr << "processEvent" << std::endl;
-    application->event.send(*ev);
+    _loop->event().send(*ev);
 }
+
 @end
+
