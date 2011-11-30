@@ -33,6 +33,7 @@
 #include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 
+#include <Pt/Gui/Application.h>
 #include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/KeyEvent.h>
 
@@ -43,7 +44,6 @@ namespace Pt {
 
 namespace Gui {
 
-    class Application;
     class Widget;
     class Event;
 
@@ -497,7 +497,7 @@ namespace Gui {
             class MainLoopImpl* _impl;
     };
 
-/*
+
 class AppImpl
 {
     public:
@@ -513,7 +513,7 @@ class AppImpl
     private:
         MainLoop _loop;
 };
-*/
+
 
 class MainLoopImpl : public Pt::System::MainLoopImpl
 {
