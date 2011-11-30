@@ -35,6 +35,7 @@
 #include <Pt/System/Clock.h>
 #include <Pt/Timespan.h>
 #include <Pt/Atomicity.h>
+#include <Pt/Main.h>
 
 class BenchClient
 {

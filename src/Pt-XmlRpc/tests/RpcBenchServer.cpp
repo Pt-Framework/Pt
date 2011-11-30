@@ -31,6 +31,7 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/Http/Server.h>
 #include <Pt/XmlRpc/Service.h>
+#include <Pt/Main.h>
 
 std::string echo(const std::string& msg)
 {

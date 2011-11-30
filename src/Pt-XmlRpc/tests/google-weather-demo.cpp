@@ -15,6 +15,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/Event.h>
+#include <Pt/Main.h>
 #include <iostream>
 #include <ctime>
 
@@ -336,7 +337,7 @@ class WeatherApplet : public Pt::System::Application
         {
             std::cerr << "Temperture: " << wev.temperature().narrow() << std::endl;
             std::cerr << "Condition: " << wev.condition().narrow() << std::endl;
-            std::cerr << "Time: " << std::time(0) << std::endl;
+            //std::cerr << "Time: " << std::time(0) << std::endl;
         }
 
     private:

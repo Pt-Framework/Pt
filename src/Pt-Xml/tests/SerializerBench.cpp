@@ -32,6 +32,7 @@
 #include <Pt/Xml/XmlSerializer.h>
 #include <Pt/Xml/XmlDeserializer.h>
 #include <Pt/Arg.h>
+#include <Pt/Main.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Convert.h>
 
