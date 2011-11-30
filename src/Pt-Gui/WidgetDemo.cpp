@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
             painter.drawLine( Pt::Gfx::Point(10,10), Pt::Gfx::Point(200,100) );
         }
 
-        return app.run();
+        app.run();
+        return 0;
     }
     catch(const std::exception& e)
     {

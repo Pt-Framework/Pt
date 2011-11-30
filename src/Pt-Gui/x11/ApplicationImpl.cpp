@@ -1243,65 +1243,6 @@ wchar_t X11EventLoop::keysymToUtf(int sym)
 }
 
 
-
-
-
-ApplicationImpl::ApplicationImpl(Application& app)
-{
-    _loop = new MainLoop();
-
-    connect(X11EventLoop::instance().event, app.event);
-}
-
-
-ApplicationImpl::~ApplicationImpl()
-{
-    delete _loop;
-
-    ///X11EventLoop::instance().exit();
-}
-
-
-void ApplicationImpl::commitEvent(const Pt::Event& event)
-{
-    ///X11EventLoop::instance().commitEvent(event);
-}
-
-
-void ApplicationImpl::queueEvent(const Pt::Event& event)
-{
-    ///X11EventLoop::instance().queueEvent(event);
-}
-
-
-void ApplicationImpl::processEvents()
-{
-    ///X11EventLoop::instance().processEvents();
-}
-
-
-int ApplicationImpl::run()
-{
-    _loop->flush();
-    _loop->run();
-    return 0;
-    ///return X11EventLoop::instance().run();
-}
-
-
-void ApplicationImpl::wake()
-{
-    ///X11EventLoop::instance().wake();
-}
-
-
-void ApplicationImpl::exit()
-{
-    _loop->exit();
-    ///X11EventLoop::instance().exit();
-}
-
-
 X11Fd::X11Fd()
 {
     int xfd = XConnectionNumber( X11EventLoop::instance().display() );
@@ -1370,28 +1311,12 @@ void X11Fd::onInput()
 }
 
 
-MainLoop::MainLoop()
-: Pt::System::MainLoop()
-{
-    this->add(_xfd);
-}
-
-
-MainLoop::MainLoop(Allocator& a)
-: Pt::System::MainLoop(a)
-{
-    this->add(_xfd);
-}
-
-
-MainLoop::~MainLoop()
-{
-}
-
-
 AppImpl::AppImpl()
 {
-    _loop->add(_xfd);
+    _loop.add(_xfd);
+    X11EventLoop::instance().event += Pt::slot( _loop.event() );
+
+    _xfd.flush();
 }
 
 

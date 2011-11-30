@@ -27,11 +27,12 @@
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
-// X11 defines these two globally, which conflicts with enum values in ptv/text/Char.h
+// X11 defines these two globally, which conflicts with enum values in Pt/Char.h
 #undef Above
 #undef Below
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
+#include <Pt/Gui/Application.h>
 #include <Pt/Allocator.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
@@ -41,19 +42,17 @@
 #include <Pt/Event.h>
 
 #include "posix/SelectableImpl.h"
+#include "posix/MainLoopImpl.h"
 
 #include <map>
 #include <iostream>
 #include <cerrno>
 
-
 namespace Pt {
 
 namespace Gui {
 
-    class Application;
     class Widget;
-
 
     class X11EventLoop : public Pt::Singleton<X11EventLoop>
     {
@@ -145,31 +144,6 @@ namespace Gui {
     };
 
 
-    class PT_API ApplicationImpl : public Pt::Connectable
-    {
-        friend class Gui::Application;
-
-        public:
-            ApplicationImpl(Application& app);
-
-            ~ApplicationImpl();
-
-            void commitEvent(const Pt::Event& event);
-
-            void queueEvent(const Pt::Event& event);
-
-            void processEvents();
-
-            int run();
-
-            void wake();
-
-            void exit();
-
-        private:
-            class MainLoop* _loop;
-    };
-
 class  X11Fd : public System::Selectable
              , private System::FdImpl
 {
@@ -211,23 +185,22 @@ class  X11Fd : public System::Selectable
         XEvent _xev;
 };
 
-class MainLoop : public Pt::System::MainLoop
+
+class MainLoopImpl : public System::MainLoopImpl
 {
     public:
-        MainLoop();
+        MainLoopImpl()
+        : System::MainLoopImpl()
+        {}
 
-        MainLoop(Allocator& a);
+        MainLoopImpl(Allocator& a)
+        : System::MainLoopImpl(a)
+        {}
 
-        ~MainLoop();
-
-        void flush()
-        { return _xfd.flush(); }
-
-    private:
-        X11Fd _xfd;
+        ~MainLoopImpl()
+        {}
 };
 
-typedef System::MainLoopImpl MainLoopImpl;
 
 class AppImpl
 {

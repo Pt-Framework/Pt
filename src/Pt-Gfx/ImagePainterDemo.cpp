@@ -6397,7 +6397,8 @@ int main( int argc, char* argv[] )
 		connect( imageTest.closed, app, &Pt::Gui::Application::exit );
 
 		imageTest.show();
-		return app.run();
+		app.run();
+        return 0;
 	}
 	catch(const std::exception& e)
 	{

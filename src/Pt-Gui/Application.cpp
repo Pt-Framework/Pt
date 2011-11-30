@@ -39,92 +39,9 @@
 #include "Pt/Gui/KeyEvent.h"
 #include "Pt/Gui/Widget.h"
 
-namespace {
-
-Pt::Gui::Application*& getGuiAppPtr()
-{
-	static Pt::Gui::Application* _app = 0;
-	return _app;
-}
-
-} 
- 
 namespace Pt {
 
 namespace Gui {
-
-Application::Application(int argc, char** argv)
-: _argc(argc)
-, _argv(argv)
-{
-    // base class already throws if constructed twice
-    ::getGuiAppPtr() = this;
-
-    _impl = new ApplicationImpl(*this);
-    connect(event(), *this, &Application::dispatchEvent);
-}
-
-
-Application::~Application()
-{
-    delete _impl;
-}
-
-
-Application& Application::instance()
-{
-    Application* app = ::getGuiAppPtr();
-    if( ! app )
-        throw std::logic_error("application not initialized");
-
-    return *app;
-}
-
-
-ApplicationImpl& Application::impl()
-{
-    return *_impl;
-}
-
-
-int Application::run()
-{
-    return _impl->run();
-}
-
-void Application::exit()
-{
-    _impl->exit();
-}
-
-
-void Application::commitEvent(const Pt::Event& event)
-{
-    _impl->commitEvent(event);
-}
-
-
-void Application::queueEvent(const Pt::Event& event)
-{
-    _impl->queueEvent(event);
-}
-
-
-void Application::processEvents()
-{
-    _impl->processEvents();
-}
-
-
-void Application::dispatchEvent(const Pt::Event& e)
-{
-    const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
-
-    if (guiEvent) {
-        guiEvent->widget().event(*guiEvent);
-    }
-}
-
 
 MainLoop::MainLoop()
 : System::EventLoop(0)
@@ -133,7 +50,6 @@ MainLoop::MainLoop()
     _impl = new MainLoopImpl();
     System::EventLoop::init(_impl);
 }
-
 
 
 MainLoop::MainLoop(Allocator& a)
@@ -190,7 +106,7 @@ void MainLoop::onChanged(System::Selectable& s)
 } // namespace Pt
 
 
-/*
+
 namespace {
 
 Pt::Gui::Application*& getGuiAppPtr()
@@ -212,14 +128,10 @@ Application::Application(int argc, char** argv)
 { 
     _appImpl = new AppImpl();
  
-    // base class already throws if constructed twice
     ::getGuiAppPtr() = this;
 
     this->init(_appImpl->loop());
-    _appImpl->loop() += Pt::slot(*this, &Application::dispatchGuiEvent);
- 
- 
-    //_loop.event() += Pt::slot(*this, &Application::dispatchGuiEvent);
+    _appImpl->loop().event() += Pt::slot(*this, &Application::dispatchGuiEvent);
 }
 
 
@@ -263,5 +175,4 @@ void Application::dispatchGuiEvent(const Pt::Event& e)
 } // namespace Gui
 
 } // namespace Pt
-*/
 

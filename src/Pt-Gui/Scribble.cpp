@@ -224,7 +224,9 @@ int main(int argc, char* argv[])
         connect(widget.closed, app, &Gui::Application::exit);
 
         widget.show();
-        return app.run();
+
+        app.run();
+        return 0;
     }
     catch(const std::exception& e)
     {

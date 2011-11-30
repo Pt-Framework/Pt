@@ -107,7 +107,8 @@ int main(int argc, char* argv[])
         connect(button2.clicked,   app, &MyApplication::inc);
         connect(mainWidget.closed, app, &MyApplication::exit);
         mainWidget.show();
-        return app.run();
+        app.run();
+        return 0;
 
     }
     catch(const std::exception& e)

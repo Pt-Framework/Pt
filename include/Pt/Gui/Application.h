@@ -39,98 +39,7 @@ namespace Pt {
 
 namespace Gui {
 
-    /**
-     * \brief %Application with a GUI event-loop.
-     *
-     * This interface provides methods for running and stopping the application, for
-     * adding and processing of events and a signal (event) to which slots can be connected to
-     * listen for events that are sent to the event queue.
-     *
-     * A class that implements this interface may contain a main event loop, where event
-     * sources can be registered and events from those sources are dispatched to listeners,
-     * that were registered to the event loop. Events may for example be operating system
-     * events (timer, file system changes) or gui-specific events (like repaint, mouse events).
-     *
-     * The application and therefore the event loop is started with a call to run() and
-     * can be exited with a call to exit(). After calling exit() the application should
-     * terminate.
-     *
-     * Events can be committed by calling commitEvent(). Long running operations
-     * can call processEvents() to keep the application responsive.
-     */
-    class PT_GUI_API Application : public Connectable
-    {
-        private:
-            int     _argc;
-            char**  _argv;
-            class ApplicationImpl* _impl;
-
-        public:
-
-            Application(int argc = 0, char** argv = 0);
-
-            //! @brief Deletes the platform specific Application object.
-            ~Application();
-
-            static Application& instance();
-
-            //! @brief Returns a reference to the platform specific Application object.
-            ApplicationImpl& impl();
-
-            // inheritdoc
-            void commitEvent(const Pt::Event& event);
-
-            // inheritdoc
-            void queueEvent(const Pt::Event& event);
-
-            // inheritdoc
-            void processEvents();
-
-            // inheritdoc
-            int run();
-
-            // inheritdoc
-            void exit();
-
-            Signal<const Pt::Event&>& event()
-            { return _event; }
-
-            void dispatchEvent(const Pt::Event& ev);
-
-            int argc() const
-            { return _argc; }
-
-            char** argv() const
-            { return _argv; }
-
-            template <typename T>
-            Arg<T> getArg(const char* name)
-            {
-                return Arg<T>(_argc, _argv, name);
-            }
-
-            template <typename T>
-            Arg<T> getArg(const char* name, const T& def)
-            {
-                return Arg<T>(_argc, _argv, name, def);
-            }
-
-            template <typename T>
-            Arg<T> getArg(const char name)
-            {
-                return Arg<T>(_argc, _argv, name);
-            }
-
-            template <typename T>
-            Arg<T> getArg(const char name, const T& def)
-            {
-                return Arg<T>(_argc, _argv, name, def);
-            }
-
-        private:
-            Signal<const Pt::Event&> _event;
-    };
-
+class MainLoopImpl;
 
 class PT_GUI_API MainLoop : public Pt::System::EventLoop
 {
@@ -155,11 +64,28 @@ class PT_GUI_API MainLoop : public Pt::System::EventLoop
         virtual void onChanged(System::Selectable& s);
 
     private:
-        class MainLoopImpl* _impl;
+        MainLoopImpl* _impl;
 };
 
-
-/*
+/**
+ * \brief %Application with a GUI event-loop.
+ *
+ * This interface provides methods for running and stopping the application, for
+ * adding and processing of events and a signal (event) to which slots can be connected to
+ * listen for events that are sent to the event queue.
+ *
+ * A class that implements this interface may contain a main event loop, where event
+ * sources can be registered and events from those sources are dispatched to listeners,
+ * that were registered to the event loop. Events may for example be operating system
+ * events (timer, file system changes) or gui-specific events (like repaint, mouse events).
+ *
+ * The application and therefore the event loop is started with a call to run() and
+ * can be exited with a call to exit(). After calling exit() the application should
+ * terminate.
+ *
+ * Events can be committed by calling commitEvent(). Long running operations
+ * can call processEvents() to keep the application responsive.
+ */ 
 class PT_GUI_API Application : public Pt::System::Application
 {
     public:
@@ -173,7 +99,7 @@ class PT_GUI_API Application : public Pt::System::Application
 
         Signal<const Pt::Event&>& event();
 
-    protected:*/
+    protected:
         /**
          * @brief Receives GUI events for widgets and delivers them to the widget.
          *
@@ -185,13 +111,12 @@ class PT_GUI_API Application : public Pt::System::Application
          *
          * @param event An event that will be dispatched to the corresponding widget.
          */
-        /*void dispatchGuiEvent(const Pt::Event& ev);
+        void dispatchGuiEvent(const Pt::Event& ev);
 
     private:     
         class AppImpl* _appImpl; 
         //MainLoop _loop;
 };
-*/
 
 } // namespace gui
 

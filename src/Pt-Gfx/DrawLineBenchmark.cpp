@@ -211,7 +211,8 @@ int main( int argc, char* argv[] )
 
         demo.resize(320, 240);
         demo.show();
-        return app.run();
+        app.run();
+        return 0;
     }
     catch(const std::exception& e)
     {
