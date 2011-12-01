@@ -185,6 +185,33 @@ class  X11Fd : public System::Selectable
         XEvent _xev;
 };
 
+class PT_GUI_API MainLoop : public Pt::System::EventLoop
+{
+    friend class AppImpl;
+
+    public:
+        virtual ~MainLoop();
+
+    protected:
+        MainLoop();
+
+        MainLoop(Allocator& a);
+
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable( System::Selectable& s );
+
+        virtual void onDisable( System::Selectable& s );
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
+
+    private:
+        class MainLoopImpl* _impl;
+};
 
 class MainLoopImpl : public System::MainLoopImpl
 {
@@ -209,7 +236,7 @@ class AppImpl
 
         ~AppImpl();
 
-        MainLoop& loop()
+        System::EventLoop& loop()
         { return _loop; }
 
     private:

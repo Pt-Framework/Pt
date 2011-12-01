@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Marc Boris Duerner
+ * Copyright (C) 2006-2011 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,66 +25,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Gui_Application_h
 #define Pt_Gui_Application_h
 
 #include <Pt/Gui/Api.h>
 #include <Pt/System/Application.h>
-#include <Pt/Arg.h>
-#include <Pt/Connectable.h>
-#include <Pt/Event.h>
-#include <Pt/Signal.h>
 
 namespace Pt {
 
 namespace Gui {
 
-class MainLoopImpl;
-
-class PT_GUI_API MainLoop : public Pt::System::EventLoop
-{
-    public:
-        MainLoop();
-
-        MainLoop(Allocator& a);
-
-        virtual ~MainLoop();
-
-    protected:
-        virtual void onAttach(System::Selectable&);
-
-        virtual void onDetach(System::Selectable&);
-
-        virtual void onEnable( System::Selectable& s );
-
-        virtual void onDisable( System::Selectable& s );
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
-
-    private:
-        MainLoopImpl* _impl;
-};
-
-/**
- * \brief %Application with a GUI event-loop.
- *
- * This interface provides methods for running and stopping the application, for
- * adding and processing of events and a signal (event) to which slots can be connected to
- * listen for events that are sent to the event queue.
- *
- * A class that implements this interface may contain a main event loop, where event
- * sources can be registered and events from those sources are dispatched to listeners,
- * that were registered to the event loop. Events may for example be operating system
- * events (timer, file system changes) or gui-specific events (like repaint, mouse events).
- *
- * The application and therefore the event loop is started with a call to run() and
- * can be exited with a call to exit(). After calling exit() the application should
- * terminate.
- *
- * Events can be committed by calling commitEvent(). Long running operations
- * can call processEvents() to keep the application responsive.
+/** @brief %Application with a GUI event-loop.
  */ 
 class PT_GUI_API Application : public Pt::System::Application
 {
@@ -95,27 +47,19 @@ class PT_GUI_API Application : public Pt::System::Application
 
         static Application& instance();
 
-        MainLoop& loop();
-
-        Signal<const Pt::Event&>& event();
-
     protected:
-        /**
-         * @brief Receives GUI events for widgets and delivers them to the widget.
-         *
-         * General events which are sent to the 'event' signal of ptv::Application are
-         * passed to this method. If the event is a GUI event, it is sent to the method
-         * Widget::event(). From there it may be dispatched to more specific event handling
-         * methods.
-         * If the event is not a GUI event, it is ignored.
-         *
-         * @param event An event that will be dispatched to the corresponding widget.
-         */
+        /** @brief Dispatched GUI events to the widgets. 
+         
+            The GUI event is sent to the method Widget::event(). From there it may
+            be dispatched to more specific event handling methods. If the event is
+            not a GUI event, it is ignored. 
+            
+            @param event An event that will be dispatched to the corresponding widget.
+        */
         void dispatchGuiEvent(const Pt::Event& ev);
 
     private:     
         class AppImpl* _appImpl; 
-        //MainLoop _loop;
 };
 
 } // namespace gui

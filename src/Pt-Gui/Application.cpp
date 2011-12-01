@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Marc Boris Drner
+ * Copyright (C) 2006-2011 Marc Boris Drner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,87 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ApplicationImpl.h"
 
-#include "Pt/Signal.h"
-#include "Pt/Gui/Event.h"
 #include "Pt/Gui/Application.h"
-#include "Pt/Gui/PaintEvent.h"
-#include "Pt/Gui/CloseEvent.h"
-#include "Pt/Gui/ResizeEvent.h"
-#include "Pt/Gui/MoveEvent.h"
-#include "Pt/Gui/MouseEvent.h"
-#include "Pt/Gui/MouseMoveEvent.h"
-#include "Pt/Gui/KeyEvent.h"
+#include "Pt/Gui/Event.h"
 #include "Pt/Gui/Widget.h"
-
-namespace Pt {
-
-namespace Gui {
-
-MainLoop::MainLoop()
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl();
-    System::EventLoop::init(_impl);
-}
-
-
-MainLoop::MainLoop(Allocator& a)
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl(a);
-    System::EventLoop::init(_impl);
-}
-
-
-MainLoop::~MainLoop()
-{
-    delete _impl;
-}
-
-
-void MainLoop::onAttach(System::Selectable& s)
-{
-    _impl->attach(s);
-}
-
-
-void MainLoop::onDetach(System::Selectable& s)
-{
-    _impl->detach(s);
-}
-
-
-void MainLoop::onEnable( System::Selectable& s )
-{
-    _impl->enable(s);
-}
-
-
-void MainLoop::onDisable( System::Selectable& s )
-{
-    _impl->disable(s);
-}
-
-
-void MainLoop::onReinit(System::Selectable& s)
-{
-}
-
-
-void MainLoop::onChanged(System::Selectable& s)
-{
-    _impl->changed(s);
-}
-
-} // namespace Gui
-
-} // namespace Pt
-
-
 
 namespace {
 
@@ -116,7 +41,6 @@ Pt::Gui::Application*& getGuiAppPtr()
 }
 
 }
-
 
 namespace Pt {
 
@@ -148,18 +72,6 @@ Application& Application::instance()
         throw std::logic_error("application not initialized");
 
     return *app;
-}
- 
- 
-MainLoop& Application::loop() 
-{ 
-    return _appImpl->loop();
-}
- 
- 
-Signal<const Pt::Event&>& Application::event() 
-{ 
-    return _appImpl->loop().event();
 }
 
  
