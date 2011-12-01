@@ -841,8 +841,7 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 
 
 X11EventLoop::X11EventLoop()
-: //_stop(false)
- _display(0)
+: _display(0)
 {
     // Open a X11 display connection
     _display = XOpenDisplay(NULL);
@@ -850,9 +849,6 @@ X11EventLoop::X11EventLoop()
         throw std::runtime_error("Could not open X11 display." + PT_SOURCEINFO);
     XSync(_display, false);
 
-    // Open a pipe to send wake up messages
-    //if( ::pipe(_wakeFds) )
-    //    throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
 
     // Set X11 to sync mode. Slow, for debugging only.
     //XSynchronize(_display, true);
@@ -873,9 +869,6 @@ X11EventLoop::~X11EventLoop()
     XSync(_display, true);
     XCloseDisplay(_display);
     _display = NULL;
-
-    //::close(_wakeFds[0]);
-    //::close(_wakeFds[1]); 
 }
 
 
@@ -899,137 +892,6 @@ Widget* X11EventLoop::findWidget(Window winId)
     return it->second;
 }
 
-/*
-int X11EventLoop::run()
-{
-    std::vector<char> msgbuf(100);
-    int xfd = XConnectionNumber(_display);
-
-   // Process the events which were added to the queue before entring the run method.
-    this->processEvents();
-    while(!_stop) {
-        fd_set readfds;
-        FD_ZERO( &readfds );
-        FD_SET ( xfd, &readfds );
-        FD_SET ( _wakeFds[0], &readfds );
-        int maxFd = std::max( xfd, _wakeFds[0] );
-
-        int nfds = ::select( maxFd + 1, &readfds, 0, 0, NULL);
-        if( nfds<0 && errno!=EAGAIN && errno!=EINTR ) {
-            std::clog << "Error: select failed in X11EventLoop::run" << std::endl;
-            return 1;
-        }
-
-        // Test if it was a message on the pipe
-        if( FD_ISSET(_wakeFds[0], &readfds) ) {
-            read( _wakeFds[0], &msgbuf[0], msgbuf.size() );
-            this->processEvents();
-        }
-
-        // Test if it was an X11 event
-        if( FD_ISSET(xfd, &readfds) ) {
-            this->processX11Events();
-        }
-    }
-
-    return 0;
-}
-
-
-void X11EventLoop::wake()
-{
-    ::write( _wakeFds[1], "PT_APP_WAKE", 11);
-    //::flush(_wakeFds[1]);
-}
-
-
-void X11EventLoop::commitEvent(const Pt::Event& event)
-{
-    this->queueEvent(event);
-    this->wake();
-}
-
-
-void X11EventLoop::queueEvent(const Pt::Event& event)
-{
-    _queueMutex.lock();
-
-    Pt::Event& ev = event.clone(_allocator);
-    _eventQueue.push_back(&ev);
-    _queueMutex.unlock();
-}
-
-
-void X11EventLoop::processX11Events()
-{
-    // Get all pending events after a flush
-    if( !XPending(_display) )
-        return;
-
-    // XEventsQueued(_display, QueuedAlready) > 0
-    while( XPending(_display) > 0 ) {
-
-        XNextEvent(_display, &_xev);
-
-        // Check which window receives the event
-        Widget* widget = X11EventLoop::instance().findWidget( _xev.xany.window );
-        if(widget == 0) continue;
-
-        //clog << "X11 Event: #" << widget << " " << _xev.xany.type << endl;
-        switch( _xev.xany.type )
-        {
-            case ClientMessage:   clientMessage(*widget, _xev);   break;
-            case MotionNotify:    motionNotify(*widget, _xev);    break;
-            case ButtonPress:     buttonPress(*widget, _xev);     break;
-            case ButtonRelease:   buttonRelease(*widget, _xev);   break;
-            case Expose:          expose(*widget, _xev);          break;
-            case NoExpose:        noExpose(*widget, _xev);        break;
-            case ConfigureNotify:
-            {
-                // Use only last configure event for the window in queue
-                XPending(_display);
-                while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) );
-                this->configureNotify(*widget, _xev);
-                break;
-            }
-            case KeyPress:        keyEvent(*widget, _xev);        break;
-            case KeyRelease:      keyEvent(*widget, _xev);        break;
-            case EnterNotify:     enterNotify(*widget, _xev);     break;
-            case LeaveNotify:     leaveNotify(*widget, _xev);     break;
-
-            default:
-                break;
-        }
-    }
-}
-
-
-void X11EventLoop::processEvents()
-{
-    while( true ) {
-        _queueMutex.lock();
-
-        if( _eventQueue.empty() ) {
-            _queueMutex.unlock();
-            break;
-        }
-
-        Pt::Event* ev = _eventQueue.front();
-        _eventQueue.remove(ev);
-        _queueMutex.unlock();
-
-        event.send(*ev);
-        ev->destroy(_allocator);
-    }
-}
-
-
-void X11EventLoop::exit()
-{
-    _stop = true;
-    this->wake();
-}
-*/
 
 void X11EventLoop::clientMessage(Widget& widget, XEvent& xev)
 {
@@ -1311,80 +1173,57 @@ void X11Fd::onInput()
 }
 
 
-
-
-MainLoop::MainLoop()
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl();
-    System::EventLoop::init(_impl);
-}
-
-
-MainLoop::MainLoop(Allocator& a)
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl(a);
-    System::EventLoop::init(_impl);
-}
-
-
-MainLoop::~MainLoop()
-{
-    delete _impl;
-}
-
-
-void MainLoop::onAttach(System::Selectable& s)
-{
-    _impl->attach(s);
-}
-
-
-void MainLoop::onDetach(System::Selectable& s)
-{
-    _impl->detach(s);
-}
-
-
-void MainLoop::onEnable( System::Selectable& s )
-{
-    _impl->enable(s);
-}
-
-
-void MainLoop::onDisable( System::Selectable& s )
-{
-    _impl->disable(s);
-}
-
-
-void MainLoop::onReinit(System::Selectable& s)
-{
-}
-
-
-void MainLoop::onChanged(System::Selectable& s)
-{
-    _impl->changed(s);
-}
-
-
-
-
 AppImpl::AppImpl()
+: System::MainLoopImpl()
+, System::EventLoop(0)
 {
-    _loop.add(_xfd);
-    X11EventLoop::instance().event += Pt::slot( _loop.event() );
+    System::EventLoop::init(this);
+    System::EventLoop::add(_xfd);
 
+    X11EventLoop::instance().event += Pt::slot( System::EventLoop::event() );
+
+    // TODO: need to flush later
     _xfd.flush();
 }
 
 
 AppImpl::~AppImpl()
 {
+}
+
+
+void AppImpl::onAttach(System::Selectable& s)
+{
+    System::MainLoopImpl::attach(s);
+}
+
+
+void AppImpl::onDetach(System::Selectable& s)
+{
+    System::MainLoopImpl::detach(s);
+}
+
+
+void AppImpl::onEnable( System::Selectable& s )
+{
+    System::MainLoopImpl::enable(s);
+}
+
+
+void AppImpl::onDisable( System::Selectable& s )
+{
+    System::MainLoopImpl::disable(s);
+}
+
+
+void AppImpl::onReinit(System::Selectable& s)
+{
+}
+
+
+void AppImpl::onChanged(System::Selectable& s)
+{
+    System::MainLoopImpl::changed(s);
 }
 
 } // namespace Gui

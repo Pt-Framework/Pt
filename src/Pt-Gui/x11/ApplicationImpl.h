@@ -77,20 +77,6 @@ namespace Gui {
 
             Widget* findWidget(Window winId);
 
-            //int run();
-
-            //void wake();
-
-            //void commitEvent(const Pt::Event& event);
-
-            //void queueEvent(const Pt::Event& event);
-
-            //void processX11Events();
-
-            //void processEvents();
-
-            //void exit();
-
         public:
             Signal<const Pt::Event&> event;
 
@@ -133,13 +119,7 @@ namespace Gui {
             wchar_t keysymToUtf(int sym);
 
         private:
-            //bool _stop;
             Display* _display;
-            //int _wakeFds[2];
-            //XEvent _xev;
-            //Pt::Allocator _allocator;
-            //std::list<Pt::Event*> _eventQueue;
-            //System::Mutex _queueMutex;
             std::map<Window, Widget*> _widgets;
     };
 
@@ -185,18 +165,19 @@ class  X11Fd : public System::Selectable
         XEvent _xev;
 };
 
-class PT_GUI_API MainLoop : public Pt::System::EventLoop
-{
-    friend class AppImpl;
 
+class AppImpl : public System::MainLoopImpl
+              , public Pt::System::EventLoop
+{
     public:
-        virtual ~MainLoop();
+        AppImpl();
+
+        ~AppImpl();
+
+        System::EventLoop& loop()
+        { return *this; }
 
     protected:
-        MainLoop();
-
-        MainLoop(Allocator& a);
-
         virtual void onAttach(System::Selectable&);
 
         virtual void onDetach(System::Selectable&);
@@ -210,37 +191,6 @@ class PT_GUI_API MainLoop : public Pt::System::EventLoop
         virtual void onChanged(System::Selectable& s);
 
     private:
-        class MainLoopImpl* _impl;
-};
-
-class MainLoopImpl : public System::MainLoopImpl
-{
-    public:
-        MainLoopImpl()
-        : System::MainLoopImpl()
-        {}
-
-        MainLoopImpl(Allocator& a)
-        : System::MainLoopImpl(a)
-        {}
-
-        ~MainLoopImpl()
-        {}
-};
-
-
-class AppImpl
-{
-    public:
-        AppImpl();
-
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return _loop; }
-
-    private:
-        MainLoop _loop;
         X11Fd _xfd;
 };
 
