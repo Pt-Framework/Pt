@@ -27,7 +27,7 @@ namespace Pt {
 
 namespace Gui {
 
-MainLoop::MainLoop()
+AppImpl::AppImpl()
 : System::EventLoop(0)
 , _impl(0)
 {
@@ -36,64 +36,45 @@ MainLoop::MainLoop()
 }
 
 
-MainLoop::MainLoop(Allocator& a)
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl(a);
-    System::EventLoop::init(_impl);
-}
 
-
-MainLoop::~MainLoop()
+AppImpl::~AppImpl()
 {
     delete _impl;
 }
 
 
-void MainLoop::onAttach(System::Selectable& s)
+void AppImpl::onAttach(System::Selectable& s)
 {
     _impl->attach(s);
 }
 
 
-void MainLoop::onDetach(System::Selectable& s)
+void AppImpl::onDetach(System::Selectable& s)
 {
     _impl->detach(s);
 }
 
 
-void MainLoop::onEnable( System::Selectable& s )
+void AppImpl::onEnable( System::Selectable& s )
 {
     _impl->enable(s);
 }
 
 
-void MainLoop::onDisable( System::Selectable& s )
+void AppImpl::onDisable( System::Selectable& s )
 {
     _impl->disable(s);
 }
 
 
-void MainLoop::onReinit(System::Selectable& s)
+void AppImpl::onReinit(System::Selectable& s)
 {
 }
 
 
-void MainLoop::onChanged(System::Selectable& s)
+void AppImpl::onChanged(System::Selectable& s)
 {
     _impl->changed(s);
-}
-
-
-
-AppImpl::AppImpl()
-{
-}
-
-
-AppImpl::~AppImpl()
-{
 }
 
 

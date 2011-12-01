@@ -29,18 +29,17 @@ namespace Pt {
 
 namespace Gui {
 
-class PT_GUI_API MainLoop : public Pt::System::EventLoop
+class AppImpl : public Pt::System::EventLoop
 {
-    friend class AppImpl;
-
     public:
-        virtual ~MainLoop();
+        AppImpl();
+
+        ~AppImpl();
+
+        System::EventLoop& loop()
+        { return *this; }
 
     protected:
-        MainLoop();
-
-        MainLoop(Allocator& a);
-
         virtual void onAttach(System::Selectable&);
 
         virtual void onDetach(System::Selectable&);
@@ -55,21 +54,6 @@ class PT_GUI_API MainLoop : public Pt::System::EventLoop
 
     private:
         class MainLoopImpl* _impl;
-};
-
-
-class AppImpl
-{
-    public:
-        AppImpl();
-
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return _loop; }
-
-    private:
-        MainLoop _loop;
 };
 
 
