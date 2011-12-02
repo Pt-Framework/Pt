@@ -17,11 +17,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #import "ApplicationImpl.h"
-#import "Application.h"
 #include <iostream>
 
+#import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
+#import <Foundation/NSGeometry.h>
+#import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSRunLoop.h>
+
+@interface PtGuiApplication : NSApplication
+{
+    NSAutoreleasePool* pool;
+}
+
+- (void) initPool;
+
+- (void) dealloc;
+
+@end
+
+@implementation PtGuiApplication
+
+- (void) initPool
+{
+    pool = [[NSAutoreleasePool alloc] init];
+}
+
+- (void) dealloc
+{
+    [super dealloc];
+    [pool release];
+}
+
+@end
+
 
 namespace Pt {
 
@@ -72,10 +101,8 @@ void MainLoopImplOnWake(void* p)
 
 MainLoopImpl::MainLoopImpl()
 {
-    //TODO: we probably do not need the derived NSApp class, if
-    //      MainLoopImpl would be a singleton...
     [PtGuiApplication sharedApplication];
-    [NSApp initWithLoop: this];
+    [NSApp initPool];
 
     // NSRunLoop, CFRunLoop, CFFileDescriptor
     CFRunLoopSourceContext ctx;
@@ -100,11 +127,9 @@ MainLoopImpl::MainLoopImpl()
 MainLoopImpl::MainLoopImpl(Allocator& a)
 : System::EventLoopImpl(a)
 {
-    //TODO: we probably do not need the derived NSApp class, if
-    //      MainLoopImpl would be a singleton...
     [PtGuiApplication sharedApplication];
-    [NSApp initWithLoop: this];
-
+    [NSApp initPool];
+    
     // NSRunLoop, CFRunLoop, CFFileDescriptor
     CFRunLoopSourceContext ctx;
     ctx.version = 0;
@@ -130,7 +155,8 @@ MainLoopImpl::~MainLoopImpl()
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopRemoveSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRelease(_wakeSource);
-    [NSApp release];
+
+    [ NSApp release];
 }
 
 
@@ -149,38 +175,38 @@ void MainLoopImpl::onWake()
 AppImpl::AppImpl()
 : System::EventLoop(0)
 {
-    System::EventLoop::init(&_impl);
+    MainLoopImpl& impl = MainLoopImpl::instance();
+    System::EventLoop::init(&impl);
 }
 
 
 
 AppImpl::~AppImpl()
 {
-    delete _impl;
 }
 
 
 void AppImpl::onAttach(System::Selectable& s)
 {
-    _impl->attach(s);
+    MainLoopImpl::instance().attach(s);
 }
 
 
 void AppImpl::onDetach(System::Selectable& s)
 {
-    _impl->detach(s);
+    MainLoopImpl::instance().detach(s);
 }
 
 
 void AppImpl::onEnable( System::Selectable& s )
 {
-    _impl->enable(s);
+    MainLoopImpl::instance().enable(s);
 }
 
 
 void AppImpl::onDisable( System::Selectable& s )
 {
-    _impl->disable(s);
+    MainLoopImpl::instance().disable(s);
 }
 
 
@@ -191,9 +217,10 @@ void AppImpl::onReinit(System::Selectable& s)
 
 void AppImpl::onChanged(System::Selectable& s)
 {
-    _impl->changed(s);
+    MainLoopImpl::instance().changed(s);
 }
 
 } // namespace Gui
 
 } // namespace Pt
+

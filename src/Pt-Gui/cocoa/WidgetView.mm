@@ -17,9 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #import "WidgetView.h"
-#import "Application.h"
-#import <AppKit/NSApplication.h>
-#import <AppKit/NSEvent.h>
+#import "ApplicationImpl.h"
 
 #include "Pt/Gui/CloseEvent.h"
 #include "Pt/Gui/PaintEvent.h"
@@ -27,6 +25,10 @@
 #include "Pt/Gui/MoveEvent.h"
 #include "Pt/Gui/MouseEvent.h"
 #include "Pt/Gui/MouseMoveEvent.h"
+
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSEvent.h>
+
 #include <iostream>
 
 @implementation WidgetView
@@ -51,7 +53,9 @@
     Pt::Gui::PaintEvent pev(*_widget, Pt::Gfx::Point(rect.origin.x, rect.origin.y),
                                       Pt::Gfx::Size(rect.size.width, rect.size.height));
 
-    [NSApp processEvent: &pev];
+    Pt::Gui::MainLoopImpl::instance().event().send(pev);
+    //[NSApp processEvent: &pev];
+
     //[super drawRect:rect];
 }
 
@@ -62,7 +66,9 @@
     [super setFrameOrigin:origin];
 
     Pt::Gui::MoveEvent mev(*_widget, origin.x, origin.y);
-    [NSApp processEvent: &mev];
+    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+
+    //[NSApp processEvent: &mev];
 }
 
 
@@ -72,7 +78,9 @@
     [super setFrameSize:frameSize];
 
     Pt::Gui::ResizeEvent rev(*_widget, frameSize.width, frameSize.height);
-    [NSApp processEvent: &rev];
+    Pt::Gui::MainLoopImpl::instance().event().send(rev);
+
+    //[NSApp processEvent: &rev];
 }
 
 
@@ -86,7 +94,9 @@
                             Pt::Gui::MouseEvent::Press,
                             0); //modifiers
 
-    [NSApp processEvent: &mev];
+    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    //[NSApp processEvent: &mev];
+
     //[super mouseDown: ev];
 }
 
@@ -100,7 +110,9 @@
                             Pt::Gui::MouseEvent::Release,
                             0); //modifiers
 
-    [NSApp processEvent: &mev];
+    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    //[NSApp processEvent: &mev];
+
     //[super mouseUp: ev];
 }
 
@@ -113,7 +125,9 @@
                                 Pt::Gui::MouseMoveEvent::Moved,
                                 Pt::Gui::MouseMoveEvent::LeftButtonDown);
 
-    [NSApp processEvent: &mev];
+    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    //[NSApp processEvent: &mev];
+
     //[super mouseDragged: event];
 }
 
@@ -126,14 +140,19 @@
                                 Pt::Gui::MouseMoveEvent::Moved,
                                 0);
 
-    [NSApp processEvent: &mev];
+    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    //[NSApp processEvent: &mev];
+
     //[super mouseMoved: event];
 }
 
 - (BOOL) windowShouldClose:(id)window
 {
     Pt::Gui::CloseEvent cev(*_widget);
-    [NSApp processEvent: &cev];
+
+    Pt::Gui::MainLoopImpl::instance().event().send(cev);
+    //[NSApp processEvent: &cev];
+
     return YES;
 }
 

@@ -2,8 +2,7 @@ SubDir TOP src Pt-Gui cocoa ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
-Library Pt-Gui-cocoa : Application.mm
-                       ApplicationImpl.mm
+Library Pt-Gui-cocoa : ApplicationImpl.mm
                        PainterImpl.mm
                        PixmapImpl.mm
                        PixmapPainter.mm

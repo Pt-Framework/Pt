@@ -23,13 +23,15 @@
 #include <Pt/Gui/Event.h>
 #include <Pt/Gui/Application.h>
 #include <Pt/System/EventLoop.h>
-#include <CoreFoundation/CFRunLoop.h>
+#include <Pt/Singleton.h>
+#import <CoreFoundation/CFRunLoop.h>
 
 namespace Pt {
 
 namespace Gui {
 
 class MainLoopImpl : public System::EventLoopImpl
+                   , public Pt::Singleton<MainLoopImpl>
 {
     public:
         MainLoopImpl();
@@ -85,9 +87,6 @@ class AppImpl : public Pt::System::EventLoop
         virtual void onReinit(System::Selectable& s);
 
         virtual void onChanged(System::Selectable& s);
-
-    private:
-        MainLoopImpl _impl;
 };
 
 } // namespace Gui
