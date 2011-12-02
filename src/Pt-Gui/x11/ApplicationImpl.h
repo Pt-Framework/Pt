@@ -166,8 +166,7 @@ class  X11Fd : public System::Selectable
 };
 
 
-class AppImpl : public System::MainLoopImpl
-              , public Pt::System::EventLoop
+class AppImpl : public Pt::System::EventLoop
 {
     public:
         AppImpl();
@@ -191,6 +190,7 @@ class AppImpl : public System::MainLoopImpl
         virtual void onChanged(System::Selectable& s);
 
     private:
+        System::MainLoopImpl _impl;
         X11Fd _xfd;
 };
 

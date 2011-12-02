@@ -29,34 +29,6 @@ namespace Pt {
 
 namespace Gui {
 
-class AppImpl : public Pt::System::EventLoop
-{
-    public:
-        AppImpl();
-
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return *this; }
-
-    protected:
-        virtual void onAttach(System::Selectable&);
-
-        virtual void onDetach(System::Selectable&);
-
-        virtual void onEnable( System::Selectable& s );
-
-        virtual void onDisable( System::Selectable& s );
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
-
-    private:
-        class MainLoopImpl* _impl;
-};
-
-
 class MainLoopImpl : public System::EventLoopImpl
 {
     public:
@@ -88,6 +60,34 @@ class MainLoopImpl : public System::EventLoopImpl
 
     private:
         CFRunLoopSourceRef _wakeSource;
+};
+
+
+class AppImpl : public Pt::System::EventLoop
+{
+    public:
+        AppImpl();
+
+        ~AppImpl();
+
+        System::EventLoop& loop()
+        { return *this; }
+
+    protected:
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable(System::Selectable& s);
+
+        virtual void onDisable(System::Selectable& s);
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
+
+    private:
+        MainLoopImpl _impl;
 };
 
 } // namespace Gui

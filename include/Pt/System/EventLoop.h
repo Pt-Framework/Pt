@@ -178,15 +178,15 @@ class PT_SYSTEM_API EventLoop : public Connectable
         //! @internal EventSink interface
         virtual void onWake();
 
+        //! @internal
+        virtual void onAddTimer(Timer& timer);
+
+        //! @internal
+        virtual void onRemoveTimer( Timer& timer );
+
     protected:
-        //! @internal
+        //! @internal OBSOLETE
         void init(EventLoopImpl* impl);
-
-        //! @internal
-        void onAddTimer(Timer& timer);
-
-        //! @internal
-        void onRemoveTimer( Timer& timer );
 
     private:
         EventLoopImpl* _impl;

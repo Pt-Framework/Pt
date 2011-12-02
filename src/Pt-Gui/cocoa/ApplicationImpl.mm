@@ -27,57 +27,6 @@ namespace Pt {
 
 namespace Gui {
 
-AppImpl::AppImpl()
-: System::EventLoop(0)
-, _impl(0)
-{
-    _impl = new MainLoopImpl();
-    System::EventLoop::init(_impl);
-}
-
-
-
-AppImpl::~AppImpl()
-{
-    delete _impl;
-}
-
-
-void AppImpl::onAttach(System::Selectable& s)
-{
-    _impl->attach(s);
-}
-
-
-void AppImpl::onDetach(System::Selectable& s)
-{
-    _impl->detach(s);
-}
-
-
-void AppImpl::onEnable( System::Selectable& s )
-{
-    _impl->enable(s);
-}
-
-
-void AppImpl::onDisable( System::Selectable& s )
-{
-    _impl->disable(s);
-}
-
-
-void AppImpl::onReinit(System::Selectable& s)
-{
-}
-
-
-void AppImpl::onChanged(System::Selectable& s)
-{
-    _impl->changed(s);
-}
-
-
 void MainLoopImplOnWake(void* p)
 {
     MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
@@ -123,6 +72,8 @@ void MainLoopImplOnWake(void* p)
 
 MainLoopImpl::MainLoopImpl()
 {
+    //TODO: we probably do not need the derived NSApp class, if
+    //      MainLoopImpl would be a singleton...
     [PtGuiApplication sharedApplication];
     [NSApp initWithLoop: this];
 
@@ -149,6 +100,8 @@ MainLoopImpl::MainLoopImpl()
 MainLoopImpl::MainLoopImpl(Allocator& a)
 : System::EventLoopImpl(a)
 {
+    //TODO: we probably do not need the derived NSApp class, if
+    //      MainLoopImpl would be a singleton...
     [PtGuiApplication sharedApplication];
     [NSApp initWithLoop: this];
 
@@ -190,6 +143,55 @@ void MainLoopImpl::onRun()
 void MainLoopImpl::onWake()
 {
     CFRunLoopSourceSignal(_wakeSource);
+}
+
+
+AppImpl::AppImpl()
+: System::EventLoop(0)
+{
+    System::EventLoop::init(&_impl);
+}
+
+
+
+AppImpl::~AppImpl()
+{
+    delete _impl;
+}
+
+
+void AppImpl::onAttach(System::Selectable& s)
+{
+    _impl->attach(s);
+}
+
+
+void AppImpl::onDetach(System::Selectable& s)
+{
+    _impl->detach(s);
+}
+
+
+void AppImpl::onEnable( System::Selectable& s )
+{
+    _impl->enable(s);
+}
+
+
+void AppImpl::onDisable( System::Selectable& s )
+{
+    _impl->disable(s);
+}
+
+
+void AppImpl::onReinit(System::Selectable& s)
+{
+}
+
+
+void AppImpl::onChanged(System::Selectable& s)
+{
+    _impl->changed(s);
 }
 
 } // namespace Gui
