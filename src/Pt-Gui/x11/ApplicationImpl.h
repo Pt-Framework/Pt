@@ -33,20 +33,14 @@
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Application.h>
-#include <Pt/Allocator.h>
 #include <Pt/Singleton.h>
-#include <Pt/Signal.h>
-#include <Pt/System/Mutex.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Event.h>
 
 #include "posix/SelectableImpl.h"
-#include "posix/MainLoopImpl.h"
 
 #include <map>
-#include <iostream>
-#include <cerrno>
 
 namespace Pt {
 
@@ -166,7 +160,7 @@ class  X11Fd : public System::Selectable
 };
 
 
-class AppImpl : public Pt::System::EventLoop
+class AppImpl : public Pt::System::MainLoop
 {
     public:
         AppImpl();
@@ -176,21 +170,7 @@ class AppImpl : public Pt::System::EventLoop
         System::EventLoop& loop()
         { return *this; }
 
-    protected:
-        virtual void onAttach(System::Selectable&);
-
-        virtual void onDetach(System::Selectable&);
-
-        virtual void onEnable( System::Selectable& s );
-
-        virtual void onDisable( System::Selectable& s );
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
-
     private:
-        System::MainLoopImpl _impl;
         X11Fd _xfd;
 };
 

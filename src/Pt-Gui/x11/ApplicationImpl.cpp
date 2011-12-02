@@ -1174,10 +1174,8 @@ void X11Fd::onInput()
 
 
 AppImpl::AppImpl()
-: System::EventLoop(0)
 {
-    _impl.init(&_impl);
-    System::EventLoop::add(_xfd);
+    this->add(_xfd);
 
     X11EventLoop::instance().event += Pt::slot( System::EventLoop::event() );
 
@@ -1188,41 +1186,6 @@ AppImpl::AppImpl()
 
 AppImpl::~AppImpl()
 {
-}
-
-
-void AppImpl::onAttach(System::Selectable& s)
-{
-    _impl.attach(s);
-}
-
-
-void AppImpl::onDetach(System::Selectable& s)
-{
-    _impl.detach(s);
-}
-
-
-void AppImpl::onEnable(System::Selectable& s)
-{
-    _impl.enable(s);
-}
-
-
-void AppImpl::onDisable(System::Selectable& s)
-{
-    _impl.disable(s);
-}
-
-
-void AppImpl::onReinit(System::Selectable& s)
-{
-}
-
-
-void AppImpl::onChanged(System::Selectable& s)
-{
-    _impl.changed(s);
 }
 
 } // namespace Gui
