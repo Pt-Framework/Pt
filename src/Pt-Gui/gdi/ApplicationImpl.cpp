@@ -49,36 +49,29 @@ namespace Pt {
 
 namespace Gui {
 
-const LPCSTR GDIRegistry::TOP_WINDOW_CLASS_NAME   = "PtTopWindow";
-const LPCSTR GDIRegistry::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
-
-GDIRegistry::GDIRegistry()
-{
-    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-
-    registerWindowClasses();
-}
+const LPCSTR MainLoopImpl::TOP_WINDOW_CLASS_NAME   = "PtTopWindow";
+const LPCSTR MainLoopImpl::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
 
 
-GDIRegistry::~GDIRegistry()
+MainLoopImpl::~MainLoopImpl()
 {
     unregisterWindowClasses();
 }
 
 
-void GDIRegistry::registerWidget(HWND windowHandle, Widget& widget)
+void MainLoopImpl::registerWidget(HWND windowHandle, Widget& widget)
 {
     _windowHandle2Widget.insert(std::make_pair(windowHandle, &widget));
 }
 
 
-void GDIRegistry::unregisterWidget(HWND windowHandle)
+void MainLoopImpl::unregisterWidget(HWND windowHandle)
 {
     _windowHandle2Widget.erase(windowHandle);
 }
 
 
-Widget* GDIRegistry::findWidget(HWND windowHandle)
+Widget* MainLoopImpl::findWidget(HWND windowHandle)
 {
     std::map<HWND, Widget*>::iterator it = _windowHandle2Widget.find(windowHandle);
     if( it == _windowHandle2Widget.end() ) {
@@ -89,7 +82,7 @@ Widget* GDIRegistry::findWidget(HWND windowHandle)
 }
 
 
-HWND GDIRegistry::getFirstHWND()
+HWND MainLoopImpl::getFirstHWND()
 {
     if (_windowHandle2Widget.empty()) {
         return 0;
@@ -99,7 +92,7 @@ HWND GDIRegistry::getFirstHWND()
 }
 
 
-void GDIRegistry::registerWindowClasses()
+void MainLoopImpl::registerWindowClasses()
 {
     basic_string<TCHAR> topLevelWindow = win32::fromMultiByte(TOP_WINDOW_CLASS_NAME);
     basic_string<TCHAR> childWindow    = win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME);
@@ -110,7 +103,7 @@ void GDIRegistry::registerWindowClasses()
     WNDCLASS topWindowClass;
 
     topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    topWindowClass.lpfnWndProc   = (WNDPROC)AppImpl::wndProc; /// GDIEventLoop
+    topWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc; /// GDIEventLoop
     topWindowClass.cbClsExtra    = 0;
     topWindowClass.cbWndExtra    = 0;
     topWindowClass.hInstance     = _instanceHandle;
@@ -128,7 +121,7 @@ void GDIRegistry::registerWindowClasses()
     WNDCLASS childWindowClass;
 
     childWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    childWindowClass.lpfnWndProc   = (WNDPROC)AppImpl::wndProc;  /// GDIEventLoop
+    childWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc;  /// GDIEventLoop
     childWindowClass.cbClsExtra    = 0;
     childWindowClass.cbWndExtra    = 0;
     childWindowClass.hInstance     = _instanceHandle;
@@ -142,69 +135,22 @@ void GDIRegistry::registerWindowClasses()
 }
 
 
-void GDIRegistry::unregisterWindowClasses()
+void MainLoopImpl::unregisterWindowClasses()
 {
     UnregisterClass(win32::fromMultiByte(TOP_WINDOW_CLASS_NAME).c_str(),   _instanceHandle);
     UnregisterClass(win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME).c_str(), _instanceHandle);
 }
 
 
-AppImpl* g_loopImpl = 0;
-
-
-AppImpl::AppImpl()
-: System::EventLoop(0)
-, System::MainLoopImpl()
-, _trackingMouseEvent(false)
+MainLoopImpl::MainLoopImpl()
+: _trackingMouseEvent(false)
 {
-    System::EventLoop::init(this);
-
-    g_loopImpl = this;
-    GDIRegistry::instance();
+    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
+    registerWindowClasses();
 }
 
 
-AppImpl::~AppImpl()
-{
-}
-
-
-void AppImpl::onAttach(System::Selectable& s)
-{
-    System::MainLoopImpl::attach(s);
-}
-
-
-void AppImpl::onDetach(System::Selectable& s)
-{
-    System::MainLoopImpl::detach(s);
-}
-
-
-void AppImpl::onEnable( System::Selectable& s )
-{
-    System::MainLoopImpl::enable(s);
-}
-
-
-void AppImpl::onDisable( System::Selectable& s )
-{
-    System::MainLoopImpl::disable(s);
-}
-
-
-void AppImpl::onReinit(System::Selectable& s)
-{
-}
-
-
-void AppImpl::onChanged(System::Selectable& s)
-{
-    System::MainLoopImpl::changed(s);
-}
-
-
-DWORD AppImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
     DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
     if(result == WAIT_FAILED)
@@ -230,7 +176,7 @@ DWORD AppImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, boo
 }
 
 
-void AppImpl::processMessage()
+void MainLoopImpl::processMessage()
 {
     MSG msg;
 
@@ -242,17 +188,17 @@ void AppImpl::processMessage()
 }
 
 
-long CALLBACK AppImpl::wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
+long CALLBACK MainLoopImpl::wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
 {
-    return g_loopImpl->dispatchGDIEvent(hwnd, message, wParam, lParam);
+    return MainLoopImpl::instance().dispatchGDIEvent(hwnd, message, wParam, lParam);
 }
 
 
-LRESULT AppImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
+LRESULT MainLoopImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
 {
     // Translate the GDI message into an event we can understand.
 
-    Widget* widget = GDIRegistry::instance().findWidget(hwnd);
+    Widget* widget = this->findWidget(hwnd);
 
     if (widget == 0) {
         return DefWindowProc(hwnd, message, wParam, lParam);
@@ -352,16 +298,16 @@ LRESULT AppImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int 
 }
 
 
-void AppImpl::processDestroyMessage(Widget& widget)
+void MainLoopImpl::processDestroyMessage(Widget& widget)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
 
     CloseEvent closeEvent(widget);
-    System::EventLoop::event().send(closeEvent);
+    event().send(closeEvent);
 }
 
-void AppImpl::processVirtualKeyMessage(Widget& widget, int wParam, int lParam, KeyEvent::Type type)
+void MainLoopImpl::processVirtualKeyMessage(Widget& widget, int wParam, int lParam, KeyEvent::Type type)
 {
     //std::cout << __FUNCTION__ << "  " << wParam << "   extended: " << (lParam & (1 << 24)) << std::endl;
 
@@ -430,21 +376,21 @@ void AppImpl::processVirtualKeyMessage(Widget& widget, int wParam, int lParam, K
     }
 
     KeyEvent keyEvent(widget, type, code, 0);
-    System::EventLoop::event().send(keyEvent);
+    event().send(keyEvent);
 }
 
 
-void AppImpl::processCharacterKeyMessage(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processCharacterKeyMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ << "  " << (char)wParam << std::endl;
 
 
     KeyEvent keyEvent(widget, KeyEvent::Press, KeyEvent::Void, (wchar_t)wParam);
-    System::EventLoop::event().send(keyEvent);
+    event().send(keyEvent);
 }
 
 
-void AppImpl::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
 {
     int x = LOWORD(lParam);
     int y = HIWORD(lParam);
@@ -460,11 +406,11 @@ void AppImpl::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
 
     MouseMoveEvent mouseMoveEvent(widget, x, y, MouseMoveEvent::Moved, modifiers);
-    System::EventLoop::event().send(mouseMoveEvent);
+    event().send(mouseMoveEvent);
 }
 
 
-void AppImpl::processMouseEntered(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processMouseEntered(Widget& widget, int wParam, int lParam)
 {
 // TODO
 // Is not supported by WinCE.
@@ -494,12 +440,12 @@ void AppImpl::processMouseEntered(Widget& widget, int wParam, int lParam)
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
 
     MouseMoveEvent mouseMoveEvent(widget, x, y, MouseMoveEvent::Entered, modifiers);
-    System::EventLoop::event().send(mouseMoveEvent);
+    event().send(mouseMoveEvent);
 #endif
 }
 
 
-void AppImpl::processMouseButtonMessage(Widget& widget, int wParam, int lParam, MouseEvent::Button button, MouseEvent::Action action)
+void MainLoopImpl::processMouseButtonMessage(Widget& widget, int wParam, int lParam, MouseEvent::Button button, MouseEvent::Action action)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -510,11 +456,11 @@ void AppImpl::processMouseButtonMessage(Widget& widget, int wParam, int lParam, 
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
 
     MouseEvent mouseEvent(widget, x, y, button, action, modifiers);
-    System::EventLoop::event().send(mouseEvent);
+    event().send(mouseEvent);
 }
 
 
-void AppImpl::processMouseWheelMessage(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processMouseWheelMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -527,20 +473,20 @@ void AppImpl::processMouseWheelMessage(Widget& widget, int wParam, int lParam)
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
 
     MouseEvent mouseEvent(widget, x, y, (zDelta > 0) ? MouseEvent::WheelUp : MouseEvent::WheelDown, MouseEvent::Press, modifiers);
-    System::EventLoop::event().send(mouseEvent);
+    event().send(mouseEvent);
 }
 
 
-void AppImpl::processMouseLeaveMessage(Widget& widget)
+void MainLoopImpl::processMouseLeaveMessage(Widget& widget)
 {
     _trackingMouseEvent = false;
 
     MouseMoveEvent mouseMoveEvent(widget, 0, 0, MouseMoveEvent::Exited, MouseMoveEvent::NoButton);
-    System::EventLoop::event().send(mouseMoveEvent);
+    event().send(mouseMoveEvent);
 }
 
 
-void AppImpl::processPaintMessage(HWND hwnd, Widget& widget)
+void MainLoopImpl::processPaintMessage(HWND hwnd, Widget& widget)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -558,13 +504,13 @@ void AppImpl::processPaintMessage(HWND hwnd, Widget& widget)
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(hwnd, &ps);
 
-    System::EventLoop::event().send(paintEvent); // commitEvent
+    event().send(paintEvent); // commitEvent
 
     EndPaint(hwnd, &ps);
 }
 
 
-void AppImpl::processMoveMessage(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processMoveMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ <<std::endl;
 
@@ -572,11 +518,11 @@ void AppImpl::processMoveMessage(Widget& widget, int wParam, int lParam)
     int y = HIWORD(lParam);
 
     MoveEvent moveEvent(widget, x, y);
-    System::EventLoop::event().send(moveEvent);
+    event().send(moveEvent);
 }
 
 
-void AppImpl::processSizeMessage(Widget& widget, int wParam, int lParam)
+void MainLoopImpl::processSizeMessage(Widget& widget, int wParam, int lParam)
 {
     int width  = LOWORD(lParam);
     int height = HIWORD(lParam);
@@ -604,11 +550,11 @@ void AppImpl::processSizeMessage(Widget& widget, int wParam, int lParam)
     }
 
     ResizeEvent resizeEvent(widget, width, height, resizeType);
-    System::EventLoop::event().send(resizeEvent);
+    event().send(resizeEvent);
 }
 
 
-unsigned int AppImpl::createModifiersFromMouseMessage(int wParam)
+unsigned int MainLoopImpl::createModifiersFromMouseMessage(int wParam)
 {
     //std::cout << __FUNCTION__ << std::endl;
 
@@ -623,6 +569,56 @@ unsigned int AppImpl::createModifiersFromMouseMessage(int wParam)
     if (wParam & MK_RBUTTON) { modifiers |= MouseEvent::RightButtonDown;  }
 
     return modifiers;
+}
+
+
+
+
+AppImpl::AppImpl()
+: System::EventLoop(0)
+{
+    MainLoopImpl& impl = MainLoopImpl::instance();
+    System::EventLoop::init(&impl);
+}
+
+
+AppImpl::~AppImpl()
+{
+}
+
+
+void AppImpl::onAttach(System::Selectable& s)
+{
+    MainLoopImpl::instance().attach(s);
+}
+
+
+void AppImpl::onDetach(System::Selectable& s)
+{
+    MainLoopImpl::instance().detach(s);
+}
+
+
+void AppImpl::onEnable( System::Selectable& s )
+{
+    MainLoopImpl::instance().enable(s);
+}
+
+
+void AppImpl::onDisable( System::Selectable& s )
+{
+    MainLoopImpl::instance().disable(s);
+}
+
+
+void AppImpl::onReinit(System::Selectable& s)
+{
+}
+
+
+void AppImpl::onChanged(System::Selectable& s)
+{
+    MainLoopImpl::instance().changed(s);
 }
 
 } // namespace Gui

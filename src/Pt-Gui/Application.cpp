@@ -51,7 +51,8 @@ Application::Application(int argc, char** argv)
 , _appImpl(0) 
 { 
     _appImpl = new AppImpl();
- 
+
+    // base class ctor already throws if constructed twice
     ::getGuiAppPtr() = this;
 
     this->init(_appImpl->loop());

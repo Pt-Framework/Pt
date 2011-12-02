@@ -52,7 +52,10 @@ Application::Application(int argc, char** argv)
 , _loop(0)
 , _owner(0)
 {
-    // base class already throws if constructed twice
+    Application* app = ::getSystemAppPtr();
+    if( app )
+        throw std::logic_error("application not initialized");
+
     ::getSystemAppPtr() = this;
 
     _impl = new ApplicationImpl;

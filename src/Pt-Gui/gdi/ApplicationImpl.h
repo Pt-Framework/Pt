@@ -37,7 +37,6 @@ namespace Pt {
 namespace Gui {
 
 class Widget;
-class Event;
 
 /**
  * @brief Global singleton class which provides access to the applications's instance
@@ -56,14 +55,20 @@ class Event;
  * method of this singleton class. It creates the essential association between the
  * Windows' HWND and the application's widget.
  */
-class GDIRegistry : public Pt::Singleton<GDIRegistry>
+class MainLoopImpl : public Pt::System::MainLoopImpl
+                   , public Pt::Singleton<MainLoopImpl>
 {
-    public:
-        //! @brief Initializes the instance handle and registers the window classes.
-        GDIRegistry();
+    friend class Pt::Singleton<MainLoopImpl>;
 
-        //! @brief Deregisters the window classes.
-        ~GDIRegistry();
+    public:
+        //! @brief Window class name for top level windows.
+        static const LPCSTR TOP_WINDOW_CLASS_NAME;
+
+        //! @brief Window class name for child windows.
+        static const LPCSTR CHILD_WINDOW_CLASS_NAME;
+
+    public:
+        ~MainLoopImpl();
 
         //! @brief Returns this application's instance handle (Windows).
         HINSTANCE getInstanceHandle()
@@ -124,54 +129,12 @@ class GDIRegistry : public Pt::Singleton<GDIRegistry>
          */
         HWND getFirstHWND();
 
-    public:
-        //! @brief Window class name for top level windows.
-        static const LPCSTR TOP_WINDOW_CLASS_NAME;
-
-        //! @brief Window class name for child windows.
-        static const LPCSTR CHILD_WINDOW_CLASS_NAME;
-
-    private:
-        //! @brief Registers the top level and child window classes with Windows for later use.
-        void registerWindowClasses();
-
-        //! @brief Unregisters the top level and child window classes.
-        void unregisterWindowClasses();
-
-    private:
-        //! @brief Instance handle of this application
-        HINSTANCE _instanceHandle;
-
-        //! @brief Map for associations between Window handles and widgets.
-        std::map<HWND, Widget*> _windowHandle2Widget;
-};
-
-
-class AppImpl : public Pt::System::EventLoop
-              , public Pt::System::MainLoopImpl
-{
-    public:
-        AppImpl();
-
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return *this; }
-
     protected:
-        virtual void onAttach(System::Selectable&);
+        MainLoopImpl();
 
-        virtual void onDetach(System::Selectable&);
+        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
-        virtual void onEnable( System::Selectable& s );
-
-        virtual void onDisable( System::Selectable& s );
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
-
-    public:
+        void processMessage();
         /**
          * @brief The window callback function which only delegates to dispatchGDIEvent().
          *
@@ -208,12 +171,7 @@ class AppImpl : public Pt::System::EventLoop
          */
         LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 
-    protected:
-        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
-
-        void processMessage();
-
-         /**
+        /**
          * @brief Creates a CloseEvent from a GDI Destroy message and sends it to
          * the application event queue.
          *
@@ -283,7 +241,7 @@ class AppImpl : public Pt::System::EventLoop
          * @param action Specifies the action: button was pressed, released or double-clicked.
          */
         void processMouseButtonMessage(Widget& widget, int wParam, int lParam,
-                                        MouseEvent::Button button, MouseEvent::Action action);
+                                       MouseEvent::Button button, MouseEvent::Action action);
 
         /**
          * @brief Creates a MouseEvent from a GDI mouse wheel message
@@ -350,7 +308,44 @@ class AppImpl : public Pt::System::EventLoop
         unsigned int createModifiersFromMouseMessage(int wParam);
 
     private:
+        //! @brief Registers the top level and child window classes with Windows for later use.
+        void registerWindowClasses();
+
+        //! @brief Unregisters the top level and child window classes.
+        void unregisterWindowClasses();
+
+    private:
+        //! @brief Instance handle of this application
+        HINSTANCE _instanceHandle;
         bool _trackingMouseEvent;
+
+        //! @brief Map for associations between Window handles and widgets.
+        std::map<HWND, Widget*> _windowHandle2Widget;
+};
+
+
+class AppImpl : public Pt::System::EventLoop
+{
+    public:
+        AppImpl();
+
+        ~AppImpl();
+
+        System::EventLoop& loop()
+        { return *this; }
+
+    protected:
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable( System::Selectable& s );
+
+        virtual void onDisable( System::Selectable& s );
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
 };
 
 } // namespace Gui
