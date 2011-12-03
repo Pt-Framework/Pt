@@ -325,6 +325,7 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
 
 
 class AppImpl : public Pt::System::EventLoop
+              , public Pt::Singleton<AppImpl>
 {
     public:
         AppImpl();
