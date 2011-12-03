@@ -36,15 +36,48 @@ namespace Pt {
 
 namespace System {
 
-    StreamBuffer::StreamBufferImpl::StreamBufferImpl(IODevice& ioDevice, size_t bufferSize, bool extend)
-    : _ioDevice(0),
+    StreamBuffer2::StreamBufferImpl::StreamBufferImpl(size_t bufferSize, bool extend)
+    : _ioDevice   (0),
       _ibufferSize(0),
-      _ibuffer(0),
+      _ibuffer    (0),
       _obufferSize(0),
-      _obuffer(0),
-      _pbmax(4),
-      _oextend(extend)
+      _obuffer    (0),
+      _pbmax      (4),
+      _oextend    (extend)
+    {}
+
+    void StreamBuffer2::StreamBufferImpl::streamBufferInit(StreamBuffer2& sb, size_t bufferSize, bool extend)
     {
+        _ibufferSize = bufferSize + 4;
+        _ibuffer = 0;
+        _obufferSize = bufferSize;
+        _obuffer = 0;
+        _oextend = extend;
+
+        if( sb.gptr() )
+            sb.setg(_ibuffer, _ibuffer + _ibufferSize, _ibuffer + _ibufferSize);
+
+        if( sb.pptr() )
+            sb.setp(_obuffer, _obuffer + _obufferSize);
+    }
+
+    void StreamBuffer2::StreamBufferImpl::streamBufferAttach(StreamBuffer2& sb, IODevice& ioDevice)
+    {
+        if(ioDevice.busy())
+            throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+        if(_ioDevice)
+        {
+            if(_ioDevice->busy())
+                throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+            disconnect(ioDevice.inputReady,  sb, &StreamBuffer2::onRead );
+            disconnect(ioDevice.outputReady, sb, &StreamBuffer2::onWrite);
+        }
+
+        _ioDevice = &ioDevice;
+        connect(ioDevice.inputReady,  sb, &StreamBuffer2::onRead );
+        connect(ioDevice.outputReady, sb, &StreamBuffer2::onWrite);
     }
 
 }
