@@ -161,6 +161,7 @@ class  X11Fd : public System::Selectable
 
 
 class AppImpl : public Pt::System::MainLoop
+              , public Pt::Singleton<AppImpl>
 {
     public:
         AppImpl();

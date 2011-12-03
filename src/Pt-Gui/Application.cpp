@@ -50,19 +50,19 @@ Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
 , _appImpl(0) 
 { 
-    _appImpl = new AppImpl();
+     AppImpl& appImpl = AppImpl::instance();
+     _appImpl = &appImpl;
 
     // base class ctor already throws if constructed twice
     ::getGuiAppPtr() = this;
 
-    this->init(_appImpl->loop());
+    this->init( appImpl );
     _appImpl->loop().event() += Pt::slot(*this, &Application::dispatchGuiEvent);
 }
 
 
 Application::~Application()
 {
-    delete _appImpl; 
 }
 
 
