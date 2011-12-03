@@ -65,15 +65,13 @@ class MainLoopImpl : public System::EventLoopImpl
 };
 
 
-class AppImpl : public Pt::System::EventLoop
+class MainLoop : public Pt::System::EventLoop
+               , public Pt::Singleton<MainLoop>
 {
     public:
-        AppImpl();
+        MainLoop();
 
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return *this; }
+        ~MainLoop();
 
     protected:
         virtual void onAttach(System::Selectable&);

@@ -48,16 +48,16 @@ namespace Gui {
 
 Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
-, _appImpl(0) 
+, _guiloop(0) 
 { 
-     AppImpl& appImpl = AppImpl::instance();
-     _appImpl = &appImpl;
+     MainLoop& loop = MainLoop::instance();
+     _guiloop = &loop;
 
     // base class ctor already throws if constructed twice
     ::getGuiAppPtr() = this;
 
-    this->init( appImpl );
-    _appImpl->loop().event() += Pt::slot(*this, &Application::dispatchGuiEvent);
+    this->init( *_guiloop );
+    _guiloop->event() += Pt::slot(*this, &Application::dispatchGuiEvent);
 }
 
 

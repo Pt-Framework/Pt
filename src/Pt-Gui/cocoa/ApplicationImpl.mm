@@ -172,7 +172,7 @@ void MainLoopImpl::onWake()
 }
 
 
-AppImpl::AppImpl()
+MainLoop::MainLoop()
 : System::EventLoop(0)
 {
     MainLoopImpl& impl = MainLoopImpl::instance();
@@ -181,41 +181,41 @@ AppImpl::AppImpl()
 
 
 
-AppImpl::~AppImpl()
+MainLoop::~MainLoop()
 {
 }
 
 
-void AppImpl::onAttach(System::Selectable& s)
+void MainLoop::onAttach(System::Selectable& s)
 {
     MainLoopImpl::instance().attach(s);
 }
 
 
-void AppImpl::onDetach(System::Selectable& s)
+void MainLoop::onDetach(System::Selectable& s)
 {
     MainLoopImpl::instance().detach(s);
 }
 
 
-void AppImpl::onEnable( System::Selectable& s )
+void MainLoop::onEnable( System::Selectable& s )
 {
     MainLoopImpl::instance().enable(s);
 }
 
 
-void AppImpl::onDisable( System::Selectable& s )
+void MainLoop::onDisable( System::Selectable& s )
 {
     MainLoopImpl::instance().disable(s);
 }
 
 
-void AppImpl::onReinit(System::Selectable& s)
+void MainLoop::onReinit(System::Selectable& s)
 {
 }
 
 
-void AppImpl::onChanged(System::Selectable& s)
+void MainLoop::onChanged(System::Selectable& s)
 {
     MainLoopImpl::instance().changed(s);
 }

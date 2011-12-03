@@ -59,7 +59,7 @@ class PT_GUI_API Application : public Pt::System::Application
         void dispatchGuiEvent(const Pt::Event& ev);
 
     private:     
-        class AppImpl* _appImpl; 
+        class MainLoop* _guiloop; 
 };
 
 } // namespace gui
