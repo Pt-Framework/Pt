@@ -324,16 +324,13 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
 };
 
 
-class AppImpl : public Pt::System::EventLoop
-              , public Pt::Singleton<AppImpl>
+class MainLoop : public Pt::System::EventLoop
+               , public Pt::Singleton<MainLoop>
 {
     public:
-        AppImpl();
+        MainLoop();
 
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return *this; }
+        ~MainLoop();
 
     protected:
         virtual void onAttach(System::Selectable&);
