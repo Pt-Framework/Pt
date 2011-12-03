@@ -56,7 +56,7 @@ PainterImpl::PainterImpl(Gui::Drawable& drawable)
 , _xftDraw(0)
 , _xftFont(0)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
     Visual* visual = XDefaultVisual(display, screen);
 
@@ -85,7 +85,7 @@ PainterImpl::PainterImpl(Gui::Drawable& drawable)
 
 PainterImpl::~PainterImpl()
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
 
     XFreeGC(display, _penGc);
     _penGc = 0;
@@ -113,7 +113,7 @@ void PainterImpl::begin()
 
 void PainterImpl::end()
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     ::XSync(display, false);
 }
 
@@ -124,7 +124,7 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 
     if( _pen.color() != pen.color() )
     {
-        Display* display = X11EventLoop::instance().display();
+        Display* display = MainLoop::instance().display();
         XSetForeground( display, _penGc, this->toXColor( pen.color() ) );
         XSetBackground( display, _penGc, this->toXColor( pen.color() ) );
     }
@@ -182,7 +182,7 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
                 break;
         }
 
-        Display* display = X11EventLoop::instance().display();
+        Display* display = MainLoop::instance().display();
         XSetLineAttributes( display, _penGc, pen.size(), lineStyle, capStyle, joinStyle );
     }
 
@@ -199,13 +199,13 @@ const Gfx::Pen& PainterImpl::pen() const
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
     if( brush.fillStyle() == Brush::SolidFill ) {
-        Display* display = X11EventLoop::instance().display();
+        Display* display = MainLoop::instance().display();
         XSetFillStyle( display, _brushGc, FillSolid );
         XSetForeground( display, _brushGc, this->toXColor( brush.color() ) );
         XSetBackground( display, _brushGc, this->toXColor( brush.color() ) );
     }
     else if( brush.fillStyle() == Brush::TextureFill ) {
-        Display* display = X11EventLoop::instance().display();
+        Display* display = MainLoop::instance().display();
         Pixmap tile( brush.texture().width(), brush.texture().width() );
         Painter painter = tile.painter();
         painter.drawImage( Gfx::Point(0, 0), brush.texture() );
@@ -231,7 +231,7 @@ const Gfx::Font& PainterImpl::font() const
 
 void PainterImpl::setFont(const Gfx::Font& font)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
 #ifndef _AIX
     if(_xftFont) {
@@ -312,7 +312,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
     if(!_xftFont)
         return Gfx::FontMetrics(0, 0, 0, 0);
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XGlyphInfo info;
 
     XftTextExtents32(display, _xftFont, (XftChar32*)text.c_str(), text.size(), &info);
@@ -329,7 +329,7 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 #ifndef _AIX
     if( _fontList.empty() )
     {
-        Display* display = X11EventLoop::instance().display();
+        Display* display = MainLoop::instance().display();
         unsigned int screen = DefaultScreen(display);
         char *family;
 
@@ -354,14 +354,14 @@ Gui::Drawable& PainterImpl::drawable() const
 
 int PainterImpl::depth() const
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     return XDefaultDepth(display, XDefaultScreen(display));
 }
 
 
 void PainterImpl::drawPixel(const Gfx::Point& to)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XDrawPoint( display, _drawable->x11Drawable(), _penGc, to.x(), to.y() );
     //XSync(display, false);
 }
@@ -371,7 +371,7 @@ void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XDrawLine(display, _drawable->x11Drawable(), _penGc, from.x(), from.y(), to.x(), to.y());
     //XSync(display, false);
 }
@@ -398,7 +398,7 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
     // (Its not possible to draw a 0 pixel wide/high rectangle in X11.)
     if (rect.width() == 0 || rect.height() == 0) return;
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XDrawRectangle(display, _drawable->x11Drawable(), _penGc, rect.x(), rect.y(), rect.width() - 1, rect.height() - 1);
     //XSync(display, false);
 }
@@ -408,7 +408,7 @@ void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount
 {
     if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
 
     XPoint xpoints[pointCount];
     for(size_t n = 0; n < pointCount; ++n)
@@ -428,7 +428,7 @@ void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
     // (Its not possible to draw a 0 pixel wide/high ellipse in X11.)
     if (size.width() == 0 || size.height() == 0) return;
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XDrawArc(display, _drawable->x11Drawable(), _penGc, topLeft.x(), topLeft.y(), size.width() - 1, size.height() - 1, 0, 360*64);
     //XSync(display, false);
 }
@@ -436,7 +436,7 @@ void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 
 void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XFillRectangle(display, _drawable->x11Drawable(), _brushGc, rect.x(), rect.y(), rect.width(), rect.height());
     //XSync(display, false);
 }
@@ -444,7 +444,7 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
 
 void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XFillArc(display, _drawable->x11Drawable(), _brushGc, topLeft.x(), topLeft.y(), size.width(), size.height(), 0, 360*64);
     //XSync(display, false);
 }
@@ -452,7 +452,7 @@ void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 
 void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
 
     XPoint xpoints[pointCount];
     for(size_t n = 0; n < pointCount; ++n) {
@@ -467,7 +467,7 @@ void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 
 void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     ::Pixmap from = pm.impl().x11Drawable();
 
     XCopyArea( display,
@@ -484,7 +484,7 @@ void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm,
                              const Gfx::Region& pmRegion)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     ::Pixmap from = pm.impl().x11Drawable();
 
     XCopyArea( display,
@@ -547,7 +547,7 @@ long PainterImpl::toXColor(const Gfx::ARgbColor& color)
 
 void PainterImpl::drawImage(size_t x, size_t y, const char* data, size_t width, size_t height)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
     Visual* visual = XDefaultVisual(display, screen);
     int depth = XDefaultDepth(display, screen);

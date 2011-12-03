@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2006 - 2007 Marc Boris D�rner
+ * Copyright (C) 2006 - 2011 Marc Boris Duerner
  * Copyright (C) 2006 - 2007 Aloysius Indrayanto
- * Copyright (C) 2006 - 2007 Sebastian Pieck
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,21 +35,17 @@
 
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/Widget.h"
-#include <Pt/Gui/PaintEvent.h>
-#include <Pt/Gui/CloseEvent.h>
-#include <Pt/Gui/ResizeEvent.h>
-#include <Pt/Gui/MouseEvent.h>
-#include <Pt/Gui/MouseMoveEvent.h>
-#include <Pt/Gui/MoveEvent.h>
-#include <Pt/Gui/KeyEvent.h>
-#include <Pt/Gui/Widget.h>
+#include "Pt/Gui/PaintEvent.h"
+#include "Pt/Gui/CloseEvent.h"
+#include "Pt/Gui/ResizeEvent.h"
+#include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
+#include "Pt/Gui/MoveEvent.h"
+#include "Pt/Gui/KeyEvent.h"
+#include "Pt/Gui/Widget.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
-#include <iostream>
 #include <vector>
-
-#include <sys/select.h>
-#include <unistd.h>
 
 namespace Pt {
 
@@ -838,17 +833,83 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 };
 
 
+X11Fd::X11Fd(Display* display)
+: _display(display)
+{
+    int xfd = XConnectionNumber( _display );
+    System::FdImpl::setFd(xfd);
+    this->setEnabled(true);
+ 
+    // Do we really need this?
+    //XftInit(0);
+}
 
 
-X11EventLoop::X11EventLoop()
-: _display(0)
+X11Fd::~X11Fd()
+{
+    try
+    {
+        System::FdImpl::setFd(-1);
+        this->close();
+    }
+    catch(...)
+    {}
+}
+
+
+void X11Fd::onInput()
+{
+    // Get all pending events after a flush
+    if( ! XPending(_display) )
+        return;
+
+    // XEventsQueued(_display, QueuedAlready) > 0
+    while( XPending(_display) > 0 ) {
+
+        XNextEvent(_display, &_xev);
+
+        // Check which window receives the event
+        Widget* widget = MainLoop::instance().findWidget( _xev.xany.window );
+        if(widget == 0) continue;
+
+        //clog << "X11 Event: #" << widget << " " << _xev.xany.type << endl;
+        switch( _xev.xany.type )
+        {
+            case ClientMessage:   MainLoop::instance().clientMessage(*widget, _xev);   break;
+            case MotionNotify:    MainLoop::instance().motionNotify(*widget, _xev);    break;
+            case ButtonPress:     MainLoop::instance().buttonPress(*widget, _xev);     break;
+            case ButtonRelease:   MainLoop::instance().buttonRelease(*widget, _xev);   break;
+            case Expose:          MainLoop::instance().expose(*widget, _xev);          break;
+            case NoExpose:        MainLoop::instance().noExpose(*widget, _xev);        break;
+            case ConfigureNotify:
+            {
+                // Use only last configure event for the window in queue
+                XPending(_display);
+                while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) );
+                MainLoop::instance().configureNotify(*widget, _xev);
+                break;
+            }
+            case KeyPress:        MainLoop::instance().keyEvent(*widget, _xev);        break;
+            case KeyRelease:      MainLoop::instance().keyEvent(*widget, _xev);        break;
+            case EnterNotify:     MainLoop::instance().enterNotify(*widget, _xev);     break;
+            case LeaveNotify:     MainLoop::instance().leaveNotify(*widget, _xev);     break;
+
+            default:
+                break;
+        }
+    }
+}
+
+
+MainLoop::MainLoop()
+: _display( XOpenDisplay(NULL) )
+, _xfd(_display)
 {
     // Open a X11 display connection
-    _display = XOpenDisplay(NULL);
-    if(!_display)
+    if( ! _display)
         throw std::runtime_error("Could not open X11 display." + PT_SOURCEINFO);
-    XSync(_display, false);
 
+    XSync(_display, false);
 
     // Set X11 to sync mode. Slow, for debugging only.
     //XSynchronize(_display, true);
@@ -861,10 +922,15 @@ X11EventLoop::X11EventLoop()
 
     // Do we really need this?
     //XftInit(0);  
+
+    this->add(_xfd);
+
+    // TODO: need to flush later
+    _xfd.flush();
 }
 
 
-X11EventLoop::~X11EventLoop()
+MainLoop::~MainLoop()
 {
     XSync(_display, true);
     XCloseDisplay(_display);
@@ -872,19 +938,19 @@ X11EventLoop::~X11EventLoop()
 }
 
 
-void X11EventLoop::registerWidget(Window winId, Widget& widget)
+void MainLoop::registerWidget(Window winId, Widget& widget)
 {
     _widgets.insert( std::make_pair(winId, &widget) );
 }
 
 
-void X11EventLoop::unregisterWidget(Window winId)
+void MainLoop::unregisterWidget(Window winId)
 {
     _widgets.erase(winId);
 }
 
 
-Widget* X11EventLoop::findWidget(Window winId)
+Widget* MainLoop::findWidget(Window winId)
 {
     std::map<Window, Widget*>::iterator it = _widgets.find(winId);
     if( it == _widgets.end() ) return 0;
@@ -893,13 +959,13 @@ Widget* X11EventLoop::findWidget(Window winId)
 }
 
 
-void X11EventLoop::clientMessage(Widget& widget, XEvent& xev)
+void MainLoop::clientMessage(Widget& widget, XEvent& xev)
 {
     if(xev.xclient.message_type == AtomWindowResize) {
         size_t width = xev.xclient.data.l[0];
         size_t height = xev.xclient.data.l[1];
         ResizeEvent ev(widget, width, height);
-        event.send( ev );
+        event().send( ev );
         return;
     }
 
@@ -907,19 +973,19 @@ void X11EventLoop::clientMessage(Widget& widget, XEvent& xev)
         size_t x = xev.xclient.data.l[0];
         size_t y = xev.xclient.data.l[1];
         MoveEvent ev(widget, x, y);
-        event.send( ev );
+        event().send( ev );
         return;
     }
 
     if(xev.xclient.message_type == AtomWMProtocols) {
         CloseEvent ev(widget);
-        event.send(ev);
+        event().send(ev);
         return;
     }
 }
 
 
-void X11EventLoop::keyEvent(Widget& widget, XEvent& xev)
+void MainLoop::keyEvent(Widget& widget, XEvent& xev)
 {
     KeyEvent::Type type = KeyEvent::Press;
     if(KeyRelease == xev.xkey.type)
@@ -952,11 +1018,11 @@ void X11EventLoop::keyEvent(Widget& widget, XEvent& xev)
     }
 
     KeyEvent ev(widget, type, code, ch);
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::motionNotify(Widget& widget, XEvent& xev)
+void MainLoop::motionNotify(Widget& widget, XEvent& xev)
 {
     size_t x = xev.xmotion.x;
     size_t y = xev.xmotion.y;
@@ -976,11 +1042,11 @@ void X11EventLoop::motionNotify(Widget& widget, XEvent& xev)
         modifiers |= MouseMoveEvent::AltDown;
 
     MouseMoveEvent ev(widget, x, y, MouseMoveEvent::Moved, modifiers);
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::buttonPress(Widget& widget, XEvent& xev)
+void MainLoop::buttonPress(Widget& widget, XEvent& xev)
 {
     size_t x = xev.xbutton.x;
     size_t y = xev.xbutton.y;
@@ -995,11 +1061,11 @@ void X11EventLoop::buttonPress(Widget& widget, XEvent& xev)
     }
 
     MouseEvent ev( widget, x, y, button, MouseEvent::Press, 0 );
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::buttonRelease(Widget& widget, XEvent& xev)
+void MainLoop::buttonRelease(Widget& widget, XEvent& xev)
 {
     size_t x = xev.xbutton.x;
     size_t y = xev.xbutton.y;
@@ -1014,11 +1080,11 @@ void X11EventLoop::buttonRelease(Widget& widget, XEvent& xev)
     }
 
     MouseEvent ev( widget, x, y, button, MouseEvent::Release, 0);
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::expose(Widget& widget, XEvent& xev)
+void MainLoop::expose(Widget& widget, XEvent& xev)
 {
     const size_t width = xev.xexpose.width;
     const size_t height = xev.xexpose.height;
@@ -1026,17 +1092,17 @@ void X11EventLoop::expose(Widget& widget, XEvent& xev)
     const size_t y = xev.xexpose.y;
 
     PaintEvent ev( widget, Gfx::Point(x, y), Gfx::Size(width, height) );
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::noExpose(Widget& widget, XEvent& xev)
+void MainLoop::noExpose(Widget& widget, XEvent& xev)
 {
     //TODO: ... but what?
 }
 
 
-void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
+void MainLoop::configureNotify(Widget& widget, XEvent& xev)
 {
     const size_t width = xev.xconfigure.width;
     const size_t height = xev.xconfigure.height;
@@ -1045,31 +1111,31 @@ void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
 
     if( widget.region().width() != width || widget.region().height() != height ) {
         ResizeEvent ev(widget, width, height);
-        event.send( ev );
+        event().send( ev );
     }
 
     if( widget.region().x() != x || widget.region().y() != y) {
         MoveEvent ev(widget, x, y);
-        event.send( ev );
+        event().send( ev );
     }
 }
 
 
-void X11EventLoop::enterNotify(Widget& widget, XEvent& xev)
+void MainLoop::enterNotify(Widget& widget, XEvent& xev)
 {
     MouseMoveEvent ev(widget, 0, 0, MouseMoveEvent::Entered, MouseMoveEvent::NoButton);
-    event.send( ev );
+    event().send( ev );
 }
 
 
-void X11EventLoop::leaveNotify(Widget& widget, XEvent& xev)
+void MainLoop::leaveNotify(Widget& widget, XEvent& xev)
 {
     MouseMoveEvent ev(widget, 0, 0, MouseMoveEvent::Exited, MouseMoveEvent::NoButton);
-    event.send( ev );
+    event().send( ev );
 }
 
 
-wchar_t X11EventLoop::keysymToUtf(int sym)
+wchar_t MainLoop::keysymToUtf(int sym)
 {
   // directly map latin-1 characters
     if((0x0020 <= sym && sym <= 0x007e) || (0x00a0 <= sym && sym <= 0x00ff)) {
@@ -1102,90 +1168,6 @@ wchar_t X11EventLoop::keysymToUtf(int sym)
 
     // No translation possible, yes returning 0 is correct!
      return 0;
-}
-
-
-X11Fd::X11Fd()
-{
-    int xfd = XConnectionNumber( X11EventLoop::instance().display() );
-    System::FdImpl::setFd(xfd);
-    this->setEnabled(true);
- 
-    // Do we really need this?
-    //XftInit(0);
-}
-
-
-X11Fd::~X11Fd()
-{
-    try
-    {
-        System::FdImpl::setFd(-1);
-        this->close();
-    }
-    catch(...)
-    {}
-}
-
-void X11Fd::onInput()
-{
-    Display* _display = X11EventLoop::instance().display() ;
-
-    // Get all pending events after a flush
-    if( ! XPending(_display) )
-        return;
-
-    // XEventsQueued(_display, QueuedAlready) > 0
-    while( XPending(_display) > 0 ) {
-
-        XNextEvent(_display, &_xev);
-
-        // Check which window receives the event
-        Widget* widget = X11EventLoop::instance().findWidget( _xev.xany.window );
-        if(widget == 0) continue;
-
-        //clog << "X11 Event: #" << widget << " " << _xev.xany.type << endl;
-        switch( _xev.xany.type )
-        {
-            case ClientMessage:   X11EventLoop::instance().clientMessage(*widget, _xev);   break;
-            case MotionNotify:    X11EventLoop::instance().motionNotify(*widget, _xev);    break;
-            case ButtonPress:     X11EventLoop::instance().buttonPress(*widget, _xev);     break;
-            case ButtonRelease:   X11EventLoop::instance().buttonRelease(*widget, _xev);   break;
-            case Expose:          X11EventLoop::instance().expose(*widget, _xev);          break;
-            case NoExpose:        X11EventLoop::instance().noExpose(*widget, _xev);        break;
-            case ConfigureNotify:
-            {
-                // Use only last configure event for the window in queue
-                XPending(_display);
-                while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) );
-                X11EventLoop::instance().configureNotify(*widget, _xev);
-                break;
-            }
-            case KeyPress:        X11EventLoop::instance().keyEvent(*widget, _xev);        break;
-            case KeyRelease:      X11EventLoop::instance().keyEvent(*widget, _xev);        break;
-            case EnterNotify:     X11EventLoop::instance().enterNotify(*widget, _xev);     break;
-            case LeaveNotify:     X11EventLoop::instance().leaveNotify(*widget, _xev);     break;
-
-            default:
-                break;
-        }
-    }
-}
-
-
-MainLoop::MainLoop()
-{
-    this->add(_xfd);
-
-    X11EventLoop::instance().event += Pt::slot( System::EventLoop::event() );
-
-    // TODO: need to flush later
-    _xfd.flush();
-}
-
-
-MainLoop::~MainLoop()
-{
 }
 
 } // namespace Gui

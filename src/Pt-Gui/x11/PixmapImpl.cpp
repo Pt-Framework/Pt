@@ -48,7 +48,7 @@ PixmapImpl::PixmapImpl(size_t width, size_t height)
 {
     //X11Context::instance().lock();
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int depth = DefaultDepth( display, DefaultScreen(display) );
     _drawable = XCreatePixmap(display, XDefaultRootWindow(display), _size.width(), _size.height(), depth);
     XSync(display, false);
@@ -62,7 +62,7 @@ PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 {
     //X11Context::instance().lock();
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
     unsigned int depth = DefaultDepth( display, screen );
 
@@ -89,7 +89,7 @@ PixmapImpl::~PixmapImpl()
     // Destroy the painter (in case we created one).
     delete _painter;
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XFreePixmap(display, _drawable);
 }
 

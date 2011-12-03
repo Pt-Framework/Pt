@@ -52,7 +52,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 , _painter(0)
 {
     // Display and Screen are inited in Application
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
 
     XSetWindowAttributes wattr;
@@ -133,7 +133,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
     XSync(display, false);
 
     // Closing a window generates a ClientMessage, which we convert to a close event.
-    Atom atomWMDeleteWindow = X11EventLoop::instance().AtomWindowClosed;
+    Atom atomWMDeleteWindow = MainLoop::instance().AtomWindowClosed;
     XSetWMProtocols(display, _drawable, &atomWMDeleteWindow, 1);
 
     // Child windows are visible by default
@@ -144,7 +144,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
     XSync(display, false);
 
     // Store for X11 window Id to C++ object mapping
-    X11EventLoop::instance().registerWidget(_drawable, apiWidget);
+    MainLoop::instance().registerWidget(_drawable, apiWidget);
 }
 
 
@@ -153,9 +153,9 @@ WidgetImpl::~WidgetImpl()
     delete _painter;
 
     // Remove this window from widget map
-    X11EventLoop::instance().unregisterWidget(_drawable);
+    MainLoop::instance().unregisterWidget(_drawable);
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XDestroyWindow(display, _drawable);
     XSync(display, false);
 }
@@ -164,7 +164,7 @@ WidgetImpl::~WidgetImpl()
 void WidgetImpl::setTitle(const Pt::String& text)
 {
     _title = text;
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XTextProperty tp;
 
     std::stringstream ss;
@@ -194,7 +194,7 @@ Painter WidgetImpl::painter()
 
 void WidgetImpl::show()
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XMapWindow(display, _drawable);
 
     XSync(display, false);
@@ -203,7 +203,7 @@ void WidgetImpl::show()
 
 void WidgetImpl::hide()
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XUnmapWindow(display, _drawable);
     XSync(display, false);
 }
@@ -212,7 +212,7 @@ void WidgetImpl::hide()
 void WidgetImpl::setParent(Widget* parent)
 {
     Window parentId;
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     unsigned int screen = XDefaultScreen(display);
 
     if(!parent)
@@ -227,7 +227,7 @@ void WidgetImpl::setParent(Widget* parent)
 
 void WidgetImpl::move(size_t x, size_t y)
 {
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XMoveWindow(display, _drawable, x, y);
 
     // X11 does not create move events, when we resize ourselves
@@ -237,7 +237,7 @@ void WidgetImpl::move(size_t x, size_t y)
     event.type = ClientMessage;
     event.display = display;
     event.window = _drawable;
-    event.message_type = X11EventLoop::instance().AtomWindowMove;
+    event.message_type = MainLoop::instance().AtomWindowMove;
     event.format = 32;
     event.data.l[0] = x;
     event.data.l[1] = y;
@@ -252,7 +252,7 @@ void WidgetImpl::resize(size_t width, size_t height)
     width = std::max(size_t(1), width);
     height = std::max(size_t(1), height);
 
-    Display* display = X11EventLoop::instance().display();
+    Display* display = MainLoop::instance().display();
     XResizeWindow( display, _drawable, width, height );
 
     // X11 does not create resize events, when we resize ourselves
@@ -262,7 +262,7 @@ void WidgetImpl::resize(size_t width, size_t height)
     event.type = ClientMessage;
     event.display = display;
     event.window = _drawable;
-    event.message_type = X11EventLoop::instance().AtomWindowResize;
+    event.message_type = MainLoop::instance().AtomWindowResize;
     event.format = 32;
     event.data.l[0] = width;
     event.data.l[1] = height;
