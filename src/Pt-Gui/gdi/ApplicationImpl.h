@@ -56,10 +56,22 @@ class Widget;
  * Windows' HWND and the application's widget.
  */
 class MainLoopImpl : public Pt::System::MainLoopImpl
-                   , public Pt::Singleton<MainLoopImpl>
 {
-    friend class Pt::Singleton<MainLoopImpl>;
+    public:
+        MainLoopImpl();
 
+        ~MainLoopImpl();
+
+    protected:
+        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
+
+        void processMessage();
+};
+
+
+class MainLoop : public Pt::System::EventLoop
+               , public Pt::Singleton<MainLoop>
+{
     public:
         //! @brief Window class name for top level windows.
         static const LPCSTR TOP_WINDOW_CLASS_NAME;
@@ -68,7 +80,9 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
         static const LPCSTR CHILD_WINDOW_CLASS_NAME;
 
     public:
-        ~MainLoopImpl();
+        MainLoop();
+
+        ~MainLoop();
 
         //! @brief Returns this application's instance handle (Windows).
         HINSTANCE getInstanceHandle()
@@ -130,11 +144,6 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
         HWND getFirstHWND();
 
     protected:
-        MainLoopImpl();
-
-        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
-
-        void processMessage();
         /**
          * @brief The window callback function which only delegates to dispatchGDIEvent().
          *
@@ -307,6 +316,19 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
          */
         unsigned int createModifiersFromMouseMessage(int wParam);
 
+     protected:
+        virtual void onAttach(System::Selectable&);
+
+        virtual void onDetach(System::Selectable&);
+
+        virtual void onEnable(System::Selectable& s);
+
+        virtual void onDisable(System::Selectable& s);
+
+        virtual void onReinit(System::Selectable& s);
+
+        virtual void onChanged(System::Selectable& s);
+
     private:
         //! @brief Registers the top level and child window classes with Windows for later use.
         void registerWindowClasses();
@@ -315,35 +337,14 @@ class MainLoopImpl : public Pt::System::MainLoopImpl
         void unregisterWindowClasses();
 
     private:
+        MainLoopImpl _impl;
+
         //! @brief Instance handle of this application
         HINSTANCE _instanceHandle;
         bool _trackingMouseEvent;
 
         //! @brief Map for associations between Window handles and widgets.
-        std::map<HWND, Widget*> _windowHandle2Widget;
-};
-
-
-class MainLoop : public Pt::System::EventLoop
-               , public Pt::Singleton<MainLoop>
-{
-    public:
-        MainLoop();
-
-        ~MainLoop();
-
-    protected:
-        virtual void onAttach(System::Selectable&);
-
-        virtual void onDetach(System::Selectable&);
-
-        virtual void onEnable( System::Selectable& s );
-
-        virtual void onDisable( System::Selectable& s );
-
-        virtual void onReinit(System::Selectable& s);
-
-        virtual void onChanged(System::Selectable& s);
+        std::map<HWND, Widget*> _windowHandle2Widget;  
 };
 
 } // namespace Gui
@@ -351,3 +352,4 @@ class MainLoop : public Pt::System::EventLoop
 } // namespace Pt
 
 #endif
+

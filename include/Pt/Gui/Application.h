@@ -64,6 +64,6 @@ class PT_GUI_API Application : public Pt::System::Application
 
 } // namespace gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

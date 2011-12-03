@@ -66,14 +66,14 @@ void WidgetImpl::init(Widget& widget, Widget* parent, const Gfx::Point& at, cons
 
     if (parent) {
         // Child window attributes
-        windowClassName    = win32::fromMultiByte(MainLoopImpl::CHILD_WINDOW_CLASS_NAME);
+        windowClassName    = win32::fromMultiByte(MainLoop::CHILD_WINDOW_CLASS_NAME);
         parentWindowHandle = parent->impl()._hwnd;
         _windowStyle       = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
     } else {
 
         // Top level window attributes
-        windowClassName = win32::fromMultiByte(MainLoopImpl::TOP_WINDOW_CLASS_NAME);
+        windowClassName = win32::fromMultiByte(MainLoop::TOP_WINDOW_CLASS_NAME);
         parentWindowHandle = NULL;
         #ifdef _WIN32_WCE
             _windowStyle       = WS_SYSMENU;
@@ -92,11 +92,11 @@ void WidgetImpl::init(Widget& widget, Widget* parent, const Gfx::Point& at, cons
         size.height(),
         parentWindowHandle,
         NULL,
-        MainLoopImpl::instance().getInstanceHandle(),
+        MainLoop::instance().getInstanceHandle(),
         NULL
     );
 
-    MainLoopImpl::instance().registerWidget(_hwnd, widget);
+    MainLoop::instance().registerWidget(_hwnd, widget);
 
     // Bring (child) widget to front, as windows seems to add child widgets behind all
     // existing widgets. We want new widgets to be on top of all existing widgets.
@@ -115,7 +115,7 @@ WidgetImpl::~WidgetImpl()
     delete _painter;
 
     // Unregister from GDIRegistry.
-    MainLoopImpl::instance().unregisterWidget(_hwnd);
+    MainLoop::instance().unregisterWidget(_hwnd);
 
     // Destroy GDI window.
     DestroyWindow(_hwnd);

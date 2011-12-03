@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Tobias Mueller
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2006-2011 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,125 +26,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Gui/Application.h"
-#include <Pt/Gui/Widget.h>
-#include <Pt/Gui/ResizeEvent.h>
-#include <Pt/Gui/CloseEvent.h>
-#include <Pt/Gui/PaintEvent.h>
-#include <Pt/Gui/MoveEvent.h>
-#include <Pt/Gui/MouseEvent.h>
-#include <Pt/Gui/KeyEvent.h>
-#include <Pt/Gui/MouseMoveEvent.h>
-#include <Pt/System/IOError.h>
 #include "ApplicationImpl.h"
 #include "WidgetImpl.h"
-#include "win32.h"
 
-#include <iostream>
+#include "Pt/Gui/Application.h"
+#include "Pt/Gui/Widget.h"
+#include "Pt/Gui/ResizeEvent.h"
+#include "Pt/Gui/CloseEvent.h"
+#include "Pt/Gui/PaintEvent.h"
+#include "Pt/Gui/MoveEvent.h"
+#include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/KeyEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
+#include "Pt/System/IOError.h"
+
+#include "win32.h"
 //#include <commctrl.h>
 
 namespace Pt {
 
 namespace Gui {
 
-const LPCSTR MainLoopImpl::TOP_WINDOW_CLASS_NAME   = "PtTopWindow";
-const LPCSTR MainLoopImpl::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
+MainLoopImpl::MainLoopImpl()
+{
+}
 
 
 MainLoopImpl::~MainLoopImpl()
 {
-    unregisterWindowClasses();
-}
-
-
-void MainLoopImpl::registerWidget(HWND windowHandle, Widget& widget)
-{
-    _windowHandle2Widget.insert(std::make_pair(windowHandle, &widget));
-}
-
-
-void MainLoopImpl::unregisterWidget(HWND windowHandle)
-{
-    _windowHandle2Widget.erase(windowHandle);
-}
-
-
-Widget* MainLoopImpl::findWidget(HWND windowHandle)
-{
-    std::map<HWND, Widget*>::iterator it = _windowHandle2Widget.find(windowHandle);
-    if( it == _windowHandle2Widget.end() ) {
-        return 0;
-    }
-
-    return it->second;
-}
-
-
-HWND MainLoopImpl::getFirstHWND()
-{
-    if (_windowHandle2Widget.empty()) {
-        return 0;
-    }
-
-    return _windowHandle2Widget.begin()->first;
-}
-
-
-void MainLoopImpl::registerWindowClasses()
-{
-    basic_string<TCHAR> topLevelWindow = win32::fromMultiByte(TOP_WINDOW_CLASS_NAME);
-    basic_string<TCHAR> childWindow    = win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME);
-
-    // TODO Add icons to top level windows.
-
-    // Register top-level window class that is used for all top-level-windows.
-    WNDCLASS topWindowClass;
-
-    topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    topWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc; /// GDIEventLoop
-    topWindowClass.cbClsExtra    = 0;
-    topWindowClass.cbWndExtra    = 0;
-    topWindowClass.hInstance     = _instanceHandle;
-    topWindowClass.hIcon         = NULL;
-    topWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    topWindowClass.hbrBackground = NULL;
-    topWindowClass.lpszMenuName  = NULL;
-    topWindowClass.lpszClassName = topLevelWindow.c_str();
-
-    RegisterClass(&topWindowClass);
-
-
-    // Register the child window class that is used for all child-windows aka widgets
-    // inside a top-level-window.
-    WNDCLASS childWindowClass;
-
-    childWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    childWindowClass.lpfnWndProc   = (WNDPROC)MainLoopImpl::wndProc;  /// GDIEventLoop
-    childWindowClass.cbClsExtra    = 0;
-    childWindowClass.cbWndExtra    = 0;
-    childWindowClass.hInstance     = _instanceHandle;
-    childWindowClass.hIcon         = NULL;
-    childWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    childWindowClass.hbrBackground = NULL;
-    childWindowClass.lpszMenuName  = NULL;
-    childWindowClass.lpszClassName = childWindow.c_str();
-
-    RegisterClass(&childWindowClass);
-}
-
-
-void MainLoopImpl::unregisterWindowClasses()
-{
-    UnregisterClass(win32::fromMultiByte(TOP_WINDOW_CLASS_NAME).c_str(),   _instanceHandle);
-    UnregisterClass(win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME).c_str(), _instanceHandle);
-}
-
-
-MainLoopImpl::MainLoopImpl()
-: _trackingMouseEvent(false)
-{
-    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-    registerWindowClasses();
 }
 
 
@@ -188,13 +95,117 @@ void MainLoopImpl::processMessage()
 }
 
 
-long CALLBACK MainLoopImpl::wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
+const LPCSTR MainLoop::TOP_WINDOW_CLASS_NAME   = "PtTopWindow";
+const LPCSTR MainLoop::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
+
+
+MainLoop::MainLoop()
+: System::EventLoop(0)
+, _trackingMouseEvent(false)
 {
-    return MainLoopImpl::instance().dispatchGDIEvent(hwnd, message, wParam, lParam);
+    System::EventLoop::init(&_impl);
+
+    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
+    registerWindowClasses();
 }
 
 
-LRESULT MainLoopImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
+MainLoop::~MainLoop()
+{
+    unregisterWindowClasses();
+}
+
+
+void MainLoop::registerWidget(HWND windowHandle, Widget& widget)
+{
+    _windowHandle2Widget.insert(std::make_pair(windowHandle, &widget));
+}
+
+
+void MainLoop::unregisterWidget(HWND windowHandle)
+{
+    _windowHandle2Widget.erase(windowHandle);
+}
+
+
+Widget* MainLoop::findWidget(HWND windowHandle)
+{
+    std::map<HWND, Widget*>::iterator it = _windowHandle2Widget.find(windowHandle);
+    if( it == _windowHandle2Widget.end() ) {
+        return 0;
+    }
+
+    return it->second;
+}
+
+
+HWND MainLoop::getFirstHWND()
+{
+    if (_windowHandle2Widget.empty()) {
+        return 0;
+    }
+
+    return _windowHandle2Widget.begin()->first;
+}
+
+
+void MainLoop::registerWindowClasses()
+{
+    basic_string<TCHAR> topLevelWindow = win32::fromMultiByte(TOP_WINDOW_CLASS_NAME);
+    basic_string<TCHAR> childWindow    = win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME);
+
+    // TODO Add icons to top level windows.
+
+    // Register top-level window class that is used for all top-level-windows.
+    WNDCLASS topWindowClass;
+
+    topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
+    topWindowClass.lpfnWndProc   = (WNDPROC)MainLoop::wndProc; /// GDIEventLoop
+    topWindowClass.cbClsExtra    = 0;
+    topWindowClass.cbWndExtra    = 0;
+    topWindowClass.hInstance     = _instanceHandle;
+    topWindowClass.hIcon         = NULL;
+    topWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    topWindowClass.hbrBackground = NULL;
+    topWindowClass.lpszMenuName  = NULL;
+    topWindowClass.lpszClassName = topLevelWindow.c_str();
+
+    RegisterClass(&topWindowClass);
+
+
+    // Register the child window class that is used for all child-windows aka widgets
+    // inside a top-level-window.
+    WNDCLASS childWindowClass;
+
+    childWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
+    childWindowClass.lpfnWndProc   = (WNDPROC)MainLoop::wndProc;  /// GDIEventLoop
+    childWindowClass.cbClsExtra    = 0;
+    childWindowClass.cbWndExtra    = 0;
+    childWindowClass.hInstance     = _instanceHandle;
+    childWindowClass.hIcon         = NULL;
+    childWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    childWindowClass.hbrBackground = NULL;
+    childWindowClass.lpszMenuName  = NULL;
+    childWindowClass.lpszClassName = childWindow.c_str();
+
+    RegisterClass(&childWindowClass);
+}
+
+
+void MainLoop::unregisterWindowClasses()
+{
+    UnregisterClass(win32::fromMultiByte(TOP_WINDOW_CLASS_NAME).c_str(),   _instanceHandle);
+    UnregisterClass(win32::fromMultiByte(CHILD_WINDOW_CLASS_NAME).c_str(), _instanceHandle);
+}
+
+
+long CALLBACK MainLoop::wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
+{
+    return MainLoop::instance().dispatchGDIEvent(hwnd, message, wParam, lParam);
+}
+
+
+LRESULT MainLoop::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
 {
     // Translate the GDI message into an event we can understand.
 
@@ -298,7 +309,7 @@ LRESULT MainLoopImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned
 }
 
 
-void MainLoopImpl::processDestroyMessage(Widget& widget)
+void MainLoop::processDestroyMessage(Widget& widget)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -307,7 +318,7 @@ void MainLoopImpl::processDestroyMessage(Widget& widget)
     event().send(closeEvent);
 }
 
-void MainLoopImpl::processVirtualKeyMessage(Widget& widget, int wParam, int lParam, KeyEvent::Type type)
+void MainLoop::processVirtualKeyMessage(Widget& widget, int wParam, int lParam, KeyEvent::Type type)
 {
     //std::cout << __FUNCTION__ << "  " << wParam << "   extended: " << (lParam & (1 << 24)) << std::endl;
 
@@ -380,7 +391,7 @@ void MainLoopImpl::processVirtualKeyMessage(Widget& widget, int wParam, int lPar
 }
 
 
-void MainLoopImpl::processCharacterKeyMessage(Widget& widget, int wParam, int lParam)
+void MainLoop::processCharacterKeyMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ << "  " << (char)wParam << std::endl;
 
@@ -390,7 +401,7 @@ void MainLoopImpl::processCharacterKeyMessage(Widget& widget, int wParam, int lP
 }
 
 
-void MainLoopImpl::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
+void MainLoop::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
 {
     int x = LOWORD(lParam);
     int y = HIWORD(lParam);
@@ -410,7 +421,7 @@ void MainLoopImpl::processMouseMoveMessage(Widget& widget, int wParam, int lPara
 }
 
 
-void MainLoopImpl::processMouseEntered(Widget& widget, int wParam, int lParam)
+void MainLoop::processMouseEntered(Widget& widget, int wParam, int lParam)
 {
 // TODO
 // Is not supported by WinCE.
@@ -445,7 +456,7 @@ void MainLoopImpl::processMouseEntered(Widget& widget, int wParam, int lParam)
 }
 
 
-void MainLoopImpl::processMouseButtonMessage(Widget& widget, int wParam, int lParam, MouseEvent::Button button, MouseEvent::Action action)
+void MainLoop::processMouseButtonMessage(Widget& widget, int wParam, int lParam, MouseEvent::Button button, MouseEvent::Action action)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -460,7 +471,7 @@ void MainLoopImpl::processMouseButtonMessage(Widget& widget, int wParam, int lPa
 }
 
 
-void MainLoopImpl::processMouseWheelMessage(Widget& widget, int wParam, int lParam)
+void MainLoop::processMouseWheelMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -477,7 +488,7 @@ void MainLoopImpl::processMouseWheelMessage(Widget& widget, int wParam, int lPar
 }
 
 
-void MainLoopImpl::processMouseLeaveMessage(Widget& widget)
+void MainLoop::processMouseLeaveMessage(Widget& widget)
 {
     _trackingMouseEvent = false;
 
@@ -486,7 +497,7 @@ void MainLoopImpl::processMouseLeaveMessage(Widget& widget)
 }
 
 
-void MainLoopImpl::processPaintMessage(HWND hwnd, Widget& widget)
+void MainLoop::processPaintMessage(HWND hwnd, Widget& widget)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
@@ -510,7 +521,7 @@ void MainLoopImpl::processPaintMessage(HWND hwnd, Widget& widget)
 }
 
 
-void MainLoopImpl::processMoveMessage(Widget& widget, int wParam, int lParam)
+void MainLoop::processMoveMessage(Widget& widget, int wParam, int lParam)
 {
     //std::cout << __FUNCTION__ <<std::endl;
 
@@ -522,7 +533,7 @@ void MainLoopImpl::processMoveMessage(Widget& widget, int wParam, int lParam)
 }
 
 
-void MainLoopImpl::processSizeMessage(Widget& widget, int wParam, int lParam)
+void MainLoop::processSizeMessage(Widget& widget, int wParam, int lParam)
 {
     int width  = LOWORD(lParam);
     int height = HIWORD(lParam);
@@ -554,7 +565,7 @@ void MainLoopImpl::processSizeMessage(Widget& widget, int wParam, int lParam)
 }
 
 
-unsigned int MainLoopImpl::createModifiersFromMouseMessage(int wParam)
+unsigned int MainLoop::createModifiersFromMouseMessage(int wParam)
 {
     //std::cout << __FUNCTION__ << std::endl;
 
@@ -572,42 +583,27 @@ unsigned int MainLoopImpl::createModifiersFromMouseMessage(int wParam)
 }
 
 
-
-
-MainLoop::MainLoop()
-: System::EventLoop(0)
-{
-    MainLoopImpl& impl = MainLoopImpl::instance();
-    System::EventLoop::init(&impl);
-}
-
-
-MainLoop::~MainLoop()
-{
-}
-
-
 void MainLoop::onAttach(System::Selectable& s)
 {
-    MainLoopImpl::instance().attach(s);
+    _impl.attach(s);
 }
 
 
 void MainLoop::onDetach(System::Selectable& s)
 {
-    MainLoopImpl::instance().detach(s);
+    _impl.detach(s);
 }
 
 
 void MainLoop::onEnable( System::Selectable& s )
 {
-    MainLoopImpl::instance().enable(s);
+    _impl.enable(s);
 }
 
 
 void MainLoop::onDisable( System::Selectable& s )
 {
-    MainLoopImpl::instance().disable(s);
+    _impl.disable(s);
 }
 
 
@@ -618,7 +614,7 @@ void MainLoop::onReinit(System::Selectable& s)
 
 void MainLoop::onChanged(System::Selectable& s)
 {
-    MainLoopImpl::instance().changed(s);
+    _impl.changed(s);
 }
 
 } // namespace Gui
