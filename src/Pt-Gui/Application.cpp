@@ -27,7 +27,6 @@
  */
 
 #include "ApplicationImpl.h"
-
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/Event.h"
 #include "Pt/Gui/Widget.h"

@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Widget.h>
+
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView{

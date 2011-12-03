@@ -53,7 +53,7 @@
     Pt::Gui::PaintEvent pev(*_widget, Pt::Gfx::Point(rect.origin.x, rect.origin.y),
                                       Pt::Gfx::Size(rect.size.width, rect.size.height));
 
-    Pt::Gui::MainLoopImpl::instance().event().send(pev);
+    Pt::Gui::MainLoop::instance().event().send(pev);
     //[NSApp processEvent: &pev];
 
     //[super drawRect:rect];
@@ -66,7 +66,7 @@
     [super setFrameOrigin:origin];
 
     Pt::Gui::MoveEvent mev(*_widget, origin.x, origin.y);
-    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    Pt::Gui::MainLoop::instance().event().send(mev);
 
     //[NSApp processEvent: &mev];
 }
@@ -78,7 +78,7 @@
     [super setFrameSize:frameSize];
 
     Pt::Gui::ResizeEvent rev(*_widget, frameSize.width, frameSize.height);
-    Pt::Gui::MainLoopImpl::instance().event().send(rev);
+    Pt::Gui::MainLoop::instance().event().send(rev);
 
     //[NSApp processEvent: &rev];
 }
@@ -94,7 +94,7 @@
                             Pt::Gui::MouseEvent::Press,
                             0); //modifiers
 
-    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    Pt::Gui::MainLoop::instance().event().send(mev);
     //[NSApp processEvent: &mev];
 
     //[super mouseDown: ev];
@@ -110,7 +110,7 @@
                             Pt::Gui::MouseEvent::Release,
                             0); //modifiers
 
-    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    Pt::Gui::MainLoop::instance().event().send(mev);
     //[NSApp processEvent: &mev];
 
     //[super mouseUp: ev];
@@ -125,7 +125,7 @@
                                 Pt::Gui::MouseMoveEvent::Moved,
                                 Pt::Gui::MouseMoveEvent::LeftButtonDown);
 
-    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    Pt::Gui::MainLoop::instance().event().send(mev);
     //[NSApp processEvent: &mev];
 
     //[super mouseDragged: event];
@@ -140,7 +140,7 @@
                                 Pt::Gui::MouseMoveEvent::Moved,
                                 0);
 
-    Pt::Gui::MainLoopImpl::instance().event().send(mev);
+    Pt::Gui::MainLoop::instance().event().send(mev);
     //[NSApp processEvent: &mev];
 
     //[super mouseMoved: event];
@@ -150,7 +150,7 @@
 {
     Pt::Gui::CloseEvent cev(*_widget);
 
-    Pt::Gui::MainLoopImpl::instance().event().send(cev);
+    Pt::Gui::MainLoop::instance().event().send(cev);
     //[NSApp processEvent: &cev];
 
     return YES;

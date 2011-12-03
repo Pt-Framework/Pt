@@ -17,7 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #import "ApplicationImpl.h"
-#include <iostream>
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
@@ -175,8 +174,7 @@ void MainLoopImpl::onWake()
 MainLoop::MainLoop()
 : System::EventLoop(0)
 {
-    MainLoopImpl& impl = MainLoopImpl::instance();
-    System::EventLoop::init(&impl);
+    System::EventLoop::init(&_impl);
 }
 
 
@@ -188,25 +186,25 @@ MainLoop::~MainLoop()
 
 void MainLoop::onAttach(System::Selectable& s)
 {
-    MainLoopImpl::instance().attach(s);
+    _impl.attach(s);
 }
 
 
 void MainLoop::onDetach(System::Selectable& s)
 {
-    MainLoopImpl::instance().detach(s);
+    _impl.detach(s);
 }
 
 
 void MainLoop::onEnable( System::Selectable& s )
 {
-    MainLoopImpl::instance().enable(s);
+    _impl.enable(s);
 }
 
 
 void MainLoop::onDisable( System::Selectable& s )
 {
-    MainLoopImpl::instance().disable(s);
+    _impl.disable(s);
 }
 
 
@@ -217,7 +215,7 @@ void MainLoop::onReinit(System::Selectable& s)
 
 void MainLoop::onChanged(System::Selectable& s)
 {
-    MainLoopImpl::instance().changed(s);
+    _impl.changed(s);
 }
 
 } // namespace Gui
