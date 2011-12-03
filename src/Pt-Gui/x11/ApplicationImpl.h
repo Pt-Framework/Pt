@@ -160,16 +160,13 @@ class  X11Fd : public System::Selectable
 };
 
 
-class AppImpl : public Pt::System::MainLoop
-              , public Pt::Singleton<AppImpl>
+class MainLoop : public Pt::System::MainLoop
+              , public Pt::Singleton<MainLoop>
 {
     public:
-        AppImpl();
+        MainLoop();
 
-        ~AppImpl();
-
-        System::EventLoop& loop()
-        { return *this; }
+        ~MainLoop();
 
     private:
         X11Fd _xfd;

@@ -1173,7 +1173,7 @@ void X11Fd::onInput()
 }
 
 
-AppImpl::AppImpl()
+MainLoop::MainLoop()
 {
     this->add(_xfd);
 
@@ -1184,7 +1184,7 @@ AppImpl::AppImpl()
 }
 
 
-AppImpl::~AppImpl()
+MainLoop::~MainLoop()
 {
 }
 
