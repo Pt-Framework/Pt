@@ -49,8 +49,33 @@ namespace System {
                     StreamBufferImpl(size_t bufferSize, bool extend);
                     StreamBufferImpl(IODevice& ioDevice, size_t bufferSize, bool extend);
                     
+                    IODevice* ioDevice()
+                    { return _ioDevice; }
+
+                    Signal<StreamBuffer2&> inputReady()
+                    { return _inputReady; }
+
+                    Signal<StreamBuffer2&> outputReady()
+                    { return _outputReady; }
+
                     void streamBufferInit(StreamBuffer2& sb, size_t bufferSize, bool extend);
                     void streamBufferAttach(StreamBuffer2& sb, IODevice& ioDevice);
+
+                    void streamBufferBeginRead(StreamBuffer2& sb);
+                    void streamBufferOnRead(StreamBuffer2& sb);
+                    void streamBufferEndRead(StreamBuffer2& sb);
+
+                    size_t streamBufferBeginWrite(StreamBuffer2& sb);
+                    void streamBufferOnWrite(StreamBuffer2& sb);
+                    size_t streamBufferEndWrite(StreamBuffer2& sb);
+
+                    void streamBufferDiscard(StreamBuffer2& sb);
+
+                    std::streamsize streamBufferXspeekn(StreamBuffer2& sb, char* buffer, std::streamsize size);
+                    std::streambuf::pos_type streamBufferSeekoff(StreamBuffer2& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
+                    std::streambuf::pos_type streamBufferSeekpos(StreamBuffer2& sb, std::streambuf::pos_type p, std::ios::openmode mode);
+                    std::streamsize streamBufferShowfull(StreamBuffer2& sb);
+                    std::streambuf::int_type streamBufferPbackfail(StreamBuffer2& sb, std::streambuf::int_type c);
 
                 private:
                     IODevice*    _ioDevice;
@@ -61,16 +86,14 @@ namespace System {
                     const size_t _pbmax;
                     bool         _oextend;
 
-                    Signal<StreamBuffer2&> inputReady;
-                    Signal<StreamBuffer2&> outputReady;
+                    Signal<StreamBuffer2&> _inputReady;
+                    Signal<StreamBuffer2&> _outputReady;
             };
 
         public:
             explicit StreamBuffer2(size_t bufferSize = 8192, bool extend = false)
             : _impl(bufferSize, extend)
-            {
-                _impl.streamBufferInit(*this, bufferSize, extend);
-            }
+            { _impl.streamBufferInit(*this, bufferSize, extend); }
             
             explicit StreamBuffer2(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
             : _impl(bufferSize, extend)
@@ -84,37 +107,74 @@ namespace System {
 
             ////////////////////////////////////////////////////////////////////////////////////////
 
+            IODevice* device()
+            { return _impl.ioDevice(); }
+
+            Signal<StreamBuffer2&> inputReady()
+            { return _impl.inputReady(); }
+
+            Signal<StreamBuffer2&> outputReady()
+            { return _impl.outputReady(); }
+
+            std::streamsize out_avail()
+            {
+                if( this->pptr() )
+                    return this->pptr() - this->pbase();
+
+                return _impl.streamBufferShowfull(*this);
+            }
+
+            std::streamsize speekn(char* buffer, std::streamsize size)
+            { return _impl.streamBufferXspeekn(*this, buffer, size); }
+
+            ////////////////////////////////////////////////////////////////////////////////////////
+
+            void attach(IODevice& ioDevice)
+            { _impl.streamBufferAttach(*this, ioDevice); }
+
+            void beginRead()
+            { _impl.streamBufferBeginRead(*this); }
+
             void onRead(IODevice& dev)
-            {}
+            { _impl.streamBufferOnRead(*this); }
+
+            void endRead()
+            { _impl.streamBufferEndRead(*this); }
+
+            void beginWrite()
+            { _impl.streamBufferBeginWrite(*this); }
 
             void onWrite(IODevice& dev)
-            {}
+            { _impl.streamBufferOnWrite(*this); }
+
+            void endWrite()
+            { _impl.streamBufferEndWrite(*this); }
+
+            void discard()
+            { _impl.streamBufferDiscard(*this); }
+            
+            ////////////////////////////////////////////////////////////////////////////////////////
+
+        protected:
+           /* virtual int sync()
+            { return StreamBufferSync(*this); }
+
+            virtual int_type underflow()
+            { return StreamBufferUnderflow(*this); }
+
+            virtual int_type overflow(int_type ch)
+            { return StreamBufferOverflow(*this, ch); }
+
+            virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
+            { return StreamBufferSeekoff(*this, offset, sd, mode); }
+
+            virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
+            { return StreamBufferSeekpos(*this, p, mode); }
+
+            virtual int_type pbackfail(int_type c)
+            { return StreamBufferPbackfail(*this, c); }
+            */
 /*
-        std::streamsize speekn(char* buffer, std::streamsize size)
-        { return this->xspeekn(buffer, size); }
-
-        std::streamsize out_avail()
-        {
-            if( this->pptr() )
-                return this->pptr() - this->pbase();
-
-             return this->showfull();
-        }
-
-        IODevice* device()
-        { return _ioDevice; }
-
-        void attach(IODevice& ioDevice)
-        { StreamBufferAttach(*this, ioDevice); }
-
-        void beginRead()
-        { StreamBufferBeginRead(*this); }
-
-        void onRead(IODevice& dev)
-        { StreamBufferOnRead(*this, dev); }
-
-        void endRead()
-        { StreamBufferEndRead(*this); }
 
         size_t beginWrite()
         { return StreamBufferBeginWrite(*this); }
