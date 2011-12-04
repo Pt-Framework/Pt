@@ -71,6 +71,10 @@ namespace System {
 
                     void streamBufferDiscard(StreamBuffer2& sb);
 
+                    int streamBufferSync(StreamBuffer2& sb);
+                    std::streambuf::int_type streamBufferUnderflow(StreamBuffer2& sb);
+                    std::streambuf::int_type streamBufferOverflow(StreamBuffer2& sb, std::streambuf::int_type ch);
+
                     std::streamsize streamBufferXspeekn(StreamBuffer2& sb, char* buffer, std::streamsize size);
                     std::streambuf::pos_type streamBufferSeekoff(StreamBuffer2& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
                     std::streambuf::pos_type streamBufferSeekpos(StreamBuffer2& sb, std::streambuf::pos_type p, std::ios::openmode mode);
@@ -156,38 +160,23 @@ namespace System {
             ////////////////////////////////////////////////////////////////////////////////////////
 
         protected:
-           /* virtual int sync()
-            { return StreamBufferSync(*this); }
+            virtual int sync()
+            { return _impl.streamBufferSync(*this); }
 
             virtual int_type underflow()
-            { return StreamBufferUnderflow(*this); }
+            { return _impl.streamBufferUnderflow(*this); }
 
             virtual int_type overflow(int_type ch)
-            { return StreamBufferOverflow(*this, ch); }
+            { return _impl.streamBufferOverflow(*this, ch); }
 
             virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
-            { return StreamBufferSeekoff(*this, offset, sd, mode); }
+            { return _impl.streamBufferSeekoff(*this, offset, sd, mode); }
 
             virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
-            { return StreamBufferSeekpos(*this, p, mode); }
+            { return _impl.streamBufferSeekpos(*this, p, mode); }
 
             virtual int_type pbackfail(int_type c)
-            { return StreamBufferPbackfail(*this, c); }
-            */
-/*
-
-        size_t beginWrite()
-        { return StreamBufferBeginWrite(*this); }
-
-        void onWrite(IODevice& dev)
-        { StreamBufferOnWrite(*this, dev); }
-
-        size_t endWrite()
-        { return StreamBufferEndWrite(*this); }
-
-        void discard()
-        { StreamBufferDiscard(*this); }
-*/
+            { return _impl.streamBufferPbackfail(*this, c); }
 
         private:
             StreamBufferImpl _impl;
