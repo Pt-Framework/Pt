@@ -85,6 +85,23 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onChanged(System::Selectable& s);
 
+        virtual void onRun();
+
+        virtual Signal<const Pt::Event&>& onEvent();
+
+        virtual void onExit();
+
+        virtual void onCommitEvent(const Pt::Event& event);
+
+        virtual void onQueueEvent(const Pt::Event& event);
+
+        virtual void onProcessEvents();
+
+        virtual void onWake();
+
+        virtual void onAddTimer(System::Timer& timer);
+
+        virtual void onRemoveTimer(System::Timer& timer);
 
     private:
         MainLoopImpl _impl;

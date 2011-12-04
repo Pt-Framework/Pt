@@ -172,9 +172,8 @@ void MainLoopImpl::onWake()
 
 
 MainLoop::MainLoop()
-: System::EventLoop(0)
+: System::EventLoop()
 {
-    System::EventLoop::init(&_impl);
 }
 
 
@@ -196,13 +195,13 @@ void MainLoop::onDetach(System::Selectable& s)
 }
 
 
-void MainLoop::onEnable( System::Selectable& s )
+void MainLoop::onEnable(System::Selectable& s)
 {
     _impl.enable(s);
 }
 
 
-void MainLoop::onDisable( System::Selectable& s )
+void MainLoop::onDisable(System::Selectable& s)
 {
     _impl.disable(s);
 }
@@ -216,6 +215,60 @@ void MainLoop::onReinit(System::Selectable& s)
 void MainLoop::onChanged(System::Selectable& s)
 {
     _impl.changed(s);
+}
+
+
+void MainLoop::onRun()
+{
+    _impl.run();
+}
+
+
+Signal<const Pt::Event&>& MainLoop::onEvent()
+{
+    return _impl.event();
+}
+
+
+void MainLoop::onExit()
+{
+    _impl.exit();
+}
+
+
+void MainLoop::onCommitEvent(const Pt::Event& ev)
+{
+    _impl.commitEvent(ev);
+}
+
+
+void MainLoop::onQueueEvent(const Pt::Event& ev)
+{
+    _impl.queueEvent(ev);
+}
+
+
+void MainLoop::onProcessEvents()
+{
+    _impl.processEvents();
+}
+
+
+void MainLoop::onWake()
+{
+    _impl.wake();
+}
+
+
+void MainLoop::onAddTimer(System::Timer& timer)
+{
+    _impl.addTimer(timer);
+}
+
+
+void MainLoop::onRemoveTimer(System::Timer& timer)
+{
+    _impl.removeTimer(timer);
 }
 
 } // namespace Gui
