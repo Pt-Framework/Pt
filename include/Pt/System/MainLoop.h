@@ -122,6 +122,24 @@ namespace System {
 
             virtual void onChanged(Selectable& s);
 
+            virtual void onRun();
+
+            virtual Signal<const Event&>& onEvent();
+
+            virtual void onExit();
+    
+            virtual void onCommitEvent(const Event& event);
+    
+            virtual void onQueueEvent(const Event& event);
+    
+            virtual void onProcessEvents();
+    
+            virtual void onWake();
+    
+            virtual void onAddTimer(Timer& timer);
+    
+            virtual void onRemoveTimer(Timer& timer);
+
         private:
             MainLoopImpl* _impl;
     };

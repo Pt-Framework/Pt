@@ -47,7 +47,6 @@ namespace System {
 
 class Timer;
 class Selectable;
-class EventLoopImpl;
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
@@ -63,8 +62,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         /** @brief Destructs the EventLoop
         */
         virtual ~EventLoop();
-
-        Allocator& allocator();
 
         /** @brief Adds a Selectable
 
@@ -126,7 +123,31 @@ class PT_SYSTEM_API EventLoop : public Connectable
     protected:
         /** @brief Constructs the EventLoop
         */
-        EventLoop(EventLoopImpl* impl);
+        EventLoop();
+
+        virtual void onRun() = 0;
+
+        virtual Signal<const Event&>& onEvent() = 0;
+
+        virtual void onExit() = 0;
+
+        //! @internal EventSink interface
+        virtual void onCommitEvent(const Event& event) = 0;
+
+        //! @internal EventSink interface
+        virtual void onQueueEvent(const Event& event) = 0;
+
+        //! @internal EventSink interface
+        virtual void onProcessEvents() = 0;
+
+        //! @internal EventSink interface
+        virtual void onWake() = 0;
+
+        //! @internal
+        virtual void onAddTimer(Timer& timer) = 0;
+
+        //! @internal
+        virtual void onRemoveTimer(Timer& timer) = 0;
 
         /** @brief A Selectable is attached to this %Selector
 
@@ -164,33 +185,9 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
 
-        virtual void onRun();
-
-        //! @internal EventSink interface
-        virtual void onCommitEvent(const Event& event);
-
-        //! @internal EventSink interface
-        virtual void onQueueEvent(const Event& event);
-
-        //! @internal EventSink interface
-        virtual void onProcessEvents();
-
-        //! @internal EventSink interface
-        virtual void onWake();
-
-        //! @internal
-        virtual void onAddTimer(Timer& timer);
-
-        //! @internal
-        virtual void onRemoveTimer( Timer& timer );
-
-    protected:
-        //! @internal OBSOLETE
-        void init(EventLoopImpl* impl);
-
     private:
-        EventLoopImpl* _impl;
         Timer _idleTimer;
+        Signal<> _exited;
 };
 
 //! @internal
@@ -217,9 +214,6 @@ class PT_SYSTEM_API EventLoopImpl
 
         Signal<const Event&>& event()
         { return _event; }
-
-        Signal<>& exited()
-        { return _exited; }
 
         void commitEvent(const Event& event);
 
@@ -248,7 +242,6 @@ class PT_SYSTEM_API EventLoopImpl
         TimerQueue _timers;
         int _state;
         Signal<const Event&> _event;
-        Signal<> _exited;
 };
 
 } // namespace System

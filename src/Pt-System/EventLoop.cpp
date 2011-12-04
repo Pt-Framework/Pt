@@ -35,26 +35,13 @@ namespace Pt {
 
 namespace System {
 
-EventLoop::EventLoop(EventLoopImpl* impl)
-: _impl(0)
+EventLoop::EventLoop()
 {
-    this->init(impl);
 }
 
 
 EventLoop::~EventLoop()
 {
-}
-
-void EventLoop::init(EventLoopImpl* impl)
-{
-    _impl = impl;
-}
-
-
-Allocator& EventLoop::allocator()
-{ 
-    return _impl->allocator(); 
 }
 
 
@@ -84,13 +71,13 @@ Signal<>& EventLoop::timeout()
 
 Signal<const Event&>& EventLoop::event()
 { 
-    return _impl->event(); 
+    return this->onEvent(); 
 }
 
 
 Signal<>& EventLoop::exited()
 { 
-    return _impl->exited(); 
+    return _exited; 
 }
 
 void EventLoop::add(Selectable& s)
@@ -124,15 +111,17 @@ void EventLoop::run()
     _idleTimer.setParent(this);
     this->onRun();
     _idleTimer.setParent(0);
+    exited();
 }
 
 
 void EventLoop::exit()
 {
-    _impl->exit();
+    this->onExit();
 }
 
 
+/*
 void EventLoop::onRun()
 {
     _impl->run();
@@ -173,6 +162,7 @@ void EventLoop::onRemoveTimer( Timer& timer )
 {
     _impl->removeTimer(timer);
 }
+*/
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -219,7 +209,6 @@ void EventLoopImpl::run()
 {
     _state = 0;
     this->onRun();
-    exited();
 }
 
 

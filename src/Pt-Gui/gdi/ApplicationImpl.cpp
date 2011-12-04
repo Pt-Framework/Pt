@@ -100,11 +100,9 @@ const LPCSTR MainLoop::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
 
 
 MainLoop::MainLoop()
-: System::EventLoop(0)
+: System::EventLoop()
 , _trackingMouseEvent(false)
 {
-    System::EventLoop::init(&_impl);
-
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
     registerWindowClasses();
 }
@@ -615,6 +613,60 @@ void MainLoop::onReinit(System::Selectable& s)
 void MainLoop::onChanged(System::Selectable& s)
 {
     _impl.changed(s);
+}
+
+
+void MainLoop::onRun()
+{
+    _impl.run();
+}
+
+
+Signal<const Pt::Event&>& MainLoop::onEvent()
+{
+    return _impl.event();
+}
+
+
+void MainLoop::onExit()
+{
+    _impl.exit();
+}
+
+
+void MainLoop::onCommitEvent(const Pt::Event& ev)
+{
+    _impl.commitEvent(ev);
+}
+
+
+void MainLoop::onQueueEvent(const Pt::Event& ev)
+{
+    _impl.queueEvent(ev);
+}
+
+
+void MainLoop::onProcessEvents()
+{
+    _impl.processEvents();
+}
+
+
+void MainLoop::onWake()
+{
+    _impl.wake();
+}
+
+
+void MainLoop::onAddTimer(System::Timer& timer)
+{
+    _impl.addTimer(timer);
+}
+
+
+void MainLoop::onRemoveTimer(System::Timer& timer )
+{
+    _impl.removeTimer(timer);
 }
 
 } // namespace Gui

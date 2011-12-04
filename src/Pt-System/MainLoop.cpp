@@ -34,22 +34,18 @@ namespace Pt {
 namespace System {
 
 MainLoop::MainLoop()
-: EventLoop(0)
+: EventLoop()
 , _impl(0)
 {
     _impl = new MainLoopImpl();
-    EventLoop::init(_impl);
-    
 }
 
 
 MainLoop::MainLoop(Allocator& a)
-: EventLoop(0)
+: EventLoop()
 , _impl(0)
 {
     _impl = new MainLoopImpl(a);
-    EventLoop::init(_impl);
-    
 }
 
 
@@ -91,6 +87,60 @@ void MainLoop::onReinit(Selectable& s)
 void MainLoop::onChanged(Selectable& s)
 {
     _impl->changed(s);
+}
+
+
+void MainLoop::onRun()
+{
+    _impl->run();
+}
+
+
+Signal<const Event&>& MainLoop::onEvent()
+{
+    return _impl->event();
+}
+
+
+void MainLoop::onExit()
+{
+    _impl->exit();
+}
+
+
+void MainLoop::onCommitEvent(const Event& ev)
+{
+    _impl->commitEvent(ev);
+}
+
+
+void MainLoop::onQueueEvent(const Event& ev)
+{
+    _impl->queueEvent(ev);
+}
+
+
+void MainLoop::onProcessEvents()
+{
+    _impl->processEvents();
+}
+
+
+void MainLoop::onWake()
+{
+    _impl->wake();
+}
+
+
+void MainLoop::onAddTimer(Timer& timer)
+{
+    _impl->addTimer(timer);
+}
+
+
+void MainLoop::onRemoveTimer( Timer& timer )
+{
+    _impl->removeTimer(timer);
 }
 
 } // namespace System
