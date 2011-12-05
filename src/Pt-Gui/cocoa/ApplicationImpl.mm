@@ -207,11 +207,6 @@ void MainLoop::onDisable(System::Selectable& s)
 }
 
 
-void MainLoop::onReinit(System::Selectable& s)
-{
-}
-
-
 void MainLoop::onChanged(System::Selectable& s)
 {
     _impl.changed(s);

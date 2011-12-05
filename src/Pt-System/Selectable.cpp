@@ -137,8 +137,6 @@ void Selectable::setEnabled(bool isEnabled)
         else
         {
             this->setState(_state);
-            if(_parent)
-                _parent->onReinit(*this);
         }
     }
     else
@@ -153,20 +151,33 @@ void Selectable::setState(State state)
     if(state == Disabled)
     {
         if(_parent)
+        {
             _parent->onDisable(*this);
+        }
     }
     else if(_state == Disabled)
     {
         if(_parent)
+        {
             _parent->onEnable(*this);
+        }
     }
 
     //State prev = _state;
     _state = state;
 
+    // TODO: rename onChanged to onAvail
+    // TODO: Disabled and Idle are somewhat the same state
     if(_parent)
     {
-        _parent->onChanged(*this /*, prev */);
+        if( _state == Avail)
+        {
+            _parent->onChanged(*this /*, prev */);
+        }
+        else if(_state == Idle || _state == Busy)
+        {
+            _parent->onChanged(*this /*, prev */);
+        }
     }
 }
 

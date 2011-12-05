@@ -118,8 +118,6 @@ namespace System {
 
             virtual void onDisable( Selectable& s );
 
-            virtual void onReinit(Selectable& s);
-
             virtual void onChanged(Selectable& s);
 
             virtual void onRun();

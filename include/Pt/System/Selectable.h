@@ -92,6 +92,16 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Sets or unsets the device enabled
         void setEnabled(bool isEnabled);
 
+        void setIdle()
+        { this->setState(Idle); }
+
+        // TODO: rename setActive
+        void setBusy()
+        { this->setState(Busy); }
+
+        void setAvail()
+        { this->setState(Avail); }
+
         //TODO: tell Selector more specifically what changed
         //      add onReinit() to Selector:
         //      pass old state as second arg with onChanged()
@@ -105,6 +115,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         virtual void onAttach(EventLoop&) = 0;
 
         virtual void onDetach(EventLoop&) = 0;
+
+    public:
+        // TODO: make SelectableImpl obsolete
+        virtual void onActive() {}
 
     private:
         EventLoop* _parent;

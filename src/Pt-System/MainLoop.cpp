@@ -79,11 +79,6 @@ void MainLoop::onDisable( Selectable& s )
 }
 
 
-void MainLoop::onReinit(Selectable& s)
-{
-}
-
-
 void MainLoop::onChanged(Selectable& s)
 {
     _impl->changed(s);

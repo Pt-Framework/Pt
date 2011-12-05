@@ -173,12 +173,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onDisable(Selectable&) = 0;
 
-        /** @brief A Selectable is reinitialised and needs to be updated
-
-            Does not throw exceptions.
-        */
-        virtual void onReinit(Selectable&) = 0; // TODO: maybe obsolete
-
         /** @brief A Selectable in this %Selector has changed
 
             Does not throw exceptions.

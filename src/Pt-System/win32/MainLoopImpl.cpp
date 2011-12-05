@@ -151,6 +151,9 @@ void MainLoopImpl::changed(Selectable& s)
     }
     else
     {
+        // TODO let selectable pull handles from this
+        s.onActive();
+
         std::set<Selectable*>::iterator it = _avail.find( &s );
         if( it == _avail.end() )
             return;
