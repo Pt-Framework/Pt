@@ -29,17 +29,15 @@ if $(OS:L) = "nt"
 rule Configure
 {
     $(1) = $(2) ;
-    local _val = [ Escape $(2) ] ;
 
-    if $(2[2])
+    local _value ;
+    for _v in $(2)
     {
-        local _val2 = [ Escape $(2[2]) ] ;
-        WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" "\"$(_val2)\""  ;"  ;
+        local _valtmp = [ Escape $(_v) ] ;
+        _value += "\"$(_valtmp)\"" ;
     }
-    else
-    {
-        WriteFile config.tmp : $(1)" ?= "\"$(_val)\"" ;"  ;
-    }
+
+    WriteFile config.tmp : $(1)" ?= "$(_value:J=" ")" ;" ;
 }
 
 rule TryCommand
@@ -51,12 +49,6 @@ rule TryCommand
     local _result = [ EXEC $(_cmd:J=" ") ] ;
 
     # Echo result $(_result) ;
-
-    if [ CHECK_IF_FILE check.log ] && $(RM)
-    {
-        _cmd = $(RM) check.log ;
-        EXEC $(_cmd:J=" ") ;
-    }
 
     if $(_result) = 0
     {
@@ -83,7 +75,7 @@ rule ConfigureRm
         RM = "del /f/q" ;
     }
 
-    TryCommand $(RM) "check.in" "check.out" "check.log" ;
+    TryCommand $(RM) "check.in" ;
 
     if ! $(RM)
     {
