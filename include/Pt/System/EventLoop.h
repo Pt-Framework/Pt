@@ -173,11 +173,11 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onDisable(Selectable&) = 0;
 
-        /** @brief A Selectable in this %Selector has changed
+        virtual void onIdle(Selectable&) = 0;
 
-            Does not throw exceptions.
-        */
-        virtual void onChanged(Selectable& s) = 0; // TODO: onAvail
+        virtual void onActive(Selectable&) = 0;
+
+        virtual void onAvail(Selectable&) = 0;
 
     private:
         Timer _idleTimer;

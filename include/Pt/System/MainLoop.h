@@ -118,7 +118,9 @@ namespace System {
 
             virtual void onDisable( Selectable& s );
 
-            virtual void onChanged(Selectable& s);
+            virtual void onIdle(Selectable& s);
+            virtual void onActive(Selectable& s);
+            virtual void onAvail(Selectable& s);
 
             virtual void onRun();
 

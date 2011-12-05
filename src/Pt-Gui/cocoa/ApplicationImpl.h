@@ -45,13 +45,19 @@ class MainLoopImpl : public System::EventLoopImpl
         void detach( System::Selectable& s )
         {}
 
-        void enable( System::Selectable& dev )
+        void enable( System::Selectable& s )
         {}
 
-        void disable( System::Selectable& dev )
+        void disable( System::Selectable& s )
         {}
 
-        void changed(System::Selectable& s)
+        void idle( System::Selectable& s )
+        {}
+
+        void active( System::Selectable& s )
+        {}
+
+        void avail( System::Selectable& s )
         {}
 
     protected:
@@ -81,7 +87,14 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onDisable(System::Selectable& s);
 
-        virtual void onChanged(System::Selectable& s);
+        virtual void onIdle(System::Selectable& s)
+        {}
+
+        virtual void onActive(System::Selectable& s)
+        {}
+
+        virtual void onAvail(System::Selectable& s)
+        {}
 
         virtual void onRun();
 

@@ -73,15 +73,27 @@ void MainLoop::onEnable( Selectable& s )
 }
 
 
-void MainLoop::onDisable( Selectable& s )
+void MainLoop::onDisable(Selectable& s)
 {
     _impl->disable(s);
 }
 
 
-void MainLoop::onChanged(Selectable& s)
+void MainLoop::onIdle(Selectable& s)
 {
-    _impl->changed(s);
+    _impl->idle(s);
+}
+
+
+void MainLoop::onActive(Selectable& s)
+{
+    _impl->active(s);
+}
+
+
+void MainLoop::onAvail(Selectable& s)
+{
+    _impl->avail(s);
 }
 
 

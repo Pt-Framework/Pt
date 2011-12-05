@@ -64,9 +64,9 @@ void IODevice::beginRead(char* buffer, size_t n)
     size_t r = this->onBeginRead(buffer, n, _eof);
 
     if(r > 0 || _eof || _wavail)
-        this->setState(Selectable::Avail);
+        this->setAvail();
     else
-        this->setState(Selectable::Busy);
+        this->setActive();
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -93,11 +93,11 @@ size_t IODevice::endRead()
     }
 
     if(_wavail > 0)
-        this->setState(Selectable::Avail);
+        this->setAvail();
     else if(_wbuf)
-        this->setState(Selectable::Busy);
+        this->setActive();
     else
-        this->setState(Selectable::Idle);
+        this->setIdle();
 
     _rbuf = 0;
     _rbuflen = 0;
@@ -146,9 +146,9 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
     size_t r = this->onBeginWrite(buffer, n);
 
     if(r > 0 || _ravail)
-        this->setState(Selectable::Avail);
+        this->setAvail();
     else
-        this->setState(Selectable::Busy);
+        this->setActive();
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -177,11 +177,11 @@ size_t IODevice::endWrite()
     }
 
     if(_ravail > 0 || (_rbuf && _eof) )
-        this->setState(Selectable::Avail);
+        this->setAvail();
     else if(_rbuf)
-        this->setState(Selectable::Busy);
+        this->setActive();
     else
-        this->setState(Selectable::Idle);
+        this->setIdle();
 
     _wbuf = 0;
     _wbuflen = 0;
@@ -222,7 +222,7 @@ void IODevice::cancel()
 {
     onCancel();
 
-    setState(Selectable::Idle);
+    setIdle();
 
     _rbuf = 0;
     _rbuflen = 0;

@@ -40,15 +40,19 @@ class MainLoopImpl : public EventLoopImpl
 
         ~MainLoopImpl();
 
-        void attach( Selectable& s );
+        void attach(Selectable& s);
 
-        void detach( Selectable& s );
+        void detach(Selectable& s);
 
-        void enable( Selectable& dev );
+        void enable(Selectable& s);
 
-        void disable( Selectable& dev );
+        void disable(Selectable& s);
 
-        void changed(Selectable& s);
+        void idle(Selectable& s);
+
+        void active(Selectable& s);
+
+        void avail(Selectable& s);
 
     protected:
         virtual void onRun();

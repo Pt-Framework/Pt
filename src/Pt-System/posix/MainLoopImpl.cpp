@@ -109,11 +109,6 @@ MainLoopImpl::MainLoopImpl(Allocator& a)
 MainLoopImpl::~MainLoopImpl()
 {
     std::set<Selectable*>::iterator it;
-    // while( _devices.size() )
-    // {
-    //     it = _devices.begin();
-    //     (*it)->setParent(0);
-    // }
 
     while( _attached.size() )
     {
@@ -171,7 +166,25 @@ void MainLoopImpl::disable(Selectable& s)
 }
 
 
-void MainLoopImpl::changed(Selectable& s)
+void MainLoopImpl::idle(Selectable& s)
+{
+    _avail.erase(&s);
+}
+
+
+void MainLoopImpl::active(Selectable& s)
+{
+    _avail.erase(&s);
+}
+
+
+void MainLoopImpl::avail(Selectable& s)
+{
+    _avail.insert(&s);
+}
+
+
+/*void MainLoopImpl::changed(Selectable& s)
 {
     if( s.avail() )
     {
@@ -181,7 +194,7 @@ void MainLoopImpl::changed(Selectable& s)
     {
         _avail.erase(&s);
     }
-}
+}*/
 
 
 void MainLoopImpl::onRun()

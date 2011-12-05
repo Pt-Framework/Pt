@@ -36,6 +36,7 @@ namespace Pt {
 namespace System {
 
 class SelectableImpl;
+class EventLoopImpl;
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
@@ -92,20 +93,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Sets or unsets the device enabled
         void setEnabled(bool isEnabled);
 
-        void setIdle()
-        { this->setState(Idle); }
+        void setIdle();
 
-        // TODO: rename setActive
-        void setBusy()
-        { this->setState(Busy); }
+        void setActive();
 
-        void setAvail()
-        { this->setState(Avail); }
-
-        //TODO: tell Selector more specifically what changed
-        //      add onReinit() to Selector:
-        //      pass old state as second arg with onChanged()
-        void setState(State state);
+        void setAvail();
 
         //! @brief Closes the Selector
         virtual void onClose() = 0;
@@ -115,10 +107,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         virtual void onAttach(EventLoop&) = 0;
 
         virtual void onDetach(EventLoop&) = 0;
-
-    public:
-        // TODO: make SelectableImpl obsolete
-        virtual void onActive() {}
 
     private:
         EventLoop* _parent;

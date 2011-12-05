@@ -36,6 +36,9 @@ Selectable::~Selectable()
 {
     if(_parent)
     {
+        if(_state == Busy || _state == Avail)
+            _parent->onIdle(*this);
+
         if( this->enabled() )
             _parent->onDisable(*this);
 
@@ -49,6 +52,9 @@ void Selectable::setParent(EventLoop* parent)
     if(_parent)
     {
         this->onDetach(*_parent);
+
+        if(_state == Busy || _state == Avail)
+            _parent->onIdle(*this);
 
         if( this->enabled() )
             _parent->onDisable(*this);
@@ -65,6 +71,12 @@ void Selectable::setParent(EventLoop* parent)
 
         if( this->enabled() )
             parent->onEnable(*this);
+
+        if(_state == Busy)
+            parent->onActive(*this);
+
+        if(_state == Avail)
+            parent->onAvail(*this);
     }
 
     _parent = parent;
@@ -132,21 +144,56 @@ void Selectable::setEnabled(bool isEnabled)
 {
     if(isEnabled)
     {
+        if(_parent)
+            _parent->onEnable(*this);
+
         if(_state == Disabled)
-            this->setState(Idle);
-        else
-        {
-            this->setState(_state);
-        }
+            _state = Idle;
     }
-    else
+    else // disable
     {
-        this->setState(Disabled);
+        if(_parent)
+        {
+           if(_state == Busy || _state == Avail)
+                _parent->onIdle(*this);
+
+            if( this->enabled() )
+                _parent->onDisable(*this);
+        }
+
+        _state = Disabled;
     }
 }
 
 
-void Selectable::setState(State state)
+void Selectable::setIdle()
+{ 
+    if(_parent)
+        _parent->onIdle(*this);
+    
+    _state = Idle; 
+}
+
+
+void Selectable::setActive()
+{ 
+    if(_parent)
+        _parent->onActive(*this); 
+
+    _state = Busy;
+}
+
+
+void Selectable::setAvail()
+{ 
+    if(_parent)
+        _parent->onAvail(*this); 
+
+    _state = Avail;
+}
+
+
+/*void Selectable::setState(State state)
 {
     if(state == Disabled)
     {
@@ -172,14 +219,14 @@ void Selectable::setState(State state)
     {
         if( _state == Avail)
         {
-            _parent->onChanged(*this /*, prev */);
+            //_parent->onChanged(*this);
         }
         else if(_state == Idle || _state == Busy)
         {
-            _parent->onChanged(*this /*, prev */);
+            //_parent->onChanged(*this);
         }
     }
-}
+}*/
 
 }
 
