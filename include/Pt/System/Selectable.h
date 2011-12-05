@@ -36,7 +36,7 @@ namespace Pt {
 namespace System {
 
 class SelectableImpl;
-class EventLoopImpl;
+class Selector;
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
@@ -107,6 +107,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         virtual void onAttach(EventLoop&) = 0;
 
         virtual void onDetach(EventLoop&) = 0;
+
+        virtual void onAvail(Selector& selector) {};
 
     private:
         EventLoop* _parent;
