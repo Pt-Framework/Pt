@@ -327,15 +327,16 @@ for _arg in $(ARGV)
     if $(_arg) = configure
     {
         CONFIGURE = 1 ;
+        CONFIGURE_ONLY = 1 ;
     }
 }
 
 if ! [ CHECK_IF_FILE config.jam ]
 {
-    NO_CONFIG = 1 ;
+    CONFIGURE = 1 ;
 }
 
-if $(CONFIGURE) || $(NO_CONFIG)
+if $(CONFIGURE)
 {
     TryCommand "rm -f config.tmp" ;
     TryCommand "del /f/q config.tmp" ;
@@ -383,7 +384,7 @@ SUFDBG ?= "" ; # TODO: deprecated
 
 JamInclude $(TARGET_OS:L).jam ;
 
-if $(CONFIGURE) || $(NO_CONFIG)
+if $(CONFIGURE)
 {
     Echo "Checking for object file suffix... " $(SUFOBJ) ;
     Echo "Checking for library prefix..." $(PRELIB) ;
@@ -399,7 +400,7 @@ if $(CONFIGURE) || $(NO_CONFIG)
 # specific rules and variables.
 ##########################################################################
 
-if $(CONFIGURE) || $(NO_CONFIG)
+if $(CONFIGURE)
 {
     if $(TOOLSET)
     {
@@ -419,13 +420,13 @@ JamInclude $(TOOLSET:L).jam ;
 # Include the project specific configuration
 ##########################################################################
 
-if $(CONFIGURE) || $(NO_CONFIG)
+if $(CONFIGURE)
 {
     include Jamconfig ;
     TryCommand $(MV) config.tmp config.jam ;
 }
 
-if $(CONFIGURE)
+if $(CONFIGURE_ONLY)
 {
     Exit "Configuration successful." ;
 }

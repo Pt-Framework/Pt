@@ -1826,7 +1826,13 @@ builtin_escape( PARSE* parse,
     {
         for(c = arg->string; *c != '\0' ; ++c)
         {
+            if(*c == '"')
+            {
+                string_push_back( &s, '\\' );
+            }
+
             string_push_back( &s, *c );
+
             if(*c == '\\')
             {
                 string_push_back( &s, *c );
