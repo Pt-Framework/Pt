@@ -132,7 +132,7 @@ void FileDeviceImpl::detach(EventLoop& s)
     this->setWaitHandle(_waitHandle, active);
     
     if(active)
-        _device.setState(Selectable::Avail);
+        _device.setAvail();
 }
 
 

@@ -221,7 +221,7 @@ void PipeIODevice::onDetach(EventLoop& s)
     this->setWaitHandle(_waitHandle, active);
 
     if(active)
-        this->setState(Selectable::Avail);
+        this->setAvail();
 }
 
 

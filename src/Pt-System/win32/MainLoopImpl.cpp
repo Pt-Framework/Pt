@@ -142,8 +142,41 @@ void MainLoopImpl::disable(Selectable& s)
         _avail.erase(iter);
 }
 
+void MainLoopImpl::idle(Selectable& s)
+{
+    std::set<Selectable*>::iterator it = _avail.find( &s );
+    if( it == _avail.end() )
+        return;
 
-void MainLoopImpl::changed(Selectable& s)
+    if( _currentAvail != _avail.end() &&
+       *_currentAvail == *it )
+        _avail.erase(_currentAvail++);
+    else
+        _avail.erase(it);
+}
+
+
+void MainLoopImpl::active(Selectable& s)
+{
+    std::set<Selectable*>::iterator it = _avail.find( &s );
+    if( it == _avail.end() )
+        return;
+
+    if( _currentAvail != _avail.end() &&
+       *_currentAvail == *it )
+        _avail.erase(_currentAvail++);
+    else
+        _avail.erase(it);
+}
+
+
+void MainLoopImpl::avail(Selectable& s)
+{
+    _avail.insert(&s);
+}
+
+
+/*void MainLoopImpl::changed(Selectable& s)
 {
     if( s.avail() )
     {
@@ -151,9 +184,6 @@ void MainLoopImpl::changed(Selectable& s)
     }
     else
     {
-        // TODO let selectable pull handles from this
-        s.onActive();
-
         std::set<Selectable*>::iterator it = _avail.find( &s );
         if( it == _avail.end() )
             return;
@@ -164,7 +194,7 @@ void MainLoopImpl::changed(Selectable& s)
         else
             _avail.erase(it);
     }
-}
+}*/
 
 
 void MainLoopImpl::onRun()

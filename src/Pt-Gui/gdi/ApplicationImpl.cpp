@@ -605,9 +605,21 @@ void MainLoop::onDisable( System::Selectable& s )
 }
 
 
-void MainLoop::onChanged(System::Selectable& s)
+void MainLoop::onIdle(System::Selectable& s)
 {
-    _impl.changed(s);
+    _impl.idle(s);
+}
+
+
+void MainLoop::onActive(System::Selectable& s)
+{
+    _impl.active(s);
+}
+
+
+void MainLoop::onAvail(System::Selectable& s)
+{
+    _impl.avail(s);
 }
 
 

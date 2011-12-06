@@ -325,7 +325,11 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onDisable(System::Selectable& s);
 
-        virtual void onChanged(System::Selectable& s);
+        virtual void onIdle(System::Selectable& s);
+
+        virtual void onActive(System::Selectable& s);
+
+        virtual void onAvail(System::Selectable& s);
 
         virtual void onRun();
 

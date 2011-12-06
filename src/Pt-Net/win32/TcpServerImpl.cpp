@@ -49,13 +49,13 @@ static struct WsaInit
 {
     WsaInit()
     {
-		WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);
-	}
-
+        WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);
+    }
+    
     ~WsaInit()
     {
-		WSACleanup();
-	}
+        WSACleanup();
+    }
 } wsaInit;
 
 
@@ -70,8 +70,8 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 
 TcpServerImpl::~TcpServerImpl()
 {
-	WSAResetEvent(_waitEvent);
-	close();
+    WSAResetEvent(_waitEvent);
+    close();
 
     WSACloseEvent(_waitEvent);
     _waitEvent = INVALID_HANDLE_VALUE;
@@ -81,7 +81,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
 
-	_fd = WSASocket(domain, type, protocol, NULL , 0, 0);
+    _fd = WSASocket(domain, type, protocol, NULL , 0, 0);
 
     if (_fd == INVALID_SOCKET)
     {
@@ -143,11 +143,11 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
         log_debug("setsockopt SO_REUSEADDR");
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
-		{
-			close();
+        {
+            close();
             throw System::SystemError("setsockopt");
-		}
-
+        }
+    
 #if defined(IPV6_V6ONLY)
         if (it->ai_family == AF_INET6)
         {
@@ -159,30 +159,30 @@ void TcpServerImpl::listen(const std::string& ipaddr,
           }
         }
 #endif
-
+    
         log_debug("bind");
         if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
         {
           // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
-
+    
             log_debug("listen ");
-
+    
             if (::listen(_fd, backlog) == SOCKET_ERROR)
             {
-				close();
-
+                close();
+    
                 if (WSAGetLastError() == WSAEADDRINUSE)
                     throw AddressInUse();
                 else
                     throw System::SystemError("listen");
             }
-
+    
             return;
         }
     }
-
-	close();
+    
+    close();
 
     if (WSAGetLastError() == WSAEADDRINUSE)
         throw AddressInUse();
@@ -193,19 +193,19 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
     log_debug(_fd << " wait " << umsecs);
-
+    
     if( _server.avail() )
-	{
-		_server.connectionPending.send(_server);
+    {
+        _server.connectionPending.send(_server);
         return true;
-	}
-
-	attachEvent(_currentHandle, FD_ACCEPT);
+    }
+    
+    attachEvent(_currentHandle, FD_ACCEPT);
     log_debug("wait for accept");
-
+    
     // convert unsigned to signed
     int msecs = umsecs;
-	if(umsecs == Pt::System::EventLoop::WaitInfinite) 
+    if(umsecs == Pt::System::EventLoop::WaitInfinite) 
     {
         msecs = INFINITE;
     }
@@ -213,13 +213,13 @@ bool TcpServerImpl::wait(std::size_t umsecs)
     {
         msecs = std::numeric_limits<int>::max();
     }
-
+    
     // Does this work if socket is closed?
-
+    
     if(WSAWaitForMultipleEvents(1, &_currentHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
     {
         WSAResetEvent(_currentHandle);
-		_server.connectionPending.send(_server);
+        _server.connectionPending.send(_server);
         return true;
     }
 
@@ -243,10 +243,10 @@ void TcpServerImpl::detach(System::EventLoop& s)
     bool active = checkEvent();
 
     if(active)
-		_server.setState(Pt::System::Selectable::Avail);
+        _server.setAvail();
 
     log_debug("server is active: " << active);
-	this->setWaitHandle(_waitEvent, active);
+    this->setWaitHandle(_waitEvent, active);
 }
 
 
@@ -256,8 +256,8 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 
     if(_currentHandle == h)
         return true;
-		
-	avail = _server.avail();
+        
+    avail = _server.avail();
 
     _currentHandle = h;
     attachEvent(_currentHandle, FD_ACCEPT);
@@ -268,24 +268,24 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 
 SOCKET TcpServerImpl::accept()
 {
-	// set the server socket to blocking-mode
-	u_long argp = 0;
-	attachEvent(0,0);
-	::ioctlsocket(_fd, FIONBIO, &argp);
-
-	SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
-
-	if( fd == SOCKET_ERROR)
-	{
-		log_debug("accept failed: "<< WSAGetLastError());
-		throw System::SystemError( PT_ERROR_MSG("accept failed") );
-	}
-
-	// reset the blocking mode
-	attachEvent(_currentHandle, FD_ACCEPT);
-	_server.setState(Pt::System::Selectable::Idle);
-	return fd;
-}
+    // set the server socket to blocking-mode
+    u_long argp = 0;
+    attachEvent(0,0);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+    
+    SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
+    
+    if( fd == SOCKET_ERROR)
+    {
+        log_debug("accept failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("accept failed") );
+    }
+    
+    // reset the blocking mode
+    attachEvent(_currentHandle, FD_ACCEPT);
+    _server.setIdle();
+    return fd;
+    }
 
 void TcpServerImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
 {
@@ -299,16 +299,16 @@ HANDLE TcpServerImpl::waitHandle() const
 
 bool TcpServerImpl::checkEvent()
 {
-	log_debug("TcpServerImpl::checkEvent");
-
+    log_debug("TcpServerImpl::checkEvent");
+    
     if (_fd == INVALID_SOCKET)
         return false;
-
-	if(_server.avail())
-	{
-		_server.connectionPending.send(_server);
-		return true;
-	}
+    
+    if(_server.avail())
+    {
+        _server.connectionPending.send(_server);
+        return true;
+    }
 
     WSANETWORKEVENTS events;
 

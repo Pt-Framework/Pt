@@ -113,7 +113,9 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
 
         void disable( Selectable& s );
 
-        void changed(Selectable& s);
+        void idle(Selectable& s);
+        void active(Selectable& s);
+        void avail(Selectable& s);
 
     protected:
         virtual void onRun();
