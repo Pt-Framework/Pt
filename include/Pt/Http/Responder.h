@@ -32,6 +32,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Signal.h>
+#include <Pt/System/EventLoop.h>
 #include <iosfwd>
 #include <exception>
 
@@ -58,7 +59,7 @@ class PT_HTTP_API Responder
 
         void release()     { _service.doReleaseResponder(this); }
 
-        void beginReply(std::ostream& os, Request& request, Reply& reply)
+        virtual void beginReply(System::EventLoop& loop, std::ostream& os, Request& request, Reply& reply)
         {
             try
             {

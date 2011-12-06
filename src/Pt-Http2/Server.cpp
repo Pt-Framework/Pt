@@ -272,7 +272,7 @@ bool Connection::doReply()
     try
     {
         _responder->replyFinished() += Pt::slot(*this, &Connection::onReplyFinished);
-        _responder->beginReply(_reply.body(), _request, _reply);
+        _responder->beginReply(*_loop, _reply.body(), _request, _reply);
         return true;
     }
     catch (const std::exception& e)

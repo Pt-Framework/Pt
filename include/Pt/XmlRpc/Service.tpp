@@ -1021,6 +1021,57 @@ class BasicServiceProcedure<R,
 };
 
 
+template <typename R, typename A1>
+class AsyncServiceProcedure : public ServiceProcedure
+{
+    public:
+        AsyncServiceProcedure(SerializationContext* ctx = 0)
+        : ServiceProcedure()
+        , _a1(ctx)
+        , _r(ctx)
+        {
+            _cb = cb.clone();
+
+            _args[0] = &_a1;
+            _args[1] = 0;
+        }
+
+        ~AsyncServiceProcedure()
+        { }
+
+        ServiceProcedure* clone(SerializationContext* ctx) const
+        {
+            return new AsyncServiceProcedure(ctx);
+        }
+
+        IComposer** beginCall()
+        {
+            _a1.begin(_v1);
+            return _args;
+        }
+
+        IDecomposer* endCall() // TODO: pass EventLoop
+        {
+            _rv = this->exec(_v1);
+            _r.begin(_rv, "");
+            return &_r;
+        }
+
+        virtual R exec(A1 a1) = 0;
+
+    private:
+        typedef typename TypeTraits<A1>::Value V1;
+        typedef typename TypeTraits<R>::Value RV;
+
+        RV _rv;
+        V1 _v1;
+
+        IComposer* _args[2];
+        Composer<V1> _a1;
+        Decomposer<RV> _r;
+};
+
+
 class PT_XMLRPC_API Service : public Http::Service
 {
         friend class XmlRpcResponder;
