@@ -36,7 +36,21 @@ namespace Pt {
 namespace System {
 
 class SelectableImpl;
-class Selector;
+class SelectorImpl;
+
+// Loop must return a ref to its Selector 
+class Selector
+{
+    public:
+        Selector()
+        {}
+
+        SelectorImpl* impl()
+        { return _impl; }
+
+    private:
+        class SelectorImpl* _impl;
+};
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
@@ -45,7 +59,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         enum State
         {
-            Disabled = 0,
+            Disabled = 0, // TODO: Is Disabled same as Idle?
             Idle = 1,
             Busy = 2,
             Avail = 3
@@ -108,7 +122,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual void onDetach(EventLoop&) = 0;
 
-        virtual void onAvail(Selector& selector) {};
+        virtual bool onAvail(Selector& selector) { return false; }
 
     private:
         EventLoop* _parent;

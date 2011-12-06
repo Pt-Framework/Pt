@@ -48,12 +48,14 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual SelectableImpl& simpl()
         { return *this; }
 
-		void redirect(int newFd, bool close = true);
+        void redirect(int newFd, bool close = true);
 
     protected:
         void onAttach(EventLoop& s);
 
         void onDetach(EventLoop& s);
+
+        bool onAvail(Selector& selector);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
@@ -76,7 +78,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void onSync() const;
 
-		virtual void onCancel() ;
+        virtual void onCancel() ;
 
      private:
         HANDLE _waitHandle;

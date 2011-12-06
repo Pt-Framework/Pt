@@ -225,6 +225,26 @@ void PipeIODevice::onDetach(EventLoop& s)
 }
 
 
+bool PipeIODevice::onAvail(Selector& selector)
+{
+    bool avail = false;
+
+    if( _wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    {
+        outputReady.send(*this);
+        avail = true;
+    }
+
+    if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
+    {
+        inputReady.send(*this);
+        avail = true;
+    }
+
+    return avail;
+}
+
+
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     // IODevice::beginRead was called before the IODevice was added to
