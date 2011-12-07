@@ -1025,7 +1025,7 @@ template <typename R, typename A1>
 class AsyncServiceProcedure : public ServiceProcedure
 {
     public:
-        AsyncServiceProcedure(SerializationContext* ctx = 0)
+        AsyncServiceProcedure(const Callable<R>& cb, SerializationContext* ctx = 0)
         : ServiceProcedure()
         , _a1(ctx)
         , _r(ctx)
@@ -1063,6 +1063,7 @@ class AsyncServiceProcedure : public ServiceProcedure
         typedef typename TypeTraits<A1>::Value V1;
         typedef typename TypeTraits<R>::Value RV;
 
+        Callable<R>* _cb;
         RV _rv;
         V1 _v1;
 
