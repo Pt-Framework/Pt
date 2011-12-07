@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace System {
 
-#if 0
+#if 1
 
 StreamBuffer::StreamBufferImpl::StreamBufferImpl(size_t bufferSize, bool extend)
 : _ioDevice   (0),

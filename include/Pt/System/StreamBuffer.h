@@ -39,14 +39,12 @@ namespace Pt {
 
 namespace System {
 
-#if 0
+#if 1
 
 class StreamBuffer : public std::streambuf
-                    , public Connectable
+                   , public Connectable
 {
     private:
-        friend class StreamBufferImpl;
-
         class PT_SYSTEM_API StreamBufferImpl {
             public:
                 StreamBufferImpl(size_t bufferSize, bool extend);
@@ -55,10 +53,10 @@ class StreamBuffer : public std::streambuf
                 IODevice* ioDevice()
                 { return _ioDevice; }
 
-                Signal<StreamBuffer&> inputReady()
+                Signal<StreamBuffer&>& inputReady()
                 { return _inputReady; }
 
-                Signal<StreamBuffer&> outputReady()
+                Signal<StreamBuffer&>& outputReady()
                 { return _outputReady; }
 
                 void streamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend);
@@ -117,10 +115,10 @@ class StreamBuffer : public std::streambuf
         IODevice* device()
         { return _impl.ioDevice(); }
 
-        Signal<StreamBuffer&> inputReady()
+        Signal<StreamBuffer&>& inputReady()
         { return _impl.inputReady(); }
 
-        Signal<StreamBuffer&> outputReady()
+        Signal<StreamBuffer&>& outputReady()
         { return _impl.outputReady(); }
 
         std::streamsize out_avail()

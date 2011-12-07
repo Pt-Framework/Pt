@@ -162,10 +162,10 @@ class PipeTest : public Pt::Unit::TestSuite
             _loop->add( pipe.out() );
 
             outbuf.attach( pipe.in() );
-            outbuf.outputReady += Pt::slot(*this, &PipeTest::onStreamOutput);
+            outbuf.outputReady() += Pt::slot(*this, &PipeTest::onStreamOutput);
 
             inbuf.attach( pipe.out() );
-            inbuf.inputReady += Pt::slot(*this, &PipeTest::onStreamInput);
+            inbuf.inputReady() += Pt::slot(*this, &PipeTest::onStreamInput);
 
             PT_UNIT_ASSERT( 0 == outbuf.out_avail() );
             outbuf.sputn(_data.c_str(), 12);
