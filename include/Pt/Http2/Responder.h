@@ -65,23 +65,22 @@ class PT_HTTP_API Responder
 
         virtual void beginReply(System::EventLoop& loop, std::ostream& os, Request& request, Reply& reply)
         {
-            try
-            {
-                this->reply(os, request, reply);
-                _replyFinished(0);
-            }
-            catch(const std::exception& e)
-            {
-                _replyFinished(&e);
-            }
+            _replyFinished();
         }
 
-        Signal<const std::exception*>& replyFinished()
+        virtual void endReply(std::ostream& os, Http::Request& request, Http::Reply& reply) 
+        { 
+            this->reply(os, request, reply);
+        }
+
+        Signal<>& replyFinished()
         { return _replyFinished; }
+
+    protected:
+        Signal<> _replyFinished;
 
     private:
         Service& _service;
-        Signal<const std::exception*> _replyFinished;
 };
 
 } // namespace Http

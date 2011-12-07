@@ -31,6 +31,8 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/Http/Service.h>
+#include <Pt/Http/Responder.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Composer.h>
 #include <Pt/Void.h>
@@ -42,11 +44,20 @@ namespace Pt {
 
 namespace XmlRpc {
 
+class XmlRpcResponder;
+
 class ServiceProcedure
 {
     public:
         ServiceProcedure()
+        : _resp(0)
         {}
+
+        void setResponder(Http::Responder& resp)
+        { _resp = &resp; }
+
+        Http::Responder* responder()
+        { return _resp; }
 
         virtual ~ServiceProcedure()
         {}
@@ -56,8 +67,20 @@ class ServiceProcedure
         virtual IComposer** beginCall() = 0;
 
         virtual IDecomposer* endCall() = 0;
-};
 
+        virtual void beginAsync(System::EventLoop& loop)
+        {
+            this->responder()->replyFinished().send();
+        }
+
+        virtual IDecomposer* endAsync()
+        {
+            return endCall();
+        }
+
+    private:
+        Http::Responder* _resp;
+};
 
 }
 
@@ -66,3 +89,4 @@ class ServiceProcedure
 #include <Pt/XmlRpc/Service.tpp>
 
 #endif
+

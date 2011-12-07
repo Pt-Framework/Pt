@@ -215,6 +215,70 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
 }
 
 
+void XmlRpcResponder::beginReply(System::EventLoop& loop, std::ostream& os, Http::Request& request, Http::Reply& reply)
+{
+    try
+    {
+        if( ! _proc )
+        {
+            _fault.setRc(4);
+            _fault.setText("invalid XML-RPC");
+            throw _fault;
+        }
+
+        if( _args )
+        {
+            ++_args;
+            if( * _args )
+            {
+                _fault.setRc(5);
+                _fault.setText("invalid XML-RPC, missing arguments");
+                throw _fault;
+            }
+        }
+
+        _proc->setResponder(*this);
+        _proc->beginAsync(loop);
+    }
+    catch (const Fault& fault)
+    {
+        _fault = fault;
+        throw;
+    }
+}
+
+
+void XmlRpcResponder::endReply(std::ostream& os, Http::Request& request, Http::Reply& reply)
+{
+    try
+    {
+        IDecomposer* rh = _proc->endAsync();
+    
+        reply.setHeader("Content-Type", "text/xml");
+    
+        _writer.begin(os);
+        _writer.writeStartTag( XMLRPC_METHODRESPONSE );
+        _writer.writeStartTag( XMLRPC_PARAMS );
+        _writer.writeStartTag( XMLRPC_PARAM );
+        rh->format(_formatter);
+        _writer.writeEndTag(XMLRPC_PARAM); // param
+        _writer.writeEndTag(XMLRPC_PARAMS); // params
+        _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
+        _writer.flush();
+    }
+    catch (const Fault& fault)
+    {
+        _fault = fault;
+        throw;
+    }
+    catch (...)
+    {
+        _writer.flush();
+        throw;
+    }
+}
+
+
 void XmlRpcResponder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)

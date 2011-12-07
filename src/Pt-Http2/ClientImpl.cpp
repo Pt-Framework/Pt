@@ -67,8 +67,8 @@ ClientImpl::ClientImpl(Client* client)
 {
     _stream.attachDevice(_socket);
     Pt::connect(_socket.connected, *this, &ClientImpl::onConnect);
-    Pt::connect(_stream.buffer().outputReady, *this, &ClientImpl::onOutput);
-    Pt::connect(_stream.buffer().inputReady, *this, &ClientImpl::onInput);
+    Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
+    Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
 }
 
 
@@ -88,8 +88,8 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 {
     _stream.attachDevice(_socket);
     Pt::connect(_socket.connected, *this, &ClientImpl::onConnect);
-    Pt::connect(_stream.buffer().outputReady, *this, &ClientImpl::onOutput);
-    Pt::connect(_stream.buffer().inputReady, *this, &ClientImpl::onInput);
+    Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
+    Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
 }
 
 
@@ -109,8 +109,8 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 {
     _stream.attachDevice(_socket);
     Pt::connect(_socket.connected, *this, &ClientImpl::onConnect);
-    Pt::connect(_stream.buffer().outputReady, *this, &ClientImpl::onOutput);
-    Pt::connect(_stream.buffer().inputReady, *this, &ClientImpl::onInput);
+    Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
+    Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
     setParent(loop);
 }
 

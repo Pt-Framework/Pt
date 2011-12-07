@@ -80,7 +80,7 @@ class Connection : public Net::TcpSocket, public Connectable
 
         bool doReply();
 
-        void onReplyFinished(const std::exception* e);
+        void onReplyFinished();
 
         void sendReply();
 
@@ -137,8 +137,8 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 , _responder(0)
 {
     _stream.attachDevice(*this);
-    _stream.buffer().inputReady += Pt::slot(*this, &Connection::onInput);
-    _stream.buffer().outputReady += Pt::slot(*this, &Connection::onOutput);
+    _stream.buffer().inputReady() += Pt::slot(*this, &Connection::onInput);
+    _stream.buffer().outputReady() += Pt::slot(*this, &Connection::onOutput);
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
 
     Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DEFER_ACCEPT);
@@ -291,13 +291,16 @@ bool Connection::doReply()
 }
 
 
-void Connection::onReplyFinished(const std::exception* e)
+void Connection::onReplyFinished()
 {
-    if(e)
+    try
     {
-        //log_warn("responder reported error: " << e.what());
+        _responder->endReply(_reply.body(), _request, _reply);
+    }
+    catch (const std::exception& e)
+    {
         _reply.clear();
-        _responder->replyError(_reply.body(), _request, _reply, *e);
+        _responder->replyError(_reply.body(), _request, _reply, e);
     }
     
     _responder->release();

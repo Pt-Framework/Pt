@@ -76,6 +76,10 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void reply(std::ostream& os, Http::Request& request, Http::Reply& reply);
 
+        void beginReply(System::EventLoop& loop, std::ostream& os, Http::Request& request, Http::Reply& reply);
+
+        void endReply(std::ostream& os, Http::Request& request, Http::Reply& reply);
+
     protected:
         void advance(const Pt::Xml::Node& node);
 

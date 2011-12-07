@@ -1010,7 +1010,6 @@ class BasicServiceProcedure<R,
         }
 
     private:
-
         typedef typename TypeTraits<R>::Value RV;
 
         Callable<R>* _cb;
@@ -1025,7 +1024,7 @@ template <typename R, typename A1>
 class AsyncServiceProcedure : public ServiceProcedure
 {
     public:
-        AsyncServiceProcedure(const Callable<R>& cb, SerializationContext* ctx = 0)
+        AsyncServiceProcedure(SerializationContext* ctx = 0)
         : ServiceProcedure()
         , _a1(ctx)
         , _r(ctx)
@@ -1052,12 +1051,27 @@ class AsyncServiceProcedure : public ServiceProcedure
 
         IDecomposer* endCall() // TODO: pass EventLoop
         {
-            _rv = this->exec(_v1);
+            this->endExec(_rv);
             _r.begin(_rv, "");
             return &_r;
         }
 
-        virtual R exec(A1 a1) = 0;
+        void beginAsync(System::EventLoop& loop)
+        {
+            this->exec(_a1);
+        }
+
+        IDecomposer* endAsync()
+        {
+            this->endExec(_rv);
+            _r.begin(_rv, "");
+            return &_r;
+        }
+
+        virtual void exec(A1 a1)
+        { this->responder().replyFinished(0); }
+
+        virtual void endExec(R& r) = 0;
 
     private:
         typedef typename TypeTraits<A1>::Value V1;
