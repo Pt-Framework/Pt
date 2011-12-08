@@ -81,8 +81,8 @@ int main(int argc, char* argv[])
     server.minThreads(threads);
     server.maxThreads(maxThreads);
 
-    Pt::XmlRpc::Service service;
-    service.registerFunction("echo", echo);
+    EchoService service;
+    //service.registerFunction("echo", echo);
     server.addService("/myservice", service);
 
     loop.run();
