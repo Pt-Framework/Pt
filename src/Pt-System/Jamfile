@@ -33,7 +33,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           SerialDevice.cpp
                           Semaphore.cpp
                           StreamBuffer.cpp
-                          StreamBuffer2.cpp
                           SystemError.cpp
                           Thread.cpp
                           Timer.cpp
