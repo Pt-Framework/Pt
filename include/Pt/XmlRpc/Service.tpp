@@ -1020,15 +1020,47 @@ class BasicServiceProcedure<R,
 };
 
 
+template <typename R>
+class ServiceResult
+{
+    public:
+        ServiceResult(ServiceProcedure* proc = 0)
+        : _proc(proc)
+        {}
+
+        void init(ServiceProcedure& proc)
+        { _proc = &proc; }
+
+        System::EventLoop* loop()
+        { return _proc->loop(); }
+
+        R& get()
+        { return _rv; }
+
+        void set(const R& r)
+        {
+            _rv = r; 
+            _proc->responder()->replyFinished().send();
+        }
+
+    private:
+        ServiceProcedure* _proc;
+        R _rv;
+};
+
+
 template <typename R, typename A1>
 class AsyncServiceProcedure : public ServiceProcedure
 {
     public:
-        AsyncServiceProcedure(const Callable<R, A1>& cb, SerializationContext* ctx = 0)
+        AsyncServiceProcedure( const Callable<void, ServiceResult<R>&, A1>& cb,
+                               SerializationContext* ctx = 0)
         : ServiceProcedure()
+        , _cb(0)
         , _a1(ctx)
         , _r(ctx)
         {
+            _rv.init(*this);
             _cb = cb.clone();
 
             _args[0] = &_a1;
@@ -1040,7 +1072,7 @@ class AsyncServiceProcedure : public ServiceProcedure
 
         ServiceProcedure* clone(SerializationContext* ctx) const
         {
-            return new AsyncServiceProcedure(ctx);
+            return new AsyncServiceProcedure(*_cb, ctx);
         }
 
         IComposer** beginCall()
@@ -1049,36 +1081,29 @@ class AsyncServiceProcedure : public ServiceProcedure
             return _args;
         }
 
-        IDecomposer* endCall() // TODO: pass EventLoop
+        IDecomposer* endCall()
         {
-            this->endExec(_rv);
-            _r.begin(_rv, "");
-            return &_r;
+            this->beginAsync();
+            return endAsync();
         }
 
-        void beginAsync(System::EventLoop& loop)
+        void beginAsync()
         {
-            this->exec(_a1);
+            _cb->call(_rv, _v1);
         }
 
         IDecomposer* endAsync()
         {
-            this->endExec(_rv);
-            _r.begin(_rv, "");
+            _r.begin(_rv.get(), "");
             return &_r;
         }
-
-        virtual void exec(A1 a1)
-        { this->responder().replyFinished(0); }
-
-        virtual void endExec(R& r) = 0;
 
     private:
         typedef typename TypeTraits<A1>::Value V1;
         typedef typename TypeTraits<R>::Value RV;
 
-        Callable<R>* _cb;
-        RV _rv;
+        Callable<void, ServiceResult<R>&, A1>* _cb;
+        ServiceResult<RV> _rv;
         V1 _v1;
 
         IComposer* _args[2];
@@ -1325,6 +1350,13 @@ class PT_XMLRPC_API Service : public Http::Service
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) )
         {
             ServiceProcedure* proc = new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( callable(obj, method) );
+            this->registerProcedure(name, proc);
+        }
+
+        template <typename R, class C, typename A1>
+        void registerAsyncMethod(const std::string& name, C& obj, void (C::*beginMethod)(ServiceResult<R>&, A1) )
+        {
+            ServiceProcedure* proc = new AsyncServiceProcedure<R, A1>( callable(obj, beginMethod) );
             this->registerProcedure(name, proc);
         }
 

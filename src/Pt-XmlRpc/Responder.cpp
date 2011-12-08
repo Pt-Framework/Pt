@@ -238,7 +238,8 @@ void XmlRpcResponder::beginReply(System::EventLoop& loop, std::ostream& os, Http
         }
 
         _proc->setResponder(*this);
-        _proc->beginAsync(loop);
+        _proc->setLoop(loop);
+        _proc->beginAsync();
     }
     catch (const Fault& fault)
     {

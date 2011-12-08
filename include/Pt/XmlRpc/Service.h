@@ -51,6 +51,7 @@ class ServiceProcedure
     public:
         ServiceProcedure()
         : _resp(0)
+        , _loop(0)
         {}
 
         void setResponder(Http::Responder& resp)
@@ -58,6 +59,12 @@ class ServiceProcedure
 
         Http::Responder* responder()
         { return _resp; }
+
+        void setLoop(System::EventLoop& loop)
+        { _loop = &loop; }
+
+        System::EventLoop* loop()
+        { return _loop; }
 
         virtual ~ServiceProcedure()
         {}
@@ -68,7 +75,7 @@ class ServiceProcedure
 
         virtual IDecomposer* endCall() = 0;
 
-        virtual void beginAsync(System::EventLoop& loop)
+        virtual void beginAsync()
         {
             this->responder()->replyFinished().send();
         }
@@ -80,6 +87,7 @@ class ServiceProcedure
 
     private:
         Http::Responder* _resp;
+        System::EventLoop* _loop;
 };
 
 }

@@ -38,6 +38,27 @@ std::string echo(const std::string& msg)
   return msg;
 }
 
+
+class EchoService : public Pt::XmlRpc::Service
+{
+    public:
+        EchoService()
+        {
+            registerAsyncMethod("echo", *this, &EchoService::beginEcho);
+        }
+
+        ~EchoService()
+        {}
+
+    protected:
+        void beginEcho(Pt::XmlRpc::ServiceResult<std::string>& r, const std::string& msg)
+        { 
+            r.loop();
+            r.set(msg);
+        }
+};
+
+
 int main(int argc, char* argv[])
 {
   try
@@ -59,6 +80,7 @@ int main(int argc, char* argv[])
     Pt::Http::Server server(loop, ip, port);
     server.minThreads(threads);
     server.maxThreads(maxThreads);
+
     Pt::XmlRpc::Service service;
     service.registerFunction("echo", echo);
     server.addService("/myservice", service);
