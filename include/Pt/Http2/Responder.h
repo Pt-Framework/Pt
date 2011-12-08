@@ -63,6 +63,7 @@ class PT_HTTP_API Responder
         void release()     
         { _service.doReleaseResponder(this); }
 
+        // TODO: pass object that contains loop and notifier, so we do not need member variables
         virtual void beginReply(System::EventLoop& loop, std::ostream& os, Request& request, Reply& reply)
         {
             _replyFinished();
