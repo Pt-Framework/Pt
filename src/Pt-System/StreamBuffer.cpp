@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace System {
 
-StreamBuffer::StreamBufferImpl::StreamBufferImpl(size_t bufferSize, bool extend)
+StreamBufferImpl::StreamBufferImpl(StreamBuffer& sb, size_t bufferSize, bool extend)
 : _ioDevice   (0),
     _ibufferSize(0),
     _ibuffer    (0),
@@ -44,9 +44,6 @@ StreamBuffer::StreamBufferImpl::StreamBufferImpl(size_t bufferSize, bool extend)
     _obuffer    (0),
     _pbmax      (4),
     _oextend    (extend)
-{}
-
-void StreamBuffer::StreamBufferImpl::streamBufferInit(StreamBuffer& sb, size_t bufferSize, bool extend)
 {
     _ibufferSize = bufferSize + 4;
     _ibuffer = 0;
@@ -61,7 +58,7 @@ void StreamBuffer::StreamBufferImpl::streamBufferInit(StreamBuffer& sb, size_t b
         sb.setp(_obuffer, _obuffer + _obufferSize);
 }
 
-void StreamBuffer::StreamBufferImpl::streamBufferAttach(StreamBuffer& sb, IODevice& ioDevice)
+void StreamBufferImpl::attach(StreamBuffer& sb, IODevice& ioDevice)
 {
     if(ioDevice.busy())
         throw IOPending( PT_ERROR_MSG("IODevice in use") );
@@ -80,7 +77,7 @@ void StreamBuffer::StreamBufferImpl::streamBufferAttach(StreamBuffer& sb, IODevi
     connect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
 }
 
-void StreamBuffer::StreamBufferImpl::streamBufferBeginRead(StreamBuffer& sb)
+void StreamBufferImpl::beginRead(StreamBuffer& sb)
 {
     if(_ioDevice == 0 || _ioDevice->reading())
         return;
@@ -114,10 +111,10 @@ void StreamBuffer::StreamBufferImpl::streamBufferBeginRead(StreamBuffer& sb)
             _ibuffer + used);              // end of get area
 }
 
-void StreamBuffer::StreamBufferImpl::streamBufferOnRead(StreamBuffer& sb)
+void StreamBufferImpl::onRead(StreamBuffer& sb)
 { _inputReady.send(sb); }
 
-void StreamBuffer::StreamBufferImpl::streamBufferEndRead(StreamBuffer& sb)
+void StreamBufferImpl::endRead(StreamBuffer& sb)
 {
     size_t readSize = _ioDevice->endRead();
 
@@ -126,7 +123,7 @@ void StreamBuffer::StreamBufferImpl::streamBufferEndRead(StreamBuffer& sb)
             sb.egptr() + readSize); // end of get area
 }
 
-size_t StreamBuffer::StreamBufferImpl::streamBufferBeginWrite(StreamBuffer& sb)
+size_t StreamBufferImpl::beginWrite(StreamBuffer& sb)
 {
     if(_ioDevice == 0 || _ioDevice->writing())
         return 0;
@@ -141,10 +138,10 @@ size_t StreamBuffer::StreamBufferImpl::streamBufferBeginWrite(StreamBuffer& sb)
     return 0;
 }
 
-void StreamBuffer::StreamBufferImpl::streamBufferOnWrite(StreamBuffer& sb)
+void StreamBufferImpl::onWrite(StreamBuffer& sb)
 { _outputReady.send(sb); }
 
-size_t StreamBuffer::StreamBufferImpl::streamBufferEndWrite(StreamBuffer& sb)
+size_t StreamBufferImpl::endWrite(StreamBuffer& sb)
 {
     typedef StreamBuffer::traits_type traits_type;
 
@@ -167,7 +164,7 @@ size_t StreamBuffer::StreamBufferImpl::streamBufferEndWrite(StreamBuffer& sb)
     return written;
 }
 
-void StreamBuffer::StreamBufferImpl::streamBufferDiscard(StreamBuffer& sb)
+void StreamBufferImpl::discard(StreamBuffer& sb)
 {
     if(_ioDevice && (_ioDevice->reading() || _ioDevice->writing()))
         throw IOPending(PT_ERROR_MSG("discard failed - streambuffer is in use"));
@@ -180,7 +177,7 @@ void StreamBuffer::StreamBufferImpl::streamBufferDiscard(StreamBuffer& sb)
         sb.setp(0, 0);
 }
 
-int StreamBuffer::StreamBufferImpl::streamBufferSync(StreamBuffer& sb)
+int StreamBufferImpl::sync(StreamBuffer& sb)
 {
     typedef StreamBuffer::traits_type traits_type;
 
@@ -202,7 +199,7 @@ int StreamBuffer::StreamBufferImpl::streamBufferSync(StreamBuffer& sb)
     return 0;
 }
 
-std::streambuf::int_type StreamBuffer::StreamBufferImpl::streamBufferUnderflow(StreamBuffer& sb)
+std::streambuf::int_type StreamBufferImpl::underflow(StreamBuffer& sb)
 {
     typedef StreamBuffer::traits_type traits_type;
 
@@ -243,7 +240,7 @@ std::streambuf::int_type StreamBuffer::StreamBufferImpl::streamBufferUnderflow(S
     return traits_type::to_int_type(*(sb.gptr()));
 }
 
-std::streambuf::int_type StreamBuffer::StreamBufferImpl::streamBufferOverflow(StreamBuffer& sb, std::streambuf::int_type ch)
+std::streambuf::int_type StreamBufferImpl::overflow(StreamBuffer& sb, std::streambuf::int_type ch)
 {
     typedef StreamBuffer::traits_type traits_type;
 
@@ -296,7 +293,7 @@ std::streambuf::int_type StreamBuffer::StreamBufferImpl::streamBufferOverflow(St
     return traits_type::not_eof(ch);
 }
 
-std::streamsize StreamBuffer::StreamBufferImpl::streamBufferXspeekn(StreamBuffer& sb, char* buffer, std::streamsize size)
+std::streamsize StreamBufferImpl::xspeekn(StreamBuffer& sb, char* buffer, std::streamsize size)
 {
     typedef StreamBuffer::traits_type traits_type;
 
@@ -312,7 +309,7 @@ std::streamsize StreamBuffer::StreamBufferImpl::streamBufferXspeekn(StreamBuffer
     return size;
 }
 
-std::streambuf::pos_type StreamBuffer::StreamBufferImpl::streamBufferSeekoff(StreamBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
+std::streambuf::pos_type StreamBufferImpl::seekoff(StreamBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
     typedef StreamBuffer::pos_type pos_type;
     typedef StreamBuffer::off_type off_type;
@@ -336,13 +333,13 @@ std::streambuf::pos_type StreamBuffer::StreamBufferImpl::streamBufferSeekoff(Str
     return ret;
 }
 
-std::streambuf::pos_type StreamBuffer::StreamBufferImpl::streamBufferSeekpos(StreamBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode)
+std::streambuf::pos_type StreamBufferImpl::seekpos(StreamBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode)
 { return sb.seekoff(p, std::ios::beg, mode); }
 
-std::streamsize StreamBuffer::StreamBufferImpl::streamBufferShowfull(StreamBuffer& sb)
+std::streamsize StreamBufferImpl::showfull(StreamBuffer& sb)
 { return 0; }
 
-std::streambuf::int_type StreamBuffer::StreamBufferImpl::streamBufferPbackfail(StreamBuffer& sb, std::streambuf::int_type)
+std::streambuf::int_type StreamBufferImpl::pbackfail(StreamBuffer& sb, std::streambuf::int_type)
 {
     typedef StreamBuffer::traits_type traits_type;
     return traits_type::eof();
