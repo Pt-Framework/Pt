@@ -508,9 +508,24 @@ int main( int argc, char * * argv, char * * arg_environ )
                 object_free( filename );
             }
 
-            if ( !n )
+            if ( ! n )
             {
-                OBJECT * filename = object_new( "+" );
+                /* Pt extension:
+                 * if no Jambase is explicitly specified with '-f', try to open a Jambase
+                 * file in the current dir, otherwise use the built in Jambase
+                 */
+                OBJECT* filename = NULL;
+                FILE* fp_jambase = fopen( "Jambase" , "r" );
+                if( fp_jambase != NULL )
+                {
+                    fclose(fp_jambase);
+                    filename = object_new( "Jambase" );
+                }
+                else
+                {
+                    filename = object_new( "+" );
+                }
+
                 parse_file( filename, frame );
                 object_free( filename );
             }
