@@ -43,6 +43,28 @@ namespace Http {
 class Request;
 class Reply;
 
+class Connection
+{
+    public:
+        Connection()
+        : _loop(0)
+        { }
+
+        virtual ~Connection()
+        { }
+
+        void begin(System::EventLoop& loop)
+        { _loop = &loop; }
+
+        System::EventLoop* loop()
+        { return _loop; }
+
+        virtual void replyFinished() = 0;
+
+    private:
+        System::EventLoop* _loop;
+};
+
 class PT_HTTP_API Responder
 {
     public:

@@ -45,7 +45,7 @@ namespace Pt {
 
 namespace Http {
 
-class Connection : public Net::TcpSocket, public Connectable
+class TcpConnection : public Net::TcpSocket, public Connectable
 {
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
@@ -63,13 +63,13 @@ class Connection : public Net::TcpSocket, public Connectable
     };
 
     public:
-        Connection(Server& server, Net::TcpServer& tcpServer);
+        TcpConnection(Server& server, Net::TcpServer& tcpServer);
 
-        ~Connection();
+        ~TcpConnection();
 
         void begin(System::EventLoop& loop);
 
-        Signal<Connection&> timeout;
+        Signal<TcpConnection&> timeout;
 
     protected:
         void onInput(System::StreamBuffer& sb);
@@ -111,25 +111,25 @@ class Connection : public Net::TcpSocket, public Connectable
 };
 
 
-void Connection::ParseEvent::onMethod(const std::string& method)
+void TcpConnection::ParseEvent::onMethod(const std::string& method)
 {
     _request.method(method);
 }
 
 
-void Connection::ParseEvent::onUrl(const std::string& url)
+void TcpConnection::ParseEvent::onUrl(const std::string& url)
 {
     _request.url(url);
 }
 
 
-void Connection::ParseEvent::onUrlParam(const std::string& q)
+void TcpConnection::ParseEvent::onUrlParam(const std::string& q)
 {
     _request.qparams(q);
 }
 
 
-Connection::Connection(Server& server, Net::TcpServer& tcpServer)
+TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
 , _parseEvent(_request)
 , _parser(_parseEvent, false)
@@ -137,22 +137,22 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 , _responder(0)
 {
     _stream.attachDevice(*this);
-    _stream.buffer().inputReady() += Pt::slot(*this, &Connection::onInput);
-    _stream.buffer().outputReady() += Pt::slot(*this, &Connection::onOutput);
-    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
+    _stream.buffer().inputReady() += Pt::slot(*this, &TcpConnection::onInput);
+    _stream.buffer().outputReady() += Pt::slot(*this, &TcpConnection::onOutput);
+    _timer.timeout() += Pt::slot(*this, &TcpConnection::onTimeout);
 
     Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DEFER_ACCEPT);
 }
 
 
-Connection::~Connection()
+TcpConnection::~TcpConnection()
 {
     if(_responder)
         _responder->release();
 }
 
 
-void Connection::begin(System::EventLoop& loop)
+void TcpConnection::begin(System::EventLoop& loop)
 {
     loop.add(*this);
     loop.add(_timer);
@@ -163,7 +163,7 @@ void Connection::begin(System::EventLoop& loop)
 }
 
 
-void Connection::onInput(System::StreamBuffer& sb)
+void TcpConnection::onInput(System::StreamBuffer& sb)
 {
     sb.endRead();
 
@@ -266,12 +266,12 @@ void Connection::onInput(System::StreamBuffer& sb)
 }
 
 
-bool Connection::doReply()
+bool TcpConnection::doReply()
 {
     //log_trace("http::Socket::doReply");
     try
     {
-        _responder->replyFinished() += Pt::slot(*this, &Connection::onReplyFinished);
+        _responder->replyFinished() += Pt::slot(*this, &TcpConnection::onReplyFinished);
         _responder->beginReply(*_loop, _reply.body(), _request, _reply);
         return true;
     }
@@ -291,7 +291,7 @@ bool Connection::doReply()
 }
 
 
-void Connection::onReplyFinished()
+void TcpConnection::onReplyFinished()
 {
     try
     {
@@ -312,7 +312,7 @@ void Connection::onReplyFinished()
 }
 
 
-bool Connection::onOutput(System::StreamBuffer& sb)
+bool TcpConnection::onOutput(System::StreamBuffer& sb)
 {
     //log_trace("onOutput");
 
@@ -366,14 +366,14 @@ bool Connection::onOutput(System::StreamBuffer& sb)
 }
 
 
-void Connection::onTimeout()
+void TcpConnection::onTimeout()
 {
     //log_debug("timeout");
     timeout(*this);
 }
 
 
-void Connection::sendReply()
+void TcpConnection::sendReply()
 {
     const char* contentLength = "Content-Length";
     const char* server = "Server";
@@ -435,15 +435,15 @@ class ServerThread : public Connectable
         class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
         {
             public:
-                AcceptEvent(Connection* conn)
+                AcceptEvent(TcpConnection* conn)
                 : _conn(conn)
                 { }
     
-                Connection* connection() const
+                TcpConnection* connection() const
                 { return _conn; }
     
             private:
-                Connection* _conn;
+                TcpConnection* _conn;
         };
 
     public:
@@ -461,7 +461,7 @@ class ServerThread : public Connectable
             stop();
         }
 
-        void serve(Connection* conn)
+        void serve(TcpConnection* conn)
         {
             AcceptEvent ev(conn);
             _loop.commitEvent(ev);
@@ -478,7 +478,7 @@ class ServerThread : public Connectable
     private:
         void onExitEvent(const ExitEvent& ev)
         {
-            std::vector<Connection*>::iterator it;
+            std::vector<TcpConnection*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 delete *it;
@@ -490,7 +490,7 @@ class ServerThread : public Connectable
 
         void onAcceptEvent(const AcceptEvent& ev)
         {
-            Connection* conn = ev.connection();
+            TcpConnection* conn = ev.connection();
 
             _connections.push_back(conn);
             conn->timeout += Pt::slot(*this, &ServerThread::onConnectionTimeout);
@@ -498,9 +498,9 @@ class ServerThread : public Connectable
             conn->begin(_loop);
         }
 
-        void onConnectionTimeout(Connection& conn)
+        void onConnectionTimeout(TcpConnection& conn)
         {
-            std::vector<Connection*>::iterator it;
+            std::vector<TcpConnection*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 if(&conn == *it)
@@ -516,7 +516,7 @@ class ServerThread : public Connectable
         Server* _server;
         Pt::System::MainLoop _loop;
         Pt::System::AttachedThread _thread;
-        std::vector<Connection*> _connections;
+        std::vector<TcpConnection*> _connections;
 };
 
 
@@ -566,7 +566,7 @@ Server::~Server()
         delete *threadIt;
     }
 
-    std::vector<Connection*>::iterator it;
+    std::vector<TcpConnection*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         delete *it;
@@ -598,7 +598,9 @@ void Server::startWorker()
 
 void Server::onAccept(Net::TcpServer& server)
 {
-    Connection* conn = new Connection(*this, server);
+    // TODO: we should only pass the TcpSocket to the worker thread
+    //       so that a Connection can be constructed with an event loop
+    TcpConnection* conn = new TcpConnection(*this, server);
 
     if(_useWorker < _serverThreads.size())
     {
@@ -615,9 +617,9 @@ void Server::onAccept(Net::TcpServer& server)
 }
 
 
-void Server::onConnectionTimeout(Connection& conn)
+void Server::onConnectionTimeout(TcpConnection& conn)
 {
-    std::vector<Connection*>::iterator it;
+    std::vector<TcpConnection*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         if(&conn == *it)

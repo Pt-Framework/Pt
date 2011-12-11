@@ -50,7 +50,7 @@ namespace Http {
 
 class Request;
 class Service;
-class Connection;
+class TcpConnection;
 class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
@@ -115,12 +115,12 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void onAccept(Net::TcpServer& server);
 
-        void onConnectionTimeout(Connection& conn);
+        void onConnectionTimeout(TcpConnection& conn);
 
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
-        std::vector<Connection*> _connections;
+        std::vector<TcpConnection*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;
         unsigned _minThreads;
