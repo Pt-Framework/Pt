@@ -63,6 +63,10 @@ LIST *builtin_precious( FRAME * frame, int flags );
 LIST *builtin_self_path( FRAME * frame, int flags );
 LIST *builtin_makedir( FRAME * frame, int flags );
 
+/* Pt extension:
+ */
+LIST *builtin_exec( FRAME * frame, int flags );
+
 void backtrace( FRAME *frame );
 extern int last_update_now_status;
 

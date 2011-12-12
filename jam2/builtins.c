@@ -28,6 +28,8 @@
 #include "constants.h"
 #include <ctype.h>
 
+# include "execcmd.h"
+
 #if defined(USE_EXECUNIX)
 # include <sys/types.h>
 # include <sys/wait.h>
@@ -416,6 +418,14 @@ void load_builtins()
       {
           const char * args [] = { "path", 0 };
           bind_builtin( "MAKEDIR", builtin_makedir, 0, args );
+      }
+
+      /* Pt extension:
+       */
+      {
+          /* char * args[] = { "exec", ":", "*", 0 }; */
+          bind_builtin( "EXEC",
+              builtin_exec, 0, 0 );
       }
 
       /* Initialize builtin modules. */
@@ -2367,6 +2377,43 @@ LIST * builtin_shell( FRAME * frame, int flags )
         result = list_new( result, object_new( buffer ) );
     }
 
+    return result;
+}
+
+/* Pt extension:
+ */
+static void exec_closure(void *closure, int status, timing_info* time)
+{
+    int * exit_code = (int*)closure;
+    *(exit_code) = status;
+}
+
+/* Pt extension:
+ */
+LIST *builtin_exec( FRAME * frame, int flags)
+{
+    LIST* shell = 0;
+    LIST* result = 0;
+    LIST* command = 0;
+    struct timing_info ti;
+    char buffer[1024];
+    int exit_code = 1;
+
+    command = lol_get( frame->args, 0 );
+    if( ! command )
+        return L0;
+
+    OBJECT* varname = object_new( "JAMSHELL" );
+    shell = var_get( varname );
+    object_free( varname );
+    
+    execcmd( object_str( command->value ), exec_closure, &exit_code, shell);
+    execwait();
+
+    sprintf (buffer, "%d", exit_code);
+    OBJECT* sbuffer = object_new( buffer );
+    result = list_new( result, sbuffer );
+    object_free( sbuffer );
     return result;
 }
 
