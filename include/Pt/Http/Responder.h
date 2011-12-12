@@ -31,7 +31,6 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Signal.h>
 #include <Pt/System/EventLoop.h>
 #include <iosfwd>
 #include <exception>
@@ -42,6 +41,28 @@ namespace Http {
 
 class Request;
 class Reply;
+
+class Connection
+{
+    public:
+        Connection()
+        : _loop(0)
+        { }
+
+        virtual ~Connection()
+        { }
+
+        void init(System::EventLoop& loop)
+        { _loop = &loop; }
+
+        System::EventLoop* loop()
+        { return _loop; }
+
+        virtual void replyFinished() = 0;
+
+    private:
+        System::EventLoop* _loop;
+};
 
 class PT_HTTP_API Responder
 {
@@ -60,22 +81,15 @@ class PT_HTTP_API Responder
         void release()     
         { _service.doReleaseResponder(this); }
 
-        // TODO: pass object that contains loop and notifier, so we do not need member variables
-        virtual void beginReply(System::EventLoop& loop, std::ostream& os, Request& request, Reply& reply)
+        virtual void beginReply(Connection& conn, std::ostream& os, Request& request, Reply& reply)
         {
-            _replyFinished();
+            conn.replyFinished();
         }
 
         virtual void endReply(std::ostream& os, Http::Request& request, Http::Reply& reply) 
         { 
             this->reply(os, request, reply);
         }
-
-        Signal<>& replyFinished()
-        { return _replyFinished; }
-
-    protected:
-        Signal<> _replyFinished;
 
     private:
         Service& _service;

@@ -45,7 +45,9 @@ namespace Pt {
 
 namespace Http {
 
-class TcpConnection : public Net::TcpSocket, public Connectable
+class TcpConnection : public Http::Connection
+                    , public Net::TcpSocket
+                    , public Connectable
 {
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
@@ -80,7 +82,7 @@ class TcpConnection : public Net::TcpSocket, public Connectable
 
         bool doReply();
 
-        void onReplyFinished();
+        virtual void replyFinished();
 
         void sendReply();
 
@@ -154,6 +156,8 @@ TcpConnection::~TcpConnection()
 
 void TcpConnection::begin(System::EventLoop& loop)
 {
+    Http::Connection::init(loop);
+
     loop.add(*this);
     loop.add(_timer);
 
@@ -271,8 +275,7 @@ bool TcpConnection::doReply()
     //log_trace("http::Socket::doReply");
     try
     {
-        _responder->replyFinished() += Pt::slot(*this, &TcpConnection::onReplyFinished);
-        _responder->beginReply(*_loop, _reply.body(), _request, _reply);
+        _responder->beginReply(*this, _reply.body(), _request, _reply);
         return true;
     }
     catch (const std::exception& e)
@@ -291,7 +294,7 @@ bool TcpConnection::doReply()
 }
 
 
-void TcpConnection::onReplyFinished()
+void TcpConnection::replyFinished()
 {
     try
     {

@@ -215,7 +215,7 @@ void XmlRpcResponder::reply(std::ostream& os, Http::Request& request, Http::Repl
 }
 
 
-void XmlRpcResponder::beginReply(System::EventLoop& loop, std::ostream& os, Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http::Request& request, Http::Reply& reply)
 {
     try
     {
@@ -237,8 +237,7 @@ void XmlRpcResponder::beginReply(System::EventLoop& loop, std::ostream& os, Http
             }
         }
 
-        _proc->setResponder(*this);
-        _proc->setLoop(loop);
+        _proc->setConnection(conn);
         _proc->beginAsync();
     }
     catch (const Fault& fault)

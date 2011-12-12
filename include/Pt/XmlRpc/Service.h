@@ -50,44 +50,43 @@ class ServiceProcedure
 {
     public:
         ServiceProcedure()
-        : _resp(0)
-        , _loop(0)
+        : _conn(0)
         {}
 
-        void setResponder(Http::Responder& resp)
-        { _resp = &resp; }
+        void setConnection(Http::Connection& conn)
+        { _conn = &conn; }
 
-        Http::Responder* responder()
-        { return _resp; }
-
-        void setLoop(System::EventLoop& loop)
-        { _loop = &loop; }
+        Http::Connection* connection()
+        { return _conn; }
 
         System::EventLoop* loop()
-        { return _loop; }
+        { return _conn->loop(); }
 
         virtual ~ServiceProcedure()
         {}
 
         virtual ServiceProcedure* clone(SerializationContext* ctx) const = 0;
 
+        // TODO: rename beginArgs
         virtual IComposer** beginCall() = 0;
 
+        // TODO: obsolete
         virtual IDecomposer* endCall() = 0;
 
+        // TODO: rename beginCall
         virtual void beginAsync()
         {
-            this->responder()->replyFinished().send();
+            _conn->replyFinished();
         }
 
+        // TODO: rename endCall
         virtual IDecomposer* endAsync()
         {
             return endCall();
         }
 
     private:
-        Http::Responder* _resp;
-        System::EventLoop* _loop;
+        Http::Connection* _conn;
 };
 
 }

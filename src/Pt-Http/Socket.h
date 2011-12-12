@@ -93,8 +93,8 @@ class Socket : public Net::TcpSocket, public Connectable
 
         MethodSlot<void, Socket, System::StreamBuffer&> inputSlot;
 
-        Connection inputConnection;
-        Connection timeoutConnection;
+        Pt::Connection inputConnection;
+        Pt::Connection timeoutConnection;
 
     private:
         Net::TcpServer& _tcpServer;
