@@ -45,6 +45,9 @@ class Selector
         Selector()
         {}
 
+        virtual ~Selector()
+        {}
+
         virtual SelectorImpl& impl() = 0;
 };
 

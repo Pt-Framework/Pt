@@ -22,6 +22,7 @@
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/Selectable.h>
 #include <Pt/Singleton.h>
 
 #import <CoreFoundation/CFRunLoop.h>
@@ -29,6 +30,22 @@
 namespace Pt {
 
 namespace Gui {
+
+class SelectorImpl : public System::Selector
+{
+    public:
+        SelectorImpl()
+        {}
+        
+        ~SelectorImpl()
+        { }
+
+        System::SelectorImpl& impl()
+        { 
+            System::SelectorImpl* xxxImp;
+            return *xxxImp; 
+        }
+};
 
 class MainLoopImpl : public System::EventLoopImpl
 {
@@ -78,6 +95,9 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
+        System::Selector& selector()
+        { return _selector; }
+
     protected:
         virtual void onAttach(System::Selectable&);
 
@@ -113,6 +133,7 @@ class MainLoop : public Pt::System::EventLoop
 
     private:
         MainLoopImpl _impl;
+        SelectorImpl _selector;
 };
 
 } // namespace Gui

@@ -79,7 +79,7 @@ class MainLoopImpl : public EventLoopImpl
 
     private:
         int _wakePipe[2];
-        Selector _selector;
+        SelectorImpl _selector;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

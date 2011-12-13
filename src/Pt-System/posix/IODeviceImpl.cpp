@@ -377,11 +377,12 @@ void IODeviceImpl::exitSelect()
 }
 
 
-bool IODeviceImpl::onAvail(Selector& s)
+bool IODeviceImpl::avail(Selector& s)
 {
     // get selector impl
     // get fd_sets
     // check descriptor
+    return false;
 }
 
 
