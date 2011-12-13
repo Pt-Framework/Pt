@@ -28,7 +28,7 @@
 #include "constants.h"
 #include <ctype.h>
 
-# include "execcmd.h"
+#include "execcmd.h"
 
 #if defined(USE_EXECUNIX)
 # include <sys/types.h>
@@ -2382,10 +2382,14 @@ LIST * builtin_shell( FRAME * frame, int flags )
 
 /* Pt extension:
  */
-static void exec_closure(void *closure, int status, timing_info* time)
+static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
+    /*
     int * exit_code = (int*)closure;
     *(exit_code) = status;
+    */
+
+    memcpy(closure, output, strlen(output));
 }
 
 /* Pt extension:
@@ -2395,9 +2399,7 @@ LIST *builtin_exec( FRAME * frame, int flags)
     LIST* shell = 0;
     LIST* result = 0;
     LIST* command = 0;
-    struct timing_info ti;
-    char buffer[1024];
-    int exit_code = 1;
+    timing_info ti;
 
     command = lol_get( frame->args, 0 );
     if( ! command )
@@ -2406,14 +2408,26 @@ LIST *builtin_exec( FRAME * frame, int flags)
     OBJECT* varname = object_new( "JAMSHELL" );
     shell = var_get( varname );
     object_free( varname );
-    
-    execcmd( object_str( command->value ), exec_closure, &exit_code, shell);
-    execwait();
+/*
+void exec_cmd
+(
+    const char * string,
+    void (* func)( void * closure, int status, timing_info *, const char *, const char * ),
+    void * closure,
+    LIST * shell,
+    const char * action,
+    const char * target
+);
+*/
 
-    sprintf (buffer, "%d", exit_code);
-    OBJECT* sbuffer = object_new( buffer );
+    char output[8192];
+    exec_cmd( object_str( command->value ), exec_closure, &output, shell, 0, 0);
+    exec_wait();
+
+    OBJECT* sbuffer = object_new( output );
     result = list_new( result, sbuffer );
     object_free( sbuffer );
+    
     return result;
 }
 

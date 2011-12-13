@@ -1,3 +1,7 @@
+ECHO "####" ;
+_result = [ EXEC "pkg-config --libs openssl" ] ;
+ECHO $(_result) ;
+ECHO "####" ;
 
 # Initialize variables
 #

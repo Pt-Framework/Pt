@@ -62,7 +62,6 @@ JamInclude Jamrules.target_$(TARGET_OS:L) ;
 #
 JamInclude Jamrules.$(TOOLSET:L) ;
 
-
 # include the project top level Jamfile
 #
 include Jamfile ;
