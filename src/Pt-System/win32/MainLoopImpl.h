@@ -96,6 +96,21 @@ class HandleMap
 };
 
 
+class SelectorImpl : public Selector
+                   , public HandleMap
+{
+    public:
+        SelectorImpl()
+        {}
+        
+        ~SelectorImpl()
+        { }
+
+        SelectorImpl& impl()
+        { return *this; }
+};
+
+
 class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
 {
     public:
@@ -104,6 +119,9 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Allocator& a);
 
         ~MainLoopImpl();
+
+        Selector& selector()
+        { return _handles; }
 
         void attach( Selectable& s );
 
@@ -129,7 +147,7 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        HandleMap _handles;
+        SelectorImpl _handles;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*>::iterator _currentAvail;
         std::set<Selectable*> _attached;

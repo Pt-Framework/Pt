@@ -114,6 +114,8 @@ namespace System {
 
             virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
+            bool avail(Selector& s);
+
         protected:
             IODevice& _device;
             int _fd;

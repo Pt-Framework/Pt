@@ -55,6 +55,12 @@ MainLoop::~MainLoop()
 }
 
 
+Selector& MainLoop::selector()
+{
+    return _impl->selector();
+}
+
+
 void MainLoop::onAttach(Selectable& s)
 {
     _impl->attach(s);

@@ -94,7 +94,9 @@ class PipeTest : public Pt::Unit::TestSuite
             if( _result.size() < _data.size() )
                 dev.beginRead(_buffer, sizeof(_buffer));
             else
+            {
                 _loop->exit();
+            }
         }
 
         void AsyncWrite()

@@ -84,6 +84,9 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
+        System::Selector& selector()
+        { return _impl.selector(); }
+
         //! @brief Returns this application's instance handle (Windows).
         HINSTANCE getInstanceHandle()
         { return _instanceHandle; }

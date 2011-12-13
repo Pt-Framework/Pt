@@ -31,6 +31,19 @@ namespace Pt {
 
 namespace System {
 
+class SelectorImpl : public Selector
+{
+    public:
+        SelectorImpl()
+        {}
+        
+        ~SelectorImpl()
+        { }
+
+        SelectorImpl& impl()
+        { return *this; }
+};
+
 class MainLoopImpl : public EventLoopImpl
 {
     public:
@@ -39,6 +52,9 @@ class MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Allocator& a);
 
         ~MainLoopImpl();
+
+        Selector& selector()
+        { return _selector; }
 
         void attach(Selectable& s);
 
@@ -63,6 +79,7 @@ class MainLoopImpl : public EventLoopImpl
 
     private:
         int _wakePipe[2];
+        Selector _selector;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

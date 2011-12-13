@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-
 namespace Pt {
 
 namespace System {
@@ -322,3 +321,4 @@ void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 } //namespace System
 
 } //namespace Pt
+

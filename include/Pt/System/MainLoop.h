@@ -109,6 +109,8 @@ namespace System {
              */
             virtual ~MainLoop();
 
+            Selector& selector();
+
         protected:
             virtual void onAttach(Selectable&);
 

@@ -346,6 +346,7 @@ void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 }
 
 
+// TODO: move to enable
 int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     _rfds = &rfds;
@@ -357,6 +358,7 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 }
 
 
+// TODO: move to detach / disable
 void IODeviceImpl::exitSelect()
 {
     if( this->fd() > 0)
@@ -372,6 +374,14 @@ void IODeviceImpl::exitSelect()
     _rfds = 0;
     _wfds = 0;
     _efds = 0;
+}
+
+
+bool IODeviceImpl::onAvail(Selector& s)
+{
+    // get selector impl
+    // get fd_sets
+    // check descriptor
 }
 
 

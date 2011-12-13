@@ -47,6 +47,7 @@ namespace System {
 
 class Timer;
 class Selectable;
+class Selector;
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
@@ -62,6 +63,8 @@ class PT_SYSTEM_API EventLoop : public Connectable
         /** @brief Destructs the EventLoop
         */
         virtual ~EventLoop();
+
+        virtual Selector& selector() = 0;
 
         /** @brief Adds a Selectable
 

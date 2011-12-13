@@ -45,11 +45,7 @@ class Selector
         Selector()
         {}
 
-        SelectorImpl* impl()
-        { return _impl; }
-
-    private:
-        class SelectorImpl* _impl;
+        virtual SelectorImpl& impl() = 0;
 };
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
@@ -122,7 +118,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual void onDetach(EventLoop&) = 0;
 
-        virtual bool onAvail(Selector& selector) { return false; }
+        virtual void onEnable(EventLoop&) {}
+
+        virtual void onDisable(Selector&) {}
+
+        virtual bool onAvail(Selector&) { return false; }
 
     private:
         EventLoop* _parent;

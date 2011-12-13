@@ -225,6 +225,11 @@ void PipeIODevice::onDetach(EventLoop& s)
 }
 
 
+void PipeIODevice::onEnable(EventLoop& loop)
+{
+}
+
+
 bool PipeIODevice::onAvail(Selector& selector)
 {
     bool avail = false;

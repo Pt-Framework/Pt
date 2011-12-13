@@ -66,11 +66,13 @@ void Selectable::setParent(EventLoop* parent)
     if(parent)
     {
         this->onAttach(*parent);
-
         parent->onAttach(*this);
 
         if( this->enabled() )
+        {
+            this->onEnable(*parent);
             parent->onEnable(*this);
+        }
 
         if(_state == Busy)
             parent->onActive(*this);
