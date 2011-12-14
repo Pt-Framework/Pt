@@ -95,7 +95,7 @@ class SelectorImpl : public Selector
             else
             {
                 // update before next wait, move to front
-                _hqueue.insert(_hqueue.begin(), h);
+                h = _hqueue.insert(_hqueue.begin(), *h);
             }
         }
 

@@ -28,6 +28,7 @@
  */
 
 #include "IODeviceImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/System/IOError.h"
 #include <cerrno>
 #include <cassert>
