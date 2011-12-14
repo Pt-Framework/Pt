@@ -26,6 +26,7 @@
 #include "Pt/System/EventLoop.h"
 #include <sys/select.h>
 #include <set>
+#include <list>
 
 namespace Pt {
 
@@ -33,15 +34,97 @@ namespace System {
 
 class SelectorImpl : public Selector
 {
+    enum IOFlags
+    {
+        Input = 1,
+        Output = 2,
+        Error = 4
+    };
+
+    public:
+        struct Node
+        {
+            Node()
+            : sel(0)
+            , wflags(0)
+            , flags(0)
+            {}
+
+            Selectable* sel;
+            int wflags;
+            int flags;
+        };
+
+        typedef std::list<Node> HandleQueue;
+        typedef std::list<Node>::iterator Handle;
+
     public:
         SelectorImpl()
-        {}
+        {
+            FD_ZERO(&_rfds);
+            FD_ZERO(&_wfds);
+            FD_ZERO(&_efds);
+        }
         
         ~SelectorImpl()
         { }
 
+        void beginRead(Selectable&, int fd)
+        {}
+
+        void endRead(Selectable&, int fd)
+        {}
+
+        Handle enable(Selectable& s, int fd)
+        {
+            Node n;
+            n.sel = &s;
+            return _hqueue.insert(_hqueue.end(), n);
+        }
+
+        void beginRead(Handle& h, int fd)
+        {
+            h->flags |= Input;
+
+            if(h->flags == h->wflags)
+            {
+                // no change required, move to back
+                if( h != _hqueue.end() )
+                    _hqueue.splice(_hqueue.end(), _hqueue, h);
+            }
+            else
+            {
+                // update before next wait, move to front
+                _hqueue.insert(_hqueue.begin(), h);
+            }
+        }
+
+        void endRead(Handle& h, int fd)
+        {
+            h->flags &= ~Input;
+
+            // update before next wait, move to front
+            if( h != _hqueue.begin() )
+                _hqueue.splice(_hqueue.begin(), _hqueue, h);
+        }
+
+        fd_set& rfds()
+        { return _rfds; }
+
+        fd_set& wfds()
+        { return _wfds; }
+
+        fd_set& efds()
+        { return _efds; }
+
         SelectorImpl& impl()
         { return *this; }
+
+    private:
+        HandleQueue _hqueue;
+        fd_set _rfds;
+        fd_set _wfds;
+        fd_set _efds;
 };
 
 class MainLoopImpl : public EventLoopImpl

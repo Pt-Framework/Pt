@@ -104,6 +104,12 @@ void IODeviceImpl::close()
 
 size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
+    EventLoop* loop = _device.parent();
+    if( loop )
+    {
+        loop->selector().impl().beginRead( _device, this->fd() );
+    }
+
     if(_rfds)
     {
         FD_SET( this->fd(), _rfds );
@@ -115,6 +121,12 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 
 size_t IODeviceImpl::endRead(bool& eof)
 {
+    EventLoop* loop = _device.parent();
+    if( loop )
+    {
+        loop->selector().impl().endRead( _device, this->fd() );
+    }
+
     if(_rfds)
     {
         FD_CLR( this->fd(), _rfds );
@@ -335,6 +347,12 @@ void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
     {
         if( _device.rbuf() )
         {
+            EventLoop* loop = _device.parent();
+            if( loop )
+            {
+                loop->selector().impl().beginRead( _device, this->fd() );
+            }
+
             FD_SET(this->fd(), &rfds);
         }
 
