@@ -53,6 +53,9 @@ class Selector
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
+    friend class Selector;
+    friend class SelectorImpl;
+
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
@@ -123,8 +126,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual void onEnable(EventLoop&) {}
 
-        virtual void onDisable(Selector&) {}
+        virtual void onDisable(EventLoop&) {}
 
+        // TODO: do not pass any args, we have _parent
         virtual bool onAvail(Selector&) { return false; }
 
     private:

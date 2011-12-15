@@ -32,6 +32,25 @@ namespace Pt {
 
 namespace System {
 
+struct IOHandle
+{
+    IOHandle(Selectable& sel, int fd)
+    : sel(&sel)
+    , _fd(fd)
+    , wflags(0)
+    , flags(0)
+    , next(0)
+    , prev(0)
+    {}
+
+    Selectable* sel;
+    int fd;
+    int wflags;
+    int flags;
+    Handle* next;
+    Handle* prev;
+};
+
 class SelectorImpl : public Selector
 {
     enum IOFlags
@@ -42,25 +61,11 @@ class SelectorImpl : public Selector
     };
 
     public:
-        struct Node
-        {
-            Node()
-            : sel(0)
-            , wflags(0)
-            , flags(0)
-            {}
-
-            Selectable* sel;
-            int wflags;
-            int flags;
-        };
-
-        typedef std::list<Node> HandleQueue;
-        typedef std::list<Node>::iterator Handle;
-
-    public:
         SelectorImpl()
+        : _first(0)
+        , _last(0)
         {
+            _current = _devices.end();
             FD_ZERO(&_rfds);
             FD_ZERO(&_wfds);
             FD_ZERO(&_efds);
@@ -75,37 +80,219 @@ class SelectorImpl : public Selector
         void endRead(Selectable&, int fd)
         {}
 
-        Handle enable(Selectable& s, int fd)
+        IOHandle* enable(Selectable& s, int fd)
         {
-            Node n;
-            n.sel = &s;
-            return _hqueue.insert(_hqueue.end(), n);
+            _devices.insert( &s );
+
+            if( fd > FD_SETSIZE )
+                throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+
+            // no change required, move to back
+            IOHandle* h = new IOHandle(s, fd);
+            push_back(h);
+            FD_SET(h->fd, &efds);
+
+            
         }
 
-        void beginRead(Handle& h, int fd)
+        void disable(IOHandle* h)
         {
-            h->flags |= Input;
+           std::set<Selectable*>::iterator it = _devices.find( h->sel );
+           if( it == _devices.end() )
+                return;
 
-            if(h->flags == h->wflags)
+            if( h->fd > 0)
             {
-                // no change required, move to back
-                if( h != _hqueue.end() )
-                    _hqueue.splice(_hqueue.end(), _hqueue, h);
+                if(h->flags & Input)
+                    FD_CLR(h->fd, _rfds);
+
+                if(h->flags & Output)
+                    FD_CLR(h->fd, _wfds);
+
+                FD_CLR(h->fd, _efds);
+            }
+
+            pop(h);
+            delete h;
+
+            if( _current == _devices.end() )
+            {
+                _devices.erase(it);
+            }
+            else if(*_current == *it)
+            {
+                _devices.erase(_current++);
             }
             else
             {
-                // update before next wait, move to front
-                h = _hqueue.insert(_hqueue.begin(), *h);
+                _devices.erase(it);
             }
         }
 
-        void endRead(Handle& h, int fd)
+        void beginRead(IOHandle* h)
+        {
+            pop(h);
+            h->flags |= Input;
+ 
+            // TODO: if no change is required, the handle does not have to be 
+            //       int the list at all... -> it would be a real changelist
+            if(h->flags == h->wflags)
+                push_back(h); // no change required, move to back
+            else
+                push_front(h); // update before next wait, move to front
+        }
+
+        void endRead(IOHandle* h)
         {
             h->flags &= ~Input;
 
             // update before next wait, move to front
-            if( h != _hqueue.begin() )
-                _hqueue.splice(_hqueue.begin(), _hqueue, h);
+            pop(h);
+            push_front(h);
+        }
+
+        void beginWrite(IOHandle* h)
+        {
+            pop(h);
+            h->flags |= Output;
+ 
+            if(h->flags == h->wflags)
+                push_back(h); // no change required, move to back
+            else
+                push_front(h); // update before next wait, move to front
+
+        }
+
+        void endWrite(IOHandle* h)
+        {
+            h->flags &= ~Output;
+
+            // update before next wait, move to front
+            pop(h);
+            push_front(h);
+        }
+
+        void beginWait()
+        {
+            for(IOHandle* h = _first; h != 0; h = h->next)
+            {
+                if(h->flags == h->wflags)
+                    break;
+
+                if(h->flags & Input &&  0 == (h->wflags & Input))
+                {
+                    FD_SET(h->fd, &rfds);
+                    h->wflags |= Input;
+                }
+
+                if(0 == h->flags & Input && h->wflags & Input)
+                {
+                    FD_CLR( h->fd, _rfds );
+                    h->wflags &= ~Intput;
+                }
+
+                if(h->flags & Output &&  0 == (h->wflags & Output))
+                {
+                    FD_SET(h->fd, &wfds);
+                    h->wflags |= Output;
+                }
+
+                if(0 == h->flags & Output &&  h->wflags & Output)
+                {
+                    FD_CLR( h->fd, _wfds );
+                    h->wflags &= ~Output;
+                }
+            }
+        }
+
+        void checkAvail(int avail)
+        {
+            try
+            {
+                avail += _avail.size();
+        
+                for( _current = _devices.begin(); _current != _devices.end(); )
+                {
+                    Selectable* selectable = *_current;
+                    avail -= selectable->onAvail(*this);
+        
+                    if(avail <= 0)
+                        break;
+        
+                    if(_current != _devices.end())
+                    {
+                        if(*_current == selectable)
+                        {
+                            ++_current;
+                        }
+                    }
+                }
+            }
+            catch (...)
+            {
+                _current = _devices.end();
+                throw;
+            }
+        }
+
+        bool isReadable(IOHandle* h)
+        {
+            FD_ISSET(h->fd, &rfds);
+        }
+
+        bool isWritable(IOHandle* h)
+        {
+            FD_ISSET(h->fd, &wfds);
+        }
+
+        bool isError(IOHandle* h)
+        {
+            FD_ISSET(h->fd, &efds);
+        }
+
+        void pop(IOHandle* h)
+        {
+            IOHandle* prev = h->prev;
+            IOHandle* next = h->next;
+
+            if(prev)
+                prev->next = next;
+
+            if(next)
+                next->prev = prev;
+
+            h->next = 0;
+            h->prev = 0;
+        }
+
+        void push_back(IOHandle* h)
+        {
+            if( ! _first)
+            {
+                _first = h;
+                _last = h;
+            }
+            else
+            {
+                _last->next = h;
+                h->prev = _last;
+                _last = h;
+            }
+        }
+
+        void push_front(IOHandle* h)
+        {
+            if( ! _first)
+            {
+                _first = h;
+                _last = h;
+            }
+            else
+            {
+                h->next = _first;
+                _first->prev = h;
+                _first = h;
+            }
         }
 
         fd_set& rfds()
@@ -121,7 +308,10 @@ class SelectorImpl : public Selector
         { return *this; }
 
     private:
-        HandleQueue _hqueue;
+        IOHandle* _first;
+        IOHandle* _last;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices; // active
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

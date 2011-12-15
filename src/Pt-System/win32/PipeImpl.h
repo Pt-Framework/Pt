@@ -23,6 +23,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
+#include "MainLoopImpl.h"
 #include <windows.h>
 
 namespace Pt {
@@ -55,7 +56,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void onDetach(EventLoop& s);
 
-        void onEnable(EventLoop& loop);
+        void onEnableX(EventLoop& loop);
+
+        void onDisableX(EventLoop& loop);
 
         bool onAvail(Selector& selector);
 
@@ -84,6 +87,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
      private:
         HANDLE _waitHandle;
+        IOHandle* _iohandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

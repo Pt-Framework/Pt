@@ -39,6 +39,7 @@ namespace System {
 
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
+, _iohandle(0)
 , _fd(-1)
 , _timeout(System::Selectable::WaitInfinite)
 , _rfds(0)
@@ -106,9 +107,9 @@ void IODeviceImpl::close()
 size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
     EventLoop* loop = _device.parent();
-    if( loop )
+    if( loop && _iohandle)
     {
-        loop->selector().impl().beginRead( _device, this->fd() );
+        loop->selector().impl().beginRead( _iohandle );
     }
 
     if(_rfds)
@@ -123,9 +124,9 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 size_t IODeviceImpl::endRead(bool& eof)
 {
     EventLoop* loop = _device.parent();
-    if( loop )
+    if( loop && _iohandle )
     {
-        loop->selector().impl().endRead( _device, this->fd() );
+        loop->selector().impl().endRead( _iohandle );
     }
 
     if(_rfds)
@@ -194,12 +195,24 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
         FD_SET( this->fd(), _wfds );
     }
 
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle)
+    {
+        loop->selector().impl().beginWrite( _iohandle );
+    }
+
     return 0;
 }
 
 
 size_t IODeviceImpl::endWrite()
 {
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->selector().impl().endWrite( _iohandle );
+    }
+
     if(_wfds)
     {
         FD_CLR( this->fd(), _wfds );
@@ -281,21 +294,6 @@ void IODeviceImpl::sync() const
     int ret = fsync(_fd);
     if(ret != 0)
         throw IOError( PT_ERROR_MSG("sync failed") );
-}
-
-
-void IODeviceImpl::attach(EventLoop& s)
-{
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-}
-
-
-void IODeviceImpl::detach(EventLoop& s)
-{
-    this->exitSelect();
 }
 
 
@@ -396,15 +394,6 @@ void IODeviceImpl::exitSelect()
 }
 
 
-bool IODeviceImpl::avail(Selector& s)
-{
-    // get selector impl
-    // get fd_sets
-    // check descriptor
-    return false;
-}
-
-
 int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     int avail = 0;
@@ -474,6 +463,119 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return avail;
+}
+
+
+void IODeviceImpl::attach(EventLoop& s)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+}
+
+
+void IODeviceImpl::detach(EventLoop& s)
+{
+    this->exitSelect();
+}
+
+
+void IODeviceImpl::enable(EventLoop& loop)
+{
+    if( this->fd() < 0 )
+        return;
+
+    _iohandle = loop.selector().impl().enable(_device, this->fd());
+
+    if( _device.rbuf() )
+    {
+        loop.selector().impl().beginRead( _iohandle );
+    }
+
+    if( _device.wbuf() )
+    {
+        loop.selector().impl().beginWrite( _iohandle );
+    }
+}
+
+
+void IODeviceImpl::disable(EventLoop& loop)
+{
+    loop.selector().impl().disable(*this);
+    _iohandle = 0;
+}
+
+
+bool IODeviceImpl::avail(Selector& s)
+{
+    if( ! _iohandle)
+        return false;
+
+    SelectorImpl& sel = s.selector().impl();
+
+    int avail = 0;
+    DestructionSentry sentry(_sentry);
+
+    if ( sel.isError(_iohandle) )
+    {
+        _errorPending = true;
+
+        try
+        {
+            bool reading = _device.reading();
+            bool writing = _device.writing();
+
+            if (reading)
+            {
+                ++avail;
+                _device.inputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
+            if (writing)
+            {
+                ++avail;
+                _device.outputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
+            if (!reading && !writing)
+            {
+                avail = true;
+                _device.close();
+            }
+        }
+        catch (...)
+        {
+            _errorPending = false;
+            throw;
+        }
+        _errorPending = false;
+
+        return avail;
+    }
+
+    if( _device.wavail() > 0 || sel.isWritable(_iohandle) )
+    {
+        _device.outputReady(_device);
+        ++avail;
+    }
+
+    if( ! sentry )
+        return avail;
+
+    if( _device.rbuf() && sel.isReadable(_iohandle) )
+    {
+        _device.inputReady(_device);
+        ++avail;
+    }
+
+    return avail > 0;
 }
 
 }//namespace System

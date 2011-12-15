@@ -112,7 +112,22 @@ void MainLoopImpl::detach(Selectable& s)
 
 void MainLoopImpl::enable(Selectable& s)
 {
-    _dirty.insert(&s);
+    bool ready = false;
+    bool accept = s.simpl().setWaitHandle(_ioEvent, ready);
+    if(accept)
+    {
+        _devices.insert(&s);
+
+        if(ready)
+            _avail.insert(&s);
+    }
+    else
+    {
+        _dirty.insert(&s);
+    }
+
+    /// OLD:
+    ///_dirty.insert(&s);
 }
 
 

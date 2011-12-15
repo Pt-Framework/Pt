@@ -96,6 +96,26 @@ class HandleMap
 };
 
 
+struct IOHandle
+{
+    IOHandle(Selectable& s)
+    : sel(&s)
+    , _handle(INVALID_HANDLE_VALUE)
+    {}
+
+    IOHandle(Selectable& s, HANDLE h)
+    : sel(&s)
+    , _handle(h)
+    {}
+
+    HANDLE handle()
+    { return _handle; }
+
+    Selectable* sel;
+    HANDLE _handle;
+};
+
+
 class SelectorImpl : public Selector
                    , public HandleMap
 {
@@ -106,8 +126,52 @@ class SelectorImpl : public Selector
         ~SelectorImpl()
         { }
 
+        HANDLE waitHandle()
+        { return _ioEvent; }
+
+        IOHandle* enable(Selectable& s)
+        {
+            return new IOHandle(s);
+        }
+
+        IOHandle* enable(Selectable& s, HANDLE h)
+        {
+            IOHandle* iohandle =  new IOHandle(s, h);
+            _dirty.push_back(iohandle);
+            return iohandle;
+        }
+
+        void disable(IOHandle* h)
+        {
+            _dirty.remove(h);
+            _avail.remove(h);
+            this->remove( *(h->sel) );
+            delete h;
+        }
+
+        void setAvail(IOHandle* h)
+        {
+            _avail.push_back(h);
+        }
+
+        void beginWait()
+        {
+            std::list<IOHandle*>::iterator iter;
+            for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
+            {
+                // TODO: handle immediate avail by calling setAvail in Selectabe
+                this->add( (*iter)->handle(), (*iter)->sel);
+            }
+            _dirty.clear();
+        }
+
         SelectorImpl& impl()
         { return *this; }
+
+    private:
+        HANDLE _ioEvent;
+        std::list<IOHandle*> _avail;
+        std::list<IOHandle*> _dirty;
 };
 
 

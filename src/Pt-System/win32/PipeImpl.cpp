@@ -40,6 +40,7 @@ namespace System {
 
 PipeIODevice::PipeIODevice()
 : _waitHandle(INVALID_HANDLE_VALUE)
+, _iohandle(0)
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
@@ -225,12 +226,71 @@ void PipeIODevice::onDetach(EventLoop& s)
 }
 
 
-void PipeIODevice::onEnable(EventLoop& loop)
+void PipeIODevice::onEnableX(EventLoop& loop)
 {
+    // TODO: use this->setAvail()
+
+    _iohandle = loop.selector().impl().enable(*this);
+    HANDLE h = loop.selector().impl().waitHandle();
+
+    // the previous handle might be this objects event handle
+    // or the one assigned by the EventLoop
+    HANDLE prevHandle = _readOv.hEvent;
+
+    // if the handle changes, we need to stop any previous I/O operation
+    // unless it has already completed. _rbuf is set by an IODevice when
+    // beginRead has been called. The event handle is NULL when this
+    // method is called for the first time. If either one is not set, then
+    // there were no I/O operations scheduled before.
+    if( prevHandle != h )
+    {
+        if(_rbuf && _readOv.hEvent)
+            HasOverlappedIoCompleted(&_readOv) ? loop.selector().impl().setAvail(_iohandle)
+                                               : CancelIo( handle() );
+
+        if(_wbuf && _writeOv.hEvent)
+            HasOverlappedIoCompleted(&_writeOv)  ? loop.selector().impl().setAvail(_iohandle)
+                                                 : CancelIo( handle() );
+
+        _readOv.hEvent = h;
+        _writeOv.hEvent = h;
+    }
+
+    // set IOHandle to Avail if data is immediately available. This will
+    // let the EventLoop check the other Selectables with a timeout of
+    // 0 and call checkEvent on this object
+
+    // If _rbuf is set by IODevice::beginRead but the previous event used in
+    // the overlapped structs is NULL, IODevice::beginRead was called before
+    // the IODevice was added to a EventLoop or IODevice::wait was called for
+    // the first time.
+    if( ! prevHandle && _rbuf )
+    {
+        bool eof = false;
+        size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
+        if(eof || n > 0)
+            loop.selector().impl().setAvail(_iohandle);
+
+        this->setEof(eof);
+    }
+
+    // see above. onBeginWrite could not do anything when it was called
+    if( ! prevHandle && _wbuf)
+    {
+        size_t n = this->onBeginWrite(_wbuf, _wbuflen);
+        if(n > 0)
+            loop.selector().impl().setAvail(_iohandle);
+    }
 }
 
 
-bool PipeIODevice::onAvail(Selector& selector)
+void PipeIODevice::onDisableX(EventLoop& loop)
+{
+    loop.selector().impl().disable(_iohandle);
+}
+
+
+bool PipeIODevice::onAvail(Selector& /*selector*/)
 {
     bool avail = false;
 

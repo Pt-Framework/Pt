@@ -98,10 +98,6 @@ namespace System {
 
             virtual void sync() const;
 
-            virtual void attach(EventLoop& s);
-
-            virtual void detach(EventLoop& s);
-
             virtual bool wait(std::size_t msecs);
 
             virtual bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
@@ -114,10 +110,19 @@ namespace System {
 
             virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
+            virtual void attach(EventLoop& s);
+
+            virtual void detach(EventLoop& s);
+
+            void enable(EventLoop& loop);
+
+            void disable(EventLoop& loop);
+
             bool avail(Selector& s);
 
         protected:
             IODevice& _device;
+            IOHandle* _iohandle;
             int _fd;
             std::size_t _timeout;
             fd_set* _rfds;
