@@ -40,6 +40,231 @@ namespace Pt {
 
 namespace System {
 
+SelectorImpl::SelectorImpl()
+: _first(0)
+, _last(0)
+{
+    _current = _devices.end();
+
+    //Open a pipe to send wake up message.
+    if( ::pipe( _wakePipe ) )
+        throw SystemError( PT_ERROR_MSG("pipe failed") );
+
+    int flags = ::fcntl(_wakePipe[0], F_GETFL);
+    if(-1 == flags)
+        throw SystemError(PT_ERROR_MSG("fcntl failed"));
+
+    int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
+    if(-1 == ret)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    flags = ::fcntl(_wakePipe[1], F_GETFL);
+    if(-1 == flags)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
+    if(-1 == ret)
+        throw SystemError( PT_ERROR_MSG("fcntl failed") );
+
+    FD_ZERO(&_rfds);
+    FD_ZERO(&_wfds);
+    FD_ZERO(&_efds);
+
+    FD_SET(_wakePipe[0], &_rfds);
+}
+
+
+SelectorImpl::~SelectorImpl()
+{ 
+    std::set<Selectable*>::iterator it;
+
+    while( _attached.size() )
+    {
+        it = _attached.begin();
+        (*it)->setParent(0);
+    }
+
+    if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
+    {
+        ::close(_wakePipe[0]);
+        ::close(_wakePipe[1]);
+    }
+}
+
+
+void SelectorImpl::attach(Selectable& s)
+{
+    _attached.insert(&s);
+}
+
+
+void SelectorImpl::detach(Selectable& s)
+{
+    _attached.erase(&s);
+}
+
+
+void SelectorImpl::idle(Selectable& s)
+{
+    _avail.erase(&s);
+}
+
+
+void SelectorImpl::active(Selectable& s)
+{
+    _avail.erase(&s);
+}
+
+
+void SelectorImpl::avail(Selectable& s)
+{
+    _avail.insert(&s);
+}
+
+
+void SelectorImpl::wake()
+{
+    ::write( _wakePipe[1], "W", 1);
+    ::fsync( _wakePipe[1] );
+}
+
+
+void SelectorImpl::waitNext(EventLoopImpl& elimpl, std::size_t msecs, bool& isActive )
+{
+    for(IOHandle* h = _first; h != 0; h = h->next)
+    {
+        if(h->flags == h->wflags)
+            break;
+
+        if(h->flags & Input &&  0 == (h->wflags & Input))
+        {
+            FD_SET(h->fd, &_rfds);
+            h->wflags |= Input;
+        }
+
+        if(0 == h->flags & Input && h->wflags & Input)
+        {
+            FD_CLR( h->fd, &_rfds );
+            h->wflags &= ~Input;
+        }
+
+        if(h->flags & Output &&  0 == (h->wflags & Output))
+        {
+            FD_SET(h->fd, &_wfds);
+            h->wflags |= Output;
+        }
+
+        if(0 == h->flags & Output &&  h->wflags & Output)
+        {
+            FD_CLR( h->fd, &_wfds );
+            h->wflags &= ~Output;
+        }
+    }
+
+    fd_set rfds = _rfds;
+    fd_set wfds = _wfds;
+    fd_set efds = _efds;
+
+    msecs = _avail.size() ? 0 : msecs;
+    int avail = -1;
+
+    while( true )
+    {
+        struct timeval* timeout = 0;
+        struct timeval tv;
+        if(msecs != EventLoop::WaitInfinite)
+        {
+            tv.tv_sec = msecs / 1000;
+            tv.tv_usec = (msecs % 1000) * 1000;
+            timeout = &tv;
+        }
+
+        _clock.start();
+        avail = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        Pt::int64_t elapsed = _clock.stop().totalMSecs();
+
+        if( avail < 0 && errno != EINTR )
+        {
+            throw IOError( PT_ERROR_MSG("select failed") );
+        }
+
+        if( avail > 0 || _avail.size() )
+            break;
+
+        if(msecs == EventLoop::WaitInfinite)
+            continue;
+
+        if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
+            return; // timeout
+
+        msecs -= int(elapsed);
+    }
+
+    if( FD_ISSET(_wakePipe[0], &efds) )
+    {
+        throw IOError( PT_ERROR_MSG("pipe failed") );
+    }
+
+    if( FD_ISSET(_wakePipe[0], &rfds) )
+    {
+        --avail;
+
+        static char buffer[1024];
+        while(true)
+        {
+            int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
+            if(ret > 0)
+            {
+                isActive = elimpl.processEvents();
+                continue;
+            }
+
+            if (ret == -1)
+            {
+                if(errno == EINTR)
+                    continue;
+
+                if(errno == EAGAIN)
+                    break;
+            }
+
+            throw IOError( PT_ERROR_MSG("pipe read failed") );
+        }
+    }
+
+    try
+    {
+        avail += _avail.size();
+
+        for( _current = _devices.begin(); _current != _devices.end(); )
+        {
+            Selectable* selectable = *_current;
+            avail -= selectable->simpl().checkEvent(rfds, wfds, efds);
+
+            if(avail <= 0)
+                break;
+
+            if(_current != _devices.end())
+            {
+                if(*_current == selectable)
+                {
+                    ++_current;
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+        _current = _devices.end();
+        throw;
+    }
+
+    return;
+}
+
+
+
+
 MainLoopImpl::MainLoopImpl()
 : EventLoopImpl()
 {

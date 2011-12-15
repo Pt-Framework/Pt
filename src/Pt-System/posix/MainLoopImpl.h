@@ -61,24 +61,9 @@ class SelectorImpl : public Selector
     };
 
     public:
-        SelectorImpl()
-        : _first(0)
-        , _last(0)
-        {
-            _current = _devices.end();
-            FD_ZERO(&_rfds);
-            FD_ZERO(&_wfds);
-            FD_ZERO(&_efds);
-        }
-        
-        ~SelectorImpl()
-        { }
+        SelectorImpl();
 
-        void beginRead(Selectable&, int fd)
-        {}
-
-        void endRead(Selectable&, int fd)
-        {}
+        ~SelectorImpl();
 
         IOHandle* enable(Selectable& s, int fd)
         {
@@ -205,36 +190,6 @@ class SelectorImpl : public Selector
             }
         }
 
-        void checkAvail(int avail)
-        {
-            try
-            {
-                avail += _avail.size();
-        
-                for( _current = _devices.begin(); _current != _devices.end(); )
-                {
-                    Selectable* selectable = *_current;
-                    avail -= selectable->onAvail(*this);
-        
-                    if(avail <= 0)
-                        break;
-        
-                    if(_current != _devices.end())
-                    {
-                        if(*_current == selectable)
-                        {
-                            ++_current;
-                        }
-                    }
-                }
-            }
-            catch (...)
-            {
-                _current = _devices.end();
-                throw;
-            }
-        }
-
         bool isReadable(IOHandle* h)
         {
             return FD_ISSET(h->fd, &_rfds);
@@ -307,15 +262,36 @@ class SelectorImpl : public Selector
         SelectorImpl& impl()
         { return *this; }
 
+        void attach(Selectable& s);
+
+        void detach(Selectable& s);
+
+        void enable(Selectable& s);
+
+        void disable(Selectable& s);
+
+        void idle(Selectable& s);
+
+        void active(Selectable& s);
+
+        void avail(Selectable& s);
+
+        void wake();
+
+        void waitNext(EventLoopImpl& elimpl, std::size_t timeout, bool& isActive);
+
     private:
+        int _wakePipe[2];
         IOHandle* _first;
         IOHandle* _last;
         std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _attached;
         std::set<Selectable*> _devices; // active
         std::set<Selectable*> _avail;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;
+        Clock _clock;
 };
 
 class MainLoopImpl : public EventLoopImpl

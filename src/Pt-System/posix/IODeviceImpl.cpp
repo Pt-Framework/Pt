@@ -346,12 +346,6 @@ void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
     {
         if( _device.rbuf() )
         {
-            EventLoop* loop = _device.parent();
-            if( loop )
-            {
-                loop->selector().impl().beginRead( _device, this->fd() );
-            }
-
             FD_SET(this->fd(), &rfds);
         }
 
