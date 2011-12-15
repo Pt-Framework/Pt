@@ -2382,49 +2382,50 @@ LIST * builtin_shell( FRAME * frame, int flags )
 
 /* Pt extension:
  */
+typedef struct exec_ret_val {
+    int  exitCode;
+    char output[8192];
+} exec_ret_val;
+
+/* Pt extension:
+ */
 static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
-    /*
-    int * exit_code = (int*)closure;
-    *(exit_code) = status;
-    */
+    exec_ret_val* erv = (exec_ret_val*) closure;
 
-    memcpy(closure, output, strlen(output));
+    erv->exitCode = status;
+    memcpy(erv->output, output, strlen(output));
 }
 
 /* Pt extension:
  */
 LIST *builtin_exec( FRAME * frame, int flags)
 {
-    LIST* shell = 0;
-    LIST* result = 0;
-    LIST* command = 0;
-    timing_info ti;
-
+    LIST*        command = 0;
+    OBJECT*      varname = 0;
+    LIST*        shell = 0;
+    exec_ret_val erv;
+    char         strExitCode[1024];
+    OBJECT*      sbuffer = 0;
+    LIST*        result = 0;
+    
     command = lol_get( frame->args, 0 );
     if( ! command )
         return L0;
 
-    OBJECT* varname = object_new( "JAMSHELL" );
+    varname = object_new( "JAMSHELL" );
     shell = var_get( varname );
     object_free( varname );
-/*
-void exec_cmd
-(
-    const char * string,
-    void (* func)( void * closure, int status, timing_info *, const char *, const char * ),
-    void * closure,
-    LIST * shell,
-    const char * action,
-    const char * target
-);
-*/
 
-    char output[8192];
-    exec_cmd( object_str( command->value ), exec_closure, &output, shell, 0, 0);
+    exec_cmd( object_str( command->value ), exec_closure, &erv, shell, 0, 0);
     exec_wait();
 
-    OBJECT* sbuffer = object_new( output );
+    sprintf(strExitCode, "%d", erv.exitCode);
+    sbuffer = object_new( strExitCode );
+    result = list_new( result, sbuffer );
+    object_free( sbuffer );
+    
+    sbuffer = object_new( erv.output );
     result = list_new( result, sbuffer );
     object_free( sbuffer );
     
