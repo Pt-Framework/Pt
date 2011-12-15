@@ -32,6 +32,8 @@ namespace Pt {
 
 namespace System {
 
+    class IOHandle;
+
     struct DestructionSentry
     {
         DestructionSentry(DestructionSentry*& sentry)

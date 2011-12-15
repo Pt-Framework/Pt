@@ -502,7 +502,7 @@ void IODeviceImpl::enable(EventLoop& loop)
 
 void IODeviceImpl::disable(EventLoop& loop)
 {
-    loop.selector().impl().disable(*this);
+    loop.selector().impl().disable(_iohandle);
     _iohandle = 0;
 }
 
@@ -512,7 +512,7 @@ bool IODeviceImpl::avail(Selector& s)
     if( ! _iohandle)
         return false;
 
-    SelectorImpl& sel = s.selector().impl();
+    SelectorImpl& sel = s.impl();
 
     int avail = 0;
     DestructionSentry sentry(_sentry);

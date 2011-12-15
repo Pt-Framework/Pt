@@ -36,7 +36,7 @@ struct IOHandle
 {
     IOHandle(Selectable& sel, int fd)
     : sel(&sel)
-    , _fd(fd)
+    , fd(fd)
     , wflags(0)
     , flags(0)
     , next(0)
@@ -47,8 +47,8 @@ struct IOHandle
     int fd;
     int wflags;
     int flags;
-    Handle* next;
-    Handle* prev;
+    IOHandle* next;
+    IOHandle* prev;
 };
 
 class SelectorImpl : public Selector
@@ -90,9 +90,9 @@ class SelectorImpl : public Selector
             // no change required, move to back
             IOHandle* h = new IOHandle(s, fd);
             push_back(h);
-            FD_SET(h->fd, &efds);
+            FD_SET(h->fd, &_efds);
 
-            
+            return h;
         }
 
         void disable(IOHandle* h)
@@ -104,12 +104,12 @@ class SelectorImpl : public Selector
             if( h->fd > 0)
             {
                 if(h->flags & Input)
-                    FD_CLR(h->fd, _rfds);
+                    FD_CLR(h->fd, &_rfds);
 
                 if(h->flags & Output)
-                    FD_CLR(h->fd, _wfds);
+                    FD_CLR(h->fd, &_wfds);
 
-                FD_CLR(h->fd, _efds);
+                FD_CLR(h->fd, &_efds);
             }
 
             pop(h);
@@ -181,25 +181,25 @@ class SelectorImpl : public Selector
 
                 if(h->flags & Input &&  0 == (h->wflags & Input))
                 {
-                    FD_SET(h->fd, &rfds);
+                    FD_SET(h->fd, &_rfds);
                     h->wflags |= Input;
                 }
 
                 if(0 == h->flags & Input && h->wflags & Input)
                 {
-                    FD_CLR( h->fd, _rfds );
-                    h->wflags &= ~Intput;
+                    FD_CLR( h->fd, &_rfds );
+                    h->wflags &= ~Input;
                 }
 
                 if(h->flags & Output &&  0 == (h->wflags & Output))
                 {
-                    FD_SET(h->fd, &wfds);
+                    FD_SET(h->fd, &_wfds);
                     h->wflags |= Output;
                 }
 
                 if(0 == h->flags & Output &&  h->wflags & Output)
                 {
-                    FD_CLR( h->fd, _wfds );
+                    FD_CLR( h->fd, &_wfds );
                     h->wflags &= ~Output;
                 }
             }
@@ -237,17 +237,17 @@ class SelectorImpl : public Selector
 
         bool isReadable(IOHandle* h)
         {
-            FD_ISSET(h->fd, &rfds);
+            return FD_ISSET(h->fd, &_rfds);
         }
 
         bool isWritable(IOHandle* h)
         {
-            FD_ISSET(h->fd, &wfds);
+            return FD_ISSET(h->fd, &_wfds);
         }
 
         bool isError(IOHandle* h)
         {
-            FD_ISSET(h->fd, &efds);
+            return FD_ISSET(h->fd, &_efds);
         }
 
         void pop(IOHandle* h)
@@ -312,6 +312,7 @@ class SelectorImpl : public Selector
         IOHandle* _last;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active
+        std::set<Selectable*> _avail;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;
