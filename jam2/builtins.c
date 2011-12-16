@@ -2382,31 +2382,46 @@ LIST * builtin_shell( FRAME * frame, int flags )
 
 /* Pt extension:
  */
-typedef struct exec_ret_val {
-    int  exitCode;
-    char output[8192];
-} exec_ret_val;
+typedef struct exec_ret_val_closure {
+    LIST* result;
+} exec_ret_val_closure;
 
 /* Pt extension:
  */
 static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
-    exec_ret_val* erv = (exec_ret_val*) closure;
+    exec_ret_val_closure* ervc = (exec_ret_val_closure*) closure;
 
-    erv->exitCode = status;
-    memcpy(erv->output, output, strlen(output));
+    char  strExitCode[1024];
+    char  lenOutput = 0;
+    char* strOutput = 0;
+    int   i         = 0;
+    
+    sprintf(strExitCode, "%d", status);
+
+    lenOutput = strlen(output) + 1;
+    strOutput = malloc(lenOutput);
+    memcpy(strOutput, output, lenOutput);
+
+    for(i = 0; i < lenOutput; ++i) {
+        if(strOutput[i] == '\n' || strOutput[i] == '\r') strOutput[i] = ' ';
+    }
+
+    ervc->result = 0;
+    ervc->result = list_new( ervc->result, object_new( strExitCode ) );
+    ervc->result = list_new( ervc->result, object_new( strOutput ) );
+
+    free(strOutput);
 }
 
 /* Pt extension:
  */
 LIST *builtin_exec( FRAME * frame, int flags)
 {
-    LIST*        command = 0;
-    OBJECT*      varname = 0;
-    LIST*        shell = 0;
-    exec_ret_val erv;
-    char         strExitCode[1024];
-    LIST*        result = 0;
+    LIST*                command = 0;
+    OBJECT*              varname = 0;
+    LIST*                shell = 0;
+    exec_ret_val_closure ervc;
     
     command = lol_get( frame->args, 0 );
     if( ! command )
@@ -2416,14 +2431,10 @@ LIST *builtin_exec( FRAME * frame, int flags)
     shell = var_get( varname );
     object_free( varname );
 
-    exec_cmd( object_str( command->value ), exec_closure, &erv, shell, 0, 0);
+    exec_cmd( object_str( command->value ), exec_closure, &ervc, shell, 0, 0);
     exec_wait();
-
-    sprintf(strExitCode, "%d", erv.exitCode);
-    result = list_new( result, object_new( strExitCode ) );
-    result = list_new( result, object_new( erv.output ) );
     
-    return result;
+    return ervc.result;
 }
 
 #else  /* #ifdef HAVE_POPEN */
