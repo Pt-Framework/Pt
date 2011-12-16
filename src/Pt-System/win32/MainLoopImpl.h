@@ -116,62 +116,76 @@ struct IOHandle
 };
 
 
-class SelectorImpl : public Selector
-                   , public HandleMap
+class Selector : public EventLoopImpl
 {
     public:
-        SelectorImpl()
-        {}
+        Selector();
         
-        ~SelectorImpl()
-        { }
+        ~Selector();
 
-        HANDLE waitHandle()
-        { return _ioEvent; }
+        void attach(Selectable& s);
 
-        IOHandle* enable(Selectable& s)
-        {
-            return new IOHandle(s);
+        void detach(Selectable& s);
+
+        void enable(Selectable& s);
+
+        void disable(Selectable& s);
+
+        void idle(Selectable& s);
+
+        void active(Selectable& s);
+
+        void avail(Selectable& s);
+
+        HANDLE beginWait(Selectable& s)
+        { 
+            _devices.insert(&s);
+            return _ioEvent; 
         }
 
-        IOHandle* enable(Selectable& s, HANDLE h)
+        void endWait(Selectable& s)
+        { 
+            _devices.erase(&s);
+        }
+
+        IOHandle* registerHandle(Selectable& s, HANDLE h)
         {
             IOHandle* iohandle =  new IOHandle(s, h);
             _dirty.push_back(iohandle);
             return iohandle;
         }
 
-        void disable(IOHandle* h)
+        void unregisterHandle(IOHandle* h)
         {
             _dirty.remove(h);
-            _avail.remove(h);
-            this->remove( *(h->sel) );
+            _handles.remove( *(h->sel) );
             delete h;
         }
 
-        void setAvail(IOHandle* h)
+        void setAvail(Selectable& s)
         {
-            _avail.push_back(h);
+            _avail.insert(&s);
         }
 
-        void beginWait()
-        {
-            std::list<IOHandle*>::iterator iter;
-            for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
-            {
-                // TODO: handle immediate avail by calling setAvail in Selectabe
-                this->add( (*iter)->handle(), (*iter)->sel);
-            }
-            _dirty.clear();
-        }
+    protected:
+        virtual void onRun();
 
-        SelectorImpl& impl()
-        { return *this; }
+        virtual void onWake();
+
+         void waitNext(std::size_t timeout, bool& isActive);
+
+        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
     private:
+        HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        std::list<IOHandle*> _avail;
+        HandleMap _handles;
         std::list<IOHandle*> _dirty;
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*>::iterator _currentAvail;
+        std::set<Selectable*> _attached;
+        std::set<Selectable*> _devices;
+        std::set<Selectable*> _avail;
 };
 
 
@@ -185,7 +199,7 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         ~MainLoopImpl();
 
         Selector& selector()
-        { return _handles; }
+        { return _selector; }
 
         void attach( Selectable& s );
 
@@ -196,7 +210,9 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         void disable( Selectable& s );
 
         void idle(Selectable& s);
+
         void active(Selectable& s);
+
         void avail(Selectable& s);
 
     protected:
@@ -211,7 +227,8 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        SelectorImpl _handles;
+        HandleMap _handles;
+        Selector _selector;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*>::iterator _currentAvail;
         std::set<Selectable*> _attached;

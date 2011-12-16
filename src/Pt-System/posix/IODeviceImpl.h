@@ -120,7 +120,7 @@ namespace System {
 
             void disable(EventLoop& loop);
 
-            bool avail(Selector& s);
+            bool avail();
 
         protected:
             IODevice& _device;

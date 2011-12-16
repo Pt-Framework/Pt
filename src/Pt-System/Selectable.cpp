@@ -27,6 +27,7 @@
  */
 
 #include "Pt/System/Selectable.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -36,11 +37,19 @@ Selectable::~Selectable()
 {
     if(_parent)
     {
+        // TODO: this should not happen...
         if(_state == Busy || _state == Avail)
+        {
+            assert(false);
             _parent->onIdle(*this);
+        }
 
+        // TODO: this should not happen...
         if( this->enabled() )
+        {
+            assert(false);
             _parent->onDisable(*this);
+        }
 
         _parent->onDetach(*this);
     }
@@ -49,16 +58,21 @@ Selectable::~Selectable()
 
 void Selectable::setParent(EventLoop* parent)
 {
+    //TODO: exception safety...
+    //      may need to split this function in attach/detach...
+
     if(_parent)
     {
-        this->onDetach(*_parent);
-
         if(_state == Busy || _state == Avail)
             _parent->onIdle(*this);
 
         if( this->enabled() )
+        {
+            this->onDisable(*_parent);
             _parent->onDisable(*this);
+        }
 
+        this->onDetach(*_parent);
         _parent->onDetach(*this);
         _parent = 0;
     }
@@ -147,7 +161,10 @@ void Selectable::setEnabled(bool isEnabled)
     if(isEnabled)
     {
         if(_parent)
+        {
+            this->onEnable(*_parent);
             _parent->onEnable(*this);
+        }
 
         if(_state == Disabled)
             _state = Idle;
@@ -160,7 +177,10 @@ void Selectable::setEnabled(bool isEnabled)
                 _parent->onIdle(*this);
 
             if( this->enabled() )
+            {
+                this->onDisable(*_parent);
                 _parent->onDisable(*this);
+            }
         }
 
         _state = Disabled;

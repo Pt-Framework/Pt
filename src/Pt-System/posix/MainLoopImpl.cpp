@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace System {
 
-SelectorImpl::SelectorImpl()
+Selector::Selector()
 : _first(0)
 , _last(0)
 {
@@ -74,7 +74,7 @@ SelectorImpl::SelectorImpl()
 }
 
 
-SelectorImpl::~SelectorImpl()
+Selector::~Selector()
 { 
     std::set<Selectable*>::iterator it;
 
@@ -92,44 +92,66 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::attach(Selectable& s)
+void Selector::attach(Selectable& s)
 {
     _attached.insert(&s);
 }
 
 
-void SelectorImpl::detach(Selectable& s)
+void Selector::detach(Selectable& s)
 {
     _attached.erase(&s);
 }
 
 
-void SelectorImpl::idle(Selectable& s)
+void Selector::enable(Selectable& s)
+{
+}
+
+
+void Selector::disable(Selectable& s)
+{
+}
+
+
+void Selector::idle(Selectable& s)
 {
     _avail.erase(&s);
 }
 
 
-void SelectorImpl::active(Selectable& s)
+void Selector::active(Selectable& s)
 {
     _avail.erase(&s);
 }
 
 
-void SelectorImpl::avail(Selectable& s)
+void Selector::avail(Selectable& s)
 {
     _avail.insert(&s);
 }
 
 
-void SelectorImpl::wake()
+void Selector::onRun()
+{
+    bool isActive = true;
+    while(isActive)
+    {
+        size_t timeout = this->processTimers();
+
+        this->waitNext(timeout, isActive);
+    }
+}
+
+
+void Selector::onWake()
 {
     ::write( _wakePipe[1], "W", 1);
     ::fsync( _wakePipe[1] );
 }
 
 
-void SelectorImpl::waitNext(EventLoopImpl& elimpl, std::size_t msecs, bool& isActive )
+void Selector::waitNext(std::size_t msecs, bool& isActive )
 {
     for(IOHandle* h = _first; h != 0; h = h->next)
     {
@@ -215,7 +237,7 @@ void SelectorImpl::waitNext(EventLoopImpl& elimpl, std::size_t msecs, bool& isAc
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                isActive = elimpl.processEvents();
+                isActive = EventLoopImpl::processEvents();
                 continue;
             }
 
@@ -236,10 +258,12 @@ void SelectorImpl::waitNext(EventLoopImpl& elimpl, std::size_t msecs, bool& isAc
     {
         avail += _avail.size();
 
+        //TODO: iterate _avail too...
+
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
             Selectable* selectable = *_current;
-            avail -= selectable->simpl().checkEvent(rfds, wfds, efds);
+            avail -= selectable->onAvail();
 
             if(avail <= 0)
                 break;

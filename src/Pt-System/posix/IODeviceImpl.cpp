@@ -480,33 +480,33 @@ void IODeviceImpl::enable(EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    _iohandle = loop.selector().impl().enable(_device, this->fd());
+    _iohandle = loop.selector().enable(_device, this->fd());
 
     if( _device.rbuf() )
     {
-        loop.selector().impl().beginRead( _iohandle );
+        loop.selector().beginRead( _iohandle );
     }
 
     if( _device.wbuf() )
     {
-        loop.selector().impl().beginWrite( _iohandle );
+        loop.selector().beginWrite( _iohandle );
     }
 }
 
 
 void IODeviceImpl::disable(EventLoop& loop)
 {
-    loop.selector().impl().disable(_iohandle);
+    loop.selector().disable(_iohandle);
     _iohandle = 0;
 }
 
 
-bool IODeviceImpl::avail(Selector& s)
+bool IODeviceImpl::avail()
 {
     if( ! _iohandle)
         return false;
 
-    SelectorImpl& sel = s.impl();
+    Selector& sel = _device.parent()->selector();
 
     int avail = 0;
     DestructionSentry sentry(_sentry);

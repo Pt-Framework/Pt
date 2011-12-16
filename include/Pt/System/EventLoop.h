@@ -64,6 +64,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual ~EventLoop();
 
+        // TODO: rename EventLoopImpl
         virtual Selector& selector() = 0;
 
         /** @brief Adds a Selectable
@@ -187,7 +188,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<> _exited;
 };
 
-//! @internal
+//! @internal TODO: rename EventDispatcher
 class PT_SYSTEM_API EventLoopImpl
 {
     typedef std::multimap<Timespan, Timer*> TimerQueue;

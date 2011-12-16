@@ -40,6 +40,259 @@ namespace Pt {
 
 namespace System {
 
+Selector::Selector()
+{
+    _current = _devices.end();
+    _currentAvail = _avail.end();
+
+    _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _wakeEvent == NULL )
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+
+    _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _ioEvent == NULL )
+    {
+        CloseHandle( _wakeEvent );
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+    }
+
+    _handles.add( _wakeEvent, 0 );
+    _handles.add( _ioEvent, 0 );
+}
+
+
+Selector::~Selector()
+{ 
+    std::set<Selectable*>::iterator it;
+
+    while( _attached.size() )
+    {
+        it = _attached.begin();
+        (*it)->setParent(0);
+    }
+
+    CloseHandle( _wakeEvent );
+    CloseHandle( _ioEvent );
+}
+
+
+void Selector::attach(Selectable& s)
+{
+    _attached.insert(&s);
+}
+
+
+void Selector::detach(Selectable& s)
+{
+    _attached.erase(&s);
+}
+
+
+void Selector::enable(Selectable& s)
+{
+
+}
+
+
+void Selector::disable(Selectable& s)
+{
+    std::set<Selectable*>::iterator iter = _devices.find( &s );
+    if( iter != _devices.end() )
+    {
+        if( _current != _devices.end() &&
+           *_current == *iter )
+            _devices.erase(_current++);
+        else
+            _devices.erase(iter);
+    }
+
+    iter = _avail.find( &s );
+    if( iter != _avail.end() )
+    {
+        if( _currentAvail != _avail.end() &&
+           *_currentAvail == *iter )
+            _avail.erase(_currentAvail++);
+        else
+            _avail.erase(iter);
+    }
+}
+
+
+void Selector::idle(Selectable& s)
+{
+    std::set<Selectable*>::iterator it = _avail.find( &s );
+    if( it == _avail.end() )
+        return;
+
+    if( _currentAvail != _avail.end() &&
+       *_currentAvail == *it )
+        _avail.erase(_currentAvail++);
+    else
+        _avail.erase(it);
+}
+
+
+void Selector::active(Selectable& s)
+{
+    std::set<Selectable*>::iterator it = _avail.find( &s );
+    if( it == _avail.end() )
+        return;
+
+    if( _currentAvail != _avail.end() &&
+       *_currentAvail == *it )
+        _avail.erase(_currentAvail++);
+    else
+        _avail.erase(it);
+}
+
+
+void Selector::avail(Selectable& s)
+{
+    _avail.insert(&s);
+}
+
+
+void Selector::onRun()
+{
+    bool isActive = true;
+    while(isActive)
+    {
+        size_t timeout = this->processTimers();
+
+        this->waitNext(timeout, isActive);
+    }
+}
+
+
+void Selector::onWake()
+{
+    SetEvent( _wakeEvent );
+}
+
+
+void Selector::waitNext(std::size_t umsecs, bool& isActive )
+{
+    // convert unsigned to signed
+    DWORD msecs = umsecs;
+    if(umsecs == MainLoop::WaitInfinite)
+    {
+        msecs = INFINITE;
+    }
+    else if( umsecs > std::numeric_limits<DWORD>::max() )
+    {
+        msecs = std::numeric_limits<DWORD>::max();
+    }
+
+    std::list<IOHandle*>::iterator iter;
+    for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
+    {
+        // TODO: handle immediate avail by calling setAvail in Selectabe
+        _handles.add( (*iter)->handle(), (*iter)->sel);
+    }
+
+    _dirty.clear();
+
+    if( _avail.size() )
+    {
+        msecs = 0;
+    }
+
+    bool isTimeout = false;
+    DWORD offset = waitFor(_handles.size(), _handles.handles(), msecs, isTimeout);
+
+    try
+    {
+        // check all selectables that did not require waiting
+        for( _currentAvail = _avail.begin(); _currentAvail != _avail.end(); )
+        {
+            Selectable* s = *_currentAvail;
+
+            if( s->enabled() ) 
+                s->onAvail();
+
+            if( _currentAvail != _avail.end() &&
+               *_currentAvail == s )
+            {
+                    ++_currentAvail;
+            }
+        }
+
+
+        if(isTimeout)
+            return;
+
+        // wake event at offset 0 was active
+        if (offset == 0)
+        {
+            isActive = EventLoopImpl::processEvents();
+            return;
+        }
+        // I/O event at offset 1 was active
+        else if (offset == 1)
+        {
+            for( _current = _devices.begin(); _current != _devices.end(); )
+            {
+                Selectable* dev = *_current;
+
+                if( dev->enabled() ) 
+                    dev->onAvail();
+
+                if( _current != _devices.end() &&
+                   *_current == dev )
+                {
+                    ++_current;
+                }
+            }
+        }
+        // some of the other event handles was active
+        else if( offset < _handles.size() )
+        {
+            Selectable* selectable = _handles.at(offset);
+
+            if( selectable->enabled() )
+                 selectable->onAvail();
+        }
+    }
+    catch (...)
+    {
+        _current = _devices.end();
+        _currentAvail = _avail.end();
+        throw;
+    }
+}
+
+
+DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+{
+    DWORD result = WaitForMultipleObjects( numHandles, handles, false, msecs );
+    if(result == WAIT_FAILED)
+    {
+        //DWORD err = GetLastError();
+        throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+    }
+
+    if( result == WAIT_TIMEOUT)
+    {
+        isTimeout = true;
+        return 0;
+    }
+
+    return result - WAIT_OBJECT_0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 MainLoopImpl::MainLoopImpl()
 : EventLoopImpl()
 {

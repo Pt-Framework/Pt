@@ -52,15 +52,15 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         void redirect(int newFd, bool close = true);
 
     protected:
-        void onAttach(EventLoop& s);
+        void onAttach(EventLoop& loop);
 
-        void onDetach(EventLoop& s);
+        void onDetach(EventLoop& loop);
 
         void onEnableX(EventLoop& loop);
 
         void onDisableX(EventLoop& loop);
 
-        bool onAvail(Selector& selector);
+        bool onAvail();
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
@@ -87,7 +87,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
      private:
         HANDLE _waitHandle;
-        IOHandle* _iohandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

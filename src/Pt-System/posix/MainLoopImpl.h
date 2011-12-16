@@ -51,7 +51,7 @@ struct IOHandle
     IOHandle* prev;
 };
 
-class SelectorImpl : public Selector
+class Selector : public EventLoopImpl
 {
     enum IOFlags
     {
@@ -61,9 +61,9 @@ class SelectorImpl : public Selector
     };
 
     public:
-        SelectorImpl();
+        Selector();
 
-        ~SelectorImpl();
+        ~Selector();
 
         IOHandle* enable(Selectable& s, int fd)
         {
@@ -259,9 +259,6 @@ class SelectorImpl : public Selector
         fd_set& efds()
         { return _efds; }
 
-        SelectorImpl& impl()
-        { return *this; }
-
         void attach(Selectable& s);
 
         void detach(Selectable& s);
@@ -276,9 +273,12 @@ class SelectorImpl : public Selector
 
         void avail(Selectable& s);
 
-        void wake();
+    protected:
+        virtual void onRun();
 
-        void waitNext(EventLoopImpl& elimpl, std::size_t timeout, bool& isActive);
+        virtual void onWake();
+
+        void waitNext(std::size_t timeout, bool& isActive);
 
     private:
         int _wakePipe[2];
@@ -329,7 +329,7 @@ class MainLoopImpl : public EventLoopImpl
 
     private:
         int _wakePipe[2];
-        SelectorImpl _selector;
+        Selector _selector;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

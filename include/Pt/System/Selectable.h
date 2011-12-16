@@ -36,25 +36,10 @@ namespace Pt {
 namespace System {
 
 class SelectableImpl;
-class SelectorImpl;
-
-// Loop must return a ref to its Selector 
-class Selector
-{
-    public:
-        Selector()
-        {}
-
-        virtual ~Selector()
-        {}
-
-        virtual SelectorImpl& impl() = 0;
-};
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class Selector;
-    friend class SelectorImpl;
 
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
@@ -83,6 +68,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         */
         void close();
 
+        // TODO: remove single wait, use blocking calls with timeout instead
         bool wait(std::size_t msecs = WaitInfinite);
 
         //! @brief Test if the I/O device object is enabled
@@ -94,6 +80,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         */
         bool enabled() const;
 
+        // TODO: active
         bool idle() const;
 
         bool busy() const;
@@ -109,8 +96,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Sets or unsets the device enabled
         void setEnabled(bool isEnabled);
 
+        // TODO: setUnavail would be enough
+        //       alternatively, the EventLoop could unset the avail flag
         void setIdle();
 
+        // TODO: setUnavail would be enough
+        //       alternatively, the EventLoop could unset the avail flag
         void setActive();
 
         void setAvail();
@@ -128,8 +119,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual void onDisable(EventLoop&) {}
 
-        // TODO: do not pass any args, we have _parent
-        virtual bool onAvail(Selector&) { return false; }
+        virtual bool onAvail() { return false; }
 
     private:
         EventLoop* _parent;
