@@ -166,24 +166,24 @@ void EventLoop::onRemoveTimer( Timer& timer )
 
 
 //////////////////////////////////////////////////////////////////////////
-// EventLoopImpl
+// EventDispatcher
 //////////////////////////////////////////////////////////////////////////
 
-EventLoopImpl::EventLoopImpl()
+EventDispatcher::EventDispatcher()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
 , _state(0)
 {}
 
 
-EventLoopImpl::EventLoopImpl(Allocator& a)
+EventDispatcher::EventDispatcher(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
 , _state(0)
 {}
 
 
-EventLoopImpl:: ~EventLoopImpl()
+EventDispatcher:: ~EventDispatcher()
 {
     try
     {
@@ -205,14 +205,14 @@ EventLoopImpl:: ~EventLoopImpl()
 }
 
 
-void EventLoopImpl::run()
+void EventDispatcher::run()
 {
     _state = 0;
     this->onRun();
 }
 
 
-void EventLoopImpl::exit()
+void EventDispatcher::exit()
 {
     RecursiveLock lock(_queueMutex);
     _state = 1;
@@ -223,13 +223,13 @@ void EventLoopImpl::exit()
 }
 
 
-void EventLoopImpl::wake()
+void EventDispatcher::wake()
 {
     this->onWake();
 }
 
 
-void EventLoopImpl::commitEvent(const Event& ev)
+void EventDispatcher::commitEvent(const Event& ev)
 {
     {
         RecursiveLock lock( _queueMutex );
@@ -251,7 +251,7 @@ void EventLoopImpl::commitEvent(const Event& ev)
 }
 
 
-void EventLoopImpl::queueEvent(const Event& ev)
+void EventDispatcher::queueEvent(const Event& ev)
 {
     RecursiveLock lock( _queueMutex );
 
@@ -269,7 +269,7 @@ void EventLoopImpl::queueEvent(const Event& ev)
 }
 
 
-bool EventLoopImpl::processEvents()
+bool EventDispatcher::processEvents()
 {
     bool isActive = true;
 
@@ -302,7 +302,7 @@ bool EventLoopImpl::processEvents()
 }
 
 
-void EventLoopImpl::addTimer(Timer& timer)
+void EventDispatcher::addTimer(Timer& timer)
 {
     if( timer.active() )
     {
@@ -312,7 +312,7 @@ void EventLoopImpl::addTimer(Timer& timer)
 }
 
 
-void EventLoopImpl::removeTimer( Timer& timer )
+void EventDispatcher::removeTimer( Timer& timer )
 {
     std::multimap<Timespan, Timer*>::iterator it;
     for(it = _timers.begin(); it != _timers.end(); ++it)
@@ -326,7 +326,7 @@ void EventLoopImpl::removeTimer( Timer& timer )
 }
 
 
-size_t EventLoopImpl::processTimers()
+size_t EventDispatcher::processTimers()
 {
     size_t lowestTimeout = EventLoop::WaitInfinite;
 

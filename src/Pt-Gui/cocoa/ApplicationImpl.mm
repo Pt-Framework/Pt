@@ -124,7 +124,7 @@ MainLoopImpl::MainLoopImpl()
 
 
 MainLoopImpl::MainLoopImpl(Allocator& a)
-: System::EventLoopImpl(a)
+: System::EventDispatcher(a)
 {
     [PtGuiApplication sharedApplication];
     [NSApp initPool];

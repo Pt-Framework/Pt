@@ -1,5 +1,6 @@
 SubDir TOP src Pt-Gui cocoa ;
 SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 Library Pt-Gui-cocoa : ApplicationImpl.mm

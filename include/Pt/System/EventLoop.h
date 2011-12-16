@@ -188,18 +188,18 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<> _exited;
 };
 
-//! @internal TODO: rename EventDispatcher
-class PT_SYSTEM_API EventLoopImpl
+//! @internal
+class PT_SYSTEM_API EventDispatcher
 {
     typedef std::multimap<Timespan, Timer*> TimerQueue;
     typedef std::deque<Event*> EventQueue;
 
     public:
-        EventLoopImpl();
+        EventDispatcher();
 
-        EventLoopImpl(Allocator& a);
+        EventDispatcher(Allocator& a);
 
-        virtual ~EventLoopImpl();
+        virtual ~EventDispatcher();
 
         void run();
 

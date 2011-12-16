@@ -51,7 +51,7 @@ struct IOHandle
     IOHandle* prev;
 };
 
-class Selector : public EventLoopImpl
+class Selector : public EventDispatcher
 {
     enum IOFlags
     {
@@ -294,7 +294,7 @@ class Selector : public EventLoopImpl
         Clock _clock;
 };
 
-class MainLoopImpl : public EventLoopImpl
+class MainLoopImpl : public EventDispatcher
 {
     public:
         MainLoopImpl();

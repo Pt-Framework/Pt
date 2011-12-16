@@ -237,7 +237,7 @@ void Selector::waitNext(std::size_t msecs, bool& isActive )
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                isActive = EventLoopImpl::processEvents();
+                isActive = EventDispatcher::processEvents();
                 continue;
             }
 
@@ -290,7 +290,7 @@ void Selector::waitNext(std::size_t msecs, bool& isActive )
 
 
 MainLoopImpl::MainLoopImpl()
-: EventLoopImpl()
+: EventDispatcher()
 {
     _current = _devices.end();
 
@@ -322,7 +322,7 @@ MainLoopImpl::MainLoopImpl()
 }
 
 MainLoopImpl::MainLoopImpl(Allocator& a)
-: EventLoopImpl(a)
+: EventDispatcher(a)
 {
     _current = _devices.end();
 
@@ -520,7 +520,7 @@ void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                isActive = EventLoopImpl::processEvents();
+                isActive = EventDispatcher::processEvents();
                 continue;
             }
 

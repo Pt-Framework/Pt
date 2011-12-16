@@ -19,6 +19,8 @@
 #ifndef Pt_Gui_cocoa_ApplicationImpl_h
 #define Pt_Gui_cocoa_ApplicationImpl_h
 
+#include "posix/MainLoopImpl.h"
+
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 #include <Pt/System/EventLoop.h>
@@ -31,23 +33,7 @@ namespace Pt {
 
 namespace Gui {
 
-class SelectorImpl : public System::Selector
-{
-    public:
-        SelectorImpl()
-        {}
-        
-        ~SelectorImpl()
-        { }
-
-        System::SelectorImpl& impl()
-        { 
-            System::SelectorImpl* xxxImp;
-            return *xxxImp; 
-        }
-};
-
-class MainLoopImpl : public System::EventLoopImpl
+class MainLoopImpl : public System::EventDispatcher
 {
     public:
         MainLoopImpl();
@@ -56,25 +42,25 @@ class MainLoopImpl : public System::EventLoopImpl
 
         virtual ~MainLoopImpl();
 
-        void attach( System::Selectable& s )
+        void attach(System::Selectable& s)
         {}
 
-        void detach( System::Selectable& s )
+        void detach(System::Selectable& s)
         {}
 
-        void enable( System::Selectable& s )
+        void enable(System::Selectable& s)
         {}
 
-        void disable( System::Selectable& s )
+        void disable(System::Selectable& s)
         {}
 
-        void idle( System::Selectable& s )
+        void idle(System::Selectable& s)
         {}
 
-        void active( System::Selectable& s )
+        void active(System::Selectable& s)
         {}
 
-        void avail( System::Selectable& s )
+        void avail(System::Selectable& s)
         {}
 
     protected:
@@ -96,7 +82,7 @@ class MainLoop : public Pt::System::EventLoop
         ~MainLoop();
 
         System::Selector& selector()
-        { return _selector; }
+        { return *_selector; }
 
     protected:
         virtual void onAttach(System::Selectable&);
@@ -133,7 +119,7 @@ class MainLoop : public Pt::System::EventLoop
 
     private:
         MainLoopImpl _impl;
-        SelectorImpl _selector;
+        System::Selector* _selector;
 };
 
 } // namespace Gui

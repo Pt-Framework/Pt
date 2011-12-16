@@ -109,7 +109,7 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
-        loop->selector().impl().beginRead( _iohandle );
+        loop->selector().beginRead( _iohandle );
     }
 
     if(_rfds)
@@ -126,7 +126,7 @@ size_t IODeviceImpl::endRead(bool& eof)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
     {
-        loop->selector().impl().endRead( _iohandle );
+        loop->selector().endRead( _iohandle );
     }
 
     if(_rfds)
@@ -198,7 +198,7 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
-        loop->selector().impl().beginWrite( _iohandle );
+        loop->selector().beginWrite( _iohandle );
     }
 
     return 0;
@@ -210,7 +210,7 @@ size_t IODeviceImpl::endWrite()
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
     {
-        loop->selector().impl().endWrite( _iohandle );
+        loop->selector().endWrite( _iohandle );
     }
 
     if(_wfds)
