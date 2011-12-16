@@ -116,7 +116,7 @@ struct IOHandle
 };
 
 
-class Selector : public EventLoopImpl
+class Selector : public EventDispatcher
 {
     public:
         Selector();
@@ -189,7 +189,7 @@ class Selector : public EventLoopImpl
 };
 
 
-class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
+class PT_SYSTEM_API MainLoopImpl : public EventDispatcher
 {
     public:
         MainLoopImpl();

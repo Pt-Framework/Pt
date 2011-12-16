@@ -224,7 +224,7 @@ void Selector::waitNext(std::size_t umsecs, bool& isActive )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            isActive = EventLoopImpl::processEvents();
+            isActive = EventDispatcher::processEvents();
             return;
         }
         // I/O event at offset 1 was active
@@ -294,7 +294,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
 
 
 MainLoopImpl::MainLoopImpl()
-: EventLoopImpl()
+: EventDispatcher()
 {
     _current = _devices.end();
     _currentAvail = _avail.end();
@@ -315,7 +315,7 @@ MainLoopImpl::MainLoopImpl()
 }
 
 MainLoopImpl::MainLoopImpl(Allocator& a)
-: EventLoopImpl(a)
+: EventDispatcher(a)
 {
     _current = _devices.end();
     _currentAvail = _avail.end();
@@ -556,7 +556,7 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            isActive = EventLoopImpl::processEvents();
+            isActive = EventDispatcher::processEvents();
             return;
         }
         // I/O event at offset 1 was active
