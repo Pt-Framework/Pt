@@ -2400,7 +2400,7 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     sprintf(strExitCode, "%d", status);
 
     lenOutput = strlen(output) + 1;
-    strOutput = malloc(lenOutput);
+    strOutput = BJAM_MALLOC(lenOutput);
     memcpy(strOutput, output, lenOutput);
 
     for(i = 0; i < lenOutput; ++i) {
@@ -2411,7 +2411,7 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     ervc->result = list_new( ervc->result, object_new( strExitCode ) );
     ervc->result = list_new( ervc->result, object_new( strOutput ) );
 
-    free(strOutput);
+    BJAM_FREE(strOutput);
 }
 
 /* Pt extension:
