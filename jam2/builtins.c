@@ -2406,7 +2406,6 @@ LIST *builtin_exec( FRAME * frame, int flags)
     LIST*        shell = 0;
     exec_ret_val erv;
     char         strExitCode[1024];
-    OBJECT*      sbuffer = 0;
     LIST*        result = 0;
     
     command = lol_get( frame->args, 0 );
@@ -2421,13 +2420,8 @@ LIST *builtin_exec( FRAME * frame, int flags)
     exec_wait();
 
     sprintf(strExitCode, "%d", erv.exitCode);
-    sbuffer = object_new( strExitCode );
-    result = list_new( result, sbuffer );
-    object_free( sbuffer );
-    
-    sbuffer = object_new( erv.output );
-    result = list_new( result, sbuffer );
-    object_free( sbuffer );
+    result = list_new( result, object_new( strExitCode ) );
+    result = list_new( result, object_new( erv.output ) );
     
     return result;
 }
