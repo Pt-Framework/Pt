@@ -2,6 +2,12 @@ ECHO "####" ;
 _result = [ EXEC "pkg-config --libs openssl" ] ;
 ECHO $(_result[1]) ;
 ECHO $(_result[2]) ;
+_result = [ EXEC "gcc --version" ] ;
+ECHO $(_result[1]) ;
+ECHO $(_result[2]) ;
+ECHO $(_result[3]) ;
+ECHO $(_result[4]) ;
+ECHO $(_result[5]) ;
 ECHO "####" ;
 
 # Initialize variables

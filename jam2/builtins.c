@@ -2393,23 +2393,26 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     exec_ret_val_closure* ervc = (exec_ret_val_closure*) closure;
 
     char  strExitCode[1024];
-    char  lenOutput = 0;
+    int   lenOutput = 0;
     char* strOutput = 0;
+    char* token     = 0;
     int   i         = 0;
     
     sprintf(strExitCode, "%d", status);
+    ervc->result = 0;
+    ervc->result = list_new( ervc->result, object_new( strExitCode ) );
 
     lenOutput = strlen(output) + 1;
+    if(lenOutput <= 0) return;
+
     strOutput = BJAM_MALLOC(lenOutput);
     memcpy(strOutput, output, lenOutput);
 
-    for(i = 0; i < lenOutput; ++i) {
-        if(strOutput[i] == '\n' || strOutput[i] == '\r') strOutput[i] = ' ';
+    token = strtok (strOutput,"\n\r");
+    while(token) {
+        ervc->result = list_new( ervc->result, object_new( token ) );
+        token = strtok(0, "\n\r");
     }
-
-    ervc->result = 0;
-    ervc->result = list_new( ervc->result, object_new( strExitCode ) );
-    ervc->result = list_new( ervc->result, object_new( strOutput ) );
 
     BJAM_FREE(strOutput);
 }
