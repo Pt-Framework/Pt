@@ -116,12 +116,12 @@ struct IOHandle
 };
 
 
-class Selector : public EventDispatcher
+class EventLoopImpl : public EventDispatcher
 {
     public:
-        Selector();
+        EventLoopImpl();
         
-        ~Selector();
+        ~EventLoopImpl();
 
         void attach(Selectable& s);
 
@@ -198,8 +198,8 @@ class PT_SYSTEM_API MainLoopImpl : public EventDispatcher
 
         ~MainLoopImpl();
 
-        Selector& selector()
-        { return _selector; }
+        EventLoopImpl& impl()
+        { return _impl; }
 
         void attach( Selectable& s );
 
@@ -228,7 +228,7 @@ class PT_SYSTEM_API MainLoopImpl : public EventDispatcher
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;
-        Selector _selector;
+        EventLoopImpl _impl;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*>::iterator _currentAvail;
         std::set<Selectable*> _attached;

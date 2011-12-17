@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace System {
 
-Selector::Selector()
+EventLoopImpl::EventLoopImpl()
 {
     _current = _devices.end();
     _currentAvail = _avail.end();
@@ -61,7 +61,7 @@ Selector::Selector()
 }
 
 
-Selector::~Selector()
+EventLoopImpl::~EventLoopImpl()
 { 
     std::set<Selectable*>::iterator it;
 
@@ -76,25 +76,25 @@ Selector::~Selector()
 }
 
 
-void Selector::attach(Selectable& s)
+void EventLoopImpl::attach(Selectable& s)
 {
     _attached.insert(&s);
 }
 
 
-void Selector::detach(Selectable& s)
+void EventLoopImpl::detach(Selectable& s)
 {
     _attached.erase(&s);
 }
 
 
-void Selector::enable(Selectable& s)
+void EventLoopImpl::enable(Selectable& s)
 {
 
 }
 
 
-void Selector::disable(Selectable& s)
+void EventLoopImpl::disable(Selectable& s)
 {
     std::set<Selectable*>::iterator iter = _devices.find( &s );
     if( iter != _devices.end() )
@@ -118,7 +118,7 @@ void Selector::disable(Selectable& s)
 }
 
 
-void Selector::idle(Selectable& s)
+void EventLoopImpl::idle(Selectable& s)
 {
     std::set<Selectable*>::iterator it = _avail.find( &s );
     if( it == _avail.end() )
@@ -132,7 +132,7 @@ void Selector::idle(Selectable& s)
 }
 
 
-void Selector::active(Selectable& s)
+void EventLoopImpl::active(Selectable& s)
 {
     std::set<Selectable*>::iterator it = _avail.find( &s );
     if( it == _avail.end() )
@@ -146,13 +146,13 @@ void Selector::active(Selectable& s)
 }
 
 
-void Selector::avail(Selectable& s)
+void EventLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);
 }
 
 
-void Selector::onRun()
+void EventLoopImpl::onRun()
 {
     bool isActive = true;
     while(isActive)
@@ -164,13 +164,13 @@ void Selector::onRun()
 }
 
 
-void Selector::onWake()
+void EventLoopImpl::onWake()
 {
     SetEvent( _wakeEvent );
 }
 
 
-void Selector::waitNext(std::size_t umsecs, bool& isActive )
+void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -262,7 +262,7 @@ void Selector::waitNext(std::size_t umsecs, bool& isActive )
 }
 
 
-DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
     DWORD result = WaitForMultipleObjects( numHandles, handles, false, msecs );
     if(result == WAIT_FAILED)

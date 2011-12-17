@@ -229,20 +229,20 @@ void PipeIODevice::onDetach(EventLoop&)
 
 void PipeIODevice::onEnableX(EventLoop& loop)
 {
-    HANDLE h = loop.selector().beginWait(*this);
+    HANDLE h = loop.impl().beginWait(*this);
 
     bool active = false;
     this->setWaitHandle(h, active);
 
     // TODO: use this->setAvail() ?
     if(active)
-        loop.selector().setAvail(*this);
+        loop.impl().setAvail(*this);
 }
 
 
 void PipeIODevice::onDisableX(EventLoop& loop)
 {
-    loop.selector().endWait(*this);
+    loop.impl().endWait(*this);
 
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
