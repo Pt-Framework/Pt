@@ -109,7 +109,7 @@ namespace System {
              */
             virtual ~MainLoop();
 
-            Selector& selector();
+            EventLoopImpl& impl();
 
         protected:
             virtual void onAttach(Selectable&);

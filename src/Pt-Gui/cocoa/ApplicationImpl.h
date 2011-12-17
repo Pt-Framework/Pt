@@ -81,8 +81,8 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
-        System::Selector& selector()
-        { return *_selector; }
+        System::EventLoopImpl& impl()
+        { return *_eimpl; }
 
     protected:
         virtual void onAttach(System::Selectable&);
@@ -119,7 +119,7 @@ class MainLoop : public Pt::System::EventLoop
 
     private:
         MainLoopImpl _impl;
-        System::Selector* _selector;
+        System::EventLoopImpl* _eimpl;
 };
 
 } // namespace Gui

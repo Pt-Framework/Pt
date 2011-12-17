@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace System {
 
-Selector::Selector()
+EventLoopImpl::EventLoopImpl()
 : _first(0)
 , _last(0)
 {
@@ -74,7 +74,7 @@ Selector::Selector()
 }
 
 
-Selector::~Selector()
+EventLoopImpl::~EventLoopImpl()
 { 
     std::set<Selectable*>::iterator it;
 
@@ -92,47 +92,47 @@ Selector::~Selector()
 }
 
 
-void Selector::attach(Selectable& s)
+void EventLoopImpl::attach(Selectable& s)
 {
     _attached.insert(&s);
 }
 
 
-void Selector::detach(Selectable& s)
+void EventLoopImpl::detach(Selectable& s)
 {
     _attached.erase(&s);
 }
 
 
-void Selector::enable(Selectable& s)
+void EventLoopImpl::enable(Selectable& s)
 {
 }
 
 
-void Selector::disable(Selectable& s)
+void EventLoopImpl::disable(Selectable& s)
 {
 }
 
 
-void Selector::idle(Selectable& s)
-{
-    _avail.erase(&s);
-}
-
-
-void Selector::active(Selectable& s)
+void EventLoopImpl::idle(Selectable& s)
 {
     _avail.erase(&s);
 }
 
 
-void Selector::avail(Selectable& s)
+void EventLoopImpl::active(Selectable& s)
+{
+    _avail.erase(&s);
+}
+
+
+void EventLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);
 }
 
 
-void Selector::onRun()
+void EventLoopImpl::onRun()
 {
     bool isActive = true;
     while(isActive)
@@ -144,14 +144,14 @@ void Selector::onRun()
 }
 
 
-void Selector::onWake()
+void EventLoopImpl::onWake()
 {
     ::write( _wakePipe[1], "W", 1);
     ::fsync( _wakePipe[1] );
 }
 
 
-void Selector::waitNext(std::size_t msecs, bool& isActive )
+void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     for(IOHandle* h = _first; h != 0; h = h->next)
     {

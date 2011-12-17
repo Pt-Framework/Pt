@@ -109,7 +109,7 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
-        loop->selector().beginRead( _iohandle );
+        loop->impl().beginRead( _iohandle );
     }
 
     if(_rfds)
@@ -126,7 +126,7 @@ size_t IODeviceImpl::endRead(bool& eof)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
     {
-        loop->selector().endRead( _iohandle );
+        loop->impl().endRead( _iohandle );
     }
 
     if(_rfds)
@@ -198,7 +198,7 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
-        loop->selector().beginWrite( _iohandle );
+        loop->impl().beginWrite( _iohandle );
     }
 
     return 0;
@@ -210,7 +210,7 @@ size_t IODeviceImpl::endWrite()
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
     {
-        loop->selector().endWrite( _iohandle );
+        loop->impl().endWrite( _iohandle );
     }
 
     if(_wfds)
@@ -480,23 +480,23 @@ void IODeviceImpl::enable(EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    _iohandle = loop.selector().enable(_device, this->fd());
+    _iohandle = loop.impl().enable(_device, this->fd());
 
     if( _device.rbuf() )
     {
-        loop.selector().beginRead( _iohandle );
+        loop.impl().beginRead( _iohandle );
     }
 
     if( _device.wbuf() )
     {
-        loop.selector().beginWrite( _iohandle );
+        loop.impl().beginWrite( _iohandle );
     }
 }
 
 
 void IODeviceImpl::disable(EventLoop& loop)
 {
-    loop.selector().disable(_iohandle);
+    loop.impl().disable(_iohandle);
     _iohandle = 0;
 }
 
@@ -506,12 +506,12 @@ bool IODeviceImpl::avail()
     if( ! _iohandle)
         return false;
 
-    Selector& sel = _device.parent()->selector();
+    EventLoopImpl& impl = _device.parent()->impl();
 
     int avail = 0;
     DestructionSentry sentry(_sentry);
 
-    if ( sel.isError(_iohandle) )
+    if ( impl.isError(_iohandle) )
     {
         _errorPending = true;
 
@@ -554,7 +554,7 @@ bool IODeviceImpl::avail()
         return avail;
     }
 
-    if( _device.wavail() > 0 || sel.isWritable(_iohandle) )
+    if( _device.wavail() > 0 || impl.isWritable(_iohandle) )
     {
         _device.outputReady(_device);
         ++avail;
@@ -563,7 +563,7 @@ bool IODeviceImpl::avail()
     if( ! sentry )
         return avail;
 
-    if( _device.rbuf() && sel.isReadable(_iohandle) )
+    if( _device.rbuf() && impl.isReadable(_iohandle) )
     {
         _device.inputReady(_device);
         ++avail;

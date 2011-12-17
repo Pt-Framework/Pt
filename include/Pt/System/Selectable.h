@@ -39,7 +39,7 @@ class SelectableImpl;
 
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
-    friend class Selector;
+    friend class EventLoopImpl;
 
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;

@@ -51,7 +51,7 @@ struct IOHandle
     IOHandle* prev;
 };
 
-class Selector : public EventDispatcher
+class EventLoopImpl : public EventDispatcher
 {
     enum IOFlags
     {
@@ -61,9 +61,9 @@ class Selector : public EventDispatcher
     };
 
     public:
-        Selector();
+        EventLoopImpl();
 
-        ~Selector();
+        ~EventLoopImpl();
 
         IOHandle* enable(Selectable& s, int fd)
         {
@@ -303,8 +303,8 @@ class MainLoopImpl : public EventDispatcher
 
         ~MainLoopImpl();
 
-        Selector& selector()
-        { return _selector; }
+        EventLoopImpl& impl()
+        { return _impl; }
 
         void attach(Selectable& s);
 
@@ -329,7 +329,7 @@ class MainLoopImpl : public EventDispatcher
 
     private:
         int _wakePipe[2];
-        Selector _selector;
+        EventLoopImpl _impl;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;
