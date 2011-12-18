@@ -2395,6 +2395,7 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     char  strExitCode[1024];
     int   lenOutput = 0;
     char* strOutput = 0;
+    char* savePtr   = 0;
     char* token     = 0;
     int   i         = 0;
     
@@ -2408,10 +2409,14 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     strOutput = BJAM_MALLOC(lenOutput);
     memcpy(strOutput, output, lenOutput);
 
-    token = strtok (strOutput,"\n\r");
+#ifdef _WIN32
+#define strtok_r(s,d,p) strtok_s(s,d,p)
+#endif
+
+    token = strtok_r(strOutput,"\n\r", &savePtr);
     while(token) {
         ervc->result = list_new( ervc->result, object_new( token ) );
-        token = strtok(0, "\n\r");
+        token = strtok_r(0, "\n\r", &savePtr);
     }
 
     BJAM_FREE(strOutput);
