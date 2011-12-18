@@ -495,8 +495,11 @@ void IODeviceImpl::enable(EventLoop& loop)
 void IODeviceImpl::disable(EventLoop& loop)
 {
     std::cerr << "IODeviceImpl::disable"<< std::endl;
-    loop.impl().disable(_iohandle);
-    _iohandle = 0;
+    if(_iohandle)
+    {
+        loop.impl().disable(_iohandle);
+        _iohandle = 0;
+    }
 }
 
 
