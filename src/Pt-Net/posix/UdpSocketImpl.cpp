@@ -28,6 +28,7 @@
 
 
 #include "UdpSocketImpl.h"
+#include "MainLoopImpl.h"
 #include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/SystemError.h>
@@ -57,8 +58,8 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 
 UdpSocketImpl::~UdpSocketImpl()
 {
-    assert(_rfds == 0);
-    assert(_wfds == 0);
+//  assert(_rfds == 0);
+//  assert(_wfds == 0);
 
     if(_sentry)
         _sentry->detach();
@@ -322,13 +323,14 @@ std::string UdpSocketImpl::getPeerAddr() const
 }
 
 
-size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
+size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool&)
 {
     assert(buffer != 0);
 
-    if(_rfds)
+    System::EventLoop* loop = _device.parent();
+    if( loop && _iohandle)
     {
-        FD_SET( this->fd(), _rfds );
+        loop->impl().beginRead( _iohandle );
     }
 
     return 0;
@@ -337,9 +339,10 @@ size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
 
 size_t UdpSocketImpl::endRead(bool& eof)
 {
-    if(_rfds)
+    System::EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
     {
-        FD_CLR( this->fd(), _rfds );
+        loop->impl().endRead( _iohandle );
     }
 
     if (_errorPending)
@@ -390,9 +393,10 @@ size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
     if(ret > 0)
         return static_cast<size_t>(ret);
 
-    if(_wfds)
+    System::EventLoop* loop = _device.parent();
+    if( loop && _iohandle)
     {
-        FD_SET( this->fd(), _wfds );
+        loop->impl().beginWrite( _iohandle );
     }
 
     return 0;
@@ -401,9 +405,10 @@ size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
 
 size_t UdpSocketImpl::endWrite()
 {
-    if(_wfds)
+    System::EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
     {
-        FD_CLR( this->fd(), _wfds );
+        loop->impl().endWrite( _iohandle );
     }
 
     if (_errorPending)

@@ -106,30 +106,30 @@ namespace System {
 
             virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            //virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual void exitSelect();
+            //virtual void exitSelect();
 
-            virtual int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual void attach(EventLoop& s);
+            void attach(EventLoop& s);
 
-            virtual void detach(EventLoop& s);
+            void detach(EventLoop& s);
 
-            void enable(EventLoop& loop);
+            virtual void enable(EventLoop& loop);
 
-            void disable(EventLoop& loop);
+            virtual void disable(EventLoop& loop);
 
-            bool avail();
+            virtual bool avail();
 
         protected:
             IODevice& _device;
             IOHandle* _iohandle;
             int _fd;
             std::size_t _timeout;
-            fd_set* _rfds;
-            fd_set* _wfds;
-            fd_set* _efds;
+            //fd_set* _rfds;
+            //fd_set* _wfds;
+            //fd_set* _efds;
             DestructionSentry* _sentry;
             bool _errorPending;
     };

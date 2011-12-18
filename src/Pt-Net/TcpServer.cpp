@@ -109,6 +109,24 @@ void TcpServer::onDetach(System::EventLoop& sb)
     _impl->detach(sb);
 }
 
+
+void TcpServer::onEnable(System::EventLoop& loop)
+{
+    _impl->enable(loop);
+}
+
+
+void TcpServer::onDisable(System::EventLoop& loop)
+{
+    _impl->disable(loop);
+}
+
+
+bool TcpServer::onAvail()
+{
+    return _impl->avail();
+}
+
 } // namespace Net
 
 } // namespace Pt

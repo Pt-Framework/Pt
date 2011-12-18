@@ -42,9 +42,9 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 , _iohandle(0)
 , _fd(-1)
 , _timeout(System::Selectable::WaitInfinite)
-, _rfds(0)
-, _wfds(0)
-, _efds(0)
+//, _rfds(0)
+//, _wfds(0)
+//, _efds(0)
 , _sentry(0)
 , _errorPending(false)
 { }
@@ -52,9 +52,9 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 
 IODeviceImpl::~IODeviceImpl()
 {
-    assert(_rfds == 0);
-    assert(_wfds == 0);
-    assert(_efds == 0);
+    //assert(_rfds == 0);
+    //assert(_wfds == 0);
+    //assert(_efds == 0);
 
     if(_sentry)
         _sentry->detach();
@@ -112,10 +112,10 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
         loop->impl().beginRead( _iohandle );
     }
 
-    if(_rfds)
-    {
-        FD_SET( this->fd(), _rfds );
-    }
+//  if(_rfds)
+//  {
+//      FD_SET( this->fd(), _rfds );
+//  }
 
     return 0;
 }
@@ -129,10 +129,10 @@ size_t IODeviceImpl::endRead(bool& eof)
         loop->impl().endRead( _iohandle );
     }
 
-    if(_rfds)
-    {
-        FD_CLR( this->fd(), _rfds );
-    }
+//  if(_rfds)
+//  {
+//      FD_CLR( this->fd(), _rfds );
+//  }
 
     if (_errorPending)
     {
@@ -182,7 +182,9 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
 {
+    std::cerr << "IODeviceImpl::beginWrite" << std::endl;
     ssize_t ret = ::write(_fd, (const void*)buffer, n);
+    std::cerr << "IODeviceImpl::beginWrite " << ret << std::endl;
 
     if (ret > 0)
         return static_cast<size_t>(ret);
@@ -190,14 +192,15 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    if(_wfds)
-    {
-        FD_SET( this->fd(), _wfds );
-    }
+//  if(_wfds)
+//  {
+//      FD_SET( this->fd(), _wfds );
+//  }
 
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
+        std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
         loop->impl().beginWrite( _iohandle );
     }
 
@@ -213,10 +216,10 @@ size_t IODeviceImpl::endWrite()
         loop->impl().endWrite( _iohandle );
     }
 
-    if(_wfds)
-    {
-        FD_CLR( this->fd(), _wfds );
-    }
+//  if(_wfds)
+//  {
+//      FD_CLR( this->fd(), _wfds );
+//  }
 
     if (_errorPending)
     {
@@ -241,6 +244,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
     while(true)
     {
         ret = ::write(_fd, (const void*)buffer, count);
+        std::cerr << "wrote: " << ret << std::endl;
         if(ret > 0)
             break;
 
@@ -275,16 +279,10 @@ void IODeviceImpl::sigwrite( int signo )
 
 void IODeviceImpl::cancel()
 {
-    if(_rfds)
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
     {
-        FD_CLR( this->fd(), _rfds );
-        _rfds = 0;
-    }
-
-    if(_wfds)
-    {
-        FD_CLR( this->fd(), _wfds );
-        _wfds = 0;
+        loop->impl().cancel(_iohandle);
     }
 }
 
@@ -307,7 +305,7 @@ bool IODeviceImpl::wait(std::size_t msecs)
     FD_ZERO(&efds);
     this->initWait(rfds, wfds, efds);
     this->wait(msecs, &rfds, &wfds, &efds);
-    return this->checkEvent(rfds, wfds, efds);
+    return this->checkWait(rfds, wfds, efds);
 }
 
 
@@ -358,7 +356,7 @@ void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
 
 // TODO: move to enable
-int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+/*int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     _rfds = &rfds;
     _wfds = &wfds;
@@ -366,11 +364,11 @@ int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
     this->initWait(rfds, wfds, efds);
 
     return this->fd();
-}
+}*/
 
 
 // TODO: move to detach / disable
-void IODeviceImpl::exitSelect()
+/*void IODeviceImpl::exitSelect()
 {
     if( this->fd() > 0)
     {
@@ -385,10 +383,10 @@ void IODeviceImpl::exitSelect()
     _rfds = 0;
     _wfds = 0;
     _efds = 0;
-}
+}*/
 
 
-int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+int IODeviceImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     int avail = 0;
 
@@ -462,16 +460,16 @@ int IODeviceImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
 void IODeviceImpl::attach(EventLoop& s)
 {
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
+//  if( this->fd() > FD_SETSIZE )
+//  {
+//      throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+//  }
 }
 
 
 void IODeviceImpl::detach(EventLoop& s)
 {
-    this->exitSelect();
+    //this->exitSelect();
 }
 
 
@@ -496,6 +494,7 @@ void IODeviceImpl::enable(EventLoop& loop)
 
 void IODeviceImpl::disable(EventLoop& loop)
 {
+    std::cerr << "IODeviceImpl::disable"<< std::endl;
     loop.impl().disable(_iohandle);
     _iohandle = 0;
 }
@@ -503,6 +502,8 @@ void IODeviceImpl::disable(EventLoop& loop)
 
 bool IODeviceImpl::avail()
 {
+    std::cerr << "IODeviceImpl::avail"<< std::endl;
+
     if( ! _iohandle)
         return false;
 
@@ -556,6 +557,7 @@ bool IODeviceImpl::avail()
 
     if( _device.wavail() > 0 || impl.isWritable(_iohandle) )
     {
+        std::cerr << "IODeviceImpl::avail " << "WRITABLE" << std::endl;
         _device.outputReady(_device);
         ++avail;
     }
@@ -565,6 +567,7 @@ bool IODeviceImpl::avail()
 
     if( _device.rbuf() && impl.isReadable(_iohandle) )
     {
+        std::cerr << "IODeviceImpl::avail " << "READABLE" << std::endl;
         _device.inputReady(_device);
         ++avail;
     }

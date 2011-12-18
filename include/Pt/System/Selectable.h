@@ -115,11 +115,11 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual void onDetach(EventLoop&) = 0;
 
-        virtual void onEnable(EventLoop&) {}
+        virtual void onEnable(EventLoop&) = 0;
 
-        virtual void onDisable(EventLoop&) {}
+        virtual void onDisable(EventLoop&) = 0;
 
-        virtual bool onAvail() { return false; }
+        virtual bool onAvail() = 0;
 
     private:
         EventLoop* _parent;

@@ -180,6 +180,24 @@ void FileDevice::onDetach(EventLoop& s)
     _impl->detach(s);
 }
 
+
+void FileDevice::onEnable(EventLoop& loop)
+{
+    _impl->enable(loop);
+}
+
+
+void FileDevice::onDisable(EventLoop& loop)
+{
+    _impl->disable(loop);
+}
+
+
+bool FileDevice::onAvail()
+{
+    return _impl->avail();
+}
+
 } // namespace System
 
 } // namespace Pt

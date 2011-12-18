@@ -152,6 +152,23 @@ void UdpSocket::onDetach(System::EventLoop& loop)
     _impl->detach(loop);
 }
 
+void UdpSocket::onEnable(System::EventLoop& loop)
+{
+    _impl->enable(loop);
+}
+
+
+void UdpSocket::onDisable(System::EventLoop& loop)
+{
+    _impl->disable(loop);
+}
+
+
+bool UdpSocket::onAvail()
+{
+    return _impl->avail();
+}
+
 
 size_t UdpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
 {

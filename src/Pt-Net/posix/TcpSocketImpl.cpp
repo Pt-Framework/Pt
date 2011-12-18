@@ -29,6 +29,7 @@
 #include "Pt/Net/AddrInfo.h"
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/SystemError.h"
@@ -40,8 +41,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define log_debug(x)
-#define log_trace(x)
+#define log_debug(x) std::cerr << x << std::endl;
+#define log_trace(x) std::cerr << x << std::endl;
 
 namespace
 {
@@ -81,8 +82,8 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-    assert(_rfds == 0);
-    assert(_wfds == 0);
+    //assert(_rfds == 0);
+    //assert(_wfds == 0);
 }
 
 
@@ -91,6 +92,19 @@ void TcpSocketImpl::close()
     log_debug("close socket " << _fd);
     System::IODeviceImpl::close();
     _isConnected = false;
+}
+
+
+// TODO enable sockets after an open call
+void TcpSocketImpl::enable(System::EventLoop& loop)
+{
+    IODeviceImpl::enable(loop);
+
+    if( ! _isConnected )
+    {
+        std::cerr << "IODeviceImpl::beginConnect on handle " << std::endl;
+        loop.impl().beginWrite( _iohandle );
+    }
 }
 
 
@@ -216,18 +230,15 @@ const char* TcpSocketImpl::tryConnect()
 bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
 {
     log_trace("begin connect");
+    std::cerr << "########### BEGIN CONNECT" << std::endl;
 
     assert(!_isConnected);
-
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
 
     _addrInfo = addrInfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
     _connectResult = tryConnect();
     checkPendingError();
+    std::cerr << "###########" << _isConnected << std::endl;
     return _isConnected;
 }
 
@@ -236,15 +247,16 @@ void TcpSocketImpl::endConnect()
 {
     log_trace("ending connect");
 
-    if(_wfds && ! _socket.wbuf() )
+    System::EventLoop* loop = _device.parent();
+    if( loop && _iohandle && ! _socket.wbuf() )
     {
-        FD_CLR( this->fd(), _wfds );
+        loop->impl().endWrite( _iohandle );
     }
 
-    if(_efds)
-    {
-        FD_CLR( this->fd(), _efds );
-    }
+//  if(_wfds && ! _socket.wbuf() )
+//  {
+//      FD_CLR( this->fd(), _wfds );
+//  }
 
     checkPendingError();
 
@@ -306,7 +318,6 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
     if( _fd < 0 )
       throw System::SystemError("accept");
 
-
     System::IODeviceImpl::open(_fd, true, inherit);
     //TODO ECONNABORTED EINTR EPERM
 
@@ -327,12 +338,81 @@ void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
             FD_SET(this->fd(), &efds);
         }
     }
-
 }
 
 
+bool TcpSocketImpl::avail()
+{
+    std::cerr << "########### AVAIL" << std::endl;
 
-int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+    if( _isConnected )
+        return System::IODeviceImpl::avail();
+
+    System::EventLoopImpl& impl = _device.parent()->impl();
+
+    if( impl.isError(_iohandle) )
+    {
+        AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
+        if (++ptr == _addrInfo.impl()->end())
+        {
+            // not really connected but error
+            // end of addrinfo list means that no working addrinfo was found
+            _socket.connected.send(_socket);
+            std::cerr << "########### CONNECT FAIL" << std::endl;
+            return true;
+        }
+        else
+        {
+            _addrInfoPtr = ptr;
+
+            close();
+            _connectResult = tryConnect();
+
+            if (_isConnected || _connectResult)
+                // immediate success or error
+                _socket.connected.send(_socket);
+            else
+                // by closing the previous file handle _pfd is set to 0.
+                // creating a new socket in tryConnect may also change the value of fd.
+                // TODO: handle this differently, without loosing the socket fd...
+                throw std::logic_error("posix tcp socket impl reconnect not implemented");
+
+            return _isConnected;
+        }
+    }
+    else if( impl.isWritable(_iohandle)  )
+    {
+        std::cerr << "########### WRITABLE" << std::endl;
+        int sockerr = checkConnect();
+        if (_isConnected)
+        {
+            _socket.connected.send(_socket);
+            return true;
+        }
+
+        // something went wrong - look for next addrInfo
+        log_debug("sockerr is " << sockerr << " try next");
+        if (++_addrInfoPtr == _addrInfo.impl()->end())
+        {
+            // no more addrInfo - propagate error
+            _connectResult = "connect failed";
+            _socket.connected.send(_socket);
+            return true;
+        }
+
+        _connectResult = tryConnect();
+        if (_isConnected)
+        {
+            _socket.connected.send(_socket);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/*int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::checkEvent");
 
@@ -395,7 +475,7 @@ int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return 0;
-}
+}*/
 
 } // namespace Net
 

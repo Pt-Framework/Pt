@@ -112,6 +112,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
             _loop->add( pipe.in() );
             _loop->run();
+            std::cerr << "run ended" << std::endl;
 
             char buffer[1024];
             size_t n = pipe.out().read(buffer, sizeof(buffer));
@@ -122,14 +123,19 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onWrite(Pt::System::IODevice& dev)
         {
+            std::cerr << "ending write" << std::endl;
             _pos += dev.endWrite();
+
+            std::cerr << "wrote " << _pos << std::endl;
             size_t len = std::min(sizeof(_buffer), _data.size() - _pos);
             if(0 == len)
             {
+                std::cerr << "exiting loop" << std::endl;
                 _loop->exit();
                 return;
             }
 
+            std::cerr << "next write" << std::endl;
             std::memcpy(_buffer, _data.c_str()+_pos, len);
             dev.beginWrite(_buffer, len);
         }

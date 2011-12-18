@@ -81,9 +81,11 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             catch(const Pt::System::IOError&)
             {
                 // success
+                std::cerr << "EEEEEEEEE" << std::endl;
                 return;
             }
 
+            std::cerr << "AAAAAAAAAAAA" << std::endl;
             _loop->add(client);
             _loop->run();
             PT_UNIT_ASSERT( false == client.isConnected() );
@@ -91,6 +93,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void onConnectFailed(Pt::Net::TcpSocket& socket)
         {
+            std::cerr << "CCCCCCCCCC" << std::endl;
             _loop->exit();
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }

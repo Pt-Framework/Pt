@@ -89,6 +89,12 @@ class PT_NET_API UdpSocket : public System::IODevice
         // inherit doc
         virtual void onDetach(System::EventLoop&);
 
+        virtual void onEnable(System::EventLoop& el);
+
+        virtual void onDisable(System::EventLoop& el);
+
+        virtual bool onAvail();
+
         // inherit doc
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

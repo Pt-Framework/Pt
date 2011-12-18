@@ -29,6 +29,7 @@
 #include <Pt/Net/AddrInfo.h>
 #include "TcpServerImpl.h"
 #include "AddrInfoImpl.h"
+#include "MainLoopImpl.h"
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/EventLoop.h>
@@ -48,7 +49,7 @@ namespace Net {
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _fd(-1)
-, _rfds(0)
+, _iohandle(0)
 {
 }
 
@@ -226,7 +227,7 @@ bool TcpServerImpl::wait(std::size_t msecs)
 }
 
 
-void TcpServerImpl::attach(System::EventLoop& s)
+/*void TcpServerImpl::attach(System::EventLoop& s)
 {
     log_debug("attach to selector");
 
@@ -234,17 +235,17 @@ void TcpServerImpl::attach(System::EventLoop& s)
     {
         throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
     }
-}
+}*/
 
 
-void TcpServerImpl::detach(System::EventLoop& s)
+/*void TcpServerImpl::detach(System::EventLoop& s)
 {
     log_debug("detach from selector");
     this->exitSelect();
-}
+}*/
 
 
-int TcpServerImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+/*int TcpServerImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     _rfds = &rfds;
 
@@ -254,10 +255,10 @@ int TcpServerImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return this->fd();
-}
+}*/
 
 
-void TcpServerImpl::exitSelect()
+/*void TcpServerImpl::exitSelect()
 {
     if( _rfds && this->fd() > 0)
     {
@@ -265,10 +266,10 @@ void TcpServerImpl::exitSelect()
     }
 
     _rfds = 0;
-}
+}*/
 
 
-int TcpServerImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+/*int TcpServerImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     if( this->fd() < 0)
         return 0;
@@ -280,6 +281,54 @@ int TcpServerImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return 0;
+}*/
+
+
+
+
+
+
+
+void TcpServerImpl::attach(System::EventLoop& s)
+{
+}
+
+
+void TcpServerImpl::detach(System::EventLoop& s)
+{
+}
+
+
+void TcpServerImpl::enable(System::EventLoop& loop)
+{
+    _iohandle = loop.impl().enable(_server, this->fd());
+    loop.impl().beginRead( _iohandle );
+}
+
+
+void TcpServerImpl::disable(System::EventLoop& loop)
+{
+    loop.impl().disable(_iohandle);
+    _iohandle = 0;
+}
+
+
+bool TcpServerImpl::avail()
+{
+    std::cerr << "IODeviceImpl::avail"<< std::endl;
+
+    if( ! _iohandle)
+        return false;
+
+    System::EventLoopImpl& impl = _server.parent()->impl();
+
+    if( impl.isReadable(_iohandle) )
+    {
+        _server.connectionPending.send(_server);
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace Net

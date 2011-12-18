@@ -27,6 +27,7 @@
 #include <sys/select.h>
 #include <set>
 #include <list>
+#include <iostream>
 
 namespace Pt {
 
@@ -67,6 +68,7 @@ class EventLoopImpl : public EventDispatcher
 
         IOHandle* enable(Selectable& s, int fd)
         {
+            std::cerr << "# enable fd: " << fd << std::endl;
             _devices.insert( &s );
 
             if( fd > FD_SETSIZE )
@@ -82,16 +84,17 @@ class EventLoopImpl : public EventDispatcher
 
         void disable(IOHandle* h)
         {
+            std::cerr << "# disable fd: " << h->fd << std::endl;
            std::set<Selectable*>::iterator it = _devices.find( h->sel );
            if( it == _devices.end() )
                 return;
 
             if( h->fd > 0)
             {
-                if(h->flags & Input)
+                if(h->wflags & Input)
                     FD_CLR(h->fd, &_rfds);
 
-                if(h->flags & Output)
+                if(h->wflags & Output)
                     FD_CLR(h->fd, &_wfds);
 
                 FD_CLR(h->fd, &_efds);
@@ -114,8 +117,21 @@ class EventLoopImpl : public EventDispatcher
             }
         }
 
+        void cancel(IOHandle* h)
+        {
+            if(h->flags)
+            {
+                h->flags = 0;
+    
+                // update before next wait, move to front
+                pop(h);
+                push_front(h);
+            }
+        }
+
         void beginRead(IOHandle* h)
         {
+            std::cerr << "beginRead on fd: " << h->fd << std::endl;
             pop(h);
             h->flags |= Input;
  
@@ -129,15 +145,20 @@ class EventLoopImpl : public EventDispatcher
 
         void endRead(IOHandle* h)
         {
-            h->flags &= ~Input;
-
-            // update before next wait, move to front
-            pop(h);
-            push_front(h);
+            if(h->flags & Input)
+            {
+                std::cerr << "endRead on fd: " << h->fd << std::endl;
+                h->flags &= ~Input;
+    
+                // update before next wait, move to front
+                pop(h);
+                push_front(h);
+            }
         }
 
         void beginWrite(IOHandle* h)
         {
+            std::cerr << "beginWrite on fd: " << h->fd << std::endl;
             pop(h);
             h->flags |= Output;
  
@@ -150,59 +171,30 @@ class EventLoopImpl : public EventDispatcher
 
         void endWrite(IOHandle* h)
         {
-            h->flags &= ~Output;
-
-            // update before next wait, move to front
-            pop(h);
-            push_front(h);
-        }
-
-        void beginWait()
-        {
-            for(IOHandle* h = _first; h != 0; h = h->next)
+            if(h->flags & Output)
             {
-                if(h->flags == h->wflags)
-                    break;
-
-                if(h->flags & Input &&  0 == (h->wflags & Input))
-                {
-                    FD_SET(h->fd, &_rfds);
-                    h->wflags |= Input;
-                }
-
-                if(0 == h->flags & Input && h->wflags & Input)
-                {
-                    FD_CLR( h->fd, &_rfds );
-                    h->wflags &= ~Input;
-                }
-
-                if(h->flags & Output &&  0 == (h->wflags & Output))
-                {
-                    FD_SET(h->fd, &_wfds);
-                    h->wflags |= Output;
-                }
-
-                if(0 == h->flags & Output &&  h->wflags & Output)
-                {
-                    FD_CLR( h->fd, &_wfds );
-                    h->wflags &= ~Output;
-                }
+                std::cerr << "endWrite on fd: " << h->fd << std::endl;
+                h->flags &= ~Output;
+    
+                // update before next wait, move to front
+                pop(h);
+                push_front(h);
             }
         }
 
         bool isReadable(IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_rfds);
+            return FD_ISSET(h->fd, &_rfdsR);
         }
 
         bool isWritable(IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_wfds);
+            return FD_ISSET(h->fd, &_wfdsR);
         }
 
         bool isError(IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_efds);
+            return FD_ISSET(h->fd, &_efdsR);
         }
 
         void pop(IOHandle* h)
@@ -210,10 +202,14 @@ class EventLoopImpl : public EventDispatcher
             IOHandle* prev = h->prev;
             IOHandle* next = h->next;
 
-            if(prev)
+            if( h == _first)
+                _first = h->next;
+            else
                 prev->next = next;
 
-            if(next)
+            if( h == _last)
+                _last = h->prev;
+            else
                 next->prev = prev;
 
             h->next = 0;
@@ -250,15 +246,6 @@ class EventLoopImpl : public EventDispatcher
             }
         }
 
-        fd_set& rfds()
-        { return _rfds; }
-
-        fd_set& wfds()
-        { return _wfds; }
-
-        fd_set& efds()
-        { return _efds; }
-
         void attach(Selectable& s);
 
         void detach(Selectable& s);
@@ -291,10 +278,13 @@ class EventLoopImpl : public EventDispatcher
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;
+        fd_set _rfdsR;
+        fd_set _wfdsR;
+        fd_set _efdsR;
         Clock _clock;
 };
 
-class MainLoopImpl : public EventDispatcher
+class MainLoopImpl : public EventLoopImpl
 {
     public:
         MainLoopImpl();
@@ -303,41 +293,41 @@ class MainLoopImpl : public EventDispatcher
 
         ~MainLoopImpl();
 
-        EventLoopImpl& impl()
-        { return _impl; }
+//      EventLoopImpl& impl()
+//      { return _impl; }
 
-        void attach(Selectable& s);
-
-        void detach(Selectable& s);
-
-        void enable(Selectable& s);
-
-        void disable(Selectable& s);
-
-        void idle(Selectable& s);
-
-        void active(Selectable& s);
-
-        void avail(Selectable& s);
-
-    protected:
-        virtual void onRun();
-
-        virtual void onWake();
-
-        void waitNext(std::size_t timeout, bool& isActive);
-
-    private:
-        int _wakePipe[2];
-        EventLoopImpl _impl;
-        fd_set _rfds;
-        fd_set _wfds;
-        fd_set _efds;
-        std::set<Selectable*>::iterator _current;
-        std::set<Selectable*> _attached;
-        std::set<Selectable*> _devices;
-        std::set<Selectable*> _avail;
-        Clock _clock;
+//      void attach(Selectable& s);
+//
+//      void detach(Selectable& s);
+//
+//      void enable(Selectable& s);
+//
+//      void disable(Selectable& s);
+//
+//      void idle(Selectable& s);
+//
+//      void active(Selectable& s);
+//
+//      void avail(Selectable& s);
+//
+//  protected:
+//      virtual void onRun();
+//
+//      virtual void onWake();
+//
+//      void waitNext(std::size_t timeout, bool& isActive);
+//
+//  private:
+//      int _wakePipe[2];
+//      EventLoopImpl _impl;
+//      fd_set _rfds;
+//      fd_set _wfds;
+//      fd_set _efds;
+//      std::set<Selectable*>::iterator _current;
+//      std::set<Selectable*> _attached;
+//      std::set<Selectable*> _devices;
+//      std::set<Selectable*> _avail;
+//      Clock _clock;
 };
 
 } //namespace System

@@ -61,7 +61,7 @@ class ApplicationTest : public Pt::Unit::TestSuite
             app.loop().timeout() += Pt::slot(app, &Pt::System::Application::exit);
             app.systemSignal() += Pt::slot(*this, &ApplicationTest::onSignal);
 
-            app.loop().setIdleTimeout(2000);
+            app.loop().setIdleTimeout(1000);
 
             if( ! hasSigUsr1 && ! hasSigAlrm )
             {

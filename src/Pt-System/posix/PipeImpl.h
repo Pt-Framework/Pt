@@ -59,6 +59,21 @@ class PipeIODevice : public Pt::System::IODevice
         void onClose()
         { cancel(); _impl.close(); }
 
+        void onAttach(EventLoop& loop)
+        { _impl.attach(loop); }
+
+        void onDetach(EventLoop& loop)
+        { _impl.detach(loop); }
+
+        void onEnable(EventLoop& loop)
+        { _impl.enable(loop); }
+
+        void onDisable(EventLoop& loop)
+        { _impl.disable(loop); }
+
+        bool onAvail()
+        { return _impl.avail(); }
+
         bool onWait(std::size_t msecs);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
@@ -82,12 +97,6 @@ class PipeIODevice : public Pt::System::IODevice
 
         SelectableImpl& simpl()
         { return _impl; }
-
-        void onAttach(EventLoop& s)
-        { _impl.attach(s); }
-
-        void onDetach(EventLoop& s)
-        { _impl.detach(s); }
 
     private:
         IODeviceImpl _impl;

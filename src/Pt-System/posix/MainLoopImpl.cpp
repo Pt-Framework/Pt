@@ -70,12 +70,17 @@ EventLoopImpl::EventLoopImpl()
     FD_ZERO(&_wfds);
     FD_ZERO(&_efds);
 
+    FD_ZERO(&_rfdsR);
+    FD_ZERO(&_wfdsR);
+    FD_ZERO(&_efdsR);
+
     FD_SET(_wakePipe[0], &_rfds);
 }
 
 
 EventLoopImpl::~EventLoopImpl()
 { 
+    std::cerr << "EventLoopImpl::~EventLoopImpl()" << std::endl;
     std::set<Selectable*>::iterator it;
 
     while( _attached.size() )
@@ -155,37 +160,46 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     for(IOHandle* h = _first; h != 0; h = h->next)
     {
+        std::cerr << "prepare handle" << std::endl;
         if(h->flags == h->wflags)
             break;
 
         if(h->flags & Input &&  0 == (h->wflags & Input))
         {
+            std::cerr << "beginWait Input on fd: " << h->fd << std::endl;
             FD_SET(h->fd, &_rfds);
             h->wflags |= Input;
         }
 
         if(0 == h->flags & Input && h->wflags & Input)
         {
+            std::cerr << "stopWait Input on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_rfds );
             h->wflags &= ~Input;
         }
 
         if(h->flags & Output &&  0 == (h->wflags & Output))
         {
+            std::cerr << "beginWait Output on fd: " << h->fd << std::endl;
             FD_SET(h->fd, &_wfds);
             h->wflags |= Output;
         }
 
         if(0 == h->flags & Output &&  h->wflags & Output)
         {
+            std::cerr << "stopWait output on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_wfds );
             h->wflags &= ~Output;
         }
     }
 
-    fd_set rfds = _rfds;
-    fd_set wfds = _wfds;
-    fd_set efds = _efds;
+    FD_ZERO(&_rfdsR);
+    FD_ZERO(&_wfdsR);
+    FD_ZERO(&_efdsR);
+
+    _rfdsR = _rfds;
+    _wfdsR = _wfds;
+    _efdsR = _efds;
 
     msecs = _avail.size() ? 0 : msecs;
     int avail = -1;
@@ -202,8 +216,10 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         }
 
         _clock.start();
-        avail = ::select(FD_SETSIZE, &rfds, &wfds, &efds, timeout);
+        std::cerr << "select called" << std::endl;
+        avail = ::select(FD_SETSIZE, &_rfdsR, &_wfdsR, &_efdsR, timeout);
         Pt::int64_t elapsed = _clock.stop().totalMSecs();
+        std::cerr << "select returned after " << elapsed << std::endl;
 
         if( avail < 0 && errno != EINTR )
         {
@@ -222,12 +238,12 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         msecs -= int(elapsed);
     }
 
-    if( FD_ISSET(_wakePipe[0], &efds) )
+    if( FD_ISSET(_wakePipe[0], &_efdsR) )
     {
         throw IOError( PT_ERROR_MSG("pipe failed") );
     }
 
-    if( FD_ISSET(_wakePipe[0], &rfds) )
+    if( FD_ISSET(_wakePipe[0], &_rfdsR) )
     {
         --avail;
 
@@ -263,7 +279,12 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
             Selectable* selectable = *_current;
-            avail -= selectable->onAvail();
+
+            bool isAvail = selectable->onAvail();
+            std::cerr << "available: " << isAvail << std::endl;
+
+            if( isAvail )
+                --avail;
 
             if(avail <= 0)
                 break;
@@ -283,115 +304,115 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         throw;
     }
 
-    return;
+    std::cerr << "waitNext return"<< std::endl;
 }
 
 
 
 
 MainLoopImpl::MainLoopImpl()
-: EventDispatcher()
+: EventLoopImpl()
 {
-    _current = _devices.end();
-
-    //Open a pipe to send wake up message.
-    if( ::pipe( _wakePipe ) )
-        throw SystemError( PT_ERROR_MSG("pipe failed") );
-
-    int flags = ::fcntl(_wakePipe[0], F_GETFL);
-    if(-1 == flags)
-        throw SystemError(PT_ERROR_MSG("fcntl failed"));
-
-    int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
-    if(-1 == ret)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    flags = ::fcntl(_wakePipe[1], F_GETFL);
-    if(-1 == flags)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
-    if(-1 == ret)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    FD_ZERO(&_rfds);
-    FD_ZERO(&_wfds);
-    FD_ZERO(&_efds);
-
-    FD_SET(_wakePipe[0], &_rfds);
+//  _current = _devices.end();
+//
+//  //Open a pipe to send wake up message.
+//  if( ::pipe( _wakePipe ) )
+//      throw SystemError( PT_ERROR_MSG("pipe failed") );
+//
+//  int flags = ::fcntl(_wakePipe[0], F_GETFL);
+//  if(-1 == flags)
+//      throw SystemError(PT_ERROR_MSG("fcntl failed"));
+//
+//  int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
+//  if(-1 == ret)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  flags = ::fcntl(_wakePipe[1], F_GETFL);
+//  if(-1 == flags)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
+//  if(-1 == ret)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  FD_ZERO(&_rfds);
+//  FD_ZERO(&_wfds);
+//  FD_ZERO(&_efds);
+//
+//  FD_SET(_wakePipe[0], &_rfds);
 }
 
 MainLoopImpl::MainLoopImpl(Allocator& a)
-: EventDispatcher(a)
+//: EventLoopImpl(a)
 {
-    _current = _devices.end();
-
-    //Open a pipe to send wake up message.
-    if( ::pipe( _wakePipe ) )
-        throw SystemError( PT_ERROR_MSG("pipe failed") );
-
-    int flags = ::fcntl(_wakePipe[0], F_GETFL);
-    if(-1 == flags)
-        throw SystemError(PT_ERROR_MSG("fcntl failed"));
-
-    int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
-    if(-1 == ret)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    flags = ::fcntl(_wakePipe[1], F_GETFL);
-    if(-1 == flags)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
-    if(-1 == ret)
-        throw SystemError( PT_ERROR_MSG("fcntl failed") );
-
-    FD_ZERO(&_rfds);
-    FD_ZERO(&_wfds);
-    FD_ZERO(&_efds);
-
-    FD_SET(_wakePipe[0], &_rfds);
+//  _current = _devices.end();
+//
+//  //Open a pipe to send wake up message.
+//  if( ::pipe( _wakePipe ) )
+//      throw SystemError( PT_ERROR_MSG("pipe failed") );
+//
+//  int flags = ::fcntl(_wakePipe[0], F_GETFL);
+//  if(-1 == flags)
+//      throw SystemError(PT_ERROR_MSG("fcntl failed"));
+//
+//  int ret = ::fcntl(_wakePipe[0], F_SETFL, flags|O_NONBLOCK);
+//  if(-1 == ret)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  flags = ::fcntl(_wakePipe[1], F_GETFL);
+//  if(-1 == flags)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
+//  if(-1 == ret)
+//      throw SystemError( PT_ERROR_MSG("fcntl failed") );
+//
+//  FD_ZERO(&_rfds);
+//  FD_ZERO(&_wfds);
+//  FD_ZERO(&_efds);
+//
+//  FD_SET(_wakePipe[0], &_rfds);
 }
 
 
 MainLoopImpl::~MainLoopImpl()
 {
-    std::set<Selectable*>::iterator it;
-
-    while( _attached.size() )
-    {
-        it = _attached.begin();
-        (*it)->setParent(0);
-    }
-
-    if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
-    {
-        ::close(_wakePipe[0]);
-        ::close(_wakePipe[1]);
-    }
+//  std::set<Selectable*>::iterator it;
+//
+//  while( _attached.size() )
+//  {
+//      it = _attached.begin();
+//      (*it)->setParent(0);
+//  }
+//
+//  if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
+//  {
+//      ::close(_wakePipe[0]);
+//      ::close(_wakePipe[1]);
+//  }
 }
 
 
-void MainLoopImpl::attach(Selectable& s)
+/*void MainLoopImpl::attach(Selectable& s)
 {
     _attached.insert(&s);
-}
+}*/
 
 
-void MainLoopImpl::detach(Selectable& s)
+/*void MainLoopImpl::detach(Selectable& s)
 {
     _attached.erase(&s);
-}
+}*/
 
 
-void MainLoopImpl::enable(Selectable& s)
+/*void MainLoopImpl::enable(Selectable& s)
 {
     s.simpl().initSelect(_rfds, _wfds, _efds);
     _devices.insert( &s );
-}
+}*/
 
 
-void MainLoopImpl::disable(Selectable& s)
+/*void MainLoopImpl::disable(Selectable& s)
 {
    std::set<Selectable*>::iterator it = _devices.find( &s );
    if( it == _devices.end() )
@@ -411,25 +432,25 @@ void MainLoopImpl::disable(Selectable& s)
     {
         _devices.erase(it);
     }
-}
+}*/
 
 
-void MainLoopImpl::idle(Selectable& s)
+/*void MainLoopImpl::idle(Selectable& s)
 {
     _avail.erase(&s);
-}
+}*/
 
 
-void MainLoopImpl::active(Selectable& s)
+/*void MainLoopImpl::active(Selectable& s)
 {
     _avail.erase(&s);
-}
+}*/
 
 
-void MainLoopImpl::avail(Selectable& s)
+/*void MainLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);
-}
+}*/
 
 
 /*void MainLoopImpl::changed(Selectable& s)
@@ -445,7 +466,7 @@ void MainLoopImpl::avail(Selectable& s)
 }*/
 
 
-void MainLoopImpl::onRun()
+/*void MainLoopImpl::onRun()
 {
     bool isActive = true;
     while(isActive)
@@ -454,17 +475,17 @@ void MainLoopImpl::onRun()
 
         this->waitNext(timeout, isActive);
     }
-}
+}*/
 
 
-void MainLoopImpl::onWake()
+/*void MainLoopImpl::onWake()
 {
     ::write( _wakePipe[1], "W", 1);
     ::fsync( _wakePipe[1] );
-}
+}*/
 
 
-void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
+/*void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     fd_set rfds = _rfds;
     fd_set wfds = _wfds;
@@ -565,7 +586,7 @@ void MainLoopImpl::waitNext(std::size_t msecs, bool& isActive )
     }
 
     return;
-}
+}*/
 
 } //namespace System
 

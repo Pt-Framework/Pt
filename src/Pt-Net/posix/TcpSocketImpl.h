@@ -68,6 +68,11 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void close();
 
+        // TODO: enable socket before connect or accept...
+        void enable(System::EventLoop& loop);
+
+        bool avail();
+
         std::string getSockAddr() const;
 
         std::string getPeerAddr() const;
@@ -85,7 +90,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-        int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        //int checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };
 
 } // namespace Net

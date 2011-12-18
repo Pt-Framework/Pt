@@ -42,22 +42,26 @@ namespace Pt {
 
 namespace System {
     class EventLoop;
+    class IOHandle;
 }
 
 namespace Net {
 
 class TcpServer;
 
-class TcpServerImpl : public System::SelectableImpl
+class TcpServerImpl  : public System::SelectableImpl
 {
     private:
         TcpServer& _server;
         int _fd;
-        fd_set* _rfds;
+        System::IOHandle* _iohandle;
         struct sockaddr_storage _servaddr;
 
     public:
         TcpServerImpl(TcpServer& server);
+
+        virtual ~TcpServerImpl() 
+        {}
 
         void create(int domain, int type, int protocol);
 
@@ -79,14 +83,20 @@ class TcpServerImpl : public System::SelectableImpl
 
         void detach(System::EventLoop& s);
 
-        // implementation using select
-        virtual int initSelect(fd_set&, fd_set&, fd_set&);
+        void enable(System::EventLoop& el);
+    
+        void disable(System::EventLoop& el);
+    
+        bool avail();
 
         // implementation using select
-        virtual void exitSelect();
+        //virtual int initSelect(fd_set&, fd_set&, fd_set&);
 
         // implementation using select
-        virtual int checkEvent(fd_set&, fd_set&, fd_set&);
+        //virtual void exitSelect();
+
+        // implementation using select
+        //virtual int checkEvent(fd_set&, fd_set&, fd_set&);
 };
 
 } // namespace Net

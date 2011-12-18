@@ -76,6 +76,12 @@ class TcpServerImpl;
 
       // inherit doc
       virtual void onDetach(System::EventLoop&);
+
+      virtual void onEnable(System::EventLoop& el);
+
+      virtual void onDisable(System::EventLoop& el);
+
+      virtual bool onAvail();
   };
 
 } // namespace Net

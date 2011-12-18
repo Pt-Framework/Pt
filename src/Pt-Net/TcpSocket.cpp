@@ -81,14 +81,18 @@ TcpSocket::TcpSocket(const AddrInfo& addrinfo)
 
 TcpSocket::~TcpSocket()
 {
+    std::cerr << "TcpSocket::~TcpSocket()" << std::endl;
     try
     {
+        std::cerr << "TcpSocket::~TcpSocket() close" << std::endl;
         this->close();
     }
     catch(...)
     {}
 
+    std::cerr << "TcpSocket::~TcpSocket() delete _impl" << std::endl;
     delete _impl;
+    std::cerr << "TcpSocket::~TcpSocket() return" << std::endl;
 }
 
 
@@ -172,7 +176,9 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 
 void TcpSocket::onClose()
 {
+    std::cerr << "TcpSocket::onClose() 1" << std::endl;
     cancel();
+    std::cerr << "TcpSocket::onClose() 2" << std::endl;
     _impl->close();
 }
 
@@ -192,6 +198,24 @@ void TcpSocket::onAttach(System::EventLoop& sb)
 void TcpSocket::onDetach(System::EventLoop& sb)
 {
     _impl->detach(sb);
+}
+
+
+void TcpSocket::onEnable(System::EventLoop& loop)
+{
+    _impl->enable(loop);
+}
+
+
+void TcpSocket::onDisable(System::EventLoop& loop)
+{
+    _impl->disable(loop);
+}
+
+
+bool TcpSocket::onAvail()
+{
+    return _impl->avail();
 }
 
 
