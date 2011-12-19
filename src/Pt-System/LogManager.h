@@ -36,7 +36,6 @@
 #include "Pt/System/LogLevel.h"
 #include "Pt/System/Mutex.h"
 #include "Pt/System/Plugin.h"
-#include "Pt/Singleton.h"
 #include "Pt/Settings.h"
 #include <string>
 #include <map>
@@ -48,10 +47,8 @@ namespace System {
 class LogTarget;
 class LogMessage;
 
-class LogManager : public Pt::Singleton<LogManager>
+class LogManager
 {
-    friend class Pt::Singleton<LogManager>;
-
     protected:
         LogManager();
 
@@ -72,6 +69,37 @@ class LogManager : public Pt::Singleton<LogManager>
 
         void setLogLevel(LogTarget &target, LogLevel level);
 
+        static LogManager& instance()
+        {
+            if( ! _instance )
+            {
+                _instance = new LogManager();
+            }
+
+            return *_instance;
+        }
+
+        static LogManager& get()
+        {
+            LogManager& mgr = instance();
+            Pt::System::RecursiveLock lock(mgr._mutex);
+            ++mgr._loggerCount;
+            return mgr;
+        }
+
+        static void release()
+        {
+            LogManager& mgr = instance();
+            Pt::System::RecursiveLock lock(mgr._mutex);
+
+            if(0 == --mgr._loggerCount)
+            {
+                lock.unlock();
+                delete _instance;
+                _instance = 0;
+            }
+        }
+
     protected:
         void initTarget(LogTarget& target, const Settings::ConstEntry& entry);
 
@@ -87,6 +115,24 @@ class LogManager : public Pt::Singleton<LogManager>
         std::map<std::string, LogChannel*> _channelMap;
         Pt::System::RecursiveMutex _mutex;
         int _concurrency;
+        size_t _loggerCount;
+
+    private:
+        static LogManager* _instance;
+};
+
+class LogManagerStaticInit
+{
+    public:
+        LogManagerStaticInit()
+        {
+            LogManager::get();
+        }
+
+        ~LogManagerStaticInit()
+        {
+            LogManager::release();
+        }
 };
 
 }

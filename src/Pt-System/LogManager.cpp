@@ -97,12 +97,17 @@ namespace Pt {
 
 namespace System {
 
+LogManagerStaticInit pt_system_log_manager_static_init;
+
+LogManager* LogManager::_instance = 0;
+
 LogManager::LogManager()
 : _consolePlugin("console", "1.0.0")
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
 , _rootTarget(0)
 , _concurrency(1)
+, _loggerCount(0)
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );

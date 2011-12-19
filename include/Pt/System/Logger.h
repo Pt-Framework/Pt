@@ -359,8 +359,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
         /** @brief Destructor
         */
-        ~Logger()
-        {}
+        ~Logger();
 
         /** @brief Returns true if the log level is enabled for the target
         */
@@ -471,6 +470,9 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         {}
 
     private:
+        LogTarget& init(const std::string& name);
+
+    private:
         //! @internal
         LogTarget* _target;
 };
@@ -556,10 +558,11 @@ class LoggedScope
     #define log_define(category)
     #define log_xxxx(level, expr)
 #else
-    #define log_message_impl(logger, level, expr) \
-    if( logger.enabled( Pt::System::level() ) ) \
-    { \
-        logger.beginLog( Pt::System::level(), PT_SOURCEINFO) << expr << Pt::System::endlog; \
+    #define log_message_impl(logger, level, expr)            \
+    if( logger.enabled( Pt::System::level() ) )              \
+    {                                                        \
+        logger.beginLog( Pt::System::level(), PT_SOURCEINFO) \
+            << expr << Pt::System::endlog;                   \
     }
 
     #define log_init(file) \

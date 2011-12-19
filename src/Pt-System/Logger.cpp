@@ -144,16 +144,41 @@ void LogTarget::assignChannel(LogChannel& ch)
 /////////////////////////////////////////////////////////////////////
 
 Logger::Logger(const std::string& name)
-: _target( &LogManager::instance().target(name) )
+: _target(0)
 {
+    LogTarget& t = init(name);
+    _target = &t;
 }
 
 
 Logger::Logger(const char* name)
-: _target( &LogManager::instance().target(name) )
+: _target(0)
 {
+    LogTarget& t = init(name);
+    _target = &t;
 }
 
+
+Logger::~Logger()
+{
+    LogManager::release();
+}
+
+
+LogTarget& Logger::init(const std::string& name)
+{
+    LogManager& lm = LogManager::get();
+
+    try
+    {
+        return lm.target(name);
+    }
+    catch(...)
+    {
+        lm.release();
+        throw;
+    }
+}
 
 //bool Logger::enabled(LogLevel level) const
 //{
