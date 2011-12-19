@@ -86,14 +86,17 @@ class TcpServerImpl : public System::SelectableImpl
 
         void detach(System::EventLoop& s);
 
+        void enable(System::EventLoop& loop);
+
+        void disable(System::EventLoop& loop);
+
+        bool avail();
+
         // implementation using WSAEventSelect
         virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         // implementation using WSAEventSelect
-        virtual void getWaitHandles(System::HandleMap& handles, bool& avail);
-
-        // implementation using WSAEventSelect
-        virtual bool checkEvent();
+        //virtual bool checkEvent();
 };
 
 } // namespace Net

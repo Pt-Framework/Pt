@@ -104,17 +104,17 @@ class UdpSocketImpl : public System::SelectableImpl
 
         std::string getSockAddr() const;
 
-		std::string getPeerAddr() const;
+        std::string getPeerAddr() const;
 
-		void setTimeout(std::size_t msecs)
-		{
-			_timeout = msecs;
-		}
+        void setTimeout(std::size_t msecs)
+        {
+            _timeout = msecs;
+        }
 
-		std::size_t timeout() const
-		{
-			return _timeout;
-		}
+        std::size_t timeout() const
+        {
+            return _timeout;
+        }
 
         size_t beginRead(char* buffer, size_t n, bool& eof);
 
@@ -136,6 +136,12 @@ class UdpSocketImpl : public System::SelectableImpl
 
         void detach(System::EventLoop& loop);
 
+        void enable(System::EventLoop& sb);
+
+        void disable(System::EventLoop& sb);
+
+        bool avail();
+
         bool setWaitHandle(HANDLE h, bool& avail);
 
     protected:
@@ -144,7 +150,7 @@ class UdpSocketImpl : public System::SelectableImpl
 
         void setEventFlags(HANDLE ev, long events);
 
-        bool checkEvent();
+        //bool checkEvent();
 
     private:
         UdpSocket&                   _socket;

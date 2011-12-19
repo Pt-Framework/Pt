@@ -116,7 +116,7 @@ struct IOHandle
 };
 
 
-class EventLoopImpl : public EventDispatcher
+class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 {
     public:
         EventLoopImpl();
@@ -137,35 +137,15 @@ class EventLoopImpl : public EventDispatcher
 
         void avail(Selectable& s);
 
-        HANDLE beginWait(Selectable& s)
-        { 
-            _devices.insert(&s);
-            return _ioEvent; 
-        }
+        HANDLE beginWait(Selectable& s);
 
-        void endWait(Selectable& s)
-        { 
-            _devices.erase(&s);
-        }
+        void endWait(Selectable& s);
 
-        IOHandle* registerHandle(Selectable& s, HANDLE h)
-        {
-            IOHandle* iohandle =  new IOHandle(s, h);
-            _dirty.push_back(iohandle);
-            return iohandle;
-        }
+        IOHandle* registerHandle(Selectable& s, HANDLE h);
 
-        void unregisterHandle(IOHandle* h)
-        {
-            _dirty.remove(h);
-            _handles.remove( *(h->sel) );
-            delete h;
-        }
+        void unregisterHandle(IOHandle* h);
 
-        void setAvail(Selectable& s)
-        {
-            _avail.insert(&s);
-        }
+        void setAvail(Selectable& s);
 
     protected:
         virtual void onRun();
@@ -189,7 +169,7 @@ class EventLoopImpl : public EventDispatcher
 };
 
 
-class PT_SYSTEM_API MainLoopImpl : public EventDispatcher
+class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
 {
     public:
         MainLoopImpl();
@@ -201,40 +181,40 @@ class PT_SYSTEM_API MainLoopImpl : public EventDispatcher
         EventLoopImpl& impl()
         { return _impl; }
 
-        void attach( Selectable& s );
+        //void attach( Selectable& s );
 
-        void detach( Selectable& s );
+        //void detach( Selectable& s );
 
-        void enable( Selectable& s );
+        //void enable( Selectable& s );
 
-        void disable( Selectable& s );
+        //void disable( Selectable& s );
 
-        void idle(Selectable& s);
+        //void idle(Selectable& s);
 
-        void active(Selectable& s);
+        //void active(Selectable& s);
 
-        void avail(Selectable& s);
+        //void avail(Selectable& s);
 
     protected:
-        virtual void onRun();
+        //virtual void onRun();
 
-        virtual void onWake();
+        //virtual void onWake();
 
-        void waitNext(std::size_t timeout, bool& isActive);
+        //void waitNext(std::size_t timeout, bool& isActive);
 
-        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
+        //virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
     private:
-        HANDLE _wakeEvent;
-        HANDLE _ioEvent;
-        HandleMap _handles;
+        //HANDLE _wakeEvent;
+        //HANDLE _ioEvent;
+        //HandleMap _handles;
         EventLoopImpl _impl;
-        std::set<Selectable*>::iterator _current;
-        std::set<Selectable*>::iterator _currentAvail;
-        std::set<Selectable*> _attached;
-        std::set<Selectable*> _devices;
-        std::set<Selectable*> _dirty;
-        std::set<Selectable*> _avail;
+        //std::set<Selectable*>::iterator _current;
+        //std::set<Selectable*>::iterator _currentAvail;
+        //std::set<Selectable*> _attached;
+        //std::set<Selectable*> _devices;
+        //std::set<Selectable*> _dirty;
+        //std::set<Selectable*> _avail;
 };
 
 }//namespace System

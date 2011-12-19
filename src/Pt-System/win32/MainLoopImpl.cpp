@@ -75,6 +75,60 @@ EventLoopImpl::~EventLoopImpl()
     CloseHandle( _ioEvent );
 }
 
+HANDLE EventLoopImpl::beginWait(Selectable& s)
+{ 
+    _devices.insert(&s);
+    return _ioEvent; 
+}
+
+
+IOHandle* EventLoopImpl::registerHandle(Selectable& s, HANDLE h)
+{
+    IOHandle* iohandle =  new IOHandle(s, h);
+    _dirty.push_back(iohandle);
+    return iohandle;
+}
+
+
+void EventLoopImpl::unregisterHandle(IOHandle* h)
+{
+    _dirty.remove(h);
+    _handles.remove( *(h->sel) );
+    delete h;
+}
+
+
+void EventLoopImpl::setAvail(Selectable& s)
+{
+    _avail.insert(&s);
+}
+
+
+void EventLoopImpl::endWait(Selectable& s)
+{
+    std::set<Selectable*>::iterator iter = _devices.find( &s );
+    if( iter != _devices.end() )
+    {
+        if( _current != _devices.end() && *_current == *iter )
+        {
+            _devices.erase(_current++);
+        }
+        else
+        {
+            _devices.erase(iter);
+        }
+    }
+
+    iter = _avail.find( &s );
+    if( iter != _avail.end() )
+    {
+        if( _currentAvail != _avail.end() && *_currentAvail == *iter )
+            _avail.erase(_currentAvail++);
+        else
+            _avail.erase(iter);
+    }
+}
+
 
 void EventLoopImpl::attach(Selectable& s)
 {
@@ -90,27 +144,30 @@ void EventLoopImpl::detach(Selectable& s)
 
 void EventLoopImpl::enable(Selectable& s)
 {
-
 }
 
 
 void EventLoopImpl::disable(Selectable& s)
 {
+    //TODO: same as endWait()
+
     std::set<Selectable*>::iterator iter = _devices.find( &s );
     if( iter != _devices.end() )
     {
-        if( _current != _devices.end() &&
-           *_current == *iter )
+        if( _current != _devices.end() && *_current == *iter )
+        {
             _devices.erase(_current++);
+        }
         else
+        {
             _devices.erase(iter);
+        }
     }
 
     iter = _avail.find( &s );
     if( iter != _avail.end() )
     {
-        if( _currentAvail != _avail.end() &&
-           *_currentAvail == *iter )
+        if( _currentAvail != _avail.end() && *_currentAvail == *iter )
             _avail.erase(_currentAvail++);
         else
             _avail.erase(iter);
@@ -234,11 +291,12 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             {
                 Selectable* dev = *_current;
 
+                std::cerr << "ON AVAIL" << std::endl;
                 if( dev->enabled() ) 
                     dev->onAvail();
 
-                if( _current != _devices.end() &&
-                   *_current == dev )
+                std::cerr << "ITERATOR AFTER AVAIL" << std::endl;
+                if( _current != _devices.end() && *_current == dev )
                 {
                     ++_current;
                 }
@@ -294,76 +352,76 @@ DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msec
 
 
 MainLoopImpl::MainLoopImpl()
-: EventDispatcher()
+: EventLoopImpl()
 {
-    _current = _devices.end();
-    _currentAvail = _avail.end();
-
-    _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _wakeEvent == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-
-    _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _ioEvent == NULL )
-    {
-        CloseHandle( _wakeEvent );
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-    }
-
-    _handles.add( _wakeEvent, 0 );
-    _handles.add( _ioEvent, 0 );
+//  _current = _devices.end();
+//  _currentAvail = _avail.end();
+//
+//  _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+//  if( _wakeEvent == NULL )
+//      throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+//
+//  _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+//  if( _ioEvent == NULL )
+//  {
+//      CloseHandle( _wakeEvent );
+//      throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+//  }
+//
+//  _handles.add( _wakeEvent, 0 );
+//  _handles.add( _ioEvent, 0 );
 }
 
 MainLoopImpl::MainLoopImpl(Allocator& a)
-: EventDispatcher(a)
+: EventLoopImpl()
 {
-    _current = _devices.end();
-    _currentAvail = _avail.end();
-
-    _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _wakeEvent == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-
-    _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _ioEvent == NULL )
-    {
-        CloseHandle( _wakeEvent );
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-    }
-
-    _handles.add( _wakeEvent, 0 );
-    _handles.add( _ioEvent, 0 );
+//  _current = _devices.end();
+//  _currentAvail = _avail.end();
+//
+//  _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+//  if( _wakeEvent == NULL )
+//      throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+//
+//  _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+//  if( _ioEvent == NULL )
+//  {
+//      CloseHandle( _wakeEvent );
+//      throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+//  }
+//
+//  _handles.add( _wakeEvent, 0 );
+//  _handles.add( _ioEvent, 0 );
 }
 
 
 MainLoopImpl::~MainLoopImpl()
 {
-    std::set<Selectable*>::iterator it;
-
-    while( _attached.size() )
-    {
-        it = _attached.begin();
-        (*it)->setParent(0);
-    }
-
-    CloseHandle( _wakeEvent );
-    CloseHandle( _ioEvent );
+//  std::set<Selectable*>::iterator it;
+//
+//  while( _attached.size() )
+//  {
+//      it = _attached.begin();
+//      (*it)->setParent(0);
+//  }
+//
+//  CloseHandle( _wakeEvent );
+//  CloseHandle( _ioEvent );
 }
 
 
-void MainLoopImpl::attach(Selectable& s)
+/*void MainLoopImpl::attach(Selectable& s)
 {
     _attached.insert(&s);
-}
+}*/
 
 
-void MainLoopImpl::detach(Selectable& s)
+/*void MainLoopImpl::detach(Selectable& s)
 {
     _attached.erase(&s);
-}
+}*/
 
 
-void MainLoopImpl::enable(Selectable& s)
+/*void MainLoopImpl::enable(Selectable& s)
 {
     bool ready = false;
     bool accept = s.simpl().setWaitHandle(_ioEvent, ready);
@@ -381,10 +439,10 @@ void MainLoopImpl::enable(Selectable& s)
 
     /// OLD:
     ///_dirty.insert(&s);
-}
+}*/
 
 
-void MainLoopImpl::disable(Selectable& s)
+/*void MainLoopImpl::disable(Selectable& s)
 {
     _dirty.erase(&s);
     _handles.remove(s);
@@ -408,9 +466,9 @@ void MainLoopImpl::disable(Selectable& s)
         _avail.erase(_currentAvail++);
     else
         _avail.erase(iter);
-}
+}*/
 
-void MainLoopImpl::idle(Selectable& s)
+/*void MainLoopImpl::idle(Selectable& s)
 {
     std::set<Selectable*>::iterator it = _avail.find( &s );
     if( it == _avail.end() )
@@ -421,10 +479,10 @@ void MainLoopImpl::idle(Selectable& s)
         _avail.erase(_currentAvail++);
     else
         _avail.erase(it);
-}
+}*/
 
 
-void MainLoopImpl::active(Selectable& s)
+/*void MainLoopImpl::active(Selectable& s)
 {
     std::set<Selectable*>::iterator it = _avail.find( &s );
     if( it == _avail.end() )
@@ -435,13 +493,13 @@ void MainLoopImpl::active(Selectable& s)
         _avail.erase(_currentAvail++);
     else
         _avail.erase(it);
-}
+}*/
 
 
-void MainLoopImpl::avail(Selectable& s)
+/*void MainLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);
-}
+}*/
 
 
 /*void MainLoopImpl::changed(Selectable& s)
@@ -465,7 +523,7 @@ void MainLoopImpl::avail(Selectable& s)
 }*/
 
 
-void MainLoopImpl::onRun()
+/*void MainLoopImpl::onRun()
 {
     bool isActive = true;
     while(isActive)
@@ -474,16 +532,16 @@ void MainLoopImpl::onRun()
 
         this->waitNext(timeout, isActive);
     }
-}
+}*/
 
 
-void MainLoopImpl::onWake()
+/*void MainLoopImpl::onWake()
 {
     SetEvent( _wakeEvent );
-}
+}*/
 
 
-void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
+/*void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 {
     // convert unsigned to signed
     DWORD msecs = umsecs;
@@ -516,12 +574,12 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         msecs = 0;
     }
 
-    /*DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
-    if(result == WAIT_FAILED)
-    {
-        //DWORD err = GetLastError();
-        throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-    }*/
+    //DWORD result = WaitForMultipleObjects( _handles.size(), _handles.handles(), false, msecs );
+    //if(result == WAIT_FAILED)
+    //{
+    //    //DWORD err = GetLastError();
+    //    throw IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+    //}
 
     bool isTimeout = false;
     DWORD offset = waitFor(_handles.size(), _handles.handles(), msecs, isTimeout);
@@ -543,10 +601,10 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             }
         }
 
-        /*if( result == WAIT_TIMEOUT)
-        {
-            return;
-        }*/
+        //if( result == WAIT_TIMEOUT)
+        //{
+        //    return;
+        //}
 
         if(isTimeout)
             return;
@@ -591,10 +649,10 @@ void MainLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         _currentAvail = _avail.end();
         throw;
     }
-}
+}*/
 
 
-DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+/*DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
     DWORD result = WaitForMultipleObjects( numHandles, handles, false, msecs );
     if(result == WAIT_FAILED)
@@ -610,7 +668,7 @@ DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs
     }
 
     return result - WAIT_OBJECT_0;
-}
+}*/
 
 } //namespace System
 

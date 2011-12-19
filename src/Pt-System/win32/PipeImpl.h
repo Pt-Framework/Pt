@@ -56,9 +56,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void onDetach(EventLoop& loop);
 
-        void onEnableX(EventLoop& loop);
+        void onEnable(EventLoop& loop);
 
-        void onDisableX(EventLoop& loop);
+        void onDisable(EventLoop& loop);
 
         bool onAvail();
 

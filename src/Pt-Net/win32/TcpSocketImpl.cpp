@@ -30,6 +30,7 @@
 #include <Pt/Net/AddrInfo.h>
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
+#include "MainLoopImpl.h"
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
@@ -56,13 +57,13 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
 , _dataSends(0)
 {
-	_currentEventHandle = _waitEvent;
+    _currentEventHandle = _waitEvent;
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-	WSAResetEvent(_waitEvent);
+    WSAResetEvent(_waitEvent);
     WSACloseEvent(_waitEvent);
 
     if(_sentry)
@@ -72,8 +73,8 @@ TcpSocketImpl::~TcpSocketImpl()
 
 void TcpSocketImpl::cancel()
 {
-	SetEvent(_currentEventHandle);
-	attachEvent(0, 0);
+    SetEvent(_currentEventHandle);
+    attachEvent(0, 0);
 }
 
 
@@ -82,7 +83,7 @@ void TcpSocketImpl::close()
     if( _fd == INVALID_SOCKET )
         return;
 
-	attachEvent(0, 0);
+    attachEvent(0, 0);
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -91,7 +92,7 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 {
-	this->beginConnect(addrinfo);
+    this->beginConnect(addrinfo);
     this->endConnect();
 }
 
@@ -110,7 +111,7 @@ const char* TcpSocketImpl::tryConnect()
         while (true)
         {
             log_debug("create socket");
-			_fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+            _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
 
              if (_fd != INVALID_SOCKET)
                 break;
@@ -181,20 +182,20 @@ void TcpSocketImpl::checkPendingError()
 
 int TcpSocketImpl::checkConnect()
 {
-	int sockerr;
+    int sockerr;
 
-	socklen_t optlen = sizeof(sockerr);
+    socklen_t optlen = sizeof(sockerr);
 
-	if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
-	{
-		//WSAINPROGRESS??
-		close();
-		throw System::SystemError("getsockopt");
-	}
-	else if(sockerr == 0)
-	{
-		_isConnected = true;
-	}
+    if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
+    {
+        //WSAINPROGRESS??
+        close();
+        throw System::SystemError("getsockopt");
+    }
+    else if(sockerr == 0)
+    {
+        _isConnected = true;
+    }
 
     return sockerr;
 }
@@ -205,18 +206,18 @@ void TcpSocketImpl::endConnect()
     log_debug(_fd << " endConnect");
 
     _eventFlags &= ~FD_CONNECT;
-	attachEvent(_currentEventHandle, _eventFlags);
+    attachEvent(_currentEventHandle, _eventFlags);
 
-	checkPendingError();
+    checkPendingError();
 
-	if( _isConnected )
-		return;
+    if( _isConnected )
+        return;
 
-	_eventFlags |= FD_CONNECT;
-	attachEvent(_currentEventHandle, _eventFlags);
+    _eventFlags |= FD_CONNECT;
+    attachEvent(_currentEventHandle, _eventFlags);
 
     log_debug(_fd << " force endConnect");
-	try
+    try
     {
         while (true)
         {
@@ -227,11 +228,11 @@ void TcpSocketImpl::endConnect()
                 // something has happened
                 checkConnect();
                 if (_isConnected)
-				{
-					_eventFlags &= ~FD_CONNECT;
-					attachEvent(_currentEventHandle, _eventFlags);
+                {
+                    _eventFlags &= ~FD_CONNECT;
+                    attachEvent(_currentEventHandle, _eventFlags);
                     return;
-				}
+                }
 
                 if (++_addrInfoPtr == _addrInfo.impl()->end())
                 {
@@ -249,11 +250,11 @@ void TcpSocketImpl::endConnect()
 
             _connectResult = tryConnect();
             if (_isConnected)
-			{
-				_eventFlags &= ~FD_CONNECT;
-				attachEvent(_currentEventHandle, _eventFlags);
+            {
+                _eventFlags &= ~FD_CONNECT;
+                attachEvent(_currentEventHandle, _eventFlags);
                 return;
-			}
+            }
             checkPendingError();
         }
     }
@@ -265,15 +266,126 @@ void TcpSocketImpl::endConnect()
 }
 
 
-void TcpSocketImpl::detach(System::EventLoop& sb)
+void TcpSocketImpl::attach(System::EventLoop& loop)
 {
-	if( _fd != INVALID_SOCKET)
-		attachEvent(_waitEvent, _eventFlags);
 }
 
 
-void TcpSocketImpl::attach(System::EventLoop& sb)
+void TcpSocketImpl::detach(System::EventLoop& loop)
 {
+    //if( _fd != INVALID_SOCKET)
+    //    attachEvent(_waitEvent, _eventFlags);
+}
+
+
+void TcpSocketImpl::enable(System::EventLoop& loop)
+{
+    log_debug("enable in loop");
+
+    HANDLE h = loop.impl().beginWait(_socket);
+
+    bool active = false;
+    this->setWaitHandle(h, active);
+
+    // TODO: use this->setAvail() ?
+    if(active)
+        loop.impl().setAvail(_socket);
+}
+
+
+void TcpSocketImpl::disable(System::EventLoop& loop)
+{
+    log_debug("disable in loop");
+
+    loop.impl().endWait(_socket);
+
+    if( _fd != INVALID_SOCKET)
+        attachEvent(_waitEvent, _eventFlags);
+}
+
+
+bool TcpSocketImpl::avail()
+{
+    log_debug(_fd << " avail");
+
+    DestructionSentry sentry(_sentry);
+
+    if(_dataSends != 0 )
+    {
+       _socket.outputReady.send(_socket);
+       return true;
+    }
+
+    WSANETWORKEVENTS events;
+
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    bool ev = false;
+
+    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
+    {
+        //ResetEvent(_currentEventHandle);
+        int s = FD_CONNECT_BIT;
+        if(events.iErrorCode[s] != 0)
+        {
+            if (++_addrInfoPtr == _addrInfo.impl()->end())
+            {
+                // no more addrInfo - propagate error
+                _connectResult = "connect failed";
+                _socket.connected.send(_socket);
+                return true;
+            }
+
+            _connectResult = tryConnect();
+            if (_isConnected)
+            {
+                _socket.connected.send(_socket);
+                return true;
+            }
+        }
+        else
+        {
+            ev = true;
+            _isConnected = true;
+            _socket.connected.send(_socket);
+
+            if( ! _sentry )
+               return ev;
+        }
+    }
+
+    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
+    {
+       //ResetEvent(_currentEventHandle);
+       ev = true;
+       _socket.outputReady.send(_socket);
+
+       if( ! _sentry )
+           return ev;
+    }
+
+    if((events.lNetworkEvents & FD_READ) == FD_READ)
+    {
+        //ResetEvent(_currentEventHandle);
+        ev = true;
+        _socket.inputReady.send(_socket);
+
+        if( ! _sentry )
+           return ev;
+    }
+
+    if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
+    {
+        //ResetEvent(_currentEventHandle);
+         ev = true;
+       _isConnected = false;
+
+       if( ! _sentry )
+           return ev;
+    }
+
+    return ev;
 }
 
 
@@ -301,7 +413,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     log_debug(_fd << " wait " << umsecs);
 
     int msecs = umsecs;
-	if(umsecs == Pt::System::EventLoop::WaitInfinite)
+    if(umsecs == Pt::System::EventLoop::WaitInfinite)
     {
         msecs = INFINITE;
     }
@@ -309,13 +421,14 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     {
         msecs = std::numeric_limits<int>::max();
     }
-DWORD www = 0;
-	if( _dataSends != 0 || (www =
+
+    DWORD www = 0;
+    if( _dataSends != 0 || (www =
         WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE)) != WSA_WAIT_TIMEOUT)
-	{      
-		bool av = checkEvent();
-		return true;
-	}
+    {      
+        bool av = this->avail();
+        return true;
+    }
 
     return false;
 }
@@ -324,10 +437,10 @@ DWORD www = 0;
 bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     log_debug(_fd << " setWaitHandle");
-	avail = _dataSends != 0;
+    avail = _dataSends != 0;
 
-	if( _currentEventHandle == h)
-		return true;
+    if( _currentEventHandle == h)
+        return true;
 
     _currentEventHandle = h;
 
@@ -338,26 +451,20 @@ bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 
     attachEvent(_currentEventHandle, _eventFlags);
 
-	return true;
-}
-
-
-void TcpSocketImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
-{
-
+    return true;
 }
 
 
 std::string TcpSocketImpl::getSockAddr() const
 {
-	SOCKADDR sockadr;
-	int len = sizeof(sockadr);
-	int ret = getsockname(_fd, &sockadr, &len);
+    SOCKADDR sockadr;
+    int len = sizeof(sockadr);
+    int ret = getsockname(_fd, &sockadr, &len);
 
-	if( ret == SOCKET_ERROR)
-		throw System::SystemError( PT_ERROR_MSG("getSockAddr failed") );
+    if( ret == SOCKET_ERROR)
+        throw System::SystemError( PT_ERROR_MSG("getSockAddr failed") );
 
-	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&sockadr);
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&sockadr);
     return inet_ntoa(sa->sin_addr);
 }
 
@@ -529,7 +636,7 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 }
 
 
-bool TcpSocketImpl::checkEvent()
+/*bool TcpSocketImpl::checkEvent()
 {
     log_debug(_fd << " checkEvent");
 
@@ -551,33 +658,33 @@ bool TcpSocketImpl::checkEvent()
     if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
     {
         //ResetEvent(_currentEventHandle);
-		int s = FD_CONNECT_BIT;
-		if(events.iErrorCode[s] != 0)
-		{
-			if (++_addrInfoPtr == _addrInfo.impl()->end())
-			{
-				// no more addrInfo - propagate error
-				_connectResult = "connect failed";
-				_socket.connected.send(_socket);
-				return true;
-			}
+        int s = FD_CONNECT_BIT;
+        if(events.iErrorCode[s] != 0)
+        {
+            if (++_addrInfoPtr == _addrInfo.impl()->end())
+            {
+                // no more addrInfo - propagate error
+                _connectResult = "connect failed";
+                _socket.connected.send(_socket);
+                return true;
+            }
 
-			_connectResult = tryConnect();
-			if (_isConnected)
-			{
-				_socket.connected.send(_socket);
-				return true;
-			}
-		}
-		else
-		{
-			ev = true;
-			_isConnected = true;
-			_socket.connected.send(_socket);
+            _connectResult = tryConnect();
+            if (_isConnected)
+            {
+                _socket.connected.send(_socket);
+                return true;
+            }
+        }
+        else
+        {
+            ev = true;
+            _isConnected = true;
+            _socket.connected.send(_socket);
 
-			if( ! _sentry )
-			   return ev;
-		}
+            if( ! _sentry )
+               return ev;
+        }
     }
 
     if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
@@ -611,7 +718,7 @@ bool TcpSocketImpl::checkEvent()
     }
 
     return ev;
-}
+}*/
 
 } // namespace Net
 

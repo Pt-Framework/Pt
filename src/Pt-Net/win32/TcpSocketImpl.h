@@ -86,32 +86,32 @@ class TcpSocketImpl : public System::SelectableImpl
         DestructionSentry*& _sentry;
     };
 
-	private:
-		AddrInfo _addrInfo;
-		const char* _connectResult;
-		AddrInfoImpl::const_iterator _addrInfoPtr;
+    private:
+        AddrInfo _addrInfo;
+        const char* _connectResult;
+        AddrInfoImpl::const_iterator _addrInfoPtr;
         DestructionSentry* _sentry;
         SOCKET	      _fd;
-		sockaddr_storage  _peeraddr;
-		TcpSocket&    _socket;
-		WSAEVENT      _waitEvent;
-		std::size_t	  _timeout;
-//		WSAOVERLAPPED _connectOverlapped;
-		WSAOVERLAPPED _sendOverlapped;
-//		WSAOVERLAPPED _receiveOverlapped;
-		WSABUF        _sendBuffer;
-		HANDLE		  _currentEventHandle;
-		WSABUF		  _receiveBuffer;
-		bool          _isConnected;
-		long		  _eventFlags;
-		size_t		  _dataSends;
+        sockaddr_storage  _peeraddr;
+        TcpSocket&    _socket;
+        WSAEVENT      _waitEvent;
+        std::size_t	  _timeout;
+        // WSAOVERLAPPED _connectOverlapped;
+        WSAOVERLAPPED _sendOverlapped;
+        // WSAOVERLAPPED _receiveOverlapped;
+        WSABUF        _sendBuffer;
+        HANDLE        _currentEventHandle;
+        WSABUF        _receiveBuffer;
+        bool          _isConnected;
+        long          _eventFlags;
+        size_t        _dataSends;
 
-		int checkConnect();
+        int checkConnect();
         void attachEvent(HANDLE ev, long events);
-		size_t checkReceiveResult(bool& eof);
-		size_t checkSendResult();
-		const char* tryConnect();
-		void checkPendingError();
+        size_t checkReceiveResult(bool& eof);
+        size_t checkSendResult();
+        const char* tryConnect();
+        void checkPendingError();
     public:
         TcpSocketImpl(TcpSocket& socket);
 
@@ -130,31 +130,31 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void endConnect();
 
-		size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(char* buffer, size_t n, bool& eof);
 
-		size_t read(char* buffer, size_t count, bool& eof);
+        size_t read(char* buffer, size_t count, bool& eof);
 
-		size_t endRead(bool& eof);
+        size_t endRead(bool& eof);
 
-		size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(const char* buffer, size_t n);
 
-		size_t endWrite();
+        size_t endWrite();
 
-		size_t write(const char* buffer, size_t count);
+        size_t write(const char* buffer, size_t count);
 
-		std::string getSockAddr() const;
+        std::string getSockAddr() const;
 
-		std::string getPeerAddr() const;
+        std::string getPeerAddr() const;
 
-		void setTimeout(std::size_t msecs)
-		{
-			_timeout = msecs;
-		}
+        void setTimeout(std::size_t msecs)
+        {
+            _timeout = msecs;
+        }
 
-		std::size_t timeout() const
-		{
-			return _timeout;
-		}
+        std::size_t timeout() const
+        {
+            return _timeout;
+        }
 
         bool wait(std::size_t msecs);
 
@@ -162,11 +162,15 @@ class TcpSocketImpl : public System::SelectableImpl
 
         void detach(System::EventLoop& sb);
 
-		bool setWaitHandle(HANDLE h, bool& avail);
+        void enable(System::EventLoop& sb);
 
-		void getWaitHandles(System::HandleMap& handles, bool& avail);
+        void disable(System::EventLoop& sb);
 
-		bool checkEvent();
+        bool avail();
+
+        bool setWaitHandle(HANDLE h, bool& avail);
+
+        //bool checkEvent();
 
         void cancel();
 };

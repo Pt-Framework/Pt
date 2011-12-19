@@ -29,6 +29,7 @@
 #include <Pt/Net/AddrInfo.h>
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
+#include "MainLoopImpl.h"
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/EventLoop.h>
@@ -40,6 +41,7 @@
 //#include <Mswsock.h>
 
 #define log_debug(x)
+#define log_trace(x)
 
 namespace Pt {
 
@@ -90,15 +92,6 @@ void TcpServerImpl::create(int domain, int type, int protocol)
     }
 
     log_debug("server socket " << _fd);
-}
-
-void TcpServerImpl::attachEvent(HANDLE ev, long events)
-{
-    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
-    {
-        log_debug("Set event failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
-    }
 }
 
 void TcpServerImpl::close()
@@ -190,6 +183,30 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         throw System::SystemError("bind");
 }
 
+
+SOCKET TcpServerImpl::accept()
+{
+    // set the server socket to blocking-mode
+    u_long argp = 0;
+    attachEvent(0,0);
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+    
+    SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
+    
+    if( fd == SOCKET_ERROR)
+    {
+        log_debug("accept failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("accept failed") );
+    }
+    
+    // reset the blocking mode
+    attachEvent(_currentHandle, FD_ACCEPT);
+
+    _server.setIdle(); // why?
+    return fd;
+}
+
+
 bool TcpServerImpl::wait(std::size_t umsecs)
 {
     log_debug(_fd << " wait " << umsecs);
@@ -227,26 +244,92 @@ bool TcpServerImpl::wait(std::size_t umsecs)
 }
 
 
+void TcpServerImpl::attachEvent(HANDLE ev, long events)
+{
+    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
+    {
+        log_debug("Set event failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
+    }
+}
+
+
 void TcpServerImpl::attach(System::EventLoop& s)
 {
-    log_debug("attach to selector");
+    log_debug("attach to loop");
 }
 
 
 void TcpServerImpl::detach(System::EventLoop& s)
 {
-    log_debug("detach from selector");
+  log_debug("detach from loop");
 
-    if (_fd == INVALID_SOCKET)
-        return;
+//  if (_fd == INVALID_SOCKET)
+//      return;
+//
+//  bool active = checkEvent();
+//
+//  if(active)
+//      _server.setAvail();
+//
+//  log_debug("server is active: " << active);
+//  this->setWaitHandle(_waitEvent, active);
+}
 
-    bool active = checkEvent();
+
+void TcpServerImpl::enable(System::EventLoop& loop)
+{
+    log_debug("enable in loop");
+
+    HANDLE h = loop.impl().beginWait(_server);
+
+    bool active = false;
+    this->setWaitHandle(h, active);
+
+    // TODO: use this->setAvail() ?
+    if(active)
+        loop.impl().setAvail(_server);
+}
+
+
+void TcpServerImpl::disable(System::EventLoop& loop)
+{
+    log_debug("disable in loop");
+
+    loop.impl().endWait(_server);
+
+    bool active = false;
+    this->setWaitHandle(_waitEvent, active);
 
     if(active)
         _server.setAvail();
+}
 
-    log_debug("server is active: " << active);
-    this->setWaitHandle(_waitEvent, active);
+
+bool TcpServerImpl::avail()
+{
+    log_debug("TcpServerImpl::avail");
+    
+    if (_fd == INVALID_SOCKET)
+        return false;
+    
+    if( _server.avail() )
+    {
+        _server.connectionPending.send(_server);
+        return true;
+    }
+
+    WSANETWORKEVENTS events;
+
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
+        return false;
+
+    ResetEvent(_currentHandle);
+    _server.connectionPending.send(_server);
+    return true;
 }
 
 
@@ -266,38 +349,12 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 }
 
 
-SOCKET TcpServerImpl::accept()
-{
-    // set the server socket to blocking-mode
-    u_long argp = 0;
-    attachEvent(0,0);
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-    
-    SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
-    
-    if( fd == SOCKET_ERROR)
-    {
-        log_debug("accept failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("accept failed") );
-    }
-    
-    // reset the blocking mode
-    attachEvent(_currentHandle, FD_ACCEPT);
-    _server.setIdle();
-    return fd;
-    }
-
-void TcpServerImpl::getWaitHandles(System::HandleMap& handles, bool& avail)
-{
-    log_debug("getWaitHandles");
-}
-
 HANDLE TcpServerImpl::waitHandle() const
 {
     return _currentHandle;
 }
 
-bool TcpServerImpl::checkEvent()
+/*bool TcpServerImpl::checkEvent()
 {
     log_debug("TcpServerImpl::checkEvent");
     
@@ -321,7 +378,7 @@ bool TcpServerImpl::checkEvent()
     ResetEvent(_currentHandle);
     _server.connectionPending.send(_server);
     return true;
-}
+}*/
 
 } // namespace Net
 

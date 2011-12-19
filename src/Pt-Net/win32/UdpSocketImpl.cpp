@@ -28,6 +28,7 @@
 
 
 #include "UdpSocketImpl.h"
+#include "MainLoopImpl.h"
 #include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
@@ -103,8 +104,8 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
                 this->close();
         }
 
-		if( it->ai_family == AF_INET6 && _broadcast)
-			continue;
+        if( it->ai_family == AF_INET6 && _broadcast)
+            continue;
 
         if( _fd == INVALID_SOCKET )
             _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
@@ -113,10 +114,10 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
             continue;
 
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
-		{
-			this->close();
+        {
+            this->close();
             throw System::SystemError("setsockopt");
-		}
+        }
 
 #if defined(IPV6_V6ONLY)
         const int on = 1;
@@ -312,12 +313,12 @@ void UdpSocketImpl::cancel()
 
 std::string UdpSocketImpl::getSockAddr() const
 {
-	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
 
     // SOCKADDR* saddr = const_cast<SOCKADDR*>(&_servaddr);
     // DWORD len = 32;
-	// TCHAR adr[32];
-	// WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
+    // TCHAR adr[32];
+    // WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
 
     // std::string address;
     // address.reserve(32);
@@ -327,31 +328,92 @@ std::string UdpSocketImpl::getSockAddr() const
     // }
 
     return inet_ntoa(sa->sin_addr);
-	//return adr;
+    //return adr;
 }
 
 
 std::string UdpSocketImpl::getPeerAddr() const
 {
-	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
 
-	//char adr[15]; //TODO: Windows CE wchar_t
-	//WSAAddressToString(sa, sizeof(sa), NULL, adr, 15);
+    //char adr[15]; //TODO: Windows CE wchar_t
+    //WSAAddressToString(sa, sizeof(sa), NULL, adr, 15);
 
     return inet_ntoa(sa->sin_addr);
-	//return adr;
-}
-
-
-void UdpSocketImpl::detach(System::EventLoop& sb)
-{
-	if( _fd != INVALID_SOCKET)
-		setEventFlags(_waitEvent, _eventFlags);
+    //return adr;
 }
 
 
 void UdpSocketImpl::attach(System::EventLoop& sb)
 {
+}
+
+
+void UdpSocketImpl::detach(System::EventLoop& sb)
+{
+    //if( _fd != INVALID_SOCKET)
+    //    setEventFlags(_waitEvent, _eventFlags);
+}
+
+
+void UdpSocketImpl::enable(System::EventLoop& loop)
+{
+    HANDLE h = loop.impl().beginWait(_socket);
+
+    bool active = false;
+    this->setWaitHandle(h, active);
+
+    // TODO: use this->setAvail() ?
+    if(active)
+        loop.impl().setAvail(_socket);
+}
+
+
+void UdpSocketImpl::disable(System::EventLoop& loop)
+{
+    loop.impl().endWait(_socket);
+
+    if( _fd != INVALID_SOCKET)
+        setEventFlags(_waitEvent, _eventFlags);
+}
+
+
+bool UdpSocketImpl::avail()
+{
+    DestructionSentry sentry(_sentry);
+
+    if(_dataSends != 0 )
+    {
+       _socket.outputReady.send(_socket);
+       return true;
+    }
+
+    WSANETWORKEVENTS events;
+
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    bool ev = false;
+
+    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
+    {
+       ev = true;
+       _socket.outputReady.send(_socket);
+
+       if( ! _sentry )
+           return ev;
+    }
+
+    if((events.lNetworkEvents & FD_READ) == FD_READ)
+    {
+        ev = true;
+        _socket.inputReady.send(_socket);
+
+        if( ! _sentry )
+           return ev;
+    }
+
+    return ev;
 }
 
 
@@ -495,7 +557,7 @@ size_t UdpSocketImpl::endWrite()
 }
 
 
-bool UdpSocketImpl::checkEvent()
+/*bool UdpSocketImpl::checkEvent()
 {
     DestructionSentry sentry(_sentry);
 
@@ -540,7 +602,7 @@ bool UdpSocketImpl::checkEvent()
     // }
 
     return ev;
-}
+}*/
 
 
 // bool UdpSocketImpl::wait(std::size_t umsecs)

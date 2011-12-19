@@ -46,6 +46,15 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void detach(EventLoop& s);
 
+        void enable(EventLoop& loop)
+        {}
+
+        void disable(EventLoop& loop)
+        {}
+
+        bool avail()
+        { return false; }
+
         virtual bool wait(std::size_t msecs);
 
         virtual bool setWaitHandle(HANDLE h, bool& avail);

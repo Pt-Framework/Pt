@@ -213,21 +213,10 @@ void PipeIODevice::onAttach(EventLoop&)
 
 void PipeIODevice::onDetach(EventLoop&)
 {
-    // TODO: only on onDisable()
-
-    // handle the case when we were added to a EventLoop and beginRead
-    // was called with data possibly available. setWaitHandle() will
-    // cancel the overlapped operation or set the active flag in which
-    // case we set Avail so the next waiter knows data is available
-    bool active = false;
-    this->setWaitHandle(_waitHandle, active);
-
-    if(active)
-        this->setAvail();
 }
 
 
-void PipeIODevice::onEnableX(EventLoop& loop)
+void PipeIODevice::onEnable(EventLoop& loop)
 {
     HANDLE h = loop.impl().beginWait(*this);
 
@@ -240,7 +229,7 @@ void PipeIODevice::onEnableX(EventLoop& loop)
 }
 
 
-void PipeIODevice::onDisableX(EventLoop& loop)
+void PipeIODevice::onDisable(EventLoop& loop)
 {
     loop.impl().endWait(*this);
 

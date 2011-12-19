@@ -37,12 +37,12 @@ class SelectableImpl
         virtual ~SelectableImpl()
         {}
 
-        virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
+        //virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
 
-        virtual void getWaitHandles(HandleMap& handles, bool& avail)
-        { }
+        //virtual void getWaitHandles(HandleMap& handles, bool& avail)
+        //{ }
 
-        virtual bool checkEvent() = 0;
+        //virtual bool checkEvent() = 0;
 };
 
 } // namespace System
