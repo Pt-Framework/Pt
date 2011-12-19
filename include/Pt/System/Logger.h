@@ -552,7 +552,7 @@ class LoggedScope
 #ifdef NLOG
     #define log_message_impl(logger, level, message)
 
-	#define log_init(file)
+    #define log_init(file)
     #define log_define(category)
     #define log_xxxx(level, expr)
 #else
@@ -565,25 +565,23 @@ class LoggedScope
     #define log_init(file) \
     Pt::System::LogTarget::initTargets(file);
 
-    #define log_define(category) \
-    static Pt::System::Logger pt_logger(category);
+    #define log_define(category)                                   \
+    Pt::System::Logger& getStaticLogger()                          \
+    {                                                              \
+        static Pt::System::Logger pt_logger(category);             \
+        return pt_logger;                                          \
+    }                                                              \
+    Pt::System::Logger& pt_static_logger_init = getStaticLogger();
 
-    #define log_xxxx(level, expr)   \
-    do { \
-        if( pt_logger.enabled(Pt::System::level) ) \
-        { \
-            pt_logger.beginLog(Pt::System::level, PT_SOURCEINFO) << expr << Pt::System::endlog; \
-        } \
+    #define log_xxxx(level, expr)                                        \
+    do {                                                                 \
+        if( getStaticLogger().enabled(Pt::System::level) )               \
+        {                                                                \
+            getStaticLogger().beginLog(Pt::System::level, PT_SOURCEINFO) \
+                << expr << Pt::System::endlog;                           \
+        }                                                                \
     } while (false)
 #endif
-
-// deprecated
-#define PT_LOG_FATAL(logger, expr) log_message_impl(logger, fatal, expr)
-#define PT_LOG_ERROR(logger, expr) log_message_impl(logger, error, expr)
-#define PT_LOG_WARN(logger, expr)  log_message_impl(logger, warn, expr)
-#define PT_LOG_INFO(logger, expr)  log_message_impl(logger, info, expr)
-#define PT_LOG_DEBUG(logger, expr) log_message_impl(logger, debug, expr)
-#define PT_LOG_TRACE(logger, expr) log_message_impl(logger, trace, expr)
 
 #define log_fatal(expr) log_xxxx(Fatal, expr)
 #define log_error(expr) log_xxxx(Error, expr)
@@ -598,5 +596,13 @@ class LoggedScope
 #define log_message_info(logger, expr)  log_message_impl(logger, info, expr)
 #define log_message_denug(logger, expr) log_message_impl(logger, debug, expr)
 #define log_message_trace(logger, expr) log_message_impl(logger, trace, expr)
+
+// deprecated
+#define PT_LOG_FATAL(logger, expr) log_message_impl(logger, fatal, expr)
+#define PT_LOG_ERROR(logger, expr) log_message_impl(logger, error, expr)
+#define PT_LOG_WARN(logger, expr)  log_message_impl(logger, warn, expr)
+#define PT_LOG_INFO(logger, expr)  log_message_impl(logger, info, expr)
+#define PT_LOG_DEBUG(logger, expr) log_message_impl(logger, debug, expr)
+#define PT_LOG_TRACE(logger, expr) log_message_impl(logger, trace, expr)
 
 #endif
