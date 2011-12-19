@@ -41,12 +41,12 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("TcpSocketTest")
         , _loop(0)
         {
-            this->registerMethod( "NonBlockingWithLoop", *this,
-                                  &TcpSocketTest::NonBlockingWithLoop);
-            this->registerMethod( "NonBlockingWithWait", *this,
-                                  &TcpSocketTest::NonBlockingWithWait);
-            this->registerMethod( "ConnectFailed", *this,
-                                  &TcpSocketTest::ConnectFailed);
+//          this->registerMethod( "NonBlockingWithLoop", *this,
+//                                &TcpSocketTest::NonBlockingWithLoop);
+//          this->registerMethod( "NonBlockingWithWait", *this,
+//                                &TcpSocketTest::NonBlockingWithWait);
+//          this->registerMethod( "ConnectFailed", *this,
+//                                &TcpSocketTest::ConnectFailed);
         }
 
         void setUp()
@@ -174,16 +174,17 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             _loop->exit();
             std::size_t n = device.endRead();
-            //std::string msg("INPUT RECEIVED: ");
-            //msg.append(input, n);
-            //this->reportMessage(msg);
+            std::string msg("INPUT RECEIVED: ");
+            msg.append(input, n);
+            this->reportMessage(msg);
             PT_UNIT_ASSERT(n > 5);
         }
 
         void onOutput(Pt::System::IODevice& device)
         {
             std::size_t n = device.endWrite();
-            //this->reportMessage("OUTPUT SENT");
+            std::cerr << "out: " << n << std::endl;
+            this->reportMessage("### ### ### OUTPUT SENT");
             PT_UNIT_ASSERT(n > 5);
         }
 

@@ -173,8 +173,9 @@ class EventLoopImpl : public EventDispatcher
         {
             if(h->flags & Output)
             {
-                std::cerr << "endWrite on fd: " << h->fd << std::endl;
+                std::cerr << "endWrite on fd: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
                 h->flags &= ~Output;
+                std::cerr << "endWrite on fd: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
     
                 // update before next wait, move to front
                 pop(h);

@@ -160,7 +160,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     for(IOHandle* h = _first; h != 0; h = h->next)
     {
-        std::cerr << "prepare handle" << std::endl;
+        std::cerr << "prepare handle: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
         if(h->flags == h->wflags)
             break;
 
@@ -171,7 +171,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             h->wflags |= Input;
         }
 
-        if(0 == h->flags & Input && h->wflags & Input)
+        if(0 == (h->flags & Input) && h->wflags & Input)
         {
             std::cerr << "stopWait Input on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_rfds );
@@ -185,7 +185,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             h->wflags |= Output;
         }
 
-        if(0 == h->flags & Output &&  h->wflags & Output)
+        if(0 == (h->flags & Output) &&  h->wflags & Output)
         {
             std::cerr << "stopWait output on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_wfds );

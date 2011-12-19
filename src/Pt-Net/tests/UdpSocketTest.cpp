@@ -40,14 +40,14 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("UdpSocketTest")
         , _loop(0)
         {
-            this->registerMethod( "Unicast", *this,
-                                  &UdpSocketTest::Unicast);
+          this->registerMethod( "Unicast", *this,
+                                &UdpSocketTest::Unicast);
 
-            this->registerMethod( "Broadcast", *this,
-                                  &UdpSocketTest::Broadcast);
+          this->registerMethod( "Broadcast", *this,
+                                &UdpSocketTest::Broadcast);
 
-            this->registerMethod( "Multicast", *this,
-                                  &UdpSocketTest::Multicast);
+          this->registerMethod( "Multicast", *this,
+                                &UdpSocketTest::Multicast);
         }
 
         void setUp()

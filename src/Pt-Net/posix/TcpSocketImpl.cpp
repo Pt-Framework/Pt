@@ -412,12 +412,12 @@ bool TcpSocketImpl::avail()
 }
 
 
-/*int TcpSocketImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
+int TcpSocketImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
-    log_debug("TcpSocketImpl::checkEvent");
+    log_debug("TcpSocketImpl::checkWait");
 
     if( _isConnected )
-        return System::IODeviceImpl::checkEvent(rfds, wfds, efds);
+        return System::IODeviceImpl::checkWait(rfds, wfds, efds);
 
     if (FD_ISSET(this->fd(), &efds) )
     {
@@ -442,7 +442,7 @@ bool TcpSocketImpl::avail()
             else
                 // by closing the previous file handle _pfd is set to 0.
                 // creating a new socket in tryConnect may also change the value of fd.
-                initSelect(rfds, wfds, efds);
+                throw std::logic_error("posix tcp socket impl reconnect not implemented");
 
             return _isConnected;
         }
@@ -475,7 +475,7 @@ bool TcpSocketImpl::avail()
     }
 
     return 0;
-}*/
+}
 
 } // namespace Net
 
