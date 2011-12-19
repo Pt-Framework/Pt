@@ -57,9 +57,6 @@ class TcpServerImpl;
 
       void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
 
-      // inherit doc
-      virtual System::SelectableImpl& simpl();
-
       TcpServerImpl& impl() const;
 
       Signal<TcpServer&> connectionPending;

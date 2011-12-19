@@ -221,12 +221,6 @@ void UdpSocket::onCancel()
 }
 
 
-System::SelectableImpl& UdpSocket::simpl()
-{
-    return *_impl;
-}
-
-
 System::IODeviceImpl& UdpSocket::ioimpl()
 {
 	System::IODeviceImpl* dev = (System::IODeviceImpl*) _impl;

@@ -45,14 +45,11 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void detach(EventLoop& s);
 
-        void enable(EventLoop& loop)
-        {}
+        void enable(EventLoop& loop);
 
-        void disable(EventLoop& loop)
-        {}
+        void disable(EventLoop& loop);
 
-        bool avail()
-        { return false; }
+        bool avail();
 
         bool wait(std::size_t msecs);
         

@@ -40,8 +40,9 @@
 #include <limits>
 //#include <Mswsock.h>
 
-#define log_debug(x)
-#define log_trace(x)
+#include <iostream>
+#define log_debug(x) std::cerr << x << std::endl;
+#define log_trace(x) std::cerr << x << std::endl;
 
 namespace Pt {
 
@@ -99,7 +100,7 @@ void TcpServerImpl::close()
     if (_fd == INVALID_SOCKET)
         return;
 
-    log_debug("close socket");
+    log_debug("close socket " << _fd);
 
     WSASetEvent(_currentHandle);
 
@@ -279,7 +280,7 @@ void TcpServerImpl::detach(System::EventLoop& s)
 
 void TcpServerImpl::enable(System::EventLoop& loop)
 {
-    log_debug("enable in loop");
+    log_debug("enable in loop " << _fd);
 
     HANDLE h = loop.impl().beginWait(_server);
 
@@ -294,15 +295,18 @@ void TcpServerImpl::enable(System::EventLoop& loop)
 
 void TcpServerImpl::disable(System::EventLoop& loop)
 {
-    log_debug("disable in loop");
+    log_debug("disable in loop " << _fd);
+
+    if (_fd != INVALID_SOCKET)
+    {
+        bool active = false;
+        this->setWaitHandle(_waitEvent, active);
+    
+        if(active)
+            _server.setAvail();
+    }
 
     loop.impl().endWait(_server);
-
-    bool active = false;
-    this->setWaitHandle(_waitEvent, active);
-
-    if(active)
-        _server.setAvail();
 }
 
 

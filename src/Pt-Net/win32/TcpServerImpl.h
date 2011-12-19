@@ -51,7 +51,7 @@ namespace Net {
 
 class TcpServer;
 
-class TcpServerImpl : public System::SelectableImpl
+class TcpServerImpl
 {
     private:
         TcpServer&			_server;

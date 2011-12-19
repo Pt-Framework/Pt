@@ -81,11 +81,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             catch(const Pt::System::IOError&)
             {
                 // success
-                std::cerr << "EEEEEEEEE" << std::endl;
+                this->reportMessage("handled beginConnect directly");
                 return;
             }
 
-            std::cerr << "AAAAAAAAAAAA" << std::endl;
             _loop->add(client);
             _loop->run();
             PT_UNIT_ASSERT( false == client.isConnected() );
@@ -93,7 +92,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void onConnectFailed(Pt::Net::TcpSocket& socket)
         {
-            std::cerr << "CCCCCCCCCC" << std::endl;
+            this->reportMessage("reached connect callback");
             _loop->exit();
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
@@ -114,7 +113,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             server.wait(1000); //on accept
             client.wait(1000); //on connect
-			client.wait(1000); //on write
+            client.wait(1000); //on write
             _acceptor->wait(1000);//on read
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
@@ -137,7 +136,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
                 client.beginConnect("127.0.0.1", 8000);
-				_loop->add(client);
+                _loop->add(client);
 
                 _loop->run();
 

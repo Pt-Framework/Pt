@@ -118,9 +118,6 @@ class PT_NET_API UdpSocket : public System::IODevice
 
     public:
         // inherit doc
-        virtual System::SelectableImpl& simpl();
-
-        // inherit doc
         virtual System::IODeviceImpl& ioimpl();
 };
 

@@ -292,42 +292,6 @@ class MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Allocator& a);
 
         ~MainLoopImpl();
-
-//      EventLoopImpl& impl()
-//      { return _impl; }
-
-//      void attach(Selectable& s);
-//
-//      void detach(Selectable& s);
-//
-//      void enable(Selectable& s);
-//
-//      void disable(Selectable& s);
-//
-//      void idle(Selectable& s);
-//
-//      void active(Selectable& s);
-//
-//      void avail(Selectable& s);
-//
-//  protected:
-//      virtual void onRun();
-//
-//      virtual void onWake();
-//
-//      void waitNext(std::size_t timeout, bool& isActive);
-//
-//  private:
-//      int _wakePipe[2];
-//      EventLoopImpl _impl;
-//      fd_set _rfds;
-//      fd_set _wfds;
-//      fd_set _efds;
-//      std::set<Selectable*>::iterator _current;
-//      std::set<Selectable*> _attached;
-//      std::set<Selectable*> _devices;
-//      std::set<Selectable*> _avail;
-//      Clock _clock;
 };
 
 } //namespace System

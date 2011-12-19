@@ -371,10 +371,10 @@ void UdpSocketImpl::enable(System::EventLoop& loop)
 
 void UdpSocketImpl::disable(System::EventLoop& loop)
 {
-    loop.impl().endWait(_socket);
-
     if( _fd != INVALID_SOCKET)
         setEventFlags(_waitEvent, _eventFlags);
+
+    loop.impl().endWait(_socket);
 }
 
 

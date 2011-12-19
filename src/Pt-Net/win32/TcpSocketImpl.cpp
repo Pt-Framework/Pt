@@ -297,10 +297,10 @@ void TcpSocketImpl::disable(System::EventLoop& loop)
 {
     log_debug("disable in loop");
 
-    loop.impl().endWait(_socket);
-
     if( _fd != INVALID_SOCKET)
         attachEvent(_waitEvent, _eventFlags);
+
+    loop.impl().endWait(_socket);
 }
 
 

@@ -74,12 +74,6 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int b
 }
 
 
-System::SelectableImpl& TcpServer::simpl()
-{
-    return *_impl;
-}
-
-
 TcpServerImpl& TcpServer::impl() const
 {
     return *_impl;

@@ -28,6 +28,7 @@
  */
 #include "win32.h"
 #include "FileDeviceImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
@@ -128,11 +129,60 @@ void FileDeviceImpl::attach(EventLoop& s)
 
 void FileDeviceImpl::detach(EventLoop& s)
 {
+//  bool active = false;
+//  this->setWaitHandle(_waitHandle, active);
+//
+//  if(active)
+//      _device.setAvail();
+}
+
+
+void FileDeviceImpl::enable(EventLoop& loop)
+{
+    HANDLE h = loop.impl().beginWait(_device);
+
+    bool active = false;
+    this->setWaitHandle(h, active);
+
+    // TODO: use this->setAvail() ?
+    if(active)
+        loop.impl().setAvail(_device);
+}
+
+
+void FileDeviceImpl::disable(EventLoop& loop)
+{
+    // handle the case when we were added to a EventLoop and beginRead
+    // was called with data possibly available. setWaitHandle() will
+    // cancel the overlapped operation or set the active flag in which
+    // case we set Avail so the next waiter knows data is available
     bool active = false;
     this->setWaitHandle(_waitHandle, active);
-    
+
     if(active)
         _device.setAvail();
+
+    loop.impl().endWait(_device);
+}
+
+
+bool FileDeviceImpl::avail()
+{
+    bool avail = false;
+
+    if( _device._wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    {
+        _device.outputReady.send(_device);
+        avail = true;
+    }
+
+    if( _device._rbuf && HasOverlappedIoCompleted(&_readOv) )
+    {
+        _device.inputReady.send(_device);
+        avail = true;
+    }
+
+    return avail;
 }
 
 

@@ -62,8 +62,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         const EventLoop* parent() const;
 
-        //! @brief Closes the I/O device
-        /*!
+        /** @brief Closes the I/O device
+
            Frees any resources associated with this object, like I/O handles.
         */
         void close();
@@ -71,8 +71,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         // TODO: remove single wait, use blocking calls with timeout instead
         bool wait(std::size_t msecs = WaitInfinite);
 
-        //! @brief Test if the I/O device object is enabled
-        /*!
+        /** @brief Test if the I/O device object is enabled
+
             Test if the I/O device object is enabled i.e. open and ready
             to perform I/O operations
 
@@ -86,8 +86,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         bool busy() const;
 
         bool avail() const;
-
-        virtual SelectableImpl& simpl() = 0;
 
     protected:
         //! @brief Default Constructor
@@ -105,6 +103,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         void setActive();
 
         void setAvail();
+
+        // TODO:
+        void setAvail(bool isAvail);
 
         //! @brief Closes the Selector
         virtual void onClose() = 0;

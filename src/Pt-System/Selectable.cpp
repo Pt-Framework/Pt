@@ -215,6 +215,24 @@ void Selectable::setAvail()
 }
 
 
+void Selectable::setAvail(bool isAvail)
+{
+    if(isAvail)
+    {
+        if(_parent)
+            _parent->onAvail(*this); 
+    
+        _state = Avail;
+    }
+    else
+    {
+        if(_parent)
+            _parent->onIdle(*this);
+    
+        _state = Idle;
+    }
+}
+
 /*void Selectable::setState(State state)
 {
     if(state == Disabled)

@@ -231,8 +231,6 @@ void PipeIODevice::onEnable(EventLoop& loop)
 
 void PipeIODevice::onDisable(EventLoop& loop)
 {
-    loop.impl().endWait(*this);
-
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
     // cancel the overlapped operation or set the active flag in which
@@ -242,6 +240,8 @@ void PipeIODevice::onDisable(EventLoop& loop)
 
     if(active)
         this->setAvail();
+
+    loop.impl().endWait(*this);
 }
 
 

@@ -177,44 +177,6 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Allocator& a);
 
         ~MainLoopImpl();
-
-        EventLoopImpl& impl()
-        { return _impl; }
-
-        //void attach( Selectable& s );
-
-        //void detach( Selectable& s );
-
-        //void enable( Selectable& s );
-
-        //void disable( Selectable& s );
-
-        //void idle(Selectable& s);
-
-        //void active(Selectable& s);
-
-        //void avail(Selectable& s);
-
-    protected:
-        //virtual void onRun();
-
-        //virtual void onWake();
-
-        //void waitNext(std::size_t timeout, bool& isActive);
-
-        //virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
-
-    private:
-        //HANDLE _wakeEvent;
-        //HANDLE _ioEvent;
-        //HandleMap _handles;
-        EventLoopImpl _impl;
-        //std::set<Selectable*>::iterator _current;
-        //std::set<Selectable*>::iterator _currentAvail;
-        //std::set<Selectable*> _attached;
-        //std::set<Selectable*> _devices;
-        //std::set<Selectable*> _dirty;
-        //std::set<Selectable*> _avail;
 };
 
 }//namespace System

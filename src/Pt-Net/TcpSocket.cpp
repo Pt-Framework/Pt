@@ -277,12 +277,6 @@ void TcpSocket::onCancel()
 }
 
 
-System::SelectableImpl& TcpSocket::simpl()
-{
-    return *_impl;
-}
-
-
 System::IODeviceImpl& TcpSocket::ioimpl()
 {
 	System::IODeviceImpl* dev = (System::IODeviceImpl*)  _impl;

@@ -56,7 +56,7 @@ class AddrInfo;
 class TcpServer;
 class TcpSocket;
 
-class TcpSocketImpl : public System::SelectableImpl
+class TcpSocketImpl
 {
     struct DestructionSentry
     {

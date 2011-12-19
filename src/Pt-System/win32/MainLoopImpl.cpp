@@ -35,6 +35,7 @@
 #include "Pt/System/Application.h"
 #include <algorithm>
 #include <limits>
+#include <cassert>
 
 namespace Pt {
 
@@ -149,29 +150,29 @@ void EventLoopImpl::enable(Selectable& s)
 
 void EventLoopImpl::disable(Selectable& s)
 {
-    //TODO: same as endWait()
-
-    std::set<Selectable*>::iterator iter = _devices.find( &s );
-    if( iter != _devices.end() )
-    {
-        if( _current != _devices.end() && *_current == *iter )
-        {
-            _devices.erase(_current++);
-        }
-        else
-        {
-            _devices.erase(iter);
-        }
-    }
-
-    iter = _avail.find( &s );
-    if( iter != _avail.end() )
-    {
-        if( _currentAvail != _avail.end() && *_currentAvail == *iter )
-            _avail.erase(_currentAvail++);
-        else
-            _avail.erase(iter);
-    }
+//  std::set<Selectable*>::iterator iter = _devices.find( &s );
+//  if( iter != _devices.end() )
+//  {
+//      assert(false);
+//      if( _current != _devices.end() && *_current == *iter )
+//      {
+//          _devices.erase(_current++);
+//      }
+//      else
+//      {
+//          _devices.erase(iter);
+//      }
+//  }
+//
+//  iter = _avail.find( &s );
+//  if( iter != _avail.end() )
+//  {
+//      assert(false);
+//      if( _currentAvail != _avail.end() && *_currentAvail == *iter )
+//          _avail.erase(_currentAvail++);
+//      else
+//          _avail.erase(iter);
+//  }
 }
 
 
@@ -337,18 +338,6 @@ DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msec
 
     return result - WAIT_OBJECT_0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 MainLoopImpl::MainLoopImpl()

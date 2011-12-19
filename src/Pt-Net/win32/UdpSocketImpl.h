@@ -48,7 +48,7 @@ namespace Net {
 
 class UdpSocket;
 
-class UdpSocketImpl : public System::SelectableImpl
+class UdpSocketImpl
 {
     private:
         struct DestructionSentry

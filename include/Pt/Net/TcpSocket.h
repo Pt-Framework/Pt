@@ -131,9 +131,6 @@ class PT_NET_API TcpSocket : public System::IODevice
 
     public:
         // inherit doc
-        virtual System::SelectableImpl& simpl();
-
-        // inherit doc
         virtual System::IODeviceImpl& ioimpl();
 };
 
@@ -142,3 +139,4 @@ class PT_NET_API TcpSocket : public System::IODevice
 } // namespace Pt
 
 #endif
+
