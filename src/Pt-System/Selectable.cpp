@@ -38,7 +38,7 @@ Selectable::~Selectable()
     if(_parent)
     {
         // TODO: this should not happen...
-        if(_state == Busy || _state == Avail)
+        if(_state == Avail)
         {
             assert(false);
             _parent->onIdle(*this);
@@ -63,7 +63,7 @@ void Selectable::setParent(EventLoop* parent)
 
     if(_parent)
     {
-        if(_state == Busy || _state == Avail)
+        if(_state == Avail)
             _parent->onIdle(*this);
 
         if( this->enabled() )
@@ -87,9 +87,6 @@ void Selectable::setParent(EventLoop* parent)
             this->onEnable(*parent);
             parent->onEnable(*this);
         }
-
-        if(_state == Busy)
-            parent->onActive(*this);
 
         if(_state == Avail)
             parent->onAvail(*this);
@@ -132,18 +129,6 @@ bool Selectable::enabled() const
 }
 
 
-bool Selectable::idle() const
-{
-    return _state == Idle;
-}
-
-
-bool Selectable::busy() const
-{
-    return _state == Busy;
-}
-
-
 bool Selectable::avail() const
 {
     return _state == Avail;
@@ -167,13 +152,13 @@ void Selectable::setEnabled(bool isEnabled)
         }
 
         if(_state == Disabled)
-            _state = Idle;
+            _state = Active;
     }
     else // disable
     {
         if(_parent)
         {
-           if(_state == Busy || _state == Avail)
+           if(_state == Avail)
                 _parent->onIdle(*this);
 
             if( this->enabled() )
@@ -185,33 +170,6 @@ void Selectable::setEnabled(bool isEnabled)
 
         _state = Disabled;
     }
-}
-
-
-void Selectable::setIdle()
-{ 
-    if(_parent)
-        _parent->onIdle(*this);
-    
-    _state = Idle; 
-}
-
-
-void Selectable::setActive()
-{ 
-    if(_parent)
-        _parent->onActive(*this); 
-
-    _state = Busy;
-}
-
-
-void Selectable::setAvail()
-{ 
-    if(_parent)
-        _parent->onAvail(*this); 
-
-    _state = Avail;
 }
 
 
@@ -229,9 +187,42 @@ void Selectable::setAvail(bool isAvail)
         if(_parent)
             _parent->onIdle(*this);
     
-        _state = Idle;
+        _state = Active;
     }
 }
+
+
+/*bool Selectable::idle() const
+{
+    return _state == Idle;
+}*/
+
+
+/*void Selectable::setIdle()
+{ 
+    if(_parent)
+        _parent->onIdle(*this);
+    
+    _state = Idle; 
+}*/
+
+
+/*void Selectable::setActive()
+{ 
+    if(_parent)
+        _parent->onActive(*this); 
+
+    _state = Busy;
+}*/
+
+
+/*void Selectable::setAvail()
+{ 
+    if(_parent)
+        _parent->onAvail(*this); 
+
+    _state = Avail;
+}*/
 
 /*void Selectable::setState(State state)
 {

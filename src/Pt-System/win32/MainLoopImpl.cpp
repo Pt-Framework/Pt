@@ -57,8 +57,17 @@ EventLoopImpl::EventLoopImpl()
         throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
     }
 
+    _signalledEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+    if( _signalledEvent == NULL )
+    {
+        CloseHandle( _wakeEvent );
+        CloseHandle( _ioEvent );
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+    }
+
     _handles.add( _wakeEvent, 0 );
     _handles.add( _ioEvent, 0 );
+    _handles.add( _signalledEvent, 0 );
 }
 
 
@@ -74,6 +83,7 @@ EventLoopImpl::~EventLoopImpl()
 
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
+    CloseHandle( _signalledEvent );
 }
 
 HANDLE EventLoopImpl::beginWait(Selectable& s)
@@ -187,26 +197,45 @@ void EventLoopImpl::idle(Selectable& s)
         _avail.erase(_currentAvail++);
     else
         _avail.erase(it);
+
+    //TODO: remove signalled
 }
 
 
 void EventLoopImpl::active(Selectable& s)
 {
     std::set<Selectable*>::iterator it = _avail.find( &s );
-    if( it == _avail.end() )
-        return;
+    if( it != _avail.end() )
+    {
+        if( _currentAvail != _avail.end() &&
+           *_currentAvail == *it )
+            _avail.erase(_currentAvail++);
+        else
+            _avail.erase(it);
+    }
 
-    if( _currentAvail != _avail.end() &&
-       *_currentAvail == *it )
-        _avail.erase(_currentAvail++);
-    else
-        _avail.erase(it);
+    //TODO: remove signalled
 }
 
 
 void EventLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);
+}
+
+
+void EventLoopImpl::cancelled(Selectable& s)
+{
+    Pt::System::MutexLock lock(_signalledMutex);
+    //_signalled.remove(&s);
+}
+
+
+void EventLoopImpl::signalAvail(Selectable& s)
+{
+    Pt::System::MutexLock lock(_signalledMutex);
+    _signalled.push_back(&s);
+    SetEvent( _signalledEvent );
 }
 
 
@@ -301,6 +330,21 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 {
                     ++_current;
                 }
+            }
+        }
+        else if (offset == 2)
+        {
+            for(;;)
+            {
+                Pt::System::MutexLock lock(_signalledMutex);
+                if( _signalled.empty() )
+                    break;
+                
+                Selectable* sel = _signalled.front();
+                _signalled.pop_front();
+                lock.unlock();
+
+                sel->onAvail();
             }
         }
         // some of the other event handles was active

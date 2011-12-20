@@ -169,7 +169,7 @@ void SerialDeviceImpl::disable(EventLoop& loop)
     this->setWaitHandle(_waitHandle, active);
 
     if(active)
-        _device.setAvail();
+        _device.setAvail(true);
 
     loop.impl().endWait(_device);
 }

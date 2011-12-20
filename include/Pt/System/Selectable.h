@@ -44,12 +44,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
+        // TODO: Idle, Active, Avail
         enum State
         {
-            Disabled = 0, // TODO: Is Disabled same as Idle?
-            Idle = 1,
-            Busy = 2,
-            Avail = 3
+            Disabled = 0,
+            Active = 1,
+            Avail = 2
         };
 
     public:
@@ -81,9 +81,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         bool enabled() const;
 
         // TODO: active
-        bool idle() const;
-
-        bool busy() const;
+        //bool idle() const;
 
         bool avail() const;
 
@@ -96,24 +94,26 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         // TODO: setUnavail would be enough
         //       alternatively, the EventLoop could unset the avail flag
-        void setIdle();
+        //void setIdle();
 
         // TODO: setUnavail would be enough
         //       alternatively, the EventLoop could unset the avail flag
-        void setActive();
+        //void setActive();
 
-        void setAvail();
+        //void setAvail();
 
-        // TODO:
+        // TODO: move close to IODevice, Selectable only knows cancel
         void setAvail(bool isAvail);
 
-        //! @brief Closes the Selector
+        //! @brief Closes the Selectable
         virtual void onClose() = 0;
 
         virtual bool onWait(std::size_t msecs) = 0;
 
+        // TODO: obsolete
         virtual void onAttach(EventLoop&) = 0;
 
+        // TODO: obsolete
         virtual void onDetach(EventLoop&) = 0;
 
         virtual void onEnable(EventLoop&) = 0;
@@ -125,6 +125,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
     private:
         EventLoop* _parent;
         State _state;
+        //unsigned long _activation;
 };
 
 } // namespace System

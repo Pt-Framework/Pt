@@ -203,7 +203,7 @@ SOCKET TcpServerImpl::accept()
     // reset the blocking mode
     attachEvent(_currentHandle, FD_ACCEPT);
 
-    _server.setIdle(); // why?
+    //_server.setIdle(); // why?
     return fd;
 }
 
@@ -303,7 +303,7 @@ void TcpServerImpl::disable(System::EventLoop& loop)
         this->setWaitHandle(_waitEvent, active);
     
         if(active)
-            _server.setAvail();
+            _server.setAvail(true);
     }
 
     loop.impl().endWait(_server);

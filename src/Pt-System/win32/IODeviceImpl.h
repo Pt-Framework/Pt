@@ -29,7 +29,7 @@ namespace System {
 
     class IODevice;
 
-    class IODeviceImpl : public SelectableImpl
+    class IODeviceImpl
     {
         public:
             IODeviceImpl();

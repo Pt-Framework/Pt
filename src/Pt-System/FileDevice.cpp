@@ -163,12 +163,6 @@ IODeviceImpl& FileDevice::ioimpl()
 }
 
 
-SelectableImpl& FileDevice::simpl()
-{ 
-    return *_impl; 
-}
-
-
 void FileDevice::onAttach(EventLoop& s)
 {
     _impl->attach(s);

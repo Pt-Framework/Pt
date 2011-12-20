@@ -46,9 +46,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual IODeviceImpl& ioimpl()
         { return *this; }
 
-        virtual SelectableImpl& simpl()
-        { return *this; }
-
         void redirect(int newFd, bool close = true);
 
     protected:

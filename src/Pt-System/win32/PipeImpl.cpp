@@ -239,7 +239,7 @@ void PipeIODevice::onDisable(EventLoop& loop)
     this->setWaitHandle(_waitHandle, active);
 
     if(active)
-        this->setAvail();
+        this->setAvail(true);
 
     loop.impl().endWait(*this);
 }

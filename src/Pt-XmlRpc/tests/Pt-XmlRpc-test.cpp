@@ -105,7 +105,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
-            _loop->setIdleTimeout(2000);
+            _loop->setIdleTimeout(10000);
             _loop->timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
             _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 

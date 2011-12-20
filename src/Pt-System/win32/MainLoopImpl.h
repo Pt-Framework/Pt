@@ -24,9 +24,11 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/Selectable.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/Mutex.h"
 #include <iostream>
 #include <vector>
 #include <set>
+#include <deque>
 #include <windows.h>
 
 namespace Pt {
@@ -137,6 +139,10 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void avail(Selectable& s);
 
+        void signalAvail(Selectable& s);
+
+        void cancelled(Selectable& s);
+
         HANDLE beginWait(Selectable& s);
 
         void endWait(Selectable& s);
@@ -159,6 +165,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
+        HANDLE _signalledEvent;
         HandleMap _handles;
         std::list<IOHandle*> _dirty;
         std::set<Selectable*>::iterator _current;
@@ -166,6 +173,8 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         std::set<Selectable*> _attached;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _avail;
+        std::deque<Selectable*> _signalled;
+        Pt::System::Mutex _signalledMutex;
 };
 
 

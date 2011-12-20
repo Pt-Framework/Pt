@@ -214,13 +214,6 @@ IODeviceImpl& SerialDevice::ioimpl()
     return *_impl; 
 }
 
-
-SelectableImpl& SerialDevice::simpl()
-{ 
-    return *_impl; 
-}
-
-
 void SerialDevice::onAttach(EventLoop& s)
 {
     _impl->attach(s);

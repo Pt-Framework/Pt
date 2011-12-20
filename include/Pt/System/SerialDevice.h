@@ -189,8 +189,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         virtual IODeviceImpl& ioimpl();
 
-        virtual SelectableImpl& simpl();
-
     protected:
         void onClose();
 

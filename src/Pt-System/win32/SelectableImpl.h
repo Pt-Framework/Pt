@@ -28,22 +28,6 @@ namespace Pt {
 
 namespace System {
 
-class Selectable;
-class HandleMap;
-
-class SelectableImpl
-{
-    public:
-        virtual ~SelectableImpl()
-        {}
-
-        //virtual bool setWaitHandle(HANDLE h, bool& avail) = 0;
-
-        //virtual void getWaitHandles(HandleMap& handles, bool& avail)
-        //{ }
-
-        //virtual bool checkEvent() = 0;
-};
 
 } // namespace System
 

@@ -60,12 +60,12 @@ StreamBufferImpl::StreamBufferImpl(StreamBuffer& sb, size_t bufferSize, bool ext
 
 void StreamBufferImpl::attach(StreamBuffer& sb, IODevice& ioDevice)
 {
-    if(ioDevice.busy())
+    if( ioDevice.reading() || ioDevice.writing() )
         throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
     if(_ioDevice)
     {
-        if(_ioDevice->busy())
+        if( ioDevice.reading() || ioDevice.writing() )
             throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
         disconnect(ioDevice.inputReady,  sb, &StreamBuffer::onRead );

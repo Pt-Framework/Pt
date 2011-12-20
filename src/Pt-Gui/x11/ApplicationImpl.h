@@ -71,7 +71,7 @@ class X11Fd : public System::Selectable
         // inherit doc
         virtual void onClose()
         { System::FdImpl::closeFd(); }
-        
+
         // inherit doc
         virtual bool onWait(std::size_t msecs)
         { return false; }
@@ -83,6 +83,15 @@ class X11Fd : public System::Selectable
         // inherit doc
         virtual void onDetach(System::EventLoop& s)
         { System::FdImpl::detach(s); }
+
+        void onEnable(EventLoop& loop)
+        { System::FdImpl::enable(loop); }
+
+        void onDisable(EventLoop& loop)
+        { System::FdImpl::disable(loop); }
+
+        bool onAvail()
+        { System::FdImpl::avail(); }
 
     private:
         Display* _display;

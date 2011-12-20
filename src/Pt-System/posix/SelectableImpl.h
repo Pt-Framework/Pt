@@ -45,7 +45,7 @@ class SelectableImpl
 };
 
 
-class FdImpl : public SelectableImpl
+class FdImpl
 {
     public:
         virtual ~FdImpl()
@@ -66,6 +66,12 @@ class FdImpl : public SelectableImpl
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
+
+        void enable(System::EventLoop& s);
+
+        void disable(System::EventLoop& s);
+
+        void avail();
 
         virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
@@ -100,16 +106,27 @@ inline void FdImpl::closeFd()
 
 inline void FdImpl::attach(System::EventLoop& s)
 {
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
 }
 
 
 inline void FdImpl::detach(System::EventLoop& s)
 {
     this->exitSelect();
+}
+
+
+inline void FdImpl::enable(System::EventLoop& s)
+{
+}
+
+
+inline void FdImpl::disable(System::EventLoop& s)
+{
+}
+
+
+inline void FdImpl::avail()
+{
 }
 
 
