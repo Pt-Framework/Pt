@@ -2395,6 +2395,7 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     char  strExitCode[1024];
     int   lenOutput = 0;
     char* strOutput = 0;
+    char* cPtr      = 0;
     char* sPtr      = 0;
     char* ePtr      = 0;
     int   i         = 0;
@@ -2409,21 +2410,22 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     strOutput = BJAM_MALLOC(lenOutput);
     memcpy(strOutput, output, lenOutput);
 
+    cPtr = strOutput;
     sPtr = strOutput;
     ePtr = 0;
     for(i = 0; i < lenOutput; ++i) {
-        char c = strOutput[i];
-        if(c == '\n' || c == '\r') {
+        char c = *cPtr;
+        if(c != '\n' && c != '\r')
+            ePtr = cPtr;
+        else {
             if(ePtr) {
                 *(++ePtr) = 0;
                 ervc->result = list_new( ervc->result, object_new( sPtr ) );
             }
-            sPtr = strOutput + i + 1;
+            sPtr = cPtr + 1;
             ePtr = 0;
         }
-        else {
-            ePtr = strOutput + i;
-        }
+        ++cPtr;
     }
     if(ePtr)
         ervc->result = list_new( ervc->result, object_new( sPtr ) );
