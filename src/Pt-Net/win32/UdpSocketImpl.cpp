@@ -77,6 +77,11 @@ void UdpSocketImpl::close()
 
     _eventFlags  = 0;
     setEventFlags(0, 0); // is this needed ?
+
+    System::EventLoop* loop = _socket.parent();
+    if(loop)
+        this->detach(*loop);
+
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -136,6 +141,11 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
+
+            System::EventLoop* loop = _socket.parent();
+            if(loop)
+                this->attach(*loop);
+
             return;
         }
 
@@ -191,6 +201,11 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         if( 0 == ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) )
         {
             _isConnected = true;
+
+            System::EventLoop* loop = _socket.parent();
+            if(loop)
+                this->attach(*loop);
+
             return;
         }
 
@@ -344,20 +359,11 @@ std::string UdpSocketImpl::getPeerAddr() const
 }
 
 
-void UdpSocketImpl::attach(System::EventLoop& sb)
+void UdpSocketImpl::attach(System::EventLoop& loop)
 {
-}
+    if( _fd == INVALID_SOCKET)
+        return;
 
-
-void UdpSocketImpl::detach(System::EventLoop& sb)
-{
-    //if( _fd != INVALID_SOCKET)
-    //    setEventFlags(_waitEvent, _eventFlags);
-}
-
-
-void UdpSocketImpl::enable(System::EventLoop& loop)
-{
     HANDLE h = loop.impl().beginWait(_socket);
 
     bool active = false;
@@ -369,12 +375,27 @@ void UdpSocketImpl::enable(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::disable(System::EventLoop& loop)
+void UdpSocketImpl::detach(System::EventLoop& loop)
 {
     if( _fd != INVALID_SOCKET)
         setEventFlags(_waitEvent, _eventFlags);
 
     loop.impl().endWait(_socket);
+
+    //if( _fd != INVALID_SOCKET)
+    //    setEventFlags(_waitEvent, _eventFlags);
+}
+
+
+void UdpSocketImpl::enable(System::EventLoop& loop)
+{
+
+}
+
+
+void UdpSocketImpl::disable(System::EventLoop& loop)
+{
+
 }
 
 

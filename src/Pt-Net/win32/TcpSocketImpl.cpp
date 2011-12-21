@@ -38,9 +38,9 @@
 #include <cstring>
 #include <cassert>
 
-//#include <iostream>
-#define log_debug(x)
-//#define log_debug(x) std::cerr << x << std::endl;
+#include <iostream>
+//#define log_debug(x)
+#define log_debug(x) std::cerr << x << std::endl;
 
 namespace Pt {
 
@@ -84,6 +84,11 @@ void TcpSocketImpl::close()
         return;
 
     attachEvent(0, 0);
+
+    System::EventLoop* loop = _socket.parent();
+    if(loop)
+        this->detach(*loop);
+
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -163,6 +168,10 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
     {
         log_debug("connected " << _fd);
     }
+
+    System::EventLoop* loop = _socket.parent();
+    if(loop)
+        this->attach(*loop);
 
     return _isConnected;
 }
@@ -269,19 +278,10 @@ void TcpSocketImpl::endConnect()
 
 void TcpSocketImpl::attach(System::EventLoop& loop)
 {
-}
+    log_debug("attach to loop");
 
-
-void TcpSocketImpl::detach(System::EventLoop& loop)
-{
-    //if( _fd != INVALID_SOCKET)
-    //    attachEvent(_waitEvent, _eventFlags);
-}
-
-
-void TcpSocketImpl::enable(System::EventLoop& loop)
-{
-    log_debug("enable in loop");
+    if( _fd == INVALID_SOCKET)
+        return;
 
     HANDLE h = loop.impl().beginWait(_socket);
 
@@ -294,14 +294,28 @@ void TcpSocketImpl::enable(System::EventLoop& loop)
 }
 
 
-void TcpSocketImpl::disable(System::EventLoop& loop)
+void TcpSocketImpl::detach(System::EventLoop& loop)
 {
-    log_debug("disable in loop");
+    log_debug("detach from loop");
 
     if( _fd != INVALID_SOCKET)
         attachEvent(_waitEvent, _eventFlags);
 
     loop.impl().endWait(_socket);
+    //if( _fd != INVALID_SOCKET)
+    //    attachEvent(_waitEvent, _eventFlags);
+}
+
+
+void TcpSocketImpl::enable(System::EventLoop& loop)
+{
+
+}
+
+
+void TcpSocketImpl::disable(System::EventLoop& loop)
+{
+
 }
 
 

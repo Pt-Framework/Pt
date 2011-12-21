@@ -102,7 +102,11 @@ void TcpServerImpl::close()
 
     log_debug("close socket " << _fd);
 
-    WSASetEvent(_currentHandle);
+    attachEvent(0, 0);
+
+    System::EventLoop* loop = _server.parent();
+    if(loop)
+        this->detach(*loop);
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -171,6 +175,10 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 else
                     throw System::SystemError("listen");
             }
+
+            System::EventLoop* loop = _server.parent();
+            if(loop)
+                this->attach(*loop);
     
             return;
         }
@@ -255,15 +263,38 @@ void TcpServerImpl::attachEvent(HANDLE ev, long events)
 }
 
 
-void TcpServerImpl::attach(System::EventLoop& s)
+void TcpServerImpl::attach(System::EventLoop& loop)
 {
-    log_debug("attach to loop");
+    log_debug("attach to loop " << _fd);
+
+    if (_fd == INVALID_SOCKET)
+        return;
+
+    HANDLE h = loop.impl().beginWait(_server);
+
+    bool active = false;
+    this->setWaitHandle(h, active);
+
+    // TODO: use this->setAvail() ?
+    if(active)
+        loop.impl().setAvail(_server);
 }
 
 
-void TcpServerImpl::detach(System::EventLoop& s)
+void TcpServerImpl::detach(System::EventLoop& loop)
 {
-  log_debug("detach from loop");
+    log_debug("detach from loop " << _fd);
+
+    if (_fd != INVALID_SOCKET)
+    {
+        bool active = false;
+        this->setWaitHandle(_waitEvent, active);
+    
+        if(active)
+            _server.setAvail(true);
+    }
+
+    loop.impl().endWait(_server);
 
 //  if (_fd == INVALID_SOCKET)
 //      return;
@@ -281,32 +312,12 @@ void TcpServerImpl::detach(System::EventLoop& s)
 void TcpServerImpl::enable(System::EventLoop& loop)
 {
     log_debug("enable in loop " << _fd);
-
-    HANDLE h = loop.impl().beginWait(_server);
-
-    bool active = false;
-    this->setWaitHandle(h, active);
-
-    // TODO: use this->setAvail() ?
-    if(active)
-        loop.impl().setAvail(_server);
 }
 
 
 void TcpServerImpl::disable(System::EventLoop& loop)
 {
     log_debug("disable in loop " << _fd);
-
-    if (_fd != INVALID_SOCKET)
-    {
-        bool active = false;
-        this->setWaitHandle(_waitEvent, active);
-    
-        if(active)
-            _server.setAvail(true);
-    }
-
-    loop.impl().endWait(_server);
 }
 
 

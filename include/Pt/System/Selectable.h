@@ -102,18 +102,16 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         //void setAvail();
 
-        // TODO: move close to IODevice, Selectable only knows cancel
         void setAvail(bool isAvail);
 
+        // TODO: move close to IODevice, Selectable only knows cancel
         //! @brief Closes the Selectable
         virtual void onClose() = 0;
 
         virtual bool onWait(std::size_t msecs) = 0;
 
-        // TODO: obsolete
         virtual void onAttach(EventLoop&) = 0;
 
-        // TODO: obsolete
         virtual void onDetach(EventLoop&) = 0;
 
         virtual void onEnable(EventLoop&) = 0;
@@ -125,7 +123,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
     private:
         EventLoop* _parent;
         State _state;
-        //unsigned long _activation;
 };
 
 } // namespace System

@@ -122,22 +122,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 }
 
 
-void FileDeviceImpl::attach(EventLoop& s)
-{
-}
-
-
-void FileDeviceImpl::detach(EventLoop& s)
-{
-//  bool active = false;
-//  this->setWaitHandle(_waitHandle, active);
-//
-//  if(active)
-//      _device.setAvail();
-}
-
-
-void FileDeviceImpl::enable(EventLoop& loop)
+void FileDeviceImpl::attach(EventLoop& loop)
 {
     HANDLE h = loop.impl().beginWait(_device);
 
@@ -150,7 +135,7 @@ void FileDeviceImpl::enable(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::disable(EventLoop& loop)
+void FileDeviceImpl::detach(EventLoop& loop)
 {
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
@@ -163,6 +148,16 @@ void FileDeviceImpl::disable(EventLoop& loop)
         _device.setAvail(true);
 
     loop.impl().endWait(_device);
+}
+
+
+void FileDeviceImpl::enable(EventLoop& loop)
+{
+}
+
+
+void FileDeviceImpl::disable(EventLoop& loop)
+{
 }
 
 

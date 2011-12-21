@@ -224,17 +224,17 @@ void EventLoopImpl::avail(Selectable& s)
 }
 
 
-void EventLoopImpl::cancelled(Selectable& s)
+void EventLoopImpl::signalCancel(Selectable& s)
 {
     Pt::System::MutexLock lock(_signalledMutex);
-    //_signalled.remove(&s);
+    _signalled.erase(&s);
 }
 
 
 void EventLoopImpl::signalAvail(Selectable& s)
 {
     Pt::System::MutexLock lock(_signalledMutex);
-    _signalled.push_back(&s);
+    _signalled.insert(&s);
     SetEvent( _signalledEvent );
 }
 
@@ -340,8 +340,8 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 if( _signalled.empty() )
                     break;
                 
-                Selectable* sel = _signalled.front();
-                _signalled.pop_front();
+                Selectable* sel = *(_signalled.begin());
+                _signalled.erase( _signalled.begin() );
                 lock.unlock();
 
                 sel->onAvail();

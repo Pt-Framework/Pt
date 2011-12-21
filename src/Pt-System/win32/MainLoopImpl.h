@@ -141,7 +141,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void signalAvail(Selectable& s);
 
-        void cancelled(Selectable& s);
+        void signalCancel(Selectable& s);
 
         HANDLE beginWait(Selectable& s);
 
@@ -173,7 +173,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         std::set<Selectable*> _attached;
         std::set<Selectable*> _devices;
         std::set<Selectable*> _avail;
-        std::deque<Selectable*> _signalled;
+        std::set<Selectable*> _signalled;
         Pt::System::Mutex _signalledMutex;
 };
 

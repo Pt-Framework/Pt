@@ -131,22 +131,7 @@ void SerialDeviceImpl::close()
 }
 
 
-void SerialDeviceImpl::attach(EventLoop& s)
-{
-}
-
-
-void SerialDeviceImpl::detach(EventLoop& s)
-{
-//  bool active = false;
-//  this->setWaitHandle(_waitHandle, active);
-//
-//  if(active)
-//      _device.setAvail();
-}
-
-
-void SerialDeviceImpl::enable(EventLoop& loop)
+void SerialDeviceImpl::attach(EventLoop& loop)
 {
     HANDLE h = loop.impl().beginWait(_device);
 
@@ -159,7 +144,7 @@ void SerialDeviceImpl::enable(EventLoop& loop)
 }
 
 
-void SerialDeviceImpl::disable(EventLoop& loop)
+void SerialDeviceImpl::detach(EventLoop& loop)
 {
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
@@ -172,6 +157,16 @@ void SerialDeviceImpl::disable(EventLoop& loop)
         _device.setAvail(true);
 
     loop.impl().endWait(_device);
+}
+
+
+void SerialDeviceImpl::enable(EventLoop& loop)
+{
+}
+
+
+void SerialDeviceImpl::disable(EventLoop& loop)
+{
 }
 
 

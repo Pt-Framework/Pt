@@ -206,30 +206,19 @@ bool PipeIODevice::checkEvent()
 }
 
 
-void PipeIODevice::onAttach(EventLoop&)
-{
-}
-
-
-void PipeIODevice::onDetach(EventLoop&)
-{
-}
-
-
-void PipeIODevice::onEnable(EventLoop& loop)
+void PipeIODevice::onAttach(EventLoop& loop)
 {
     HANDLE h = loop.impl().beginWait(*this);
 
     bool active = false;
     this->setWaitHandle(h, active);
 
-    // TODO: use this->setAvail() ?
     if(active)
         loop.impl().setAvail(*this);
 }
 
 
-void PipeIODevice::onDisable(EventLoop& loop)
+void PipeIODevice::onDetach(EventLoop& loop)
 {
     // handle the case when we were added to a EventLoop and beginRead
     // was called with data possibly available. setWaitHandle() will
@@ -239,9 +228,21 @@ void PipeIODevice::onDisable(EventLoop& loop)
     this->setWaitHandle(_waitHandle, active);
 
     if(active)
-        this->setAvail(true);
+        loop.impl().setAvail(*this);
 
     loop.impl().endWait(*this);
+}
+
+
+void PipeIODevice::onEnable(EventLoop& loop)
+{
+
+}
+
+
+void PipeIODevice::onDisable(EventLoop& loop)
+{
+
 }
 
 
