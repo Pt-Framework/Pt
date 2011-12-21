@@ -2391,50 +2391,9 @@ typedef struct exec_ret_val_closure {
 static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
     exec_ret_val_closure* ervc = (exec_ret_val_closure*) closure;
-#if 0
-    char  strExitCode[1024];
-    int   lenOutput = 0;
-    char* strOutput = 0;
-    char* cPtr      = 0;
-    char* sPtr      = 0;
-    char* ePtr      = 0;
-    int   i         = 0;
     
-    sprintf(strExitCode, "%d", status);
-    ervc->result = 0;
-    ervc->result = list_new( ervc->result, object_new( strExitCode ) );
-
-    lenOutput = strlen(output) + 1;
-    if(lenOutput <= 0) return;
-
-    strOutput = BJAM_MALLOC(lenOutput);
-    memcpy(strOutput, output, lenOutput);
-
-    cPtr = strOutput;
-    sPtr = strOutput;
-    ePtr = 0;
-    for(i = 0; i < lenOutput; ++i) {
-        char c = *cPtr;
-        if(c != '\n' && c != '\r')
-            ePtr = cPtr;
-        else {
-            if(ePtr) {
-                *(++ePtr) = 0;
-                ervc->result = list_new( ervc->result, object_new( sPtr ) );
-            }
-            sPtr = cPtr + 1;
-            ePtr = 0;
-        }
-        ++cPtr;
-    }
-    if(ePtr)
-        ervc->result = list_new( ervc->result, object_new( sPtr ) );
-
-    BJAM_FREE(strOutput);
-#else
     char   strExitCode[1024];
     string s;
-    int    onCR = 0; /* State variable */
 
     sprintf(strExitCode, "%d", status);
     ervc->result = 0;
@@ -2445,26 +2404,15 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     {
         switch(*output)
         {
-            case '\r':
-                if(onCR) /* Double \r */
-                    string_push_back(&s, *output);
-
-                onCR = 1;
-                break;
-
             case '\0':
             case '\n':
-                ervc->result = list_new( ervc->result, object_new( s.value ) );
+            case '\r':
+                if(s.size > 0) ervc->result = list_new( ervc->result, object_new( s.value ) );
                 string_truncate(&s, 0);
-                onCR = 0;
                 break;
 
             default:
-                if(onCR) /* Stray \r */
-                    string_push_back(&s, '\r');
-
                 string_push_back(&s, *output);
-                onCR = 0;
         }
 
         if(*output == '\0')
@@ -2473,7 +2421,6 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
         ++output;
     }
     string_free(&s);
-#endif    
 }
 
 /* Pt extension:
