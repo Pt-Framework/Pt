@@ -2407,8 +2407,10 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
             case '\0':
             case '\n':
             case '\r':
-                if(s.size > 0) ervc->result = list_new( ervc->result, object_new( s.value ) );
-                string_truncate(&s, 0);
+                if(s.size > 0) {
+                    ervc->result = list_new( ervc->result, object_new( s.value ) );
+                    string_truncate(&s, 0);
+                }
                 break;
 
             default:
