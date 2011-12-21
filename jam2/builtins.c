@@ -2391,7 +2391,7 @@ typedef struct exec_ret_val_closure {
 static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
     exec_ret_val_closure* ervc = (exec_ret_val_closure*) closure;
-
+#if 0
     char  strExitCode[1024];
     int   lenOutput = 0;
     char* strOutput = 0;
@@ -2431,6 +2431,49 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
         ervc->result = list_new( ervc->result, object_new( sPtr ) );
 
     BJAM_FREE(strOutput);
+#else
+    char   strExitCode[1024];
+    string s;
+    int    onCR = 0; /* State variable */
+
+    sprintf(strExitCode, "%d", status);
+    ervc->result = 0;
+    ervc->result = list_new( ervc->result, object_new( strExitCode ) );
+    
+    string_new(&s);
+    for( ; ; )
+    {
+        switch(*output)
+        {
+            case '\r':
+                if(onCR) /* Double \r */
+                    string_push_back(&s, *output);
+
+                onCR = 1;
+                break;
+
+            case '\0':
+            case '\n':
+                ervc->result = list_new( ervc->result, object_new( s.value ) );
+                string_truncate(&s, 0);
+                onCR = 0;
+                break;
+
+            default:
+                if(onCR) /* Stray \r */
+                    string_push_back(&s, '\r');
+
+                string_push_back(&s, *output);
+                onCR = 0;
+        }
+
+        if(*output == '\0')
+            break;
+
+        ++output;
+    }
+    string_free(&s);
+#endif    
 }
 
 /* Pt extension:
